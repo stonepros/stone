@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Intel Corporation
  *
@@ -25,7 +25,7 @@ class QccCryptoPlugin : public CryptoPlugin {
 
 public:
 
-  explicit QccCryptoPlugin(StoneeContext* cct) : CryptoPlugin(cct)
+  explicit QccCryptoPlugin(StoneContext* cct) : CryptoPlugin(cct)
   {}
   ~QccCryptoPlugin()
   {}

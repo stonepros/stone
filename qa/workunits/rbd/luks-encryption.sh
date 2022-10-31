@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-CEPH_ID=${CEPH_ID:-admin}
+STONE_ID=${STONE_ID:-admin}
 TMP_FILES="/tmp/passphrase /tmp/testdata1 /tmp/testdata2"
 
 _sudo()
@@ -73,7 +73,7 @@ if [[ $(uname) != "Linux" ]]; then
 fi
 
 
-if [[ $(($(ceph-conf --name client.${CEPH_ID} rbd_default_features) & 64)) != 0 ]]; then
+if [[ $(($(stone-conf --name client.${STONE_ID} rbd_default_features) & 64)) != 0 ]]; then
 	echo "LUKS encryption tests not supported alongside image journaling feature"
 	exit 0
 fi

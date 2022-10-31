@@ -17,7 +17,7 @@ The following Solaris packages are required for compilation:
 
 Download and Compile Boost 1.59 (or higher)
 
-Building Ceph
+Building Stone
 =============
 
         export LDFLAGS="-m64  -L<pathtoboost>/stage/lib -L/usr/lib/mps/64"

@@ -130,14 +130,14 @@ namespace rgw {
   
 } /* namespace rgw */
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/common_init.h"
 #include "common/dout.h"
 #include "common/safe_io.h"
 #include <boost/algorithm/string.hpp>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-std::string parse_rgw_ldap_bindpw(CephContext* ctx);
+std::string parse_rgw_ldap_bindpw(StoneContext* ctx);
 
 #endif /* RGW_LDAP_H */

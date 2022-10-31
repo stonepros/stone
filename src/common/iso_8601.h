@@ -7,9 +7,9 @@
 #include <string_view>
 #include <boost/optional.hpp>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
-namespace ceph {
+namespace stone {
 
 // Here, we support the W3C profile of ISO 8601 with the following
 // restrictions:
@@ -29,14 +29,14 @@ namespace ceph {
 //
 // If a date is invalid, boost::none is returned.
 
-boost::optional<ceph::real_time> from_iso_8601(
+boost::optional<stone::real_time> from_iso_8601(
   std::string_view s, const bool ws_terminates = true) noexcept;
 
 enum class iso_8601_format {
   Y, YM, YMD, YMDh, YMDhm, YMDhms, YMDhmsn
 };
 
-std::string to_iso_8601(const ceph::real_time t,
+std::string to_iso_8601(const stone::real_time t,
 			const iso_8601_format f = iso_8601_format::YMDhmsn)
   noexcept;
 }

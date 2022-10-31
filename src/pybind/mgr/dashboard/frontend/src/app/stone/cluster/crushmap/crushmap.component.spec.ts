@@ -38,7 +38,7 @@ describe('CrushmapComponent', () => {
     expect(span.textContent).toBe('CRUSH map viewer');
   });
 
-  it('should display "No nodes!" if ceph tree nodes is empty array', fakeAsync(() => {
+  it('should display "No nodes!" if stone tree nodes is empty array', fakeAsync(() => {
     crushRuleServiceInfoSpy.and.returnValue(of({ nodes: [] }));
     fixture.detectChanges();
     tick(5000);

@@ -1,5 +1,5 @@
 commit 9764da52395923e0b32908d83a9f7304401fee43 (tag: refs/tags/v0.94.5, refs/remotes/gh/hammer)
-Author: Jenkins <jenkins@ceph.com>
+Author: Jenkins <jenkins@stone.com>
 Date:   Mon Oct 26 07:05:32 2015 -0700
 
     0.94.5
@@ -70,7 +70,7 @@ Date:   Thu Oct 22 12:14:42 2015 -0400
 
     Merge pull request #6330 from dachary/wip-13550-hammer
     
-    qemu workunit refers to apt-mirror.front.sepia.ceph.com
+    qemu workunit refers to apt-mirror.front.sepia.stone.com
     
     Reviewed-by: Jason Dillaman <dillaman@redhat.com>
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -78,7 +78,7 @@ class interval_map {
 	  std::make_pair(
 	    off,
 	    std::make_pair(len, std::move(n))));
-	ceph_assert(p.second);
+	stone_assert(p.second);
 	niter = p.first;
       }
     }
@@ -98,7 +98,7 @@ class interval_map {
 	std::make_pair(
 	  off,
 	  std::make_pair(len, std::move(n))));
-      ceph_assert(p.second);
+      stone_assert(p.second);
     }
   }
 public:
@@ -166,11 +166,11 @@ public:
     m.insert(to_insert.begin(), to_insert.end());
   }
   void insert(K off, K len, V &&v) {
-    ceph_assert(len > 0);
-    ceph_assert(len == s.length(v));
+    stone_assert(len > 0);
+    stone_assert(len == s.length(v));
     erase(off, len);
     auto p = m.insert(make_pair(off, std::make_pair(len, std::forward<V>(v))));
-    ceph_assert(p.second);
+    stone_assert(p.second);
     try_merge(p.first);
   }
   void insert(interval_map &&other) {
@@ -181,11 +181,11 @@ public:
     }
   }
   void insert(K off, K len, const V &v) {
-    ceph_assert(len > 0);
-    ceph_assert(len == s.length(v));
+    stone_assert(len > 0);
+    stone_assert(len == s.length(v));
     erase(off, len);
     auto p = m.insert(make_pair(off, std::make_pair(len, v)));
-    ceph_assert(p.second);
+    stone_assert(p.second);
     try_merge(p.first);
   }
   void insert(const interval_map &other) {

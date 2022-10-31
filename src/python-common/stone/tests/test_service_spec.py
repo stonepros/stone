@@ -6,11 +6,11 @@ import yaml
 
 import pytest
 
-from ceph.deployment.service_spec import HostPlacementSpec, PlacementSpec, \
+from stone.deployment.service_spec import HostPlacementSpec, PlacementSpec, \
     ServiceSpec, RGWSpec, NFSServiceSpec, IscsiServiceSpec, AlertManagerSpec, \
     CustomContainerSpec
-from ceph.deployment.drive_group import DriveGroupSpec
-from ceph.deployment.hostspec import SpecValidationError
+from stone.deployment.drive_group import DriveGroupSpec
+from stone.deployment.hostspec import SpecValidationError
 
 
 @pytest.mark.parametrize("test_input,expected, require_network",
@@ -214,7 +214,7 @@ service_id: default-rgw-realm.eu-central-1.1
 service_name: rgw.default-rgw-realm.eu-central-1.1
 placement:
   hosts:
-  - ceph-001
+  - stone-001
 networks:
 - 10.0.0.0/8
 - 192.168.0.0/16

@@ -5,8 +5,8 @@ import _ from 'lodash';
 import { Observable, of as observableOf } from 'rxjs';
 import { map, mergeMap, toArray } from 'rxjs/operators';
 
-import { InventoryDevice } from '~/app/ceph/cluster/inventory/inventory-devices/inventory-device.model';
-import { InventoryHost } from '~/app/ceph/cluster/inventory/inventory-host.model';
+import { InventoryDevice } from '~/app/stone/cluster/inventory/inventory-devices/inventory-device.model';
+import { InventoryHost } from '~/app/stone/cluster/inventory/inventory-host.model';
 import { ApiClient } from '~/app/shared/api/api-client';
 import { CdHelperClass } from '~/app/shared/classes/cd-helper.class';
 import { Daemon } from '../models/daemon.interface';
@@ -29,7 +29,7 @@ export class HostService extends ApiClient {
 
   list(facts: string): Observable<object[]> {
     return this.http.get<object[]>(this.baseURL, {
-      headers: { Accept: 'application/vnd.ceph.api.v1.1+json' },
+      headers: { Accept: 'application/vnd.stone.api.v1.1+json' },
       params: { facts: facts }
     });
   }

@@ -30,7 +30,7 @@ class ProtocolV2 final : public Protocol {
 
   void trigger_close() override;
 
-  ceph::bufferlist do_sweep_messages(
+  stone::bufferlist do_sweep_messages(
       const std::deque<MessageRef>& msgs,
       size_t num_msgs,
       bool require_keepalive,
@@ -112,8 +112,8 @@ class ProtocolV2 final : public Protocol {
  // TODO: Frame related implementations, probably to a separate class.
  private:
   bool record_io = false;
-  ceph::bufferlist rxbuf;
-  ceph::bufferlist txbuf;
+  stone::bufferlist rxbuf;
+  stone::bufferlist txbuf;
 
   void enable_recording();
   seastar::future<Socket::tmp_buf> read_exactly(size_t bytes);
@@ -121,14 +121,14 @@ class ProtocolV2 final : public Protocol {
   seastar::future<> write(bufferlist&& buf);
   seastar::future<> write_flush(bufferlist&& buf);
 
-  ceph::crypto::onwire::rxtx_t session_stream_handlers;
-  ceph::msgr::v2::FrameAssembler tx_frame_asm{&session_stream_handlers, false};
-  ceph::msgr::v2::FrameAssembler rx_frame_asm{&session_stream_handlers, false};
-  ceph::bufferlist rx_preamble;
-  ceph::msgr::v2::segment_bls_t rx_segments_data;
+  stone::crypto::onwire::rxtx_t session_stream_handlers;
+  stone::msgr::v2::FrameAssembler tx_frame_asm{&session_stream_handlers, false};
+  stone::msgr::v2::FrameAssembler rx_frame_asm{&session_stream_handlers, false};
+  stone::bufferlist rx_preamble;
+  stone::msgr::v2::segment_bls_t rx_segments_data;
 
   size_t get_current_msg_size() const;
-  seastar::future<ceph::msgr::v2::Tag> read_main_preamble();
+  seastar::future<stone::msgr::v2::Tag> read_main_preamble();
   seastar::future<> read_frame_payload();
   template <class F>
   seastar::future<> write_frame(F &frame, bool flush=true);
@@ -196,7 +196,7 @@ class ProtocolV2 final : public Protocol {
                          bool do_reset,
                          SocketRef&& new_socket,
                          AuthConnectionMetaRef&& new_auth_meta,
-                         ceph::crypto::onwire::rxtx_t new_rxtx,
+                         stone::crypto::onwire::rxtx_t new_rxtx,
                          uint64_t new_peer_global_seq,
                          // !reconnect
                          uint64_t new_client_cookie,

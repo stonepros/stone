@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc.
  *
@@ -48,7 +48,7 @@ struct Invoker {
   Result result;
   template <typename Completion>
   void dispatch(Completion&& completion, boost::system::error_code ec) {
-    ceph::async::dispatch(std::move(completion), ec, std::move(result));
+    stone::async::dispatch(std::move(completion), ec, std::move(result));
   }
 };
 // specialization for Result=void
@@ -57,7 +57,7 @@ struct Invoker<void> {
   using Signature = void(boost::system::error_code);
   template <typename Completion>
   void dispatch(Completion&& completion, boost::system::error_code ec) {
-    ceph::async::dispatch(std::move(completion), ec);
+    stone::async::dispatch(std::move(completion), ec);
   }
 };
 
@@ -66,7 +66,7 @@ struct AsyncOp : Invoker<Result> {
   unique_aio_completion_ptr aio_completion;
 
   using Signature = typename Invoker<Result>::Signature;
-  using Completion = ceph::async::Completion<Signature, AsyncOp<Result>>;
+  using Completion = stone::async::Completion<Signature, AsyncOp<Result>>;
 
   static void aio_dispatch(completion_t cb, void *arg) {
     // reclaim ownership of the completion
@@ -108,7 +108,7 @@ auto async_read(ExecutionContext& ctx, IoCtx& io, const std::string& oid,
   int ret = io.aio_read(oid, op.aio_completion.get(), &op.result, len, off);
   if (ret < 0) {
     auto ec = boost::system::error_code{-ret, boost::system::system_category()};
-    ceph::async::post(std::move(p), ec, bufferlist{});
+    stone::async::post(std::move(p), ec, bufferlist{});
   } else {
     p.release(); // release ownership until completion
   }
@@ -131,7 +131,7 @@ auto async_write(ExecutionContext& ctx, IoCtx& io, const std::string& oid,
   int ret = io.aio_write(oid, op.aio_completion.get(), bl, len, off);
   if (ret < 0) {
     auto ec = boost::system::error_code{-ret, boost::system::system_category()};
-    ceph::async::post(std::move(p), ec);
+    stone::async::post(std::move(p), ec);
   } else {
     p.release(); // release ownership until completion
   }
@@ -155,7 +155,7 @@ auto async_operate(ExecutionContext& ctx, IoCtx& io, const std::string& oid,
                            flags, &op.result);
   if (ret < 0) {
     auto ec = boost::system::error_code{-ret, boost::system::system_category()};
-    ceph::async::post(std::move(p), ec, bufferlist{});
+    stone::async::post(std::move(p), ec, bufferlist{});
   } else {
     p.release(); // release ownership until completion
   }
@@ -178,7 +178,7 @@ auto async_operate(ExecutionContext& ctx, IoCtx& io, const std::string& oid,
   int ret = io.aio_operate(oid, op.aio_completion.get(), write_op, flags);
   if (ret < 0) {
     auto ec = boost::system::error_code{-ret, boost::system::system_category()};
-    ceph::async::post(std::move(p), ec);
+    stone::async::post(std::move(p), ec);
   } else {
     p.release(); // release ownership until completion
   }
@@ -201,7 +201,7 @@ auto async_notify(ExecutionContext& ctx, IoCtx& io, const std::string& oid,
                           bl, timeout_ms, &op.result);
   if (ret < 0) {
     auto ec = boost::system::error_code{-ret, boost::system::system_category()};
-    ceph::async::post(std::move(p), ec, bufferlist{});
+    stone::async::post(std::move(p), ec, bufferlist{});
   } else {
     p.release(); // release ownership until completion
   }

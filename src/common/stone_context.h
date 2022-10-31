@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -51,13 +51,13 @@ class CryptoHandler;
 class CryptoRandom;
 class MonMap;
 
-namespace ceph::common {
-  class StoneeContextServiceThread;
-  class StoneeContextObs;
-  class StoneeContextHook;
+namespace stone::common {
+  class StoneContextServiceThread;
+  class StoneContextObs;
+  class StoneContextHook;
 }
 
-namespace ceph {
+namespace stone {
   class PluginRegistry;
   class HeartbeatMap;
   namespace logging {
@@ -67,16 +67,16 @@ namespace ceph {
 
 #if defined(WITH_SEASTAR) && !defined(WITH_ALIEN)
 namespace crimson::common {
-class StoneeContext {
+class StoneContext {
 public:
-  StoneeContext();
-  StoneeContext(uint32_t,
+  StoneContext();
+  StoneContext(uint32_t,
 	      code_environment_t=CODE_ENVIRONMENT_UTILITY,
 	      int = 0)
-    : StoneeContext{}
+    : StoneContext{}
   {}
-  StoneeContextStoneneContext&&) = default;
-  ~StoneeContext();
+  StoneContext(StoneContext&&) = default;
+  ~StoneContext();
 
   uint32_t get_module_type() const;
   bool check_experimental_feature_enabled(const std::string& feature) {
@@ -87,7 +87,7 @@ public:
   PerfCountersCollectionImpl* get_perfcounters_collection();
   crimson::common::ConfigProxy& _conf;
   crimson::common::PerfCountersCollection& _perf_counters_collection;
-  StoneeContext* get();
+  StoneContext* get();
   void put();
 private:
   std::unique_ptr<CryptoRandom> _crypto_random;
@@ -96,49 +96,49 @@ private:
 }
 #else
 #ifdef __cplusplus
-namespace ceph::common {
+namespace stone::common {
 #endif
-/* A StoneeContext represents the context held by a single library user.
- * There can be multiple StoneeContexts in the same process.
+/* A StoneContext represents the context held by a single library user.
+ * There can be multiple StoneContexts in the same process.
  *
- * For daemons and utility programs, there will be only one StoneeContext.  The
- * StoneeContext contains the configuration, the dout object, and anything else
+ * For daemons and utility programs, there will be only one StoneContext.  The
+ * StoneContext contains the configuration, the dout object, and anything else
  * that you might want to pass to libcommon with every function call.
  */
-class StoneeContext {
+class StoneContext {
 public:
-  StoneeContext(uint32_t module_type_,
+  StoneContext(uint32_t module_type_,
               enum code_environment_t code_env=CODE_ENVIRONMENT_UTILITY,
               int init_flags_ = 0);
 
-  StoneeContext(constStoneneContext&) = delete;
-  StoneeContext& operator =(constStoneneContext&) = delete;
-  StoneeContextStoneneContext&&) = delete;
-  StoneeContext& operator =StoneneContext&&) = delete;
+  StoneContext(const StoneContext&) = delete;
+  StoneContext& operator =(const StoneContext&) = delete;
+  StoneContext(StoneContext&&) = delete;
+  StoneContext& operator =(StoneContext&&) = delete;
 
   bool _finished = false;
-  ~StoneeContext();
+  ~StoneContext();
 
   // ref count!
 private:
   std::atomic<unsigned> nref;
 public:
-  StoneeContext *get() {
+  StoneContext *get() {
     ++nref;
     return this;
   }
   void put();
 
   ConfigProxy _conf;
-  ceph::logging::Log *_log;
+  stone::logging::Log *_log;
 
-  /* init ceph::crypto */
+  /* init stone::crypto */
   void init_crypto();
 
   /// shutdown crypto (should match init_crypto calls)
   void shutdown_crypto();
 
-  /* Start the Stonee Context's service thread */
+  /* Start the Stone Context's service thread */
   void start_service_thread();
 
   /* Reopen the log files */
@@ -155,15 +155,15 @@ public:
   void set_init_flags(int flags);
   int get_init_flags() const;
 
-  /* Get the PerfCountersCollection of this StoneeContext */
+  /* Get the PerfCountersCollection of this StoneContext */
   PerfCountersCollection *get_perfcounters_collection();
 
-  ceph::HeartbeatMap *get_heartbeat_map() {
+  stone::HeartbeatMap *get_heartbeat_map() {
     return _heartbeat_map;
   }
 
   /**
-   * Get the admin socket associated with this StoneeContext.
+   * Get the admin socket associated with this StoneContext.
    *
    * Currently there is always an admin socket object,
    * so this will never return NULL.
@@ -178,11 +178,11 @@ public:
   int do_command(std::string_view command, const cmdmap_t& cmdmap,
 		 Formatter *f,
 		 std::ostream& errss,
-		 ceph::bufferlist *out);
+		 stone::bufferlist *out);
   int _do_command(std::string_view command, const cmdmap_t& cmdmap,
 		  Formatter *f,
 		  std::ostream& errss,
-		  ceph::bufferlist *out);
+		  stone::bufferlist *out);
 
   static constexpr std::size_t largest_singleton = 8 * 72;
 
@@ -207,7 +207,7 @@ public:
 	std::forward_as_tuple(std::in_place_type<T>,
 			      std::forward<Args>(args)...));
     }
-    return ceph::any_cast<T&>(i->second);
+    return stone::any_cast<T&>(i->second);
   }
 
   /**
@@ -222,7 +222,7 @@ public:
   bool check_experimental_feature_enabled(const std::string& feature,
 					  std::ostream *message);
 
-  ceph::PluginRegistry *get_plugin_registry() {
+  stone::PluginRegistry *get_plugin_registry() {
     return _plugin_registry;
   }
 
@@ -264,7 +264,7 @@ public:
   void notify_post_fork();
 
   /**
-   * update StoneeContext with a copy of the passed in MonMap mon addrs
+   * update StoneContext with a copy of the passed in MonMap mon addrs
    *
    * @param mm MonMap to extract and update mon addrs
    */
@@ -281,7 +281,7 @@ public:
 private:
 
 
-  /* Stop and join the Stonee Context's service thread */
+  /* Stop and join the Stone Context's service thread */
   void join_service_thread();
 
   uint32_t _module_type;
@@ -299,10 +299,10 @@ private:
 
   /* libcommon service thread.
    * SIGHUP wakes this thread, which then reopens logfiles */
-  friend class StoneeContextServiceThread;
-  StoneeContextServiceThread *_service_thread;
+  friend class StoneContextServiceThread;
+  StoneContextServiceThread *_service_thread;
 
-  using md_config_obs_t = ceph::md_config_obs_impl<ConfigProxy>;
+  using md_config_obs_t = stone::md_config_obs_impl<ConfigProxy>;
 
   md_config_obs_t *_log_obs;
 
@@ -310,18 +310,18 @@ private:
   AdminSocket *_admin_socket;
 
   /* lock which protects service thread creation, destruction, etc. */
-  ceph::spinlock _service_thread_lock;
+  stone::spinlock _service_thread_lock;
 
   /* The collection of profiling loggers associated with this context */
   PerfCountersCollection *_perf_counters_collection;
 
   md_config_obs_t *_perf_counters_conf_obs;
 
-  StoneeContextHook *_admin_hook;
+  StoneContextHook *_admin_hook;
 
-  ceph::HeartbeatMap *_heartbeat_map;
+  stone::HeartbeatMap *_heartbeat_map;
 
-  ceph::spinlock associated_objs_lock;
+  stone::spinlock associated_objs_lock;
 
   struct associated_objs_cmp {
     using is_transparent = std::true_type;
@@ -334,11 +334,11 @@ private:
   };
 
   std::map<std::pair<std::string, std::type_index>,
-	   ceph::immobile_any<largest_singleton>,
+	   stone::immobile_any<largest_singleton>,
 	   associated_objs_cmp> associated_objs;
   std::set<std::string> associated_objs_drop_on_fork;
 
-  ceph::spinlock _fork_watchers_lock;
+  stone::spinlock _fork_watchers_lock;
   std::vector<ForkWatcher*> _fork_watchers;
 
   // crypto
@@ -347,11 +347,11 @@ private:
   std::unique_ptr<CryptoRandom> _crypto_random;
 
   // experimental
-  StoneeContextObs *_cct_obs;
-  ceph::spinlock _feature_lock;
+  StoneContextObs *_cct_obs;
+  stone::spinlock _feature_lock;
   std::set<std::string> _experimental_features;
 
-  ceph::PluginRegistry* _plugin_registry;
+  stone::PluginRegistry* _plugin_registry;
 
   md_config_obs_t *_lockdep_obs;
 
@@ -390,7 +390,7 @@ private:
    */
   void _refresh_perf_values();
 
-  friend class StoneeContextObs;
+  friend class StoneContextObs;
 };
 #ifdef __cplusplus
 }
@@ -398,13 +398,13 @@ private:
 #endif	// WITH_SEASTAR
 
 #if !(defined(WITH_SEASTAR) && !defined(WITH_ALIEN)) && defined(__cplusplus)
-namespace ceph::common {
-inline void intrusive_ptr_add_ref(StoneeContext* cct)
+namespace stone::common {
+inline void intrusive_ptr_add_ref(StoneContext* cct)
 {
   cct->get();
 }
 
-inline void intrusive_ptr_release(StoneeContext* cct)
+inline void intrusive_ptr_release(StoneContext* cct)
 {
   cct->put();
 }

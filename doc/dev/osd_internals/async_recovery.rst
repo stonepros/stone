@@ -2,7 +2,7 @@
 Asynchronous Recovery
 =====================
 
-Ceph Placement Groups (PGs) maintain a log of write transactions to
+Stone Placement Groups (PGs) maintain a log of write transactions to
 facilitate speedy recovery of data. During recovery, each of these PG logs
 is used to determine which content in each OSD is missing or outdated.
 This obviates the need to scan all RADOS objects.

@@ -1,5 +1,5 @@
 commit 50e863e0f4bc8f4b9e31156de690d765af245185
-Author: Jenkins Build Slave User <ceph-release-team@redhat.com>
+Author: Jenkins Build Slave User <stone-release-team@redhat.com>
 Date:   Mon Apr 10 11:43:44 2017 +0000
 
     10.2.7
@@ -107,7 +107,7 @@ Date:   Tue Feb 28 15:49:06 2017 -0500
     we currently use safe_link mode, an is_linked() check is
     available, and exhaustive.
     
-    Fixes: http://tracker.ceph.com/issues/19111
+    Fixes: http://tracker.stone.com/issues/19111
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit c0aa515f8d8c57ec5ee09e3b60df3cac60453c40)
@@ -121,7 +121,7 @@ Date:   Tue Mar 28 15:55:11 2017 +0200
     This is a cherry-pick from kraken -- the master diverged after
     ManagedLock refactoring and is not affected.
     
-    Fix: http://tracker.ceph.com/issues/19368
+    Fix: http://tracker.stone.com/issues/19368
     Signed-off-by: Mykola Golub <mgolub@mirantis.com>
     (cherry picked from commit df59d6d5f7deb586cf14a6ef6984e6847db08852)
 
@@ -137,7 +137,7 @@ Date:   Tue Feb 28 20:24:12 2017 -0500
     to see handles still interned on the FHcache when nfs-ganesha is
     recycling objects from its own LRU.
     
-    Fixes: http://tracker.ceph.com/issues/19112
+    Fixes: http://tracker.stone.com/issues/19112
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit d51a3b1224ba62bb53c6c2c7751fcf7853c35a4b)
@@ -231,7 +231,7 @@ Date:   Mon Feb 20 15:05:18 2017 -0500
 
     rgw_file: fix marker computation
     
-    Fixes: http://tracker.ceph.com/issues/19018
+    Fixes: http://tracker.stone.com/issues/19018
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 4454765e7dd08535c50d24205858e18dba4b454c)
@@ -254,7 +254,7 @@ Date:   Sun Feb 19 20:34:31 2017 -0500
     progress) a null pointer for the start cookie offset, intended
     to convey this.
     
-    Fixes: http://tracker.ceph.com/issues/18991
+    Fixes: http://tracker.stone.com/issues/18991
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 2cd60ee9712291b906123aca1704288b18a9742b)
@@ -275,7 +275,7 @@ Date:   Sun Feb 19 18:21:06 2017 -0500
     such a handle, we must be ready to create the object inline with
     storing the attributes.
     
-    Fixes: http://tracker.ceph.com/issues/18989
+    Fixes: http://tracker.stone.com/issues/18989
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 55eec1c0a0e136736961423b7b6244d0f3693c1a)
@@ -467,7 +467,7 @@ Date:   Mon Feb 20 15:05:18 2017 -0500
 
     rgw_file: fix marker computation
     
-    Fixes: http://tracker.ceph.com/issues/19018
+    Fixes: http://tracker.stone.com/issues/19018
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 4454765e7dd08535c50d24205858e18dba4b454c)
@@ -491,7 +491,7 @@ Date:   Sun Feb 19 20:34:31 2017 -0500
     progress) a null pointer for the start cookie offset, intended
     to convey this.
     
-    Fixes: http://tracker.ceph.com/issues/18991
+    Fixes: http://tracker.stone.com/issues/18991
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 2cd60ee9712291b906123aca1704288b18a9742b)
@@ -513,7 +513,7 @@ Date:   Sun Feb 19 18:21:06 2017 -0500
     such a handle, we must be ready to create the object inline with
     storing the attributes.
     
-    Fixes: http://tracker.ceph.com/issues/18989
+    Fixes: http://tracker.stone.com/issues/18989
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 55eec1c0a0e136736961423b7b6244d0f3693c1a)
@@ -657,7 +657,7 @@ Date:   Tue Jul 26 14:53:44 2016 +0200
     
     Add multipart uploads copy part feature.
     
-    Fixes: http://tracker.ceph.com/issues/12790
+    Fixes: http://tracker.stone.com/issues/12790
     
     Signed-off-by: Javier M. Mellid <jmunhoz@igalia.com>
     (cherry picked from commit 949480c2e9760855ed6a0501d364d5e766c8207d)
@@ -675,7 +675,7 @@ Date:   Fri Feb 17 00:56:34 2017 +0100
     to RFC 7230 (a part of the HTTP specification) or violates it
     but follows the Swift's behavior.
     
-    Fixes: http://tracker.ceph.com/issues/16602
+    Fixes: http://tracker.stone.com/issues/16602
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit d8e3e64ec97a3c222a56bb6f510e5e23d7858615)
     
@@ -698,7 +698,7 @@ Date:   Thu Mar 9 15:24:08 2017 -0500
     colliding zones at the same time - we don't have to remember old zone
     short ids forever
     
-    Fixes: http://tracker.ceph.com/issues/15618
+    Fixes: http://tracker.stone.com/issues/15618
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 9c45633c836c966ab1f75ea2b1ad3fa0a4886600)
@@ -734,12 +734,12 @@ Date:   Thu Mar 23 09:46:53 2017 +0100
     Merge branch 'jewel-next' into jewel
     
     Branch "jewel-next" was merged to jewel on Dec 22 (5b402f8a7b), and then PR
-    https://github.com/ceph/ceph/pull/13143 merged to jewel-next much later (Feb
+    https://github.com/stone/stone/pull/13143 merged to jewel-next much later (Feb
     1st), and then jewel-next was never merged to jewel again before we tagged
     v10.2.6.
     
     This merge brings in a single commit, i.e. the one from
-    https://github.com/ceph/ceph/pull/13143
+    https://github.com/stone/stone/pull/13143
     
     Reported-by: Ken Dreyer <kdreyer@redhat.com>
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
@@ -774,7 +774,7 @@ Date:   Tue Oct 11 15:19:37 2016 -0400
     async notifications will still try to call wakeup() on RGWDataSyncControlCR
     if it fails, leading to segfault
     
-    Fixes: http://tracker.ceph.com/issues/17569
+    Fixes: http://tracker.stone.com/issues/17569
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 5cc599b9bf2dde31de16a5b2831baf06851d69d5)
@@ -809,7 +809,7 @@ Date:   Mon Feb 20 16:00:01 2017 -0500
     that it will continue to retry with backoff no matter what error code it
     gets
     
-    Fixes: http://tracker.ceph.com/issues/19019
+    Fixes: http://tracker.stone.com/issues/19019
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 3e4059557fd6cad5d31014327f60832b36d04a6c)
@@ -829,7 +829,7 @@ Date:   Thu Feb 23 10:21:38 2017 -0500
     prevents clients from eerily permitting things like "cd sara0" via
     partial name match on "sara01."
     
-    Fixes: http://tracker.ceph.com/issues/19059
+    Fixes: http://tracker.stone.com/issues/19059
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 70ef7d45e0abf2661bd4e23161d4e70cf5178079)
@@ -849,7 +849,7 @@ Date:   Sun Feb 19 17:43:17 2017 -0500
     convention requires lookup("foo") to match a non-materialized
     instance of "foo/" (case 2 in RGWLibFS::stat_leaf's stat loop).
     
-    Fixes: http://tracker.ceph.com/issues/18992
+    Fixes: http://tracker.stone.com/issues/18992
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit e31e9eb980f958640150e8d7f17de1b9e5478b1e)
@@ -864,7 +864,7 @@ Date:   Wed Feb 22 14:57:59 2017 -0500
     magical that other consumers should be persuaded to understand
     their specialness.
     
-    Fixes: http://tracker.ceph.com/issues/19060
+    Fixes: http://tracker.stone.com/issues/19060
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit dea8d1ee373399a21851690a9753388b659b8ede)
@@ -885,7 +885,7 @@ Date:   Wed Feb 22 10:24:29 2017 -0500
     handles, as current safe_link mode requires first removing from
     the FHCache.
     
-    Fixes: http://tracker.ceph.com/issues/19036
+    Fixes: http://tracker.stone.com/issues/19036
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 6cde812c92e5bba9f85fbf8486ebe69b55952370)
@@ -900,7 +900,7 @@ Date:   Mon Feb 27 13:06:59 2017 +1000
     it calls setuid (via civetweb) after the new code sets PR_SET_DUMPABLE.
     Add another prctl call before wait_shutdown.
     
-    Fixes: http://tracker.ceph.com/issues/19089
+    Fixes: http://tracker.stone.com/issues/19089
     
     Signed-off-by: Brad Hubbard <bhubbard@redhat.com>
     (cherry picked from commit bc458d39630b599e0e1ca9fe25ad7455fcffdd10)
@@ -915,7 +915,7 @@ Date:   Wed Feb 8 15:07:43 2017 +0800
     metadata header by sending an empty key value. this description can be found at
     No.8 in http://docs.openstack.org/user-guide/cli-swift-set-object-versions.html.
     
-    Fixes: http://tracker.ceph.com/issues/18852
+    Fixes: http://tracker.stone.com/issues/18852
     Signed-off-by: Jing Wenjun <jingwenjun@cmss.chinamobile.com>
     (cherry picked from commit 17c5a0edd2227703cec867f0f588d4eae36dfe1c)
 
@@ -943,7 +943,7 @@ Date:   Fri Feb 3 13:44:45 2017 -0500
 
     rgw_file:  fix RGWLibFS::setattr for directory objects
     
-    Fixes:  http://tracker.ceph.com/issues/18808
+    Fixes:  http://tracker.stone.com/issues/18808
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 4ad5a9226852d6d564baf2e63278ed6c4c185ecb)
@@ -962,7 +962,7 @@ Date:   Thu Feb 23 16:02:07 2017 -0500
     not removing up the proposed object from FHCache, which produced a
     boost assert when recycled.
     
-    Fixes: http://tracker.ceph.com/issues/19066
+    Fixes: http://tracker.stone.com/issues/19066
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit eb1cd3b30c0504385f05bf2d2dd5e2251b7efed7)
@@ -993,7 +993,7 @@ Date:   Tue Feb 21 15:33:01 2017 -0500
 
     rbd-mirror: retry object copy after -ENOENT error
     
-    Fixes: http://tracker.ceph.com/issues/18990
+    Fixes: http://tracker.stone.com/issues/18990
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit b4f36d5dc3f4f3cbb23f61cbb945b222248a50df)
     
@@ -1046,7 +1046,7 @@ Date:   Fri Dec 30 23:30:16 2016 -0500
     The extra ref is omitted when parent->is_root(), as that node is
     not in the LRU cache.
     
-    Fixes: http://tracker.ceph.com/issues/18650
+    Fixes: http://tracker.stone.com/issues/18650
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 0e5299f3f43e633a5d8a9360893b4b11f6217d81)
@@ -1098,7 +1098,7 @@ Date:   Wed Oct 19 17:10:29 2016 -0700
 
     tasks/scrub_test.py: Make test deterministic by updating digests
     
-    ceph_test_rados: Get coverage of digest updates in deep-scrub/repair
+    stone_test_rados: Get coverage of digest updates in deep-scrub/repair
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit e000ab2f46b7b98a223176a2a25bb7195e601af6)
@@ -1194,7 +1194,7 @@ commit 2230e6adc66ca3e5dbe81aecccdb4a435e93e256
 Author: David Zafman <dzafman@redhat.com>
 Date:   Tue Aug 30 10:56:06 2016 -0700
 
-    common: Change cleanbin() to use base64 encoding, update ceph-objectstore-tool
+    common: Change cleanbin() to use base64 encoding, update stone-objectstore-tool
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 92e982c71995b863466d83671468f84761cb1793)
@@ -1246,7 +1246,7 @@ Date:   Fri Nov 11 21:37:50 2016 +0800
     
     and requeue the blocked ops.
     
-    Fixes: http://tracker.ceph.com/issues/17857
+    Fixes: http://tracker.stone.com/issues/17857
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit b3224a18f6acc7ed54c2162b140a33b6146a16be)
 
@@ -1299,7 +1299,7 @@ Date:   Fri May 20 15:20:18 2016 -0700
 
     osd: Handle recovery read errors
     
-    Fixes: http://tracker.ceph.com/issues/13937
+    Fixes: http://tracker.stone.com/issues/13937
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit c51d70e1e837c972e42ddd5fa66f7ca4477b95cc)
@@ -1368,7 +1368,7 @@ Date:   Wed Jan 11 00:06:15 2017 -0500
     by flush().  So, this logic adds a new per-instance variable to separately
     track state that it emitted a previous item (and should emit a newline).
     
-    Fixes: http://tracker.ceph.com/issues/18473
+    Fixes: http://tracker.stone.com/issues/18473
     Signed-off-by: Marcus Watts <mwatts@redhat.com>
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 5f229d6a33eae4906f22cdb90941835e47ee9f02)
@@ -1379,7 +1379,7 @@ Date:   Wed Jan 25 21:54:27 2017 +0530
 
     osd: jewel fix OSD network address in OSD heartbeat_check log message
     
-    Fixes: http://tracker.ceph.com/issues/18657
+    Fixes: http://tracker.stone.com/issues/18657
     
     Signed-off-by: Vikhyat Umrao <vumrao@redhat.com>
 
@@ -1472,14 +1472,14 @@ Date:   Fri Jan 13 03:39:57 2017 -0500
     the library soname values in as the libraries to load with "dlopen".
     
     The issue reported here against master
-    http://tracker.ceph.com/issues/16535
+    http://tracker.stone.com/issues/16535
     reflects stuff that doesn't seem to have made it into jewel
     	(which had: -lssl -lcrypto hard-wired into it.)
     Still, since people were pretty riled about making that change,
     this puts things in congruence to the final result in master.
     	(which is: runtime shared object load of ssl crypto by soname.)
     
-    Fixes: http://tracker.ceph.com/issues/11239
+    Fixes: http://tracker.stone.com/issues/11239
     
     Signed-off-by: Marcus Watts <mwatts@redhat.com>
     (inspired by commit 7caa0bd002110b62514da83a37a2a3deb841267a)
@@ -1497,12 +1497,12 @@ Date:   Mon Jul 11 17:54:07 2016 -0400
     
     This is a problem that went away for a bit, but came back with some
     changes for
-    http://tracker.ceph.com/issues/16535
+    http://tracker.stone.com/issues/16535
     
     Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=1341775
     Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=1258961
     
-    Fixes: http://tracker.ceph.com/issues/11239
+    Fixes: http://tracker.stone.com/issues/11239
     
     Signed-off-by: Marcus Watts <mwatts@redhat.com>
     (cherry picked from commit 7caa0bd002110b62514da83a37a2a3deb841267a)
@@ -1518,7 +1518,7 @@ Date:   Thu Nov 3 23:33:44 2016 -0400
     break anything, so it wasn't doing anything useful.  If it has it
     any effect, it would be to cause everything that linked against this
     "library" to also use the indictated include path.  Which would be great
-    except everything in ceph wants to include "civetweb/civetweb.h" and
+    except everything in stone wants to include "civetweb/civetweb.h" and
     not "civetweb.h".  We already make separate arrangements elsewhere for
     that to work.  Additionally, static object libraries in cmake aren't
     really libraries, so I'm not entirely sure this even does anything.

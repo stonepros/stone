@@ -1,9 +1,9 @@
 =================================
- Mount CephFS using Kernel Driver
+ Mount StoneFS using Kernel Driver
 =================================
 
-The CephFS kernel driver is part of the Linux kernel. It allows mounting
-CephFS as a regular file system with native kernel performance. It is the
+The StoneFS kernel driver is part of the Linux kernel. It allows mounting
+StoneFS as a regular file system with native kernel performance. It is the
 client of choice for most use-cases.
 
 Prerequisites
@@ -12,14 +12,14 @@ Prerequisites
 Complete General Prerequisites
 ------------------------------
 Go through the prerequisites required by both, kernel as well as FUSE mounts,
-in `Mount CephFS: Prerequisites`_ page.
+in `Mount StoneFS: Prerequisites`_ page.
 
 Is mount helper is present?
 ---------------------------
-``mount.ceph`` helper is installed by Ceph packages. The helper passes the
-monitor address(es) and CephX user keyrings automatically saving the Ceph
-admin the effort to pass these details explicitly while mountng CephFS. In
-case the helper is not present on the client machine, CephFS can still be
+``mount.ceph`` helper is installed by Stone packages. The helper passes the
+monitor address(es) and StoneX user keyrings automatically saving the Stone
+admin the effort to pass these details explicitly while mountng StoneFS. In
+case the helper is not present on the client machine, StoneFS can still be
 mounted using kernel but by passing these details explicitly to the ``mount``
 command. To check whether it is present on your system, do::
 
@@ -31,42 +31,42 @@ Which Kernel Version?
 Because the kernel client is distributed as part of the linux kernel (not
 as part of packaged ceph releases), you will need to consider which kernel
 version to use on your client nodes. Older kernels are known to include buggy
-ceph clients, and may not support features that more recent Ceph clusters
+ceph clients, and may not support features that more recent Stone clusters
 support.
 
 Remember that the "latest" kernel in a stable linux distribution is likely
-to be years behind the latest upstream linux kernel where Ceph development
+to be years behind the latest upstream linux kernel where Stone development
 takes place (including bug fixes).
 
-As a rough guide, as of Ceph 10.x (Jewel), you should be using a least a 4.x
+As a rough guide, as of Stone 10.x (Jewel), you should be using a least a 4.x
 kernel. If you absolutely have to use an older kernel, you should use the
 fuse client instead of the kernel client.
 
 This advice does not apply if you are using a linux distribution that
-includes CephFS support, as in this case the distributor will be responsible
+includes StoneFS support, as in this case the distributor will be responsible
 for backporting fixes to their stable kernel: check with your vendor.
 
 Synopsis
 ========
-In general, the command to mount CephFS via kernel driver looks like this::
+In general, the command to mount StoneFS via kernel driver looks like this::
 
     mount -t ceph {device-string}:{path-to-mounted} {mount-point} -o {key-value-args} {other-args}
 
-Mounting CephFS
+Mounting StoneFS
 ===============
-On Ceph clusters, CephX is enabled by default. Use ``mount`` command to
-mount CephFS with the kernel driver::
+On Stone clusters, StoneX is enabled by default. Use ``mount`` command to
+mount StoneFS with the kernel driver::
 
     mkdir /mnt/mycephfs
     mount -t ceph :/ /mnt/mycephfs -o name=foo
 
-The key-value argument right after option ``-o`` is CephX credential;
-``name`` is the username of the CephX user we are using to mount CephFS. The
+The key-value argument right after option ``-o`` is StoneX credential;
+``name`` is the username of the StoneX user we are using to mount StoneFS. The
 default value for ``name`` is ``guest``.
 
-The kernel driver also requires MON's socket and the secret key for the CephX
+The kernel driver also requires MON's socket and the secret key for the StoneX
 user. In case of the above command, ``mount.ceph`` helper figures out these
-details automatically by finding and reading Ceph conf file and keyring. In
+details automatically by finding and reading Stone conf file and keyring. In
 case you don't have these files on the host where you're running mount
 command, you can pass these details yourself too::
 
@@ -82,23 +82,23 @@ the file by using the option ``secretfile`` instead of ``secret``::
 Ensure the permissions on the secret key file are appropriate (preferably,
 ``600``).
 
-In case CephX is disabled, you can omit ``-o`` and the list of key-value
+In case StoneX is disabled, you can omit ``-o`` and the list of key-value
 arguments that follow it::
 
     mount -t ceph :/ /mnt/mycephfs
 
-To mount a subtree of the CephFS root, append the path to the device string::
+To mount a subtree of the StoneFS root, append the path to the device string::
 
     mount -t ceph :/subvolume/dir1/dir2 /mnt/mycephfs -o name=fs
 
-If you have more than one file system on your Ceph cluster, you can mount the
+If you have more than one file system on your Stone cluster, you can mount the
 non-default FS as follows::
 
     mount -t ceph :/ /mnt/mycephfs2 -o name=fs,fs=mycephfs2
 
-Unmounting CephFS
+Unmounting StoneFS
 =================
-To unmount the Ceph file system, use the ``umount`` command as usual::
+To unmount the Stone file system, use the ``umount`` command as usual::
 
     umount /mnt/mycephfs
 
@@ -108,7 +108,7 @@ To unmount the Ceph file system, use the ``umount`` command as usual::
 Persistent Mounts
 ==================
 
-To mount CephFS in your file systems table as a kernel driver, add the
+To mount StoneFS in your file systems table as a kernel driver, add the
 following to ``/etc/fstab``::
 
     [{ipaddress}:{port}]:/ {mount}/{mountpoint} ceph [name=username,secret=secretkey|secretfile=/path/to/secretfile],[{mount.options}]
@@ -121,11 +121,11 @@ The default for the ``name=`` parameter is ``guest``. If the ``secret`` or
 ``secretfile`` options are not specified then the mount helper will attempt to
 find a secret for the given ``name`` in one of the configured keyrings.
 
-See `User Management`_ for details on CephX user management and mount.ceph_
+See `User Management`_ for details on StoneX user management and mount.ceph_
 manual for more options it can take. For troubleshooting, see
 :ref:`kernel_mount_debugging`.
 
 .. _fstab: ../fstab/#kernel-driver
-.. _Mount CephFS\: Prerequisites: ../mount-prerequisites
+.. _Mount StoneFS\: Prerequisites: ../mount-prerequisites
 .. _mount.ceph: ../../man/8/mount.ceph/
 .. _User Management: ../../rados/operations/user-management/

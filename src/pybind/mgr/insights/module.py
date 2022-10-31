@@ -168,13 +168,13 @@ class Module(MgrModule):
 
     def _version_parse(self, version):
         """
-        Return the components of a Ceph version string.
+        Return the components of a Stone version string.
 
         This returns nothing when the version string cannot be parsed into its
-        constituent components, such as when Ceph has been built with
+        constituent components, such as when Stone has been built with
         ENABLE_GIT_VERSION=OFF.
         """
-        r = r"ceph version (?P<release>\d+)\.(?P<major>\d+)\.(?P<minor>\d+)"
+        r = r"stone version (?P<release>\d+)\.(?P<major>\d+)\.(?P<minor>\d+)"
         m = re.match(r, version)
         ver = {} if not m else {
             "release": m.group("release"),

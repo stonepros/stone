@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This is one helper for mounting the ceph-fuse/kernel clients by
+# This is one helper for mounting the stone-fuse/kernel clients by
 # unsharing the network namespace, let's call it netns container.
 # With the netns container, you can easily suspend or resume the
 # virtual network interface to simulate the client node hard
@@ -16,7 +16,7 @@
 #           |                       |                      |
 #            \                      | brx.Y               /
 #             \          ----------------------          /
-#              \  brx.X |       ceph-brx       | brx.Z  / 
+#              \  brx.X |       stone-brx       | brx.Z  / 
 #               \------>|       default        |<------/
 #                   |   |  192.168.255.254/16  |   |
 #                   |    ----------------------    |
@@ -27,10 +27,10 @@
 #                              -----------
 #
 # Defaultly it will use the 192.168.X.Y/16 private network IPs for
-# the ceph-brx and netnses as above. And you can also specify your
-# own new ip/mask for the ceph-brx, like:
+# the stone-brx and netnses as above. And you can also specify your
+# own new ip/mask for the stone-brx, like:
 #
-#  $ unshare_ns_mount.sh --fuse /mnt/cephfs --brxip 172.19.100.100/12
+#  $ unshare_ns_mount.sh --fuse /mnt/stonefs --brxip 172.19.100.100/12
 #
 # Then the each netns will get a new ip from the ranges:
 # [172.16.0.1 ~ 172.19.100.99]/12 and [172.19.100.101 ~ 172.31.255.254]/12
@@ -41,43 +41,43 @@ usage() {
     echo ""
     echo "usage: unshare_ns_mount.sh [OPTIONS [paramters]] [--brxip <ip_address/mask>]"
     echo "OPTIONS:" 
-    echo -e "  --fuse    <ceph-fuse options>"
-    echo -e "\tThe ceph-fuse command options"
-    echo -e "\t  $ unshare_ns_mount.sh --fuse -m 192.168.0.1:6789 /mnt/cephfs -o nonempty"
+    echo -e "  --fuse    <stone-fuse options>"
+    echo -e "\tThe stone-fuse command options"
+    echo -e "\t  $ unshare_ns_mount.sh --fuse -m 192.168.0.1:6789 /mnt/stonefs -o nonempty"
     echo ""
     echo -e "  --kernel  <mount options>"
     echo -e "\tThe mount command options"
-    echo -e "\t  $ unshare_ns_mount.sh --kernel -t ceph 192.168.0.1:6789:/ /mnt/cephfs -o fs=a"
+    echo -e "\t  $ unshare_ns_mount.sh --kernel -t stone 192.168.0.1:6789:/ /mnt/stonefs -o fs=a"
     echo ""
     echo -e "  --suspend <mountpoint>"
     echo -e "\tDown the veth interface in the network namespace"
-    echo -e "\t  $ unshare_ns_mount.sh --suspend /mnt/cephfs"
+    echo -e "\t  $ unshare_ns_mount.sh --suspend /mnt/stonefs"
     echo ""
     echo -e "  --resume  <mountpoint>"
     echo -e "\tUp the veth interface in the network namespace"
-    echo -e "\t  $ unshare_ns_mount.sh --resume /mnt/cephfs"
+    echo -e "\t  $ unshare_ns_mount.sh --resume /mnt/stonefs"
     echo ""
     echo -e "  --umount  <mountpoint>"
     echo -e "\tUmount and delete the network namespace"
-    echo -e "\t  $ unshare_ns_mount.sh --umount /mnt/cephfs"
+    echo -e "\t  $ unshare_ns_mount.sh --umount /mnt/stonefs"
     echo ""
     echo -e "  --brxip   <ip_address/mask>"
-    echo -e "\tSpecify ip/mask for ceph-brx and it only makes sense for --fuse/--kernel options"
+    echo -e "\tSpecify ip/mask for stone-brx and it only makes sense for --fuse/--kernel options"
     echo -e "\t(default: 192.168.255.254/16, netns ip: 192.168.0.1/16 ~ 192.168.255.253/16)"
-    echo -e "\t  $ unshare_ns_mount.sh --fuse -m 192.168.0.1:6789 /mnt/cephfs --brxip 172.19.255.254/12"
-    echo -e "\t  $ unshare_ns_mount.sh --kernel 192.168.0.1:6789:/ /mnt/cephfs --brxip 172.19.255.254/12"
+    echo -e "\t  $ unshare_ns_mount.sh --fuse -m 192.168.0.1:6789 /mnt/stonefs --brxip 172.19.255.254/12"
+    echo -e "\t  $ unshare_ns_mount.sh --kernel 192.168.0.1:6789:/ /mnt/stonefs --brxip 172.19.255.254/12"
     echo ""
     echo -e "  -h, --help"
     echo -e "\tPrint help"
     echo ""
 }
 
-CEPH_BRX=ceph-brx
-CEPH_BRX_IP_DEF=192.168.255.254
+STONE_BRX=stone-brx
+STONE_BRX_IP_DEF=192.168.255.254
 NET_MASK_DEF=16
 BRD_DEF=192.168.255.255
 
-CEPH_BRX_IP=$CEPH_BRX_IP_DEF
+STONE_BRX_IP=$STONE_BRX_IP_DEF
 NET_MASK=$NET_MASK_DEF
 BRD=$BRD_DEF
 
@@ -90,7 +90,7 @@ function get_mountpoint() {
     do
         if [ -d $param ]; then
             # skipping "--client_mountpoint/-r root_directory"
-            # option for ceph-fuse command
+            # option for stone-fuse command
             if [ "$last" == "-r" -o "$last" == "--client_mountpoint" ]; then
                 last=$param
                 continue
@@ -112,7 +112,7 @@ function get_mountpoint() {
 
 function get_new_netns() {
     # prune the repeating slashes:
-    # "/mnt///cephfs///" --> "/mnt/cephfs/"
+    # "/mnt///stonefs///" --> "/mnt/stonefs/"
     __mountpoint=`echo "$mountpoint" | sed 's/\/\+/\//g'`
 
     # prune the leading slashes
@@ -130,35 +130,35 @@ function get_new_netns() {
     # replace '/' with '-'
     __mountpoint=${__mountpoint//\//-}
 
-    # "mnt/cephfs" --> "ceph-fuse-mnt-cephfs"
+    # "mnt/stonefs" --> "stone-fuse-mnt-stonefs"
     if [ "$1" == "--fuse" ]; then
-        new_netns=`echo ceph-fuse-$__mountpoint`
+        new_netns=`echo stone-fuse-$__mountpoint`
         fuse_type=true
         return
     fi
 
-    # "mnt/cephfs" --> "ceph-kernel-mnt-cephfs"
+    # "mnt/stonefs" --> "stone-kernel-mnt-stonefs"
     if [ "$1" == "--kernel" ]; then
-        new_netns=`echo ceph-kernel-$__mountpoint`
+        new_netns=`echo stone-kernel-$__mountpoint`
         return
     fi
 
     # we are in umount/suspend/resume routines
     for ns in `ip netns list | awk '{print $1}'`
     do
-        if [ "$ns" == "ceph-fuse-$__mountpoint" ]; then
+        if [ "$ns" == "stone-fuse-$__mountpoint" ]; then
             new_netns=$ns
             fuse_type=true
             return
         fi
-        if [ "$ns" == "ceph-kernel-$__mountpoint" ]; then
+        if [ "$ns" == "stone-kernel-$__mountpoint" ]; then
             new_netns=$ns
             return
         fi
     done
     
     if [ "0$new_netns" == "0" ]; then
-        echo "Oops, netns 'ceph-{fuse/kernel}-$__mountpoint' does not exists!"
+        echo "Oops, netns 'stone-{fuse/kernel}-$__mountpoint' does not exists!"
         exit 1
     fi
 }
@@ -206,7 +206,7 @@ if [ $1 == "--resume" ]; then
     exit 0
 fi
 
-function ceph_umount() {
+function stone_umount() {
     get_mountpoint $@
     get_new_netns
 
@@ -223,12 +223,12 @@ function ceph_umount() {
         for pid in `ip netns pids $new_netns 2>/dev/null`
         do
             name=`cat /proc/$pid/comm 2>/dev/null`
-            if [ "$name" == "ceph-fuse" ]; then
+            if [ "$name" == "stone-fuse" ]; then
                 break
             fi
         done
 
-        if [ "$name" == "ceph-fuse" ]; then
+        if [ "$name" == "stone-fuse" ]; then
             name=""
             usleep 100000
             continue
@@ -240,26 +240,26 @@ function ceph_umount() {
     nsid=`ip netns list-id | grep "$new_netns" | awk '{print $2}'`
     netns_brx=brx.$nsid
 
-    # brctl delif $CEPH_BRX $netns_brx 2>/dev/null
+    # brctl delif $STONE_BRX $netns_brx 2>/dev/null
     nmcli connection down $netns_brx down 2>/dev/null
     nmcli connection delete $netns_brx 2>/dev/null
 
     ip netns delete $new_netns 2>/dev/null
     
     # if this is the last netns_brx, will delete
-    # the $CEPH_BRX and restore the OS configure
-    # rc=`brctl show ceph-brx 2>/dev/null | grep 'brx\.'|wc -l`
+    # the $STONE_BRX and restore the OS configure
+    # rc=`brctl show stone-brx 2>/dev/null | grep 'brx\.'|wc -l`
     rc=`nmcli connection show 2>/dev/null | grep 'brx\.' | wc -l`
     if [ $rc == 0 ]; then
-        ip link set $CEPH_BRX down 2>/dev/null
-        # brctl delbr $CEPH_BRX 2>/dev/null
-        nmcli connection delete $CEPH_BRX 2>/dev/null
+        ip link set $STONE_BRX down 2>/dev/null
+        # brctl delbr $STONE_BRX 2>/dev/null
+        nmcli connection delete $STONE_BRX 2>/dev/null
 
         # restore the ip forward
-        tmpfile=`ls /tmp/ | grep "$CEPH_BRX\."`
+        tmpfile=`ls /tmp/ | grep "$STONE_BRX\."`
         tmpfile=/tmp/$tmpfile
         if [ ! -f $tmpfile ]; then
-            echo "Oops, the $CEPH_BRX.XXX temp file does not exist!"
+            echo "Oops, the $STONE_BRX.XXX temp file does not exist!"
         else
             save=`cat $tmpfile`
             echo $save > /proc/sys/net/ipv4/ip_forward
@@ -268,17 +268,17 @@ function ceph_umount() {
 
         # drop the iptables NAT rules
         host_nic=`route | grep default | awk '{print $8}'`
-        iptables -D FORWARD -o $host_nic -i $CEPH_BRX -j ACCEPT
-        iptables -D FORWARD -i $host_nic -o $CEPH_BRX -j ACCEPT
-        iptables -t nat -D POSTROUTING -s $CEPH_BRX_IP/$NET_MASK -o $host_nic -j MASQUERADE
+        iptables -D FORWARD -o $host_nic -i $STONE_BRX -j ACCEPT
+        iptables -D FORWARD -i $host_nic -o $STONE_BRX -j ACCEPT
+        iptables -t nat -D POSTROUTING -s $STONE_BRX_IP/$NET_MASK -o $host_nic -j MASQUERADE
     fi
 }
 
 function get_brd_mask() {
-    first=`echo "$CEPH_BRX_IP" | awk -F. '{print $1}'`
-    second=`echo "$CEPH_BRX_IP" | awk -F. '{print $2}'`
-    third=`echo "$CEPH_BRX_IP" | awk -F. '{print $3}'`
-    fourth=`echo "$CEPH_BRX_IP" | awk -F. '{print $4}'`
+    first=`echo "$STONE_BRX_IP" | awk -F. '{print $1}'`
+    second=`echo "$STONE_BRX_IP" | awk -F. '{print $2}'`
+    third=`echo "$STONE_BRX_IP" | awk -F. '{print $3}'`
+    fourth=`echo "$STONE_BRX_IP" | awk -F. '{print $4}'`
 
     if [ "$first" == "172" ]; then
         second_max=31
@@ -313,12 +313,12 @@ function get_brd_mask() {
 
 # As default:
 # The netns IP will be 192.168.0.1 ~ 192.168.255.253,
-# and 192.168.255.254 is saved for $CEPH_BRX
+# and 192.168.255.254 is saved for $STONE_BRX
 function get_new_ns_ip() {
-    first=`echo "$CEPH_BRX_IP" | awk -F. '{print $1}'`
-    second=`echo "$CEPH_BRX_IP" | awk -F. '{print $2}'`
-    third=`echo "$CEPH_BRX_IP" | awk -F. '{print $3}'`
-    fourth=`echo "$CEPH_BRX_IP" | awk -F. '{print $4}'`
+    first=`echo "$STONE_BRX_IP" | awk -F. '{print $1}'`
+    second=`echo "$STONE_BRX_IP" | awk -F. '{print $2}'`
+    third=`echo "$STONE_BRX_IP" | awk -F. '{print $3}'`
+    fourth=`echo "$STONE_BRX_IP" | awk -F. '{print $4}'`
 
     if [ "$first" == ""172 ]; then
         second_max=31
@@ -424,7 +424,7 @@ function check_valid_private_ip() {
         return
     fi
 
-    echo "Oops: invalid private ip address '$CEPH_BRX_IP/$NET_MASK'!"
+    echo "Oops: invalid private ip address '$STONE_BRX_IP/$NET_MASK'!"
     exit 1
 }
 
@@ -443,17 +443,17 @@ function setup_bridge_and_nat() {
         fi
     done
 
-    # if the $CEPH_BRX already exists, then check the new
+    # if the $STONE_BRX already exists, then check the new
     # brxip, if not match fail it without doing anything.
-    rc=`ip addr | grep "inet " | grep " $CEPH_BRX"`
+    rc=`ip addr | grep "inet " | grep " $STONE_BRX"`
     if [ "0$rc" != "0" ]; then
         existing_brxip=`echo "$rc" | awk '{print $2}'`
         if [ "0$new_brxip" != "0" -a "$existing_brxip" != "$new_brxip" ]; then
-            echo "Oops: conflict with the existing $CEPH_BRX ip '$existing_brxip', new '$new_brxip'!"
+            echo "Oops: conflict with the existing $STONE_BRX ip '$existing_brxip', new '$new_brxip'!"
             exit 1
         fi
 
-        CEPH_BRX_IP=`echo "$existing_brxip" | awk -F/ '{print $1}'`
+        STONE_BRX_IP=`echo "$existing_brxip" | awk -F/ '{print $1}'`
         NET_MASK=`echo "$existing_brxip" | awk -F/ '{print $2}'`
         get_brd_mask
         return
@@ -461,52 +461,52 @@ function setup_bridge_and_nat() {
 
     # if it is the first time to run the the script or there
     # is no any network namespace exists, we need to setup
-    # the $CEPH_BRX, if no --brxip is specified will use the
-    # default $CEPH_BRX_IP/$NET_MASK
+    # the $STONE_BRX, if no --brxip is specified will use the
+    # default $STONE_BRX_IP/$NET_MASK
     if [ "0$new_brxip" != "0" ]; then
-        CEPH_BRX_IP=`echo "$new_brxip" | awk -F/ '{print $1}'`
+        STONE_BRX_IP=`echo "$new_brxip" | awk -F/ '{print $1}'`
         NET_MASK=`echo "$new_brxip" | awk -F/ '{print $2}'`
         get_brd_mask
-        check_valid_private_ip $CEPH_BRX_IP
+        check_valid_private_ip $STONE_BRX_IP
     fi
 
-    # brctl addbr $CEPH_BRX
-    nmcli connection add type bridge con-name $CEPH_BRX ifname $CEPH_BRX stp no
-    # ip link set $CEPH_BRX up
-    # ip addr add $CEPH_BRX_IP/$NET_MASK brd $BRD dev $CEPH_BRX
-    nmcli connection modify $CEPH_BRX ipv4.addresses $CEPH_BRX_IP/$NET_MASK ipv4.method manual
-    nmcli connection up $CEPH_BRX
+    # brctl addbr $STONE_BRX
+    nmcli connection add type bridge con-name $STONE_BRX ifname $STONE_BRX stp no
+    # ip link set $STONE_BRX up
+    # ip addr add $STONE_BRX_IP/$NET_MASK brd $BRD dev $STONE_BRX
+    nmcli connection modify $STONE_BRX ipv4.addresses $STONE_BRX_IP/$NET_MASK ipv4.method manual
+    nmcli connection up $STONE_BRX
 
     # setup the NAT
-    rm -rf /tmp/ceph-brx.*
-    tmpfile=$(mktemp /tmp/ceph-brx.XXXXXXXX)
+    rm -rf /tmp/stone-brx.*
+    tmpfile=$(mktemp /tmp/stone-brx.XXXXXXXX)
     save=`cat /proc/sys/net/ipv4/ip_forward`
     echo $save > $tmpfile
     echo 1 > /proc/sys/net/ipv4/ip_forward
 
     host_nic=`route | grep default | awk '{print $8}'`
-    iptables -A FORWARD -o $host_nic -i $CEPH_BRX -j ACCEPT
-    iptables -A FORWARD -i $host_nic -o $CEPH_BRX -j ACCEPT
-    iptables -t nat -A POSTROUTING -s $CEPH_BRX_IP/$NET_MASK -o $host_nic -j MASQUERADE
+    iptables -A FORWARD -o $host_nic -i $STONE_BRX -j ACCEPT
+    iptables -A FORWARD -i $host_nic -o $STONE_BRX -j ACCEPT
+    iptables -t nat -A POSTROUTING -s $STONE_BRX_IP/$NET_MASK -o $host_nic -j MASQUERADE
 }
 
-function __ceph_mount() {
+function __stone_mount() {
     # for some options like the '-t' in mount command
     # the nsenter command will take over it, so it is
     # hard to pass it direct to the netns.
     # here we will create one temp file with x mode
-    tmpfile=$(mktemp /tmp/ceph-nsenter.XXXXXXXX)
+    tmpfile=$(mktemp /tmp/stone-nsenter.XXXXXXXX)
     chmod +x $tmpfile
     if [ "$1" == "--kernel" ]; then
         cmd=`echo "$@" | sed 's/--kernel/mount/'`
     else
-        cmd=`echo "$@" | sed 's/--fuse/ceph-fuse/'`
+        cmd=`echo "$@" | sed 's/--fuse/stone-fuse/'`
     fi
 
     # remove the --brxip parameter
     cmd=`echo "$cmd" | sed 's/--brxip.*\/[0-9]* //'`
 
-    # enter $new_netns and run ceph fuse client mount,
+    # enter $new_netns and run stone fuse client mount,
     # we couldn't use 'ip netns exec' here because it
     # will unshare the mount namespace.
     echo "$cmd" > $tmpfile
@@ -518,7 +518,7 @@ function __ceph_mount() {
     if [ $rc != 0 ]; then
         m=$mountpoint
         mountpoint=""
-        ceph_umount $m
+        stone_umount $m
     fi
 }
 
@@ -537,7 +537,7 @@ function get_new_nsid() {
     eval $1="$uniq_id"
 }
 
-function ceph_mount() {
+function stone_mount() {
     get_mountpoint $@
     setup_bridge_and_nat $@
 
@@ -569,19 +569,19 @@ function ceph_mount() {
     ip netns exec $new_netns ip addr add $ns_ip/$NET_MASK brd $BRD dev $ns_veth
     ip netns exec $new_netns ip link set $ns_veth up
     ip netns exec $new_netns ip link set lo up
-    ip netns exec $new_netns ip route add default via $CEPH_BRX_IP
+    ip netns exec $new_netns ip route add default via $STONE_BRX_IP
 
-    # bring up the bridge interface and join it to $CEPH_BRX
-    # brctl addif $CEPH_BRX $netns_brx
-    nmcli connection add type bridge-slave con-name $netns_brx ifname $netns_brx master $CEPH_BRX
+    # bring up the bridge interface and join it to $STONE_BRX
+    # brctl addif $STONE_BRX $netns_brx
+    nmcli connection add type bridge-slave con-name $netns_brx ifname $netns_brx master $STONE_BRX
     nmcli connection up $netns_brx
     # ip link set $netns_brx up
 
-    __ceph_mount $@
+    __stone_mount $@
 }
 
 if [ "$1" == "--umount" ]; then
-    ceph_umount $@
+    stone_umount $@
     exit 0
 fi
 
@@ -591,4 +591,4 @@ if [ "$1" != "--kernel" -a "$1" != "--fuse" ]; then
     exit 1
 fi
 
-ceph_mount $@
+stone_mount $@

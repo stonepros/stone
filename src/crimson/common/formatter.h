@@ -3,13 +3,13 @@
 
 #include <seastar/core/lowres_clock.hh>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 namespace std {
 
 ostream& operator<<(ostream& out,
                     const seastar::lowres_system_clock::time_point& t);
 ostream& operator<<(ostream& out,
-                    const ceph::coarse_real_clock::time_point& t);
+                    const stone::coarse_real_clock::time_point& t);
 
 }

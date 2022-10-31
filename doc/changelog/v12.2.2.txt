@@ -1,5 +1,5 @@
 commit cf0baeeeeba3b47f9427c6c97e2144b094b7e5ba
-Author: Jenkins Build Slave User <ceph-release-team@redhat.com>
+Author: Jenkins Build Slave User <stone-release-team@redhat.com>
 Date:   Thu Nov 30 14:59:27 2017 +0000
 
     12.2.2
@@ -11,7 +11,7 @@ Date:   Thu Nov 30 22:26:46 2017 +0800
 
     Merge pull request #19240 from tchaikov/wip-22266-luminous
     
-    luminous: tools/ceph_monstore_tool: rebuild initial mgrmap also
+    luminous: tools/stone_monstore_tool: rebuild initial mgrmap also
     
     Reviewed-by: Abhishek Lekshmanan <abhishek@suse.com>
 
@@ -31,9 +31,9 @@ Merge: a57edd4f1a eb99a7ee36
 Author: Andrew Schoen <andrew.schoen@gmail.com>
 Date:   Wed Nov 29 10:33:34 2017 -0600
 
-    Merge pull request #19239 from ceph/luminous-bz1518264
+    Merge pull request #19239 from stone/luminous-bz1518264
     
-    luminous: ceph-volume correctly fallback to bluestore when no objectstore is specified
+    luminous: stone-volume correctly fallback to bluestore when no objectstore is specified
     
     Reviewed-by: Andrew Schoen <aschoen@redhat.com>
 
@@ -41,9 +41,9 @@ commit b5d02ac0fd60c26417ad33dc6efcf80bff503fdd
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Wed Nov 29 20:21:33 2017 +0800
 
-    tools/ceph_monstore_tool: rebuild initial mgrmap also
+    tools/stone_monstore_tool: rebuild initial mgrmap also
     
-    Fixes: http://tracker.ceph.com/issues/22266
+    Fixes: http://tracker.stone.com/issues/22266
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit f63d1da4afa3463730ecbc0be29df6375b79fa8f)
 
@@ -51,7 +51,7 @@ commit eb99a7ee36d541939f589a674d9890b14e017dbe
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 28 09:22:19 2017 -0500
 
-    ceph-volume lvm.activate correct detection and fallback of objectstore flags
+    stone-volume lvm.activate correct detection and fallback of objectstore flags
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit f0ac2dfdbc0a05cff0a5edbedca91274885b7870)
@@ -60,7 +60,7 @@ commit 10dbbb0a6e09c6181e81b04765cd368963753bb8
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 28 09:21:34 2017 -0500
 
-    ceph-volume tests.devices.lvm verify objectstore flags in activate
+    stone-volume tests.devices.lvm verify objectstore flags in activate
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 8d22856d6c95ac3b45918765b382cae507a8d1a4)
@@ -83,7 +83,7 @@ Date:   Sun Nov 26 22:51:58 2017 -0700
     Previous code forgot to multiple raw_used_ratio to calculate
     used byte.
     
-    Fixes: http://tracker.ceph.com/issues/22247
+    Fixes: http://tracker.stone.com/issues/22247
     Signed-off-by: Xiaoxi Chen <xiaoxchen@ebay.com>
     (cherry picked from commit d10c6c26f9ef7372e2c95da79d23b07ce5f4e0e5)
 
@@ -99,7 +99,7 @@ commit d2a284c782fed3bec4ed38c898351826bca0a8bc
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Nov 28 15:02:18 2017 -0600
 
-    qa/suites/upgrade/jewel-x/parallel: only mount ceph-fuse once
+    qa/suites/upgrade/jewel-x/parallel: only mount stone-fuse once
     
     Otherwise we do 4 mounts for no good reason.
     
@@ -139,7 +139,7 @@ Date:   Tue Nov 28 23:47:17 2017 +0800
 
     Merge pull request #19205 from tchaikov/wip-22136-luminous
     
-    luminous: qa/ceph-disk: enlarge the simulated SCSI disk
+    luminous: qa/stone-disk: enlarge the simulated SCSI disk
     
     Reviewed-by: Alfredo Deza <adeza@redhat.com>
 
@@ -150,7 +150,7 @@ Date:   Tue Nov 28 14:03:01 2017 +0100
 
     Merge pull request #19152 from smithfarm/wip-22235-luminous
     
-    luminous: ceph-disk flake8 test fails on very old, and very new, versions of flake8
+    luminous: stone-disk flake8 test fails on very old, and very new, versions of flake8
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -158,14 +158,14 @@ commit 6e1e33a88d038d5b6a469d7fb4e52182b888010f
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Nov 28 14:42:31 2017 +0800
 
-    qa/ceph-disk: enlarge the simulated SCSI disk
+    qa/stone-disk: enlarge the simulated SCSI disk
     
     100MB will be allocated for journal, and the remaining 100MB is for data
     device. taking the inode into consideration, there will be approximately
     87988 kB available for the activated OSD. and it will complain with a
     "nearfull" state.
     
-    Fixes: http://tracker.ceph.com/issues/22136
+    Fixes: http://tracker.stone.com/issues/22136
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit b3c159e9fb8c31d0acd75f0702080f18959f672e)
 
@@ -186,7 +186,7 @@ Merge: 7ce2013dfd 5633a58824
 Author: Yuri Weinstein <yuri.weinstein@gmail.com>
 Date:   Mon Nov 27 10:23:57 2017 -0800
 
-    Merge pull request #19179 from ceph/wip-yuriw-BP-19175-luminous
+    Merge pull request #19179 from stone/wip-yuriw-BP-19175-luminous
     
     qa/suites/rados/rest: move rest_test from qa/suites/rest/
     
@@ -245,21 +245,21 @@ commit bb03f6b20b4963ad5d51c1c6f45f19bc7eaf220b
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Tue Nov 21 11:36:02 2017 +0100
 
-    tests: ceph-disk: ignore E722 in flake8 test
+    tests: stone-disk: ignore E722 in flake8 test
     
     Very old, and very new, versions of flake8 treat E722 as an error:
     
-    flake8 runtests: commands[0] | flake8 --ignore=H105,H405,E127 ceph_disk tests
-    ceph_disk/main.py:1575:9: E722 do not use bare except'
-    ceph_disk/main.py:1582:9: E722 do not use bare except'
-    ceph_disk/main.py:3252:5: E722 do not use bare except'
-    ceph_disk/main.py:3288:21: E722 do not use bare except'
-    ceph_disk/main.py:3296:17: E722 do not use bare except'
-    ceph_disk/main.py:4358:5: E722 do not use bare except'
+    flake8 runtests: commands[0] | flake8 --ignore=H105,H405,E127 stone_disk tests
+    stone_disk/main.py:1575:9: E722 do not use bare except'
+    stone_disk/main.py:1582:9: E722 do not use bare except'
+    stone_disk/main.py:3252:5: E722 do not use bare except'
+    stone_disk/main.py:3288:21: E722 do not use bare except'
+    stone_disk/main.py:3296:17: E722 do not use bare except'
+    stone_disk/main.py:4358:5: E722 do not use bare except'
     tests/test_main.py:26:1: E722 do not use bare except'
-    ERROR: InvocationError: '/opt/j/ws/mkck/src/ceph-disk/.tox/flake8/bin/flake8 --ignore=H105,H405,E127 ceph_disk tests'
+    ERROR: InvocationError: '/opt/j/ws/mkck/src/stone-disk/.tox/flake8/bin/flake8 --ignore=H105,H405,E127 stone_disk tests'
     
-    Fixes: http://tracker.ceph.com/issues/22207
+    Fixes: http://tracker.stone.com/issues/22207
     References: https://gitlab.com/pycqa/flake8/issues/361
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
@@ -272,7 +272,7 @@ Date:   Wed Nov 22 13:36:58 2017 +0800
 
     Merge pull request #19080 from smithfarm/wip-22212-luminous
     
-    luminous: tests: ceph-disk: silence deprecation warnings
+    luminous: tests: stone-disk: silence deprecation warnings
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -280,13 +280,13 @@ commit aac7a85a3ae9cce38987ce3f51be4c6cb63c8dd2
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Nov 21 21:47:30 2017 +0800
 
-    qa/workunits: silence py warnings for ceph-disk tests
+    qa/workunits: silence py warnings for stone-disk tests
     
-    ceph-disk now prints "depreacted" warning message when it starts. but
+    stone-disk now prints "depreacted" warning message when it starts. but
     the tests parses its stdout and stderr for a json string. so we need to
     silence the warnings for the tests.
     
-    Fixes: http://tracker.ceph.com/issues/22154
+    Fixes: http://tracker.stone.com/issues/22154
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit d44334f31704487ec3574738e75145872d9932cf)
 
@@ -295,9 +295,9 @@ Merge: 5a469c0376 94839deb2f
 Author: Andrew Schoen <andrew.schoen@gmail.com>
 Date:   Mon Nov 20 09:24:41 2017 -0600
 
-    Merge pull request #18989 from ceph/wip-luminous-rm22154
+    Merge pull request #18989 from stone/wip-luminous-rm22154
     
-    luminous: ceph-disk create deprecation warnings
+    luminous: stone-disk create deprecation warnings
     
     Reviewed-by: Andrew Schoen <aschoen@redhat.com>
 
@@ -331,7 +331,7 @@ Date:   Mon Nov 20 13:40:56 2017 +0800
     
     see also #17902
     
-    Fixes: http://tracker.ceph.com/issues/21474
+    Fixes: http://tracker.stone.com/issues/21474
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 749bbda07522114b99b17a4a01cfcf019520285d)
 
@@ -359,7 +359,7 @@ Date:   Wed Nov 15 08:55:33 2017 -0600
     Only include this option in luminous so that we implicitly sunset this
     compatibility kludge immediately.
     
-    Fixes: http://tracker.ceph.com/issues/22128
+    Fixes: http://tracker.stone.com/issues/22128
     Signed-off-by: Sage Weil <sage@redhat.com>
 
 commit 9abf0913367a1ad8cf076c79bf3adace8c526853
@@ -369,7 +369,7 @@ Date:   Sat Nov 18 09:44:46 2017 -0600
 
     Merge pull request #18751 from shinobu-x/wip-21701-luminous
     
-    luminous: ceph-kvstore-tool does not call bluestore's umount when exit
+    luminous: stone-kvstore-tool does not call bluestore's umount when exit
 
 commit c0e032c153a36c00109970395fe42cc2013fdb9a
 Merge: 81b768ab03 4d4aee14a4
@@ -395,7 +395,7 @@ commit 94839deb2f32e8059206ad48ad711dd2baf2fef5
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 17 13:10:29 2017 -0500
 
-    doc/ceph-volume create a migration section to help users coming from ceph-disk
+    doc/stone-volume create a migration section to help users coming from stone-disk
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit e433efe51481ec63bc9753a0f446fe2b12b5bb6a)
@@ -404,11 +404,11 @@ commit b8bf0d047868054135592188c7ebe186181310c5
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 17 13:01:14 2017 -0500
 
-    ceph-disk add deprecation warnings in favor of ceph-volume
+    stone-disk add deprecation warnings in favor of stone-volume
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     
-    Fixes: http://tracker.ceph.com/issues/22154
+    Fixes: http://tracker.stone.com/issues/22154
     (cherry picked from commit c9da92e1ec8d60dc40d86630dab95e4fec4d0d30)
 
 commit f02d7109c5f00cd2165082c4336b3623352be7c5
@@ -416,9 +416,9 @@ Merge: 9515da2777 ebbe033936
 Author: Alfredo Deza <alfredo@deza.pe>
 Date:   Fri Nov 17 12:19:36 2017 -0500
 
-    Merge pull request #18973 from ceph/backport-18924
+    Merge pull request #18973 from stone/backport-18924
     
-    luminous: ceph-volume: allow using a device or partition for `lvm --data`
+    luminous: stone-volume: allow using a device or partition for `lvm --data`
     
     Reviewed-by: Alfredo Deza <adeza@redhat.com>
 
@@ -426,7 +426,7 @@ commit ebbe033936c424a0f6ba2d102fc271d0b0e9578d
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 17 08:41:24 2017 -0500
 
-    ceph-volume tests.devices.lvm prepare isn't bluestore specific anymore
+    stone-volume tests.devices.lvm prepare isn't bluestore specific anymore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 2f40dbac386be631ac97e2450117c218d9bf02f9)
@@ -456,7 +456,7 @@ Date:   Tue Nov 7 22:05:10 2017 -0600
     Set the sb->coll pointer after because remove() asserts the parent matches
     where we are unregistering.
     
-    Fixes: http://tracker.ceph.com/issues/22039
+    Fixes: http://tracker.stone.com/issues/22039
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 78a465b90b1c5187cfec9f25eb58b3bf617ca39b)
 
@@ -475,7 +475,7 @@ commit ad4668b65cb3e32f1b3afc5ec767004f166856e6
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Nov 16 08:50:34 2017 -0500
 
-    ceph-volume tests.functional create a common playbook directory for setups
+    stone-volume tests.functional create a common playbook directory for setups
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit def89a411f2f4bdb23c4bbd3b71c1310a564f07d)
@@ -484,19 +484,19 @@ commit d25a04114c98aa1449809248e8b87ecd1124af3d
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 11:01:48 2017 -0500
 
-    doc/ceph-volume lvm prepare can accept devices for --data
+    doc/stone-volume lvm prepare can accept devices for --data
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 9bfab348b2ff59c0b939a19c22d4a06bc5236b96)
     
     Conflicts:
-            doc/ceph-volume/lvm/prepare.rst
+            doc/stone-volume/lvm/prepare.rst
 
 commit 7f7d62a1848e297153f88a8e476585596114e1d5
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 08:42:27 2017 -0500
 
-    ceph-volume tests.functional add setup playbook for xenial filestore
+    stone-volume tests.functional add setup playbook for xenial filestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 210c1e1d4770dde47f0008cadaaec35deb729272)
@@ -505,7 +505,7 @@ commit 210e1b3bf507654167349411c5cc85641b1d8680
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 08:42:02 2017 -0500
 
-    ceph-volume tests.functional add data device and journal to xenial filestore
+    stone-volume tests.functional add data device and journal to xenial filestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d0754e25177b9bf3bce695b7991e99f49312d91c)
@@ -514,7 +514,7 @@ commit 211895ac0906747bc448b2326ae5c62f3e6ee4a1
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 08:40:37 2017 -0500
 
-    ceph-volume tests.functional add setup playbook for xenial bluestore
+    stone-volume tests.functional add setup playbook for xenial bluestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d0f5623963f58fc4d5727a79d8377b2191b0f9dc)
@@ -523,7 +523,7 @@ commit 398a1365a12de95bc9810b89a9aeab9040bb07b8
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 08:40:18 2017 -0500
 
-    ceph-volume tests.functional add raw data device to xenial bluestore
+    stone-volume tests.functional add raw data device to xenial bluestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit fbcfb522981cd4039cfe617609c5f160f0b05c52)
@@ -532,7 +532,7 @@ commit 0d082d0dbb43cc418bf0786b1f708968050ae114
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 08:38:23 2017 -0500
 
-    ceph-volume tests.functional tox.ini addition of setup playbook for partitions
+    stone-volume tests.functional tox.ini addition of setup playbook for partitions
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d074b534643dde37d732b34c36c5089e41848d6d)
@@ -541,7 +541,7 @@ commit a167556eaacb444c41299cd28f1efd4327da4747
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 08:37:17 2017 -0500
 
-    ceph-volume tests.functional add raw data device to centos7 bluestore
+    stone-volume tests.functional add raw data device to centos7 bluestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 2d416a849ad7b33dde1386da09c81249e6c2299d)
@@ -550,7 +550,7 @@ commit 12e180a84f1456dfe7ab940255c6c47ee8ebddf0
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 08:36:36 2017 -0500
 
-    ceph-volume tests.functional add setup playbook for centos7 bluestore
+    stone-volume tests.functional add setup playbook for centos7 bluestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 161fd373d2f11f64466927e5d615d039822e2ab5)
@@ -559,7 +559,7 @@ commit f06ea77590336d439235bd9acc6028b854e8c181
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 08:35:59 2017 -0500
 
-    ceph-volume tests.functional add setup playbook for centos7 filestore
+    stone-volume tests.functional add setup playbook for centos7 filestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit b3bb147298f8816651f231f77bc91a3a1b50d96f)
@@ -568,7 +568,7 @@ commit f10bfbeefe06e59629a4e9d904e8035bf060920b
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 14 08:35:42 2017 -0500
 
-    ceph-volume tests.functional add raw device to centos7 filestore
+    stone-volume tests.functional add raw device to centos7 filestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit c5b8d72570b24dfd0d2f8c1cc8f13812c6c11a69)
@@ -577,7 +577,7 @@ commit 968006a271dc82f3dcada4e5de93ecb0e23238c6
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 13 14:29:32 2017 -0500
 
-    ceph-volume lvm.common update --data flag to reflect device acceptance
+    stone-volume lvm.common update --data flag to reflect device acceptance
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 4df7ea8d83cfa02c8864d043b5d5fb2f5409dc96)
@@ -586,7 +586,7 @@ commit c8f64af027689a1fb1bb916e6d479519a12b764e
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 13 14:28:32 2017 -0500
 
-    ceph-volume lvm.prepare add example of raw device or partition in help menu
+    stone-volume lvm.prepare add example of raw device or partition in help menu
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 6fb8d566aac0e0fa081e6500852855ad177f784f)
@@ -595,7 +595,7 @@ commit f930934159edd947024eef1a33e15a30467cb332
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 13 14:26:44 2017 -0500
 
-    ceph-volume lvm.prepare allow partition or raw device as input for --data in filestore
+    stone-volume lvm.prepare allow partition or raw device as input for --data in filestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 89236ee3f81e50b9b059c10f6d6e7ce048c06474)
@@ -628,9 +628,9 @@ Merge: d69f42e1af 806e49aadb
 Author: Alfredo Deza <alfredo@deza.pe>
 Date:   Tue Nov 14 11:06:00 2017 -0500
 
-    Merge pull request #18910 from ceph/backport-18882
+    Merge pull request #18910 from stone/backport-18882
     
-    luminous: ceph-volume: add functional tests for simple, rearrange lvm tests
+    luminous: stone-volume: add functional tests for simple, rearrange lvm tests
     
     Reviewed-by: Alfredo Deza <adeza@redhat.com>
 
@@ -638,7 +638,7 @@ commit 806e49aadb0d832a4bf46fcd681d889d93158232
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 13:18:07 2017 -0500
 
-    ceph-volume tests.functional update lvm/tox.ini paths after moving it
+    stone-volume tests.functional update lvm/tox.ini paths after moving it
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 7d787849556788961155534039886aedfcdb2a88)
@@ -647,7 +647,7 @@ commit 724ad01afc0af79fc7f808aae819ff9dc0971b33
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 13:14:55 2017 -0500
 
-    ceph-volume tests.functional move top level tox.ini to lvm/tox.ini
+    stone-volume tests.functional move top level tox.ini to lvm/tox.ini
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 9b14b96d3bf6c8326cfc91e657161ffab3b8c2b4)
@@ -656,7 +656,7 @@ commit 754c237597cc91af4bfe7199f891a9c2a6938ad4
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 13:12:51 2017 -0500
 
-    ceph-volume tests.functional move xenial to lvm/xenial
+    stone-volume tests.functional move xenial to lvm/xenial
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 00d576d266b63080129e58482bd6fba62534ee97)
@@ -665,7 +665,7 @@ commit 762c5f1cc10266d5efa62628c0686b3f8d696bff
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 13:11:58 2017 -0500
 
-    ceph-volume tests.functional lvm move xenial/bluestore to xenial/bluestore/create
+    stone-volume tests.functional lvm move xenial/bluestore to xenial/bluestore/create
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d5ec7d1c58141f4593ed9d1e4501c9f3be6d9755)
@@ -674,7 +674,7 @@ commit 5b1bde338fbb1e689e3e1305e91f5450ef175edd
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 13:09:48 2017 -0500
 
-    ceph-volume tests.functional lvm move xenial/create to xenial/filestore/create
+    stone-volume tests.functional lvm move xenial/create to xenial/filestore/create
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit c504b8781b3a31475280a032cd75c9e1eaa6d8c9)
@@ -683,7 +683,7 @@ commit 5a00604f27acad8cb368495f841ce76cce383414
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 13:02:05 2017 -0500
 
-    ceph-volume tests.functional move centos7 to lvm/centos7
+    stone-volume tests.functional move centos7 to lvm/centos7
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit dc1da3fd0aeafe59a82343fb16fe1fcea66ae3eb)
@@ -692,7 +692,7 @@ commit 57d64a86d0758d174c1ca0b432a43194cbe6162c
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 12:58:27 2017 -0500
 
-    ceph-volume tests.functional lvm move bluestore to bluestore/create
+    stone-volume tests.functional lvm move bluestore to bluestore/create
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit aec1a80a3e1e61720f494980711808bfee783a03)
@@ -701,7 +701,7 @@ commit 94a9f3f43d9c3a2ac08be4025e65c47c3767d2c1
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 12:54:01 2017 -0500
 
-    ceph-volume tests.functional lvm move create to filestore/create
+    stone-volume tests.functional lvm move create to filestore/create
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d6905f3f620d4c733835e21a275d4127cdcb769b)
@@ -710,7 +710,7 @@ commit bc134c20a5409bd6f966d205dd7ba850ff28fc91
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 12:42:19 2017 -0500
 
-    ceph-volume tests.functional simple xenial bluestore scenario
+    stone-volume tests.functional simple xenial bluestore scenario
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 8f0fdc975951a2a8af31bbaa3abd2b5d807a0add)
@@ -719,7 +719,7 @@ commit 004efbfbe4d1eb56190e5e7497a9613776494fae
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 12:40:18 2017 -0500
 
-    ceph-volume tests.functional simple xenial filestore scenario
+    stone-volume tests.functional simple xenial filestore scenario
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 7452e1b6f9b82c2ef62bae19c632e81039638ba5)
@@ -728,7 +728,7 @@ commit b51744f26f3c6db4d2927a2ac1733f0b80e44010
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 12:30:05 2017 -0500
 
-    ceph-volume tests.functional simple tox.ini update for xenial scnearios
+    stone-volume tests.functional simple tox.ini update for xenial scnearios
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 76ed6a8f2ecab7c58def0453ffed9d8a997e0d5b)
@@ -737,7 +737,7 @@ commit 19983b9ba5ed45c8e6fac967fb702fd586132c35
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 09:12:09 2017 -0500
 
-    ceph-volume tests.functional simple tox.ini addition for bluestore
+    stone-volume tests.functional simple tox.ini addition for bluestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 02154e445b87a8fdcabbd699a2532833764140b5)
@@ -746,7 +746,7 @@ commit 040e7913b028c54aeb9acd854610f6a4f112465d
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 10 09:11:39 2017 -0500
 
-    ceph-volume tests.functional add initial files for simple bluestore activate
+    stone-volume tests.functional add initial files for simple bluestore activate
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 3320f28e799e1d77d1ea69be9ced603bb69cc5fa)
@@ -755,7 +755,7 @@ commit 23f6c3e779c743bc1302d1ad542201434ff9431f
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Nov 9 16:55:30 2017 -0500
 
-    ceph-volume tests.functional add initial files for simple filestore activate
+    stone-volume tests.functional add initial files for simple filestore activate
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 9d18bae52ad77be0e64ef105c33a019446b6f1cf)
@@ -764,7 +764,7 @@ commit 8f425b678f6c947a8c83f121be4fa46151fd6664
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Nov 9 16:07:53 2017 -0500
 
-    ceph-volume tests.functional create a specific test.yml for simple activate
+    stone-volume tests.functional create a specific test.yml for simple activate
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 37bde0d3b37a87c456438b0edc0cb9e2dcd39120)
@@ -773,7 +773,7 @@ commit 6f1fff00f5210840fe143aac7506ce3773600f05
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Nov 9 15:40:51 2017 -0500
 
-    ceph-volume tests.functional create a separate tox.ini environ for
+    stone-volume tests.functional create a separate tox.ini environ for
     `simple`
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
@@ -784,9 +784,9 @@ Merge: a7c8c8101d 90976ef6b9
 Author: Andrew Schoen <andrew.schoen@gmail.com>
 Date:   Mon Nov 13 10:55:24 2017 -0600
 
-    Merge pull request #18907 from ceph/luminous-wip-bz1498200
+    Merge pull request #18907 from stone/luminous-wip-bz1498200
     
-    luminous: ceph-volume: support GPT and other deployed OSDs
+    luminous: stone-volume: support GPT and other deployed OSDs
     
     Reviewed-by: Andrew Schoen <aschoen@redhat.com>
 
@@ -803,7 +803,7 @@ commit 90976ef6b9815b68df620aac46f2c04117766f99
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Nov 9 10:50:43 2017 -0500
 
-    doc/ceph-volume include the top level systemd.rst in the toctree
+    doc/stone-volume include the top level systemd.rst in the toctree
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit e2f281c115c15e820588b478214c3600ff97470f)
@@ -812,7 +812,7 @@ commit 9a8a00d3a17f03d2b1b3a92662f7288f7d18fe7a
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Nov 9 06:49:49 2017 -0500
 
-    ceph-volume simple.activate add --file in help docstring as an example
+    stone-volume simple.activate add --file in help docstring as an example
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit ff60592897b63581ebce372b3f6ffa0f10d2fe5a)
@@ -821,7 +821,7 @@ commit 34194b8d788d91b4f7c969be5f0099a279bc61bf
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Nov 9 06:46:59 2017 -0500
 
-    doc/ceph-volume activate has a --file option for json files
+    doc/stone-volume activate has a --file option for json files
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 29913951b71d68b3f3f9b9fa076f309c0252da36)
@@ -830,7 +830,7 @@ commit 582262b57bcc959d1698636000d7a804cab9c611
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 17:23:41 2017 -0500
 
-    ceph-volume simple.activate enable the osd when activating
+    stone-volume simple.activate enable the osd when activating
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 366fb8c43af54e9c92f4e95d9a0582c1fc378dbc)
@@ -839,7 +839,7 @@ commit a32e72cdb0efb55d185488fb02f44055f9d3dffe
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 15:25:05 2017 -0500
 
-    ceph-volume systemd.systemctl always force symlink when masking ceph-disk
+    stone-volume systemd.systemctl always force symlink when masking stone-disk
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit cb470622fd4f13fafe9cb2f38fb25fd1fbd8d89c)
@@ -848,7 +848,7 @@ commit 3af40c35f3cf42be722f9d905cb2d0ba2baf1b1b
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 15:21:10 2017 -0500
 
-    ceph-volume simple.activate use the contents of the JSON file, fallback to CLI args
+    stone-volume simple.activate use the contents of the JSON file, fallback to CLI args
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit c954c913395557bcd89f25b0496c4428e6109494)
@@ -857,7 +857,7 @@ commit 161e9657d985aa4ceffad2f56e18edd78ca2a81f
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 14:50:16 2017 -0500
 
-    ceph-volume simple.activate only check for missing id and uuid if file is not passed in
+    stone-volume simple.activate only check for missing id and uuid if file is not passed in
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 826c2709dd5ab0fbf6eb419a735d15e718a7712c)
@@ -866,7 +866,7 @@ commit 585072afc814c6ac87fd64f15c561c51c1e55070
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 14:28:12 2017 -0500
 
-    ceph-volume simple.activate allow to pass a file to activate
+    stone-volume simple.activate allow to pass a file to activate
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit bd3498f3eabf07637cb936e6c036d1d8d75415b0)
@@ -875,7 +875,7 @@ commit 01266c193588066425b44fea4c1729692f999692
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 12:49:31 2017 -0500
 
-    ceph-volume tests.util add tests for OSDPath validator
+    stone-volume tests.util add tests for OSDPath validator
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d7fc26ab4e2cebe485647510119ea300d47db184)
@@ -884,7 +884,7 @@ commit 56fdc1c973b41d855563e459d23682990e8940bf
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 11:56:36 2017 -0500
 
-    ceph-volume systemd.systemctl masking ceph-disk needs to be done by directly symlinking to dev/null
+    stone-volume systemd.systemctl masking stone-disk needs to be done by directly symlinking to dev/null
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit cda47c247b929401a7dce3f1ef70371ea80eeceb)
@@ -893,7 +893,7 @@ commit 0a0c289de605b6b74b762b2a0a4ed0f3a04de8ad
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 09:47:12 2017 -0500
 
-    ceph-volume systemd.systemctl masking needs to use systemctl mask, not disable
+    stone-volume systemd.systemctl masking needs to use systemctl mask, not disable
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit bad2f62b34243addc854abf691854b886aecdc19)
@@ -902,7 +902,7 @@ commit 32913844b36285aae40f9786e5cb035bfca22f2d
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 09:46:20 2017 -0500
 
-    ceph-volume simple.scan if mounted device cannot be detected, raise an error
+    stone-volume simple.scan if mounted device cannot be detected, raise an error
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 6b2fc4c0ba63e4bd51774ea09cc6542738128621)
@@ -911,7 +911,7 @@ commit fe73229fb123fdb45f4ef743d8584f6748318868
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 09:17:52 2017 -0500
 
-    ceph-volume simple.activate remove str formatting from logging
+    stone-volume simple.activate remove str formatting from logging
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 230faf04a185c0b95c8ad497ddd5501dc70c1409)
@@ -920,7 +920,7 @@ commit 50c19ef335305215a636595506eda1b5d16f3687
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 09:11:41 2017 -0500
 
-    ceph-volume util.arg_validators always convert the path to an absolute path
+    stone-volume util.arg_validators always convert the path to an absolute path
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit b5acf4d720b5395ae4ccbf007c94c99610e40089)
@@ -929,7 +929,7 @@ commit d27c35c972abba2b230e1cff1fa35437500dcdf6
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 09:10:47 2017 -0500
 
-    ceph-volume util.arg_validators require superuser privs to check paths
+    stone-volume util.arg_validators require superuser privs to check paths
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 376dad74159532f901d0044f95330fc02f93bd25)
@@ -938,7 +938,7 @@ commit 0832ddc52496cd81aa7c2e1e85252b50d2f33044
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 8 09:09:06 2017 -0500
 
-    ceph-volume simple.scan skip directories to scan
+    stone-volume simple.scan skip directories to scan
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 6bc1e9ee0b8d7bc475f218ae3dd8c6c7fe5a983a)
@@ -947,7 +947,7 @@ commit d6071cb75ba1a702c551d073f032336560654e97
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 15:08:13 2017 -0500
 
-    ceph-volume tests.devices.simple add activate CLI unit tests
+    stone-volume tests.devices.simple add activate CLI unit tests
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit cde0d517563b537319d06c758b93e421cdabe59d)
@@ -956,7 +956,7 @@ commit 2bff2e7fdbba37280791d3bc9a363e47aa26ab53
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 15:07:44 2017 -0500
 
-    ceph-volume tests.devices add help menu unit test
+    stone-volume tests.devices add help menu unit test
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit dcc7c72196a327f9501045f025761b228b5379df)
@@ -965,7 +965,7 @@ commit ec8624005082913faf89a9b001d4abeb7c27a589
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 13:42:45 2017 -0500
 
-    doc/ceph-volume systemd describe the interaction with 'simple' activation
+    doc/stone-volume systemd describe the interaction with 'simple' activation
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 7071eeaeb5d77c6ab6e7a24f1b630cb0cf8a8e7c)
@@ -974,7 +974,7 @@ commit aacd22681d1e7f5a604025b2019b195041151b3f
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 13:42:11 2017 -0500
 
-    doc/ceph-volume index initial description of simple
+    doc/stone-volume index initial description of simple
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit f9ee51f9feadb6d0f91b76a2b2ba8a24f1523a77)
@@ -983,7 +983,7 @@ commit e9527e65d5da503107e21dc5b695f287c8529049
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 13:41:12 2017 -0500
 
-    doc/ceph-volume lvm add back a system.rst with just the lvm portion of it
+    doc/stone-volume lvm add back a system.rst with just the lvm portion of it
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit f872cd29b93e02b77172f7b382c4746af9ba845d)
@@ -992,7 +992,7 @@ commit ef027a737989dca83c0e5810935bad2280146356
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 13:40:44 2017 -0500
 
-    doc/ceph-volume make systemd.rst generic enough to be related to other sub-commands
+    doc/stone-volume make systemd.rst generic enough to be related to other sub-commands
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit cf4e32a0dc3ab4f55fe7857b51afbc63a638ec66)
@@ -1001,7 +1001,7 @@ commit a83b746eaeece5896770b40949804316c29f6bc1
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 13:39:52 2017 -0500
 
-    doc/ceph-volume move lvm/systemd.rst to top level, making it generic
+    doc/stone-volume move lvm/systemd.rst to top level, making it generic
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 0672dd608d4601a936d703ea5ba6edc14a161d8e)
@@ -1010,7 +1010,7 @@ commit bc492490e15d3ea91654cd4dabfb3115f835b9ac
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 11:52:17 2017 -0500
 
-    doc/ceph-volume simple.activate initial take on documenting activation
+    doc/stone-volume simple.activate initial take on documenting activation
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 80c796bd1c43125f5678710b494b03c486b3fce6)
@@ -1019,7 +1019,7 @@ commit 6301c83097729749fc712846954a3c0f89647f07
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 08:35:57 2017 -0500
 
-    doc/ceph-volume lvm update systemd anchor to reflect lvm parent
+    doc/stone-volume lvm update systemd anchor to reflect lvm parent
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 53420a4756a5e4fa6b0f2aa74d6ad1e2919f1954)
@@ -1028,7 +1028,7 @@ commit 5fe4122bcfdc9c8e4f69079e45c907148eccdb7d
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 08:35:43 2017 -0500
 
-    doc/ceph-volume lvm.activate update systemd anchor to reflect lvm parent
+    doc/stone-volume lvm.activate update systemd anchor to reflect lvm parent
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 7fc0e7ebcae06f28f6ed08c0db14075ada34e8a7)
@@ -1037,7 +1037,7 @@ commit c98886a99914748d73d0f695808a74850bc9e66e
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Nov 7 07:56:35 2017 -0500
 
-    doc/ceph-volume lvm.systemd update anchor to reflect lvm parent
+    doc/stone-volume lvm.systemd update anchor to reflect lvm parent
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 01a8b7e6a45f6fd85bf53d3cab15acc81d0bae1b)
@@ -1046,7 +1046,7 @@ commit 68f89b52d608c3946be9ad92e733fe9472bd35f0
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 6 15:53:39 2017 -0500
 
-    doc/ceph-volume document the scan functionality
+    doc/stone-volume document the scan functionality
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit b30a3eaf17a20a1273724b2cfcaf0a7b36eb08f6)
@@ -1055,7 +1055,7 @@ commit 19d0ca22908fcd3fbe83d39c1b708c5818b34f47
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 6 14:17:20 2017 -0500
 
-    doc/ceph-volume update the index to include the simple sub command and files
+    doc/stone-volume update the index to include the simple sub command and files
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d7f85c64e4b409ea95e30ccb5a1388278843c478)
@@ -1064,7 +1064,7 @@ commit 61c90bacc562e1e2d65b767dca97b08973832131
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 6 11:15:28 2017 -0500
 
-    ceph-volume tests.simple add tests for trigger parsing from systemd
+    stone-volume tests.simple add tests for trigger parsing from systemd
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 0e2620234e82abf85274b3c08b39cdf76430ce48)
@@ -1073,7 +1073,7 @@ commit 80ae5b1fb024827cceb0594a60e3361fd4a1e7a3
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 6 10:36:14 2017 -0500
 
-    ceph-volume tests.simple create etc_path scan tests
+    stone-volume tests.simple create etc_path scan tests
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 90ebc4e1ffa7b3273787d708bb2c05180530b5d1)
@@ -1082,7 +1082,7 @@ commit b9ad514b45e0233a17834e19a232bca4467a8140
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 6 10:06:02 2017 -0500
 
-    ceph-volume tests.simple add checks for get_contents in scan
+    stone-volume tests.simple add checks for get_contents in scan
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 647bfe0883d2bb05b4ff7f99894075df3e73d2d5)
@@ -1091,7 +1091,7 @@ commit c9308af91a322f92ab7d1f45a423b2a94f64c429
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 6 09:43:58 2017 -0500
 
-    ceph-volume tests.util add binary verification tests
+    stone-volume tests.util add binary verification tests
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 827aa57557561355dd4068e26801b5f1ed62f295)
@@ -1100,7 +1100,7 @@ commit c94f52dffe0ea4b48c9fb316e8c53fd06a81b870
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Nov 6 09:42:53 2017 -0500
 
-    ceph-volume tests create a fixture for temporary files
+    stone-volume tests create a fixture for temporary files
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 23da3445718c01f71e2a5748fb4fc1c5fdc85ca5)
@@ -1109,7 +1109,7 @@ commit bbb25df806609083efd377befb44d6d3bef3338b
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:36:38 2017 -0400
 
-    ceph-volume systemd.systemctl helpers to mask ceph-disk
+    stone-volume systemd.systemctl helpers to mask stone-disk
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 3da23fa4caea8c9dc91da3eee5b5acc1860bf242)
@@ -1118,7 +1118,7 @@ commit c971321430fd1a4de7c6fa2687ecf35a5b3ec71c
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:36:13 2017 -0400
 
-    ceph-volume devices include simple at the module import level
+    stone-volume devices include simple at the module import level
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 027a09b3ea6bac416ff632a69a53393badd51708)
@@ -1127,7 +1127,7 @@ commit 1615d947db50ac37e4ef554acc6debe8fd870962
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:35:45 2017 -0400
 
-    ceph-volume main add simple to the sub-commands
+    stone-volume main add simple to the sub-commands
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 94579c77ffe4d5ba2d457ad3981a2b9ed232a90f)
@@ -1136,7 +1136,7 @@ commit abb77a8d9824eef3bd9c75d17f8df101440c25d1
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:35:03 2017 -0400
 
-    ceph-volume util add an OSDPath argument validator
+    stone-volume util add an OSDPath argument validator
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit a826fdf4a2ed9ff704fb823d05d3cb706ba89e38)
@@ -1145,7 +1145,7 @@ commit ff2a1833da385d6c0c9087e98cb2b93925b06cab
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:34:39 2017 -0400
 
-    ceph-volume simple.system add a helper to check if a file is a binary or not
+    stone-volume simple.system add a helper to check if a file is a binary or not
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 7bf8676045b4f966b60cdadf4d5af1c89fca69ae)
@@ -1154,7 +1154,7 @@ commit 84d2a15ce9f1a045ed67f79fa7d1dc99dc1e4b8f
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:34:06 2017 -0400
 
-    ceph-volume util.system add a context manager for temporary mounting/unmounting
+    stone-volume util.system add a context manager for temporary mounting/unmounting
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 6394cdd41943e3cda6867ecc59ab835cb2151707)
@@ -1163,7 +1163,7 @@ commit 3d8ff08c2d46017749e7ecaa4e4d49dda4d55d74
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:32:42 2017 -0400
 
-    ceph-volume simple.scan initial take on directory/device scanning
+    stone-volume simple.scan initial take on directory/device scanning
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 0e54b9be621cc0969a3bbc972d1870080ccdae77)
@@ -1172,7 +1172,7 @@ commit d701569a6486d7ccccf14b5eadf702ad07db4821
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:27:23 2017 -0400
 
-    ceph-volume simple.trigger enable systemd triggering for simple setups
+    stone-volume simple.trigger enable systemd triggering for simple setups
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit cbc0c0f775e96a5b0ab5d5bc141acebe4cc48373)
@@ -1181,7 +1181,7 @@ commit 76fe659a19a8a450b4c61f6d2b56e03dc46746ae
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:26:13 2017 -0400
 
-    ceph-volume simple.activate initial take on activation
+    stone-volume simple.activate initial take on activation
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 5a97374605408d18e9be29bcc051ae7b913d1675)
@@ -1190,7 +1190,7 @@ commit 206c7551435983b4cbdaece61b737e4a1f265dbd
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:23:47 2017 -0400
 
-    ceph-volume simple add __init__ for the module
+    stone-volume simple add __init__ for the module
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 285e5bdd28a42d98418ca90ad0cdec6bd87849db)
@@ -1199,7 +1199,7 @@ commit 8a5edb9a2acc3f0b5477f09edae4f97f5ec7f5b5
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Nov 3 14:23:29 2017 -0400
 
-    ceph-volume simple create the initial, main module
+    stone-volume simple create the initial, main module
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit f050502425a1993ae8edfdb5785b24129cffeeba)
@@ -1261,7 +1261,7 @@ Date:   Thu Nov 9 22:27:47 2017 +0800
 
     Merge pull request #18741 from shinobu-x/wip-22019-luminous
     
-    luminous: tests: "ceph osd create" is not idempotent
+    luminous: tests: "stone osd create" is not idempotent
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -1333,7 +1333,7 @@ Date:   Wed Nov 8 18:19:27 2017 +0800
 
     Merge pull request #18726 from shinobu-x/wip-luminous-22035
     
-    luminous: Spurious ceph-mgr failovers during mon elections
+    luminous: Spurious stone-mgr failovers during mon elections
     
     Reviewed-by: John Spray <john.spray@redhat.com>
 
@@ -1344,7 +1344,7 @@ Date:   Wed Nov 8 18:18:39 2017 +0800
 
     Merge pull request #18738 from shinobu-x/wip-21547-luminous
     
-    luminous: ceph-mgr gets process called "exe" after respawn
+    luminous: stone-mgr gets process called "exe" after respawn
     
     Reviewed-by: John Spray <john.spray@redhat.com>
 
@@ -1603,7 +1603,7 @@ Merge: 925c68e9e9 902d467a0e
 Author: Abhishek L <abhishek.lekshmanan@gmail.com>
 Date:   Tue Nov 7 18:15:38 2017 +0100
 
-    Merge pull request #18516 from ceph/wip-bp-pr18193-luminous
+    Merge pull request #18516 from stone/wip-bp-pr18193-luminous
     
     qa/rgw: ignore errors from 'pool application enable'
     
@@ -1660,7 +1660,7 @@ commit 1db44c5bef752b3a6ce59ea21548b54b77b587d2
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Sun Oct 15 20:46:28 2017 +0800
 
-    qa/tasks/ceph: add "create_rbd_pool" option
+    qa/tasks/stone: add "create_rbd_pool" option
     
     True by default, but we can opt not to create the "rbd" pool.
     
@@ -1709,7 +1709,7 @@ Date:   Tue Nov 7 17:48:34 2017 +0800
 
     Merge pull request #18775 from tchaikov/wip-upgrade-luminous-x
     
-    qa: add 1-ceph-install to upgrade:luminous-x
+    qa: add 1-stone-install to upgrade:luminous-x
     
     Reviewed-by: Yuri Weinstein <yweinste@redhat.com>
     Reviewed-by: Abhishek Lekshmanan <abhishek.lekshmanan@gmail.com>
@@ -1718,7 +1718,7 @@ commit 4cac43679a7688cb4765728e1a75e812d0df22de
 Author: Yuri Weinstein <yweinste@redhat.com>
 Date:   Tue Aug 29 09:50:51 2017 -0700
 
-    qa: add 1-ceph-install to upgrade:luminous-x
+    qa: add 1-stone-install to upgrade:luminous-x
     
     Signed-off-by: Yuri Weinstein <yweinste@redhat.com>
     (cherry picked from commit aff342627cf77e2faae6904e626d9fb2c897f155)
@@ -1756,7 +1756,7 @@ Date:   Tue Oct 31 16:29:31 2017 -0400
     this removes the dependency between bucket entrypoint metadata and its
     bucket instance metadata during multisite sync
     
-    Fixes: http://tracker.ceph.com/issues/21990
+    Fixes: http://tracker.stone.com/issues/21990
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit dd5d278a4f9b080234cbb77e448208803ec0cf93)
@@ -1777,9 +1777,9 @@ commit 975229c3674ce99704aef399ecfb770cc8bcf1da
 Author: Chang Liu <liuchang0812@gmail.com>
 Date:   Tue Oct 3 00:12:43 2017 +0800
 
-    tool: ceph-kvstore-tool doesn't umount BlueStore properly
+    tool: stone-kvstore-tool doesn't umount BlueStore properly
     
-    Fixes: http://tracker.ceph.com/issues/21625
+    Fixes: http://tracker.stone.com/issues/21625
     
     Signed-off-by: Chang Liu <liuchang0812@gmail.com>
     (cherry picked from commit 81e4560781c4e5a5a033bfd4a4fe4094fc27d964)
@@ -1790,10 +1790,10 @@ Date:   Tue Oct 3 00:01:43 2017 +0800
 
     os/bluestore: make BlueStore opened by start_kv_only umountable
     
-    ceph-kvstore-tool use start_kv_only to debug the kvstore. we
+    stone-kvstore-tool use start_kv_only to debug the kvstore. we
     will get a crash when we try to umount bluestore in kvstore-tool.
     
-    Fixes: http://tracker.ceph.com/issues/21624
+    Fixes: http://tracker.stone.com/issues/21624
     
     Signed-off-by: Chang Liu <liuchang0812@gmail.com>
     (cherry picked from commit 2754c5acad442e50d97c8daf648cfcadd38222a6)
@@ -1816,11 +1816,11 @@ commit 8a7f983f3322b62cb18421c088e652341125eb1f
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Wed Nov 1 10:45:09 2017 +0800
 
-    qa: stop testing deprecated "ceph osd create"
+    qa: stop testing deprecated "stone osd create"
     
-    "ceph osd create" is not idempotent, and is considered deprecated.
+    "stone osd create" is not idempotent, and is considered deprecated.
     
-    Fixes: http://tracker.ceph.com/issues/21993
+    Fixes: http://tracker.stone.com/issues/21993
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 371d3f40911917704f4992c48236b4c60905bf4e)
 
@@ -1834,7 +1834,7 @@ Date:   Fri Sep 15 12:23:39 2017 -0400
     when respawning.  This is the same as what commit 4f177bb6b
     did for the MDS.
     
-    Fixes: http://tracker.ceph.com/issues/21404
+    Fixes: http://tracker.stone.com/issues/21404
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 44dce0a5664639b2ae0949cc434f1be1176d872d)
 
@@ -1867,7 +1867,7 @@ Date:   Mon Aug 21 17:21:10 2017 +0000
     http://$IP:$PORT/$PREFIX/. This is necessary if you wish to use a
     reverse http proxy that forwards to the dashboard under a sub-path.
     
-    Fixes: http://tracker.ceph.com/issues/20568
+    Fixes: http://tracker.stone.com/issues/20568
     Signed-off-by: Nick Erdmann <n@nirf.de>
     (cherry picked from commit 6d285fff0df598d66f46d38bf0a6a2cc9c0dc62f)
 
@@ -1877,7 +1877,7 @@ Date:   Wed Sep 27 15:13:48 2017 +0100
 
     mgr/dashboard: sort servers and OSDs in OSD list
     
-    Fixes: http://tracker.ceph.com/issues/21572
+    Fixes: http://tracker.stone.com/issues/21572
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit f409099fa25b73fe580ee4662aff51636f118ed2)
 
@@ -1900,7 +1900,7 @@ Date:   Sat Sep 23 15:18:18 2017 +0100
 
     mgr/zabbix: fix div by zero
     
-    Fixes: http://tracker.ceph.com/issues/21518
+    Fixes: http://tracker.stone.com/issues/21518
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 9c02738b4ea0303f5b3cbfc4748d6791007be834)
 
@@ -1919,7 +1919,7 @@ Date:   Wed Sep 27 14:33:58 2017 +0100
 
     mgr/dashboard: handle null in format_number
     
-    Fixes: http://tracker.ceph.com/issues/21570
+    Fixes: http://tracker.stone.com/issues/21570
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit f43859d4dca696ba4cac224e0c7e87e4b2aad40f)
 
@@ -1929,7 +1929,7 @@ Date:   Thu Oct 19 09:28:18 2017 -0400
 
     mon: don't blow away bootstrap-mgr on upgrades
     
-    Fixes: http://tracker.ceph.com/issues/20950
+    Fixes: http://tracker.stone.com/issues/20950
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 57229ea2a4369518c7a16b7a09b045b7896f5a70)
 
@@ -1939,7 +1939,7 @@ Date:   Thu Oct 12 11:57:50 2017 +0100
 
     mon: handle monitor lag when killing mgrs
     
-    Fixes: http://tracker.ceph.com/issues/20629
+    Fixes: http://tracker.stone.com/issues/20629
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 3c3776b30a2da3f5d2ece15c57713c0ce191c778)
 
@@ -1952,7 +1952,7 @@ Date:   Tue Oct 31 13:23:49 2017 +0800
     These two counters should be reported to mgr because the dashboard
     plugin needing them to display osd detailed information.
     
-    Fixes: http://tracker.ceph.com/issues/21981
+    Fixes: http://tracker.stone.com/issues/21981
     
     Signed-off-by: Yao Zongyou <yaozongyou@vip.qq.com>
     (cherry picked from commit 40bb3c5f05b6f2a917a7e400f88677f41a9629a3)
@@ -1987,7 +1987,7 @@ Date:   Wed Nov 1 08:31:31 2017 -0500
     
     We have EC tests with k=2,m=2, so we need a min of 4.
     
-    Fixes: http://tracker.ceph.com/issues/21997
+    Fixes: http://tracker.stone.com/issues/21997
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit d21809b14ea58dc1f44df844e407ebab5a315062)
 
@@ -2013,7 +2013,7 @@ Date:   Mon Sep 25 16:17:47 2017 +0200
     computing the size of each OSD.
     
     Signed-off-by: Theofilos Mouratidis <t.mour@cern.ch>
-    Fixes: http://tracker.ceph.com/issues/21538
+    Fixes: http://tracker.stone.com/issues/21538
     (cherry picked from commit b8561cefa705d31954d47723125376a3c087f4f4)
 
 commit 03a11694feee0d78dcc1f296a77200635a651707
@@ -2257,7 +2257,7 @@ Date:   Thu Nov 2 14:54:50 2017 -0500
 
     Merge pull request #18590 from liewegas/wip-prime-fixes-luminous
     
-    luminous: ceph-bluestore-tool: prime-osd-dir: update symlinks instead of bailing
+    luminous: stone-bluestore-tool: prime-osd-dir: update symlinks instead of bailing
 
 commit 4e1eec777cf194cdf9bd4db1e7c4672d5b2adac7
 Merge: 79736e781f 338af16881
@@ -2289,7 +2289,7 @@ Date:   Thu Nov 2 14:52:32 2017 -0500
 
     Merge pull request #18623 from liewegas/wip-pr-18585-luminous
     
-    luminous: ceph-bluestore-tool: prime-osd-dir: update symlinks instead of bailing
+    luminous: stone-bluestore-tool: prime-osd-dir: update symlinks instead of bailing
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -2298,9 +2298,9 @@ Merge: 24bd1de6af 796e336470
 Author: Sage Weil <sage@newdream.net>
 Date:   Thu Nov 2 14:51:58 2017 -0500
 
-    Merge pull request #18625 from tchaikov/wip-ceph-disk-unlock-dmcrypted-partitions-luminous
+    Merge pull request #18625 from tchaikov/wip-stone-disk-unlock-dmcrypted-partitions-luminous
     
-    luminous: ceph-disk: unlocks dmcrypted partitions when activating them
+    luminous: stone-disk: unlocks dmcrypted partitions when activating them
     
     Reviewed-by: Nathan Cutler <ncutler@suse.com>
 
@@ -2322,16 +2322,16 @@ Date:   Thu Nov 2 14:51:11 2017 -0500
 
     Merge pull request #18675 from jcsp/wip-luminous-mgr
     
-    luminous: bulk backport of ceph-mgr improvements
+    luminous: bulk backport of stone-mgr improvements
 
 commit 98edc3b9f2012db277c5796055223f6e69b67e66
 Merge: 96102df540 0c0d8e6f40
 Author: Alfredo Deza <alfredo@deza.pe>
 Date:   Thu Nov 2 13:39:05 2017 -0400
 
-    Merge pull request #18687 from ceph/backport-18656
+    Merge pull request #18687 from stone/backport-18656
     
-    luminous: "ceph-volume: adds functional testing for bluestore"
+    luminous: "stone-volume: adds functional testing for bluestore"
     
     Reviewed-by: Alfredo Deza <adeza@redhat.com>
 
@@ -2342,7 +2342,7 @@ Date:   Fri Nov 3 01:02:26 2017 +0800
 
     Merge pull request #18293 from smithfarm/wip-21795-luminous
     
-    luminous: Ubuntu amd64 client can not discover the ubuntu arm64 ceph cluster
+    luminous: Ubuntu amd64 client can not discover the ubuntu arm64 stone cluster
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -2350,7 +2350,7 @@ commit 0c0d8e6f402ae78ae8110a717188f8b366a67696
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Tue Oct 31 15:25:23 2017 -0500
 
-    ceph-volume tests: adds objecstore as a testing factor
+    stone-volume tests: adds objecstore as a testing factor
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit f8b114be61d033c853a2e8295b966e30c6a5f721)
@@ -2359,10 +2359,10 @@ commit 9d970edddc1ab453a683bff1dfd19cab46e8cf9a
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Tue Oct 31 15:10:28 2017 -0500
 
-    ceph-volume: enable the centos7-bluestore and xenial-bluestore tests
+    stone-volume: enable the centos7-bluestore and xenial-bluestore tests
     
     This also updates the ansible and testinfra version to match the current
-    ceph-ansible master branch.
+    stone-ansible master branch.
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit b49a19a9773599de295197979b498d06ca500cf8)
@@ -2371,7 +2371,7 @@ commit f9554c4e3ef0eea1f4f09828f98c58838390d4fa
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Tue Oct 31 15:09:52 2017 -0500
 
-    ceph-volume: adds the xenial-bluestore testing scenario
+    stone-volume: adds the xenial-bluestore testing scenario
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 38372890c9c40e6f536026f61c5ef6e6d23d7111)
@@ -2380,7 +2380,7 @@ commit b7fef119d0730a3cb8f19a461f773e66ce97af0f
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Tue Oct 31 15:05:46 2017 -0500
 
-    ceph-volume: adds the centos7-bluestore testing scenario
+    stone-volume: adds the centos7-bluestore testing scenario
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 45e4b0c9d7d4fea1d7bd3481d46edf3b42c40d26)
@@ -2509,7 +2509,7 @@ Date:   Tue Oct 17 18:14:43 2017 -0400
     
     This was doing a Py_DECREF outside of the Gil.
     
-    Fixes: http://tracker.ceph.com/issues/21593
+    Fixes: http://tracker.stone.com/issues/21593
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 58dfa97ba88882fb3540d15e31bcac48a1aef5ef)
 
@@ -2699,7 +2699,7 @@ Date:   Thu Jul 27 11:50:23 2017 -0400
 
     mgr: enable python modules to advertise their service URI
     
-    Fixes: http://tracker.ceph.com/issues/17460
+    Fixes: http://tracker.stone.com/issues/17460
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit a0183a63fa791954d14c57632e184858cefe893d)
 
@@ -2743,9 +2743,9 @@ commit b69a656ac76fe38431bcd66c626883e324be1ba4
 Author: John Spray <john.spray@redhat.com>
 Date:   Wed Jul 26 12:31:13 2017 -0400
 
-    pybind: update MgrModule for ceph_state->ceph_module
+    pybind: update MgrModule for stone_state->stone_module
     
-    & tidy up the places where ceph_state was getting
+    & tidy up the places where stone_state was getting
     used outside of MgrModule.
     
     Signed-off-by: John Spray <john.spray@redhat.com>
@@ -2920,7 +2920,7 @@ Date:   Thu Sep 28 10:50:53 2017 -0400
 
     doc: flesh out prometheus docs
     
-    Explain ceph_disk_occupation, importance
+    Explain stone_disk_occupation, importance
     of instance labels and honor_labels, provide
     example prometheus configuration yaml.
     
@@ -2931,13 +2931,13 @@ commit 8a9e1cb00110ed73f492f1f6cf23b3595756efc4
 Author: John Spray <john.spray@redhat.com>
 Date:   Thu Sep 28 10:10:14 2017 -0400
 
-    mgr/prometheus: add ceph_disk_occupation series
+    mgr/prometheus: add stone_disk_occupation series
     
     This is the magic series that enables consumers to
     easily get the drive stats that go with their
     OSD stats.
     
-    Fixes: http://tracker.ceph.com/issues/21594
+    Fixes: http://tracker.stone.com/issues/21594
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 284be75524f7125dc1409b9c05fe47b37484964e)
 
@@ -2945,7 +2945,7 @@ commit 51d74e41223397abcde006a4ce53e693a2125852
 Author: Benjeman Meekhof <bmeekhof@users.noreply.github.com>
 Date:   Wed Oct 4 10:05:17 2017 -0400
 
-    mgr/influx: Correct name of daemon stat measurement to 'ceph_daemon_stats'
+    mgr/influx: Correct name of daemon stat measurement to 'stone_daemon_stats'
     
     Signed-off-by: Benjeman Meekhof <bmeekhof@umich.edu>
     (cherry picked from commit f9014a1c75c6a3adf414b48a707fd444e65b3024)
@@ -3000,7 +3000,7 @@ Date:   Wed Sep 13 17:16:54 2017 -0400
     qa: add mgr module selftest task
     
     The module self test commands give us a chance to
-    catch any other ceph changes that change something
+    catch any other stone changes that change something
     that a module was relying on reading.
     
     Signed-off-by: John Spray <john.spray@redhat.com>
@@ -3091,7 +3091,7 @@ Date:   Tue Sep 12 06:51:21 2017 -0400
     
     The idea of self-test commands is that they're self
     contained and just exercise the module's calls
-    to the Ceph-side.
+    to the Stone-side.
     
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 125294ab9d6e99aa4c960fea147a4e86624b869e)
@@ -3104,7 +3104,7 @@ Date:   Tue Sep 12 06:18:15 2017 -0400
     
     - Use new get_all_perf_counters path
     - Consequently get counters for all daemons, not just OSD
-    - Tag stats with ceph_daemon rather than osd_id, as some
+    - Tag stats with stone_daemon rather than osd_id, as some
       stats appear from more than one daemon type
     - Remove summing of perf counters, external TSDB and/or queries
       can do this.
@@ -3146,7 +3146,7 @@ commit 290d15ed912285803a40d02308b921b415c580a2
 Author: John Spray <john.spray@redhat.com>
 Date:   Mon Sep 11 09:12:25 2017 -0400
 
-    ceph.in: use PRIO_INTERESTING as daemonperf threshold
+    stone.in: use PRIO_INTERESTING as daemonperf threshold
     
     Using PRIO_USEFUL as the threshold for what goes into
     time series databases.  I'm claiming that we have
@@ -3348,7 +3348,7 @@ commit 5f0ef3a73a55a3f24997e415a848308afa0263ba
 Author: Jan Fajerski <jfajerski@suse.com>
 Date:   Fri Aug 4 10:23:11 2017 +0200
 
-    pybind/mgr/prometheus: prefix metrics with 'ceph'; replace :: with _
+    pybind/mgr/prometheus: prefix metrics with 'stone'; replace :: with _
     
     Both follow prometheus best practices. While : is a legal metric
     character, "Exposed metrics should not contain colons, these are for
@@ -3392,7 +3392,7 @@ Date:   Sat Sep 23 11:55:55 2017 -0400
     are using the same name (stomping on each other's stats/statsu)
     but it shouldn't crash.
     
-    Fixes: http://tracker.ceph.com/issues/21197
+    Fixes: http://tracker.stone.com/issues/21197
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit dc415f1ae09a308bd448614934a4c168eb9cf07b)
 
@@ -3433,7 +3433,7 @@ Date:   Thu Aug 24 12:53:24 2017 -0400
     a MMgrReport is handled, to look up the DaemonState
     for the sender.
     
-    Fixes: http://tracker.ceph.com/issues/21158
+    Fixes: http://tracker.stone.com/issues/21158
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 806f10847cefe5c7a78fc319b1b130d372197dd3)
 
@@ -3443,7 +3443,7 @@ Date:   Thu Aug 31 12:13:23 2017 -0400
 
     mgr: runtime adjustment of perf counter threshold
     
-    ceph-mgr has missed out on the `config set` command
+    stone-mgr has missed out on the `config set` command
     that the other daemons got recently: add it here
     and hook it all up to the stats period and threshold
     settings.
@@ -3458,7 +3458,7 @@ Date:   Mon Jul 31 09:24:09 2017 -0400
     mgr: apply a threshold to perf counter prios
     
     ...so that we can control the level of load
-    we're putting on ceph-mgr with perf counters.  Don't collect
+    we're putting on stone-mgr with perf counters.  Don't collect
     anything below PRIO_USEFUL by default.
     
     Signed-off-by: John Spray <john.spray@redhat.com>
@@ -3606,7 +3606,7 @@ Date:   Tue Jul 11 16:25:42 2017 -0400
 
     mgr/PyModules: add 'pg_status' dump
     
-    This is summary info, same as what's in 'ceph status'.
+    This is summary info, same as what's in 'stone status'.
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 85b5b80906d00e098d4b1af1354c60a357022dd2)
@@ -3617,7 +3617,7 @@ Date:   Wed Nov 1 09:53:34 2017 -0700
 
     osd: build_past_intervals_parallel: Ignore new partially created PGs
     
-    Fixes: http://tracker.ceph.com/issues/21833
+    Fixes: http://tracker.stone.com/issues/21833
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
 
@@ -3626,9 +3626,9 @@ Merge: 2988a39abe 966683fde6
 Author: Casey Bodley <cbodley@users.noreply.github.com>
 Date:   Wed Nov 1 16:28:25 2017 -0400
 
-    Merge pull request #18674 from ceph/wip-rgw-s3-branch
+    Merge pull request #18674 from stone/wip-rgw-s3-branch
     
-    qa/tests: use ceph-luminous branch for s3tests
+    qa/tests: use stone-luminous branch for s3tests
     
     Reviewed-by: Casey Bodley <cbodley@redhat.com>
 
@@ -3636,7 +3636,7 @@ commit 966683fde600837eb9a0f82ca6fd00f52e721809
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Wed Nov 1 10:32:07 2017 -0700
 
-    qa: use ceph-luminous branch for s3tests
+    qa: use stone-luminous branch for s3tests
     
     Signed-off-by: Vasu Kulkarni <vasu@redhat.com>
 
@@ -3658,7 +3658,7 @@ Date:   Wed Nov 1 12:33:45 2017 +0100
 
     Merge pull request #18113 from jcsp/wip-prometheus-port-backport
     
-    luminous: ceph-mgr: can not change prometheus port for mgr
+    luminous: stone-mgr: can not change prometheus port for mgr
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
     Reviewed-by: John Spray <john.spray@redhat.com>
@@ -3668,17 +3668,17 @@ Merge: a7f519913d f463cd84ae
 Author: Yuri Weinstein <yuri.weinstein@gmail.com>
 Date:   Tue Oct 31 14:45:27 2017 -0700
 
-    Merge pull request #18655 from ceph/wip-yuriw-bp-PR18634-luminous
+    Merge pull request #18655 from stone/wip-yuriw-bp-PR18634-luminous
     
-    qa: add "restful" to ceph_mgr_modules in ceph-ansible suite
+    qa: add "restful" to stone_mgr_modules in stone-ansible suite
 
 commit f463cd84ae1fb38817078967a4a40ba4b600f0e5
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Oct 31 11:21:58 2017 +0800
 
-    qa: add "restful" to ceph_mgr_modules in ceph-ansible suite
+    qa: add "restful" to stone_mgr_modules in stone-ansible suite
     
-    backport of https://github.com/ceph/ceph/pull/18634
+    backport of https://github.com/stone/stone/pull/18634
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit caf9ee5c60d999951979d0b67afda8d56e1cd91d)
@@ -3727,7 +3727,7 @@ Date:   Thu Sep 21 17:24:07 2017 +0200
     getattr on the sysfs lnk files and the current policy does not allow
     this.
     
-    Fixes: http://tracker.ceph.com/issues/21523
+    Fixes: http://tracker.stone.com/issues/21523
     Signed-off-by: Boris Ranto <branto@redhat.com>
     (cherry picked from commit 394c26adb97cd150233fe8760355f486d03624a4)
 
@@ -3748,7 +3748,7 @@ Merge: 4f024c6831 c603faaf17
 Author: Yuri Weinstein <yuri.weinstein@gmail.com>
 Date:   Mon Oct 30 20:23:39 2017 -0700
 
-    Merge pull request #18629 from ceph/wip-yuriw-21978-luminous
+    Merge pull request #18629 from stone/wip-yuriw-21978-luminous
     
     qa/suites/upgrade/jewel-x: Changed typo ('hammer' to 'jewel')
 
@@ -3758,7 +3758,7 @@ Date:   Mon Oct 30 14:52:52 2017 -0700
 
     Changed typo ('hammer' to 'jewel')
     
-    Fixes http://tracker.ceph.com/issues/21978
+    Fixes http://tracker.stone.com/issues/21978
     Signed-off-by: Yuri Weinstein <yweinste@redhat.com>
 
 commit 555746a09e8bb7bcf99da91f9d00dfab9791d80c
@@ -3767,7 +3767,7 @@ Date:   Fri Oct 27 13:20:07 2017 -0700
 
     MDSMonitor: wait for readable OSDMap before sanitizing
     
-    Fixes: http://tracker.ceph.com/issues/21945
+    Fixes: http://tracker.stone.com/issues/21945
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit ca52f3bd93e6c743aa05171108527d877807b426)
@@ -3778,12 +3778,12 @@ Date:   Tue Oct 3 12:25:12 2017 -0700
 
     mds: clean up non-existent data pools in MDSMap
     
-    Older versions of Ceph weren't strict about preventing pool deletion when the
+    Older versions of Stone weren't strict about preventing pool deletion when the
     MDSMap referred to to-be-deleted pool. If we are dealing with a cluster
     upgrade, we should try to gracefully handle that by cleaning out data pools
     that have been removed.
     
-    Reproduced this by allowing CephFS pools to be deleted:
+    Reproduced this by allowing StoneFS pools to be deleted:
     
     diff --git a/src/mon/OSDMonitor.cc b/src/mon/OSDMonitor.cc
     index 85c47c13da6..694b240cb9f 100644
@@ -3792,38 +3792,38 @@ Date:   Tue Oct 3 12:25:12 2017 -0700
     @@ -10962,7 +10962,7 @@ int OSDMonitor::_check_remove_pool(int64_t pool_id, const pg_pool_t& pool,
        FSMap const &pending_fsmap = mon->mdsmon()->get_pending();
        if (pending_fsmap.pool_in_use(pool_id)) {
-         *ss << "pool '" << poolstr << "' is in use by CephFS";
+         *ss << "pool '" << poolstr << "' is in use by StoneFS";
     -    return -EBUSY;
     +    //return -EBUSY;
        }
     
        if (pool.tier_of >= 0) {
     
-    pdonnell@icewind ~/ceph/build$ bin/ceph osd pool create derp 4 4
+    pdonnell@icewind ~/stone/build$ bin/stone osd pool create derp 4 4
     pool 'derp' created
-    pdonnell@icewind ~/ceph/build$ bin/ceph fs add_data_pool cephfs_a derp
+    pdonnell@icewind ~/stone/build$ bin/stone fs add_data_pool stonefs_a derp
     added data pool 3 to fsmap
-    pdonnell@icewind ~/ceph/build$ bin/ceph osd pool rm derp derp --yes-i-really-really-mean-it
-    pool 'derp' is in use by CephFSpool 'derp' removed
-    pdonnell@icewind ~/ceph/build$ bin/ceph fs ls
+    pdonnell@icewind ~/stone/build$ bin/stone osd pool rm derp derp --yes-i-really-really-mean-it
+    pool 'derp' is in use by StoneFSpool 'derp' removed
+    pdonnell@icewind ~/stone/build$ bin/stone fs ls
     ...
-    2017-10-03 12:50:48.409561 7f9e2e05b700 -1 /home/pdonnell/ceph/src/osd/OSDMap.h: In function 'const string& OSDMap::get_pool_name(int64_t) const' thread 7f9e2e05b700 time 2017-10-03 12:50:48.407897
-    /home/pdonnell/ceph/src/osd/OSDMap.h: 1184: FAILED assert(i != pool_name.end())
+    2017-10-03 12:50:48.409561 7f9e2e05b700 -1 /home/pdonnell/stone/src/osd/OSDMap.h: In function 'const string& OSDMap::get_pool_name(int64_t) const' thread 7f9e2e05b700 time 2017-10-03 12:50:48.407897
+    /home/pdonnell/stone/src/osd/OSDMap.h: 1184: FAILED assert(i != pool_name.end())
     
-     ceph version 12.1.2-2624-g37884a41964 (37884a419640b446fffc1fa4d6074c97339fdd96) mimic (dev)
-      1: (ceph::__ceph_assert_fail(char const*, char const*, int, char const*)+0xf5) [0x564ebb5420f5]
+     stone version 12.1.2-2624-g37884a41964 (37884a419640b446fffc1fa4d6074c97339fdd96) mimic (dev)
+      1: (stone::__stone_assert_fail(char const*, char const*, int, char const*)+0xf5) [0x564ebb5420f5]
       2: (()+0x41dade) [0x564ebb3cbade]
       3: (MDSMonitor::preprocess_command(boost::intrusive_ptr<MonOpRequest>)+0x1fb9) [0x564ebb4cd119]
     
     Note when testing this fix, use something like this after removing the data pool:
     
-    pdonnell@icewind ~/ceph/build$ bin/ceph fs set cephfs_a max_mds 2
+    pdonnell@icewind ~/stone/build$ bin/stone fs set stonefs_a max_mds 2
     
     Setting max_mds will cause a new FSMap to be created where MDSMap::sanitize is
     called; this is simulating the initial load+sanitize of a Hammer legacy MDSMap
     by the mons.
     
-    Fixes: http://tracker.ceph.com/issues/21568
+    Fixes: http://tracker.stone.com/issues/21568
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     
@@ -3843,9 +3843,9 @@ Merge: 6166148078 5a0016131b
 Author: Alfredo Deza <alfredo@deza.pe>
 Date:   Mon Oct 30 14:05:00 2017 -0400
 
-    Merge pull request #18627 from ceph/backport-18513
+    Merge pull request #18627 from stone/backport-18513
     
-    ceph-volume lvm zap backport
+    stone-volume lvm zap backport
     
     Reviewed-by: Alfredo Deza <adeza@redhat.com>
 
@@ -3853,7 +3853,7 @@ commit 5a0016131b1ec900255057876c98fc70e00542f0
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Fri Oct 27 11:29:50 2017 -0500
 
-    ceph-volume: set journal_uuid and journal_device when using a partition
+    stone-volume: set journal_uuid and journal_device when using a partition
     
     This correctly sets the tags when a partition is used for a filestore
     journal.
@@ -3865,7 +3865,7 @@ commit 05522e75f8d98658b5440d3c2f70e93ce65c65ce
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Tue Oct 24 10:13:40 2017 -0500
 
-    docs for ceph-volume lvm zap
+    docs for stone-volume lvm zap
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 3e93a31deda96ed6fb23fa19ce3e273de05f7d88)
@@ -3874,7 +3874,7 @@ commit cb1e81447f5c0c4eb8c0fd9fb11d0ceae3e26199
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Mon Oct 23 09:51:43 2017 -0500
 
-    ceph-volume: add tests for ceph-volume lvm zap
+    stone-volume: add tests for stone-volume lvm zap
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 3d5e391693fc64747a4774287c968f842294eaa6)
@@ -3883,7 +3883,7 @@ commit 33927c10e78842bb4c4ce4c0e4051ccceb8bb9e8
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Mon Oct 23 09:44:07 2017 -0500
 
-    ceph-volume: print success message if zap succeeds
+    stone-volume: print success message if zap succeeds
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 6d70762dee0cd9047c291cf9869f666a375e956b)
@@ -3892,7 +3892,7 @@ commit d8381ab509d9f60f6fe62c5692a9374b3187d5c9
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Fri Oct 20 09:58:48 2017 -0500
 
-    ceph-volume: terminal.write only takes one argument
+    stone-volume: terminal.write only takes one argument
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit a5454eba241abd8cc1b1a660b12a1aec7c3c16e0)
@@ -3901,7 +3901,7 @@ commit 6f2bd88278f2c7dc4cfd156969f98d7cc8c3e763
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Thu Oct 19 16:29:39 2017 -0500
 
-    ceph-volume: the metadata field for the lv path is lv_path not path
+    stone-volume: the metadata field for the lv path is lv_path not path
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit e3a9113e7025f1e3a3130ec1e2d565f37bf3d2dc)
@@ -3910,7 +3910,7 @@ commit 1dfe7e9854b00850b86168049821447d33298fff
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Thu Oct 19 14:59:26 2017 -0500
 
-    ceph-volume: update help text for ceph-volume lvm zap
+    stone-volume: update help text for stone-volume lvm zap
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit cbc38c4e4a7dcc24b31bcfa6af73eb8cf04f56ad)
@@ -3919,7 +3919,7 @@ commit c5206435a9bae9d93e6cd9a3c2b98127871ad94e
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Thu Oct 19 14:55:44 2017 -0500
 
-    ceph-volume: remove lvm metadata when zapping an lv
+    stone-volume: remove lvm metadata when zapping an lv
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 5f57fc87205c2d35da9a1f28c72e233ffb3fe4d9)
@@ -3928,7 +3928,7 @@ commit eb53ef67b4e3bf5afb6e414fd42caab67c4cfdf2
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Thu Oct 19 14:55:02 2017 -0500
 
-    ceph-volume: adds Volume.clear_tags
+    stone-volume: adds Volume.clear_tags
     
     Will remove all tags for the current lv
     
@@ -3939,10 +3939,10 @@ commit 4ee13e0587c5e152fdac18004bc4336f8b90e4af
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Thu Oct 19 12:01:57 2017 -0500
 
-    ceph-volume: zap should leave lvs and partitions intact
+    stone-volume: zap should leave lvs and partitions intact
     
     This will remove filesystems and wipe data from any lv or partition
-    given to 'ceph-volume lvm zap' but still leave it intact for further
+    given to 'stone-volume lvm zap' but still leave it intact for further
     use.
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
@@ -3952,7 +3952,7 @@ commit 8c3ab3459abfebac20bb4ce3ddecf1a7a58cf401
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Thu Oct 19 11:44:11 2017 -0500
 
-    ceph-volume: adds utilites to wipe the fs and clear data when zapping
+    stone-volume: adds utilites to wipe the fs and clear data when zapping
     
     These should eventually move to a disk api.
     
@@ -3963,7 +3963,7 @@ commit 8a0e7fad57e41e10d51e0e167b671668ee1aa286
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Thu Oct 19 10:35:51 2017 -0500
 
-    ceph-volume: adds tests for api.lvm.remove_lv
+    stone-volume: adds tests for api.lvm.remove_lv
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 937b57438147681c2c6e32c6db38d8bea68d4731)
@@ -3972,7 +3972,7 @@ commit c6dd47ab6d1ec6784ec3cef8f65139baeaf4fa3a
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Thu Oct 19 10:35:10 2017 -0500
 
-    ceph-volume: api.lvm.remove_lv should return True when successful
+    stone-volume: api.lvm.remove_lv should return True when successful
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 7f055aa6deb3904cf0334e214c13a26098b08aa8)
@@ -3981,7 +3981,7 @@ commit 71ae0b8cabc0a696e6762d7f377f9f4b28d2a963
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Wed Oct 18 10:19:25 2017 -0500
 
-    ceph-volume: zap logical volumes
+    stone-volume: zap logical volumes
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 1d083a2191315ee94301c2f5f102a0906dd05fa8)
@@ -3990,7 +3990,7 @@ commit 7110922c42ee30fa25dc9dacbfc8d0f9ae2f2a79
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Wed Oct 18 10:19:00 2017 -0500
 
-    ceph-volume: adds a remove_lv command to the lvm api
+    stone-volume: adds a remove_lv command to the lvm api
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit cf98b6971ced0caa29ff4f7ac346df652177fa29)
@@ -3999,7 +3999,7 @@ commit 731610f18b9e4109ce72a4467af209144e4a127d
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Tue Oct 17 14:15:18 2017 -0500
 
-    ceph-volume: stubs out the ceph-volume lvm zap command
+    stone-volume: stubs out the stone-volume lvm zap command
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit 2e64b797ef6ae91623ffba8ae28d3f8ccc7d7b93)
@@ -4019,7 +4019,7 @@ Date:   Fri Oct 27 09:57:43 2017 -0400
 
     cls/journal: fixed possible infinite loop in expire_tags
     
-    Fixes: http://tracker.ceph.com/issues/21956
+    Fixes: http://tracker.stone.com/issues/21956
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 9e66dca49591e50b9cab5df311f1dc217eb58fcc)
 
@@ -4027,7 +4027,7 @@ commit 796e33647022de1fd831b31045242fb8e9d0e4d2
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Wed Aug 30 18:46:49 2017 +0800
 
-    ceph-disk: unlock all partitions when activate
+    stone-disk: unlock all partitions when activate
     
     should unlock all dmcrypted partitions when activating a device.
     
@@ -4038,7 +4038,7 @@ commit 3e9aad1a116e02bb126010f310ca2267177b5162
 Author: Felix Winterhalter <felix@audiofair.de>
 Date:   Mon Jul 17 02:04:39 2017 +0200
 
-    ceph-disk activate unlocks bluestore data partition
+    stone-disk activate unlocks bluestore data partition
     
     Signed-off-by: Felix Winterhalter <felix@audiofair.de>
     (cherry picked from commit 1287caf2dbb5ef6e5f243fe1d23633946aef26f9)
@@ -4047,7 +4047,7 @@ commit 6b6eceee027e571d8d3da4af144391f8da85b53e
 Author: Yao Zongyou <yaozongyou@vip.qq.com>
 Date:   Sat Oct 28 18:23:30 2017 +0800
 
-    ceph-bluestore-tool: the link target should not ending with new line
+    stone-bluestore-tool: the link target should not ending with new line
     
     Signed-off-by: Yao Zongyou <yaozongyou@vip.qq.com>
     (cherry picked from commit 39c68d128cf29f8e0a617009d16c5edf471ead47)
@@ -4056,7 +4056,7 @@ commit cc84812507607d0a91233a513088094533a2d6a7
 Author: Yao Zongyou <yaozongyou@vip.qq.com>
 Date:   Sat Oct 28 18:22:27 2017 +0800
 
-    ceph-bluestore-tool: the right action is prime-osd-dir not prime-osd-dev
+    stone-bluestore-tool: the right action is prime-osd-dir not prime-osd-dev
     
     Signed-off-by: Yao Zongyou <yaozongyou@vip.qq.com>
     (cherry picked from commit d418a04e9fed6bf91cc9acc5ac777eadf664c974)
@@ -4067,7 +4067,7 @@ Date:   Mon Sep 25 10:44:28 2017 +0100
 
     mon: implement MDSMonitor::get_store_prefixes
     
-    Fixes: http://tracker.ceph.com/issues/21534
+    Fixes: http://tracker.stone.com/issues/21534
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit a3c317b406c69b9d6a2d7df94806f4c308e6ee6a)
 
@@ -4079,7 +4079,7 @@ Date:   Mon Sep 25 15:01:02 2017 +0800
     
     sync mgr_command_descs table and mgr_metadata table to new mons
     
-    Fixes: http://tracker.ceph.com/issues/21527
+    Fixes: http://tracker.stone.com/issues/21527
     
     Signed-off-by: huanwen ren <ren.huanwen@zte.com.cn>
     (cherry picked from commit 13f6aa3aaa6de0aeccec67d7c6f3effe43dcae49)
@@ -4097,7 +4097,7 @@ Date:   Mon Sep 25 10:37:18 2017 +0100
     We should define them in one place to make it easy
     when updating get_store_prefixes.
     
-    Fixes: http://tracker.ceph.com/issues/21534
+    Fixes: http://tracker.stone.com/issues/21534
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 889ac5166ad8fd30678325ddc2da59f45db53f06)
 
@@ -4170,7 +4170,7 @@ Date:   Sun Oct 29 11:06:16 2017 -0700
     Merge PR #17729 into luminous
     
     * refs/pull/17729/head:
-            ceph.in: validate service glob
+            stone.in: validate service glob
     
     Reviewed-by: Patrick Donnelly <pdonnell@redhat.com>
     Reviewed-by: Amit Kumar <amitkuma@redhat.com>
@@ -4208,7 +4208,7 @@ Date:   Sun Oct 29 11:00:10 2017 -0700
     Merge PR #18085 into luminous
     
     * refs/pull/18085/head:
-            ceph_volume_client: fix setting caps for IDs
+            stone_volume_client: fix setting caps for IDs
     
     Reviewed-by: Ramana Raja <rraja@redhat.com>
 
@@ -4226,7 +4226,7 @@ Date:   Sun Oct 29 11:00:06 2017 -0700
             mds: cap client recall to min caps per client
             mds: fix conf types
             mds: fix whitespace
-            doc/cephfs: add client min cache and max cache ratio describe
+            doc/stonefs: add client min cache and max cache ratio describe
             mds: adding tunable features for caps_per_client
     
     Reviewed-by: Zheng Yan <zyan@redhat.com>
@@ -4239,7 +4239,7 @@ Date:   Sun Oct 29 10:55:32 2017 -0700
     Merge PR #17921 into luminous
     
     * refs/pull/17921/head:
-            ceph_volume_client: perform snapshot operations in
+            stone_volume_client: perform snapshot operations in
     
     Reviewed-by: Amit Kumar <amitkuma@redhat.com>
     Reviewed-by: Ramana Raja <rraja@redhat.com>
@@ -4253,7 +4253,7 @@ Date:   Thu Oct 26 18:28:10 2017 -0400
     Required to store correct final accounted_size of objects in
     RGWWriteWriteRequest::write_finish.
     
-    Fixes: http://tracker.ceph.com/issues/21940
+    Fixes: http://tracker.stone.com/issues/21940
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit b1f528d35aeccabb4e5818aec6feb8e53e562500)
@@ -4262,7 +4262,7 @@ commit 8cbb2eb937cae4e136ef77bc93e6d5346e21c8da
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Oct 9 08:15:21 2017 -0500
 
-    qa/cephfs: test ec data pool
+    qa/stonefs: test ec data pool
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit d0732fc96fbc6849dd51b391d85f765c74cfb593)
@@ -4272,9 +4272,9 @@ Merge: d294493c42 8a87d43db2
 Author: Andrew Schoen <andrew.schoen@gmail.com>
 Date:   Fri Oct 27 11:34:15 2017 -0500
 
-    Merge pull request #18593 from ceph/luminous-wip-bz1499840
+    Merge pull request #18593 from stone/luminous-wip-bz1499840
     
-    luminous ceph-volume lvm bluestore support
+    luminous stone-volume lvm bluestore support
     
     Reviewed-by: Andrew Schoen <aschoen@redhat.com>
 
@@ -4346,7 +4346,7 @@ commit 8a87d43db25a364841d969636bd74b7590c3d563
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 26 15:09:18 2017 -0400
 
-    ceph-volume lvm.activate remove links on activate before priming
+    stone-volume lvm.activate remove links on activate before priming
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 634b5caaed7c9188e426727e83a0768bdbc51f0d)
@@ -4355,7 +4355,7 @@ commit 869d13037dbb2b8882c4a4a91ec20c9814bcc438
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 26 07:48:24 2017 -0400
 
-    ceph-volume lvm.activate ceph-bluestore-tool needs --cluster too
+    stone-volume lvm.activate stone-bluestore-tool needs --cluster too
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit fb36087bc3c7e7bb8358cbf8ad84409fa23fac68)
@@ -4364,7 +4364,7 @@ commit 3baab9f4e286c3b54c179b0f471435c2dbc859b2
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 25 18:57:28 2017 -0400
 
-    ceph-volume lvm.activate consume cluster_name from lvm metadata
+    stone-volume lvm.activate consume cluster_name from lvm metadata
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 2b7ff497fe9e0e167ab01bf0d8ce5e26f0da836f)
@@ -4373,7 +4373,7 @@ commit 8f41a983356ee9d182f8247f2da8db15848afae0
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 25 18:57:03 2017 -0400
 
-    ceph-volume lvm.prepare persist cluster_name on lvm metadata
+    stone-volume lvm.prepare persist cluster_name on lvm metadata
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 6d38ad987e08791be379f6c006c1eb5bf9464415)
@@ -4382,7 +4382,7 @@ commit 1ae30d3130af845ebf563a74a1e2642f5236f1ed
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 25 15:30:43 2017 -0400
 
-    ceph-volume util.prepare bluestore db and wal paths are to devices, not osd dir paths
+    stone-volume util.prepare bluestore db and wal paths are to devices, not osd dir paths
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit fd616acd6ae0f184c1757e7de38fc746d526908c)
@@ -4391,7 +4391,7 @@ commit fdfbfb8140fc1be3123d1254f4463613dc7c7cb0
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 25 15:30:06 2017 -0400
 
-    ceph-volume lvm.prepare bluestore wal and db links get created with mkfs
+    stone-volume lvm.prepare bluestore wal and db links get created with mkfs
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 80698d2309a221d2318b11be9b8f8a95b51416ea)
@@ -4400,7 +4400,7 @@ commit 6ac58f3cd5e292153c82d881a30db1f6c4bfd936
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 25 10:28:43 2017 -0400
 
-    ceph-volume lvm.prepare use wal and db for mkfs
+    stone-volume lvm.prepare use wal and db for mkfs
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 4970ab5c804111ce4b2b57817f1e29d58b18a893)
@@ -4409,7 +4409,7 @@ commit c9ecd14ca220e45960650715703cae3e4376e3c0
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 24 16:28:33 2017 -0400
 
-    ceph-volume lvm.prepare ensure tags are set for ceph.type correctly for block and data
+    stone-volume lvm.prepare ensure tags are set for stone.type correctly for block and data
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 58dbefd3be7bad51e6c56c50fbfb450e205b3036)
@@ -4418,7 +4418,7 @@ commit 76fb5fec94a9bbfed1163a23faf87e19d5617bd4
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 24 16:26:03 2017 -0400
 
-    ceph-volume lvm.activate check if lv device is mounted at path
+    stone-volume lvm.activate check if lv device is mounted at path
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 1ead135bef801280e7cec21283c95c7ba440d84b)
@@ -4427,7 +4427,7 @@ commit 343362027368c4170bd785f1633afeb5ed90f3a2
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 24 15:55:21 2017 -0400
 
-    ceph-volume lvm.prepare default to using bluestore
+    stone-volume lvm.prepare default to using bluestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 39dd0d1d10aba08c3e8299eb1702260274a756a7)
@@ -4436,7 +4436,7 @@ commit 0a27fe88266458eead5a011c27cc323f5b7173a5
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 24 15:54:57 2017 -0400
 
-    ceph-volume lvm.create default to using bluestore
+    stone-volume lvm.create default to using bluestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d3145da6e643dedb2fbed72e7d4d0cddf397c5e3)
@@ -4445,7 +4445,7 @@ commit bd2e0aa78ad1a500935c3134f4d1e6c3413a26ae
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 24 15:54:11 2017 -0400
 
-    ceph-volume lvm.common remove boolean defaults for CLI flags
+    stone-volume lvm.common remove boolean defaults for CLI flags
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit a7d5965ab532a621f402bad55d45dfed61d90cc5)
@@ -4454,7 +4454,7 @@ commit c3d474af562ec5b8658bed6362046b0208a2c0eb
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 24 13:29:18 2017 -0400
 
-    ceph-volume lvm.prepare update to use create_osd_path
+    stone-volume lvm.prepare update to use create_osd_path
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit bafb72144666f891773bed95e9a0f757673af2e0)
@@ -4496,7 +4496,7 @@ commit 02013a714ec5fa6c2ff1073e432b8f6b9ff41305
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Oct 23 09:44:27 2017 -0400
 
-    ceph-volume lvm.activate only prime-osd-dir when directory is empty
+    stone-volume lvm.activate only prime-osd-dir when directory is empty
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 9bb6cfd867c2d8e972093d023622f8c2e5b440d4)
@@ -4505,7 +4505,7 @@ commit 28593dbf1caeeec8f7c69dbd06e2ff9759afd072
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Oct 23 09:20:26 2017 -0400
 
-    ceph-volume lvm.activate safeguard against auto detect objectstore flag not being set
+    stone-volume lvm.activate safeguard against auto detect objectstore flag not being set
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit c9b5f352a8f9e2743e5dca3a0479c8099a59fd12)
@@ -4514,7 +4514,7 @@ commit 8df51c8af5d95d67effece720ec2ff82517155b9
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 15:18:20 2017 -0400
 
-    ceph-volume util.system use strings for comparison in py3
+    stone-volume util.system use strings for comparison in py3
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 1b671a8602b036cb8d53bc40eb70198c13143051)
@@ -4523,7 +4523,7 @@ commit 1f09ee754fec40c4b17ea33829e6449d8749690a
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 15:10:08 2017 -0400
 
-    f ceph-volume tests update changes from the help menu in lvm
+    f stone-volume tests update changes from the help menu in lvm
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 3ddcd3c2f19cc848a11a2882f150462ad2f26c65)
@@ -4532,7 +4532,7 @@ commit ec7c42bd59dc05cb8bad082d64ffdc28f13d3dc8
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 14:12:02 2017 -0400
 
-    ceph-volume lvm.common --journal-size doesn't accept a volume group
+    stone-volume lvm.common --journal-size doesn't accept a volume group
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit a8282e9a580bcfa74abdd33032e2ce2851b5cf29)
@@ -4541,7 +4541,7 @@ commit 243098815d1d49570c193767d008cbc4fa0f174b
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 14:04:31 2017 -0400
 
-    ceph-volume lvm.prepare filestore does not require a volume group
+    stone-volume lvm.prepare filestore does not require a volume group
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 3653f105927d455b8df143797af0cfe72f8d6834)
@@ -4550,7 +4550,7 @@ commit da5f764a083613e5d74d1401da65c2ba3aff5fb4
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 14:04:05 2017 -0400
 
-    ceph-volume lvm.common volume groups are no longer required
+    stone-volume lvm.common volume groups are no longer required
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 526c0aa81ac8eed95c2b4664a00ded2118372fff)
@@ -4559,7 +4559,7 @@ commit eaa9150d4a6bacf62fcf485e8d36430743ac06cf
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 12:07:06 2017 -0400
 
-    doc/ceph-volume activate workflow mention tmpfs in osd dirs
+    doc/stone-volume activate workflow mention tmpfs in osd dirs
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 8788fe3721034f390240c01493bc1d27d65a73a5)
@@ -4568,7 +4568,7 @@ commit d65af56eaaab728d8c81ddb69b967cb13f177766
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 12:02:10 2017 -0400
 
-    doc/ceph-volume update activation to include bluestore support
+    doc/stone-volume update activation to include bluestore support
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 288a3124793d11d71b540555fd03c2f61a79dd16)
@@ -4577,7 +4577,7 @@ commit 6545b1c14e84af5f25fd4bbd405b56f7b5797113
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 11:58:47 2017 -0400
 
-    doc/ceph-volume update create to indicate bluestore support
+    doc/stone-volume update create to indicate bluestore support
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 61ce8b4b844fcb64fc95373c5515de902a52fc8c)
@@ -4743,7 +4743,7 @@ commit 29470eac4ca939c824b56f4fbc03c8b7814f9d02
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 11:51:55 2017 -0400
 
-    doc/ceph-volume update prepare with bluestore workflow
+    doc/stone-volume update prepare with bluestore workflow
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 9f1a5627399e2589fe706b158a32a9fb8642ac23)
@@ -4752,7 +4752,7 @@ commit c90e473ff35d15d309eb92dbdc6b9df2e8bd5ecc
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 10:15:09 2017 -0400
 
-    doc/ceph-volume update filestore to indicate it is not the only/default objectstore
+    doc/stone-volume update filestore to indicate it is not the only/default objectstore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit c93603e5764e021305cfeb1c297ee16318126fe1)
@@ -4761,7 +4761,7 @@ commit 3890c47dddd0d028b0c003cb46a9bec670c445f1
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 10:00:17 2017 -0400
 
-    doc/ceph-volume elaborate on env vars for interval and tries in activation
+    doc/stone-volume elaborate on env vars for interval and tries in activation
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 1dc24d1a7065b4e23b1bfa0e7c6d263b5ebc6906)
@@ -4770,7 +4770,7 @@ commit 88240acf19176ae5c139836b7d46848e15ef5454
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 09:33:55 2017 -0400
 
-    ceph-volume lvm.common update cli flags help for bluestore support
+    stone-volume lvm.common update cli flags help for bluestore support
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit c9693fb3f8386016aba5d7c8f53f5f71f948c88d)
@@ -4779,7 +4779,7 @@ commit a945e7776309d39955918cec7e0c5f1895abc39b
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 09:23:35 2017 -0400
 
-    ceph-volume util.disk st_mode is needed for stat()
+    stone-volume util.disk st_mode is needed for stat()
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit e3b5663f7968e44ec0cd6db2bfc43acdb233e314)
@@ -4788,7 +4788,7 @@ commit e833916afe22e9c4765344229b5b89cfc9af1b14
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 09:23:02 2017 -0400
 
-    ceph-volume decorators always log to the file with exceptions
+    stone-volume decorators always log to the file with exceptions
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit cb3533a72571251d9f1b6171f783246462726857)
@@ -4797,7 +4797,7 @@ commit 53e9cf6fcd7549b4bfa78d7568d56b30b38e81fd
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 08:49:32 2017 -0400
 
-    ceph-volume tests verify behavior of get_lv_from_argument
+    stone-volume tests verify behavior of get_lv_from_argument
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit adabbd462bcb19a6da65211e24dfb2b9b5043ef4)
@@ -4806,7 +4806,7 @@ commit 40cfec281cc2584b2e2987f356109c6c160d4597
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 08:48:01 2017 -0400
 
-    ceph-volume api.lvm return result of get_lv when using arguments
+    stone-volume api.lvm return result of get_lv when using arguments
     
     If the argument is an absolute path it is fine to just return whatever
     get_lv finds since it is a "safe" call, it will return a None if nothing
@@ -4819,7 +4819,7 @@ commit 7139077aab892c3213815d1dcf71d93df80a32c8
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 08:12:01 2017 -0400
 
-    ceph-volume lvm.listing support bluestore, not only filestore
+    stone-volume lvm.listing support bluestore, not only filestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 6a5b89a475c2a36022ca09dbb7f6b94cc3b44881)
@@ -4828,7 +4828,7 @@ commit 654e06f1202596d5cecef9d03134861eed053882
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 08:10:51 2017 -0400
 
-    ceph-volume api.lvm allow full paths to detect lv from arguments
+    stone-volume api.lvm allow full paths to detect lv from arguments
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 8d257101b1556ec5ce805622e9b7b6b74f6b000d)
@@ -4837,7 +4837,7 @@ commit 454d48eb29f4429370b831645a29e0450b5b46b1
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 20 08:10:26 2017 -0400
 
-    ceph-volume tests add support for bluestore list verification
+    stone-volume tests add support for bluestore list verification
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 4674da9c07f871bf1f25bb782c136fe082095a14)
@@ -4846,7 +4846,7 @@ commit 8d72737f90b0cd1db860678ebb66596e233fd646
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 19 13:20:55 2017 -0400
 
-    ceph-volume tests activate with fsid works for bluestore and filestore
+    stone-volume tests activate with fsid works for bluestore and filestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 5b9f0853f780db3b0af6b4b7c1ad1d59184069c9)
@@ -4855,7 +4855,7 @@ commit 846aa2492f6db342d9fb4c477c2e13e61e414aaf
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 19 13:14:05 2017 -0400
 
-    ceph-volume tests arg validator can accept absolute paths
+    stone-volume tests arg validator can accept absolute paths
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 15586715f506505a57ec5122416541479df74bc8)
@@ -4864,7 +4864,7 @@ commit 2c9ee51a0a7ed5edc900316c19ba27facb9163eb
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 19 12:03:17 2017 -0400
 
-    ceph-volume tests update changes from the help menu in lvm
+    stone-volume tests update changes from the help menu in lvm
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 39bdc2e3f621a32bcbb3dfe64f156bbfd7e4f5ee)
@@ -4873,7 +4873,7 @@ commit 5724bb04bb74e17b9f7e96b3a3e434cac720c4ed
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 19 11:46:57 2017 -0400
 
-    ceph-volume tests update to get_lv from get_journal_lv
+    stone-volume tests update to get_lv from get_journal_lv
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 9be1012072f36e21a3f3cef42a42f7f1eb83c64e)
@@ -4882,7 +4882,7 @@ commit 43e25933701605ac8cd7cb3d6fbd4cbf6705565e
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 19 11:30:29 2017 -0400
 
-    ceph-volume tests.util new path/device mount interface
+    stone-volume tests.util new path/device mount interface
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d5984bad97347e58318793fc05da84832d323113)
@@ -4891,7 +4891,7 @@ commit 9b36a8bf8d471047dc94cdfcac1f84a9802b9fc5
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 19 09:49:25 2017 -0400
 
-    ceph-volume tests update api.lvm tests
+    stone-volume tests update api.lvm tests
     
     The create_lv signature changed to require full size description and
     tags need to be an actual dictionary (vs. keyword args)
@@ -4903,7 +4903,7 @@ commit ea57e70e6f826ac17eae0226b9d916e8bff4d021
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 18 16:06:55 2017 -0400
 
-    ceph-volume lvm.activate ceph-bluestore-tool should populate the osd dir
+    stone-volume lvm.activate stone-bluestore-tool should populate the osd dir
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit f3bb616bcf8a4737a3701ebf812de831785d6341)
@@ -4912,7 +4912,7 @@ commit fe3b61ac0da67d9c80ead24c6ccf79e1507fa132
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 18 15:06:01 2017 -0400
 
-    ceph-volume lvm.activate auto detect objectstore type
+    stone-volume lvm.activate auto detect objectstore type
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 472aa0b1997a0b1301b699b7ce30dce728aaea0c)
@@ -4921,7 +4921,7 @@ commit 5da9775184e4bc9bf1b83d18eae602c9a510a89f
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 18 15:00:19 2017 -0400
 
-    ceph-volume lvm.trigger enable objectstore auto detection for activate
+    stone-volume lvm.trigger enable objectstore auto detection for activate
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit f579ef07026564f1a94b2923a2e4640ade2da503)
@@ -4930,7 +4930,7 @@ commit 307c99e4382895e6b42c193e9b98b9206fd57f9a
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 18 12:00:34 2017 -0400
 
-    ceph-volume lvm.activate add bluestore support for activation
+    stone-volume lvm.activate add bluestore support for activation
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 5696fed09b65044142b34f89492a6d91d3243e14)
@@ -4939,7 +4939,7 @@ commit 70632b0fac2fa7e411418c90a50b99391379f436
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 18 11:40:38 2017 -0400
 
-    ceph-volume util.system create mappings of mounts
+    stone-volume util.system create mappings of mounts
     
     This makes it easier for consumers to detect a path, or a device that
     might be mounted or might have more than one mount, including tmpfs and
@@ -4952,7 +4952,7 @@ commit 839dc1f554a12fb109ca1f992784dd4f4933898a
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Oct 16 06:51:05 2017 -0400
 
-    ceph-volume util.prepare separate filestore vs. bluestore prepare utils
+    stone-volume util.prepare separate filestore vs. bluestore prepare utils
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 85cdc783008ff0e0566c34aaab7cd5f12db1cbc7)
@@ -4961,7 +4961,7 @@ commit deae88983d80cedcdc842d192f8d659b7533d3dc
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Oct 16 06:50:27 2017 -0400
 
-    ceph-volume process allow obfuscating a key or index when logging commands
+    stone-volume process allow obfuscating a key or index when logging commands
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit bbcca70d962855d991f0aa8e86a19f1855345668)
@@ -4970,7 +4970,7 @@ commit 18336242b85065d8a2b0a92f22b2e91a81b997ba
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Oct 13 09:22:53 2017 -0400
 
-    ceph-volume util.prepare add other ln helpers for bluestore
+    stone-volume util.prepare add other ln helpers for bluestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 555b664882db2cd247087f907bdf4d426fb652f8)
@@ -4979,7 +4979,7 @@ commit 37a1564a41ba8ae6a89eb0903f0fdf6b463d90f0
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 12 16:08:52 2017 -0400
 
-    ceph-volume util.arg_validators allow to pass a group as --data for lvm
+    stone-volume util.arg_validators allow to pass a group as --data for lvm
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 211c38f591945dee53196068533784c385bae102)
@@ -4988,7 +4988,7 @@ commit afd1588fe06a80f2277082fd7bd15f43d8e601b7
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 12 16:08:16 2017 -0400
 
-    ceph-volume util.disk add utilities for is_device and is_partition
+    stone-volume util.disk add utilities for is_device and is_partition
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 6b23fc72240ced158cf5335f6e815dbfd804dfab)
@@ -4997,10 +4997,10 @@ commit 5e8f798d2b8f80b21f3ce4701d22e47992dd0938
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 12 16:05:22 2017 -0400
 
-    ceph-volume api.lvm udpate create_lv for bluestore
+    stone-volume api.lvm udpate create_lv for bluestore
     
     Require full size notation for LVM (e.g. 50G or 100M) and do not
-    "translate" tags by pre-fixing them with 'ceph'. That is already how the
+    "translate" tags by pre-fixing them with 'stone'. That is already how the
     rest of the API works, no need to make that translation in one place
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
@@ -5032,7 +5032,7 @@ commit 3bbd840fe0d34d42c04fac523aee5fc023d8bd3b
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 12 15:42:22 2017 -0400
 
-    ceph-volume lvm.prepare update filestore workflow to use new helpers
+    stone-volume lvm.prepare update filestore workflow to use new helpers
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 1e8a79b8f4b9e6360e8e3ace580e46caeedca8c7)
@@ -5064,7 +5064,7 @@ commit fb95f3f9fd6122f9b8c3c2215463fc8a1ef62ba2
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 12 14:19:07 2017 -0400
 
-    ceph-volume lvm.prepare initial take on bluestore support
+    stone-volume lvm.prepare initial take on bluestore support
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit e4fc3464af472a8dbdf049917eed73519ff82c3b)
@@ -5084,7 +5084,7 @@ commit 26ef33efc37cdd626c6a7577812bb87947417e01
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Oct 12 14:16:25 2017 -0400
 
-    ceph-volume lvm.common update help flags for bluestore usage
+    stone-volume lvm.common update help flags for bluestore usage
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 17028f3a3c1f9394fa82dc6f2bbd596d96acb037)
@@ -5093,7 +5093,7 @@ commit 005359b92a910b72712edbcaa7b2e27a54d3a093
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 11 14:30:41 2017 -0400
 
-    ceph-volume api.lvm allow to create a vg
+    stone-volume api.lvm allow to create a vg
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 16d7feb2b5d5eb5fa0bf23a95b60623ae2e1676f)
@@ -5102,7 +5102,7 @@ commit 795e69673f452227afc12d76ed5aa0d6a8af8665
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 10 12:30:06 2017 -0400
 
-    ceph-volume lvm add block CLI flags for bluestore
+    stone-volume lvm add block CLI flags for bluestore
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 63d2afbc605ac1531bc9f00a1891017bfd42fbce)
@@ -5111,7 +5111,7 @@ commit cbfb082c180e93cd147e164afd1d32ef9234924e
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 10 12:15:14 2017 -0400
 
-    ceph-volume lvm make bluestore the default option
+    stone-volume lvm make bluestore the default option
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit dc3ced30747312dedd0e895a75ec15b1925ef1ea)
@@ -5141,7 +5141,7 @@ Date:   Mon Oct 9 14:09:40 2017 -0400
     the call to set_state() returns 0, when we want operate() to return the
     error code instead. use set_cr_error() to do this
     
-    Fixes: http://tracker.ceph.com/issues/21735
+    Fixes: http://tracker.stone.com/issues/21735
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit ed6340a47f32472bb1f650407dbe739c44bf4bd6)
@@ -5161,7 +5161,7 @@ commit 56359c367d8267281f714dcecefdb50c598718a6
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Oct 26 13:51:40 2017 -0500
 
-    ceph-bluestore-tool: prime-osd-dir: update symlinks instead of bailing
+    stone-bluestore-tool: prime-osd-dir: update symlinks instead of bailing
     
     If the symlink points to the right location, do nothing.  If it doesn't,
     replace it.  If it's not a symlink, bail with EEXIST.
@@ -5185,9 +5185,9 @@ Merge: 2bc24caa00 bb8586b259
 Author: Andrew Schoen <andrew.schoen@gmail.com>
 Date:   Fri Oct 27 08:03:16 2017 -0500
 
-    Merge pull request #18587 from ceph/luminous-wip-volume-api-change
+    Merge pull request #18587 from stone/luminous-wip-volume-api-change
     
-    luminous ceph-volume lvm api refactor/move
+    luminous stone-volume lvm api refactor/move
     
     Reviewed-by: Andrew Schoen <aschoen@redhat.com>
 
@@ -5206,7 +5206,7 @@ commit bb8586b259726eb0ae72db7c6a238b2d2432fc9b
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 3 16:13:33 2017 -0400
 
-    ceph-volume create an api module to hold common api modules
+    stone-volume create an api module to hold common api modules
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit f72368641d7f38b6395afb7ed70a0a9d0794a03a)
@@ -5215,7 +5215,7 @@ commit 3d32fb30193437b57535c79657ee726704f4b037
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 4 06:44:54 2017 -0400
 
-    ceph-volume tests move lvm api tests into its new test module
+    stone-volume tests move lvm api tests into its new test module
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit eec0c8a5c27adc9b3fc5e999cbee8165bdb45736)
@@ -5224,7 +5224,7 @@ commit e6145af90c3f1c8c520bb7671194e6d8a13bb5d2
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 4 06:43:36 2017 -0400
 
-    ceph-volume tests refactor lvm api import for test_listing
+    stone-volume tests refactor lvm api import for test_listing
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 66fd41fd4b35e275196bfb94794f3fda9fd77f76)
@@ -5233,7 +5233,7 @@ commit c63d3ba89489cc42aaa364c99b3d3b4c1bba226c
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 4 06:43:18 2017 -0400
 
-    ceph-volume tests refactor lvm api import for api tests
+    stone-volume tests refactor lvm api import for api tests
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 2a9a36bd24bddb35a7618127a0ec57f661a71566)
@@ -5242,7 +5242,7 @@ commit 6efd25344230c0abb51cd82f99310a4b94f2fcd3
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 4 06:42:47 2017 -0400
 
-    ceph-volume tests refactor lvm api import for activate tests
+    stone-volume tests refactor lvm api import for activate tests
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d81aa8c112312f2fb49d94ce3512b3356b0b8814)
@@ -5251,7 +5251,7 @@ commit 47cd005b672828aedf11aeb67a6099477783f7f0
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Oct 4 06:42:01 2017 -0400
 
-    ceph-volume tests refactor lvm api import in conftest
+    stone-volume tests refactor lvm api import in conftest
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit a00aff7066fe6a679498ac8a02ec22ef29feced3)
@@ -5260,7 +5260,7 @@ commit 4a6dfa9b6949bdcdba22a7003c451390105d287e
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 3 16:17:08 2017 -0400
 
-    ceph-volume devices.lvm refactor importing api to come from api/lvm.py
+    stone-volume devices.lvm refactor importing api to come from api/lvm.py
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit f4bee6cb42a017abce269ed3926deff04038a47e)
@@ -5269,7 +5269,7 @@ commit 9a20f184676973222c931cecff26ca313e636e1d
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 3 16:14:16 2017 -0400
 
-    ceph-volume move lvm/api.py to api/lvm.py so disk can consume it
+    stone-volume move lvm/api.py to api/lvm.py so disk can consume it
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit bb72480d2bf44ff04ea93c98f4a4e59032a28896)
@@ -5280,7 +5280,7 @@ Date:   Sun Sep 24 08:41:04 2017 +0800
 
     rgw:fix list objects with marker when bucket is enable versioning
     
-    fix: http://tracker.ceph.com/issues/21500
+    fix: http://tracker.stone.com/issues/21500
     
     Signed-off-by: yuliyang <yuliyang@cmss.chinamobile.com>
     (cherry picked from commit bc16b162cf757b9c6ceae30912eb647ef9304f75)
@@ -5301,9 +5301,9 @@ Merge: 50c4cc0610 565b5cd1d6
 Author: Andrew Schoen <andrew.schoen@gmail.com>
 Date:   Thu Oct 26 16:50:20 2017 -0500
 
-    Merge pull request #18567 from ceph/backport-wip-bz1491250
+    Merge pull request #18567 from stone/backport-wip-bz1491250
     
-    luminous: ceph-volume lvm list
+    luminous: stone-volume lvm list
     
     Reviewed-by: Andrew Schoen <aschoen@redhat.com>
 
@@ -5371,7 +5371,7 @@ Date:   Thu Oct 26 16:11:21 2017 -0500
 
     Merge pull request #18540 from liewegas/wip-pr-17894-luminous
     
-    luminous: ceph.spec.in,debian/rules: change aio-max-nr to 1048576
+    luminous: stone.spec.in,debian/rules: change aio-max-nr to 1048576
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
     Reviewed-by: Boris Ranto <branto@redhat.com>
@@ -5380,7 +5380,7 @@ commit 565b5cd1d68437096e283ccb942d8f108c26d3d4
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Sep 13 08:23:40 2017 -0400
 
-    ceph-volume lvm add listing module to main
+    stone-volume lvm add listing module to main
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit ff72fd0ed52ef2d166007c7769c0140424982dc7)
@@ -5389,7 +5389,7 @@ commit 58095350953140a1fa4b968c2e0a5774a960e739
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 3 11:41:10 2017 -0400
 
-    doc/ceph-volume add lvm/list to the toctree
+    doc/stone-volume add lvm/list to the toctree
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d11c80c917f44b33077715b19564aeea30c78e42)
@@ -5398,7 +5398,7 @@ commit 3893947d3e04f049a85245750b841adbbcefeac8
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 3 11:36:06 2017 -0400
 
-    doc/ceph-volume create the reference for the list sub-command
+    doc/stone-volume create the reference for the list sub-command
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 9a52939ef8fc4abe720d2525c59997f4f9760902)
@@ -5407,7 +5407,7 @@ commit 0992c3d7c136a58ff38f521fc0978ff036843d27
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 3 11:35:39 2017 -0400
 
-    doc/ceph-volume add create and list to the index
+    doc/stone-volume add create and list to the index
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit ed5fa519aca1335039bfc32bc060af5181265517)
@@ -5416,7 +5416,7 @@ commit 148537cc333d88b75640506c15a1bc221c9e09d6
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 3 08:59:37 2017 -0400
 
-    ceph-volume tests create a unit test module for listing features
+    stone-volume tests create a unit test module for listing features
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 2c2cf547b07f9510146b86d0746190b6d3fead3d)
@@ -5425,7 +5425,7 @@ commit 285bc06569c8ed06890d23e9537a9d1106825b7f
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Oct 3 08:59:01 2017 -0400
 
-    ceph-volume tests create a small factory fixture
+    stone-volume tests create a small factory fixture
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 5a0b17de81770ef3b851a1ff98232d93c78f49f9)
@@ -5434,7 +5434,7 @@ commit 1e4e241d9c77796874a003799a0546fc185c5241
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Oct 2 14:40:41 2017 -0400
 
-    ceph-volume tests ensure Volume.as_dict gets populated correctly
+    stone-volume tests ensure Volume.as_dict gets populated correctly
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit c5b933a96d067fb8c7f753a67123e5662398f964)
@@ -5443,7 +5443,7 @@ commit a0ab94e8d70ae9fc5d741c47a8f0dcfe033f9a5e
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Oct 2 14:31:57 2017 -0400
 
-    ceph-volume lvm.listing initial take on listing command
+    stone-volume lvm.listing initial take on listing command
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 2d80190a039798a637383513f292e6aab62cd3f8)
@@ -5452,7 +5452,7 @@ commit 454c655f2eb0b1e79ca8e1e1d87ff9c0fe4886da
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Oct 2 12:35:13 2017 -0400
 
-    ceph-volume lvm.api be able to return a dictionary repr of a Volume object
+    stone-volume lvm.api be able to return a dictionary repr of a Volume object
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 0cae22750f396d1c1664875edb2742c50a41bffd)
@@ -5461,7 +5461,7 @@ commit 1390fb76d76b76428e6a9210005dbf01fd3b3a1a
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Oct 2 12:12:57 2017 -0400
 
-    ceph-volume process allows to fully mute terminal output on commands
+    stone-volume process allows to fully mute terminal output on commands
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 233f64a4fd90a19c50d57b849ffaa6a25c835f34)
@@ -5470,7 +5470,7 @@ commit 00e9ec1fa25ac3950f43ec3cf84f8321b04507eb
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Sep 14 07:35:47 2017 -0400
 
-    ceph-volume lvm.api use a helper to get an lv from an arg
+    stone-volume lvm.api use a helper to get an lv from an arg
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 3c5bbbc5822f02a038f093647c5de58bef2fe8f5)
@@ -5481,7 +5481,7 @@ Date:   Mon Oct 23 14:53:30 2017 -0400
 
     rbd-mirror: strip environment/CLI overrides for remote cluster
     
-    Fixes: http://tracker.ceph.com/issues/21894
+    Fixes: http://tracker.stone.com/issues/21894
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 70dc22e03a115b130b9c214030d5996276a1634b)
 
@@ -5508,11 +5508,11 @@ commit cec24f99ab5e368d2dae7d53628fee09515bd873
 Author: chenliuzhong <liuzhong.chen@easystack.cn>
 Date:   Tue Oct 24 10:54:33 2017 +0800
 
-    ceph.spec.in,debian/rules: change aio-max-nr to 1048576
+    stone.spec.in,debian/rules: change aio-max-nr to 1048576
     
     when osd is more than 14 in one host,it report error that aio is not enough.
     As the default aio-max-nr is 65536, one OSD needs 4096 aios and other programs may use aios.
-    This patch change aio-max-nr to 1048576 when install ceph-osd rpm package and debian package
+    This patch change aio-max-nr to 1048576 when install stone-osd rpm package and debian package
     
     Signed-off-by: chenliuzhong <liuzhong.chen@easystack.cn>
     (cherry picked from commit 36326dc7104fc2f20f19d51b6f618a029ba072d7)
@@ -5531,9 +5531,9 @@ Date:   Wed Oct 18 11:16:20 2017 +0800
     s3cmd del s3://bucket1/obj
     s3cmd del s3://bucket2/obj
     you can see the pool 'default.rgw.buckets.data', the data of obj can not deleted.
-    ceph df | grep default.rgw.buckets.data
+    stone df | grep default.rgw.buckets.data
     
-    Fixes: http://tracker.ceph.com/issues/21819
+    Fixes: http://tracker.stone.com/issues/21819
     
     Signed-off-by: Xueyu Bai baixueyu@inspur.com
     (cherry picked from commit 2e11545077c485d5c155ab932b6274a8ac863e61)
@@ -5550,7 +5550,7 @@ Date:   Thu Oct 19 22:13:36 2017 -0400
     efficient data recording system for post-incident analysis
     use-cases.
     
-    Fixes: http://tracker.ceph.com/issues/21860
+    Fixes: http://tracker.stone.com/issues/21860
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit a3a40413f7908b08c40dec4020034cca4a0c4798)
 
@@ -5589,7 +5589,7 @@ Date:   Mon Oct 9 10:11:14 2017 -0400
 
     qa/rgw: ignore errors from 'pool application enable'
     
-    Fixes: http://tracker.ceph.com/issues/21715
+    Fixes: http://tracker.stone.com/issues/21715
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 160240e0c1c216c950b7210a561b27436198de1f)
@@ -5636,7 +5636,7 @@ Date:   Fri Oct 20 08:51:17 2017 -0500
     never bail out early if jump_to is set (which would indicate this or
     another similar bug is still present).
     
-    Fixes: http://tracker.ceph.com/issues/21878
+    Fixes: http://tracker.stone.com/issues/21878
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 4324c8bc7e66633035c15995e3f82ef91d3a5e8c)
 
@@ -5649,7 +5649,7 @@ Date:   Wed Oct 11 16:48:41 2017 -0500
     If the blob is compressed, we aren't mapping to a range within
     the allocated extents, but rather referencing the entire blob.
     
-    Fixes: http://tracker.ceph.com/issues/21766
+    Fixes: http://tracker.stone.com/issues/21766
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit eb26cfbfbb2b9b9fe84dfe9c999e2d67fd2661c0)
 
@@ -5736,7 +5736,7 @@ Date:   Thu Oct 19 16:19:35 2017 -0500
     contents.  We don't (currently) have a need to map an empty list to a
     particular mempool and have that state stick.
     
-    Fixes: http://tracker.ceph.com/issues/21573
+    Fixes: http://tracker.stone.com/issues/21573
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 9b92d87d37e3892b0096cd728b46154aed1e2d86)
 
@@ -5760,11 +5760,11 @@ commit 724a51cd442d35c950414b86608c48936b01b78b
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Oct 23 12:05:39 2017 -0500
 
-    /etc/sysconfig/ceph: remove jemalloc option
+    /etc/sysconfig/stone: remove jemalloc option
     
     This breaks when used with rocksdb, which is now the default.
     
-    See http://tracker.ceph.com/issues/20557
+    See http://tracker.stone.com/issues/20557
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 19efccef248c2d66fe3d7fdac8f56d455f2c7b27)
@@ -5773,11 +5773,11 @@ commit 95b6bc9ac41c4985ad97a515c4105351a0e6b94d
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Oct 23 11:16:26 2017 -0500
 
-    etc/default/ceph: remove jemalloc option
+    etc/default/stone: remove jemalloc option
     
     This breaks when used with rocksdb, which is now the default.
     
-    See http://tracker.ceph.com/issues/20557
+    See http://tracker.stone.com/issues/20557
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit fba2055b4e54128db1e9a83f27bb3526d65d4db7)
@@ -5888,7 +5888,7 @@ Date:   Fri Oct 20 23:08:58 2017 -0500
 
     Merge pull request #18401 from liewegas/wip-bluestore-label-luminous
     
-    luminous: os/bluestore: ceph-bluestore-tool repair updates and prime-osd-dir support
+    luminous: os/bluestore: stone-bluestore-tool repair updates and prime-osd-dir support
 
 commit dbddf21bd3aac284122fd5fc84abdd4c89b12b3e
 Author: Sage Weil <sage@redhat.com>
@@ -5903,7 +5903,7 @@ Date:   Fri Oct 20 22:32:33 2017 -0500
     and not see/understand the alternate weight set.  It will send requests
     to the wrong OSDs where they will just get dropped.
     
-    Fixes: http://tracker.ceph.com/issues/21882
+    Fixes: http://tracker.stone.com/issues/21882
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 9eaafc66278d59447b29ce6cc378d0cd3ad14ad4)
 
@@ -5911,12 +5911,12 @@ commit c5ccbf1108532547f54f084b8f06c7f5ddf8a4e8
 Author: Ramana Raja <rraja@redhat.com>
 Date:   Sun Sep 24 20:23:12 2017 +0530
 
-    ceph_volume_client: fix setting caps for IDs
+    stone_volume_client: fix setting caps for IDs
     
     ... that have empty OSD and MDS caps. Don't add a ',' at the
     start of OSD and MDS caps.
     
-    Fixes: http://tracker.ceph.com/issues/21501
+    Fixes: http://tracker.stone.com/issues/21501
     Signed-off-by: Ramana Raja <rraja@redhat.com>
     (cherry picked from commit baf3b88800c63ef7467abbc7b54e40c0da669f38)
 
@@ -5929,7 +5929,7 @@ Date:   Wed Sep 20 13:15:30 2017 +1000
     get_up_osd_features() returns 0 if no osds are up which causes feature
     checks to fail.
     
-    Fixes: http://tracker.ceph.com/issues/21471
+    Fixes: http://tracker.stone.com/issues/21471
     
     Signed-off-by: Brad Hubbard <bhubbard@redhat.com>
     (cherry picked from commit 26ba0ba044846d18f9bdfdbee6e2a9c46882c742)
@@ -5946,7 +5946,7 @@ Date:   Tue Sep 19 18:25:56 2017 -0400
 
     osd/OSDMap: ignore xinfo if features == 0
     
-    Some old bug (e.g., http://tracker.ceph.com/issues/20751) could
+    Some old bug (e.g., http://tracker.stone.com/issues/20751) could
     result in an UP+EXISTS osd having features==0.  If that happens,
     we shouldn't crash the mon, which (reasonably) does
     
@@ -5983,7 +5983,7 @@ Date:   Thu Sep 28 13:54:32 2017 -0400
     Add code to check s3:GetBucketWebsite and s3:PutBucketWebsite
     operations against bucket policy.
     
-    Fixes: http://tracker.ceph.com/issues/21597
+    Fixes: http://tracker.stone.com/issues/21597
     Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=1493896
     
     Signed-off-by: Adam C. Emerson <aemerson@redhat.com>
@@ -5998,7 +5998,7 @@ Date:   Wed Sep 27 15:42:27 2017 -0400
     Add code to check s3:GetCORS and s3:PutCORS operations against bucket
     policy.
     
-    Fixes: http://tracker.ceph.com/issues/21578
+    Fixes: http://tracker.stone.com/issues/21578
     Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=1494140
     
     Signed-off-by: Adam C. Emerson <aemerson@redhat.com>
@@ -6012,7 +6012,7 @@ Date:   Wed Sep 27 16:08:56 2017 -0400
     
     Add code to check s3:GetBucketLocation against bucket policy.
     
-    Fixes: http://tracker.ceph.com/issues/21582
+    Fixes: http://tracker.stone.com/issues/21582
     Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=1493934
     
     Signed-off-by: Adam C. Emerson <aemerson@redhat.com>
@@ -6024,7 +6024,7 @@ Date:   Wed Sep 27 14:26:25 2017 -0400
 
     rgw: include SSE-KMS headers in encrypted upload response
     
-    Fixes: http://tracker.ceph.com/issues/21576
+    Fixes: http://tracker.stone.com/issues/21576
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit a5b3db7acb4150d9d27ba42f72658e418dd444c0)
@@ -6051,7 +6051,7 @@ Date:   Wed Sep 27 14:35:59 2017 -0400
     Add code to check s3:GetBucketVersioning and s3:PutBucketVersioning
     operations against bucket policy.
     
-    Fixes: http://tracker.ceph.com/issues/21389
+    Fixes: http://tracker.stone.com/issues/21389
     Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=1490278
     
     Signed-off-by: Adam C. Emerson <aemerson@redhat.com>
@@ -6066,7 +6066,7 @@ Date:   Thu Sep 14 18:07:15 2017 -0400
     Add code to check s3:GetBucketRequestPayment and
     s3:PutBucketRequestPayment operations against bucket policy.
     
-    Fixes: http://tracker.ceph.com/issues/21389
+    Fixes: http://tracker.stone.com/issues/21389
     Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=1490278
     
     Signed-off-by: Adam C. Emerson <aemerson@redhat.com>
@@ -6078,7 +6078,7 @@ Date:   Thu Sep 7 23:27:40 2017 -0500
 
     rgw: admin api - add ability to sync user stats from admin api
     
-    Fixes: http://tracker.ceph.com/issues/21301
+    Fixes: http://tracker.stone.com/issues/21301
     Signed-off-by: Nathan Johnson <nathan@nathanjohnson.org>
     (cherry picked from commit 828412d573a0b31387fc9f6a879f9a6083535730)
 
@@ -6088,7 +6088,7 @@ Date:   Tue Sep 26 10:19:22 2017 +0800
 
     RGW: fix a bug about inconsistent unit of comparison
     
-    Fixes：http://tracker.ceph.com/issues/21590
+    Fixes：http://tracker.stone.com/issues/21590
     
     Signed-off-by: gaosibei <gaosb@inspur.com>
     (cherry picked from commit cb39f065d6eba87cf1fc2e99334322bf63092df3)
@@ -6098,7 +6098,7 @@ Author: Mark Kogan <mkogan@redhat.com>
 Date:   Mon Sep 25 09:53:00 2017 +0300
 
     rgw: update the usage read iterator in truncated scenario
-    Fixes: http://tracker.ceph.com/issues/21196
+    Fixes: http://tracker.stone.com/issues/21196
     
     Signed-off-by: Mark Kogan <mkogan@redhat.com>
     (cherry picked from commit 7306514a813661b77bfcbfc6f534dbabbdd3aa78)
@@ -6122,7 +6122,7 @@ Date:   Thu Oct 5 16:39:30 2017 -0400
     is detected in RGWUser::check_op() and a "user id mismatch" error is
     returned
     
-    Fixes: http://tracker.ceph.com/issues/21685
+    Fixes: http://tracker.stone.com/issues/21685
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 4e65c9e9af86e832cb96d57d487771aa28251e7c)
@@ -6133,7 +6133,7 @@ Date:   Tue Sep 26 10:44:09 2017 +0800
 
     RGW: Multipart upload may double the quota
     
-    Fixes: http://tracker.ceph.com/issues/21586
+    Fixes: http://tracker.stone.com/issues/21586
     
     Signed-off-by: Sibei Gao <gaosb@inspur.com>
     (cherry picked from commit 97f95e457fb7f9e36031f41e0f2dd3955daedd87)
@@ -6144,7 +6144,7 @@ Date:   Thu Oct 12 13:26:29 2017 -0400
 
     rgw: 'zone placement' commands validate compression type
     
-    Fixes: http://tracker.ceph.com/issues/21775
+    Fixes: http://tracker.stone.com/issues/21775
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 33f8ee8b6fa5605edbbfe12d8e097123e509ad9f)
@@ -6164,7 +6164,7 @@ Date:   Mon Oct 9 13:25:36 2017 +0300
 
     rgw: disable dynamic resharding in multisite environment
     
-    Fixes:http://tracker.ceph.com/issues/21725
+    Fixes:http://tracker.stone.com/issues/21725
     Signed-off-by: Orit Wasserman <owasserm@redhat.com>
     (cherry picked from commit f1ec7a49bde054a19a0a8fd80f37866e1e40379f)
 
@@ -6174,7 +6174,7 @@ Date:   Tue Sep 26 10:00:59 2017 +0800
 
     rgw: Torrents are not supported for objects encrypted using SSE-C
     
-    Fixes: http://tracker.ceph.com/issues/21720
+    Fixes: http://tracker.stone.com/issues/21720
     
     Signed-off-by: Zhang Shaowen <zhangshaowen@cmss.chinamobile.com>
     (cherry picked from commit 9a8ae664da54eb74e74a12cc16a52b0df7df70a0)
@@ -6189,7 +6189,7 @@ Date:   Tue Oct 3 17:48:29 2017 -0400
     ::complete(), in order to avoid duplicated code in various early
     return cases.
     
-    Fixes: http://tracker.ceph.com/issues/21596
+    Fixes: http://tracker.stone.com/issues/21596
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 704f793f08a02760d23eb5778b738bb07be0e7cf)
@@ -6222,7 +6222,7 @@ Date:   Fri Aug 25 19:48:53 2017 +0800
     This is not a correct way to deal with it. It is better to
     return error.
     
-    Fixes: http://tracker.ceph.com/issues/21581
+    Fixes: http://tracker.stone.com/issues/21581
     
     Signed-off-by: Enming Zhang <enming.zhang@umcloud.com>
     (cherry picked from commit f8c4be8a8943096217d89f7c5abd129fa2414b36)
@@ -6251,7 +6251,7 @@ Date:   Thu Oct 12 08:58:03 2017 -0400
 
     cls/journal: fixed possible infinite loop which could kill the OSD
     
-    Fixes: http://tracker.ceph.com/issues/21771
+    Fixes: http://tracker.stone.com/issues/21771
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 9e7475f8fb08b0ef30cad2c0d680cecf331b44ef)
 
@@ -6259,7 +6259,7 @@ commit e0d57c544d55f3693f858464f7995b4b30cfa88d
 Author: Jason Dillaman <dillaman@redhat.com>
 Date:   Thu Oct 12 08:56:57 2017 -0400
 
-    test: ceph_test_cls_journal was dropped when converting to cmake
+    test: stone_test_cls_journal was dropped when converting to cmake
     
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 5d9cfebabac33b645c6199bda63ff4619e6f538f)
@@ -6270,7 +6270,7 @@ Date:   Sun Oct 15 17:26:25 2017 -0400
 
     librbd: batch large object map updates into multiple chunks
     
-    Fixes: http://tracker.ceph.com/issues/21797
+    Fixes: http://tracker.stone.com/issues/21797
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 04c5d12acc045731fbf1d0ddce276b5743d9fd89)
 
@@ -6341,7 +6341,7 @@ Date:   Mon Oct 2 17:28:04 2017 -0400
 
     osd: additional protection for out-of-bounds EC reads
     
-    Fixes: http://tracker.ceph.com/issues/21629
+    Fixes: http://tracker.stone.com/issues/21629
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 881f2a02aecef0cd6bf8ec3e5045b76c8441e832)
 
@@ -6354,7 +6354,7 @@ Date:   Sat Sep 23 13:21:47 2017 -0400
     This function was recently fixed to return null
     on missing entries: handle that properly.
     
-    Fixes: http://tracker.ceph.com/issues/17737
+    Fixes: http://tracker.stone.com/issues/17737
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit ade4827d86bb2bc79466a2da040475651c2aae0d)
 
@@ -6364,7 +6364,7 @@ Date:   Fri Oct 6 11:58:50 2017 +0800
 
     qa/suites/rest/basic/tasks/rest_test: whiltelist OSD_DOWN
     
-    Fixes: http://tracker.ceph.com/issues/21425
+    Fixes: http://tracker.stone.com/issues/21425
     Signed-off-by: huangjun <huangjun@xsky.com>
     (cherry picked from commit 838e12cfc84b386fd4eae09e526b078286f0771e)
 
@@ -6374,7 +6374,7 @@ Date:   Tue Sep 19 16:13:34 2017 +0800
 
     qa/suites/rest/basic/tasks/rest_test: more whitelisting
     
-    Fixes: http://tracker.ceph.com/issues/21425
+    Fixes: http://tracker.stone.com/issues/21425
     
     Signed-off-by: huangjun <huangjun@xsky.com>
     (cherry picked from commit 4d30d02e522039461762d51a3a826a337214ca7e)
@@ -6449,7 +6449,7 @@ Date:   Thu Oct 19 16:39:53 2017 -0500
 
     Merge pull request #17951 from smithfarm/wip-21548-luminous
     
-    luminous: tests: ceph_manager: bad AssertionError: failed to recover before timeout expired
+    luminous: tests: stone_manager: bad AssertionError: failed to recover before timeout expired
 
 commit 4f1a7a82a1134d6688537653ac07d924275e1f3a
 Merge: 37b13acabe a670921f4f
@@ -6475,7 +6475,7 @@ commit 1e9aa60e3f6acca6649f5d5d51421cc2bd51e55a
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Oct 16 17:45:54 2017 -0500
 
-    ceph-bluestore-tool: implement 'set-label-key' and 'rm-label-key'
+    stone-bluestore-tool: implement 'set-label-key' and 'rm-label-key'
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 4b468c989f9e8609e7f640cfa4385c454ae6dc17)
@@ -6493,7 +6493,7 @@ commit 895a277568f902f1c00b9df475ea56b00b115841
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Oct 12 11:40:11 2017 -0500
 
-    doc/man/8/ceph-bluestore-tool: add man page
+    doc/man/8/stone-bluestore-tool: add man page
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 7b91e50dbd289e65f10cb98c5eea9f3171c2d1f1)
@@ -6511,7 +6511,7 @@ commit 508889d4a7aa93f3bbe13ad8bfc181f3fc9ed2a9
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Oct 12 13:54:06 2017 -0500
 
-    ceph-bluestore-tool: fix show-label to use dev name as key
+    stone-bluestore-tool: fix show-label to use dev name as key
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 4785345ace7b675a0e1c34c457aad1103aab5a1d)
@@ -6520,7 +6520,7 @@ commit 6e17557f288aa7686b8b68c1df31a9a8c26912ac
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Oct 12 08:48:59 2017 -0500
 
-    ceph-bluestore-tool: drop "action ..." print
+    stone-bluestore-tool: drop "action ..." print
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 5e486c2bd3414f4ee6519574d4d4584618144867)
@@ -6529,7 +6529,7 @@ commit a128aad320e99c396ff17bcaadb48866667b87df
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Oct 12 08:48:46 2017 -0500
 
-    ceph-bluestore-tool: only infer devs if devs.empty()
+    stone-bluestore-tool: only infer devs if devs.empty()
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 2d217367af0df5e18394b1c6179d92db3c0b4448)
@@ -6538,7 +6538,7 @@ commit 24d86603faf4a826684a5e124ed9b447de0b50e8
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Oct 11 17:36:40 2017 -0500
 
-    ceph-bluestore-tool: implement prime-osd-dir
+    stone-bluestore-tool: implement prime-osd-dir
     
     This populates an osd dir based on the metadata in a bluestore
     device label.
@@ -6561,7 +6561,7 @@ Date:   Wed Oct 11 17:33:00 2017 -0500
 
     vstart.sh: specify block files
     
-    This is mostly just to test ceph-bluestore-tool prime-osd-dir.
+    This is mostly just to test stone-bluestore-tool prime-osd-dir.
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit d4e0c46d89c2ebe6ae5f9af1c909a09daaea9687)
@@ -6570,7 +6570,7 @@ commit ce83461a60cea6026a7abdd51b2a7a35302392c6
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Oct 11 16:32:16 2017 -0500
 
-    osd: store osd cephx key in "osd_key" meta slot
+    osd: store osd stonex key in "osd_key" meta slot
     
     Note that this *only* works with --mkkey (deprecated except for
     vstart.sh) and --key <key>.  If you write out a full keyring before
@@ -6584,7 +6584,7 @@ commit 60d43cb51d7b05cc778cda6b5fcd368db618e3db
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Oct 11 16:17:09 2017 -0500
 
-    ceph-osd: mkkey before mkfs
+    stone-osd: mkkey before mkfs
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 75400ead3061ba1e2820878783fe7b1ddcd9a5fb)
@@ -6627,7 +6627,7 @@ Date:   Wed Oct 11 17:45:19 2017 +0800
     in hope to fix the mysterious test failure where cli/crushtool/build.t
     prints nothing when error message is expected.
     
-    Fixes: http://tracker.ceph.com/issues/21758
+    Fixes: http://tracker.stone.com/issues/21758
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit dc78d40af77ff8d5e4f3d39497e6e3c98c309306)
 
@@ -6669,7 +6669,7 @@ Date:   Wed Sep 27 19:59:47 2017 +0800
     MDS opens the purge queue when it starts standby replay. This is
     wrong because purge queue may change during standby replay.
     
-    Fixes: http://tracker.ceph.com/issues/19593
+    Fixes: http://tracker.stone.com/issues/19593
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit e515e84f69eeab90ea5c5831f7d3e684e48fb62e)
 
@@ -6687,18 +6687,18 @@ Merge: 90b6067f6f f30e9a5e6b
 Author: vasukulkarni <vasu.kulkarni@gmail.com>
 Date:   Tue Oct 17 15:47:31 2017 -0700
 
-    Merge pull request #18363 from ceph/wip-yuriw-21822-luminous
+    Merge pull request #18363 from stone/wip-yuriw-21822-luminous
     
-    tests - ceph-ansible vars additions
+    tests - stone-ansible vars additions
 
 commit f30e9a5e6bd47129f8a35c1f9067216cfe8a6a70
 Author: Yuri Weinstein <yweinste@redhat.com>
 Date:   Tue Oct 17 13:14:36 2017 -0700
 
-    tests - ceph-ansible vars additions
+    tests - stone-ansible vars additions
     added symlinks for distros
     
-    Fixes http://tracker.ceph.com/issues/21822
+    Fixes http://tracker.stone.com/issues/21822
     Signed-off-by: Yuri Weinstein <yweinste@redhat.com>
 
 commit 90b6067f6f5cbfaf48afb08bd17cb9e5f46a5af9
@@ -6758,7 +6758,7 @@ Date:   Fri Sep 22 10:58:40 2017 +0800
     longer to perform the deep fsck with verbose log. so prolong the
     revive_osd()'s timeout from 150 sec to 360 sec.
     
-    Fixes: http://tracker.ceph.com/issues/21474
+    Fixes: http://tracker.stone.com/issues/21474
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 42be200c564184feff1056b7771ce3c1b2cc5527)
 
@@ -6831,7 +6831,7 @@ Date:   Tue Sep 26 15:46:28 2017 -0400
     it's already in the replaying state so it can verify the
     ancestry to detect split-brains.
     
-    Fixes: http://tracker.ceph.com/issues/21559
+    Fixes: http://tracker.stone.com/issues/21559
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit bc96c53d947625d12f7b30a45da68a96c09faf70)
 
@@ -6841,7 +6841,7 @@ Date:   Tue Sep 26 14:21:42 2017 -0400
 
     rbd-mirror: forced-promotion should interrupt replay delay to shut down
     
-    Fixes: http://tracker.ceph.com/issues/21559
+    Fixes: http://tracker.stone.com/issues/21559
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit e3b58312572ceb7abc675128dfb231c9b888655e)
 
@@ -6851,7 +6851,7 @@ Date:   Fri Sep 29 15:11:38 2017 -0400
 
     librbd: snapshots should be created/removed against data pool
     
-    Fixes: http://tracker.ceph.com/issues/21567
+    Fixes: http://tracker.stone.com/issues/21567
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 5a3baf1bd852d6c5d0de10a33839658789edc4eb)
 
@@ -6861,7 +6861,7 @@ Date:   Thu Oct 12 11:25:13 2017 -0400
 
     cls/rgw: increment header version to avoid overwriting bilog entries
     
-    Fixes: http://tracker.ceph.com/issues/21772
+    Fixes: http://tracker.stone.com/issues/21772
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 081ba106a910583851b9acdcaf5971e37a439329)
@@ -6881,7 +6881,7 @@ Date:   Sat Oct 14 13:47:53 2017 -0700
 
     mds: prevent trim count from underflowing
     
-    Fixes: http://tracker.ceph.com/issues/21807
+    Fixes: http://tracker.stone.com/issues/21807
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 452bdd8b35643ed82d8614efcd4ca22688392eb6)
@@ -6919,7 +6919,7 @@ Date:   Thu Oct 12 12:01:35 2017 +0800
 
     mds: keep CInode::STATE_QUEUEDEXPORTPIN state when exporting inode
     
-    Fixes: http://tracker.ceph.com/issues/21768
+    Fixes: http://tracker.stone.com/issues/21768
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit 1d160098a93092904026b62326fd9890de48044a)
 
@@ -6932,7 +6932,7 @@ Date:   Tue Oct 10 17:47:33 2017 +0800
     session opened by Server::prepare_force_open_sessions() has no
     client metadata.
     
-    Fixes: http://tracker.ceph.com/issues/21746
+    Fixes: http://tracker.stone.com/issues/21746
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit 9d5c92a3367369789836d8669aa421074c69e4f3)
 
@@ -6945,7 +6945,7 @@ Date:   Mon Oct 9 18:00:38 2017 +0800
     when doing small size random writes, size of data structures that used
     for tracking dirty data can be larger than the dirty data size.
     
-    Fixes: http://tracker.ceph.com/issues/21726
+    Fixes: http://tracker.stone.com/issues/21726
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit 27db0255992354e15b4285891a33fede6849cf62)
 
@@ -6954,7 +6954,7 @@ Merge: d3804d216d 6d032e6ce3
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Fri Oct 13 15:29:45 2017 -0700
 
-    Merge pull request #18275 from ceph/wip-yuriw-21776-luminous
+    Merge pull request #18275 from stone/wip-yuriw-21776-luminous
     
     tests - Removed `distors` and added `supported` to run on all support…
     
@@ -6970,9 +6970,9 @@ Date:   Thu Oct 12 13:36:20 2017 -0700
     Forced/hard-coded `machine_type=vps`
     Added `print`s
     Added only centos and ubuntu latest to support systemd (in distros dir)
-    Added `ceph osd set-require-min-compat-client luminous`
+    Added `stone osd set-require-min-compat-client luminous`
     
-    Fixes http://tracker.ceph.com/issues/21776
+    Fixes http://tracker.stone.com/issues/21776
     
     Signed-off-by: Yuri Weinstein <yweinste@redhat.com>
 
@@ -7000,16 +7000,16 @@ commit 2e6b29084ae505098fe6889d69133a8527c773be
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Fri Sep 1 17:32:22 2017 +0800
 
-    arch/arm: set ceph_arch_aarch64_crc32 only if the build host supports crc32cx
+    arch/arm: set stone_arch_aarch64_crc32 only if the build host supports crc32cx
     
     HWCAP_CRC32 is defined by the linux kernel source. so it's defined as
     long as the linux kernel source is new enough. but the compiler on the
     building host is not necessarily able to build the `crc32cx`
     instruction. if we happen to have an incapable compiler on a machine with
-    recent linux kernel source, the dummy "ceph_crc32c_aarch64()" will be
-    selected by `ceph_choose_crc32()`. and it always return 0.
+    recent linux kernel source, the dummy "stone_crc32c_aarch64()" will be
+    selected by `stone_choose_crc32()`. and it always return 0.
     
-    See-also: http://tracker.ceph.com/issues/19705
+    See-also: http://tracker.stone.com/issues/19705
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 8a077bd2a93d3e12e20013e76e57a35240f5f481)
 
@@ -7029,7 +7029,7 @@ Merge: 7fdd9a6dac 37ea1976b3
 Author: Sage Weil <sage@newdream.net>
 Date:   Thu Oct 12 14:57:38 2017 -0500
 
-    Merge pull request #18253 from ceph/wip-yuriw-21660_2-luminous_1
+    Merge pull request #18253 from stone/wip-yuriw-21660_2-luminous_1
     
     tests - Added yaml fragmet to cover testing...
 
@@ -7038,7 +7038,7 @@ Merge: 8ad4617f3d 2b7bd94f13
 Author: Sage Weil <sage@newdream.net>
 Date:   Thu Oct 12 14:57:23 2017 -0500
 
-    Merge pull request #18254 from ceph/wip-yuriw-21660_3-luminous_1
+    Merge pull request #18254 from stone/wip-yuriw-21660_3-luminous_1
     
     tests - Added yaml fragmet to cover testing...
 
@@ -7057,9 +7057,9 @@ commit 099801e616c3c9e8501f153501b74d5220383f33
 Author: Yanhu Cao <gmayyyha@gmail.com>
 Date:   Wed Oct 11 09:31:14 2017 +0800
 
-    mgr/status: fix ceph fs status returns error
+    mgr/status: fix stone fs status returns error
     
-    Fixes: http://tracker.ceph.com/issues/21752
+    Fixes: http://tracker.stone.com/issues/21752
     
     Signed-off-by: Yanhu Cao <gmayyyha@gmail.com>
     (cherry picked from commit 4a90daa700142ed1f58f5f2a2cc85f3049bccd64)
@@ -7070,7 +7070,7 @@ Date:   Wed Aug 30 20:32:11 2017 +0100
 
     mgr/status: format byte quantities in base 2 multiples
     
-    Fixes: http://tracker.ceph.com/issues/21189
+    Fixes: http://tracker.stone.com/issues/21189
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 2a5ae210928f8c9f1e3b72863c277ae5655bb771)
 
@@ -7079,7 +7079,7 @@ Author: Yuri Weinstein <yweinste@redhat.com>
 Date:   Wed Oct 11 13:12:45 2017 -0700
 
     tests - Added yaml fragmet to cover testing...
-    ... for http://tracker.ceph.com/issues/21660#note-17
+    ... for http://tracker.stone.com/issues/21660#note-17
     
     for luminous-x (see similar #18200, #18226)
     
@@ -7092,8 +7092,8 @@ Author: Yuri Weinstein <yweinste@redhat.com>
 Date:   Tue Oct 10 13:48:33 2017 -0700
 
     tests - Added yaml fragmet to cover testing...
-    ... for http://tracker.ceph.com/issues/21660#note-17
-    for jewel-x (see similar https://github.com/ceph/ceph/pull/18200)
+    ... for http://tracker.stone.com/issues/21660#note-17
+    for jewel-x (see similar https://github.com/stone/stone/pull/18200)
     
     Signed-off-by: Yuri Weinstein <yweinste@redhat.com>
     (cherry picked from commit b552e636ddd8ce2cfb605b4c124440d8dd1e8e47)
@@ -7126,7 +7126,7 @@ Date:   Wed Oct 11 12:19:08 2017 -0500
 
     Merge pull request #18189 from tchaikov/wip-retry-oserror-luminous
     
-    luminous: ceph-disk: retry on OSError
+    luminous: stone-disk: retry on OSError
 
 commit 27d3f8c748de33a35c5006513d198bbcbee19b45
 Merge: a33dd01164 f60a942023
@@ -7163,7 +7163,7 @@ Date:   Tue Oct 10 20:32:08 2017 +0800
     single state a time. but it's always better to be explicit than
     implicit.
     
-    Fixes: http://tracker.ceph.com/issues/21609
+    Fixes: http://tracker.stone.com/issues/21609
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 260f87a9f1c4e32ff3a596ea341ad07a901f44a9)
     
@@ -7198,7 +7198,7 @@ Date:   Thu Sep 21 17:21:16 2017 -0500
 
     common/options.cc: Set Filestore rocksdb compaction readahead option.
     
-    fixes: http://tracker.ceph.com/issues/21505
+    fixes: http://tracker.stone.com/issues/21505
     
     Signed-off-by: Mark Nelson <mnelson@redhat.com>
     (cherry picked from commit 66567e573836c570040c8d8148c34b0cf9dc9ce2)
@@ -7244,7 +7244,7 @@ Merge: 9e48df69de c0a1168ec2
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Tue Oct 10 13:17:46 2017 -0700
 
-    Merge pull request #18200 from ceph/wip-yuriw-21660-luminous
+    Merge pull request #18200 from stone/wip-yuriw-21660-luminous
     
     tests - Added yaml fragmet to cover testing
     
@@ -7256,7 +7256,7 @@ Author: Yuri Weinstein <yweinste@redhat.com>
 Date:   Mon Oct 9 12:51:59 2017 -0700
 
     tests - Added yaml fragmet to cover testing on standanone client.4
-    for http://tracker.ceph.com/issues/21660#note-17
+    for http://tracker.stone.com/issues/21660#note-17
     
     Signed-off-by: Yuri Weinstein <yweinste@redhat.com>
 
@@ -7264,7 +7264,7 @@ commit b3f9439cfd9141ddde9874c06fd43d346c10c5da
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Sat Oct 7 22:15:11 2017 +0800
 
-    ceph-disk: retry on OSError
+    stone-disk: retry on OSError
     
     we are likely to
     1) create partition, for instance, sdc1
@@ -7283,7 +7283,7 @@ commit 83b3377c6b04d78b20b7c23d145e015d63e471a4
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Sat Oct 7 21:13:47 2017 +0800
 
-    ceph-disk: factor out the retry logic into a decorator
+    stone-disk: factor out the retry logic into a decorator
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 02a8620de7f200736900aafc944b2c1ac47d9910)
@@ -7328,7 +7328,7 @@ Date:   Fri Oct 6 17:42:30 2017 -0400
 
     Merge pull request #17914 from liewegas/wip-21498-luminous
     
-    ceph-disk: fix '--runtime' omission for ceph-osd service
+    stone-disk: fix '--runtime' omission for stone-osd service
     
     Reviewed-by: Alfredo Deza <adeza@redhat.com>
 
@@ -7376,7 +7376,7 @@ Date:   Thu Oct 5 22:12:22 2017 -0500
 
     Merge pull request #18037 from ajarr/wip-21602-luminous
     
-    luminous: ceph_volume_client: add get, put, and delete object interfaces
+    luminous: stone_volume_client: add get, put, and delete object interfaces
     
     Reviewed-by: Patrick Donnelly <pdonnell@redhat.com>
 
@@ -7460,7 +7460,7 @@ Date:   Thu Oct 5 15:26:16 2017 -0500
     the previously mentioned bits but not SERVER_LUMINOUS.  This
     prevents kraken clients from decoding luminous maps.
     
-    Fixes: http://tracker.ceph.com/issues/21660
+    Fixes: http://tracker.stone.com/issues/21660
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit d2664aa34dc4c13da64d1ad187019737080069d7)
 
@@ -7486,7 +7486,7 @@ Date:   Mon Oct 2 14:01:47 2017 -0700
     
     Thread::join triggers an assert otherwise.
     
-    Fixes http://tracker.ceph.com/issues/21666
+    Fixes http://tracker.stone.com/issues/21666
     
     Signed-off-by: Karol Mroz <kmroz@suse.de>
     (cherry picked from commit 26f2da083c7dd21b89c1c1e6c498b14e034364a6)
@@ -7499,8 +7499,8 @@ Date:   Thu Aug 31 18:15:28 2017 +0800
     
     to silence following warning and to avoid compiling this file twice:
     
-    ceph/src/common/options.cc: In function ‘std::vector<Option> get_global_options()’:
-    ceph/src/common/options.cc:151:21: note: variable tracking
+    stone/src/common/options.cc: In function ‘std::vector<Option> get_global_options()’:
+    stone/src/common/options.cc:151:21: note: variable tracking
     size limit exceeded with -fvar-tracking-assignments, retrying without
      std::vector<Option> get_global_options() {
                          ^~~~~~~~~~~~~~~~~~
@@ -7567,7 +7567,7 @@ Date:   Sun Oct 1 15:03:22 2017 -0500
     requested here (e.g., because the primary is still waiting for the local
     reservation).  Just ignore it and remain in RepNotRecovering.
     
-    Fixes: http://tracker.ceph.com/issues/21613
+    Fixes: http://tracker.stone.com/issues/21613
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 1ce235c5dd0b777223f6465e71fb7ee4befd13d8)
 
@@ -7614,7 +7614,7 @@ Date:   Fri Sep 29 15:18:26 2017 -0700
     Instead check SORTBITWISE in the main OSDMap handling code prior to
     prepublishing it. Let it go through if we aren't active at the time.
     
-    Fixes: http://tracker.ceph.com/issues/20416
+    Fixes: http://tracker.stone.com/issues/20416
     
     Signed-off-by: Greg Farnum <gfarnum@redhat.com>
     (cherry picked from commit 0a691b2b1c19fbc30af5c4046736dacb2fb8bfa4)
@@ -7651,11 +7651,11 @@ Date:   Tue Sep 12 17:17:13 2017 -0700
     Once OSDs boot with this change you can't downgrade to a previous release.
     If someone does downgrade they could have unstable OSDs that hit assert(state.v < 3).
     The following command run after shutting down the cluster but before downgrading
-    ceph packages would be a way to fix this.
+    stone packages would be a way to fix this.
     
-    ceph-osdomap-tool --omap-path ... --command resetv2
+    stone-osdomap-tool --omap-path ... --command resetv2
     
-    Fixes: http://tracker.ceph.com/issues/21328
+    Fixes: http://tracker.stone.com/issues/21328
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 8805ef53424e30fd3f24ee38f5a6bdd9e6dd8641)
@@ -7664,7 +7664,7 @@ commit d0ea152865eeff63cf49e137f5ac342ec6725a6a
 Author: David Zafman <dzafman@redhat.com>
 Date:   Tue Sep 12 18:06:10 2017 -0700
 
-    tools: Add --backend option to ceph-osdomap-tool default to rocksdb
+    tools: Add --backend option to stone-osdomap-tool default to rocksdb
     
     Fix hard-coded "leveldb" backend.  The command is broken in Luminous
     now that "rocksdb" is the default.
@@ -7742,7 +7742,7 @@ Date:   Tue Oct 3 16:48:37 2017 -0500
     to resolve the problem (of the async deferred_try_submit() never executing,
     leading to a bluestore stall/deadlock).
     
-    Fixes: http://tracker.ceph.com/issues/21470
+    Fixes: http://tracker.stone.com/issues/21470
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 67ec75805787ed63b35f8d70478a7a2cd785df06)
 
@@ -7782,7 +7782,7 @@ commit 72c858310796848128bbccfa328794d504471e5a
 Author: wujian <wujian3659@163.com>
 Date:   Fri Sep 15 11:23:44 2017 +0800
 
-    ceph-mgr: can not change prometheus port for mgr
+    stone-mgr: can not change prometheus port for mgr
     
     Signed-off-by: wujian <wujian3659@163.com>
     (cherry picked from commit 6cc0338ed15a0402471cfd05acfcf00d07517d1a)
@@ -7794,7 +7794,7 @@ Date:   Wed Oct 4 08:25:38 2017 -0500
     mgr/localpool: fix rule selection
     
     The 'osd pool create' arg parsing is broken; the rule name for
-    'ceph osd pool create $name $numpgs replicated $rulename' is passed
+    'stone osd pool create $name $numpgs replicated $rulename' is passed
     via the erasure_code_profile param.  Too many req=false options
     without a way to disambiguate them.
     
@@ -7849,7 +7849,7 @@ Date:   Thu Sep 7 17:11:30 2017 -0400
 
     os/bluestore: dump stray cache content on shutdown
     
-    Tracking down http://tracker.ceph.com/issues/21259.
+    Tracking down http://tracker.stone.com/issues/21259.
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 28d9b6b0e92cf51996a12a43c81f7ac2abcaecaa)
@@ -7907,7 +7907,7 @@ Date:   Fri Sep 22 12:03:57 2017 -0400
     put_bucket_entrypoint_info() doesn't invalidate that, so this call to
     get_bucket_info() was reading from a stale cache and failing with ENOENT
     
-    Fixes: http://tracker.ceph.com/issues/21506
+    Fixes: http://tracker.stone.com/issues/21506
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 3f4f760a85f162262c5b419e9cf78966c7299f0a)
@@ -7927,7 +7927,7 @@ Date:   Wed Sep 20 12:38:46 2017 -0400
     says it is free (old mkfs assumption).  The disparity is harmless since
     the extent is below min_alloc_size, so ignore it.
     
-    Fixes: http://tracker.ceph.com/issues/21408
+    Fixes: http://tracker.stone.com/issues/21408
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 4959ad310a96208565b47c035ab5d5dded1b8ff5)
 
@@ -7960,7 +7960,7 @@ Date:   Sun Oct 1 15:55:30 2017 -0500
 
     Merge pull request #17896 from liewegas/wip-bluestore-tool-luminous
     
-    ceph-objectstore-tool and ceph-bluestore-tool: backports from master
+    stone-objectstore-tool and stone-bluestore-tool: backports from master
     
     Reviewed-by: David Zafman <dzafman@redhat.com>
 
@@ -8210,7 +8210,7 @@ Date:   Wed Sep 20 17:53:40 2017 +0100
     Therefore, make sure to read the `command_descs` from disk if the vector
     is empty.
     
-    Fixes: http://tracker.ceph.com/issues/21300
+    Fixes: http://tracker.stone.com/issues/21300
     
     Signed-off-by: Joao Eduardo Luis <joao@suse.de>
     (cherry picked from commit 3d06079bae0fbc096d6c3639807d9be3597e841a)
@@ -8219,11 +8219,11 @@ commit 8b2bd387859bdc2287ba6dcaba27d8b234984a5a
 Author: Ramana Raja <rraja@redhat.com>
 Date:   Wed Sep 13 19:53:43 2017 +0530
 
-    pybind/ceph_volume_client: add get, put, and delete object interfaces
+    pybind/stone_volume_client: add get, put, and delete object interfaces
     
-    Wrap low-level rados APIs to allow ceph_volume_client to get, put, and
+    Wrap low-level rados APIs to allow stone_volume_client to get, put, and
     delete objects. The interfaces would allow OpenStack Manila's
-    cephfs driver to store config data in a shared storage to implement
+    stonefs driver to store config data in a shared storage to implement
     highly available Manila deployments. Restrict  write(put) and
     read(get) object sizes to 'osd_max_size' config setting.
     
@@ -8234,10 +8234,10 @@ commit 9421b40f1748c50b7f92abe8615c0cd9208fdbdc
 Author: Ramana Raja <rraja@redhat.com>
 Date:   Mon Sep 18 20:16:30 2017 +0530
 
-    pybind/ceph_volume_client: remove 'compat_version'
+    pybind/stone_volume_client: remove 'compat_version'
     
-    ... class attribute of the 'CephFSVolumeClient' class. It was supposed
-    to record the earliest version of CephFSVolumeClient that the current
+    ... class attribute of the 'StoneFSVolumeClient' class. It was supposed
+    to record the earliest version of StoneFSVolumeClient that the current
     version is compatible with. It's not useful data to be stored as a
     class attribute.
     
@@ -8248,10 +8248,10 @@ commit dd23023329b2382afef23ee02d7ef9b14baaf07b
 Author: Ramana Raja <rraja@redhat.com>
 Date:   Mon Sep 18 20:09:55 2017 +0530
 
-    pybind/ceph_volume_client: set the version
+    pybind/stone_volume_client: set the version
     
     ... of on-disk structures to be same as the class attribute 'version'
-    of the CephFSVolumeClient class.
+    of the StoneFSVolumeClient class.
     
     Signed-off-by: Ramana Raja <rraja@redhat.com>
     (cherry picked from commit 8267c2ba09841095f20a8833c155185529e64f46)
@@ -8267,7 +8267,7 @@ Date:   Wed Sep 27 17:55:17 2017 +0100
     are upgrading from a cluster that never had a mgr, we may end up
     crashing because we have no cmd descs to load from disk.
     
-    Fixes: http://tracker.ceph.com/issues/21300
+    Fixes: http://tracker.stone.com/issues/21300
     
     Signed-off-by: Joao Eduardo Luis <joao@suse.de>
 
@@ -8322,7 +8322,7 @@ Date:   Wed Sep 27 10:39:01 2017 -0700
 
     mds: cap client recall to min caps per client
     
-    Fixes: http://tracker.ceph.com/issues/21575
+    Fixes: http://tracker.stone.com/issues/21575
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 538834171fe4524b4bb7cffdcb08c5b13fe7689f)
@@ -8351,7 +8351,7 @@ commit 5b1306142feb820a6c4f6e180ba68e428985b3f1
 Author: ren.huanwen <ren.huanwen@zte.com.cn>
 Date:   Mon Sep 18 15:51:29 2017 +0800
 
-    doc/cephfs: add client min cache and max cache ratio describe
+    doc/stonefs: add client min cache and max cache ratio describe
     
     Signed-off-by: ren.huanwen <ren.huanwen@zte.com.cn>
     (cherry picked from commit d879ff91e76f66f90364038920fc2c62dd18c449)
@@ -8444,7 +8444,7 @@ Date:   Wed Sep 27 22:19:06 2017 +0800
     This patch is for luminous only. The issue has been fixed in master
     branch in another way (change is much bigger)
     
-    Fixes: http://tracker.ceph.com/issues/21337
+    Fixes: http://tracker.stone.com/issues/21337
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
 
 commit 1236e0f2e9e8724569cf5fc7d7d525c7fca6ad77
@@ -8453,7 +8453,7 @@ Date:   Sun Sep 24 22:11:22 2017 +0800
 
     rgw_file: fix write error when the write offset overlaps.
     
-    Fixes: http://tracker.ceph.com/issues/21455
+    Fixes: http://tracker.stone.com/issues/21455
     
     Signed-off-by: Yao Zongyou <yaozongyou@vip.qq.com>
     (cherry picked from commit 872d73f945364002f0fa31762e6976db5b4b3c19)
@@ -8476,9 +8476,9 @@ Merge: 3e7492b9ad 6b5f212b91
 Author: vasukulkarni <vasu.kulkarni@gmail.com>
 Date:   Wed Sep 27 09:50:44 2017 -0700
 
-    Merge pull request #17953 from ceph/wip-ceph-ansible-bport
+    Merge pull request #17953 from stone/wip-stone-ansible-bport
     
-    tests - ceph-ansible backports
+    tests - stone-ansible backports
 
 commit 6b5f212b9170dbd99779527b41be233b9d40b5e4
 Author: Vasu Kulkarni <vasu@redhat.com>
@@ -8496,12 +8496,12 @@ Date:   Tue Sep 26 14:05:37 2017 +0200
 
     rbd-mirorr: does not start on reboot
     
-    The current systemd unit file misses 'PartOf=ceph-rbd-mirror.target',
+    The current systemd unit file misses 'PartOf=stone-rbd-mirror.target',
     which results in the unit not starting after reboot.
-    If you have ceph-rbd-mirror@rbd-mirror.ceph-rbd-mirror0, it won't start
+    If you have stone-rbd-mirror@rbd-mirror.stone-rbd-mirror0, it won't start
     after reboot even if enabled.
-    Adding 'PartOf=ceph-rbd-mirror.target' will enable
-    ceph-rbd-mirror.target when ceph-rbd-mirror@rbd-mirror.ceph-rbd-mirror0
+    Adding 'PartOf=stone-rbd-mirror.target' will enable
+    stone-rbd-mirror.target when stone-rbd-mirror@rbd-mirror.stone-rbd-mirror0
     gets enabled.
     
     Signed-off-by: Sébastien Han <seb@redhat.com>
@@ -8529,7 +8529,7 @@ commit fc7db58fc5ed071436d5f0f6cc9dcd61e3276aea
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Tue Sep 19 17:06:03 2017 -0700
 
-    qa/tests: update required ceph-ansbile vars
+    qa/tests: update required stone-ansbile vars
     
     Signed-off-by: Vasu Kulkarni <vasu@redhat.com>
     (cherry picked from commit 184d5e6bad46451b3a8c5787f56148566bb42f20)
@@ -8538,7 +8538,7 @@ commit 4342d80354c941d47598897ca7ec6a6b4928edf6
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Tue Sep 19 17:03:46 2017 -0700
 
-    qa/tests: Fix ceph-ansible upstream vars
+    qa/tests: Fix stone-ansible upstream vars
     
     Signed-off-by: Vasu Kulkarni <vasu@redhat.com>
     (cherry picked from commit 077904a0b5dffe9d64feade94cf30ffc92f1c0e5)
@@ -8569,7 +8569,7 @@ commit 69bbaf5173c09afbf02b1894843570d403ad4235
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Thu Sep 7 17:10:04 2017 -0700
 
-    Test ceph-mgr RESTful api
+    Test stone-mgr RESTful api
     
     Signed-off-by: Vasu Kulkarni <vasu@redhat.com>
     (cherry picked from commit e5b5a1b8c8d0e750d29fe41a16252dcb0adf449f)
@@ -8578,11 +8578,11 @@ commit 581656e3874822f958400c235241cddb07c4aca3
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Thu Sep 7 16:54:51 2017 -0700
 
-    Add additional variables as required by ceph-ansible for upstream
+    Add additional variables as required by stone-ansible for upstream
     installation.
     
     possible revert if those are made default
-    issue: https://github.com/ceph/ceph-ansible/issues/1834
+    issue: https://github.com/stone/stone-ansible/issues/1834
     
     Signed-off-by: Vasu Kulkarni <vasu@redhat.com>
     (cherry picked from commit e963bfd6ca0ea1525e37dc35bf3309548c7a3831)
@@ -8627,9 +8627,9 @@ commit 05f7ce97a8b94b5abcaddd7d125398c7d0118bbc
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Fri Aug 18 10:47:22 2017 -0700
 
-    Catchup with recent changes with ceph-ansible
+    Catchup with recent changes with stone-ansible
     
-    Adds osd_scenario and ceph_stable_release variables
+    Adds osd_scenario and stone_stable_release variables
     
     Signed-off-by: Vasu Kulkarni <vasu@redhat.com>
     (cherry picked from commit 0395b844884a63a2cb7480dcc40762df6915b403)
@@ -8638,7 +8638,7 @@ commit 58ffed6fb9e8695deb53edd7754aed56c73403bd
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Thu Aug 24 11:02:20 2017 -0700
 
-    Add workaround for http://tracker.ceph.com/issues/20950
+    Add workaround for http://tracker.stone.com/issues/20950
     
     mgr bootstrap key differs on disk, rewrite the new key
     using auth get.
@@ -8680,7 +8680,7 @@ commit 566dada1f6a73b8be128167a425becea7ba110fe
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Fri Jul 28 23:11:41 2017 -0700
 
-    since the roles are mapped inside ceph-deploy, store the roles that
+    since the roles are mapped inside stone-deploy, store the roles that
     are mapped and use the new mapped role for upgrades during later
     stage.
     
@@ -8695,7 +8695,7 @@ commit 093a13268dff5b1114294456e83e0e24bfd7be6d
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Fri Jul 28 17:48:09 2017 -0700
 
-    Add doc string for missing ceph-deploy-branch
+    Add doc string for missing stone-deploy-branch
     
     Signed-off-by: Vasu Kulkarni <vasu@redhat.com>
     (cherry picked from commit e7a0a4f87f2fbea0c9e27341c952245f1ad34ab8)
@@ -8704,7 +8704,7 @@ commit df415e81887b06918731d7d3b7677ecab1ee2db5
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Thu Jul 27 15:24:25 2017 -0700
 
-    use mon.a as ceph-admin node, the previous get_first_mon returns
+    use mon.a as stone-admin node, the previous get_first_mon returns
     a sorted(mons)[0] as first mon.
     
     Signed-off-by: Vasu Kulkarni <vasu@redhat.com>
@@ -8726,7 +8726,7 @@ commit 7db1550a55002d28d899aee6ec695604045edabb
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Wed Jul 26 19:18:11 2017 -0700
 
-    Jewel to luminous upgrade scenario using ceph-deploy
+    Jewel to luminous upgrade scenario using stone-deploy
     
     Signed-off-by: Vasu Kulkarni <vasu@redhat.com>
     (cherry picked from commit 9c85c76a90dcf46ec2bcc6840f4fc57ed86583b5)
@@ -8735,7 +8735,7 @@ commit ab219d2e985cd1c6a7fd17b5ced4db25cb0b7427
 Author: Vasu Kulkarni <vasu@redhat.com>
 Date:   Wed Jul 26 18:56:08 2017 -0700
 
-    Add upgrade functionality using ceph-deploy
+    Add upgrade functionality using stone-deploy
     
     This is to test for customer like upgrade scenarios and to find
     any issues that may be related to systemd, packaging etc
@@ -8765,12 +8765,12 @@ commit 82651da2d504913f2145085df8a89484308f3eba
 Author: huangjun <huangjun@xsky.com>
 Date:   Wed Sep 20 00:04:04 2017 +0800
 
-    qa/ceph_manager: check pg state again before timedout
+    qa/stone_manager: check pg state again before timedout
     
     Pg state maybe all in active+clean when no recovering going on,
     so check it again before timedout.
     
-    Fixes: http://tracker.ceph.com/issues/21294
+    Fixes: http://tracker.stone.com/issues/21294
     
     Signed-off-by: huangjun <huangjun@xsky.com>
     (cherry picked from commit fa40add7f0123dfeac30986f3d53cdfa77736a87)
@@ -8828,12 +8828,12 @@ commit d5e583490d946242bdfd26e863dd0aac27c12e3c
 Author: Ramana Raja <rraja@redhat.com>
 Date:   Wed Sep 20 20:27:22 2017 +0530
 
-    ceph_volume_client: perform snapshot operations in
+    stone_volume_client: perform snapshot operations in
     
     ... client configured snap directory name, instead of in hard-coded
     '.snap' directory.
     
-    Fixes: http://tracker.ceph.com/issues/21476
+    Fixes: http://tracker.stone.com/issues/21476
     
     Signed-off-by: Ramana Raja <rraja@redhat.com>
     (cherry picked from commit f4fc1722594ed007706b54901fb07a2a443d1b96)
@@ -8842,12 +8842,12 @@ commit e4164c43f5ec808c0420036d2a647a5a7d38a436
 Author: Carl Xiong <xiongc05@gmail.com>
 Date:   Fri Sep 22 11:55:33 2017 +0800
 
-    ceph-disk: fix '--runtime' omission for ceph-osd service
+    stone-disk: fix '--runtime' omission for stone-osd service
     
-    f425a127b introduces a regression that ceph-disk omits "--runtime" when
-    enabling ceph-osd@$ID.service units for device-backed OSDs.
+    f425a127b introduces a regression that stone-disk omits "--runtime" when
+    enabling stone-osd@$ID.service units for device-backed OSDs.
     
-    Fixes: http://tracker.ceph.com/issues/21498
+    Fixes: http://tracker.stone.com/issues/21498
     
     Signed-off-by: Carl Xiong <cxiong@suse.com>
     (cherry picked from commit a385b5b0c35106c9b44d81655983b2f7566b21cd)
@@ -8856,7 +8856,7 @@ commit faf3fec1a628c9c4f4791e33d7795ef719267cbc
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Sep 13 18:33:21 2017 -0400
 
-    ceph-bluestore-tool: better default logging; --log-file and --log-level options
+    stone-bluestore-tool: better default logging; --log-file and --log-level options
     
     - keep derr going to stderr (so we see 'fsck error' messages)
     - hide the rest
@@ -8869,7 +8869,7 @@ commit 2184e3077caa9de5f21cc901d26f6ecfb76de9e1
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Sep 7 18:27:20 2017 -0400
 
-    ceph-bluestore-tool: add 'bluefs-bdev-expand' to expand wal or db usage
+    stone-bluestore-tool: add 'bluefs-bdev-expand' to expand wal or db usage
     
     If you are using the wal or db devices, this will expand bluefs's usage to
     include the entire block device.
@@ -8881,7 +8881,7 @@ commit af9a43a47b1dd0d8bb9946d4b4a0ab9b5c39e427
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Sep 7 18:20:27 2017 -0400
 
-    ceph-bluestore-tool: add 'bluefs-bdev-sizes' command
+    stone-bluestore-tool: add 'bluefs-bdev-sizes' command
     
     Show bdev sizes vs owned extents.
     
@@ -8892,7 +8892,7 @@ commit 6a6678c52ac4aba7fd313ddc2cb3c013819fe28f
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Sep 7 18:12:21 2017 -0400
 
-    ceph-bluestore-tool: factor out bluefs mount
+    stone-bluestore-tool: factor out bluefs mount
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 86db2d7b09de4362d90fba834d61978860d73309)
@@ -8910,11 +8910,11 @@ commit edd4d98fefe63ad31bf96fa61716b4ee079c0498
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Sep 8 17:53:07 2017 -0700
 
-    ceph-objectstore-tool: Make pg removal require --force
+    stone-objectstore-tool: Make pg removal require --force
     
     Add new export-remove to combine the 2 operations
     
-    Fixes: http://tracker.ceph.com/issues/21272
+    Fixes: http://tracker.stone.com/issues/21272
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 3bb20f6d750915d176c7a34367dac966a20faa76)
@@ -8923,7 +8923,7 @@ commit bbe0f34cc81a8db873ef23cca0cdea8651411b86
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Sep 8 17:09:48 2017 -0700
 
-    ceph-objectstore-tool: Better messages for bad --journal-path
+    stone-objectstore-tool: Better messages for bad --journal-path
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 49ca1fff7fc4360d2f3a9cac60c0ba651cbc4750)
@@ -8932,7 +8932,7 @@ commit fd7d53bacb10d5b2094f1f579c96899d8a0a4b4f
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Sep 6 20:41:50 2017 -0700
 
-    test: Fix ceph-objectstore-tool test for standalone and latest code
+    test: Fix stone-objectstore-tool test for standalone and latest code
     
     vstart.sh now defaults to bluestore, so specify filestore
     Set environment for run-standalone.sh and cmake build
@@ -8940,7 +8940,7 @@ Date:   Wed Sep 6 20:41:50 2017 -0700
     Crush output format change
     Change dir into test directory
     Give a little time after pool creation
-    Check for core files as ceph-helpers.sh does
+    Check for core files as stone-helpers.sh does
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 3ac219df2d635a08be52df3ad44cf0683de46af2)
@@ -8949,7 +8949,7 @@ commit 3e20e0f3071188f52b7a7c3f9e36b09305431ed0
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Sep 6 20:40:37 2017 -0700
 
-    test: Move ceph-objectstore-tool test to standalone
+    test: Move stone-objectstore-tool test to standalone
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 495c32fd31b311d22f0d4509e896916bd2671615)
@@ -8966,7 +8966,7 @@ Date:   Mon Aug 28 19:55:06 2017 +0100
     throttle-filestore_bytes becomes throttle_filestore_bytes.
     
     At some point once this is all settled we should
-    probably just change Ceph's internal perf counter
+    probably just change Stone's internal perf counter
     naming to satisfy the major TSDB naming rules.
     
     Signed-off-by: John Spray <john.spray@redhat.com>
@@ -8998,7 +8998,7 @@ Date:   Sun Aug 27 21:26:28 2017 -0800
     
     I suppose another alternative would be to change MDS metrics so they don't use 'illegal' characters, but this also seems cumbersome and would break more third parties.
     
-    Fixes: http://tracker.ceph.com/issues/20899
+    Fixes: http://tracker.stone.com/issues/20899
     Signed-off-by: Jeremy H Austin <jhaustin@gmail.com>
     (cherry picked from commit d719cd04b294e90ab9d440ba7d033826c069a2de)
 
@@ -9008,7 +9008,7 @@ Date:   Fri Sep 8 11:33:02 2017 -0400
 
     mgr: fix py calls for dne service perf counters
     
-    Fixes: http://tracker.ceph.com/issues/21253
+    Fixes: http://tracker.stone.com/issues/21253
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit f9a4ca07acecd15986cbce61a6e118a6cb05af29)
 
@@ -9022,7 +9022,7 @@ Date:   Thu Jul 27 11:48:42 2017 -0400
     genuinely exceptional exceptions.  For these
     known cases, we should just print the message cleanly.
     
-    http://tracker.ceph.com/issues/21292
+    http://tracker.stone.com/issues/21292
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit f7a1d57dd0d6c29b8c57a5de624da33777403fe5)
 
@@ -9033,11 +9033,11 @@ Date:   Tue Aug 8 13:59:41 2017 -0400
     os/filestore: fix device/partition metadata detection
     
     The UUID thing (a) relies on partition labels to work, which isn't
-    always true (and won't be true for ceph-volume going forward), and
+    always true (and won't be true for stone-volume going forward), and
     (b) reportedly doesn't work anyway.  The fd-based helper works
     just fine (even for vstart).
     
-    Fixes: http://tracker.ceph.com/issues/20944
+    Fixes: http://tracker.stone.com/issues/20944
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit e62862be0b68a17763e19ed8453436c457294505)
 
@@ -9074,7 +9074,7 @@ Date:   Thu Sep 7 12:47:36 2017 +0800
 
     mon,option: set default value for mon_dns_srv_name
     
-    Fixes: http://tracker.ceph.com/issues/21204
+    Fixes: http://tracker.stone.com/issues/21204
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 50207769f0c187cc8caf2bed3a1c94df409718e5)
 
@@ -9086,7 +9086,7 @@ Date:   Wed Sep 6 12:57:40 2017 -0400
     
     This was printing the absolute time instead of the period.
     
-    Fixes: http://tracker.ceph.com/issues/21249
+    Fixes: http://tracker.stone.com/issues/21249
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit f07480fec729d66f4cdc19a1c3bde3d185df1289)
 
@@ -9096,7 +9096,7 @@ Date:   Fri Sep 8 16:43:58 2017 -0400
 
     rbd: mirror "get" actions now have cleaner error messages
     
-    Fixes: http://tracker.ceph.com/issues/21319
+    Fixes: http://tracker.stone.com/issues/21319
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 053be9847ff0052348aa259520d641923e57537d)
 
@@ -9126,7 +9126,7 @@ Date:   Fri Aug 11 14:27:41 2017 +0200
 
     rbd-mirror: update asok hook name on image rename
     
-    Fixes: http://tracker.ceph.com/issues/20860
+    Fixes: http://tracker.stone.com/issues/20860
     Signed-off-by: Mykola Golub <mgolub@mirantis.com>
     (cherry picked from commit 9ddb5da3377029d11cb1089102d7146e9ee2537a)
 
@@ -9138,7 +9138,7 @@ Date:   Thu Aug 17 16:02:02 2017 +0800
     
     If more than two bucket hash to the same lc object, only the first bucket will do lifecycle operation. Other buckets lifecycle will never be schduled.
     
-    Fixes: http://tracker.ceph.com/issues/21022
+    Fixes: http://tracker.stone.com/issues/21022
     
     Signed-off-by: Shasha Lu <lu.shasha@eisoo.com>
     (cherry picked from commit 9561dc0a903d9021f64857762e73887ffe46c28e)
@@ -9149,7 +9149,7 @@ Date:   Wed Aug 23 21:31:11 2017 +0200
 
     rgw: fix accessing expired memory in PrefixableSignatureHelper.
     
-    Fixes: http://tracker.ceph.com/issues/21085
+    Fixes: http://tracker.stone.com/issues/21085
     Signed-off-by: Radoslaw Zarzynski <rzarzyns@redhat.com>
     (cherry picked from commit 9260d39ceb1ef39a32c8f1742c3069bb83d628f8)
 
@@ -9161,7 +9161,7 @@ Date:   Fri Aug 25 15:05:52 2017 +0800
     
     Get bucket location which is created in another zonegroup, will return "301 Moved Permanently".
     
-    Fixes: http://tracker.ceph.com/issues/21125
+    Fixes: http://tracker.stone.com/issues/21125
     
     Signed-off-by: Shasha Lu <lu.shasha@eisoo.com>
     (cherry picked from commit 71d2eca3e00de19419fb07bf9346f5863b20d40f)
@@ -9177,7 +9177,7 @@ Date:   Thu Aug 31 13:39:13 2017 +0200
     time at bucket index as the time at that point. Fix this by using the
     setting the same mtime for the object as well.
     
-    Fixes: http://tracker.ceph.com/issues/21200
+    Fixes: http://tracker.stone.com/issues/21200
     Signed-off-by: Abhishek Lekshmanan <abhishek@suse.com>
     (cherry picked from commit 87e8e89fe11fa805739a2b85d1b009424641fa4e)
 
@@ -9187,7 +9187,7 @@ Date:   Wed Dec 28 19:22:32 2016 +0100
 
     rgw: calculate and print Swift's X-Account-Storage-Policy-* headers.
     
-    Fixes: http://tracker.ceph.com/issues/17932
+    Fixes: http://tracker.stone.com/issues/17932
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit 5e5c0677ba69f0d162df1da9a22b1fb56028baa4)
 
@@ -9197,7 +9197,7 @@ Date:   Wed Dec 28 17:14:35 2016 +0100
 
     rgw: bucket linking stores also the info about a placement rule.
     
-    Fixes: http://tracker.ceph.com/issues/17932
+    Fixes: http://tracker.stone.com/issues/17932
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit de7a8679af93457c10bf514c17a7cfc5327e745c)
 
@@ -9207,7 +9207,7 @@ Date:   Wed Dec 28 17:12:50 2016 +0100
 
     rgw: convey placement rule in RGWBucketEnt and cls_user_bucket_entry.
     
-    Fixes: http://tracker.ceph.com/issues/17932
+    Fixes: http://tracker.stone.com/issues/17932
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit 5eca89f08d29ac6aa7b55a3b4fb5b4183bdc0496)
 
@@ -9245,7 +9245,7 @@ Date:   Mon Aug 28 21:54:56 2017 +0200
 
     rgw: add basic support for Swift's reversed account listings.
     
-    Fixes: http://tracker.ceph.com/issues/21148
+    Fixes: http://tracker.stone.com/issues/21148
     Signed-off-by: Radoslaw Zarzynski <rzarzyns@redhat.com>
     (cherry picked from commit 870f54806b7c1f570d2e82d3d2aa308b2178c6f0)
 
@@ -9269,7 +9269,7 @@ Date:   Wed May 24 16:50:26 2017 +0200
     introduced in a5d1fa0587184f43c69d8e03114b58d43f320781 and causes
     Tempest's test_list_container_contents_with_end_marker to fail.
     
-    Fixes: http://tracker.ceph.com/issues/18977
+    Fixes: http://tracker.stone.com/issues/18977
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit 09db1e412ef0853e7f345f813c8d452ec8354c36)
 
@@ -9343,7 +9343,7 @@ Date:   Tue Aug 29 12:16:30 2017 +0200
     
     The investigation has been made by: Marcus Watts <mwatts@redhat.com>.
     
-    Fixes: http://tracker.ceph.com/issues/21169
+    Fixes: http://tracker.stone.com/issues/21169
     Signed-off-by: Radoslaw Zarzynski <rzarzyns@redhat.com>
     (cherry picked from commit 308c8d3ab7e3e4978beccba2c27beb95e75cde22)
 
@@ -9362,7 +9362,7 @@ Date:   Tue May 30 16:36:06 2017 +0200
 
     rgw: add support for max_meta_count of Swift API's /info.
     
-    Fixes: http://tracker.ceph.com/issues/17934
+    Fixes: http://tracker.stone.com/issues/17934
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit 9e53c14a3398dfe55f6b816bb57c4b1b6d01c8ec)
 
@@ -9372,7 +9372,7 @@ Date:   Tue May 30 22:19:33 2017 +0200
 
     rgw: Swift API returns 400 Bad Request on too long container names.
     
-    Fixes: http://tracker.ceph.com/issues/17935
+    Fixes: http://tracker.stone.com/issues/17935
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit 1845e41292696da9e20ecd87b9260b44ee312aed)
 
@@ -9391,7 +9391,7 @@ Date:   Mon May 29 18:02:23 2017 +0200
 
     rgw: add support for max_meta_value_length of Swift API's /info.
     
-    Fixes: http://tracker.ceph.com/issues/17936
+    Fixes: http://tracker.stone.com/issues/17936
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit 06b1f25021924e0c55da0bc22216f31344735dfe)
 
@@ -9410,7 +9410,7 @@ Date:   Tue May 30 22:19:58 2017 +0200
 
     rgw: add support for max_meta_name_length of Swift API's /info.
     
-    Fixes: http://tracker.ceph.com/issues/17938
+    Fixes: http://tracker.stone.com/issues/17938
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit 593d656dffd477943b8bd15153004d905b4b0d73)
 
@@ -9435,7 +9435,7 @@ Date:   Mon Sep 18 14:44:36 2017 +0800
     
     Note that this patch is not going to land on master first
     (and hence can not be cherry-picked from master) because it will
-    finally be deprecated by https://github.com/ceph/ceph/pull/17579,
+    finally be deprecated by https://github.com/stone/stone/pull/17579,
     in which we are going to kill the snapdir object completely for Mimic.
     
     Signed-off-by: xie xingguo <xie.xingguo@zte.com.cn>
@@ -9446,7 +9446,7 @@ Date:   Sat Sep 16 10:04:56 2017 +0800
 
     qa: fix pool-quota related tests
     
-    https://github.com/ceph/ceph/pull/17371 introduces support of
+    https://github.com/stone/stone/pull/17371 introduces support of
     per-pool space-full flag, which turns out to set both
     full and full_no_quota flags now if a pool is currently running out
     of quota.
@@ -9454,7 +9454,7 @@ Date:   Sat Sep 16 10:04:56 2017 +0800
     Actually this test is fragile as long as we keep appending new flags
     at pool granularity, but let's not bother with that complexity now.
     
-    Fixes: http://tracker.ceph.com/issues/21409
+    Fixes: http://tracker.stone.com/issues/21409
     Signed-off-by: xie xingguo <xie.xingguo@zte.com.cn>
     (cherry picked from commit 5dd3458eec7d6c56a71ee6f0fcdd45aa15a58ec7)
 
@@ -9469,7 +9469,7 @@ Date:   Mon Aug 28 15:51:28 2017 +0800
     for backup data and all-flash-pool for DB applications.
     
     However, if any osd of the cluster is currently running out
-    of space (exceeding the predefined 'full' threshold), Ceph
+    of space (exceeding the predefined 'full' threshold), Stone
     will mark the whole cluster as full and prevent writes to all pools,
     which turns out to be very wrong.
     
@@ -9512,7 +9512,7 @@ Date:   Wed Sep 13 23:03:07 2017 -0400
 
     os/bluestore/KernelDevice: hack to inject bad device size
     
-    This conditionally reintroduces bug http://tracker.ceph.com/issues/21089,
+    This conditionally reintroduces bug http://tracker.stone.com/issues/21089,
     fixed by f6f1ae3724d593d3709d982c973ec18a25a47b6e, to aid in testing
     repair.
     
@@ -9522,9 +9522,9 @@ commit 460268b5e9c9a77aae134049aa320977f02fc911
 Author: Patrick Donnelly <pdonnell@redhat.com>
 Date:   Wed Aug 30 15:28:11 2017 -0700
 
-    ceph.in: validate service glob
+    stone.in: validate service glob
     
-    Fixes: http://tracker.ceph.com/issues/21191
+    Fixes: http://tracker.stone.com/issues/21191
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 59bee1e7274934cebe0dcefd9fcedb6886a5e2d0)
@@ -9535,6 +9535,6 @@ Date:   Wed Aug 30 10:17:31 2017 +0200
 
     build/ops: python-numpy-devel build dependency for SUSE
     
-    Fixes: http://tracker.ceph.com/issues/21176
+    Fixes: http://tracker.stone.com/issues/21176
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 1586f2ca9ab94af85682945a3c7c7ebbd82c6e03)

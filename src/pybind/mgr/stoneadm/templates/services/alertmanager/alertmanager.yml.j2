@@ -1,4 +1,4 @@
-# {{ cephadm_managed }}
+# {{ stoneadm_managed }}
 # See https://prometheus.io/docs/alerting/configuration/ for documentation.
 
 global:
@@ -16,7 +16,7 @@ route:
       group_wait: 10s
       group_interval: 10s
       repeat_interval: 1h
-      receiver: 'ceph-dashboard'
+      receiver: 'stone-dashboard'
 {% if snmp_gateway_urls %}
       continue: true
     - receiver: 'snmp-gateway'
@@ -33,7 +33,7 @@ receivers:
 {% for url in default_webhook_urls %}
   - url: '{{ url }}'
 {% endfor %}
-- name: 'ceph-dashboard'
+- name: 'stone-dashboard'
   webhook_configs:
 {% for url in dashboard_urls %}
   - url: '{{ url }}/api/prometheus_receiver'

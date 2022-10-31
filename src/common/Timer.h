@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -17,8 +17,8 @@
 
 #include <map>
 #include "include/common_fwd.h"
-#include "ceph_time.h"
-#include "ceph_mutex.h"
+#include "stone_time.h"
+#include "stone_mutex.h"
 #include "fair_mutex.h"
 #include <condition_variable>
 
@@ -29,7 +29,7 @@ template <class Mutex> class CommonSafeTimerThread;
 template <class Mutex>
 class CommonSafeTimer
 {
-  StoneeContext *cct;
+  StoneContext *cct;
   Mutex& lock;
   std::condition_variable_any cond;
   bool safe_callbacks;
@@ -40,7 +40,7 @@ class CommonSafeTimer
   void timer_thread();
   void _shutdown();
 
-  using clock_t = ceph::real_clock;
+  using clock_t = stone::real_clock;
   using scheduled_map_t = std::multimap<clock_t::time_point, Context*>;
   scheduled_map_t schedule;
   using event_lookup_map_t = std::map<Context*, scheduled_map_t::iterator>;
@@ -64,7 +64,7 @@ public:
    * If you are able to relax requirements on cancelled callbacks, then
    * setting safe_callbacks = false eliminates the lock cycle issue.
    * */
-  CommonSafeTimer(StoneeContext *cct, Mutex &l, bool safe_callbacks=true);
+  CommonSafeTimer(StoneContext *cct, Mutex &l, bool safe_callbacks=true);
   virtual ~CommonSafeTimer();
 
   /* Call with the event_lock UNLOCKED.
@@ -78,7 +78,7 @@ public:
 
   /* Schedule an event in the future
    * Call with the event_lock LOCKED */
-  Context* add_event_after(ceph::timespan duration, Context *callback);
+  Context* add_event_after(stone::timespan duration, Context *callback);
   Context* add_event_after(double seconds, Context *callback);
   Context* add_event_at(clock_t::time_point when, Context *callback);
 
@@ -100,8 +100,8 @@ public:
 
 };
 
-extern template class CommonSafeTimer<ceph::mutex>;
-extern template class CommonSafeTimer<ceph::fair_mutex>;
-using SafeTimer = class CommonSafeTimer<ceph::mutex>;
+extern template class CommonSafeTimer<stone::mutex>;
+extern template class CommonSafeTimer<stone::fair_mutex>;
+using SafeTimer = class CommonSafeTimer<stone::mutex>;
 
 #endif

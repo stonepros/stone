@@ -22,7 +22,7 @@ SETTINGS_SCHEMA = [{
 @APIDoc("Settings Management API", "Settings")
 class Settings(RESTController):
     """
-    Enables to manage the settings of the dashboard (not the Ceph cluster).
+    Enables to manage the settings of the dashboard (not the Stone cluster).
     """
     @contextmanager
     def _attribute_handler(self, name):

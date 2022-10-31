@@ -80,7 +80,7 @@ private:
 
   ImageCtxT* m_parent_image_ctx = nullptr;
 
-  ceph::bufferlist m_out_bl;
+  stone::bufferlist m_out_bl;
   NoOpProgressContext m_no_op;
 
   void clone_v2_child_detach();

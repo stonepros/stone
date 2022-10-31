@@ -6,15 +6,15 @@
 
 # Includes
 source $(dirname $0)/detect-build-env-vars.sh
-source ../qa/standalone/ceph-helpers.sh
+source ../qa/standalone/stone-helpers.sh
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:17119" # git grep '\<17119\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:17119" # git grep '\<17119\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
     local funcs=${@:-$(set | ${SED} -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -31,9 +31,9 @@ function TEST_crush_bucket() {
     run_osd $dir 2 || return 1
 
 
-    ceph osd getcrushmap -o "$dir/map1" || return 1
+    stone osd getcrushmap -o "$dir/map1" || return 1
     crushtool -d "$dir/map1" -o "$dir/map1.txt"|| return 1
-    local var=`ceph osd crush dump|grep -w id|grep '-'|grep -Eo '[0-9]+'|sort|uniq|${SED} -n '$p'`
+    local var=`stone osd crush dump|grep -w id|grep '-'|grep -Eo '[0-9]+'|sort|uniq|${SED} -n '$p'`
     local id=`expr  $var + 1`
     local item=`${SED} -n '/^root/,/}/p' $dir/map1.txt|grep  'item'|head -1`
     local weight=`${SED} -n '/^root/,/}/p' $dir/map1.txt|grep  'item'|head -1|awk '{print $4}'`

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
  *
@@ -12,13 +12,13 @@
 #define BIT_VECTOR_HPP
 
 #include "common/Formatter.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/encoding.h"
 #include <memory>
 #include <utility>
 #include <vector>
 
-namespace ceph {
+namespace stone {
 
 template <uint8_t _bit_count>
 class BitVector
@@ -109,7 +109,7 @@ public:
       uint64_t index;
       compute_index(m_offset, &index, &m_shift);
 
-      ceph_assert(index == m_index || index == m_index + 1);
+      stone_assert(index == m_index || index == m_index + 1);
       if (index > m_index) {
         m_index = index;
         ++m_data_iterator;
@@ -312,7 +312,7 @@ void BitVector<_b>::encode_header(bufferlist& bl) const {
 
 template <uint8_t _b>
 void BitVector<_b>::decode_header(bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   bufferlist header_bl;
   decode(header_bl, it);
 
@@ -335,8 +335,8 @@ uint64_t BitVector<_b>::get_header_length() const {
 template <uint8_t _b>
 void BitVector<_b>::encode_data(bufferlist& bl, uint64_t data_byte_offset,
 				uint64_t byte_length) const {
-  ceph_assert(data_byte_offset % BLOCK_SIZE == 0);
-  ceph_assert(data_byte_offset + byte_length == m_data.length() ||
+  stone_assert(data_byte_offset % BLOCK_SIZE == 0);
+  stone_assert(data_byte_offset + byte_length == m_data.length() ||
               byte_length % BLOCK_SIZE == 0);
 
   uint64_t end_offset = data_byte_offset + byte_length;
@@ -356,7 +356,7 @@ void BitVector<_b>::encode_data(bufferlist& bl, uint64_t data_byte_offset,
 template <uint8_t _b>
 void BitVector<_b>::decode_data(bufferlist::const_iterator& it,
                                 uint64_t data_byte_offset) {
-  ceph_assert(data_byte_offset % BLOCK_SIZE == 0);
+  stone_assert(data_byte_offset % BLOCK_SIZE == 0);
   if (it.end()) {
     return;
   }
@@ -392,7 +392,7 @@ void BitVector<_b>::decode_data(bufferlist::const_iterator& it,
     tail.substr_of(m_data, end_offset, m_data.length() - end_offset);
     data.append(tail);
   }
-  ceph_assert(data.length() == m_data.length());
+  stone_assert(data.length() == m_data.length());
   data.swap(m_data);
 }
 
@@ -402,7 +402,7 @@ void BitVector<_b>::get_data_extents(uint64_t offset, uint64_t length,
                                      uint64_t *object_byte_offset,
                                      uint64_t *byte_length) const {
   // read BLOCK_SIZE-aligned chunks
-  ceph_assert(length > 0 && offset + length <= m_size);
+  stone_assert(length > 0 && offset + length <= m_size);
   uint64_t shift;
   compute_index(offset, data_byte_offset, &shift);
   *data_byte_offset -= (*data_byte_offset % BLOCK_SIZE);
@@ -410,7 +410,7 @@ void BitVector<_b>::get_data_extents(uint64_t offset, uint64_t length,
   uint64_t end_offset;
   compute_index(offset + length - 1, &end_offset, &shift);
   end_offset += (BLOCK_SIZE - (end_offset % BLOCK_SIZE));
-  ceph_assert(*data_byte_offset <= end_offset);
+  stone_assert(*data_byte_offset <= end_offset);
 
   *object_byte_offset = get_header_length() + *data_byte_offset;
   *byte_length = end_offset - *data_byte_offset;
@@ -421,7 +421,7 @@ void BitVector<_b>::get_data_extents(uint64_t offset, uint64_t length,
 
 template <uint8_t _b>
 void BitVector<_b>::encode_footer(bufferlist& bl) const {
-  using ceph::encode;
+  using stone::encode;
   bufferlist footer_bl;
   if (m_crc_enabled) {
     encode(m_header_crc, footer_bl);
@@ -435,7 +435,7 @@ void BitVector<_b>::encode_footer(bufferlist& bl) const {
 
 template <uint8_t _b>
 void BitVector<_b>::decode_footer(bufferlist::const_iterator& it) {
-  using ceph::decode;
+  using stone::decode;
   bufferlist footer_bl;
   decode(footer_bl, it);
 
@@ -464,7 +464,7 @@ template <uint8_t _b>
 void BitVector<_b>::decode_header_crc(bufferlist::const_iterator& it) {
   if (it.get_remaining() > 0) {
     __u32 header_crc;
-    ceph::decode(header_crc, it);
+    stone::decode(header_crc, it);
     if (m_header_crc != header_crc) {
       throw buffer::malformed_input("incorrect header CRC");
     }
@@ -495,7 +495,7 @@ void BitVector<_b>::encode_data_crcs(bufferlist& bl, uint64_t offset,
   uint64_t end_crc_index = index / BLOCK_SIZE;
   while (crc_index <= end_crc_index) {
     __u32 crc = m_data_crcs[crc_index++].val;
-    ceph::encode(crc, bl);
+    stone::encode(crc, bl);
   }
 }
 
@@ -514,7 +514,7 @@ void BitVector<_b>::decode_data_crcs(bufferlist::const_iterator& it,
   uint64_t remaining = it.get_remaining() / sizeof(__u32);
   while (remaining > 0) {
     __u32 crc;
-    ceph::decode(crc, it);
+    stone::decode(crc, it);
     m_data_crcs[crc_index++].val = crc;
     --remaining;
   }
@@ -532,7 +532,7 @@ void BitVector<_b>::get_data_crcs_extents(uint64_t offset, uint64_t length,
   *byte_offset += sizeof(__u32);
 
   // CRCs are computed over BLOCK_SIZE chunks
-  ceph_assert(length > 0 && offset + length <= m_size);
+  stone_assert(length > 0 && offset + length <= m_size);
   uint64_t index;
   uint64_t shift;
   compute_index(offset, &index, &shift);
@@ -542,7 +542,7 @@ void BitVector<_b>::get_data_crcs_extents(uint64_t offset, uint64_t length,
   compute_index(offset + length, &index, &shift);
   uint64_t end_byte_offset =
     *byte_offset + (((index / BLOCK_SIZE) + 1) * sizeof(__u32));
-  ceph_assert(start_byte_offset < end_byte_offset);
+  stone_assert(start_byte_offset < end_byte_offset);
 
   *byte_offset = start_byte_offset;
   *byte_length = end_byte_offset - start_byte_offset;
@@ -633,12 +633,12 @@ void BitVector<_b>::generate_test_instances(std::list<BitVector *> &o) {
 }
 
 
-WRITE_CLASS_ENCODER(ceph::BitVector<2>)
+WRITE_CLASS_ENCODER(stone::BitVector<2>)
 
 template <uint8_t _b>
-inline std::ostream& operator<<(std::ostream& out, const ceph::BitVector<_b> &b)
+inline std::ostream& operator<<(std::ostream& out, const stone::BitVector<_b> &b)
 {
-  out << "ceph::BitVector<" << _b << ">(size=" << b.size() << ", data="
+  out << "stone::BitVector<" << _b << ">(size=" << b.size() << ", data="
       << b.get_data() << ")";
   return out;
 }

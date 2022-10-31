@@ -4,22 +4,22 @@
 
 .. index:: OSD; configuration
 
-You can configure Ceph OSD Daemons in the Ceph configuration file (or in recent
-releases, the central config store), but Ceph OSD
+You can configure Stone OSD Daemons in the Stone configuration file (or in recent
+releases, the central config store), but Stone OSD
 Daemons can use the default values and a very minimal configuration. A minimal
-Ceph OSD Daemon configuration sets ``osd journal size`` (for Filestore), ``host``,  and
+Stone OSD Daemon configuration sets ``osd journal size`` (for Filestore), ``host``,  and
 uses default values for nearly everything else.
 
-Ceph OSD Daemons are numerically identified in incremental fashion, beginning
+Stone OSD Daemons are numerically identified in incremental fashion, beginning
 with ``0`` using the following convention. ::
 
 	osd.0
 	osd.1
 	osd.2
 
-In a configuration file, you may specify settings for all Ceph OSD Daemons in
+In a configuration file, you may specify settings for all Stone OSD Daemons in
 the cluster by adding configuration settings to the ``[osd]`` section of your
-configuration file. To add settings directly to a specific Ceph OSD Daemon
+configuration file. To add settings directly to a specific Stone OSD Daemon
 (e.g., ``host``), enter  it in an OSD-specific section of your configuration
 file. For example:
 
@@ -40,32 +40,32 @@ file. For example:
 General Settings
 ================
 
-The following settings provide a Ceph OSD Daemon's ID, and determine paths to
-data and journals. Ceph deployment scripts typically generate the UUID
+The following settings provide a Stone OSD Daemon's ID, and determine paths to
+data and journals. Stone deployment scripts typically generate the UUID
 automatically.
 
 .. warning:: **DO NOT** change the default paths for data or journals, as it
-             makes it more problematic to troubleshoot Ceph later.
+             makes it more problematic to troubleshoot Stone later.
 
 When using Filestore, the journal size should be at least twice the product of the expected drive
 speed multiplied by ``filestore_max_sync_interval``. However, the most common
 practice is to partition the journal drive (often an SSD), and mount it such
-that Ceph uses the entire partition for the journal.
+that Stone uses the entire partition for the journal.
 
 
 ``osd_uuid``
 
-:Description: The universally unique identifier (UUID) for the Ceph OSD Daemon.
+:Description: The universally unique identifier (UUID) for the Stone OSD Daemon.
 :Type: UUID
 :Default: The UUID.
-:Note: The ``osd_uuid`` applies to a single Ceph OSD Daemon. The ``fsid``
+:Note: The ``osd_uuid`` applies to a single Stone OSD Daemon. The ``fsid``
        applies to the entire cluster.
 
 
 ``osd_data``
 
 :Description: The path to the OSDs data. You must create the directory when
-              deploying Ceph. You should mount a drive for OSD data at this
+              deploying Stone. You should mount a drive for OSD data at this
               mount point. We do not recommend changing the default.
 
 :Type: String
@@ -104,11 +104,11 @@ that Ceph uses the entire partition for the journal.
 
 File System Settings
 ====================
-Ceph builds and mounts file systems which are used for Ceph OSDs.
+Stone builds and mounts file systems which are used for Stone OSDs.
 
 ``osd_mkfs_options {fs-type}``
 
-:Description: Options used when creating a new Ceph Filestore OSD of type {fs-type}.
+:Description: Options used when creating a new Stone Filestore OSD of type {fs-type}.
 
 :Type: String
 :Default for xfs: ``-f -i 2048``
@@ -119,7 +119,7 @@ For example::
 
 ``osd_mount_options {fs-type}``
 
-:Description: Options used when mounting a Ceph Filestore OSD of type {fs-type}.
+:Description: Options used when mounting a Stone Filestore OSD of type {fs-type}.
 
 :Type: String
 :Default for xfs: ``rw,noatime,inode64``
@@ -137,7 +137,7 @@ Journal Settings
 This section applies only to the older Filestore OSD back end.  Since Luminous
 BlueStore has been default and preferred.
 
-By default, Ceph expects that you will provision a Ceph OSD Daemon's journal at
+By default, Stone expects that you will provision a Stone OSD Daemon's journal at
 the following path, which is usually a symlink to a device or partition::
 
 	/var/lib/ceph/osd/$cluster-$id/journal
@@ -182,8 +182,8 @@ See `Journal Config Reference`_ for additional details.
 Monitor OSD Interaction
 =======================
 
-Ceph OSD Daemons check each other's heartbeats and report to monitors
-periodically. Ceph can use default values in many cases. However, if your
+Stone OSD Daemons check each other's heartbeats and report to monitors
+periodically. Stone can use default values in many cases. However, if your
 network has latency issues, you may need to adopt longer intervals. See
 `Configuring Monitor/OSD Interaction`_ for a detailed discussion of heartbeats.
 
@@ -199,9 +199,9 @@ See `Pool & PG Config Reference`_ for details.
 Scrubbing
 =========
 
-In addition to making multiple copies of objects, Ceph ensures data integrity by
-scrubbing placement groups. Ceph scrubbing is analogous to ``fsck`` on the
-object storage layer. For each placement group, Ceph generates a catalog of all
+In addition to making multiple copies of objects, Stone ensures data integrity by
+scrubbing placement groups. Stone scrubbing is analogous to ``fsck`` on the
+object storage layer. For each placement group, Stone generates a catalog of all
 objects and compares each primary object and its replicas to ensure that no
 objects are missing or mismatched. Light scrubbing (daily) checks the object
 size and attributes.  Deep scrubbing (weekly) reads the data and uses checksums
@@ -215,7 +215,7 @@ scrubbing operations.
 ``osd_max_scrubs``
 
 :Description: The maximum number of simultaneous scrub operations for
-              a Ceph OSD Daemon.
+              a Stone OSD Daemon.
 
 :Type: 32-bit Int
 :Default: ``1``
@@ -299,7 +299,7 @@ scrubbing operations.
 
 ``osd_scrub_load_threshold``
 
-:Description: The normalized maximum load. Ceph will not scrub when the system load
+:Description: The normalized maximum load. Stone will not scrub when the system load
               (as defined by ``getloadavg() / number of online CPUs``) is higher than this number.
               Default is ``0.5``.
 
@@ -309,8 +309,8 @@ scrubbing operations.
 
 ``osd_scrub_min_interval``
 
-:Description: The minimal interval in seconds for scrubbing the Ceph OSD Daemon
-              when the Ceph Storage Cluster load is low.
+:Description: The minimal interval in seconds for scrubbing the Stone OSD Daemon
+              when the Stone Storage Cluster load is low.
 
 :Type: Float
 :Default: Once per day. ``24*60*60``
@@ -319,7 +319,7 @@ scrubbing operations.
 
 ``osd_scrub_max_interval``
 
-:Description: The maximum interval in seconds for scrubbing the Ceph OSD Daemon
+:Description: The maximum interval in seconds for scrubbing the Stone OSD Daemon
               irrespective of cluster load.
 
 :Type: Float
@@ -329,7 +329,7 @@ scrubbing operations.
 ``osd_scrub_chunk_min``
 
 :Description: The minimal number of object store chunks to scrub during single operation.
-              Ceph blocks writes to single chunk during scrub.
+              Stone blocks writes to single chunk during scrub.
 
 :Type: 32-bit Integer
 :Default: 5
@@ -529,7 +529,7 @@ Operations
 
 ``osd_op_thread_timeout``
 
-:Description: The Ceph OSD Daemon operation thread timeout in seconds.
+:Description: The Stone OSD Daemon operation thread timeout in seconds.
 :Type: 32-bit Integer
 :Default: ``15``
 
@@ -569,18 +569,18 @@ Operations
 QoS Based on mClock
 -------------------
 
-Ceph's use of mClock is now more refined and can be used by following the
+Stone's use of mClock is now more refined and can be used by following the
 steps as described in `mClock Config Reference`_.
 
 Core Concepts
 `````````````
 
-Ceph's QoS support is implemented using a queueing scheduler
+Stone's QoS support is implemented using a queueing scheduler
 based on `the dmClock algorithm`_. This algorithm allocates the I/O
-resources of the Ceph cluster in proportion to weights, and enforces
+resources of the Stone cluster in proportion to weights, and enforces
 the constraints of minimum reservation and maximum limitation, so that
 the services can compete for the resources fairly. Currently the
-*mclock_scheduler* operation queue divides Ceph services involving I/O
+*mclock_scheduler* operation queue divides Stone services involving I/O
 resources into following buckets:
 
 - client op: the iops issued by client
@@ -597,7 +597,7 @@ words, the share of each type of service is controlled by three tags:
 #. weight: the proportional share of capacity if extra capacity or system
    oversubscribed.
 
-In Ceph, operations are graded with "cost". And the resources allocated
+In Stone, operations are graded with "cost". And the resources allocated
 for serving various services are consumed by these "costs". So, for
 example, the more reservation a services has, the more resource it is
 guaranteed to possess, as long as it requires. Assuming there are 2
@@ -649,7 +649,7 @@ Caveats
 ```````
 
 There are some factors that can reduce the impact of the mClock op
-queues within Ceph. First, requests to an OSD are sharded by their
+queues within Stone. First, requests to an OSD are sharded by their
 placement group identifier. Each shard has its own mClock queue and
 these queues neither interact nor share information among them. The
 number of shards can be controlled with the configuration options
@@ -784,12 +784,12 @@ mClock and dmClock experiments on the ``ceph-devel`` mailing list.
 Backfilling
 ===========
 
-When you add or remove Ceph OSD Daemons to a cluster, CRUSH will
-rebalance the cluster by moving placement groups to or from Ceph OSDs
+When you add or remove Stone OSD Daemons to a cluster, CRUSH will
+rebalance the cluster by moving placement groups to or from Stone OSDs
 to restore balanced utilization. The process of migrating placement groups and
 the objects they contain can reduce the cluster's operational performance
-considerably. To maintain operational performance, Ceph performs this migration
-with 'backfilling', which allows Ceph to set backfill operations to a lower
+considerably. To maintain operational performance, Stone performs this migration
+with 'backfilling', which allows Stone to set backfill operations to a lower
 priority than requests to read or write data.
 
 
@@ -829,8 +829,8 @@ OSD Map
 =======
 
 OSD maps reflect the OSD daemons operating in the cluster. Over time, the
-number of map epochs increases. Ceph provides some settings to ensure that
-Ceph performs well as the OSD map grows larger.
+number of map epochs increases. Stone provides some settings to ensure that
+Stone performs well as the OSD map grows larger.
 
 
 ``osd_map_dedup``
@@ -860,28 +860,28 @@ Ceph performs well as the OSD map grows larger.
 Recovery
 ========
 
-When the cluster starts or when a Ceph OSD Daemon crashes and restarts, the OSD
-begins peering with other Ceph OSD Daemons before writes can occur.  See
+When the cluster starts or when a Stone OSD Daemon crashes and restarts, the OSD
+begins peering with other Stone OSD Daemons before writes can occur.  See
 `Monitoring OSDs and PGs`_ for details.
 
-If a Ceph OSD Daemon crashes and comes back online, usually it will be out of
-sync with other Ceph OSD Daemons containing more recent versions of objects in
-the placement groups. When this happens, the Ceph OSD Daemon goes into recovery
+If a Stone OSD Daemon crashes and comes back online, usually it will be out of
+sync with other Stone OSD Daemons containing more recent versions of objects in
+the placement groups. When this happens, the Stone OSD Daemon goes into recovery
 mode and seeks to get the latest copy of the data and bring its map back up to
-date. Depending upon how long the Ceph OSD Daemon was down, the OSD's objects
+date. Depending upon how long the Stone OSD Daemon was down, the OSD's objects
 and placement groups may be significantly out of date. Also, if a failure domain
-went down (e.g., a rack), more than one Ceph OSD Daemon may come back online at
+went down (e.g., a rack), more than one Stone OSD Daemon may come back online at
 the same time. This can make the recovery process time consuming and resource
 intensive.
 
-To maintain operational performance, Ceph performs recovery with limitations on
-the number recovery requests, threads and object chunk sizes which allows Ceph
+To maintain operational performance, Stone performs recovery with limitations on
+the number recovery requests, threads and object chunk sizes which allows Stone
 perform well in a degraded state.
 
 
 ``osd_recovery_delay_start``
 
-:Description: After peering completes, Ceph will delay for the specified number
+:Description: After peering completes, Stone will delay for the specified number
               of seconds before starting to recover RADOS objects.
 
 :Type: Float

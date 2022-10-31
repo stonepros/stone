@@ -9,11 +9,11 @@
 struct cls_user_set_buckets_op {
   std::list<cls_user_bucket_entry> entries;
   bool add;
-  ceph::real_time time; /* op time */
+  stone::real_time time; /* op time */
 
   cls_user_set_buckets_op() : add(false) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(entries, bl);
     encode(add, bl);
@@ -21,7 +21,7 @@ struct cls_user_set_buckets_op {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(entries, bl);
     decode(add, bl);
@@ -29,7 +29,7 @@ struct cls_user_set_buckets_op {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_user_set_buckets_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_user_set_buckets_op)
@@ -39,19 +39,19 @@ struct cls_user_remove_bucket_op {
 
   cls_user_remove_bucket_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(bucket, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(bucket, bl);
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_user_remove_bucket_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_user_remove_bucket_op)
@@ -65,7 +65,7 @@ struct cls_user_list_buckets_op {
   cls_user_list_buckets_op()
     : max_entries(0) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 1, bl);
     encode(marker, bl);
     encode(max_entries, bl);
@@ -73,7 +73,7 @@ struct cls_user_list_buckets_op {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(2, bl);
     decode(marker, bl);
     decode(max_entries, bl);
@@ -83,7 +83,7 @@ struct cls_user_list_buckets_op {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_user_list_buckets_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_user_list_buckets_op)
@@ -95,7 +95,7 @@ struct cls_user_list_buckets_ret {
 
   cls_user_list_buckets_ret() : truncated(false) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(entries, bl);
     encode(marker, bl);
@@ -103,7 +103,7 @@ struct cls_user_list_buckets_ret {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(entries, bl);
     decode(marker, bl);
@@ -111,7 +111,7 @@ struct cls_user_list_buckets_ret {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_user_list_buckets_ret*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_user_list_buckets_ret)
@@ -120,50 +120,50 @@ WRITE_CLASS_ENCODER(cls_user_list_buckets_ret)
 struct cls_user_get_header_op {
   cls_user_get_header_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_user_get_header_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_user_get_header_op)
 
 struct cls_user_reset_stats_op {
-  ceph::real_time time;
+  stone::real_time time;
   cls_user_reset_stats_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(time, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(time, bl);
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_user_reset_stats_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_user_reset_stats_op);
 
 struct cls_user_reset_stats2_op {
-  ceph::real_time time;
+  stone::real_time time;
   std::string marker;
   cls_user_stats acc_stats;
 
   cls_user_reset_stats2_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(time, bl);
     encode(marker, bl);
@@ -171,7 +171,7 @@ struct cls_user_reset_stats2_op {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(time, bl);
     decode(marker, bl);
@@ -179,7 +179,7 @@ struct cls_user_reset_stats2_op {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_user_reset_stats2_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_user_reset_stats2_op);
@@ -197,7 +197,7 @@ struct cls_user_reset_stats2_ret {
     call.acc_stats = acc_stats;
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(marker, bl);
     encode(acc_stats, bl);
@@ -205,7 +205,7 @@ struct cls_user_reset_stats2_ret {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(marker, bl);
     decode(acc_stats, bl);
@@ -213,7 +213,7 @@ struct cls_user_reset_stats2_ret {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(
     std::list<cls_user_reset_stats2_ret*>& ls);
 };
@@ -224,41 +224,41 @@ struct cls_user_get_header_ret {
 
   cls_user_get_header_ret() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(header, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(header, bl);
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_user_get_header_ret*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_user_get_header_ret)
 
 struct cls_user_complete_stats_sync_op {
-  ceph::real_time time;
+  stone::real_time time;
 
   cls_user_complete_stats_sync_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(time, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(time, bl);
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_user_complete_stats_sync_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_user_complete_stats_sync_op)

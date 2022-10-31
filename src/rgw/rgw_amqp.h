@@ -25,7 +25,7 @@ void intrusive_ptr_release(const connection_t* p);
 typedef std::function<void(int)> reply_callback_t;
 
 // initialize the amqp manager
-bool init(CephContext* cct);
+bool init(StoneContext* cct);
 
 // shutdown the amqp manager
 void shutdown();

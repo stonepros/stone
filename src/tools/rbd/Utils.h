@@ -215,7 +215,7 @@ int get_local_mirror_image_status(
 std::string timestr(time_t t);
 
 // duplicate here to not include librbd_internal lib
-uint64_t get_rbd_default_features(CephContext* cct);
+uint64_t get_rbd_default_features(StoneContext* cct);
 
 void get_mirror_peer_sites(
     librados::IoCtx& io_ctx,

@@ -29,26 +29,26 @@ public:
 
  public:
   void paxos_encode() {
-    using ceph::encode;
+    using stone::encode;
     encode(version, payload);
     encode(deprecated_session_mon, payload);
     encode(deprecated_session_mon_tid, payload);
   }
 
-  void paxos_decode(ceph::buffer::list::const_iterator& p ) {
-    using ceph::decode;
+  void paxos_decode(stone::buffer::list::const_iterator& p ) {
+    using stone::decode;
     decode(version, p);
     decode(deprecated_session_mon, p);
     decode(deprecated_session_mon_tid, p);
   }
 
   void encode_payload(uint64_t features) override {
-    ceph_abort();
+    stone_abort();
     paxos_encode();
   }
 
   void decode_payload() override {
-    ceph_abort();
+    stone_abort();
     auto p = payload.cbegin();
     paxos_decode(p);
   }

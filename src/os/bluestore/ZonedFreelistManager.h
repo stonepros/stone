@@ -17,7 +17,7 @@
 #include <string>
 #include <mutex>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/buffer.h"
 #include "kv/KeyValueDB.h"
 
@@ -26,7 +26,7 @@ using cfg_reader_t = std::function<int(const std::string&, std::string*)>;
 class ZonedFreelistManager : public FreelistManager {
   std::string meta_prefix;    ///< device size, zone size, etc.
   std::string info_prefix;    ///< per zone write pointer, dead bytes
-  mutable ceph::mutex lock = ceph::make_mutex("ZonedFreelistManager::lock");
+  mutable stone::mutex lock = stone::make_mutex("ZonedFreelistManager::lock");
 
   uint64_t size;	      ///< size of sequential region (bytes)
   uint64_t bytes_per_block;   ///< bytes per allocation unit (bytes)
@@ -54,7 +54,7 @@ class ZonedFreelistManager : public FreelistManager {
   int _read_cfg(cfg_reader_t cfg_reader);
 
 public:
-  ZonedFreelistManager(CephContext* cct,
+  ZonedFreelistManager(StoneContext* cct,
 		       std::string meta_prefix,
 		       std::string info_prefix);
 

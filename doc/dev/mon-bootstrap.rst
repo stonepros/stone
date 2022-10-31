@@ -24,7 +24,7 @@ Logical id
 ==========
 
 The logical id should be unique across the cluster.  It will be
-appended to ``mon.`` to logically describe the monitor in the Ceph
+appended to ``mon.`` to logically describe the monitor in the Stone
 cluster.  For example, if the logical id is ``foo``, the monitor's
 name will be ``mon.foo``.
 

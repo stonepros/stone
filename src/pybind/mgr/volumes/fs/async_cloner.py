@@ -6,7 +6,7 @@ import logging
 from contextlib import contextmanager
 from typing import Optional
 
-import cephfs
+import stonefs
 from mgr_util import lock_timeout_log
 
 from .async_job import AsyncJobs
@@ -120,7 +120,7 @@ def sync_attrs(fs_handle, target_path, source_statx):
         fs_handle.lutimes(target_path, (time.mktime(source_statx["atime"].timetuple()),
                                         time.mktime(source_statx["mtime"].timetuple())))
         fs_handle.lchmod(target_path, source_statx["mode"])
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         log.warning("error synchronizing attrs for {0} ({1})".format(target_path, e))
         raise e
 
@@ -140,20 +140,20 @@ def bulk_copy(fs_handle, source_path, dst_path, should_cancel):
                         log.debug("d={0}".format(d))
                         d_full_src = os.path.join(src_root_path, d.d_name)
                         d_full_dst = os.path.join(dst_root_path, d.d_name)
-                        stx = fs_handle.statx(d_full_src, cephfs.CEPH_STATX_MODE  |
-                                                          cephfs.CEPH_STATX_UID   |
-                                                          cephfs.CEPH_STATX_GID   |
-                                                          cephfs.CEPH_STATX_ATIME |
-                                                          cephfs.CEPH_STATX_MTIME |
-                                                          cephfs.CEPH_STATX_SIZE,
-                                                          cephfs.AT_SYMLINK_NOFOLLOW)
+                        stx = fs_handle.statx(d_full_src, stonefs.STONE_STATX_MODE  |
+                                                          stonefs.STONE_STATX_UID   |
+                                                          stonefs.STONE_STATX_GID   |
+                                                          stonefs.STONE_STATX_ATIME |
+                                                          stonefs.STONE_STATX_MTIME |
+                                                          stonefs.STONE_STATX_SIZE,
+                                                          stonefs.AT_SYMLINK_NOFOLLOW)
                         handled = True
                         mo = stx["mode"] & ~stat.S_IFMT(stx["mode"])
                         if stat.S_ISDIR(stx["mode"]):
                             log.debug("cptree: (DIR) {0}".format(d_full_src))
                             try:
                                 fs_handle.mkdir(d_full_dst, mo)
-                            except cephfs.Error as e:
+                            except stonefs.Error as e:
                                 if not e.args[0] == errno.EEXIST:
                                     raise
                             cptree(d_full_src, d_full_dst)
@@ -162,7 +162,7 @@ def bulk_copy(fs_handle, source_path, dst_path, should_cancel):
                             target = fs_handle.readlink(d_full_src, 4096)
                             try:
                                 fs_handle.symlink(target[:stx["size"]], d_full_dst)
-                            except cephfs.Error as e:
+                            except stonefs.Error as e:
                                 if not e.args[0] == errno.EEXIST:
                                     raise
                         elif stat.S_ISREG(stx["mode"]):
@@ -174,12 +174,12 @@ def bulk_copy(fs_handle, source_path, dst_path, should_cancel):
                         if handled:
                             sync_attrs(fs_handle, d_full_dst, stx)
                     d = fs_handle.readdir(dir_handle)
-                stx_root = fs_handle.statx(src_root_path, cephfs.CEPH_STATX_ATIME |
-                                                          cephfs.CEPH_STATX_MTIME,
-                                                          cephfs.AT_SYMLINK_NOFOLLOW)
+                stx_root = fs_handle.statx(src_root_path, stonefs.STONE_STATX_ATIME |
+                                                          stonefs.STONE_STATX_MTIME,
+                                                          stonefs.AT_SYMLINK_NOFOLLOW)
                 fs_handle.lutimes(dst_root_path, (time.mktime(stx_root["atime"].timetuple()),
                                                   time.mktime(stx_root["mtime"].timetuple())))
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             if not e.args[0] == errno.ENOENT:
                 raise VolumeException(-e.args[0], e.args[1])
     cptree(source_path, dst_path)
@@ -191,30 +191,30 @@ def set_quota_on_clone(fs_handle, clone_volumes_pair):
     dst_path = clone_volumes_pair[0].path
     quota = None # type: Optional[int]
     try:
-        quota = int(fs_handle.getxattr(src_path, 'ceph.quota.max_bytes').decode('utf-8'))
-    except cephfs.NoData:
+        quota = int(fs_handle.getxattr(src_path, 'stone.quota.max_bytes').decode('utf-8'))
+    except stonefs.NoData:
         pass
 
     if quota is not None:
         try:
-            fs_handle.setxattr(dst_path, 'ceph.quota.max_bytes', str(quota).encode('utf-8'), 0)
-        except cephfs.InvalidValue:
+            fs_handle.setxattr(dst_path, 'stone.quota.max_bytes', str(quota).encode('utf-8'), 0)
+        except stonefs.InvalidValue:
             raise VolumeException(-errno.EINVAL, "invalid size specified: '{0}'".format(quota))
-        except cephfs.Error as e:
+        except stonefs.Error as e:
              raise VolumeException(-e.args[0], e.args[1])
 
     quota_files = None # type: Optional[int]
     try:
-        quota_files = int(fs_handle.getxattr(src_path, 'ceph.quota.max_files').decode('utf-8'))
-    except cephfs.NoData:
+        quota_files = int(fs_handle.getxattr(src_path, 'stone.quota.max_files').decode('utf-8'))
+    except stonefs.NoData:
         pass
 
     if quota_files is not None:
         try:
-            fs_handle.setxattr(dst_path, 'ceph.quota.max_files', str(quota_files).encode('utf-8'), 0)
-        except cephfs.InvalidValue:
+            fs_handle.setxattr(dst_path, 'stone.quota.max_files', str(quota_files).encode('utf-8'), 0)
+        except stonefs.InvalidValue:
             raise VolumeException(-errno.EINVAL, "invalid file count specified: '{0}'".format(quota_files))
-        except cephfs.Error as e:
+        except stonefs.Error as e:
              raise VolumeException(-e.args[0], e.args[1])
 
 def do_clone(fs_client, volspec, volname, groupname, subvolname, should_cancel):

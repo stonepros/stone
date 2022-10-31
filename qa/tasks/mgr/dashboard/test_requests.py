@@ -11,7 +11,7 @@ class RequestsTest(DashboardTestCase):
         self._get('/api/summary')
         self.assertHeaders({
             'Content-Encoding': 'gzip',
-            'Content-Type': 'application/vnd.ceph.api.v{}+json'.format(DEFAULT_API_VERSION)
+            'Content-Type': 'application/vnd.stone.api.v{}+json'.format(DEFAULT_API_VERSION)
         })
 
     def test_force_no_gzip(self):
@@ -26,8 +26,8 @@ class RequestsTest(DashboardTestCase):
     def test_server(self):
         self._get('/api/summary')
         self.assertHeaders({
-            'server': 'Ceph-Dashboard',
-            'Content-Type': 'application/vnd.ceph.api.v{}+json'.format(DEFAULT_API_VERSION),
+            'server': 'Stone-Dashboard',
+            'Content-Type': 'application/vnd.stone.api.v{}+json'.format(DEFAULT_API_VERSION),
             'Content-Security-Policy': "frame-ancestors 'self';",
             'X-Content-Type-Options': 'nosniff',
             'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload'

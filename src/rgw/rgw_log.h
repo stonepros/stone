@@ -10,7 +10,7 @@
 #include <vector>
 #include <fstream>
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 class RGWRados;
 
@@ -129,7 +129,7 @@ struct rgw_log_entry {
     }
     DECODE_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(list<rgw_log_entry*>& o);
 };
 WRITE_CLASS_ENCODER(rgw_log_entry)
@@ -149,8 +149,8 @@ public:
 };
 
 class JsonOpsLogSink : public OpsLogSink {
-  ceph::Formatter *formatter;
-  ceph::mutex lock = ceph::make_mutex("JsonOpsLogSink");
+  stone::Formatter *formatter;
+  stone::mutex lock = stone::make_mutex("JsonOpsLogSink");
 
   void formatter_to_bl(bufferlist& bl);
 protected:
@@ -162,12 +162,12 @@ public:
 };
 
 class OpsLogFile : public JsonOpsLogSink, public Thread, public DoutPrefixProvider {
-  CephContext* cct;
-  ceph::mutex log_mutex = ceph::make_mutex("OpsLogFile_log");
-  ceph::mutex flush_mutex = ceph::make_mutex("OpsLogFile_flush");
+  StoneContext* cct;
+  stone::mutex log_mutex = stone::make_mutex("OpsLogFile_log");
+  stone::mutex flush_mutex = stone::make_mutex("OpsLogFile_flush");
   std::vector<bufferlist> log_buffer;
   std::vector<bufferlist> flush_buffer;
-  ceph::condition_variable cond_flush;
+  stone::condition_variable cond_flush;
   std::ofstream file;
   bool stopped;
   uint64_t data_size;
@@ -178,9 +178,9 @@ protected:
   int log_json(struct req_state* s, bufferlist& bl) override;
   void *entry() override;
 public:
-  OpsLogFile(CephContext* cct, std::string& path, uint64_t max_data_size);
+  OpsLogFile(StoneContext* cct, std::string& path, uint64_t max_data_size);
   ~OpsLogFile() override;
-  CephContext *get_cct() const override { return cct; }
+  StoneContext *get_cct() const override { return cct; }
   unsigned get_subsys() const override { return dout_subsys; }
   std::ostream& gen_prefix(std::ostream& out) const override { return out << "rgw OpsLogFile: "; }
   void start();
@@ -193,7 +193,7 @@ protected:
   void init_connection(bufferlist& bl) override;
 
 public:
-  OpsLogSocket(CephContext *cct, uint64_t _backlog);
+  OpsLogSocket(StoneContext *cct, uint64_t _backlog);
 };
 
 class OpsLogRados : public OpsLogSink {
@@ -207,10 +207,10 @@ class RGWREST;
 
 int rgw_log_op(RGWREST* const rest, struct req_state* s,
 	       const std::string& op_name, OpsLogSink* olog);
-void rgw_log_usage_init(CephContext *cct, RGWRados *store);
+void rgw_log_usage_init(StoneContext *cct, RGWRados *store);
 void rgw_log_usage_finalize();
 void rgw_format_ops_log_entry(struct rgw_log_entry& entry,
-			      ceph::Formatter *formatter);
+			      stone::Formatter *formatter);
 
 #endif /* STONE_RGW_LOG_H */
 

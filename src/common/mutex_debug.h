@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -21,14 +21,14 @@
 
 #include <pthread.h>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/common_fwd.h"
 
-#include "ceph_time.h"
+#include "stone_time.h"
 #include "likely.h"
 #include "lockdep.h"
 
-namespace ceph {
+namespace stone {
 namespace mutex_debug_detail {
 
 class mutex_debugging_base
@@ -81,9 +81,9 @@ private:
       r = pthread_mutexattr_settype(&a, PTHREAD_MUTEX_RECURSIVE);
     else
       r = pthread_mutexattr_settype(&a, PTHREAD_MUTEX_ERRORCHECK);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
     r = pthread_mutex_init(&m, &a);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 
   bool enable_lockdep(bool no_lockdep) const {
@@ -107,7 +107,7 @@ public:
   // Mutex is Destructible
   ~mutex_debug_impl() {
     int r = pthread_mutex_destroy(&m);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 
   // Mutex concept is non-Copyable
@@ -126,12 +126,12 @@ public:
 		 r == EBUSY)) {
       throw std::system_error(r, std::generic_category());
     }
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 
   void unlock_impl() noexcept {
     int r = pthread_mutex_unlock(&m);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 
   bool try_lock_impl() {
@@ -151,18 +151,18 @@ public:
 
   void _post_lock() {
     if (!recursive)
-      ceph_assert(nlock == 0);
+      stone_assert(nlock == 0);
     locked_by = std::this_thread::get_id();
     nlock.fetch_add(1, std::memory_order_release);
   }
 
   void _pre_unlock() {
     if (recursive) {
-      ceph_assert(nlock > 0);
+      stone_assert(nlock > 0);
     } else {
-      ceph_assert(nlock == 1);
+      stone_assert(nlock == 1);
     }
-    ceph_assert(locked_by == std::this_thread::get_id());
+    stone_assert(locked_by == std::this_thread::get_id());
     if (nlock == 1)
       locked_by = std::thread::id();
     nlock.fetch_sub(1, std::memory_order_release);
@@ -204,6 +204,6 @@ public:
 } // namespace mutex_debug_detail
 typedef mutex_debug_detail::mutex_debug_impl<false> mutex_debug;
 typedef mutex_debug_detail::mutex_debug_impl<true> mutex_recursive_debug;
-} // namespace ceph
+} // namespace stone
 
 #endif

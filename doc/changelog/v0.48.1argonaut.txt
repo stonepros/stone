@@ -114,7 +114,7 @@ commit 7084f29544f431b7c6a3286356f2448ae0333eda
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Aug 8 14:01:53 2012 -0700
 
-    mkcephfs: use default osd_data, _journal values
+    mkstonefs: use default osd_data, _journal values
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     Reviewed-by: Greg Farnum <greg@inktank.com>
@@ -123,13 +123,13 @@ commit 96b1a496cdfda34a5efdb6686becf0d2e7e3a1c0
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Aug 8 14:01:35 2012 -0700
 
-    mkcephfs: use new default keyring locations
+    mkstonefs: use new default keyring locations
     
-    The ceph-conf command only parses the conf; it does not apply default
-    config values.  This breaks mkcephfs if values are not specified in the
+    The stone-conf command only parses the conf; it does not apply default
+    config values.  This breaks mkstonefs if values are not specified in the
     config.
     
-    Let ceph-osd create its own key, fix copying, and fix creation/copying for
+    Let stone-osd create its own key, fix copying, and fix creation/copying for
     the mds.
     
     Fixes: #2845
@@ -276,7 +276,7 @@ commit 81d72e5d7ba4713eb7c290878d901e21c0709028
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Jul 23 10:47:10 2012 -0700
 
-    mon: make 'ceph osd rm ...' wipe out all state bits, not just EXISTS
+    mon: make 'stone osd rm ...' wipe out all state bits, not just EXISTS
     
     This ensures that when a new osd reclaims that id it behaves as if it were
     really new.
@@ -293,8 +293,8 @@ Date:   Mon Jul 9 20:54:19 2012 -0700
     This was creating a new cluster connection/session per iteration, and
     along with it a few service threads and sockets and so forth.
     
-    Unfortunately, librados leaks like a sieve, starting with CephContext
-    and ceph::crypto::init().  See #845 and #2067.
+    Unfortunately, librados leaks like a sieve, starting with StoneContext
+    and stone::crypto::init().  See #845 and #2067.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
 
@@ -587,9 +587,9 @@ commit 2869039b79027e530c2863ebe990662685e4bbe6
 Author: Pascal de Bruijn | Unilogic Networks B.V <pascal@unilogicnetworks.net>
 Date:   Wed Jul 11 15:23:16 2012 +0200
 
-    Robustify ceph-rbdnamer and adapt udev rules
+    Robustify stone-rbdnamer and adapt udev rules
     
-    Below is a patch which makes the ceph-rbdnamer script more robust and
+    Below is a patch which makes the stone-rbdnamer script more robust and
     fixes a problem with the rbd udev rules.
     
     On our setup we encountered a symlink which was linked to the wrong rbd:
@@ -599,18 +599,18 @@ Date:   Wed Jul 11 15:23:16 2012 +0200
     While that link should have gone to /dev/rbd3 (on which a
     partition /dev/rbd3p1 was present).
     
-    Now the old udev rule passes %n to the ceph-rbdnamer script, the problem
+    Now the old udev rule passes %n to the stone-rbdnamer script, the problem
     with %n is that %n results in a value of 3 (for rbd3), but in a value of
     1 (for rbd3p1), so it seems it can't be depended upon for rbdnaming.
     
-    In the patch below the ceph-rbdnamer script is made more robust and it
+    In the patch below the stone-rbdnamer script is made more robust and it
     now it can be called in various ways:
     
-      /usr/bin/ceph-rbdnamer /dev/rbd3
-      /usr/bin/ceph-rbdnamer /dev/rbd3p1
-      /usr/bin/ceph-rbdnamer rbd3
-      /usr/bin/ceph-rbdnamer rbd3p1
-      /usr/bin/ceph-rbdnamer 3
+      /usr/bin/stone-rbdnamer /dev/rbd3
+      /usr/bin/stone-rbdnamer /dev/rbd3p1
+      /usr/bin/stone-rbdnamer rbd3
+      /usr/bin/stone-rbdnamer rbd3p1
+      /usr/bin/stone-rbdnamer 3
     
     Even with all these different styles of calling the modified script, it
     should now return the same rbdname. This change "has" to be combined
@@ -622,12 +622,12 @@ Date:   Wed Jul 11 15:23:16 2012 +0200
     
     So the rbdname was symlinked to the partition on the rbd instead of the
     rbd itself. So what probably went wrong is udev discovering the disk and
-    running ceph-rbdnamer which resolved it to myrbd so the following
+    running stone-rbdnamer which resolved it to myrbd so the following
     symlink was created:
     
       /dev/rbd/mypool/myrbd -> /dev/rbd3
     
-    However partitions would be discovered next and ceph-rbdnamer would be
+    However partitions would be discovered next and stone-rbdnamer would be
     run with rbd3p1 (%k) as parameter, resulting in the name myrbd too, with
     the previous correct symlink being overwritten with a faulty one:
     
@@ -692,7 +692,7 @@ Date:   Mon Jul 16 13:11:24 2012 -0700
          0> 2012-05-19 17:24:09.113684 7fe66be3d700 -1 osd/OSD.h: In function 'void OSD::unreg_last_pg_scrub(pg_t, utime_t)' thread 7fe66be3d700 time 2012-05-19 17:24:09.095719
     osd/OSD.h: 840: FAILED assert(last_scrub_pg.count(p))
     
-     ceph version 0.46-313-g4277d4d (commit:4277d4d3378dde4264e2b8d211371569219c6e4b)
+     stone version 0.46-313-g4277d4d (commit:4277d4d3378dde4264e2b8d211371569219c6e4b)
      1: (OSD::unreg_last_pg_scrub(pg_t, utime_t)+0x149) [0x641f49]
      2: (PG::proc_primary_info(ObjectStore::Transaction&, pg_info_t const&)+0x5e) [0x63383e]
      3: (PG::RecoveryState::ReplicaActive::react(PG::RecoveryState::MInfoRec const&)+0x4a) [0x633eda]
@@ -798,7 +798,7 @@ commit d6c766ea425d87a2f2405c08dcec66f000a4e1a0
 Author: James Page <james.page@ubuntu.com>
 Date:   Wed Jul 11 11:34:21 2012 -0700
 
-    debian: fix ceph-fs-common-dbg depends
+    debian: fix stone-fs-common-dbg depends
     
     Signed-off-by: James Page <james.page@ubuntu.com>
 
@@ -1018,7 +1018,7 @@ commit 23d31d3e2aa7f2b474a7b8e9d40deb245d8be9de
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jul 6 08:47:44 2012 -0700
 
-    ceph.spec.in: add ceph-disk-{activate,prepare}
+    stone.spec.in: add stone-disk-{activate,prepare}
     
     Reported-by: Jimmy Tang <jtang@tchpc.tcd.ie>
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -1027,7 +1027,7 @@ commit ea11c7f9d8fd9795e127cfd7e8a1f28d4f5472e9
 Author: Wido den Hollander <wido@widodh.nl>
 Date:   Thu Jul 5 15:29:54 2012 +0200
 
-    Allow URL-safe base64 cephx keys to be decoded.
+    Allow URL-safe base64 stonex keys to be decoded.
     
     In these cases + and / are replaced by - and _ to prevent problems when using
     the base64 strings in URLs.
@@ -1101,7 +1101,7 @@ commit 5674158163e9c1d50985796931240b237676b74d
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Jul 3 11:32:57 2012 -0700
 
-    ceph: fix cli help test
+    stone: fix cli help test
     
     Signed-off-by: Sage Weil <sage@inktank.com>
 
@@ -1124,7 +1124,7 @@ commit 32833e88a1ad793fa4be86101ce9c22b6f677c06
 Author: Kyle Bader <kyle.bader@dreamhost.com>
 Date:   Tue Jul 3 11:20:38 2012 -0700
 
-    ceph: better usage
+    stone: better usage
     
     Signed-off-by: Kyle Bader <kyle.bader@dreamhost.com>
 
@@ -1132,7 +1132,7 @@ commit 67455c21879c9c117f6402259b5e2da84524e169
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Jul 3 09:20:35 2012 -0700
 
-    debian: strip new ceph-mds package
+    debian: strip new stone-mds package
     
     Reported-by: Amon Ott <a.ott@m-privacy.de>
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -1241,7 +1241,7 @@ Date:   Wed Jun 27 17:06:40 2012 -0700
     of a check for m being non-zero in the dispatch_entry() thread.  Adjust the
     enums so that they get delivered again.
     
-    This fixes hangs when, for example, the ceph tool sends a command, gets a
+    This fixes hangs when, for example, the stone tool sends a command, gets a
     connection reset, and doesn't get the connect callback to resend after
     reconnecting to a new monitor.
     

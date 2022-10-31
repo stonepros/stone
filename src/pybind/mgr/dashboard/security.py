@@ -19,7 +19,7 @@ class Scope(object):
     ISCSI = "iscsi"
     RBD_MIRRORING = "rbd-mirroring"
     RGW = "rgw"
-    CEPHFS = "cephfs"
+    STONEFS = "stonefs"
     MANAGER = "manager"
     LOG = "log"
     GRAFANA = "grafana"

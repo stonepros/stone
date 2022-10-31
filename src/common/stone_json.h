@@ -6,8 +6,8 @@
 #include <include/types.h>
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
-#include <include/ceph_fs.h>
-#include "common/ceph_time.h"
+#include <include/stone_fs.h>
+#include "common/stone_time.h"
 
 #include "json_spirit/json_spirit.h"
 
@@ -110,7 +110,7 @@ public:
   void set_failure() { success = false; }
 };
 
-void encode_json(const char *name, const JSONObj::data_val& v, ceph::Formatter *f);
+void encode_json(const char *name, const JSONObj::data_val& v, stone::Formatter *f);
 
 class JSONDecoder {
 public:
@@ -120,7 +120,7 @@ public:
 
   JSONParser parser;
 
-  JSONDecoder(ceph::buffer::list& bl) {
+  JSONDecoder(stone::buffer::list& bl) {
     if (!parser.parse(bl.c_str(), bl.length())) {
       std::cout << "JSONDecoder::err()" << std::endl;
       throw JSONDecoder::err("failed to parse JSON input");
@@ -167,13 +167,13 @@ void decode_json_obj(long& val, JSONObj *obj);
 void decode_json_obj(unsigned& val, JSONObj *obj);
 void decode_json_obj(int& val, JSONObj *obj);
 void decode_json_obj(bool& val, JSONObj *obj);
-void decode_json_obj(ceph::buffer::list& val, JSONObj *obj);
+void decode_json_obj(stone::buffer::list& val, JSONObj *obj);
 class utime_t;
 void decode_json_obj(utime_t& val, JSONObj *obj);
-void decode_json_obj(ceph_dir_layout& i, JSONObj *obj);
+void decode_json_obj(stone_dir_layout& i, JSONObj *obj);
 
-void decode_json_obj(ceph::real_time& val, JSONObj *obj);
-void decode_json_obj(ceph::coarse_real_time& val, JSONObj *obj);
+void decode_json_obj(stone::real_time& val, JSONObj *obj);
+void decode_json_obj(stone::coarse_real_time& val, JSONObj *obj);
 
 template<class T>
 void decode_json_obj(std::list<T>& l, JSONObj *obj)
@@ -458,7 +458,7 @@ public:
     virtual ~HandlerBase() {}
 
     virtual std::type_index get_type() = 0;
-    virtual void encode_json(const char *name, const void *pval, ceph::Formatter *) const = 0;
+    virtual void encode_json(const char *name, const void *pval, stone::Formatter *) const = 0;
   };
 
   template <class T>
@@ -480,7 +480,7 @@ public:
   }
 
   template <class T>
-  bool encode_json(const char *name, const T& val, ceph::Formatter *f) {
+  bool encode_json(const char *name, const T& val, stone::Formatter *f) {
     auto iter = handlers.find(std::type_index(typeid(val)));
     if (iter == handlers.end()) {
       return false;
@@ -492,7 +492,7 @@ public:
 };
 
 template<class T>
-static void encode_json_impl(const char *name, const T& val, ceph::Formatter *f)
+static void encode_json_impl(const char *name, const T& val, stone::Formatter *f)
 {
   f->open_object_section(name);
   val.dump(f);
@@ -500,7 +500,7 @@ static void encode_json_impl(const char *name, const T& val, ceph::Formatter *f)
 }
 
 template<class T>
-static void encode_json(const char *name, const T& val, ceph::Formatter *f)
+static void encode_json(const char *name, const T& val, stone::Formatter *f)
 {
   JSONEncodeFilter *filter = static_cast<JSONEncodeFilter *>(f->get_external_feature_handler("JSONEncodeFilter"));
 
@@ -512,23 +512,23 @@ static void encode_json(const char *name, const T& val, ceph::Formatter *f)
 
 class utime_t;
 
-void encode_json(const char *name, const std::string& val, ceph::Formatter *f);
-void encode_json(const char *name, const char *val, ceph::Formatter *f);
-void encode_json(const char *name, bool val, ceph::Formatter *f);
-void encode_json(const char *name, int val, ceph::Formatter *f);
-void encode_json(const char *name, unsigned val, ceph::Formatter *f);
-void encode_json(const char *name, long val, ceph::Formatter *f);
-void encode_json(const char *name, unsigned long val, ceph::Formatter *f);
-void encode_json(const char *name, long long val, ceph::Formatter *f);
-void encode_json(const char *name, const utime_t& val, ceph::Formatter *f);
-void encode_json(const char *name, const ceph::buffer::list& bl, ceph::Formatter *f);
-void encode_json(const char *name, long long unsigned val, ceph::Formatter *f);
+void encode_json(const char *name, const std::string& val, stone::Formatter *f);
+void encode_json(const char *name, const char *val, stone::Formatter *f);
+void encode_json(const char *name, bool val, stone::Formatter *f);
+void encode_json(const char *name, int val, stone::Formatter *f);
+void encode_json(const char *name, unsigned val, stone::Formatter *f);
+void encode_json(const char *name, long val, stone::Formatter *f);
+void encode_json(const char *name, unsigned long val, stone::Formatter *f);
+void encode_json(const char *name, long long val, stone::Formatter *f);
+void encode_json(const char *name, const utime_t& val, stone::Formatter *f);
+void encode_json(const char *name, const stone::buffer::list& bl, stone::Formatter *f);
+void encode_json(const char *name, long long unsigned val, stone::Formatter *f);
 
-void encode_json(const char *name, const ceph::real_time& val, ceph::Formatter *f);
-void encode_json(const char *name, const ceph::coarse_real_time& val, ceph::Formatter *f);
+void encode_json(const char *name, const stone::real_time& val, stone::Formatter *f);
+void encode_json(const char *name, const stone::coarse_real_time& val, stone::Formatter *f);
 
 template<class T>
-static void encode_json(const char *name, const std::list<T>& l, ceph::Formatter *f)
+static void encode_json(const char *name, const std::list<T>& l, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto iter = l.cbegin(); iter != l.cend(); ++iter) {
@@ -538,7 +538,7 @@ static void encode_json(const char *name, const std::list<T>& l, ceph::Formatter
 }
 
 template<class T>
-static void encode_json(const char *name, const std::deque<T>& l, ceph::Formatter *f)
+static void encode_json(const char *name, const std::deque<T>& l, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto iter = l.cbegin(); iter != l.cend(); ++iter) {
@@ -548,7 +548,7 @@ static void encode_json(const char *name, const std::deque<T>& l, ceph::Formatte
 }
 
 template<class T, class Compare = std::less<T> >
-static void encode_json(const char *name, const std::set<T, Compare>& l, ceph::Formatter *f)
+static void encode_json(const char *name, const std::set<T, Compare>& l, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto iter = l.cbegin(); iter != l.cend(); ++iter) {
@@ -560,7 +560,7 @@ static void encode_json(const char *name, const std::set<T, Compare>& l, ceph::F
 template<class T, class Compare = std::less<T> >
 static void encode_json(const char *name,
                         const boost::container::flat_set<T, Compare>& l,
-                        ceph::Formatter *f)
+                        stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto iter = l.cbegin(); iter != l.cend(); ++iter) {
@@ -570,7 +570,7 @@ static void encode_json(const char *name,
 }
 
 template<class T>
-static void encode_json(const char *name, const std::vector<T>& l, ceph::Formatter *f)
+static void encode_json(const char *name, const std::vector<T>& l, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto iter = l.cbegin(); iter != l.cend(); ++iter) {
@@ -580,7 +580,7 @@ static void encode_json(const char *name, const std::vector<T>& l, ceph::Formatt
 }
 
 template<class K, class V, class C = std::less<K>>
-static void encode_json(const char *name, const std::map<K, V, C>& m, ceph::Formatter *f)
+static void encode_json(const char *name, const std::map<K, V, C>& m, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto i = m.cbegin(); i != m.cend(); ++i) {
@@ -593,7 +593,7 @@ static void encode_json(const char *name, const std::map<K, V, C>& m, ceph::Form
 }
 
 template<class K, class V, class C = std::less<K> >
-static void encode_json(const char *name, const boost::container::flat_map<K, V, C>& m, ceph::Formatter *f)
+static void encode_json(const char *name, const boost::container::flat_map<K, V, C>& m, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto i = m.cbegin(); i != m.cend(); ++i) {
@@ -606,7 +606,7 @@ static void encode_json(const char *name, const boost::container::flat_map<K, V,
 }
 
 template<class K, class V>
-static void encode_json(const char *name, const std::multimap<K, V>& m, ceph::Formatter *f)
+static void encode_json(const char *name, const std::multimap<K, V>& m, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto i = m.begin(); i != m.end(); ++i) {
@@ -619,7 +619,7 @@ static void encode_json(const char *name, const std::multimap<K, V>& m, ceph::Fo
 }
 
 template<class K, class V>
-static void encode_json(const char *name, const boost::container::flat_map<K, V>& m, ceph::Formatter *f)
+static void encode_json(const char *name, const boost::container::flat_map<K, V>& m, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto i = m.begin(); i != m.end(); ++i) {
@@ -632,7 +632,7 @@ static void encode_json(const char *name, const boost::container::flat_map<K, V>
 }
 
 template<class K, class V>
-void encode_json_map(const char *name, const std::map<K, V>& m, ceph::Formatter *f)
+void encode_json_map(const char *name, const std::map<K, V>& m, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto iter = m.cbegin(); iter != m.cend(); ++iter) {
@@ -645,8 +645,8 @@ void encode_json_map(const char *name, const std::map<K, V>& m, ceph::Formatter 
 template<class K, class V>
 void encode_json_map(const char *name, const char *index_name,
                      const char *object_name, const char *value_name,
-                     void (*cb)(const char *, const V&, ceph::Formatter *, void *), void *parent,
-                     const std::map<K, V>& m, ceph::Formatter *f)
+                     void (*cb)(const char *, const V&, stone::Formatter *, void *), void *parent,
+                     const std::map<K, V>& m, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto iter = m.cbegin(); iter != m.cend(); ++iter) {
@@ -678,20 +678,20 @@ void encode_json_map(const char *name, const char *index_name,
 template<class K, class V>
 void encode_json_map(const char *name, const char *index_name,
                      const char *object_name, const char *value_name,
-                     const std::map<K, V>& m, ceph::Formatter *f)
+                     const std::map<K, V>& m, stone::Formatter *f)
 {
   encode_json_map<K, V>(name, index_name, object_name, value_name, NULL, NULL, m, f);
 }
 
 template<class K, class V>
 void encode_json_map(const char *name, const char *index_name, const char *value_name,
-                     const std::map<K, V>& m, ceph::Formatter *f)
+                     const std::map<K, V>& m, stone::Formatter *f)
 {
   encode_json_map<K, V>(name, index_name, NULL, value_name, NULL, NULL, m, f);
 }
 
 template <class T>
-static void encode_json(const char *name, const std::optional<T>& o, ceph::Formatter *f)
+static void encode_json(const char *name, const std::optional<T>& o, stone::Formatter *f)
 {
   if (!o) {
     return;
@@ -701,7 +701,7 @@ static void encode_json(const char *name, const std::optional<T>& o, ceph::Forma
 
 
 template<class K, class V>
-void encode_json_map(const char *name, const boost::container::flat_map<K, V>& m, ceph::Formatter *f)
+void encode_json_map(const char *name, const boost::container::flat_map<K, V>& m, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto iter = m.cbegin(); iter != m.cend(); ++iter) {
@@ -714,8 +714,8 @@ void encode_json_map(const char *name, const boost::container::flat_map<K, V>& m
 template<class K, class V>
 void encode_json_map(const char *name, const char *index_name,
                      const char *object_name, const char *value_name,
-                     void (*cb)(const char *, const V&, ceph::Formatter *, void *), void *parent,
-                     const boost::container::flat_map<K, V>& m, ceph::Formatter *f)
+                     void (*cb)(const char *, const V&, stone::Formatter *, void *), void *parent,
+                     const boost::container::flat_map<K, V>& m, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (auto iter = m.cbegin(); iter != m.cend(); ++iter) {
@@ -747,20 +747,20 @@ void encode_json_map(const char *name, const char *index_name,
 template<class K, class V>
 void encode_json_map(const char *name, const char *index_name,
                      const char *object_name, const char *value_name,
-                     const boost::container::flat_map<K, V>& m, ceph::Formatter *f)
+                     const boost::container::flat_map<K, V>& m, stone::Formatter *f)
 {
   encode_json_map<K, V>(name, index_name, object_name, value_name, NULL, NULL, m, f);
 }
 
 template<class K, class V>
 void encode_json_map(const char *name, const char *index_name, const char *value_name,
-                     const boost::container::flat_map<K, V>& m, ceph::Formatter *f)
+                     const boost::container::flat_map<K, V>& m, stone::Formatter *f)
 {
   encode_json_map<K, V>(name, index_name, NULL, value_name, NULL, NULL, m, f);
 }
 
 
-class JSONFormattable : public ceph::JSONFormatter {
+class JSONFormattable : public stone::JSONFormatter {
   JSONObj::data_val value;
   std::vector<JSONFormattable> arr;
   std::map<std::string, JSONFormattable> obj;
@@ -807,7 +807,7 @@ public:
     }
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 1, bl);
     encode((uint8_t)type, bl);
     encode(value.str, bl);
@@ -817,7 +817,7 @@ public:
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(2, bl);
     uint8_t t;
     decode(t, bl);
@@ -917,7 +917,7 @@ public:
 
   void derive_from(const JSONFormattable& jf);
 
-  void encode_json(const char *name, ceph::Formatter *f) const;
+  void encode_json(const char *name, stone::Formatter *f) const;
 
   bool is_array() const {
     return (type == FMT_ARRAY);
@@ -925,6 +925,6 @@ public:
 };
 WRITE_CLASS_ENCODER(JSONFormattable)
 
-void encode_json(const char *name, const JSONFormattable& v, ceph::Formatter *f);
+void encode_json(const char *name, const JSONFormattable& v, stone::Formatter *f);
 
 #endif

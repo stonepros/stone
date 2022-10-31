@@ -33,18 +33,18 @@ enum {
 
 struct EntityAuth {
   CryptoKey key;
-  std::map<std::string, ceph::buffer::list> caps;
+  std::map<std::string, stone::buffer::list> caps;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     __u8 struct_v = 2;
-    using ceph::encode;
+    using stone::encode;
     encode(struct_v, bl);
     encode((uint64_t)STONE_AUTH_UID_DEFAULT, bl);
     encode(key, bl);
     encode(caps, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     if (struct_v >= 2) {
@@ -63,20 +63,20 @@ inline std::ostream& operator<<(std::ostream& out, const EntityAuth& a) {
 
 struct AuthCapsInfo {
   bool allow_all;
-  ceph::buffer::list caps;
+  stone::buffer::list caps;
 
   AuthCapsInfo() : allow_all(false) {}
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     encode(struct_v, bl);
     __u8 a = (__u8)allow_all;
     encode(a, bl);
     encode(caps, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     __u8 a;
@@ -109,8 +109,8 @@ struct AuthTicket {
     renew_after += ttl / 2.0;
   }
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 2;
     encode(struct_v, bl);
     encode(name, bl);
@@ -121,8 +121,8 @@ struct AuthTicket {
     encode(caps, bl);
     encode(flags, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(name, bl);
@@ -145,15 +145,15 @@ WRITE_CLASS_ENCODER(AuthTicket)
  */
 struct AuthAuthorizer {
   __u32 protocol;
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   CryptoKey session_key;
 
   explicit AuthAuthorizer(__u32 p) : protocol(p) {}
   virtual ~AuthAuthorizer() {}
-  virtual bool verify_reply(ceph::buffer::list::const_iterator& reply,
+  virtual bool verify_reply(stone::buffer::list::const_iterator& reply,
 			    std::string *connection_secret) = 0;
   virtual bool add_challenge(StoneContext *cct,
-			     const ceph::buffer::list& challenge) = 0;
+			     const stone::buffer::list& challenge) = 0;
 };
 
 struct AuthAuthorizerChallenge {
@@ -206,15 +206,15 @@ struct ExpiringCryptoKey {
   CryptoKey key;
   utime_t expiration;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(key, bl);
     encode(expiration, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(key, bl);
@@ -234,15 +234,15 @@ struct RotatingSecrets {
 
   RotatingSecrets() : max_ver(0) {}
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(secrets, bl);
     encode(max_ver, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(secrets, bl);

@@ -19,7 +19,7 @@ public:
   C_WriteRequest(
       T &pwl, const utime_t arrived, io::Extents &&image_extents,
       bufferlist&& cmp_bl, bufferlist&& bl, uint64_t *mismatch_offset,
-      const int fadvise_flags, ceph::mutex &lock,
+      const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req)
     : pwl::C_WriteRequest<T>(
         pwl, arrived, std::move(image_extents), std::move(cmp_bl),
@@ -28,7 +28,7 @@ public:
 
   C_WriteRequest(
       T &pwl, const utime_t arrived, io::Extents &&image_extents,
-      bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+      bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req)
     : pwl::C_WriteRequest<T>(
         pwl, arrived, std::move(image_extents), std::move(bl),
@@ -48,7 +48,7 @@ public:
   C_CompAndWriteRequest(
       T &pwl, const utime_t arrived, io::Extents &&image_extents,
       bufferlist&& cmp_bl, bufferlist&& bl, uint64_t *mismatch_offset,
-      const int fadvise_flags, ceph::mutex &lock,
+      const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req)
     : C_WriteRequest<T>(
         pwl, arrived, std::move(image_extents), std::move(cmp_bl),
@@ -68,7 +68,7 @@ class C_WriteSameRequest : public pwl::C_WriteSameRequest<T> {
 public:
   C_WriteSameRequest(
       T &pwl, const utime_t arrived, io::Extents &&image_extents,
-      bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+      bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req)
     : pwl::C_WriteSameRequest<T>(
         pwl, arrived, std::move(image_extents), std::move(bl), fadvise_flags,

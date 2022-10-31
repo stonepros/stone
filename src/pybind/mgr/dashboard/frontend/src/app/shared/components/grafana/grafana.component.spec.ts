@@ -7,7 +7,7 @@ import { NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
 import { of } from 'rxjs';
 
 import { SettingsService } from '~/app/shared/api/settings.service';
-import { CephReleaseNamePipe } from '~/app/shared/pipes/ceph-release-name.pipe';
+import { StoneReleaseNamePipe } from '~/app/shared/pipes/stone-release-name.pipe';
 import { SummaryService } from '~/app/shared/services/summary.service';
 import { configureTestBed } from '~/testing/unit-test-helper';
 import { AlertPanelComponent } from '../alert-panel/alert-panel.component';
@@ -24,7 +24,7 @@ describe('GrafanaComponent', () => {
   configureTestBed({
     declarations: [GrafanaComponent, AlertPanelComponent, LoadingPanelComponent, DocComponent],
     imports: [NgbAlertModule, HttpClientTestingModule, RouterTestingModule, FormsModule],
-    providers: [CephReleaseNamePipe, SettingsService, SummaryService]
+    providers: [StoneReleaseNamePipe, SettingsService, SummaryService]
   });
 
   beforeEach(() => {

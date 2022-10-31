@@ -9,7 +9,7 @@ import sqlite3
 from typing import Dict, Sequence, Optional, cast, Optional
 from .fs.schedule_client import SnapSchedClient
 from mgr_module import MgrModule, CLIReadCommand, CLIWriteCommand, Option
-from mgr_util import CephfsConnectionException
+from mgr_util import StonefsConnectionException
 from threading import Event
 
 
@@ -54,7 +54,7 @@ class Module(MgrModule):
             return fs_map['filesystems'][0]['mdsmap']['fs_name']
         else:
             self.log.error('No filesystem instance could be found.')
-            raise CephfsConnectionException(
+            raise StonefsConnectionException(
                 -errno.ENOENT, "no filesystem found")
 
     def serve(self):
@@ -77,7 +77,7 @@ class Module(MgrModule):
         try:
             path = cast(str, path)
             ret_scheds = self.client.get_snap_schedules(use_fs, path)
-        except CephfsConnectionException as e:
+        except StonefsConnectionException as e:
             return e.to_tuple()
         if format == 'json':
             json_report = ','.join([ret_sched.report_json() for ret_sched in ret_scheds])
@@ -98,7 +98,7 @@ class Module(MgrModule):
             recursive = cast(bool, recursive)
             scheds = self.client.list_snap_schedules(use_fs, path, recursive)
             self.log.debug(f'recursive is {recursive}')
-        except CephfsConnectionException as e:
+        except StonefsConnectionException as e:
             return e.to_tuple()
         if not scheds:
             if format == 'json':
@@ -139,7 +139,7 @@ class Module(MgrModule):
             return -errno.EEXIST, '', error_msg
         except ValueError as e:
             return -errno.ENOENT, '', str(e)
-        except CephfsConnectionException as e:
+        except StonefsConnectionException as e:
             return e.to_tuple()
         return 0, suc_msg, ''
 
@@ -157,7 +157,7 @@ class Module(MgrModule):
             use_fs = fs if fs else self.default_fs
             abs_path = self.resolve_subvolume_path(fs, subvol, path)
             self.client.rm_snap_schedule(use_fs, abs_path, repeat, start)
-        except CephfsConnectionException as e:
+        except StonefsConnectionException as e:
             return e.to_tuple()
         except ValueError as e:
             return -errno.ENOENT, '', str(e)
@@ -179,7 +179,7 @@ class Module(MgrModule):
             self.client.add_retention_spec(use_fs, abs_path,
                                           retention_spec_or_period,
                                           retention_count)
-        except CephfsConnectionException as e:
+        except StonefsConnectionException as e:
             return e.to_tuple()
         except ValueError as e:
             return -errno.ENOENT, '', str(e)
@@ -201,7 +201,7 @@ class Module(MgrModule):
             self.client.rm_retention_spec(use_fs, abs_path,
                                           retention_spec_or_period,
                                           retention_count)
-        except CephfsConnectionException as e:
+        except StonefsConnectionException as e:
             return e.to_tuple()
         except ValueError as e:
             return -errno.ENOENT, '', str(e)
@@ -221,7 +221,7 @@ class Module(MgrModule):
             use_fs = fs if fs else self.default_fs
             abs_path = self.resolve_subvolume_path(fs, subvol, path)
             self.client.activate_snap_schedule(use_fs, abs_path, repeat, start)
-        except CephfsConnectionException as e:
+        except StonefsConnectionException as e:
             return e.to_tuple()
         except ValueError as e:
             return -errno.ENOENT, '', str(e)
@@ -241,7 +241,7 @@ class Module(MgrModule):
             use_fs = fs if fs else self.default_fs
             abs_path = self.resolve_subvolume_path(fs, subvol, path)
             self.client.deactivate_snap_schedule(use_fs, abs_path, repeat, start)
-        except CephfsConnectionException as e:
+        except StonefsConnectionException as e:
             return e.to_tuple()
         except ValueError as e:
             return -errno.ENOENT, '', str(e)

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -15,7 +15,7 @@
 #ifndef PG_EFFECTS_H_
 #define PG_EFFECTS_H_
 
-#include "include/cephfs/libcephfs.h"
+#include "include/stonefs/libstonefs.h"
 #include "osd/osd_types.h"
 #include <set>
 #include "osdc/Objecter.h"
@@ -30,12 +30,12 @@ class PgFiles
 {
 private:
   Objecter *objecter;
-  struct ceph_mount_info *cmount = nullptr;
+  struct stone_mount_info *cmount = nullptr;
 
   std::set<pg_t> pgs;
   std::set<uint64_t> pools;
 
-  void hit_file(std::string const &path, const struct ceph_statx &stx);
+  void hit_file(std::string const &path, const struct stone_statx &stx);
   void hit_dir(std::string const &path);
 
 

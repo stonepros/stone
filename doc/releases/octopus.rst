@@ -2,231 +2,231 @@ v15.2.8 Octopus
 ===============
 
 This is the 8th backport release in the Octopus series. This release fixes
-a security flaw in CephFS and includes a number of bug fixes. We recommend
+a security flaw in StoneFS and includes a number of bug fixes. We recommend
 users to update to this release.
 
 Notable Changes
 ---------------
 
-* CVE-2020-27781 : OpenStack Manila use of ceph_volume_client.py library allowed
-  tenant access to any Ceph credential's secret. (Kotresh Hiremath Ravishankar,
+* CVE-2020-27781 : OpenStack Manila use of stone_volume_client.py library allowed
+  tenant access to any Stone credential's secret. (Kotresh Hiremath Ravishankar,
   Ramana Raja)
 
-* ceph-volume: The ``lvm batch`` subcommand received a major rewrite. This closed
+* stone-volume: The ``lvm batch`` subcommand received a major rewrite. This closed
   a number of bugs and improves usability in terms of size specification and
   calculation, as well as idempotency behaviour and disk replacement process.
-  Please refer to https://docs.ceph.com/en/latest/ceph-volume/lvm/batch/ for
+  Please refer to https://docs.stone.com/en/latest/stone-volume/lvm/batch/ for
   more detailed information.
 
 * MON: The cluster log now logs health detail every ``mon_health_to_clog_interval``,
   which has been changed from 1hr to 10min. Logging of health detail will be
   skipped if there is no change in health summary since last known.
 
-* The ``ceph df`` command now lists the number of pgs in each pool.
+* The ``stone df`` command now lists the number of pgs in each pool.
 
 * The ``bluefs_preextend_wal_files`` option has been removed.
 
-* It is now possible to specify the initial monitor to contact for Ceph tools
+* It is now possible to specify the initial monitor to contact for Stone tools
   and daemons using the ``mon_host_override`` config option or
   ``--mon-host-override <ip>`` command-line switch. This generally should only
-  be used for debugging and only affects initial communication with Ceph's
+  be used for debugging and only affects initial communication with Stone's
   monitor cluster.
 
 
 Changelog
 ---------
 
-* pybind/ceph_volume_client: disallow authorize on existing auth ids (Kotresh
+* pybind/stone_volume_client: disallow authorize on existing auth ids (Kotresh
   Hiremath Ravishankar, Ramana Raja)
-* Enable per-RBD image monitoring (`pr#37697 <https://github.com/ceph/ceph/pull/37697>`_, Patrick Seidensal)
-* [ceph-volume]: remove unneeded call to get_devices() (`pr#37412 <https://github.com/ceph/ceph/pull/37412>`_, Marc Gariepy)
-* bluestore: fix collection_list ordering (`pr#37048 <https://github.com/ceph/ceph/pull/37048>`_, Mykola Golub)
-* bluestore: mempool's finer granularity + adding missed structs (`pr#37264 <https://github.com/ceph/ceph/pull/37264>`_, Deepika Upadhyay, Igor Fedotov, Adam Kupczyk)
-* bluestore: remove preextended WAL support (`pr#37373 <https://github.com/ceph/ceph/pull/37373>`_, Igor Fedotov)
-* ceph-volume batch: reject partitions in argparser (`pr#38280 <https://github.com/ceph/ceph/pull/38280>`_, Jan Fajerski)
-* ceph-volume inventory: make libstoragemgmt data retrieval optional (`pr#38299 <https://github.com/ceph/ceph/pull/38299>`_, Jan Fajerski)
-* ceph-volume: add libstoragemgmt support (`pr#36852 <https://github.com/ceph/ceph/pull/36852>`_, Paul Cuzner, Satoru Takeuchi)
-* ceph-volume: add no-systemd argument to zap (`pr#37722 <https://github.com/ceph/ceph/pull/37722>`_, wanghongxu)
-* ceph-volume: avoid format strings for now (`pr#37345 <https://github.com/ceph/ceph/pull/37345>`_, Jan Fajerski)
-* ceph-volume: consume mount opt in simple activate (`pr#38014 <https://github.com/ceph/ceph/pull/38014>`_, Dimitri Savineau)
-* ceph-volume: fix filestore/dmcrypt activate (`pr#38199 <https://github.com/ceph/ceph/pull/38199>`_, Guillaume Abrioux)
-* ceph-volume: fix journal size argument not work (`pr#37344 <https://github.com/ceph/ceph/pull/37344>`_, wanghongxu)
-* ceph-volume: fix lvm batch auto with full SSDs (`pr#38045 <https://github.com/ceph/ceph/pull/38045>`_, Dimitri Savineau, Guillaume Abrioux)
-* ceph-volume: fix simple activate when legacy osd (`pr#37194 <https://github.com/ceph/ceph/pull/37194>`_, Guillaume Abrioux)
-* ceph-volume: implement the --log-level flag (`pr#38426 <https://github.com/ceph/ceph/pull/38426>`_, Andrew Schoen)
-* ceph-volume: major batch refactor (`pr#37520 <https://github.com/ceph/ceph/pull/37520>`_, Jan Fajerski, Joshua Schmid)
-* ceph-volume: prepare: use \*-slots arguments for implicit sizing (`pr#38205 <https://github.com/ceph/ceph/pull/38205>`_, Jan Fajerski)
-* ceph-volume: remove mention of dmcache from docs and help text (`pr#38047 <https://github.com/ceph/ceph/pull/38047>`_, Dimitri Savineau, Andrew Schoen)
-* ceph-volume: retry when acquiring lock fails (`pr#36925 <https://github.com/ceph/ceph/pull/36925>`_, Sébastien Han)
-* ceph-volume: simple scan should ignore tmpfs (`pr#36953 <https://github.com/ceph/ceph/pull/36953>`_, Andrew Schoen)
-* ceph-volume: support for mpath devices (`pr#36928 <https://github.com/ceph/ceph/pull/36928>`_, Jan Fajerski)
-* ceph.in: ignore failures to flush stdout (`pr#37225 <https://github.com/ceph/ceph/pull/37225>`_, Dan van der Ster)
-* ceph.spec, debian: add smartmontools, nvme-cli dependencies (`pr#37257 <https://github.com/ceph/ceph/pull/37257>`_, Yaarit Hatuka)
-* cephadm batch backport November (`pr#38155 <https://github.com/ceph/ceph/pull/38155>`_, Ricardo Marques, Sebastian Wagner, Kyr Shatskyy, Dan Williams, Volker Theile, Varsha Rao, Tim Serong, Adam King, Dimitri Savineau, Patrick Seidensal, Dan Mick, Michael Fritch, Joshua Schmid)
-* cephadm batch backport September (1) (`pr#36975 <https://github.com/ceph/ceph/pull/36975>`_, Stephan Müller, Matthew Oliver, Sebastian Wagner, Paul Cuzner, Adam King, Patrick Seidensal, Shraddha Agrawal, Michael Fritch, Dan Mick)
-* cephadm batch backport September (2) (`pr#37436 <https://github.com/ceph/ceph/pull/37436>`_, Varsha Rao, Kiefer Chang, Patrick Donnelly, Sebastian Wagner, Kefu Chai, Guillaume Abrioux, Juan Miguel Olmo Martínez, Paul Cuzner, Volker Theile, Tim Serong, Zac Dover, Adam King, Michael Fritch, Joshua Schmid)
-* cephfs-journal-tool: fix incorrect read_offset when finding missing objects (`pr#37854 <https://github.com/ceph/ceph/pull/37854>`_, Xue Yantao)
-* cephfs: client: fix directory inode can not call release callback (`pr#37017 <https://github.com/ceph/ceph/pull/37017>`_, sepia-liu)
-* cephfs: client: fix extra open ref decrease (`pr#37249 <https://github.com/ceph/ceph/pull/37249>`_, Xiubo Li)
-* cephfs: client: fix inode ll_ref reference count leak (`pr#37839 <https://github.com/ceph/ceph/pull/37839>`_, sepia-liu)
-* cephfs: client: handle readdir reply without Fs cap (`pr#37370 <https://github.com/ceph/ceph/pull/37370>`_, "Yan, Zheng")
-* cephfs: client: make Client::open() pass proper cap mask to path_walk (`pr#37369 <https://github.com/ceph/ceph/pull/37369>`_, "Yan, Zheng")
-* cephfs: client: use non-static dirent for thread-safety (`pr#37351 <https://github.com/ceph/ceph/pull/37351>`_, Patrick Donnelly)
-* cephfs: libcephfs: ignore restoring the open files limit (`pr#37358 <https://github.com/ceph/ceph/pull/37358>`_, Xiubo Li)
-* cephfs: osdc/Journaler: do not call onsafe->complete() if onsafe is 0 (`pr#37368 <https://github.com/ceph/ceph/pull/37368>`_, Xiubo Li)
-* common/admin_socket: always validate the parameters (`pr#37341 <https://github.com/ceph/ceph/pull/37341>`_, Kefu Chai)
-* compressor: Add a config option to specify Zstd compression level (`pr#37253 <https://github.com/ceph/ceph/pull/37253>`_, Bryan Stillwell)
-* core: include/encoding: Fix encode/decode of float types on big-endian systems (`pr#37032 <https://github.com/ceph/ceph/pull/37032>`_, Ulrich Weigand)
-* debian: Add missing Python dependency for ceph-mgr (`pr#37422 <https://github.com/ceph/ceph/pull/37422>`_, Johannes M. Scheuermann)
-* doc/PendingReleaseNotes: mention bluefs_preextend_wal_files (`pr#37549 <https://github.com/ceph/ceph/pull/37549>`_, Nathan Cutler)
-* doc/mgr/orchestrator: Add hints related to custom containers to the docs (`pr#37962 <https://github.com/ceph/ceph/pull/37962>`_, Volker Theile)
-* doc: cephfs: improve documentation of "ceph nfs cluster create" and "ceph fs volume create" commands (`pr#37691 <https://github.com/ceph/ceph/pull/37691>`_, Nathan Cutler)
-* doc: enable Read the Docs (`pr#37201 <https://github.com/ceph/ceph/pull/37201>`_, Kefu Chai)
-* erasure-code: enable isa-l EC for aarch64 platform (`pr#37504 <https://github.com/ceph/ceph/pull/37504>`_, luo rixin, Hang Li)
-* krbd: optionally skip waiting for udev events (`pr#37285 <https://github.com/ceph/ceph/pull/37285>`_, Ilya Dryomov)
-* librbd: ensure that thread pool lock is held when processing throttled IOs (`pr#37116 <https://github.com/ceph/ceph/pull/37116>`_, Jason Dillaman)
-* librbd: handle DNE from immutable-object-cache (`pr#36860 <https://github.com/ceph/ceph/pull/36860>`_, Feng Hualong, Mykola Golub, Yin Congmin, Jason Dillaman)
-* librbd: using migration abort can result in the loss of data (`pr#37164 <https://github.com/ceph/ceph/pull/37164>`_, Jason Dillaman)
-* mds/CInode: Optimize only pinned by subtrees check (`pr#37248 <https://github.com/ceph/ceph/pull/37248>`_, Mark Nelson)
-* mds: account for closing sessions in hit_session (`pr#37856 <https://github.com/ceph/ceph/pull/37856>`_, Dan van der Ster)
-* mds: add request to batch_op before taking auth pins and locks (`pr#37022 <https://github.com/ceph/ceph/pull/37022>`_, "Yan, Zheng")
-* mds: do not raise "client failing to respond to cap release" when client working set is reasonable (`pr#37353 <https://github.com/ceph/ceph/pull/37353>`_, Patrick Donnelly)
-* mds: do not submit omap_rm_keys if the dir is the basedir of merge (`pr#37034 <https://github.com/ceph/ceph/pull/37034>`_, "Yan, Zheng", Chencan)
-* mds: don't recover files after normal session close (`pr#37334 <https://github.com/ceph/ceph/pull/37334>`_, "Yan, Zheng")
-* mds: fix 'forward loop' when forward_all_requests_to_auth is set (`pr#37360 <https://github.com/ceph/ceph/pull/37360>`_, "Yan, Zheng")
-* mds: fix hang issue when accessing a file under a lost parent directory (`pr#37020 <https://github.com/ceph/ceph/pull/37020>`_, Zhi Zhang)
-* mds: fix kcephfs parse dirfrag's ndist is always 0 (`pr#37357 <https://github.com/ceph/ceph/pull/37357>`_, Yanhu Cao)
-* mds: fix mds forwarding request 'no_available_op_found' (`pr#37240 <https://github.com/ceph/ceph/pull/37240>`_, Yanhu Cao)
-* mds: fix nullptr dereference in MDCache::finish_rollback (`pr#37243 <https://github.com/ceph/ceph/pull/37243>`_, "Yan, Zheng")
-* mds: fix purge_queue's _calculate_ops is inaccurate (`pr#37372 <https://github.com/ceph/ceph/pull/37372>`_, Yanhu Cao)
-* mds: make threshold for MDS_TRIM configurable (`pr#36970 <https://github.com/ceph/ceph/pull/36970>`_, Paul Emmerich)
-* mds: optimize random threshold lookup for dentry load (`pr#37247 <https://github.com/ceph/ceph/pull/37247>`_, Patrick Donnelly)
-* mds: place MDSGatherBuilder on the stack (`pr#37354 <https://github.com/ceph/ceph/pull/37354>`_, Patrick Donnelly)
-* mds: reduce memory usage of open file table prefetch #37382 (`pr#37383 <https://github.com/ceph/ceph/pull/37383>`_, "Yan, Zheng")
-* mds: resolve SIGSEGV in waiting for uncommitted fragments (`pr#37355 <https://github.com/ceph/ceph/pull/37355>`_, Patrick Donnelly)
-* mds: revert the decode version (`pr#37356 <https://github.com/ceph/ceph/pull/37356>`_, Jos Collin)
-* mds: send scrub status to ceph-mgr only when scrub is running (`issue#45349 <http://tracker.ceph.com/issues/45349>`_, `pr#36047 <https://github.com/ceph/ceph/pull/36047>`_, Kefu Chai, Venky Shankar)
-* mds: standy-replay mds remained in the "resolve" state after resta… (`pr#37363 <https://github.com/ceph/ceph/pull/37363>`_, Wei Qiaomiao)
-* messages,mds: Fix decoding of enum types on big-endian systems (`pr#36813 <https://github.com/ceph/ceph/pull/36813>`_, Ulrich Weigand)
-* mgr/dashboard/api: move/create OSD histogram in separate endpoint (`pr#37973 <https://github.com/ceph/ceph/pull/37973>`_, Aashish Sharma)
-* mgr/dashboard: Add short descriptions to the telemetry report preview (`pr#37597 <https://github.com/ceph/ceph/pull/37597>`_, Nizamudeen A)
-* mgr/dashboard: Allow editing iSCSI targets with initiators logged-in (`pr#37277 <https://github.com/ceph/ceph/pull/37277>`_, Tiago Melo)
-* mgr/dashboard: Auto close table column dropdown on click outside (`pr#36862 <https://github.com/ceph/ceph/pull/36862>`_, Tiago Melo)
-* mgr/dashboard: Copy to clipboard does not work in Firefox (`pr#37493 <https://github.com/ceph/ceph/pull/37493>`_, Volker Theile)
-* mgr/dashboard: Datatable catches select events from other datatables (`pr#36899 <https://github.com/ceph/ceph/pull/36899>`_, Volker Theile, Tiago Melo)
-* mgr/dashboard: Disable TLS 1.0 and 1.1 (`pr#38331 <https://github.com/ceph/ceph/pull/38331>`_, Volker Theile)
-* mgr/dashboard: Disable autocomplete on user form (`pr#36901 <https://github.com/ceph/ceph/pull/36901>`_, Volker Theile)
-* mgr/dashboard: Disable sso without python3-saml (`pr#38405 <https://github.com/ceph/ceph/pull/38405>`_, Kevin Meijer)
-* mgr/dashboard: Disabling the form inputs for the read_only modals (`pr#37239 <https://github.com/ceph/ceph/pull/37239>`_, Nizamudeen)
-* mgr/dashboard: Fix bugs in a unit test and i18n translation (`pr#36991 <https://github.com/ceph/ceph/pull/36991>`_, Volker Theile)
-* mgr/dashboard: Fix for CrushMap viewer items getting compressed vertically (`pr#36871 <https://github.com/ceph/ceph/pull/36871>`_, Nizamudeen A)
-* mgr/dashboard: Fix many-to-many issue in host-details Grafana dashboard (`pr#37299 <https://github.com/ceph/ceph/pull/37299>`_, Patrick Seidensal)
-* mgr/dashboard: Fix npm package's vulnerabilities (`pr#36921 <https://github.com/ceph/ceph/pull/36921>`_, Tiago Melo)
-* mgr/dashboard: Hide table action input field if limit=0 (`pr#36872 <https://github.com/ceph/ceph/pull/36872>`_, Volker Theile)
-* mgr/dashboard: Host delete action should be disabled if not managed by Orchestrator (`pr#36874 <https://github.com/ceph/ceph/pull/36874>`_, Volker Theile)
-* mgr/dashboard: Improve notification badge (`pr#37090 <https://github.com/ceph/ceph/pull/37090>`_, Aashish Sharma)
-* mgr/dashboard: Landing Page improvements (`pr#37390 <https://github.com/ceph/ceph/pull/37390>`_, Tiago Melo, Alfonso Martínez)
-* mgr/dashboard: Merge disable and disableDesc (`pr#37763 <https://github.com/ceph/ceph/pull/37763>`_, Tiago Melo)
-* mgr/dashboard: Proper format iSCSI target portals (`pr#36870 <https://github.com/ceph/ceph/pull/36870>`_, Volker Theile)
-* mgr/dashboard: REST API returns 500 when no Content-Type is specified (`pr#37308 <https://github.com/ceph/ceph/pull/37308>`_, Avan Thakkar)
-* mgr/dashboard: Remove useless tab in monitoring/alerts datatable details (`pr#36875 <https://github.com/ceph/ceph/pull/36875>`_, Volker Theile)
-* mgr/dashboard: Show warning when replicated size is 1 (`pr#37578 <https://github.com/ceph/ceph/pull/37578>`_, Sebastian Krah)
-* mgr/dashboard: The performance 'Client Read/Write' widget shows incorrect write values (`pr#38189 <https://github.com/ceph/ceph/pull/38189>`_, Volker Theile)
-* mgr/dashboard: Update datatable only when necessary (`pr#37331 <https://github.com/ceph/ceph/pull/37331>`_, Volker Theile)
-* mgr/dashboard: Use pipe instead of calling function within template (`pr#38094 <https://github.com/ceph/ceph/pull/38094>`_, Volker Theile)
-* mgr/dashboard: cluster > manager modules (`pr#37434 <https://github.com/ceph/ceph/pull/37434>`_, Avan Thakkar)
-* mgr/dashboard: display devices' health information within a tabset (`pr#37784 <https://github.com/ceph/ceph/pull/37784>`_, Kiefer Chang)
-* mgr/dashboard: fix error when typing existing paths in the Ganesha form (`pr#37688 <https://github.com/ceph/ceph/pull/37688>`_, Kiefer Chang)
-* mgr/dashboard: fix perf. issue when listing large amounts of buckets (`pr#37405 <https://github.com/ceph/ceph/pull/37405>`_, Alfonso Martínez)
-* mgr/dashboard: fix security scopes of some NFS-Ganesha endpoints (`pr#37450 <https://github.com/ceph/ceph/pull/37450>`_, Kiefer Chang)
-* mgr/dashboard: fix the error when exporting CephFS path "/" in NFS exports (`pr#37686 <https://github.com/ceph/ceph/pull/37686>`_, Kiefer Chang)
-* mgr/dashboard: get rgw daemon zonegroup name from mgr (`pr#37620 <https://github.com/ceph/ceph/pull/37620>`_, Alfonso Martinez)
-* mgr/dashboard: increase Grafana iframe height to avoid scroll bar (`pr#37182 <https://github.com/ceph/ceph/pull/37182>`_, Ngwa Sedrick Meh)
-* mgr/dashboard: log in non-admin users successfully if the telemetry notification is shown (`pr#37452 <https://github.com/ceph/ceph/pull/37452>`_, Tatjana Dehler)
-* mgr/dashboard: support Orchestrator and user-defined Ganesha cluster (`pr#37885 <https://github.com/ceph/ceph/pull/37885>`_, Kiefer Chang)
-* mgr/dashboard: table detail rows overflow (`pr#37332 <https://github.com/ceph/ceph/pull/37332>`_, Aashish Sharma)
-* mgr/devicehealth: device_health_metrics pool gets created even without any OSDs in the cluster (`pr#37533 <https://github.com/ceph/ceph/pull/37533>`_, Sunny Kumar)
-* mgr/insights: Test environment requires 'six' (`pr#38396 <https://github.com/ceph/ceph/pull/38396>`_, Brad Hubbard)
-* mgr/prometheus: add pool compression stats (`pr#37562 <https://github.com/ceph/ceph/pull/37562>`_, Paul Cuzner)
-* mgr/telemetry: fix device id splitting when anonymizing serial (`pr#37302 <https://github.com/ceph/ceph/pull/37302>`_, Yaarit Hatuka)
-* mgr/volumes/nfs: Check if orchestrator spec service_id is valid (`pr#37371 <https://github.com/ceph/ceph/pull/37371>`_, Varsha Rao)
-* mgr/volumes/nfs: Fix wrong error message for pseudo path (`pr#37855 <https://github.com/ceph/ceph/pull/37855>`_, Varsha Rao)
-* mgr/volumes: Make number of cloner threads configurable (`pr#37671 <https://github.com/ceph/ceph/pull/37671>`_, Kotresh HR)
-* mgr/zabbix: indent the output of "zabbix config-show" (`pr#37128 <https://github.com/ceph/ceph/pull/37128>`_, Kefu Chai)
-* mgr: PyModuleRegistry::unregister_client() can run endlessly (`issue#47329 <http://tracker.ceph.com/issues/47329>`_, `pr#37217 <https://github.com/ceph/ceph/pull/37217>`_, Venky Shankar)
-* mgr: don't update pending service map epoch on receiving map from mon (`pr#37180 <https://github.com/ceph/ceph/pull/37180>`_, Mykola Golub)
-* mon scrub testing (`pr#38361 <https://github.com/ceph/ceph/pull/38361>`_, Brad Hubbard)
-* mon/MDSMonitor do not ignore mds's down:dne request (`pr#37858 <https://github.com/ceph/ceph/pull/37858>`_, chencan)
-* mon/MDSMonitor: divide mds identifier and mds real name with dot (`pr#37857 <https://github.com/ceph/ceph/pull/37857>`_, Zhi Zhang)
-* mon/MonMap: fix unconditional failure for init_with_hosts (`pr#37817 <https://github.com/ceph/ceph/pull/37817>`_, Nathan Cutler, Patrick Donnelly)
-* mon/PGMap: add pg count for pools in the ceph df command (`pr#36945 <https://github.com/ceph/ceph/pull/36945>`_, Vikhyat Umrao)
-* mon: Log "ceph health detail" periodically in cluster log (`pr#38345 <https://github.com/ceph/ceph/pull/38345>`_, Prashant Dhange)
-* mon: deleting a CephFS and its pools causes MONs to crash (`pr#37256 <https://github.com/ceph/ceph/pull/37256>`_, Patrick Donnelly)
-* mon: have 'mon stat' output json as well (`pr#37705 <https://github.com/ceph/ceph/pull/37705>`_, Joao Eduardo Luis)
-* mon: mark pgtemp messages as no_reply more consistenly in preprocess\_… (`pr#37347 <https://github.com/ceph/ceph/pull/37347>`_, Greg Farnum)
-* mon: set session_timeout when adding to session_map (`pr#37553 <https://github.com/ceph/ceph/pull/37553>`_, Ilya Dryomov)
-* mon: store mon updates in ceph context for future MonMap instantiation (`pr#36705 <https://github.com/ceph/ceph/pull/36705>`_, Patrick Donnelly, Shyamsundar Ranganathan)
-* msg/async/ProtocolV2: allow rxbuf/txbuf get bigger in testing (`pr#37080 <https://github.com/ceph/ceph/pull/37080>`_, Ilya Dryomov)
-* os/bluestore: enable more flexible bluefs space management by default (`pr#37092 <https://github.com/ceph/ceph/pull/37092>`_, Igor Fedotov)
-* osd/osd-rep-recov-eio.sh: TEST_rados_repair_warning:  return 1 (`pr#37853 <https://github.com/ceph/ceph/pull/37853>`_, David Zafman)
-* osd: Check for nosrub/nodeep-scrub in between chunks, to avoid races (`pr#38359 <https://github.com/ceph/ceph/pull/38359>`_, David Zafman)
-* osdc/ObjectCacher: overwrite might cause stray read request callbacks (`pr#37674 <https://github.com/ceph/ceph/pull/37674>`_, Jason Dillaman)
-* osdc: add timeout configs for mons/osds (`pr#37530 <https://github.com/ceph/ceph/pull/37530>`_, Patrick Donnelly)
-* prometheus: Properly split the port off IPv6 addresses (`pr#36985 <https://github.com/ceph/ceph/pull/36985>`_, Matthew Oliver)
-* pybind/cephfs: add special values for not reading conffile (`pr#37724 <https://github.com/ceph/ceph/pull/37724>`_, Kefu Chai)
-* pybind/cephfs: fix custom exception raised by cephfs.pyx (`pr#37350 <https://github.com/ceph/ceph/pull/37350>`_, Ramana Raja)
-* pybind/mgr/volumes: add global lock debug (`pr#37366 <https://github.com/ceph/ceph/pull/37366>`_, Patrick Donnelly)
-* qa/\*/mon/mon-last-epoch-clean.sh: mark osd out instead of down (`pr#37349 <https://github.com/ceph/ceph/pull/37349>`_, Neha Ojha)
-* qa/cephfs: add session_timeout option support (`pr#37841 <https://github.com/ceph/ceph/pull/37841>`_, Xiubo Li)
-* qa/tasks/nfs: Test mounting of export created with nfs command (`pr#37365 <https://github.com/ceph/ceph/pull/37365>`_, Varsha Rao)
-* qa/tasks/{ceph,ceph_manager}: drop py2 support (`pr#37863 <https://github.com/ceph/ceph/pull/37863>`_, Kefu Chai)
-* qa/tests: added rhel 8.2 (`pr#38287 <https://github.com/ceph/ceph/pull/38287>`_, Yuri Weinstein)
-* qa/tests: use bionic only for old clients in rados/thrash-old-clients (`pr#36931 <https://github.com/ceph/ceph/pull/36931>`_, Yuri Weinstein)
-* qa/workunits/mon: fixed excessively large pool PG count (`pr#37346 <https://github.com/ceph/ceph/pull/37346>`_, Jason Dillaman)
-* qa: Enable debug_client for mgr tests (`pr#37270 <https://github.com/ceph/ceph/pull/37270>`_, Brad Hubbard)
-* qa: Fix traceback during fs cleanup between tests (`pr#36713 <https://github.com/ceph/ceph/pull/36713>`_, Kotresh HR)
-* qa: add debugging for volumes plugin use of libcephfs (`pr#37352 <https://github.com/ceph/ceph/pull/37352>`_, Patrick Donnelly)
-* qa: drop hammer branch qa tests (`pr#37728 <https://github.com/ceph/ceph/pull/37728>`_, Neha Ojha, Deepika Upadhyay)
-* qa: ignore expected mds failover message (`pr#37367 <https://github.com/ceph/ceph/pull/37367>`_, Patrick Donnelly)
-* rbd-mirror: peer setup can still race and fail creation of peer (`pr#37342 <https://github.com/ceph/ceph/pull/37342>`_, Jason Dillaman)
-* rbd: include RADOS namespace in krbd symlinks (`pr#37343 <https://github.com/ceph/ceph/pull/37343>`_, Ilya Dryomov)
-* rbd: journal: possible race condition between flush and append callback (`pr#37850 <https://github.com/ceph/ceph/pull/37850>`_, Jason Dillaman)
-* rbd: librbd: ignore -ENOENT error when disabling object-map (`pr#37852 <https://github.com/ceph/ceph/pull/37852>`_, Jason Dillaman)
-* rbd: librbd: update AioCompletion return value before evaluating pending count (`pr#37851 <https://github.com/ceph/ceph/pull/37851>`_, Jason Dillaman)
-* rbd: make common options override krbd-specific options (`pr#37408 <https://github.com/ceph/ceph/pull/37408>`_, Ilya Dryomov)
-* rbd: rbd-nbd: don't ignore namespace when unmapping by image spec (`pr#37812 <https://github.com/ceph/ceph/pull/37812>`_, Mykola Golub)
-* rgw/gc: fix for incrementing the perf counter 'gc_retire_object' (`pr#37847 <https://github.com/ceph/ceph/pull/37847>`_, Pritha Srivastava)
-* rgw/gc: fixing the condition when marker for a queue is (`pr#37846 <https://github.com/ceph/ceph/pull/37846>`_, Pritha Srivastava)
-* rgw/rgw_file: Fix the incorrect lru object eviction (`pr#37672 <https://github.com/ceph/ceph/pull/37672>`_, luo rixin)
-* rgw: Add bucket name to bucket stats error logging (`pr#37335 <https://github.com/ceph/ceph/pull/37335>`_, Seena Fallah)
-* rgw: Add request timeout to beast (`pr#37809 <https://github.com/ceph/ceph/pull/37809>`_, Adam C. Emerson, Or Friedmann)
-* rgw: RGWObjVersionTracker tracks version over increments (`pr#37337 <https://github.com/ceph/ceph/pull/37337>`_, Casey Bodley)
-* rgw: Swift API anonymous access should 401 (`pr#37339 <https://github.com/ceph/ceph/pull/37339>`_, Matthew Oliver)
-* rgw: adds code for creating and managing oidc provider entities in rgw and for offline validation of OpenID Connect Access and ID Token (`pr#37640 <https://github.com/ceph/ceph/pull/37640>`_, Pritha Srivastava, Casey Bodley)
-* rgw: allow rgw-orphan-list to note when rados objects are in namespace (`pr#37800 <https://github.com/ceph/ceph/pull/37800>`_, J. Eric Ivancich)
-* rgw: dump transitions in RGWLifecycleConfiguration::dump() (`pr#36812 <https://github.com/ceph/ceph/pull/36812>`_, Shengming Zhang)
-* rgw: during GC defer, prevent new GC enqueue (`pr#38249 <https://github.com/ceph/ceph/pull/38249>`_, Casey Bodley, J. Eric Ivancich)
-* rgw: fix expiration header returned even if there is only one tag in the object the same as the rule (`pr#37807 <https://github.com/ceph/ceph/pull/37807>`_, Or Friedmann)
-* rgw: fix setting of namespace in ordered and unordered bucket listing (`pr#37673 <https://github.com/ceph/ceph/pull/37673>`_, J. Eric Ivancich)
-* rgw: fix user stats iterative increment (`pr#37779 <https://github.com/ceph/ceph/pull/37779>`_, Mark Kogan)
-* rgw: fix: S3 API KeyCount incorrect return (`pr#37849 <https://github.com/ceph/ceph/pull/37849>`_, 胡玮文)
-* rgw: log resharding events at level 1 (formerly 20) (`pr#36840 <https://github.com/ceph/ceph/pull/36840>`_, Or Friedmann)
-* rgw: radosgw-admin should paginate internally when listing bucket (`pr#37803 <https://github.com/ceph/ceph/pull/37803>`_, J. Eric Ivancich)
-* rgw: radosgw-admin: period pull command is not always a raw_storage_op (`pr#37336 <https://github.com/ceph/ceph/pull/37336>`_, Casey Bodley)
-* rgw: replace '+' with "%20" in canonical query string for s3 v4 auth (`pr#37338 <https://github.com/ceph/ceph/pull/37338>`_, yuliyang_yewu)
-* rgw: rgw_file: avoid long-ish delay on shutdown (`pr#37551 <https://github.com/ceph/ceph/pull/37551>`_, Matt Benjamin)
-* rgw: s3: mark bucket encryption as not implemented (`pr#36691 <https://github.com/ceph/ceph/pull/36691>`_, Abhishek Lekshmanan)
-* rgw: urlencode bucket name when forwarding request (`pr#37340 <https://github.com/ceph/ceph/pull/37340>`_, caolei)
-* rgw: use yum rather than dnf for teuthology testing of rgw-orphan-list (`pr#37845 <https://github.com/ceph/ceph/pull/37845>`_, J. Eric Ivancich)
-* rpm,deb: drop /etc/sudoers.d/cephadm (`pr#37401 <https://github.com/ceph/ceph/pull/37401>`_, Nathan Cutler)
-* run-make-check.sh: Don't run tests if build fails (`pr#38294 <https://github.com/ceph/ceph/pull/38294>`_, Brad Hubbard)
-* systemd: Support Graceful Reboot for AIO Node (`pr#37300 <https://github.com/ceph/ceph/pull/37300>`_, Wong Hoi Sing Edison)
-* test/librados: fix endian bugs in checksum test cases (`pr#37604 <https://github.com/ceph/ceph/pull/37604>`_, Ulrich Weigand)
-* test/rbd-mirror: pool watcher registration error might result in race (`pr#37208 <https://github.com/ceph/ceph/pull/37208>`_, Jason Dillaman)
-* test/store_test: use 'threadsafe' style for death tests (`pr#37819 <https://github.com/ceph/ceph/pull/37819>`_, Igor Fedotov)
-* tools/osdmaptool.cc: add ability to clean_temps (`pr#37348 <https://github.com/ceph/ceph/pull/37348>`_, Neha Ojha)
-* tools/rados: flush formatter periodically during json output of "rados ls" (`pr#37835 <https://github.com/ceph/ceph/pull/37835>`_, J. Eric Ivancich)
-* vstart.sh: fix fs set max_mds bug (`pr#37837 <https://github.com/ceph/ceph/pull/37837>`_, Jinmyeong Lee)
+* Enable per-RBD image monitoring (`pr#37697 <https://github.com/stone/stone/pull/37697>`_, Patrick Seidensal)
+* [stone-volume]: remove unneeded call to get_devices() (`pr#37412 <https://github.com/stone/stone/pull/37412>`_, Marc Gariepy)
+* bluestore: fix collection_list ordering (`pr#37048 <https://github.com/stone/stone/pull/37048>`_, Mykola Golub)
+* bluestore: mempool's finer granularity + adding missed structs (`pr#37264 <https://github.com/stone/stone/pull/37264>`_, Deepika Upadhyay, Igor Fedotov, Adam Kupczyk)
+* bluestore: remove preextended WAL support (`pr#37373 <https://github.com/stone/stone/pull/37373>`_, Igor Fedotov)
+* stone-volume batch: reject partitions in argparser (`pr#38280 <https://github.com/stone/stone/pull/38280>`_, Jan Fajerski)
+* stone-volume inventory: make libstoragemgmt data retrieval optional (`pr#38299 <https://github.com/stone/stone/pull/38299>`_, Jan Fajerski)
+* stone-volume: add libstoragemgmt support (`pr#36852 <https://github.com/stone/stone/pull/36852>`_, Paul Cuzner, Satoru Takeuchi)
+* stone-volume: add no-systemd argument to zap (`pr#37722 <https://github.com/stone/stone/pull/37722>`_, wanghongxu)
+* stone-volume: avoid format strings for now (`pr#37345 <https://github.com/stone/stone/pull/37345>`_, Jan Fajerski)
+* stone-volume: consume mount opt in simple activate (`pr#38014 <https://github.com/stone/stone/pull/38014>`_, Dimitri Savineau)
+* stone-volume: fix filestore/dmcrypt activate (`pr#38199 <https://github.com/stone/stone/pull/38199>`_, Guillaume Abrioux)
+* stone-volume: fix journal size argument not work (`pr#37344 <https://github.com/stone/stone/pull/37344>`_, wanghongxu)
+* stone-volume: fix lvm batch auto with full SSDs (`pr#38045 <https://github.com/stone/stone/pull/38045>`_, Dimitri Savineau, Guillaume Abrioux)
+* stone-volume: fix simple activate when legacy osd (`pr#37194 <https://github.com/stone/stone/pull/37194>`_, Guillaume Abrioux)
+* stone-volume: implement the --log-level flag (`pr#38426 <https://github.com/stone/stone/pull/38426>`_, Andrew Schoen)
+* stone-volume: major batch refactor (`pr#37520 <https://github.com/stone/stone/pull/37520>`_, Jan Fajerski, Joshua Schmid)
+* stone-volume: prepare: use \*-slots arguments for implicit sizing (`pr#38205 <https://github.com/stone/stone/pull/38205>`_, Jan Fajerski)
+* stone-volume: remove mention of dmcache from docs and help text (`pr#38047 <https://github.com/stone/stone/pull/38047>`_, Dimitri Savineau, Andrew Schoen)
+* stone-volume: retry when acquiring lock fails (`pr#36925 <https://github.com/stone/stone/pull/36925>`_, Sébastien Han)
+* stone-volume: simple scan should ignore tmpfs (`pr#36953 <https://github.com/stone/stone/pull/36953>`_, Andrew Schoen)
+* stone-volume: support for mpath devices (`pr#36928 <https://github.com/stone/stone/pull/36928>`_, Jan Fajerski)
+* stone.in: ignore failures to flush stdout (`pr#37225 <https://github.com/stone/stone/pull/37225>`_, Dan van der Ster)
+* stone.spec, debian: add smartmontools, nvme-cli dependencies (`pr#37257 <https://github.com/stone/stone/pull/37257>`_, Yaarit Hatuka)
+* stoneadm batch backport November (`pr#38155 <https://github.com/stone/stone/pull/38155>`_, Ricardo Marques, Sebastian Wagner, Kyr Shatskyy, Dan Williams, Volker Theile, Varsha Rao, Tim Serong, Adam King, Dimitri Savineau, Patrick Seidensal, Dan Mick, Michael Fritch, Joshua Schmid)
+* stoneadm batch backport September (1) (`pr#36975 <https://github.com/stone/stone/pull/36975>`_, Stephan Müller, Matthew Oliver, Sebastian Wagner, Paul Cuzner, Adam King, Patrick Seidensal, Shraddha Agrawal, Michael Fritch, Dan Mick)
+* stoneadm batch backport September (2) (`pr#37436 <https://github.com/stone/stone/pull/37436>`_, Varsha Rao, Kiefer Chang, Patrick Donnelly, Sebastian Wagner, Kefu Chai, Guillaume Abrioux, Juan Miguel Olmo Martínez, Paul Cuzner, Volker Theile, Tim Serong, Zac Dover, Adam King, Michael Fritch, Joshua Schmid)
+* stonefs-journal-tool: fix incorrect read_offset when finding missing objects (`pr#37854 <https://github.com/stone/stone/pull/37854>`_, Xue Yantao)
+* stonefs: client: fix directory inode can not call release callback (`pr#37017 <https://github.com/stone/stone/pull/37017>`_, sepia-liu)
+* stonefs: client: fix extra open ref decrease (`pr#37249 <https://github.com/stone/stone/pull/37249>`_, Xiubo Li)
+* stonefs: client: fix inode ll_ref reference count leak (`pr#37839 <https://github.com/stone/stone/pull/37839>`_, sepia-liu)
+* stonefs: client: handle readdir reply without Fs cap (`pr#37370 <https://github.com/stone/stone/pull/37370>`_, "Yan, Zheng")
+* stonefs: client: make Client::open() pass proper cap mask to path_walk (`pr#37369 <https://github.com/stone/stone/pull/37369>`_, "Yan, Zheng")
+* stonefs: client: use non-static dirent for thread-safety (`pr#37351 <https://github.com/stone/stone/pull/37351>`_, Patrick Donnelly)
+* stonefs: libstonefs: ignore restoring the open files limit (`pr#37358 <https://github.com/stone/stone/pull/37358>`_, Xiubo Li)
+* stonefs: osdc/Journaler: do not call onsafe->complete() if onsafe is 0 (`pr#37368 <https://github.com/stone/stone/pull/37368>`_, Xiubo Li)
+* common/admin_socket: always validate the parameters (`pr#37341 <https://github.com/stone/stone/pull/37341>`_, Kefu Chai)
+* compressor: Add a config option to specify Zstd compression level (`pr#37253 <https://github.com/stone/stone/pull/37253>`_, Bryan Stillwell)
+* core: include/encoding: Fix encode/decode of float types on big-endian systems (`pr#37032 <https://github.com/stone/stone/pull/37032>`_, Ulrich Weigand)
+* debian: Add missing Python dependency for stone-mgr (`pr#37422 <https://github.com/stone/stone/pull/37422>`_, Johannes M. Scheuermann)
+* doc/PendingReleaseNotes: mention bluefs_preextend_wal_files (`pr#37549 <https://github.com/stone/stone/pull/37549>`_, Nathan Cutler)
+* doc/mgr/orchestrator: Add hints related to custom containers to the docs (`pr#37962 <https://github.com/stone/stone/pull/37962>`_, Volker Theile)
+* doc: stonefs: improve documentation of "stone nfs cluster create" and "stone fs volume create" commands (`pr#37691 <https://github.com/stone/stone/pull/37691>`_, Nathan Cutler)
+* doc: enable Read the Docs (`pr#37201 <https://github.com/stone/stone/pull/37201>`_, Kefu Chai)
+* erasure-code: enable isa-l EC for aarch64 platform (`pr#37504 <https://github.com/stone/stone/pull/37504>`_, luo rixin, Hang Li)
+* krbd: optionally skip waiting for udev events (`pr#37285 <https://github.com/stone/stone/pull/37285>`_, Ilya Dryomov)
+* librbd: ensure that thread pool lock is held when processing throttled IOs (`pr#37116 <https://github.com/stone/stone/pull/37116>`_, Jason Dillaman)
+* librbd: handle DNE from immutable-object-cache (`pr#36860 <https://github.com/stone/stone/pull/36860>`_, Feng Hualong, Mykola Golub, Yin Congmin, Jason Dillaman)
+* librbd: using migration abort can result in the loss of data (`pr#37164 <https://github.com/stone/stone/pull/37164>`_, Jason Dillaman)
+* mds/CInode: Optimize only pinned by subtrees check (`pr#37248 <https://github.com/stone/stone/pull/37248>`_, Mark Nelson)
+* mds: account for closing sessions in hit_session (`pr#37856 <https://github.com/stone/stone/pull/37856>`_, Dan van der Ster)
+* mds: add request to batch_op before taking auth pins and locks (`pr#37022 <https://github.com/stone/stone/pull/37022>`_, "Yan, Zheng")
+* mds: do not raise "client failing to respond to cap release" when client working set is reasonable (`pr#37353 <https://github.com/stone/stone/pull/37353>`_, Patrick Donnelly)
+* mds: do not submit omap_rm_keys if the dir is the basedir of merge (`pr#37034 <https://github.com/stone/stone/pull/37034>`_, "Yan, Zheng", Chencan)
+* mds: don't recover files after normal session close (`pr#37334 <https://github.com/stone/stone/pull/37334>`_, "Yan, Zheng")
+* mds: fix 'forward loop' when forward_all_requests_to_auth is set (`pr#37360 <https://github.com/stone/stone/pull/37360>`_, "Yan, Zheng")
+* mds: fix hang issue when accessing a file under a lost parent directory (`pr#37020 <https://github.com/stone/stone/pull/37020>`_, Zhi Zhang)
+* mds: fix kstonefs parse dirfrag's ndist is always 0 (`pr#37357 <https://github.com/stone/stone/pull/37357>`_, Yanhu Cao)
+* mds: fix mds forwarding request 'no_available_op_found' (`pr#37240 <https://github.com/stone/stone/pull/37240>`_, Yanhu Cao)
+* mds: fix nullptr dereference in MDCache::finish_rollback (`pr#37243 <https://github.com/stone/stone/pull/37243>`_, "Yan, Zheng")
+* mds: fix purge_queue's _calculate_ops is inaccurate (`pr#37372 <https://github.com/stone/stone/pull/37372>`_, Yanhu Cao)
+* mds: make threshold for MDS_TRIM configurable (`pr#36970 <https://github.com/stone/stone/pull/36970>`_, Paul Emmerich)
+* mds: optimize random threshold lookup for dentry load (`pr#37247 <https://github.com/stone/stone/pull/37247>`_, Patrick Donnelly)
+* mds: place MDSGatherBuilder on the stack (`pr#37354 <https://github.com/stone/stone/pull/37354>`_, Patrick Donnelly)
+* mds: reduce memory usage of open file table prefetch #37382 (`pr#37383 <https://github.com/stone/stone/pull/37383>`_, "Yan, Zheng")
+* mds: resolve SIGSEGV in waiting for uncommitted fragments (`pr#37355 <https://github.com/stone/stone/pull/37355>`_, Patrick Donnelly)
+* mds: revert the decode version (`pr#37356 <https://github.com/stone/stone/pull/37356>`_, Jos Collin)
+* mds: send scrub status to stone-mgr only when scrub is running (`issue#45349 <http://tracker.stone.com/issues/45349>`_, `pr#36047 <https://github.com/stone/stone/pull/36047>`_, Kefu Chai, Venky Shankar)
+* mds: standy-replay mds remained in the "resolve" state after resta… (`pr#37363 <https://github.com/stone/stone/pull/37363>`_, Wei Qiaomiao)
+* messages,mds: Fix decoding of enum types on big-endian systems (`pr#36813 <https://github.com/stone/stone/pull/36813>`_, Ulrich Weigand)
+* mgr/dashboard/api: move/create OSD histogram in separate endpoint (`pr#37973 <https://github.com/stone/stone/pull/37973>`_, Aashish Sharma)
+* mgr/dashboard: Add short descriptions to the telemetry report preview (`pr#37597 <https://github.com/stone/stone/pull/37597>`_, Nizamudeen A)
+* mgr/dashboard: Allow editing iSCSI targets with initiators logged-in (`pr#37277 <https://github.com/stone/stone/pull/37277>`_, Tiago Melo)
+* mgr/dashboard: Auto close table column dropdown on click outside (`pr#36862 <https://github.com/stone/stone/pull/36862>`_, Tiago Melo)
+* mgr/dashboard: Copy to clipboard does not work in Firefox (`pr#37493 <https://github.com/stone/stone/pull/37493>`_, Volker Theile)
+* mgr/dashboard: Datatable catches select events from other datatables (`pr#36899 <https://github.com/stone/stone/pull/36899>`_, Volker Theile, Tiago Melo)
+* mgr/dashboard: Disable TLS 1.0 and 1.1 (`pr#38331 <https://github.com/stone/stone/pull/38331>`_, Volker Theile)
+* mgr/dashboard: Disable autocomplete on user form (`pr#36901 <https://github.com/stone/stone/pull/36901>`_, Volker Theile)
+* mgr/dashboard: Disable sso without python3-saml (`pr#38405 <https://github.com/stone/stone/pull/38405>`_, Kevin Meijer)
+* mgr/dashboard: Disabling the form inputs for the read_only modals (`pr#37239 <https://github.com/stone/stone/pull/37239>`_, Nizamudeen)
+* mgr/dashboard: Fix bugs in a unit test and i18n translation (`pr#36991 <https://github.com/stone/stone/pull/36991>`_, Volker Theile)
+* mgr/dashboard: Fix for CrushMap viewer items getting compressed vertically (`pr#36871 <https://github.com/stone/stone/pull/36871>`_, Nizamudeen A)
+* mgr/dashboard: Fix many-to-many issue in host-details Grafana dashboard (`pr#37299 <https://github.com/stone/stone/pull/37299>`_, Patrick Seidensal)
+* mgr/dashboard: Fix npm package's vulnerabilities (`pr#36921 <https://github.com/stone/stone/pull/36921>`_, Tiago Melo)
+* mgr/dashboard: Hide table action input field if limit=0 (`pr#36872 <https://github.com/stone/stone/pull/36872>`_, Volker Theile)
+* mgr/dashboard: Host delete action should be disabled if not managed by Orchestrator (`pr#36874 <https://github.com/stone/stone/pull/36874>`_, Volker Theile)
+* mgr/dashboard: Improve notification badge (`pr#37090 <https://github.com/stone/stone/pull/37090>`_, Aashish Sharma)
+* mgr/dashboard: Landing Page improvements (`pr#37390 <https://github.com/stone/stone/pull/37390>`_, Tiago Melo, Alfonso Martínez)
+* mgr/dashboard: Merge disable and disableDesc (`pr#37763 <https://github.com/stone/stone/pull/37763>`_, Tiago Melo)
+* mgr/dashboard: Proper format iSCSI target portals (`pr#36870 <https://github.com/stone/stone/pull/36870>`_, Volker Theile)
+* mgr/dashboard: REST API returns 500 when no Content-Type is specified (`pr#37308 <https://github.com/stone/stone/pull/37308>`_, Avan Thakkar)
+* mgr/dashboard: Remove useless tab in monitoring/alerts datatable details (`pr#36875 <https://github.com/stone/stone/pull/36875>`_, Volker Theile)
+* mgr/dashboard: Show warning when replicated size is 1 (`pr#37578 <https://github.com/stone/stone/pull/37578>`_, Sebastian Krah)
+* mgr/dashboard: The performance 'Client Read/Write' widget shows incorrect write values (`pr#38189 <https://github.com/stone/stone/pull/38189>`_, Volker Theile)
+* mgr/dashboard: Update datatable only when necessary (`pr#37331 <https://github.com/stone/stone/pull/37331>`_, Volker Theile)
+* mgr/dashboard: Use pipe instead of calling function within template (`pr#38094 <https://github.com/stone/stone/pull/38094>`_, Volker Theile)
+* mgr/dashboard: cluster > manager modules (`pr#37434 <https://github.com/stone/stone/pull/37434>`_, Avan Thakkar)
+* mgr/dashboard: display devices' health information within a tabset (`pr#37784 <https://github.com/stone/stone/pull/37784>`_, Kiefer Chang)
+* mgr/dashboard: fix error when typing existing paths in the Ganesha form (`pr#37688 <https://github.com/stone/stone/pull/37688>`_, Kiefer Chang)
+* mgr/dashboard: fix perf. issue when listing large amounts of buckets (`pr#37405 <https://github.com/stone/stone/pull/37405>`_, Alfonso Martínez)
+* mgr/dashboard: fix security scopes of some NFS-Ganesha endpoints (`pr#37450 <https://github.com/stone/stone/pull/37450>`_, Kiefer Chang)
+* mgr/dashboard: fix the error when exporting StoneFS path "/" in NFS exports (`pr#37686 <https://github.com/stone/stone/pull/37686>`_, Kiefer Chang)
+* mgr/dashboard: get rgw daemon zonegroup name from mgr (`pr#37620 <https://github.com/stone/stone/pull/37620>`_, Alfonso Martinez)
+* mgr/dashboard: increase Grafana iframe height to avoid scroll bar (`pr#37182 <https://github.com/stone/stone/pull/37182>`_, Ngwa Sedrick Meh)
+* mgr/dashboard: log in non-admin users successfully if the telemetry notification is shown (`pr#37452 <https://github.com/stone/stone/pull/37452>`_, Tatjana Dehler)
+* mgr/dashboard: support Orchestrator and user-defined Ganesha cluster (`pr#37885 <https://github.com/stone/stone/pull/37885>`_, Kiefer Chang)
+* mgr/dashboard: table detail rows overflow (`pr#37332 <https://github.com/stone/stone/pull/37332>`_, Aashish Sharma)
+* mgr/devicehealth: device_health_metrics pool gets created even without any OSDs in the cluster (`pr#37533 <https://github.com/stone/stone/pull/37533>`_, Sunny Kumar)
+* mgr/insights: Test environment requires 'six' (`pr#38396 <https://github.com/stone/stone/pull/38396>`_, Brad Hubbard)
+* mgr/prometheus: add pool compression stats (`pr#37562 <https://github.com/stone/stone/pull/37562>`_, Paul Cuzner)
+* mgr/telemetry: fix device id splitting when anonymizing serial (`pr#37302 <https://github.com/stone/stone/pull/37302>`_, Yaarit Hatuka)
+* mgr/volumes/nfs: Check if orchestrator spec service_id is valid (`pr#37371 <https://github.com/stone/stone/pull/37371>`_, Varsha Rao)
+* mgr/volumes/nfs: Fix wrong error message for pseudo path (`pr#37855 <https://github.com/stone/stone/pull/37855>`_, Varsha Rao)
+* mgr/volumes: Make number of cloner threads configurable (`pr#37671 <https://github.com/stone/stone/pull/37671>`_, Kotresh HR)
+* mgr/zabbix: indent the output of "zabbix config-show" (`pr#37128 <https://github.com/stone/stone/pull/37128>`_, Kefu Chai)
+* mgr: PyModuleRegistry::unregister_client() can run endlessly (`issue#47329 <http://tracker.stone.com/issues/47329>`_, `pr#37217 <https://github.com/stone/stone/pull/37217>`_, Venky Shankar)
+* mgr: don't update pending service map epoch on receiving map from mon (`pr#37180 <https://github.com/stone/stone/pull/37180>`_, Mykola Golub)
+* mon scrub testing (`pr#38361 <https://github.com/stone/stone/pull/38361>`_, Brad Hubbard)
+* mon/MDSMonitor do not ignore mds's down:dne request (`pr#37858 <https://github.com/stone/stone/pull/37858>`_, chencan)
+* mon/MDSMonitor: divide mds identifier and mds real name with dot (`pr#37857 <https://github.com/stone/stone/pull/37857>`_, Zhi Zhang)
+* mon/MonMap: fix unconditional failure for init_with_hosts (`pr#37817 <https://github.com/stone/stone/pull/37817>`_, Nathan Cutler, Patrick Donnelly)
+* mon/PGMap: add pg count for pools in the stone df command (`pr#36945 <https://github.com/stone/stone/pull/36945>`_, Vikhyat Umrao)
+* mon: Log "stone health detail" periodically in cluster log (`pr#38345 <https://github.com/stone/stone/pull/38345>`_, Prashant Dhange)
+* mon: deleting a StoneFS and its pools causes MONs to crash (`pr#37256 <https://github.com/stone/stone/pull/37256>`_, Patrick Donnelly)
+* mon: have 'mon stat' output json as well (`pr#37705 <https://github.com/stone/stone/pull/37705>`_, Joao Eduardo Luis)
+* mon: mark pgtemp messages as no_reply more consistenly in preprocess\_… (`pr#37347 <https://github.com/stone/stone/pull/37347>`_, Greg Farnum)
+* mon: set session_timeout when adding to session_map (`pr#37553 <https://github.com/stone/stone/pull/37553>`_, Ilya Dryomov)
+* mon: store mon updates in stone context for future MonMap instantiation (`pr#36705 <https://github.com/stone/stone/pull/36705>`_, Patrick Donnelly, Shyamsundar Ranganathan)
+* msg/async/ProtocolV2: allow rxbuf/txbuf get bigger in testing (`pr#37080 <https://github.com/stone/stone/pull/37080>`_, Ilya Dryomov)
+* os/bluestore: enable more flexible bluefs space management by default (`pr#37092 <https://github.com/stone/stone/pull/37092>`_, Igor Fedotov)
+* osd/osd-rep-recov-eio.sh: TEST_rados_repair_warning:  return 1 (`pr#37853 <https://github.com/stone/stone/pull/37853>`_, David Zafman)
+* osd: Check for nosrub/nodeep-scrub in between chunks, to avoid races (`pr#38359 <https://github.com/stone/stone/pull/38359>`_, David Zafman)
+* osdc/ObjectCacher: overwrite might cause stray read request callbacks (`pr#37674 <https://github.com/stone/stone/pull/37674>`_, Jason Dillaman)
+* osdc: add timeout configs for mons/osds (`pr#37530 <https://github.com/stone/stone/pull/37530>`_, Patrick Donnelly)
+* prometheus: Properly split the port off IPv6 addresses (`pr#36985 <https://github.com/stone/stone/pull/36985>`_, Matthew Oliver)
+* pybind/stonefs: add special values for not reading conffile (`pr#37724 <https://github.com/stone/stone/pull/37724>`_, Kefu Chai)
+* pybind/stonefs: fix custom exception raised by stonefs.pyx (`pr#37350 <https://github.com/stone/stone/pull/37350>`_, Ramana Raja)
+* pybind/mgr/volumes: add global lock debug (`pr#37366 <https://github.com/stone/stone/pull/37366>`_, Patrick Donnelly)
+* qa/\*/mon/mon-last-epoch-clean.sh: mark osd out instead of down (`pr#37349 <https://github.com/stone/stone/pull/37349>`_, Neha Ojha)
+* qa/stonefs: add session_timeout option support (`pr#37841 <https://github.com/stone/stone/pull/37841>`_, Xiubo Li)
+* qa/tasks/nfs: Test mounting of export created with nfs command (`pr#37365 <https://github.com/stone/stone/pull/37365>`_, Varsha Rao)
+* qa/tasks/{stone,stone_manager}: drop py2 support (`pr#37863 <https://github.com/stone/stone/pull/37863>`_, Kefu Chai)
+* qa/tests: added rhel 8.2 (`pr#38287 <https://github.com/stone/stone/pull/38287>`_, Yuri Weinstein)
+* qa/tests: use bionic only for old clients in rados/thrash-old-clients (`pr#36931 <https://github.com/stone/stone/pull/36931>`_, Yuri Weinstein)
+* qa/workunits/mon: fixed excessively large pool PG count (`pr#37346 <https://github.com/stone/stone/pull/37346>`_, Jason Dillaman)
+* qa: Enable debug_client for mgr tests (`pr#37270 <https://github.com/stone/stone/pull/37270>`_, Brad Hubbard)
+* qa: Fix traceback during fs cleanup between tests (`pr#36713 <https://github.com/stone/stone/pull/36713>`_, Kotresh HR)
+* qa: add debugging for volumes plugin use of libstonefs (`pr#37352 <https://github.com/stone/stone/pull/37352>`_, Patrick Donnelly)
+* qa: drop hammer branch qa tests (`pr#37728 <https://github.com/stone/stone/pull/37728>`_, Neha Ojha, Deepika Upadhyay)
+* qa: ignore expected mds failover message (`pr#37367 <https://github.com/stone/stone/pull/37367>`_, Patrick Donnelly)
+* rbd-mirror: peer setup can still race and fail creation of peer (`pr#37342 <https://github.com/stone/stone/pull/37342>`_, Jason Dillaman)
+* rbd: include RADOS namespace in krbd symlinks (`pr#37343 <https://github.com/stone/stone/pull/37343>`_, Ilya Dryomov)
+* rbd: journal: possible race condition between flush and append callback (`pr#37850 <https://github.com/stone/stone/pull/37850>`_, Jason Dillaman)
+* rbd: librbd: ignore -ENOENT error when disabling object-map (`pr#37852 <https://github.com/stone/stone/pull/37852>`_, Jason Dillaman)
+* rbd: librbd: update AioCompletion return value before evaluating pending count (`pr#37851 <https://github.com/stone/stone/pull/37851>`_, Jason Dillaman)
+* rbd: make common options override krbd-specific options (`pr#37408 <https://github.com/stone/stone/pull/37408>`_, Ilya Dryomov)
+* rbd: rbd-nbd: don't ignore namespace when unmapping by image spec (`pr#37812 <https://github.com/stone/stone/pull/37812>`_, Mykola Golub)
+* rgw/gc: fix for incrementing the perf counter 'gc_retire_object' (`pr#37847 <https://github.com/stone/stone/pull/37847>`_, Pritha Srivastava)
+* rgw/gc: fixing the condition when marker for a queue is (`pr#37846 <https://github.com/stone/stone/pull/37846>`_, Pritha Srivastava)
+* rgw/rgw_file: Fix the incorrect lru object eviction (`pr#37672 <https://github.com/stone/stone/pull/37672>`_, luo rixin)
+* rgw: Add bucket name to bucket stats error logging (`pr#37335 <https://github.com/stone/stone/pull/37335>`_, Seena Fallah)
+* rgw: Add request timeout to beast (`pr#37809 <https://github.com/stone/stone/pull/37809>`_, Adam C. Emerson, Or Friedmann)
+* rgw: RGWObjVersionTracker tracks version over increments (`pr#37337 <https://github.com/stone/stone/pull/37337>`_, Casey Bodley)
+* rgw: Swift API anonymous access should 401 (`pr#37339 <https://github.com/stone/stone/pull/37339>`_, Matthew Oliver)
+* rgw: adds code for creating and managing oidc provider entities in rgw and for offline validation of OpenID Connect Access and ID Token (`pr#37640 <https://github.com/stone/stone/pull/37640>`_, Pritha Srivastava, Casey Bodley)
+* rgw: allow rgw-orphan-list to note when rados objects are in namespace (`pr#37800 <https://github.com/stone/stone/pull/37800>`_, J. Eric Ivancich)
+* rgw: dump transitions in RGWLifecycleConfiguration::dump() (`pr#36812 <https://github.com/stone/stone/pull/36812>`_, Shengming Zhang)
+* rgw: during GC defer, prevent new GC enqueue (`pr#38249 <https://github.com/stone/stone/pull/38249>`_, Casey Bodley, J. Eric Ivancich)
+* rgw: fix expiration header returned even if there is only one tag in the object the same as the rule (`pr#37807 <https://github.com/stone/stone/pull/37807>`_, Or Friedmann)
+* rgw: fix setting of namespace in ordered and unordered bucket listing (`pr#37673 <https://github.com/stone/stone/pull/37673>`_, J. Eric Ivancich)
+* rgw: fix user stats iterative increment (`pr#37779 <https://github.com/stone/stone/pull/37779>`_, Mark Kogan)
+* rgw: fix: S3 API KeyCount incorrect return (`pr#37849 <https://github.com/stone/stone/pull/37849>`_, 胡玮文)
+* rgw: log resharding events at level 1 (formerly 20) (`pr#36840 <https://github.com/stone/stone/pull/36840>`_, Or Friedmann)
+* rgw: radosgw-admin should paginate internally when listing bucket (`pr#37803 <https://github.com/stone/stone/pull/37803>`_, J. Eric Ivancich)
+* rgw: radosgw-admin: period pull command is not always a raw_storage_op (`pr#37336 <https://github.com/stone/stone/pull/37336>`_, Casey Bodley)
+* rgw: replace '+' with "%20" in canonical query string for s3 v4 auth (`pr#37338 <https://github.com/stone/stone/pull/37338>`_, yuliyang_yewu)
+* rgw: rgw_file: avoid long-ish delay on shutdown (`pr#37551 <https://github.com/stone/stone/pull/37551>`_, Matt Benjamin)
+* rgw: s3: mark bucket encryption as not implemented (`pr#36691 <https://github.com/stone/stone/pull/36691>`_, Abhishek Lekshmanan)
+* rgw: urlencode bucket name when forwarding request (`pr#37340 <https://github.com/stone/stone/pull/37340>`_, caolei)
+* rgw: use yum rather than dnf for teuthology testing of rgw-orphan-list (`pr#37845 <https://github.com/stone/stone/pull/37845>`_, J. Eric Ivancich)
+* rpm,deb: drop /etc/sudoers.d/stoneadm (`pr#37401 <https://github.com/stone/stone/pull/37401>`_, Nathan Cutler)
+* run-make-check.sh: Don't run tests if build fails (`pr#38294 <https://github.com/stone/stone/pull/38294>`_, Brad Hubbard)
+* systemd: Support Graceful Reboot for AIO Node (`pr#37300 <https://github.com/stone/stone/pull/37300>`_, Wong Hoi Sing Edison)
+* test/librados: fix endian bugs in checksum test cases (`pr#37604 <https://github.com/stone/stone/pull/37604>`_, Ulrich Weigand)
+* test/rbd-mirror: pool watcher registration error might result in race (`pr#37208 <https://github.com/stone/stone/pull/37208>`_, Jason Dillaman)
+* test/store_test: use 'threadsafe' style for death tests (`pr#37819 <https://github.com/stone/stone/pull/37819>`_, Igor Fedotov)
+* tools/osdmaptool.cc: add ability to clean_temps (`pr#37348 <https://github.com/stone/stone/pull/37348>`_, Neha Ojha)
+* tools/rados: flush formatter periodically during json output of "rados ls" (`pr#37835 <https://github.com/stone/stone/pull/37835>`_, J. Eric Ivancich)
+* vstart.sh: fix fs set max_mds bug (`pr#37837 <https://github.com/stone/stone/pull/37837>`_, Jinmyeong Lee)
 
 
 v15.2.7 Octopus
@@ -243,7 +243,7 @@ a period of time.
 Changelog
 ---------
 
-* rgw: during GC defer, prevent new GC enqueue (`issue#47866 <https://tracker.ceph.com/issues/47866>`_, `pr#38249 <https://github.com/ceph/ceph/pull/38249>`_, Eric Ivancich, Casey Bodley)
+* rgw: during GC defer, prevent new GC enqueue (`issue#47866 <https://tracker.stone.com/issues/47866>`_, `pr#38249 <https://github.com/stone/stone/pull/38249>`_, Eric Ivancich, Casey Bodley)
 
 
 v15.2.6 Octopus
@@ -267,17 +267,17 @@ Changelog
 v15.2.5 Octopus
 ===============
 
-This is the fifth release of the Ceph Octopus stable release series. This
+This is the fifth release of the Stone Octopus stable release series. This
 release brings a range of fixes across all components. We recommend that all
 Octopus users upgrade to this release.
 
 Notable Changes
 ---------------
 
-* CephFS: Automatic static subtree partitioning policies may now be configured
+* StoneFS: Automatic static subtree partitioning policies may now be configured
   using the new distributed and random ephemeral pinning extended attributes on
   directories. See the documentation for more information:
-  https://docs.ceph.com/docs/master/cephfs/multimds/
+  https://docs.stone.com/docs/master/stonefs/multimds/
 
 * Monitors now have a config option ``mon_osd_warn_num_repaired``, 10 by default.
   If any OSD has repaired more than this many I/O errors in stored data a
@@ -288,183 +288,183 @@ Notable Changes
   scrubs are NOT interrupted.
 
 * Fix an issue with osdmaps not being trimmed in a healthy cluster (
-  `issue#47297 <https://tracker.ceph.com/issues/47297>`_,
-  `pr#36981 <https://github.com/ceph/ceph/pull/36981>`_)
+  `issue#47297 <https://tracker.stone.com/issues/47297>`_,
+  `pr#36981 <https://github.com/stone/stone/pull/36981>`_)
 
 Changelog
 ---------
 
-* bluestore,core: bluestore: blk:BlockDevice.cc: use pending_aios instead of iovec size as ios num (`pr#36668 <https://github.com/ceph/ceph/pull/36668>`_, weixinwei)
-* bluestore,tests: test/store_test: refactor bluestore spillover test (`pr#34943 <https://github.com/ceph/ceph/pull/34943>`_, Igor Fedotov)
-* bluestore,tests: tests: objectstore/store_test: kill ExcessiveFragmentation test case (`pr#36049 <https://github.com/ceph/ceph/pull/36049>`_, Igor Fedotov)
-* bluestore: bluestore: Rescue procedure for extremely large bluefs log (`pr#36123 <https://github.com/ceph/ceph/pull/36123>`_, Adam Kupczyk)
-* bluestore: octopus:os/bluestore: improve/fix bluefs stats reporting (`pr#35748 <https://github.com/ceph/ceph/pull/35748>`_, Igor Fedotov)
-* bluestore: os/bluestore: fix bluefs log growth (`pr#36621 <https://github.com/ceph/ceph/pull/36621>`_, Adam Kupczyk, Jianpeng Ma)
-* bluestore: os/bluestore: simplify Onode pin/unpin logic (`pr#36795 <https://github.com/ceph/ceph/pull/36795>`_, Igor Fedotov)
-* build/ops: Revert "mgr/osd_support: remove module and all traces" (`pr#36973 <https://github.com/ceph/ceph/pull/36973>`_, Sebastian Wagner)
-* build/ops: ceph-iscsi: selinux fixes (`pr#36302 <https://github.com/ceph/ceph/pull/36302>`_, Mike Christie)
-* build/ops: mgr/dashboard/api: reduce amount of daemon logs (`pr#36693 <https://github.com/ceph/ceph/pull/36693>`_, Ernesto Puerta)
-* ceph-volume: add dmcrypt support in raw mode (`pr#35830 <https://github.com/ceph/ceph/pull/35830>`_, Guillaume Abrioux)
-* ceph-volume: add drive-group subcommand (`pr#36558 <https://github.com/ceph/ceph/pull/36558>`_, Jan Fajerski, Sebastian Wagner)
-* ceph-volume: add tests for new functions that run LVM commands (`pr#36614 <https://github.com/ceph/ceph/pull/36614>`_, Rishabh Dave)
-* ceph-volume: don't use container classes in api/lvm.py (`pr#35879 <https://github.com/ceph/ceph/pull/35879>`_, Rishabh Dave, Guillaume Abrioux)
-* ceph-volume: fix lvm functional tests (`pr#36409 <https://github.com/ceph/ceph/pull/36409>`_, Jan Fajerski)
-* ceph-volume: handle idempotency with batch and explicit scenarios (`pr#35880 <https://github.com/ceph/ceph/pull/35880>`_, Andrew Schoen)
-* ceph-volume: remove container classes from api/lvm.py (`pr#36608 <https://github.com/ceph/ceph/pull/36608>`_, Rishabh Dave)
-* ceph-volume: report correct rejected reason in inventory if device type is invalid (`pr#36410 <https://github.com/ceph/ceph/pull/36410>`_, Satoru Takeuchi)
-* ceph-volume: run flake8 in python3 (`pr#36588 <https://github.com/ceph/ceph/pull/36588>`_, Jan Fajerski)
-* cephfs,common: common:  ignore SIGHUP prior to fork (`issue#46269 <http://tracker.ceph.com/issues/46269>`_, `pr#36195 <https://github.com/ceph/ceph/pull/36195>`_, Willem Jan Withagen, hzwuhongsong)
-* cephfs,core,mgr: mgr/status: metadata is fetched async (`pr#36630 <https://github.com/ceph/ceph/pull/36630>`_, Michael Fritch)
-* cephfs,core,rbd,rgw: librados: add LIBRADOS_SUPPORTS_GETADDRS support (`pr#36643 <https://github.com/ceph/ceph/pull/36643>`_, Xiubo Li)
-* cephfs,mgr: mgr/volumes/nfs: Add interface for adding user defined configuration (`pr#36635 <https://github.com/ceph/ceph/pull/36635>`_, Varsha Rao)
-* cephfs,mon: mon/MDSMonitor: copy MDS info which may be removed (`pr#36035 <https://github.com/ceph/ceph/pull/36035>`_, Patrick Donnelly)
-* cephfs,pybind: pybind/ceph_volume_client: Fix PEP-8 SyntaxWarning (`pr#36100 <https://github.com/ceph/ceph/pull/36100>`_, Đặng Minh Dũng)
-* cephfs,tests: mgr/fs/volumes: misc fixes (`pr#36327 <https://github.com/ceph/ceph/pull/36327>`_, Patrick Donnelly, Kotresh HR)
-* cephfs,tests: tests: Revert "Revert "qa/suites/rados/mgr/tasks/module_selftest: whitelist … (`issue#43943 <http://tracker.ceph.com/issues/43943>`_, `pr#36042 <https://github.com/ceph/ceph/pull/36042>`_, Venky Shankar)
-* cephfs,tests: tests: qa/tasks/cephfs/cephfs_test_case.py: skip cleaning the core dumps when in program case (`pr#36043 <https://github.com/ceph/ceph/pull/36043>`_, Xiubo Li)
-* cephfs,tests: tests: qa/tasks: make sh() in vstart_runner.py identical with teuthology.orchestra.remote.sh (`pr#36044 <https://github.com/ceph/ceph/pull/36044>`_, Jos Collin)
-* cephfs: Update nfs-ganesha package requirements doc backport (`pr#36063 <https://github.com/ceph/ceph/pull/36063>`_, Varsha Rao)
-* cephfs: cephfs: client: fix setxattr for 0 size value (NULL value) (`pr#36045 <https://github.com/ceph/ceph/pull/36045>`_, Sidharth Anupkrishnan)
-* cephfs: cephfs: client: fix snap directory atime (`pr#36039 <https://github.com/ceph/ceph/pull/36039>`_, Luis Henriques)
-* cephfs: cephfs: client: release the client_lock before copying data in read (`pr#36046 <https://github.com/ceph/ceph/pull/36046>`_, Chencan)
-* cephfs: client: expose ceph.quota.max_bytes xattr within snapshots (`pr#36403 <https://github.com/ceph/ceph/pull/36403>`_, Shyamsundar Ranganathan)
-* cephfs: client: introduce timeout for client shutdown (`issue#44276 <http://tracker.ceph.com/issues/44276>`_, `pr#35962 <https://github.com/ceph/ceph/pull/35962>`_, "Yan, Zheng", Venky Shankar)
-* cephfs: mds/MDSRank: fix typo in "unrecognized" (`pr#36197 <https://github.com/ceph/ceph/pull/36197>`_, Nathan Cutler)
-* cephfs: mds: add ephemeral random and distributed export pins (`pr#35759 <https://github.com/ceph/ceph/pull/35759>`_, Patrick Donnelly, Sidharth Anupkrishnan)
-* cephfs: mds: fix filelock state when Fc is issued (`pr#35842 <https://github.com/ceph/ceph/pull/35842>`_, Xiubo Li)
-* cephfs: mds: reset heartbeat in EMetaBlob replay (`pr#36040 <https://github.com/ceph/ceph/pull/36040>`_, Yanhu Cao)
-* cephfs: mgr/nfs: Check if pseudo path is absolute path (`pr#36299 <https://github.com/ceph/ceph/pull/36299>`_, Varsha Rao)
-* cephfs: mgr/nfs: Update MDCACHE block in ganesha config and doc about nfs-cephadm in vstart (`pr#36224 <https://github.com/ceph/ceph/pull/36224>`_, Varsha Rao)
-* cephfs: mgr/volumes: Deprecate protect/unprotect CLI calls for subvolume snapshots (`pr#36126 <https://github.com/ceph/ceph/pull/36126>`_, Shyamsundar Ranganathan)
-* cephfs: mgr/volumes: fix "ceph nfs export" help messages (`pr#36220 <https://github.com/ceph/ceph/pull/36220>`_, Nathan Cutler)
-* cephfs: nfs backport (`pr#35499 <https://github.com/ceph/ceph/pull/35499>`_, Jeff Layton, Varsha Rao, Ramana Raja, Kefu Chai)
-* common,core: common, osd: add sanity checks around osd_scrub_max_preemptions (`pr#36034 <https://github.com/ceph/ceph/pull/36034>`_, xie xingguo)
-* common,rbd,tools: rbd: immutable-object-cache: fixed crashes on start up (`pr#36660 <https://github.com/ceph/ceph/pull/36660>`_, Jason Dillaman)
-* common,rbd: crush/CrushWrapper: rebuild reverse maps after rebuilding crush map (`pr#36662 <https://github.com/ceph/ceph/pull/36662>`_, Jason Dillaman)
-* common: common: log: fix timestap precision of log can't set to millisecond (`pr#36048 <https://github.com/ceph/ceph/pull/36048>`_, Guan yunfei)
-* core,mgr: mgr: decrease pool stats if pg was removed (`pr#36667 <https://github.com/ceph/ceph/pull/36667>`_, Aleksei Gutikov)
-* core,rbd: osd/OSDCap: rbd profile permits use of "rbd_info" (`pr#36414 <https://github.com/ceph/ceph/pull/36414>`_, Florian Florensa)
-* core,tools: tools/rados: Set locator key when exporting or importing a pool (`pr#36666 <https://github.com/ceph/ceph/pull/36666>`_, Iain Buclaw)
-* core: mon/OSDMonitor: Reset grace period if failure interval exceeds a threshold (`pr#35799 <https://github.com/ceph/ceph/pull/35799>`_, Sridhar Seshasayee)
-* core: mon/OSDMonitor: only take in osd into consideration when trimming osd… (`pr#36981 <https://github.com/ceph/ceph/pull/36981>`_, Kefu Chai)
-* core: mon: fix the 'Error ERANGE' message when conf "osd_objectstore" is filestore (`pr#36665 <https://github.com/ceph/ceph/pull/36665>`_, wangyunqing)
-* core: monclient: schedule first tick using mon_client_hunt_interval (`pr#36633 <https://github.com/ceph/ceph/pull/36633>`_, Mykola Golub)
-* core: osd/OSD.cc: remove osd_lock for bench (`pr#36664 <https://github.com/ceph/ceph/pull/36664>`_, Neha Ojha, Adam Kupczyk)
-* core: osd/PG: fix history.same_interval_since of merge target again (`pr#36033 <https://github.com/ceph/ceph/pull/36033>`_, xie xingguo)
-* core: osd/PeeringState: prevent peer's num_objects going negative (`pr#36663 <https://github.com/ceph/ceph/pull/36663>`_, xie xingguo)
-* core: osd/PrimaryLogPG: don't populate watchers if replica (`pr#36029 <https://github.com/ceph/ceph/pull/36029>`_, Ilya Dryomov)
-* core: osd: Cancel in-progress scrubs (not user requested) (`pr#36291 <https://github.com/ceph/ceph/pull/36291>`_, David Zafman)
-* core: osd: expose osdspec_affinity to osd_metadata (`pr#35957 <https://github.com/ceph/ceph/pull/35957>`_, Joshua Schmid)
-* core: osd: fix crash in _committed_osd_maps if incremental osdmap crc fails (`pr#36340 <https://github.com/ceph/ceph/pull/36340>`_, Neha Ojha, Dan van der Ster)
-* core: osd: make message cap option usable again (`pr#35737 <https://github.com/ceph/ceph/pull/35737>`_, Neha Ojha, Josh Durgin)
-* core: osd: wakeup all threads of shard rather than one thread (`pr#36032 <https://github.com/ceph/ceph/pull/36032>`_, Jianpeng Ma)
-* core: test: osd-backfill-stats.sh use nobackfill to avoid races in remainin… (`pr#36030 <https://github.com/ceph/ceph/pull/36030>`_, David Zafman)
-* doc: cephadm batch backport (`pr#36450 <https://github.com/ceph/ceph/pull/36450>`_, Varsha Rao, Ricardo Marques, Kiefer Chang, Matthew Oliver, Paul Cuzner, Kefu Chai, Daniel-Pivonka, Sebastian Wagner, Volker Theile, Adam King, Michael Fritch, Joshua Schmid)
-* doc: doc/mgr/crash: Add missing command in rm example (`pr#36690 <https://github.com/ceph/ceph/pull/36690>`_, Daniël Vos)
-* doc: doc/rados: Fix osd_scrub_during_recovery default value (`pr#36661 <https://github.com/ceph/ceph/pull/36661>`_, Benoît Knecht)
-* doc: doc/rbd: add rbd-target-gw enable and start (`pr#36416 <https://github.com/ceph/ceph/pull/36416>`_, Zac Dover)
-* doc: doc: PendingReleaseNotes: clean slate for 15.2.5 (`pr#35753 <https://github.com/ceph/ceph/pull/35753>`_, Nathan Cutler)
-* mgr,pybind: pybind/mgr/balancer: use "==" and "!=" for comparing str (`pr#36036 <https://github.com/ceph/ceph/pull/36036>`_, Kefu Chai)
-* mgr,pybind: pybind/mgr/pg_autoscaler/module.py: do not update event if ev.pg_num== ev.pg_num_target (`pr#36037 <https://github.com/ceph/ceph/pull/36037>`_, Neha Ojha)
-* mgr,rbd: mgr/prometheus: automatically discover RBD pools for stats gathering (`pr#36411 <https://github.com/ceph/ceph/pull/36411>`_, Jason Dillaman)
-* mgr/dashboard/api: increase API health timeout (`pr#36562 <https://github.com/ceph/ceph/pull/36562>`_, Ernesto Puerta)
-* mgr/dashboard: Add button to copy the bootstrap token into the clipboard (`pr#35796 <https://github.com/ceph/ceph/pull/35796>`_, Ishan Rai)
-* mgr/dashboard: Add host labels in UI (`pr#35893 <https://github.com/ceph/ceph/pull/35893>`_, Volker Theile)
-* mgr/dashboard: Add hosts page unit tests (`pr#36350 <https://github.com/ceph/ceph/pull/36350>`_, Volker Theile)
-* mgr/dashboard: Allow to edit iSCSI target with active session (`pr#35997 <https://github.com/ceph/ceph/pull/35997>`_, Ricardo Marques)
-* mgr/dashboard: Always use fast angular unit tests (`pr#36267 <https://github.com/ceph/ceph/pull/36267>`_, Stephan Müller)
-* mgr/dashboard: Configure overflow of popover in health page (`pr#36460 <https://github.com/ceph/ceph/pull/36460>`_, Tiago Melo)
-* mgr/dashboard: Display check icon instead of true|false in various datatables (`pr#35892 <https://github.com/ceph/ceph/pull/35892>`_, Volker Theile)
-* mgr/dashboard: Display users current bucket quota usage (`pr#35926 <https://github.com/ceph/ceph/pull/35926>`_, Ernesto Puerta, Avan Thakkar)
-* mgr/dashboard: Extract documentation link to a component (`pr#36587 <https://github.com/ceph/ceph/pull/36587>`_, Tiago Melo)
-* mgr/dashboard: Fix host attributes like labels are not returned (`pr#36678 <https://github.com/ceph/ceph/pull/36678>`_, Kiefer Chang)
-* mgr/dashboard: Hide password notification when expiration date is far (`pr#35975 <https://github.com/ceph/ceph/pull/35975>`_, Tiago Melo)
-* mgr/dashboard: Improve Summary's subscribe methods (`pr#35705 <https://github.com/ceph/ceph/pull/35705>`_, Tiago Melo)
-* mgr/dashboard: Prometheus query error in the metrics of Pools, OSDs and RBD images (`pr#35885 <https://github.com/ceph/ceph/pull/35885>`_, Avan Thakkar)
-* mgr/dashboard: Re-enable OSD's table autoReload (`pr#36226 <https://github.com/ceph/ceph/pull/36226>`_, Kiefer Chang, Tiago Melo)
-* mgr/dashboard: Strange iSCSI discovery auth behavior (`pr#36782 <https://github.com/ceph/ceph/pull/36782>`_, Volker Theile)
-* mgr/dashboard: The max. buckets field in RGW user form should be pre-filled (`pr#35795 <https://github.com/ceph/ceph/pull/35795>`_, Volker Theile)
-* mgr/dashboard: Unable to edit iSCSI logged-in client (`pr#36611 <https://github.com/ceph/ceph/pull/36611>`_, Ricardo Marques)
-* mgr/dashboard: Use right size in pool form (`pr#35925 <https://github.com/ceph/ceph/pull/35925>`_, Stephan Müller)
-* mgr/dashboard: Use same required field message accross the UI (`pr#36277 <https://github.com/ceph/ceph/pull/36277>`_, Volker Theile)
-* mgr/dashboard: add API team to CODEOWNERS (`pr#36143 <https://github.com/ceph/ceph/pull/36143>`_, Ernesto Puerta)
-* mgr/dashboard: allow preserving OSD IDs when deleting OSDs (`pr#35766 <https://github.com/ceph/ceph/pull/35766>`_, Kiefer Chang)
-* mgr/dashboard: cpu stats incorrectly displayed (`pr#36322 <https://github.com/ceph/ceph/pull/36322>`_, Avan Thakkar)
-* mgr/dashboard: cropped actions menu in nested details (`pr#35620 <https://github.com/ceph/ceph/pull/35620>`_, Avan Thakkar)
-* mgr/dashboard: fix Source column i18n issue in RBD configuration tables (`pr#35819 <https://github.com/ceph/ceph/pull/35819>`_, Kiefer Chang)
-* mgr/dashboard: fix backporting issue #35926 (`pr#36073 <https://github.com/ceph/ceph/pull/36073>`_, Ernesto Puerta)
-* mgr/dashboard: fix pool usage calculation (`pr#36137 <https://github.com/ceph/ceph/pull/36137>`_, Ernesto Puerta)
-* mgr/dashboard: fix rbdmirroring dropdown menu (`pr#36382 <https://github.com/ceph/ceph/pull/36382>`_, Avan Thakkar)
-* mgr/dashboard: fix regression in delete OSD modal (`pr#36419 <https://github.com/ceph/ceph/pull/36419>`_, Kiefer Chang)
-* mgr/dashboard: fix tasks.mgr.dashboard.test_rbd.RbdTest.test_move_image_to_trash error (`pr#36563 <https://github.com/ceph/ceph/pull/36563>`_, Kiefer Chang)
-* mgr/dashboard: fix ui api endpoints (`pr#36160 <https://github.com/ceph/ceph/pull/36160>`_, Fabrizio D'Angelo)
-* mgr/dashboard: fix wal/db slots controls in the OSD form (`pr#35883 <https://github.com/ceph/ceph/pull/35883>`_, Kiefer Chang)
-* mgr/dashboard: increase API test coverage in API controllers (`pr#36260 <https://github.com/ceph/ceph/pull/36260>`_, Kefu Chai, Aashish Sharma)
-* mgr/dashboard: redirect to original URL after successful login (`pr#36831 <https://github.com/ceph/ceph/pull/36831>`_, Avan Thakkar)
-* mgr/dashboard: remove "This week/month/year" and "Today" time stamps (`pr#36789 <https://github.com/ceph/ceph/pull/36789>`_, Avan Thakkar)
-* mgr/dashboard: remove cdCopy2ClipboardButton `formatted` attribute (`pr#35889 <https://github.com/ceph/ceph/pull/35889>`_, Tatjana Dehler)
-* mgr/dashboard: remove password field if login is using SSO and fix error message in confirm password (`pr#36689 <https://github.com/ceph/ceph/pull/36689>`_, Ishan Rai)
-* mgr/dashboard: right-align dropdown menu of column filters (`pr#36369 <https://github.com/ceph/ceph/pull/36369>`_, Kiefer Chang)
-* mgr/dashboard: telemetry activation notification (`pr#35772 <https://github.com/ceph/ceph/pull/35772>`_, Tatjana Dehler)
-* mgr/dashboard: wait longer for health status to be cleared (`pr#36346 <https://github.com/ceph/ceph/pull/36346>`_, Tatjana Dehler)
-* mgr/k8sevents: sanitise kubernetes events (`pr#35684 <https://github.com/ceph/ceph/pull/35684>`_, Paul Cuzner)
-* mgr/prometheus: improve cache (`pr#35847 <https://github.com/ceph/ceph/pull/35847>`_, Patrick Seidensal)
-* mgr: avoid false alarm of MGR_MODULE_ERROR (`pr#35995 <https://github.com/ceph/ceph/pull/35995>`_, Kefu Chai)
-* mgr: mgr/DaemonServer.cc: make 'config show' on fsid work (`pr#35793 <https://github.com/ceph/ceph/pull/35793>`_, Neha Ojha)
-* mgr: mgr/cephadm: Adapt Vagrantfile to use octopus instead of master repo on shaman (`pr#35988 <https://github.com/ceph/ceph/pull/35988>`_, Volker Theile)
-* mgr: mgr/diskprediction_local: Fix array size error (`pr#36577 <https://github.com/ceph/ceph/pull/36577>`_, Benoît Knecht)
-* mgr: mgr/progress: Skip pg_summary update if _events dict is empty (`pr#36076 <https://github.com/ceph/ceph/pull/36076>`_, Manuel Lausch)
-* mgr: mgr/prometheus: log time it takes to collect metrics (`pr#36581 <https://github.com/ceph/ceph/pull/36581>`_, Patrick Seidensal)
-* mgr: mgr: Add missing states to PG_STATES in mgr_module.py (`pr#36786 <https://github.com/ceph/ceph/pull/36786>`_, Harley Gorrell)
-* mgr: mgr: fix race between module load and notify (`pr#35794 <https://github.com/ceph/ceph/pull/35794>`_, Mykola Golub)
-* mgr: mon/PGMap: do not consider changing pg stuck (`pr#35958 <https://github.com/ceph/ceph/pull/35958>`_, Kefu Chai)
-* monitoring: alert for pool fill up broken (`pr#35136 <https://github.com/ceph/ceph/pull/35136>`_, Volker Theile)
-* msgr: New msgr2 crc and secure modes (msgr2.1) (`pr#35720 <https://github.com/ceph/ceph/pull/35720>`_, Ilya Dryomov)
-* rbd,tests: tests/rbd_mirror: fix race on test shut down (`pr#36657 <https://github.com/ceph/ceph/pull/36657>`_, Mykola Golub)
-* rbd: librbd:  global and pool-level config overrides require image refresh to apply (`pr#36638 <https://github.com/ceph/ceph/pull/36638>`_, Jason Dillaman)
-* rbd: librbd: new 'write_zeroes' API methods to suppliment the `discard` APIs (`pr#36247 <https://github.com/ceph/ceph/pull/36247>`_, Jason Dillaman)
-* rbd: librbd: potential race conditions handling API IO completions (`pr#36331 <https://github.com/ceph/ceph/pull/36331>`_, Jason Dillaman)
-* rbd: mgr/dashboard: work with v1 RBD images (`pr#35711 <https://github.com/ceph/ceph/pull/35711>`_, Ernesto Puerta)
-* rbd: rbd: librbd: Align rbd_write_zeroes declarations (`pr#36717 <https://github.com/ceph/ceph/pull/36717>`_, Corey Bryant)
-* rbd: rbd: librbd: don't resend async_complete if watcher is unregistered (`pr#36659 <https://github.com/ceph/ceph/pull/36659>`_, Mykola Golub)
-* rbd: rbd: librbd: flush all queued object IO from simple scheduler (`pr#36658 <https://github.com/ceph/ceph/pull/36658>`_, Jason Dillaman)
-* rbd: rbd: librbd: race when disabling object map with overlapping in-flight writes (`pr#36656 <https://github.com/ceph/ceph/pull/36656>`_, Jason Dillaman)
-* rbd: rbd: recognize crush_location, read_from_replica and compression_hint map options (`pr#36061 <https://github.com/ceph/ceph/pull/36061>`_, Ilya Dryomov)
-* rgw,tests: qa/tasks/ragweed: always set ragweed_repo (`pr#36651 <https://github.com/ceph/ceph/pull/36651>`_, Kefu Chai)
-* rgw:  rgw: lc: fix Segmentation Fault when the tag of the object was not found (`pr#36085 <https://github.com/ceph/ceph/pull/36085>`_, yupeng chen, zhuo li)
-* rgw: Add subuser to OPA request (`pr#36023 <https://github.com/ceph/ceph/pull/36023>`_, Seena Fallah)
-* rgw: Add support wildcard subuser for bucket policy (`pr#36022 <https://github.com/ceph/ceph/pull/36022>`_, Seena Fallah)
-* rgw: Adding data cache and CDN capabilities (`pr#36646 <https://github.com/ceph/ceph/pull/36646>`_, Mark Kogan, Or Friedmann)
-* rgw: Empty reqs_change_state queue before unregistered_reqs (`pr#36650 <https://github.com/ceph/ceph/pull/36650>`_, Soumya Koduri)
-* rgw: add abort multipart date and rule-id header to init multipart upload response (`pr#36649 <https://github.com/ceph/ceph/pull/36649>`_, zhang Shaowen, zhangshaowen)
-* rgw: add access log to the beast frontend (`pr#36024 <https://github.com/ceph/ceph/pull/36024>`_, Mark Kogan)
-* rgw: add check for index entry's existing when adding bucket stats during bucket reshard (`pr#36025 <https://github.com/ceph/ceph/pull/36025>`_, zhang Shaowen)
-* rgw: add negative cache to the system object (`pr#36648 <https://github.com/ceph/ceph/pull/36648>`_, Or Friedmann)
-* rgw: add quota enforcement to CopyObj (`pr#36020 <https://github.com/ceph/ceph/pull/36020>`_, Casey Bodley)
-* rgw: append obj: prevent tail from being GC'ed (`pr#36389 <https://github.com/ceph/ceph/pull/36389>`_, Abhishek Lekshmanan)
-* rgw: bucket list/stats truncates for user w/ >1000 buckets (`pr#36019 <https://github.com/ceph/ceph/pull/36019>`_, J. Eric Ivancich)
-* rgw: cls/rgw: preserve olh entry's name on last unlink (`pr#36652 <https://github.com/ceph/ceph/pull/36652>`_, Casey Bodley)
-* rgw: cls/rgw_gc: Fixing the iterator used to access urgent data map (`pr#36017 <https://github.com/ceph/ceph/pull/36017>`_, Pritha Srivastava)
-* rgw: fix boost::asio::async_write() does not return error (`pr#36647 <https://github.com/ceph/ceph/pull/36647>`_, Mark Kogan)
-* rgw: fix bug where ordered bucket listing gets stuck (`pr#35877 <https://github.com/ceph/ceph/pull/35877>`_, J. Eric Ivancich)
-* rgw: fix double slash (//) killing the gateway (`pr#36654 <https://github.com/ceph/ceph/pull/36654>`_, Theofilos Mouratidis)
-* rgw: fix loop problem with swift stat on account (`pr#36021 <https://github.com/ceph/ceph/pull/36021>`_, Marcus Watts)
-* rgw: fix shutdown crash in RGWAsyncReadMDLogEntries (`pr#36653 <https://github.com/ceph/ceph/pull/36653>`_, Casey Bodley)
-* rgw: introduce safe user-reset-stats (`pr#36655 <https://github.com/ceph/ceph/pull/36655>`_, Yuval Lifshitz, Matt Benjamin)
-* rgw: lc: add lifecycle perf counters (`pr#36018 <https://github.com/ceph/ceph/pull/36018>`_, Mark Kogan, Matt Benjamin)
-* rgw: orphan list teuthology test & fully-qualified domain issue (`pr#36027 <https://github.com/ceph/ceph/pull/36027>`_, J. Eric Ivancich)
-* rgw: orphan-list timestamp fix (`pr#35929 <https://github.com/ceph/ceph/pull/35929>`_, J. Eric Ivancich)
-* rgw: policy: reuse eval_principal to evaluate the policy principal (`pr#36636 <https://github.com/ceph/ceph/pull/36636>`_, Abhishek Lekshmanan)
-* rgw: radoslist incomplete multipart uploads fix marker progression (`pr#36028 <https://github.com/ceph/ceph/pull/36028>`_, J. Eric Ivancich)
-* rgw: rgw/iam: correcting the result of get role policy (`pr#36645 <https://github.com/ceph/ceph/pull/36645>`_, Pritha Srivastava)
-* rgw: selinux: allow ceph_t amqp_port_t:tcp_socket (`pr#36026 <https://github.com/ceph/ceph/pull/36026>`_, Kaleb S. KEITHLEY, Thomas Serlin)
-* rgw: stop realm reloader before store shutdown (`pr#36644 <https://github.com/ceph/ceph/pull/36644>`_, Kefu Chai, Casey Bodley)
-* tools: tools: Add statfs operation to ceph-objecstore-tool (`pr#35715 <https://github.com/ceph/ceph/pull/35715>`_, David Zafman)
+* bluestore,core: bluestore: blk:BlockDevice.cc: use pending_aios instead of iovec size as ios num (`pr#36668 <https://github.com/stone/stone/pull/36668>`_, weixinwei)
+* bluestore,tests: test/store_test: refactor bluestore spillover test (`pr#34943 <https://github.com/stone/stone/pull/34943>`_, Igor Fedotov)
+* bluestore,tests: tests: objectstore/store_test: kill ExcessiveFragmentation test case (`pr#36049 <https://github.com/stone/stone/pull/36049>`_, Igor Fedotov)
+* bluestore: bluestore: Rescue procedure for extremely large bluefs log (`pr#36123 <https://github.com/stone/stone/pull/36123>`_, Adam Kupczyk)
+* bluestore: octopus:os/bluestore: improve/fix bluefs stats reporting (`pr#35748 <https://github.com/stone/stone/pull/35748>`_, Igor Fedotov)
+* bluestore: os/bluestore: fix bluefs log growth (`pr#36621 <https://github.com/stone/stone/pull/36621>`_, Adam Kupczyk, Jianpeng Ma)
+* bluestore: os/bluestore: simplify Onode pin/unpin logic (`pr#36795 <https://github.com/stone/stone/pull/36795>`_, Igor Fedotov)
+* build/ops: Revert "mgr/osd_support: remove module and all traces" (`pr#36973 <https://github.com/stone/stone/pull/36973>`_, Sebastian Wagner)
+* build/ops: stone-iscsi: selinux fixes (`pr#36302 <https://github.com/stone/stone/pull/36302>`_, Mike Christie)
+* build/ops: mgr/dashboard/api: reduce amount of daemon logs (`pr#36693 <https://github.com/stone/stone/pull/36693>`_, Ernesto Puerta)
+* stone-volume: add dmcrypt support in raw mode (`pr#35830 <https://github.com/stone/stone/pull/35830>`_, Guillaume Abrioux)
+* stone-volume: add drive-group subcommand (`pr#36558 <https://github.com/stone/stone/pull/36558>`_, Jan Fajerski, Sebastian Wagner)
+* stone-volume: add tests for new functions that run LVM commands (`pr#36614 <https://github.com/stone/stone/pull/36614>`_, Rishabh Dave)
+* stone-volume: don't use container classes in api/lvm.py (`pr#35879 <https://github.com/stone/stone/pull/35879>`_, Rishabh Dave, Guillaume Abrioux)
+* stone-volume: fix lvm functional tests (`pr#36409 <https://github.com/stone/stone/pull/36409>`_, Jan Fajerski)
+* stone-volume: handle idempotency with batch and explicit scenarios (`pr#35880 <https://github.com/stone/stone/pull/35880>`_, Andrew Schoen)
+* stone-volume: remove container classes from api/lvm.py (`pr#36608 <https://github.com/stone/stone/pull/36608>`_, Rishabh Dave)
+* stone-volume: report correct rejected reason in inventory if device type is invalid (`pr#36410 <https://github.com/stone/stone/pull/36410>`_, Satoru Takeuchi)
+* stone-volume: run flake8 in python3 (`pr#36588 <https://github.com/stone/stone/pull/36588>`_, Jan Fajerski)
+* stonefs,common: common:  ignore SIGHUP prior to fork (`issue#46269 <http://tracker.stone.com/issues/46269>`_, `pr#36195 <https://github.com/stone/stone/pull/36195>`_, Willem Jan Withagen, hzwuhongsong)
+* stonefs,core,mgr: mgr/status: metadata is fetched async (`pr#36630 <https://github.com/stone/stone/pull/36630>`_, Michael Fritch)
+* stonefs,core,rbd,rgw: librados: add LIBRADOS_SUPPORTS_GETADDRS support (`pr#36643 <https://github.com/stone/stone/pull/36643>`_, Xiubo Li)
+* stonefs,mgr: mgr/volumes/nfs: Add interface for adding user defined configuration (`pr#36635 <https://github.com/stone/stone/pull/36635>`_, Varsha Rao)
+* stonefs,mon: mon/MDSMonitor: copy MDS info which may be removed (`pr#36035 <https://github.com/stone/stone/pull/36035>`_, Patrick Donnelly)
+* stonefs,pybind: pybind/stone_volume_client: Fix PEP-8 SyntaxWarning (`pr#36100 <https://github.com/stone/stone/pull/36100>`_, Đặng Minh Dũng)
+* stonefs,tests: mgr/fs/volumes: misc fixes (`pr#36327 <https://github.com/stone/stone/pull/36327>`_, Patrick Donnelly, Kotresh HR)
+* stonefs,tests: tests: Revert "Revert "qa/suites/rados/mgr/tasks/module_selftest: whitelist … (`issue#43943 <http://tracker.stone.com/issues/43943>`_, `pr#36042 <https://github.com/stone/stone/pull/36042>`_, Venky Shankar)
+* stonefs,tests: tests: qa/tasks/stonefs/stonefs_test_case.py: skip cleaning the core dumps when in program case (`pr#36043 <https://github.com/stone/stone/pull/36043>`_, Xiubo Li)
+* stonefs,tests: tests: qa/tasks: make sh() in vstart_runner.py identical with teuthology.orchestra.remote.sh (`pr#36044 <https://github.com/stone/stone/pull/36044>`_, Jos Collin)
+* stonefs: Update nfs-ganesha package requirements doc backport (`pr#36063 <https://github.com/stone/stone/pull/36063>`_, Varsha Rao)
+* stonefs: stonefs: client: fix setxattr for 0 size value (NULL value) (`pr#36045 <https://github.com/stone/stone/pull/36045>`_, Sidharth Anupkrishnan)
+* stonefs: stonefs: client: fix snap directory atime (`pr#36039 <https://github.com/stone/stone/pull/36039>`_, Luis Henriques)
+* stonefs: stonefs: client: release the client_lock before copying data in read (`pr#36046 <https://github.com/stone/stone/pull/36046>`_, Chencan)
+* stonefs: client: expose stone.quota.max_bytes xattr within snapshots (`pr#36403 <https://github.com/stone/stone/pull/36403>`_, Shyamsundar Ranganathan)
+* stonefs: client: introduce timeout for client shutdown (`issue#44276 <http://tracker.stone.com/issues/44276>`_, `pr#35962 <https://github.com/stone/stone/pull/35962>`_, "Yan, Zheng", Venky Shankar)
+* stonefs: mds/MDSRank: fix typo in "unrecognized" (`pr#36197 <https://github.com/stone/stone/pull/36197>`_, Nathan Cutler)
+* stonefs: mds: add ephemeral random and distributed export pins (`pr#35759 <https://github.com/stone/stone/pull/35759>`_, Patrick Donnelly, Sidharth Anupkrishnan)
+* stonefs: mds: fix filelock state when Fc is issued (`pr#35842 <https://github.com/stone/stone/pull/35842>`_, Xiubo Li)
+* stonefs: mds: reset heartbeat in EMetaBlob replay (`pr#36040 <https://github.com/stone/stone/pull/36040>`_, Yanhu Cao)
+* stonefs: mgr/nfs: Check if pseudo path is absolute path (`pr#36299 <https://github.com/stone/stone/pull/36299>`_, Varsha Rao)
+* stonefs: mgr/nfs: Update MDCACHE block in ganesha config and doc about nfs-stoneadm in vstart (`pr#36224 <https://github.com/stone/stone/pull/36224>`_, Varsha Rao)
+* stonefs: mgr/volumes: Deprecate protect/unprotect CLI calls for subvolume snapshots (`pr#36126 <https://github.com/stone/stone/pull/36126>`_, Shyamsundar Ranganathan)
+* stonefs: mgr/volumes: fix "stone nfs export" help messages (`pr#36220 <https://github.com/stone/stone/pull/36220>`_, Nathan Cutler)
+* stonefs: nfs backport (`pr#35499 <https://github.com/stone/stone/pull/35499>`_, Jeff Layton, Varsha Rao, Ramana Raja, Kefu Chai)
+* common,core: common, osd: add sanity checks around osd_scrub_max_preemptions (`pr#36034 <https://github.com/stone/stone/pull/36034>`_, xie xingguo)
+* common,rbd,tools: rbd: immutable-object-cache: fixed crashes on start up (`pr#36660 <https://github.com/stone/stone/pull/36660>`_, Jason Dillaman)
+* common,rbd: crush/CrushWrapper: rebuild reverse maps after rebuilding crush map (`pr#36662 <https://github.com/stone/stone/pull/36662>`_, Jason Dillaman)
+* common: common: log: fix timestap precision of log can't set to millisecond (`pr#36048 <https://github.com/stone/stone/pull/36048>`_, Guan yunfei)
+* core,mgr: mgr: decrease pool stats if pg was removed (`pr#36667 <https://github.com/stone/stone/pull/36667>`_, Aleksei Gutikov)
+* core,rbd: osd/OSDCap: rbd profile permits use of "rbd_info" (`pr#36414 <https://github.com/stone/stone/pull/36414>`_, Florian Florensa)
+* core,tools: tools/rados: Set locator key when exporting or importing a pool (`pr#36666 <https://github.com/stone/stone/pull/36666>`_, Iain Buclaw)
+* core: mon/OSDMonitor: Reset grace period if failure interval exceeds a threshold (`pr#35799 <https://github.com/stone/stone/pull/35799>`_, Sridhar Seshasayee)
+* core: mon/OSDMonitor: only take in osd into consideration when trimming osd… (`pr#36981 <https://github.com/stone/stone/pull/36981>`_, Kefu Chai)
+* core: mon: fix the 'Error ERANGE' message when conf "osd_objectstore" is filestore (`pr#36665 <https://github.com/stone/stone/pull/36665>`_, wangyunqing)
+* core: monclient: schedule first tick using mon_client_hunt_interval (`pr#36633 <https://github.com/stone/stone/pull/36633>`_, Mykola Golub)
+* core: osd/OSD.cc: remove osd_lock for bench (`pr#36664 <https://github.com/stone/stone/pull/36664>`_, Neha Ojha, Adam Kupczyk)
+* core: osd/PG: fix history.same_interval_since of merge target again (`pr#36033 <https://github.com/stone/stone/pull/36033>`_, xie xingguo)
+* core: osd/PeeringState: prevent peer's num_objects going negative (`pr#36663 <https://github.com/stone/stone/pull/36663>`_, xie xingguo)
+* core: osd/PrimaryLogPG: don't populate watchers if replica (`pr#36029 <https://github.com/stone/stone/pull/36029>`_, Ilya Dryomov)
+* core: osd: Cancel in-progress scrubs (not user requested) (`pr#36291 <https://github.com/stone/stone/pull/36291>`_, David Zafman)
+* core: osd: expose osdspec_affinity to osd_metadata (`pr#35957 <https://github.com/stone/stone/pull/35957>`_, Joshua Schmid)
+* core: osd: fix crash in _committed_osd_maps if incremental osdmap crc fails (`pr#36340 <https://github.com/stone/stone/pull/36340>`_, Neha Ojha, Dan van der Ster)
+* core: osd: make message cap option usable again (`pr#35737 <https://github.com/stone/stone/pull/35737>`_, Neha Ojha, Josh Durgin)
+* core: osd: wakeup all threads of shard rather than one thread (`pr#36032 <https://github.com/stone/stone/pull/36032>`_, Jianpeng Ma)
+* core: test: osd-backfill-stats.sh use nobackfill to avoid races in remainin… (`pr#36030 <https://github.com/stone/stone/pull/36030>`_, David Zafman)
+* doc: stoneadm batch backport (`pr#36450 <https://github.com/stone/stone/pull/36450>`_, Varsha Rao, Ricardo Marques, Kiefer Chang, Matthew Oliver, Paul Cuzner, Kefu Chai, Daniel-Pivonka, Sebastian Wagner, Volker Theile, Adam King, Michael Fritch, Joshua Schmid)
+* doc: doc/mgr/crash: Add missing command in rm example (`pr#36690 <https://github.com/stone/stone/pull/36690>`_, Daniël Vos)
+* doc: doc/rados: Fix osd_scrub_during_recovery default value (`pr#36661 <https://github.com/stone/stone/pull/36661>`_, Benoît Knecht)
+* doc: doc/rbd: add rbd-target-gw enable and start (`pr#36416 <https://github.com/stone/stone/pull/36416>`_, Zac Dover)
+* doc: doc: PendingReleaseNotes: clean slate for 15.2.5 (`pr#35753 <https://github.com/stone/stone/pull/35753>`_, Nathan Cutler)
+* mgr,pybind: pybind/mgr/balancer: use "==" and "!=" for comparing str (`pr#36036 <https://github.com/stone/stone/pull/36036>`_, Kefu Chai)
+* mgr,pybind: pybind/mgr/pg_autoscaler/module.py: do not update event if ev.pg_num== ev.pg_num_target (`pr#36037 <https://github.com/stone/stone/pull/36037>`_, Neha Ojha)
+* mgr,rbd: mgr/prometheus: automatically discover RBD pools for stats gathering (`pr#36411 <https://github.com/stone/stone/pull/36411>`_, Jason Dillaman)
+* mgr/dashboard/api: increase API health timeout (`pr#36562 <https://github.com/stone/stone/pull/36562>`_, Ernesto Puerta)
+* mgr/dashboard: Add button to copy the bootstrap token into the clipboard (`pr#35796 <https://github.com/stone/stone/pull/35796>`_, Ishan Rai)
+* mgr/dashboard: Add host labels in UI (`pr#35893 <https://github.com/stone/stone/pull/35893>`_, Volker Theile)
+* mgr/dashboard: Add hosts page unit tests (`pr#36350 <https://github.com/stone/stone/pull/36350>`_, Volker Theile)
+* mgr/dashboard: Allow to edit iSCSI target with active session (`pr#35997 <https://github.com/stone/stone/pull/35997>`_, Ricardo Marques)
+* mgr/dashboard: Always use fast angular unit tests (`pr#36267 <https://github.com/stone/stone/pull/36267>`_, Stephan Müller)
+* mgr/dashboard: Configure overflow of popover in health page (`pr#36460 <https://github.com/stone/stone/pull/36460>`_, Tiago Melo)
+* mgr/dashboard: Display check icon instead of true|false in various datatables (`pr#35892 <https://github.com/stone/stone/pull/35892>`_, Volker Theile)
+* mgr/dashboard: Display users current bucket quota usage (`pr#35926 <https://github.com/stone/stone/pull/35926>`_, Ernesto Puerta, Avan Thakkar)
+* mgr/dashboard: Extract documentation link to a component (`pr#36587 <https://github.com/stone/stone/pull/36587>`_, Tiago Melo)
+* mgr/dashboard: Fix host attributes like labels are not returned (`pr#36678 <https://github.com/stone/stone/pull/36678>`_, Kiefer Chang)
+* mgr/dashboard: Hide password notification when expiration date is far (`pr#35975 <https://github.com/stone/stone/pull/35975>`_, Tiago Melo)
+* mgr/dashboard: Improve Summary's subscribe methods (`pr#35705 <https://github.com/stone/stone/pull/35705>`_, Tiago Melo)
+* mgr/dashboard: Prometheus query error in the metrics of Pools, OSDs and RBD images (`pr#35885 <https://github.com/stone/stone/pull/35885>`_, Avan Thakkar)
+* mgr/dashboard: Re-enable OSD's table autoReload (`pr#36226 <https://github.com/stone/stone/pull/36226>`_, Kiefer Chang, Tiago Melo)
+* mgr/dashboard: Strange iSCSI discovery auth behavior (`pr#36782 <https://github.com/stone/stone/pull/36782>`_, Volker Theile)
+* mgr/dashboard: The max. buckets field in RGW user form should be pre-filled (`pr#35795 <https://github.com/stone/stone/pull/35795>`_, Volker Theile)
+* mgr/dashboard: Unable to edit iSCSI logged-in client (`pr#36611 <https://github.com/stone/stone/pull/36611>`_, Ricardo Marques)
+* mgr/dashboard: Use right size in pool form (`pr#35925 <https://github.com/stone/stone/pull/35925>`_, Stephan Müller)
+* mgr/dashboard: Use same required field message accross the UI (`pr#36277 <https://github.com/stone/stone/pull/36277>`_, Volker Theile)
+* mgr/dashboard: add API team to CODEOWNERS (`pr#36143 <https://github.com/stone/stone/pull/36143>`_, Ernesto Puerta)
+* mgr/dashboard: allow preserving OSD IDs when deleting OSDs (`pr#35766 <https://github.com/stone/stone/pull/35766>`_, Kiefer Chang)
+* mgr/dashboard: cpu stats incorrectly displayed (`pr#36322 <https://github.com/stone/stone/pull/36322>`_, Avan Thakkar)
+* mgr/dashboard: cropped actions menu in nested details (`pr#35620 <https://github.com/stone/stone/pull/35620>`_, Avan Thakkar)
+* mgr/dashboard: fix Source column i18n issue in RBD configuration tables (`pr#35819 <https://github.com/stone/stone/pull/35819>`_, Kiefer Chang)
+* mgr/dashboard: fix backporting issue #35926 (`pr#36073 <https://github.com/stone/stone/pull/36073>`_, Ernesto Puerta)
+* mgr/dashboard: fix pool usage calculation (`pr#36137 <https://github.com/stone/stone/pull/36137>`_, Ernesto Puerta)
+* mgr/dashboard: fix rbdmirroring dropdown menu (`pr#36382 <https://github.com/stone/stone/pull/36382>`_, Avan Thakkar)
+* mgr/dashboard: fix regression in delete OSD modal (`pr#36419 <https://github.com/stone/stone/pull/36419>`_, Kiefer Chang)
+* mgr/dashboard: fix tasks.mgr.dashboard.test_rbd.RbdTest.test_move_image_to_trash error (`pr#36563 <https://github.com/stone/stone/pull/36563>`_, Kiefer Chang)
+* mgr/dashboard: fix ui api endpoints (`pr#36160 <https://github.com/stone/stone/pull/36160>`_, Fabrizio D'Angelo)
+* mgr/dashboard: fix wal/db slots controls in the OSD form (`pr#35883 <https://github.com/stone/stone/pull/35883>`_, Kiefer Chang)
+* mgr/dashboard: increase API test coverage in API controllers (`pr#36260 <https://github.com/stone/stone/pull/36260>`_, Kefu Chai, Aashish Sharma)
+* mgr/dashboard: redirect to original URL after successful login (`pr#36831 <https://github.com/stone/stone/pull/36831>`_, Avan Thakkar)
+* mgr/dashboard: remove "This week/month/year" and "Today" time stamps (`pr#36789 <https://github.com/stone/stone/pull/36789>`_, Avan Thakkar)
+* mgr/dashboard: remove cdCopy2ClipboardButton `formatted` attribute (`pr#35889 <https://github.com/stone/stone/pull/35889>`_, Tatjana Dehler)
+* mgr/dashboard: remove password field if login is using SSO and fix error message in confirm password (`pr#36689 <https://github.com/stone/stone/pull/36689>`_, Ishan Rai)
+* mgr/dashboard: right-align dropdown menu of column filters (`pr#36369 <https://github.com/stone/stone/pull/36369>`_, Kiefer Chang)
+* mgr/dashboard: telemetry activation notification (`pr#35772 <https://github.com/stone/stone/pull/35772>`_, Tatjana Dehler)
+* mgr/dashboard: wait longer for health status to be cleared (`pr#36346 <https://github.com/stone/stone/pull/36346>`_, Tatjana Dehler)
+* mgr/k8sevents: sanitise kubernetes events (`pr#35684 <https://github.com/stone/stone/pull/35684>`_, Paul Cuzner)
+* mgr/prometheus: improve cache (`pr#35847 <https://github.com/stone/stone/pull/35847>`_, Patrick Seidensal)
+* mgr: avoid false alarm of MGR_MODULE_ERROR (`pr#35995 <https://github.com/stone/stone/pull/35995>`_, Kefu Chai)
+* mgr: mgr/DaemonServer.cc: make 'config show' on fsid work (`pr#35793 <https://github.com/stone/stone/pull/35793>`_, Neha Ojha)
+* mgr: mgr/stoneadm: Adapt Vagrantfile to use octopus instead of master repo on shaman (`pr#35988 <https://github.com/stone/stone/pull/35988>`_, Volker Theile)
+* mgr: mgr/diskprediction_local: Fix array size error (`pr#36577 <https://github.com/stone/stone/pull/36577>`_, Benoît Knecht)
+* mgr: mgr/progress: Skip pg_summary update if _events dict is empty (`pr#36076 <https://github.com/stone/stone/pull/36076>`_, Manuel Lausch)
+* mgr: mgr/prometheus: log time it takes to collect metrics (`pr#36581 <https://github.com/stone/stone/pull/36581>`_, Patrick Seidensal)
+* mgr: mgr: Add missing states to PG_STATES in mgr_module.py (`pr#36786 <https://github.com/stone/stone/pull/36786>`_, Harley Gorrell)
+* mgr: mgr: fix race between module load and notify (`pr#35794 <https://github.com/stone/stone/pull/35794>`_, Mykola Golub)
+* mgr: mon/PGMap: do not consider changing pg stuck (`pr#35958 <https://github.com/stone/stone/pull/35958>`_, Kefu Chai)
+* monitoring: alert for pool fill up broken (`pr#35136 <https://github.com/stone/stone/pull/35136>`_, Volker Theile)
+* msgr: New msgr2 crc and secure modes (msgr2.1) (`pr#35720 <https://github.com/stone/stone/pull/35720>`_, Ilya Dryomov)
+* rbd,tests: tests/rbd_mirror: fix race on test shut down (`pr#36657 <https://github.com/stone/stone/pull/36657>`_, Mykola Golub)
+* rbd: librbd:  global and pool-level config overrides require image refresh to apply (`pr#36638 <https://github.com/stone/stone/pull/36638>`_, Jason Dillaman)
+* rbd: librbd: new 'write_zeroes' API methods to suppliment the `discard` APIs (`pr#36247 <https://github.com/stone/stone/pull/36247>`_, Jason Dillaman)
+* rbd: librbd: potential race conditions handling API IO completions (`pr#36331 <https://github.com/stone/stone/pull/36331>`_, Jason Dillaman)
+* rbd: mgr/dashboard: work with v1 RBD images (`pr#35711 <https://github.com/stone/stone/pull/35711>`_, Ernesto Puerta)
+* rbd: rbd: librbd: Align rbd_write_zeroes declarations (`pr#36717 <https://github.com/stone/stone/pull/36717>`_, Corey Bryant)
+* rbd: rbd: librbd: don't resend async_complete if watcher is unregistered (`pr#36659 <https://github.com/stone/stone/pull/36659>`_, Mykola Golub)
+* rbd: rbd: librbd: flush all queued object IO from simple scheduler (`pr#36658 <https://github.com/stone/stone/pull/36658>`_, Jason Dillaman)
+* rbd: rbd: librbd: race when disabling object map with overlapping in-flight writes (`pr#36656 <https://github.com/stone/stone/pull/36656>`_, Jason Dillaman)
+* rbd: rbd: recognize crush_location, read_from_replica and compression_hint map options (`pr#36061 <https://github.com/stone/stone/pull/36061>`_, Ilya Dryomov)
+* rgw,tests: qa/tasks/ragweed: always set ragweed_repo (`pr#36651 <https://github.com/stone/stone/pull/36651>`_, Kefu Chai)
+* rgw:  rgw: lc: fix Segmentation Fault when the tag of the object was not found (`pr#36085 <https://github.com/stone/stone/pull/36085>`_, yupeng chen, zhuo li)
+* rgw: Add subuser to OPA request (`pr#36023 <https://github.com/stone/stone/pull/36023>`_, Seena Fallah)
+* rgw: Add support wildcard subuser for bucket policy (`pr#36022 <https://github.com/stone/stone/pull/36022>`_, Seena Fallah)
+* rgw: Adding data cache and CDN capabilities (`pr#36646 <https://github.com/stone/stone/pull/36646>`_, Mark Kogan, Or Friedmann)
+* rgw: Empty reqs_change_state queue before unregistered_reqs (`pr#36650 <https://github.com/stone/stone/pull/36650>`_, Soumya Koduri)
+* rgw: add abort multipart date and rule-id header to init multipart upload response (`pr#36649 <https://github.com/stone/stone/pull/36649>`_, zhang Shaowen, zhangshaowen)
+* rgw: add access log to the beast frontend (`pr#36024 <https://github.com/stone/stone/pull/36024>`_, Mark Kogan)
+* rgw: add check for index entry's existing when adding bucket stats during bucket reshard (`pr#36025 <https://github.com/stone/stone/pull/36025>`_, zhang Shaowen)
+* rgw: add negative cache to the system object (`pr#36648 <https://github.com/stone/stone/pull/36648>`_, Or Friedmann)
+* rgw: add quota enforcement to CopyObj (`pr#36020 <https://github.com/stone/stone/pull/36020>`_, Casey Bodley)
+* rgw: append obj: prevent tail from being GC'ed (`pr#36389 <https://github.com/stone/stone/pull/36389>`_, Abhishek Lekshmanan)
+* rgw: bucket list/stats truncates for user w/ >1000 buckets (`pr#36019 <https://github.com/stone/stone/pull/36019>`_, J. Eric Ivancich)
+* rgw: cls/rgw: preserve olh entry's name on last unlink (`pr#36652 <https://github.com/stone/stone/pull/36652>`_, Casey Bodley)
+* rgw: cls/rgw_gc: Fixing the iterator used to access urgent data map (`pr#36017 <https://github.com/stone/stone/pull/36017>`_, Pritha Srivastava)
+* rgw: fix boost::asio::async_write() does not return error (`pr#36647 <https://github.com/stone/stone/pull/36647>`_, Mark Kogan)
+* rgw: fix bug where ordered bucket listing gets stuck (`pr#35877 <https://github.com/stone/stone/pull/35877>`_, J. Eric Ivancich)
+* rgw: fix double slash (//) killing the gateway (`pr#36654 <https://github.com/stone/stone/pull/36654>`_, Theofilos Mouratidis)
+* rgw: fix loop problem with swift stat on account (`pr#36021 <https://github.com/stone/stone/pull/36021>`_, Marcus Watts)
+* rgw: fix shutdown crash in RGWAsyncReadMDLogEntries (`pr#36653 <https://github.com/stone/stone/pull/36653>`_, Casey Bodley)
+* rgw: introduce safe user-reset-stats (`pr#36655 <https://github.com/stone/stone/pull/36655>`_, Yuval Lifshitz, Matt Benjamin)
+* rgw: lc: add lifecycle perf counters (`pr#36018 <https://github.com/stone/stone/pull/36018>`_, Mark Kogan, Matt Benjamin)
+* rgw: orphan list teuthology test & fully-qualified domain issue (`pr#36027 <https://github.com/stone/stone/pull/36027>`_, J. Eric Ivancich)
+* rgw: orphan-list timestamp fix (`pr#35929 <https://github.com/stone/stone/pull/35929>`_, J. Eric Ivancich)
+* rgw: policy: reuse eval_principal to evaluate the policy principal (`pr#36636 <https://github.com/stone/stone/pull/36636>`_, Abhishek Lekshmanan)
+* rgw: radoslist incomplete multipart uploads fix marker progression (`pr#36028 <https://github.com/stone/stone/pull/36028>`_, J. Eric Ivancich)
+* rgw: rgw/iam: correcting the result of get role policy (`pr#36645 <https://github.com/stone/stone/pull/36645>`_, Pritha Srivastava)
+* rgw: selinux: allow stone_t amqp_port_t:tcp_socket (`pr#36026 <https://github.com/stone/stone/pull/36026>`_, Kaleb S. KEITHLEY, Thomas Serlin)
+* rgw: stop realm reloader before store shutdown (`pr#36644 <https://github.com/stone/stone/pull/36644>`_, Kefu Chai, Casey Bodley)
+* tools: tools: Add statfs operation to stone-objecstore-tool (`pr#35715 <https://github.com/stone/stone/pull/35715>`_, David Zafman)
 
 v15.2.4 Octopus
 ===============
 
-This is the fourth release of the Ceph Octopus stable release series.
+This is the fourth release of the Stone Octopus stable release series.
 In addition to a security fix in RGW, this release brings a range of fixes
 across all components. We recommend that all Octopus users upgrade to this
 release.
@@ -475,30 +475,30 @@ Notable Changes
 * CVE-2020-10753: rgw: sanitize newlines in s3 CORSConfiguration's ExposeHeader
   (William Bowling, Adam Mohammed, Casey Bodley)
 
-* Cephadm: There were a lot of small usability improvements and bug fixes:
+* Stoneadm: There were a lot of small usability improvements and bug fixes:
 
-  * Grafana when deployed by Cephadm now binds to all network interfaces.
-  * ``cephadm check-host`` now prints all detected problems at once.
-  * Cephadm now calls ``ceph dashboard set-grafana-api-ssl-verify false``
+  * Grafana when deployed by Stoneadm now binds to all network interfaces.
+  * ``stoneadm check-host`` now prints all detected problems at once.
+  * Stoneadm now calls ``stone dashboard set-grafana-api-ssl-verify false``
     when generating an SSL certificate for Grafana.
-  * The Alertmanager is now correctly pointed to the Ceph Dashboard
-  * ``cephadm adopt`` now supports adopting an Alertmanager
-  * ``ceph orch ps`` now supports filtering by service name
-  * ``ceph orch host ls`` now marks hosts as offline, if they are not
+  * The Alertmanager is now correctly pointed to the Stone Dashboard
+  * ``stoneadm adopt`` now supports adopting an Alertmanager
+  * ``stone orch ps`` now supports filtering by service name
+  * ``stone orch host ls`` now marks hosts as offline, if they are not
     accessible.
 
-* Cephadm can now deploy NFS Ganesha services. For example, to deploy NFS with
+* Stoneadm can now deploy NFS Ganesha services. For example, to deploy NFS with
   a service id of mynfs, that will use the RADOS pool nfs-ganesha and namespace
   nfs-ns::
 
-    ceph orch apply nfs mynfs nfs-ganesha nfs-ns
+    stone orch apply nfs mynfs nfs-ganesha nfs-ns
 
-* Cephadm: ``ceph orch ls --export`` now returns all service specifications in
-  yaml representation that is consumable by ``ceph orch apply``. In addition,
+* Stoneadm: ``stone orch ls --export`` now returns all service specifications in
+  yaml representation that is consumable by ``stone orch apply``. In addition,
   the commands ``orch ps`` and ``orch ls`` now support ``--format yaml`` and
   ``--format json-pretty``.
 
-* Cephadm: ``ceph orch apply osd`` supports a ``--preview`` flag that prints a preview of
+* Stoneadm: ``stone orch apply osd`` supports a ``--preview`` flag that prints a preview of
   the OSD specification before deploying OSDs. This makes it possible to
   verify that the specification is correct, before applying it.
 
@@ -529,113 +529,113 @@ Notable Changes
 Changelog
 ---------
 
-* build/ops: address SElinux denials observed in rgw/multisite test run (`pr#34538 <https://github.com/ceph/ceph/pull/34538>`_, Kefu Chai, Kaleb S. Keithley)
-* ceph-volume: add and delete lvm tags in a single lvchange call (`pr#35452 <https://github.com/ceph/ceph/pull/35452>`_, Jan Fajerski)
-* ceph-volume: add ceph.osdspec_affinity tag (`pr#35134 <https://github.com/ceph/ceph/pull/35134>`_, Joshua Schmid)
-* cephadm: batch backport May (1) (`pr#34893 <https://github.com/ceph/ceph/pull/34893>`_, Michael Fritch, Ricardo Marques, Matthew Oliver, Sebastian Wagner, Joshua Schmid, Zac Dover, Varsha Rao)
-* cephadm: batch backport May (2) (`pr#35188 <https://github.com/ceph/ceph/pull/35188>`_, Michael Fritch, Sebastian Wagner, Kefu Chai, Georgios Kyratsas, Kiefer Chang, Joshua Schmid, Patrick Seidensal, Varsha Rao, Matthew Oliver, Zac Dover, Juan Miguel Olmo Martínez, Tim Serong, Alexey Miasoedov, Ricardo Marques, Satoru Takeuchi)
-* cephadm: batch backport June (1) (`pr#35347 <https://github.com/ceph/ceph/pull/35347>`_, Sebastian Wagner, Zac Dover, Georgios Kyratsas, Kiefer Chang, Ricardo Marques, Patrick Seidensal, Patrick Donnelly, Joshua Schmid, Matthew Oliver, Varsha Rao, Juan Miguel Olmo Martínez, Michael Fritch)
-* cephadm: batch backport June (2) (`pr#35475 <https://github.com/ceph/ceph/pull/35475>`_, Sebastian Wagner, Kiefer Chang, Joshua Schmid, Michael Fritch, shinhwagk, Kefu Chai, Juan Miguel Olmo Martínez, Daniel Pivonka)
-* cephfs: allow pool names with hyphen and period (`pr#35251 <https://github.com/ceph/ceph/pull/35251>`_, Ramana Raja)
-* cephfs: bash_completion: Do not auto complete obsolete and hidden cmds (`pr#34996 <https://github.com/ceph/ceph/pull/34996>`_, Kotresh HR)
-* cephfs: cephfs-shell: Change tox testenv name to py3 (`pr#34998 <https://github.com/ceph/ceph/pull/34998>`_, Kefu Chai, Varsha Rao, Aditya Srivastava)
-* cephfs: client: expose Client::ll_register_callback via libcephfs (`pr#35150 <https://github.com/ceph/ceph/pull/35150>`_, Jeff Layton)
-* cephfs: client: fix Finisher assert failure (`pr#34999 <https://github.com/ceph/ceph/pull/34999>`_, Xiubo Li)
-* cephfs: client: only set MClientCaps::FLAG_SYNC when flushing dirty auth caps (`pr#34997 <https://github.com/ceph/ceph/pull/34997>`_, Jeff Layton)
-* cephfs: fuse: add the '-d' option back for libfuse (`pr#35449 <https://github.com/ceph/ceph/pull/35449>`_, Xiubo Li)
-* cephfs: mds: Handle blacklisted error in purge queue (`pr#35148 <https://github.com/ceph/ceph/pull/35148>`_, Varsha Rao)
-* cephfs: mds: preserve ESlaveUpdate logevent until receiving OP_FINISH (`pr#35253 <https://github.com/ceph/ceph/pull/35253>`_, songxinying)
-* cephfs: mds: take xlock in the order requests start locking (`pr#35252 <https://github.com/ceph/ceph/pull/35252>`_, "Yan, Zheng")
-* cephfs: src/client/fuse_ll: compatible with libfuse3.5 or higher (`pr#35450 <https://github.com/ceph/ceph/pull/35450>`_, Jeff Layton, Xiubo Li)
-* cephfs: vstart_runner: set mounted to True at the end of mount() (`pr#35447 <https://github.com/ceph/ceph/pull/35447>`_, Rishabh Dave)
-* core: bluestore: fix large (>2GB) writes when bluefs_buffered_io = true (`pr#35446 <https://github.com/ceph/ceph/pull/35446>`_, Igor Fedotov)
-* core: bluestore: introduce hybrid allocator (`pr#35498 <https://github.com/ceph/ceph/pull/35498>`_, Igor Fedotov, Adam Kupczyk)
-* core: cls/queue: fix empty markers when listing entries (`pr#35241 <https://github.com/ceph/ceph/pull/35241>`_, Pritha Srivastava, Yuval Lifshitz)
-* core: objecter: don't attempt to read from non-primary on EC pools (`pr#35444 <https://github.com/ceph/ceph/pull/35444>`_, Ilya Dryomov)
-* core: osd: add --osdspec-affinity flag (`pr#35382 <https://github.com/ceph/ceph/pull/35382>`_, Joshua Schmid)
-* core: osd: make "missing incremental map" a debug log message (`pr#35442 <https://github.com/ceph/ceph/pull/35442>`_, Nathan Cutler)
-* core: osd: prevent ShardedOpWQ suicide_grace drop when waiting for work (`pr#34881 <https://github.com/ceph/ceph/pull/34881>`_, Dan Hill)
-* core: rocksdb: Update to ceph-octopus-v5.8-1436 (`pr#35036 <https://github.com/ceph/ceph/pull/35036>`_, Brad Hubbard)
-* doc: drop obsolete cache tier options (`pr#35105 <https://github.com/ceph/ceph/pull/35105>`_, Nathan Cutler)
-* doc: mgr/dashboard: Add troubleshooting guide (`pr#34947 <https://github.com/ceph/ceph/pull/34947>`_, Tatjana Dehler)
-* doc: rgw: document 'rgw gc max concurrent io' (`pr#34987 <https://github.com/ceph/ceph/pull/34987>`_, Casey Bodley)
-* mds: cleanup uncommitted fragments before mds goes to active (`pr#35448 <https://github.com/ceph/ceph/pull/35448>`_, "Yan, Zheng")
-* mds: don't assert empty io context list when shutting down (`pr#34509 <https://github.com/ceph/ceph/pull/34509>`_, "Yan, Zheng")
-* mds: don't shallow copy when decoding xattr map (`pr#35147 <https://github.com/ceph/ceph/pull/35147>`_, "Yan, Zheng")
-* mds: flag backtrace scrub failures for new files as okay (`pr#35555 <https://github.com/ceph/ceph/pull/35555>`_, Milind Changire)
-* mgr/dashboard/grafana: Add rbd-image details dashboard (`pr#35247 <https://github.com/ceph/ceph/pull/35247>`_, Enno Gotthold)
-* mgr/dashboard: Asynchronous unique username validation for User Component (`pr#34849 <https://github.com/ceph/ceph/pull/34849>`_, Nizamudeen)
-* mgr/dashboard: ECP modal enhancement (`pr#35152 <https://github.com/ceph/ceph/pull/35152>`_, Stephan Müller)
-* mgr/dashboard: Fix HomeTest setup (`pr#35085 <https://github.com/ceph/ceph/pull/35085>`_, Tiago Melo)
-* mgr/dashboard: Fix e2e chromium binary validation (`pr#35679 <https://github.com/ceph/ceph/pull/35679>`_, Tiago Melo)
-* mgr/dashboard: Fix random E2E error in mgr-modules (`pr#35706 <https://github.com/ceph/ceph/pull/35706>`_, Tiago Melo)
-* mgr/dashboard: Fix redirect after changing password (`pr#35243 <https://github.com/ceph/ceph/pull/35243>`_, Tiago Melo)
-* mgr/dashboard: Prevent dashboard breakdown on bad pool selection (`pr#35135 <https://github.com/ceph/ceph/pull/35135>`_, Stephan Müller)
-* mgr/dashboard: Proposed About Modal box (`pr#35291 <https://github.com/ceph/ceph/pull/35291>`_, Ngwa Sedrick Meh, Tiago Melo)
-* mgr/dashboard: Reduce requests in Mirroring page (`pr#34992 <https://github.com/ceph/ceph/pull/34992>`_, Tiago Melo)
-* mgr/dashboard: Replace Protractor with Cypress (`pr#34910 <https://github.com/ceph/ceph/pull/34910>`_, Tiago Melo)
-* mgr/dashboard: Show labels in hosts page (`pr#35517 <https://github.com/ceph/ceph/pull/35517>`_, Volker Theile)
-* mgr/dashboard: Show table details inside the datatable (`pr#35270 <https://github.com/ceph/ceph/pull/35270>`_, Sebastian Krah)
-* mgr/dashboard: add telemetry report component (`pr#34850 <https://github.com/ceph/ceph/pull/34850>`_, Tatjana Dehler)
-* mgr/dashboard: displaying Service detail inside table (`pr#35269 <https://github.com/ceph/ceph/pull/35269>`_, Kiefer Chang)
-* mgr/dashboard: fix autocomplete input backgrounds in chrome and firefox (`pr#35718 <https://github.com/ceph/ceph/pull/35718>`_, Ishan Rai)
-* mgr/dashboard: grafana panels for rgw multisite sync performance (`pr#35693 <https://github.com/ceph/ceph/pull/35693>`_, Alfonso Martínez)
-* mgr/dashboard: monitoring menu entry should indicate firing alerts (`pr#34822 <https://github.com/ceph/ceph/pull/34822>`_, Tiago Melo, Volker Theile)
-* mgr/dashboard: redesign the login screen (`pr#35268 <https://github.com/ceph/ceph/pull/35268>`_, Ishan Rai)
-* mgr/dashboard: remove space after service name in the Hosts List table (`pr#35531 <https://github.com/ceph/ceph/pull/35531>`_, Kiefer Chang)
-* mgr/dashboard: replace hard coded telemetry URLs (`pr#35231 <https://github.com/ceph/ceph/pull/35231>`_, Tatjana Dehler)
-* mgr/rbd_support: rename "rbd_trash_trash_purge_schedule" oid (`pr#35436 <https://github.com/ceph/ceph/pull/35436>`_, Nathan Cutler, Mykola Golub)
-* mgr/status: Fix "ceph fs status" json format writing to stderr (`pr#34727 <https://github.com/ceph/ceph/pull/34727>`_, Kotresh HR)
-* mgr/test_orchestrator: fix _get_ceph_daemons() (`pr#34979 <https://github.com/ceph/ceph/pull/34979>`_, Alfonso Martínez)
-* mgr/volumes: Add snapshot info command (`pr#35670 <https://github.com/ceph/ceph/pull/35670>`_, Kotresh HR)
-* mgr/volumes: Create subvolume with isolated rados namespace (`pr#35671 <https://github.com/ceph/ceph/pull/35671>`_, Kotresh HR)
-* mgr/volumes: Fix subvolume create idempotency (`pr#35256 <https://github.com/ceph/ceph/pull/35256>`_, Kotresh HR)
-* mgr: synchronize ClusterState's health and mon_status (`pr#34995 <https://github.com/ceph/ceph/pull/34995>`_, Radoslaw Zarzynski)
-* monitoring: Fix "10% OSDs down" alert description (`pr#35151 <https://github.com/ceph/ceph/pull/35151>`_, Benoît Knecht)
-* monitoring: fixing some issues in RBD detail dashboard (`pr#35463 <https://github.com/ceph/ceph/pull/35463>`_, Kiefer Chang)
-* rbd: librbd: Watcher should not attempt to re-watch after detecting blacklisting (`pr#35439 <https://github.com/ceph/ceph/pull/35439>`_, Jason Dillaman)
-* rbd: librbd: avoid completing mirror:DisableRequest while holding its lock (`pr#35126 <https://github.com/ceph/ceph/pull/35126>`_, Jason Dillaman)
-* rbd: librbd: copy API should not inherit v1 image format by default (`pr#35255 <https://github.com/ceph/ceph/pull/35255>`_, Jason Dillaman)
-* rbd: librbd: make rbd_read_from_replica_policy actually work (`pr#35438 <https://github.com/ceph/ceph/pull/35438>`_, Ilya Dryomov)
-* rbd: pybind: RBD.create() method's 'old_format' parameter now defaults to False (`pr#35435 <https://github.com/ceph/ceph/pull/35435>`_, Jason Dillaman)
-* rbd: rbd-mirror: don't hold (stale) copy of local image journal pointer (`pr#35430 <https://github.com/ceph/ceph/pull/35430>`_, Jason Dillaman)
-* rbd: rbd-mirror: stop local journal replayer first during shut down (`pr#35440 <https://github.com/ceph/ceph/pull/35440>`_, Jason Dillaman, Mykola Golub)
-* rbd: rbd-mirror: wait for in-flight start/stop/restart (`pr#35437 <https://github.com/ceph/ceph/pull/35437>`_, Mykola Golub)
-* rgw: add "rgw-orphan-list" tool and "radosgw-admin bucket radoslist ..." (`pr#34991 <https://github.com/ceph/ceph/pull/34991>`_, J. Eric Ivancich)
-* rgw: amqp: fix the "routable" delivery mode (`pr#35433 <https://github.com/ceph/ceph/pull/35433>`_, Yuval Lifshitz)
-* rgw: anonomous swift to obj that dont exist should 401 (`pr#35120 <https://github.com/ceph/ceph/pull/35120>`_, Matthew Oliver)
-* rgw: fix bug where bucket listing end marker not always set correctly (`pr#34993 <https://github.com/ceph/ceph/pull/34993>`_, J. Eric Ivancich)
-* rgw: fix rgw tries to fetch anonymous user (`pr#34988 <https://github.com/ceph/ceph/pull/34988>`_, Or Friedmann)
-* rgw: fix some list buckets handle leak (`pr#34985 <https://github.com/ceph/ceph/pull/34985>`_, Tianshan Qu)
-* rgw: gc: Clearing off urgent data in bufferlist, before (`pr#35434 <https://github.com/ceph/ceph/pull/35434>`_, Pritha Srivastava)
-* rgw: lc: enable thread-parallelism in RGWLC (`pr#35431 <https://github.com/ceph/ceph/pull/35431>`_, Matt Benjamin)
-* rgw: notifications: fix zero size in notifications (`pr#34940 <https://github.com/ceph/ceph/pull/34940>`_, J. Eric Ivancich, Yuval Lifshitz)
-* rgw: notifications: version id was not sent in versioned buckets (`pr#35254 <https://github.com/ceph/ceph/pull/35254>`_, Yuval Lifshitz)
-* rgw: radosgw-admin: fix infinite loops in 'datalog list' (`pr#34989 <https://github.com/ceph/ceph/pull/34989>`_, Casey Bodley)
-* rgw: url: fix amqp urls with vhosts (`pr#35432 <https://github.com/ceph/ceph/pull/35432>`_, Yuval Lifshitz)
-* tests: migrate qa/ to Python3 (`pr#35364 <https://github.com/ceph/ceph/pull/35364>`_, Kyr Shatskyy, Ilya Dryomov, Xiubo Li, Kefu Chai, Casey Bodley, Rishabh Dave, Patrick Donnelly, Sidharth Anupkrishnan, Michael Fritch)
+* build/ops: address SElinux denials observed in rgw/multisite test run (`pr#34538 <https://github.com/stone/stone/pull/34538>`_, Kefu Chai, Kaleb S. Keithley)
+* stone-volume: add and delete lvm tags in a single lvchange call (`pr#35452 <https://github.com/stone/stone/pull/35452>`_, Jan Fajerski)
+* stone-volume: add stone.osdspec_affinity tag (`pr#35134 <https://github.com/stone/stone/pull/35134>`_, Joshua Schmid)
+* stoneadm: batch backport May (1) (`pr#34893 <https://github.com/stone/stone/pull/34893>`_, Michael Fritch, Ricardo Marques, Matthew Oliver, Sebastian Wagner, Joshua Schmid, Zac Dover, Varsha Rao)
+* stoneadm: batch backport May (2) (`pr#35188 <https://github.com/stone/stone/pull/35188>`_, Michael Fritch, Sebastian Wagner, Kefu Chai, Georgios Kyratsas, Kiefer Chang, Joshua Schmid, Patrick Seidensal, Varsha Rao, Matthew Oliver, Zac Dover, Juan Miguel Olmo Martínez, Tim Serong, Alexey Miasoedov, Ricardo Marques, Satoru Takeuchi)
+* stoneadm: batch backport June (1) (`pr#35347 <https://github.com/stone/stone/pull/35347>`_, Sebastian Wagner, Zac Dover, Georgios Kyratsas, Kiefer Chang, Ricardo Marques, Patrick Seidensal, Patrick Donnelly, Joshua Schmid, Matthew Oliver, Varsha Rao, Juan Miguel Olmo Martínez, Michael Fritch)
+* stoneadm: batch backport June (2) (`pr#35475 <https://github.com/stone/stone/pull/35475>`_, Sebastian Wagner, Kiefer Chang, Joshua Schmid, Michael Fritch, shinhwagk, Kefu Chai, Juan Miguel Olmo Martínez, Daniel Pivonka)
+* stonefs: allow pool names with hyphen and period (`pr#35251 <https://github.com/stone/stone/pull/35251>`_, Ramana Raja)
+* stonefs: bash_completion: Do not auto complete obsolete and hidden cmds (`pr#34996 <https://github.com/stone/stone/pull/34996>`_, Kotresh HR)
+* stonefs: stonefs-shell: Change tox testenv name to py3 (`pr#34998 <https://github.com/stone/stone/pull/34998>`_, Kefu Chai, Varsha Rao, Aditya Srivastava)
+* stonefs: client: expose Client::ll_register_callback via libstonefs (`pr#35150 <https://github.com/stone/stone/pull/35150>`_, Jeff Layton)
+* stonefs: client: fix Finisher assert failure (`pr#34999 <https://github.com/stone/stone/pull/34999>`_, Xiubo Li)
+* stonefs: client: only set MClientCaps::FLAG_SYNC when flushing dirty auth caps (`pr#34997 <https://github.com/stone/stone/pull/34997>`_, Jeff Layton)
+* stonefs: fuse: add the '-d' option back for libfuse (`pr#35449 <https://github.com/stone/stone/pull/35449>`_, Xiubo Li)
+* stonefs: mds: Handle blacklisted error in purge queue (`pr#35148 <https://github.com/stone/stone/pull/35148>`_, Varsha Rao)
+* stonefs: mds: preserve ESlaveUpdate logevent until receiving OP_FINISH (`pr#35253 <https://github.com/stone/stone/pull/35253>`_, songxinying)
+* stonefs: mds: take xlock in the order requests start locking (`pr#35252 <https://github.com/stone/stone/pull/35252>`_, "Yan, Zheng")
+* stonefs: src/client/fuse_ll: compatible with libfuse3.5 or higher (`pr#35450 <https://github.com/stone/stone/pull/35450>`_, Jeff Layton, Xiubo Li)
+* stonefs: vstart_runner: set mounted to True at the end of mount() (`pr#35447 <https://github.com/stone/stone/pull/35447>`_, Rishabh Dave)
+* core: bluestore: fix large (>2GB) writes when bluefs_buffered_io = true (`pr#35446 <https://github.com/stone/stone/pull/35446>`_, Igor Fedotov)
+* core: bluestore: introduce hybrid allocator (`pr#35498 <https://github.com/stone/stone/pull/35498>`_, Igor Fedotov, Adam Kupczyk)
+* core: cls/queue: fix empty markers when listing entries (`pr#35241 <https://github.com/stone/stone/pull/35241>`_, Pritha Srivastava, Yuval Lifshitz)
+* core: objecter: don't attempt to read from non-primary on EC pools (`pr#35444 <https://github.com/stone/stone/pull/35444>`_, Ilya Dryomov)
+* core: osd: add --osdspec-affinity flag (`pr#35382 <https://github.com/stone/stone/pull/35382>`_, Joshua Schmid)
+* core: osd: make "missing incremental map" a debug log message (`pr#35442 <https://github.com/stone/stone/pull/35442>`_, Nathan Cutler)
+* core: osd: prevent ShardedOpWQ suicide_grace drop when waiting for work (`pr#34881 <https://github.com/stone/stone/pull/34881>`_, Dan Hill)
+* core: rocksdb: Update to stone-octopus-v5.8-1436 (`pr#35036 <https://github.com/stone/stone/pull/35036>`_, Brad Hubbard)
+* doc: drop obsolete cache tier options (`pr#35105 <https://github.com/stone/stone/pull/35105>`_, Nathan Cutler)
+* doc: mgr/dashboard: Add troubleshooting guide (`pr#34947 <https://github.com/stone/stone/pull/34947>`_, Tatjana Dehler)
+* doc: rgw: document 'rgw gc max concurrent io' (`pr#34987 <https://github.com/stone/stone/pull/34987>`_, Casey Bodley)
+* mds: cleanup uncommitted fragments before mds goes to active (`pr#35448 <https://github.com/stone/stone/pull/35448>`_, "Yan, Zheng")
+* mds: don't assert empty io context list when shutting down (`pr#34509 <https://github.com/stone/stone/pull/34509>`_, "Yan, Zheng")
+* mds: don't shallow copy when decoding xattr map (`pr#35147 <https://github.com/stone/stone/pull/35147>`_, "Yan, Zheng")
+* mds: flag backtrace scrub failures for new files as okay (`pr#35555 <https://github.com/stone/stone/pull/35555>`_, Milind Changire)
+* mgr/dashboard/grafana: Add rbd-image details dashboard (`pr#35247 <https://github.com/stone/stone/pull/35247>`_, Enno Gotthold)
+* mgr/dashboard: Asynchronous unique username validation for User Component (`pr#34849 <https://github.com/stone/stone/pull/34849>`_, Nizamudeen)
+* mgr/dashboard: ECP modal enhancement (`pr#35152 <https://github.com/stone/stone/pull/35152>`_, Stephan Müller)
+* mgr/dashboard: Fix HomeTest setup (`pr#35085 <https://github.com/stone/stone/pull/35085>`_, Tiago Melo)
+* mgr/dashboard: Fix e2e chromium binary validation (`pr#35679 <https://github.com/stone/stone/pull/35679>`_, Tiago Melo)
+* mgr/dashboard: Fix random E2E error in mgr-modules (`pr#35706 <https://github.com/stone/stone/pull/35706>`_, Tiago Melo)
+* mgr/dashboard: Fix redirect after changing password (`pr#35243 <https://github.com/stone/stone/pull/35243>`_, Tiago Melo)
+* mgr/dashboard: Prevent dashboard breakdown on bad pool selection (`pr#35135 <https://github.com/stone/stone/pull/35135>`_, Stephan Müller)
+* mgr/dashboard: Proposed About Modal box (`pr#35291 <https://github.com/stone/stone/pull/35291>`_, Ngwa Sedrick Meh, Tiago Melo)
+* mgr/dashboard: Reduce requests in Mirroring page (`pr#34992 <https://github.com/stone/stone/pull/34992>`_, Tiago Melo)
+* mgr/dashboard: Replace Protractor with Cypress (`pr#34910 <https://github.com/stone/stone/pull/34910>`_, Tiago Melo)
+* mgr/dashboard: Show labels in hosts page (`pr#35517 <https://github.com/stone/stone/pull/35517>`_, Volker Theile)
+* mgr/dashboard: Show table details inside the datatable (`pr#35270 <https://github.com/stone/stone/pull/35270>`_, Sebastian Krah)
+* mgr/dashboard: add telemetry report component (`pr#34850 <https://github.com/stone/stone/pull/34850>`_, Tatjana Dehler)
+* mgr/dashboard: displaying Service detail inside table (`pr#35269 <https://github.com/stone/stone/pull/35269>`_, Kiefer Chang)
+* mgr/dashboard: fix autocomplete input backgrounds in chrome and firefox (`pr#35718 <https://github.com/stone/stone/pull/35718>`_, Ishan Rai)
+* mgr/dashboard: grafana panels for rgw multisite sync performance (`pr#35693 <https://github.com/stone/stone/pull/35693>`_, Alfonso Martínez)
+* mgr/dashboard: monitoring menu entry should indicate firing alerts (`pr#34822 <https://github.com/stone/stone/pull/34822>`_, Tiago Melo, Volker Theile)
+* mgr/dashboard: redesign the login screen (`pr#35268 <https://github.com/stone/stone/pull/35268>`_, Ishan Rai)
+* mgr/dashboard: remove space after service name in the Hosts List table (`pr#35531 <https://github.com/stone/stone/pull/35531>`_, Kiefer Chang)
+* mgr/dashboard: replace hard coded telemetry URLs (`pr#35231 <https://github.com/stone/stone/pull/35231>`_, Tatjana Dehler)
+* mgr/rbd_support: rename "rbd_trash_trash_purge_schedule" oid (`pr#35436 <https://github.com/stone/stone/pull/35436>`_, Nathan Cutler, Mykola Golub)
+* mgr/status: Fix "stone fs status" json format writing to stderr (`pr#34727 <https://github.com/stone/stone/pull/34727>`_, Kotresh HR)
+* mgr/test_orchestrator: fix _get_stone_daemons() (`pr#34979 <https://github.com/stone/stone/pull/34979>`_, Alfonso Martínez)
+* mgr/volumes: Add snapshot info command (`pr#35670 <https://github.com/stone/stone/pull/35670>`_, Kotresh HR)
+* mgr/volumes: Create subvolume with isolated rados namespace (`pr#35671 <https://github.com/stone/stone/pull/35671>`_, Kotresh HR)
+* mgr/volumes: Fix subvolume create idempotency (`pr#35256 <https://github.com/stone/stone/pull/35256>`_, Kotresh HR)
+* mgr: synchronize ClusterState's health and mon_status (`pr#34995 <https://github.com/stone/stone/pull/34995>`_, Radoslaw Zarzynski)
+* monitoring: Fix "10% OSDs down" alert description (`pr#35151 <https://github.com/stone/stone/pull/35151>`_, Benoît Knecht)
+* monitoring: fixing some issues in RBD detail dashboard (`pr#35463 <https://github.com/stone/stone/pull/35463>`_, Kiefer Chang)
+* rbd: librbd: Watcher should not attempt to re-watch after detecting blacklisting (`pr#35439 <https://github.com/stone/stone/pull/35439>`_, Jason Dillaman)
+* rbd: librbd: avoid completing mirror:DisableRequest while holding its lock (`pr#35126 <https://github.com/stone/stone/pull/35126>`_, Jason Dillaman)
+* rbd: librbd: copy API should not inherit v1 image format by default (`pr#35255 <https://github.com/stone/stone/pull/35255>`_, Jason Dillaman)
+* rbd: librbd: make rbd_read_from_replica_policy actually work (`pr#35438 <https://github.com/stone/stone/pull/35438>`_, Ilya Dryomov)
+* rbd: pybind: RBD.create() method's 'old_format' parameter now defaults to False (`pr#35435 <https://github.com/stone/stone/pull/35435>`_, Jason Dillaman)
+* rbd: rbd-mirror: don't hold (stale) copy of local image journal pointer (`pr#35430 <https://github.com/stone/stone/pull/35430>`_, Jason Dillaman)
+* rbd: rbd-mirror: stop local journal replayer first during shut down (`pr#35440 <https://github.com/stone/stone/pull/35440>`_, Jason Dillaman, Mykola Golub)
+* rbd: rbd-mirror: wait for in-flight start/stop/restart (`pr#35437 <https://github.com/stone/stone/pull/35437>`_, Mykola Golub)
+* rgw: add "rgw-orphan-list" tool and "radosgw-admin bucket radoslist ..." (`pr#34991 <https://github.com/stone/stone/pull/34991>`_, J. Eric Ivancich)
+* rgw: amqp: fix the "routable" delivery mode (`pr#35433 <https://github.com/stone/stone/pull/35433>`_, Yuval Lifshitz)
+* rgw: anonomous swift to obj that dont exist should 401 (`pr#35120 <https://github.com/stone/stone/pull/35120>`_, Matthew Oliver)
+* rgw: fix bug where bucket listing end marker not always set correctly (`pr#34993 <https://github.com/stone/stone/pull/34993>`_, J. Eric Ivancich)
+* rgw: fix rgw tries to fetch anonymous user (`pr#34988 <https://github.com/stone/stone/pull/34988>`_, Or Friedmann)
+* rgw: fix some list buckets handle leak (`pr#34985 <https://github.com/stone/stone/pull/34985>`_, Tianshan Qu)
+* rgw: gc: Clearing off urgent data in bufferlist, before (`pr#35434 <https://github.com/stone/stone/pull/35434>`_, Pritha Srivastava)
+* rgw: lc: enable thread-parallelism in RGWLC (`pr#35431 <https://github.com/stone/stone/pull/35431>`_, Matt Benjamin)
+* rgw: notifications: fix zero size in notifications (`pr#34940 <https://github.com/stone/stone/pull/34940>`_, J. Eric Ivancich, Yuval Lifshitz)
+* rgw: notifications: version id was not sent in versioned buckets (`pr#35254 <https://github.com/stone/stone/pull/35254>`_, Yuval Lifshitz)
+* rgw: radosgw-admin: fix infinite loops in 'datalog list' (`pr#34989 <https://github.com/stone/stone/pull/34989>`_, Casey Bodley)
+* rgw: url: fix amqp urls with vhosts (`pr#35432 <https://github.com/stone/stone/pull/35432>`_, Yuval Lifshitz)
+* tests: migrate qa/ to Python3 (`pr#35364 <https://github.com/stone/stone/pull/35364>`_, Kyr Shatskyy, Ilya Dryomov, Xiubo Li, Kefu Chai, Casey Bodley, Rishabh Dave, Patrick Donnelly, Sidharth Anupkrishnan, Michael Fritch)
 
 
 v15.2.3 Octopus
 ===============
 
-This is the third bug-fix release of the Ceph Octopus stable release series.
+This is the third bug-fix release of the Stone Octopus stable release series.
 This release mainly is a workaround for a potential OSD corruption in v15.2.2.
 We advise users to upgrade to v15.2.3 directly. For users running v15.2.2 please
 execute the following::
 
-  ceph config set osd bluefs_preextend_wal_files false
+  stone config set osd bluefs_preextend_wal_files false
 
 Changelog
 ---------
 
-* bluestore: remove preextended WAL support (`issue#45613 <http://tracker.ceph.com/issues/45613>`_, Igor Fedotov, Neha Ojha)
+* bluestore: remove preextended WAL support (`issue#45613 <http://tracker.stone.com/issues/45613>`_, Igor Fedotov, Neha Ojha)
 
 
 v15.2.2 Octopus
 ===============
 
-This is the second bug-fix release of the Ceph Octopus stable release series. This release
+This is the second bug-fix release of the Stone Octopus stable release series. This release
 brings a range of fixes across all components, as well as patching a security flaw. We
 recommend that all Octopus users upgrade.
 
@@ -647,81 +647,81 @@ Notable Changes
 Changelog
 ---------
 
-* bluestore,core: common/options: Disable bluefs_buffered_io by default again (`pr#34353 <https://github.com/ceph/ceph/pull/34353>`_, Mark Nelson)
-* bluestore: os/bluestore: Don't pollute old journal when add new device (`pr#34795 <https://github.com/ceph/ceph/pull/34795>`_, Yang Honggang)
-* bluestore: os/bluestore: fix 'unused' calculation (`pr#34793 <https://github.com/ceph/ceph/pull/34793>`_, Igor Fedotov, xie xingguo)
-* bluestore: os/bluestore: open DB in read-only when expanding DB/WAL (`pr#34610 <https://github.com/ceph/ceph/pull/34610>`_, Adam Kupczyk, Igor Fedotov)
-* build/ops: rpm: add python3-saml as install dependency (`pr#34474 <https://github.com/ceph/ceph/pull/34474>`_, Ernesto Puerta)
-* build/ops: rpm: drop "is_opensuse" conditional in SUSE-specific bcond block (`pr#34790 <https://github.com/ceph/ceph/pull/34790>`_, Nathan Cutler)
-* build/ops: spec: address some warnings raised by RPM 4.15.1 (`pr#34526 <https://github.com/ceph/ceph/pull/34526>`_, Nathan Cutler)
-* ceph-volume/batch: check lvs list before access (`pr#34480 <https://github.com/ceph/ceph/pull/34480>`_, Jan Fajerski)
-* ceph-volume/batch: return success when all devices are filtered (`pr#34477 <https://github.com/ceph/ceph/pull/34477>`_, Jan Fajerski)
-* ceph-volume: update functional testing deploy.yml playbook (`pr#34886 <https://github.com/ceph/ceph/pull/34886>`_, Guillaume Abrioux)
-* cephadm: Fix check_ip_port to work with IPv6 (`pr#34350 <https://github.com/ceph/ceph/pull/34350>`_, Ricardo Marques)
-* cephadm: Update images used (`pr#34686 <https://github.com/ceph/ceph/pull/34686>`_, Sebastian Wagner)
-* cephadm: ceph-volume: disallow concurrent execution (`pr#34423 <https://github.com/ceph/ceph/pull/34423>`_, Sage Weil)
-* cephadm: rm-cluster clean up /etc/ceph (`pr#34299 <https://github.com/ceph/ceph/pull/34299>`_, Daniel-Pivonka)
-* cephfs,mgr: mgr/volumes: Add interface to get subvolume metadata (`pr#34681 <https://github.com/ceph/ceph/pull/34681>`_, Kotresh HR)
-* cephfs,mgr: mgr: force purge normal ceph entities from service map (`issue#44677 <http://tracker.ceph.com/issues/44677>`_, `pr#34800 <https://github.com/ceph/ceph/pull/34800>`_, Venky Shankar)
-* cephfs,tools: cephfs-journal-tool: correctly parse --dry_run argument (`pr#34804 <https://github.com/ceph/ceph/pull/34804>`_, Milind Changire)
-* cephfs,tools: tools/cephfs: add accounted_rstat/rstat when building file dentry (`pr#34803 <https://github.com/ceph/ceph/pull/34803>`_, Xiubo Li)
-* cephfs: ceph-fuse: link to libfuse3 and pass `-o big_writes` to libfuse if libfuse < 3.0.0 (`pr#34769 <https://github.com/ceph/ceph/pull/34769>`_, Xiubo Li, "Yan, Zheng", Kefu Chai)
-* cephfs: client: reset requested_max_size if file write is not wanted (`pr#34766 <https://github.com/ceph/ceph/pull/34766>`_, "Yan, Zheng")
-* cephfs: mds: fix 'if there is lock cache on dir' check (`pr#34273 <https://github.com/ceph/ceph/pull/34273>`_, "Yan, Zheng")
-* cephfs: mon/FSCommands: Fix 'add_data_pool' command and 'fs new' command (`pr#34775 <https://github.com/ceph/ceph/pull/34775>`_, Ramana Raja)
-* cephfs: qa: install task runs twice with double unwind causing fatal errors (`pr#34912 <https://github.com/ceph/ceph/pull/34912>`_, Patrick Donnelly)
-* core,mon: mon/OSDMonitor: allow trimming maps even if osds are down (`pr#34924 <https://github.com/ceph/ceph/pull/34924>`_, Joao Eduardo Luis)
-* core: ceph-object-corpus: update to octopus (`pr#34797 <https://github.com/ceph/ceph/pull/34797>`_, Josh Durgin)
-* core: mgr/DaemonServer: fetch metadata for new daemons (e.g., mons) (`pr#34416 <https://github.com/ceph/ceph/pull/34416>`_, Sage Weil)
-* core: mon/OSDMonitor: Always tune priority cache manager memory on all mons (`pr#34917 <https://github.com/ceph/ceph/pull/34917>`_, Sridhar Seshasayee)
-* core: mon: calculate min_size on osd pool set size (`pr#34528 <https://github.com/ceph/ceph/pull/34528>`_, Deepika Upadhyay)
-* core: osd/PeeringState: do not trim pg log past last_update_ondisk (`pr#34807 <https://github.com/ceph/ceph/pull/34807>`_, xie xingguo, Samuel Just)
-* core: osd/PrimaryLogPG: fix SPARSE_READ stat (`pr#34809 <https://github.com/ceph/ceph/pull/34809>`_, Yan Jun)
-* devices/simple/scan: Fix string in log statement (`pr#34446 <https://github.com/ceph/ceph/pull/34446>`_, Jan Fajerski)
-* doc: cephadm: Batch backport April (1) (`pr#34554 <https://github.com/ceph/ceph/pull/34554>`_, Matthew Oliver, Sage Weil, Sebastian Wagner, Michael Fritch, Tim, Jeff Layton, Juan Miguel Olmo Martínez, Joshua Schmid)
-* doc: cephadm: Batch backport April (2) (`issue#45029 <http://tracker.ceph.com/issues/45029>`_, `pr#34687 <https://github.com/ceph/ceph/pull/34687>`_, Maran Hidskes, Kiefer Chang, Matthew Oliver, Sebastian Wagner, Andreas Haase, Tim Serong, Zac Dover, Michael Fritch, Joshua Schmid)
-* doc: cephadm: Batch backport April (3) (`pr#34742 <https://github.com/ceph/ceph/pull/34742>`_, Sebastian Wagner, Dimitri Savineau, Michael Fritch)
-* doc: cephadm: batch backport March (`pr#34438 <https://github.com/ceph/ceph/pull/34438>`_, Jan Fajerski, Sebastian Wagner, Daniel-Pivonka, Michael Fritch, Sage Weil)
-* doc: doc/releases/nautilus: restart OSDs to make them bind to v2 addr (`pr#34523 <https://github.com/ceph/ceph/pull/34523>`_, Nathan Cutler)
-* mgr/dashboard: 'Prometheus / All Alerts' page shows progress bar (`pr#34631 <https://github.com/ceph/ceph/pull/34631>`_, Volker Theile)
-* mgr/dashboard: Fix ServiceDetails and PoolDetails unit tests (`pr#34760 <https://github.com/ceph/ceph/pull/34760>`_, Tiago Melo)
-* mgr/dashboard: Fix iSCSI's username and password validation (`pr#34547 <https://github.com/ceph/ceph/pull/34547>`_, Tiago Melo)
-* mgr/dashboard: Improve iSCSI CHAP message (`pr#34630 <https://github.com/ceph/ceph/pull/34630>`_, Ricardo Marques)
-* mgr/dashboard: Prevent iSCSI target recreation when editing controls (`pr#34548 <https://github.com/ceph/ceph/pull/34548>`_, Tiago Melo)
-* mgr/dashboard: RGW auto refresh is not working (`pr#34739 <https://github.com/ceph/ceph/pull/34739>`_, Avan Thakkar)
-* mgr/dashboard: Repair broken grafana panels (`pr#34495 <https://github.com/ceph/ceph/pull/34495>`_, Kristoffer Grönlund)
-* mgr/dashboard: Update translations on octopus (`pr#34309 <https://github.com/ceph/ceph/pull/34309>`_, Sebastian Krah)
-* mgr/dashboard: add crush rule test suite (`pr#34211 <https://github.com/ceph/ceph/pull/34211>`_, Tatjana Dehler)
-* mgr/dashboard: fix API tests to be py3 compatible (`pr#34759 <https://github.com/ceph/ceph/pull/34759>`_, Kefu Chai, Laura Paduano, Alfonso Martínez)
-* mgr/dashboard: fix errors related to frontend service subscriptions (`pr#34467 <https://github.com/ceph/ceph/pull/34467>`_, Alfonso Martínez)
-* mgr/dashboard: fix tasks.mgr.dashboard.test_rgw.RgwBucketTest.test_all (`pr#34708 <https://github.com/ceph/ceph/pull/34708>`_, Alfonso Martínez)
-* mgr/dashboard: lint error on plugins/debug.py (`pr#34625 <https://github.com/ceph/ceph/pull/34625>`_, Volker Theile)
-* mgr/dashboard: shorten "Container ID" and "Container image ID" in Services page (`pr#34648 <https://github.com/ceph/ceph/pull/34648>`_, Volker Theile)
-* mgr/dashboard: use FQDN for failover redirection (`pr#34498 <https://github.com/ceph/ceph/pull/34498>`_, Ernesto Puerta)
-* mgr: mgr/PyModule: fix missing tracebacks in handle_pyerror() (`pr#34626 <https://github.com/ceph/ceph/pull/34626>`_, Tim Serong)
-* mgr: mgr/telegraf: catch FileNotFoundError exception (`pr#34629 <https://github.com/ceph/ceph/pull/34629>`_, Kefu Chai)
-* monitoring: Fix pool capacity incorrect (`pr#34449 <https://github.com/ceph/ceph/pull/34449>`_, James Cheng)
-* monitoring: alert for prediction of disk and pool fill up broken (`pr#34395 <https://github.com/ceph/ceph/pull/34395>`_, Patrick Seidensal)
-* monitoring: fix decimal precision in Grafana %percentages (`pr#34828 <https://github.com/ceph/ceph/pull/34828>`_, Ernesto Puerta)
-* monitoring: root volume full alert fires false positives (`pr#34418 <https://github.com/ceph/ceph/pull/34418>`_, Patrick Seidensal)
-* pybind,rbd: pybind/rbd: ensure image is open before permitting operations (`pr#34425 <https://github.com/ceph/ceph/pull/34425>`_, Mykola Golub)
-* pybind,rbd: pybind/rbd: fix no lockers are obtained, ImageNotFound exception will be output (`pr#34387 <https://github.com/ceph/ceph/pull/34387>`_, zhangdaolong)
-* qa/suites/rados/cephadm/upgrade: start from v15.2.0 (`pr#34440 <https://github.com/ceph/ceph/pull/34440>`_, Sage Weil)
-* qa/tasks/cephadm: add 'roleless' mode (`pr#34407 <https://github.com/ceph/ceph/pull/34407>`_, Sage Weil)
-* rbd,tests: tests: update unmap.t for table spacing changes (`pr#34819 <https://github.com/ceph/ceph/pull/34819>`_, Ilya Dryomov)
-* rbd: rbd-mirror: improved replication statistics (`pr#34810 <https://github.com/ceph/ceph/pull/34810>`_, Mykola Golub, Jason Dillaman)
-* rbd: rbd: ignore tx-only mirror peers when adding new peers (`pr#34638 <https://github.com/ceph/ceph/pull/34638>`_, Jason Dillaman)
-* rgw: Disable prefetch of entire head object when GET request with range header (`pr#34826 <https://github.com/ceph/ceph/pull/34826>`_, Or Friedmann)
-* rgw: pubsub sync module ignores ERR_USER_EXIST (`pr#34825 <https://github.com/ceph/ceph/pull/34825>`_, Casey Bodley)
-* rgw: radosgw-admin: add support for --bucket-id in bucket stats command (`pr#34816 <https://github.com/ceph/ceph/pull/34816>`_, Vikhyat Umrao)
-* rgw: reshard: skip stale bucket id entries from reshard queue (`pr#34734 <https://github.com/ceph/ceph/pull/34734>`_, Abhishek Lekshmanan)
-* rgw: use DEFER_DROP_PRIVILEGES flag unconditionally (`pr#34731 <https://github.com/ceph/ceph/pull/34731>`_, Casey Bodley)
+* bluestore,core: common/options: Disable bluefs_buffered_io by default again (`pr#34353 <https://github.com/stone/stone/pull/34353>`_, Mark Nelson)
+* bluestore: os/bluestore: Don't pollute old journal when add new device (`pr#34795 <https://github.com/stone/stone/pull/34795>`_, Yang Honggang)
+* bluestore: os/bluestore: fix 'unused' calculation (`pr#34793 <https://github.com/stone/stone/pull/34793>`_, Igor Fedotov, xie xingguo)
+* bluestore: os/bluestore: open DB in read-only when expanding DB/WAL (`pr#34610 <https://github.com/stone/stone/pull/34610>`_, Adam Kupczyk, Igor Fedotov)
+* build/ops: rpm: add python3-saml as install dependency (`pr#34474 <https://github.com/stone/stone/pull/34474>`_, Ernesto Puerta)
+* build/ops: rpm: drop "is_opensuse" conditional in SUSE-specific bcond block (`pr#34790 <https://github.com/stone/stone/pull/34790>`_, Nathan Cutler)
+* build/ops: spec: address some warnings raised by RPM 4.15.1 (`pr#34526 <https://github.com/stone/stone/pull/34526>`_, Nathan Cutler)
+* stone-volume/batch: check lvs list before access (`pr#34480 <https://github.com/stone/stone/pull/34480>`_, Jan Fajerski)
+* stone-volume/batch: return success when all devices are filtered (`pr#34477 <https://github.com/stone/stone/pull/34477>`_, Jan Fajerski)
+* stone-volume: update functional testing deploy.yml playbook (`pr#34886 <https://github.com/stone/stone/pull/34886>`_, Guillaume Abrioux)
+* stoneadm: Fix check_ip_port to work with IPv6 (`pr#34350 <https://github.com/stone/stone/pull/34350>`_, Ricardo Marques)
+* stoneadm: Update images used (`pr#34686 <https://github.com/stone/stone/pull/34686>`_, Sebastian Wagner)
+* stoneadm: stone-volume: disallow concurrent execution (`pr#34423 <https://github.com/stone/stone/pull/34423>`_, Sage Weil)
+* stoneadm: rm-cluster clean up /etc/stone (`pr#34299 <https://github.com/stone/stone/pull/34299>`_, Daniel-Pivonka)
+* stonefs,mgr: mgr/volumes: Add interface to get subvolume metadata (`pr#34681 <https://github.com/stone/stone/pull/34681>`_, Kotresh HR)
+* stonefs,mgr: mgr: force purge normal stone entities from service map (`issue#44677 <http://tracker.stone.com/issues/44677>`_, `pr#34800 <https://github.com/stone/stone/pull/34800>`_, Venky Shankar)
+* stonefs,tools: stonefs-journal-tool: correctly parse --dry_run argument (`pr#34804 <https://github.com/stone/stone/pull/34804>`_, Milind Changire)
+* stonefs,tools: tools/stonefs: add accounted_rstat/rstat when building file dentry (`pr#34803 <https://github.com/stone/stone/pull/34803>`_, Xiubo Li)
+* stonefs: stone-fuse: link to libfuse3 and pass `-o big_writes` to libfuse if libfuse < 3.0.0 (`pr#34769 <https://github.com/stone/stone/pull/34769>`_, Xiubo Li, "Yan, Zheng", Kefu Chai)
+* stonefs: client: reset requested_max_size if file write is not wanted (`pr#34766 <https://github.com/stone/stone/pull/34766>`_, "Yan, Zheng")
+* stonefs: mds: fix 'if there is lock cache on dir' check (`pr#34273 <https://github.com/stone/stone/pull/34273>`_, "Yan, Zheng")
+* stonefs: mon/FSCommands: Fix 'add_data_pool' command and 'fs new' command (`pr#34775 <https://github.com/stone/stone/pull/34775>`_, Ramana Raja)
+* stonefs: qa: install task runs twice with double unwind causing fatal errors (`pr#34912 <https://github.com/stone/stone/pull/34912>`_, Patrick Donnelly)
+* core,mon: mon/OSDMonitor: allow trimming maps even if osds are down (`pr#34924 <https://github.com/stone/stone/pull/34924>`_, Joao Eduardo Luis)
+* core: stone-object-corpus: update to octopus (`pr#34797 <https://github.com/stone/stone/pull/34797>`_, Josh Durgin)
+* core: mgr/DaemonServer: fetch metadata for new daemons (e.g., mons) (`pr#34416 <https://github.com/stone/stone/pull/34416>`_, Sage Weil)
+* core: mon/OSDMonitor: Always tune priority cache manager memory on all mons (`pr#34917 <https://github.com/stone/stone/pull/34917>`_, Sridhar Seshasayee)
+* core: mon: calculate min_size on osd pool set size (`pr#34528 <https://github.com/stone/stone/pull/34528>`_, Deepika Upadhyay)
+* core: osd/PeeringState: do not trim pg log past last_update_ondisk (`pr#34807 <https://github.com/stone/stone/pull/34807>`_, xie xingguo, Samuel Just)
+* core: osd/PrimaryLogPG: fix SPARSE_READ stat (`pr#34809 <https://github.com/stone/stone/pull/34809>`_, Yan Jun)
+* devices/simple/scan: Fix string in log statement (`pr#34446 <https://github.com/stone/stone/pull/34446>`_, Jan Fajerski)
+* doc: stoneadm: Batch backport April (1) (`pr#34554 <https://github.com/stone/stone/pull/34554>`_, Matthew Oliver, Sage Weil, Sebastian Wagner, Michael Fritch, Tim, Jeff Layton, Juan Miguel Olmo Martínez, Joshua Schmid)
+* doc: stoneadm: Batch backport April (2) (`issue#45029 <http://tracker.stone.com/issues/45029>`_, `pr#34687 <https://github.com/stone/stone/pull/34687>`_, Maran Hidskes, Kiefer Chang, Matthew Oliver, Sebastian Wagner, Andreas Haase, Tim Serong, Zac Dover, Michael Fritch, Joshua Schmid)
+* doc: stoneadm: Batch backport April (3) (`pr#34742 <https://github.com/stone/stone/pull/34742>`_, Sebastian Wagner, Dimitri Savineau, Michael Fritch)
+* doc: stoneadm: batch backport March (`pr#34438 <https://github.com/stone/stone/pull/34438>`_, Jan Fajerski, Sebastian Wagner, Daniel-Pivonka, Michael Fritch, Sage Weil)
+* doc: doc/releases/nautilus: restart OSDs to make them bind to v2 addr (`pr#34523 <https://github.com/stone/stone/pull/34523>`_, Nathan Cutler)
+* mgr/dashboard: 'Prometheus / All Alerts' page shows progress bar (`pr#34631 <https://github.com/stone/stone/pull/34631>`_, Volker Theile)
+* mgr/dashboard: Fix ServiceDetails and PoolDetails unit tests (`pr#34760 <https://github.com/stone/stone/pull/34760>`_, Tiago Melo)
+* mgr/dashboard: Fix iSCSI's username and password validation (`pr#34547 <https://github.com/stone/stone/pull/34547>`_, Tiago Melo)
+* mgr/dashboard: Improve iSCSI CHAP message (`pr#34630 <https://github.com/stone/stone/pull/34630>`_, Ricardo Marques)
+* mgr/dashboard: Prevent iSCSI target recreation when editing controls (`pr#34548 <https://github.com/stone/stone/pull/34548>`_, Tiago Melo)
+* mgr/dashboard: RGW auto refresh is not working (`pr#34739 <https://github.com/stone/stone/pull/34739>`_, Avan Thakkar)
+* mgr/dashboard: Repair broken grafana panels (`pr#34495 <https://github.com/stone/stone/pull/34495>`_, Kristoffer Grönlund)
+* mgr/dashboard: Update translations on octopus (`pr#34309 <https://github.com/stone/stone/pull/34309>`_, Sebastian Krah)
+* mgr/dashboard: add crush rule test suite (`pr#34211 <https://github.com/stone/stone/pull/34211>`_, Tatjana Dehler)
+* mgr/dashboard: fix API tests to be py3 compatible (`pr#34759 <https://github.com/stone/stone/pull/34759>`_, Kefu Chai, Laura Paduano, Alfonso Martínez)
+* mgr/dashboard: fix errors related to frontend service subscriptions (`pr#34467 <https://github.com/stone/stone/pull/34467>`_, Alfonso Martínez)
+* mgr/dashboard: fix tasks.mgr.dashboard.test_rgw.RgwBucketTest.test_all (`pr#34708 <https://github.com/stone/stone/pull/34708>`_, Alfonso Martínez)
+* mgr/dashboard: lint error on plugins/debug.py (`pr#34625 <https://github.com/stone/stone/pull/34625>`_, Volker Theile)
+* mgr/dashboard: shorten "Container ID" and "Container image ID" in Services page (`pr#34648 <https://github.com/stone/stone/pull/34648>`_, Volker Theile)
+* mgr/dashboard: use FQDN for failover redirection (`pr#34498 <https://github.com/stone/stone/pull/34498>`_, Ernesto Puerta)
+* mgr: mgr/PyModule: fix missing tracebacks in handle_pyerror() (`pr#34626 <https://github.com/stone/stone/pull/34626>`_, Tim Serong)
+* mgr: mgr/telegraf: catch FileNotFoundError exception (`pr#34629 <https://github.com/stone/stone/pull/34629>`_, Kefu Chai)
+* monitoring: Fix pool capacity incorrect (`pr#34449 <https://github.com/stone/stone/pull/34449>`_, James Cheng)
+* monitoring: alert for prediction of disk and pool fill up broken (`pr#34395 <https://github.com/stone/stone/pull/34395>`_, Patrick Seidensal)
+* monitoring: fix decimal precision in Grafana %percentages (`pr#34828 <https://github.com/stone/stone/pull/34828>`_, Ernesto Puerta)
+* monitoring: root volume full alert fires false positives (`pr#34418 <https://github.com/stone/stone/pull/34418>`_, Patrick Seidensal)
+* pybind,rbd: pybind/rbd: ensure image is open before permitting operations (`pr#34425 <https://github.com/stone/stone/pull/34425>`_, Mykola Golub)
+* pybind,rbd: pybind/rbd: fix no lockers are obtained, ImageNotFound exception will be output (`pr#34387 <https://github.com/stone/stone/pull/34387>`_, zhangdaolong)
+* qa/suites/rados/stoneadm/upgrade: start from v15.2.0 (`pr#34440 <https://github.com/stone/stone/pull/34440>`_, Sage Weil)
+* qa/tasks/stoneadm: add 'roleless' mode (`pr#34407 <https://github.com/stone/stone/pull/34407>`_, Sage Weil)
+* rbd,tests: tests: update unmap.t for table spacing changes (`pr#34819 <https://github.com/stone/stone/pull/34819>`_, Ilya Dryomov)
+* rbd: rbd-mirror: improved replication statistics (`pr#34810 <https://github.com/stone/stone/pull/34810>`_, Mykola Golub, Jason Dillaman)
+* rbd: rbd: ignore tx-only mirror peers when adding new peers (`pr#34638 <https://github.com/stone/stone/pull/34638>`_, Jason Dillaman)
+* rgw: Disable prefetch of entire head object when GET request with range header (`pr#34826 <https://github.com/stone/stone/pull/34826>`_, Or Friedmann)
+* rgw: pubsub sync module ignores ERR_USER_EXIST (`pr#34825 <https://github.com/stone/stone/pull/34825>`_, Casey Bodley)
+* rgw: radosgw-admin: add support for --bucket-id in bucket stats command (`pr#34816 <https://github.com/stone/stone/pull/34816>`_, Vikhyat Umrao)
+* rgw: reshard: skip stale bucket id entries from reshard queue (`pr#34734 <https://github.com/stone/stone/pull/34734>`_, Abhishek Lekshmanan)
+* rgw: use DEFER_DROP_PRIVILEGES flag unconditionally (`pr#34731 <https://github.com/stone/stone/pull/34731>`_, Casey Bodley)
 
 
 v15.2.1 Octopus
 ===============
 
-This is the first bugfix release of Ceph Octopus, we recommend all Octopus users
+This is the first bugfix release of Stone Octopus, we recommend all Octopus users
 upgrade. This release fixes an upgrade issue and also has 2 security fixes
 
 Notable Changes
@@ -734,37 +734,37 @@ Notable Changes
 Changelog
 ---------
 
-* build/ops: fix ceph_release type to 'stable' (`pr#34194 <https://github.com/ceph/ceph/pull/34194>`_, Sage Weil)
-* build/ops: vstart_runner.py: fix OSError when checking if non-existent path is mounted (`pr#34132 <https://github.com/ceph/ceph/pull/34132>`_, Alfonso Martínez)
-* cephadm: Add alertmanager adopt (`pr#34157 <https://github.com/ceph/ceph/pull/34157>`_, Eric Jackson)
-* cephadm: Add alertmanager sample (`pr#34158 <https://github.com/ceph/ceph/pull/34158>`_, Eric Jackson)
-* cephadm: Fix truncated output of "ceph mgr dump" (`pr#34258 <https://github.com/ceph/ceph/pull/34258>`_, Sebastian Wagner)
-* mgr/cephadm: Add example to run when debugging ssh failures (`pr#34153 <https://github.com/ceph/ceph/pull/34153>`_, Sebastian Wagner)
-* mgr/cephadm: DriveGroupSpec needs to support/ignore _unmanaged_ (`pr#34185 <https://github.com/ceph/ceph/pull/34185>`_, Joshua Schmid)
-* mgr/cephadm: bind grafana to all interfaces (`pr#34191 <https://github.com/ceph/ceph/pull/34191>`_, Sage Weil)
-* mgr/cephadm: fix 'orch ps --refresh' (`pr#34190 <https://github.com/ceph/ceph/pull/34190>`_, Sage Weil)
-* mgr/cephadm: fix 'upgrade start' message when specifying a version (`pr#34186 <https://github.com/ceph/ceph/pull/34186>`_, Sage Weil)
-* mgr/cephadm: include alerts in prometheus deployment (`pr#34155 <https://github.com/ceph/ceph/pull/34155>`_, Sage Weil)
-* mgr/cephadm: point alertmanager at all mgr/dashboard URLs (`pr#34154 <https://github.com/ceph/ceph/pull/34154>`_, Sage Weil)
-* mgr/cephadm: provision nfs-ganesha via orchestrator (`pr#34192 <https://github.com/ceph/ceph/pull/34192>`_, Michael Fritch)
-* mgr/dashboard: Check for missing npm resolutions (`pr#34202 <https://github.com/ceph/ceph/pull/34202>`_, Tiago Melo)
-* mgr/dashboard: NoRebalance flag is added to the Dashboard (`pr#33939 <https://github.com/ceph/ceph/pull/33939>`_, Nizamudeen)
-* mgr/dashboard: correct Orchestrator documentation link (`pr#34212 <https://github.com/ceph/ceph/pull/34212>`_, Tatjana Dehler)
-* mgr/dashboard: do not fail on user creation (CLI) (`pr#34280 <https://github.com/ceph/ceph/pull/34280>`_, Tatjana Dehler)
-* mgr/orch: allow list daemons by service_name (`pr#34160 <https://github.com/ceph/ceph/pull/34160>`_, Kiefer Chang)
-* mgr/prometheus: ceph_pg\_\* metrics contains last value instead of sum across all reported states (`pr#34163 <https://github.com/ceph/ceph/pull/34163>`_, Jacek Suchenia)
-* mgr/rook: Blinking lights (`pr#34199 <https://github.com/ceph/ceph/pull/34199>`_, Juan Miguel Olmo Martínez)
-* osd/PeeringState: drop mimic assert (`pr#34204 <https://github.com/ceph/ceph/pull/34204>`_, Sage Weil)
-* osd/PeeringState: fix pending want_acting vs osd offline race (`pr#34123 <https://github.com/ceph/ceph/pull/34123>`_, xie xingguo)
-* pybind/mgr: fix config_notify handling of default values (`pr#34178 <https://github.com/ceph/ceph/pull/34178>`_, Nathan Cutler)
-* rbd: librbd: fix client backwards compatibility issues (`issue#39450 <http://tracker.ceph.com/issues/39450>`_, `issue#38834 <http://tracker.ceph.com/issues/38834>`_, `pr#34323 <https://github.com/ceph/ceph/pull/34323>`_, Jason Dillaman)
-* tools: ceph-backport.sh: add deprecation warning (`pr#34125 <https://github.com/ceph/ceph/pull/34125>`_, Nathan Cutler)
+* build/ops: fix stone_release type to 'stable' (`pr#34194 <https://github.com/stone/stone/pull/34194>`_, Sage Weil)
+* build/ops: vstart_runner.py: fix OSError when checking if non-existent path is mounted (`pr#34132 <https://github.com/stone/stone/pull/34132>`_, Alfonso Martínez)
+* stoneadm: Add alertmanager adopt (`pr#34157 <https://github.com/stone/stone/pull/34157>`_, Eric Jackson)
+* stoneadm: Add alertmanager sample (`pr#34158 <https://github.com/stone/stone/pull/34158>`_, Eric Jackson)
+* stoneadm: Fix truncated output of "stone mgr dump" (`pr#34258 <https://github.com/stone/stone/pull/34258>`_, Sebastian Wagner)
+* mgr/stoneadm: Add example to run when debugging ssh failures (`pr#34153 <https://github.com/stone/stone/pull/34153>`_, Sebastian Wagner)
+* mgr/stoneadm: DriveGroupSpec needs to support/ignore _unmanaged_ (`pr#34185 <https://github.com/stone/stone/pull/34185>`_, Joshua Schmid)
+* mgr/stoneadm: bind grafana to all interfaces (`pr#34191 <https://github.com/stone/stone/pull/34191>`_, Sage Weil)
+* mgr/stoneadm: fix 'orch ps --refresh' (`pr#34190 <https://github.com/stone/stone/pull/34190>`_, Sage Weil)
+* mgr/stoneadm: fix 'upgrade start' message when specifying a version (`pr#34186 <https://github.com/stone/stone/pull/34186>`_, Sage Weil)
+* mgr/stoneadm: include alerts in prometheus deployment (`pr#34155 <https://github.com/stone/stone/pull/34155>`_, Sage Weil)
+* mgr/stoneadm: point alertmanager at all mgr/dashboard URLs (`pr#34154 <https://github.com/stone/stone/pull/34154>`_, Sage Weil)
+* mgr/stoneadm: provision nfs-ganesha via orchestrator (`pr#34192 <https://github.com/stone/stone/pull/34192>`_, Michael Fritch)
+* mgr/dashboard: Check for missing npm resolutions (`pr#34202 <https://github.com/stone/stone/pull/34202>`_, Tiago Melo)
+* mgr/dashboard: NoRebalance flag is added to the Dashboard (`pr#33939 <https://github.com/stone/stone/pull/33939>`_, Nizamudeen)
+* mgr/dashboard: correct Orchestrator documentation link (`pr#34212 <https://github.com/stone/stone/pull/34212>`_, Tatjana Dehler)
+* mgr/dashboard: do not fail on user creation (CLI) (`pr#34280 <https://github.com/stone/stone/pull/34280>`_, Tatjana Dehler)
+* mgr/orch: allow list daemons by service_name (`pr#34160 <https://github.com/stone/stone/pull/34160>`_, Kiefer Chang)
+* mgr/prometheus: stone_pg\_\* metrics contains last value instead of sum across all reported states (`pr#34163 <https://github.com/stone/stone/pull/34163>`_, Jacek Suchenia)
+* mgr/rook: Blinking lights (`pr#34199 <https://github.com/stone/stone/pull/34199>`_, Juan Miguel Olmo Martínez)
+* osd/PeeringState: drop mimic assert (`pr#34204 <https://github.com/stone/stone/pull/34204>`_, Sage Weil)
+* osd/PeeringState: fix pending want_acting vs osd offline race (`pr#34123 <https://github.com/stone/stone/pull/34123>`_, xie xingguo)
+* pybind/mgr: fix config_notify handling of default values (`pr#34178 <https://github.com/stone/stone/pull/34178>`_, Nathan Cutler)
+* rbd: librbd: fix client backwards compatibility issues (`issue#39450 <http://tracker.stone.com/issues/39450>`_, `issue#38834 <http://tracker.stone.com/issues/38834>`_, `pr#34323 <https://github.com/stone/stone/pull/34323>`_, Jason Dillaman)
+* tools: stone-backport.sh: add deprecation warning (`pr#34125 <https://github.com/stone/stone/pull/34125>`_, Nathan Cutler)
 
 
 v15.2.0 Octopus
 ===============
 
-This is the first stable release of Ceph Octopus.
+This is the first stable release of Stone Octopus.
 
 Major Changes from Nautilus
 ---------------------------
@@ -772,12 +772,12 @@ Major Changes from Nautilus
 General
 ~~~~~~~
   
-* A new deployment tool called **cephadm** has been introduced that
-  integrates Ceph daemon deployment and management via containers
+* A new deployment tool called **stoneadm** has been introduced that
+  integrates Stone daemon deployment and management via containers
   into the orchestration layer.  For more information see
-  :ref:`cephadm`.
+  :ref:`stoneadm`.
 * Health alerts can now be muted, either temporarily or permanently.
-* Health alerts are now raised for recent Ceph daemons crashes.
+* Health alerts are now raised for recent Stone daemons crashes.
 * A simple 'alerts' module has been introduced to send email
   health alerts for clusters deployed without the benefit of an
   existing external monitoring infrastructure.
@@ -822,7 +822,7 @@ The :ref:`mgr-dashboard` has gained a lot of new features and functionality:
   - Configurable password expiration
   - Change password after first login
 
-New and enhanced management of Ceph features/services:
+New and enhanced management of Stone features/services:
 
 * OSD/device management
 
@@ -848,12 +848,12 @@ New and enhanced management of Ceph features/services:
   - Enable MFA support
   - Select placement target on bucket creation
 
-* CephFS management enhancements
+* StoneFS management enhancements
 
-  - CephFS client eviction
-  - CephFS snapshot management
-  - CephFS quota management
-  - Browse CephFS directory
+  - StoneFS client eviction
+  - StoneFS snapshot management
+  - StoneFS quota management
+  - Browse StoneFS directory
 
 * iSCSI management enhancements
 
@@ -872,12 +872,12 @@ RADOS
 * Objects can now be brought in sync during recovery by copying only
   the modified portion of the object, reducing tail latencies during
   recovery.
-* Ceph will allow recovery below *min_size* for Erasure coded pools,
+* Stone will allow recovery below *min_size* for Erasure coded pools,
   wherever possible.
 * The PG autoscaler feature introduced in Nautilus is enabled for
   new pools by default, allowing new clusters to autotune *pg num*
   without any user intervention.  The default values for new pools
-  and RGW/CephFS metadata pools have also been adjusted to perform
+  and RGW/StoneFS metadata pools have also been adjusted to perform
   well for most users.
 * BlueStore has received several improvements and performance
   updates, including improved accounting for "omap" (key/value)
@@ -930,18 +930,18 @@ RGW object storage
 * Added `HashiCorp Vault Integration`_ for SSE-KMS.
 * Added Keystone token cache for S3 requests.
 
-CephFS distributed file system
+StoneFS distributed file system
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-* Inline data support in CephFS has been deprecated and will likely be
+* Inline data support in StoneFS has been deprecated and will likely be
   removed in a future release.
 * MDS daemons can now be assigned to manage a particular file system via the
   new ``mds_join_fs`` option.
 * MDS now aggressively asks idle clients to trim caps which improves stability
   when file system load changes.
-* The mgr volumes plugin has received numerous improvements to support CephFS
+* The mgr volumes plugin has received numerous improvements to support StoneFS
   via CSI, including snapshots and cloning.
-* cephfs-shell has had numerous incremental improvements and bug fixes.
+* stonefs-shell has had numerous incremental improvements and bug fixes.
 
 
 Upgrading from Mimic or Nautilus
@@ -950,7 +950,7 @@ Upgrading from Mimic or Nautilus
 .. note::
 
   You can monitor the progress of your upgrade at each stage with the
-  ``ceph versions`` command, which will tell you what ceph version(s) are
+  ``stone versions`` command, which will tell you what stone version(s) are
   running for each type of daemon.
 
 Instructions
@@ -964,18 +964,18 @@ Instructions
 #. Set the ``noout`` flag for the duration of the upgrade. (Optional,
    but recommended.)::
 
-     # ceph osd set noout
+     # stone osd set noout
 
 #. Upgrade monitors by installing the new packages and restarting the
    monitor daemons.  For example, on each monitor host,::
 
-     # systemctl restart ceph-mon.target
+     # systemctl restart stone-mon.target
 
    Once all monitors are up, verify that the monitor upgrade is
    complete by looking for the ``octopus`` string in the mon
    map.  The command::
 
-     # ceph mon dump | grep min_mon_release
+     # stone mon dump | grep min_mon_release
 
    should report::
 
@@ -984,15 +984,15 @@ Instructions
    If it doesn't, that implies that one or more monitors hasn't been
    upgraded and restarted and/or the quorum does not include all monitors.
 
-#. Upgrade ``ceph-mgr`` daemons by installing the new packages and
+#. Upgrade ``stone-mgr`` daemons by installing the new packages and
    restarting all manager daemons.  For example, on each manager host,::
 
-     # systemctl restart ceph-mgr.target
+     # systemctl restart stone-mgr.target
 
-   Verify the ``ceph-mgr`` daemons are running by checking ``ceph
+   Verify the ``stone-mgr`` daemons are running by checking ``stone
    -s``::
 
-     # ceph -s
+     # stone -s
 
      ...
        services:
@@ -1001,94 +1001,94 @@ Instructions
      ...
 
 #. Upgrade all OSDs by installing the new packages and restarting the
-   ceph-osd daemons on all OSD hosts::
+   stone-osd daemons on all OSD hosts::
 
-     # systemctl restart ceph-osd.target
+     # systemctl restart stone-osd.target
 
    Note that the first time each OSD starts, it will do a format
    conversion to improve the accounting for "omap" data.  This may
    take a few minutes to as much as a few hours (for an HDD with lots
    of omap data).  You can disable this automatic conversion with::
 
-     # ceph config set osd bluestore_fsck_quick_fix_on_mount false
+     # stone config set osd bluestore_fsck_quick_fix_on_mount false
 
    You can monitor the progress of the OSD upgrades with the
-   ``ceph versions`` or ``ceph osd versions`` commands::
+   ``stone versions`` or ``stone osd versions`` commands::
 
-     # ceph osd versions
+     # stone osd versions
      {
-        "ceph version 13.2.5 (...) mimic (stable)": 12,
-        "ceph version 15.2.0 (...) octopus (stable)": 22,
+        "stone version 13.2.5 (...) mimic (stable)": 12,
+        "stone version 15.2.0 (...) octopus (stable)": 22,
      }
 
-#. Upgrade all CephFS MDS daemons.  For each CephFS file system,
+#. Upgrade all StoneFS MDS daemons.  For each StoneFS file system,
 
    #. Reduce the number of ranks to 1.  (Make note of the original
       number of MDS daemons first if you plan to restore it later.)::
 
-	# ceph status
-	# ceph fs set <fs_name> max_mds 1
+	# stone status
+	# stone fs set <fs_name> max_mds 1
 
    #. Wait for the cluster to deactivate any non-zero ranks by
       periodically checking the status::
 
-	# ceph status
+	# stone status
 
    #. Take all standby MDS daemons offline on the appropriate hosts with::
 
-	# systemctl stop ceph-mds@<daemon_name>
+	# systemctl stop stone-mds@<daemon_name>
 
    #. Confirm that only one MDS is online and is rank 0 for your FS::
 
-	# ceph status
+	# stone status
 
    #. Upgrade the last remaining MDS daemon by installing the new
       packages and restarting the daemon::
 
-        # systemctl restart ceph-mds.target
+        # systemctl restart stone-mds.target
 
    #. Restart all standby MDS daemons that were taken offline::
 
-	# systemctl start ceph-mds.target
+	# systemctl start stone-mds.target
 
    #. Restore the original value of ``max_mds`` for the volume::
 
-	# ceph fs set <fs_name> max_mds <original_max_mds>
+	# stone fs set <fs_name> max_mds <original_max_mds>
 
 #. Upgrade all radosgw daemons by upgrading packages and restarting
    daemons on all hosts::
 
-     # systemctl restart ceph-radosgw.target
+     # systemctl restart stone-radosgw.target
 
 #. Complete the upgrade by disallowing pre-Octopus OSDs and enabling
    all new Octopus-only functionality::
 
-     # ceph osd require-osd-release octopus
+     # stone osd require-osd-release octopus
 
 #. If you set ``noout`` at the beginning, be sure to clear it with::
 
-     # ceph osd unset noout
+     # stone osd unset noout
 
-#. Verify the cluster is healthy with ``ceph health``.
+#. Verify the cluster is healthy with ``stone health``.
 
-   If your CRUSH tunables are older than Hammer, Ceph will now issue a
+   If your CRUSH tunables are older than Hammer, Stone will now issue a
    health warning.  If you see a health alert to that effect, you can
    revert this change with::
 
-     ceph config set mon mon_crush_min_required_version firefly
+     stone config set mon mon_crush_min_required_version firefly
 
-   If Ceph does not complain, however, then we recommend you also
+   If Stone does not complain, however, then we recommend you also
    switch any existing CRUSH buckets to straw2, which was added back
    in the Hammer release.  If you have any 'straw' buckets, this will
    result in a modest amount of data movement, but generally nothing
    too severe.::
 
-     ceph osd getcrushmap -o backup-crushmap
-     ceph osd crush set-all-straw-buckets-to-straw2
+     stone osd getcrushmap -o backup-crushmap
+     stone osd crush set-all-straw-buckets-to-straw2
 
    If there are problems, you can easily revert with::
 
-     ceph osd setcrushmap -i backup-crushmap
+     stone osd setcrushmap -i backup-crushmap
 
    Moving to 'straw2' buckets will unlock a few recent features, like
    the `crush-compat` :ref:`balancer <balancer>` mode added back in Luminous.
@@ -1098,29 +1098,29 @@ Instructions
    upgraded to Nautlius, we recommened you enable the new :ref:`v2
    network protocol <msgr2>`, issue the following command::
 
-     ceph mon enable-msgr2
+     stone mon enable-msgr2
 
    This will instruct all monitors that bind to the old default port
    6789 for the legacy v1 protocol to also bind to the new 3300 v2
    protocol port.  To see if all monitors have been updated,::
 
-     ceph mon dump
+     stone mon dump
 
    and verify that each monitor has both a ``v2:`` and ``v1:`` address
    listed.
 
 #. Consider enabling the :ref:`telemetry module <telemetry>` to send
-   anonymized usage statistics and crash information to the Ceph
+   anonymized usage statistics and crash information to the Stone
    upstream developers.  To see what would be reported (without actually
    sending any information to anyone),::
 
-     ceph mgr module enable telemetry
-     ceph telemetry show
+     stone mgr module enable telemetry
+     stone telemetry show
 
    If you are comfortable with the data that is reported, you can opt-in to
    automatically report the high-level cluster metadata with::
 
-     ceph telemetry on
+     stone telemetry on
 
    For more information about the telemetry module, see :ref:`the
    documentation <telemetry>`.
@@ -1137,7 +1137,7 @@ Upgrade compatibility notes
 ---------------------------
 
 * Starting with Octopus, there is now a separate repository directory
-  for each version on `download.ceph.com` (e.g., ``rpm-15.2.0`` and
+  for each version on `download.stone.com` (e.g., ``rpm-15.2.0`` and
   ``debian-15.2.0``).  The traditional package directory that is named
   after the release (e.g., ``rpm-octopus`` and ``debian-octopus``) is
   now a symlink to the most recently bug fix version for that release.
@@ -1150,7 +1150,7 @@ Upgrade compatibility notes
   "objecter_inflight_op_bytes" parameters by the old
   "num_rados_handles" to get the same throttle behavior.
 
-* Ceph now packages python bindings for python3.6 instead of
+* Stone now packages python bindings for python3.6 instead of
   python3.4, because python3 in EL7/EL8 is now using python3.6
   as the native python3. see the `announcement`_
   for more details on the background of this change.
@@ -1186,7 +1186,7 @@ Upgrade compatibility notes
   Update your Zabbix template accordingly so that it accepts the
   new key being send to Zabbix.
 
-* zabbix plugin for ceph manager now includes osd and pool
+* zabbix plugin for stone manager now includes osd and pool
   discovery. Update of zabbix_template.xml is needed
   to receive per-pool (read/write throughput, diskspace usage)
   and per-osd (latency, status, pgs) statistics
@@ -1213,8 +1213,8 @@ Upgrade compatibility notes
   fsck will warn but not fail on legacy stores, and repair will
   convert to per-pool stats.
 
-* The disaster-recovery related 'ceph mon sync force' command has been
-  replaced with 'ceph daemon <...> sync_force'.
+* The disaster-recovery related 'stone mon sync force' command has been
+  replaced with 'stone daemon <...> sync_force'.
 
 * The ``osd_recovery_max_active`` option now has
   ``osd_recovery_max_active_hdd`` and ``osd_recovery_max_active_ssd``
@@ -1226,11 +1226,11 @@ Upgrade compatibility notes
   value similar to the new defaults (3 for HDDs and 10 for SSDs) and,
   if so, remove the option from their configuration entirely.
 
-* monitors now have a `ceph osd info` command that will provide information
+* monitors now have a `stone osd info` command that will provide information
   on all osds, or provided osds, thus simplifying the process of having to
   parse `osd dump` for the same information.
 
-* The structured output of ``ceph status`` or ``ceph -s`` is now more
+* The structured output of ``stone status`` or ``stone -s`` is now more
   concise, particularly the `mgrmap` and `monmap` sections, and the
   structure of the `osdmap` section has been cleaned up.
 
@@ -1243,21 +1243,21 @@ Upgrade compatibility notes
   value of zero disables the warning.  New configuration option
   ``mon_warn_on_slow_ping_time`` specified in milliseconds over-rides
   the computed value, causes a warning when OSD heartbeat pings take
-  longer than the specified amount.  New admin command ``ceph daemon
+  longer than the specified amount.  New admin command ``stone daemon
   mgr.# dump_osd_network [threshold]`` command will list all
   connections with a ping time longer than the specified threshold or
   value determined by the config options, for the average for any of
-  the 3 intervals.  New admin command ``ceph daemon osd.#
+  the 3 intervals.  New admin command ``stone daemon osd.#
   dump_osd_network [threshold]`` will do the same but only including
   heartbeats initiated by the specified OSD.
 
-* Inline data support for CephFS has been deprecated. When setting the flag,
+* Inline data support for StoneFS has been deprecated. When setting the flag,
   users will see a warning to that effect, and enabling it now requires the
   ``--yes-i-really-really-mean-it`` flag. If the MDS is started on a
   filesystem that has it enabled, a health warning is generated. Support for
   this feature will be removed in a future release.
 
-* ``ceph {set,unset} full`` is not supported anymore. We have been using
+* ``stone {set,unset} full`` is not supported anymore. We have been using
   ``full`` and ``nearfull`` flags in OSD map for tracking the fullness status
   of a cluster back since the Hammer release, if the OSD map is marked ``full``
   all write operations will be blocked until this flag is removed. In the
@@ -1271,7 +1271,7 @@ Upgrade compatibility notes
   place of their cluster-wide counterparts, as the monitor started removing
   these two flags from OSD map. So the clients of Infernalis and up can benefit
   from this change, as they won't be blocked by the full pools which they are
-  not writing to. In this release, ``ceph {set,unset} full`` is now considered
+  not writing to. In this release, ``stone {set,unset} full`` is now considered
   as an invalid command. And the clients will continue honoring both the
   cluster-wide and per-pool flags to be backward comaptible with pre-infernalis
   clusters.
@@ -1280,13 +1280,13 @@ Upgrade compatibility notes
 
   First, there is a new 'device' channel, enabled by default, that
   will report anonymized hard disk and SSD health metrics to
-  telemetry.ceph.com in order to build and improve device failure
+  telemetry.stone.com in order to build and improve device failure
   prediction algorithms.  If you are not comfortable sharing device
   metrics, you can disable that channel first before re-opting-in::
 
-    ceph config set mgr mgr/telemetry/channel_device false
+    stone config set mgr mgr/telemetry/channel_device false
 
-  Second, we now report more information about CephFS file systems,
+  Second, we now report more information about StoneFS file systems,
   including:
 
   - how many MDS daemons (in total and per file system)
@@ -1298,7 +1298,7 @@ Upgrade compatibility notes
 
   We have also added:
 
-  - which Ceph release the monitors are running
+  - which Stone release the monitors are running
   - whether msgr v1 or v2 addresses are used for the monitors
   - whether IPv4 or IPv6 addresses are used for the monitors
   - whether RADOS cache tiering is enabled (and which mode)
@@ -1314,15 +1314,15 @@ Upgrade compatibility notes
 
   If you had telemetry enabled, you will need to re-opt-in with::
 
-    ceph telemetry on
+    stone telemetry on
 
   You can view exactly what information will be reported first with::
 
-    $ ceph telemetry show        # see everything
-    $ ceph telemetry show basic  # basic cluster info (including all of the new info)
+    $ stone telemetry show        # see everything
+    $ stone telemetry show basic  # basic cluster info (including all of the new info)
 
 * Following invalid settings now are not tolerated anymore
-  for the command `ceph osd erasure-code-profile set xxx`.
+  for the command `stone osd erasure-code-profile set xxx`.
   * invalid `m` for "reed_sol_r6_op" erasure technique
   * invalid `m` and invalid `w` for "liber8tion" erasure technique
 
@@ -1332,40 +1332,40 @@ Upgrade compatibility notes
 * New OSD daemon command dump_scrub_reservations which reveals the
   scrub reservations that are held for local (primary) and remote (replica) PGs.
 
-* Previously, ``ceph tell mgr ...`` could be used to call commands
+* Previously, ``stone tell mgr ...`` could be used to call commands
   implemented by mgr modules.  This is no longer supported.  Since
   luminous, using ``tell`` has not been necessary: those same commands
-  are also accessible without the ``tell mgr`` portion (e.g., ``ceph
-  tell mgr influx foo`` is the same as ``ceph influx foo``.  ``ceph
+  are also accessible without the ``tell mgr`` portion (e.g., ``stone
+  tell mgr influx foo`` is the same as ``stone influx foo``.  ``stone
   tell mgr ...`` will now call admin commands--the same set of
-  commands accessible via ``ceph daemon ...`` when you are logged into
+  commands accessible via ``stone daemon ...`` when you are logged into
   the appropriate host.
 
-* The ``ceph tell`` and ``ceph daemon`` commands have been unified,
+* The ``stone tell`` and ``stone daemon`` commands have been unified,
   such that all such commands are accessible via either interface.
-  Note that ceph-mgr tell commands are accessible via either ``ceph
-  tell mgr ...`` or ``ceph tell mgr.<id> ...``, and it is only
+  Note that stone-mgr tell commands are accessible via either ``stone
+  tell mgr ...`` or ``stone tell mgr.<id> ...``, and it is only
   possible to send tell commands to the active daemon (the standbys do
   not accept incoming connections over the network).
 
-* Ceph will now issue a health warning if a RADOS pool as a ``pg_num``
+* Stone will now issue a health warning if a RADOS pool as a ``pg_num``
   value that is not a power of two.  This can be fixed by adjusting
   the pool to a nearby power of two::
 
-    ceph osd pool set <pool-name> pg_num <new-pg-num>
+    stone osd pool set <pool-name> pg_num <new-pg-num>
 
   Alternatively, the warning can be silenced with::
 
-    ceph config set global mon_warn_on_pool_pg_num_not_power_of_two false
+    stone config set global mon_warn_on_pool_pg_num_not_power_of_two false
 
-* The format of MDSs in ``ceph fs dump`` has changed.
+* The format of MDSs in ``stone fs dump`` has changed.
 
 * The ``mds_cache_size`` config option is completely removed. Since luminous,
   the ``mds_cache_memory_limit`` config option has been preferred to configure
   the MDS's cache limits.
 
 * The ``pg_autoscale_mode`` is now set to ``on`` by default for newly
-  created pools, which means that Ceph will automatically manage the
+  created pools, which means that Stone will automatically manage the
   number of PGs.  To change this behavior, or to learn more about PG
   autoscaling, see :ref:`pg-autoscaler`.  Note that existing pools in
   upgraded clusters will still be set to ``warn`` by default.
@@ -1377,7 +1377,7 @@ Upgrade compatibility notes
   these pools to autoscale ``warn`` mode to avoid data movement during
   the upgrade::
 
-    ceph osd pool set <pool-name> pg_autoscale_mode warn
+    stone osd pool set <pool-name> pg_autoscale_mode warn
 
 * The ``upmap_max_iterations`` config option of mgr/balancer has been
   renamed to ``upmap_max_optimizations`` to better match its behaviour.
@@ -1407,8 +1407,8 @@ Upgrade compatibility notes
 
 * In certain rare cases, OSDs would self-classify themselves as type
   'nvme' instead of 'hdd' or 'ssd'.  This appears to be limited to
-  cases where BlueStore was deployed with older versions of ceph-disk,
-  or manually without ceph-volume and LVM.  Going forward, the OSD
+  cases where BlueStore was deployed with older versions of stone-disk,
+  or manually without stone-volume and LVM.  Going forward, the OSD
   will limit itself to only 'hdd' and 'ssd' (or whatever device class
   the user manually specifies).
 
@@ -1423,7 +1423,7 @@ Upgrade compatibility notes
   upmap balancing has been removed. Instead use the mgr balancer config
   ``upmap_max_deviation`` which now is an integer number of PGs of 
   deviation from the target PGs per OSD.  This can be set with a command 
-  like ``ceph config set mgr mgr/balancer/upmap_max_deviation 2``. The 
+  like ``stone config set mgr mgr/balancer/upmap_max_deviation 2``. The 
   default ``upmap_max_deviation`` is 1.  There are situations where 
   crush rules would not allow a pool to ever have completely balanced 
   PGs. For example, if crush requires 1 replica on each of 3 racks, but
@@ -1458,138 +1458,138 @@ Upgrade compatibility notes
 
 Changelog
 ---------
-* .gitignore: add more stuff (`pr#29568 <https://github.com/ceph/ceph/pull/29568>`_, Volker Theile)
-* async/dpdk: fix compile errors from ceph::mutex update (`pr#30066 <https://github.com/ceph/ceph/pull/30066>`_, yehu)
-* bluestore,build/ops,common,rgw: Enable _GLIBCXX_ASSERTIONS and fix unittest problems (`pr#32387 <https://github.com/ceph/ceph/pull/32387>`_, Samuel Just)
-* bluestore,cephfs,common,core,mgr,mon,rbd,rgw: src/: s/Mutex/ceph::mutex/ (`pr#29113 <https://github.com/ceph/ceph/pull/29113>`_, Kefu Chai)
-* bluestore,common,core,mgr,rbd: common/RefCountedObj: cleanup con/des (`pr#29672 <https://github.com/ceph/ceph/pull/29672>`_, Patrick Donnelly)
-* bluestore,common,core,rgw: common, \\*: kill the bl::last_p member. Use iterator instead (`pr#32831 <https://github.com/ceph/ceph/pull/32831>`_, Radoslaw Zarzynski)
-* bluestore,common: os/bluestore: s/align_down/p2align/ (`pr#29379 <https://github.com/ceph/ceph/pull/29379>`_, Kefu Chai)
-* bluestore,core: common/options: Set bluestore min_alloc size to 4K (`pr#30698 <https://github.com/ceph/ceph/pull/30698>`_, Mark Nelson)
-* bluestore,core: common/options: Set concurrent bluestore rocksdb compactions to 2 (`pr#29027 <https://github.com/ceph/ceph/pull/29027>`_, Mark Nelson)
-* bluestore,core: mon,osd: only use new per-pool usage stats once \\*all\\* osds are reporting (`pr#28978 <https://github.com/ceph/ceph/pull/28978>`_, Sage Weil)
-* bluestore,core: os/bluestore,mon: segregate omap keys by pool; report via df (`pr#29292 <https://github.com/ceph/ceph/pull/29292>`_, Sage Weil)
-* bluestore,core: os/bluestore/BlueFS: explicit check for too-granular allocations (`pr#33027 <https://github.com/ceph/ceph/pull/33027>`_, Sage Weil)
-* bluestore,core: os/bluestore/bluefs_types: consolidate contiguous extents (`pr#28821 <https://github.com/ceph/ceph/pull/28821>`_, Sage Weil)
-* bluestore,core: os/bluestore/KernelDevice: fix RW_IO_MAX constant (`pr#29577 <https://github.com/ceph/ceph/pull/29577>`_, Sage Weil)
-* bluestore,core: os/bluestore: do not set osd_memory_target default from cgroup limit (`pr#29581 <https://github.com/ceph/ceph/pull/29581>`_, Sage Weil)
-* bluestore,core: os/bluestore: drop (semi-broken) nvme automatic class (`pr#31796 <https://github.com/ceph/ceph/pull/31796>`_, Sage Weil)
-* bluestore,core: os/bluestore: expand lttng tracepoints, improve fio_ceph_objectstore backend (`pr#29674 <https://github.com/ceph/ceph/pull/29674>`_, Samuel Just)
-* bluestore,core: os/bluestore: Keep separate onode cache pinned list (`pr#30964 <https://github.com/ceph/ceph/pull/30964>`_, Mark Nelson)
-* bluestore,core: os/bluestore: prefix omap of temp objects by real pool (`pr#29717 <https://github.com/ceph/ceph/pull/29717>`_, xie xingguo)
-* bluestore,core: os/bluestore: Unify on preadv for io_uring and future refactor (`pr#28025 <https://github.com/ceph/ceph/pull/28025>`_, Mark Nelson)
-* bluestore,core: os/bluestore: v.2 framework for more intelligent DB space usage (`pr#29687 <https://github.com/ceph/ceph/pull/29687>`_, Igor Fedotov)
-* bluestore,mgr,rgw: rgw,bluestore: fixes to address failures from check-generated.sh (`pr#29862 <https://github.com/ceph/ceph/pull/29862>`_, Kefu Chai)
-* bluestore,mon: os/bluestore: create the tail when first set FLAG_OMAP (`pr#27627 <https://github.com/ceph/ceph/pull/27627>`_, Tao Ning)
-* bluestore,tools: os/bluestore/bluestore-tool: minor fixes around migrate (`pr#28651 <https://github.com/ceph/ceph/pull/28651>`_, Igor Fedotov)
-* bluestore,tools: tools/ceph-objectstore-tool: implement onode metadata dump (`pr#27869 <https://github.com/ceph/ceph/pull/27869>`_, Igor Fedotov)
-* bluestore,tools: tools/ceph-objectstore-tool: introduce list-slow-omap command (`pr#27985 <https://github.com/ceph/ceph/pull/27985>`_, Igor Fedotov)
-* bluestore: BlueFS: prevent BlueFS::dirty_files from being leaked when syncing metadata (`pr#30631 <https://github.com/ceph/ceph/pull/30631>`_, Xuehan Xu)
-* bluestore: bluestore/allocator: Ageing test for bluestore allocators (`pr#22574 <https://github.com/ceph/ceph/pull/22574>`_, Adam Kupczyk)
-* bluestore: bluestore/bdev: initialize size when creating object (`pr#29968 <https://github.com/ceph/ceph/pull/29968>`_, Willem Jan Withagen)
-* bluestore: bluestore/bluefs: make accounting resiliant to unlock() (`pr#32584 <https://github.com/ceph/ceph/pull/32584>`_, Adam Kupczyk)
-* bluestore: common/options.cc: change default value of bluestore_fsck_on_mount_deep to false (`pr#29408 <https://github.com/ceph/ceph/pull/29408>`_, Neha Ojha)
-* bluestore: common/options: bluestore 64k min_alloc_size for HDD (`pr#32809 <https://github.com/ceph/ceph/pull/32809>`_, Sage Weil)
-* bluestore: NVMEDevice: Remove the unnecessary aio_wait in sync read (`pr#33597 <https://github.com/ceph/ceph/pull/33597>`_, Ziye Yang)
-* bluestore: NVMEDevice: Split the read I/O if the io size is large (`pr#32647 <https://github.com/ceph/ceph/pull/32647>`_, Ziye Yang)
-* bluestore: os/bluestore/Blue(FS|Store): uint64_t alloc_size (`pr#32484 <https://github.com/ceph/ceph/pull/32484>`_, Bernd Zeimetz)
-* bluestore: os/bluestore/BlueFS: clear newly allocated space for WAL logs (`pr#30549 <https://github.com/ceph/ceph/pull/30549>`_, Adam Kupczyk)
-* bluestore: os/bluestore/BlueFS: fixed printing stats (`pr#33235 <https://github.com/ceph/ceph/pull/33235>`_, Adam Kupczyk)
-* bluestore: os/bluestore/BlueFS: less verbose about alloc adjustments (`pr#33512 <https://github.com/ceph/ceph/pull/33512>`_, Sage Weil)
-* bluestore: os/bluestore/BlueFS: Move bluefs alloc size initialization log message to log level 1 (`pr#29822 <https://github.com/ceph/ceph/pull/29822>`_, Vikhyat Umrao)
-* bluestore: os/bluestore/BlueFS: replace flush_log with sync_metadata (`pr#32563 <https://github.com/ceph/ceph/pull/32563>`_, Jianpeng Ma)
-* bluestore: os/bluestore/BlueFS: use 64K alloc_size on the shared device (`pr#29537 <https://github.com/ceph/ceph/pull/29537>`_, Sage Weil, Neha Ojha)
-* bluestore: os/bluestore/BlueStore.cc: set priorities for compression stats (`pr#31959 <https://github.com/ceph/ceph/pull/31959>`_, Neha Ojha)
-* bluestore: os/bluestore/spdk: Fix the overflow error of parsing spdk coremask (`pr#32440 <https://github.com/ceph/ceph/pull/32440>`_, Hu Ye, Chunsong Feng, luo rixin)
-* bluestore: os/bluestore: Actually wait until completion in write_sync (`pr#26909 <https://github.com/ceph/ceph/pull/26909>`_, Vitaliy Filippov)
-* bluestore: os/bluestore: add bluestore_bluefs_max_free; smooth space balancing a bit (`pr#30231 <https://github.com/ceph/ceph/pull/30231>`_, xie xingguo)
-* bluestore: os/bluestore: add slow op detection for collection_listing (`issue#40741 <http://tracker.ceph.com/issues/40741>`_, `pr#29085 <https://github.com/ceph/ceph/pull/29085>`_, Igor Fedotov)
-* bluestore: os/bluestore: allocate Task on stack (`pr#33358 <https://github.com/ceph/ceph/pull/33358>`_, Jun Su)
-* bluestore: os/bluestore: apply garbage collection against excessive blob count growth (`pr#28229 <https://github.com/ceph/ceph/pull/28229>`_, Igor Fedotov)
-* bluestore: os/bluestore: AVL-tree & extent - based space allocator (`pr#30897 <https://github.com/ceph/ceph/pull/30897>`_, Adam Kupczyk, xie xingguo, Kefu Chai)
-* bluestore: os/bluestore: avoid length overflow in extents returned by Stupid (`issue#40703 <http://tracker.ceph.com/issues/40703>`_, `pr#28945 <https://github.com/ceph/ceph/pull/28945>`_, Igor Fedotov)
-* bluestore: os/bluestore: avoid race between split_cache and get/put pin/unpin (`pr#32665 <https://github.com/ceph/ceph/pull/32665>`_, Sage Weil)
-* bluestore: os/bluestore: avoid unnecessary notify (`pr#29345 <https://github.com/ceph/ceph/pull/29345>`_, Jianpeng Ma)
-* bluestore: os/bluestore: be more verbose doing bluefs log replay (`pr#27615 <https://github.com/ceph/ceph/pull/27615>`_, Igor Fedotov)
-* bluestore: os/bluestore: bluefs_preextend_wal_files=true (`pr#28322 <https://github.com/ceph/ceph/pull/28322>`_, Sage Weil)
-* bluestore: os/bluestore: call fault_range prior to looking for blob to reuse (`pr#27444 <https://github.com/ceph/ceph/pull/27444>`_, Igor Fedotov)
-* bluestore: os/bluestore: check bluefs allocations on log replay (`pr#31513 <https://github.com/ceph/ceph/pull/31513>`_, Igor Fedotov)
-* bluestore: os/bluestore: check return value of func _open_db_and_around (`pr#27477 <https://github.com/ceph/ceph/pull/27477>`_, Jianpeng Ma)
-* bluestore: os/bluestore: cleanup around allocator calls (`pr#29068 <https://github.com/ceph/ceph/pull/29068>`_, Igor Fedotov)
-* bluestore: os/bluestore: cleanups (`pr#30737 <https://github.com/ceph/ceph/pull/30737>`_, Kefu Chai)
-* bluestore: os/bluestore: consolidate extents from the same device only (`pr#31621 <https://github.com/ceph/ceph/pull/31621>`_, Igor Fedotov)
-* bluestore: os/bluestore: correctly measure deferred writes into new blobs (`issue#38816 <http://tracker.ceph.com/issues/38816>`_, `pr#27789 <https://github.com/ceph/ceph/pull/27789>`_, Sage Weil)
-* bluestore: os/bluestore: deferred IO notify and locking optimization (`pr#29522 <https://github.com/ceph/ceph/pull/29522>`_, Jianpeng Ma)
-* bluestore: os/bluestore: do not check osd_max_object_size in _open_path() (`pr#26176 <https://github.com/ceph/ceph/pull/26176>`_, Igor Fedotov)
-* bluestore: os/bluestore: do not mark per_pool_omap updated unless we fixed it (`pr#31167 <https://github.com/ceph/ceph/pull/31167>`_, Sage Weil)
-* bluestore: os/bluestore: dont round_up_to in apply_for_bitset_range (`pr#31903 <https://github.com/ceph/ceph/pull/31903>`_, Jianpeng Ma)
-* bluestore: os/bluestore: dump onode before no available blob id abort (`pr#27911 <https://github.com/ceph/ceph/pull/27911>`_, Igor Fedotov)
-* bluestore: os/bluestore: dump onode that has too many spanning blobs (`pr#28010 <https://github.com/ceph/ceph/pull/28010>`_, Igor Fedotov)
-* bluestore: os/bluestore: fix >2GB writes (`pr#27871 <https://github.com/ceph/ceph/pull/27871>`_, Sage Weil, kungf)
-* bluestore: os/bluestore: fix bitmap allocator issues (`pr#26939 <https://github.com/ceph/ceph/pull/26939>`_, Igor Fedotov)
-* bluestore: os/bluestore: fix duplicate allocations in bmap allocator (`issue#40080 <http://tracker.ceph.com/issues/40080>`_, `pr#28496 <https://github.com/ceph/ceph/pull/28496>`_, Igor Fedotov)
-* bluestore: os/bluestore: fix duplicative and misleading debug in KernelDevice::open() (`pr#28630 <https://github.com/ceph/ceph/pull/28630>`_, Radoslaw Zarzynski)
-* bluestore: os/bluestore: fix for FreeBSD iocb structure (`pr#27458 <https://github.com/ceph/ceph/pull/27458>`_, Willem Jan Withagen)
-* bluestore: os/bluestore: fix invalid stray shared blob detection in fsck (`pr#30616 <https://github.com/ceph/ceph/pull/30616>`_, Igor Fedotov)
-* bluestore: os/bluestore: fix missing discard in BlueStore::_kv_sync_thread (`pr#27843 <https://github.com/ceph/ceph/pull/27843>`_, Junhui Tang)
-* bluestore: os/bluestore: fix origin reference in logging slow ops (`pr#27951 <https://github.com/ceph/ceph/pull/27951>`_, Igor Fedotov)
-* bluestore: os/bluestore: fix out-of-bound access in bmap allocator (`pr#27691 <https://github.com/ceph/ceph/pull/27691>`_, Igor Fedotov)
-* bluestore: os/bluestore: fix per-pool omap repair (`pr#32925 <https://github.com/ceph/ceph/pull/32925>`_, Igor Fedotov)
-* bluestore: os/bluestore: fix space balancing overflow (`pr#30255 <https://github.com/ceph/ceph/pull/30255>`_, xie xingguo)
-* bluestore: os/bluestore: fix wakeup bug (`pr#31931 <https://github.com/ceph/ceph/pull/31931>`_, Jianpeng Ma)
-* bluestore: os/bluestore: introduce legacy statfs and dev size mismatch alerts (`pr#27519 <https://github.com/ceph/ceph/pull/27519>`_, Sage Weil, Igor Fedotov)
-* bluestore: os/bluestore: introduce new io_uring IO engine (`pr#27392 <https://github.com/ceph/ceph/pull/27392>`_, Roman Penyaev)
-* bluestore: os/bluestore: its better to erase spanning blob once (`pr#29238 <https://github.com/ceph/ceph/pull/29238>`_, Xiangyang Yu)
-* bluestore: os/bluestore: load OSD all compression settings unconditionally (`issue#40480 <http://tracker.ceph.com/issues/40480>`_, `pr#28688 <https://github.com/ceph/ceph/pull/28688>`_, Igor Fedotov)
-* bluestore: os/bluestore: log allocation stats on a daily basis (`pr#33565 <https://github.com/ceph/ceph/pull/33565>`_, Igor Fedotov)
-* bluestore: os/bluestore: memorize layout of BlueFS on management (`pr#30593 <https://github.com/ceph/ceph/pull/30593>`_, Radoslaw Zarzynski)
-* bluestore: os/bluestore: Merge deferred_finisher and finisher (`pr#29623 <https://github.com/ceph/ceph/pull/29623>`_, Jianpeng Ma)
-* bluestore: os/bluestore: minor improvements/cleanup around allocator (`pr#29738 <https://github.com/ceph/ceph/pull/29738>`_, Igor Fedotov)
-* bluestore: os/bluestore: more aggressive deferred submit when onode trim skipping (`issue#21531 <http://tracker.ceph.com/issues/21531>`_, `pr#25697 <https://github.com/ceph/ceph/pull/25697>`_, Zengran Zhang)
-* bluestore: os/bluestore: more smart allocator dump when lacking space for bluefs (`issue#40623 <http://tracker.ceph.com/issues/40623>`_, `pr#28845 <https://github.com/ceph/ceph/pull/28845>`_, Igor Fedotov)
-* bluestore: os/bluestore: new bluestore_debug_enforce_settings option (`pr#27132 <https://github.com/ceph/ceph/pull/27132>`_, Igor Fedotov)
-* bluestore: os/bluestore: no need protected by OpSequencer::qlock (`pr#29488 <https://github.com/ceph/ceph/pull/29488>`_, Jianpeng Ma)
-* bluestore: os/bluestore: no need to add tail length (revert PR#29185) (`pr#29465 <https://github.com/ceph/ceph/pull/29465>`_, Xiangyang Yu)
-* bluestore: os/bluestore: print correctly info (`pr#29939 <https://github.com/ceph/ceph/pull/29939>`_, Jianpeng Ma)
-* bluestore: os/bluestore: print error if spdk_nvme_ns_cmd_writev() fails (`pr#31932 <https://github.com/ceph/ceph/pull/31932>`_, NancySu05)
-* bluestore: os/bluestore: proper locking for BlueFS prefetching (`pr#29012 <https://github.com/ceph/ceph/pull/29012>`_, Igor Fedotov)
-* bluestore: os/bluestore: reduce wakeups (`pr#29130 <https://github.com/ceph/ceph/pull/29130>`_, Jianpeng Ma)
-* bluestore: os/bluestore: Refactor Bluestore Caches (`pr#28597 <https://github.com/ceph/ceph/pull/28597>`_, Mark Nelson)
-* bluestore: os/bluestore: remove unused arg to _get_deferred_op() (`issue#40918 <http://tracker.ceph.com/issues/40918>`_, `pr#29320 <https://github.com/ceph/ceph/pull/29320>`_, Sage Weil)
-* bluestore: os/bluestore: remove unused _tune_cache_size() method declaration (`pr#29393 <https://github.com/ceph/ceph/pull/29393>`_, Igor Fedotov)
-* bluestore: os/bluestore: restore and fix bug with onode cache pinning (`pr#31778 <https://github.com/ceph/ceph/pull/31778>`_, Josh Durgin)
-* bluestore: os/bluestore: revert cache pinned list (`pr#31180 <https://github.com/ceph/ceph/pull/31180>`_, Sage Weil)
-* bluestore: os/bluestore: set STATE_KV_SUBMITTED properly (`pr#30753 <https://github.com/ceph/ceph/pull/30753>`_, Igor Fedotov)
-* bluestore: os/bluestore: show device name in osd metadata output (`pr#28107 <https://github.com/ceph/ceph/pull/28107>`_, Igor Fedotov)
-* bluestore: os/bluestore: silence StupidAllocator reorder warning (`pr#29866 <https://github.com/ceph/ceph/pull/29866>`_, Jos Collin)
-* bluestore: os/bluestore: simplify multithreaded shallow fsck (`pr#31473 <https://github.com/ceph/ceph/pull/31473>`_, Igor Fedotov)
-* bluestore: os/bluestore: simplify per-pool-stat config options (`pr#30350 <https://github.com/ceph/ceph/pull/30350>`_, Sage Weil, Igor Fedotov)
-* bluestore: os/bluestore: support RocksDB prefetch in buffered read mode (`issue#36482 <http://tracker.ceph.com/issues/36482>`_, `pr#27782 <https://github.com/ceph/ceph/pull/27782>`_, Igor Fedotov)
-* bluestore: os/bluestore: tiny tracepoints improvement (`pr#31669 <https://github.com/ceph/ceph/pull/31669>`_, Adam Kupczyk)
-* bluestore: os/bluestore: upgrade legacy omap to per-pool format automatically (`pr#32758 <https://github.com/ceph/ceph/pull/32758>`_, Igor Fedotov)
-* bluestore: os/bluestore: verify disk layout of BlueFS (`issue#25098 <http://tracker.ceph.com/issues/25098>`_, `pr#30109 <https://github.com/ceph/ceph/pull/30109>`_, Radoslaw Zarzynski)
-* bluestore: os/bluestore:fix two calculation bugs (`pr#29185 <https://github.com/ceph/ceph/pull/29185>`_, Xiangyang Yu)
-* bluestore: os/ceph-bluestore-tool: bluefs-bdev-expand asserts if no WAL (`pr#27445 <https://github.com/ceph/ceph/pull/27445>`_, Igor Fedotov)
-* bluestore: os/objectstore: add new op OP_CREATE for create a new object (`pr#26251 <https://github.com/ceph/ceph/pull/26251>`_, Jianpeng Ma)
-* bluestore: Revert os/bluestore: add kv_drain_preceding_waiters indicate drain_preceding. (`pr#31503 <https://github.com/ceph/ceph/pull/31503>`_, Sage Weil)
-* bluestore: test/fio: handle nullptr when parsing throttle params (`pr#31681 <https://github.com/ceph/ceph/pull/31681>`_, Igor Fedotov)
-* bluestore: [bluestore][tools] Inspect allocations in bluestore (`pr#29425 <https://github.com/ceph/ceph/pull/29425>`_, Adam Kupczyk)
-* build(deps): bump lodash from 4.17.11 to 4.17.13 in /src/pybind/mgr/dashboard/frontend (`pr#29192 <https://github.com/ceph/ceph/pull/29192>`_, dependabot[bot])
-* build/ops,cephfs,common,core,rbd: Fix big-endian handling (`pr#30079 <https://github.com/ceph/ceph/pull/30079>`_, Ulrich Weigand)
-* build/ops,cephfs: mgr/ssh: make mds add work (`pr#31059 <https://github.com/ceph/ceph/pull/31059>`_, Sage Weil)
-* build/ops,common,core: common, include: bump the version of ceph::buffers C++ API (`pr#33373 <https://github.com/ceph/ceph/pull/33373>`_, Radoslaw Zarzynski)
-* build/ops,common,mgr: python-common:  Python common package (`pr#28915 <https://github.com/ceph/ceph/pull/28915>`_, Kefu Chai, Sebastian Wagner)
-* build/ops,common,rgw: rgw, common, build: drop NSS support (`pr#27834 <https://github.com/ceph/ceph/pull/27834>`_, Radoslaw Zarzynski)
-* build/ops,core,rbd: Windows support [part 1] (`pr#31981 <https://github.com/ceph/ceph/pull/31981>`_, Lucian Petrut, Alin Gabriel Serdean)
-* build/ops,core: ceph-crash: use client.crash[.host] to post, and provsion keys via mgr/ssh + ceph-daemon (`pr#30734 <https://github.com/ceph/ceph/pull/30734>`_, Sage Weil)
-* build/ops,core: debian: fix ceph-mgr-modules-core files (`pr#33468 <https://github.com/ceph/ceph/pull/33468>`_, Sage Weil)
-* build/ops,core: os/bluestore: fix pmem osd build problem (`pr#28761 <https://github.com/ceph/ceph/pull/28761>`_, Peterson, Scott, Li, Xiaoyan)
-* build/ops,core: qa: stop testing on 16.04 xenial (`pr#28943 <https://github.com/ceph/ceph/pull/28943>`_, Sage Weil)
-* build/ops,mgr: mgr/diskprediction_local: Replaced old models and updated predictor (`pr#29437 <https://github.com/ceph/ceph/pull/29437>`_, Karanraj Chauhan)
-* build/ops,mgr: systemd: ceph-mgr: set MemoryDenyWriteExecute to false (`issue#39628 <http://tracker.ceph.com/issues/39628>`_, `pr#28023 <https://github.com/ceph/ceph/pull/28023>`_, Ricardo Dias)
-* build/ops,pybind: cmake, pybind: fix build on armhf (`pr#28843 <https://github.com/ceph/ceph/pull/28843>`_, Kefu Chai)
-* build/ops,rbd: rpm,deb: fix python dateutil module dependency (`pr#33624 <https://github.com/ceph/ceph/pull/33624>`_, Mykola Golub)
-* build/ops,rgw: build/rgw: unittest_rgw_dmclock_scheduler does not need Boost_LIBRARIES (`pr#27466 <https://github.com/ceph/ceph/pull/27466>`_, Willem Jan Withagen)
+* .gitignore: add more stuff (`pr#29568 <https://github.com/stone/stone/pull/29568>`_, Volker Theile)
+* async/dpdk: fix compile errors from stone::mutex update (`pr#30066 <https://github.com/stone/stone/pull/30066>`_, yehu)
+* bluestore,build/ops,common,rgw: Enable _GLIBCXX_ASSERTIONS and fix unittest problems (`pr#32387 <https://github.com/stone/stone/pull/32387>`_, Samuel Just)
+* bluestore,stonefs,common,core,mgr,mon,rbd,rgw: src/: s/Mutex/stone::mutex/ (`pr#29113 <https://github.com/stone/stone/pull/29113>`_, Kefu Chai)
+* bluestore,common,core,mgr,rbd: common/RefCountedObj: cleanup con/des (`pr#29672 <https://github.com/stone/stone/pull/29672>`_, Patrick Donnelly)
+* bluestore,common,core,rgw: common, \\*: kill the bl::last_p member. Use iterator instead (`pr#32831 <https://github.com/stone/stone/pull/32831>`_, Radoslaw Zarzynski)
+* bluestore,common: os/bluestore: s/align_down/p2align/ (`pr#29379 <https://github.com/stone/stone/pull/29379>`_, Kefu Chai)
+* bluestore,core: common/options: Set bluestore min_alloc size to 4K (`pr#30698 <https://github.com/stone/stone/pull/30698>`_, Mark Nelson)
+* bluestore,core: common/options: Set concurrent bluestore rocksdb compactions to 2 (`pr#29027 <https://github.com/stone/stone/pull/29027>`_, Mark Nelson)
+* bluestore,core: mon,osd: only use new per-pool usage stats once \\*all\\* osds are reporting (`pr#28978 <https://github.com/stone/stone/pull/28978>`_, Sage Weil)
+* bluestore,core: os/bluestore,mon: segregate omap keys by pool; report via df (`pr#29292 <https://github.com/stone/stone/pull/29292>`_, Sage Weil)
+* bluestore,core: os/bluestore/BlueFS: explicit check for too-granular allocations (`pr#33027 <https://github.com/stone/stone/pull/33027>`_, Sage Weil)
+* bluestore,core: os/bluestore/bluefs_types: consolidate contiguous extents (`pr#28821 <https://github.com/stone/stone/pull/28821>`_, Sage Weil)
+* bluestore,core: os/bluestore/KernelDevice: fix RW_IO_MAX constant (`pr#29577 <https://github.com/stone/stone/pull/29577>`_, Sage Weil)
+* bluestore,core: os/bluestore: do not set osd_memory_target default from cgroup limit (`pr#29581 <https://github.com/stone/stone/pull/29581>`_, Sage Weil)
+* bluestore,core: os/bluestore: drop (semi-broken) nvme automatic class (`pr#31796 <https://github.com/stone/stone/pull/31796>`_, Sage Weil)
+* bluestore,core: os/bluestore: expand lttng tracepoints, improve fio_stone_objectstore backend (`pr#29674 <https://github.com/stone/stone/pull/29674>`_, Samuel Just)
+* bluestore,core: os/bluestore: Keep separate onode cache pinned list (`pr#30964 <https://github.com/stone/stone/pull/30964>`_, Mark Nelson)
+* bluestore,core: os/bluestore: prefix omap of temp objects by real pool (`pr#29717 <https://github.com/stone/stone/pull/29717>`_, xie xingguo)
+* bluestore,core: os/bluestore: Unify on preadv for io_uring and future refactor (`pr#28025 <https://github.com/stone/stone/pull/28025>`_, Mark Nelson)
+* bluestore,core: os/bluestore: v.2 framework for more intelligent DB space usage (`pr#29687 <https://github.com/stone/stone/pull/29687>`_, Igor Fedotov)
+* bluestore,mgr,rgw: rgw,bluestore: fixes to address failures from check-generated.sh (`pr#29862 <https://github.com/stone/stone/pull/29862>`_, Kefu Chai)
+* bluestore,mon: os/bluestore: create the tail when first set FLAG_OMAP (`pr#27627 <https://github.com/stone/stone/pull/27627>`_, Tao Ning)
+* bluestore,tools: os/bluestore/bluestore-tool: minor fixes around migrate (`pr#28651 <https://github.com/stone/stone/pull/28651>`_, Igor Fedotov)
+* bluestore,tools: tools/stone-objectstore-tool: implement onode metadata dump (`pr#27869 <https://github.com/stone/stone/pull/27869>`_, Igor Fedotov)
+* bluestore,tools: tools/stone-objectstore-tool: introduce list-slow-omap command (`pr#27985 <https://github.com/stone/stone/pull/27985>`_, Igor Fedotov)
+* bluestore: BlueFS: prevent BlueFS::dirty_files from being leaked when syncing metadata (`pr#30631 <https://github.com/stone/stone/pull/30631>`_, Xuehan Xu)
+* bluestore: bluestore/allocator: Ageing test for bluestore allocators (`pr#22574 <https://github.com/stone/stone/pull/22574>`_, Adam Kupczyk)
+* bluestore: bluestore/bdev: initialize size when creating object (`pr#29968 <https://github.com/stone/stone/pull/29968>`_, Willem Jan Withagen)
+* bluestore: bluestore/bluefs: make accounting resiliant to unlock() (`pr#32584 <https://github.com/stone/stone/pull/32584>`_, Adam Kupczyk)
+* bluestore: common/options.cc: change default value of bluestore_fsck_on_mount_deep to false (`pr#29408 <https://github.com/stone/stone/pull/29408>`_, Neha Ojha)
+* bluestore: common/options: bluestore 64k min_alloc_size for HDD (`pr#32809 <https://github.com/stone/stone/pull/32809>`_, Sage Weil)
+* bluestore: NVMEDevice: Remove the unnecessary aio_wait in sync read (`pr#33597 <https://github.com/stone/stone/pull/33597>`_, Ziye Yang)
+* bluestore: NVMEDevice: Split the read I/O if the io size is large (`pr#32647 <https://github.com/stone/stone/pull/32647>`_, Ziye Yang)
+* bluestore: os/bluestore/Blue(FS|Store): uint64_t alloc_size (`pr#32484 <https://github.com/stone/stone/pull/32484>`_, Bernd Zeimetz)
+* bluestore: os/bluestore/BlueFS: clear newly allocated space for WAL logs (`pr#30549 <https://github.com/stone/stone/pull/30549>`_, Adam Kupczyk)
+* bluestore: os/bluestore/BlueFS: fixed printing stats (`pr#33235 <https://github.com/stone/stone/pull/33235>`_, Adam Kupczyk)
+* bluestore: os/bluestore/BlueFS: less verbose about alloc adjustments (`pr#33512 <https://github.com/stone/stone/pull/33512>`_, Sage Weil)
+* bluestore: os/bluestore/BlueFS: Move bluefs alloc size initialization log message to log level 1 (`pr#29822 <https://github.com/stone/stone/pull/29822>`_, Vikhyat Umrao)
+* bluestore: os/bluestore/BlueFS: replace flush_log with sync_metadata (`pr#32563 <https://github.com/stone/stone/pull/32563>`_, Jianpeng Ma)
+* bluestore: os/bluestore/BlueFS: use 64K alloc_size on the shared device (`pr#29537 <https://github.com/stone/stone/pull/29537>`_, Sage Weil, Neha Ojha)
+* bluestore: os/bluestore/BlueStore.cc: set priorities for compression stats (`pr#31959 <https://github.com/stone/stone/pull/31959>`_, Neha Ojha)
+* bluestore: os/bluestore/spdk: Fix the overflow error of parsing spdk coremask (`pr#32440 <https://github.com/stone/stone/pull/32440>`_, Hu Ye, Chunsong Feng, luo rixin)
+* bluestore: os/bluestore: Actually wait until completion in write_sync (`pr#26909 <https://github.com/stone/stone/pull/26909>`_, Vitaliy Filippov)
+* bluestore: os/bluestore: add bluestore_bluefs_max_free; smooth space balancing a bit (`pr#30231 <https://github.com/stone/stone/pull/30231>`_, xie xingguo)
+* bluestore: os/bluestore: add slow op detection for collection_listing (`issue#40741 <http://tracker.stone.com/issues/40741>`_, `pr#29085 <https://github.com/stone/stone/pull/29085>`_, Igor Fedotov)
+* bluestore: os/bluestore: allocate Task on stack (`pr#33358 <https://github.com/stone/stone/pull/33358>`_, Jun Su)
+* bluestore: os/bluestore: apply garbage collection against excessive blob count growth (`pr#28229 <https://github.com/stone/stone/pull/28229>`_, Igor Fedotov)
+* bluestore: os/bluestore: AVL-tree & extent - based space allocator (`pr#30897 <https://github.com/stone/stone/pull/30897>`_, Adam Kupczyk, xie xingguo, Kefu Chai)
+* bluestore: os/bluestore: avoid length overflow in extents returned by Stupid (`issue#40703 <http://tracker.stone.com/issues/40703>`_, `pr#28945 <https://github.com/stone/stone/pull/28945>`_, Igor Fedotov)
+* bluestore: os/bluestore: avoid race between split_cache and get/put pin/unpin (`pr#32665 <https://github.com/stone/stone/pull/32665>`_, Sage Weil)
+* bluestore: os/bluestore: avoid unnecessary notify (`pr#29345 <https://github.com/stone/stone/pull/29345>`_, Jianpeng Ma)
+* bluestore: os/bluestore: be more verbose doing bluefs log replay (`pr#27615 <https://github.com/stone/stone/pull/27615>`_, Igor Fedotov)
+* bluestore: os/bluestore: bluefs_preextend_wal_files=true (`pr#28322 <https://github.com/stone/stone/pull/28322>`_, Sage Weil)
+* bluestore: os/bluestore: call fault_range prior to looking for blob to reuse (`pr#27444 <https://github.com/stone/stone/pull/27444>`_, Igor Fedotov)
+* bluestore: os/bluestore: check bluefs allocations on log replay (`pr#31513 <https://github.com/stone/stone/pull/31513>`_, Igor Fedotov)
+* bluestore: os/bluestore: check return value of func _open_db_and_around (`pr#27477 <https://github.com/stone/stone/pull/27477>`_, Jianpeng Ma)
+* bluestore: os/bluestore: cleanup around allocator calls (`pr#29068 <https://github.com/stone/stone/pull/29068>`_, Igor Fedotov)
+* bluestore: os/bluestore: cleanups (`pr#30737 <https://github.com/stone/stone/pull/30737>`_, Kefu Chai)
+* bluestore: os/bluestore: consolidate extents from the same device only (`pr#31621 <https://github.com/stone/stone/pull/31621>`_, Igor Fedotov)
+* bluestore: os/bluestore: correctly measure deferred writes into new blobs (`issue#38816 <http://tracker.stone.com/issues/38816>`_, `pr#27789 <https://github.com/stone/stone/pull/27789>`_, Sage Weil)
+* bluestore: os/bluestore: deferred IO notify and locking optimization (`pr#29522 <https://github.com/stone/stone/pull/29522>`_, Jianpeng Ma)
+* bluestore: os/bluestore: do not check osd_max_object_size in _open_path() (`pr#26176 <https://github.com/stone/stone/pull/26176>`_, Igor Fedotov)
+* bluestore: os/bluestore: do not mark per_pool_omap updated unless we fixed it (`pr#31167 <https://github.com/stone/stone/pull/31167>`_, Sage Weil)
+* bluestore: os/bluestore: dont round_up_to in apply_for_bitset_range (`pr#31903 <https://github.com/stone/stone/pull/31903>`_, Jianpeng Ma)
+* bluestore: os/bluestore: dump onode before no available blob id abort (`pr#27911 <https://github.com/stone/stone/pull/27911>`_, Igor Fedotov)
+* bluestore: os/bluestore: dump onode that has too many spanning blobs (`pr#28010 <https://github.com/stone/stone/pull/28010>`_, Igor Fedotov)
+* bluestore: os/bluestore: fix >2GB writes (`pr#27871 <https://github.com/stone/stone/pull/27871>`_, Sage Weil, kungf)
+* bluestore: os/bluestore: fix bitmap allocator issues (`pr#26939 <https://github.com/stone/stone/pull/26939>`_, Igor Fedotov)
+* bluestore: os/bluestore: fix duplicate allocations in bmap allocator (`issue#40080 <http://tracker.stone.com/issues/40080>`_, `pr#28496 <https://github.com/stone/stone/pull/28496>`_, Igor Fedotov)
+* bluestore: os/bluestore: fix duplicative and misleading debug in KernelDevice::open() (`pr#28630 <https://github.com/stone/stone/pull/28630>`_, Radoslaw Zarzynski)
+* bluestore: os/bluestore: fix for FreeBSD iocb structure (`pr#27458 <https://github.com/stone/stone/pull/27458>`_, Willem Jan Withagen)
+* bluestore: os/bluestore: fix invalid stray shared blob detection in fsck (`pr#30616 <https://github.com/stone/stone/pull/30616>`_, Igor Fedotov)
+* bluestore: os/bluestore: fix missing discard in BlueStore::_kv_sync_thread (`pr#27843 <https://github.com/stone/stone/pull/27843>`_, Junhui Tang)
+* bluestore: os/bluestore: fix origin reference in logging slow ops (`pr#27951 <https://github.com/stone/stone/pull/27951>`_, Igor Fedotov)
+* bluestore: os/bluestore: fix out-of-bound access in bmap allocator (`pr#27691 <https://github.com/stone/stone/pull/27691>`_, Igor Fedotov)
+* bluestore: os/bluestore: fix per-pool omap repair (`pr#32925 <https://github.com/stone/stone/pull/32925>`_, Igor Fedotov)
+* bluestore: os/bluestore: fix space balancing overflow (`pr#30255 <https://github.com/stone/stone/pull/30255>`_, xie xingguo)
+* bluestore: os/bluestore: fix wakeup bug (`pr#31931 <https://github.com/stone/stone/pull/31931>`_, Jianpeng Ma)
+* bluestore: os/bluestore: introduce legacy statfs and dev size mismatch alerts (`pr#27519 <https://github.com/stone/stone/pull/27519>`_, Sage Weil, Igor Fedotov)
+* bluestore: os/bluestore: introduce new io_uring IO engine (`pr#27392 <https://github.com/stone/stone/pull/27392>`_, Roman Penyaev)
+* bluestore: os/bluestore: its better to erase spanning blob once (`pr#29238 <https://github.com/stone/stone/pull/29238>`_, Xiangyang Yu)
+* bluestore: os/bluestore: load OSD all compression settings unconditionally (`issue#40480 <http://tracker.stone.com/issues/40480>`_, `pr#28688 <https://github.com/stone/stone/pull/28688>`_, Igor Fedotov)
+* bluestore: os/bluestore: log allocation stats on a daily basis (`pr#33565 <https://github.com/stone/stone/pull/33565>`_, Igor Fedotov)
+* bluestore: os/bluestore: memorize layout of BlueFS on management (`pr#30593 <https://github.com/stone/stone/pull/30593>`_, Radoslaw Zarzynski)
+* bluestore: os/bluestore: Merge deferred_finisher and finisher (`pr#29623 <https://github.com/stone/stone/pull/29623>`_, Jianpeng Ma)
+* bluestore: os/bluestore: minor improvements/cleanup around allocator (`pr#29738 <https://github.com/stone/stone/pull/29738>`_, Igor Fedotov)
+* bluestore: os/bluestore: more aggressive deferred submit when onode trim skipping (`issue#21531 <http://tracker.stone.com/issues/21531>`_, `pr#25697 <https://github.com/stone/stone/pull/25697>`_, Zengran Zhang)
+* bluestore: os/bluestore: more smart allocator dump when lacking space for bluefs (`issue#40623 <http://tracker.stone.com/issues/40623>`_, `pr#28845 <https://github.com/stone/stone/pull/28845>`_, Igor Fedotov)
+* bluestore: os/bluestore: new bluestore_debug_enforce_settings option (`pr#27132 <https://github.com/stone/stone/pull/27132>`_, Igor Fedotov)
+* bluestore: os/bluestore: no need protected by OpSequencer::qlock (`pr#29488 <https://github.com/stone/stone/pull/29488>`_, Jianpeng Ma)
+* bluestore: os/bluestore: no need to add tail length (revert PR#29185) (`pr#29465 <https://github.com/stone/stone/pull/29465>`_, Xiangyang Yu)
+* bluestore: os/bluestore: print correctly info (`pr#29939 <https://github.com/stone/stone/pull/29939>`_, Jianpeng Ma)
+* bluestore: os/bluestore: print error if spdk_nvme_ns_cmd_writev() fails (`pr#31932 <https://github.com/stone/stone/pull/31932>`_, NancySu05)
+* bluestore: os/bluestore: proper locking for BlueFS prefetching (`pr#29012 <https://github.com/stone/stone/pull/29012>`_, Igor Fedotov)
+* bluestore: os/bluestore: reduce wakeups (`pr#29130 <https://github.com/stone/stone/pull/29130>`_, Jianpeng Ma)
+* bluestore: os/bluestore: Refactor Bluestore Caches (`pr#28597 <https://github.com/stone/stone/pull/28597>`_, Mark Nelson)
+* bluestore: os/bluestore: remove unused arg to _get_deferred_op() (`issue#40918 <http://tracker.stone.com/issues/40918>`_, `pr#29320 <https://github.com/stone/stone/pull/29320>`_, Sage Weil)
+* bluestore: os/bluestore: remove unused _tune_cache_size() method declaration (`pr#29393 <https://github.com/stone/stone/pull/29393>`_, Igor Fedotov)
+* bluestore: os/bluestore: restore and fix bug with onode cache pinning (`pr#31778 <https://github.com/stone/stone/pull/31778>`_, Josh Durgin)
+* bluestore: os/bluestore: revert cache pinned list (`pr#31180 <https://github.com/stone/stone/pull/31180>`_, Sage Weil)
+* bluestore: os/bluestore: set STATE_KV_SUBMITTED properly (`pr#30753 <https://github.com/stone/stone/pull/30753>`_, Igor Fedotov)
+* bluestore: os/bluestore: show device name in osd metadata output (`pr#28107 <https://github.com/stone/stone/pull/28107>`_, Igor Fedotov)
+* bluestore: os/bluestore: silence StupidAllocator reorder warning (`pr#29866 <https://github.com/stone/stone/pull/29866>`_, Jos Collin)
+* bluestore: os/bluestore: simplify multithreaded shallow fsck (`pr#31473 <https://github.com/stone/stone/pull/31473>`_, Igor Fedotov)
+* bluestore: os/bluestore: simplify per-pool-stat config options (`pr#30350 <https://github.com/stone/stone/pull/30350>`_, Sage Weil, Igor Fedotov)
+* bluestore: os/bluestore: support RocksDB prefetch in buffered read mode (`issue#36482 <http://tracker.stone.com/issues/36482>`_, `pr#27782 <https://github.com/stone/stone/pull/27782>`_, Igor Fedotov)
+* bluestore: os/bluestore: tiny tracepoints improvement (`pr#31669 <https://github.com/stone/stone/pull/31669>`_, Adam Kupczyk)
+* bluestore: os/bluestore: upgrade legacy omap to per-pool format automatically (`pr#32758 <https://github.com/stone/stone/pull/32758>`_, Igor Fedotov)
+* bluestore: os/bluestore: verify disk layout of BlueFS (`issue#25098 <http://tracker.stone.com/issues/25098>`_, `pr#30109 <https://github.com/stone/stone/pull/30109>`_, Radoslaw Zarzynski)
+* bluestore: os/bluestore:fix two calculation bugs (`pr#29185 <https://github.com/stone/stone/pull/29185>`_, Xiangyang Yu)
+* bluestore: os/stone-bluestore-tool: bluefs-bdev-expand asserts if no WAL (`pr#27445 <https://github.com/stone/stone/pull/27445>`_, Igor Fedotov)
+* bluestore: os/objectstore: add new op OP_CREATE for create a new object (`pr#26251 <https://github.com/stone/stone/pull/26251>`_, Jianpeng Ma)
+* bluestore: Revert os/bluestore: add kv_drain_preceding_waiters indicate drain_preceding. (`pr#31503 <https://github.com/stone/stone/pull/31503>`_, Sage Weil)
+* bluestore: test/fio: handle nullptr when parsing throttle params (`pr#31681 <https://github.com/stone/stone/pull/31681>`_, Igor Fedotov)
+* bluestore: [bluestore][tools] Inspect allocations in bluestore (`pr#29425 <https://github.com/stone/stone/pull/29425>`_, Adam Kupczyk)
+* build(deps): bump lodash from 4.17.11 to 4.17.13 in /src/pybind/mgr/dashboard/frontend (`pr#29192 <https://github.com/stone/stone/pull/29192>`_, dependabot[bot])
+* build/ops,stonefs,common,core,rbd: Fix big-endian handling (`pr#30079 <https://github.com/stone/stone/pull/30079>`_, Ulrich Weigand)
+* build/ops,stonefs: mgr/ssh: make mds add work (`pr#31059 <https://github.com/stone/stone/pull/31059>`_, Sage Weil)
+* build/ops,common,core: common, include: bump the version of stone::buffers C++ API (`pr#33373 <https://github.com/stone/stone/pull/33373>`_, Radoslaw Zarzynski)
+* build/ops,common,mgr: python-common:  Python common package (`pr#28915 <https://github.com/stone/stone/pull/28915>`_, Kefu Chai, Sebastian Wagner)
+* build/ops,common,rgw: rgw, common, build: drop NSS support (`pr#27834 <https://github.com/stone/stone/pull/27834>`_, Radoslaw Zarzynski)
+* build/ops,core,rbd: Windows support [part 1] (`pr#31981 <https://github.com/stone/stone/pull/31981>`_, Lucian Petrut, Alin Gabriel Serdean)
+* build/ops,core: stone-crash: use client.crash[.host] to post, and provsion keys via mgr/ssh + stone-daemon (`pr#30734 <https://github.com/stone/stone/pull/30734>`_, Sage Weil)
+* build/ops,core: debian: fix stone-mgr-modules-core files (`pr#33468 <https://github.com/stone/stone/pull/33468>`_, Sage Weil)
+* build/ops,core: os/bluestore: fix pmem osd build problem (`pr#28761 <https://github.com/stone/stone/pull/28761>`_, Peterson, Scott, Li, Xiaoyan)
+* build/ops,core: qa: stop testing on 16.04 xenial (`pr#28943 <https://github.com/stone/stone/pull/28943>`_, Sage Weil)
+* build/ops,mgr: mgr/diskprediction_local: Replaced old models and updated predictor (`pr#29437 <https://github.com/stone/stone/pull/29437>`_, Karanraj Chauhan)
+* build/ops,mgr: systemd: stone-mgr: set MemoryDenyWriteExecute to false (`issue#39628 <http://tracker.stone.com/issues/39628>`_, `pr#28023 <https://github.com/stone/stone/pull/28023>`_, Ricardo Dias)
+* build/ops,pybind: cmake, pybind: fix build on armhf (`pr#28843 <https://github.com/stone/stone/pull/28843>`_, Kefu Chai)
+* build/ops,rbd: rpm,deb: fix python dateutil module dependency (`pr#33624 <https://github.com/stone/stone/pull/33624>`_, Mykola Golub)
+* build/ops,rgw: build/rgw: unittest_rgw_dmclock_scheduler does not need Boost_LIBRARIES (`pr#27466 <https://github.com/stone/ceph/pull/27466>`_, Willem Jan Withagen)
 * build/ops,rgw: install-deps.sh, cmake: use boost 1.72 on bionic (`pr#32391 <https://github.com/ceph/ceph/pull/32391>`_, Kefu Chai)
 * build/ops,tests: ceph-daemon: a few fixes; functional test (`pr#31094 <https://github.com/ceph/ceph/pull/31094>`_, Sage Weil)
 * build/ops,tests: googletest: pick up change to suppress CMP0048 warning (`pr#29471 <https://github.com/ceph/ceph/pull/29471>`_, Kefu Chai)
@@ -1801,7 +1801,7 @@ Changelog
 * ceph-daemon: only set up crash dir mount if it exists (`pr#31130 <https://github.com/ceph/ceph/pull/31130>`_, Sage Weil)
 * ceph-daemon: py2 compatibility (`pr#31168 <https://github.com/ceph/ceph/pull/31168>`_, Sage Weil)
 * ceph-daemon: py2: tolerate whitespace before config key name (`pr#32098 <https://github.com/ceph/ceph/pull/32098>`_, Sage Weil)
-* ceph-daemon: raise RuntimeError when CephContainer.run() fails (`pr#31328 <https://github.com/ceph/ceph/pull/31328>`_, Michael Fritch)
+* ceph-daemon: raise RuntimeError when StoneContainer.run() fails (`pr#31328 <https://github.com/ceph/ceph/pull/31328>`_, Michael Fritch)
 * ceph-daemon: Remove data dir during adopt (`pr#31437 <https://github.com/ceph/ceph/pull/31437>`_, Michael Fritch)
 * ceph-daemon: remove prepare-host (`pr#32108 <https://github.com/ceph/ceph/pull/32108>`_, Sage Weil)
 * ceph-daemon: replace podman variables by container (`pr#31618 <https://github.com/ceph/ceph/pull/31618>`_, Dimitri Savineau)
@@ -1828,7 +1828,7 @@ Changelog
 * ceph-volume/batch: fail on filtered devices when non-interactive (`pr#31978 <https://github.com/ceph/ceph/pull/31978>`_, Jan Fajerski)
 * ceph-volume/lvm/activate.py: clarify error message: fsid refers to osd_fsid (`pr#32351 <https://github.com/ceph/ceph/pull/32351>`_, Yaniv Kaul)
 * ceph-volume/test: patch VolumeGroups (`pr#31979 <https://github.com/ceph/ceph/pull/31979>`_, Jan Fajerski)
-* ceph-volume: add Cephs device id to inventory (`pr#31072 <https://github.com/ceph/ceph/pull/31072>`_, Sebastian Wagner)
+* ceph-volume: add Stones device id to inventory (`pr#31072 <https://github.com/ceph/ceph/pull/31072>`_, Sebastian Wagner)
 * ceph-volume: add db and wal support to raw mode (`pr#32828 <https://github.com/ceph/ceph/pull/32828>`_, S\xc3\xa9bastien Han)
 * ceph-volume: add methods to pass filters to pvs, vgs and lvs commands (`pr#32242 <https://github.com/ceph/ceph/pull/32242>`_, Rishabh Dave)
 * ceph-volume: add proper size attribute to partitions (`pr#31492 <https://github.com/ceph/ceph/pull/31492>`_, Jan Fajerski)
@@ -1989,7 +1989,7 @@ Changelog
 * cephadm: use spec to deploy crash on every host (`pr#33658 <https://github.com/ceph/ceph/pull/33658>`_, Sage Weil)
 * cephadm: use `sh` instead of `bash` during enter (`pr#33822 <https://github.com/ceph/ceph/pull/33822>`_, Michael Fritch)
 * cephadm: wait longer for things to come up (`pr#33216 <https://github.com/ceph/ceph/pull/33216>`_, Sage Weil)
-* cephfs,common,core: global: disable THP for Ceph daemons (`pr#31582 <https://github.com/ceph/ceph/pull/31582>`_, Patrick Donnelly, Mark Nelson)
+* cephfs,common,core: global: disable THP for Stone daemons (`pr#31582 <https://github.com/ceph/ceph/pull/31582>`_, Patrick Donnelly, Mark Nelson)
 * cephfs,common,rbd: common/config_proxy: hold lock while accessing mutable container (`pr#29809 <https://github.com/ceph/ceph/pull/29809>`_, Jason Dillaman)
 * cephfs,common: common/secret.c: fix key parsing when doing a remount (`pr#28148 <https://github.com/ceph/ceph/pull/28148>`_, Luis Henriques)
 * cephfs,common: osdc: should release the rwlock before waiting (`pr#29686 <https://github.com/ceph/ceph/pull/29686>`_, Kefu Chai)
@@ -2129,15 +2129,15 @@ Changelog
 * cephfs: libcephfs: Add Tests for LazyIO (`issue#40283 <http://tracker.ceph.com/issues/40283>`_, `pr#28834 <https://github.com/ceph/ceph/pull/28834>`_, Sidharth Anupkrishnan)
 * cephfs: mds : clean up data written to unsafe inodes (`pr#30969 <https://github.com/ceph/ceph/pull/30969>`_, simon gao)
 * cephfs: mds : optimization functions,get_dirfrags_under, to speed up processing directories with tens of millions of files (`pr#31123 <https://github.com/ceph/ceph/pull/31123>`_, simon gao)
-* cephfs: mds,mon: deprecate CephFS inline_data support (`pr#29824 <https://github.com/ceph/ceph/pull/29824>`_, Jeff Layton)
+* cephfs: mds,mon: deprecate StoneFS inline_data support (`pr#29824 <https://github.com/ceph/ceph/pull/29824>`_, Jeff Layton)
 * cephfs: mds/client: inode number delegation (`pr#31817 <https://github.com/ceph/ceph/pull/31817>`_, Jeff Layton)
 * cephfs: mds/FSMap: fix adjust_standby_fscid (`pr#32709 <https://github.com/ceph/ceph/pull/32709>`_, Sage Weil)
 * cephfs: mds/OpenFileTable: match MAX_ITEMS_PER_OBJ to osd_deep_scrub_large_omap_object_key_threshold (`pr#31232 <https://github.com/ceph/ceph/pull/31232>`_, Vikhyat Umrao)
 * cephfs: mds/server:mds: drop reconnect message from non-existent session (`issue#39026 <http://tracker.ceph.com/issues/39026>`_, `pr#27256 <https://github.com/ceph/ceph/pull/27256>`_, Shen Hang)
-* cephfs: messages: make CephFS messages safe (`pr#31330 <https://github.com/ceph/ceph/pull/31330>`_, Patrick Donnelly)
+* cephfs: messages: make StoneFS messages safe (`pr#31330 <https://github.com/ceph/ceph/pull/31330>`_, Patrick Donnelly)
 * cephfs: mgr / volume: refactor [sub]volume (`issue#39969 <http://tracker.ceph.com/issues/39969>`_, `pr#28082 <https://github.com/ceph/ceph/pull/28082>`_, Venky Shankar)
 * cephfs: mgr / volumes: background purge queue for subvolumes (`issue#40036 <http://tracker.ceph.com/issues/40036>`_, `pr#28003 <https://github.com/ceph/ceph/pull/28003>`_, Patrick Donnelly, Venky Shankar)
-* cephfs: mgr/dashboard: CephFS class issues with strings (`pr#29353 <https://github.com/ceph/ceph/pull/29353>`_, Volker Theile)
+* cephfs: mgr/dashboard: StoneFS class issues with strings (`pr#29353 <https://github.com/ceph/ceph/pull/29353>`_, Volker Theile)
 * cephfs: mgr/volume: adapt arg passing to ServiceSpec (`pr#33687 <https://github.com/ceph/ceph/pull/33687>`_, Joshua Schmid)
 * cephfs: mgr/volumes: add `mypy` support (`pr#33674 <https://github.com/ceph/ceph/pull/33674>`_, Michael Fritch)
 * cephfs: mgr/volumes: check for string values in uid/gid (`pr#31961 <https://github.com/ceph/ceph/pull/31961>`_, Jos Collin)
@@ -2179,7 +2179,7 @@ Changelog
 * cephfs: octopus: Add FS subvolume clone cancel (`issue#44208 <http://tracker.ceph.com/issues/44208>`_, `pr#34018 <https://github.com/ceph/ceph/pull/34018>`_, Venky Shankar)
 * cephfs: osdc/objecter: Fix last_sent in scientific format and add age to ops (`pr#29818 <https://github.com/ceph/ceph/pull/29818>`_, Varsha Rao)
 * cephfs: propagate ll_releasedir errors (`pr#32548 <https://github.com/ceph/ceph/pull/32548>`_, David Disseldorp)
-* cephfs: pybind / cephfs: remove static typing in LibCephFS.chown (`issue#42923 <http://tracker.ceph.com/issues/42923>`_, `pr#31756 <https://github.com/ceph/ceph/pull/31756>`_, Venky Shankar)
+* cephfs: pybind / cephfs: remove static typing in LibStoneFS.chown (`issue#42923 <http://tracker.ceph.com/issues/42923>`_, `pr#31756 <https://github.com/ceph/ceph/pull/31756>`_, Venky Shankar)
 * cephfs: pybind/cephfs: Modification to error message (`pr#28628 <https://github.com/ceph/ceph/pull/28628>`_, Varsha Rao)
 * cephfs: pybind/mgr: add cephfs subvolumes module (`issue#39610 <http://tracker.ceph.com/issues/39610>`_, `pr#27594 <https://github.com/ceph/ceph/pull/27594>`_, Ramana Raja)
 * cephfs: pybind/test_volume_client: print python version correctly (`issue#40184 <http://tracker.ceph.com/issues/40184>`_, `pr#28221 <https://github.com/ceph/ceph/pull/28221>`_, Lianne)
@@ -2228,7 +2228,7 @@ Changelog
 * cephfs: qa: use -D_GNU_SOURCE when compiling fsync-tester.c (`pr#32480 <https://github.com/ceph/ceph/pull/32480>`_, Patrick Donnelly)
 * cephfs: qa: use hard_reset to reboot kclient (`issue#37681 <http://tracker.ceph.com/issues/37681>`_, `pr#28825 <https://github.com/ceph/ceph/pull/28825>`_, Patrick Donnelly)
 * cephfs: qa: use mimic-O upgrade process (`pr#27731 <https://github.com/ceph/ceph/pull/27731>`_, Patrick Donnelly)
-* cephfs: qa: use small default pg count for CephFS pools (`pr#30816 <https://github.com/ceph/ceph/pull/30816>`_, Patrick Donnelly)
+* cephfs: qa: use small default pg count for StoneFS pools (`pr#30816 <https://github.com/ceph/ceph/pull/30816>`_, Patrick Donnelly)
 * cephfs: qa: wait for MDS to come back after removing it (`issue#40967 <http://tracker.ceph.com/issues/40967>`_, `pr#29336 <https://github.com/ceph/ceph/pull/29336>`_, Patrick Donnelly)
 * cephfs: qa: whitelist Error recovering journal for cephfs-data-scan (`pr#30971 <https://github.com/ceph/ceph/pull/30971>`_, Yan, Zheng)
 * cephfs: qa: whitelist TOO_FEW_PGS during Mimic deploy (`pr#31063 <https://github.com/ceph/ceph/pull/31063>`_, Patrick Donnelly)
@@ -2568,7 +2568,7 @@ Changelog
 * core: common/TextTable,mgr: standardize on 2 spaces between table columns (`pr#33138 <https://github.com/ceph/ceph/pull/33138>`_, Sage Weil)
 * core: common/util: handle long lines in /proc/cpuinfo (`issue#38296 <http://tracker.ceph.com/issues/38296>`_, `pr#27707 <https://github.com/ceph/ceph/pull/27707>`_, Sage Weil)
 * core: compressor/lz4: work around bug in liblz4 versions <1.8.2 (`pr#33584 <https://github.com/ceph/ceph/pull/33584>`_, Sage Weil, Dan van der Ster)
-* core: crimson, osd: add support for Ceph Classes, part 1 (`pr#29651 <https://github.com/ceph/ceph/pull/29651>`_, Radoslaw Zarzynski)
+* core: crimson, osd: add support for Stone Classes, part 1 (`pr#29651 <https://github.com/ceph/ceph/pull/29651>`_, Radoslaw Zarzynski)
 * core: crimson/osd: add osd to crush when it boots (`pr#28689 <https://github.com/ceph/ceph/pull/28689>`_, Kefu Chai)
 * core: crush/CrushCompiler: Fix __replacement_assert (`issue#39174 <http://tracker.ceph.com/issues/39174>`_, `pr#27506 <https://github.com/ceph/ceph/pull/27506>`_, Brad Hubbard)
 * core: crush/CrushWrapper.cc: Fix sign compare compiler warning (`pr#31184 <https://github.com/ceph/ceph/pull/31184>`_, Prashant D)
@@ -2941,16 +2941,16 @@ Changelog
 * doc: add a deduplication document (`pr#28462 <https://github.com/ceph/ceph/pull/28462>`_, Myoungwon Oh)
 * doc: add a doc for vstart_runner.py (`pr#29907 <https://github.com/ceph/ceph/pull/29907>`_, Rishabh Dave)
 * doc: add a new document on distributed cephfs metadata cache (`pr#30265 <https://github.com/ceph/ceph/pull/30265>`_, Jeff Layton)
-* doc: Add a new document on Dynamic Metadata Management in CephFS (`pr#30348 <https://github.com/ceph/ceph/pull/30348>`_, Sidharth Anupkrishnan)
+* doc: Add a new document on Dynamic Metadata Management in StoneFS (`pr#30348 <https://github.com/ceph/ceph/pull/30348>`_, Sidharth Anupkrishnan)
 * doc: Add a RGW swift auth note (`pr#31309 <https://github.com/ceph/ceph/pull/31309>`_, Matthew Oliver)
 * doc: add ceph fs volumes and subvolumes documentation (`pr#30381 <https://github.com/ceph/ceph/pull/30381>`_, Ramana Raja)
-* doc: add CephFS Octopus release notes (`pr#33450 <https://github.com/ceph/ceph/pull/33450>`_, Patrick Donnelly)
+* doc: add StoneFS Octopus release notes (`pr#33450 <https://github.com/ceph/ceph/pull/33450>`_, Patrick Donnelly)
 * doc: add changelog for nautilus (`pr#27048 <https://github.com/ceph/ceph/pull/27048>`_, Abhishek Lekshmanan)
 * doc: add chrony to preflight checklist for Ubuntu 18.04 (`pr#31948 <https://github.com/ceph/ceph/pull/31948>`_, Zac Dover)
 * doc: add config help/get/set section for runtime client configuration (`issue#41688 <http://tracker.ceph.com/issues/41688>`_, `pr#32117 <https://github.com/ceph/ceph/pull/32117>`_, Venky Shankar)
 * doc: Add Dashboard Octopus release notes (`pr#33555 <https://github.com/ceph/ceph/pull/33555>`_, Lenz Grimmer)
 * doc: add description for fuse_disable_pagecache (`pr#31902 <https://github.com/ceph/ceph/pull/31902>`_, Yan, Zheng)
-* doc: add doc for blacklisting older CephFS clients (`issue#39130 <http://tracker.ceph.com/issues/39130>`_, `pr#27412 <https://github.com/ceph/ceph/pull/27412>`_, Patrick Donnelly)
+* doc: add doc for blacklisting older StoneFS clients (`issue#39130 <http://tracker.ceph.com/issues/39130>`_, `pr#27412 <https://github.com/ceph/ceph/pull/27412>`_, Patrick Donnelly)
 * doc: add doc for cephfs lazyio (`issue#38729 <http://tracker.ceph.com/issues/38729>`_, `pr#26976 <https://github.com/ceph/ceph/pull/26976>`_, Yan, Zheng)
 * doc: add guide for running tests with teuthology (`pr#32114 <https://github.com/ceph/ceph/pull/32114>`_, Rishabh Dave)
 * doc: add mds map to list of ceph monitor assets (`pr#32631 <https://github.com/ceph/ceph/pull/32631>`_, Zac Dover)
@@ -2966,7 +2966,7 @@ Changelog
 * doc: Add stat command usage in cephfs-shell (`pr#28236 <https://github.com/ceph/ceph/pull/28236>`_, Varsha Rao)
 * doc: Add usage for shortcuts command in cephfs-shell (`pr#27373 <https://github.com/ceph/ceph/pull/27373>`_, Varsha Rao)
 * doc: Add warning that the root directory cannot be fragmented (`pr#28354 <https://github.com/ceph/ceph/pull/28354>`_, Nathan Fish)
-* doc: Added a link to Ceph Community Calendar (`pr#31475 <https://github.com/ceph/ceph/pull/31475>`_, Zac Dover)
+* doc: Added a link to Stone Community Calendar (`pr#31475 <https://github.com/ceph/ceph/pull/31475>`_, Zac Dover)
 * doc: added a remark to always use powers of two for pg_num (`pr#31541 <https://github.com/ceph/ceph/pull/31541>`_, Thomas Schneider)
 * doc: added an is where it was needed (`pr#32374 <https://github.com/ceph/ceph/pull/32374>`_, Zac Dover)
 * doc: Added dashboard features, improved wording (`pr#27997 <https://github.com/ceph/ceph/pull/27997>`_, Lenz Grimmer)
@@ -2989,7 +2989,7 @@ Changelog
 * doc: clarify difference between fs and kcephfs suite (`pr#32144 <https://github.com/ceph/ceph/pull/32144>`_, Rishabh Dave)
 * doc: clarify priority use (`pr#32191 <https://github.com/ceph/ceph/pull/32191>`_, Yuri Weinstein)
 * doc: clarify support for rbd fancy striping (`pr#32176 <https://github.com/ceph/ceph/pull/32176>`_, Ilya Dryomov)
-* doc: cleanup CephFS Landing Page (`pr#30542 <https://github.com/ceph/ceph/pull/30542>`_, Milind Changire)
+* doc: cleanup StoneFS Landing Page (`pr#30542 <https://github.com/ceph/ceph/pull/30542>`_, Milind Changire)
 * doc: coding-style: update a link and fix typos (`pr#33128 <https://github.com/ceph/ceph/pull/33128>`_, Ponnuvel Palaniyappan)
 * doc: common/admin_socket: Add doxygen for call and call_async (`pr#32547 <https://github.com/ceph/ceph/pull/32547>`_, Adam Kupczyk)
 * doc: common/hobject: Error invocation of formula in documentation (`pr#28366 <https://github.com/ceph/ceph/pull/28366>`_, Albert)
@@ -3050,7 +3050,7 @@ Changelog
 * doc: doc/mgr/ansible.rst: fix typo (`pr#28827 <https://github.com/ceph/ceph/pull/28827>`_, Lan Liu)
 * doc: doc/mgr/cephadm: document adoption process (`pr#33459 <https://github.com/ceph/ceph/pull/33459>`_, Sage Weil)
 * doc: doc/mgr/orchestrator.rst: updated current implementation status (`pr#33410 <https://github.com/ceph/ceph/pull/33410>`_, Kai Wagner)
-* doc: doc/mgr/orchestrator: Add Cephfs (`pr#33574 <https://github.com/ceph/ceph/pull/33574>`_, Sebastian Wagner)
+* doc: doc/mgr/orchestrator: Add Stonefs (`pr#33574 <https://github.com/ceph/ceph/pull/33574>`_, Sebastian Wagner)
 * doc: doc/mgr/orchestrator_cli: Rook orch supports mon update (`issue#39137 <http://tracker.ceph.com/issues/39137>`_, `pr#27431 <https://github.com/ceph/ceph/pull/27431>`_, Sebastian Wagner)
 * doc: doc/mgr/telemetry: added device channel details (`pr#33113 <https://github.com/ceph/ceph/pull/33113>`_, Yaarit Hatuka)
 * doc: doc/mgr/telemetry: update default interval (`pr#31008 <https://github.com/ceph/ceph/pull/31008>`_, Tim Serong)
@@ -3111,7 +3111,7 @@ Changelog
 * doc: doc/releases: add release notes for mimic v13.2.7 (`pr#31777 <https://github.com/ceph/ceph/pull/31777>`_, Nathan Cutler)
 * doc: doc/releases: add release notes for mimic v13.2.8 (`pr#32040 <https://github.com/ceph/ceph/pull/32040>`_, Nathan Cutler)
 * doc: doc/releases: add release notes for nautilus v14.2.5 (`pr#31970 <https://github.com/ceph/ceph/pull/31970>`_, Nathan Cutler)
-* doc: doc/releases: Ceph Nautilus v14.2.4 Release Notes (`pr#30429 <https://github.com/ceph/ceph/pull/30429>`_, Nathan Cutler)
+* doc: doc/releases: Stone Nautilus v14.2.4 Release Notes (`pr#30429 <https://github.com/ceph/ceph/pull/30429>`_, Nathan Cutler)
 * doc: doc/releases: octopus draft notes (`pr#33043 <https://github.com/ceph/ceph/pull/33043>`_, Sage Weil)
 * doc: doc/releases: Octopus is not stable yet (`pr#33729 <https://github.com/ceph/ceph/pull/33729>`_, Nathan Cutler)
 * doc: doc/releases: update for 12 month cycle (`pr#28864 <https://github.com/ceph/ceph/pull/28864>`_, Sage Weil)
@@ -3146,7 +3146,7 @@ Changelog
 * doc: fix errors in search page and use relative address for releases.json (`pr#33423 <https://github.com/ceph/ceph/pull/33423>`_, Kefu Chai)
 * doc: Fix for new ceph-devel mailing list (`pr#29492 <https://github.com/ceph/ceph/pull/29492>`_, David Zafman)
 * doc: Fix FUSE expansion (`pr#30473 <https://github.com/ceph/ceph/pull/30473>`_, Sidharth Anupkrishnan)
-* doc: fix Getting Started with CephFS (`pr#32457 <https://github.com/ceph/ceph/pull/32457>`_, Jos Collin)
+* doc: fix Getting Started with StoneFS (`pr#32457 <https://github.com/ceph/ceph/pull/32457>`_, Jos Collin)
 * doc: fix links in developer_guide (`pr#32728 <https://github.com/ceph/ceph/pull/32728>`_, Rishabh Dave)
 * doc: fix LRC documentation (`pr#27106 <https://github.com/ceph/ceph/pull/27106>`_, Danny Al-Gaaf)
 * doc: fix parameter to set pg autoscale mode (`pr#27422 <https://github.com/ceph/ceph/pull/27422>`_, Changcheng Liu)
@@ -3166,7 +3166,7 @@ Changelog
 * doc: fixed typo in leadership names (`pr#27396 <https://github.com/ceph/ceph/pull/27396>`_, Servesha Dudhgaonkar)
 * doc: Fixes OSD node labels which based on the osd_devices name (`pr#23312 <https://github.com/ceph/ceph/pull/23312>`_, Siyu Sun)
 * doc: Fixes typo for ceph dashboard command (`pr#30292 <https://github.com/ceph/ceph/pull/30292>`_, Fabian Bonk)
-* doc: hide page contents for Ceph Internals (`pr#31046 <https://github.com/ceph/ceph/pull/31046>`_, Milind Changire)
+* doc: hide page contents for Stone Internals (`pr#31046 <https://github.com/ceph/ceph/pull/31046>`_, Milind Changire)
 * doc: improve ceph-backport.sh comment block (`pr#28042 <https://github.com/ceph/ceph/pull/28042>`_, Nathan Cutler)
 * doc: improve developer guide doc (`pr#30435 <https://github.com/ceph/ceph/pull/30435>`_, Rishabh Dave)
 * doc: improve in mount.ceph man page (`pr#31024 <https://github.com/ceph/ceph/pull/31024>`_, Rishabh Dave)
@@ -3191,7 +3191,7 @@ Changelog
 * doc: Miscellaneous spelling fixes (`pr#27202 <https://github.com/ceph/ceph/pull/27202>`_, Bryan Stillwell)
 * doc: Modify nature theme (`pr#32312 <https://github.com/ceph/ceph/pull/32312>`_, Brad Hubbard)
 * doc: mon/OSDMonitor: Fix pool set target_size_bytes (etc) with unit suffix (`pr#30701 <https://github.com/ceph/ceph/pull/30701>`_, Prashant D)
-* doc: mounting CephFS subdirectory and Persistent Mounts cleanup (`pr#32498 <https://github.com/ceph/ceph/pull/32498>`_, Jos Collin)
+* doc: mounting StoneFS subdirectory and Persistent Mounts cleanup (`pr#32498 <https://github.com/ceph/ceph/pull/32498>`_, Jos Collin)
 * doc: Move ceph-deploy docs to doc/install/ceph-deploy (`pr#33953 <https://github.com/ceph/ceph/pull/33953>`_, Sebastian Wagner)
 * doc: move cephadm files to its own directory (`pr#33551 <https://github.com/ceph/ceph/pull/33551>`_, Alexandra Settle, Sebastian Wagner)
 * doc: move Developer Guide to its own subdirectory (`pr#27159 <https://github.com/ceph/ceph/pull/27159>`_, Nathan Cutler)
@@ -3223,10 +3223,10 @@ Changelog
 * doc: remove prod cluster examples from hardware recs (`pr#32670 <https://github.com/ceph/ceph/pull/32670>`_, Zac Dover)
 * doc: remove recommendation for kernel.pid_max (`pr#27965 <https://github.com/ceph/ceph/pull/27965>`_, Ben England)
 * doc: remove reference to obsolete scrub command (`pr#32508 <https://github.com/ceph/ceph/pull/32508>`_, Patrick Donnelly)
-* doc: remove the CephFS-Hadoop instructions (`pr#32980 <https://github.com/ceph/ceph/pull/32980>`_, Greg Farnum)
+* doc: remove the StoneFS-Hadoop instructions (`pr#32980 <https://github.com/ceph/ceph/pull/32980>`_, Greg Farnum)
 * doc: removed OpenStack Kilo references in Keystone docs (`pr#27203 <https://github.com/ceph/ceph/pull/27203>`_, James McClune)
 * doc: removes kube-helm installation instructions (`pr#32009 <https://github.com/ceph/ceph/pull/32009>`_, Zac Dover)
-* doc: reorganize CephFS landing page and ToC (`pr#32038 <https://github.com/ceph/ceph/pull/32038>`_, Patrick Donnelly)
+* doc: reorganize StoneFS landing page and ToC (`pr#32038 <https://github.com/ceph/ceph/pull/32038>`_, Patrick Donnelly)
 * doc: Revert doc: do not add suffix for search result links (`pr#33562 <https://github.com/ceph/ceph/pull/33562>`_, Jason Dillaman)
 * doc: rgw/pubsub: add S3 compliant API to master zone (`pr#28971 <https://github.com/ceph/ceph/pull/28971>`_, Yuval Lifshitz)
 * doc: rgw/pubsub: clarify pubsub zone configuration (`pr#27493 <https://github.com/ceph/ceph/pull/27493>`_, Yuval Lifshitz)
@@ -3249,8 +3249,8 @@ Changelog
 * doc: update ceph ansible iscsi info (`pr#28665 <https://github.com/ceph/ceph/pull/28665>`_, Mike Christie)
 * doc: Update ceph-deploy docs from dumpling to nautilus (`pr#30269 <https://github.com/ceph/ceph/pull/30269>`_, Danny Abukalam)
 * doc: Update ceph-iscsi min version (`pr#29195 <https://github.com/ceph/ceph/pull/29195>`_, Ricardo Marques)
-* doc: update CephFS overview in introductory page (`pr#30014 <https://github.com/ceph/ceph/pull/30014>`_, Patrick Donnelly)
-* doc: update CephFS Quick Start doc (`pr#30406 <https://github.com/ceph/ceph/pull/30406>`_, Rishabh Dave)
+* doc: update StoneFS overview in introductory page (`pr#30014 <https://github.com/ceph/ceph/pull/30014>`_, Patrick Donnelly)
+* doc: update StoneFS Quick Start doc (`pr#30406 <https://github.com/ceph/ceph/pull/30406>`_, Rishabh Dave)
 * doc: Update commands in bootstrap.rst (`pr#31800 <https://github.com/ceph/ceph/pull/31800>`_, Zac Dover)
 * doc: update default container images (`pr#33974 <https://github.com/ceph/ceph/pull/33974>`_, Sage Weil)
 * doc: Update documentation for LazyIO methods lazyio_synchronize() and lazyio_propagate() (`pr#29711 <https://github.com/ceph/ceph/pull/29711>`_, Sidharth Anupkrishnan)
@@ -3261,9 +3261,9 @@ Changelog
 * doc: update list of formats for --format flag for ceph pg dump (`pr#32373 <https://github.com/ceph/ceph/pull/32373>`_, Zac Dover)
 * doc: Update mailing lists (`pr#31666 <https://github.com/ceph/ceph/pull/31666>`_, hrchu)
 * doc: update mondb recovery script (`pr#28515 <https://github.com/ceph/ceph/pull/28515>`_, Hannes von Haugwitz)
-* doc: Update mount CephFS index (`pr#28955 <https://github.com/ceph/ceph/pull/28955>`_, Jos Collin)
+* doc: Update mount StoneFS index (`pr#28955 <https://github.com/ceph/ceph/pull/28955>`_, Jos Collin)
 * doc: Update python-rtsli and tcmu-runner min versions (`pr#28494 <https://github.com/ceph/ceph/pull/28494>`_, Ricardo Marques)
-* doc: Update requirements for using CephFS (`pr#30251 <https://github.com/ceph/ceph/pull/30251>`_, Varsha Rao)
+* doc: Update requirements for using StoneFS (`pr#30251 <https://github.com/ceph/ceph/pull/30251>`_, Varsha Rao)
 * doc: update with osd addition (`pr#31244 <https://github.com/ceph/ceph/pull/31244>`_, Changcheng Liu)
 * doc: update with zone bucket and straw2 addition (`pr#31177 <https://github.com/ceph/ceph/pull/31177>`_, Changcheng Liu)
 * doc: update Zabbix template reference (`pr#33661 <https://github.com/ceph/ceph/pull/33661>`_, Mathijs Smit)
@@ -3622,8 +3622,8 @@ Changelog
 * mgr/dashboard: behave when pwdUpdateRequired key is missing (`pr#33513 <https://github.com/ceph/ceph/pull/33513>`_, Sage Weil)
 * mgr/dashboard: Bucket names cannot be formatted as IP address (`pr#30620 <https://github.com/ceph/ceph/pull/30620>`_, Volker Theile)
 * mgr/dashboard: ceph dashboard i18ntool (`pr#26953 <https://github.com/ceph/ceph/pull/26953>`_, Sebastian Krah)
-* mgr/dashboard: CephFS client tab switch (`pr#29556 <https://github.com/ceph/ceph/pull/29556>`_, Stephan M\xc3\xbcller)
-* mgr/dashboard: CephFS tab component (`pr#29800 <https://github.com/ceph/ceph/pull/29800>`_, Stephan M\xc3\xbcller)
+* mgr/dashboard: StoneFS client tab switch (`pr#29556 <https://github.com/ceph/ceph/pull/29556>`_, Stephan M\xc3\xbcller)
+* mgr/dashboard: StoneFS tab component (`pr#29800 <https://github.com/ceph/ceph/pull/29800>`_, Stephan M\xc3\xbcller)
 * mgr/dashboard: Change the provider of services to root (`issue#39996 <http://tracker.ceph.com/issues/39996>`_, `pr#28211 <https://github.com/ceph/ceph/pull/28211>`_, Tiago Melo)
 * mgr/dashboard: change warn_explicit to warn (`pr#30075 <https://github.com/ceph/ceph/pull/30075>`_, Ernesto Puerta)
 * mgr/dashboard: Check if gateway is in use before deletion (`pr#27262 <https://github.com/ceph/ceph/pull/27262>`_, Ricardo Marques)
@@ -3645,7 +3645,7 @@ Changelog
 * mgr/dashboard: Disable event propagation in the helper icon (`issue#40715 <http://tracker.ceph.com/issues/40715>`_, `pr#29105 <https://github.com/ceph/ceph/pull/29105>`_, Tiago Melo)
 * mgr/dashboard: Display correct dialog title (`pr#28168 <https://github.com/ceph/ceph/pull/28168>`_, Volker Theile)
 * mgr/dashboard: Display iSCSI logged in info (`pr#28265 <https://github.com/ceph/ceph/pull/28265>`_, Ricardo Marques)
-* mgr/dashboard: Display legend for CephFS standbys (`pr#29927 <https://github.com/ceph/ceph/pull/29927>`_, Volker Theile)
+* mgr/dashboard: Display legend for StoneFS standbys (`pr#29927 <https://github.com/ceph/ceph/pull/29927>`_, Volker Theile)
 * mgr/dashboard: display OSD IDs on inventory page (`pr#31189 <https://github.com/ceph/ceph/pull/31189>`_, Kiefer Chang)
 * mgr/dashboard: Display the number of iSCSI active sessions (`pr#27248 <https://github.com/ceph/ceph/pull/27248>`_, Ricardo Marques)
 * mgr/dashboard: Display WWN and LUN number in iSCSI target details (`pr#30288 <https://github.com/ceph/ceph/pull/30288>`_, Ricardo Marques)
@@ -3657,14 +3657,14 @@ Changelog
 * mgr/dashboard: enable/disable versioning on RGW bucket (`pr#29460 <https://github.com/ceph/ceph/pull/29460>`_, Alfonso Mart\xc3\xadnez)
 * mgr/dashboard: Enforce password change upon first login (`pr#32680 <https://github.com/ceph/ceph/pull/32680>`_, Volker Theile, Tatjana Dehler)
 * mgr/dashboard: Enhance user create CLI command to force password change (`pr#33552 <https://github.com/ceph/ceph/pull/33552>`_, Volker Theile)
-* mgr/dashboard: Evict a CephFS client (`pr#28898 <https://github.com/ceph/ceph/pull/28898>`_, Ricardo Marques)
+* mgr/dashboard: Evict a StoneFS client (`pr#28898 <https://github.com/ceph/ceph/pull/28898>`_, Ricardo Marques)
 * mgr/dashboard: Explicitly set/change the device class of an OSD (`pr#32150 <https://github.com/ceph/ceph/pull/32150>`_, Ricardo Marques)
 * mgr/dashboard: Extend E2E test section (`pr#28858 <https://github.com/ceph/ceph/pull/28858>`_, Laura Paduano)
 * mgr/dashboard: extend types of `smart` response (`pr#30595 <https://github.com/ceph/ceph/pull/30595>`_, Patrick Seidensal)
 * mgr/dashboard: fix adding/removing host errors (`pr#34023 <https://github.com/ceph/ceph/pull/34023>`_, Kiefer Chang)
 * mgr/dashboard: fix backend error when updating RBD interlocked features (`issue#39933 <http://tracker.ceph.com/issues/39933>`_, `pr#28147 <https://github.com/ceph/ceph/pull/28147>`_, Kiefer Chang)
 * mgr/dashboard: fix cdEncode decorator is not working on class (`pr#30064 <https://github.com/ceph/ceph/pull/30064>`_, Kiefer Chang)
-* mgr/dashboard: Fix CephFS chart (`pr#29557 <https://github.com/ceph/ceph/pull/29557>`_, Stephan M\xc3\xbcller)
+* mgr/dashboard: Fix StoneFS chart (`pr#29557 <https://github.com/ceph/ceph/pull/29557>`_, Stephan M\xc3\xbcller)
 * mgr/dashboard: Fix dashboard health test failure (`pr#29172 <https://github.com/ceph/ceph/pull/29172>`_, Ricardo Marques)
 * mgr/dashboard: Fix deletion of NFS protocol properties (`issue#38997 <http://tracker.ceph.com/issues/38997>`_, `pr#27244 <https://github.com/ceph/ceph/pull/27244>`_, Tiago Melo)
 * mgr/dashboard: Fix deletion of NFS transports properties (`issue#39090 <http://tracker.ceph.com/issues/39090>`_, `pr#27350 <https://github.com/ceph/ceph/pull/27350>`_, Tiago Melo)
@@ -3757,7 +3757,7 @@ Changelog
 * mgr/dashboard: Reduce the number of renders on the tables (`issue#39944 <http://tracker.ceph.com/issues/39944>`_, `pr#28118 <https://github.com/ceph/ceph/pull/28118>`_, Tiago Melo)
 * mgr/dashboard: Refactor and cleanup tasks.mgr.dashboard.test_user (`pr#33743 <https://github.com/ceph/ceph/pull/33743>`_, Volker Theile)
 * mgr/dashboard: Refactor Python unittests and controller (`pr#31165 <https://github.com/ceph/ceph/pull/31165>`_, Volker Theile)
-* mgr/dashboard: Reload all CephFS directories (`pr#32552 <https://github.com/ceph/ceph/pull/32552>`_, Stephan M\xc3\xbcller)
+* mgr/dashboard: Reload all StoneFS directories (`pr#32552 <https://github.com/ceph/ceph/pull/32552>`_, Stephan M\xc3\xbcller)
 * mgr/dashboard: remove config-opt: read perm. from system roles (`pr#33690 <https://github.com/ceph/ceph/pull/33690>`_, Alfonso Mart\xc3\xadnez)
 * mgr/dashboard: Remove ngx-store (`pr#33756 <https://github.com/ceph/ceph/pull/33756>`_, Tiago Melo)
 * mgr/dashboard: remove traceback/version assertions (`pr#31720 <https://github.com/ceph/ceph/pull/31720>`_, Ernesto Puerta)
@@ -3802,7 +3802,7 @@ Changelog
 * mgr/dashboard: Validate iSCSI controls min/max value (`pr#28942 <https://github.com/ceph/ceph/pull/28942>`_, Ricardo Marques)
 * mgr/dashboard: Validate iSCSI images features (`pr#27135 <https://github.com/ceph/ceph/pull/27135>`_, Ricardo Marques)
 * mgr/dashboard: Validate `ceph-iscsi` config version (`pr#26835 <https://github.com/ceph/ceph/pull/26835>`_, Ricardo Marques)
-* mgr/dashboard: Various UI issues related to CephFS (`pr#29272 <https://github.com/ceph/ceph/pull/29272>`_, Volker Theile)
+* mgr/dashboard: Various UI issues related to StoneFS (`pr#29272 <https://github.com/ceph/ceph/pull/29272>`_, Volker Theile)
 * mgr/dashboard: Vertically align the Refresh label (`pr#29737 <https://github.com/ceph/ceph/pull/29737>`_, Tiago Melo)
 * mgr/dashboard: vstart: Fix /dev/tty No such device or address (`pr#31195 <https://github.com/ceph/ceph/pull/31195>`_, Volker Theile)
 * mgr/dashboard: wait for PG unknown state to be cleared (`pr#33013 <https://github.com/ceph/ceph/pull/33013>`_, Tatjana Dehler)
@@ -3918,7 +3918,7 @@ Changelog
 * mgr: close restful socket after exec (`pr#32396 <https://github.com/ceph/ceph/pull/32396>`_, liushi)
 * mgr: Configure Py root logger for Mgr modules (`pr#27069 <https://github.com/ceph/ceph/pull/27069>`_, Volker Theile)
 * mgr: do not reset reported if a new metric is not collected (`pr#30285 <https://github.com/ceph/ceph/pull/30285>`_, Ilsoo Byun)
-* mgr: drop session with Ceph daemon when not ready (`pr#31899 <https://github.com/ceph/ceph/pull/31899>`_, Patrick Donnelly)
+* mgr: drop session with Stone daemon when not ready (`pr#31899 <https://github.com/ceph/ceph/pull/31899>`_, Patrick Donnelly)
 * mgr: fix a few bugs with teh pgp_num adjustments (`pr#27875 <https://github.com/ceph/ceph/pull/27875>`_, Sage Weil)
 * mgr: fix ceph native option value types (`pr#29855 <https://github.com/ceph/ceph/pull/29855>`_, Sage Weil)
 * mgr: fix debug typo (`pr#31900 <https://github.com/ceph/ceph/pull/31900>`_, Patrick Donnelly)
@@ -3953,7 +3953,7 @@ Changelog
 * mgr: mgr/DaemonServer: safe-to-destroy - do not consider irrelevant pgs (`pr#27962 <https://github.com/ceph/ceph/pull/27962>`_, xie xingguo)
 * mgr: mgr/DaemonServer: skip adjusting pgp_num when merging is in-progress (`pr#30139 <https://github.com/ceph/ceph/pull/30139>`_, xie xingguo)
 * mgr: mgr/dashboard: Do not default to admin as Admin Resource (`issue#39338 <http://tracker.ceph.com/issues/39338>`_, `pr#27626 <https://github.com/ceph/ceph/pull/27626>`_, Wido den Hollander)
-* mgr: mgr/dashboard: Handle always-on Ceph Manager modules correctly (`pr#30142 <https://github.com/ceph/ceph/pull/30142>`_, Volker Theile)
+* mgr: mgr/dashboard: Handle always-on Stone Manager modules correctly (`pr#30142 <https://github.com/ceph/ceph/pull/30142>`_, Volker Theile)
 * mgr: mgr/dashboard: integrate progress mgr module events into dashboard tasks list (`pr#29048 <https://github.com/ceph/ceph/pull/29048>`_, Ricardo Dias)
 * mgr: mgr/dashboard: Manager should complain about wrong dashboard certificate (`pr#27036 <https://github.com/ceph/ceph/pull/27036>`_, Volker Theile)
 * mgr: mgr/deepsea: return ganesha and iscsi endpoint URLs (`pr#27336 <https://github.com/ceph/ceph/pull/27336>`_, Tim Serong)

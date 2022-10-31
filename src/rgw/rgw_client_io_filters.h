@@ -20,11 +20,11 @@ class AccountingFilter : public DecoratedRestfulClient<T>,
   bool enabled;
   uint64_t total_sent;
   uint64_t total_received;
-  CephContext *cct;
+  StoneContext *cct;
 
 public:
   template <typename U>
-  AccountingFilter(CephContext *cct, U&& decoratee)
+  AccountingFilter(StoneContext *cct, U&& decoratee)
     : DecoratedRestfulClient<T>(std::forward<U>(decoratee)),
       enabled(false),
       total_sent(0),
@@ -155,15 +155,15 @@ template <typename T>
 class BufferingFilter : public DecoratedRestfulClient<T> {
   template<typename Td> friend class DecoratedRestfulClient;
 protected:
-  ceph::bufferlist data;
+  stone::bufferlist data;
 
   bool has_content_length;
   bool buffer_data;
-  CephContext *cct;
+  StoneContext *cct;
 
 public:
   template <typename U>
-  BufferingFilter(CephContext *cct, U&& decoratee)
+  BufferingFilter(StoneContext *cct, U&& decoratee)
     : DecoratedRestfulClient<T>(std::forward<U>(decoratee)),
       has_content_length(false),
       buffer_data(false), cct(cct) {
@@ -255,7 +255,7 @@ size_t BufferingFilter<T>::complete_request()
 
 template <typename T> static inline
 BufferingFilter<T> add_buffering(
-CephContext *cct,
+StoneContext *cct,
 T&& t) {
   return BufferingFilter<T>(cct, std::forward<T>(t));
 }

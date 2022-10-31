@@ -3,7 +3,7 @@
 msgr2 protocol (msgr2.0 and msgr2.1)
 ====================================
 
-This is a revision of the legacy Ceph on-wire protocol that was
+This is a revision of the legacy Stone on-wire protocol that was
 implemented by the SimpleMessenger.  It addresses performance and
 security issues.
 

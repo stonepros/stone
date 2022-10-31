@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -28,7 +28,7 @@
 #include "common/ref.h"
 #include "common/debug.h"
 #include "common/zipkin_trace.h"
-#include "include/ceph_assert.h" // Because intrusive_ptr clobbers our assert...
+#include "include/stone_assert.h" // Because intrusive_ptr clobbers our assert...
 #include "include/buffer.h"
 #include "include/types.h"
 #include "msg/Connection.h"
@@ -214,20 +214,20 @@
 #define MSG_MON_HEALTH_CHECKS     0x608
 #define MSG_TIMECHECK2            0x609
 
-// *** ceph-mgr <-> OSD/MDS daemons ***
+// *** stone-mgr <-> OSD/MDS daemons ***
 #define MSG_MGR_OPEN              0x700
 #define MSG_MGR_CONFIGURE         0x701
 #define MSG_MGR_REPORT            0x702
 
-// *** ceph-mgr <-> ceph-mon ***
+// *** stone-mgr <-> stone-mon ***
 #define MSG_MGR_BEACON            0x703
 
-// *** ceph-mon(MgrMonitor) -> OSD/MDS daemons ***
+// *** stone-mon(MgrMonitor) -> OSD/MDS daemons ***
 #define MSG_MGR_MAP               0x704
 
-// *** ceph-mon(MgrMonitor) -> ceph-mgr
+// *** stone-mon(MgrMonitor) -> stone-mgr
 #define MSG_MGR_DIGEST               0x705
-// *** cephmgr -> ceph-mon
+// *** stonemgr -> stone-mon
 #define MSG_MON_MGR_REPORT        0x706
 #define MSG_SERVICE_MAP           0x707
 
@@ -248,11 +248,11 @@ public:
 #endif // WITH_SEASTAR
 
 protected:
-  ceph_msg_header  header;      // headerelope
-  ceph_msg_footer  footer;
-  ceph::buffer::list       payload;  // "front" unaligned blob
-  ceph::buffer::list       middle;   // "middle" unaligned blob
-  ceph::buffer::list       data;     // data payload (page-alignment will be preserved where possible)
+  stone_msg_header  header;      // headerelope
+  stone_msg_footer  footer;
+  stone::buffer::list       payload;  // "front" unaligned blob
+  stone::buffer::list       middle;   // "middle" unaligned blob
+  stone::buffer::list       data;     // data payload (page-alignment will be preserved where possible)
 
   /* recv_stamp is set when the Messenger starts reading the
    * Message off the wire */
@@ -274,8 +274,8 @@ protected:
 public:
   // zipkin tracing
   ZTracer::Trace trace;
-  void encode_trace(ceph::buffer::list &bl, uint64_t features) const;
-  void decode_trace(ceph::buffer::list::const_iterator &p, bool create = false);
+  void encode_trace(stone::buffer::list &bl, uint64_t features) const;
+  void decode_trace(stone::buffer::list::const_iterator &p, bool create = false);
 
   class CompletionHook : public Context {
   protected:
@@ -292,7 +292,7 @@ public:
 				   boost::intrusive::list_member_hook<>,
 				   &Message::dispatch_q>> Queue;
 
-  ceph::mono_time queue_start;
+  stone::mono_time queue_start;
 protected:
   CompletionHook* completion_hook = nullptr; // owned by Messenger
 
@@ -356,12 +356,12 @@ public:
   void set_dispatch_throttle_size(uint64_t s) { dispatch_throttle_size = s; }
   uint64_t get_dispatch_throttle_size() const { return dispatch_throttle_size; }
 
-  const ceph_msg_header &get_header() const { return header; }
-  ceph_msg_header &get_header() { return header; }
-  void set_header(const ceph_msg_header &e) { header = e; }
-  void set_footer(const ceph_msg_footer &e) { footer = e; }
-  const ceph_msg_footer &get_footer() const { return footer; }
-  ceph_msg_footer &get_footer() { return footer; }
+  const stone_msg_header &get_header() const { return header; }
+  stone_msg_header &get_header() { return header; }
+  void set_header(const stone_msg_header &e) { header = e; }
+  void set_footer(const stone_msg_footer &e) { footer = e; }
+  const stone_msg_footer &get_footer() const { return footer; }
+  stone_msg_footer &get_footer() { return footer; }
   void set_src(const entity_name_t& src) { header.src = src; }
 
   uint32_t get_magic() const { return magic; }
@@ -369,7 +369,7 @@ public:
 
   /*
    * If you use get_[data, middle, payload] you shouldn't
-   * use it to change those ceph::buffer::lists unless you KNOW
+   * use it to change those stone::buffer::lists unless you KNOW
    * there is no throttle being used. The other
    * functions are throttling-aware as appropriate.
    */
@@ -396,9 +396,9 @@ public:
   }
 
   bool empty_payload() const { return payload.length() == 0; }
-  ceph::buffer::list& get_payload() { return payload; }
-  const ceph::buffer::list& get_payload() const { return payload; }
-  void set_payload(ceph::buffer::list& bl) {
+  stone::buffer::list& get_payload() { return payload; }
+  const stone::buffer::list& get_payload() const { return payload; }
+  void set_payload(stone::buffer::list& bl) {
     if (byte_throttler)
       byte_throttler->put(payload.length());
     payload = std::move(bl);
@@ -406,16 +406,16 @@ public:
       byte_throttler->take(payload.length());
   }
 
-  void set_middle(ceph::buffer::list& bl) {
+  void set_middle(stone::buffer::list& bl) {
     if (byte_throttler)
       byte_throttler->put(middle.length());
     middle = std::move(bl);
     if (byte_throttler)
       byte_throttler->take(middle.length());
   }
-  ceph::buffer::list& get_middle() { return middle; }
+  stone::buffer::list& get_middle() { return middle; }
 
-  void set_data(const ceph::buffer::list &bl) {
+  void set_data(const stone::buffer::list &bl) {
     if (byte_throttler)
       byte_throttler->put(data.length());
     data.share(bl);
@@ -423,9 +423,9 @@ public:
       byte_throttler->take(data.length());
   }
 
-  const ceph::buffer::list& get_data() const { return data; }
-  ceph::buffer::list& get_data() { return data; }
-  void claim_data(ceph::buffer::list& bl) {
+  const stone::buffer::list& get_data() const { return data; }
+  stone::buffer::list& get_data() { return data; }
+  void claim_data(stone::buffer::list& bl) {
     if (byte_throttler)
       byte_throttler->put(data.length());
     bl = std::move(data);
@@ -442,7 +442,7 @@ public:
   const utime_t& get_recv_complete_stamp() const { return recv_complete_stamp; }
 
   void calc_header_crc() {
-    header.crc = ceph_crc32c(0, (unsigned char*)&header,
+    header.crc = stone_crc32c(0, (unsigned char*)&header,
 			     sizeof(header) - sizeof(header.crc));
   }
   void calc_front_crc() {
@@ -510,18 +510,18 @@ public:
     out << get_type_name() << " magic: " << magic;
   }
 
-  virtual void dump(ceph::Formatter *f) const;
+  virtual void dump(stone::Formatter *f) const;
 
   void encode(uint64_t features, int crcflags, bool skip_header_crc = false);
 };
 
-extern Message *decode_message(StoneeContext *cct,
+extern Message *decode_message(StoneContext *cct,
                                int crcflags,
-                               ceph_msg_header& header,
-                               ceph_msg_footer& footer,
-                               ceph::buffer::list& front,
-                               ceph::buffer::list& middle,
-                               ceph::buffer::list& data,
+                               stone_msg_header& header,
+                               stone_msg_footer& footer,
+                               stone::buffer::list& front,
+                               stone::buffer::list& middle,
+                               stone::buffer::list& data,
                                Message::ConnectionRef conn);
 inline std::ostream& operator<<(std::ostream& out, const Message& m) {
   m.print(out);
@@ -530,9 +530,9 @@ inline std::ostream& operator<<(std::ostream& out, const Message& m) {
   return out;
 }
 
-extern void encode_message(Message *m, uint64_t features, ceph::buffer::list& bl);
-extern Message *decode_message(StoneeContext *cct, int crcflags,
-                               ceph::buffer::list::const_iterator& bl);
+extern void encode_message(Message *m, uint64_t features, stone::buffer::list& bl);
+extern Message *decode_message(StoneContext *cct, int crcflags,
+                               stone::buffer::list::const_iterator& bl);
 
 /// this is a "safe" version of Message. it does not allow calling get/put
 /// methods on its derived classes. This is intended to prevent some accidental
@@ -546,9 +546,9 @@ private:
   using RefCountedObject::put;
 };
 
-namespace ceph {
+namespace stone {
 template<class T, typename... Args>
-ceph::ref_t<T> make_message(Args&&... args) {
+stone::ref_t<T> make_message(Args&&... args) {
   return {new T(std::forward<Args>(args)...), false};
 }
 }

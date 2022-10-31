@@ -16,7 +16,7 @@ the ``mon election default strategy`` option. This option is an integer value:
 
 Once your cluster is running, you can change strategies by running ::
 
-  $ ceph mon set election_strategy {classic|disallow|connectivity}
+  $ stone mon set election_strategy {classic|disallow|connectivity}
 
 Choosing a mode
 ===============
@@ -32,16 +32,16 @@ may wish to use this if you have some monitors which are known to be far away
 from clients.
 You can disallow a leader by running ::
 
-  $ ceph mon add disallowed_leader {name}
+  $ stone mon add disallowed_leader {name}
 
 You can remove a monitor from the disallowed list, and allow it to become
 a leader again, by running ::
 
-  $ ceph mon rm disallowed_leader {name}
+  $ stone mon rm disallowed_leader {name}
 
 The list of disallowed_leaders is included when you run ::
 
-  $ ceph mon dump
+  $ stone mon dump
 
 The connectivity Mode
 =====================
@@ -60,7 +60,7 @@ The monitors maintain connection scores even if they aren't in
 the connectivity election mode. You can examine the scores a monitor
 has by running ::
 
-  ceph daemon mon.{name} connection scores dump
+  stone daemon mon.{name} connection scores dump
 
 Scores for individual connections range from 0-1 inclusive, and also
 include whether the connection is considered alive or dead (determined by
@@ -70,7 +70,7 @@ While this would be an unexpected occurrence, if for some reason you experience
 problems and troubleshooting makes you think your scores have become invalid,
 you can forget history and reset them by running ::
 
-  ceph daemon mon.{name} connection scores reset
+  stone daemon mon.{name} connection scores reset
 
 While resetting scores has low risk (monitors will still quickly determine
 if a connection is alive or dead, and trend back to the previous scores if they

@@ -9,7 +9,7 @@
 
 #include "common/AsyncOpTracker.h"
 #include "common/Formatter.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "tools/rbd_mirror/Types.h"
 
 namespace journal { struct CacheManagerHandler; }
@@ -104,7 +104,7 @@ private:
   journal::CacheManagerHandler *m_cache_manager_handler;
   PoolMetaCache* m_pool_meta_cache;
 
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
   AsyncOpTracker m_async_op_tracker;
   std::map<std::string, ImageReplayer<ImageCtxT> *> m_image_replayers;
   Peers m_peers;

@@ -32,7 +32,7 @@ class DashboardTestCase(MgrTestCase):
     MDSS_REQUIRED = 1
     REQUIRE_FILESYSTEM = True
     CLIENTS_REQUIRED = 1
-    CEPHFS = False
+    STONEFS = False
     ORCHESTRATOR = False
     ORCHESTRATOR_TEST_DATA = {
         'inventory': [
@@ -108,8 +108,8 @@ class DashboardTestCase(MgrTestCase):
         :type cmd_args: None | list[str]
         """
         try:
-            cls._ceph_cmd(['dashboard', 'ac-user-show', username])
-            cls._ceph_cmd(['dashboard', 'ac-user-delete', username])
+            cls._stone_cmd(['dashboard', 'ac-user-show', username])
+            cls._stone_cmd(['dashboard', 'ac-user-delete', username])
         except CommandFailedError as ex:
             if ex.exitstatus != 2:
                 raise ex
@@ -121,7 +121,7 @@ class DashboardTestCase(MgrTestCase):
             user_create_args.append('--force-password')
         if cmd_args:
             user_create_args.extend(cmd_args)
-        cls._ceph_cmd_with_secret(user_create_args, password)
+        cls._stone_cmd_with_secret(user_create_args, password)
         if roles:
             set_roles_args = ['dashboard', 'ac-user-set-roles', username]
             for idx, role in enumerate(roles):
@@ -131,18 +131,18 @@ class DashboardTestCase(MgrTestCase):
                     assert isinstance(role, dict)
                     rolename = 'test_role_{}'.format(idx)
                     try:
-                        cls._ceph_cmd(['dashboard', 'ac-role-show', rolename])
-                        cls._ceph_cmd(['dashboard', 'ac-role-delete', rolename])
+                        cls._stone_cmd(['dashboard', 'ac-role-show', rolename])
+                        cls._stone_cmd(['dashboard', 'ac-role-delete', rolename])
                     except CommandFailedError as ex:
                         if ex.exitstatus != 2:
                             raise ex
-                    cls._ceph_cmd(['dashboard', 'ac-role-create', rolename])
+                    cls._stone_cmd(['dashboard', 'ac-role-create', rolename])
                     for mod, perms in role.items():
                         args = ['dashboard', 'ac-role-add-scope-perms', rolename, mod]
                         args.extend(perms)
-                        cls._ceph_cmd(args)
+                        cls._stone_cmd(args)
                     set_roles_args.append(rolename)
-            cls._ceph_cmd(set_roles_args)
+            cls._stone_cmd(set_roles_args)
 
     @classmethod
     def create_pool(cls, name, pg_num, pool_type, application='rbd'):
@@ -178,10 +178,10 @@ class DashboardTestCase(MgrTestCase):
     def delete_user(cls, username, roles=None):
         if roles is None:
             roles = []
-        cls._ceph_cmd(['dashboard', 'ac-user-delete', username])
+        cls._stone_cmd(['dashboard', 'ac-user-delete', username])
         for idx, role in enumerate(roles):
             if isinstance(role, dict):
-                cls._ceph_cmd(['dashboard', 'ac-role-delete', 'test_role_{}'.format(idx)])
+                cls._stone_cmd(['dashboard', 'ac-role-delete', 'test_role_{}'.format(idx)])
 
     @classmethod
     def RunAs(cls, username, password, roles=None, force_password=True,
@@ -214,7 +214,7 @@ class DashboardTestCase(MgrTestCase):
         cls._load_module("dashboard")
         cls.update_base_uri()
 
-        if cls.CEPHFS:
+        if cls.STONEFS:
             cls.mds_cluster.clear_firewall()
 
             # To avoid any issues with e.g. unlink bugs, we destroy and recreate
@@ -290,7 +290,7 @@ class DashboardTestCase(MgrTestCase):
         if version is None:
             headers['Accept'] = 'application/json'
         else:
-            headers['Accept'] = 'application/vnd.ceph.api.v{}+json'.format(version)
+            headers['Accept'] = 'application/vnd.stone.api.v{}+json'.format(version)
 
         if set_cookies:
             if method == 'GET':
@@ -509,27 +509,27 @@ class DashboardTestCase(MgrTestCase):
             self.assertEqual(body['detail'], detail)
 
     @classmethod
-    def _ceph_cmd(cls, cmd):
+    def _stone_cmd(cls, cmd):
         res = cls.mgr_cluster.mon_manager.raw_cluster_cmd(*cmd)
         log.debug("command result: %s", res)
         return res
 
     @classmethod
-    def _ceph_cmd_result(cls, cmd):
+    def _stone_cmd_result(cls, cmd):
         exitstatus = cls.mgr_cluster.mon_manager.raw_cluster_cmd_result(*cmd)
         log.debug("command exit status: %d", exitstatus)
         return exitstatus
 
     @classmethod
-    def _ceph_cmd_with_secret(cls, cmd: List[str], secret: str, return_exit_code: bool = False):
+    def _stone_cmd_with_secret(cls, cmd: List[str], secret: str, return_exit_code: bool = False):
         cmd.append('-i')
-        cmd.append('{}'.format(cls._ceph_create_tmp_file(secret)))
+        cmd.append('{}'.format(cls._stone_create_tmp_file(secret)))
         if return_exit_code:
-            return cls._ceph_cmd_result(cmd)
-        return cls._ceph_cmd(cmd)
+            return cls._stone_cmd_result(cmd)
+        return cls._stone_cmd(cmd)
 
     @classmethod
-    def _ceph_create_tmp_file(cls, content: str) -> str:
+    def _stone_create_tmp_file(cls, content: str) -> str:
         """Create a temporary file in the remote cluster"""
         file_name = ''.join(random.choices(string.ascii_letters + string.digits, k=20))
         file_path = '/tmp/{}'.format(file_name)
@@ -537,10 +537,10 @@ class DashboardTestCase(MgrTestCase):
         return file_path
 
     def set_config_key(self, key, value):
-        self._ceph_cmd(['config-key', 'set', key, value])
+        self._stone_cmd(['config-key', 'set', key, value])
 
     def get_config_key(self, key):
-        return self._ceph_cmd(['config-key', 'get', key])
+        return self._stone_cmd(['config-key', 'get', key])
 
     @classmethod
     def _cmd(cls, args):
@@ -566,7 +566,7 @@ class DashboardTestCase(MgrTestCase):
 
     @classmethod
     def mons(cls):
-        out = cls.ceph_cluster.mon_manager.raw_cluster_cmd('quorum_status')
+        out = cls.stone_cluster.mon_manager.raw_cluster_cmd('quorum_status')
         j = json.loads(out)
         return [mon['name'] for mon in j['monmap']['mons']]
 

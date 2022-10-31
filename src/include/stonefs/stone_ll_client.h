@@ -51,10 +51,10 @@ typedef struct vinodeno_t {
  * Heavily borrowed from David Howells' draft statx patchset.
  *
  * Since the xstat patches are still a work in progress, we borrow its data
- * structures and #defines to implement ceph_getattrx. Once the xstat stuff
+ * structures and #defines to implement stone_getattrx. Once the xstat stuff
  * has been merged we should drop this and switch over to using that instead.
  */
-struct ceph_statx {
+struct stone_statx {
 	uint32_t	stx_mask;
 	uint32_t	stx_blksize;
 	uint32_t	stx_nlink;
@@ -103,7 +103,7 @@ struct ceph_statx {
 #define STONE_REQ_FLAG_MASK		(AT_SYMLINK_NOFOLLOW|AT_NO_ATTR_SYNC)
 
 /* delegation recalls */
-typedef void (*ceph_deleg_cb_t)(Fh *fh, void *priv);
+typedef void (*stone_deleg_cb_t)(Fh *fh, void *priv);
 
 /* inode data/metadata invalidation */
 typedef void (*client_ino_callback_t)(void *handle, vinodeno_t ino,
@@ -130,7 +130,7 @@ typedef void (*client_ino_release_t)(void *handle, vinodeno_t ino);
  * The handle is an opaque value that gets passed to some callbacks. Any fields
  * set to NULL will be left alone. There is no way to unregister callbacks.
  */
-struct ceph_client_callback_args {
+struct stone_client_callback_args {
   void *handle;
   client_ino_callback_t ino_cb;
   client_dentry_callback_t dentry_cb;

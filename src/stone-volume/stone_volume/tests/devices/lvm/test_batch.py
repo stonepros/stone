@@ -5,8 +5,8 @@ import random
 from argparse import ArgumentError
 from mock import MagicMock, patch
 
-from ceph_volume.devices.lvm import batch
-from ceph_volume.util import arg_validators
+from stone_volume.devices.lvm import batch
+from stone_volume.util import arg_validators
 
 
 class TestBatch(object):
@@ -20,15 +20,15 @@ class TestBatch(object):
             batch.Batch(argv=['--osd-ids', '1', 'foo']).main()
 
     def test_disjoint_device_lists(self, factory):
-        device1 = factory(used_by_ceph=False, available=True, abspath="/dev/sda")
-        device2 = factory(used_by_ceph=False, available=True, abspath="/dev/sdb")
+        device1 = factory(used_by_stone=False, available=True, abspath="/dev/sda")
+        device2 = factory(used_by_stone=False, available=True, abspath="/dev/sdb")
         devices = [device1, device2]
         db_devices = [device2]
         with pytest.raises(Exception) as disjoint_ex:
             batch.ensure_disjoint_device_lists(devices, db_devices)
         assert 'Device lists are not disjoint' in str(disjoint_ex.value)
 
-    @patch('ceph_volume.util.arg_validators.Device')
+    @patch('stone_volume.util.arg_validators.Device')
     def test_reject_partition(self, mocked_device):
         mocked_device.return_value = MagicMock(
             is_partition=True,
@@ -39,9 +39,9 @@ class TestBatch(object):
             arg_validators.ValidBatchDevice()('foo')
 
     @pytest.mark.parametrize('format_', ['pretty', 'json', 'json-pretty'])
-    def test_report(self, format_, factory, conf_ceph_stub, mock_device_generator):
+    def test_report(self, format_, factory, conf_stone_stub, mock_device_generator):
         # just ensure reporting works
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
         devs = [mock_device_generator() for _ in range(5)]
         args = factory(data_slots=1,
                        osds_per_device=1,
@@ -61,9 +61,9 @@ class TestBatch(object):
         b.report(plan)
 
     @pytest.mark.parametrize('format_', ['json', 'json-pretty'])
-    def test_json_report_valid_empty(self, format_, factory, conf_ceph_stub, mock_device_generator):
+    def test_json_report_valid_empty(self, format_, factory, conf_stone_stub, mock_device_generator):
         # ensure json reports are valid when empty
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
         devs = []
         args = factory(data_slots=1,
                        osds_per_device=1,
@@ -84,9 +84,9 @@ class TestBatch(object):
         json.loads(report)
 
     @pytest.mark.parametrize('format_', ['json', 'json-pretty'])
-    def test_json_report_valid_empty_unavailable_fast(self, format_, factory, conf_ceph_stub, mock_device_generator):
+    def test_json_report_valid_empty_unavailable_fast(self, format_, factory, conf_stone_stub, mock_device_generator):
         # ensure json reports are valid when empty
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
         devs = [mock_device_generator() for _ in range(5)]
         fast_devs = [mock_device_generator()]
         fast_devs[0].available_lvm = False
@@ -110,9 +110,9 @@ class TestBatch(object):
 
 
     @pytest.mark.parametrize('format_', ['json', 'json-pretty'])
-    def test_json_report_valid_empty_unavailable_very_fast(self, format_, factory, conf_ceph_stub, mock_device_generator):
+    def test_json_report_valid_empty_unavailable_very_fast(self, format_, factory, conf_stone_stub, mock_device_generator):
         # ensure json reports are valid when empty
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
         devs = [mock_device_generator() for _ in range(5)]
         fast_devs = [mock_device_generator()]
         very_fast_devs = [mock_device_generator()]
@@ -137,9 +137,9 @@ class TestBatch(object):
 
     @pytest.mark.parametrize('rota', [0, 1])
     def test_batch_sort_full(self, factory, rota):
-        device1 = factory(used_by_ceph=False, available=True, rotational=rota, abspath="/dev/sda")
-        device2 = factory(used_by_ceph=False, available=True, rotational=rota, abspath="/dev/sdb")
-        device3 = factory(used_by_ceph=False, available=True, rotational=rota, abspath="/dev/sdc")
+        device1 = factory(used_by_stone=False, available=True, rotational=rota, abspath="/dev/sda")
+        device2 = factory(used_by_stone=False, available=True, rotational=rota, abspath="/dev/sdb")
+        device3 = factory(used_by_stone=False, available=True, rotational=rota, abspath="/dev/sdc")
         devices = [device1, device2, device3]
         args = factory(report=True,
                        devices=devices,
@@ -152,9 +152,9 @@ class TestBatch(object):
 
     @pytest.mark.parametrize('objectstore', ['bluestore', 'filestore'])
     def test_batch_sort_mixed(self, factory, objectstore):
-        device1 = factory(used_by_ceph=False, available=True, rotational=1, abspath="/dev/sda")
-        device2 = factory(used_by_ceph=False, available=True, rotational=1, abspath="/dev/sdb")
-        device3 = factory(used_by_ceph=False, available=True, rotational=0, abspath="/dev/sdc")
+        device1 = factory(used_by_stone=False, available=True, rotational=1, abspath="/dev/sda")
+        device2 = factory(used_by_stone=False, available=True, rotational=1, abspath="/dev/sdb")
+        device3 = factory(used_by_stone=False, available=True, rotational=0, abspath="/dev/sdc")
         devices = [device1, device2, device3]
         args = factory(report=True,
                        devices=devices,
@@ -171,9 +171,9 @@ class TestBatch(object):
 
     def test_get_physical_osds_return_len(self, factory,
                                           mock_devices_available,
-                                          conf_ceph_stub,
+                                          conf_stone_stub,
                                           osds_per_device):
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
         args = factory(data_slots=1, osds_per_device=osds_per_device,
                        osd_ids=[], dmcrypt=False)
         osds = batch.get_physical_osds(mock_devices_available, args)
@@ -181,7 +181,7 @@ class TestBatch(object):
 
     def test_get_physical_osds_rel_size(self, factory,
                                           mock_devices_available,
-                                          conf_ceph_stub,
+                                          conf_stone_stub,
                                           osds_per_device):
         args = factory(data_slots=1, osds_per_device=osds_per_device,
                        osd_ids=[], dmcrypt=False)
@@ -191,9 +191,9 @@ class TestBatch(object):
 
     def test_get_physical_osds_abs_size(self, factory,
                                           mock_devices_available,
-                                          conf_ceph_stub,
+                                          conf_stone_stub,
                                           osds_per_device):
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
         args = factory(data_slots=1, osds_per_device=osds_per_device,
                        osd_ids=[], dmcrypt=False)
         osds = batch.get_physical_osds(mock_devices_available, args)
@@ -206,17 +206,17 @@ class TestBatch(object):
         pass
 
     def test_get_physical_fast_allocs_length(self, factory,
-                                             conf_ceph_stub,
+                                             conf_stone_stub,
                                              mock_devices_available):
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
         args = factory(block_db_slots=None, get_block_db_size=None)
         fast = batch.get_physical_fast_allocs(mock_devices_available,
                                               'block_db', 2, 2, args)
         assert len(fast) == 2
 
-    def test_batch_fast_allocations_one_block_db_length(self, factory, conf_ceph_stub,
+    def test_batch_fast_allocations_one_block_db_length(self, factory, conf_stone_stub,
                                                   mock_lv_device_generator):
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
 
         b = batch.Batch([])
         db_lv_devices = [mock_lv_device_generator()]
@@ -231,9 +231,9 @@ class TestBatch(object):
                                                       slots,
                                                       occupied_prior,
                                                       factory,
-                                                      conf_ceph_stub,
+                                                      conf_stone_stub,
                                                       mock_device_generator):
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
         occupied_prior = min(occupied_prior, slots)
         devs = [mock_device_generator() for _ in range(num_devs)]
         already_assigned = 0
@@ -256,9 +256,9 @@ class TestBatch(object):
 
     def test_get_lvm_osds_return_len(self, factory,
                                      mock_lv_device_generator,
-                                     conf_ceph_stub,
+                                     conf_stone_stub,
                                      osds_per_device):
-        conf_ceph_stub('[global]\nfsid=asdf-lkjh')
+        conf_stone_stub('[global]\nfsid=asdf-lkjh')
         args = factory(data_slots=1, osds_per_device=osds_per_device,
                        osd_ids=[], dmcrypt=False)
         mock_lvs = [mock_lv_device_generator()]

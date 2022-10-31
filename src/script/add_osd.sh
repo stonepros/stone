@@ -2,34 +2,34 @@
 
 set -ex
 
-CEPH_DEV_DIR=dev
-CEPH_BIN=bin
-ceph_adm=$CEPH_BIN/ceph
+STONE_DEV_DIR=dev
+STONE_BIN=bin
+stone_adm=$STONE_BIN/stone
 osd=$1
 location=$2
 weight=.0990
 
 # DANGEROUS
-rm -rf $CEPH_DEV_DIR/osd$osd
-mkdir -p $CEPH_DEV_DIR/osd$osd
+rm -rf $STONE_DEV_DIR/osd$osd
+mkdir -p $STONE_DEV_DIR/osd$osd
 
 uuid=`uuidgen`
 echo "add osd$osd $uuid"
-OSD_SECRET=$($CEPH_BIN/ceph-authtool --gen-print-key)
-echo "{\"cephx_secret\": \"$OSD_SECRET\"}" > $CEPH_DEV_DIR/osd$osd/new.json
-$CEPH_BIN/ceph osd new $uuid -i $CEPH_DEV_DIR/osd$osd/new.json
-rm $CEPH_DEV_DIR/osd$osd/new.json
-$CEPH_BIN/ceph-osd -i $osd $ARGS --mkfs --key $OSD_SECRET --osd-uuid $uuid
+OSD_SECRET=$($STONE_BIN/stone-authtool --gen-print-key)
+echo "{\"stonex_secret\": \"$OSD_SECRET\"}" > $STONE_DEV_DIR/osd$osd/new.json
+$STONE_BIN/stone osd new $uuid -i $STONE_DEV_DIR/osd$osd/new.json
+rm $STONE_DEV_DIR/osd$osd/new.json
+$STONE_BIN/stone-osd -i $osd $ARGS --mkfs --key $OSD_SECRET --osd-uuid $uuid
 
-key_fn=$CEPH_DEV_DIR/osd$osd/keyring
+key_fn=$STONE_DEV_DIR/osd$osd/keyring
 cat > $key_fn<<EOF
 [osd.$osd]
 	key = $OSD_SECRET
 EOF
 echo adding osd$osd key to auth repository
-$CEPH_BIN/ceph -i "$key_fn" auth add osd.$osd osd "allow *" mon "allow profile osd" mgr "allow profile osd"
+$STONE_BIN/stone -i "$key_fn" auth add osd.$osd osd "allow *" mon "allow profile osd" mgr "allow profile osd"
 
-$CEPH_BIN/ceph osd crush add osd.$osd $weight $location
+$STONE_BIN/stone osd crush add osd.$osd $weight $location
 
 echo start osd.$osd
-$CEPH_BIN/ceph-osd -i $osd $ARGS $COSD_ARGS
+$STONE_BIN/stone-osd -i $osd $ARGS $COSD_ARGS

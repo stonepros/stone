@@ -11,13 +11,13 @@
 #include <string>
 #include <utility>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/config_obs.h"
 #include "include/common_fwd.h"
 
 class Context;
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 namespace librbd { class ImageCtx; }
 
 namespace rbd {
@@ -27,7 +27,7 @@ template <typename ImageCtxT = librbd::ImageCtx>
 class Throttler : public md_config_obs_t {
 public:
   static Throttler *create(
-      CephContext *cct,
+      StoneContext *cct,
       const std::string &config_key) {
     return new Throttler(cct, config_key);
   }
@@ -35,7 +35,7 @@ public:
     delete this;
   }
 
-  Throttler(CephContext *cct,
+  Throttler(StoneContext *cct,
             const std::string &config_key);
   ~Throttler() override;
 
@@ -46,16 +46,16 @@ public:
   void finish_op(const std::string &ns, const std::string &id);
   void drain(const std::string &ns, int r);
 
-  void print_status(ceph::Formatter *f);
+  void print_status(stone::Formatter *f);
 
 private:
   typedef std::pair<std::string, std::string> Id;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   const std::string m_config_key;
   mutable const char* m_config_keys[2];
 
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   uint32_t m_max_concurrent_ops;
   std::list<Id> m_queue;
   std::map<Id, Context *> m_queued_ops;

@@ -12,10 +12,10 @@ TEST_POOL=rbd
 
 # Functions
 setup() {
-        export CEPH_NUM_OSD=$1
+        export STONE_NUM_OSD=$1
         vstart_config=$2
 
-        # Start ceph
+        # Start stone
         ./stop.sh
 
         # set recovery start to a really long time to ensure that we don't start recovery
@@ -24,10 +24,10 @@ setup() {
 	# for exiting pools set size not greater than number of OSDs,
 	# so recovery from degraded ps is possible
 	local changed=0
-	for pool in `./ceph osd pool ls`; do
-	    local size=`./ceph osd pool get ${pool} size | awk '{print $2}'`
-	    if [ "${size}" -gt "${CEPH_NUM_OSD}" ]; then
-		./ceph osd pool set ${pool} size ${CEPH_NUM_OSD} --yes-i-really-mean-it
+	for pool in `./stone osd pool ls`; do
+	    local size=`./stone osd pool get ${pool} size | awk '{print $2}'`
+	    if [ "${size}" -gt "${STONE_NUM_OSD}" ]; then
+		./stone osd pool set ${pool} size ${STONE_NUM_OSD} --yes-i-really-mean-it
 		changed=1
 	    fi
 	done
@@ -35,11 +35,11 @@ setup() {
 	    # XXX: When a pool has degraded pgs due to size greater than number
 	    # of OSDs, after decreasing the size the recovery still could stuck
 	    # and requires an additional kick.
-	    ./ceph osd out 0
-	    ./ceph osd in 0
+	    ./stone osd out 0
+	    ./stone osd in 0
 	fi
 
-	poll_cmd "./ceph health" HEALTH_OK 1 30
+	poll_cmd "./stone health" HEALTH_OK 1 30
 }
 
 recovery1_impl() {
@@ -63,9 +63,9 @@ recovery1_impl() {
         # Objects should be lost.
         stop_osd 0
 
-	poll_cmd "./ceph pg debug degraded_pgs_exist" TRUE 3 120
+	poll_cmd "./stone pg debug degraded_pgs_exist" TRUE 3 120
         [ $? -eq 1 ] || die "Failed to see degraded PGs."
-	poll_cmd "./ceph pg debug unfound_objects_exist" TRUE 3 120
+	poll_cmd "./stone pg debug unfound_objects_exist" TRUE 3 120
         [ $? -eq 1 ] || die "Failed to see unfound objects."
         echo "Got unfound objects."
 
@@ -74,9 +74,9 @@ recovery1_impl() {
 	start_recovery 2
 
         # Turn on recovery and wait for it to complete.
-	poll_cmd "./ceph pg debug unfound_objects_exist" FALSE 3 120
+	poll_cmd "./stone pg debug unfound_objects_exist" FALSE 3 120
         [ $? -eq 1 ] || die "Failed to recover unfound objects."
-	poll_cmd "./ceph pg debug degraded_pgs_exist" FALSE 3 120
+	poll_cmd "./stone pg debug degraded_pgs_exist" FALSE 3 120
         [ $? -eq 1 ] || die "Recovery never finished."
 }
 
@@ -115,15 +115,15 @@ lost1_impl() {
         stop_osd 0
 
 	# Since recovery can't proceed, stuff should be unfound.
-	poll_cmd "./ceph pg debug unfound_objects_exist" TRUE 3 120
+	poll_cmd "./stone pg debug unfound_objects_exist" TRUE 3 120
         [ $? -eq 1 ] || die "Failed to see unfound objects."
 
-	pgs_unfound=`./ceph health detail |awk '$1 = "pg" && /[0-9] unfound$/ {print $2}'`
+	pgs_unfound=`./stone health detail |awk '$1 = "pg" && /[0-9] unfound$/ {print $2}'`
 
 	[ -n "$pgs_unfound" ] || die "no pg with unfound objects"
 
 	for pg in $pgs_unfound; do
-	    ./ceph pg $pg mark_unfound_lost revert &&
+	    ./stone pg $pg mark_unfound_lost revert &&
 	    die "mark_unfound_lost unexpectedly succeeded for pg $pg"
 	done
 
@@ -136,22 +136,22 @@ lost1_impl() {
 	  # verify we get woken to an error when it's declared lost.
 	  echo "trying to get one of the unfound objects"
 	  (
-	  ./rados -c ./ceph.conf -p $TEST_POOL get obj02 $TEMPDIR/obj02 &&\
+	  ./rados -c ./stone.conf -p $TEST_POOL get obj02 $TEMPDIR/obj02 &&\
 	    die "expected radostool error"
 	  ) &
 	fi
 
 	if is_set mark_osd_lost $flags; then
-	  ./ceph osd lost 0 --yes-i-really-mean-it
+	  ./stone osd lost 0 --yes-i-really-mean-it
 	fi
 
 	if is_set rm_osd $flags; then
-	    ./ceph osd rm 0
+	    ./stone osd rm 0
 	fi
 
 	if ! is_set auto_mark_unfound_lost $flags; then
 	    for pg in $pgs_unfound; do
-		./ceph pg $pg mark_unfound_lost ${lost_action} ||
+		./stone pg $pg mark_unfound_lost ${lost_action} ||
 		  die "mark_unfound_lost failed for pg $pg"
 	    done
 	fi
@@ -159,18 +159,18 @@ lost1_impl() {
 	start_recovery 2
 
 	# Unfound objects go away and are turned into lost objects.
-	poll_cmd "./ceph pg debug unfound_objects_exist" FALSE 3 120
+	poll_cmd "./stone pg debug unfound_objects_exist" FALSE 3 120
         [ $? -eq 1 ] || die "Unfound objects didn't go away."
 
-	for pg in `ceph pg ls | awk '/^[0-9]/ {print $1}'`; do
-	    ./ceph pg $pg mark_unfound_lost revert 2>&1 |
+	for pg in `stone pg ls | awk '/^[0-9]/ {print $1}'`; do
+	    ./stone pg $pg mark_unfound_lost revert 2>&1 |
 	      grep 'pg has no unfound objects' ||
 	      die "pg $pg has unfound objects"
 	done
 
 	# Reading from a lost object gives back an error code.
 	# TODO: check error code
-	./rados -c ./ceph.conf -p $TEST_POOL get obj01 $TEMPDIR/obj01
+	./rados -c ./stone.conf -p $TEST_POOL get obj01 $TEMPDIR/obj01
 	if [ lost_action = delete -a $? -eq 0 ]; then
 	  die "expected radostool error"
 	elif [ lost_action = revert -a $? -ne 0 ]; then
@@ -210,7 +210,7 @@ lost5() {
 }
 
 all_osds_die_impl() {
-        poll_cmd "./ceph osd stat" '3 up, 3 in' 20 240
+        poll_cmd "./stone osd stat" '3 up, 3 in' 20 240
         [ $? -eq 1 ] || die "didn't start 3 osds"
 
         stop_osd 0
@@ -218,7 +218,7 @@ all_osds_die_impl() {
         stop_osd 2
 
 	# wait for the MOSDPGStat timeout
-        poll_cmd "./ceph osd stat" '0 up' 20 240
+        poll_cmd "./stone osd stat" '0 up' 20 240
         [ $? -eq 1 ] || die "all osds weren't marked as down"
 }
 

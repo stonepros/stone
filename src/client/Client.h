@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,18 +19,18 @@
 #include "common/CommandTable.h"
 #include "common/Finisher.h"
 #include "common/Timer.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/cmdparse.h"
 #include "common/compiler_extensions.h"
 #include "include/common_fwd.h"
-#include "include/cephfs/ceph_ll_client.h"
+#include "include/stonefs/stone_ll_client.h"
 #include "include/filepath.h"
 #include "include/interval_set.h"
 #include "include/lru.h"
 #include "include/types.h"
 #include "include/unordered_map.h"
 #include "include/unordered_set.h"
-#include "include/cephfs/metrics/Types.h"
+#include "include/stonefs/metrics/Types.h"
 #include "mds/mdstypes.h"
 #include "msg/Dispatcher.h"
 #include "msg/MessageRef.h"
@@ -86,11 +86,11 @@ class MDSCommandOp : public CommandOp
   public:
   mds_gid_t     mds_gid;
 
-  explicit MDSCommandOp(ceph_tid_t t) : CommandOp(t) {}
+  explicit MDSCommandOp(stone_tid_t t) : CommandOp(t) {}
 };
 
-/* error code for ceph_fuse */
-#define STONE_FUSE_NO_MDS_UP    -((1<<16)+0) /* no mds up deteced in ceph_fuse */
+/* error code for stone_fuse */
+#define STONE_FUSE_NO_MDS_UP    -((1<<16)+0) /* no mds up deteced in stone_fuse */
 #define STONE_FUSE_LAST         -((1<<16)+1) /* (unused) */
 
 // ============================================
@@ -123,7 +123,7 @@ struct Fh;
 struct CapSnap;
 
 struct MetaRequest;
-class ceph_lock_state_t;
+class stone_lock_state_t;
 
 // ========================================================
 // client interface
@@ -158,20 +158,20 @@ struct dir_result_t {
     if (hash)
       v |= HASH;
     else
-      ceph_assert((v & HASH) != HASH);
+      stone_assert((v & HASH) != HASH);
     return v;
   }
   static unsigned fpos_high(uint64_t p) {
     unsigned v = (p & (END-1)) >> SHIFT;
     if ((p & HASH) == HASH)
-      return ceph_frag_value(v);
+      return stone_frag_value(v);
     return v;
   }
   static unsigned fpos_low(uint64_t p) {
     return p & MASK;
   }
   static int fpos_cmp(uint64_t l, uint64_t r) {
-    int c = ceph_frag_compare(fpos_high(l), fpos_high(r));
+    int c = stone_frag_compare(fpos_high(l), fpos_high(r));
     if (c)
       return c;
     if (fpos_low(l) == fpos_low(r))
@@ -245,9 +245,9 @@ public:
   template <typename T> friend class RWRef;
 
   using Dispatcher::cct;
-  using clock = ceph::coarse_mono_clock;
+  using clock = stone::coarse_mono_clock;
 
-  typedef int (*add_dirent_cb_t)(void *p, struct dirent *de, struct ceph_statx *stx, off_t off, Inode *in);
+  typedef int (*add_dirent_cb_t)(void *p, struct dirent *de, struct stone_statx *stx, off_t off, Inode *in);
 
   struct walk_dentry_result {
     InodeRef in;
@@ -277,7 +277,7 @@ public:
   Client(const Client&&) = delete;
   virtual ~Client() override;
 
-  static UserPerm pick_my_perms(StoneeContext *c) {
+  static UserPerm pick_my_perms(StoneContext *c) {
     uid_t uid = c->_conf->client_mount_uid >= 0 ? c->_conf->client_mount_uid : -1;
     gid_t gid = c->_conf->client_mount_gid >= 0 ? c->_conf->client_mount_gid : -1;
     return UserPerm(uid, gid);
@@ -348,7 +348,7 @@ public:
 
   struct dirent * readdir(dir_result_t *d);
   int readdir_r(dir_result_t *dirp, struct dirent *de);
-  int readdirplus_r(dir_result_t *dirp, struct dirent *de, struct ceph_statx *stx, unsigned want, unsigned flags, Inode **out);
+  int readdirplus_r(dir_result_t *dirp, struct dirent *de, struct stone_statx *stx, unsigned want, unsigned flags, Inode **out);
 
   int getdir(const char *relpath, list<string>& names,
 	     const UserPerm& perms);  // get the whole dir at once.
@@ -398,7 +398,7 @@ public:
   unsigned statx_to_mask(unsigned int flags, unsigned int want);
   int stat(const char *path, struct stat *stbuf, const UserPerm& perms,
 	   frag_info_t *dirstat=0, int mask=STONE_STAT_CAP_INODE_ALL);
-  int statx(const char *path, struct ceph_statx *stx,
+  int statx(const char *path, struct stone_statx *stx,
 	    const UserPerm& perms,
 	    unsigned int want, unsigned int flags);
   int lstat(const char *path, struct stat *stbuf, const UserPerm& perms,
@@ -406,10 +406,10 @@ public:
 
   int setattr(const char *relpath, struct stat *attr, int mask,
 	      const UserPerm& perms);
-  int setattrx(const char *relpath, struct ceph_statx *stx, int mask,
+  int setattrx(const char *relpath, struct stone_statx *stx, int mask,
 	       const UserPerm& perms, int flags=0);
   int fsetattr(int fd, struct stat *attr, int mask, const UserPerm& perms);
-  int fsetattrx(int fd, struct ceph_statx *stx, int mask, const UserPerm& perms);
+  int fsetattrx(int fd, struct stone_statx *stx, int mask, const UserPerm& perms);
   int chmod(const char *path, mode_t mode, const UserPerm& perms);
   int fchmod(int fd, mode_t mode, const UserPerm& perms);
   int chmodat(int dirfd, const char *relpath, mode_t mode, int flags, const UserPerm& perms);
@@ -471,10 +471,10 @@ public:
   int fsync(int fd, bool syncdataonly);
   int fstat(int fd, struct stat *stbuf, const UserPerm& perms,
 	    int mask=STONE_STAT_CAP_INODE_ALL);
-  int fstatx(int fd, struct ceph_statx *stx, const UserPerm& perms,
+  int fstatx(int fd, struct stone_statx *stx, const UserPerm& perms,
 	     unsigned int want, unsigned int flags);
   int statxat(int dirfd, const char *relpath,
-              struct ceph_statx *stx, const UserPerm& perms,
+              struct stone_statx *stx, const UserPerm& perms,
               unsigned int want, unsigned int flags);
   int fallocate(int fd, int mode, loff_t offset, loff_t length);
 
@@ -553,16 +553,16 @@ public:
   int ll_lookup_inode(struct inodeno_t ino, const UserPerm& perms, Inode **inode);
   int ll_lookup_vino(vinodeno_t vino, const UserPerm& perms, Inode **inode);
   int ll_lookupx(Inode *parent, const char *name, Inode **out,
-			struct ceph_statx *stx, unsigned want, unsigned flags,
+			struct stone_statx *stx, unsigned want, unsigned flags,
 			const UserPerm& perms);
   bool ll_forget(Inode *in, uint64_t count);
   bool ll_put(Inode *in);
   int ll_get_snap_ref(snapid_t snap);
 
   int ll_getattr(Inode *in, struct stat *st, const UserPerm& perms);
-  int ll_getattrx(Inode *in, struct ceph_statx *stx, unsigned int want,
+  int ll_getattrx(Inode *in, struct stone_statx *stx, unsigned int want,
 		  unsigned int flags, const UserPerm& perms);
-  int ll_setattrx(Inode *in, struct ceph_statx *stx, int mask,
+  int ll_setattrx(Inode *in, struct stone_statx *stx, int mask,
 		  const UserPerm& perms);
   int ll_setattr(Inode *in, struct stat *st, int mask,
 		 const UserPerm& perms);
@@ -580,17 +580,17 @@ public:
   int ll_mknod(Inode *in, const char *name, mode_t mode, dev_t rdev,
 	       struct stat *attr, Inode **out, const UserPerm& perms);
   int ll_mknodx(Inode *parent, const char *name, mode_t mode, dev_t rdev,
-	        Inode **out, struct ceph_statx *stx, unsigned want,
+	        Inode **out, struct stone_statx *stx, unsigned want,
 		unsigned flags, const UserPerm& perms);
   int ll_mkdir(Inode *in, const char *name, mode_t mode, struct stat *attr,
 	       Inode **out, const UserPerm& perm);
   int ll_mkdirx(Inode *parent, const char *name, mode_t mode, Inode **out,
-		struct ceph_statx *stx, unsigned want, unsigned flags,
+		struct stone_statx *stx, unsigned want, unsigned flags,
 		const UserPerm& perms);
   int ll_symlink(Inode *in, const char *name, const char *value,
 		 struct stat *attr, Inode **out, const UserPerm& perms);
   int ll_symlinkx(Inode *parent, const char *name, const char *value,
-		  Inode **out, struct ceph_statx *stx, unsigned want,
+		  Inode **out, struct stone_statx *stx, unsigned want,
 		  unsigned flags, const UserPerm& perms);
   int ll_unlink(Inode *in, const char *name, const UserPerm& perm);
   int ll_rmdir(Inode *in, const char *name, const UserPerm& perms);
@@ -607,7 +607,7 @@ public:
 		const UserPerm& perms);
   int ll_createx(Inode *parent, const char *name, mode_t mode,
 		int oflags, Inode **outp, Fh **fhp,
-		struct ceph_statx *stx, unsigned want, unsigned lflags,
+		struct stone_statx *stx, unsigned want, unsigned lflags,
 		const UserPerm& perms);
   int ll_read_block(Inode *in, uint64_t blockid, char *buf,  uint64_t offset,
 		    uint64_t length, file_layout_t* layout);
@@ -619,7 +619,7 @@ public:
   int ll_commit_blocks(Inode *in, uint64_t offset, uint64_t length);
 
   int ll_statfs(Inode *in, struct statvfs *stbuf, const UserPerm& perms);
-  int ll_walk(const char* name, Inode **i, struct ceph_statx *stx,
+  int ll_walk(const char* name, Inode **i, struct stone_statx *stx,
 	       unsigned int want, unsigned int flags, const UserPerm& perms);
   uint32_t ll_stripe_unit(Inode *in);
   int ll_file_layout(Inode *in, file_layout_t *layout);
@@ -653,7 +653,7 @@ public:
   int ll_osdaddr(int osd, uint32_t *addr);
   int ll_osdaddr(int osd, char* buf, size_t size);
 
-  void ll_register_callbacks(struct ceph_client_callback_args *args);
+  void ll_register_callbacks(struct stone_client_callback_args *args);
   std::pair<int, bool> test_dentry_handling(bool can_invalidate);
 
   const char** get_tracked_conf_keys() const override;
@@ -661,11 +661,11 @@ public:
 	                          const std::set <std::string> &changed) override;
   uint32_t get_deleg_timeout() { return deleg_timeout; }
   int set_deleg_timeout(uint32_t timeout);
-  int ll_delegation(Fh *fh, unsigned cmd, ceph_deleg_cb_t cb, void *priv);
+  int ll_delegation(Fh *fh, unsigned cmd, stone_deleg_cb_t cb, void *priv);
 
   entity_name_t get_myname() { return messenger->get_myname(); }
-  void wait_on_list(std::list<ceph::condition_variable*>& ls);
-  void signal_cond_list(std::list<ceph::condition_variable*>& ls);
+  void wait_on_list(std::list<stone::condition_variable*>& ls);
+  void signal_cond_list(std::list<stone::condition_variable*>& ls);
 
   void set_filer_flags(int flags);
   void clear_filer_flags(int flags);
@@ -702,7 +702,7 @@ public:
   void remove_cap(Cap *cap, bool queue_release);
   void remove_all_caps(Inode *in);
   void remove_session_caps(MetaSession *session, int err);
-  int mark_caps_flushing(Inode *in, ceph_tid_t *ptid);
+  int mark_caps_flushing(Inode *in, stone_tid_t *ptid);
   void adjust_session_flushing_caps(Inode *in, MetaSession *old_s, MetaSession *new_s);
   void flush_caps_sync();
   void kick_flushing_caps(Inode *in, MetaSession *session);
@@ -727,15 +727,15 @@ public:
 
   void send_cap(Inode *in, MetaSession *session, Cap *cap, int flags,
 		int used, int want, int retain, int flush,
-		ceph_tid_t flush_tid);
+		stone_tid_t flush_tid);
 
   void send_flush_snap(Inode *in, MetaSession *session, snapid_t follows, CapSnap& capsnap);
 
   void flush_snaps(Inode *in);
   void get_cap_ref(Inode *in, int cap);
   void put_cap_ref(Inode *in, int cap);
-  void wait_sync_caps(Inode *in, ceph_tid_t want);
-  void wait_sync_caps(ceph_tid_t want);
+  void wait_sync_caps(Inode *in, stone_tid_t want);
+  void wait_sync_caps(stone_tid_t want);
   void queue_cap_snap(Inode *in, SnapContext &old_snapc);
   void finish_cap_snap(Inode *in, CapSnap &capsnap, int used);
 
@@ -877,12 +877,12 @@ public:
   xlist<Inode*> &get_dirty_list() { return dirty_list; }
 
   /* timer_lock for 'timer' */
-  ceph::mutex timer_lock = ceph::make_mutex("Client::timer_lock");
+  stone::mutex timer_lock = stone::make_mutex("Client::timer_lock");
   SafeTimer timer;
 
   /* tick thread */
   std::thread upkeeper;
-  ceph::condition_variable upkeep_cond;
+  stone::condition_variable upkeep_cond;
   bool tick_thread_stopped = false;
 
   std::unique_ptr<PerfCounters> logger;
@@ -1030,8 +1030,8 @@ protected:
     return fill_stat(in.get(), st, dirstat, rstat);
   }
 
-  void fill_statx(Inode *in, unsigned int mask, struct ceph_statx *stx);
-  void fill_statx(InodeRef& in, unsigned int mask, struct ceph_statx *stx) {
+  void fill_statx(Inode *in, unsigned int mask, struct stone_statx *stx);
+  void fill_statx(InodeRef& in, unsigned int mask, struct stone_statx *stx) {
     return fill_statx(in.get(), mask, stx);
   }
 
@@ -1095,7 +1095,7 @@ protected:
 
   // global client lock
   //  - protects Client and buffer cache both!
-  ceph::mutex client_lock = ceph::make_mutex("Client::client_lock");
+  stone::mutex client_lock = stone::make_mutex("Client::client_lock");
 
   std::map<snapid_t, int> ll_snap_ref;
 
@@ -1255,7 +1255,7 @@ private:
     MAY_READ = 4,
   };
 
-  std::unique_ptr<StoneeContext, std::function<voidStoneneContext*)>> cct_deleter;
+  std::unique_ptr<StoneContext, std::function<void(StoneContext*)>> cct_deleter;
 
   /* Flags for VXattr */
   static const unsigned VXATTR_RSTAT = 0x1;
@@ -1318,16 +1318,16 @@ private:
 	       const UserPerm& perms, std::string alternate_name, InodeRef *inp = 0);
   int _mknod(Inode *dir, const char *name, mode_t mode, dev_t rdev,
 	     const UserPerm& perms, InodeRef *inp = 0);
-  int _do_setattr(Inode *in, struct ceph_statx *stx, int mask,
+  int _do_setattr(Inode *in, struct stone_statx *stx, int mask,
 		  const UserPerm& perms, InodeRef *inp);
-  void stat_to_statx(struct stat *st, struct ceph_statx *stx);
-  int __setattrx(Inode *in, struct ceph_statx *stx, int mask,
+  void stat_to_statx(struct stat *st, struct stone_statx *stx);
+  int __setattrx(Inode *in, struct stone_statx *stx, int mask,
 		 const UserPerm& perms, InodeRef *inp = 0);
-  int _setattrx(InodeRef &in, struct ceph_statx *stx, int mask,
+  int _setattrx(InodeRef &in, struct stone_statx *stx, int mask,
 		const UserPerm& perms);
   int _setattr(InodeRef &in, struct stat *attr, int mask,
 	       const UserPerm& perms);
-  int _ll_setattrx(Inode *in, struct ceph_statx *stx, int mask,
+  int _ll_setattrx(Inode *in, struct stone_statx *stx, int mask,
 		   const UserPerm& perms, InodeRef *inp = 0);
   int _getattr(Inode *in, int mask, const UserPerm& perms, bool force=false);
   int _getattr(InodeRef &in, int mask, const UserPerm& perms, bool force=false) {
@@ -1366,7 +1366,7 @@ private:
   int64_t _preadv_pwritev_locked(Fh *fh, const struct iovec *iov,
                                  unsigned iovcnt, int64_t offset,
                                  bool write, bool clamp_to_int,
-                                 std::unique_lock<ceph::mutex> &cl);
+                                 std::unique_lock<stone::mutex> &cl);
   int _preadv_pwritev(int fd, const struct iovec *iov, unsigned iovcnt, int64_t offset, bool write);
   int _flush(Fh *fh);
   int _fsync(Fh *fh, bool syncdataonly);
@@ -1383,7 +1383,7 @@ private:
 
   int xattr_permission(Inode *in, const char *name, unsigned want,
 		       const UserPerm& perms);
-  int may_setattr(Inode *in, struct ceph_statx *stx, int mask,
+  int may_setattr(Inode *in, struct stone_statx *stx, int mask,
 		  const UserPerm& perms);
   int may_open(Inode *in, int flags, const UserPerm& perms);
   int may_lookup(Inode *dir, const UserPerm& perms);
@@ -1437,7 +1437,7 @@ private:
   int _interrupt_filelock(MetaRequest *req);
   void _encode_filelocks(Inode *in, bufferlist& bl);
   void _release_filelocks(Fh *fh);
-  void _update_lock_state(struct flock *fl, uint64_t owner, ceph_lock_state_t *lock_state);
+  void _update_lock_state(struct flock *fl, uint64_t owner, stone_lock_state_t *lock_state);
 
   int _posix_acl_create(Inode *dir, mode_t *mode, bufferlist& xattrs_bl,
 			const UserPerm& perms);
@@ -1485,15 +1485,15 @@ private:
   // mds sessions
   map<mds_rank_t, MetaSession> mds_sessions;  // mds -> push seq
   std::set<mds_rank_t> mds_ranks_closing;  // mds ranks currently tearing down sessions
-  std::list<ceph::condition_variable*> waiting_for_mdsmap;
+  std::list<stone::condition_variable*> waiting_for_mdsmap;
 
   // FSMap, for when using mds_command
-  std::list<ceph::condition_variable*> waiting_for_fsmap;
+  std::list<stone::condition_variable*> waiting_for_fsmap;
   std::unique_ptr<FSMap> fsmap;
   std::unique_ptr<FSMapUser> fsmap_user;
 
   // This mutex only protects command_table
-  ceph::mutex command_lock = ceph::make_mutex("Client::command_lock");
+  stone::mutex command_lock = stone::make_mutex("Client::command_lock");
   // MDS command state
   CommandTable<MDSCommandOp> command_table;
 
@@ -1504,16 +1504,16 @@ private:
 
   // file handles, etc.
   interval_set<int> free_fd_set;  // unused fds
-  ceph::unordered_map<int, Fh*> fd_map;
+  stone::unordered_map<int, Fh*> fd_map;
   set<Fh*> ll_unclosed_fh_set;
-  ceph::unordered_set<dir_result_t*> opened_dirs;
+  stone::unordered_set<dir_result_t*> opened_dirs;
   uint64_t fd_gen = 1;
 
   bool   mount_aborted = false;
   bool   blocklisted = false;
 
-  ceph::unordered_map<vinodeno_t, Inode*> inode_map;
-  ceph::unordered_map<ino_t, vinodeno_t> faked_ino_map;
+  stone::unordered_map<vinodeno_t, Inode*> inode_map;
+  stone::unordered_map<ino_t, vinodeno_t> faked_ino_map;
   interval_set<ino_t> free_faked_inos;
   ino_t last_used_faked_ino;
   ino_t last_used_faked_root;
@@ -1522,17 +1522,17 @@ private:
   epoch_t local_osd_epoch = 0;
 
   // mds requests
-  ceph_tid_t last_tid = 0;
-  ceph_tid_t oldest_tid = 0; // oldest incomplete mds request, excluding setfilelock requests
-  map<ceph_tid_t, MetaRequest*> mds_requests;
+  stone_tid_t last_tid = 0;
+  stone_tid_t oldest_tid = 0; // oldest incomplete mds request, excluding setfilelock requests
+  map<stone_tid_t, MetaRequest*> mds_requests;
 
   // cap flushing
-  ceph_tid_t last_flush_tid = 1;
+  stone_tid_t last_flush_tid = 1;
 
   // dirty_list keeps all the dirty inodes before flushing.
   xlist<Inode*> delayed_list, dirty_list;
   int num_flushing_caps = 0;
-  ceph::unordered_map<inodeno_t,SnapRealm*> snap_realms;
+  stone::unordered_map<inodeno_t,SnapRealm*> snap_realms;
   std::map<std::string, std::string> metadata;
 
   utime_t last_auto_reconnect;
@@ -1540,15 +1540,15 @@ private:
   // trace generation
   ofstream traceout;
 
-  ceph::condition_variable mount_cond, sync_cond;
+  stone::condition_variable mount_cond, sync_cond;
 
   std::map<std::pair<int64_t,std::string>, int> pool_perms;
-  std::list<ceph::condition_variable*> waiting_for_pool_perm;
+  std::list<stone::condition_variable*> waiting_for_pool_perm;
 
   uint64_t retries_on_invalidate = 0;
 
   // state reclaim
-  std::list<ceph::condition_variable*> waiting_for_reclaim;
+  std::list<stone::condition_variable*> waiting_for_reclaim;
   int reclaim_errno = 0;
   epoch_t reclaim_osd_epoch = 0;
   entity_addrvec_t reclaim_target_addrs;
@@ -1571,7 +1571,7 @@ private:
   uint64_t total_write_ops = 0;
   uint64_t total_write_size = 0;
 
-  ceph::spinlock delay_i_lock;
+  stone::spinlock delay_i_lock;
   std::map<Inode*,int> delay_i_release;
 };
 

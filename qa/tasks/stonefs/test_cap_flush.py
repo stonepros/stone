@@ -2,9 +2,9 @@
 import os
 import time
 from textwrap import dedent
-from tasks.cephfs.cephfs_test_case import CephFSTestCase, for_teuthology
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase, for_teuthology
 
-class TestCapFlush(CephFSTestCase):
+class TestCapFlush(StoneFSTestCase):
     @for_teuthology
     def test_replay_create(self):
         """
@@ -32,7 +32,7 @@ class TestCapFlush(CephFSTestCase):
         file_name = "testfile"
         file_path = dir_path + "/" + file_name
 
-        # Create a file and modify its mode. ceph-fuse will mark Ax cap dirty
+        # Create a file and modify its mode. stone-fuse will mark Ax cap dirty
         py_script = dedent("""
             import os
             os.chdir("{0}")
@@ -43,7 +43,7 @@ class TestCapFlush(CephFSTestCase):
             """).format(dir_path, file_name)
         self.mount_a.run_python(py_script, sudo=True)
 
-        # Modify file mode by different user. ceph-fuse will send a setattr request
+        # Modify file mode by different user. stone-fuse will send a setattr request
         self.mount_a.run_shell(["chmod", "600", file_path], wait=False, sudo=True)
 
         time.sleep(10)

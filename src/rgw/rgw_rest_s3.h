@@ -23,7 +23,7 @@
 #include "rgw_ldap.h"
 
 #include "rgw_token.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "rgw_auth.h"
 #include "rgw_auth_filters.h"
@@ -315,7 +315,7 @@ public:
   int complete_get_params();
 
   void send_response() override;
-  int get_data(ceph::bufferlist& bl, bool& again) override;
+  int get_data(stone::bufferlist& bl, bool& again) override;
   int get_encrypt_filter(std::unique_ptr<rgw::putobj::DataProcessor> *filter,
                          rgw::putobj::DataProcessor *cb) override;
 };
@@ -978,7 +978,7 @@ public:
      * used later to compare with the user-provided one. The methodology for
      * doing that depends on AWS auth version. */
     using signature_factory_t = \
-      std::function<server_signature_t(CephContext* cct,
+      std::function<server_signature_t(StoneContext* cct,
                                        const std::string& secret_key,
                                        const string_to_sign_t& string_to_sign)>;
 
@@ -1002,10 +1002,10 @@ public:
   };
 
 protected:
-  CephContext* cct;
+  StoneContext* cct;
   const VersionAbstractor& ver_abstractor;
 
-  AWSEngine(CephContext* const cct, const VersionAbstractor& ver_abstractor)
+  AWSEngine(StoneContext* const cct, const VersionAbstractor& ver_abstractor)
     : cct(cct),
       ver_abstractor(ver_abstractor) {
   }
@@ -1035,7 +1035,7 @@ public:
 
 
 class AWSGeneralAbstractor : public AWSEngine::VersionAbstractor {
-  CephContext* const cct;
+  StoneContext* const cct;
 
   virtual boost::optional<std::string>
   get_v4_canonical_headers(const req_info& info,
@@ -1046,7 +1046,7 @@ class AWSGeneralAbstractor : public AWSEngine::VersionAbstractor {
   auth_data_t get_auth_data_v4(const req_state* s, const bool using_qs) const;
 
 public:
-  explicit AWSGeneralAbstractor(CephContext* const cct)
+  explicit AWSGeneralAbstractor(StoneContext* const cct)
     : cct(cct) {
   }
 
@@ -1064,7 +1064,7 @@ public:
 };
 
 class AWSBrowserUploadAbstractor : public AWSEngine::VersionAbstractor {
-  static std::string to_string(ceph::bufferlist bl) {
+  static std::string to_string(stone::bufferlist bl) {
     return std::string(bl.c_str(),
                        static_cast<std::string::size_type>(bl.length()));
   }
@@ -1073,7 +1073,7 @@ class AWSBrowserUploadAbstractor : public AWSEngine::VersionAbstractor {
   auth_data_t get_auth_data_v4(const req_state* s) const;
 
 public:
-  explicit AWSBrowserUploadAbstractor(CephContext*) {
+  explicit AWSBrowserUploadAbstractor(StoneContext*) {
   }
 
   auth_data_t get_auth_data(const req_state* s) const override;
@@ -1084,7 +1084,7 @@ class LDAPEngine : public AWSEngine {
   static rgw::LDAPHelper* ldh;
   static std::mutex mtx;
 
-  static void init(CephContext* const cct);
+  static void init(StoneContext* const cct);
 
   using acl_strategy_t = rgw::auth::RemoteApplier::acl_strategy_t;
   using auth_info_t = rgw::auth::RemoteApplier::AuthInfo;
@@ -1107,7 +1107,7 @@ protected:
                         const req_state* s,
 			optional_yield y) const override;
 public:
-  LDAPEngine(CephContext* const cct,
+  LDAPEngine(StoneContext* const cct,
              RGWCtl* const ctl,
              const VersionAbstractor& ver_abstractor,
              const rgw::auth::RemoteApplier::Factory* const apl_factory)
@@ -1141,7 +1141,7 @@ class LocalEngine : public AWSEngine {
                         const req_state* s,
 			optional_yield y) const override;
 public:
-  LocalEngine(CephContext* const cct,
+  LocalEngine(StoneContext* const cct,
               RGWCtl* const ctl,
               const VersionAbstractor& ver_abstractor,
               const rgw::auth::LocalApplier::Factory* const apl_factory)
@@ -1182,7 +1182,7 @@ class STSEngine : public AWSEngine {
                         const req_state* s,
 			optional_yield y) const override;
 public:
-  STSEngine(CephContext* const cct,
+  STSEngine(StoneContext* const cct,
               RGWCtl* const ctl,
               const VersionAbstractor& ver_abstractor,
               const rgw::auth::LocalApplier::Factory* const local_apl_factory,

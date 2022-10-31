@@ -33,31 +33,31 @@ class TestReplayExtent final: public NodeExtent {
     recorder->apply_delta(p, mut);
     assert(p == bl.end());
     auto cmp = std::memcmp(get_read(), replayed_extent->get_read(), get_length());
-    ceph_assert(cmp == 0 && "replay mismatch!");
+    stone_assert(cmp == 0 && "replay mismatch!");
   }
 
   static Ref create(extent_len_t length, DeltaRecorderURef&& recorder) {
-    auto r = ceph::buffer::create_aligned(length, 4096);
-    auto bp = ceph::bufferptr(std::move(r));
+    auto r = stone::buffer::create_aligned(length, 4096);
+    auto bp = stone::bufferptr(std::move(r));
     return new TestReplayExtent(std::move(bp), std::move(recorder));
   }
 
  protected:
   NodeExtentRef mutate(context_t, DeltaRecorderURef&&) override {
-    ceph_abort("impossible path"); }
+    stone_abort("impossible path"); }
   DeltaRecorder* get_recorder() const override {
-    ceph_abort("impossible path"); }
+    stone_abort("impossible path"); }
   CachedExtentRef duplicate_for_write() override {
-    ceph_abort("impossible path"); }
+    stone_abort("impossible path"); }
   extent_types_t get_type() const override {
     return extent_types_t::TEST_BLOCK; }
-  ceph::bufferlist get_delta() override {
-    ceph_abort("impossible path"); }
-  void apply_delta(const ceph::bufferlist&) override {
-    ceph_abort("impossible path"); }
+  stone::bufferlist get_delta() override {
+    stone_abort("impossible path"); }
+  void apply_delta(const stone::bufferlist&) override {
+    stone_abort("impossible path"); }
 
  private:
-  TestReplayExtent(ceph::bufferptr&& ptr, DeltaRecorderURef&& recorder)
+  TestReplayExtent(stone::bufferptr&& ptr, DeltaRecorderURef&& recorder)
       : NodeExtent(std::move(ptr)), recorder(std::move(recorder)) {
     state = extent_state_t::MUTATION_PENDING;
   }

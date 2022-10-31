@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank <info@inktank.com>
  *
@@ -65,9 +65,9 @@ public:
     virtual bool contains(const hobject_t& o) const = 0;
     virtual unsigned insert_count() const = 0;
     virtual unsigned approx_unique_insert_count() const = 0;
-    virtual void encode(ceph::buffer::list &bl) const = 0;
-    virtual void decode(ceph::buffer::list::const_iterator& p) = 0;
-    virtual void dump(ceph::Formatter *f) const = 0;
+    virtual void encode(stone::buffer::list &bl) const = 0;
+    virtual void decode(stone::buffer::list::const_iterator& p) = 0;
+    virtual void dump(stone::Formatter *f) const = 0;
     virtual Impl* clone() const = 0;
     virtual void seal() {}
     virtual ~Impl() {}
@@ -85,9 +85,9 @@ public:
     public:
       virtual impl_type_t get_type() const = 0;
       virtual HitSet::Impl *get_new_impl() const = 0;
-      virtual void encode(ceph::buffer::list &bl) const {}
-      virtual void decode(ceph::buffer::list::const_iterator& p) {}
-      virtual void dump(ceph::Formatter *f) const {}
+      virtual void encode(stone::buffer::list &bl) const {}
+      virtual void decode(stone::buffer::list::const_iterator& p) {}
+      virtual void dump(stone::Formatter *f) const {}
       virtual void dump_stream(std::ostream& o) const {}
       virtual ~Impl() {}
     };
@@ -107,9 +107,9 @@ public:
     Params(const Params& o) noexcept;
     const Params& operator=(const Params& o);
 
-    void encode(ceph::buffer::list &bl) const;
-    void decode(ceph::buffer::list::const_iterator& bl);
-    void dump(ceph::Formatter *f) const;
+    void encode(stone::buffer::list &bl) const;
+    void decode(stone::buffer::list::const_iterator& bl);
+    void dump(stone::Formatter *f) const;
     static void generate_test_instances(std::list<HitSet::Params*>& o);
 
     friend std::ostream& operator<<(std::ostream& out, const HitSet::Params& p);
@@ -155,14 +155,14 @@ public:
     return impl->approx_unique_insert_count();
   }
   void seal() {
-    ceph_assert(!sealed);
+    stone_assert(!sealed);
     sealed = true;
     impl->seal();
   }
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<HitSet*>& o);
 
 private:
@@ -180,7 +180,7 @@ std::ostream& operator<<(std::ostream& out, const HitSet::Params& p);
  */
 class ExplicitHashHitSet : public HitSet::Impl {
   uint64_t count;
-  ceph::unordered_set<uint32_t> hits;
+  stone::unordered_set<uint32_t> hits;
 public:
   class Params : public HitSet::Params::Impl {
   public:
@@ -223,19 +223,19 @@ public:
   unsigned approx_unique_insert_count() const override {
     return hits.size();
   }
-  void encode(ceph::buffer::list &bl) const override {
+  void encode(stone::buffer::list &bl) const override {
     ENCODE_START(1, 1, bl);
     encode(count, bl);
     encode(hits, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator &bl) override {
+  void decode(stone::buffer::list::const_iterator &bl) override {
     DECODE_START(1, bl);
     decode(count, bl);
     decode(hits, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const override;
+  void dump(stone::Formatter *f) const override;
   static void generate_test_instances(std::list<ExplicitHashHitSet*>& o) {
     o.push_back(new ExplicitHashHitSet);
     o.push_back(new ExplicitHashHitSet);
@@ -251,7 +251,7 @@ WRITE_CLASS_ENCODER(ExplicitHashHitSet)
  */
 class ExplicitObjectHitSet : public HitSet::Impl {
   uint64_t count;
-  ceph::unordered_set<hobject_t> hits;
+  stone::unordered_set<hobject_t> hits;
 public:
   class Params : public HitSet::Params::Impl {
   public:
@@ -294,19 +294,19 @@ public:
   unsigned approx_unique_insert_count() const override {
     return hits.size();
   }
-  void encode(ceph::buffer::list &bl) const override {
+  void encode(stone::buffer::list &bl) const override {
     ENCODE_START(1, 1, bl);
     encode(count, bl);
     encode(hits, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) override {
+  void decode(stone::buffer::list::const_iterator& bl) override {
     DECODE_START(1, bl);
     decode(count, bl);
     decode(hits, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const override;
+  void dump(stone::Formatter *f) const override;
   static void generate_test_instances(std::list<ExplicitObjectHitSet*>& o) {
     o.push_back(new ExplicitObjectHitSet);
     o.push_back(new ExplicitObjectHitSet);
@@ -358,21 +358,21 @@ public:
       fpp_micro = (unsigned)(llrintl(f * 1000000.0));
     }
 
-    void encode(ceph::buffer::list& bl) const override {
+    void encode(stone::buffer::list& bl) const override {
       ENCODE_START(1, 1, bl);
       encode(fpp_micro, bl);
       encode(target_size, bl);
       encode(seed, bl);
       ENCODE_FINISH(bl);
     }
-    void decode(ceph::buffer::list::const_iterator& bl) override {
+    void decode(stone::buffer::list::const_iterator& bl) override {
       DECODE_START(1, bl);
       decode(fpp_micro, bl);
       decode(target_size, bl);
       decode(seed, bl);
       DECODE_FINISH(bl);
     }
-    void dump(ceph::Formatter *f) const override;
+    void dump(stone::Formatter *f) const override;
     void dump_stream(std::ostream& o) const override {
       o << "false_positive_probability: "
 	<< get_fpp() << ", target_size: " << target_size
@@ -398,7 +398,7 @@ public:
 
   BloomHitSet(const BloomHitSet &o) {
     // oh god
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     o.encode(bl);
     auto bli = std::cbegin(bl);
     this->decode(bli);
@@ -431,17 +431,17 @@ public:
       bloom.compress(pc);
   }
 
-  void encode(ceph::buffer::list &bl) const override {
+  void encode(stone::buffer::list &bl) const override {
     ENCODE_START(1, 1, bl);
     encode(bloom, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) override {
+  void decode(stone::buffer::list::const_iterator& bl) override {
     DECODE_START(1, bl);
     decode(bloom, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const override;
+  void dump(stone::Formatter *f) const override;
   static void generate_test_instances(std::list<BloomHitSet*>& o) {
     o.push_back(new BloomHitSet);
     o.push_back(new BloomHitSet(10, .1, 1));

@@ -102,14 +102,14 @@ commit 586c68f544c95f9e379df7e4d2705a3090baca49
 Author: Sage Weil <sage@inktank.com>
 Date:   Sun Jun 2 21:21:09 2013 -0700
 
-    ceph-fuse: create finisher threads after fork()
+    stone-fuse: create finisher threads after fork()
 
     The ObjectCacher and MonClient classes both instantiate Finisher
     threads.  We need to make sure they are created *after* the fork(2)
     or else the process will fail to join() them on shutdown, and the
     threads will not exist while fuse is doing useful work.
 
-    Put CephFuse on the heap and move all this initalization into the child
+    Put StoneFuse on the heap and move all this initalization into the child
     block, and make sure errors are passed back to the parent.
 
     Fix-proposed-by: Alexandre Marangone <alexandre.maragone@inktank.com>

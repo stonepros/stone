@@ -9,7 +9,7 @@
 #include "include/Context.h"
 #include "librbd/Watcher.h"
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 namespace librbd {
 namespace watcher {
@@ -43,7 +43,7 @@ public:
 
   template <typename P>
   inline void operator()(const P &payload) const {
-    using ceph::encode;
+    using stone::encode;
     encode(static_cast<uint32_t>(P::NOTIFY_OP), m_bl);
     payload.encode(m_bl);
   }

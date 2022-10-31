@@ -7,7 +7,7 @@
 #include "include/int_types.h"
 #include "include/Context.h"
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/containers.h"
 #include "common/Timer.h"
 #include "journal/Future.h"
@@ -22,7 +22,7 @@ namespace journal {
 class JournalRecorder {
 public:
   JournalRecorder(librados::IoCtx &ioctx, std::string_view object_oid_prefix,
-                  ceph::ref_t<JournalMetadata> journal_metadata,
+                  stone::ref_t<JournalMetadata> journal_metadata,
                   uint64_t max_in_flight_appends);
   ~JournalRecorder();
 
@@ -34,11 +34,11 @@ public:
   Future append(uint64_t tag_tid, const bufferlist &bl);
   void flush(Context *on_safe);
 
-  ceph::ref_t<ObjectRecorder> get_object(uint8_t splay_offset);
+  stone::ref_t<ObjectRecorder> get_object(uint8_t splay_offset);
 
 private:
-  typedef std::map<uint8_t, ceph::ref_t<ObjectRecorder>> ObjectRecorderPtrs;
-  typedef std::vector<std::unique_lock<ceph::mutex>> Lockers;
+  typedef std::map<uint8_t, stone::ref_t<ObjectRecorder>> ObjectRecorderPtrs;
+  typedef std::vector<std::unique_lock<stone::mutex>> Lockers;
 
   struct Listener : public JournalMetadataListener {
     JournalRecorder *journal_recorder;
@@ -78,10 +78,10 @@ private:
   };
 
   librados::IoCtx m_ioctx;
-  StoneeContext *m_cct = nullptr;
+  StoneContext *m_cct = nullptr;
   std::string m_object_oid_prefix;
 
-  ceph::ref_t<JournalMetadata> m_journal_metadata;
+  stone::ref_t<JournalMetadata> m_journal_metadata;
 
   uint32_t m_flush_interval = 0;
   uint64_t m_flush_bytes = 0;
@@ -91,15 +91,15 @@ private:
   Listener m_listener;
   ObjectHandler m_object_handler;
 
-  ceph::mutex m_lock = ceph::make_mutex("JournalerRecorder::m_lock");
+  stone::mutex m_lock = stone::make_mutex("JournalerRecorder::m_lock");
 
   uint32_t m_in_flight_advance_sets = 0;
   uint32_t m_in_flight_object_closes = 0;
   uint64_t m_current_set;
   ObjectRecorderPtrs m_object_ptrs;
-  ceph::containers::tiny_vector<ceph::mutex> m_object_locks;
+  stone::containers::tiny_vector<stone::mutex> m_object_locks;
 
-  ceph::ref_t<FutureImpl> m_prev_future;
+  stone::ref_t<FutureImpl> m_prev_future;
 
   Context *m_on_object_set_advanced = nullptr;
 
@@ -111,9 +111,9 @@ private:
 
   void close_and_advance_object_set(uint64_t object_set);
 
-  ceph::ref_t<ObjectRecorder> create_object_recorder(uint64_t object_number,
-                                           ceph::mutex* lock);
-  bool create_next_object_recorder(ceph::ref_t<ObjectRecorder> object_recorder);
+  stone::ref_t<ObjectRecorder> create_object_recorder(uint64_t object_number,
+                                           stone::mutex* lock);
+  bool create_next_object_recorder(stone::ref_t<ObjectRecorder> object_recorder);
 
   void handle_update();
 

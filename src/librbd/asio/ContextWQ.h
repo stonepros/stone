@@ -30,7 +30,7 @@ public:
     boost::asio::post(*m_strand, [this, ctx, r]() {
       ctx->complete(r);
 
-      ceph_assert(m_queued_ops > 0);
+      stone_assert(m_queued_ops > 0);
       --m_queued_ops;
     });
   }

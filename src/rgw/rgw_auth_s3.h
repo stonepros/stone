@@ -40,7 +40,7 @@ class STSAuthStrategy : public rgw::auth::Strategy,
 
   STSEngine  sts_engine;
 
-  aplptr_t create_apl_remote(CephContext* const cct,
+  aplptr_t create_apl_remote(StoneContext* const cct,
                              const req_state* const s,
                              rgw::auth::RemoteApplier::acl_strategy_t&& acl_alg,
                              const rgw::auth::RemoteApplier::AuthInfo &info
@@ -52,7 +52,7 @@ class STSAuthStrategy : public rgw::auth::Strategy,
     return aplptr_t(new decltype(apl)(std::move(apl)));
   }
 
-  aplptr_t create_apl_local(CephContext* const cct,
+  aplptr_t create_apl_local(StoneContext* const cct,
                             const req_state* const s,
                             const RGWUserInfo& user_info,
                             const std::string& subuser,
@@ -62,7 +62,7 @@ class STSAuthStrategy : public rgw::auth::Strategy,
     return aplptr_t(new decltype(apl)(std::move(apl)));
   }
 
-  aplptr_t create_apl_role(CephContext* const cct,
+  aplptr_t create_apl_role(StoneContext* const cct,
                             const req_state* const s,
                             const rgw::auth::RoleApplier::Role& role,
                             const rgw_user& user_id,
@@ -76,7 +76,7 @@ class STSAuthStrategy : public rgw::auth::Strategy,
   }
 
 public:
-  STSAuthStrategy(CephContext* const cct,
+  STSAuthStrategy(StoneContext* const cct,
                        RGWCtl* const ctl,
                        rgw::auth::ImplicitTenants& implicit_tenant_context,
                        AWSEngine::VersionAbstractor* const ver_abstractor)
@@ -102,7 +102,7 @@ class ExternalAuthStrategy : public rgw::auth::Strategy,
   RGWCtl* const ctl;
   rgw::auth::ImplicitTenants& implicit_tenant_context;
 
-  using keystone_config_t = rgw::keystone::CephCtxConfig;
+  using keystone_config_t = rgw::keystone::StoneCtxConfig;
   using keystone_cache_t = rgw::keystone::TokenCache;
   using secret_cache_t = rgw::auth::keystone::SecretCache;
   using EC2Engine = rgw::auth::keystone::EC2Engine;
@@ -110,7 +110,7 @@ class ExternalAuthStrategy : public rgw::auth::Strategy,
   boost::optional <EC2Engine> keystone_engine;
   LDAPEngine ldap_engine;
 
-  aplptr_t create_apl_remote(CephContext* const cct,
+  aplptr_t create_apl_remote(StoneContext* const cct,
                              const req_state* const s,
                              rgw::auth::RemoteApplier::acl_strategy_t&& acl_alg,
                              const rgw::auth::RemoteApplier::AuthInfo &info
@@ -124,7 +124,7 @@ class ExternalAuthStrategy : public rgw::auth::Strategy,
   }
 
 public:
-  ExternalAuthStrategy(CephContext* const cct,
+  ExternalAuthStrategy(StoneContext* const cct,
                        RGWCtl* const ctl,
                        rgw::auth::ImplicitTenants& implicit_tenant_context,
                        AWSEngine::VersionAbstractor* const ver_abstractor)
@@ -174,7 +174,7 @@ class AWSAuthStrategy : public rgw::auth::Strategy,
   STSAuthStrategy sts_engine;
   LocalEngine local_engine;
 
-  aplptr_t create_apl_local(CephContext* const cct,
+  aplptr_t create_apl_local(StoneContext* const cct,
                             const req_state* const s,
                             const RGWUserInfo& user_info,
                             const std::string& subuser,
@@ -204,7 +204,7 @@ public:
     }
   }
 
-  auto parse_auth_order(CephContext* const cct)
+  auto parse_auth_order(StoneContext* const cct)
   {
     std::vector <std::string> result;
 
@@ -222,7 +222,7 @@ public:
     return result;
   }
 
-  AWSAuthStrategy(CephContext* const cct,
+  AWSAuthStrategy(StoneContext* const cct,
                   rgw::auth::ImplicitTenants& implicit_tenant_context,
                   RGWCtl* const ctl)
     : ctl(ctl),
@@ -270,7 +270,7 @@ class AWSv4ComplMulti : public rgw::auth::Completer,
   using io_base_t = rgw::io::DecoratedRestfulClient<rgw::io::RestfulClient*>;
   using signing_key_t = sha256_digest_t;
 
-  CephContext* const cct;
+  StoneContext* const cct;
 
   const std::string_view date;
   const std::string_view credential_scope;
@@ -323,7 +323,7 @@ class AWSv4ComplMulti : public rgw::auth::Completer,
     /* Factory: parse a block of META_MAX_SIZE bytes and creates an object
      * representing non-first chunk in a stream. As the process is sequential
      * and depends on the previous chunk, caller must pass it. */
-    static std::pair<ChunkMeta, size_t> create_next(CephContext* cct,
+    static std::pair<ChunkMeta, size_t> create_next(StoneContext* cct,
                                                     ChunkMeta&& prev,
                                                     const char* metabuf,
                                                     size_t metabuf_len);
@@ -331,7 +331,7 @@ class AWSv4ComplMulti : public rgw::auth::Completer,
 
   size_t stream_pos;
   boost::container::static_vector<char, ChunkMeta::META_MAX_SIZE> parsing_buf;
-  ceph::crypto::SHA256* sha256_hash;
+  stone::crypto::SHA256* sha256_hash;
   std::string prev_chunk_signature;
 
   bool is_signature_mismatched();
@@ -385,9 +385,9 @@ class AWSv4ComplSingle : public rgw::auth::Completer,
                          public std::enable_shared_from_this<AWSv4ComplSingle> {
   using io_base_t = rgw::io::DecoratedRestfulClient<rgw::io::RestfulClient*>;
 
-  CephContext* const cct;
+  StoneContext* const cct;
   const char* const expected_request_payload_hash;
-  ceph::crypto::SHA256* sha256_hash = nullptr;
+  stone::crypto::SHA256* sha256_hash = nullptr;
 
 public:
   /* Defined in rgw_auth_s3.cc because of get_v4_exp_payload_hash(). We need
@@ -529,7 +529,7 @@ static inline std::string get_v4_canonical_uri(const req_info& info) {
 
 static inline const string calc_v4_payload_hash(const string& payload)
 {
-  ceph::crypto::SHA256* sha256_hash = calc_hash_sha256_open_stream();
+  stone::crypto::SHA256* sha256_hash = calc_hash_sha256_open_stream();
   calc_hash_sha256_update_stream(sha256_hash, payload.c_str(), payload.length());
   const auto payload_hash = calc_hash_sha256_close_stream(&sha256_hash);
   return payload_hash;
@@ -590,7 +590,7 @@ get_v4_canonical_headers(const req_info& info,
                          bool force_boto2_compat);
 
 extern sha256_digest_t
-get_v4_canon_req_hash(CephContext* cct,
+get_v4_canon_req_hash(StoneContext* cct,
                       const std::string_view& http_verb,
                       const std::string& canonical_uri,
                       const std::string& canonical_qs,
@@ -600,7 +600,7 @@ get_v4_canon_req_hash(CephContext* cct,
                       const DoutPrefixProvider *dpp);
 
 AWSEngine::VersionAbstractor::string_to_sign_t
-get_v4_string_to_sign(CephContext* cct,
+get_v4_string_to_sign(StoneContext* cct,
                       const std::string_view& algorithm,
                       const std::string_view& request_date,
                       const std::string_view& credential_scope,
@@ -609,13 +609,13 @@ get_v4_string_to_sign(CephContext* cct,
 
 extern AWSEngine::VersionAbstractor::server_signature_t
 get_v4_signature(const std::string_view& credential_scope,
-                 CephContext* const cct,
+                 StoneContext* const cct,
                  const std::string_view& secret_key,
                  const AWSEngine::VersionAbstractor::string_to_sign_t& string_to_sign,
                  const DoutPrefixProvider *dpp);
 
 extern AWSEngine::VersionAbstractor::server_signature_t
-get_v2_signature(CephContext*,
+get_v2_signature(StoneContext*,
                  const std::string& secret_key,
                  const AWSEngine::VersionAbstractor::string_to_sign_t& string_to_sign);
 } /* namespace s3 */

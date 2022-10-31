@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 
-from ceph.deployment.service_spec import ServiceSpec, PlacementSpec
+from stone.deployment.service_spec import ServiceSpec, PlacementSpec
 from orchestrator import DaemonDescription, OrchResult, ServiceDescription
 
 try:
@@ -18,7 +18,7 @@ def mds_autoscaler_module():
     yield MDSAutoscaler('mds_autoscaler', 0, 0)
 
 
-class TestCephadm(object):
+class TestStoneadm(object):
 
     @mock.patch("mds_autoscaler.module.MDSAutoscaler.get")
     @mock.patch("mds_autoscaler.module.MDSAutoscaler.list_daemons")

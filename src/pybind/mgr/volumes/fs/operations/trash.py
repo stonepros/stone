@@ -3,7 +3,7 @@ import uuid
 import logging
 from contextlib import contextmanager
 
-import cephfs
+import stonefs
 
 from .template import GroupTemplate
 from ..fs_util import listdir
@@ -40,7 +40,7 @@ class Trash(GroupTemplate):
                         return entry.d_name
                     entry = self.fs.readdir(d)
             return None
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     def get_trash_entry(self, exclude_list):
@@ -73,9 +73,9 @@ class Trash(GroupTemplate):
                             else:
                                 self.fs.unlink(d_full)
                         d = self.fs.readdir(dir_handle)
-            except cephfs.ObjectNotFound:
+            except stonefs.ObjectNotFound:
                 return
-            except cephfs.Error as e:
+            except stonefs.Error as e:
                 raise VolumeException(-e.args[0], e.args[1])
             # remove the directory only if we were not asked to cancel
             # (else we would fail to remove this anyway)
@@ -85,7 +85,7 @@ class Trash(GroupTemplate):
         # catch any unlink errors
         try:
             rmtree(trashpath)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     def dump(self, path):
@@ -97,35 +97,35 @@ class Trash(GroupTemplate):
         """
         try:
             self.fs.rename(path, self.unique_trash_path)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     def link(self, path, bname):
         pth = os.path.join(self.path, bname)
         try:
             self.fs.symlink(path, pth)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     def delink(self, bname):
         pth = os.path.join(self.path, bname)
         try:
             self.fs.unlink(pth)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
 def create_trashcan(fs, vol_spec):
     """
     create a trash can.
 
-    :param fs: ceph filesystem handle
+    :param fs: stone filesystem handle
     :param vol_spec: volume specification
     :return: None
     """
     trashcan = Trash(fs, vol_spec)
     try:
         fs.mkdirs(trashcan.path, 0o700)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         raise VolumeException(-e.args[0], e.args[1])
 
 @contextmanager
@@ -133,13 +133,13 @@ def open_trashcan(fs, vol_spec):
     """
     open a trash can. This API is to be used as a context manager.
 
-    :param fs: ceph filesystem handle
+    :param fs: stone filesystem handle
     :param vol_spec: volume specification
     :return: yields a trash can object (subclass of GroupTemplate)
     """
     trashcan = Trash(fs, vol_spec)
     try:
         fs.stat(trashcan.path)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         raise VolumeException(-e.args[0], e.args[1])
     yield trashcan

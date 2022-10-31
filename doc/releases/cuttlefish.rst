@@ -8,13 +8,13 @@ radosgw.  We recommend that all production cuttlefish users upgrade.
 Notable Changes
 ---------------
 
-* ceph, ceph-authtool: fix help (Danny Al-Gaaf)
-* ceph-disk: partprobe after creating journal partition
-* ceph-disk: specific fs type when mounting (Alfredo Deza)
-* ceph-fuse: fix bug when compiled against old versions
-* ceph-fuse: fix use-after-free in caching code (Yan, Zheng)
-* ceph-fuse: misc caching bugs
-* ceph.spec: remove incorrect mod_fcgi dependency (Gary Lowell)
+* stone, stone-authtool: fix help (Danny Al-Gaaf)
+* stone-disk: partprobe after creating journal partition
+* stone-disk: specific fs type when mounting (Alfredo Deza)
+* stone-fuse: fix bug when compiled against old versions
+* stone-fuse: fix use-after-free in caching code (Yan, Zheng)
+* stone-fuse: misc caching bugs
+* stone.spec: remove incorrect mod_fcgi dependency (Gary Lowell)
 * crush: fix name caching
 * librbd: fix bug when unpausing cluster (Josh Durgin)
 * mds: fix LAZYIO lock hang
@@ -58,7 +58,7 @@ Notable Changes
 * mon: fix bug during mon cluster expansion
 * rgw: fix crash during multi delete operation
 * msgr: fix race conditions during osd network reinitialization
-* ceph-disk: apply mount options when remounting
+* stone-disk: apply mount options when remounting
 
 For more detailed information, see :download:`the complete changelog <../changelog/v0.61.8.txt>`.
 
@@ -68,14 +68,14 @@ v0.61.7 "Cuttlefish"
 
 This release fixes another regression preventing monitors to start after
 undergoing certain upgrade sequences, as well as some corner cases with
-Paxos and support for unusual device names in ceph-disk/ceph-deploy.
+Paxos and support for unusual device names in stone-disk/stone-deploy.
 
 Notable Changes
 ---------------
 
 * mon: fix regression in latest full osdmap retrieval
 * mon: fix a long-standing bug in a paxos corner case
-* ceph-disk: improved support for unusual device names (e.g., /dev/cciss/c0d0)
+* stone-disk: improved support for unusual device names (e.g., /dev/cciss/c0d0)
 
 For more detailed information, see :download:`the complete changelog <../changelog/v0.61.7.txt>`.
 
@@ -85,7 +85,7 @@ v0.61.6 "Cuttlefish"
 
 This release fixes a regression in v0.61.5 that could prevent monitors
 from restarting.  This affects any cluster that was upgraded from a
-previous version of Ceph (and not freshly created with v0.61.5).
+previous version of Stone (and not freshly created with v0.61.5).
 
 All users are strongly recommended to upgrade.
 
@@ -103,7 +103,7 @@ v0.61.5 "Cuttlefish"
 ====================
 
 This release most improves stability of the monitor and fixes a few
-bugs with the ceph-disk utility (used by ceph-deploy).  We recommend
+bugs with the stone-disk utility (used by stone-deploy).  We recommend
 that all v0.61.x users upgrade.
 
 Upgrading
@@ -111,7 +111,7 @@ Upgrading
 
 * This release fixes a 32-bit vs 64-bit arithmetic bug with the
   feature bits.  An unfortunate consequence of the fix is that 0.61.4
-  (or earlier) ceph-mon daemons can't form a quorum with 0.61.5 (or
+  (or earlier) stone-mon daemons can't form a quorum with 0.61.5 (or
   later) monitors.  To avoid the possibility of service disruption, we
   recommend you upgrade all monitors at once.
 
@@ -133,13 +133,13 @@ Notable Changes
 * mds: fix occasional client failure to reconnect
 * mds: fix bad list traversal after unlink
 * mds: fix underwater dentry cleanup (occasional crash after mds restart)
-* libcephfs, ceph-fuse: fix occasional hangs on umount
-* libcephfs, ceph-fuse: fix old bug with O_LAZY vs O_NOATIME confusion
-* ceph-disk: more robust journal device detection on RHEL/CentOS
-* ceph-disk: better, simpler locking
-* ceph-disk: do not inadvertantely mount over existing osd mounts
-* ceph-disk: better handling for unusual device names
-* sysvinit, upstart: handle symlinks in /var/lib/ceph/*
+* libstonefs, stone-fuse: fix occasional hangs on umount
+* libstonefs, stone-fuse: fix old bug with O_LAZY vs O_NOATIME confusion
+* stone-disk: more robust journal device detection on RHEL/CentOS
+* stone-disk: better, simpler locking
+* stone-disk: do not inadvertantely mount over existing osd mounts
+* stone-disk: better handling for unusual device names
+* sysvinit, upstart: handle symlinks in /var/lib/stone/*
 
 For more detailed information, see :download:`the complete changelog <../changelog/v0.61.5.txt>`.
 
@@ -149,7 +149,7 @@ v0.61.4 "Cuttlefish"
 
 This release resolves a possible data corruption on power-cycle when
 using XFS, a few outstanding problems with monitor sync, several
-problems with ceph-disk and ceph-deploy operation, and a problem with
+problems with stone-disk and stone-deploy operation, and a problem with
 OSD memory usage during scrub.
 
 Upgrading
@@ -168,18 +168,18 @@ Notable Changes
 * rgw: fix listing objects that start with underscore
 * rgw: fix deep URI resource, CORS bugs
 * librados python binding: fix truncate on 32-bit architectures
-* ceph-disk: fix udev rules
+* stone-disk: fix udev rules
 * rpm: install sysvinit script on package install
-* ceph-disk: fix OSD start on machine reboot on Debian wheezy
-* ceph-disk: activate OSD when journal device appears second
-* ceph-disk: fix various bugs on RHEL/CentOS 6.3
-* ceph-disk: add 'zap' command
-* ceph-disk: add '[un]suppress-activate' command for preparing spare disks
+* stone-disk: fix OSD start on machine reboot on Debian wheezy
+* stone-disk: activate OSD when journal device appears second
+* stone-disk: fix various bugs on RHEL/CentOS 6.3
+* stone-disk: add 'zap' command
+* stone-disk: add '[un]suppress-activate' command for preparing spare disks
 * upstart: start on runlevel [2345] (instead of after the first network interface starts)
-* ceph-fuse, libcephfs: handle mds session reset during session open
-* ceph-fuse, libcephfs: fix two capability revocation bugs
-* ceph-fuse: fix thread creation on startup
-* all daemons: create /var/run/ceph directory on startup if missing
+* stone-fuse, libstonefs: handle mds session reset during session open
+* stone-fuse, libstonefs: fix two capability revocation bugs
+* stone-fuse: fix thread creation on startup
+* all daemons: create /var/run/stone directory on startup if missing
 
 For more detailed information, see :download:`the complete changelog <../changelog/v0.61.4.txt>`.
 
@@ -194,7 +194,7 @@ Upgrading
 ---------
 
 * There is one known problem with mon upgrades from bobtail.  If the
-  ceph-mon conversion on startup is aborted or fails for some reason, we
+  stone-mon conversion on startup is aborted or fails for some reason, we
   do not correctly error out, but instead continue with (in certain cases)
   odd results.  Please be careful if you have to restart the mons during
   the upgrade.  A 0.61.4 release with a fix will be out shortly.
@@ -221,7 +221,7 @@ Notable Changes
 * rgw: fix locking issue with ops log socket
 * rgw: require matching version of librados
 * librbd: make image creation defaults configurable (e.g., create format 2 images via qemu-img)
-* fix units in 'ceph df' output
+* fix units in 'stone df' output
 * debian: fix prerm/postinst hooks to start/stop daemons appropriately
 * upstart: allow uppercase daemons names (and thus hostnames)
 * sysvinit: fix enumeration of local daemons by type
@@ -256,8 +256,8 @@ Notable Changes
 ---------------
 
 * osd: handle upgrade when legacy snap collections are present; repair from previous failed restart
-* ceph-create-keys: fix race with ceph-mon startup (which broke 'ceph-deploy gatherkeys ...')
-* ceph-create-keys: gracefully handle bad response from ceph-osd
+* stone-create-keys: fix race with stone-mon startup (which broke 'stone-deploy gatherkeys ...')
+* stone-create-keys: gracefully handle bad response from stone-osd
 * sysvinit: do not assume default osd_data when automatically weighting OSD
 * osd: avoid crash from ill-behaved classes using getomapvals
 * debian: fix squeeze dependency
@@ -271,17 +271,17 @@ v0.61 "Cuttlefish"
 Upgrading from v0.60
 --------------------
 
-* The ceph-deploy tool is now the preferred method of provisioning
-  new clusters.  For existing clusters created via mkcephfs that
+* The stone-deploy tool is now the preferred method of provisioning
+  new clusters.  For existing clusters created via mkstonefs that
   would like to transition to the new tool, there is a migration
-  path, documented at `Transitioning to ceph-deploy`_.
+  path, documented at `Transitioning to stone-deploy`_.
 
 
-* The sysvinit script (/etc/init.d/ceph) will now verify (and, if
+* The sysvinit script (/etc/init.d/stone) will now verify (and, if
   necessary, update) the OSD's position in the CRUSH map on startup.
   (The upstart script has always worked this way.) By default, this
   ensures that the OSD is under a 'host' with a name that matches the
-  hostname (``hostname -s``).  Legacy clusters create with mkcephfs do
+  hostname (``hostname -s``).  Legacy clusters create with mkstonefs do
   this by default, so this should not cause any problems, but legacy
   clusters with customized CRUSH maps with an alternate structure
   should set ``osd crush update on start = false``.
@@ -302,9 +302,9 @@ Upgrading from v0.60
 * Please review the changes going back to 0.56.4 if you are upgrading
   all the way from bobtail.
 
-* The old 'ceph stop_cluster' command has been removed.
+* The old 'stone stop_cluster' command has been removed.
 
-* The sysvinit script now uses the ceph.conf file on the remote host
+* The sysvinit script now uses the stone.conf file on the remote host
   when starting remote daemons via the '-a' option.  Note that if '-a'
   is used in conjunction with '-c path', the path must also be present
   on the remote host (it is not copied to a temporary file, as it was
@@ -316,20 +316,20 @@ Upgrading from v0.56.4 "Bobtail"
 
 Please see `Upgrading from Bobtail to Cuttlefish`_ for details.
 
-.. _Upgrading from Bobtail to Cuttlefish: ../install/upgrading-ceph/#upgrading-from-bobtail-to-cuttlefish
+.. _Upgrading from Bobtail to Cuttlefish: ../install/upgrading-stone/#upgrading-from-bobtail-to-cuttlefish
 
-* The ceph-deploy tool is now the preferred method of provisioning
-  new clusters.  For existing clusters created via mkcephfs that
+* The stone-deploy tool is now the preferred method of provisioning
+  new clusters.  For existing clusters created via mkstonefs that
   would like to transition to the new tool, there is a migration
-  path, documented at `Transitioning to ceph-deploy`_.
+  path, documented at `Transitioning to stone-deploy`_.
 
-.. _Transitioning to ceph-deploy: ../rados/deployment/ceph-deploy-transition
+.. _Transitioning to stone-deploy: ../rados/deployment/stone-deploy-transition
 
-* The sysvinit script (/etc/init.d/ceph) will now verify (and, if
+* The sysvinit script (/etc/init.d/stone) will now verify (and, if
   necessary, update) the OSD's position in the CRUSH map on startup.
   (The upstart script has always worked this way.) By default, this
   ensures that the OSD is under a 'host' with a name that matches the
-  hostname (``hostname -s``).  Legacy clusters create with mkcephfs do
+  hostname (``hostname -s``).  Legacy clusters create with mkstonefs do
   this by default, so this should not cause any problems, but legacy
   clusters with customized CRUSH maps with an alternate structure
   should set ``osd crush update on start = false``.
@@ -350,9 +350,9 @@ Please see `Upgrading from Bobtail to Cuttlefish`_ for details.
 * Please review the changes going back to 0.56.4 if you are upgrading
   all the way from bobtail.
 
-* The old 'ceph stop_cluster' command has been removed.
+* The old 'stone stop_cluster' command has been removed.
 
-* The sysvinit script now uses the ceph.conf file on the remote host
+* The sysvinit script now uses the stone.conf file on the remote host
   when starting remote daemons via the '-a' option.  Note that if '-a'
   is used in conjunction with '-c path', the path must also be present
   on the remote host (it is not copied to a temporary file, as it was
@@ -367,8 +367,8 @@ Please see `Upgrading from Bobtail to Cuttlefish`_ for details.
   upgraded.  For this reason, we recommend not running a mixed-version
   cluster for very long.
 
-* ceph-mon now requires the creation of its data directory prior to
-  --mkfs, similarly to what happens on ceph-osd.  This directory is no
+* stone-mon now requires the creation of its data directory prior to
+  --mkfs, similarly to what happens on stone-osd.  This directory is no
   longer automatically created, and custom scripts should be adjusted to
   reflect just that.
 
@@ -380,7 +380,7 @@ Please see `Upgrading from Bobtail to Cuttlefish`_ for details.
   multi-mds configurations may need to be adjusted accordingly to give
   daemons unique names.
 
-* The 'ceph osd pool delete <poolname>' and 'rados rmpool <poolname>'
+* The 'stone osd pool delete <poolname>' and 'rados rmpool <poolname>'
   now have safety interlocks with loud warnings that make you confirm
   pool removal.  Any scripts currently rely on these functions zapping
   data without confirmation need to be adjusted accordingly.
@@ -419,42 +419,42 @@ Notable Changes from v0.60
 * mds: fixed bugs in journal replay
 * mds: many fixes
 * librados: clean up snapshot constant definitions
-* libcephfs: calls to query CRUSH topology (used by Hadoop)
-* ceph-fuse, libcephfs: misc fixes to mds session management
-* ceph-fuse: disabled cache invalidation (again) due to potential deadlock with kernel
+* libstonefs: calls to query CRUSH topology (used by Hadoop)
+* stone-fuse, libstonefs: misc fixes to mds session management
+* stone-fuse: disabled cache invalidation (again) due to potential deadlock with kernel
 * sysvinit: try to start all daemons despite early failures
-* ceph-disk: new 'list' command
-* ceph-disk: hotplug fixes for RHEL/CentOS
-* ceph-disk: fix creation of OSD data partitions on >2TB disks
+* stone-disk: new 'list' command
+* stone-disk: hotplug fixes for RHEL/CentOS
+* stone-disk: fix creation of OSD data partitions on >2TB disks
 * osd: fix udev rules for RHEL/CentOS systems
 * fix daemon logging during initial startup
 
 Notable changes from v0.56 "Bobtail"
 ------------------------------------
 * always use installed system leveldb (Gary Lowell)
-* auth: ability to require new cephx signatures on messages (still off by default)
+* auth: ability to require new stonex signatures on messages (still off by default)
 * buffer unit testing (Loic Dachary)
-* ceph tool: some CLI interface cleanups
-* ceph-disk: improve multicluster support, error handling (Sage Weil)
-* ceph-disk: support for dm-crypt (Alexandre Marangone)
-* ceph-disk: support for sysvinit, directories or partitions (not full disks)
-* ceph-disk: fix mkfs args on old distros (Alexandre Marangone)
-* ceph-disk: fix creation of OSD data partitions on >2TB disks
-* ceph-disk: hotplug fixes for RHEL/CentOS
-* ceph-disk: new 'list' command
-* ceph-fuse, libcephfs: misc fixes to mds session management
-* ceph-fuse: disabled cache invalidation (again) due to potential deadlock with kernel
-* ceph-fuse: enable kernel cache invalidation (Sam Lang)
-* ceph-fuse: fix statfs(2) reporting
-* ceph-fuse: session handling cleanup, bug fixes (Sage Weil)
+* stone tool: some CLI interface cleanups
+* stone-disk: improve multicluster support, error handling (Sage Weil)
+* stone-disk: support for dm-crypt (Alexandre Marangone)
+* stone-disk: support for sysvinit, directories or partitions (not full disks)
+* stone-disk: fix mkfs args on old distros (Alexandre Marangone)
+* stone-disk: fix creation of OSD data partitions on >2TB disks
+* stone-disk: hotplug fixes for RHEL/CentOS
+* stone-disk: new 'list' command
+* stone-fuse, libstonefs: misc fixes to mds session management
+* stone-fuse: disabled cache invalidation (again) due to potential deadlock with kernel
+* stone-fuse: enable kernel cache invalidation (Sam Lang)
+* stone-fuse: fix statfs(2) reporting
+* stone-fuse: session handling cleanup, bug fixes (Sage Weil)
 * crush: ability to create, remove rules via CLI
 * crush: update weights for all instances of an item, not just the first (Sage Weil)
 * fix daemon logging during initial startup
 * fixed log rotation (Gary Lowell)
-* init-ceph, mkcephfs: close a few security holes with -a  (Sage Weil)
-* libcephfs: calls to query CRUSH topology (used by Hadoop)
-* libcephfs: many fixes, cleanups with the Java bindings
-* libcephfs: new topo API requests for Hadoop (Noah Watkins)
+* init-stone, mkstonefs: close a few security holes with -a  (Sage Weil)
+* libstonefs: calls to query CRUSH topology (used by Hadoop)
+* libstonefs: many fixes, cleanups with the Java bindings
+* libstonefs: new topo API requests for Hadoop (Noah Watkins)
 * librados: clean up snapshot constant definitions
 * librados: fix linger bugs (Josh Durgin)
 * librbd: fixed flatten deadlock (Josh Durgin)
@@ -462,8 +462,8 @@ Notable changes from v0.56 "Bobtail"
 * librbd: many bug fixes
 * librbd: optionally wait for flush before enabling writeback (Josh Durgin)
 * many many cleanups (Danny Al-Gaaf)
-* mds, ceph-fuse: fix bugs with replayed requests after MDS restart (Sage Weil)
-* mds, ceph-fuse: manage layouts via xattrs
+* mds, stone-fuse: fix bugs with replayed requests after MDS restart (Sage Weil)
+* mds, stone-fuse: manage layouts via xattrs
 * mds: allow xattrs on root
 * mds: fast failover between MDSs (enforce unique mds names)
 * mds: fix xattr handling on root inode
@@ -479,18 +479,18 @@ Notable changes from v0.56 "Bobtail"
 * mon: approximate recovery, IO workload stats
 * mon: avoid marking entire CRUSH subtrees out (e.g., if an entire rack goes offline)
 * mon: config-keys service to store arbitrary data on monitor
-* mon: easy adjustment of crush tunables via 'ceph osd crush tunables ...'
-* mon: easy creation of crush rules vai 'ceph osd rule ...'
+* mon: easy adjustment of crush tunables via 'stone osd crush tunables ...'
+* mon: easy creation of crush rules vai 'stone osd rule ...'
 * mon: fix data conversion/upgrade problem (from bobtail)
 * mon: improved trimming behavior
 * mon: many fixes
-* mon: new 'ceph df [detail]' command
+* mon: new 'stone df [detail]' command
 * mon: new checks for identifying and reporting clock drift
 * mon: rearchitected to utilize single instance of paxos and a key/value store (Joao Luis)
 * mon: safety check for pool deletion
 * mon: shut down safely if disk approaches full (Joao Luis)
 * mon: trigger leveldb compaction on trim
-* msgr: fix comparison of IPv6 addresses (fixes monitor bringup via ceph-deploy, chef)
+* msgr: fix comparison of IPv6 addresses (fixes monitor bringup via stone-deploy, chef)
 * msgr: fixed race in connection reset
 * msgr: optionally tune TCP buffer size to avoid throughput collapse (Jim Schutt)
 * much code cleanup and optimization (Danny Al-Gaaf)
@@ -501,7 +501,7 @@ Notable changes from v0.56 "Bobtail"
 * osd: ability to tune leveldb
 * osd: add 'noscrub', 'nodeepscrub' osdmap flags (David Zafman)
 * osd: better prevention of wedging OSDs with ENOSPC
-* osd: ceph-filestore-dump tool for debugging
+* osd: stone-filestore-dump tool for debugging
 * osd: connection handling bug fixes
 * osd: deep-scrub omap keys/values
 * osd: default to libaio for the journal (some performance boost)
@@ -544,7 +544,7 @@ Notable changes from v0.56 "Bobtail"
 * rgw: fix object corruption on COPY to self
 * rgw: fixed >4MB range requests (Jan Harkes)
 * rgw: new sysvinit script for rpm-based systems
-* rpm/deb: do not remove /var/lib/ceph on purge (v0.59 was the only release to do so)
+* rpm/deb: do not remove /var/lib/stone on purge (v0.59 was the only release to do so)
 * sysvinit: try to start all daemons despite early failures
 * upstart: automatically set osd weight based on df (Guilhem Lettron)
 * use less memory for logging by default
@@ -569,23 +569,23 @@ Notable Changes
 * osd: improve handling when disk fills up (David Zafman)
 * osd: add 'noscrub', 'nodeepscrub' osdmap flags (David Zafman)
 * osd: fix hang in 'journal aio = true' mode (Sage Weil)
-* ceph-disk-prepare: fix mkfs args on old distros (Alexandre Marangone)
-* ceph-disk-activate: improve multicluster support, error handling (Sage Weil)
+* stone-disk-prepare: fix mkfs args on old distros (Alexandre Marangone)
+* stone-disk-activate: improve multicluster support, error handling (Sage Weil)
 * librbd: optionally wait for flush before enabling writeback (Josh Durgin)
 * crush: update weights for all instances of an item, not just the first (Sage Weil)
 * mon: shut down safely if disk approaches full (Joao Luis)
 * rgw: fix Content-Length on 32-bit machines (Jan Harkes)
 * mds: store and update backpointers/traces on directory, file objects (Sam Lang)
 * mds: improve session cleanup (Sage Weil)
-* mds, ceph-fuse: fix bugs with replayed requests after MDS restart (Sage Weil)
-* ceph-fuse: enable kernel cache invalidation (Sam Lang)
-* libcephfs: new topo API requests for Hadoop (Noah Watkins)
-* ceph-fuse: session handling cleanup, bug fixes (Sage Weil)
+* mds, stone-fuse: fix bugs with replayed requests after MDS restart (Sage Weil)
+* stone-fuse: enable kernel cache invalidation (Sam Lang)
+* libstonefs: new topo API requests for Hadoop (Noah Watkins)
+* stone-fuse: session handling cleanup, bug fixes (Sage Weil)
 * much code cleanup and optimization (Danny Al-Gaaf)
 * use less memory for logging by default
 * upstart: automatically set osd weight based on df (Guilhem Lettron)
-* init-ceph, mkcephfs: close a few security holes with -a  (Sage Weil)
-* rpm/deb: do not remove /var/lib/ceph on purge (v0.59 was the only release to do so)
+* init-stone, mkstonefs: close a few security holes with -a  (Sage Weil)
+* rpm/deb: do not remove /var/lib/stone on purge (v0.59 was the only release to do so)
 
 
 v0.59
@@ -603,8 +603,8 @@ Upgrading
   upgraded.  For this reason, we recommend not running a mixed-version
   cluster for very long.
 
-* ceph-mon now requires the creation of its data directory prior to
-  --mkfs, similarly to what happens on ceph-osd.  This directory is no
+* stone-mon now requires the creation of its data directory prior to
+  --mkfs, similarly to what happens on stone-osd.  This directory is no
   longer automatically created, and custom scripts should be adjusted to
   reflect just that.
 
@@ -613,7 +613,7 @@ Notable Changes
 ---------------
 
  * mon: rearchitected to utilize single instance of paxos and a key/value store (Joao Luis)
- * mon: new 'ceph df [detail]' command
+ * mon: new 'stone df [detail]' command
  * osd: support for improved hashing of PGs across OSDs via HASHPSPOOL pool flag and feature
  * osd: refactored watch/notify infrastructure (fixes protocol, removes many bugs) (Sam Just)
  * osd, librados: ability to list watchers (David Zafman)
@@ -628,7 +628,7 @@ Notable Changes
  * rgw: fixed >4MB range requests (Jan Harkes)
  * rgw: fix log rotation
  * mds: allow xattrs on root
- * ceph-fuse: fix statfs(2) reporting
+ * stone-fuse: fix statfs(2) reporting
  * msgr: optionally tune TCP buffer size to avoid throughput collapse (Jim Schutt)
  * consume less memory for logging by default
  * always use system leveldb (Gary Lowell)
@@ -658,10 +658,10 @@ Notable Changes
  * osd: fix pg log trimming (avoids memory bloat on degraded clusters)
  * osd: fixed bug in journal checksums (Sam Just)
  * osd: verify snap collections on startup (Sam Just)
- * ceph-disk-prepare/activate: support for dm-crypt (Alexandre Marangone)
- * ceph-disk-prepare/activate: support for sysvinit, directories or partitions (not full disks)
+ * stone-disk-prepare/activate: support for dm-crypt (Alexandre Marangone)
+ * stone-disk-prepare/activate: support for sysvinit, directories or partitions (not full disks)
  * msgr: fixed race in connection reset
- * msgr: fix comparison of IPv6 addresses (fixes monitor bringup via ceph-deploy, chef)
+ * msgr: fix comparison of IPv6 addresses (fixes monitor bringup via stone-deploy, chef)
  * radosgw: fix object copy onto self (Yehuda Sadeh)
  * radosgw: ACL grants in headers (Caleb Miles)
  * radosgw: ability to listen to fastcgi via a port (Guilhem Lettron)
@@ -683,7 +683,7 @@ backported to v0.56.x, and is not mentioned here.
 Upgrading
 ---------
 
-* The 'ceph osd pool delete <poolname>' and 'rados rmpool <poolname>'
+* The 'stone osd pool delete <poolname>' and 'rados rmpool <poolname>'
   now have safety interlocks with loud warnings that make you confirm
   pool removal.  Any scripts currently rely on these functions zapping
   data without confirmation need to be adjusted accordingly.
@@ -693,11 +693,11 @@ Notable Changes
 
 * osd: default to libaio for the journal (some performance boost)
 * osd: validate snap collections on startup
-* osd: ceph-filestore-dump tool for debugging
+* osd: stone-filestore-dump tool for debugging
 * osd: deep-scrub omap keys/values
-* ceph tool: some CLI interface cleanups
-* mon: easy adjustment of crush tunables via 'ceph osd crush tunables ...'
-* mon: easy creation of crush rules vai 'ceph osd rule ...'
+* stone tool: some CLI interface cleanups
+* mon: easy adjustment of crush tunables via 'stone osd crush tunables ...'
+* mon: easy creation of crush rules vai 'stone osd rule ...'
 * mon: approximate recovery, IO workload stats
 * mon: avoid marking entire CRUSH subtrees out (e.g., if an entire rack goes offline)
 * mon: safety check for pool deletion
@@ -705,8 +705,8 @@ Notable Changes
 * radosgw: misc fixes
 * rbd: wait for udev to settle in strategic places (avoid spurious errors, failures)
 * rbd-fuse: new tool, package
-* mds, ceph-fuse: manage layouts via xattrs
+* mds, stone-fuse: manage layouts via xattrs
 * mds: misc bug fixes with clustered MDSs and failure recovery
 * mds: misc bug fixes with readdir
-* libcephfs: many fixes, cleanups with the Java bindings
-* auth: ability to require new cephx signatures on messages (still off by default)
+* libstonefs: many fixes, cleanups with the Java bindings
+* auth: ability to require new stonex signatures on messages (still off by default)

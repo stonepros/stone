@@ -32,30 +32,30 @@ class DummySuper final: public Super {
   }
  private:
   static seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
   laddr_t* p_root_laddr;
 };
 
 class DummyNodeExtent final: public NodeExtent {
  public:
-  DummyNodeExtent(ceph::bufferptr &&ptr) : NodeExtent(std::move(ptr)) {
+  DummyNodeExtent(stone::bufferptr &&ptr) : NodeExtent(std::move(ptr)) {
     state = extent_state_t::INITIAL_WRITE_PENDING;
   }
   ~DummyNodeExtent() override = default;
  protected:
   NodeExtentRef mutate(context_t, DeltaRecorderURef&&) override {
-    ceph_abort("impossible path"); }
+    stone_abort("impossible path"); }
   DeltaRecorder* get_recorder() const override {
     return nullptr; }
   CachedExtentRef duplicate_for_write() override {
-    ceph_abort("impossible path"); }
+    stone_abort("impossible path"); }
   extent_types_t get_type() const override {
     return extent_types_t::TEST_BLOCK; }
-  ceph::bufferlist get_delta() override {
-    ceph_abort("impossible path"); }
-  void apply_delta(const ceph::bufferlist&) override {
-    ceph_abort("impossible path"); }
+  stone::bufferlist get_delta() override {
+    stone_abort("impossible path"); }
+  void apply_delta(const stone::bufferlist&) override {
+    stone_abort("impossible path"); }
 };
 
 template <bool SYNC>
@@ -125,9 +125,9 @@ class DummyNodeExtentManager final: public NodeExtentManager {
   tm_future<NodeExtentRef> alloc_extent_sync(
       Transaction& t, extent_len_t len) {
     assert(len % ALIGNMENT == 0);
-    auto r = ceph::buffer::create_aligned(len, ALIGNMENT);
+    auto r = stone::buffer::create_aligned(len, ALIGNMENT);
     auto addr = reinterpret_cast<laddr_t>(r->get_data());
-    auto bp = ceph::bufferptr(std::move(r));
+    auto bp = stone::bufferptr(std::move(r));
     auto extent = Ref<DummyNodeExtent>(new DummyNodeExtent(std::move(bp)));
     extent->set_laddr(addr);
     assert(allocate_map.find(extent->get_laddr()) == allocate_map.end());
@@ -146,7 +146,7 @@ class DummyNodeExtentManager final: public NodeExtentManager {
   }
 
   static seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 
   std::map<laddr_t, Ref<DummyNodeExtent>> allocate_map;

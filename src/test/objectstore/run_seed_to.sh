@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # vim: ts=8 sw=2 smarttab
 #
-# run_seed_to.sh - Run ceph_test_filestore_idempotent_sequence up until an 
+# run_seed_to.sh - Run stone_test_filestore_idempotent_sequence up until an 
 # injection point, generating a sequence of operations based on a
 # provided seed.
 #
@@ -246,13 +246,13 @@ do
   fi
 
   do_rm $tmp_name_a $tmp_name_a.fail $tmp_name_a.recover
-  $v ceph_test_filestore_idempotent_sequence run-sequence-to $to \
+  $v stone_test_filestore_idempotent_sequence run-sequence-to $to \
     $tmp_name_a $tmp_name_a/journal \
     --test-seed $seed --osd-journal-size 100 \
     --filestore-kill-at $killat $tmp_opts_a \
     --log-file $tmp_name_a.fail --debug-filestore 20 --no-log-to-stderr || true
 
-  stop_at=`ceph_test_filestore_idempotent_sequence get-last-op \
+  stop_at=`stone_test_filestore_idempotent_sequence get-last-op \
     $tmp_name_a $tmp_name_a/journal \
     --log-file $tmp_name_a.recover \
     --debug-filestore 20 --debug-journal 20 --no-log-to-stderr`
@@ -265,13 +265,13 @@ do
   echo stopped at $stop_at
 
   do_rm $tmp_name_b $tmp_name_b.clean
-  $v ceph_test_filestore_idempotent_sequence run-sequence-to \
+  $v stone_test_filestore_idempotent_sequence run-sequence-to \
     $stop_at $tmp_name_b $tmp_name_b/journal \
     --test-seed $seed --osd-journal-size 100 \
     --log-file $tmp_name_b.clean --debug-filestore 20 --no-log-to-stderr \
     $tmp_opts_b
 
-  if $v ceph_test_filestore_idempotent_sequence diff \
+  if $v stone_test_filestore_idempotent_sequence diff \
     $tmp_name_a $tmp_name_a/journal $tmp_name_b $tmp_name_b/journal --no-log-to-stderr --log-file $tmp_name_a.diff.log --debug-filestore 20 ; then
       echo OK
   else

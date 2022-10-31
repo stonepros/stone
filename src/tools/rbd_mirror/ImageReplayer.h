@@ -5,7 +5,7 @@
 #define STONE_RBD_MIRROR_IMAGE_REPLAYER_H
 
 #include "common/AsyncOpTracker.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/rados/librados.hpp"
 #include "cls/rbd/cls_rbd_types.h"
 #include "ProgressContext.h"
@@ -140,7 +140,7 @@ protected:
 
   void on_start_fail(int r, const std::string &desc);
   bool on_start_interrupted();
-  bool on_start_interrupted(ceph::mutex& lock);
+  bool on_start_interrupted(stone::mutex& lock);
 
   void on_stop_journal_replay(int r = 0, const std::string &desc = "");
 
@@ -192,7 +192,7 @@ private:
   std::string m_local_image_name;
   std::string m_image_spec;
 
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
   State m_state = STATE_STOPPED;
   std::string m_state_desc;
 

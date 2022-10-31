@@ -2,16 +2,16 @@
  Block Devices and CloudStack
 =============================
 
-You may use Ceph Block Device images with CloudStack 4.0 and higher through
-``libvirt``, which configures the QEMU interface to ``librbd``. Ceph stripes
-block device images as objects across the cluster, which means that large Ceph
+You may use Stone Block Device images with CloudStack 4.0 and higher through
+``libvirt``, which configures the QEMU interface to ``librbd``. Stone stripes
+block device images as objects across the cluster, which means that large Stone
 Block Device images have better performance than a standalone server!
 
-To use Ceph Block Devices with CloudStack 4.0 and higher, you must install QEMU,
+To use Stone Block Devices with CloudStack 4.0 and higher, you must install QEMU,
 ``libvirt``, and CloudStack first. We recommend using a separate physical host
 for your CloudStack installation. CloudStack recommends a minimum of 4GB of RAM
 and a dual-core processor, but more CPU and RAM will perform better. The
-following diagram depicts the CloudStack/Ceph technology stack.
+following diagram depicts the CloudStack/Stone technology stack.
 
 
 .. ditaa::
@@ -34,10 +34,10 @@ following diagram depicts the CloudStack/Ceph technology stack.
             |          OSDs          | |        Monitors        |
             +------------------------+ +------------------------+
 
-.. important:: To use Ceph Block Devices with CloudStack, you must have  
-   access to a running Ceph Storage Cluster.
+.. important:: To use Stone Block Devices with CloudStack, you must have  
+   access to a running Stone Storage Cluster.
 
-CloudStack integrates with Ceph's block devices to provide CloudStack with a
+CloudStack integrates with Stone's block devices to provide CloudStack with a
 back end for CloudStack's Primary Storage. The instructions below detail the
 setup for CloudStack Primary Storage.
 
@@ -46,10 +46,10 @@ setup for CloudStack Primary Storage.
    libvirt from source.
 
 Installing and configuring QEMU for use with CloudStack doesn't require any
-special handling. Ensure that you have a running Ceph Storage Cluster. Install
-QEMU and configure it for use with Ceph; then, install ``libvirt`` version
+special handling. Ensure that you have a running Stone Storage Cluster. Install
+QEMU and configure it for use with Stone; then, install ``libvirt`` version
 0.9.13 or higher (you may need to compile from source) and ensure it is running
-with Ceph.
+with Stone.
 
 
 .. note:: Ubuntu 14.04 and CentOS 7.2 will have ``libvirt`` with RBD storage
@@ -60,8 +60,8 @@ with Ceph.
 Create a Pool
 =============
 
-By default, Ceph block devices use the ``rbd`` pool. Create a pool for
-CloudStack NFS Primary Storage. Ensure your Ceph cluster is running, then create
+By default, Stone block devices use the ``rbd`` pool. Create a pool for
+CloudStack NFS Primary Storage. Ensure your Stone cluster is running, then create
 the pool. ::
 
    ceph osd pool create cloudstack
@@ -75,10 +75,10 @@ to initialize the pool::
 
         rbd pool init cloudstack
 
-Create a Ceph User
+Create a Stone User
 ==================
 
-To access the Ceph cluster we require a Ceph user which has the correct
+To access the Stone cluster we require a Stone user which has the correct
 credentials to access the ``cloudstack`` pool we just created. Although we could
 use ``client.admin`` for this, it's recommended to create a user with only
 access to the ``cloudstack`` pool. ::
@@ -93,7 +93,7 @@ See `User Management`_ for additional details.
 Add Primary Storage
 ===================
 
-To add a Ceph block device as Primary Storage, the steps include: 
+To add a Stone block device as Primary Storage, the steps include: 
 
 #. Log in to the CloudStack UI.
 #. Click **Infrastructure** on the left side navigation bar. 
@@ -117,7 +117,7 @@ To add a Ceph block device as Primary Storage, the steps include:
    
 #. Add cluster information (``cephx`` is supported).
 
-   - For **RADOS Monitor**, provide the IP address of a Ceph monitor node.
+   - For **RADOS Monitor**, provide the IP address of a Stone monitor node.
    
    - For **RADOS Pool**, provide the name of an RBD pool.
    

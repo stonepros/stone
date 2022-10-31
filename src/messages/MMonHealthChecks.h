@@ -32,20 +32,20 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(health_checks, p);
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(health_checks, payload);
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

@@ -5,7 +5,7 @@
 #define RGW_REALM_WATCHER_H
 
 #include "include/rados/librados.hpp"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/Timer.h"
 #include "common/Cond.h"
 
@@ -36,7 +36,7 @@ class RGWRealmWatcher : public librados::WatchCtx2 {
                                bufferlist::const_iterator& p) = 0;
   };
 
-  RGWRealmWatcher(const DoutPrefixProvider *dpp, CephContext* cct, const RGWRealm& realm);
+  RGWRealmWatcher(const DoutPrefixProvider *dpp, StoneContext* cct, const RGWRealm& realm);
   ~RGWRealmWatcher() override;
 
   /// register a watcher for the given notification type
@@ -50,7 +50,7 @@ class RGWRealmWatcher : public librados::WatchCtx2 {
   void handle_error(uint64_t cookie, int err) override;
 
  private:
-  CephContext *const cct;
+  StoneContext *const cct;
 
   /// keep a separate Rados client whose lifetime is independent of RGWRados
   /// so that we don't miss notifications during realm reconfiguration

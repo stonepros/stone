@@ -27,8 +27,8 @@ class ECPTest(DashboardTestCase):
     @classmethod
     def tearDownClass(cls):
         super(ECPTest, cls).tearDownClass()
-        cls._ceph_cmd(['osd', 'erasure-code-profile', 'rm', 'ecp32'])
-        cls._ceph_cmd(['osd', 'erasure-code-profile', 'rm', 'lrc'])
+        cls._stone_cmd(['osd', 'erasure-code-profile', 'rm', 'ecp32'])
+        cls._stone_cmd(['osd', 'erasure-code-profile', 'rm', 'lrc'])
 
     def test_list(self):
         data = self._get('/api/erasure_code_profile')

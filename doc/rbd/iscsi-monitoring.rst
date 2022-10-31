@@ -1,8 +1,8 @@
 ------------------------------
-Monitoring Ceph iSCSI gateways
+Monitoring Stone iSCSI gateways
 ------------------------------
 
-Ceph provides a tool for iSCSI gateway environments
+Stone provides a tool for iSCSI gateway environments
 to monitor performance of exported RADOS Block Device (RBD) images.
 
 The ``gwtop`` tool is a ``top``-like tool that displays aggregated
@@ -14,7 +14,7 @@ metrics.
 
 **Requirements:**
 
--  A running Ceph iSCSI gateway
+-  A running Stone iSCSI gateway
 
 **Installing:**
 
@@ -69,7 +69,7 @@ selects the LIO collector automatically.
 ::
 
     gwtop  2/2 Gateways   CPU% MIN:  4 MAX:  5    Network Total In:    2M  Out:    3M   10:20:00
-    Capacity:   8G    Disks:   8   IOPS:  503   Clients:  1   Ceph: HEALTH_OK          OSDs:   3
+    Capacity:   8G    Disks:   8   IOPS:  503   Clients:  1   Stone: HEALTH_OK          OSDs:   3
     Pool.Image       Src    Size     iops     rMB/s     wMB/s   Client
     iscsi.t1703             500M        0      0.00      0.00
     iscsi.testme1           500M        0      0.00      0.00

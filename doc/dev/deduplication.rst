@@ -21,7 +21,7 @@ hash value rather than searching all contents that reside in
 the underlying storage.
 
 There are many challenges in order to implement deduplication on top
-of Ceph. Among them, two issues are essential for deduplication.
+of Stone. Among them, two issues are essential for deduplication.
 First is managing scalability of fingerprint index; Second is
 it is complex to ensure compatibility between newly applied
 deduplication metadata and existing metadata.
@@ -53,12 +53,12 @@ Design
 .. ditaa::
 
            +-------------+
-           | Ceph Client |
+           | Stone Client |
            +------+------+
                   ^
      Tiering is   |  
     Transparent   |               Metadata
-        to Ceph   |           +---------------+
+        to Stone   |           +---------------+
      Client Ops   |           |               |   
                   |    +----->+   Base Pool   |
                   |    |      |               |
@@ -94,7 +94,7 @@ Regarding how to use, please see ``osd_internals/manifest.rst``
 Usage Patterns
 ==============
 
-The different Ceph interface layers present potentially different oportunities
+The different Stone interface layers present potentially different oportunities
 and costs for deduplication and tiering in general.
 
 RadosGW
@@ -110,10 +110,10 @@ locating the remaining pieces.  As such, radosgw could use the
 refcounting machinery (``osd_internals/refcount.rst``) directly without
 needing direct support from rados for manifests.
 
-RBD/Cephfs
+RBD/Stonefs
 ----------
 
-RBD and CephFS both use deterministic naming schemes to partition
+RBD and StoneFS both use deterministic naming schemes to partition
 block devices/file data over rados objects.  As such, the redirection
 metadata would need to be included as part of rados, presumably
 transparently.

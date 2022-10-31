@@ -1,6 +1,6 @@
 from io import StringIO
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 import json
 import logging
 
@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 failure = "using old balancer; mantle failed for balancer="
 success = "mantle balancer version changed: "
 
-class TestMantle(CephFSTestCase):
+class TestMantle(StoneFSTestCase):
     def start_mantle(self):
         self.wait_for_health_clear(timeout=30)
         self.fs.set_max_mds(2)
@@ -102,7 +102,7 @@ class TestMantle(CephFSTestCase):
         # trigger a pull from RADOS
         self.fs.mon_manager.raw_cluster_cmd_result('fs', 'set', self.fs.name, 'balancer', "valid.lua")
 
-        # make the timeout a little longer since dead OSDs spam ceph -w
+        # make the timeout a little longer since dead OSDs spam stone -w
         with self.assert_cluster_log(failure + "valid.lua" + expect, timeout=30):
             log.info("run a balancer that should timeout")
 

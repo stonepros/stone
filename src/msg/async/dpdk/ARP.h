@@ -163,7 +163,7 @@ class arp_for : public arp_for_protocol {
   friend class C_handle_arp_timeout;
 
  private:
-  StoneeContext *cct;
+  StoneContext *cct;
   EventCenter *center;
   l3addr _l3self = L3::broadcast_address();
   std::unordered_map<l3addr, l2addr> _table;
@@ -176,7 +176,7 @@ class arp_for : public arp_for_protocol {
   void send(l2addr to, Packet &&p);
  public:
   void send_query(const l3addr& paddr);
-  explicit arp_for(StoneeContext *c, arp& a, EventCenter *cen)
+  explicit arp_for(StoneContext *c, arp& a, EventCenter *cen)
       : arp_for_protocol(a, L3::arp_protocol_type()), cct(c), center(cen) {
     _table[L3::broadcast_address()] = ethernet::broadcast_address();
   }

@@ -26,7 +26,7 @@ export class IscsiTargetDetailsComponent implements OnChanges, OnInit {
   @Input()
   settings: any;
   @Input()
-  cephIscsiConfigVersion: number;
+  stoneIscsiConfigVersion: number;
 
   @ViewChild('highlightTpl', { static: true })
   highlightTpl: TemplateRef<any>;
@@ -98,8 +98,8 @@ export class IscsiTargetDetailsComponent implements OnChanges, OnInit {
 
   private generateTree() {
     const target_meta = _.cloneDeep(this.selectedItem.target_controls);
-    // Target level authentication was introduced in ceph-iscsi config v11
-    if (this.cephIscsiConfigVersion > 10) {
+    // Target level authentication was introduced in stone-iscsi config v11
+    if (this.stoneIscsiConfigVersion > 10) {
       _.extend(target_meta, _.cloneDeep(this.selectedItem.auth));
     }
     this.metadata = { root: target_meta };
@@ -287,8 +287,8 @@ export class IscsiTargetDetailsComponent implements OnChanges, OnInit {
             current: !_.isUndefined(tempData[key]) ? this.format(tempData[key]) : value
           };
         });
-        // Target level authentication was introduced in ceph-iscsi config v11
-        if (this.cephIscsiConfigVersion > 10) {
+        // Target level authentication was introduced in stone-iscsi config v11
+        if (this.stoneIscsiConfigVersion > 10) {
           ['user', 'password', 'mutual_user', 'mutual_password'].forEach((key) => {
             this.data.push({
               displayName: key,

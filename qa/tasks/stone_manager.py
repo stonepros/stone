@@ -1,5 +1,5 @@
 """
-ceph manager -- Thrasher and CephManager objects
+stone manager -- Thrasher and StoneManager objects
 """
 from functools import wraps
 import contextlib
@@ -29,11 +29,11 @@ from teuthology.exceptions import CommandFailedError
 from tasks.thrasher import Thrasher
 
 
-DEFAULT_CONF_PATH = '/etc/ceph/ceph.conf'
+DEFAULT_CONF_PATH = '/etc/stonepros/stone.conf'
 
 log = logging.getLogger(__name__)
 
-# this is for cephadm clusters
+# this is for stoneadm clusters
 def shell(ctx, cluster_name, remote, args, name=None, **kwargs):
     extra_args = []
     if name:
@@ -41,11 +41,11 @@ def shell(ctx, cluster_name, remote, args, name=None, **kwargs):
     return remote.run(
         args=[
             'sudo',
-            ctx.cephadm,
-            '--image', ctx.ceph[cluster_name].image,
+            ctx.stoneadm,
+            '--image', ctx.stone[cluster_name].image,
             'shell',
         ] + extra_args + [
-            '--fsid', ctx.ceph[cluster_name].fsid,
+            '--fsid', ctx.stone[cluster_name].fsid,
             '--',
         ] + args,
         **kwargs
@@ -56,7 +56,7 @@ def toolbox(ctx, cluster_name, args, **kwargs):
     return ctx.rook[cluster_name].remote.run(
         args=[
             'kubectl',
-            '-n', 'rook-ceph',
+            '-n', 'rook-stone',
             'exec',
             ctx.rook[cluster_name].toolbox,
             '--',
@@ -65,14 +65,14 @@ def toolbox(ctx, cluster_name, args, **kwargs):
     )
 
 
-def write_conf(ctx, conf_path=DEFAULT_CONF_PATH, cluster='ceph'):
+def write_conf(ctx, conf_path=DEFAULT_CONF_PATH, cluster='stone'):
     conf_fp = BytesIO()
-    ctx.ceph[cluster].conf.write(conf_fp)
+    ctx.stone[cluster].conf.write(conf_fp)
     conf_fp.seek(0)
     writes = ctx.cluster.run(
         args=[
-            'sudo', 'mkdir', '-p', '/etc/ceph', run.Raw('&&'),
-            'sudo', 'chmod', '0755', '/etc/ceph', run.Raw('&&'),
+            'sudo', 'mkdir', '-p', '/etc/stone', run.Raw('&&'),
+            'sudo', 'chmod', '0755', '/etc/stone', run.Raw('&&'),
             'sudo', 'tee', conf_path, run.Raw('&&'),
             'sudo', 'chmod', '0644', conf_path,
             run.Raw('>'), '/dev/null',
@@ -97,12 +97,12 @@ def get_valgrind_args(testdir, name, preamble, v, exit_on_first_error=True, cd=T
     if not isinstance(v, list):
         v = [v]
 
-    # https://tracker.ceph.com/issues/44362
+    # https://tracker.stone.com/issues/44362
     preamble.extend([
         'env', 'OPENSSL_ia32cap=~0x1000000000000000',
     ])
 
-    val_path = '/var/log/ceph/valgrind'
+    val_path = '/var/log/stonepros/valgrind'
     if '--tool=memcheck' in v or '--tool=helgrind' in v:
         extra_args = [
             'valgrind',
@@ -147,12 +147,12 @@ def mount_osd_data(ctx, remote, cluster, osd):
 
     :param ctx: Context
     :param remote: Remote site
-    :param cluster: name of ceph cluster
+    :param cluster: name of stone cluster
     :param osd: Osd name
     """
     log.debug('Mounting data for osd.{o} on {r}'.format(o=osd, r=remote))
     role = "{0}.osd.{1}".format(cluster, osd)
-    alt_role = role if cluster != 'ceph' else "osd.{0}".format(osd)
+    alt_role = role if cluster != 'stone' else "osd.{0}".format(osd)
     if remote in ctx.disk_config.remote_to_roles_to_dev:
         if alt_role in ctx.disk_config.remote_to_roles_to_dev[remote]:
             role = alt_role
@@ -162,7 +162,7 @@ def mount_osd_data(ctx, remote, cluster, osd):
         mount_options = ctx.disk_config.\
             remote_to_roles_to_dev_mount_options[remote][role]
         fstype = ctx.disk_config.remote_to_roles_to_dev_fstype[remote][role]
-        mnt = os.path.join('/var/lib/ceph/osd', '{0}-{1}'.format(cluster, osd))
+        mnt = os.path.join('/var/lib/stonepros/osd', '{0}-{1}'.format(cluster, osd))
 
         log.info('Mounting osd.{o}: dev: {n}, cluster: {c}'
                  'mountpoint: {p}, type: {t}, options: {v}'.format(
@@ -199,15 +199,15 @@ class PoolType:
 
 class OSDThrasher(Thrasher):
     """
-    Object used to thrash Ceph
+    Object used to thrash Stone
     """
     def __init__(self, manager, config, name, logger):
         super(OSDThrasher, self).__init__()
 
-        self.ceph_manager = manager
+        self.stone_manager = manager
         self.cluster = manager.cluster
-        self.ceph_manager.wait_for_clean()
-        osd_status = self.ceph_manager.get_osd_status()
+        self.stone_manager.wait_for_clean()
+        osd_status = self.stone_manager.get_osd_status()
         self.in_osds = osd_status['in']
         self.live_osds = osd_status['live']
         self.out_osds = osd_status['out']
@@ -252,21 +252,21 @@ class OSDThrasher(Thrasher):
                                            opt)
             self.saved_options.append((service, opt, old_value))
             manager.inject_args(service, '*', opt, new_value)
-        # initialize ceph_objectstore_tool property - must be done before
-        # do_thrash is spawned - http://tracker.ceph.com/issues/18799
+        # initialize stone_objectstore_tool property - must be done before
+        # do_thrash is spawned - http://tracker.stone.com/issues/18799
         if (self.config.get('powercycle') or
-            not self.cmd_exists_on_osds("ceph-objectstore-tool") or
+            not self.cmd_exists_on_osds("stone-objectstore-tool") or
             self.config.get('disable_objectstore_tool_tests', False)):
-            self.ceph_objectstore_tool = False
+            self.stone_objectstore_tool = False
             if self.config.get('powercycle'):
-                self.log("Unable to test ceph-objectstore-tool, "
+                self.log("Unable to test stone-objectstore-tool, "
                          "powercycle testing")
             else:
-                self.log("Unable to test ceph-objectstore-tool, "
+                self.log("Unable to test stone-objectstore-tool, "
                          "not available on all OSD nodes")
         else:
-            self.ceph_objectstore_tool = \
-                self.config.get('ceph_objectstore_tool', True)
+            self.stone_objectstore_tool = \
+                self.config.get('stone_objectstore_tool', True)
         # spawn do_thrash
         self.thread = gevent.spawn(self.do_thrash)
         if self.sighup_delay:
@@ -282,9 +282,9 @@ class OSDThrasher(Thrasher):
         self.logger.info(msg, *args, **kwargs)
 
     def cmd_exists_on_osds(self, cmd):
-        if self.ceph_manager.cephadm or self.ceph_manager.rook:
+        if self.stone_manager.stoneadm or self.stone_manager.rook:
             return True
-        allremotes = self.ceph_manager.ctx.cluster.only(\
+        allremotes = self.stone_manager.ctx.cluster.only(\
             teuthology.is_type('osd', self.cluster)).remotes.keys()
         allremotes = list(set(allremotes))
         for remote in allremotes:
@@ -295,38 +295,38 @@ class OSDThrasher(Thrasher):
                 return False;
         return True;
 
-    def run_ceph_objectstore_tool(self, remote, osd, cmd):
-        if self.ceph_manager.cephadm:
+    def run_stone_objectstore_tool(self, remote, osd, cmd):
+        if self.stone_manager.stoneadm:
             return shell(
-                self.ceph_manager.ctx, self.ceph_manager.cluster, remote,
-                args=['ceph-objectstore-tool'] + cmd,
+                self.stone_manager.ctx, self.stone_manager.cluster, remote,
+                args=['stone-objectstore-tool'] + cmd,
                 name=osd,
                 wait=True, check_status=False,
                 stdout=StringIO(),
                 stderr=StringIO())
-        elif self.ceph_manager.rook:
+        elif self.stone_manager.rook:
             assert False, 'not implemented'
         else:
             return remote.run(
-                args=['sudo', 'adjust-ulimits', 'ceph-objectstore-tool'] + cmd,
+                args=['sudo', 'adjust-ulimits', 'stone-objectstore-tool'] + cmd,
                 wait=True, check_status=False,
                 stdout=StringIO(),
                 stderr=StringIO())
 
-    def run_ceph_bluestore_tool(self, remote, osd, cmd):
-        if self.ceph_manager.cephadm:
+    def run_stone_bluestore_tool(self, remote, osd, cmd):
+        if self.stone_manager.stoneadm:
             return shell(
-                self.ceph_manager.ctx, self.ceph_manager.cluster, remote,
-                args=['ceph-bluestore-tool', '--err-to-stderr'] + cmd,
+                self.stone_manager.ctx, self.stone_manager.cluster, remote,
+                args=['stone-bluestore-tool', '--err-to-stderr'] + cmd,
                 name=osd,
                 wait=True, check_status=False,
                 stdout=StringIO(),
                 stderr=StringIO())
-        elif self.ceph_manager.rook:
+        elif self.stone_manager.rook:
             assert False, 'not implemented'
         else:
             return remote.run(
-                args=['sudo', 'ceph-bluestore-tool', '--err-to-stderr'] + cmd,
+                args=['sudo', 'stone-bluestore-tool', '--err-to-stderr'] + cmd,
                 wait=True, check_status=False,
                 stdout=StringIO(),
                 stderr=StringIO())
@@ -343,15 +343,15 @@ class OSDThrasher(Thrasher):
                                                        str(self.live_osds)))
         self.live_osds.remove(osd)
         self.dead_osds.append(osd)
-        self.ceph_manager.kill_osd(osd)
+        self.stone_manager.kill_osd(osd)
         if mark_down:
-            self.ceph_manager.mark_down_osd(osd)
+            self.stone_manager.mark_down_osd(osd)
         if mark_out and osd in self.in_osds:
             self.out_osd(osd)
-        if self.ceph_objectstore_tool:
-            self.log("Testing ceph-objectstore-tool on down osd.%s" % osd)
-            remote = self.ceph_manager.find_remote('osd', osd)
-            FSPATH = self.ceph_manager.get_filepath()
+        if self.stone_objectstore_tool:
+            self.log("Testing stone-objectstore-tool on down osd.%s" % osd)
+            remote = self.stone_manager.find_remote('osd', osd)
+            FSPATH = self.stone_manager.get_filepath()
             JPATH = os.path.join(FSPATH, "journal")
             exp_osd = imp_osd = osd
             self.log('remote for osd %s is %s' % (osd, remote))
@@ -360,33 +360,33 @@ class OSDThrasher(Thrasher):
             if (len(self.dead_osds) > 1 and
                     random.random() < self.chance_move_pg):
                 exp_osd = random.choice(self.dead_osds[:-1])
-                exp_remote = self.ceph_manager.find_remote('osd', exp_osd)
+                exp_remote = self.stone_manager.find_remote('osd', exp_osd)
                 self.log('remote for exp osd %s is %s' % (exp_osd, exp_remote))
             prefix = [
                 '--no-mon-config',
-                '--log-file=/var/log/ceph/objectstore_tool.$pid.log',
+                '--log-file=/var/log/stonepros/objectstore_tool.$pid.log',
             ]
 
-            if self.ceph_manager.rook:
+            if self.stone_manager.rook:
                 assert False, 'not implemented'
 
-            if not self.ceph_manager.cephadm:
-                # ceph-objectstore-tool might be temporarily absent during an
-                # upgrade - see http://tracker.ceph.com/issues/18014
-                with safe_while(sleep=15, tries=40, action="type ceph-objectstore-tool") as proceed:
+            if not self.stone_manager.stoneadm:
+                # stone-objectstore-tool might be temporarily absent during an
+                # upgrade - see http://tracker.stone.com/issues/18014
+                with safe_while(sleep=15, tries=40, action="type stone-objectstore-tool") as proceed:
                     while proceed():
-                        proc = exp_remote.run(args=['type', 'ceph-objectstore-tool'],
+                        proc = exp_remote.run(args=['type', 'stone-objectstore-tool'],
                                               wait=True, check_status=False, stdout=BytesIO(),
                                               stderr=BytesIO())
                         if proc.exitstatus == 0:
                             break
-                        log.debug("ceph-objectstore-tool binary not present, trying again")
+                        log.debug("stone-objectstore-tool binary not present, trying again")
 
-            # ceph-objectstore-tool might bogusly fail with "OSD has the store locked"
-            # see http://tracker.ceph.com/issues/19556
-            with safe_while(sleep=15, tries=40, action="ceph-objectstore-tool --op list-pgs") as proceed:
+            # stone-objectstore-tool might bogusly fail with "OSD has the store locked"
+            # see http://tracker.stone.com/issues/19556
+            with safe_while(sleep=15, tries=40, action="stone-objectstore-tool --op list-pgs") as proceed:
                 while proceed():
-                    proc = self.run_ceph_objectstore_tool(
+                    proc = self.run_stone_objectstore_tool(
                         exp_remote, 'osd.%s' % exp_osd,
                         prefix + [
                             '--data-path', FSPATH.format(id=exp_osd),
@@ -399,7 +399,7 @@ class OSDThrasher(Thrasher):
                           proc.stderr.getvalue() == "OSD has the store locked"):
                         continue
                     else:
-                        raise Exception("ceph-objectstore-tool: "
+                        raise Exception("stone-objectstore-tool: "
                                         "exp list-pgs failure with status {ret}".
                                         format(ret=proc.exitstatus))
 
@@ -408,16 +408,16 @@ class OSDThrasher(Thrasher):
                 self.log("No PGs found for osd.{osd}".format(osd=exp_osd))
                 return
             pg = random.choice(pgs)
-            #exp_path = teuthology.get_testdir(self.ceph_manager.ctx)
+            #exp_path = teuthology.get_testdir(self.stone_manager.ctx)
             #exp_path = os.path.join(exp_path, '{0}.data'.format(self.cluster))
-            exp_path = os.path.join('/var/log/ceph', # available inside 'shell' container
+            exp_path = os.path.join('/var/log/stone', # available inside 'shell' container
                                     "exp.{pg}.{id}".format(
                                         pg=pg,
                                         id=exp_osd))
-            if self.ceph_manager.cephadm:
+            if self.stone_manager.stoneadm:
                 exp_host_path = os.path.join(
-                    '/var/log/ceph',
-                    self.ceph_manager.ctx.ceph[self.ceph_manager.cluster].fsid,
+                    '/var/log/stone',
+                    self.stone_manager.ctx.stone[self.stone_manager.cluster].fsid,
                     "exp.{pg}.{id}".format(
                         pg=pg,
                         id=exp_osd))
@@ -426,7 +426,7 @@ class OSDThrasher(Thrasher):
 
             # export
             # Can't use new export-remove op since this is part of upgrade testing
-            proc = self.run_ceph_objectstore_tool(
+            proc = self.run_stone_objectstore_tool(
                 exp_remote, 'osd.%s' % exp_osd,
                 prefix + [
                     '--data-path', FSPATH.format(id=exp_osd),
@@ -436,11 +436,11 @@ class OSDThrasher(Thrasher):
                     '--file', exp_path,
                 ])
             if proc.exitstatus:
-                raise Exception("ceph-objectstore-tool: "
+                raise Exception("stone-objectstore-tool: "
                                 "export failure with status {ret}".
                                 format(ret=proc.exitstatus))
             # remove
-            proc = self.run_ceph_objectstore_tool(
+            proc = self.run_stone_objectstore_tool(
                 exp_remote, 'osd.%s' % exp_osd,
                 prefix + [
                     '--data-path', FSPATH.format(id=exp_osd),
@@ -450,13 +450,13 @@ class OSDThrasher(Thrasher):
                     '--pgid', pg,
                 ])
             if proc.exitstatus:
-                raise Exception("ceph-objectstore-tool: "
+                raise Exception("stone-objectstore-tool: "
                                 "remove failure with status {ret}".
                                 format(ret=proc.exitstatus))
             # If there are at least 2 dead osds we might move the pg
             if exp_osd != imp_osd:
                 # If pg isn't already on this osd, then we will move it there
-                proc = self.run_ceph_objectstore_tool(
+                proc = self.run_stone_objectstore_tool(
                     imp_remote,
                     'osd.%s' % imp_osd,
                     prefix + [
@@ -465,7 +465,7 @@ class OSDThrasher(Thrasher):
                         '--op', 'list-pgs',
                     ])
                 if proc.exitstatus:
-                    raise Exception("ceph-objectstore-tool: "
+                    raise Exception("stone-objectstore-tool: "
                                     "imp list-pgs failure with status {ret}".
                                     format(ret=proc.exitstatus))
                 pgs = proc.stdout.getvalue().split('\n')[:-1]
@@ -476,16 +476,16 @@ class OSDThrasher(Thrasher):
                         # Copy export file to the other machine
                         self.log("Transfer export file from {srem} to {trem}".
                                  format(srem=exp_remote, trem=imp_remote))
-                        # just in case an upgrade make /var/log/ceph unreadable by non-root,
+                        # just in case an upgrade make /var/log/stone unreadable by non-root,
                         exp_remote.run(args=['sudo', 'chmod', '777',
-                                             '/var/log/ceph'])
+                                             '/var/log/stone'])
                         imp_remote.run(args=['sudo', 'chmod', '777',
-                                             '/var/log/ceph'])
+                                             '/var/log/stone'])
                         tmpexport = Remote.get_file(exp_remote, exp_host_path,
                                                     sudo=True)
                         if exp_host_path != exp_path:
-                            # push to /var/log/ceph, then rename (we can't
-                            # chmod 777 the /var/log/ceph/$fsid mountpoint)
+                            # push to /var/log/stone, then rename (we can't
+                            # chmod 777 the /var/log/stonepros/$fsid mountpoint)
                             Remote.put_file(imp_remote, tmpexport, exp_path)
                             imp_remote.run(args=[
                                 'sudo', 'mv', exp_path, exp_host_path])
@@ -497,12 +497,12 @@ class OSDThrasher(Thrasher):
                     imp_osd = exp_osd
                     imp_remote = exp_remote
             # import
-            proc = self.run_ceph_objectstore_tool(
+            proc = self.run_stone_objectstore_tool(
                 imp_remote, 'osd.%s' % imp_osd,
                 [
                     '--data-path', FSPATH.format(id=imp_osd),
                     '--journal-path', JPATH.format(id=imp_osd),
-                    '--log-file=/var/log/ceph/objectstore_tool.$pid.log',
+                    '--log-file=/var/log/stonepros/objectstore_tool.$pid.log',
                     '--op', 'import',
                     '--file', exp_path,
                 ])
@@ -524,7 +524,7 @@ class OSDThrasher(Thrasher):
                 self.log("PG merged on target"
                          "...ignored")
             elif proc.exitstatus:
-                raise Exception("ceph-objectstore-tool: "
+                raise Exception("stone-objectstore-tool: "
                                 "import failure with status {ret}".
                                 format(ret=proc.exitstatus))
             cmd = "sudo rm -f {file}".format(file=exp_host_path)
@@ -533,11 +533,11 @@ class OSDThrasher(Thrasher):
                 imp_remote.run(args=cmd)
 
             # apply low split settings to each pool
-            if not self.ceph_manager.cephadm:
-                for pool in self.ceph_manager.list_pools():
-                    cmd = ("CEPH_ARGS='--filestore-merge-threshold 1 "
+            if not self.stone_manager.stoneadm:
+                for pool in self.stone_manager.list_pools():
+                    cmd = ("STONE_ARGS='--filestore-merge-threshold 1 "
                            "--filestore-split-multiple 1' sudo -E "
-                           + 'ceph-objectstore-tool '
+                           + 'stone-objectstore-tool '
                            + ' '.join(prefix + [
                                '--data-path', FSPATH.format(id=imp_osd),
                                '--journal-path', JPATH.format(id=imp_osd),
@@ -549,7 +549,7 @@ class OSDThrasher(Thrasher):
                     if 'Couldn\'t find pool' in proc.stderr.getvalue():
                         continue
                     if proc.exitstatus:
-                        raise Exception("ceph-objectstore-tool apply-layout-settings"
+                        raise Exception("stone-objectstore-tool apply-layout-settings"
                                         " failed with {status}".format(status=proc.exitstatus))
 
 
@@ -564,7 +564,7 @@ class OSDThrasher(Thrasher):
                  (str(osd), str(self.live_osds)))
         self.live_osds.remove(osd)
         self.dead_osds.append(osd)
-        self.ceph_manager.blackhole_kill_osd(osd)
+        self.stone_manager.blackhole_kill_osd(osd)
 
     def revive_osd(self, osd=None, skip_admin_check=False):
         """
@@ -574,16 +574,16 @@ class OSDThrasher(Thrasher):
         if osd is None:
             osd = random.choice(self.dead_osds)
         self.log("Reviving osd %s" % (str(osd),))
-        self.ceph_manager.revive_osd(
+        self.stone_manager.revive_osd(
             osd,
             self.revive_timeout,
             skip_admin_check=skip_admin_check)
         self.dead_osds.remove(osd)
         self.live_osds.append(osd)
         if self.random_eio > 0 and osd == self.rerrosd:
-            self.ceph_manager.set_config(self.rerrosd,
+            self.stone_manager.set_config(self.rerrosd,
                                          filestore_debug_random_read_err = self.random_eio)
-            self.ceph_manager.set_config(self.rerrosd,
+            self.stone_manager.set_config(self.rerrosd,
                                          bluestore_debug_random_read_err = self.random_eio)
 
 
@@ -596,7 +596,7 @@ class OSDThrasher(Thrasher):
             osd = random.choice(self.in_osds)
         self.log("Removing osd %s, in_osds are: %s" %
                  (str(osd), str(self.in_osds)))
-        self.ceph_manager.mark_out_osd(osd)
+        self.stone_manager.mark_out_osd(osd)
         self.in_osds.remove(osd)
         self.out_osds.append(osd)
 
@@ -612,7 +612,7 @@ class OSDThrasher(Thrasher):
         self.log("Adding osd %s" % (str(osd),))
         self.out_osds.remove(osd)
         self.in_osds.append(osd)
-        self.ceph_manager.mark_in_osd(osd)
+        self.stone_manager.mark_in_osd(osd)
         self.log("Added osd %s" % (str(osd),))
 
     def reweight_osd_or_by_util(self, osd=None):
@@ -625,7 +625,7 @@ class OSDThrasher(Thrasher):
                 osd = random.choice(self.in_osds)
             val = random.uniform(.1, 1.0)
             self.log("Reweighting osd %s to %s" % (str(osd), str(val)))
-            self.ceph_manager.raw_cluster_cmd('osd', 'reweight',
+            self.stone_manager.raw_cluster_cmd('osd', 'reweight',
                                               str(osd), str(val))
         else:
             # do it several times, the option space is large
@@ -638,7 +638,7 @@ class OSDThrasher(Thrasher):
                         'test-reweight-by-utilization']),
                 }
                 self.log("Reweighting by: %s"%(str(options),))
-                self.ceph_manager.raw_cluster_cmd(
+                self.stone_manager.raw_cluster_cmd(
                     'osd',
                     options['type'],
                     options['overage'],
@@ -654,7 +654,7 @@ class OSDThrasher(Thrasher):
         else:
             pa = 0
         self.log('Setting osd %s primary_affinity to %f' % (str(osd), pa))
-        self.ceph_manager.raw_cluster_cmd('osd', 'primary-affinity',
+        self.stone_manager.raw_cluster_cmd('osd', 'primary-affinity',
                                           str(osd), str(pa))
 
     def thrash_cluster_full(self):
@@ -662,22 +662,22 @@ class OSDThrasher(Thrasher):
         Set and unset cluster full condition
         """
         self.log('Setting full ratio to .001')
-        self.ceph_manager.raw_cluster_cmd('osd', 'set-full-ratio', '.001')
+        self.stone_manager.raw_cluster_cmd('osd', 'set-full-ratio', '.001')
         time.sleep(1)
         self.log('Setting full ratio back to .95')
-        self.ceph_manager.raw_cluster_cmd('osd', 'set-full-ratio', '.95')
+        self.stone_manager.raw_cluster_cmd('osd', 'set-full-ratio', '.95')
 
     def thrash_pg_upmap(self):
         """
         Install or remove random pg_upmap entries in OSDMap
         """
         from random import shuffle
-        out = self.ceph_manager.raw_cluster_cmd('osd', 'dump', '-f', 'json-pretty')
+        out = self.stone_manager.raw_cluster_cmd('osd', 'dump', '-f', 'json-pretty')
         j = json.loads(out)
         self.log('j is %s' % j)
         try:
             if random.random() >= .3:
-                pgs = self.ceph_manager.get_pg_stats()
+                pgs = self.stone_manager.get_pg_stats()
                 if not pgs:
                     return
                 pg = random.choice(pgs)
@@ -693,14 +693,14 @@ class OSDThrasher(Thrasher):
                 self.log('Setting %s to %s' % (pgid, osds))
                 cmd = ['osd', 'pg-upmap', pgid] + [str(x) for x in osds]
                 self.log('cmd %s' % cmd)
-                self.ceph_manager.raw_cluster_cmd(*cmd)
+                self.stone_manager.raw_cluster_cmd(*cmd)
             else:
                 m = j['pg_upmap']
                 if len(m) > 0:
                     shuffle(m)
                     pg = m[0]['pgid']
                     self.log('Clearing pg_upmap on %s' % pg)
-                    self.ceph_manager.raw_cluster_cmd(
+                    self.stone_manager.raw_cluster_cmd(
                         'osd',
                         'rm-pg-upmap',
                         pg)
@@ -714,12 +714,12 @@ class OSDThrasher(Thrasher):
         Install or remove random pg_upmap_items entries in OSDMap
         """
         from random import shuffle
-        out = self.ceph_manager.raw_cluster_cmd('osd', 'dump', '-f', 'json-pretty')
+        out = self.stone_manager.raw_cluster_cmd('osd', 'dump', '-f', 'json-pretty')
         j = json.loads(out)
         self.log('j is %s' % j)
         try:
             if random.random() >= .3:
-                pgs = self.ceph_manager.get_pg_stats()
+                pgs = self.stone_manager.get_pg_stats()
                 if not pgs:
                     return
                 pg = random.choice(pgs)
@@ -735,14 +735,14 @@ class OSDThrasher(Thrasher):
                 self.log('Setting %s to %s' % (pgid, osds))
                 cmd = ['osd', 'pg-upmap-items', pgid] + [str(x) for x in osds]
                 self.log('cmd %s' % cmd)
-                self.ceph_manager.raw_cluster_cmd(*cmd)
+                self.stone_manager.raw_cluster_cmd(*cmd)
             else:
                 m = j['pg_upmap_items']
                 if len(m) > 0:
                     shuffle(m)
                     pg = m[0]['pgid']
                     self.log('Clearing pg_upmap on %s' % pg)
-                    self.ceph_manager.raw_cluster_cmd(
+                    self.stone_manager.raw_cluster_cmd(
                         'osd',
                         'rm-pg-upmap-items',
                         pg)
@@ -756,13 +756,13 @@ class OSDThrasher(Thrasher):
         Force recovery on some of PGs
         """
         backfill = random.random() >= 0.5
-        j = self.ceph_manager.get_pgids_to_force(backfill)
+        j = self.stone_manager.get_pgids_to_force(backfill)
         if j:
             try:
                 if backfill:
-                    self.ceph_manager.raw_cluster_cmd('pg', 'force-backfill', *j)
+                    self.stone_manager.raw_cluster_cmd('pg', 'force-backfill', *j)
                 else:
-                    self.ceph_manager.raw_cluster_cmd('pg', 'force-recovery', *j)
+                    self.stone_manager.raw_cluster_cmd('pg', 'force-recovery', *j)
             except CommandFailedError:
                 self.log('Failed to force backfill|recovery, ignoring')
 
@@ -772,13 +772,13 @@ class OSDThrasher(Thrasher):
         Force recovery on some of PGs
         """
         backfill = random.random() >= 0.5
-        j = self.ceph_manager.get_pgids_to_cancel_force(backfill)
+        j = self.stone_manager.get_pgids_to_cancel_force(backfill)
         if j:
             try:
                 if backfill:
-                    self.ceph_manager.raw_cluster_cmd('pg', 'cancel-force-backfill', *j)
+                    self.stone_manager.raw_cluster_cmd('pg', 'cancel-force-backfill', *j)
                 else:
-                    self.ceph_manager.raw_cluster_cmd('pg', 'cancel-force-recovery', *j)
+                    self.stone_manager.raw_cluster_cmd('pg', 'cancel-force-recovery', *j)
             except CommandFailedError:
                 self.log('Failed to force backfill|recovery, ignoring')
 
@@ -808,14 +808,14 @@ class OSDThrasher(Thrasher):
         """
         self.all_up();
         for osd in self.live_osds:
-            self.ceph_manager.raw_cluster_cmd('osd', 'reweight',
+            self.stone_manager.raw_cluster_cmd('osd', 'reweight',
                                               str(osd), str(1))
-            self.ceph_manager.raw_cluster_cmd('osd', 'primary-affinity',
+            self.stone_manager.raw_cluster_cmd('osd', 'primary-affinity',
                                               str(osd), str(1))
 
     def do_join(self):
         """
-        Break out of this Ceph loop
+        Break out of this Stone loop
         """
         self.stopping = True
         self.thread.get()
@@ -836,11 +836,11 @@ class OSDThrasher(Thrasher):
         """
         Increase the size of the pool
         """
-        pool = self.ceph_manager.get_pool()
+        pool = self.stone_manager.get_pool()
         if pool is None:
             return
         self.log("Growing pool %s" % (pool,))
-        if self.ceph_manager.expand_pool(pool,
+        if self.stone_manager.expand_pool(pool,
                                          self.config.get('pool_grow_by', 10),
                                          self.max_pgs):
             self.pools_to_fix_pgp_num.add(pool)
@@ -849,12 +849,12 @@ class OSDThrasher(Thrasher):
         """
         Decrease the size of the pool
         """
-        pool = self.ceph_manager.get_pool()
+        pool = self.stone_manager.get_pool()
         if pool is None:
             return
-        _ = self.ceph_manager.get_pool_pg_num(pool)
+        _ = self.stone_manager.get_pool_pg_num(pool)
         self.log("Shrinking pool %s" % (pool,))
-        if self.ceph_manager.contract_pool(
+        if self.stone_manager.contract_pool(
                 pool,
                 self.config.get('pool_shrink_by', 10),
                 self.min_pgs):
@@ -865,14 +865,14 @@ class OSDThrasher(Thrasher):
         Fix number of pgs in pool.
         """
         if pool is None:
-            pool = self.ceph_manager.get_pool()
+            pool = self.stone_manager.get_pool()
             if not pool:
                 return
             force = False
         else:
             force = True
         self.log("fixing pg num pool %s" % (pool,))
-        if self.ceph_manager.set_pool_pgpnum(pool, force):
+        if self.stone_manager.set_pool_pgpnum(pool, force):
             self.pools_to_fix_pgp_num.discard(pool)
 
     def test_pool_min_size(self):
@@ -882,7 +882,7 @@ class OSDThrasher(Thrasher):
         """
         self.log("test_pool_min_size")
         self.all_up()
-        self.ceph_manager.wait_for_recovery(
+        self.stone_manager.wait_for_recovery(
             timeout=self.config.get('timeout')
             )
 
@@ -890,8 +890,8 @@ class OSDThrasher(Thrasher):
         minlive = int(self.config.get("min_live", 2))
         mindead = int(self.config.get("min_dead", 1))
         self.log("doing min_size thrashing")
-        self.ceph_manager.wait_for_clean(timeout=60)
-        assert self.ceph_manager.is_clean(), \
+        self.stone_manager.wait_for_clean(timeout=60)
+        assert self.stone_manager.is_clean(), \
             'not clean before minsize thrashing starts'
         while not self.stopping:
             # look up k and m from all the pools on each loop, in case it
@@ -899,7 +899,7 @@ class OSDThrasher(Thrasher):
             k = 0
             m = 99
             has_pools = False
-            pools_json = self.ceph_manager.get_osd_dump_json()['pools']
+            pools_json = self.stone_manager.get_osd_dump_json()['pools']
 
             for pool_json in pools_json:
                 pool = pool_json['pool_name']
@@ -908,11 +908,11 @@ class OSDThrasher(Thrasher):
                 min_size = pool_json['min_size']
                 self.log("pool {pool} min_size is {min_size}".format(pool=pool,min_size=min_size))
                 try:
-                    ec_profile = self.ceph_manager.get_pool_property(pool, 'erasure_code_profile')
+                    ec_profile = self.stone_manager.get_pool_property(pool, 'erasure_code_profile')
                     if pool_type != PoolType.ERASURE_CODED:
                         continue
                     ec_profile = pool_json['erasure_code_profile']
-                    ec_profile_json = self.ceph_manager.raw_cluster_cmd(
+                    ec_profile_json = self.stone_manager.raw_cluster_cmd(
                         'osd',
                         'erasure-code-profile',
                         'get',
@@ -967,7 +967,7 @@ class OSDThrasher(Thrasher):
                             sleep=5, tries=5,
                             action='check for active or peered') as proceed:
                         while proceed():
-                            if self.ceph_manager.all_active_or_peered():
+                            if self.stone_manager.all_active_or_peered():
                                 break
                             self.log('not all PGs are active or peered')
                 else: # chose to revive OSDs, bring up a random fraction of the dead ones
@@ -976,12 +976,12 @@ class OSDThrasher(Thrasher):
                         self.revive_osd(i)
 
             # let PGs repair themselves or our next knockout might kill one
-            self.ceph_manager.wait_for_clean(timeout=self.config.get('timeout'))
+            self.stone_manager.wait_for_clean(timeout=self.config.get('timeout'))
  
         # / while not self.stopping
         self.all_up_in()
  
-        self.ceph_manager.wait_for_recovery(
+        self.stone_manager.wait_for_recovery(
             timeout=self.config.get('timeout')
             )
 
@@ -1001,14 +1001,14 @@ class OSDThrasher(Thrasher):
                 after=check_after,
                 shouldbedown=should_be_down
                 ))
-        self.ceph_manager.set_config(the_one, **{conf_key: duration})
+        self.stone_manager.set_config(the_one, **{conf_key: duration})
         if not should_be_down:
             return
         time.sleep(check_after)
-        status = self.ceph_manager.get_osd_status()
+        status = self.stone_manager.get_osd_status()
         assert the_one in status['down']
         time.sleep(duration - check_after + 20)
-        status = self.ceph_manager.get_osd_status()
+        status = self.stone_manager.get_osd_status()
         assert not the_one in status['down']
 
     def test_backfill_full(self):
@@ -1026,26 +1026,26 @@ class OSDThrasher(Thrasher):
         """
         self.log("injecting backfill full")
         for i in self.live_osds:
-            self.ceph_manager.set_config(
+            self.stone_manager.set_config(
                 i,
                 osd_debug_skip_full_check_in_backfill_reservation=
                 random.choice(['false', 'true']))
-            self.ceph_manager.osd_admin_socket(i, command=['injectfull', 'backfillfull'],
+            self.stone_manager.osd_admin_socket(i, command=['injectfull', 'backfillfull'],
                                      check_status=True, timeout=30, stdout=DEVNULL)
         for i in range(30):
-            status = self.ceph_manager.compile_pg_status()
+            status = self.stone_manager.compile_pg_status()
             if 'backfilling' not in status.keys():
                 break
             self.log(
                 "waiting for {still_going} backfillings".format(
                     still_going=status.get('backfilling')))
             time.sleep(1)
-        assert('backfilling' not in self.ceph_manager.compile_pg_status().keys())
+        assert('backfilling' not in self.stone_manager.compile_pg_status().keys())
         for i in self.live_osds:
-            self.ceph_manager.set_config(
+            self.stone_manager.set_config(
                 i,
                 osd_debug_skip_full_check_in_backfill_reservation='false')
-            self.ceph_manager.osd_admin_socket(i, command=['injectfull', 'none'],
+            self.stone_manager.osd_admin_socket(i, command=['injectfull', 'none'],
                                      check_status=True, timeout=30, stdout=DEVNULL)
 
 
@@ -1085,12 +1085,12 @@ class OSDThrasher(Thrasher):
         """
 
         osd = random.choice(self.dead_osds)
-        remote = self.ceph_manager.find_remote('osd', osd)
-        FSPATH = self.ceph_manager.get_filepath()
+        remote = self.stone_manager.find_remote('osd', osd)
+        FSPATH = self.stone_manager.get_filepath()
 
         prefix = [
                 '--no-mon-config',
-                '--log-file=/var/log/ceph/bluestore_tool.$pid.log',
+                '--log-file=/var/log/stonepros/bluestore_tool.$pid.log',
                 '--log-level=10',
                 '--path', FSPATH.format(id=osd)
             ]
@@ -1100,19 +1100,19 @@ class OSDThrasher(Thrasher):
         cmd = prefix + [
             'show-label'
             ]
-        proc = self.run_ceph_bluestore_tool(remote, 'osd.%s' % osd, cmd)
+        proc = self.run_stone_bluestore_tool(remote, 'osd.%s' % osd, cmd)
         if proc.exitstatus != 0:
-            raise Exception("ceph-bluestore-tool access failed.")
+            raise Exception("stone-bluestore-tool access failed.")
 
         # check if sharding is possible
         self.log('checking if target bluestore supports sharding on osd.%s' % osd)
         cmd = prefix + [
             'show-sharding'
             ]
-        proc = self.run_ceph_bluestore_tool(remote, 'osd.%s' % osd, cmd)
+        proc = self.run_stone_bluestore_tool(remote, 'osd.%s' % osd, cmd)
         if proc.exitstatus != 0:
             self.log("Unable to test resharding, "
-                     "ceph-bluestore-tool does not support it.")
+                     "stone-bluestore-tool does not support it.")
             return
 
         # now go for reshard to something else
@@ -1128,18 +1128,18 @@ class OSDThrasher(Thrasher):
             '--sharding', new_sharding,
             'reshard'
             ]
-        proc = self.run_ceph_bluestore_tool(remote, 'osd.%s' % osd, cmd)
+        proc = self.run_stone_bluestore_tool(remote, 'osd.%s' % osd, cmd)
         if proc.exitstatus != 0:
-            raise Exception("ceph-bluestore-tool resharding failed.")
+            raise Exception("stone-bluestore-tool resharding failed.")
 
         # now do fsck to
         self.log('running fsck to verify new sharding on osd.%s' % osd)
         cmd = prefix + [
             'fsck'
             ]
-        proc = self.run_ceph_bluestore_tool(remote, 'osd.%s' % osd, cmd)
+        proc = self.run_stone_bluestore_tool(remote, 'osd.%s' % osd, cmd)
         if proc.exitstatus != 0:
-            raise Exception("ceph-bluestore-tool fsck failed.")
+            raise Exception("stone-bluestore-tool fsck failed.")
         self.log('resharding successfully completed')
 
     def test_bluestore_reshard(self):
@@ -1168,13 +1168,13 @@ class OSDThrasher(Thrasher):
         while len(self.in_osds) < (self.minin + 1):
             self.in_osd()
         self.log("Waiting for recovery")
-        self.ceph_manager.wait_for_all_osds_up(
+        self.stone_manager.wait_for_all_osds_up(
             timeout=self.config.get('timeout')
             )
         # now we wait 20s for the pg status to change, if it takes longer,
         # the test *should* fail!
         time.sleep(20)
-        self.ceph_manager.wait_for_clean(
+        self.stone_manager.wait_for_clean(
             timeout=self.config.get('timeout')
             )
 
@@ -1183,7 +1183,7 @@ class OSDThrasher(Thrasher):
         self.log("Recovered, killing an osd")
         self.kill_osd(mark_down=True, mark_out=True)
         self.log("Waiting for clean again")
-        self.ceph_manager.wait_for_clean(
+        self.stone_manager.wait_for_clean(
             timeout=self.config.get('timeout')
             )
         self.log("Waiting for trim")
@@ -1257,8 +1257,8 @@ class OSDThrasher(Thrasher):
                 actions.append(scenario)
 
         # only consider resharding if objectstore is bluestore
-        cluster_name = self.ceph_manager.cluster
-        cluster = self.ceph_manager.ctx.ceph[cluster_name]
+        cluster_name = self.stone_manager.cluster
+        cluster = self.stone_manager.ctx.stone[cluster_name]
         if cluster.conf.get('osd', {}).get('osd objectstore', 'bluestore') == 'bluestore':
             actions.append((self.test_bluestore_reshard,
                             self.config.get('chance_bluestore_reshard', 0),))
@@ -1295,7 +1295,7 @@ class OSDThrasher(Thrasher):
         self.log("starting do_sighup with a delay of {0}".format(delay))
         while not self.stopping:
             osd = random.choice(self.live_osds)
-            self.ceph_manager.signal_osd(osd, signal.SIGHUP, silent=True)
+            self.stone_manager.signal_osd(osd, signal.SIGHUP, silent=True)
             time.sleep(delay)
 
     @log_exc
@@ -1314,7 +1314,7 @@ class OSDThrasher(Thrasher):
             else:
                 osd_state = "true"
             try:
-                self.ceph_manager.inject_args('osd', '*',
+                self.stone_manager.inject_args('osd', '*',
                                               'osd_enable_op_tracker',
                                               osd_state)
             except CommandFailedError:
@@ -1330,11 +1330,11 @@ class OSDThrasher(Thrasher):
         while not self.stopping:
             for osd in self.live_osds:
                 # Ignore errors because live_osds is in flux
-                self.ceph_manager.osd_admin_socket(osd, command=['dump_ops_in_flight'],
+                self.stone_manager.osd_admin_socket(osd, command=['dump_ops_in_flight'],
                                      check_status=False, timeout=30, stdout=DEVNULL)
-                self.ceph_manager.osd_admin_socket(osd, command=['dump_blocked_ops'],
+                self.stone_manager.osd_admin_socket(osd, command=['dump_blocked_ops'],
                                      check_status=False, timeout=30, stdout=DEVNULL)
-                self.ceph_manager.osd_admin_socket(osd, command=['dump_historic_ops'],
+                self.stone_manager.osd_admin_socket(osd, command=['dump_historic_ops'],
                                      check_status=False, timeout=30, stdout=DEVNULL)
             gevent.sleep(0)
 
@@ -1350,25 +1350,25 @@ class OSDThrasher(Thrasher):
         self.log("starting do_noscrub_toggle with a delay of {0}".format(delay))
         while not self.stopping:
             if scrub_state == "none":
-                self.ceph_manager.raw_cluster_cmd('osd', 'set', 'noscrub')
+                self.stone_manager.raw_cluster_cmd('osd', 'set', 'noscrub')
                 scrub_state = "noscrub"
             elif scrub_state == "noscrub":
-                self.ceph_manager.raw_cluster_cmd('osd', 'set', 'nodeep-scrub')
+                self.stone_manager.raw_cluster_cmd('osd', 'set', 'nodeep-scrub')
                 scrub_state = "both"
             elif scrub_state == "both":
-                self.ceph_manager.raw_cluster_cmd('osd', 'unset', 'noscrub')
+                self.stone_manager.raw_cluster_cmd('osd', 'unset', 'noscrub')
                 scrub_state = "nodeep-scrub"
             else:
-                self.ceph_manager.raw_cluster_cmd('osd', 'unset', 'nodeep-scrub')
+                self.stone_manager.raw_cluster_cmd('osd', 'unset', 'nodeep-scrub')
                 scrub_state = "none"
             gevent.sleep(delay)
-        self.ceph_manager.raw_cluster_cmd('osd', 'unset', 'noscrub')
-        self.ceph_manager.raw_cluster_cmd('osd', 'unset', 'nodeep-scrub')
+        self.stone_manager.raw_cluster_cmd('osd', 'unset', 'noscrub')
+        self.stone_manager.raw_cluster_cmd('osd', 'unset', 'nodeep-scrub')
 
     @log_exc
     def _do_thrash(self):
         """
-        Loop to select random actions to thrash ceph manager with.
+        Loop to select random actions to thrash stone manager with.
         """
         cleanint = self.config.get("clean_interval", 60)
         scrubint = self.config.get("scrub_interval", -1)
@@ -1376,10 +1376,10 @@ class OSDThrasher(Thrasher):
         delay = self.config.get("op_delay", 5)
         self.rerrosd = self.live_osds[0]
         if self.random_eio > 0:
-            self.ceph_manager.inject_args('osd', self.rerrosd,
+            self.stone_manager.inject_args('osd', self.rerrosd,
                                           'filestore_debug_random_read_err',
                                           self.random_eio)
-            self.ceph_manager.inject_args('osd', self.rerrosd,
+            self.stone_manager.inject_args('osd', self.rerrosd,
                                           'bluestore_debug_random_read_err',
                                           self.random_eio)
         self.log("starting do_thrash")
@@ -1393,35 +1393,35 @@ class OSDThrasher(Thrasher):
                 while len(self.dead_osds) > maxdead:
                     self.revive_osd()
                 for osd in self.in_osds:
-                    self.ceph_manager.raw_cluster_cmd('osd', 'reweight',
+                    self.stone_manager.raw_cluster_cmd('osd', 'reweight',
                                                       str(osd), str(1))
                 if random.uniform(0, 1) < float(
                         self.config.get('chance_test_map_discontinuity', 0)) \
                         and len(self.live_osds) > 5: # avoid m=2,k=2 stall, w/ some buffer for crush being picky
                     self.test_map_discontinuity()
                 else:
-                    self.ceph_manager.wait_for_recovery(
+                    self.stone_manager.wait_for_recovery(
                         timeout=self.config.get('timeout')
                         )
                 time.sleep(self.clean_wait)
                 if scrubint > 0:
                     if random.uniform(0, 1) < (float(delay) / scrubint):
                         self.log('Scrubbing while thrashing being performed')
-                        Scrubber(self.ceph_manager, self.config)
+                        Scrubber(self.stone_manager, self.config)
             self.choose_action()()
             time.sleep(delay)
         self.all_up()
         if self.random_eio > 0:
-            self.ceph_manager.inject_args('osd', self.rerrosd,
+            self.stone_manager.inject_args('osd', self.rerrosd,
                                           'filestore_debug_random_read_err', '0.0')
-            self.ceph_manager.inject_args('osd', self.rerrosd,
+            self.stone_manager.inject_args('osd', self.rerrosd,
                                           'bluestore_debug_random_read_err', '0.0')
         for pool in list(self.pools_to_fix_pgp_num):
-            if self.ceph_manager.get_pool_pg_num(pool) > 0:
+            if self.stone_manager.get_pool_pg_num(pool) > 0:
                 self.fix_pgp_num(pool)
         self.pools_to_fix_pgp_num.clear()
         for service, opt, saved_value in self.saved_options:
-            self.ceph_manager.inject_args(service, '*', opt, saved_value)
+            self.stone_manager.inject_args(service, '*', opt, saved_value)
         self.saved_options = []
         self.all_up_in()
 
@@ -1452,7 +1452,7 @@ class ObjectStoreTool:
     def build_cmd(self, options, args, stdin):
         lines = []
         if self.object_name:
-            lines.append("object=$(sudo adjust-ulimits ceph-objectstore-tool "
+            lines.append("object=$(sudo adjust-ulimits stone-objectstore-tool "
                          "{paths} --pgid {pgid} --op list |"
                          "grep '\"oid\":\"{name}\"')".
                          format(paths=self.paths,
@@ -1460,7 +1460,7 @@ class ObjectStoreTool:
                                 name=self.object_name))
             args = '"$object" ' + args
             options += " --pgid {pgid}".format(pgid=self.pgid)
-        cmd = ("sudo adjust-ulimits ceph-objectstore-tool {paths} {options} {args}".
+        cmd = ("sudo adjust-ulimits stone-objectstore-tool {paths} {options} {args}".
                format(paths=self.paths,
                       args=args,
                       options=options))
@@ -1492,30 +1492,30 @@ class ObjectStoreTool:
                 self.manager.wait_till_osd_is_up(self.osd, 300)
 
 
-# XXX: this class has nothing to do with the Ceph daemon (ceph-mgr) of
+# XXX: this class has nothing to do with the Stone daemon (stone-mgr) of
 # the same name.
-class CephManager:
+class StoneManager:
     """
-    Ceph manager object.
+    Stone manager object.
     Contains several local functions that form a bulk of this module.
 
-    :param controller: the remote machine where the Ceph commands should be
+    :param controller: the remote machine where the Stone commands should be
                        executed
     :param ctx: the cluster context
-    :param config: path to Ceph config file
+    :param config: path to Stone config file
     :param logger: for logging messages
-    :param cluster: name of the Ceph cluster
+    :param cluster: name of the Stone cluster
     """
 
     def __init__(self, controller, ctx=None, config=None, logger=None,
-                 cluster='ceph', cephadm=False, rook=False) -> None:
+                 cluster='stone', stoneadm=False, rook=False) -> None:
         self.lock = threading.RLock()
         self.ctx = ctx
         self.config = config
         self.controller = controller
         self.next_pool_id = 0
         self.cluster = cluster
-        self.cephadm = cephadm
+        self.stoneadm = stoneadm
         self.rook = rook
         if (logger):
             self.log = lambda x: logger.info(x)
@@ -1537,9 +1537,9 @@ class CephManager:
             except CommandFailedError:
                 self.log('Failed to get pg_num from pool %s, ignoring' % pool)
 
-    def ceph(self, cmd, **kwargs):
+    def stone(self, cmd, **kwargs):
         """
-        Simple Ceph admin command wrapper around run_cluster_cmd.
+        Simple Stone admin command wrapper around run_cluster_cmd.
         """
 
         kwargs.pop('args', None)
@@ -1550,32 +1550,32 @@ class CephManager:
 
     def run_cluster_cmd(self, **kwargs):
         """
-        Run a Ceph command and return the object representing the process
+        Run a Stone command and return the object representing the process
         for the command.
 
         Accepts arguments same as that of teuthology.orchestra.run.run()
         """
-        if self.cephadm:
+        if self.stoneadm:
             return shell(self.ctx, self.cluster, self.controller,
-                         args=['ceph'] + list(kwargs['args']),
+                         args=['stone'] + list(kwargs['args']),
                          stdout=StringIO(),
                          check_status=kwargs.get('check_status', True))
         if self.rook:
             return toolbox(self.ctx, self.cluster,
-                           args=['ceph'] + list(kwargs['args']),
+                           args=['stone'] + list(kwargs['args']),
                            stdout=StringIO(),
                            check_status=kwargs.get('check_status', True))
 
         testdir = teuthology.get_testdir(self.ctx)
-        prefix = ['sudo', 'adjust-ulimits', 'ceph-coverage',
-                  f'{testdir}/archive/coverage', 'timeout', '120', 'ceph',
+        prefix = ['sudo', 'adjust-ulimits', 'stone-coverage',
+                  f'{testdir}/archive/coverage', 'timeout', '120', 'stone',
                   '--cluster', self.cluster]
         kwargs['args'] = prefix + list(kwargs['args'])
         return self.controller.run(**kwargs)
 
     def raw_cluster_cmd(self, *args, **kwargs) -> str:
         """
-        Start ceph on a raw cluster.  Return count
+        Start stone on a raw cluster.  Return count
         """
         stdout = kwargs.pop('stdout', StringIO())
         p = self.run_cluster_cmd(args=args, stdout=stdout, **kwargs)
@@ -1583,14 +1583,14 @@ class CephManager:
 
     def raw_cluster_cmd_result(self, *args, **kwargs):
         """
-        Start ceph on a cluster.  Return success or failure information.
+        Start stone on a cluster.  Return success or failure information.
         """
         kwargs['args'], kwargs['check_status'] = args, False
         return self.run_cluster_cmd(**kwargs).exitstatus
 
-    def run_ceph_w(self, watch_channel=None):
+    def run_stone_w(self, watch_channel=None):
         """
-        Execute "ceph -w" in the background with stdout connected to a BytesIO,
+        Execute "stone -w" in the background with stdout connected to a BytesIO,
         and return the RemoteProcess.
 
         :param watch_channel: Specifies the channel to be watched. This can be
@@ -1600,7 +1600,7 @@ class CephManager:
         args = ["sudo",
                 "daemon-helper",
                 "kill",
-                "ceph",
+                "stone",
                 '--cluster',
                 self.cluster,
                 "-w"]
@@ -1707,7 +1707,7 @@ class CephManager:
         testdir = teuthology.get_testdir(self.ctx)
         pre = [
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             '{tdir}/archive/coverage'.format(tdir=testdir),
             'rados',
             '--cluster',
@@ -1798,7 +1798,7 @@ class CephManager:
     def admin_socket(self, service_type, service_id,
                      command, check_status=True, timeout=0, stdout=None):
         """
-        Remotely start up ceph specifying the admin socket
+        Remotely start up stone specifying the admin socket
         :param command: a list of words to use as the command
                         to the admin socket
         """
@@ -1807,11 +1807,11 @@ class CephManager:
 
         remote = self.find_remote(service_type, service_id)
 
-        if self.cephadm:
+        if self.stoneadm:
             return shell(
                 self.ctx, self.cluster, remote,
                 args=[
-                    'ceph', 'daemon', '%s.%s' % (service_type, service_id),
+                    'stone', 'daemon', '%s.%s' % (service_type, service_id),
                 ] + command,
                 stdout=stdout,
                 wait=True,
@@ -1824,15 +1824,15 @@ class CephManager:
         args = [
             'sudo',
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             '{tdir}/archive/coverage'.format(tdir=testdir),
             'timeout',
             str(timeout),
-            'ceph',
+            'stone',
             '--cluster',
             self.cluster,
             '--admin-daemon',
-            '/var/run/ceph/{cluster}-{type}.{id}.asok'.format(
+            '/var/run/stonepros/{cluster}-{type}.{id}.asok'.format(
                 cluster=self.cluster,
                 type=service_type,
                 id=service_id),
@@ -3138,23 +3138,23 @@ class CephManager:
         """
         Return path to osd data with {id} needing to be replaced
         """
-        return '/var/lib/ceph/osd/' + self.cluster + '-{id}'
+        return '/var/lib/stonepros/osd/' + self.cluster + '-{id}'
 
     def make_admin_daemon_dir(self, remote):
         """
-        Create /var/run/ceph directory on remote site.
+        Create /var/run/stone directory on remote site.
 
         :param ctx: Context
         :param remote: Remote site
         """
         remote.run(args=['sudo',
-                         'install', '-d', '-m0777', '--', '/var/run/ceph', ], )
+                         'install', '-d', '-m0777', '--', '/var/run/stone', ], )
 
     def get_service_task_status(self, service, status_key):
         """
-        Return daemon task status for a given ceph service.
+        Return daemon task status for a given stone service.
 
-        :param service: ceph service (mds, osd, etc...)
+        :param service: stone service (mds, osd, etc...)
         :param status_key: matching task status key
         """
         task_status = {}
@@ -3171,7 +3171,7 @@ class CephManager:
 
 def utility_task(name):
     """
-    Generate ceph_manager subtask corresponding to ceph_manager
+    Generate stone_manager subtask corresponding to stone_manager
     method name
     """
     def task(ctx, config):
@@ -3179,7 +3179,7 @@ def utility_task(name):
             config = {}
         args = config.get('args', [])
         kwargs = config.get('kwargs', {})
-        cluster = config.get('cluster', 'ceph')
+        cluster = config.get('cluster', 'stone')
         fn = getattr(ctx.managers[cluster], name)
         fn(*args, **kwargs)
     return task

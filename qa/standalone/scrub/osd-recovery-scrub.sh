@@ -14,18 +14,18 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library Public License for more details.
 #
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7124" # git grep '\<7124\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7124" # git grep '\<7124\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
-    export -n CEPH_CLI_TEST_DUP_COMMAND
+    export -n STONE_CLI_TEST_DUP_COMMAND
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
         $func $dir || return 1
@@ -56,9 +56,9 @@ function TEST_recovery_scrub_1() {
     # Create a pool with $PGS pgs
     create_pool $poolname $PGS $PGS
     wait_for_clean || return 1
-    poolid=$(ceph osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
+    poolid=$(stone osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     dd if=/dev/urandom of=$TESTDATA bs=1M count=50
     for i in $(seq 1 $OBJECTS)
@@ -67,14 +67,14 @@ function TEST_recovery_scrub_1() {
     done
     rm -f $TESTDATA
 
-    ceph osd pool set $poolname size 4
+    stone osd pool set $poolname size 4
 
     # Wait for recovery to start
     set -o pipefail
     count=0
     while(true)
     do
-      if ceph --format json pg dump pgs |
+      if stone --format json pg dump pgs |
         jq '.pg_stats | [.[] | .state | contains("recovering")]' | grep -q true
       then
         break
@@ -88,10 +88,10 @@ function TEST_recovery_scrub_1() {
       count=$(expr $count + 1)
     done
     set +o pipefail
-    ceph pg dump pgs
+    stone pg dump pgs
 
     sleep 10
-    # Work around for http://tracker.ceph.com/issues/38195
+    # Work around for http://tracker.stone.com/issues/38195
     kill_daemons $dir #|| return 1
 
     declare -a err_strings
@@ -159,7 +159,7 @@ function wait_for_scrub_mod() {
         fi
         sleep 1
         # are we still the primary?
-        local current_primary=`bin/ceph pg $pgid query | jq '.acting[0]' `
+        local current_primary=`bin/stone pg $pgid query | jq '.acting[0]' `
         if [ $orig_primary != $current_primary ]; then
             echo $orig_primary no longer primary for $pgid
             return 0
@@ -185,8 +185,8 @@ function pg_scrub_mod() {
     local pgid=$1
     local last_scrub=$(get_last_scrub_stamp $pgid)
     # locate the primary
-    local my_primary=`bin/ceph pg $pgid query | jq '.acting[0]' `
-    ceph pg scrub $pgid
+    local my_primary=`bin/stone pg $pgid query | jq '.acting[0]' `
+    stone pg scrub $pgid
     wait_for_scrub_mod $pgid $my_primary "$last_scrub"
 }
 
@@ -265,7 +265,7 @@ function TEST_recovery_scrub_2() {
     # Create a pool with $PGS pgs
     create_pool $poolname $PGS $PGS
     wait_for_clean || return 1
-    poolid=$(ceph osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
+    poolid=$(stone osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1M count=50
     for i in $(seq 1 $OBJECTS)
@@ -277,9 +277,9 @@ function TEST_recovery_scrub_2() {
     flush_pg_stats
     date  --rfc-3339=ns
     mark_logs_linecount $dir logwc
-    ceph osd pool set $poolname size 3
+    stone osd pool set $poolname size 3
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     # Wait for recovery to start
     set -o pipefail
@@ -287,7 +287,7 @@ function TEST_recovery_scrub_2() {
     while(true)
     do
       grep_all_after_linecount $dir logwc recovering && break
-      if ceph --format json pg dump pgs |
+      if stone --format json pg dump pgs |
         jq '.pg_stats | [.[] | .state | contains("recovering")]' | grep -q true
       then
         break
@@ -304,14 +304,14 @@ function TEST_recovery_scrub_2() {
     flush_pg_stats
     sleep 2
     set +o pipefail
-    ceph pg dump pgs
+    stone pg dump pgs
 
     pids=""
     for pg in $(seq 0 $(expr $PGS - 1))
     do
         run_in_background pids pg_scrub_mod $poolid.$(printf "%x" $pg)
     done
-    ceph pg dump pgs
+    stone pg dump pgs
     wait_background pids
     return_code=$?
     if [ $return_code -ne 0 ]; then return $return_code; fi
@@ -326,7 +326,7 @@ function TEST_recovery_scrub_2() {
         ERRORS=$(expr $ERRORS + 1)
     fi
 
-    # Work around for http://tracker.ceph.com/issues/38195
+    # Work around for http://tracker.stone.com/issues/38195
     kill_daemons $dir #|| return 1
 
     declare -a err_strings

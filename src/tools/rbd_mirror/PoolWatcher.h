@@ -10,13 +10,13 @@
 #include <string>
 
 #include "common/AsyncOpTracker.h"
-#include "common/ceph_context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_context.h"
+#include "common/stone_mutex.h"
 #include "include/rados/librados.hpp"
 #include "tools/rbd_mirror/Types.h"
 #include <boost/functional/hash.hpp>
 #include <boost/optional.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "tools/rbd_mirror/pool_watcher/Types.h"
 
 namespace librbd { struct ImageCtx; }
@@ -110,7 +110,7 @@ private:
   ImageIds m_refresh_image_ids;
   bufferlist m_out_bl;
 
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
 
   Context *m_on_init_finish = nullptr;
 

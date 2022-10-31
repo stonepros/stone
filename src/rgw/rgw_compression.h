@@ -20,7 +20,7 @@ int rgw_compression_info_from_attrset(const map<string, bufferlist>& attrs,
 
 class RGWGetObj_Decompress : public RGWGetObj_Filter
 {
-  CephContext* cct;
+  StoneContext* cct;
   CompressorRef compressor;
   RGWCompressionInfo* cs_info;
   bool partial_content;
@@ -29,7 +29,7 @@ class RGWGetObj_Decompress : public RGWGetObj_Filter
   uint64_t cur_ofs;
   bufferlist waiting;
 public:
-  RGWGetObj_Decompress(CephContext* cct_, 
+  RGWGetObj_Decompress(StoneContext* cct_, 
                        RGWCompressionInfo* cs_info_, 
                        bool partial_content_,
                        RGWGetObj_Filter* next);
@@ -42,13 +42,13 @@ public:
 
 class RGWPutObj_Compress : public rgw::putobj::Pipe
 {
-  CephContext* cct;
+  StoneContext* cct;
   bool compressed{false};
   CompressorRef compressor;
   boost::optional<int32_t> compressor_message;
   std::vector<compression_block> blocks;
 public:
-  RGWPutObj_Compress(CephContext* cct_, CompressorRef compressor,
+  RGWPutObj_Compress(StoneContext* cct_, CompressorRef compressor,
                      rgw::putobj::DataProcessor *next)
     : Pipe(next), cct(cct_), compressor(compressor) {}
 

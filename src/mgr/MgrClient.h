@@ -2,7 +2,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -53,22 +53,22 @@ class MgrCommand : public CommandOp
   std::string name;
   bool tell = false;
 
-  explicit MgrCommand(ceph_tid_t t) : CommandOp(t) {}
+  explicit MgrCommand(stone_tid_t t) : CommandOp(t) {}
   MgrCommand() : CommandOp() {}
 };
 
 class MgrClient : public Dispatcher
 {
 protected:
-  StoneeContext *cct;
+  StoneContext *cct;
   MgrMap map;
   Messenger *msgr;
   MonMap *monmap;
 
   std::unique_ptr<MgrSessionState> session;
 
-  ceph::mutex lock = ceph::make_mutex("MgrClient::lock");
-  ceph::condition_variable shutdown_cond;
+  stone::mutex lock = stone::make_mutex("MgrClient::lock");
+  stone::condition_variable shutdown_cond;
 
   uint32_t stats_period = 0;
   uint32_t stats_threshold = 0;
@@ -76,7 +76,7 @@ protected:
 
   CommandTable<MgrCommand> command_table;
 
-  using clock_t = ceph::real_clock;
+  using clock_t = stone::real_clock;
   clock_t::time_point last_connect_attempt;
 
   uint64_t last_config_bl_version = 0;
@@ -103,12 +103,12 @@ protected:
   void reconnect();
   void _send_open();
 
-  // In pre-luminous clusters, the ceph-mgr service is absent or optional,
+  // In pre-luminous clusters, the stone-mgr service is absent or optional,
   // so we must not block in start_command waiting for it.
   bool mgr_optional = false;
 
 public:
-  MgrClient(StoneeContext *cct_, Messenger *msgr_, MonMap *monmap);
+  MgrClient(StoneContext *cct_, Messenger *msgr_, MonMap *monmap);
 
   void set_messenger(Messenger *msgr_) { msgr = msgr_; }
 
@@ -117,17 +117,17 @@ public:
 
   void set_mgr_optional(bool optional_) {mgr_optional = optional_;}
 
-  bool ms_dispatch2(const ceph::ref_t<Message>& m) override;
+  bool ms_dispatch2(const stone::ref_t<Message>& m) override;
   bool ms_handle_reset(Connection *con) override;
   void ms_handle_remote_reset(Connection *con) override {}
   bool ms_handle_refused(Connection *con) override;
 
-  bool handle_mgr_map(ceph::ref_t<MMgrMap> m);
-  bool handle_mgr_configure(ceph::ref_t<MMgrConfigure> m);
-  bool handle_mgr_close(ceph::ref_t<MMgrClose> m);
+  bool handle_mgr_map(stone::ref_t<MMgrMap> m);
+  bool handle_mgr_configure(stone::ref_t<MMgrConfigure> m);
+  bool handle_mgr_close(stone::ref_t<MMgrClose> m);
   bool handle_command_reply(
     uint64_t tid,
-    ceph::buffer::list& data,
+    stone::buffer::list& data,
     const std::string& rs,
     int r);
 
@@ -148,13 +148,13 @@ public:
   }
 
   int start_command(
-    const std::vector<std::string>& cmd, const ceph::buffer::list& inbl,
-    ceph::buffer::list *outbl, std::string *outs,
+    const std::vector<std::string>& cmd, const stone::buffer::list& inbl,
+    stone::buffer::list *outbl, std::string *outs,
     Context *onfinish);
   int start_tell_command(
     const std::string& name,
-    const std::vector<std::string>& cmd, const ceph::buffer::list& inbl,
-    ceph::buffer::list *outbl, std::string *outs,
+    const std::vector<std::string>& cmd, const stone::buffer::list& inbl,
+    stone::buffer::list *outbl, std::string *outs,
     Context *onfinish);
 
   int service_daemon_register(
@@ -183,7 +183,7 @@ private:
   }
 
   void handle_config_payload(const UnknownConfigPayload &payload) {
-    ceph_abort();
+    stone_abort();
   }
 
   struct HandlePayloadVisitor : public boost::static_visitor<void> {

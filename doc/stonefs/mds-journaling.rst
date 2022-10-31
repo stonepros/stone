@@ -1,25 +1,25 @@
 MDS Journaling
 ==============
 
-CephFS Metadata Pool
+StoneFS Metadata Pool
 --------------------
 
-CephFS uses a separate (metadata) pool for managing file metadata (inodes and
-dentries) in a Ceph File System. The metadata pool has all the information about
-files in a Ceph File System including the File System hierarchy. Additionally,
-CephFS maintains meta information related to other entities in a file system
+StoneFS uses a separate (metadata) pool for managing file metadata (inodes and
+dentries) in a Stone File System. The metadata pool has all the information about
+files in a Stone File System including the File System hierarchy. Additionally,
+StoneFS maintains meta information related to other entities in a file system
 such as file system journals, open file table, session map, etc.
 
-This document describes how Ceph Metadata Servers use and rely on journaling.
+This document describes how Stone Metadata Servers use and rely on journaling.
 
-CephFS MDS Journaling
+StoneFS MDS Journaling
 ---------------------
 
-CephFS metadata servers stream a journal of metadata events into RADOS in the metadata
+StoneFS metadata servers stream a journal of metadata events into RADOS in the metadata
 pool prior to executing a file system operation. Active MDS daemon(s) manage metadata
-for files and directories in CephFS.
+for files and directories in StoneFS.
 
-CephFS uses journaling for couple of reasons:
+StoneFS uses journaling for couple of reasons:
 
 #. Consistency: On an MDS failover, the journal events can be replayed to reach a
    consistent file system state. Also, metadata operations that require multiple
@@ -39,21 +39,21 @@ old) are trimmed by the metadata server.
 Journal Events
 --------------
 
-Apart from journaling file system metadata updates, CephFS journals various other events
+Apart from journaling file system metadata updates, StoneFS journals various other events
 such as client session info and directory import/export state to name a few. These events
-are used by the metadata sever to reestablish correct state as required, e.g., Ceph MDS
+are used by the metadata sever to reestablish correct state as required, e.g., Stone MDS
 tries to reconnect clients on restart when journal events get replayed and a specific
 event type in the journal specifies that a client entity type has a session with the MDS
 before it was restarted.
 
-To examine the list of such events recorded in the journal, CephFS provides a command
+To examine the list of such events recorded in the journal, StoneFS provides a command
 line utility `cephfs-journal-tool` which can be used as follows:
 
 ::
 
    cephfs-journal-tool --rank=<fs>:<rank> event get list
 
-`cephfs-journal-tool` is also used to discover and repair a damaged Ceph File System.
+`cephfs-journal-tool` is also used to discover and repair a damaged Stone File System.
 (See :doc:`/cephfs/cephfs-journal-tool` for more details)
 
 Journal Event Types

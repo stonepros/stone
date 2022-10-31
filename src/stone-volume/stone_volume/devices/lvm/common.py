@@ -1,6 +1,6 @@
-from ceph_volume.util import arg_validators, disk
-from ceph_volume import process, conf
-from ceph_volume import terminal
+from stone_volume.util import arg_validators, disk
+from stone_volume import process, conf
+from stone_volume import terminal
 import argparse
 
 def valid_osd_id(val):
@@ -23,9 +23,9 @@ def rollback_osd(args, osd_id=None):
     # once here, this is an error condition that needs to be rolled back
     terminal.error('Was unable to complete a new OSD, will rollback changes')
     osd_name = 'osd.%s'
-    bootstrap_keyring = '/var/lib/ceph/bootstrap-osd/%s.keyring' % conf.cluster
+    bootstrap_keyring = '/var/lib/stone/bootstrap-osd/%s.keyring' % conf.cluster
     cmd = [
-        'ceph',
+        'stone',
         '--cluster', conf.cluster,
         '--name', 'client.bootstrap-osd',
         '--keyring', bootstrap_keyring,
@@ -65,7 +65,7 @@ common_args = {
         'default': None,
     },
     '--cluster-fsid': {
-        'help': 'Specify the cluster fsid, useful when no ceph.conf is available',
+        'help': 'Specify the cluster fsid, useful when no stone.conf is available',
         'default': None,
     },
     '--crush-device-class': {

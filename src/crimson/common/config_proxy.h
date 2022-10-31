@@ -10,7 +10,7 @@
 #include "common/config_obs_mgr.h"
 #include "common/errno.h"
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 
@@ -29,7 +29,7 @@ class ConfigProxy : public seastar::peering_sharded_service<ConfigProxy>
   md_config_t* remote_config = nullptr;
   std::unique_ptr<md_config_t> local_config;
 
-  using ConfigObserver = ceph::md_config_obs_impl<ConfigProxy>;
+  using ConfigObserver = stone::md_config_obs_impl<ConfigProxy>;
   ObserverMgr<ConfigObserver> obs_mgr;
 
   const md_config_t& get_config() const {
@@ -163,7 +163,7 @@ public:
       }
     });
   }
-  void show_config(ceph::Formatter* f) const;
+  void show_config(stone::Formatter* f) const;
 
   seastar::future<> parse_argv(std::vector<const char*>& argv) {
     // we could pass whatever is unparsed to seastar, but seastar::app_template

@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <ostream>
 #include <boost/variant.hpp>
-#include "include/ceph_assert.h"	// boost clobbers this
+#include "include/stone_assert.h"	// boost clobbers this
 #include "include/common_fwd.h"
 #include "common/Formatter.h"
 #include "common/BackTrace.h"
@@ -24,14 +24,14 @@ typedef std::map<std::string, cmd_vartype, std::less<>> cmdmap_t;
 namespace TOPNSPC::common {
 std::string cmddesc_get_prefix(const std::string_view &cmddesc);
 std::string cmddesc_get_prenautilus_compat(const std::string &cmddesc);
-void dump_cmd_to_json(ceph::Formatter *f, uint64_t features,
+void dump_cmd_to_json(stone::Formatter *f, uint64_t features,
                       const std::string& cmd);
-void dump_cmd_and_help_to_json(ceph::Formatter *f,
+void dump_cmd_and_help_to_json(stone::Formatter *f,
 			       uint64_t features,
 			       const std::string& secname,
 			       const std::string& cmd,
 			       const std::string& helptext);
-void dump_cmddesc_to_json(ceph::Formatter *jf,
+void dump_cmddesc_to_json(stone::Formatter *jf,
 		          uint64_t features,
 		          const std::string& secname,
 		          const std::string& cmdsig,
@@ -41,8 +41,8 @@ void dump_cmddesc_to_json(ceph::Formatter *jf,
 		          uint64_t flags);
 bool cmdmap_from_json(const std::vector<std::string>& cmd, cmdmap_t *mapp,
 		      std::ostream& ss);
-void cmdmap_dump(const cmdmap_t &cmdmap, ceph::Formatter *f);
-void handle_bad_get(StoneeContext *cct, const std::string& k, const char *name);
+void cmdmap_dump(const cmdmap_t &cmdmap, stone::Formatter *f);
+void handle_bad_get(StoneContext *cct, const std::string& k, const char *name);
 
 std::string cmd_vartype_stringify(const cmd_vartype& v);
 
@@ -96,12 +96,12 @@ bool cmd_getval(
 
 template <typename T>
 void
-cmd_putval(StoneeContext *cct, cmdmap_t& cmdmap, const std::string& k, const T& val)
+cmd_putval(StoneContext *cct, cmdmap_t& cmdmap, const std::string& k, const T& val)
 {
   cmdmap[k] = val;
 }
 
-bool validate_cmd(StoneeContext* cct,
+bool validate_cmd(StoneContext* cct,
 		  const std::string& desc,
 		  const cmdmap_t& cmdmap,
 		  std::ostream& os);

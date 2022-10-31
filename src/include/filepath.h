@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -132,7 +132,7 @@ class filepath {
 
   const std::string& last_dentry() const {
     if (bits.empty() && path.length() > 0) parse_bits();
-    ceph_assert(!bits.empty());
+    stone_assert(!bits.empty());
     return bits[ bits.size()-1 ];
   }
 
@@ -184,21 +184,21 @@ class filepath {
     rebuild_path();
   }
   void append(const filepath& a) {
-    ceph_assert(a.pure_relative());
+    stone_assert(a.pure_relative());
     for (unsigned i=0; i<a.depth(); i++) 
       push_dentry(a[i]);
   }
 
   // encoding
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(ino, bl);
     encode(path, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& blp) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& blp) {
+    using stone::decode;
     bits.clear();
     __u8 struct_v;
     decode(struct_v, blp);
@@ -206,7 +206,7 @@ class filepath {
     decode(path, blp);
     encoded = true;
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_unsigned("base_ino", ino);
     f->dump_string("relative_path", path);
   }

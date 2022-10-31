@@ -1,6 +1,6 @@
-FROM ceph/daemon-base:latest-master
+FROM stone/daemon-base:latest-master
 # for openSUSE, use:
-# FROM registry.opensuse.org/home/ssebastianwagner/rook-ceph/images/opensuse/leap:latest
+# FROM registry.opensuse.org/home/ssebastianwagner/rook-stone/images/opensuse/leap:latest
 
 
 #ADD bin.tar.gz /usr/bin/
@@ -8,8 +8,8 @@ FROM ceph/daemon-base:latest-master
 
 # Assume developer is using default paths (i.e. /usr/local), so
 # build binaries will be looking for libs there.
-#ADD eclib.tar.gz /usr/local/lib64/ceph/erasure-code/
+#ADD eclib.tar.gz /usr/local/lib64/stone/erasure-code/
 #ADD clslib.tar.gz /usr/local/lib64/rados-classes/
 
-ADD python_common.tar.gz /usr/share/ceph/python_common
-ADD mgr_plugins.tar.gz /usr/share/ceph/mgr
+ADD python_common.tar.gz /usr/share/stone/python_common
+ADD mgr_plugins.tar.gz /usr/share/stone/mgr

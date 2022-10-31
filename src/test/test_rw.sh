@@ -16,9 +16,9 @@ my_write_objects() {
 }
 
 setup() {
-        export CEPH_NUM_OSD=$1
+        export STONE_NUM_OSD=$1
 
-        # Start ceph
+        # Start stone
         ./stop.sh
 
         ./vstart.sh -d -n || die "vstart.sh failed"

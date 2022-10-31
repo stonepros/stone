@@ -64,38 +64,38 @@ EOF
 DEV=$(sudo rbd map -o ms_mode=legacy img)
 sudo dmesg -C
 ./racereads
-[[ $(dmesg | grep -c 'libceph: osd.* bad crc/signature') -gt 100 ]]
+[[ $(dmesg | grep -c 'libstone: osd.* bad crc/signature') -gt 100 ]]
 sudo rbd unmap $DEV
 
 DEV=$(sudo rbd map -o ms_mode=legacy,rxbounce img)
 sudo dmesg -C
 ./racereads
-[[ $(dmesg | grep -c 'libceph: osd.* bad crc/signature') -eq 0 ]]
+[[ $(dmesg | grep -c 'libstone: osd.* bad crc/signature') -eq 0 ]]
 sudo rbd unmap $DEV
 
 DEV=$(sudo rbd map -o ms_mode=crc img)
 sudo dmesg -C
 ./racereads
-[[ $(dmesg | grep -c 'libceph: osd.* integrity error') -gt 100 ]]
+[[ $(dmesg | grep -c 'libstone: osd.* integrity error') -gt 100 ]]
 sudo rbd unmap $DEV
 
 DEV=$(sudo rbd map -o ms_mode=crc,rxbounce img)
 sudo dmesg -C
 ./racereads
-[[ $(dmesg | grep -c 'libceph: osd.* integrity error') -eq 0 ]]
+[[ $(dmesg | grep -c 'libstone: osd.* integrity error') -eq 0 ]]
 sudo rbd unmap $DEV
 
 # rxbounce is a no-op for secure mode
 DEV=$(sudo rbd map -o ms_mode=secure img)
 sudo dmesg -C
 ./racereads
-[[ $(dmesg | grep -c 'libceph: osd.* integrity error') -eq 0 ]]
+[[ $(dmesg | grep -c 'libstone: osd.* integrity error') -eq 0 ]]
 sudo rbd unmap $DEV
 
 DEV=$(sudo rbd map -o ms_mode=secure,rxbounce img)
 sudo dmesg -C
 ./racereads
-[[ $(dmesg | grep -c 'libceph: osd.* integrity error') -eq 0 ]]
+[[ $(dmesg | grep -c 'libstone: osd.* integrity error') -eq 0 ]]
 sudo rbd unmap $DEV
 
 rbd rm img

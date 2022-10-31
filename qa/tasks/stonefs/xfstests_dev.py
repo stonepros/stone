@@ -1,6 +1,6 @@
 from io import BytesIO
 import logging
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 logger = logging.getLogger(__name__)
 
@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 # TODO: add code to run non-ACL tests too.
 # TODO: get tests running with SCRATCH_DEV and SCRATCH_DIR.
 # TODO: make xfstests-dev tests running without running `make install`.
-# TODO: make xfstests-dev compatible with ceph-fuse. xfstests-dev remounts
-# CephFS before running tests using kernel, so ceph-fuse mounts are never
+# TODO: make xfstests-dev compatible with stone-fuse. xfstests-dev remounts
+# StoneFS before running tests using kernel, so stone-fuse mounts are never
 # actually testsed.
-class XFSTestsDev(CephFSTestCase):
+class XFSTestsDev(StoneFSTestCase):
 
     def setUp(self):
         super(XFSTestsDev, self).setUp()
@@ -41,7 +41,7 @@ class XFSTestsDev(CephFSTestCase):
 
         # TODO: make sure that repo is not cloned for every test. it should
         # happen only once.
-        remoteurl = 'git://git.ceph.com/xfstests-dev.git'
+        remoteurl = 'git://git.stone.com/xfstests-dev.git'
         self.repo_path = self.mount_a.client_remote.mkdtemp(suffix=
                                                             'xfstests-dev')
         self.mount_a.run_shell(['git', 'archive', '--remote=' + remoteurl,
@@ -58,7 +58,7 @@ class XFSTestsDev(CephFSTestCase):
         return cp['client.admin']['key']
 
     def get_test_and_scratch_dirs_ready(self):
-        """ "test" and "scratch" directories are directories inside Ceph FS.
+        """ "test" and "scratch" directories are directories inside Stone FS.
             And, test and scratch mounts are path on the local FS where "test"
             and "scratch" directories would be mounted. Look at xfstests-dev
             local.config's template inside this file to get some context.
@@ -139,7 +139,7 @@ class XFSTestsDev(CephFSTestCase):
         self.scratch_dev = mon_sock + ':/' + self.scratch_dirname
 
         xfstests_config_contents = dedent('''\
-            export FSTYP=ceph
+            export FSTYP=stone
             export TEST_DEV={}
             export TEST_DIR={}
             #export SCRATCH_DEV={}

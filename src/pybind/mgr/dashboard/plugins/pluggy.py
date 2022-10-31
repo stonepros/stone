@@ -29,7 +29,7 @@ https://github.com/pytest-dev/pluggy/releases/tag/0.8.0).
 
 
 Despite being a widely available Python library, it does not reach all the
-distros and releases currently targeted for Ceph Nautilus:
+distros and releases currently targeted for Stone Nautilus:
 - CentOS/RHEL 7.5 [ ]
 - CentOS/RHEL 8 [ ]
 - Debian 8.0 [ ]

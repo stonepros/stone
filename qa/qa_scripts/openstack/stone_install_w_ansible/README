@@ -1,7 +1,7 @@
 
-ceph_install.sh installs a ceph cluster using the cdn and ceph-ansible.
+stone_install.sh installs a stone cluster using the cdn and stone-ansible.
 
-Right now, it takes 5 parameters -- an admin node, a ceph mon node, and
+Right now, it takes 5 parameters -- an admin node, a stone mon node, and
 three osd nodes.
 
 In order to subscribe to the cdn, in your home directory create a file named
@@ -24,7 +24,7 @@ and execs/cdn_setup.sh is used to remotely update the cdn information.
 
 After that, it makes sure that all nodes can connect via passwordless ssh
 (using talknice.sh and config) and then installs the appropriate repos and
-runs ceph_ansible on the admin node using execs/ceph_ansible.sh,
+runs stone_ansible on the admin node using execs/stone_ansible.sh,
 execs/edit_ansible_hosts.sh and execs/edit_groupvars_osds.sh.
 
 repolocs.sh contains the locations of repo files.  These variables can

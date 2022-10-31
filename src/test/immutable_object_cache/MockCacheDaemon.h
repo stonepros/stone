@@ -12,12 +12,12 @@
 #include "include/Context.h"
 #include "tools/immutable_object_cache/CacheClient.h"
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 class MockCacheClient {
  public:
-  MockCacheClient(const std::string& file, StoneeContext* ceph_ctx) {}
+  MockCacheClient(const std::string& file, StoneContext* stone_ctx) {}
   MOCK_METHOD0(run, void());
   MOCK_METHOD0(is_session_work, bool());
   MOCK_METHOD0(close, void());
@@ -31,7 +31,7 @@ class MockCacheClient {
 
 class MockCacheServer {
  public:
-  MockCacheServer(StoneeContext* cct, const std::string& file,
+  MockCacheServer(StoneContext* cct, const std::string& file,
                   ProcessMsg processmsg) {
   }
   MOCK_METHOD0(run, int());
@@ -40,6 +40,6 @@ class MockCacheServer {
 };
 
 }  // namespace immutable_obj_cach3
-}  // namespace ceph
+}  // namespace stone
 
 #endif  // IMMUTABLE_OBJECT_CACHE_MOCK_DAEMON

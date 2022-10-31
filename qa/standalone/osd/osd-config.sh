@@ -16,16 +16,16 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7100" # git grep '\<7100\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7100" # git grep '\<7100\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -46,7 +46,7 @@ function TEST_config_init() {
         --osd-map-cache-size=$cache \
         --osd-pg-epoch-persisted-max-stale=$stale \
         || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.0) log flush || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.0) log flush || return 1
     grep 'is not > osd_pg_epoch_persisted_max_stale' $dir/osd.0.log || return 1
 }
 
@@ -57,9 +57,9 @@ function TEST_config_track() {
     run_mgr $dir x || return 1
     run_osd $dir 0 || return 1
 
-    local osd_map_cache_size=$(CEPH_ARGS='' ceph-conf \
+    local osd_map_cache_size=$(STONE_ARGS='' stone-conf \
         --show-config-value osd_map_cache_size)
-    local osd_pg_epoch_persisted_max_stale=$(CEPH_ARGS='' ceph-conf \
+    local osd_pg_epoch_persisted_max_stale=$(STONE_ARGS='' stone-conf \
         --show-config-value osd_pg_epoch_persisted_max_stale)
 
     #
@@ -67,24 +67,24 @@ function TEST_config_track() {
     #
     ! grep 'is not > osd_pg_epoch_persisted_max_stale' $dir/osd.0.log || return 1
     local stale=$(($osd_map_cache_size * 2))
-    ceph tell osd.0 injectargs "--osd-pg-epoch-persisted-max-stale $stale" || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.0) log flush || return 1
+    stone tell osd.0 injectargs "--osd-pg-epoch-persisted-max-stale $stale" || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.0) log flush || return 1
     grep 'is not > osd_pg_epoch_persisted_max_stale' $dir/osd.0.log || return 1
     rm $dir/osd.0.log
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.0) log reopen || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.0) log reopen || return 1
 }
 
 function TEST_default_adjustment() {
-    a=$(ceph-osd --no-mon-config --show-config-value rgw_torrent_origin)
-    b=$(ceph-osd --no-mon-config --show-config-value rgw_torrent_origin --default-rgw-torrent-origin default)
-    c=$(ceph-osd --no-mon-config --show-config-value rgw_torrent_origin --default-rgw-torrent-origin arg)
+    a=$(stone-osd --no-mon-config --show-config-value rgw_torrent_origin)
+    b=$(stone-osd --no-mon-config --show-config-value rgw_torrent_origin --default-rgw-torrent-origin default)
+    c=$(stone-osd --no-mon-config --show-config-value rgw_torrent_origin --default-rgw-torrent-origin arg)
     [ "$a" != "default" ] || return 1
     [ "$b" = "default" ] || return 1
     [ "$c" = "arg" ] || return 1
 
-    a=$(ceph-osd --no-mon-config --show-config-value log_to_file)
-    b=$(ceph-osd --no-mon-config --show-config-value log_to_file --default-log-to-file=false)
-    c=$(ceph-osd --no-mon-config --show-config-value log_to_file --default-log-to-file=false --log-to-file)
+    a=$(stone-osd --no-mon-config --show-config-value log_to_file)
+    b=$(stone-osd --no-mon-config --show-config-value log_to_file --default-log-to-file=false)
+    c=$(stone-osd --no-mon-config --show-config-value log_to_file --default-log-to-file=false --log-to-file)
     [ "$a" = "true" ] || return 1
     [ "$b" = "false" ] || return 1
     [ "$c" = "true" ] || return 1

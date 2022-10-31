@@ -41,7 +41,7 @@ struct rgw_get_bucket_info_params {
 };
 
 struct rgw_get_bucket_info_result {
-  ceph::real_time mtime;
+  stone::real_time mtime;
   RGWBucketInfo bucket_info;
   map<string, bufferlist> attrs;
 };

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -29,7 +29,7 @@
 #include "messages/MMgrReport.h"
 #include "DaemonKey.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -120,7 +120,7 @@ class DaemonPerfCounters
 class DaemonState
 {
   public:
-  ceph::mutex lock = ceph::make_mutex("DaemonState::lock");
+  stone::mutex lock = stone::make_mutex("DaemonState::lock");
 
   DaemonKey key;
 
@@ -245,33 +245,33 @@ private:
 };
 
 /**
- * Fuse the collection of per-daemon metadata from Stonee into
+ * Fuse the collection of per-daemon metadata from Stone into
  * a view that can be queried by service type, ID or also
  * by server (aka fqdn).
  */
 class DaemonStateIndex
 {
 private:
-  mutable ceph::shared_mutex lock =
-    ceph::make_shared_mutex("DaemonStateIndex", true, true, true);
+  mutable stone::shared_mutex lock =
+    stone::make_shared_mutex("DaemonStateIndex", true, true, true);
 
   std::map<std::string, DaemonStateCollection> by_server;
   DaemonStateCollection all;
   std::set<DaemonKey> updating;
 
-  std::map<std::string,ceph::ref_t<DeviceState>> devices;
+  std::map<std::string,stone::ref_t<DeviceState>> devices;
 
   void _erase(const DaemonKey& dmk);
 
-  ceph::ref_t<DeviceState> _get_or_create_device(const std::string& dev) {
+  stone::ref_t<DeviceState> _get_or_create_device(const std::string& dev) {
     auto em = devices.try_emplace(dev, nullptr);
     auto& d = em.first->second;
     if (em.second) {
-      d = ceph::make_ref<DeviceState>(dev);
+      d = stone::make_ref<DeviceState>(dev);
     }
     return d;
   }
-  void _erase_device(const ceph::ref_t<DeviceState>& d) {
+  void _erase_device(const stone::ref_t<DeviceState>& d) {
     devices.erase(d->devid);
   }
 

@@ -59,10 +59,10 @@ describe('PlacementPipe', () => {
     expect(
       pipe.transform({
         placement: {
-          host_pattern: 'abc.ceph.xyz.com'
+          host_pattern: 'abc.stone.xyz.com'
         }
       })
-    ).toBe('abc.ceph.xyz.com');
+    ).toBe('abc.stone.xyz.com');
   });
 
   it('transforms placement (6)', () => {

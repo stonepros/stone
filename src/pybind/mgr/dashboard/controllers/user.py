@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 
 import cherrypy
-from ceph_argparse import CephString
+from stone_argparse import StoneString
 
 from .. import mgr
 from ..exceptions import DashboardException, PasswordPolicyException, \
@@ -14,7 +14,7 @@ from ..security import Scope
 from ..services.access_control import SYSTEM_ROLES, PasswordPolicy
 from ..services.auth import JwtManager
 from . import APIDoc, APIRouter, BaseController, Endpoint, EndpointDoc, \
-    RESTController, allow_empty_body, validate_ceph_type
+    RESTController, allow_empty_body, validate_stone_type
 
 USER_SCHEMA = ([{
     "username": (str, 'Username of the user'),
@@ -82,7 +82,7 @@ class User(RESTController):
             raise cherrypy.HTTPError(404)
         return User._user_to_dict(user)
 
-    @validate_ceph_type([('username', CephString())], 'user')
+    @validate_stone_type([('username', StoneString())], 'user')
     def create(self, username=None, password=None, name=None, email=None,
                roles=None, enabled=True, pwdExpirationDate=None, pwdUpdateRequired=True):
         if not username:

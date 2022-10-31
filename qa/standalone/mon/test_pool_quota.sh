@@ -7,16 +7,16 @@
 # Includes
 
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:17108" # git grep '\<17108\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:17108" # git grep '\<17108\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -35,8 +35,8 @@ function TEST_pool_quota() {
 
     local poolname=testquota
     create_pool $poolname 20
-    local objects=`ceph df detail | grep -w $poolname|awk '{print $3}'`
-    local bytes=`ceph df detail | grep -w $poolname|awk '{print $4}'`
+    local objects=`stone df detail | grep -w $poolname|awk '{print $3}'`
+    local bytes=`stone df detail | grep -w $poolname|awk '{print $4}'`
 
     echo $objects
     echo $bytes
@@ -45,18 +45,18 @@ function TEST_pool_quota() {
       return 1
     fi
 
-    ceph osd pool set-quota  $poolname   max_objects 1000
-    ceph osd pool set-quota  $poolname  max_bytes 1024
+    stone osd pool set-quota  $poolname   max_objects 1000
+    stone osd pool set-quota  $poolname  max_bytes 1024
 
-    objects=`ceph df detail | grep -w $poolname|awk '{print $3}'`
-    bytes=`ceph df detail | grep -w $poolname|awk '{print $4}'`
+    objects=`stone df detail | grep -w $poolname|awk '{print $3}'`
+    bytes=`stone df detail | grep -w $poolname|awk '{print $4}'`
    
     if [ $objects != '1000' ] || [ $bytes != '1K' ] ;
       then
       return 1
     fi
 
-    ceph osd pool delete  $poolname $poolname  --yes-i-really-really-mean-it
+    stone osd pool delete  $poolname $poolname  --yes-i-really-really-mean-it
     teardown $dir || return 1
 }
 

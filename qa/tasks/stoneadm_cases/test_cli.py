@@ -5,7 +5,7 @@ from tasks.mgr.mgr_test_case import MgrTestCase
 log = logging.getLogger(__name__)
 
 
-class TestCephadmCLI(MgrTestCase):
+class TestStoneadmCLI(MgrTestCase):
     def _cmd(self, *args) -> str:
         assert self.mgr_cluster is not None
         return self.mgr_cluster.mon_manager.raw_cluster_cmd(*args)
@@ -14,7 +14,7 @@ class TestCephadmCLI(MgrTestCase):
         return self._cmd("orch", *args)
 
     def setUp(self):
-        super(TestCephadmCLI, self).setUp()
+        super(TestStoneadmCLI, self).setUp()
 
     def test_yaml(self):
         """
@@ -41,7 +41,7 @@ class TestCephadmCLI(MgrTestCase):
 
     def test_pause(self):
         self._orch_cmd('pause')
-        self.wait_for_health('CEPHADM_PAUSED', 60)
+        self.wait_for_health('STONEADM_PAUSED', 60)
         self._orch_cmd('resume')
         self.wait_for_health_clear(60)
 
@@ -55,9 +55,9 @@ class TestCephadmCLI(MgrTestCase):
     def test_device_ls_wide(self):
         self._orch_cmd('device', 'ls', '--wide')
 
-    def test_cephfs_mirror(self):
-        self._orch_cmd('apply', 'cephfs-mirror')
-        self.wait_until_true(lambda: 'cephfs-mirror' in self._orch_cmd('ps'), 60)
+    def test_stonefs_mirror(self):
+        self._orch_cmd('apply', 'stonefs-mirror')
+        self.wait_until_true(lambda: 'stonefs-mirror' in self._orch_cmd('ps'), 60)
         self.wait_for_health_clear(60)
-        self._orch_cmd('rm', 'cephfs-mirror')
-        self.wait_until_true(lambda: 'cephfs-mirror' not in self._orch_cmd('ps'), 60)
+        self._orch_cmd('rm', 'stonefs-mirror')
+        self.wait_until_true(lambda: 'stonefs-mirror' not in self._orch_cmd('ps'), 60)

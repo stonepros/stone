@@ -27,8 +27,8 @@ def cleanup(cluster):
 
 def init():
     # For local testing
-    #cluster = rados.Rados(conffile='./ceph.conf')
-    cluster = rados.Rados(conffile='/etc/ceph/ceph.conf')
+    #cluster = rados.Rados(conffile='./stone.conf')
+    cluster = rados.Rados(conffile='/etc/stonepros/stone.conf')
     cluster.connect()
     print("\nCluster ID: " + cluster.get_fsid())
     cluster.create_pool('large-omap-test-pool')
@@ -70,7 +70,7 @@ def init():
     return cluster
 
 def get_deep_scrub_timestamp(pgid):
-    cmd = ['ceph', 'pg', 'dump', '--format=json-pretty']
+    cmd = ['stone', 'pg', 'dump', '--format=json-pretty']
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     out = proc.communicate()[0]
     try:
@@ -84,13 +84,13 @@ def get_deep_scrub_timestamp(pgid):
 def wait_for_scrub():
     osds = set();
     pgs = dict();
-    cmd = ['ceph', 'osd', 'map', 'large-omap-test-pool',
+    cmd = ['stone', 'osd', 'map', 'large-omap-test-pool',
            'large-omap-test-object1', '--format=json-pretty']
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     out = proc.communicate()[0]
     osds.add(json.loads(out)['acting_primary'])
     pgs[json.loads(out)['pgid']] = get_deep_scrub_timestamp(json.loads(out)['pgid'])
-    cmd = ['ceph', 'osd', 'map', 'large-omap-test-pool',
+    cmd = ['stone', 'osd', 'map', 'large-omap-test-pool',
            'large-omap-test-object2', '--format=json-pretty']
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     out = proc.communicate()[0]
@@ -98,7 +98,7 @@ def wait_for_scrub():
     pgs[json.loads(out)['pgid']] = get_deep_scrub_timestamp(json.loads(out)['pgid'])
 
     for pg in pgs:
-        command = "ceph pg deep-scrub " + str(pg)
+        command = "stone pg deep-scrub " + str(pg)
         subprocess.check_call(shlex.split(command))
 
     for pg in pgs:
@@ -113,7 +113,7 @@ def check_health_output():
     while RETRIES < 6 and result != 2:
         result = 0
         RETRIES += 1
-        output = subprocess.check_output(["ceph", "health", "detail"])
+        output = subprocess.check_output(["stone", "health", "detail"])
         for line in output.splitlines():
             result += int(line.find(b'2 large omap objects') != -1)
         time.sleep(10)

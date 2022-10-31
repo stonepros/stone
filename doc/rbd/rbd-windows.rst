@@ -6,7 +6,7 @@ The ``rbd`` command can be used to create, remove, import, export, map or
 unmap images exactly like it would on Linux. Make sure to check the
 `RBD basic commands`_ guide.
 
-``librbd.dll`` is also available for applications that can natively use Ceph.
+``librbd.dll`` is also available for applications that can natively use Stone.
 
 Please check the `installation guide`_ to get started.
 
@@ -35,11 +35,11 @@ The following command can be used to configure the service. Please update
 the ``rbd-wnbd.exe`` path accordingly::
 
     New-Service -Name "ceph-rbd" `
-                -Description "Ceph RBD Mapping Service" `
+                -Description "Stone RBD Mapping Service" `
                 -BinaryPathName "c:\ceph\rbd-wnbd.exe service" `
                 -StartupType Automatic
 
-Note that the Ceph MSI installer takes care of creating the ``ceph-rbd``
+Note that the Stone MSI installer takes care of creating the ``ceph-rbd``
 Windows service.
 
 Usage

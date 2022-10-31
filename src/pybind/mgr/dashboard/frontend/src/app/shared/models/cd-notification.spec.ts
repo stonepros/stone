@@ -10,8 +10,8 @@ describe('cd-notification classes', () => {
   describe('CdNotificationConfig', () => {
     it('should create a new config without any parameters', () => {
       expectObject(new CdNotificationConfig(), {
-        application: 'Ceph',
-        applicationClass: 'ceph-icon',
+        application: 'Stone',
+        applicationClass: 'stone-icon',
         message: undefined,
         options: undefined,
         title: undefined,
@@ -48,8 +48,8 @@ describe('cd-notification classes', () => {
 
     it('should create a new config without any parameters', () => {
       expectObject(new CdNotification(), {
-        application: 'Ceph',
-        applicationClass: 'ceph-icon',
+        application: 'Stone',
+        applicationClass: 'stone-icon',
         iconClass: 'fa fa-info',
         message: undefined,
         options: undefined,

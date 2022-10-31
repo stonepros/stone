@@ -14,7 +14,7 @@
 #include "include/stringify.h"
 #include "include/utime.h"
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 enum ClientMetricType {
   CLIENT_METRIC_TYPE_CAP_INFO,
@@ -96,7 +96,7 @@ struct CapInfoPayload : public ClientMetricPayloadBase {
   }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(cap_hits, bl);
     encode(cap_misses, bl);
@@ -105,7 +105,7 @@ struct CapInfoPayload : public ClientMetricPayloadBase {
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(cap_hits, iter);
     decode(cap_misses, iter);
@@ -136,14 +136,14 @@ struct ReadLatencyPayload : public ClientMetricPayloadBase {
   }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(lat, bl);
     ENCODE_FINISH(bl);
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(lat, iter);
     DECODE_FINISH(iter);
@@ -168,14 +168,14 @@ struct WriteLatencyPayload : public ClientMetricPayloadBase {
   }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(lat, bl);
     ENCODE_FINISH(bl);
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(lat, iter);
     DECODE_FINISH(iter);
@@ -200,14 +200,14 @@ struct MetadataLatencyPayload : public ClientMetricPayloadBase {
   }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(lat, bl);
     ENCODE_FINISH(bl);
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(lat, iter);
     DECODE_FINISH(iter);
@@ -234,7 +234,7 @@ struct DentryLeasePayload : public ClientMetricPayloadBase {
     dlease_hits(dlease_hits), dlease_misses(dlease_misses), nr_dentries(nr_dentries) { }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(dlease_hits, bl);
     encode(dlease_misses, bl);
@@ -243,7 +243,7 @@ struct DentryLeasePayload : public ClientMetricPayloadBase {
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(dlease_hits, iter);
     decode(dlease_misses, iter);
@@ -275,7 +275,7 @@ struct OpenedFilesPayload : public ClientMetricPayloadBase {
     opened_files(opened_files), total_inodes(total_inodes) { }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(opened_files, bl);
     encode(total_inodes, bl);
@@ -283,7 +283,7 @@ struct OpenedFilesPayload : public ClientMetricPayloadBase {
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(opened_files, iter);
     decode(total_inodes, iter);
@@ -312,7 +312,7 @@ struct PinnedIcapsPayload : public ClientMetricPayloadBase {
     pinned_icaps(pinned_icaps), total_inodes(total_inodes) { }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(pinned_icaps, bl);
     encode(total_inodes, bl);
@@ -320,7 +320,7 @@ struct PinnedIcapsPayload : public ClientMetricPayloadBase {
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(pinned_icaps, iter);
     decode(total_inodes, iter);
@@ -349,7 +349,7 @@ struct OpenedInodesPayload : public ClientMetricPayloadBase {
     opened_inodes(opened_inodes), total_inodes(total_inodes) { }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(opened_inodes, bl);
     encode(total_inodes, bl);
@@ -357,7 +357,7 @@ struct OpenedInodesPayload : public ClientMetricPayloadBase {
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(opened_inodes, iter);
     decode(total_inodes, iter);
@@ -386,7 +386,7 @@ struct ReadIoSizesPayload : public ClientMetricPayloadBase {
     total_ops(total_ops), total_size(total_size) {  }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(total_ops, bl);
     encode(total_size, bl);
@@ -394,7 +394,7 @@ struct ReadIoSizesPayload : public ClientMetricPayloadBase {
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(total_ops, iter);
     decode(total_size, iter);
@@ -423,7 +423,7 @@ struct WriteIoSizesPayload : public ClientMetricPayloadBase {
   }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(total_ops, bl);
     encode(total_size, bl);
@@ -431,7 +431,7 @@ struct WriteIoSizesPayload : public ClientMetricPayloadBase {
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(total_ops, iter);
     decode(total_size, iter);
@@ -458,7 +458,7 @@ struct UnknownPayload : public ClientMetricPayloadBase {
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(254, iter);
     iter.seek(struct_len);
     DECODE_FINISH(iter);
@@ -497,7 +497,7 @@ public:
 
     template <typename ClientMetricPayload>
     inline void operator()(const ClientMetricPayload &payload) const {
-      using ceph::encode;
+      using stone::encode;
       encode(static_cast<uint32_t>(payload.get_type()), m_bl);
       payload.encode(m_bl);
     }
@@ -513,7 +513,7 @@ public:
 
     template <typename ClientMetricPayload>
     inline void operator()(ClientMetricPayload &payload) const {
-      using ceph::decode;
+      using stone::decode;
       payload.decode(m_iter);
     }
 
@@ -559,7 +559,7 @@ public:
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
 
     uint32_t metric_type;
     decode(metric_type, iter);

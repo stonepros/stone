@@ -3,7 +3,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -31,7 +31,7 @@ public:
     RGWSI_BucketIndex_RADOS *bi{nullptr};
   } svc;
 
-  RGWSI_BILog_RADOS(CephContext *cct);
+  RGWSI_BILog_RADOS(StoneContext *cct);
 
   void init(RGWSI_BucketIndex_RADOS *bi_rados_svc);
 

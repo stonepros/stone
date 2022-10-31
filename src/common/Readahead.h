@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "include/Context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 /**
    This class provides common state and logic for code that needs to perform readahead
@@ -134,7 +134,7 @@ private:
   std::vector<uint64_t> m_alignments;
 
   /// Held while reading/modifying any state except m_pending
-  ceph::mutex m_lock = ceph::make_mutex("Readahead::m_lock");
+  stone::mutex m_lock = stone::make_mutex("Readahead::m_lock");
 
   /// Number of consecutive read requests in the current sequential stream
   int m_nr_consec_read;
@@ -158,7 +158,7 @@ private:
   int m_pending;
 
   /// Lock for m_pending
-  ceph::mutex m_pending_lock = ceph::make_mutex("Readahead::m_pending_lock");
+  stone::mutex m_pending_lock = stone::make_mutex("Readahead::m_pending_lock");
 
   /// Waiters for pending readahead
   std::list<Context *> m_pending_waiting;

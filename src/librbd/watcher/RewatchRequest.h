@@ -4,7 +4,7 @@
 #ifndef STONE_LIBRBD_WATCHER_REWATCH_REQUEST_H
 #define STONE_LIBRBD_WATCHER_REWATCH_REQUEST_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/int_types.h"
 #include "include/rados/librados.hpp"
 
@@ -18,7 +18,7 @@ class RewatchRequest {
 public:
 
   static RewatchRequest *create(librados::IoCtx& ioctx, const std::string& oid,
-                                ceph::shared_mutex &watch_lock,
+                                stone::shared_mutex &watch_lock,
                                 librados::WatchCtx2 *watch_ctx,
                                 uint64_t *watch_handle, Context *on_finish) {
     return new RewatchRequest(ioctx, oid, watch_lock, watch_ctx, watch_handle,
@@ -26,7 +26,7 @@ public:
   }
 
   RewatchRequest(librados::IoCtx& ioctx, const std::string& oid,
-                 ceph::shared_mutex &watch_lock, librados::WatchCtx2 *watch_ctx,
+                 stone::shared_mutex &watch_lock, librados::WatchCtx2 *watch_ctx,
                  uint64_t *watch_handle, Context *on_finish);
 
   void send();
@@ -53,7 +53,7 @@ private:
 
   librados::IoCtx& m_ioctx;
   std::string m_oid;
-  ceph::shared_mutex &m_watch_lock;
+  stone::shared_mutex &m_watch_lock;
   librados::WatchCtx2 *m_watch_ctx;
   uint64_t *m_watch_handle;
   Context *m_on_finish;

@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_IO_OBJECT_DISPATCHER_H
 
 #include "include/int_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/io/Dispatcher.h"
 #include "librbd/io/ObjectDispatchInterface.h"
 #include "librbd/io/ObjectDispatchSpec.h"

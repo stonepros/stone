@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -21,7 +21,7 @@
 #include "include/encoding.h"
 #include "include/utime.h"
 #include "common/Formatter.h"
-#include "common/ceph_releases.h"
+#include "common/stone_releases.h"
 #include "common/version.h"
 #include "common/options.h"
 #include "common/Clock.h"
@@ -42,7 +42,7 @@ public:
     std::set<std::string> tags;
     std::set<std::string> see_also;
 
-    void encode(ceph::buffer::list& bl) const {
+    void encode(stone::buffer::list& bl) const {
       ENCODE_START(1, 1, bl);
       encode(name, bl);
       encode(type, bl);
@@ -58,7 +58,7 @@ public:
       encode(see_also, bl);
       ENCODE_FINISH(bl);
     }
-    void decode(ceph::buffer::list::const_iterator& p) {
+    void decode(stone::buffer::list::const_iterator& p) {
       DECODE_START(1, p);
       decode(name, p);
       decode(type, p);
@@ -74,7 +74,7 @@ public:
       decode(see_also, p);
       DECODE_FINISH(p);
     }
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_string("name", name);
       f->dump_string("type", Option::type_to_str(
 		       static_cast<Option::type_t>(type)));
@@ -114,7 +114,7 @@ public:
 
     // We do not include the module's `failed` field in the beacon,
     // because it is exposed via health checks.
-    void encode(ceph::buffer::list &bl) const {
+    void encode(stone::buffer::list &bl) const {
       ENCODE_START(2, 1, bl);
       encode(name, bl);
       encode(can_run, bl);
@@ -123,7 +123,7 @@ public:
       ENCODE_FINISH(bl);
     }
 
-    void decode(ceph::buffer::list::const_iterator &bl) {
+    void decode(stone::buffer::list::const_iterator &bl) {
       DECODE_START(1, bl);
       decode(name, bl);
       decode(can_run, bl);
@@ -139,7 +139,7 @@ public:
       return (name == rhs.name) && (can_run == rhs.can_run);
     }
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->open_object_section("module");
       f->dump_string("name", name);
       f->dump_bool("can_run", can_run);
@@ -170,7 +170,7 @@ public:
 
     StandbyInfo() {}
 
-    void encode(ceph::buffer::list& bl) const
+    void encode(stone::buffer::list& bl) const
     {
       ENCODE_START(4, 1, bl);
       encode(gid, bl);
@@ -185,7 +185,7 @@ public:
       ENCODE_FINISH(bl);
     }
 
-    void decode(ceph::buffer::list::const_iterator& p)
+    void decode(stone::buffer::list::const_iterator& p)
     {
       DECODE_START(4, p);
       decode(gid, p);
@@ -225,7 +225,7 @@ public:
   epoch_t epoch = 0;
   epoch_t last_failure_osd_epoch = 0;
 
-  /// global_id of the ceph-mgr instance selected as a leader
+  /// global_id of the stone-mgr instance selected as a leader
   uint64_t active_gid = 0;
   /// server address reported by the leader once it is active
   entity_addrvec_t active_addrs;
@@ -353,7 +353,7 @@ public:
   }
 
   std::set<std::string> get_always_on_modules() const {
-    unsigned rnum = to_integer<uint32_t>(ceph_release());
+    unsigned rnum = to_integer<uint32_t>(stone_release());
     auto it = always_on_modules.find(rnum);
     if (it == always_on_modules.end()) {
       // ok, try the most recent release
@@ -369,7 +369,7 @@ public:
     return it->second;
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const
+  void encode(stone::buffer::list& bl, uint64_t features) const
   {
     if (!HAVE_FEATURE(features, SERVER_NAUTILUS)) {
       ENCODE_START(5, 1, bl);
@@ -413,7 +413,7 @@ public:
     return;
   }
 
-  void decode(ceph::buffer::list::const_iterator& p)
+  void decode(stone::buffer::list::const_iterator& p)
   {
     DECODE_START(11, p);
     decode(epoch, p);
@@ -466,7 +466,7 @@ public:
     DECODE_FINISH(p);
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_int("epoch", epoch);
     f->dump_int("active_gid", get_active_gid());
     f->dump_string("active_name", get_active_name());
@@ -508,7 +508,7 @@ public:
 
     f->open_object_section("always_on_modules");
     for (auto& v : always_on_modules) {
-      f->open_array_section(ceph_release_name(v.first));
+      f->open_array_section(stone_release_name(v.first));
       for (auto& m : v.second) {
         f->dump_string("module", m);
       }
@@ -527,10 +527,10 @@ public:
     l.push_back(new MgrMap);
   }
 
-  void print_summary(ceph::Formatter *f, std::ostream *ss) const
+  void print_summary(stone::Formatter *f, std::ostream *ss) const
   {
     // One or the other, not both
-    ceph_assert((ss != nullptr) != (f != nullptr));
+    stone_assert((ss != nullptr) != (f != nullptr));
     if (f) {
       f->dump_bool("available", available);
       f->dump_int("num_standbys", standbys.size());
@@ -545,7 +545,7 @@ public:
       }
       f->close_section();
     } else {
-      utime_t now = ceph_clock_now();
+      utime_t now = stone_clock_now();
       if (get_active_gid() != 0) {
 	*ss << get_active_name();
         if (!available) {

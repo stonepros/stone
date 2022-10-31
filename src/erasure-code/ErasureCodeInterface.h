@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -150,7 +150,7 @@
 
 class CrushWrapper;
 
-namespace ceph {
+namespace stone {
 
   typedef std::map<std::string,std::string> ErasureCodeProfile;
 

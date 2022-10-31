@@ -243,7 +243,7 @@ describe('NotificationService', () => {
       service.show(NotificationType.info, 'Some info');
       expect(toastr.info).toHaveBeenCalledWith(
         `<small class="date">${time}</small>` +
-          '<i class="float-right custom-icon ceph-icon" title="Ceph"></i>',
+          '<i class="float-right custom-icon stone-icon" title="Stone"></i>',
         'Some info',
         undefined
       );
@@ -257,7 +257,7 @@ describe('NotificationService', () => {
       expect(toastr.error).toHaveBeenCalledWith(
         'Some operation failed<br>' +
           `<small class="date">${time}</small>` +
-          '<i class="float-right custom-icon ceph-icon" title="Ceph"></i>',
+          '<i class="float-right custom-icon stone-icon" title="Stone"></i>',
         'Some error',
         undefined
       );

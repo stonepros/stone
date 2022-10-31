@@ -4,7 +4,7 @@ from .helper import DashboardTestCase
 
 
 class SummaryTest(DashboardTestCase):
-    CEPHFS = True
+    STONEFS = True
 
     def test_summary(self):
         data = self._get("/api/summary")

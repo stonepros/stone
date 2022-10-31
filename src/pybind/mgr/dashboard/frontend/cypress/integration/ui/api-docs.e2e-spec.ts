@@ -10,6 +10,6 @@ describe('Api Docs Page', () => {
   });
 
   it('should show the API Docs description', () => {
-    cy.get('.renderedMarkdown').first().contains('This is the official Ceph REST API');
+    cy.get('.renderedMarkdown').first().contains('This is the official Stone REST API');
   });
 });

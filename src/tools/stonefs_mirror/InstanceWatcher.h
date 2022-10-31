@@ -6,14 +6,14 @@
 
 #include <string_view>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/Context.h"
 #include "include/rados/librados.hpp"
 #include "Watcher.h"
 
 class ContextWQ;
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 // watch directory update notifications via per daemon rados
@@ -59,7 +59,7 @@ private:
   Listener &m_listener;
   ContextWQ *m_work_queue;
 
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   Context *m_on_init_finish = nullptr;
   Context *m_on_shutdown_finish = nullptr;
 
@@ -80,6 +80,6 @@ private:
 };
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_INSTANCE_WATCHER_H

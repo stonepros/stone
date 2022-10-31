@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,11 +19,11 @@
 #include "include/cmp.h"
 
 #include "json_spirit/json_spirit_value.h"
-#include "include/ceph_assert.h"   // spirit clobbers it!
+#include "include/stone_assert.h"   // spirit clobbers it!
 
 #include "reverse.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -205,7 +205,7 @@ public:
   }
 
   bool is_max() const {
-    ceph_assert(!max || (*this == hobject_t(hobject_t::get_max())));
+    stone_assert(!max || (*this == hobject_t(hobject_t::get_max())));
     return max;
   }
   bool is_min() const {
@@ -237,7 +237,7 @@ public:
 
   // filestore nibble-based key
   uint32_t get_nibblewise_key_u32() const {
-    ceph_assert(!max);
+    stone_assert(!max);
     return nibblewise_key_cache;
   }
   uint64_t get_nibblewise_key() const {
@@ -246,7 +246,7 @@ public:
 
   // newer bit-reversed key
   uint32_t get_bitwise_key_u32() const {
-    ceph_assert(!max);
+    stone_assert(!max);
     return hash_reverse_bits;
   }
   uint64_t get_bitwise_key() const {
@@ -292,10 +292,10 @@ public:
 
   bool parse(const std::string& s);
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::bufferlist::const_iterator& bl);
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::bufferlist::const_iterator& bl);
   void decode(json_spirit::Value& v);
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<hobject_t*>& o);
   friend int cmp(const hobject_t& l, const hobject_t& r);
   friend bool operator>(const hobject_t& l, const hobject_t& r) {
@@ -472,11 +472,11 @@ public:
     (*this) = temp;
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
   void decode(json_spirit::Value& v);
   size_t encoded_size() const;
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ghobject_t*>& o);
   friend int cmp(const ghobject_t& l, const ghobject_t& r);
   friend bool operator>(const ghobject_t& l, const ghobject_t& r) {

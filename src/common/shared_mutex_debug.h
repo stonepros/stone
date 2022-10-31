@@ -8,10 +8,10 @@
 
 #include "common/mutex_debug.h"
 
-namespace ceph {
+namespace stone {
 
 class shared_mutex_debug :
-    public ceph::mutex_debug_detail::mutex_debugging_base
+    public stone::mutex_debug_detail::mutex_debugging_base
 {
   pthread_rwlock_t rwlock;
   const bool track;
@@ -49,4 +49,4 @@ private:
   void _post_lock_shared();
 };
 
-} // namespace ceph
+} // namespace stone

@@ -33,7 +33,7 @@ struct rgw_sync_aws_multipart_part_info {
 WRITE_CLASS_ENCODER(rgw_sync_aws_multipart_part_info)
 
 struct rgw_sync_aws_src_obj_properties {
-  ceph::real_time mtime;
+  stone::real_time mtime;
   string etag;
   uint32_t zone_short_id{0};
   uint64_t pg_ver{0};
@@ -105,7 +105,7 @@ class RGWAWSSyncModule : public RGWSyncModule {
  public:
   RGWAWSSyncModule() {}
   bool supports_data_export() override { return false;}
-  int create_instance(CephContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) override;
+  int create_instance(StoneContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) override;
 };
 
 #endif /* RGW_SYNC_MODULE_AWS_H */

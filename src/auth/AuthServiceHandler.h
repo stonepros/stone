@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -19,7 +19,7 @@
 #include <stdint.h>              // for uint64_t
 #include "common/entity_name.h"  // for EntityName
 #include "include/common_fwd.h"
-#include "include/buffer_fwd.h"  // for ceph::buffer::list
+#include "include/buffer_fwd.h"  // for stone::buffer::list
 
 class KeyServer;
 class CryptoKey;
@@ -27,13 +27,13 @@ struct AuthCapsInfo;
 
 enum class global_id_status_t {
   NONE,
-  // fresh client (global_id == 0); waiting for StoneeXAuthenticate
+  // fresh client (global_id == 0); waiting for StoneXAuthenticate
   NEW_PENDING,
   // connected client; new enough to correctly reclaim global_id
   NEW_OK,
   // connected client; unknown whether it can reclaim global_id correctly
   NEW_NOT_EXPOSED,
-  // reconnecting client (global_id != 0); waiting for StoneeXAuthenticate
+  // reconnecting client (global_id != 0); waiting for StoneXAuthenticate
   RECLAIM_PENDING,
   // reconnected client; correctly reclaimed global_id
   RECLAIM_OK,
@@ -46,24 +46,24 @@ std::ostream& operator<<(std::ostream& os,
 
 struct AuthServiceHandler {
 protected:
-  StoneeContext *cct;
+  StoneContext *cct;
   EntityName entity_name;
   uint64_t global_id = 0;
   global_id_status_t global_id_status = global_id_status_t::NONE;
 
 public:
-  explicit AuthServiceHandler(StoneeContext *cct_) : cct(cct_) {}
+  explicit AuthServiceHandler(StoneContext *cct_) : cct(cct_) {}
 
   virtual ~AuthServiceHandler() { }
 
   int start_session(const EntityName& entity_name,
 		    uint64_t global_id,
 		    bool is_new_global_id,
-		    ceph::buffer::list *result,
+		    stone::buffer::list *result,
 		    AuthCapsInfo *caps);
-  virtual int handle_request(ceph::buffer::list::const_iterator& indata,
+  virtual int handle_request(stone::buffer::list::const_iterator& indata,
 			     size_t connection_secret_required_length,
-			     ceph::buffer::list *result,
+			     stone::buffer::list *result,
 			     AuthCapsInfo *caps,
 			     CryptoKey *session_key,
 			     std::string *connection_secret) = 0;
@@ -74,10 +74,10 @@ public:
 
 private:
   virtual int do_start_session(bool is_new_global_id,
-			       ceph::buffer::list *result,
+			       stone::buffer::list *result,
 			       AuthCapsInfo *caps) = 0;
 };
 
-extern AuthServiceHandler *get_auth_service_handler(int type, StoneeContext *cct, KeyServer *ks);
+extern AuthServiceHandler *get_auth_service_handler(int type, StoneContext *cct, KeyServer *ks);
 
 #endif

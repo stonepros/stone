@@ -153,7 +153,7 @@ public:
 
   uint64_t allocate_op_tid() {
     uint64_t op_tid = ++m_op_tid;
-    ceph_assert(op_tid != 0);
+    stone_assert(op_tid != 0);
     return op_tid;
   }
 
@@ -266,10 +266,10 @@ private:
 
   ContextWQ *m_work_queue = nullptr;
   SafeTimer *m_timer = nullptr;
-  ceph::mutex *m_timer_lock = nullptr;
+  stone::mutex *m_timer_lock = nullptr;
 
   Journaler *m_journaler;
-  mutable ceph::mutex m_lock = ceph::make_mutex("Journal<I>::m_lock");
+  mutable stone::mutex m_lock = stone::make_mutex("Journal<I>::m_lock");
   State m_state;
   uint64_t m_max_append_size = 0;
   uint64_t m_tag_class = 0;
@@ -283,7 +283,7 @@ private:
   ReplayHandler m_replay_handler;
   bool m_close_pending;
 
-  ceph::mutex m_event_lock = ceph::make_mutex("Journal<I>::m_event_lock");
+  stone::mutex m_event_lock = stone::make_mutex("Journal<I>::m_event_lock");
   uint64_t m_event_tid;
   Events m_events;
 
@@ -309,19 +309,19 @@ private:
 
   typedef std::set<journal::Listener *> Listeners;
   Listeners m_listeners;
-  ceph::condition_variable m_listener_cond;
+  stone::condition_variable m_listener_cond;
   bool m_listener_notify = false;
 
   uint64_t m_refresh_sequence = 0;
 
-  bool is_journal_replaying(const ceph::mutex &) const;
-  bool is_tag_owner(const ceph::mutex &) const;
+  bool is_journal_replaying(const stone::mutex &) const;
+  bool is_tag_owner(const stone::mutex &) const;
 
   uint64_t append_io_events(journal::EventType event_type,
                             const Bufferlists &bufferlists,
                             uint64_t offset, size_t length, bool flush_entry,
                             int filter_ret_val);
-  Future wait_event(ceph::mutex &lock, uint64_t tid, Context *on_safe);
+  Future wait_event(stone::mutex &lock, uint64_t tid, Context *on_safe);
 
   void create_journaler();
   void destroy_journaler(int r);

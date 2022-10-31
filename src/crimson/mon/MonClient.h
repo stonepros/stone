@@ -12,7 +12,7 @@
 
 #include "auth/AuthRegistry.h"
 #include "auth/KeyRing.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 #include "crimson/auth/AuthClient.h"
 #include "crimson/auth/AuthServer.h"
@@ -61,13 +61,13 @@ class Client : public crimson::net::Dispatcher,
   // commands
   using get_version_t = seastar::future<std::tuple<version_t, version_t>>;
 
-  ceph_tid_t last_version_req_id = 0;
-  std::map<ceph_tid_t, typename get_version_t::promise_type> version_reqs;
+  stone_tid_t last_version_req_id = 0;
+  std::map<stone_tid_t, typename get_version_t::promise_type> version_reqs;
 
-  ceph_tid_t last_mon_command_id = 0;
+  stone_tid_t last_mon_command_id = 0;
   using command_result_t =
-    seastar::future<std::tuple<std::int32_t, string, ceph::bufferlist>>;
-  std::map<ceph_tid_t, typename command_result_t::promise_type> mon_commands;
+    seastar::future<std::tuple<std::int32_t, string, stone::bufferlist>>;
+  std::map<stone_tid_t, typename command_result_t::promise_type> mon_commands;
 
   MonSub sub;
 
@@ -105,10 +105,10 @@ private:
 			  AuthConnectionMetaRef auth_meta,
 			  bool more,
 			  uint32_t auth_method,
-			  const ceph::bufferlist& payload,
-			  ceph::bufferlist *reply) final;
+			  const stone::bufferlist& payload,
+			  stone::bufferlist *reply) final;
 
-  crimson::common::CephContext cct; // for auth_registry
+  crimson::common::StoneContext cct; // for auth_registry
   AuthRegistry auth_registry;
   crimson::common::AuthHandler& auth_handler;
 
@@ -118,7 +118,7 @@ private:
 		   AuthConnectionMetaRef auth_meta) final;
 
    // Handle server's request to continue the handshake
-  ceph::bufferlist handle_auth_reply_more(crimson::net::ConnectionRef conn,
+  stone::bufferlist handle_auth_reply_more(crimson::net::ConnectionRef conn,
 					  AuthConnectionMetaRef auth_meta,
 					  const bufferlist& bl) final;
 

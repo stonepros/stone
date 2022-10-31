@@ -2,7 +2,7 @@
 set -x
 
 mkdir -p testspace
-ceph-fuse testspace -m $1
+stone-fuse testspace -m $1
 
 ./runallonce.sh testspace
-killall ceph-fuse
+killall stone-fuse

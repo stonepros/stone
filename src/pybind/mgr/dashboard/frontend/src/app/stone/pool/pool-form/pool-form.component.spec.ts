@@ -606,8 +606,8 @@ describe('PoolFormComponent', () => {
     it('adds all predefined and a custom applications to the application metadata array', () => {
       testAddApp('g', ['rgw']);
       testAddApp('b', ['rbd', 'rgw']);
-      testAddApp('c', ['cephfs', 'rbd', 'rgw']);
-      testAddApp('ownApp', ['cephfs', 'ownApp', 'rbd', 'rgw']);
+      testAddApp('c', ['stonefs', 'rbd', 'rgw']);
+      testAddApp('ownApp', ['stonefs', 'ownApp', 'rbd', 'rgw']);
     });
 
     it('only allows 4 apps to be added to the array', () => {
@@ -1188,9 +1188,9 @@ describe('PoolFormComponent', () => {
       });
 
       it('creates a pool with application metadata', () => {
-        component.data.applications.selected = ['cephfs', 'rgw'];
+        component.data.applications.selected = ['stonefs', 'rgw'];
         expectEcSubmit({
-          application_metadata: ['cephfs', 'rgw']
+          application_metadata: ['stonefs', 'rgw']
         });
       });
     });
@@ -1348,7 +1348,7 @@ describe('PoolFormComponent', () => {
       it('should include the custom app as valid option', () => {
         expect(
           component.data.applications.available.map((app: Record<string, any>) => app.name)
-        ).toEqual(['cephfs', 'ownApp', 'rbd', 'rgw']);
+        ).toEqual(['stonefs', 'ownApp', 'rbd', 'rgw']);
       });
 
       it('set all control values to the given pool', () => {

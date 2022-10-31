@@ -3,12 +3,12 @@ SNMP Gateway Service
 ====================
 
 SNMP_ is still a widely used protocol, to monitor distributed systems and devices across a variety of hardware
-and software platforms. Ceph's SNMP integration focuses on forwarding alerts from it's Prometheus Alertmanager
+and software platforms. Stone's SNMP integration focuses on forwarding alerts from it's Prometheus Alertmanager
 cluster to a gateway daemon. The gateway daemon, transforms the alert into an SNMP Notification and sends
 it on to a designated SNMP management platform. The gateway daemon is from the snmp_notifier_ project,
 which provides SNMP V2c and V3 support (authentication and encryption).
 
-Ceph's SNMP gateway service deploys one instance of the gateway by default. You may increase this
+Stone's SNMP gateway service deploys one instance of the gateway by default. You may increase this
 by providing placement information. However, bear in mind that if you enable multiple SNMP gateway daemons,
 your SNMP management platform will receive multiple notifications for the same event.
 
@@ -166,6 +166,6 @@ alert that has an OID_ label to the SNMP gateway daemon for processing.
 Implementing the MIB
 ======================
 To make sense of the SNMP Notification/Trap, you'll need to apply the MIB to your SNMP management platform. The MIB (CEPH-MIB.txt) can
-downloaded from the main Ceph repo_
+downloaded from the main Stone repo_
 
 .. _repo: https://github.com/ceph/ceph/tree/master/monitoring/snmp

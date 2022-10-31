@@ -15,7 +15,7 @@
 
 #include "common/allocator.h"
 #include "common/Timer.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/config_proxy.h"
 #include "common/event_socket.h"
 #include "common/Readahead.h"
@@ -132,8 +132,8 @@ namespace librbd {
      * owner_lock, image_lock
      * async_op_lock, timestamp_lock
      */
-    ceph::shared_mutex owner_lock; // protects exclusive lock leadership updates
-    mutable ceph::shared_mutex image_lock; // protects snapshot-related member variables,
+    stone::shared_mutex owner_lock; // protects exclusive lock leadership updates
+    mutable stone::shared_mutex image_lock; // protects snapshot-related member variables,
                        // features (and associated helper classes), and flags
                        // protects access to the mutable image metadata that
                        // isn't guarded by other locks below, and blocks writes
@@ -146,9 +146,9 @@ namespace librbd {
                        // object_map
                        // parent_md and parent
 
-    ceph::shared_mutex timestamp_lock; // protects (create/access/modify)_timestamp
-    ceph::mutex async_ops_lock; // protects async_ops and async_requests
-    ceph::mutex copyup_list_lock; // protects copyup_waiting_list
+    stone::shared_mutex timestamp_lock; // protects (create/access/modify)_timestamp
+    stone::mutex async_ops_lock; // protects async_ops and async_requests
+    stone::mutex copyup_list_lock; // protects copyup_waiting_list
 
     unsigned extra_read_flags;  // librados::OPERATION_*
 
@@ -201,7 +201,7 @@ namespace librbd {
 
     typedef boost::lockfree::queue<
       io::AioCompletion*,
-      boost::lockfree::allocator<ceph::allocator<void>>> Completions;
+      boost::lockfree::allocator<stone::allocator<void>>> Completions;
 
     Completions event_socket_completions;
     EventSocket event_socket;
@@ -307,15 +307,15 @@ namespace librbd {
     uint64_t get_object_count(librados::snap_t in_snap_id) const;
     bool test_features(uint64_t test_features) const;
     bool test_features(uint64_t test_features,
-                       const ceph::shared_mutex &in_image_lock) const;
+                       const stone::shared_mutex &in_image_lock) const;
     bool test_op_features(uint64_t op_features) const;
     bool test_op_features(uint64_t op_features,
-                          const ceph::shared_mutex &in_image_lock) const;
+                          const stone::shared_mutex &in_image_lock) const;
     int get_flags(librados::snap_t in_snap_id, uint64_t *flags) const;
     int test_flags(librados::snap_t in_snap_id,
                    uint64_t test_flags, bool *flags_set) const;
     int test_flags(librados::snap_t in_snap_id,
-                   uint64_t test_flags, const ceph::shared_mutex &in_image_lock,
+                   uint64_t test_flags, const stone::shared_mutex &in_image_lock,
                    bool *flags_set) const;
     int update_flags(librados::snap_t in_snap_id, uint64_t flag, bool enabled);
 
@@ -355,7 +355,7 @@ namespace librbd {
     IOContext duplicate_data_io_context() const;
 
     static void get_timer_instance(StoneContext *cct, SafeTimer **timer,
-                                   ceph::mutex **timer_lock);
+                                   stone::mutex **timer_lock);
 
   private:
     std::shared_ptr<neorados::IOContext> data_io_context;

@@ -1,9 +1,9 @@
 import argparse
 import os
-from ceph_volume import terminal
-from ceph_volume import decorators
-from ceph_volume.util import disk
-from ceph_volume.util.device import Device
+from stone_volume import terminal
+from stone_volume import decorators
+from stone_volume.util import disk
+from stone_volume.util.device import Device
 
 
 class ValidDevice(object):
@@ -74,7 +74,7 @@ class OSDPath(object):
         if not os.path.isdir(absolute_path):
             error = "Argument is not a directory or device which is required to scan"
             raise argparse.ArgumentError(None, error)
-        key_files = ['ceph_fsid', 'fsid', 'keyring', 'ready', 'type', 'whoami']
+        key_files = ['stone_fsid', 'fsid', 'keyring', 'ready', 'type', 'whoami']
         dir_files = os.listdir(absolute_path)
         for key_file in key_files:
             if key_file not in dir_files:
@@ -107,7 +107,7 @@ def exclude_group_options(parser, groups, argv=None):
     :param argv: Consume the args (sys.argv) directly from this argument
 
     .. note: **Unfortunately** this will not be able to validate correctly when
-    using default flags. In the case of filestore vs. bluestore, ceph-volume
+    using default flags. In the case of filestore vs. bluestore, stone-volume
     defaults to --bluestore, but we can't check that programmatically, we can
     only parse the flags seen via argv
     """

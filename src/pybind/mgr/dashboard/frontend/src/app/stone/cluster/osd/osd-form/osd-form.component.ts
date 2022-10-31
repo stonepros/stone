@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 
 import _ from 'lodash';
 
-import { InventoryDevice } from '~/app/ceph/cluster/inventory/inventory-devices/inventory-device.model';
+import { InventoryDevice } from '~/app/stone/cluster/inventory/inventory-devices/inventory-device.model';
 import { HostService } from '~/app/shared/api/host.service';
 import { OrchestratorService } from '~/app/shared/api/orchestrator.service';
 import { FormButtonPanelComponent } from '~/app/shared/components/form-button-panel/form-button-panel.component';

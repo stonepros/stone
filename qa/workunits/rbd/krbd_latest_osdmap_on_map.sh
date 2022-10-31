@@ -3,7 +3,7 @@
 set -ex
 
 function run_test() {
-    ceph osd pool create foo 12
+    stone osd pool create foo 12
     rbd pool init foo
     rbd create --size 1 foo/img
 
@@ -11,7 +11,7 @@ function run_test() {
     dev=$(sudo rbd map foo/img)
     sudo rbd unmap $dev
 
-    ceph osd pool delete foo foo --yes-i-really-really-mean-it
+    stone osd pool delete foo foo --yes-i-really-really-mean-it
 }
 
 NUM_ITER=20

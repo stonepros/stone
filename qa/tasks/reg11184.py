@@ -25,7 +25,7 @@ def task(ctx, config):
     to regression test tracker #11184
 
     overrides:
-      ceph:
+      stone:
         conf:
           osd:
             debug osd: 5
@@ -37,7 +37,7 @@ def task(ctx, config):
     assert isinstance(config, dict), \
         'divergent_priors task only accepts a dict for configuration'
 
-    manager = ctx.managers['ceph']
+    manager = ctx.managers['stone']
 
     while len(manager.get_osd_status()['up']) < 3:
         time.sleep(10)
@@ -167,10 +167,10 @@ def task(ctx, config):
         cluster.only('osd.{o}'.format(o=divergent)).remotes.keys()
     FSPATH = manager.get_filepath()
     JPATH = os.path.join(FSPATH, "journal")
-    prefix = ("sudo adjust-ulimits ceph-objectstore-tool "
+    prefix = ("sudo adjust-ulimits stone-objectstore-tool "
               "--data-path {fpath} --journal-path {jpath} "
               "--log-file="
-              "/var/log/ceph/objectstore_tool.$$.log ".
+              "/var/log/stonepros/objectstore_tool.$$.log ".
               format(fpath=FSPATH, jpath=JPATH))
     pid = os.getpid()
     expfile = os.path.join(testdir, "exp.{pid}.out".format(pid=pid))

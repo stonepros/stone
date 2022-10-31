@@ -17,7 +17,7 @@
 
 #include "include/uses_allocator.h"
 
-namespace ceph::async {
+namespace stone::async {
 namespace detail {
 template<typename T>
 struct allocator_binder_check
@@ -40,7 +40,7 @@ protected:
   template<typename A, typename U>
   allocator_binder_base(A&& a, U&& u)
     : Allocator(std::forward<A>(a),
-		target(ceph::make_obj_using_allocator(*this,
+		target(stone::make_obj_using_allocator(*this,
 						      std::forward<U>(u)))) {}
 
   T target;
@@ -200,23 +200,23 @@ bind_allocator(const Allocator& a, T&& t)
   return allocator_binder<std::decay_t<T>, Allocator>(std::allocator_arg_t(),
 						      a, std::forward<T>(t));
 }
-} // namespace ceph::async
+} // namespace stone::async
 
 // Since we have an allocator_type member we shouldn't need a
 // uses_allocator specialization.
 
 namespace boost::asio {
 template<typename T, typename Allocator, typename Signature>
-class async_result<ceph::async::allocator_binder<T, Allocator>, Signature>
+class async_result<stone::async::allocator_binder<T, Allocator>, Signature>
 {
 public:
   using completion_handler_type =
-    ceph::async::allocator_binder<
+    stone::async::allocator_binder<
   typename async_result<T, Signature>::completion_handler_type, Allocator>;
 
   using return_type = typename async_result<T, Signature>::return_type;
 
-  explicit async_result(ceph::async::allocator_binder<T, Allocator>& b)
+  explicit async_result(stone::async::allocator_binder<T, Allocator>& b)
     : target(b.get()) {}
 
   return_type get() {
@@ -231,12 +231,12 @@ private:
 };
 
 template<typename T, typename Allocator, typename Executor>
-struct associated_executor<ceph::async::allocator_binder<T, Allocator>,
+struct associated_executor<stone::async::allocator_binder<T, Allocator>,
 			   Executor>
 {
   using type = typename associated_executor<T, Executor>::type;
 
-  static type get(const ceph::async::allocator_binder<T, Allocator>& b,
+  static type get(const stone::async::allocator_binder<T, Allocator>& b,
 		  Executor ex = {}) noexcept {
     return get_associated_executor(b.get(), ex);
   }

@@ -36,7 +36,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(from_mds, p);
     decode(dirfrag, p);
@@ -47,7 +47,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(from_mds, payload);
     encode(dirfrag, payload);
     encode(dir_rep, payload);
@@ -92,7 +92,7 @@ private:
   static constexpr int HEAD_VERSION = 1;
   static constexpr int COMPAT_VERSION = 1;
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

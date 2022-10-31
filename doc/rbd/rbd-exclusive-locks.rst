@@ -4,7 +4,7 @@
  RBD Exclusive Locks
 ====================
 
-.. index:: Ceph Block Device; RBD exclusive locks; exclusive-lock
+.. index:: Stone Block Device; RBD exclusive locks; exclusive-lock
 
 Exclusive locks are a mechanism designed to prevent multiple processes
 from accessing the same Rados Block Device (RBD) in an uncoordinated
@@ -18,7 +18,7 @@ the ``--image-feature`` flag for ``rbd create``.
 
 In order to ensure proper exclusive locking operations, any client
 using an RBD image whose ``exclusive-lock`` feature is enabled should
-be using a CephX identity whose capabilities include ``profile rbd``.
+be using a StoneX identity whose capabilities include ``profile rbd``.
 
 Exclusive locking is mostly transparent to the user.
 
@@ -54,7 +54,7 @@ starts and attempts to use the device, it needs a way to break the
 previously held exclusive lock.
 
 However, a process (or kernel thread) may also hang, or merely lose
-network connectivity to the Ceph cluster for some amount of time. In
+network connectivity to the Stone cluster for some amount of time. In
 that case, simply breaking the lock would be potentially catastrophic:
 the hung process or connectivity issue may resolve itself, and the old
 process may then compete with one that has started in the interim,
@@ -63,7 +63,7 @@ accessing RBD data in an uncoordinated and destructive manner.
 Thus, in the event that a lock cannot be acquired in the standard
 graceful manner, the overtaking process not only breaks the lock, but
 also blocklists the previous lock holder. This is negotiated between
-the new client process and the Ceph Mon: upon receiving the blocklist
+the new client process and the Stone Mon: upon receiving the blocklist
 request,
 
 * the Mon instructs the relevant OSDs to no longer serve requests from
@@ -77,7 +77,7 @@ Blocklisting is thus a form of storage-level resource `fencing`_.
 
 In order for blocklisting to work, the client must have the ``osd
 blocklist`` capability. This capability is included in the ``profile
-rbd`` capability profile, which should generally be set on all Ceph
+rbd`` capability profile, which should generally be set on all Stone
 :ref:`client identities <user-management>` using RBD.
 
 .. _fencing: https://en.wikipedia.org/wiki/Fencing_(computing)

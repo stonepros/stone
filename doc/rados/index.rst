@@ -1,41 +1,41 @@
 .. _rados-index:
 
 ======================
- Ceph Storage Cluster
+ Stone Storage Cluster
 ======================
 
-The :term:`Ceph Storage Cluster` is the foundation for all Ceph deployments.
-Based upon :abbr:`RADOS (Reliable Autonomic Distributed Object Store)`, Ceph
-Storage Clusters consist of two types of daemons: a :term:`Ceph OSD Daemon`
-(OSD) stores data as objects on a storage node; and a :term:`Ceph Monitor` (MON)
-maintains a master copy of the cluster map. A Ceph Storage Cluster may contain
+The :term:`Stone Storage Cluster` is the foundation for all Stone deployments.
+Based upon :abbr:`RADOS (Reliable Autonomic Distributed Object Store)`, Stone
+Storage Clusters consist of two types of daemons: a :term:`Stone OSD Daemon`
+(OSD) stores data as objects on a storage node; and a :term:`Stone Monitor` (MON)
+maintains a master copy of the cluster map. A Stone Storage Cluster may contain
 thousands of storage nodes. A minimal system will have at least one 
-Ceph Monitor and two Ceph OSD Daemons for data replication. 
+Stone Monitor and two Stone OSD Daemons for data replication. 
 
-The Ceph File System, Ceph Object Storage and Ceph Block Devices read data from
-and write data to the Ceph Storage Cluster.
+The Stone File System, Stone Object Storage and Stone Block Devices read data from
+and write data to the Stone Storage Cluster.
 
 .. raw:: html
 
 	<style type="text/css">div.body h3{margin:5px 0px 0px 0px;}</style>
 	<table cellpadding="10"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><tbody valign="top"><tr><td><h3>Config and Deploy</h3>
 
-Ceph Storage Clusters have a few required settings, but most configuration
+Stone Storage Clusters have a few required settings, but most configuration
 settings have default values. A typical deployment uses a deployment tool 
 to define a cluster and bootstrap a monitor. See `Deployment`_ for details 
-on ``cephadm.``
+on ``stoneadm.``
 
 .. toctree::
 	:maxdepth: 2
 
 	Configuration <configuration/index>
-	Deployment <../cephadm/index>
+	Deployment <../stoneadm/index>
 
 .. raw:: html 
 
 	</td><td><h3>Operations</h3>
 
-Once you have deployed a Ceph Storage Cluster, you may begin operating 
+Once you have deployed a Stone Storage Cluster, you may begin operating 
 your cluster.
 
 .. toctree::
@@ -59,9 +59,9 @@ your cluster.
 
 	</td><td><h3>APIs</h3>
 
-Most Ceph deployments use `Ceph Block Devices`_, `Ceph Object Storage`_ and/or the
-`Ceph File System`_. You  may also develop applications that talk directly to
-the Ceph Storage Cluster.
+Most Stone deployments use `Stone Block Devices`_, `Stone Object Storage`_ and/or the
+`Stone File System`_. You  may also develop applications that talk directly to
+the Stone Storage Cluster.
 
 .. toctree::
 	:maxdepth: 2
@@ -72,7 +72,7 @@ the Ceph Storage Cluster.
 
 	</td></tr></tbody></table>
 
-.. _Ceph Block Devices: ../rbd/
-.. _Ceph File System: ../cephfs/
-.. _Ceph Object Storage: ../radosgw/
-.. _Deployment: ../cephadm/
+.. _Stone Block Devices: ../rbd/
+.. _Stone File System: ../stonefs/
+.. _Stone Object Storage: ../radosgw/
+.. _Deployment: ../stoneadm/

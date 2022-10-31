@@ -1,12 +1,12 @@
 .. _object-gateway:
 
 =====================
- Ceph Object Gateway
+ Stone Object Gateway
 =====================
 
-:term:`Ceph Object Gateway` is an object storage interface built on top of
+:term:`Stone Object Gateway` is an object storage interface built on top of
 ``librados`` to provide applications with a RESTful gateway to
-Ceph Storage Clusters. :term:`Ceph Object Storage` supports two interfaces:
+Stone Storage Clusters. :term:`Stone Object Storage` supports two interfaces:
 
 #. **S3-compatible:** Provides object storage functionality with an interface
    that is compatible with a large subset of the Amazon S3 RESTful API.
@@ -14,12 +14,12 @@ Ceph Storage Clusters. :term:`Ceph Object Storage` supports two interfaces:
 #. **Swift-compatible:** Provides object storage functionality with an interface
    that is compatible with a large subset of the OpenStack Swift API.
 
-Ceph Object Storage uses the Ceph Object Gateway daemon (``radosgw``), which is
-an HTTP server for interacting with a Ceph Storage Cluster. Since it
-provides interfaces compatible with OpenStack Swift and Amazon S3, the Ceph
-Object Gateway has its own user management. Ceph Object Gateway can store data
-in the same Ceph Storage Cluster used to store data from Ceph File System clients
-or Ceph Block Device clients. The S3 and Swift APIs share a common namespace, so
+Stone Object Storage uses the Stone Object Gateway daemon (``radosgw``), which is
+an HTTP server for interacting with a Stone Storage Cluster. Since it
+provides interfaces compatible with OpenStack Swift and Amazon S3, the Stone
+Object Gateway has its own user management. Stone Object Gateway can store data
+in the same Stone Storage Cluster used to store data from Stone File System clients
+or Stone Block Device clients. The S3 and Swift APIs share a common namespace, so
 you may write data with one API and retrieve it with the other.
 
 .. ditaa::
@@ -34,7 +34,7 @@ you may write data with one API and retrieve it with the other.
             |          OSDs          | |        Monitors        |
             +------------------------+ +------------------------+
 
-.. note:: Ceph Object Storage does **NOT** use the Ceph Metadata Server.
+.. note:: Stone Object Storage does **NOT** use the Stone Metadata Server.
 
 
 .. toctree::

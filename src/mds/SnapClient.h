@@ -81,7 +81,7 @@ public:
 
   bool is_synced() const { return synced; }
   void wait_for_sync(MDSContext *c) {
-    ceph_assert(!synced);
+    stone_assert(!synced);
     waiting_for_version[std::max<version_t>(cached_version, 1)].push_back(c);
   }
 

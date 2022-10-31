@@ -12,14 +12,14 @@ cleanup() {
 
 set_variables() {
     # defaults
-    [ -z "$bindir" ] && bindir=$PWD       # location of init-ceph
+    [ -z "$bindir" ] && bindir=$PWD       # location of init-stone
     if [ -z "$conf" ]; then
-        conf="$basedir/ceph.conf"
-        [ -e $conf ] || conf="/etc/ceph/ceph.conf"
+        conf="$basedir/stone.conf"
+        [ -e $conf ] || conf="/etc/stonepros/stone.conf"
     fi
     [ -e $conf ] || die "conf file not found"
 
-    CCONF="ceph-conf -c $conf"
+    CCONF="stone-conf -c $conf"
 
     [ -z "$mnt" ] && mnt="/c"
     if [ -z "$monhost" ]; then
@@ -34,7 +34,7 @@ set_variables() {
     [ -z "$imgsize" ] && imgsize=1024
     [ -z "$user" ] && user=admin
     [ -z "$keyring" ] && keyring="`$CCONF keyring`"
-    [ -z "$secret" ] && secret="`ceph-authtool $keyring -n client.$user -p`"
+    [ -z "$secret" ] && secret="`stone-authtool $keyring -n client.$user -p`"
 
     monip="`echo $monhost | sed 's/:/ /g' | awk '{print $1}'`"
     monport="`echo $monhost | sed 's/:/ /g' | awk '{print $2}'`"

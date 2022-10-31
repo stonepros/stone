@@ -17,19 +17,19 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
-class CephNativeLoader {
-  private static final CephNativeLoader instance = new CephNativeLoader();
+class StoneNativeLoader {
+  private static final StoneNativeLoader instance = new StoneNativeLoader();
   private static boolean initialized = false;
 
-  private static final String JNI_PATH_ENV_VAR = "CEPH_JNI_PATH";
-  private static final String LIBRARY_NAME = "cephfs_jni";
-  private static final String LIBRARY_FILE = "libcephfs_jni.so";
+  private static final String JNI_PATH_ENV_VAR = "STONE_JNI_PATH";
+  private static final String LIBRARY_NAME = "stonefs_jni";
+  private static final String LIBRARY_FILE = "libstonefs_jni.so";
 
-  private CephNativeLoader() {}
+  private StoneNativeLoader() {}
 
-  public static CephNativeLoader getInstance() {
+  public static StoneNativeLoader getInstance() {
     return instance;
   }
 
@@ -40,13 +40,13 @@ class CephNativeLoader {
     boolean success = false;
 
     /*
-     * Allow a Ceph specific environment variable to force
+     * Allow a Stone specific environment variable to force
      * the loading path.
      */
     String path = System.getenv(JNI_PATH_ENV_VAR);
     try {
       if (path != null) {
-        System.out.println("Loading libcephfs-jni: " + path);
+        System.out.println("Loading libstonefs-jni: " + path);
         System.load(path);
         success = true;
       } else {
@@ -54,7 +54,7 @@ class CephNativeLoader {
           /*
            * Try default Java loading path(s)
            */
-          System.out.println("Loading libcephfs-jni from default path: " +
+          System.out.println("Loading libstonefs-jni from default path: " +
               System.getProperty("java.library.path"));
           System.loadLibrary(LIBRARY_NAME);
           success = true;
@@ -64,7 +64,7 @@ class CephNativeLoader {
              * Try RHEL/CentOS default path
              */
             path = "/usr/lib64/" + LIBRARY_FILE;
-            System.out.println("Loading libcephfs-jni: " + path);
+            System.out.println("Loading libstonefs-jni: " + path);
             System.load(path);
             success = true;
           } catch (final UnsatisfiedLinkError ule2) {
@@ -72,21 +72,21 @@ class CephNativeLoader {
              * Try Ubuntu default path
              */
             path = "/usr/lib/jni/" + LIBRARY_FILE;
-            System.out.println("Loading libcephfs-jni: " + path);
+            System.out.println("Loading libstonefs-jni: " + path);
             System.load(path);
             success = true;
           }
         }
       }
     } finally {
-      System.out.println("Loading libcephfs-jni: " +
+      System.out.println("Loading libstonefs-jni: " +
           (success ? "Success!" : "Failure!"));
     }
 
     /*
      * Finish initialization
      */
-    CephMount.native_initialize();
+    StoneMount.native_initialize();
     initialized = true;
   }
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -58,7 +58,7 @@ public:
   friend struct SubWriteApplied;
   friend struct SubWriteCommitted;
   void sub_write_committed(
-    ceph_tid_t tid,
+    stone_tid_t tid,
     eversion_t version,
     eversion_t last_complete,
     const ZTracer::Trace &trace);
@@ -92,7 +92,7 @@ public:
   void on_change() override;
   void clear_recovery_state() override;
 
-  void dump_recovery_info(ceph::Formatter *f) const override;
+  void dump_recovery_info(stone::Formatter *f) const override;
 
   void call_write_ordered(std::function<void(void)> &&cb) override;
 
@@ -106,7 +106,7 @@ public:
     std::vector<pg_log_entry_t>&& log_entries,
     std::optional<pg_hit_set_history_t> &hset_history,
     Context *on_all_commit,
-    ceph_tid_t tid,
+    stone_tid_t tid,
     osd_reqid_t reqid,
     OpRequestRef op
     ) override;
@@ -116,7 +116,7 @@ public:
     uint64_t off,
     uint64_t len,
     uint32_t op_flags,
-    ceph::buffer::list *bl) override;
+    stone::buffer::list *bl) override;
 
   /**
    * Async read mechanism
@@ -155,9 +155,9 @@ public:
       const hobject_t &hoid,
       int err,
       extent_map &&buffers) {
-      ceph_assert(objects_to_read);
+      stone_assert(objects_to_read);
       --objects_to_read;
-      ceph_assert(!results.count(hoid));
+      stone_assert(!results.count(hoid));
       results.emplace(hoid, std::make_pair(err, std::move(buffers)));
     }
     bool is_complete() const {
@@ -171,7 +171,7 @@ public:
   void objects_read_async(
     const hobject_t &hoid,
     const std::list<std::pair<boost::tuple<uint64_t, uint64_t, uint32_t>,
-		    std::pair<ceph::buffer::list*, Context*> > > &to_read,
+		    std::pair<stone::buffer::list*, Context*> > > &to_read,
     Context *on_complete,
     bool fast_read = false) override;
 
@@ -268,14 +268,14 @@ private:
       case ECBackend::RecoveryOp::COMPLETE:
 	return "COMPLETE";
       default:
-	ceph_abort();
+	stone_abort();
 	return "";
       }
     }
 
     // must be filled if state == WRITING
-    std::map<int, ceph::buffer::list> returned_data;
-    std::map<std::string, ceph::buffer::list> xattrs;
+    std::map<int, stone::buffer::list> returned_data;
+    std::map<std::string, stone::buffer::list> xattrs;
     ECUtil::HashInfoRef hinfo;
     ObjectContextRef obc;
     std::set<pg_shard_t> waiting_on_pushes;
@@ -283,7 +283,7 @@ private:
     // valid in state READING
     std::pair<uint64_t, uint64_t> extent_requested;
 
-    void dump(ceph::Formatter *f) const;
+    void dump(stone::Formatter *f) const;
 
     RecoveryOp() : state(IDLE) {}
   };
@@ -297,8 +297,8 @@ private:
   friend struct OnRecoveryReadComplete;
   void handle_recovery_read_complete(
     const hobject_t &hoid,
-    boost::tuple<uint64_t, uint64_t, std::map<pg_shard_t, ceph::buffer::list> > &to_read,
-    std::optional<std::map<std::string, ceph::buffer::list> > attrs,
+    boost::tuple<uint64_t, uint64_t, std::map<pg_shard_t, stone::buffer::list> > &to_read,
+    std::optional<std::map<std::string, stone::buffer::list> > attrs,
     RecoveryMessages *m);
   void handle_recovery_push(
     const PushOp &op,
@@ -340,10 +340,10 @@ public:
   struct read_result_t {
     int r;
     std::map<pg_shard_t, int> errors;
-    std::optional<std::map<std::string, ceph::buffer::list> > attrs;
+    std::optional<std::map<std::string, stone::buffer::list> > attrs;
     std::list<
       boost::tuple<
-	uint64_t, uint64_t, std::map<pg_shard_t, ceph::buffer::list> > > returned;
+	uint64_t, uint64_t, std::map<pg_shard_t, stone::buffer::list> > > returned;
     read_result_t() : r(0) {}
   };
   struct read_request_t {
@@ -363,7 +363,7 @@ public:
 
   struct ReadOp {
     int priority;
-    ceph_tid_t tid;
+    stone_tid_t tid;
     OpRequestRef op; // may be null if not on behalf of a client
     // True if redundant reads are issued, false otherwise,
     // this is useful to tradeoff some resources (redundant ops) for
@@ -382,13 +382,13 @@ public:
     std::map<hobject_t, std::set<pg_shard_t>> obj_to_source;
     std::map<pg_shard_t, std::set<hobject_t> > source_to_obj;
 
-    void dump(ceph::Formatter *f) const;
+    void dump(stone::Formatter *f) const;
 
     std::set<pg_shard_t> in_progress;
 
     ReadOp(
       int priority,
-      ceph_tid_t tid,
+      stone_tid_t tid,
       bool do_redundant_reads,
       bool for_recovery,
       OpRequestRef op,
@@ -404,7 +404,7 @@ public:
 	    boost::make_tuple(
 	      extent.get<0>(),
 	      extent.get<1>(),
-	      std::map<pg_shard_t, ceph::buffer::list>()));
+	      std::map<pg_shard_t, stone::buffer::list>()));
 	}
       }
     }
@@ -418,8 +418,8 @@ public:
     ReadOp &op);
   void complete_read_op(ReadOp &rop, RecoveryMessages *m);
   friend ostream &operator<<(ostream &lhs, const ReadOp &rhs);
-  std::map<ceph_tid_t, ReadOp> tid_to_read_map;
-  std::map<pg_shard_t, std::set<ceph_tid_t> > shard_to_read_map;
+  std::map<stone_tid_t, ReadOp> tid_to_read_map;
+  std::map<pg_shard_t, std::set<stone_tid_t> > shard_to_read_map;
   void start_read_op(
     int priority,
     std::map<hobject_t, std::set<int>> &want_to_read,
@@ -454,7 +454,7 @@ public:
     eversion_t trim_to;
     std::optional<pg_hit_set_history_t> updated_hit_set_history;
     std::vector<pg_log_entry_t> log_entries;
-    ceph_tid_t tid;
+    stone_tid_t tid;
     osd_reqid_t reqid;
     ZTracer::Trace trace;
 
@@ -511,7 +511,7 @@ public:
   friend ostream &operator<<(ostream &lhs, const Op &rhs);
 
   ExtentCache cache;
-  std::map<ceph_tid_t, Op> tid_to_op_map; /// Owns Op structure
+  std::map<stone_tid_t, Op> tid_to_op_map; /// Owns Op structure
 
   /**
    * We model the possible rmw states as a std::set of waitlists.
@@ -566,7 +566,7 @@ public:
   bool try_finish_rmw();
   void check_ops();
 
-  ceph::ErasureCodeInterfaceRef ec_impl;
+  stone::ErasureCodeInterfaceRef ec_impl;
 
 
   /**
@@ -576,9 +576,9 @@ public:
    */
   class ECRecPred : public IsPGRecoverablePredicate {
     std::set<int> want;
-    ceph::ErasureCodeInterfaceRef ec_impl;
+    stone::ErasureCodeInterfaceRef ec_impl;
   public:
-    explicit ECRecPred(ceph::ErasureCodeInterfaceRef ec_impl) : ec_impl(ec_impl) {
+    explicit ECRecPred(stone::ErasureCodeInterfaceRef ec_impl) : ec_impl(ec_impl) {
       for (unsigned i = 0; i < ec_impl->get_chunk_count(); ++i) {
 	want.insert(i);
       }
@@ -616,7 +616,7 @@ public:
   public:
     ECReadPred(
       pg_shard_t whoami,
-      ceph::ErasureCodeInterfaceRef ec_impl) : whoami(whoami), rec_pred(ec_impl) {}
+      stone::ErasureCodeInterfaceRef ec_impl) : whoami(whoami), rec_pred(ec_impl) {}
     bool operator()(const std::set<pg_shard_t> &_have) const override {
       return _have.count(whoami) && rec_pred(_have);
     }
@@ -630,7 +630,7 @@ public:
   /// If modified, ensure that the ref is held until the update is applied
   SharedPtrRegistry<hobject_t, ECUtil::HashInfo> unstable_hashinfo_registry;
   ECUtil::HashInfoRef get_hash_info(const hobject_t &hoid, bool create = false,
-				    const std::map<std::string, ceph::buffer::ptr> *attr = NULL);
+				    const std::map<std::string, stone::buffer::ptr> *attr = NULL);
 
 public:
   ECBackend(
@@ -638,8 +638,8 @@ public:
     const coll_t &coll,
     ObjectStore::CollectionHandle &ch,
     ObjectStore *store,
-    StoneeContext *cct,
-    ceph::ErasureCodeInterfaceRef ec_impl,
+    StoneContext *cct,
+    stone::ErasureCodeInterfaceRef ec_impl,
     uint64_t stripe_width);
 
   /// Returns to_read replicas sufficient to reconstruct want
@@ -661,7 +661,7 @@ public:
 
   int objects_get_attrs(
     const hobject_t &hoid,
-    std::map<std::string, ceph::buffer::list> *out) override;
+    std::map<std::string, stone::buffer::list> *out) override;
 
   void rollback_append(
     const hobject_t &hoid,

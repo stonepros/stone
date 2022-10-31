@@ -1,5 +1,5 @@
-#ifndef CEPH_RADOS_TYPES_HPP
-#define CEPH_RADOS_TYPES_HPP
+#ifndef STONE_RADOS_TYPES_HPP
+#define STONE_RADOS_TYPES_HPP
 
 #include <map>
 #include <utility>
@@ -158,7 +158,7 @@ struct err_t {
 };
 
 struct shard_info_t : err_t {
-  std::map<std::string, ceph::bufferlist> attrs;
+  std::map<std::string, stone::bufferlist> attrs;
   uint64_t size = -1;
   bool omap_digest_present = false;
   uint32_t omap_digest = 0;
@@ -270,7 +270,7 @@ struct inconsistent_snapset_t {
   // Extra clones
   std::vector<snap_t> clones;
   std::vector<snap_t> missing;
-  ceph::bufferlist ss_bl;
+  stone::bufferlist ss_bl;
 
   bool ss_attr_missing() const {     // Compatibility
     return errors & SNAPSET_MISSING;
@@ -330,7 +330,7 @@ const std::string all_nspaces(LIBRADOS_ALL_NSPACES);
 struct notify_ack_t {
   uint64_t notifier_id;
   uint64_t cookie;
-  ceph::bufferlist payload_bl;
+  stone::bufferlist payload_bl;
 };
 
 struct notify_timeout_t {

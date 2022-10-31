@@ -209,11 +209,11 @@ struct rgw_pubsub_s3_event {
   constexpr static const char* const json_type_plural = "Records";
   std::string eventVersion = "2.2";
   // aws:s3
-  std::string eventSource = "ceph:s3";
+  std::string eventSource = "stone:s3";
   // zonegroup
   std::string awsRegion;
   // time of the request
-  ceph::real_time eventTime;
+  stone::real_time eventTime;
   // type of the event
   std::string eventName;
   // user that sent the request
@@ -330,7 +330,7 @@ struct rgw_pubsub_event {
   std::string id;
   std::string event_name;
   std::string source;
-  ceph::real_time timestamp;
+  stone::real_time timestamp;
   JSONFormattable info;
 
   void encode(bufferlist& bl) const {
@@ -518,7 +518,7 @@ struct rgw_pubsub_topic_filter {
     encode(topic, bl);
     // events are stored as a vector of strings
     std::vector<std::string> tmp_events;
-    const auto converter = s3_id.empty() ? rgw::notify::to_ceph_string : rgw::notify::to_string;
+    const auto converter = s3_id.empty() ? rgw::notify::to_stone_string : rgw::notify::to_string;
     std::transform(events.begin(), events.end(), std::back_inserter(tmp_events), converter);
     encode(tmp_events, bl);
     encode(s3_id, bl);
@@ -694,12 +694,12 @@ public:
     
     static const int DEFAULT_MAX_EVENTS = 100;
     // followint virtual methods should only be called in derived
-    virtual int list_events(const DoutPrefixProvider *dpp, const string& marker, int max_events) {ceph_assert(false);}
-    virtual int remove_event(const DoutPrefixProvider *dpp, const string& event_id) {ceph_assert(false);}
-    virtual void dump(Formatter* f) const {ceph_assert(false);}
+    virtual int list_events(const DoutPrefixProvider *dpp, const string& marker, int max_events) {stone_assert(false);}
+    virtual int remove_event(const DoutPrefixProvider *dpp, const string& event_id) {stone_assert(false);}
+    virtual void dump(Formatter* f) const {stone_assert(false);}
   };
 
-  // subscription with templated list of events to support both S3 compliant and Ceph specific events
+  // subscription with templated list of events to support both S3 compliant and Stone specific events
   template<typename EventType>
   class SubWithEvents : public Sub {
   private:

@@ -1,6 +1,6 @@
 import pytest
-from ceph_volume import exceptions, conf
-from ceph_volume.systemd.main import parse_subcommand, main, process
+from stone_volume import exceptions, conf
+from stone_volume.systemd.main import parse_subcommand, main, process
 
 
 class TestParseSubcommand(object):
@@ -42,10 +42,10 @@ class TestMain(object):
     def test_correct_command(self, monkeypatch):
         run = Capture()
         monkeypatch.setattr(process, 'run', run)
-        main(args=['ceph-volume-systemd', 'lvm-8715BEB4-15C5-49DE-BA6F-401086EC7B41-0' ])
+        main(args=['stone-volume-systemd', 'lvm-8715BEB4-15C5-49DE-BA6F-401086EC7B41-0' ])
         command = run.calls[0][0]
         assert command == [
-            'ceph-volume',
+            'stone-volume',
             'lvm', 'trigger',
             '8715BEB4-15C5-49DE-BA6F-401086EC7B41-0'
         ]

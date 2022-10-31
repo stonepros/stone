@@ -1,2 +1,2 @@
 # RbdDevice		Parameters
-#poolname/imagename	id=client,keyring=/etc/ceph/ceph.client.keyring
+#poolname/imagename	id=client,keyring=/etc/stone/stone.client.keyring

@@ -1,6 +1,6 @@
 Set up
 
-  $ ceph osd pool create rbda
+  $ stone osd pool create rbda
   pool 'rbda' created
   $ rbd pool init rbda
   $ rbd create rbda/image1 --size 1000
@@ -60,5 +60,5 @@ Test at image level
 
 Teardown
 
-  $ ceph osd pool rm rbda rbda --yes-i-really-really-mean-it
+  $ stone osd pool rm rbda rbda --yes-i-really-really-mean-it
   pool 'rbda' removed

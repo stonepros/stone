@@ -32,8 +32,8 @@ class Root(RestController):
         return {
             'api_version': 1,
             'auth':
-                'Use "ceph restful create-key <key>" to create a key pair, '
+                'Use "stone restful create-key <key>" to create a key pair, '
                 'pass it as HTTP Basic auth to authenticate',
             'doc': 'See /doc endpoint',
-            'info': "Ceph Manager RESTful API server",
+            'info': "Stone Manager RESTful API server",
         }

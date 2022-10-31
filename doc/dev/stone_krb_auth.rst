@@ -1,5 +1,5 @@
 ===============================================================================
-A Detailed Documentation on How to Set up Ceph Kerberos Authentication
+A Detailed Documentation on How to Set up Stone Kerberos Authentication
 ===============================================================================
 
 This document provides details on the Kerberos authorization protocol. This is
@@ -232,7 +232,7 @@ Simple and Protected GSSAPI Negotiation Mechanism (SPNEGO)
     Having this background information in mind, we can easily describe things
     like:
 
-        1. *Ceph Kerberos authentication* is based totally on MIT *Kerberos*
+        1. *Stone Kerberos authentication* is based totally on MIT *Kerberos*
         implementation using *GSSAPI*.
 
         2. At the moment we are still using *Kerberos default backend
@@ -253,7 +253,7 @@ properly:
 
         - Time Synchronization (either using `NTP <http://www.ntp.org/>`_  or `chrony <https://chrony.tuxfamily.org/>`_).
 
-            + Not only Kerberos, but also Ceph depends and relies on time
+            + Not only Kerberos, but also Stone depends and relies on time
               synchronization.
 
         - DNS resolution
@@ -338,8 +338,8 @@ Also, the following *Kerberos terminology* is important:
 
             + The ``primary`` is the first part of the principal. In the case
               of a user, it's the same as the ``username``. For a host, the
-              primary is the word ``host``. For Ceph, will use ``ceph`` as a
-              primary name which makes it easier to organize and identify Ceph
+              primary is the word ``host``. For Stone, will use ``ceph`` as a
+              primary name which makes it easier to organize and identify Stone
               related principals.
 
             + The ``instance`` is an optional string that qualifies the
@@ -366,7 +366,7 @@ Also, the following *Kerberos terminology* is important:
           lieu of a password challenge for a given principal. Creating keytab
           files are useful for noninteractive principals, such as *Service
           Principal Names*, which are often associated with long-running
-          processes like Ceph daemons. A keytab file does not have to be a
+          processes like Stone daemons. A keytab file does not have to be a
           "1:1 mapping" to a single principal. Multiple different principal
           keys can be stored in a single keytab file:
 
@@ -379,12 +379,12 @@ Also, the following *Kerberos terminology* is important:
 
 |
 
-The 'Ceph side' of the things
+The 'Stone side' of the things
 ------------------------------
 
-In order to configure connections (from Ceph nodes) to the KDC:
+In order to configure connections (from Stone nodes) to the KDC:
 
-1. Login to the Kerberos client (Ceph server nodes) and confirm it is properly
+1. Login to the Kerberos client (Stone server nodes) and confirm it is properly
    configured, by checking and editing ``/etc/krb5.conf`` file properly:  ::
 
     /etc/krb5.conf
@@ -460,7 +460,7 @@ In order to configure connections (from Ceph nodes) to the KDC:
     ...
 
 
-4. Add a *principal for each Ceph cluster node* we want to be authenticated by
+4. Add a *principal for each Stone cluster node* we want to be authenticated by
    Kerberos:
 
     a. Adding principals:  ::
@@ -501,7 +501,7 @@ In order to configure connections (from Ceph nodes) to the KDC:
         ...
 
 
-5. Create a *keytab file* for each Ceph cluster node:
+5. Create a *keytab file* for each Stone cluster node:
 
     As the default client keytab file is ``/etc/krb5.keytab``, we will want to
     use a different file name, so we especify which *keytab file to create* and
@@ -554,16 +554,16 @@ In order to configure connections (from Ceph nodes) to the KDC:
         ...
 
 
-6. A new *set parameter* was added in Ceph, ``gss ktab client file`` which
-   points to the keytab file related to the Ceph node *(or principal)* in
+6. A new *set parameter* was added in Stone, ``gss ktab client file`` which
+   points to the keytab file related to the Stone node *(or principal)* in
    question.
 
     By default it points to ``/var/lib/ceph/$name/gss_client_$name.ktab``. So,
-    in the case of a Ceph server ``osd1.mydomain.com``, the location and name
+    in the case of a Stone server ``osd1.mydomain.com``, the location and name
     of the keytab file should be: ``/var/lib/ceph/osd1/gss_client_osd1.ktab``
 
     Therefore, we need to ``scp`` each of these newly created keytab files from
-    the KDC to their respective Ceph cluster nodes (i.e):
+    the KDC to their respective Stone cluster nodes (i.e):
     ``# for node in mon1 osd1 osd2 osd3 osd4; do scp /etc/gss_client_$node*.ktab root@ceph-$node:/var/lib/ceph/$node/; done``
 
     Or whatever other way one feels comfortable with, as long as each keytab
@@ -584,7 +584,7 @@ In order to configure connections (from Ceph nodes) to the KDC:
 
 
     Given that the *keytab client file* is/should already be copied and available at the
-    Kerberos client (Ceph cluster node), we should be able to athenticate using it before
+    Kerberos client (Stone cluster node), we should be able to athenticate using it before
     going forward:  ::
 
         # kdestroy -A && kinit -k -t /etc/gss_client_mon1.ktab -f 'ceph/ceph-mon1@MYDOMAIN.COM' && klist -f
@@ -638,7 +638,7 @@ In order to configure connections (from Ceph nodes) to the KDC:
 |
 |
 
-** *For Ceph Developers Only* **
+** *For Stone Developers Only* **
 =================================
 
 We certainly could have used straight native ``KRB5 APIs`` (instead of
@@ -981,7 +981,7 @@ In order to get a new MIT KDC Server running:
         */admin@MYDOMAIN.COM     *
 
 
-    d. Create a simple 'user principal' (same steps as by *The 'Ceph side' of
+    d. Create a simple 'user principal' (same steps as by *The 'Stone side' of
        the things*; 4a):  ::
 
         kadmin.local:  addprinc johndoe
@@ -992,7 +992,7 @@ In order to get a new MIT KDC Server running:
 
 
     e. Confirm the newly created 'user principal' is able to authenticate (same
-       steps as by *The 'Ceph side' of the things*; 6):  ::
+       steps as by *The 'Stone side' of the things*; 6):  ::
 
         # kdestroy -A && kinit -f johndoe && klist -f
         Password for johndoe@MYDOMAIN.COM:
@@ -1008,7 +1008,7 @@ In order to get a new MIT KDC Server running:
 5. At this point, we should have a *simple (MIT) Kerberos Server up and running*:
 
      a. Considering we will want to work with keytab files, for both 'user and
-        service' principals, refer to The *'Ceph side' of the things* starting
+        service' principals, refer to The *'Stone side' of the things* starting
         at step 4.
 
      b. Make sure you are comfortable with following and their ``manpages``:  ::
@@ -1032,7 +1032,7 @@ In order to get a new MIT KDC Server running:
     the Kerberos issues are usually related to name resolution, since Kerberos
     is *very picky* on both *systems names* and *host lookups*.
 
-    a. As described in *The 'Ceph side' of the things*; step 2a, DNS RRs
+    a. As described in *The 'Stone side' of the things*; step 2a, DNS RRs
        greatly improves service location and host/domain resolution, by using
        ``(srv resources)`` and ``(txt record)`` respectively (as per
        *Before We Start*; *DNS resolution*).  ::

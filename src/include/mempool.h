@@ -27,8 +27,8 @@
 #include <boost/container/flat_map.hpp>
 
 #include "common/Formatter.h"
-#include "common/ceph_atomic.h"
-#include "include/ceph_assert.h"
+#include "common/stone_atomic.h"
+#include "include/stone_assert.h"
 #include "include/compact_map.h"
 #include "include/compact_set.h"
 #include "include/compat.h"
@@ -203,9 +203,9 @@ enum {
 
 // align shard to a cacheline
 struct shard_t {
-  ceph::atomic<size_t> bytes = {0};
-  ceph::atomic<size_t> items = {0};
-  char __padding[128 - sizeof(ceph::atomic<size_t>)*2];
+  stone::atomic<size_t> bytes = {0};
+  stone::atomic<size_t> items = {0};
+  char __padding[128 - sizeof(stone::atomic<size_t>)*2];
 } __attribute__ ((aligned (128)));
 
 static_assert(sizeof(shard_t) == 128, "shard_t should be cacheline-sized");
@@ -213,7 +213,7 @@ static_assert(sizeof(shard_t) == 128, "shard_t should be cacheline-sized");
 struct stats_t {
   ssize_t items = 0;
   ssize_t bytes = 0;
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_int("items", items);
     f->dump_int("bytes", bytes);
   }
@@ -231,7 +231,7 @@ const char *get_pool_name(pool_index_t ix);
 struct type_t {
   const char *type_name;
   size_t item_size;
-  ceph::atomic<ssize_t> items = {0};  // signed
+  stone::atomic<ssize_t> items = {0};  // signed
 };
 
 struct type_info_hash {
@@ -284,10 +284,10 @@ public:
   void get_stats(stats_t *total,
 		 std::map<std::string, stats_t> *by_type) const;
 
-  void dump(ceph::Formatter *f, stats_t *ptotal=0) const;
+  void dump(stone::Formatter *f, stats_t *ptotal=0) const;
 };
 
-void dump(ceph::Formatter *f);
+void dump(stone::Formatter *f);
 
 
 // STL allocator for use with containers.  All actual state
@@ -528,10 +528,10 @@ bool operator!=(const std::vector<T, mempool::pool_allocator<pool_index, T>>& lh
 #define MEMPOOL_CLASS_HELPERS()						\
   void *operator new(size_t size);					\
   void *operator new[](size_t size) noexcept {				\
-    ceph_abort_msg("no array new");					\
+    stone_abort_msg("no array new");					\
     return nullptr; }							\
   void  operator delete(void *);					\
-  void  operator delete[](void *) { ceph_abort_msg("no array delete"); }
+  void  operator delete[](void *) { stone_abort_msg("no array delete"); }
 
 
 // Use this in some particular .cc file to match each class with a

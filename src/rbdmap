@@ -89,9 +89,9 @@ do_map() {
 			[ -n "${MNT_RV}" ] && logger -p "daemon.debug" -t rbdmap "Mounted '${MAP_RV}' to '${MNT_RV}'"
 
 			## post-mapping
-			if [ -x "/etc/ceph/rbd.d/${DEV}" ]; then
-			    logger -p "daemon.debug" -t rbdmap "Running post-map hook '/etc/ceph/rbd.d/${DEV}'"
-			    /etc/ceph/rbd.d/${DEV} map "/dev/rbd/${DEV}"
+			if [ -x "/etc/stone/rbd.d/${DEV}" ]; then
+			    logger -p "daemon.debug" -t rbdmap "Running post-map hook '/etc/stone/rbd.d/${DEV}'"
+			    /etc/stone/rbd.d/${DEV} map "/dev/rbd/${DEV}"
 			fi
 		fi
 	done < $RBDMAPFILE
@@ -134,9 +134,9 @@ do_unmap_all() {
 			for L in $(find /dev/rbd -type l); do
 			    LL="${L##/dev/rbd/}"
 			    if [ "$(readlink -f $L)" = "${DEV}" ] \
-			    && [ -x "/etc/ceph/rbd.d/${LL}" ]; then
-			        logger -p "daemon.debug" -t rbdmap "Running pre-unmap hook for '${DEV}': '/etc/ceph/rbd.d/${LL}'"
-			        /etc/ceph/rbd.d/${LL} unmap "$L"
+			    && [ -x "/etc/stone/rbd.d/${LL}" ]; then
+			        logger -p "daemon.debug" -t rbdmap "Running pre-unmap hook for '${DEV}': '/etc/stone/rbd.d/${LL}'"
+			        /etc/stone/rbd.d/${LL} unmap "$L"
 			        break
 			    fi
 			done
@@ -173,9 +173,9 @@ do_unmap() {
 		fi
 
 		## pre-unmapping
-		if [ -x "/etc/ceph/rbd.d/${DEV}" ]; then
-			logger -p "daemon.debug" -t rbdmap "Running pre-unmap hook '/etc/ceph/rbd.d/${DEV}'"
-			/etc/ceph/rbd.d/${DEV} unmap "/dev/rbd/${DEV}"
+		if [ -x "/etc/stone/rbd.d/${DEV}" ]; then
+			logger -p "daemon.debug" -t rbdmap "Running pre-unmap hook '/etc/stone/rbd.d/${DEV}'"
+			/etc/stone/rbd.d/${DEV} unmap "/dev/rbd/${DEV}"
 		fi
 
 		unmount_unmap "$MAP_RV" || RET=$((${RET}+$?))
@@ -185,7 +185,7 @@ do_unmap() {
 }
 
 # default to reasonable value if RBDMAPFILE not set in environment
-RBDMAPFILE="${RBDMAPFILE:-/etc/ceph/rbdmap}"
+RBDMAPFILE="${RBDMAPFILE:-/etc/stone/rbdmap}"
 
 if [ ! -f "$RBDMAPFILE" ]; then
 	logger -p "daemon.warning" -t rbdmap "No $RBDMAPFILE found."

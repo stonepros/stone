@@ -1,7 +1,7 @@
 #!/usr/bin/env bash 
 set -e
 #
-# ceph-backport.sh - Ceph backporting script
+# stone-backport.sh - Stone backporting script
 #
 # Credits: This script is based on work done by Loic Dachary
 #
@@ -11,13 +11,13 @@ set -e
 #
 # Setup:
 #
-#     ceph-backport.sh --setup
+#     stone-backport.sh --setup
 #
 # Usage and troubleshooting:
 #
-#     ceph-backport.sh --help
-#     ceph-backport.sh --usage | less
-#     ceph-backport.sh --troubleshooting | less
+#     stone-backport.sh --help
+#     stone-backport.sh --usage | less
+#     stone-backport.sh --troubleshooting | less
 #
 
 full_path="$0"
@@ -56,19 +56,19 @@ declare -A comp_hash=(
 ["auth"]="core"
 ["bluestore"]="bluestore"
 ["build/ops"]="build/ops"
-["ceph.spec"]="build/ops"
-["ceph-volume"]="ceph-volume"
-["cephfs"]="cephfs"
+["stone.spec"]="build/ops"
+["stone-volume"]="stone-volume"
+["stonefs"]="stonefs"
 ["cmake"]="build/ops"
 ["config"]="config"
-["client"]="cephfs"
+["client"]="stonefs"
 ["common"]="common"
 ["core"]="core"
 ["dashboard"]="dashboard"
 ["deb"]="build/ops"
 ["doc"]="documentation"
 ["grafana"]="monitoring"
-["mds"]="cephfs"
+["mds"]="stonefs"
 ["messenger"]="core"
 ["mon"]="core"
 ["msg"]="core"
@@ -140,7 +140,7 @@ function bail_out_github_api {
 function blindly_set_pr_metadata {
     local pr_number="$1"
     local json_blob="$2"
-    curl -u ${github_user}:${github_token} --silent --data-binary "$json_blob" "https://api.github.com/repos/ceph/ceph/issues/${pr_number}" >/dev/null 2>&1 || true
+    curl -u ${github_user}:${github_token} --silent --data-binary "$json_blob" "https://api.github.com/repos/stone/stone/issues/${pr_number}" >/dev/null 2>&1 || true
 }
 
 function check_milestones {
@@ -211,17 +211,17 @@ function cherry_pick_phase {
     info "Parent issue ostensibly fixed by: ${original_pr_url}"
 
     verbose "Examining ${original_pr_url}"
-    remote_api_output=$(curl -u ${github_user}:${github_token} --silent "https://api.github.com/repos/ceph/ceph/pulls/${original_pr}")
+    remote_api_output=$(curl -u ${github_user}:${github_token} --silent "https://api.github.com/repos/stone/stone/pulls/${original_pr}")
     base_branch=$(echo "${remote_api_output}" | jq -r '.base.label')
-    if [ "$base_branch" = "ceph:master" ] ; then
+    if [ "$base_branch" = "stone:master" ] ; then
         true
     else
         if [ "$FORCE" ] ; then
-            warning "base_branch ->$base_branch<- is something other than \"ceph:master\""
+            warning "base_branch ->$base_branch<- is something other than \"stone:master\""
             info "--force was given, so continuing anyway"
         else
             error "${original_pr_url} is targeting ${base_branch}: cowardly refusing to perform automated cherry-pick"
-            info "Out of an abundance of caution, the script only automates cherry-picking of commits from PRs targeting \"ceph:master\"."
+            info "Out of an abundance of caution, the script only automates cherry-picking of commits from PRs targeting \"stone:master\"."
             info "You can still use the script to stage the backport, though. Just prepare the local branch \"${local_branch}\" manually and re-run the script."
             false
         fi
@@ -349,7 +349,7 @@ function debug {
 }
 
 function display_version_message_and_exit {
-    echo "$this_script: Ceph backporting script, version $SCRIPT_VERSION"
+    echo "$this_script: Stone backporting script, version $SCRIPT_VERSION"
     exit 0 
 }
 
@@ -389,7 +389,7 @@ function existing_pr_routine {
     local pr_json_tempfile
     local remote_api_output
     local update_pr_body
-    remote_api_output="$(curl -u ${github_user}:${github_token} --silent "https://api.github.com/repos/ceph/ceph/pulls/${backport_pr_number}")"
+    remote_api_output="$(curl -u ${github_user}:${github_token} --silent "https://api.github.com/repos/stone/stone/pulls/${backport_pr_number}")"
     backport_pr_title="$(echo "$remote_api_output" | jq -r '.title')"
     if [ "$backport_pr_title" = "null" ] ; then
         error "could not get PR title of existing PR ${backport_pr_number}"
@@ -406,7 +406,7 @@ function existing_pr_routine {
         bail_out_github_api "$remote_api_output"
     fi
     base_branch=$(echo "${remote_api_output}" | jq -r '.base.label')
-    base_branch="${base_branch#ceph:}"
+    base_branch="${base_branch#stone:}"
     if [ -z "$(is_active_milestone "$base_branch")" ] ; then
         error "existing PR $backport_pr_url is targeting $base_branch which is not an active milestone"
         info "Cowardly refusing to work on a backport to $base_branch"
@@ -456,7 +456,7 @@ $clipped_pr_body
 
 ---
 
-updated using ceph-backport.sh version ${SCRIPT_VERSION}"
+updated using stone-backport.sh version ${SCRIPT_VERSION}"
     fi
     maybe_update_pr_title_body "${new_pr_title}" "${new_pr_body}"
 }
@@ -532,8 +532,8 @@ function info {
 
 function init_endpoints {
     verbose "Initializing remote API endpoints"
-    redmine_endpoint="${redmine_endpoint:-"https://tracker.ceph.com"}"
-    github_endpoint="${github_endpoint:-"https://github.com/ceph/ceph"}"
+    redmine_endpoint="${redmine_endpoint:-"https://tracker.stone.com"}"
+    github_endpoint="${github_endpoint:-"https://github.com/stone/stone"}"
 }
 
 function init_fork_remote {
@@ -659,7 +659,7 @@ function interactive_setup_routine {
     echo "---------------------------------------------------------------------"
     echo "Setup step 4 of $total_steps - Redmine key"
     echo "---------------------------------------------------------------------"
-    echo "To generate a Redmine API access key, go to https://tracker.ceph.com"
+    echo "To generate a Redmine API access key, go to https://tracker.stone.com"
     echo "After signing in, click: \"My account\""
     echo "Now, find \"API access key\"."
     echo "Once you know the API access key, enter it below."
@@ -777,7 +777,7 @@ function maybe_deduce_remote {
     local remote=""
     local url_component=""
     if [ "$remote_type" = "upstream" ] ; then
-        url_component="ceph"
+        url_component="stone"
     elif [ "$remote_type" = "fork" ] ; then
         if [ "$EXPLICIT_FORK" ] ; then
             url_component="$EXPLICIT_FORK"
@@ -787,7 +787,7 @@ function maybe_deduce_remote {
     else
         assert_fail "bad remote_type ->$remote_type<- in maybe_deduce_remote"
     fi
-    remote=$(git remote -v | grep --extended-regexp --ignore-case '(://|@)github.com(/|:)'${url_component}'/ceph(\s|\.|\/)' | head -n1 | cut -f 1)
+    remote=$(git remote -v | grep --extended-regexp --ignore-case '(://|@)github.com(/|:)'${url_component}'/stone(\s|\.|\/)' | head -n1 | cut -f 1)
     echo "$remote"
 }
 
@@ -896,14 +896,14 @@ function milestone_number_from_remote_api {
     local mtt="$1"  # milestone to try
     local mn=""     # milestone number
     local milestones
-    remote_api_output=$(curl -u ${github_user}:${github_token} --silent -X GET "https://api.github.com/repos/ceph/ceph/milestones")
+    remote_api_output=$(curl -u ${github_user}:${github_token} --silent -X GET "https://api.github.com/repos/stone/stone/milestones")
     mn=$(echo "$remote_api_output" | jq --arg milestone "$mtt" '.[] | select(.title==$milestone) | .number')
     if [ "$mn" -gt "0" ] >/dev/null 2>&1 ; then
         echo "$mn"
     else
         error "Could not determine milestone number of ->$milestone<-"
         verbose_en "GitHub API said:\n${remote_api_output}\n"
-        remote_api_output=$(curl -u ${github_user}:${github_token} --silent -X GET "https://api.github.com/repos/ceph/ceph/milestones")
+        remote_api_output=$(curl -u ${github_user}:${github_token} --silent -X GET "https://api.github.com/repos/stone/stone/milestones")
         milestones=$(echo "$remote_api_output" | jq '.[].title')
         info "Valid values are ${milestones}"
         info "(This probably means the Release field of ${redmine_url} is populated with"
@@ -989,7 +989,7 @@ function set_github_user_from_github_token {
 function set_redmine_user_from_redmine_key {
     [ "$redmine_key" ] || assert_fail "set_redmine_user_from_redmine_key was called, but redmine_key not set"
     local api_key_from_api
-    remote_api_output="$(curl --silent "https://tracker.ceph.com/users/current.json?key=$redmine_key")"
+    remote_api_output="$(curl --silent "https://tracker.stone.com/users/current.json?key=$redmine_key")"
     redmine_login="$(echo "$remote_api_output" | jq -r '.user.login')"
     redmine_user_id="$(echo "$remote_api_output" | jq -r '.user.id')"
     api_key_from_api="$(echo "$remote_api_output" | jq -r '.user.api_key')"
@@ -1065,7 +1065,7 @@ EOM
 }
 
 # to update known milestones, consult:
-#   curl --verbose -X GET https://api.github.com/repos/ceph/ceph/milestones
+#   curl --verbose -X GET https://api.github.com/repos/stone/stone/milestones
 function try_known_milestones {
     local mtt=$1  # milestone to try
     local mn=""   # milestone number
@@ -1151,7 +1151,7 @@ Usage advice
 
 Once you have completed --setup, you can run the script with the ID of
 a Backport tracker issue. For example, to stage the backport
-https://tracker.ceph.com/issues/41502, run:
+https://tracker.stone.com/issues/41502, run:
 
     ${this_script} 41502
 
@@ -1196,9 +1196,9 @@ For details on all the options the script takes, run:
 
     ${this_script} --help
 
-For more information on Ceph backporting, see:
+For more information on Stone backporting, see:
 
-    https://github.com/ceph/ceph/tree/master/SubmittingPatches-backports.rst
+    https://github.com/stone/stone/tree/master/SubmittingPatches-backports.rst
 
 EOM
 }
@@ -1246,7 +1246,7 @@ function vet_prs_for_milestone {
     local pr_title=
     local pr_url=
     # determine last page (i.e., total number of pages)
-    remote_api_output="$(curl -u ${github_user}:${github_token} --silent --head "https://api.github.com/repos/ceph/ceph/pulls?base=${milestone_title}" | grep -E '^Link' || true)"
+    remote_api_output="$(curl -u ${github_user}:${github_token} --silent --head "https://api.github.com/repos/stone/stone/pulls?base=${milestone_title}" | grep -E '^Link' || true)"
     if [ "$remote_api_output" ] ; then
          # Link: <https://api.github.com/repositories/2310495/pulls?base=luminous&page=2>; rel="next", <https://api.github.com/repositories/2310495/pulls?base=luminous&page=2>; rel="last"
          # shellcheck disable=SC2001
@@ -1257,7 +1257,7 @@ function vet_prs_for_milestone {
     verbose "GitHub has $pages_of_output pages of pull request data for \"base:${milestone_title}\""
     for ((page=1; page<=pages_of_output; page++)) ; do
         verbose "Fetching PRs (page $page of ${pages_of_output})"
-        remote_api_output="$(curl -u ${github_user}:${github_token} --silent -X GET "https://api.github.com/repos/ceph/ceph/pulls?base=${milestone_title}&page=${page}")"
+        remote_api_output="$(curl -u ${github_user}:${github_token} --silent -X GET "https://api.github.com/repos/stone/stone/pulls?base=${milestone_title}&page=${page}")"
         prs_in_page="$(echo "$remote_api_output" | jq -r '. | length')"
         verbose "Page $page of remote API output contains information on $prs_in_page PRs"
         for ((i=0; i<prs_in_page; i++)) ; do
@@ -1284,9 +1284,9 @@ function vet_remotes {
     else
         error "Cannot auto-determine fork remote"
         if [ "$EXPLICIT_FORK" ] ; then
-            info "(Could not find $EXPLICIT_FORK fork of ceph/ceph in \"git remote -v\")"
+            info "(Could not find $EXPLICIT_FORK fork of stone/stone in \"git remote -v\")"
         else
-            info "(Could not find GitHub user ${github_user}'s fork of ceph/ceph in \"git remote -v\")"
+            info "(Could not find GitHub user ${github_user}'s fork of stone/stone in \"git remote -v\")"
         fi
         setup_ok=""
     fi
@@ -1556,7 +1556,7 @@ vet_remotes
 #
 
 verbose "Querying GitHub API for active milestones"
-remote_api_output="$(curl -u ${github_user}:${github_token} --silent -X GET "https://api.github.com/repos/ceph/ceph/milestones")"
+remote_api_output="$(curl -u ${github_user}:${github_token} --silent -X GET "https://api.github.com/repos/stone/stone/milestones")"
 active_milestones="$(echo "$remote_api_output" | jq -r '.[] | .title')"
 if [ "$active_milestones" = "null" ] ; then
     error "Could not determine the active milestones"
@@ -1704,11 +1704,11 @@ if [ "$PR_PHASE" ] ; then
         [ "$original_pr"    ] && desc="${desc}\nbackport of $(number_to_url "github" "${original_pr}")"
         [ "$original_issue" ] && desc="${desc}\nparent tracker: $(number_to_url "redmine" "${original_issue}")"
     fi
-    desc="${desc}\n\nthis backport was staged using ceph-backport.sh version ${SCRIPT_VERSION}\nfind the latest version at ${github_endpoint}/blob/master/src/script/ceph-backport.sh"
+    desc="${desc}\n\nthis backport was staged using stone-backport.sh version ${SCRIPT_VERSION}\nfind the latest version at ${github_endpoint}/blob/master/src/script/stone-backport.sh"
     
     debug "Generating backport PR title"
     if [ "$original_pr" ] ; then
-        backport_pr_title="${milestone}: $(curl --silent https://api.github.com/repos/ceph/ceph/pulls/${original_pr} | jq -r '.title')"
+        backport_pr_title="${milestone}: $(curl --silent https://api.github.com/repos/stone/stone/pulls/${original_pr} | jq -r '.title')"
     else
         if [[ $tracker_title =~ ^${milestone}: ]] ; then
             backport_pr_title="${tracker_title}"
@@ -1726,7 +1726,7 @@ if [ "$PR_PHASE" ] ; then
     else
         source_repo="$github_user"
     fi
-    remote_api_output=$(curl -u ${github_user}:${github_token} --silent --data-binary "{\"title\":\"${backport_pr_title}\",\"head\":\"${source_repo}:${local_branch}\",\"base\":\"${target_branch}\",\"body\":\"${desc}\"}" "https://api.github.com/repos/ceph/ceph/pulls")
+    remote_api_output=$(curl -u ${github_user}:${github_token} --silent --data-binary "{\"title\":\"${backport_pr_title}\",\"head\":\"${source_repo}:${local_branch}\",\"base\":\"${target_branch}\",\"body\":\"${desc}\"}" "https://api.github.com/repos/stone/stone/pulls")
     backport_pr_number=$(echo "$remote_api_output" | jq -r .number)
     if [ -z "$backport_pr_number" ] || [ "$backport_pr_number" = "null" ] ; then
         error "failed to open backport PR"
@@ -1805,7 +1805,7 @@ if [ "$TRACKER_PHASE" ] ; then
         pgrep firefox >/dev/null && firefox "${redmine_url}"
         exit 1
     else
-        data_binary="{\"issue\":{\"notes\":\"please link this Backport tracker issue with GitHub PR ${desc_should_be}\nceph-backport.sh version ${SCRIPT_VERSION}\"}}"
+        data_binary="{\"issue\":{\"notes\":\"please link this Backport tracker issue with GitHub PR ${desc_should_be}\nstone-backport.sh version ${SCRIPT_VERSION}\"}}"
         remote_api_status_code=$(curl --write-out '%{http_code}' --output /dev/null --silent -X PUT --header "Content-type: application/json" --data-binary "${data_binary}" "${redmine_url}.json?key=$redmine_key")
         if [ "${remote_api_status_code:0:1}" = "2" ] ; then
             info "Comment added to ${redmine_url}"

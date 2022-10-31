@@ -14,7 +14,7 @@ from collections import namedtuple, defaultdict
 from textwrap import dedent
 
 from teuthology.orchestra.run import CommandFailedError
-from tasks.cephfs.cephfs_test_case import CephFSTestCase, for_teuthology
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase, for_teuthology
 
 log = logging.getLogger(__name__)
 
@@ -160,7 +160,7 @@ class StripedStashedLayout(Workload):
         # Create a dir with a striped layout set on it
         self._mount.run_shell(["mkdir", "stripey"])
 
-        self._mount.setfattr("./stripey", "ceph.dir.layout",
+        self._mount.setfattr("./stripey", "stone.dir.layout",
              "stripe_unit={ss} stripe_count={sc} object_size={os} pool={pool}".format(
                  ss=self.ss, os=self.os, sc=self.sc,
                  pool=self._filesystem.get_data_pool_name()
@@ -290,13 +290,13 @@ class NonDefaultLayout(Workload):
     """
     def write(self):
         self._mount.run_shell(["touch", "datafile"])
-        self._mount.setfattr("./datafile", "ceph.file.layout.object_size", "8388608")
+        self._mount.setfattr("./datafile", "stone.file.layout.object_size", "8388608")
         self._mount.run_shell(["dd", "if=/dev/urandom", "of=./datafile", "bs=1M", "count=32"])
         self._initial_state = self._mount.stat("datafile")
 
     def validate(self):
         # Check we got the layout reconstructed properly
-        object_size = int(self._mount.getfattr("./datafile", "ceph.file.layout.object_size", sudo=True))
+        object_size = int(self._mount.getfattr("./datafile", "stone.file.layout.object_size", sudo=True))
         self.assert_equal(object_size, 8388608)
 
         # Check we got the file size reconstructed properly
@@ -304,7 +304,7 @@ class NonDefaultLayout(Workload):
         self.assert_equal(st['st_size'], self._initial_state['st_size'])
 
 
-class TestDataScan(CephFSTestCase):
+class TestDataScan(StoneFSTestCase):
     MDSS_REQUIRED = 2
 
     def is_marked_damaged(self, rank):
@@ -331,8 +331,8 @@ class TestDataScan(CephFSTestCase):
 
         # After recovery, we need the MDS to not be strict about stats (in production these options
         # are off by default, but in QA we need to explicitly disable them)
-        self.fs.set_ceph_conf('mds', 'mds verify scatter', False)
-        self.fs.set_ceph_conf('mds', 'mds debug scatterstat', False)
+        self.fs.set_stone_conf('mds', 'mds verify scatter', False)
+        self.fs.set_stone_conf('mds', 'mds debug scatterstat', False)
 
         # Apply any data damage the workload wants
         workload.damage()
@@ -428,8 +428,8 @@ class TestDataScan(CephFSTestCase):
         file_names = ["%s" % n for n in range(0, file_count)]
 
         # Make sure and disable dirfrag auto merging and splitting
-        self.fs.set_ceph_conf('mds', 'mds bal merge size', 0)
-        self.fs.set_ceph_conf('mds', 'mds bal split size', 100 * file_count)
+        self.fs.set_stone_conf('mds', 'mds bal merge size', 0)
+        self.fs.set_stone_conf('mds', 'mds bal split size', 100 * file_count)
 
         # Create a directory of `file_count` files, each named after its
         # decimal number and containing the string of its decimal number
@@ -491,7 +491,7 @@ class TestDataScan(CephFSTestCase):
         self.fs.wait_for_daemons()
         self.mount_a.mount_wait()
         self.mount_a.run_shell(["ls", "-l", "subdir/"]) # debugging
-        # Use sudo because cephfs-data-scan will reinsert the dentry with root ownership, it can't know the real owner.
+        # Use sudo because stonefs-data-scan will reinsert the dentry with root ownership, it can't know the real owner.
         out = self.mount_a.run_shell_payload(f"cat subdir/{victim_dentry}", sudo=True).stdout.getvalue().strip()
         self.assertEqual(out, victim_dentry)
 
@@ -620,7 +620,7 @@ class TestDataScan(CephFSTestCase):
 
         self.mount_a.run_shell(["mkdir", "dir1"])
         dir_ino = self.mount_a.path_to_ino("dir1")
-        self.mount_a.setfattr("dir1", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("dir1", "stone.dir.pin", "1")
         # wait for subtree migration
 
         file_ino = 0;

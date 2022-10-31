@@ -49,7 +49,7 @@ template <
 class FixedKVNodeLayout {
   char *buf = nullptr;
 
-  using L = absl::container_internal::Layout<ceph_le32, MetaInt, KINT, VINT>;
+  using L = absl::container_internal::Layout<stone_le32, MetaInt, KINT, VINT>;
   static constexpr L layout{1, 1, CAPACITY, CAPACITY};
 
 public:

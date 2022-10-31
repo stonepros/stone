@@ -3,9 +3,9 @@ overrides:
     conf:
       client:
         rgw crypt s3 kms backend: kmip
-        rgw crypt kmip ca path: /etc/stone/kmiproot.crt
-        rgw crypt kmip client cert: /etc/stone/kmip-client.crt
-        rgw crypt kmip client key: /etc/stone/kmip-client.key
+        rgw crypt kmip ca path: /etc/stonepros/kmiproot.crt
+        rgw crypt kmip client cert: /etc/stonepros/kmip-client.crt
+        rgw crypt kmip client key: /etc/stonepros/kmip-client.key
         rgw crypt kmip kms key template: pykmip-$keyid
   rgw:
     client.0:

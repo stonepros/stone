@@ -1,21 +1,21 @@
 :orphan:
 
 ===============================================
-ceph-create-keys -- ceph keyring generate tool
+stone-create-keys -- stone keyring generate tool
 ===============================================
 
-.. program:: ceph-create-keys
+.. program:: stone-create-keys
 
 Synopsis
 ========
 
-| **ceph-create-keys** [-h] [-v] [-t seconds] [--cluster *name*] --id *id*
+| **stone-create-keys** [-h] [-v] [-t seconds] [--cluster *name*] --id *id*
 
 
 Description
 ===========
 
-:program:`ceph-create-keys` is a utility to generate bootstrap keyrings using
+:program:`stone-create-keys` is a utility to generate bootstrap keyrings using
 the given monitor when it is ready.
 
 It creates following auth entities (or users)
@@ -30,7 +30,7 @@ It creates following auth entities (or users)
 
 To list all users in the cluster::
 
-    ceph auth ls
+    stone auth ls
 
 
 Options
@@ -38,7 +38,7 @@ Options
 
 .. option:: --cluster
 
-   name of the cluster (default 'ceph').
+   name of the cluster (default 'stone').
 
 .. option:: -t
 
@@ -46,7 +46,7 @@ Options
 
 .. option:: -i, --id
 
-   id of a ceph-mon that is coming up. **ceph-create-keys** will wait until it joins quorum.
+   id of a stone-mon that is coming up. **stone-create-keys** will wait until it joins quorum.
 
 .. option:: -v, --verbose
 
@@ -56,12 +56,12 @@ Options
 Availability
 ============
 
-**ceph-create-keys** is part of Ceph, a massively scalable, open-source, distributed storage system.  Please refer
-to the Ceph documentation at http://ceph.com/docs for more
+**stone-create-keys** is part of Stone, a massively scalable, open-source, distributed storage system.  Please refer
+to the Stone documentation at http://stone.com/docs for more
 information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)

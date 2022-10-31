@@ -2,17 +2,17 @@
  Block Devices and OpenStack
 =============================
 
-.. index:: Ceph Block Device; OpenStack
+.. index:: Stone Block Device; OpenStack
 
-You can attach Ceph Block Device images to OpenStack instances through ``libvirt``,
-which configures the QEMU interface to ``librbd``. Ceph stripes block volumes
+You can attach Stone Block Device images to OpenStack instances through ``libvirt``,
+which configures the QEMU interface to ``librbd``. Stone stripes block volumes
 across multiple OSDs within the cluster, which means that large volumes can
 realize better performance than local drives on a standalone server!
 
-To use Ceph Block Devices with OpenStack, you must install QEMU, ``libvirt``,
+To use Stone Block Devices with OpenStack, you must install QEMU, ``libvirt``,
 and OpenStack first. We recommend using a separate physical node for your
 OpenStack installation. OpenStack recommends a minimum of 8GB of RAM and a
-quad-core processor. The following diagram depicts the OpenStack/Ceph
+quad-core processor. The following diagram depicts the OpenStack/Stone
 technology stack.
 
 
@@ -36,10 +36,10 @@ technology stack.
             |          OSDs          | |        Monitors        |
             +------------------------+ +------------------------+
 
-.. important:: To use Ceph Block Devices with OpenStack, you must have
-   access to a running Ceph Storage Cluster.
+.. important:: To use Stone Block Devices with OpenStack, you must have
+   access to a running Stone Storage Cluster.
 
-Three parts of OpenStack integrate with Ceph's block devices:
+Three parts of OpenStack integrate with Stone's block devices:
 
 - **Images**: OpenStack Glance manages images for VMs. Images are immutable.
   OpenStack treats images as binary blobs and downloads them accordingly.
@@ -51,9 +51,9 @@ Three parts of OpenStack integrate with Ceph's block devices:
 - **Guest Disks**: Guest disks are guest operating system disks. By default,
   when you boot a virtual machine, its disk appears as a file on the file system
   of the hypervisor (usually under ``/var/lib/nova/instances/<uuid>/``). Prior
-  to OpenStack Havana, the only way to boot a VM in Ceph was to use the
+  to OpenStack Havana, the only way to boot a VM in Stone was to use the
   boot-from-volume functionality of Cinder. However, now it is possible to boot
-  every virtual machine inside Ceph directly without using Cinder, which is
+  every virtual machine inside Stone directly without using Cinder, which is
   advantageous because it allows you to perform maintenance operations easily
   with the live-migration process. Additionally, if your hypervisor dies it is
   also convenient to trigger ``nova evacuate`` and reinstate the virtual machine
@@ -62,15 +62,15 @@ Three parts of OpenStack integrate with Ceph's block devices:
   compute nodes from concurrently accessing the guest disk.
 
 
-You can use OpenStack Glance to store images as Ceph Block Devices, and you
+You can use OpenStack Glance to store images as Stone Block Devices, and you
 can use Cinder to boot a VM using a copy-on-write clone of an image.
 
 The instructions below detail the setup for Glance, Cinder and Nova, although
-they do not have to be used together. You may store images in Ceph block devices
+they do not have to be used together. You may store images in Stone block devices
 while running VMs using a local disk, or vice versa.
 
 .. important:: Using QCOW2 for hosting a virtual machine disk is NOT recommended.
-   If you want to boot virtual machines in Ceph (ephemeral backend or boot
+   If you want to boot virtual machines in Stone (ephemeral backend or boot
    from volume), please use the ``raw`` image format within Glance.
 
 .. index:: pools; OpenStack
@@ -78,9 +78,9 @@ while running VMs using a local disk, or vice versa.
 Create a Pool
 =============
 
-By default, Ceph block devices live within the ``rbd`` pool. You may use any
+By default, Stone block devices live within the ``rbd`` pool. You may use any
 suitable pool by specifying it explicitly. We recommend creating a pool for
-Cinder and a pool for Glance. Ensure your Ceph cluster is running, then create the pools. ::
+Cinder and a pool for Glance. Ensure your Stone cluster is running, then create the pools. ::
 
     ceph osd pool create volumes
     ceph osd pool create images
@@ -103,16 +103,16 @@ to initialize the pools::
 .. _Placement Groups: ../../rados/operations/placement-groups
 
 
-Configure OpenStack Ceph Clients
+Configure OpenStack Stone Clients
 ================================
 
 The nodes running ``glance-api``, ``cinder-volume``, ``nova-compute`` and
-``cinder-backup`` act as Ceph clients. Each requires the ``ceph.conf`` file::
+``cinder-backup`` act as Stone clients. Each requires the ``ceph.conf`` file::
 
   ssh {your-openstack-server} sudo tee /etc/ceph/ceph.conf </etc/ceph/ceph.conf
 
 
-Install Ceph client packages
+Install Stone client packages
 ----------------------------
 
 On the ``glance-api`` node, you will need the Python bindings for ``librbd``::
@@ -127,7 +127,7 @@ use both the Python bindings and the client command line tools::
   sudo yum install ceph-common
 
 
-Setup Ceph Client Authentication
+Setup Stone Client Authentication
 --------------------------------
 
 If you have `cephx authentication`_ enabled, create a new user for Nova/Cinder
@@ -188,13 +188,13 @@ Save the uuid of the secret for configuring ``nova-compute`` later.
 .. _cephx authentication: ../../rados/configuration/auth-config-ref/#enabling-disabling-cephx
 
 
-Configure OpenStack to use Ceph
+Configure OpenStack to use Stone
 ===============================
 
 Configuring Glance
 ------------------
 
-Glance can use multiple back ends to store images. To use Ceph block devices by
+Glance can use multiple back ends to store images. To use Stone block devices by
 default, configure Glance like the following.
 
 
@@ -249,7 +249,7 @@ We recommend to use the following properties for your images:
 Configuring Cinder
 ------------------
 
-OpenStack requires a driver to interact with Ceph block devices. You must also
+OpenStack requires a driver to interact with Stone block devices. You must also
 specify the pool name for the block device. On your OpenStack node, edit
 ``/etc/cinder/cinder.conf`` by adding::
 
@@ -296,13 +296,13 @@ On your Cinder Backup node, edit ``/etc/cinder/cinder.conf`` and add::
     restore_discard_excess_bytes = true
 
 
-Configuring Nova to attach Ceph RBD block device
+Configuring Nova to attach Stone RBD block device
 ------------------------------------------------
 
 In order to attach Cinder devices (either normal block or by issuing a boot
 from volume), you must tell Nova (and libvirt) which user and UUID to refer to
 when attaching the device. libvirt will refer to this user when connecting and
-authenticating with the Ceph cluster. ::
+authenticating with the Stone cluster. ::
 
     [libvirt]
     ...
@@ -315,10 +315,10 @@ These two flags are also used by the Nova ephemeral back end.
 Configuring Nova
 ----------------
 
-In order to boot virtual machines directly from Ceph volumes, you must
+In order to boot virtual machines directly from Stone volumes, you must
 configure the ephemeral backend for Nova.
 
-It is recommended to enable the RBD cache in your Ceph configuration file; this
+It is recommended to enable the RBD cache in your Stone configuration file; this
 has been enabled by default since the Giant release. Moreover, enabling the
 client admin socket allows the collection of metrics and can be invaluable
 for troubleshooting.
@@ -351,7 +351,7 @@ The provided example works for RedHat based systems.
 Restart OpenStack
 =================
 
-To activate the Ceph block device driver and load the block device pool name
+To activate the Stone block device driver and load the block device pool name
 into the configuration, you must restart the related OpenStack services.
 For Debian based systems execute these commands on the appropriate nodes::
 
@@ -383,7 +383,7 @@ You can use `qemu-img`_ to convert from one format to another. For example::
     qemu-img convert -f {source-format} -O {output-format} {source-filename} {output-filename}
     qemu-img convert -f qcow2 -O raw precise-cloudimg.img precise-cloudimg.raw
 
-When Glance and Cinder are both using Ceph block devices, the image is a
+When Glance and Cinder are both using Stone block devices, the image is a
 copy-on-write clone, so new volumes are created quickly. In the OpenStack
 dashboard, you can boot from that volume by performing the following steps:
 

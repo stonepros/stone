@@ -1,8 +1,8 @@
 ================
-CephFS Mirroring
+StoneFS Mirroring
 ================
 
-CephFS supports asynchronous replication of snapshots to a remote CephFS file system via
+StoneFS supports asynchronous replication of snapshots to a remote StoneFS file system via
 `cephfs-mirror` tool. Snapshots are synchronized by mirroring snapshot data followed by
 creating a snapshot with the same name (for a given directory on the remote file system) as
 the snapshot being synchronized.
@@ -10,7 +10,7 @@ the snapshot being synchronized.
 Requirements
 ------------
 
-The primary (local) and secondary (remote) Ceph clusters version should be Pacific or later.
+The primary (local) and secondary (remote) Stone clusters version should be Pacific or later.
 
 Key Idea
 --------
@@ -59,7 +59,7 @@ Mirror daemon should be spawned using `systemctl(1)` unit files::
 Mirroring Design
 ----------------
 
-CephFS supports asynchronous replication of snapshots to a remote CephFS file system
+StoneFS supports asynchronous replication of snapshots to a remote StoneFS file system
 via `cephfs-mirror` tool. For a given directory, snapshots are synchronized by transferring
 snapshot data to the remote file system and creating a snapshot with the same name as the
 snapshot being synchronized.
@@ -93,7 +93,7 @@ Mirroring Module and Interface
 ------------------------------
 
 Mirroring module provides interface for managing directory snapshot mirroring. The module
-is implemented as a Ceph Manager plugin. Mirroring module does not manage spawning (and
+is implemented as a Stone Manager plugin. Mirroring module does not manage spawning (and
 terminating) the mirror daemons. Right now the preferred way would be to start/stop
 mirror daemons via `systemctl(1)`. Going forward, deploying mirror daemons would be
 managed by `cephadm` (Tracker: http://tracker.ceph.com/issues/47261).
@@ -127,7 +127,7 @@ To disable mirroring, use::
 
 Once mirroring is enabled, add a peer to which directory snapshots are to be mirrored.
 Peers follow `<client>@<cluster>` specification and get assigned a unique-id (UUID)
-when added. See `Creating Users` section on how to create Ceph users for mirroring.
+when added. See `Creating Users` section on how to create Stone users for mirroring.
 
 To add a peer use::
 
@@ -212,7 +212,7 @@ Mirror Daemon Status
 Mirror daemons get asynchronously notified about changes in file system mirroring status
 and/or peer updates.
 
-CephFS mirroring module provides `mirror daemon status` interface to check mirror daemon
+StoneFS mirroring module provides `mirror daemon status` interface to check mirror daemon
 status::
 
   $ ceph fs snapshot mirror daemon status
@@ -251,7 +251,7 @@ An entry per mirror daemon instance is displayed along with information such as 
 peers and basic stats. For more detailed stats, use the admin socket interface as detailed
 below.
 
-CephFS mirror daemons provide admin socket commands for querying mirror status. To check
+StoneFS mirror daemons provide admin socket commands for querying mirror status. To check
 available commands for mirror status use::
 
   $ ceph --admin-daemon /path/to/mirror/daemon/admin/socket help

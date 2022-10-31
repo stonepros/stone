@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  * Copyright (C) 2015 Yehuda Sadeh <yehuda@redhat.com>
@@ -20,16 +20,16 @@
 #include "include/common_fwd.h"
 
 /* size should be the required string size + 1 */
-int gen_rand_base64(StoneeContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric(StoneeContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_lower(StoneeContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_upper(StoneeContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_no_underscore(StoneeContext *cct, char *dest, size_t size);
-void gen_rand_alphanumeric_plain(StoneeContext *cct, char *dest, size_t size);
+int gen_rand_base64(StoneContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric(StoneContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric_lower(StoneContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric_upper(StoneContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric_no_underscore(StoneContext *cct, char *dest, size_t size);
+void gen_rand_alphanumeric_plain(StoneContext *cct, char *dest, size_t size);
 
 // returns a std::string with 'size' random characters
-std::string gen_rand_alphanumeric(StoneeContext *cct, size_t size);
-std::string gen_rand_alphanumeric_lower(StoneeContext *cct, size_t size);
-std::string gen_rand_alphanumeric_upper(StoneeContext *cct, size_t size);
-std::string gen_rand_alphanumeric_no_underscore(StoneeContext *cct, size_t size);
-std::string gen_rand_alphanumeric_plain(StoneeContext *cct, size_t size);
+std::string gen_rand_alphanumeric(StoneContext *cct, size_t size);
+std::string gen_rand_alphanumeric_lower(StoneContext *cct, size_t size);
+std::string gen_rand_alphanumeric_upper(StoneContext *cct, size_t size);
+std::string gen_rand_alphanumeric_no_underscore(StoneContext *cct, size_t size);
+std::string gen_rand_alphanumeric_plain(StoneContext *cct, size_t size);

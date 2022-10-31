@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson
@@ -19,7 +19,7 @@
 
 #include "common/async/bind_allocator.h"
 
-namespace ceph::async {
+namespace stone::async {
 template<typename Executor, typename Allocator, typename Completion>
 auto bind_ea(const Executor& executor, const Allocator& allocator,
 	     Completion&& completion) {

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc. <contact@redhat.com>
  *
@@ -26,7 +26,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
 
-namespace ceph {
+namespace stone {
 
 // This is for error categories we define, so we can specify the
 // equivalent integral value at the point of definition.
@@ -35,7 +35,7 @@ public:
   virtual int from_code(int code) const noexcept = 0;
 };
 
-const boost::system::error_category& ceph_category() noexcept;
+const boost::system::error_category& stone_category() noexcept;
 
 enum class errc {
   not_in_map = 1, // The requested item was not found in the map
@@ -51,24 +51,24 @@ enum class errc {
 
 namespace boost::system {
 template<>
-struct is_error_condition_enum<::ceph::errc> {
+struct is_error_condition_enum<::stone::errc> {
   static const bool value = true;
 };
 template<>
-struct is_error_code_enum<::ceph::errc> {
+struct is_error_code_enum<::stone::errc> {
   static const bool value = false;
 };
 }
 
-namespace ceph {
+namespace stone {
 //  explicit conversion:
 inline boost::system::error_code make_error_code(errc e) noexcept {
-  return { static_cast<int>(e), ceph_category() };
+  return { static_cast<int>(e), stone_category() };
 }
 
 // implicit conversion:
 inline boost::system::error_condition make_error_condition(errc e) noexcept {
-  return { static_cast<int>(e), ceph_category() };
+  return { static_cast<int>(e), stone_category() };
 }
 
 [[nodiscard]] boost::system::error_code to_error_code(int ret) noexcept;
@@ -80,7 +80,7 @@ inline boost::system::error_condition make_error_condition(errc e) noexcept {
 // Moved here from buffer.h so librados doesn't gain a dependency on
 // Boost.System
 
-namespace ceph::buffer {
+namespace stone::buffer {
 inline namespace v15_2_0 {
 const boost::system::error_category& buffer_category() noexcept;
 enum class errc { bad_alloc = 1,
@@ -91,17 +91,17 @@ enum class errc { bad_alloc = 1,
 
 namespace boost::system {
 template<>
-struct is_error_code_enum<::ceph::buffer::errc> {
+struct is_error_code_enum<::stone::buffer::errc> {
   static const bool value = true;
 };
 
 template<>
-struct is_error_condition_enum<::ceph::buffer::errc> {
+struct is_error_condition_enum<::stone::buffer::errc> {
   static const bool value = false;
 };
 }
 
-namespace ceph::buffer {
+namespace stone::buffer {
 inline namespace v15_2_0 {
 
 // implicit conversion:

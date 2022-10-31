@@ -1,13 +1,13 @@
 Essentials (tl;dr)
 ==================
 
-This chapter presents essential information that every Ceph developer needs
+This chapter presents essential information that every Stone developer needs
 to know.
 
 Leads
 -----
 
-The Ceph project is led by Sage Weil. In addition, each major project
+The Stone project is led by Sage Weil. In addition, each major project
 component has its own lead. The following table shows all the leads and
 their nicks on `GitHub`_:
 
@@ -16,19 +16,19 @@ their nicks on `GitHub`_:
 ========= ================ =============
 Scope     Lead             GitHub nick
 ========= ================ =============
-Ceph      Sage Weil        liewegas
+Stone      Sage Weil        liewegas
 RADOS     Neha Ojha        neha-ojha
 RGW       Yehuda Sadeh     yehudasa
 RGW       Matt Benjamin    mattbenjamin
 RBD       Jason Dillaman   dillaman
-CephFS    Patrick Donnelly batrick
+StoneFS    Patrick Donnelly batrick
 Dashboard Lenz Grimmer     LenzGr
 MON       Joao Luis        jecluis
 Build/Ops Ken Dreyer       ktdreyer
 Docs      Zac Dover        zdover23
 ========= ================ =============
 
-The Ceph-specific acronyms in the table are explained in
+The Stone-specific acronyms in the table are explained in
 :doc:`/architecture`.
 
 History
@@ -36,14 +36,14 @@ History
 
 See the `History chapter of the Wikipedia article`_.
 
-.. _`History chapter of the Wikipedia article`: https://en.wikipedia.org/wiki/Ceph_%28software%29#History
+.. _`History chapter of the Wikipedia article`: https://en.wikipedia.org/wiki/Stone_%28software%29#History
 
 Licensing
 ---------
 
-Ceph is free software.
+Stone is free software.
 
-Unless stated otherwise, the Ceph source code is distributed under the
+Unless stated otherwise, the Stone source code is distributed under the
 terms of the LGPL2.1 or LGPL3.0. For full details, see the file
 `COPYING`_ in the top-level directory of the source-code tree.
 
@@ -53,28 +53,28 @@ terms of the LGPL2.1 or LGPL3.0. For full details, see the file
 Source code repositories
 ------------------------
 
-The source code of Ceph lives on `GitHub`_ in a number of repositories below
-the `Ceph "organization"`_.
+The source code of Stone lives on `GitHub`_ in a number of repositories below
+the `Stone "organization"`_.
 
-.. _`Ceph "organization"`: https://github.com/ceph
+.. _`Stone "organization"`: https://github.com/ceph
 
 A working knowledge of git_ is essential to make a meaningful contribution to the project as a developer.
 
 .. _git: https://git-scm.com/doc
 
-Although the `Ceph "organization"`_ includes several software repositories,
+Although the `Stone "organization"`_ includes several software repositories,
 this document covers only one: https://github.com/ceph/ceph.
 
 Redmine issue tracker
 ---------------------
 
-Although `GitHub`_ is used for code, Ceph-related issues (Bugs, Features,
+Although `GitHub`_ is used for code, Stone-related issues (Bugs, Features,
 Backports, Documentation, etc.) are tracked at http://tracker.ceph.com,
 which is powered by `Redmine`_.
 
 .. _Redmine: http://www.redmine.org
 
-The tracker has a Ceph project with a number of subprojects loosely
+The tracker has a Stone project with a number of subprojects loosely
 corresponding to the various architectural components (see
 :doc:`/architecture`).
 
@@ -83,10 +83,10 @@ sufficient to open new issues and comment on existing ones.
 
 .. _registration: http://tracker.ceph.com/account/register
 
-To report a bug or propose a new feature, `jump to the Ceph project`_ and
+To report a bug or propose a new feature, `jump to the Stone project`_ and
 click on `New issue`_.
 
-.. _`jump to the Ceph project`: http://tracker.ceph.com/projects/ceph
+.. _`jump to the Stone project`: http://tracker.ceph.com/projects/ceph
 .. _`New issue`: http://tracker.ceph.com/projects/ceph/issues/new
 
 .. _mailing-list:
@@ -94,39 +94,39 @@ click on `New issue`_.
 Mailing lists
 -------------
 
-Ceph Development Mailing List
+Stone Development Mailing List
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The ``dev@ceph.io`` list is for discussion about the development of Ceph,
+The ``dev@ceph.io`` list is for discussion about the development of Stone,
 its interoperability with other technology, and the operations of the
 project itself.
 
-The email discussion list for Ceph development is open to all. Subscribe by
+The email discussion list for Stone development is open to all. Subscribe by
 sending a message to ``dev-request@ceph.io`` with the following line in the
 body of the message::
 
     subscribe ceph-devel
 
 
-Ceph Client Patch Review Mailing List
+Stone Client Patch Review Mailing List
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The ``ceph-devel@vger.kernel.org`` list is for discussion and patch review
-for the Linux kernel Ceph client component. Note that this list used to
+for the Linux kernel Stone client component. Note that this list used to
 be an all-encompassing list for developers. When searching the archives, 
 remember that this list contains the generic devel-ceph archives before mid-2018.
 
-Subscribe to the list covering the Linux kernel Ceph client component by sending
+Subscribe to the list covering the Linux kernel Stone client component by sending
 a message to ``majordomo@vger.kernel.org`` with the following line in the body
 of the message::
 
     subscribe ceph-devel
 
 
-Other Ceph Mailing Lists
+Other Stone Mailing Lists
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-There are also `other Ceph-related mailing lists`_.
+There are also `other Stone-related mailing lists`_.
 
-.. _`other Ceph-related mailing lists`: https://ceph.com/irc/
+.. _`other Stone-related mailing lists`: https://ceph.com/irc/
 
 .. _irc:
 
@@ -134,7 +134,7 @@ There are also `other Ceph-related mailing lists`_.
 IRC
 ---
 
-In addition to mailing lists, the Ceph community also communicates in real time
+In addition to mailing lists, the Stone community also communicates in real time
 using `Internet Relay Chat`_.
 
 .. _`Internet Relay Chat`: http://www.irchelp.org/
@@ -190,7 +190,7 @@ Cleaning the Source Tree
 
    git clean -fdx; git submodule foreach git clean -fdx
 
-Building Ceph with ccache
+Building Stone with ccache
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 ``ccache`` is available as a package in most distros. To build ceph with
 ccache, run the following command.
@@ -266,5 +266,5 @@ The rest (including the actual backporting) will be taken care of by the
 Guidance for use of cluster log
 -------------------------------
 
-If your patches emit messages to the Ceph cluster log, please consult
+If your patches emit messages to the Stone cluster log, please consult
 this: :doc:`/dev/logging`.

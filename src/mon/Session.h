@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -76,7 +76,7 @@ struct MonSession : public RefCountedObject {
   bool any_config = false;
 
   MonSession(Connection *c)
-    : RefCountedObject(g_ceph_context),
+    : RefCountedObject(g_stone_context),
       con(c),
       item(this) { }
 
@@ -94,15 +94,15 @@ struct MonSession : public RefCountedObject {
   ~MonSession() override {
     //generic_dout(0) << "~MonSession " << this << dendl;
     // we should have been removed before we get destructed; see MonSessionMap::remove_session()
-    ceph_assert(!item.is_on_list());
-    ceph_assert(sub_map.empty());
+    stone_assert(!item.is_on_list());
+    stone_assert(sub_map.empty());
     delete auth_handler;
   }
 
   bool is_capable(std::string service, int mask) {
     std::map<std::string,std::string> args;
     return caps.is_capable(
-      g_ceph_context,
+      g_stone_context,
       entity_name,
       service, "", args,
       mask & MON_CAP_R, mask & MON_CAP_W, mask & MON_CAP_X,
@@ -121,16 +121,16 @@ struct MonSession : public RefCountedObject {
     return socket_addr;
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_stream("name") << name;
     f->dump_stream("entity_name") << entity_name;
     f->dump_object("addrs", addrs);
     f->dump_object("socket_addr", socket_addr);
-    f->dump_string("con_type", ceph_entity_type_name(con_type));
+    f->dump_string("con_type", stone_entity_type_name(con_type));
     f->dump_unsigned("con_features", con_features);
     f->dump_stream("con_features_hex") << std::hex << con_features << std::dec;
     f->dump_string("con_features_release",
-		   ceph_release_name(ceph_release_from_features(con_features)));
+		   stone_release_name(stone_release_from_features(con_features)));
     f->dump_bool("open", !closed);
     f->dump_object("caps", caps);
     f->dump_bool("authenticated", authenticated);
@@ -151,7 +151,7 @@ struct MonSessionMap {
   MonSessionMap() {}
   ~MonSessionMap() {
     while (!subs.empty()) {
-      ceph_assert(subs.begin()->second->empty());
+      stone_assert(subs.begin()->second->empty());
       delete subs.begin()->second;
       subs.erase(subs.begin());
     }
@@ -162,7 +162,7 @@ struct MonSessionMap {
   }
 
   void remove_session(MonSession *s) {
-    ceph_assert(!s->closed);
+    stone_assert(!s->closed);
     for (std::map<std::string,Subscription*>::iterator p = s->sub_map.begin(); p != s->sub_map.end(); ++p) {
       p->second->type_item.remove_myself();
       delete p->second;
@@ -190,14 +190,14 @@ struct MonSessionMap {
 			  const entity_addrvec_t& av,
 			  Connection *c) {
     MonSession *s = new MonSession(c);
-    ceph_assert(s);
+    stone_assert(s);
     s->_ident(n, av);
     add_session(s);
     return s;
   }
 
   void add_session(MonSession *s) {
-    s->session_timeout = ceph_clock_now();
+    s->session_timeout = stone_clock_now();
     s->session_timeout += g_conf()->mon_session_timeout;
 
     sessions.push_back(&s->item);
@@ -287,7 +287,7 @@ inline std::ostream& operator<<(std::ostream& out, const MonSession& s)
       << " is " << (s.closed ? "closed" : "open")
       << " " << s.caps
       << ", features 0x" << std::hex << s.con_features << std::dec
-      <<  " (" << ceph_release_name(ceph_release_from_features(s.con_features))
+      <<  " (" << stone_release_name(stone_release_from_features(s.con_features))
       << "))";
   return out;
 }

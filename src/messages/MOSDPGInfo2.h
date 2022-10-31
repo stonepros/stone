@@ -74,7 +74,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(spgid, payload);
     encode(epoch_sent, payload);
     encode(min_epoch, payload);
@@ -83,7 +83,7 @@ public:
     encode(lease_ack, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(spgid, p);
     decode(epoch_sent, p);
@@ -94,5 +94,5 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };

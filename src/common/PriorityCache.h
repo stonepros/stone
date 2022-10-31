@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -21,7 +21,7 @@
 #include <memory>
 #include <unordered_map>
 #include "common/perf_counters.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace PriorityCache {
   // Reserve 16384 slots for PriorityCache perf counters
@@ -103,7 +103,7 @@ namespace PriorityCache {
   };
 
   class Manager {
-    StoneeContext* cct = nullptr;
+    StoneContext* cct = nullptr;
     PerfCounters* logger;
     std::unordered_map<std::string, PerfCounters*> loggers;
     std::unordered_map<std::string, std::vector<int>> indexes;
@@ -119,7 +119,7 @@ namespace PriorityCache {
     bool reserve_extra;
     std::string name;
   public:
-    Manager(StoneeContext *c, uint64_t min, uint64_t max, uint64_t target,
+    Manager(StoneContext *c, uint64_t min, uint64_t max, uint64_t target,
             bool reserve_extra, const std::string& name = std::string());
     ~Manager();
     void set_min_memory(uint64_t min) {

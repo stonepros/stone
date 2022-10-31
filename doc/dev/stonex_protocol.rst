@@ -1,13 +1,13 @@
 .. _cephx_2012_peter:
 
 ============================================================
-A Detailed Description of the Cephx Authentication Protocol
+A Detailed Description of the Stonex Authentication Protocol
 ============================================================
 
 Peter Reiher
 7/13/12
 
-This document provides deeper detail on the Cephx authorization protocol whose high level flow 
+This document provides deeper detail on the Stonex authorization protocol whose high level flow 
 is described in the memo by Yehuda (12/19/09).  Because this memo discusses details of 
 routines called and variables used, it represents a snapshot.  The code might be changed 
 subsequent to the creation of this document, and the document is not likely to be updated in
@@ -91,7 +91,7 @@ Phase I:
 --------
 
 The client is set up to know that it needs certain things, using a variable called ``need``, 
-which is part of the ``AuthClientHandler`` class, which the ``CephxClientHandler`` inherits 
+which is part of the ``AuthClientHandler`` class, which the ``StonexClientHandler`` inherits 
 from.  At this point, one thing that's encoded in the ``need`` variable is 
 ``CEPH_ENTITY_TYPE_AUTH``, indicating that we need to start the authentication protocol 
 from scratch.  Since we're always talking to the same authorization server, if we've gone 
@@ -99,13 +99,13 @@ through this step of the protocol before (and the resulting ticket/session hasn'
 we can skip this step and just ask for client tickets.  But it must be done initially, and 
 we'll assume that we are in that state.
 
-The message C sends to A in phase I is build in ``CephxClientHandler::build_request()`` (in 
-``auth/cephx/CephxClientHandler.cc``).  This routine is used for more than one purpose.  
+The message C sends to A in phase I is build in ``StonexClientHandler::build_request()`` (in 
+``auth/cephx/StonexClientHandler.cc``).  This routine is used for more than one purpose.  
 In this case, we first call ``validate_tickets()`` (from routine 
-``CephXTicektManager::validate_tickets()`` which lives in ``auth/cephx/CephxProtocol.h``).  
+``StoneXTicektManager::validate_tickets()`` which lives in ``auth/cephx/StonexProtocol.h``).  
 This code runs through the list of possible tickets to determine what we need, setting values 
 in the ``need`` flag as necessary.  Then we call ``ticket.get_handler()``.  This routine 
-(in ``CephxProtocol.h``) finds a ticket of the specified type (a ticket to perform 
+(in ``StonexProtocol.h``) finds a ticket of the specified type (a ticket to perform 
 authorization) in the ticket map, creates a ticket handler object for it,  and puts the 
 handler into the right place in the map.  Then we hit specialized code to deal with individual 
 cases.  The case here is when we still need to authenticate to A (the 
@@ -127,7 +127,7 @@ message is sent.
 
 We now switch over to the authenticator side, A.  The server receives the message that was 
 sent, of type ``CEPH_GET_AUTH_SESSION_KEY``.  The message gets handled in ``prep_auth()``,
-in ``mon/AuthMonitor.cc``, which calls ``handle_request()`` is ``CephxServiceHandler.cc`` to 
+in ``mon/AuthMonitor.cc``, which calls ``handle_request()`` is ``StonexServiceHandler.cc`` to 
 do most of the work.  This routine, also, handles multiple cases.  
 
 The control flow is determined by the ``request_type`` in the ``cephx_header`` associated 
@@ -136,7 +136,7 @@ secret key A shares with C, so we call ``get_secret()`` from out local key repos
 it. (It's called a ``key_server`` in the code, but it's not really a separate machine or
 processing entity. It's more like the place where locally used keys are kept.)  We should
 have set up a server challenge already with this client, so we make sure
-we really do have one.  (This variable is specific to a ``CephxServiceHandler``, so there 
+we really do have one.  (This variable is specific to a ``StonexServiceHandler``, so there 
 is a different one for each such structure we create, presumably one per client A is 
 dealing with.)  If there is no challenge, we'll need to start over, since we need to 
 check the client's crypto hash, which depends on a server challenge, in part.
@@ -163,7 +163,7 @@ which will tell the client C what to do with the message we send it.
 We build a cephx response header and call
 ``cephx_build_service_ticket_reply()``.
 
-``cephx_build_service_ticket_reply()`` is in ``auth/cephx/CephxProtocol.cc``.  This 
+``cephx_build_service_ticket_reply()`` is in ``auth/cephx/StonexProtocol.cc``.  This 
 routine will build up the response message.   Much of it copies data from its parameters to 
 a message structure.  Part of that information (the session key and the validity period) 
 gets encrypted with C's permanent key.  If the ``should_encrypt_ticket`` flag is set, 
@@ -196,7 +196,7 @@ This phase starts when C receives the message from A containing a new ticket and
 The goal of this phase is to provide C with a session key and ticket allowing it to
 communicate with S.
 
-The message A sent to C is dispatched to ``build_request()`` in ``CephxClientHandler.cc``, 
+The message A sent to C is dispatched to ``build_request()`` in ``StonexClientHandler.cc``, 
 the same routine that was used early in Phase I to build the first message in the protocol.  
 This time, when ``validate_tickets()`` is called, the ``need`` variable will not contain 
 ``CEPH_ENTITY_TYPE_AUTH``, so a different branch through the bulk of the routine will be 
@@ -206,10 +206,10 @@ but we still need service tickets.
 We must send another message to A to obtain the tickets (and session key) for the server 
 S.  We set the ``request_type`` of the message to ``CEPHX_GET_PRINCIPAL_SESSION_KEY`` and 
 call ``ticket_handler.build_authorizer()`` to obtain an authorizer.  This routine is in 
-``CephxProtocol.cc``.  We set the key for this authorizer to be the session key we just got 
+``StonexProtocol.cc``.  We set the key for this authorizer to be the session key we just got 
 from A,and create a new nonce.  We put the global ID, the service ID, and the ticket into a 
-message buffer that is part of the authorizer.  Then we create a new ``CephXAuthorize`` 
-structure.  The nonce we just created goes there.  We encrypt this ``CephXAuthorize`` 
+message buffer that is part of the authorizer.  Then we create a new ``StoneXAuthorize`` 
+structure.  The nonce we just created goes there.  We encrypt this ``StoneXAuthorize`` 
 structure with the current session key and stuff it into the authorizer's buffer.  We 
 return the authorizer.
 
@@ -221,10 +221,10 @@ the message gets sent.
 
 The authorizer A receives this message which is of type ``CEPHX_GET_PRINCIPAL_SESSION_KEY``.
 The message gets handled in ``prep_auth()``, in ``mon/AuthMonitor.cc``, which again calls 
-``handle_request()`` in ``CephxServiceHandler.cc`` to do most of the work.  
+``handle_request()`` in ``StonexServiceHandler.cc`` to do most of the work.  
 
 In this case, ``handle_request()`` will take the ``CEPHX_GET_PRINCIPAL_SESSION_KEY`` case. 
-It will call ``cephx_verify_authorizer()`` in ``CephxProtocol.cc``.  Here, we will grab 
+It will call ``cephx_verify_authorizer()`` in ``StonexProtocol.cc``.  Here, we will grab 
 a bunch of data out of the input buffer, including the global and service IDs and the ticket 
 for A.   The ticket contains a ``secret_id``, indicating which key is being used for it.     
 If the secret ID pulled out of the ticket was -1, the ticket does not specify which secret 
@@ -240,7 +240,7 @@ ticket, using this key.  It should be a ticket for A.
 The ticket also contains a session key that C should have used to encrypt other parts of 
 this message.  Use that session key to decrypt the rest of the message.  
 
-Create a ``CephXAuthorizeReply`` to hold our reply.  Extract the nonce (which was in the stuff 
+Create a ``StoneXAuthorizeReply`` to hold our reply.  Extract the nonce (which was in the stuff 
 we just decrypted), add 1 to it, and put the result in the reply.  Encrypt the reply and 
 put it in the buffer provided in the call to ``cephx_verify_authorizer()`` and return 
 to ``handle_request()``.  This will be used to prove to C that A (rather than an attacker) 
@@ -253,13 +253,13 @@ request to see what it wanted.  (He could potentially be asking for multiple dif
 services in the same request, but we will assume it's just one, for this discussion.)  Once we 
 know which service ID it's after, call ``build_session_auth_info()``.
 
-``build_session_auth_info()`` is in ``CephxKeyServer.cc``.  It checks to see if the 
+``build_session_auth_info()`` is in ``StonexKeyServer.cc``.  It checks to see if the 
 secret for the ``service_ID`` of S is available and puts it into the subfield of one of 
 the parameters, and calls the similarly named ``_build_session_auth_info()``, located in 
 the same file.      This routine loads up the new ``auth_info`` structure with the 
 ID of S, a ticket, and some timestamps for that ticket.  It generates a new session key 
 and puts it in the structure.   It then calls ``get_caps()`` to fill in the 
-``info.ticket`` caps field.  ``get_caps()`` is also in ``CephxKeyServer.cc``.  It fills the 
+``info.ticket`` caps field.  ``get_caps()`` is also in ``StonexKeyServer.cc``.  It fills the 
 ``caps_info`` structure it is provided with caps for S allowed to C.
 
 Once ``build_session_auth_info()`` returns, A has a list of the capabilities allowed to 
@@ -267,11 +267,11 @@ C for S.  We put a validity period based on the current TTL for this context int
 structure, and put it into the ``info_vec`` structure we are preparing in response to the 
 message.  
 
-Now call ``build_cephx_response_header()``, also in ``CephxServiceHandler.cc``.   Fill in 
+Now call ``build_cephx_response_header()``, also in ``StonexServiceHandler.cc``.   Fill in 
 the ``request_type``, which is ``CEPHX_GET_PRINCIPAL_SESSION_KEY``, a status of 0, 
 and the result buffer.  
 
-Now call ``cephx_build_service_ticket_reply()``, which is in ``CephxProtocol.cc``.  The 
+Now call ``cephx_build_service_ticket_reply()``, which is in ``StonexProtocol.cc``.  The 
 same routine was used towards the end of A's handling of its response in phase I.  Here, 
 the session key (now a session key to talk to S, not A) and the validity period for that 
 key will be encrypted with the existing session key shared between C and A.  
@@ -296,15 +296,15 @@ it looks like failure to provide an authorizer, which contains the nonce, would 
 to an attacker.
 
 The message eventually makes its way through to ``handle_response()``, in 
-``CephxClientHandler.cc``.    In this routine, we call ``get_handler()`` to get a ticket 
+``StonexClientHandler.cc``.    In this routine, we call ``get_handler()`` to get a ticket 
 handler to hold the ticket we have just received.  This routine is embedded in the definition 
-for a ``CephXTicketManager`` structure.  It takes a type (``CEPH_ENTITY_TYPE_AUTH``, in 
+for a ``StoneXTicketManager`` structure.  It takes a type (``CEPH_ENTITY_TYPE_AUTH``, in 
 this case) and looks through the ``tickets_map`` to find that type.  There should be one, and 
 it should have the session key of the session between C and A in its entry.  This key will 
 be used to decrypt the information provided by A, particularly the new session key allowing 
 C to talk to S.
 
-We then call ``verify_service_ticket_reply()``, in ``CephxProtocol.cc``.  This routine 
+We then call ``verify_service_ticket_reply()``, in ``StonexProtocol.cc``.  This routine 
 needs to determine if the ticket is OK and also obtain the session key associated with this 
 ticket.  It decrypts the encrypted portion of the message buffer, using the session key 
 shared with A.  This ticket was not encrypted (well, not twice - tickets are always encrypted, 

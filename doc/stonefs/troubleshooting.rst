@@ -24,7 +24,7 @@ information we need to diagnose and solve the issue.
 RADOS Health
 ============
 
-If part of the CephFS metadata or data pools is unavailable and CephFS is not
+If part of the StoneFS metadata or data pools is unavailable and StoneFS is not
 responding, it is probably because RADOS itself is unhealthy. Resolve those
 problems first (:doc:`../../rados/troubleshooting/index`).
 
@@ -62,7 +62,7 @@ Usually the last "event" will have been an attempt to gather locks, or sending
 the operation off to the MDS log. If it is waiting on the OSDs, fix them. If
 operations are stuck on a specific inode, you probably have a client holding
 caps which prevent others from using it, either because the client is trying
-to flush out dirty data or because you have encountered a bug in CephFS'
+to flush out dirty data or because you have encountered a bug in StoneFS'
 distributed file lock code (the file "capabilities" ["caps"] system).
 
 If it's a result of a bug in the capabilities code, restarting the MDS
@@ -112,10 +112,10 @@ will contain a variety of files that output interesting output when you ``cat``
 them. These files are described below; the most interesting when debugging
 slow requests are probably the ``mdsc`` and ``osdc`` files.
 
-* bdi: BDI info about the Ceph system (blocks dirtied, written, etc)
+* bdi: BDI info about the Stone system (blocks dirtied, written, etc)
 * caps: counts of file "caps" structures in-memory and used
-* client_options: dumps the options provided to the CephFS mount
-* dentry_lru: Dumps the CephFS dentries currently in-memory
+* client_options: dumps the options provided to the StoneFS mount
+* dentry_lru: Dumps the StoneFS dentries currently in-memory
 * mdsc: Dumps current requests to the MDS
 * mdsmap: Dumps the current MDSMap epoch and MDSes
 * mds_sessions: Dumps the current sessions to MDSes
@@ -129,7 +129,7 @@ you might have a...
 
 Disconnected+Remounted FS
 =========================
-Because CephFS has a "consistent cache", if your network connection is
+Because StoneFS has a "consistent cache", if your network connection is
 disrupted for a long enough time, the client will be forcibly
 disconnected from the system. At this point, the kernel client is in
 a bind: it cannot safely write back dirty data, and many applications
@@ -169,12 +169,12 @@ Mount 12 Error
 --------------
 
 A mount 12 error with ``cannot allocate memory`` usually occurs if you  have a
-version mismatch between the :term:`Ceph Client` version and the :term:`Ceph
+version mismatch between the :term:`Stone Client` version and the :term:`Stone
 Storage Cluster` version. Check the versions using::
 
 	ceph -v
 	
-If the Ceph Client is behind the Ceph cluster, try to upgrade it::
+If the Stone Client is behind the Stone cluster, try to upgrade it::
 
 	sudo apt-get update && sudo apt-get install ceph-common 
 
@@ -184,7 +184,7 @@ and then reinstall it so that you have the latest version.
 Dynamic Debugging
 =================
 
-You can enable dynamic debug against the CephFS module.
+You can enable dynamic debug against the StoneFS module.
 
 Please see: https://github.com/ceph/ceph/blob/master/src/script/kcon_all.sh
 
@@ -194,7 +194,7 @@ Reporting Issues
 If you have identified a specific issue, please report it with as much
 information as possible. Especially important information:
 
-* Ceph versions installed on client and server
+* Stone versions installed on client and server
 * Whether you are using the kernel or fuse client
 * If you are using the kernel client, what kernel version?
 * How many clients are in play, doing what kind of workload?

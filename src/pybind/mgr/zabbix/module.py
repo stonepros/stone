@@ -1,7 +1,7 @@
 """
-Zabbix module for ceph-mgr
+Zabbix module for stone-mgr
 
-Collect statistics from Ceph cluster and every X seconds send data to a Zabbix
+Collect statistics from Stone cluster and every X seconds send data to a Zabbix
 server using the zabbix_sender executable.
 """
 import json
@@ -38,7 +38,7 @@ class ZabbixSender(object):
         proc = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
         for key, value in data.items():
-            proc.stdin.write('{0} ceph.{1} {2}\n'.format(hostname, key, value).encode('utf-8'))
+            proc.stdin.write('{0} stone.{1} {2}\n'.format(hostname, key, value).encode('utf-8'))
 
         stdout, stderr = proc.communicate()
         if proc.returncode != 0:
@@ -51,7 +51,7 @@ class ZabbixSender(object):
 class Module(MgrModule):
     run = False
     config = dict()
-    ceph_health_mapping = {'HEALTH_OK': 0, 'HEALTH_WARN': 1, 'HEALTH_ERR': 2}
+    stone_health_mapping = {'HEALTH_OK': 0, 'HEALTH_WARN': 1, 'HEALTH_ERR': 2}
     _zabbix_hosts = list()
 
     @property
@@ -91,8 +91,8 @@ class Module(MgrModule):
 
     COMMANDS = [
         {
-            "cmd": "zabbix config-set name=key,type=CephString "
-                   "name=value,type=CephString",
+            "cmd": "zabbix config-set name=key,type=StoneString "
+                   "name=value,type=StoneString",
             "desc": "Set a configuration value",
             "perm": "rw"
         },
@@ -119,7 +119,7 @@ class Module(MgrModule):
 
     def init_module_config(self):
         self.fsid = self.get('mon_map')['fsid']
-        self.log.debug('Found Ceph fsid %s', self.fsid)
+        self.log.debug('Found Stone fsid %s', self.fsid)
 
         for key, default in self.config_keys.items():
             self.set_config_option(key, self.get_module_option(key, default))
@@ -199,7 +199,7 @@ class Module(MgrModule):
         data['overall_status'] = health.get('status',
                                             health.get('overall_status'))
         data['overall_status_int'] = \
-            self.ceph_health_mapping.get(data['overall_status'])
+            self.stone_health_mapping.get(data['overall_status'])
 
         mon_status = json.loads(self.get('mon_status')['json'])
         data['num_mon'] = len(mon_status['monmap']['mons'])
@@ -307,11 +307,11 @@ class Module(MgrModule):
     def send(self, data):
         identifier = self.config['identifier']
         if identifier is None or len(identifier) == 0:
-            identifier = 'ceph-{0}'.format(self.fsid)
+            identifier = 'stone-{0}'.format(self.fsid)
 
         if not self.config['zabbix_host'] or not self._zabbix_hosts:
             self.log.error('Zabbix server not set, please configure using: '
-                           'ceph zabbix config-set zabbix_host <zabbix_host>')
+                           'stone zabbix config-set zabbix_host <zabbix_host>')
             self.set_health_checks({
                 'MGR_ZABBIX_NO_SERVER': {
                     'severity': 'warning',
@@ -352,7 +352,7 @@ class Module(MgrModule):
         osd_map = self.get('osd_map')
         osd_map_crush = self.get('osd_map_crush')
 
-        # Discovering ceph pools
+        # Discovering stone pools
         pool_discovery = {
             pool['pool_name']: step['item_name']
             for pool in osd_map['pools']
@@ -481,7 +481,7 @@ class Module(MgrModule):
     def self_test(self):
         data = self.get_data()
 
-        if data['overall_status'] not in self.ceph_health_mapping:
+        if data['overall_status'] not in self.stone_health_mapping:
             raise RuntimeError('No valid overall_status found in data')
 
         int(data['overall_status_int'])

@@ -38,11 +38,11 @@ commit 65969f8fbef02ee39f6c2365fffbcd3f633f4b37
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Feb 8 21:36:13 2013 -0800
 
-    java: make CephMountTest use user.* xattr names
+    java: make StoneMountTest use user.* xattr names
     
-    Changes to the xattr code in Ceph require
+    Changes to the xattr code in Stone require
     a few tweaks to existing test cases.
-    Specifically, there is now a ceph.file.layout
+    Specifically, there is now a stone.file.layout
     xattr by default and user defined xattrs
     are prepended with "user."
     
@@ -119,7 +119,7 @@ Date:   Tue Feb 12 14:10:51 2013 -0800
     
     Conflicts:
     
-    	src/include/ceph_features.h
+    	src/include/stone_features.h
 
 commit 102a519632f1b7a0fede9a3fbd4a5c1df0e732a5
 Merge: 2c6afa0 2ebf4d0
@@ -132,9 +132,9 @@ commit 2c6afa058e8b1738c1400392320482945834de86
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jan 30 11:32:23 2013 -0800
 
-    test_libcephfs: fix xattr test
+    test_libstonefs: fix xattr test
     
-    Ignore the ceph.*.layout xattrs.
+    Ignore the stone.*.layout xattrs.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit b0d4dd21c7be86eb47728a4702a3c67ca44424ac)
@@ -354,7 +354,7 @@ commit d386622c3961a3b57eea42fdb82611cd2e904f4d
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jan 19 10:11:18 2013 -0800
 
-    mds: allow dir layout/policy to be removed via removexattr on ceph.dir.layout
+    mds: allow dir layout/policy to be removed via removexattr on stone.dir.layout
     
     This lets a user remove a policy that was previously set on a dir.
     
@@ -365,7 +365,7 @@ commit 6af5da7ae2c4ef95c16c6460770b6244d1aa1a6e
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jan 19 10:09:39 2013 -0800
 
-    mds: handle ceph.*.layout.* setxattr
+    mds: handle stone.*.layout.* setxattr
     
     Allow individual fields of file or dir layouts to be set via setxattr.
     
@@ -416,9 +416,9 @@ commit 809cff488ea1ffa299edd678ba6260993771bde3
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jan 18 22:26:00 2013 -0800
 
-    client: implement ceph.file.* and ceph.dir.* vxattrs
+    client: implement stone.file.* and stone.dir.* vxattrs
     
-    Display ceph.file.* vxattrs on any regular file, and ceph.dir.* vxattrs
+    Display stone.file.* vxattrs on any regular file, and stone.dir.* vxattrs
     on any directory that has a policy set.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -430,7 +430,7 @@ Date:   Fri Jan 18 17:21:37 2013 -0800
 
     client: move xattr namespace enforcement into internal method
     
-    This captures libcephfs users now too.
+    This captures libstonefs users now too.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit febb96509559084357bfaabf7e4d28e494c274aa)
@@ -439,7 +439,7 @@ commit 65ab51740175254ba3ee050f0fd97332dffe2eb7
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jan 18 17:20:22 2013 -0800
 
-    client: allow ceph.* xattrs
+    client: allow stone.* xattrs
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit ad7ebad70bf810fde45067f78f316f130a243b9c)
@@ -494,7 +494,7 @@ Date:   Wed Jan 30 18:52:24 2013 +0100
     Fix -Wsign-compare compiler warning:
     
     mon/PGMap.cc: In member function 'void PGMap::apply_incremental
-     (CephContext*, const PGMap::Incremental&)':
+     (StoneContext*, const PGMap::Incremental&)':
     mon/PGMap.cc:247:30: warning: comparison between signed and
      unsigned integer expressions [-Wsign-compare]
     

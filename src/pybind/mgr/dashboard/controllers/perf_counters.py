@@ -5,7 +5,7 @@ import cherrypy
 
 from .. import mgr
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from . import APIDoc, APIRouter, EndpointDoc, RESTController
 
 PERF_SCHEMA = {
@@ -27,12 +27,12 @@ class PerfCounter(RESTController):
 
     def get(self, service_id):
         try:
-            return CephService.get_service_perf_counters(self.service_type, str(service_id))
+            return StoneService.get_service_perf_counters(self.service_type, str(service_id))
         except KeyError as error:
             raise cherrypy.HTTPError(404, "{0} not found".format(error))
 
 
-@APIRouter('perf_counters/mds', Scope.CEPHFS)
+@APIRouter('perf_counters/mds', Scope.STONEFS)
 @APIDoc("Mds Perf Counters Management API", "MdsPerfCounter")
 class MdsPerfCounter(PerfCounter):
     service_type = 'mds'

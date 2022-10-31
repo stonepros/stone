@@ -85,7 +85,7 @@ public:
     case EXPORT_EXPORTING: return "exporting";
     case EXPORT_LOGGINGFINISH: return "loggingfinish";
     case EXPORT_NOTIFYING: return "notifying";
-    default: ceph_abort(); return std::string_view();
+    default: stone_abort(); return std::string_view();
     }
   }
 
@@ -99,7 +99,7 @@ public:
     case IMPORT_ACKING: return "acking";
     case IMPORT_FINISHING: return "finishing";
     case IMPORT_ABORTING: return "aborting";
-    default: ceph_abort(); return std::string_view();
+    default: stone_abort(); return std::string_view();
     }
   }
 
@@ -139,18 +139,18 @@ public:
 
   int get_import_state(dirfrag_t df) const {
     auto it = import_state.find(df);
-    ceph_assert(it != import_state.end());
+    stone_assert(it != import_state.end());
     return it->second.state;
   }
   int get_import_peer(dirfrag_t df) const {
     auto it = import_state.find(df);
-    ceph_assert(it != import_state.end());
+    stone_assert(it != import_state.end());
     return it->second.peer;
   }
 
   int get_export_state(CDir *dir) const {
     auto it = export_state.find(dir);
-    ceph_assert(it != export_state.end());
+    stone_assert(it != export_state.end());
     return it->second.state;
   }
   // this returns true if we are export @dir,
@@ -159,21 +159,21 @@ public:
   // only returns meaningful results during EXPORT_WARNING state.
   bool export_has_warned(CDir *dir, mds_rank_t who) {
     auto it = export_state.find(dir);
-    ceph_assert(it != export_state.end());
-    ceph_assert(it->second.state == EXPORT_WARNING);
+    stone_assert(it != export_state.end());
+    stone_assert(it->second.state == EXPORT_WARNING);
     return (it->second.warning_ack_waiting.count(who) == 0);
   }
 
   bool export_has_notified(CDir *dir, mds_rank_t who) const {
     auto it = export_state.find(dir);
-    ceph_assert(it != export_state.end());
-    ceph_assert(it->second.state == EXPORT_NOTIFYING);
+    stone_assert(it != export_state.end());
+    stone_assert(it->second.state == EXPORT_NOTIFYING);
     return (it->second.notify_ack_waiting.count(who) == 0);
   }
 
   void export_freeze_inc_num_waiters(CDir *dir) {
     auto it = export_state.find(dir);
-    ceph_assert(it != export_state.end());
+    stone_assert(it != export_state.end());
     it->second.num_remote_waiters++;
   }
   void find_stale_export_freeze();

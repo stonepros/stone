@@ -4,17 +4,17 @@
 #ifndef STONEFS_MIRROR_SERVICE_DAEMON_H
 #define STONEFS_MIRROR_SERVICE_DAEMON_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "mds/FSMap.h"
 #include "Types.h"
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 class ServiceDaemon {
 public:
-  ServiceDaemon(CephContext *cct, RadosRef rados);
+  ServiceDaemon(StoneContext *cct, RadosRef rados);
   ~ServiceDaemon();
 
   int init();
@@ -41,14 +41,14 @@ private:
     }
   };
 
-  const std::string STONEFS_MIRROR_AUTH_ID_PREFIX = "cephfs-mirror.";
+  const std::string STONEFS_MIRROR_AUTH_ID_PREFIX = "stonefs-mirror.";
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   RadosRef m_rados;
   SafeTimer *m_timer;
-  ceph::mutex m_timer_lock = ceph::make_mutex("cephfs::mirror::ServiceDaemon");
+  stone::mutex m_timer_lock = stone::make_mutex("stonefs::mirror::ServiceDaemon");
 
-  ceph::mutex m_lock = ceph::make_mutex("cephfs::mirror::service_daemon");
+  stone::mutex m_lock = stone::make_mutex("stonefs::mirror::service_daemon");
   Context *m_timer_ctx = nullptr;
   std::map<fs_cluster_id_t, Filesystem> m_filesystems;
 
@@ -57,6 +57,6 @@ private:
 };
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_SERVICE_DAEMON_H

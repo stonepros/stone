@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -47,7 +47,7 @@ private:
 public:
   void decode_payload() override {
     auto p = payload.cbegin();
-    using ceph::decode;
+    using stone::decode;
     decode(session_mon_tid, p);
     entity_inst_t dest_unused;
     decode(dest_unused, p);
@@ -58,7 +58,7 @@ public:
     decode(send_osdmap_first, p);
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(session_mon_tid, payload);
     entity_inst_t dest_unused;
     encode(dest_unused, payload, features);
@@ -84,7 +84,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

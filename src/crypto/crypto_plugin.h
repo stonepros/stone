@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Mirantis, Inc.
  *
@@ -22,11 +22,11 @@
 #include "crypto/crypto_accel.h"
 // -----------------------------------------------------------------------------
 
-class CryptoPlugin : public ceph::Plugin {
+class CryptoPlugin : public stone::Plugin {
 
 public:
   CryptoAccelRef cryptoaccel;
-  explicit CryptoPlugin(StoneeContext* cct) : Plugin(cct)
+  explicit CryptoPlugin(StoneContext* cct) : Plugin(cct)
   {}
   ~CryptoPlugin()
   {}

@@ -8,8 +8,8 @@ overrides:
         log to stderr: false
       # make these predictable
       client.mirror:
-        admin socket: /var/run/stone/stonefs-mirror.asok
-        pid file: /var/run/stone/stonefs-mirror.pid
+        admin socket: /var/run/stonepros/stonefs-mirror.asok
+        pid file: /var/run/stonepros/stonefs-mirror.pid
 tasks:
 - exec:
     client.mirror:

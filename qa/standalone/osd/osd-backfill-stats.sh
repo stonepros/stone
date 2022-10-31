@@ -15,18 +15,18 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
     # Fix port????
-    export CEPH_MON="127.0.0.1:7114" # git grep '\<7114\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
-    CEPH_ARGS+="--osd_min_pg_log_entries=5 --osd_max_pg_log_entries=10 "
+    export STONE_MON="127.0.0.1:7114" # git grep '\<7114\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
+    STONE_ARGS+="--osd_min_pg_log_entries=5 --osd_max_pg_log_entries=10 "
     export margin=10
     export objects=200
     export poolname=test
@@ -134,7 +134,7 @@ function TEST_backfill_sizeup() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
     run_osd $dir 0 || return 1
     run_osd $dir 1 || return 1
     run_osd $dir 2 || return 1
@@ -143,7 +143,7 @@ function TEST_backfill_sizeup() {
     run_osd $dir 5 || return 1
 
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 1 --yes-i-really-mean-it
+    stone osd pool set $poolname size 1 --yes-i-really-mean-it
 
     wait_for_clean || return 1
 
@@ -152,10 +152,10 @@ function TEST_backfill_sizeup() {
 	rados -p $poolname put obj$i /dev/null
     done
 
-    ceph osd set nobackfill
-    ceph osd pool set $poolname size 3
+    stone osd set nobackfill
+    stone osd pool set $poolname size 3
     sleep 2
-    ceph osd unset nobackfill
+    stone osd unset nobackfill
 
     wait_for_clean || return 1
 
@@ -191,7 +191,7 @@ function TEST_backfill_sizeup_out() {
     run_osd $dir 5 || return 1
 
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 1 --yes-i-really-mean-it
+    stone osd pool set $poolname size 1 --yes-i-really-mean-it
 
     wait_for_clean || return 1
 
@@ -204,11 +204,11 @@ function TEST_backfill_sizeup_out() {
     # Remember primary during the backfill
     local primary=$(get_primary $poolname obj1)
 
-    ceph osd set nobackfill
-    ceph osd out osd.$primary
-    ceph osd pool set $poolname size 3
+    stone osd set nobackfill
+    stone osd out osd.$primary
+    stone osd pool set $poolname size 3
     sleep 2
-    ceph osd unset nobackfill
+    stone osd unset nobackfill
 
     wait_for_clean || return 1
 
@@ -239,7 +239,7 @@ function TEST_backfill_out() {
     run_osd $dir 5 || return 1
 
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 2
+    stone osd pool set $poolname size 2
     sleep 5
 
     wait_for_clean || return 1
@@ -253,10 +253,10 @@ function TEST_backfill_out() {
     # Remember primary during the backfill
     local primary=$(get_primary $poolname obj1)
 
-    ceph osd set nobackfill
-    ceph osd out osd.$(get_not_primary $poolname obj1)
+    stone osd set nobackfill
+    stone osd out osd.$(get_not_primary $poolname obj1)
     sleep 2
-    ceph osd unset nobackfill
+    stone osd unset nobackfill
 
     wait_for_clean || return 1
 
@@ -287,7 +287,7 @@ function TEST_backfill_down_out() {
     run_osd $dir 5 || return 1
 
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 2
+    stone osd pool set $poolname size 2
     sleep 5
 
     wait_for_clean || return 1
@@ -302,12 +302,12 @@ function TEST_backfill_down_out() {
     local primary=$(get_primary $poolname obj1)
     local otherosd=$(get_not_primary $poolname obj1)
 
-    ceph osd set nobackfill
+    stone osd set nobackfill
     kill $(cat $dir/osd.${otherosd}.pid)
-    ceph osd down osd.${otherosd}
-    ceph osd out osd.${otherosd}
+    stone osd down osd.${otherosd}
+    stone osd out osd.${otherosd}
     sleep 2
-    ceph osd unset nobackfill
+    stone osd unset nobackfill
 
     wait_for_clean || return 1
 
@@ -338,7 +338,7 @@ function TEST_backfill_out2() {
     run_osd $dir 5 || return 1
 
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 2
+    stone osd pool set $poolname size 2
     sleep 5
 
     wait_for_clean || return 1
@@ -353,16 +353,16 @@ function TEST_backfill_out2() {
     local primary=$(get_primary $poolname obj1)
     local otherosd=$(get_not_primary $poolname obj1)
 
-    ceph osd set nobackfill
-    ceph osd pool set $poolname size 3
-    ceph osd out osd.${otherosd}
-    ceph osd out osd.${primary}
+    stone osd set nobackfill
+    stone osd pool set $poolname size 3
+    stone osd out osd.${otherosd}
+    stone osd out osd.${primary}
     # Primary might change before backfill starts
     sleep 2
     primary=$(get_primary $poolname obj1)
-    ceph osd unset nobackfill
-    ceph tell osd.$primary get_latest_osdmap
-    ceph tell osd.$primary debug kick_recovery_wq 0
+    stone osd unset nobackfill
+    stone tell osd.$primary get_latest_osdmap
+    stone tell osd.$primary debug kick_recovery_wq 0
     sleep 2
 
     wait_for_clean || return 1
@@ -397,7 +397,7 @@ function TEST_backfill_sizeup4_allout() {
     run_osd $dir 4 || return 1
 
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 2
+    stone osd pool set $poolname size 2
 
     wait_for_clean || return 1
 
@@ -411,16 +411,16 @@ function TEST_backfill_sizeup4_allout() {
     local primary=$(get_primary $poolname obj1)
     local otherosd=$(get_not_primary $poolname obj1)
 
-    ceph osd set nobackfill
-    ceph osd out osd.$otherosd
-    ceph osd out osd.$primary
-    ceph osd pool set $poolname size 4
+    stone osd set nobackfill
+    stone osd out osd.$otherosd
+    stone osd out osd.$primary
+    stone osd pool set $poolname size 4
     # Primary might change before backfill starts
     sleep 2
     primary=$(get_primary $poolname obj1)
-    ceph osd unset nobackfill
-    ceph tell osd.$primary get_latest_osdmap
-    ceph tell osd.$primary debug kick_recovery_wq 0
+    stone osd unset nobackfill
+    stone tell osd.$primary get_latest_osdmap
+    stone tell osd.$primary debug kick_recovery_wq 0
     sleep 2
 
     wait_for_clean || return 1
@@ -449,7 +449,7 @@ function TEST_backfill_remapped() {
     run_osd $dir 3 || return 1
 
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 3
+    stone osd pool set $poolname size 3
     sleep 5
 
     wait_for_clean || return 1
@@ -464,28 +464,28 @@ function TEST_backfill_remapped() {
     local primary=$(get_primary $poolname obj1)
     local otherosd=$(get_not_primary $poolname obj1)
 
-    ceph osd set nobackfill
-    ceph osd out osd.${otherosd}
+    stone osd set nobackfill
+    stone osd out osd.${otherosd}
     for i in $(get_osds $poolname obj1)
     do
         if [ $i = $primary -o $i = $otherosd ];
         then
             continue
         fi
-        ceph osd out osd.$i
+        stone osd out osd.$i
         break
     done
-    ceph osd out osd.${primary}
-    ceph osd pool set $poolname size 2
+    stone osd out osd.${primary}
+    stone osd pool set $poolname size 2
     sleep 2
 
     # primary may change due to invalidating the old pg_temp, which was [1,2,0],
     # but up_primary (3) chooses [0,1] for acting.
     primary=$(get_primary $poolname obj1)
 
-    ceph osd unset nobackfill
-    ceph tell osd.$primary get_latest_osdmap
-    ceph tell osd.$primary debug kick_recovery_wq 0
+    stone osd unset nobackfill
+    stone tell osd.$primary get_latest_osdmap
+    stone tell osd.$primary debug kick_recovery_wq 0
 
     sleep 2
 
@@ -522,7 +522,7 @@ function TEST_backfill_ec_all_out() {
     run_osd $dir 3 || return 1
     run_osd $dir 4 || return 1
 
-    ceph osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd
+    stone osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd
     create_pool $poolname 1 1 erasure myprofile
 
     wait_for_clean || return 1
@@ -536,17 +536,17 @@ function TEST_backfill_ec_all_out() {
     # Remember primary during the backfill
     local primary=$(get_primary $poolname obj1)
 
-    ceph osd set nobackfill
+    stone osd set nobackfill
     for o in $(get_osds $poolname obj1)
     do
-        ceph osd out osd.$o
+        stone osd out osd.$o
     done
     # Primary might change before backfill starts
     sleep 2
     primary=$(get_primary $poolname obj1)
-    ceph osd unset nobackfill
-    ceph tell osd.$primary get_latest_osdmap
-    ceph tell osd.$primary debug kick_recovery_wq 0
+    stone osd unset nobackfill
+    stone tell osd.$primary get_latest_osdmap
+    stone tell osd.$primary debug kick_recovery_wq 0
     sleep 2
 
     wait_for_clean || return 1
@@ -576,7 +576,7 @@ function TEST_backfill_ec_prim_out() {
     run_osd $dir 3 || return 1
     run_osd $dir 4 || return 1
 
-    ceph osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd
+    stone osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd
     create_pool $poolname 1 1 erasure myprofile
 
     wait_for_clean || return 1
@@ -590,14 +590,14 @@ function TEST_backfill_ec_prim_out() {
     # Remember primary during the backfill
     local primary=$(get_primary $poolname obj1)
 
-    ceph osd set nobackfill
-    ceph osd out osd.$primary
+    stone osd set nobackfill
+    stone osd out osd.$primary
     # Primary might change before backfill starts
     sleep 2
     primary=$(get_primary $poolname obj1)
-    ceph osd unset nobackfill
-    ceph tell osd.$primary get_latest_osdmap
-    ceph tell osd.$primary debug kick_recovery_wq 0
+    stone osd unset nobackfill
+    stone tell osd.$primary get_latest_osdmap
+    stone tell osd.$primary debug kick_recovery_wq 0
     sleep 2
 
     wait_for_clean || return 1
@@ -627,9 +627,9 @@ function TEST_backfill_ec_down_all_out() {
     run_osd $dir 4 || return 1
     run_osd $dir 5 || return 1
 
-    ceph osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd
+    stone osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd
     create_pool $poolname 1 1 erasure myprofile
-    ceph osd pool set $poolname min_size 2
+    stone osd pool set $poolname min_size 2
 
     wait_for_clean || return 1
 
@@ -644,19 +644,19 @@ function TEST_backfill_ec_down_all_out() {
     local otherosd=$(get_not_primary $poolname obj1)
     local allosds=$(get_osds $poolname obj1)
 
-    ceph osd set nobackfill
+    stone osd set nobackfill
     kill $(cat $dir/osd.${otherosd}.pid)
-    ceph osd down osd.${otherosd}
+    stone osd down osd.${otherosd}
     for o in $allosds
     do
-        ceph osd out osd.$o
+        stone osd out osd.$o
     done
     # Primary might change before backfill starts
     sleep 2
     primary=$(get_primary $poolname obj1)
-    ceph osd unset nobackfill
-    ceph tell osd.$primary get_latest_osdmap
-    ceph tell osd.$primary debug kick_recovery_wq 0
+    stone osd unset nobackfill
+    stone tell osd.$primary get_latest_osdmap
+    stone tell osd.$primary debug kick_recovery_wq 0
     sleep 2
     flush_pg_stats
 
@@ -665,7 +665,7 @@ function TEST_backfill_ec_down_all_out() {
     # to  active+undersized+remapped
     while(true)
     do
-      if test "$(ceph --format json pg dump pgs |
+      if test "$(stone --format json pg dump pgs |
          jq '.pg_stats | [.[] | .state | select(. == "incomplete")] | length')" -ne "0"
       then
         sleep 2
@@ -673,10 +673,10 @@ function TEST_backfill_ec_down_all_out() {
       fi
       break
     done
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $(seq 1 60)
     do
-      if ceph pg dump pgs | grep ^$PG | grep -qv backfilling
+      if stone pg dump pgs | grep ^$PG | grep -qv backfilling
       then
           break
       fi
@@ -688,7 +688,7 @@ function TEST_backfill_ec_down_all_out() {
       sleep 1
     done
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     local misplaced=$(expr $objects \* 2)
     check $dir $PG $primary erasure $objects 0 $misplaced 0 || return 1
@@ -716,9 +716,9 @@ function TEST_backfill_ec_down_out() {
     run_osd $dir 4 || return 1
     run_osd $dir 5 || return 1
 
-    ceph osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd
+    stone osd erasure-code-profile set myprofile plugin=jerasure technique=reed_sol_van k=2 m=1 crush-failure-domain=osd
     create_pool $poolname 1 1 erasure myprofile
-    ceph osd pool set $poolname min_size 2
+    stone osd pool set $poolname min_size 2
 
     wait_for_clean || return 1
 
@@ -732,16 +732,16 @@ function TEST_backfill_ec_down_out() {
     local primary=$(get_primary $poolname obj1)
     local otherosd=$(get_not_primary $poolname obj1)
 
-    ceph osd set nobackfill
+    stone osd set nobackfill
     kill $(cat $dir/osd.${otherosd}.pid)
-    ceph osd down osd.${otherosd}
-    ceph osd out osd.${otherosd}
+    stone osd down osd.${otherosd}
+    stone osd out osd.${otherosd}
     # Primary might change before backfill starts
     sleep 2
     primary=$(get_primary $poolname obj1)
-    ceph osd unset nobackfill
-    ceph tell osd.$primary get_latest_osdmap
-    ceph tell osd.$primary debug kick_recovery_wq 0
+    stone osd unset nobackfill
+    stone tell osd.$primary get_latest_osdmap
+    stone tell osd.$primary debug kick_recovery_wq 0
     sleep 2
 
     wait_for_clean || return 1

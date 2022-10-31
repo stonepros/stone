@@ -33,10 +33,10 @@ class AdminSocket;
 struct tell_result_t {
   int ret = 0;
   std::string err;
-  ceph::bufferlist out;
+  stone::bufferlist out;
   tell_result_t() = default;
   tell_result_t(int ret, std::string&& err);
-  tell_result_t(int ret, std::string&& err, ceph::bufferlist&& out);
+  tell_result_t(int ret, std::string&& err, stone::bufferlist&& out);
   /**
    * create a \c tell_result_t indicating the successful completion
    * of command
@@ -72,7 +72,7 @@ class AdminSocketHook {
    */
   virtual seastar::future<tell_result_t> call(const cmdmap_t& cmdmap,
 					      std::string_view format,
-					      ceph::bufferlist&& input) const = 0;
+					      stone::bufferlist&& input) const = 0;
   virtual ~AdminSocketHook() {}
   const std::string_view prefix;
   const std::string_view desc;
@@ -147,10 +147,10 @@ private:
                                  seastar::output_stream<char>& out);
 
   seastar::future<> finalize_response(seastar::output_stream<char>& out,
-                                      ceph::bufferlist&& msgs);
+                                      stone::bufferlist&& msgs);
 
   seastar::future<tell_result_t> execute_command(const std::vector<std::string>& cmd,
-						 ceph::bufferlist&& buf);
+						 stone::bufferlist&& buf);
 
   std::optional<seastar::future<>> task;
   std::optional<seastar::server_socket> server_sock;

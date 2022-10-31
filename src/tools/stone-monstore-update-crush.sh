@@ -36,10 +36,10 @@ function osdmap_get() {
     local epoch=${3:+-v $3}
     local osdmap=`mktemp`
 
-    $CEPH_BIN/ceph-monstore-tool $store_path get osdmap -- \
+    $STONE_BIN/stone-monstore-tool $store_path get osdmap -- \
                        $epoch -o $osdmap > /dev/null || return
 
-    echo $($CEPH_BIN/osdmaptool --dump json $osdmap 2> /dev/null | \
+    echo $($STONE_BIN/osdmaptool --dump json $osdmap 2> /dev/null | \
            jq "$query")
 
     rm -f $osdmap
@@ -52,11 +52,11 @@ function test_crush() {
     local crush=$4
     local osdmap=`mktemp`
 
-    $CEPH_BIN/ceph-monstore-tool $store_path get osdmap -- \
+    $STONE_BIN/stone-monstore-tool $store_path get osdmap -- \
                        -v $epoch -o $osdmap > /dev/null
-    $CEPH_BIN/osdmaptool --export-crush $crush $osdmap &> /dev/null
+    $STONE_BIN/osdmaptool --export-crush $crush $osdmap &> /dev/null
 
-    if $CEPH_BIN/crushtool --test --check $max_osd -i $crush > /dev/null; then
+    if $STONE_BIN/crushtool --test --check $max_osd -i $crush > /dev/null; then
         good=true
     else
         good=false
@@ -159,14 +159,14 @@ function main() {
     if test $good_epoch -eq $last_osdmap_epoch; then
         echo "and mon store has no faulty crush maps."
     elif test $output; then
-        $CEPH_BIN/crushtool --decompile $good_crush --outfn $output
+        $STONE_BIN/crushtool --decompile $good_crush --outfn $output
     elif test $rewrite; then
-        $CEPH_BIN/ceph-monstore-tool $store_path rewrite-crush --  \
+        $STONE_BIN/stone-monstore-tool $store_path rewrite-crush --  \
                            --crush $good_crush      \
                            --good-epoch $good_epoch
     else
         echo
-        $CEPH_BIN/crushtool --decompile $good_crush
+        $STONE_BIN/crushtool --decompile $good_crush
     fi
     rm -f $good_crush
 }

@@ -2,9 +2,9 @@ import os
 import errno
 import logging
 
-from ceph.deployment.service_spec import ServiceSpec, PlacementSpec
+from stone.deployment.service_spec import ServiceSpec, PlacementSpec
 
-import cephfs
+import stonefs
 import orchestrator
 
 from .exception import VolumeException
@@ -74,7 +74,7 @@ def listdir(fs, dirpath, filter_entries=None):
                 if (d.d_name not in filter_entries) and d.is_dir():
                     dirs.append(d.d_name)
                 d = fs.readdir(dir_handle)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         raise VolumeException(-e.args[0], e.args[1])
     return dirs
 
@@ -102,7 +102,7 @@ def listsnaps(fs, volspec, snapdirpath, filter_inherited_snaps=False):
                     elif is_inherited_snap(d_name) and not filter_inherited_snaps:
                         snaps.append(d.d_name)
                 d = fs.readdir(dir_handle)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         raise VolumeException(-e.args[0], e.args[1])
     return snaps
 
@@ -117,7 +117,7 @@ def list_one_entry_at_a_time(fs, dirpath):
                 if d.d_name not in (b".", b".."):
                     yield d
                 d = fs.readdir(dir_handle)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         raise VolumeException(-e.args[0], e.args[1])
 
 def copy_file(fs, src, dst, mode, cancel_check=None):
@@ -128,7 +128,7 @@ def copy_file(fs, src, dst, mode, cancel_check=None):
     try:
         src_fd = fs.open(src, os.O_RDONLY);
         dst_fd = fs.open(dst, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, mode)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         if src_fd is not None:
             fs.close(src_fd)
         if dst_fd is not None:
@@ -147,7 +147,7 @@ def copy_file(fs, src, dst, mode, cancel_check=None):
             while written < len(data):
                 written += fs.write(dst_fd, data[written:], -1)
         fs.fsync(dst_fd, 0)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         raise VolumeException(-e.args[0], e.args[1])
     finally:
         fs.close(src_fd)
@@ -160,7 +160,7 @@ def get_ancestor_xattr(fs, path, attr):
     """
     try:
         return fs.getxattr(path, attr).decode('utf-8')
-    except cephfs.NoData as e:
+    except stonefs.NoData as e:
         if path == "/":
             raise VolumeException(-e.args[0], e.args[1])
         else:
@@ -172,7 +172,7 @@ def create_base_dir(fs, path, mode):
     """
     try:
         fs.stat(path)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         if e.args[0] == errno.ENOENT:
             fs.mkdirs(path, mode)
         else:

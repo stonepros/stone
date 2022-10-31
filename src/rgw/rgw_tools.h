@@ -7,9 +7,9 @@
 #include <string>
 
 #include "include/types.h"
-#include "include/ceph_hash.h"
+#include "include/stone_hash.h"
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 #include "rgw_common.h"
 
@@ -56,7 +56,7 @@ static inline int rgw_shards_mod(unsigned hval, int max_shards)
 // used for logging and tagging
 inline int rgw_shard_id(const string& key, int max_shards)
 {
-  return rgw_shards_mod(ceph_str_hash_linux(key.c_str(), key.size()),
+  return rgw_shards_mod(stone_str_hash_linux(key.c_str(), key.size()),
 			max_shards);
 }
 
@@ -102,7 +102,7 @@ int rgw_rados_notify(const DoutPrefixProvider *dpp, librados::IoCtx& ioctx, cons
                      bufferlist& bl, uint64_t timeout_ms, bufferlist* pbl,
                      optional_yield y);
 
-int rgw_tools_init(CephContext *cct);
+int rgw_tools_init(StoneContext *cct);
 void rgw_tools_cleanup();
 
 template<class H, size_t S>
@@ -170,7 +170,7 @@ public:
     string tenant;
     string name;
     string bucket_id;
-    ceph::real_time mtime;
+    stone::real_time mtime;
     map<std::string, bufferlist> attrs;
 
     RGWAccessControlPolicy policy;
@@ -198,10 +198,10 @@ public:
     BucketRef bucket;
     rgw_obj_key key;
 
-    ceph::real_time mtime;
+    stone::real_time mtime;
     string etag;
     std::optional<uint64_t> olh_epoch;
-    ceph::real_time delete_at;
+    stone::real_time delete_at;
     std::optional<string> user_data;
 
     std::optional<bufferlist> aclbl;
@@ -214,7 +214,7 @@ public:
   public:
     int put(bufferlist& data, map<string, bufferlist>& attrs, const DoutPrefixProvider *dpp, optional_yield y); /* might modify attrs */
 
-    void set_mtime(const ceph::real_time& _mtime) {
+    void set_mtime(const stone::real_time& _mtime) {
       mtime = _mtime;
     }
 
@@ -226,7 +226,7 @@ public:
       olh_epoch = epoch;
     }
 
-    void set_delete_at(ceph::real_time _delete_at) {
+    void set_delete_at(stone::real_time _delete_at) {
       delete_at = _delete_at;
     }
 

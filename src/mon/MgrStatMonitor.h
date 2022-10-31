@@ -19,7 +19,7 @@ class MgrStatMonitor : public PaxosService {
   PGMapDigest pending_digest;
   health_check_map_t pending_health_checks;
   std::map<std::string,ProgressEvent> pending_progress_events;
-  ceph::buffer::list pending_service_map_bl;
+  stone::buffer::list pending_service_map_bl;
 
 public:
   MgrStatMonitor(Monitor &mn, Paxos &p, const std::string& service_name);
@@ -83,24 +83,24 @@ public:
     return digest;
   }
 
-  ceph_statfs get_statfs(OSDMap& osdmap,
+  stone_statfs get_statfs(OSDMap& osdmap,
 			 boost::optional<int64_t> data_pool) const {
     return digest.get_statfs(osdmap, data_pool);
   }
 
-  void print_summary(ceph::Formatter *f, std::ostream *out) const {
+  void print_summary(stone::Formatter *f, std::ostream *out) const {
     digest.print_summary(f, out);
   }
-  void dump_info(ceph::Formatter *f) const {
+  void dump_info(stone::Formatter *f) const {
     digest.dump(f);
     f->dump_object("servicemap", get_service_map());
   }
   void dump_cluster_stats(std::stringstream *ss,
-			  ceph::Formatter *f,
+			  stone::Formatter *f,
 			  bool verbose) const {
     digest.dump_cluster_stats(ss, f, verbose);
   }
-  void dump_pool_stats(const OSDMap& osdm, std::stringstream *ss, ceph::Formatter *f,
+  void dump_pool_stats(const OSDMap& osdm, std::stringstream *ss, stone::Formatter *f,
 		       bool verbose) const {
     digest.dump_pool_stats_full(osdm, ss, f, verbose);
   }

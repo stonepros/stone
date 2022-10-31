@@ -8,8 +8,8 @@
 
 #include "common/async/yield_context.h"
 
-#include "common/ceph_json.h"
-#include "common/ceph_context.h"
+#include "common/stone_json.h"
+#include "common/stone_context.h"
 
 #include "rgw/rgw_rados.h"
 
@@ -27,7 +27,7 @@ class RGWRole
   static constexpr uint64_t SESSION_DURATION_MIN = 3600; // in seconds
   static constexpr uint64_t SESSION_DURATION_MAX = 43200; // in seconds
 
-  CephContext *cct;
+  StoneContext *cct;
   RGWCtl *ctl;
   string id;
   string name;
@@ -49,7 +49,7 @@ class RGWRole
   void extract_name_tenant(const std::string& str);
 
 public:
-  RGWRole(CephContext *cct,
+  RGWRole(StoneContext *cct,
           RGWCtl *ctl,
           string name,
           string path,
@@ -72,7 +72,7 @@ public:
     }
   }
 
-  RGWRole(CephContext *cct,
+  RGWRole(StoneContext *cct,
           RGWCtl *ctl,
           string name,
           string tenant)
@@ -83,14 +83,14 @@ public:
     extract_name_tenant(this->name);
   }
 
-  RGWRole(CephContext *cct,
+  RGWRole(StoneContext *cct,
           RGWCtl *ctl,
           string id)
   : cct(cct),
     ctl(ctl),
     id(std::move(id)) {}
 
-  RGWRole(CephContext *cct,
+  RGWRole(StoneContext *cct,
           RGWCtl *ctl)
   : cct(cct),
     ctl(ctl) {}
@@ -159,7 +159,7 @@ public:
   static const string& get_path_oid_prefix();
   static int get_roles_by_path_prefix(const DoutPrefixProvider *dpp, 
                                       RGWRados *store,
-                                      CephContext *cct,
+                                      StoneContext *cct,
                                       const string& path_prefix,
                                       const string& tenant,
                                       vector<RGWRole>& roles,

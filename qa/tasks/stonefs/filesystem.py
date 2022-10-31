@@ -18,8 +18,8 @@ from teuthology import misc
 from teuthology.nuke import clear_firewall
 from teuthology.parallel import parallel
 from teuthology import contextutil
-from tasks.ceph_manager import write_conf
-from tasks import ceph_manager
+from tasks.stone_manager import write_conf
+from tasks import stone_manager
 
 
 log = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ class FileLayout(object):
         self.object_size = object_size
 
     @classmethod
-    def load_from_ceph(layout_str):
+    def load_from_stone(layout_str):
         # TODO
         pass
 
@@ -217,7 +217,7 @@ class FSStatus(object):
         #all matching
         return False
 
-class CephCluster(object):
+class StoneCluster(object):
     @property
     def admin_remote(self):
         first_mon = misc.get_first_mon(self._ctx, None)
@@ -226,7 +226,7 @@ class CephCluster(object):
 
     def __init__(self, ctx) -> None:
         self._ctx = ctx
-        self.mon_manager = ceph_manager.CephManager(self.admin_remote, ctx=ctx, logger=log.getChild('ceph_manager'))
+        self.mon_manager = stone_manager.StoneManager(self.admin_remote, ctx=ctx, logger=log.getChild('stone_manager'))
 
     def get_config(self, key, service_type=None):
         """
@@ -238,15 +238,15 @@ class CephCluster(object):
         service_id = sorted(misc.all_roles_of_type(self._ctx.cluster, service_type))[0]
         return self.json_asok(['config', 'get', key], service_type, service_id)[key]
 
-    def set_ceph_conf(self, subsys, key, value):
-        if subsys not in self._ctx.ceph['ceph'].conf:
-            self._ctx.ceph['ceph'].conf[subsys] = {}
-        self._ctx.ceph['ceph'].conf[subsys][key] = value
-        write_conf(self._ctx)  # XXX because we don't have the ceph task's config object, if they
+    def set_stone_conf(self, subsys, key, value):
+        if subsys not in self._ctx.stone['stone'].conf:
+            self._ctx.stone['stone'].conf[subsys] = {}
+        self._ctx.stone['stone'].conf[subsys][key] = value
+        write_conf(self._ctx)  # XXX because we don't have the stone task's config object, if they
                                # used a different config path this won't work.
 
-    def clear_ceph_conf(self, subsys, key):
-        del self._ctx.ceph['ceph'].conf[subsys][key]
+    def clear_stone_conf(self, subsys, key):
+        del self._ctx.stone['stone'].conf[subsys][key]
         write_conf(self._ctx)
 
     def json_asok(self, command, service_type, service_id, timeout=None):
@@ -279,9 +279,9 @@ class CephCluster(object):
         return False
 
 
-class MDSCluster(CephCluster):
+class MDSCluster(StoneCluster):
     """
-    Collective operations on all the MDS daemons in the Ceph cluster.  These
+    Collective operations on all the MDS daemons in the Stone cluster.  These
     daemons may be in use by various Filesystems.
 
     For the benefit of pre-multi-filesystem tests, this class is also
@@ -294,7 +294,7 @@ class MDSCluster(CephCluster):
 
     @property
     def mds_ids(self):
-        # do this dynamically because the list of ids may change periodically with cephadm
+        # do this dynamically because the list of ids may change periodically with stoneadm
         return list(misc.all_roles_of_type(self._ctx.cluster, 'mds'))
 
     @property
@@ -375,7 +375,7 @@ class MDSCluster(CephCluster):
         """
         self.mds_daemons[mds_id].signal(sig, silent);
 
-    def newfs(self, name='cephfs', create=True):
+    def newfs(self, name='stonefs', create=True):
         return Filesystem(self._ctx, name=name, create=create)
 
     def status(self, epoch=None):
@@ -482,7 +482,7 @@ class MDSCluster(CephCluster):
 
 class Filesystem(MDSCluster):
     """
-    This object is for driving a CephFS filesystem.  The MDS daemons driven by
+    This object is for driving a StoneFS filesystem.  The MDS daemons driven by
     MDSCluster may be shared with other Filesystems.
     """
     def __init__(self, ctx, fs_config={}, fscid=None, name=None, create=False):
@@ -652,7 +652,7 @@ class Filesystem(MDSCluster):
 
     def create(self):
         if self.name is None:
-            self.name = "cephfs"
+            self.name = "stonefs"
         if self.metadata_pool_name is None:
             self.metadata_pool_name = "{0}_metadata".format(self.name)
         if self.data_pool_name is None:
@@ -704,7 +704,7 @@ class Filesystem(MDSCluster):
                 self.add_data_pool(ec_data_pool_name, create=False)
                 self.check_pool_application(ec_data_pool_name)
 
-                self.run_client_payload(f"setfattr -n ceph.dir.layout.pool -v {ec_data_pool_name} . && getfattr -n ceph.dir.layout .")
+                self.run_client_payload(f"setfattr -n stone.dir.layout.pool -v {ec_data_pool_name} . && getfattr -n stone.dir.layout .")
 
         self.check_pool_application(self.metadata_pool_name)
         self.check_pool_application(data_pool_name)
@@ -739,20 +739,20 @@ class Filesystem(MDSCluster):
 
     def run_client_payload(self, cmd):
         # avoid circular dep by importing here:
-        from tasks.cephfs.fuse_mount import FuseMount
+        from tasks.stonefs.fuse_mount import FuseMount
         d = misc.get_testdir(self._ctx)
-        m = FuseMount(self._ctx, {}, d, "admin", self.client_remote, cephfs_name=self.name)
+        m = FuseMount(self._ctx, {}, d, "admin", self.client_remote, stonefs_name=self.name)
         m.mount_wait()
         m.run_shell_payload(cmd)
         m.umount_wait(require_clean=True)
 
     def _remove_pool(self, name, **kwargs):
         c = f'osd pool rm {name} {name} --yes-i-really-really-mean-it'
-        return self.mon_manager.ceph(c, **kwargs)
+        return self.mon_manager.stone(c, **kwargs)
 
     def rm(self, **kwargs):
         c = f'fs rm {self.name} --yes-i-really-mean-it'
-        return self.mon_manager.ceph(c, **kwargs)
+        return self.mon_manager.stone(c, **kwargs)
 
     def remove_pools(self, data_pools):
         self._remove_pool(self.get_metadata_pool_name())
@@ -800,8 +800,8 @@ class Filesystem(MDSCluster):
         for pool in osd_map['pools']:
             if pool['pool_name'] == pool_name:
                 if "application_metadata" in pool:
-                    if not "cephfs" in pool['application_metadata']:
-                        raise RuntimeError("Pool {pool_name} does not name cephfs as application!".\
+                    if not "stonefs" in pool['application_metadata']:
+                        raise RuntimeError("Pool {pool_name} does not name stonefs as application!".\
                                            format(pool_name=pool_name))
 
     def __del__(self):
@@ -827,7 +827,7 @@ class Filesystem(MDSCluster):
             if metadata_pool_exists:
                 self.metadata_pool_name = 'metadata'
         except CommandFailedError as e:
-            # For use in upgrade tests, Ceph cuttlefish and earlier don't support
+            # For use in upgrade tests, Stone cuttlefish and earlier don't support
             # structured output (--format) from the CLI.
             if e.exitstatus == 22:
                 metadata_pool_exists = True
@@ -850,7 +850,7 @@ class Filesystem(MDSCluster):
 
     def set_dir_layout(self, mount, path, layout):
         for name, value in layout.items():
-            mount.run_shell(args=["setfattr", "-n", "ceph.dir.layout."+name, "-v", str(value), path])
+            mount.run_shell(args=["setfattr", "-n", "stone.dir.layout."+name, "-v", str(value), path])
 
     def add_data_pool(self, name, create=True):
         if create:
@@ -937,7 +937,7 @@ class Filesystem(MDSCluster):
         at least max_mds daemons are in 'active'.
 
         Unlike most of Filesystem, this function is tolerant of new-style `fs`
-        commands being missing, because we are part of the ceph installation
+        commands being missing, because we are part of the stone installation
         process during upgrade suites, so must fall back to old style commands
         when we get an EINVAL on a new style command.
 
@@ -1111,7 +1111,7 @@ class Filesystem(MDSCluster):
             status = self.status()
 
     def dencoder(self, obj_type, obj_blob):
-        args = [os.path.join(self._prefix, "ceph-dencoder"), 'type', obj_type, 'import', '-', 'decode', 'dump_json']
+        args = [os.path.join(self._prefix, "stone-dencoder"), 'type', obj_type, 'import', '-', 'decode', 'dump_json']
         p = self.mon_manager.controller.run(args=args, stdin=BytesIO(obj_blob), stdout=BytesIO())
         return p.stdout.getvalue()
 
@@ -1139,7 +1139,7 @@ class Filesystem(MDSCluster):
     def get_metadata_object(self, object_type, object_id):
         """
         Retrieve an object from the metadata pool, pass it through
-        ceph-dencoder to dump it to JSON, and return the decoded object.
+        stone-dencoder to dump it to JSON, and return the decoded object.
         """
 
         o = self.radosmo(['get', object_id, '-'])
@@ -1318,8 +1318,8 @@ class Filesystem(MDSCluster):
 
         ::
 
-            rados -p cephfs_data getxattr 10000000002.00000000 parent > out.bin
-            ceph-dencoder type inode_backtrace_t import out.bin decode dump_json
+            rados -p stonefs_data getxattr 10000000002.00000000 parent > out.bin
+            stone-dencoder type inode_backtrace_t import out.bin decode dump_json
 
             { "ino": 1099511627778,
               "ancestors": [
@@ -1428,7 +1428,7 @@ class Filesystem(MDSCluster):
 
     def get_meta_of_fs_file(self, dir_ino, obj_name, out):
         """
-        get metadata from parent to verify the correctness of the data format encoded by the tool, cephfs-meta-injection.
+        get metadata from parent to verify the correctness of the data format encoded by the tool, stonefs-meta-injection.
         warning : The splitting of directory is not considered here.
         """
 
@@ -1508,34 +1508,34 @@ class Filesystem(MDSCluster):
     def tool_remote(self):
         """
         An arbitrary remote to use when invoking recovery tools.  Use an MDS host because
-        it'll definitely have keys with perms to access cephfs metadata pool.  This is public
+        it'll definitely have keys with perms to access stonefs metadata pool.  This is public
         so that tests can use this remote to go get locally written output files from the tools.
         """
         return self.mon_manager.controller
 
     def journal_tool(self, args, rank, quiet=False):
         """
-        Invoke cephfs-journal-tool with the passed arguments for a rank, and return its stdout
+        Invoke stonefs-journal-tool with the passed arguments for a rank, and return its stdout
         """
         fs_rank = self._make_rank(rank)
-        return self._run_tool("cephfs-journal-tool", args, fs_rank, quiet)
+        return self._run_tool("stonefs-journal-tool", args, fs_rank, quiet)
 
     def meta_tool(self, args, rank, quiet=False):
         """
-        Invoke cephfs-meta-injection with the passed arguments for a rank, and return its stdout
+        Invoke stonefs-meta-injection with the passed arguments for a rank, and return its stdout
         """
         fs_rank = self._make_rank(rank)
-        return self._run_tool("cephfs-meta-injection", args, fs_rank, quiet)
+        return self._run_tool("stonefs-meta-injection", args, fs_rank, quiet)
 
     def table_tool(self, args, quiet=False):
         """
-        Invoke cephfs-table-tool with the passed arguments, and return its stdout
+        Invoke stonefs-table-tool with the passed arguments, and return its stdout
         """
-        return self._run_tool("cephfs-table-tool", args, None, quiet)
+        return self._run_tool("stonefs-table-tool", args, None, quiet)
 
     def data_scan(self, args, quiet=False, worker_count=1):
         """
-        Invoke cephfs-data-scan with the passed arguments, and return its stdout
+        Invoke stonefs-data-scan with the passed arguments, and return its stdout
 
         :param worker_count: if greater than 1, multiple workers will be run
                              in parallel and the return value will be None
@@ -1553,7 +1553,7 @@ class Filesystem(MDSCluster):
                 worker_args = args
 
             workers.append(Greenlet.spawn(lambda wargs=worker_args:
-                                          self._run_tool("cephfs-data-scan", wargs, None, quiet)))
+                                          self._run_tool("stonefs-data-scan", wargs, None, quiet)))
 
         for w in workers:
             w.get()
@@ -1568,7 +1568,7 @@ class Filesystem(MDSCluster):
 
     def authorize(self, client_id, caps=('/', 'rw')):
         """
-        Run "ceph fs authorize" and run "ceph auth get" to get and returnt the
+        Run "stone fs authorize" and run "stone auth get" to get and returnt the
         keyring.
 
         client_id: client id that will be authorized

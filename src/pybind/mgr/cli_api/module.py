@@ -17,10 +17,10 @@ def pretty_json(obj: Any) -> Any:
     return json.dumps(obj, sort_keys=True, indent=2)
 
 
-class CephCommander:
+class StoneCommander:
     """
     Utility class to inspect Python functions and generate corresponding
-    CephCommand signatures (see src/mon/MonCommand.h for details)
+    StoneCommand signatures (see src/mon/MonCommand.h for details)
     """
 
     def __init__(self, func: Callable):
@@ -28,9 +28,9 @@ class CephCommander:
         self.signature = inspect.signature(func)
         self.params = self.signature.parameters
 
-    def to_ceph_signature(self) -> Dict[str, str]:
+    def to_stone_signature(self) -> Dict[str, str]:
         """
-        Generate CephCommand signature (dict-like)
+        Generate StoneCommand signature (dict-like)
         """
         return {
             'prefix': f'mgr cli {self.func.__name__}',
@@ -53,7 +53,7 @@ class MgrAPIReflector(type):
                 # save functions to klass._cli_{n}() methods. This
                 # can help on unit testing
                 wrapper = cls.func_wrapper(func)
-                command = CLICommand(**CephCommander(func).to_ceph_signature())(  # type: ignore
+                command = CLICommand(**StoneCommander(func).to_stone_signature())(  # type: ignore
                     wrapper)
                 setattr(
                     klass,

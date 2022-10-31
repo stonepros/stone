@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-. $(dirname $0)/../../standalone/ceph-helpers.sh
+. $(dirname $0)/../../standalone/stone-helpers.sh
 
 function list_tests()
 {

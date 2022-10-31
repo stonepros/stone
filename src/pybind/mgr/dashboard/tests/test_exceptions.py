@@ -6,7 +6,7 @@ import time
 import rados
 
 from ..controllers import Endpoint, RESTController, Router, Task
-from ..services.ceph_service import SendCommandError
+from ..services.stone_service import SendCommandError
 from ..services.exception import handle_rados_error, \
     handle_send_command_error, serialize_dashboard_exception
 from ..tests import ControllerTestCase

@@ -1,13 +1,13 @@
 #!/bin/sh
 #
-# Regression test for http://tracker.ceph.com/issues/14984
+# Regression test for http://tracker.stone.com/issues/14984
 #
 # When the bug is present, starting the rbdmap service causes
 # a bogus log message to be emitted to the log because the RBDMAPFILE
 # environment variable is not set.
 #
 # When the bug is not present, starting the rbdmap service will emit
-# no log messages, because /etc/ceph/rbdmap does not contain any lines
+# no log messages, because /etc/stonepros/rbdmap does not contain any lines
 # that require processing.
 #
 set -ex

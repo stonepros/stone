@@ -2,13 +2,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.ceph</groupId>
-  <artifactId>libcephfs</artifactId>
+  <groupId>com.stone</groupId>
+  <artifactId>libstonefs</artifactId>
   <packaging>jar</packaging>
   <version>${version}</version>
-  <name>libcephfs</name>
-  <url>http://www.ceph.com</url>
-  <description>Ceph FS Java API.</description>
+  <name>libstonefs</name>
+  <url>http://www.stone.com</url>
+  <description>Stone FS Java API.</description>
   <licenses>
     <license>
       <name>GNU Lesser General Public License, Version 2.1</name>
@@ -67,9 +67,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git@github.com:ceph/ceph.git</connection>
-    <developerConnection>scm:git:git@github.com:ceph/ceph.git</developerConnection>
-    <url>scm:git:git@github.com:ceph/ceph.git</url>
+    <connection>scm:git:git@github.com:stone/stone.git</connection>
+    <developerConnection>scm:git:git@github.com:stone/stone.git</developerConnection>
+    <url>scm:git:git@github.com:stone/stone.git</url>
   </scm>
 
   <distributionManagement>

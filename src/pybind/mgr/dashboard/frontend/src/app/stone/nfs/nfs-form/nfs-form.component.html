@@ -79,9 +79,9 @@
             </div>
           </div>
 
-          <!-- CephFS Volume -->
+          <!-- StoneFS Volume -->
           <div class="form-group row"
-               *ngIf="nfsForm.getValue('name') === 'CEPH'">
+               *ngIf="nfsForm.getValue('name') === 'STONE'">
             <label class="cd-col-form-label required"
                    for="fs_name"
                    i18n>Volume</label>
@@ -96,10 +96,10 @@
                         i18n>Loading...</option>
                 <option *ngIf="allFsNames !== null && allFsNames.length === 0"
                         value=""
-                        i18n>-- No CephFS filesystem available --</option>
+                        i18n>-- No StoneFS filesystem available --</option>
                 <option *ngIf="allFsNames !== null && allFsNames.length > 0"
                         value=""
-                        i18n>-- Select the CephFS filesystem --</option>
+                        i18n>-- Select the StoneFS filesystem --</option>
                 <option *ngFor="let filesystem of allFsNames"
                         [value]="filesystem.name">{{ filesystem.name }}</option>
               </select>
@@ -112,7 +112,7 @@
 
         <!-- Security Label -->
         <div class="form-group row"
-             *ngIf="nfsForm.getValue('name') === 'CEPH'">
+             *ngIf="nfsForm.getValue('name') === 'STONE'">
           <label class="cd-col-form-label"
                  [ngClass]="{'required': nfsForm.getValue('security_label')}"
                  for="security_label"
@@ -147,13 +147,13 @@
 
         <!-- Path -->
         <div class="form-group row"
-             *ngIf="nfsForm.getValue('name') === 'CEPH'">
+             *ngIf="nfsForm.getValue('name') === 'STONE'">
           <label class="cd-col-form-label"
                  for="path">
             <span class="required"
-                  i18n>CephFS Path</span>
+                  i18n>StoneFS Path</span>
             <cd-helper>
-              <p i18n>A path in a CephFS file system.</p>
+              <p i18n>A path in a StoneFS file system.</p>
             </cd-helper>
           </label>
           <div class="cd-col-form-input">

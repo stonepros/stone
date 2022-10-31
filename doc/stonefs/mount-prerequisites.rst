@@ -1,33 +1,33 @@
-Mount CephFS: Prerequisites
+Mount StoneFS: Prerequisites
 ===========================
 
-You can use CephFS by mounting it to your local filesystem or by using
-`cephfs-shell`_. Mounting CephFS requires superuser privileges to trim
-dentries by issuing a remount of itself. CephFS can be mounted
+You can use StoneFS by mounting it to your local filesystem or by using
+`cephfs-shell`_. Mounting StoneFS requires superuser privileges to trim
+dentries by issuing a remount of itself. StoneFS can be mounted
 `using kernel`_ as well as `using FUSE`_. Both have their own
 advantages. Read the following section to understand more about both of
-these ways to mount CephFS.
+these ways to mount StoneFS.
 
-For Windows CephFS mounts, please check the `ceph-dokan`_ page.
+For Windows StoneFS mounts, please check the `ceph-dokan`_ page.
 
-Which CephFS Client?
+Which StoneFS Client?
 --------------------
 
 The FUSE client is the most accessible and the easiest to upgrade to the
-version of Ceph used by the storage cluster, while the kernel client will
+version of Stone used by the storage cluster, while the kernel client will
 always gives better performance.
 
 When encountering bugs or performance issues, it is often instructive to
 try using the other client, in order to find out whether the bug was
 client-specific or not (and then to let the developers know).
 
-General Pre-requisite for Mounting CephFS
+General Pre-requisite for Mounting StoneFS
 -----------------------------------------
-Before mounting CephFS, ensure that the client host (where CephFS has to be
-mounted and used) has a copy of the Ceph configuration file (i.e.
-``ceph.conf``) and a keyring of the CephX user that has permission to access
+Before mounting StoneFS, ensure that the client host (where StoneFS has to be
+mounted and used) has a copy of the Stone configuration file (i.e.
+``ceph.conf``) and a keyring of the StoneX user that has permission to access
 the MDS. Both of these files must already be present on the host where the
-Ceph MON resides.
+Stone MON resides.
 
 #. Generate a minimal conf file for the client host and place it at a
    standard location::
@@ -44,16 +44,16 @@ Ceph MON resides.
 
     chmod 644 /etc/ceph/ceph.conf
 
-#. Create a CephX user and get its secret key::
+#. Create a StoneX user and get its secret key::
 
     ssh {user}@{mon-host} "sudo ceph fs authorize cephfs client.foo / rw" | sudo tee /etc/ceph/ceph.client.foo.keyring
 
-   In above command, replace ``cephfs`` with the name of your CephFS, ``foo``
-   by the name you want for your CephX user and ``/`` by the path within your
-   CephFS for which you want to allow access to the client host and ``rw``
+   In above command, replace ``cephfs`` with the name of your StoneFS, ``foo``
+   by the name you want for your StoneX user and ``/`` by the path within your
+   StoneFS for which you want to allow access to the client host and ``rw``
    stands for both read and write permissions. Alternatively, you may copy the
-   Ceph keyring from the MON host to client host at ``/etc/ceph`` but creating
-   a keyring specific to the client host is better. While creating a CephX
+   Stone keyring from the MON host to client host at ``/etc/ceph`` but creating
+   a keyring specific to the client host is better. While creating a StoneX
    keyring/client, using same client name across multiple machines is perfectly
    fine.
 

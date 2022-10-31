@@ -12,7 +12,7 @@
 #endif
 #include <memory>
 
-namespace ceph {
+namespace stone {
 
 #ifdef LIBTCMALLOC_MISSING_ALIGNED_ALLOC
 
@@ -63,7 +63,7 @@ using allocator = std::allocator<T>;
 
 #endif // LIBTCMALLOC_MISSING_ALIGNED_ALLOC
 
-} // namespace ceph
+} // namespace stone
 
 #endif // STONE_COMMON_ALLOCATOR_H
 

@@ -40,7 +40,7 @@ class OSDMap;
 class OSDMeta;
 class Heartbeat;
 
-namespace ceph::os {
+namespace stone::os {
   class Transaction;
 }
 
@@ -91,7 +91,7 @@ class OSD final : public crimson::net::Dispatcher,
   //< since when there is no more pending pg creates from mon
   epoch_t last_pg_create_epoch = 0;
 
-  ceph::mono_time startup_time;
+  stone::mono_time startup_time;
 
   OSDSuperblock superblock;
 
@@ -164,13 +164,13 @@ private:
   seastar::future<bufferlist> load_map_bl(epoch_t e);
   seastar::future<std::map<epoch_t, bufferlist>>
   load_map_bls(epoch_t first, epoch_t last);
-  void store_map_bl(ceph::os::Transaction& t,
+  void store_map_bl(stone::os::Transaction& t,
                     epoch_t e, bufferlist&& bl);
-  seastar::future<> store_maps(ceph::os::Transaction& t,
+  seastar::future<> store_maps(stone::os::Transaction& t,
                                epoch_t start, Ref<MOSDMap> m);
   seastar::future<> osdmap_subscribe(version_t epoch, bool force_request);
 
-  void write_superblock(ceph::os::Transaction& t);
+  void write_superblock(stone::os::Transaction& t);
   seastar::future<> read_superblock();
 
   bool require_mon_peer(crimson::net::Connection *conn, Ref<Message> m);

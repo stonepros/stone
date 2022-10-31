@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Adam Crume <adamcrume@gmail.com>
  *
@@ -141,7 +141,7 @@ public:
 
   std::ostream& dump(std::ostream& o) const override {
     o << get_action_name() << ": ";
-    ceph::JSONFormatter formatter(false);
+    stone::JSONFormatter formatter(false);
     formatter.open_object_section("");
     m_action.dump(&formatter);
     formatter.close_section();

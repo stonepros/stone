@@ -10,8 +10,8 @@ import _ from 'lodash';
 import { ToastrModule } from 'ngx-toastr';
 import { EMPTY, of } from 'rxjs';
 
-import { CephModule } from '~/app/ceph/ceph.module';
-import { PerformanceCounterModule } from '~/app/ceph/performance-counter/performance-counter.module';
+import { StoneModule } from '~/app/stone/stone.module';
+import { PerformanceCounterModule } from '~/app/stone/performance-counter/performance-counter.module';
 import { CoreModule } from '~/app/core/core.module';
 import { OrchestratorService } from '~/app/shared/api/orchestrator.service';
 import { OsdService } from '~/app/shared/api/osd.service';
@@ -98,7 +98,7 @@ describe('OsdListComponent', () => {
       HttpClientTestingModule,
       PerformanceCounterModule,
       ToastrModule.forRoot(),
-      CephModule,
+      StoneModule,
       ReactiveFormsModule,
       NgbDropdownModule,
       RouterTestingModule,

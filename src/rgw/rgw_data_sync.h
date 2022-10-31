@@ -7,7 +7,7 @@
 #include "include/encoding.h"
 
 #include "common/RWLock.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
 #include "rgw_coroutine.h"
 #include "rgw_http_client.h"
@@ -24,7 +24,7 @@
 struct rgw_data_sync_obligation {
   std::string key;
   std::string marker;
-  ceph::real_time timestamp;
+  stone::real_time timestamp;
   bool retry = false;
 };
 
@@ -33,7 +33,7 @@ inline std::ostream& operator<<(std::ostream& out, const rgw_data_sync_obligatio
   if (!o.marker.empty()) {
     out << " marker=" << o.marker;
   }
-  if (o.timestamp != ceph::real_time{}) {
+  if (o.timestamp != stone::real_time{}) {
     out << " timestamp=" << o.timestamp;
   }
   if (o.retry) {
@@ -266,7 +266,7 @@ WRITE_CLASS_ENCODER(rgw_data_sync_status)
 
 struct rgw_datalog_entry {
   string key;
-  ceph::real_time timestamp;
+  stone::real_time timestamp;
 
   void decode_json(JSONObj *obj);
 };
@@ -298,7 +298,7 @@ class RGWServices;
 
 struct RGWDataSyncEnv {
   const DoutPrefixProvider *dpp{nullptr};
-  CephContext *cct{nullptr};
+  StoneContext *cct{nullptr};
   rgw::sal::RGWRadosStore *store{nullptr};
   RGWServices *svc{nullptr};
   RGWAsyncRadosProcessor *async_rados{nullptr};
@@ -310,7 +310,7 @@ struct RGWDataSyncEnv {
 
   RGWDataSyncEnv() {}
 
-  void init(const DoutPrefixProvider *_dpp, CephContext *_cct, rgw::sal::RGWRadosStore *_store, RGWServices *_svc,
+  void init(const DoutPrefixProvider *_dpp, StoneContext *_cct, rgw::sal::RGWRadosStore *_store, RGWServices *_svc,
             RGWAsyncRadosProcessor *_async_rados, RGWHTTPManager *_http_manager,
             RGWSyncErrorLogger *_error_logger, RGWSyncTraceManager *_sync_tracer,
             RGWSyncModuleInstanceRef& _sync_module,
@@ -332,7 +332,7 @@ struct RGWDataSyncEnv {
 };
 
 struct RGWDataSyncCtx {
-  CephContext *cct{nullptr};
+  StoneContext *cct{nullptr};
   RGWDataSyncEnv *env{nullptr};
 
   RGWRESTConn *conn{nullptr};
@@ -353,7 +353,7 @@ class RGWRados;
 class RGWRemoteDataLog : public RGWCoroutinesManager {
   const DoutPrefixProvider *dpp;
   rgw::sal::RGWRadosStore *store;
-  CephContext *cct;
+  StoneContext *cct;
   RGWCoroutinesManagerRegistry *cr_registry;
   RGWAsyncRadosProcessor *async_rados;
   RGWHTTPManager http_manager;
@@ -361,7 +361,7 @@ class RGWRemoteDataLog : public RGWCoroutinesManager {
   RGWDataSyncEnv sync_env;
   RGWDataSyncCtx sc;
 
-  ceph::shared_mutex lock = ceph::make_shared_mutex("RGWRemoteDataLog::lock");
+  stone::shared_mutex lock = stone::make_shared_mutex("RGWRemoteDataLog::lock");
   RGWDataSyncControlCR *data_sync_cr;
 
   RGWSyncTraceNodeRef tn;
@@ -459,7 +459,7 @@ public:
   }
 
   // implements DoutPrefixProvider
-  CephContext *get_cct() const override;
+  StoneContext *get_cct() const override;
   unsigned get_subsys() const override;
   std::ostream& gen_prefix(std::ostream& out) const override;
 };
@@ -496,7 +496,7 @@ WRITE_CLASS_ENCODER(rgw_bucket_shard_full_sync_marker)
 
 struct rgw_bucket_shard_inc_sync_marker {
   string position;
-  ceph::real_time timestamp;
+  stone::real_time timestamp;
 
   void encode_attr(map<string, bufferlist>& attrs);
 
@@ -533,7 +533,7 @@ struct rgw_bucket_shard_sync_info {
   rgw_bucket_shard_full_sync_marker full_marker;
   rgw_bucket_shard_inc_sync_marker inc_marker;
 
-  void decode_from_attrs(CephContext *cct, map<string, bufferlist>& attrs);
+  void decode_from_attrs(StoneContext *cct, map<string, bufferlist>& attrs);
   void encode_all_attrs(map<string, bufferlist>& attrs);
   void encode_state_attr(map<string, bufferlist>& attrs);
 
@@ -667,7 +667,7 @@ public:
                                                                                        can be used by sync modules */
 
   // implements DoutPrefixProvider
-  CephContext *get_cct() const override;
+  StoneContext *get_cct() const override;
   unsigned get_subsys() const override;
   std::ostream& gen_prefix(std::ostream& out) const override;
 
@@ -688,7 +688,7 @@ public:
   RGWDefaultSyncModule() {}
   bool supports_writes() override { return true; }
   bool supports_data_export() override { return true; }
-  int create_instance(CephContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) override;
+  int create_instance(StoneContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) override;
 };
 
 class RGWArchiveSyncModule : public RGWDefaultSyncModule {
@@ -696,7 +696,7 @@ public:
   RGWArchiveSyncModule() {}
   bool supports_writes() override { return true; }
   bool supports_data_export() override { return false; }
-  int create_instance(CephContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) override;
+  int create_instance(StoneContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) override;
 };
 
 #endif

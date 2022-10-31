@@ -4,7 +4,7 @@
 #ifndef STONE_ASYNC_OP_TRACKER_H
 #define STONE_ASYNC_OP_TRACKER_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/Context.h"
 
 class AsyncOpTracker {
@@ -20,7 +20,7 @@ public:
   bool empty();
 
 private:
-  ceph::mutex m_lock = ceph::make_mutex("AsyncOpTracker::m_lock");
+  stone::mutex m_lock = stone::make_mutex("AsyncOpTracker::m_lock");
   uint32_t m_pending_ops = 0;
   Context *m_on_finish = nullptr;
 

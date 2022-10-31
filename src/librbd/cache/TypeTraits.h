@@ -4,20 +4,20 @@
 #ifndef STONE_LIBRBD_CACHE_TYPE_TRAITS_H
 #define STONE_LIBRBD_CACHE_TYPE_TRAITS_H
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 class CacheClient;
 
 } // namespace immutable_obj_cache
-} // namespace ceph
+} // namespace stone
 
 namespace librbd {
 namespace cache {
 
 template <typename ImageCtxT>
 struct TypeTraits {
-  typedef ceph::immutable_obj_cache::CacheClient CacheClient;    
+  typedef stone::immutable_obj_cache::CacheClient CacheClient;    
 };
 
 } // namespace librbd

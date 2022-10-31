@@ -8,7 +8,7 @@
 
 #include "OSDMap.h"
 #include "common/HBHandle.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/dout.h"
 #include "osd_types.h"
 
@@ -36,8 +36,8 @@ class MissingLoc {
 	       (l.other < r.other)));
     }
     friend std::ostream& operator<<(std::ostream& out, const loc_count_t& l) {
-      ceph_assert(l.up >= 0);
-      ceph_assert(l.other >= 0);
+      stone_assert(l.up >= 0);
+      stone_assert(l.other >= 0);
       return out << "(" << l.up << "+" << l.other << ")";
     }
   };
@@ -94,7 +94,7 @@ class MissingLoc {
     pgs_by_shard_id(s, pgsbs);
     for (auto shard: pgsbs) {
       auto p = missing_by_count[shard.first].find(_get_count(shard.second));
-      ceph_assert(p != missing_by_count[shard.first].end());
+      stone_assert(p != missing_by_count[shard.first].end());
       if (--p->second == 0) {
 	missing_by_count[shard.first].erase(p);
       }
@@ -104,7 +104,7 @@ class MissingLoc {
   spg_t pgid;
   MappingInfo *mapping_info;
   DoutPrefixProvider *dpp;
-  StoneeContext *cct;
+  StoneContext *cct;
   std::set<pg_shard_t> empty_set;
  public:
   boost::scoped_ptr<IsPGReadablePredicate> is_readable;
@@ -113,7 +113,7 @@ class MissingLoc {
     spg_t pgid,
     MappingInfo *mapping_info,
     DoutPrefixProvider *dpp,
-    StoneeContext *cct)
+    StoneContext *cct)
     : pgid(pgid), mapping_info(mapping_info), dpp(dpp), cct(cct) { }
   void set_backend_predicates(
     IsPGReadablePredicate *_is_readable,
@@ -239,7 +239,7 @@ class MissingLoc {
 	  lgeneric_dout(cct, 0) << this << " " << pgid << " unexpected need for "
 				<< i->first << " have " << j->second
 				<< " tried to add " << i->second << dendl;
-	  ceph_assert(0 == "unexpected need for missing item");
+	  stone_assert(0 == "unexpected need for missing item");
 	}
       }
     }
@@ -250,7 +250,7 @@ class MissingLoc {
   }
   void revise_need(const hobject_t &hoid, eversion_t need) {
     auto it = needs_recovery_map.find(hoid);
-    ceph_assert(it != needs_recovery_map.end());
+    stone_assert(it != needs_recovery_map.end());
     it->second.need = need;
   }
 
@@ -303,7 +303,7 @@ class MissingLoc {
 	if (i == self)
 	  continue;
 	auto pmiter = pmissing.find(i);
-	ceph_assert(pmiter != pmissing.end());
+	stone_assert(pmiter != pmissing.end());
 	miter = pmiter->second.get_items().find(hoid);
 	if (miter != pmiter->second.get_items().end()) {
 	  item = miter->second;
@@ -319,15 +319,15 @@ class MissingLoc {
       return;
     auto mliter =
       missing_loc.emplace(hoid, std::set<pg_shard_t>()).first;
-    ceph_assert(info.last_backfill.is_max());
-    ceph_assert(info.last_update >= item->need);
+    stone_assert(info.last_backfill.is_max());
+    stone_assert(info.last_update >= item->need);
     if (!missing.is_missing(hoid))
       mliter->second.insert(self);
     for (auto &&i: pmissing) {
       if (i.first == self)
 	continue;
       auto pinfoiter = pinfo.find(i.first);
-      ceph_assert(pinfoiter != pinfo.end());
+      stone_assert(pinfoiter != pinfo.end());
       if (item->need <= pinfoiter->second.last_update &&
 	  hoid <= pinfoiter->second.last_backfill &&
 	  !i.second.is_missing(hoid))

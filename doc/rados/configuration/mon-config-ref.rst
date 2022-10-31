@@ -2,35 +2,35 @@
  Monitor Config Reference
 ==========================
 
-Understanding how to configure a :term:`Ceph Monitor` is an important part of
-building a reliable :term:`Ceph Storage Cluster`. **All Ceph Storage Clusters
+Understanding how to configure a :term:`Stone Monitor` is an important part of
+building a reliable :term:`Stone Storage Cluster`. **All Stone Storage Clusters
 have at least one monitor**. The monitor complement usually remains fairly
 consistent, but you can add, remove or replace a monitor in a cluster. See
 `Adding/Removing a Monitor`_ for details.
 
 
-.. index:: Ceph Monitor; Paxos
+.. index:: Stone Monitor; Paxos
 
 Background
 ==========
 
-Ceph Monitors maintain a "master copy" of the :term:`Cluster Map`, which means a
-:term:`Ceph Client` can determine the location of all Ceph Monitors, Ceph OSD
-Daemons, and Ceph Metadata Servers just by connecting to one Ceph Monitor and
-retrieving a current cluster map. Before Ceph Clients can read from or write to
-Ceph OSD Daemons or Ceph Metadata Servers, they must connect to a Ceph Monitor
-first. With a current copy of the cluster map and the CRUSH algorithm, a Ceph
+Stone Monitors maintain a "master copy" of the :term:`Cluster Map`, which means a
+:term:`Stone Client` can determine the location of all Stone Monitors, Stone OSD
+Daemons, and Stone Metadata Servers just by connecting to one Stone Monitor and
+retrieving a current cluster map. Before Stone Clients can read from or write to
+Stone OSD Daemons or Stone Metadata Servers, they must connect to a Stone Monitor
+first. With a current copy of the cluster map and the CRUSH algorithm, a Stone
 Client can compute the location for any object. The ability to compute object
-locations allows a Ceph Client to talk directly to Ceph OSD Daemons, which is a
-very important aspect of Ceph's high scalability and performance. See 
+locations allows a Stone Client to talk directly to Stone OSD Daemons, which is a
+very important aspect of Stone's high scalability and performance. See 
 `Scalability and High Availability`_ for additional details.
 
-The primary role of the Ceph Monitor is to maintain a master copy of the cluster
-map. Ceph Monitors also provide authentication and logging services. Ceph
+The primary role of the Stone Monitor is to maintain a master copy of the cluster
+map. Stone Monitors also provide authentication and logging services. Stone
 Monitors write all changes in the monitor services to a single Paxos instance,
-and Paxos writes the changes to a key/value store for strong consistency. Ceph
+and Paxos writes the changes to a key/value store for strong consistency. Stone
 Monitors can query the most recent version of the cluster map during sync
-operations. Ceph Monitors leverage the key/value store's snapshots and iterators
+operations. Stone Monitors leverage the key/value store's snapshots and iterators
 (using leveldb) to perform store-wide synchronization.
 
 .. ditaa::
@@ -57,32 +57,32 @@ operations. Ceph Monitors leverage the key/value store's snapshots and iterators
 
 .. deprecated:: version 0.58
 
-In Ceph versions 0.58 and earlier, Ceph Monitors use a Paxos instance for
+In Stone versions 0.58 and earlier, Stone Monitors use a Paxos instance for
 each service and store the map as a file. 
 
-.. index:: Ceph Monitor; cluster map
+.. index:: Stone Monitor; cluster map
 
 Cluster Maps
 ------------
 
 The cluster map is a composite of maps, including the monitor map, the OSD map,
 the placement group map and the metadata server map. The cluster map tracks a
-number of important things: which processes are ``in`` the Ceph Storage Cluster;
-which processes that are ``in`` the Ceph Storage Cluster are ``up`` and running
+number of important things: which processes are ``in`` the Stone Storage Cluster;
+which processes that are ``in`` the Stone Storage Cluster are ``up`` and running
 or ``down``; whether, the placement groups are ``active`` or ``inactive``, and
 ``clean`` or in some other state; and, other details that reflect the current
 state of the cluster such as the total amount of storage space, and the amount
 of storage used.
 
-When there is a significant change in the state of the cluster--e.g., a Ceph OSD
+When there is a significant change in the state of the cluster--e.g., a Stone OSD
 Daemon goes down, a placement group falls into a degraded state, etc.--the
 cluster map gets updated to reflect the current state of the cluster.
-Additionally, the Ceph Monitor also maintains a history of the prior states of
+Additionally, the Stone Monitor also maintains a history of the prior states of
 the cluster. The monitor map, OSD map, placement group map and metadata server
 map each maintain a history of their map versions. We call each version an
 "epoch."
 
-When operating your Ceph Storage Cluster, keeping track of these states is an
+When operating your Stone Storage Cluster, keeping track of these states is an
 important part of your system administration duties. See `Monitoring a Cluster`_
 and `Monitoring OSDs and PGs`_ for additional details.
 
@@ -91,15 +91,15 @@ and `Monitoring OSDs and PGs`_ for additional details.
 Monitor Quorum
 --------------
 
-Our Configuring ceph section provides a trivial `Ceph configuration file`_ that
+Our Configuring stone section provides a trivial `Stone configuration file`_ that
 provides for one monitor in the test cluster. A cluster will run fine with a
 single monitor; however, **a single monitor is a single-point-of-failure**. To
-ensure high availability in a production Ceph Storage Cluster, you should run
-Ceph with multiple monitors so that the failure of a single monitor **WILL NOT**
+ensure high availability in a production Stone Storage Cluster, you should run
+Stone with multiple monitors so that the failure of a single monitor **WILL NOT**
 bring down your entire cluster.
 
-When a Ceph Storage Cluster runs multiple Ceph Monitors for high availability,
-Ceph Monitors use `Paxos`_ to establish consensus about the master cluster map.
+When a Stone Storage Cluster runs multiple Stone Monitors for high availability,
+Stone Monitors use `Paxos`_ to establish consensus about the master cluster map.
 A consensus requires a majority of monitors running to establish a quorum for
 consensus about the cluster map (e.g., 1; 2 out of 3; 3 out of 5; 4 out of 6;
 etc.).
@@ -110,74 +110,74 @@ etc.).
 :Type: Boolean
 :Default: ``False``
 
-.. index:: Ceph Monitor; consistency
+.. index:: Stone Monitor; consistency
 
 Consistency
 -----------
 
-When you add monitor settings to your Ceph configuration file, you need to be
-aware of some of the architectural aspects of Ceph Monitors. **Ceph imposes
-strict consistency requirements** for a Ceph monitor when discovering another
-Ceph Monitor within the cluster. Whereas, Ceph Clients and other Ceph daemons
-use the Ceph configuration file to discover monitors, monitors discover each
-other using the monitor map (monmap), not the Ceph configuration file.
+When you add monitor settings to your Stone configuration file, you need to be
+aware of some of the architectural aspects of Stone Monitors. **Stone imposes
+strict consistency requirements** for a Stone monitor when discovering another
+Stone Monitor within the cluster. Whereas, Stone Clients and other Stone daemons
+use the Stone configuration file to discover monitors, monitors discover each
+other using the monitor map (monmap), not the Stone configuration file.
 
-A Ceph Monitor always refers to the local copy of the monmap when discovering
-other Ceph Monitors in the Ceph Storage Cluster. Using the monmap instead of the
-Ceph configuration file avoids errors that could break the cluster (e.g., typos
-in ``ceph.conf`` when specifying a monitor address or port). Since monitors use
-monmaps for discovery and they share monmaps with clients and other Ceph
+A Stone Monitor always refers to the local copy of the monmap when discovering
+other Stone Monitors in the Stone Storage Cluster. Using the monmap instead of the
+Stone configuration file avoids errors that could break the cluster (e.g., typos
+in ``stone.conf`` when specifying a monitor address or port). Since monitors use
+monmaps for discovery and they share monmaps with clients and other Stone
 daemons, **the monmap provides monitors with a strict guarantee that their
 consensus is valid.**
 
 Strict consistency also applies to updates to the monmap. As with any other
-updates on the Ceph Monitor, changes to the monmap always run through a
-distributed consensus algorithm called `Paxos`_. The Ceph Monitors must agree on
-each update to the monmap, such as adding or removing a Ceph Monitor, to ensure
+updates on the Stone Monitor, changes to the monmap always run through a
+distributed consensus algorithm called `Paxos`_. The Stone Monitors must agree on
+each update to the monmap, such as adding or removing a Stone Monitor, to ensure
 that each monitor in the quorum has the same version of the monmap. Updates to
-the monmap are incremental so that Ceph Monitors have the latest agreed upon
-version, and a set of previous versions. Maintaining a history enables a Ceph
+the monmap are incremental so that Stone Monitors have the latest agreed upon
+version, and a set of previous versions. Maintaining a history enables a Stone
 Monitor that has an older version of the monmap to catch up with the current
-state of the Ceph Storage Cluster.
+state of the Stone Storage Cluster.
 
-If Ceph Monitors were to discover each other through the Ceph configuration file
+If Stone Monitors were to discover each other through the Stone configuration file
 instead of through the monmap, additional risks would be introduced because
-Ceph configuration files are not updated and distributed automatically. Ceph
-Monitors might inadvertently use an older Ceph configuration file, fail to
-recognize a Ceph Monitor, fall out of a quorum, or develop a situation where
+Stone configuration files are not updated and distributed automatically. Stone
+Monitors might inadvertently use an older Stone configuration file, fail to
+recognize a Stone Monitor, fall out of a quorum, or develop a situation where
 `Paxos`_ is not able to determine the current state of the system accurately.
 
 
-.. index:: Ceph Monitor; bootstrapping monitors
+.. index:: Stone Monitor; bootstrapping monitors
 
 Bootstrapping Monitors
 ----------------------
 
-In most configuration and deployment cases, tools that deploy Ceph help
-bootstrap the Ceph Monitors by generating a monitor map for you (e.g.,
-``cephadm``, etc). A Ceph Monitor requires a few explicit
+In most configuration and deployment cases, tools that deploy Stone help
+bootstrap the Stone Monitors by generating a monitor map for you (e.g.,
+``stoneadm``, etc). A Stone Monitor requires a few explicit
 settings:
 
 - **Filesystem ID**: The ``fsid`` is the unique identifier for your
   object store. Since you can run multiple clusters on the same
   hardware, you must specify the unique ID of the object store when
   bootstrapping a monitor.  Deployment tools usually do this for you
-  (e.g., ``cephadm`` can call a tool like ``uuidgen``), but you
+  (e.g., ``stoneadm`` can call a tool like ``uuidgen``), but you
   may specify the ``fsid`` manually too.
   
 - **Monitor ID**: A monitor ID is a unique ID assigned to each monitor within 
   the cluster. It is an alphanumeric value, and by convention the identifier 
   usually follows an alphabetical increment (e.g., ``a``, ``b``, etc.). This 
-  can be set in a Ceph configuration file (e.g., ``[mon.a]``, ``[mon.b]``, etc.), 
-  by a deployment tool, or using the ``ceph`` commandline.
+  can be set in a Stone configuration file (e.g., ``[mon.a]``, ``[mon.b]``, etc.), 
+  by a deployment tool, or using the ``stone`` commandline.
 
 - **Keys**: The monitor must have secret keys. A deployment tool such as 
-  ``cephadm`` usually does this for you, but you may
+  ``stoneadm`` usually does this for you, but you may
   perform this step manually too. See `Monitor Keyrings`_ for details.
 
 For additional details on bootstrapping, see `Bootstrapping a Monitor`_.
 
-.. index:: Ceph Monitor; configuring monitors
+.. index:: Stone Monitor; configuring monitors
 
 Configuring Monitors
 ====================
@@ -204,7 +204,7 @@ configuration settings to specific monitors, specify the monitor instance
 Minimum Configuration
 ---------------------
 
-The bare minimum monitor settings for a Ceph monitor via the Ceph configuration
+The bare minimum monitor settings for a Stone monitor via the Stone configuration
 file include a hostname and a network address for each monitor. You can configure
 these under ``[mon]`` or under the entry for a specific monitor.
 
@@ -224,7 +224,7 @@ See the `Network Configuration Reference`_ for details.
 .. note:: This minimum configuration for monitors assumes that a deployment 
    tool generates the ``fsid`` and the ``mon.`` key for you.
 
-Once you deploy a Ceph cluster, you **SHOULD NOT** change the IP addresses of
+Once you deploy a Stone cluster, you **SHOULD NOT** change the IP addresses of
 monitors. However, if you decide to change the monitor's IP address, you
 must follow a specific procedure. See `Changing a Monitor's IP Address`_ for
 details.
@@ -234,7 +234,7 @@ Monitors can also be found by clients by using DNS SRV records. See `Monitor loo
 Cluster ID
 ----------
 
-Each Ceph Storage Cluster has a unique identifier (``fsid``). If specified, it
+Each Stone Storage Cluster has a unique identifier (``fsid``). If specified, it
 usually appears under the ``[global]`` section of the configuration file.
 Deployment tools usually generate the ``fsid`` and store it in the monitor map,
 so the value may not appear in a configuration file. The ``fsid`` makes it
@@ -251,12 +251,12 @@ possible to run daemons for multiple clusters on the same hardware.
    it for you.
 
 
-.. index:: Ceph Monitor; initial members
+.. index:: Stone Monitor; initial members
 
 Initial Members
 ---------------
 
-We recommend running a production Ceph Storage Cluster with at least three Ceph
+We recommend running a production Stone Storage Cluster with at least three Stone
 Monitors to ensure high availability. When you run multiple monitors, you may
 specify the initial monitors that must be members of the cluster in order to
 establish a quorum. This may reduce the time it takes for your cluster to come
@@ -271,7 +271,7 @@ online.
 ``mon_initial_members``
 
 :Description: The IDs of initial monitors in a cluster during startup. If 
-              specified, Ceph requires an odd number of monitors to form an 
+              specified, Stone requires an odd number of monitors to form an 
               initial quorum (e.g., 3). 
 
 :Type: String
@@ -281,30 +281,30 @@ online.
    each other in order to establish a quorum. You can decrease the initial 
    number of monitors to establish a quorum with this setting.
 
-.. index:: Ceph Monitor; data path
+.. index:: Stone Monitor; data path
 
 Data
 ----
 
-Ceph provides a default path where Ceph Monitors store data. For optimal
-performance in a production Ceph Storage Cluster, we recommend running Ceph
-Monitors on separate hosts and drives from Ceph OSD Daemons. As leveldb uses
-``mmap()`` for writing the data, Ceph Monitors flush their data from memory to disk
-very often, which can interfere with Ceph OSD Daemon workloads if the data
+Stone provides a default path where Stone Monitors store data. For optimal
+performance in a production Stone Storage Cluster, we recommend running Stone
+Monitors on separate hosts and drives from Stone OSD Daemons. As leveldb uses
+``mmap()`` for writing the data, Stone Monitors flush their data from memory to disk
+very often, which can interfere with Stone OSD Daemon workloads if the data
 store is co-located with the OSD Daemons.
 
-In Ceph versions 0.58 and earlier, Ceph Monitors store their data in plain files. This 
+In Stone versions 0.58 and earlier, Stone Monitors store their data in plain files. This 
 approach allows users to inspect monitor data with common tools like ``ls``
 and ``cat``. However, this approach didn't provide strong consistency.
 
-In Ceph versions 0.59 and later, Ceph Monitors store their data as key/value
-pairs. Ceph Monitors require `ACID`_ transactions. Using a data store prevents
-recovering Ceph Monitors from running corrupted versions through Paxos, and it
+In Stone versions 0.59 and later, Stone Monitors store their data as key/value
+pairs. Stone Monitors require `ACID`_ transactions. Using a data store prevents
+recovering Stone Monitors from running corrupted versions through Paxos, and it
 enables multiple modification operations in one single atomic batch, among other
 advantages.
 
 Generally, we do not recommend changing the default data location. If you modify
-the default location, we recommend that you make it uniform across Ceph Monitors
+the default location, we recommend that you make it uniform across Stone Monitors
 by setting it in the ``[mon]`` section of the configuration file.
 
 
@@ -312,7 +312,7 @@ by setting it in the ``[mon]`` section of the configuration file.
 
 :Description: The monitor's data location.
 :Type: String
-:Default: ``/var/lib/ceph/mon/$cluster-$id``
+:Default: ``/var/lib/stone/mon/$cluster-$id``
 
 
 ``mon_data_size_warn``
@@ -463,17 +463,17 @@ by setting it in the ``[mon]`` section of the configuration file.
 
 
 
-.. index:: Ceph Storage Cluster; capacity planning, Ceph Monitor; capacity planning
+.. index:: Stone Storage Cluster; capacity planning, Stone Monitor; capacity planning
 
 .. _storage-capacity:
 
 Storage Capacity
 ----------------
 
-When a Ceph Storage Cluster gets close to its maximum capacity
-(see``mon_osd_full ratio``), Ceph prevents you from writing to or reading from OSDs
+When a Stone Storage Cluster gets close to its maximum capacity
+(see``mon_osd_full ratio``), Stone prevents you from writing to or reading from OSDs
 as a safety measure to prevent data loss. Therefore, letting a
-production Ceph Storage Cluster approach its full ratio is not a good practice,
+production Stone Storage Cluster approach its full ratio is not a good practice,
 because it sacrifices high availability. The default full ratio is ``.95``, or
 95% of capacity. This a very aggressive setting for a test cluster with a small
 number of OSDs.
@@ -484,22 +484,22 @@ number of OSDs.
    more OSDs to increase storage capacity.
 
 A common scenario for test clusters involves a system administrator removing an
-OSD from the Ceph Storage Cluster, watching the cluster rebalance, then removing
+OSD from the Stone Storage Cluster, watching the cluster rebalance, then removing
 another OSD, and another, until at least one OSD eventually reaches the full
 ratio and the cluster locks up. We recommend a bit of capacity
 planning even with a test cluster. Planning enables you to gauge how much spare
 capacity you will need in order to maintain high availability. Ideally, you want
-to plan for a series of Ceph OSD Daemon failures where the cluster can recover
+to plan for a series of Stone OSD Daemon failures where the cluster can recover
 to an ``active+clean`` state without replacing those OSDs
 immediately. Cluster operation continues in the ``active+degraded`` state, but this
 is not ideal for normal operation and should be addressed promptly.
 
-The following diagram depicts a simplistic Ceph Storage Cluster containing 33
-Ceph Nodes with one OSD per host, each OSD reading from
-and writing to a 3TB drive. So this exemplary Ceph Storage Cluster has a maximum
-actual capacity of 99TB. With a ``mon osd full ratio`` of ``0.95``, if the Ceph
+The following diagram depicts a simplistic Stone Storage Cluster containing 33
+Stone Nodes with one OSD per host, each OSD reading from
+and writing to a 3TB drive. So this exemplary Stone Storage Cluster has a maximum
+actual capacity of 99TB. With a ``mon osd full ratio`` of ``0.95``, if the Stone
 Storage Cluster falls to 5TB of remaining capacity, the cluster will not allow
-Ceph Clients to read and write data. So the Ceph Storage Cluster's operating
+Stone Clients to read and write data. So the Stone Storage Cluster's operating
 capacity is 95TB, not 99TB.
 
 .. ditaa::
@@ -589,21 +589,21 @@ config store.
          may have an inaccurate CRUSH weight set for the nearfull OSDs.
 
 .. tip:: These settings only apply during cluster creation. Afterwards they need
-         to be changed in the OSDMap using ``ceph osd set-nearfull-ratio`` and
-         ``ceph osd set-full-ratio``
+         to be changed in the OSDMap using ``stone osd set-nearfull-ratio`` and
+         ``stone osd set-full-ratio``
 
 .. index:: heartbeat
 
 Heartbeat
 ---------
 
-Ceph monitors know about the cluster by requiring reports from each OSD, and by
-receiving reports from OSDs about the status of their neighboring OSDs. Ceph
+Stone monitors know about the cluster by requiring reports from each OSD, and by
+receiving reports from OSDs about the status of their neighboring OSDs. Stone
 provides reasonable default settings for monitor/OSD interaction; however,  you
 may modify them as needed. See `Monitor/OSD Interaction`_ for details.
 
 
-.. index:: Ceph Monitor; leader, Ceph Monitor; provider, Ceph Monitor; requester, Ceph Monitor; synchronization
+.. index:: Stone Monitor; leader, Stone Monitor; provider, Stone Monitor; requester, Stone Monitor; synchronization
 
 Monitor Store Synchronization
 -----------------------------
@@ -671,7 +671,7 @@ times. This means the leader and provider roles may migrate from one monitor to
 another. If this happens while synchronizing (e.g., a provider falls behind the
 leader), the provider can terminate synchronization with a requester.
 
-Once synchronization is complete, Ceph performs trimming across the cluster. 
+Once synchronization is complete, Stone performs trimming across the cluster. 
 Trimming requires that the placement groups are ``active+clean``.
 
 
@@ -858,13 +858,13 @@ Trimming requires that the placement groups are ``active+clean``.
 
 
 
-.. index:: Ceph Monitor; clock
+.. index:: Stone Monitor; clock
 
 Clock
 -----
 
-Ceph daemons pass critical messages to each other, which must be processed
-before daemons reach a timeout threshold. If the clocks in Ceph monitors
+Stone daemons pass critical messages to each other, which must be processed
+before daemons reach a timeout threshold. If the clocks in Stone monitors
 are not synchronized, it can lead to a number of anomalies. For example:
 
 - Daemons ignoring received messages (e.g., timestamps outdated)
@@ -873,20 +873,20 @@ are not synchronized, it can lead to a number of anomalies. For example:
 See `Monitor Store Synchronization`_ for details.
 
 
-.. tip:: You must configure NTP or PTP daemons on your Ceph monitor hosts to 
+.. tip:: You must configure NTP or PTP daemons on your Stone monitor hosts to 
          ensure that the monitor cluster operates with synchronized clocks.
          It can be advantageous to have monitor hosts sync with each other
          as well as with multiple quality upstream time sources.
 
 Clock drift may still be noticeable with NTP even though the discrepancy is not
-yet harmful. Ceph's clock drift / clock skew warnings may get triggered even 
+yet harmful. Stone's clock drift / clock skew warnings may get triggered even 
 though NTP maintains a reasonable level of synchronization. Increasing your 
 clock drift may be tolerable under such circumstances; however, a number of 
 factors such as workload, network latency, configuring overrides to default 
 timeouts and the `Monitor Store Synchronization`_ settings may influence 
 the level of acceptable clock drift without compromising Paxos guarantees.
 
-Ceph provides the following tunable options to allow you to find 
+Stone provides the following tunable options to allow you to find 
 acceptable values.
 
 
@@ -1048,7 +1048,7 @@ Miscellaneous
 
 ``mon_stat_smooth_intervals``
 
-:Description: Ceph will smooth statistics over the last ``N`` PG maps.
+:Description: Stone will smooth statistics over the last ``N`` PG maps.
 :Type: Integer
 :Default: ``6``
 
@@ -1146,8 +1146,8 @@ Miscellaneous
 
 ``mon_compact_on_start``
 
-:Description: Compact the database used as Ceph Monitor store on
-              ``ceph-mon`` start. A manual compaction helps to shrink the
+:Description: Compact the database used as Stone Monitor store on
+              ``stone-mon`` start. A manual compaction helps to shrink the
               monitor database and improve the performance of it if the regular
               compaction fails to work.
 
@@ -1157,7 +1157,7 @@ Miscellaneous
 
 ``mon_compact_on_bootstrap``
 
-:Description: Compact the database used as Ceph Monitor store
+:Description: Compact the database used as Stone Monitor store
               on bootstrap. Monitors probe each other to establish
               a quorum after bootstrap. If a monitor times out before joining the
               quorum, it will start over and bootstrap again.
@@ -1227,7 +1227,7 @@ Miscellaneous
 
 .. _Paxos: https://en.wikipedia.org/wiki/Paxos_(computer_science)
 .. _Monitor Keyrings: ../../../dev/mon-bootstrap#secret-keys
-.. _Ceph configuration file: ../ceph-conf/#monitors
+.. _Stone configuration file: ../stone-conf/#monitors
 .. _Network Configuration Reference: ../network-config-ref
 .. _Monitor lookup through DNS: ../mon-lookup-dns
 .. _ACID: https://en.wikipedia.org/wiki/ACID

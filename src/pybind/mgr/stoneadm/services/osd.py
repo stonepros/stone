@@ -3,29 +3,29 @@ import logging
 from threading import Lock
 from typing import List, Dict, Any, Set, Tuple, cast, Optional, TYPE_CHECKING
 
-from ceph.deployment import translate
-from ceph.deployment.drive_group import DriveGroupSpec
-from ceph.deployment.drive_selection import DriveSelection
-from ceph.deployment.inventory import Device
-from ceph.utils import datetime_to_str, str_to_datetime
+from stone.deployment import translate
+from stone.deployment.drive_group import DriveGroupSpec
+from stone.deployment.drive_selection import DriveSelection
+from stone.deployment.inventory import Device
+from stone.utils import datetime_to_str, str_to_datetime
 
 from datetime import datetime
 import orchestrator
-from cephadm.serve import CephadmServe
-from cephadm.utils import forall_hosts
-from ceph.utils import datetime_now
+from stoneadm.serve import StoneadmServe
+from stoneadm.utils import forall_hosts
+from stone.utils import datetime_now
 from orchestrator import OrchestratorError, DaemonDescription
 from mgr_module import MonCommandFailed
 
-from cephadm.services.cephadmservice import CephadmDaemonDeploySpec, CephService
+from stoneadm.services.stoneadmservice import StoneadmDaemonDeploySpec, StoneService
 
 if TYPE_CHECKING:
-    from cephadm.module import CephadmOrchestrator
+    from stoneadm.module import StoneadmOrchestrator
 
 logger = logging.getLogger(__name__)
 
 
-class OSDService(CephService):
+class OSDService(StoneService):
     TYPE = 'osd'
 
     def create_from_spec(self, drive_group: DriveGroupSpec) -> str:
@@ -48,7 +48,7 @@ class OSDService(CephService):
 
             osd_id_claims_for_host = osd_id_claims.filtered_by_host(host)
 
-            cmd = self.driveselection_to_ceph_volume(drive_selection,
+            cmd = self.driveselection_to_stone_volume(drive_selection,
                                                      osd_id_claims_for_host)
             if not cmd:
                 logger.debug("No data_devices, skipping DriveGroup: {}".format(
@@ -59,7 +59,7 @@ class OSDService(CephService):
                 drive_group.service_id, host
             ))
             start_ts = datetime_now()
-            env_vars: List[str] = [f"CEPH_VOLUME_OSDSPEC_AFFINITY={drive_group.service_id}"]
+            env_vars: List[str] = [f"STONE_VOLUME_OSDSPEC_AFFINITY={drive_group.service_id}"]
             ret_msg = self.create_single_host(
                 drive_group, host, cmd,
                 replace_osd_ids=osd_id_claims_for_host, env_vars=env_vars
@@ -77,17 +77,17 @@ class OSDService(CephService):
                            drive_group: DriveGroupSpec,
                            host: str, cmd: str, replace_osd_ids: List[str],
                            env_vars: Optional[List[str]] = None) -> str:
-        out, err, code = self._run_ceph_volume_command(host, cmd, env_vars=env_vars)
+        out, err, code = self._run_stone_volume_command(host, cmd, env_vars=env_vars)
 
         if code == 1 and ', it is already prepared' in '\n'.join(err):
-            # HACK: when we create against an existing LV, ceph-volume
+            # HACK: when we create against an existing LV, stone-volume
             # returns an error and the above message.  To make this
             # command idempotent, tolerate this "error" and continue.
             logger.debug('the device was already prepared; continuing')
             code = 0
         if code:
             raise RuntimeError(
-                'cephadm exited with an error code: %d, stderr:%s' % (
+                'stoneadm exited with an error code: %d, stderr:%s' % (
                     code, '\n'.join(err)))
         return self.deploy_osd_daemons_for_existing_osds(host, drive_group.service_name(),
                                                          replace_osd_ids)
@@ -99,8 +99,8 @@ class OSDService(CephService):
             replace_osd_ids = OsdIdClaims(self.mgr).filtered_by_host(host)
             assert replace_osd_ids is not None
         # check result
-        osds_elems: dict = CephadmServe(self.mgr)._run_cephadm_json(
-            host, 'osd', 'ceph-volume',
+        osds_elems: dict = StoneadmServe(self.mgr)._run_stoneadm_json(
+            host, 'osd', 'stone-volume',
             [
                 '--',
                 'lvm', 'list',
@@ -114,35 +114,35 @@ class OSDService(CephService):
             for osd in osds:
                 if osd['type'] == 'db':
                     continue
-                if osd['tags']['ceph.cluster_fsid'] != fsid:
+                if osd['tags']['stone.cluster_fsid'] != fsid:
                     logger.debug('mismatched fsid, skipping %s' % osd)
                     continue
                 if osd_id in before_osd_uuid_map and osd_id not in replace_osd_ids:
                     # if it exists but is part of the replacement operation, don't skip
                     continue
                 if self.mgr.cache.has_daemon(f'osd.{osd_id}', host):
-                    # cephadm daemon instance already exists
+                    # stoneadm daemon instance already exists
                     logger.debug(f'osd id {osd_id} daemon already exists')
                     continue
                 if osd_id not in osd_uuid_map:
                     logger.debug('osd id {} does not exist in cluster'.format(osd_id))
                     continue
-                if osd_uuid_map.get(osd_id) != osd['tags']['ceph.osd_fsid']:
+                if osd_uuid_map.get(osd_id) != osd['tags']['stone.osd_fsid']:
                     logger.debug('mismatched osd uuid (cluster has %s, osd '
                                  'has %s)' % (
                                      osd_uuid_map.get(osd_id),
-                                     osd['tags']['ceph.osd_fsid']))
+                                     osd['tags']['stone.osd_fsid']))
                     continue
 
                 created.append(osd_id)
-                daemon_spec: CephadmDaemonDeploySpec = CephadmDaemonDeploySpec(
+                daemon_spec: StoneadmDaemonDeploySpec = StoneadmDaemonDeploySpec(
                     service_name=service_name,
                     daemon_id=str(osd_id),
                     host=host,
                     daemon_type='osd',
                 )
                 daemon_spec.final_config, daemon_spec.deps = self.generate_config(daemon_spec)
-                CephadmServe(self.mgr)._create_daemon(
+                StoneadmServe(self.mgr)._create_daemon(
                     daemon_spec,
                     osd_uuid_map=osd_uuid_map)
 
@@ -186,13 +186,13 @@ class OSDService(CephService):
         return host_ds_map
 
     @staticmethod
-    def driveselection_to_ceph_volume(drive_selection: DriveSelection,
+    def driveselection_to_stone_volume(drive_selection: DriveSelection,
                                       osd_id_claims: Optional[List[str]] = None,
                                       preview: bool = False) -> Optional[str]:
-        logger.debug(f"Translating DriveGroup <{drive_selection.spec}> to ceph-volume command")
-        cmd: Optional[str] = translate.to_ceph_volume(drive_selection,
+        logger.debug(f"Translating DriveGroup <{drive_selection.spec}> to stone-volume command")
+        cmd: Optional[str] = translate.to_stone_volume(drive_selection,
                                                       osd_id_claims, preview=preview).run()
-        logger.debug(f"Resulting ceph-volume cmd: {cmd}")
+        logger.debug(f"Resulting stone-volume cmd: {cmd}")
         return cmd
 
     def get_previews(self, host: str) -> List[Dict[str, Any]]:
@@ -236,7 +236,7 @@ class OSDService(CephService):
                     continue
 
                 # driveselection for host
-                cmd = self.driveselection_to_ceph_volume(ds,
+                cmd = self.driveselection_to_stone_volume(ds,
                                                          osd_id_claims.filtered_by_host(host),
                                                          preview=True)
                 if not cmd:
@@ -244,8 +244,8 @@ class OSDService(CephService):
                         osdspec.service_name()))
                     continue
 
-                # get preview data from ceph-volume
-                out, err, code = self._run_ceph_volume_command(host, cmd)
+                # get preview data from stone-volume
+                out, err, code = self._run_stone_volume_command(host, cmd)
                 if out:
                     try:
                         concat_out: Dict[str, Any] = json.loads(' '.join(out))
@@ -288,7 +288,7 @@ class OSDService(CephService):
                 matching_specs.append(spec)
         return matching_specs
 
-    def _run_ceph_volume_command(self, host: str,
+    def _run_stone_volume_command(self, host: str,
                                  cmd: str, env_vars: Optional[List[str]] = None
                                  ) -> Tuple[List[str], List[str], int]:
         self.mgr.inventory.assert_host(host)
@@ -300,15 +300,15 @@ class OSDService(CephService):
         })
 
         j = json.dumps({
-            'config': self.mgr.get_minimal_ceph_conf(),
+            'config': self.mgr.get_minimal_stone_conf(),
             'keyring': keyring,
         })
 
         split_cmd = cmd.split(' ')
         _cmd = ['--config-json', '-', '--']
         _cmd.extend(split_cmd)
-        out, err, code = CephadmServe(self.mgr)._run_cephadm(
-            host, 'osd', 'ceph-volume',
+        out, err, code = StoneadmServe(self.mgr)._run_stoneadm(
+            host, 'osd', 'stone-volume',
             _cmd,
             env_vars=env_vars,
             stdin=j,
@@ -317,7 +317,7 @@ class OSDService(CephService):
 
     def post_remove(self, daemon: DaemonDescription, is_failed_deploy: bool) -> None:
         # Do not remove the osd.N keyring, if we failed to deploy the OSD, because
-        # we cannot recover from it. The OSD keys are created by ceph-volume and not by
+        # we cannot recover from it. The OSD keys are created by stone-volume and not by
         # us.
         if not is_failed_deploy:
             super().post_remove(daemon, is_failed_deploy=is_failed_deploy)
@@ -328,8 +328,8 @@ class OsdIdClaims(object):
     Retrieve and provide osd ids that can be reused in the cluster
     """
 
-    def __init__(self, mgr: "CephadmOrchestrator") -> None:
-        self.mgr: "CephadmOrchestrator" = mgr
+    def __init__(self, mgr: "StoneadmOrchestrator") -> None:
+        self.mgr: "StoneadmOrchestrator" = mgr
         self.osd_host_map: Dict[str, List[str]] = dict()
         self.refresh()
 
@@ -373,8 +373,8 @@ class OsdIdClaims(object):
 
 
 class RemoveUtil(object):
-    def __init__(self, mgr: "CephadmOrchestrator") -> None:
-        self.mgr: "CephadmOrchestrator" = mgr
+    def __init__(self, mgr: "StoneadmOrchestrator") -> None:
+        self.mgr: "StoneadmOrchestrator" = mgr
 
     def get_osds_in_cluster(self) -> List[str]:
         osd_map = self.mgr.get_osdmap()
@@ -479,8 +479,8 @@ class RemoveUtil(object):
     def zap_osd(self, osd: "OSD") -> str:
         "Zaps all devices that are associated with an OSD"
         if osd.hostname is not None:
-            out, err, code = CephadmServe(self.mgr)._run_cephadm(
-                osd.hostname, 'osd', 'ceph-volume',
+            out, err, code = StoneadmServe(self.mgr)._run_stoneadm(
+                osd.hostname, 'osd', 'stone-volume',
                 ['--', 'lvm', 'zap', '--destroy', '--osd-id', str(osd.osd_id)],
                 error_ok=True)
             self.mgr.cache.invalidate_host_devices(osd.hostname)
@@ -722,8 +722,8 @@ class OSD:
 
 class OSDRemovalQueue(object):
 
-    def __init__(self, mgr: "CephadmOrchestrator") -> None:
-        self.mgr: "CephadmOrchestrator" = mgr
+    def __init__(self, mgr: "StoneadmOrchestrator") -> None:
+        self.mgr: "StoneadmOrchestrator" = mgr
         self.osds: Set[OSD] = set()
         self.rm_util = RemoveUtil(mgr)
 
@@ -780,7 +780,7 @@ class OSDRemovalQueue(object):
             assert osd.hostname is not None
 
             if self.mgr.cache.has_daemon(f'osd.{osd.osd_id}'):
-                CephadmServe(self.mgr)._remove_daemon(f'osd.{osd.osd_id}', osd.hostname)
+                StoneadmServe(self.mgr)._remove_daemon(f'osd.{osd.osd_id}', osd.hostname)
                 logger.info(f"Successfully removed {osd} on {osd.hostname}")
             else:
                 logger.info(f"Daemon {osd} on {osd.hostname} was already removed")

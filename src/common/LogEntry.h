@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,7 +20,7 @@
 #include "common/entity_name.h"
 #include "ostream_temp.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -69,7 +69,7 @@ public:
     return _hash;
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<LogEntryKey*>& o);
 
   friend bool operator==(const LogEntryKey& l, const LogEntryKey& r) {
@@ -101,9 +101,9 @@ struct LogEntry {
 
   void log_to_syslog(std::string level, std::string facility);
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<LogEntry*>& o);
   static clog_type str_to_level(std::string const &str);
 };
@@ -114,7 +114,7 @@ struct LogSummary {
   // channel -> [(seq#, entry), ...]
   std::map<std::string,std::list<std::pair<uint64_t,LogEntry>>> tail_by_channel;
   uint64_t seq = 0;
-  ceph::unordered_set<LogEntryKey> keys;
+  stone::unordered_set<LogEntryKey> keys;
 
   LogSummary() : version(0) {}
 
@@ -136,9 +136,9 @@ struct LogSummary {
     return keys.count(k);
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<LogSummary*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(LogSummary)

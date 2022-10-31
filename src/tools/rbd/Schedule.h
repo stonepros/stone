@@ -12,7 +12,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 namespace rbd {
 
@@ -33,7 +33,7 @@ public:
   }
   
   int parse(json_spirit::mValue &schedule_val);
-  void dump(ceph::Formatter *f);
+  void dump(stone::Formatter *f);
 
   friend std::ostream& operator<<(std::ostream& os, Schedule &s);
 
@@ -51,7 +51,7 @@ public:
 
   int parse(const std::string &list);
   Schedule *find(const std::string &name);
-  void dump(ceph::Formatter *f);
+  void dump(stone::Formatter *f);
 
   friend std::ostream& operator<<(std::ostream& os, ScheduleList &l);
 

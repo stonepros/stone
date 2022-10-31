@@ -35,7 +35,7 @@ public:
   WriteLogEntry(const WriteLogEntry&) = delete;
   WriteLogEntry &operator=(const WriteLogEntry&) = delete;
   void writeback_bl(librbd::cache::ImageWritebackInterface &image_writeback,
-                 Context *ctx, ceph::bufferlist &&bl) override;
+                 Context *ctx, stone::bufferlist &&bl) override;
   void init_cache_bl(bufferlist &src_bl, uint64_t off, uint64_t len) override;
   buffer::list &get_cache_bl() override;
   void copy_cache_bl(bufferlist *out) override;
@@ -64,7 +64,7 @@ public:
   WriteSameLogEntry(const WriteSameLogEntry&) = delete;
   WriteSameLogEntry &operator=(const WriteSameLogEntry&) = delete;
   void writeback_bl(librbd::cache::ImageWritebackInterface &image_writeback,
-                 Context *ctx, ceph::bufferlist &&bl) override;
+                 Context *ctx, stone::bufferlist &&bl) override;
 };
 
 } // namespace ssd

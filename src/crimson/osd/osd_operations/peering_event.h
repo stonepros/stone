@@ -11,7 +11,7 @@
 #include "osd/PGPeeringEvent.h"
 #include "osd/PeeringState.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -69,7 +69,7 @@ public:
     ShardServices &shard_services, const pg_shard_t &from, const spg_t &pgid,
     Args&&... args) :
     shard_services(shard_services),
-    ctx{ceph_release_t::octopus},
+    ctx{stone_release_t::octopus},
     from(from),
     pgid(pgid),
     evt(std::forward<Args>(args)...)
@@ -79,7 +79,7 @@ public:
     ShardServices &shard_services, const pg_shard_t &from, const spg_t &pgid,
     float delay, Args&&... args) :
     shard_services(shard_services),
-    ctx{ceph_release_t::octopus},
+    ctx{stone_release_t::octopus},
     from(from),
     pgid(pgid),
     delay(delay),
@@ -87,7 +87,7 @@ public:
   {}
 
   void print(std::ostream &) const final;
-  void dump_detail(ceph::Formatter* f) const final;
+  void dump_detail(stone::Formatter* f) const final;
   seastar::future<> start();
 };
 

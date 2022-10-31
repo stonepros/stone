@@ -30,7 +30,7 @@ def task(ctx, config):
     example:
 
     tasks:
-    - ceph:
+    - stone:
     - watch_notify_same_primary:
         clients: [client.0]
     - interactive:
@@ -46,7 +46,7 @@ def task(ctx, config):
     PREFIX = 'client.'
     assert role.startswith(PREFIX)
     (remote,) = ctx.cluster.only(role).remotes.keys()
-    manager = ctx.managers['ceph']
+    manager = ctx.managers['stone']
     manager.raw_cluster_cmd('osd', 'set', 'noout')
 
     pool = manager.create_pool_with_unique_name()

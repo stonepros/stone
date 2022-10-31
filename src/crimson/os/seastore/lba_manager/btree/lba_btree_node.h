@@ -53,7 +53,7 @@ struct LBANode : CachedExtent {
 
   btree_range_pin_t pin;
 
-  LBANode(ceph::bufferptr &&ptr) : CachedExtent(std::move(ptr)), pin(this) {}
+  LBANode(stone::bufferptr &&ptr) : CachedExtent(std::move(ptr)), pin(this) {}
   LBANode(const LBANode &rhs)
     : CachedExtent(rhs), pin(rhs.pin, this) {}
 

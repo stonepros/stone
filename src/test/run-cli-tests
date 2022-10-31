@@ -26,7 +26,7 @@ if [ ! -e "$CRAM_BIN" ]; then
     # https://bitbucket.org/brodie/cram/issue/9/allow-read-only-directories-for-t
     # -- tv@inktank.com
     python3 -m venv "$VENV" && $VENV/bin/pip --log "$VENV"/log.txt \
-        install git+https://github.com/ceph/cram.git@0.7-error-dir#egg=cram
+        install git+https://github.com/stone/cram.git@0.7-error-dir#egg=cram
 fi
 
 SRCDIR_ABS="$(readlink -f "$SRCDIR")"
@@ -43,8 +43,8 @@ for tool in "$SRCDIR"/cli/*; do
     install -d -m0755 -- "$BUILDDIR/cli/$toolname"
     if ! env -i \
 	PATH="$BUILDDIR_ABS/..:$SRCDIR_ABS/..:$PATH" \
-	CEPH_CONF=/dev/null \
-	CEPH_ARGS="--no-mon-config" \
+	STONE_CONF=/dev/null \
+	STONE_ARGS="--no-mon-config" \
 	CCACHE_DIR="$CCACHE_DIR" \
 	CC="$CC" \
 	CXX="$CXX" \

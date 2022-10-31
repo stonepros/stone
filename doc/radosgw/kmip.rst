@@ -33,9 +33,9 @@ KMIP Integration
                 |                 | object          |             |
                 |                 |------------------------------>|
 
-#. `Setting KMIP Access for Ceph`_
+#. `Setting KMIP Access for Stone`_
 #. `Creating Keys in KMIP`_
-#. `Configure the Ceph Object Gateway`_
+#. `Configure the Stone Object Gateway`_
 #. `Upload object`_
 
 Before you can use KMIP with ceph, you will need to do three things.
@@ -43,10 +43,10 @@ You will need to associate ceph with client information in KMIP,
 and configure ceph to use that client information.
 You will also need to create 1 or more keys in KMIP.
 
-Setting KMIP Access for Ceph
+Setting KMIP Access for Stone
 ============================
 
-Setting up Ceph in KMIP is very dependent on the mechanism(s) supported
+Setting up Stone in KMIP is very dependent on the mechanism(s) supported
 by your implementation of KMIP.  Two implementations are described
 here,
 
@@ -64,7 +64,7 @@ Using IBM SKLM
 IBM SKLM__ supports client authentication using certificates.
 Certificates may either be self-signed certificates created,
 for instance, using openssl, or certificates may be created
-using SKLM.  Ceph should then be configured (see below) to
+using SKLM.  Stone should then be configured (see below) to
 use KMIP and an attempt made to use it.  This will fail,
 but it will leave an "untrusted client device certificate" in SKLM.
 This can be then upgraded to a registered client using the web
@@ -165,10 +165,10 @@ until a blank line or end of file (^D) is given it, or
 an error occurs.  Of course you can turn this into a regular
 python script if you prefer.
 
-Configure the Ceph Object Gateway
+Configure the Stone Object Gateway
 =================================
 
-Edit the Ceph configuration file to enable Vault as a KMS backend for
+Edit the Stone configuration file to enable Vault as a KMS backend for
 server-side encryption::
 
   rgw crypt s3 kms backend = kmip

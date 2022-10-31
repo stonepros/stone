@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -34,11 +34,11 @@
 // handler. This is only allowed with a signature of
 // (boost::system::error_code) or (). On completion the AioCompletion
 // is completed with the error_code converted to an int with
-// ceph::from_error_code.
+// stone::from_error_code.
 //
 // async_result::return_type is void.
 
-namespace ceph::async {
+namespace stone::async {
 
 namespace bs = boost::system;
 namespace lr = librados;
@@ -67,7 +67,7 @@ struct librados_handler {
 
   void operator()(bs::error_code ec) {
     pc->lock.lock();
-    pc->rval = ceph::from_error_code(ec);
+    pc->rval = stone::from_error_code(ec);
     pc->complete = true;
     pc->lock.unlock();
 
@@ -94,14 +94,14 @@ struct librados_handler {
   }
 };
 } // namespace detail
-} // namespace ceph::async
+} // namespace stone::async
 
 
 namespace boost::asio {
 template<typename ReturnType>
 class async_result<librados::AioCompletion*, ReturnType()> {
 public:
-  using completion_handler_type = ceph::async::detail::librados_handler;
+  using completion_handler_type = stone::async::detail::librados_handler;
   explicit async_result(completion_handler_type&) {};
   using return_type = void;
   void get() {
@@ -113,7 +113,7 @@ template<typename ReturnType>
 class async_result<librados::AioCompletion*,
 		   ReturnType(boost::system::error_code)> {
 public:
-  using completion_handler_type = ceph::async::detail::librados_handler;
+  using completion_handler_type = stone::async::detail::librados_handler;
   explicit async_result(completion_handler_type&) {};
   using return_type = void;
   void get() {

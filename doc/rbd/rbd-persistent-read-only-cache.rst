@@ -2,7 +2,7 @@
  RBD Persistent Read-only Cache
 ===============================
 
-.. index:: Ceph Block Device; Persistent Read-only Cache
+.. index:: Stone Block Device; Persistent Read-only Cache
 
 Shared, Read-only Parent Image Cache
 ====================================
@@ -19,7 +19,7 @@ RBD cache must be explicitly enabled in
 caching the parent content on the local disk, and future reads on that data
 will be serviced from the local cache.
 
-.. note:: RBD shared read-only parent image cache requires the Ceph Nautilus release or later.
+.. note:: RBD shared read-only parent image cache requires the Stone Nautilus release or later.
 
 .. ditaa::
 
@@ -37,7 +37,7 @@ will be serviced from the local cache.
 Enable RBD Shared Read-only Parent Image Cache
 ----------------------------------------------
 
-To enable RBD shared read-only parent image cache, the following Ceph settings
+To enable RBD shared read-only parent image cache, the following Stone settings
 need to added in the ``[client]`` `section`_ of your ``ceph.conf`` file::
 
         rbd parent cache enabled = true
@@ -119,8 +119,8 @@ The ``ceph-immutable-object-cache`` daemon is available within the optional
 Running the Immutable Object Cache Daemon
 -----------------------------------------
 
-``ceph-immutable-object-cache`` daemon should use a unique Ceph user ID.
-To `create a Ceph user`_, with ``ceph`` specify the ``auth get-or-create``
+``ceph-immutable-object-cache`` daemon should use a unique Stone user ID.
+To `create a Stone user`_, with ``ceph`` specify the ``auth get-or-create``
 command, user name, monitor caps, and OSD caps::
 
   ceph auth get-or-create client.ceph-immutable-object-cache.{unique id} mon 'allow r' osd 'profile rbd-read-only'
@@ -196,5 +196,5 @@ The immutable object cache supports throttling, controlled by the following sett
 
 .. _Cloned RBD Images: ../rbd-snapshot/#layering
 .. _section: ../../rados/configuration/ceph-conf/#configuration-sections
-.. _create a Ceph user: ../../rados/operations/user-management#add-a-user
+.. _create a Stone user: ../../rados/operations/user-management#add-a-user
 

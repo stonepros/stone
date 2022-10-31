@@ -6,14 +6,14 @@
 
 #include "include/int_types.h"
 #include "common/dout.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/set.hpp>
 #include <deque>
 #include <list>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::BlockGuard: " << this << " " \
                            <<  __func__ << ": "
@@ -112,7 +112,7 @@ public:
   void release(BlockGuardCell *cell, BlockOperations *block_operations) {
     std::lock_guard locker{m_lock};
 
-    ceph_assert(cell != nullptr);
+    stone_assert(cell != nullptr);
     auto &detained_block_extent = reinterpret_cast<DetainedBlockExtent &>(
       *cell);
     ldout(m_cct, 20) << detained_block_extent.block_extent << ", "
@@ -160,7 +160,7 @@ private:
 
   StoneContext *m_cct;
 
-  ceph::mutex m_lock = ceph::make_mutex("librbd::BlockGuard::m_lock");
+  stone::mutex m_lock = stone::make_mutex("librbd::BlockGuard::m_lock");
   DetainedBlockExtentsPool m_detained_block_extent_pool;
   DetainedBlockExtents m_free_detained_block_extents;
   BlockExtentToDetainedBlockExtents m_detained_block_extents;

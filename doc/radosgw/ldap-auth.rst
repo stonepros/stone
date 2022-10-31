@@ -4,17 +4,17 @@ LDAP Authentication
 
 .. versionadded:: Jewel
 
-You can delegate the Ceph Object Gateway authentication to an LDAP server.
+You can delegate the Stone Object Gateway authentication to an LDAP server.
 
 How it works
 ============
 
-The Ceph Object Gateway extracts the users LDAP credentials from a token. A
-search filter is constructed with the user name. The Ceph Object Gateway uses
+The Stone Object Gateway extracts the users LDAP credentials from a token. A
+search filter is constructed with the user name. The Stone Object Gateway uses
 the configured service account to search the directory for a matching entry. If
-an entry is found, the Ceph Object Gateway attempts to bind to the found
+an entry is found, the Stone Object Gateway attempts to bind to the found
 distinguished name with the password from the token. If the credentials are
-valid, the bind will succeed, and the Ceph Object Gateway will grant access and
+valid, the bind will succeed, and the Stone Object Gateway will grant access and
 radosgw-user will be created with the provided username.
 
 You can limit the allowed users by setting the base for the search to a
@@ -29,14 +29,14 @@ base-64-encoded credentials / access tokens.
 Requirements
 ============
 
-- **LDAP or Active Directory:** A running LDAP instance accessible by the Ceph
+- **LDAP or Active Directory:** A running LDAP instance accessible by the Stone
   Object Gateway
-- **Service account:** LDAP credentials to be used by the Ceph Object Gateway
+- **Service account:** LDAP credentials to be used by the Stone Object Gateway
   with search permissions
 - **User account:** At least one user account in the LDAP directory
 - **Do not overlap LDAP and local users:** You should not use the same user
   names for local users and for users being authenticated by using LDAP. The
-  Ceph Object Gateway cannot distinguish them and it treats them as the same
+  Stone Object Gateway cannot distinguish them and it treats them as the same
   user.
 
 Sanity checks
@@ -49,13 +49,13 @@ Use the ``ldapsearch`` utility to verify the service account or the LDAP connect
   # ldapsearch -x -D "uid=ceph,ou=system,dc=example,dc=com" -W \
   -H ldaps://example.com -b "ou=users,dc=example,dc=com" 'uid=*' dn
 
-.. note:: Make sure to use the same LDAP parameters like in the Ceph configuration file to
+.. note:: Make sure to use the same LDAP parameters like in the Stone configuration file to
           eliminate possible problems.
 
-Configuring the Ceph Object Gateway to use LDAP authentication
+Configuring the Stone Object Gateway to use LDAP authentication
 ==============================================================
 
-The following parameters in the Ceph configuration file are related to the LDAP
+The following parameters in the Stone configuration file are related to the LDAP
 authentication:
 
 - ``rgw_s3_auth_use_ldap``: Set this to ``true`` to enable S3 authentication with LDAP
@@ -63,7 +63,7 @@ authentication:
   ``ldaps://<fqdn>:<port>`` parameter to not transmit clear text credentials
   over the wire.
 - ``rgw_ldap_binddn``: The Distinguished Name (DN) of the service account used
-  by the Ceph Object Gateway
+  by the Stone Object Gateway
 - ``rgw_ldap_secret``: Path to file containing credentials for ``rgw_ldap_binddn``
 - ``rgw_ldap_searchdn``: Specifies the base in the directory information tree
   for searching users. This might be your users organizational unit or some
@@ -72,7 +72,7 @@ authentication:
   filter to match a username. Depending on your Directory Information Tree
   (DIT) this would probably be ``uid`` or ``cn``. The generated filter string
   will be, e.g., ``cn=some_username``.
-- ``rgw_ldap_searchfilter``: If not specified, the Ceph Object Gateway
+- ``rgw_ldap_searchfilter``: If not specified, the Stone Object Gateway
   automatically constructs the search filter with the ``rgw_ldap_dnattr``
   setting. Use this parameter to narrow the list of allowed users in very
   flexible ways. Consult the *Using a custom search filter to limit user access
@@ -92,7 +92,7 @@ An example for a partial filter:
 
   "objectclass=inetorgperson"
 
-The Ceph Object Gateway will generate the search filter as usual with the
+The Stone Object Gateway will generate the search filter as usual with the
 user name from the token and the value of ``rgw_ldap_dnattr``. The constructed
 filter is then combined with the partial filter from the ``rgw_search_filter``
 attribute. Depending on the user name and the settings the final search filter

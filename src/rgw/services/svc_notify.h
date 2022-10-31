@@ -31,7 +31,7 @@ private:
   RGWSI_RADOS *rados_svc{nullptr};
   RGWSI_Finisher *finisher_svc{nullptr};
 
-  ceph::shared_mutex watchers_lock = ceph::make_shared_mutex("watchers_lock");
+  stone::shared_mutex watchers_lock = stone::make_shared_mutex("watchers_lock");
   rgw_pool control_pool;
 
   int num_watchers{0};
@@ -84,7 +84,7 @@ private:
 
   void schedule_context(Context *c);
 public:
-  RGWSI_Notify(CephContext *cct): RGWServiceInstance(cct) {}
+  RGWSI_Notify(StoneContext *cct): RGWServiceInstance(cct) {}
   ~RGWSI_Notify();
 
   class CB {

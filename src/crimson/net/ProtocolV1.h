@@ -29,7 +29,7 @@ class ProtocolV1 final : public Protocol {
 
   void trigger_close() override;
 
-  ceph::bufferlist do_sweep_messages(
+  stone::bufferlist do_sweep_messages(
       const std::deque<MessageRef>& msgs,
       size_t num_msgs,
       bool require_keepalive,
@@ -52,10 +52,10 @@ class ProtocolV1 final : public Protocol {
 
   // state for handshake
   struct Handshake {
-    ceph_msg_connect connect;
-    ceph_msg_connect_reply reply;
-    ceph::bufferlist auth_payload;  // auth(orizer) payload read off the wire
-    ceph::bufferlist auth_more;     // connect-side auth retry (we added challenge)
+    stone_msg_connect connect;
+    stone_msg_connect_reply reply;
+    stone::bufferlist auth_payload;  // auth(orizer) payload read off the wire
+    stone::bufferlist auth_more;     // connect-side auth retry (we added challenge)
     std::chrono::milliseconds backoff;
     uint32_t connect_seq = 0;
     uint32_t peer_global_seq = 0;
@@ -66,8 +66,8 @@ class ProtocolV1 final : public Protocol {
 
   // state for an incoming message
   struct MessageReader {
-    ceph_msg_header header;
-    ceph_msg_footer footer;
+    stone_msg_header header;
+    stone_msg_footer footer;
     bufferlist front;
     bufferlist middle;
     bufferlist data;
@@ -76,13 +76,13 @@ class ProtocolV1 final : public Protocol {
   struct Keepalive {
     struct {
       const char tag = STONE_MSGR_TAG_KEEPALIVE2;
-      ceph_timespec stamp;
+      stone_timespec stamp;
     } __attribute__((packed)) req;
     struct {
       const char tag = STONE_MSGR_TAG_KEEPALIVE2_ACK;
-      ceph_timespec stamp;
+      stone_timespec stamp;
     } __attribute__((packed)) ack;
-    ceph_timespec ack_stamp;
+    stone_timespec ack_stamp;
   } k;
 
  private:
@@ -90,7 +90,7 @@ class ProtocolV1 final : public Protocol {
   void reset_session();
   seastar::future<stop_t> handle_connect_reply(crimson::net::msgr_tag_t tag);
   seastar::future<stop_t> repeat_connect();
-  ceph::bufferlist get_auth_payload();
+  stone::bufferlist get_auth_payload();
 
   // accepting
   seastar::future<stop_t> send_connect_reply(
@@ -104,7 +104,7 @@ class ProtocolV1 final : public Protocol {
   seastar::future<stop_t> handle_connect_with_existing(
       SocketConnectionRef existing, bufferlist&& authorizer_reply);
   bool require_auth_feature() const;
-  bool require_cephx_v2_feature() const;
+  bool require_stonex_v2_feature() const;
   seastar::future<stop_t> repeat_handle_connect();
 
   // open

@@ -38,12 +38,12 @@ function gen_child_specs() {
     echo $child_specs
 }
 
-ceph osd pool create foo 12
+stone osd pool create foo 12
 rbd pool init foo
-ceph osd pool create bar 12
+stone osd pool create bar 12
 rbd pool init bar
 
-ceph osd set-require-min-compat-client nautilus
+stone osd set-require-min-compat-client nautilus
 rbd namespace create foo/ns1
 rbd namespace create foo/ns2
 

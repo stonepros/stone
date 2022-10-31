@@ -1,7 +1,7 @@
 import os
 import errno
 
-import cephfs
+import stonefs
 
 from ..exception import VolumeException
 
@@ -12,9 +12,9 @@ def mksnap(fs, snappath):
     try:
         # snap create does not accept mode -- use default
         fs.mkdir(snappath, 0o755)
-    except cephfs.ObjectExists:
+    except stonefs.ObjectExists:
         return
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         raise VolumeException(-e.args[0], e.args[1])
 
 def rmsnap(fs, snappath):
@@ -24,7 +24,7 @@ def rmsnap(fs, snappath):
     try:
         fs.stat(snappath)
         fs.rmdir(snappath)
-    except cephfs.ObjectNotFound:
+    except stonefs.ObjectNotFound:
         raise VolumeException(-errno.ENOENT, "snapshot '{0}' does not exist".format(os.path.basename(snappath)))
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         raise VolumeException(-e.args[0], e.args[1])

@@ -90,7 +90,7 @@ commit 901fa435bb4be29b72cec39e5ff77570d13cbc6c
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 22 13:25:43 2013 -0700
 
-    init-ceph: clean up temp ceph.conf filename on exit
+    init-stone: clean up temp stone.conf filename on exit
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     Reviewed-by: Dan Mick <dan.mick@inktank.com>
@@ -100,7 +100,7 @@ commit 951f7e562afb4ae91b8d037ef793a96779461e96
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 22 13:25:33 2013 -0700
 
-    init-ceph: push temp conf file to a unique location on remote host
+    init-stone: push temp conf file to a unique location on remote host
     
     The predictable file name is a security problem.
     
@@ -115,7 +115,7 @@ commit dd670afccfd3ae58c03ea3b4c213dd8db22f618e
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 22 13:25:23 2013 -0700
 
-    mkcephfs: make remote temp directory name unique
+    mkstonefs: make remote temp directory name unique
     
     The predictable file name is a security problem.
     
@@ -722,7 +722,7 @@ commit 2fa2546c90e7a6eab9a3de7ab4e4271f8b25bad6
 Author: Concubidated <tyler.brekke@inktank.com>
 Date:   Fri Mar 8 13:44:39 2013 -0800
 
-    Fix output of 'ceph osd tree --format=json'
+    Fix output of 'stone osd tree --format=json'
     
     Signed-off-by: Tyler Brekke <tyler.brekke@inktank.com>
     (cherry picked from commit 9bcba944c6586ad5f007c0a30e69c6b5a886510b)
@@ -731,11 +731,11 @@ commit b70e2c270b9eb3fce673b7e51b527ebf88214f14
 Author: Sam Lang <sam.lang@inktank.com>
 Date:   Tue Feb 12 11:32:29 2013 -0600
 
-    deb:  Add ceph-coverage to ceph-test deb package
+    deb:  Add stone-coverage to stone-test deb package
     
-    Teuthology uses the ceph-coverage script extensively
-    and expects it to be installed by the ceph task.  Add
-    the script to the ceph-test debian package so that it
+    Teuthology uses the stone-coverage script extensively
+    and expects it to be installed by the stone task.  Add
+    the script to the stone-test debian package so that it
     gets installed for that use case.
     
     Signed-off-by: Sam Lang <sam.lang@inktank.com>
@@ -927,7 +927,7 @@ Date:   Thu Feb 21 09:21:01 2013 -0800
 
     mds: use inode_t::layout for dir layout policy
     
-    Remove the default_file_layout struct, which was just a ceph_file_layout,
+    Remove the default_file_layout struct, which was just a stone_file_layout,
     and store it in the inode_t.  Rip out all the annoying code that put this
     on the heap.
     
@@ -941,11 +941,11 @@ commit b4fd196cae5ab76aeb8f82f0581d0a6a2133a3ed
 Author: Sage Weil <sage@inktank.com>
 Date:   Sun Jan 20 21:53:37 2013 -0800
 
-    mds: parse ceph.*.layout vxattr key/value content
+    mds: parse stone.*.layout vxattr key/value content
     
     Use qi to parse a strictly formatted set of key/value pairs.  Be picky
     about whitespace.  Any subset of recognized keys is allowed.  Parse the
-    same set of keys as the ceph.*.layout.* vxattrs.
+    same set of keys as the stone.*.layout.* vxattrs.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit 5551aa5b3b5c2e9e7006476b9cd8cc181d2c9a04)
@@ -1006,7 +1006,7 @@ Date:   Mon Feb 18 16:24:54 2013 +0000
 
     Strip any trailing whitespace from rbd showmapped
     
-    More recent versions of ceph append a bit of whitespace to the line
+    More recent versions of stone append a bit of whitespace to the line
     after the name of the /dev/rbdX device; this causes the monitor check
     to fail as it can't find the device name due to the whitespace.
     

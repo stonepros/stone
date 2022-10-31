@@ -2,7 +2,7 @@
 This module handles the interaction with libstoragemgmt for local disk 
 devices. Interaction may fail with LSM for a number of issues, but the
 intent here is to make this a soft fail, since LSM related data is not
-a critical component of ceph-volume.
+a critical component of stone-volume.
 """
 import logging
 

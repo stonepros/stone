@@ -8,7 +8,7 @@ from teuthology.orchestra import run
 from teuthology import misc
 from teuthology.exceptions import ConfigError
 from teuthology.task import Task
-from tasks.ceph_manager import get_valgrind_args
+from tasks.stone_manager import get_valgrind_args
 from tasks.util import get_remote_for_role
 
 log = logging.getLogger(__name__)
@@ -30,9 +30,9 @@ class RBDMirror(Task):
         - [secondary.mon.a, secondary.osd.0, secondary.osd.1, secondary.osd.2]
         - [primary.client.mirror, secondary.client.mirror]
         tasks:
-        - ceph:
+        - stone:
             cluster: primary
-        - ceph:
+        - stone:
             cluster: secondary
         - rbd-mirror:
             client: primary.client.mirror
@@ -45,7 +45,7 @@ class RBDMirror(Task):
 
     Possible options for this task are:
 
-        client: role - ceph client to connect as
+        client: role - stone client to connect as
         valgrind: [--tool=<valgrind tool>] - none by default
         coverage: bool - whether this run may be collecting coverage data
         thrash: bool - whether this run may be thrashed
@@ -79,7 +79,7 @@ class RBDMirror(Task):
 
         args = [
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             '{tdir}/archive/coverage'.format(tdir=testdir),
             'daemon-helper',
             daemon_signal,

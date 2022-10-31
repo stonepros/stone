@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# test_mon_config_key - Test 'ceph config-key' interface
+# test_mon_config_key - Test 'stone config-key' interface
 #
 # Copyright (C) 2013 Inktank
 #
@@ -23,9 +23,9 @@ import time
 
 #
 # Accepted Environment variables:
-#   CEPH_TEST_VERBOSE     - be more verbose; '1' enables; '0' disables
-#   CEPH_TEST_DURATION    - test duration in seconds
-#   CEPH_TEST_SEED        - seed to be used during the test
+#   STONE_TEST_VERBOSE     - be more verbose; '1' enables; '0' disables
+#   STONE_TEST_DURATION    - test duration in seconds
+#   STONE_TEST_SEED        - seed to be used during the test
 #
 # Accepted arguments and options (see --help):
 #   -v, --verbose         - be more verbose
@@ -70,7 +70,7 @@ CONFIG_EXISTING = {}  # map: key -> size
 
 
 def run_cmd(cmd, expects=0):
-    full_cmd = ['ceph', 'config-key'] + cmd
+    full_cmd = ['stone', 'config-key'] + cmd
 
     if expects < 0:
         expects = -expects
@@ -102,7 +102,7 @@ def gen_key(rnd):
 
 def gen_tmp_file_path(rnd):
     file_name = gen_data(20, rnd)
-    file_path = os.path.join('/tmp', 'ceph-test.' + file_name)
+    file_path = os.path.join('/tmp', 'stone-test.' + file_name)
     return file_path
 
 
@@ -161,11 +161,11 @@ def main():
     args = parse_args(sys.argv[1:])
 
     verbose = args.verbose
-    if os.environ.get('CEPH_TEST_VERBOSE') is not None:
-        verbose = (os.environ.get('CEPH_TEST_VERBOSE') == '1')
+    if os.environ.get('STONE_TEST_VERBOSE') is not None:
+        verbose = (os.environ.get('STONE_TEST_VERBOSE') == '1')
 
-    duration = int(os.environ.get('CEPH_TEST_DURATION', args.duration))
-    seed = os.environ.get('CEPH_TEST_SEED', args.seed)
+    duration = int(os.environ.get('STONE_TEST_DURATION', args.duration))
+    seed = os.environ.get('STONE_TEST_SEED', args.seed)
     seed = int(time.time()) if seed is None else int(seed)
 
     rnd = random.Random()

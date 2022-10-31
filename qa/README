@@ -1,4 +1,4 @@
-ceph-qa-suite
+stone-qa-suite
 -------------
 
 clusters/    - some predefined cluster layouts
@@ -61,4 +61,4 @@ tests without causing an unwanted increase in the total number of jobs run.
 
 Symlinks are okay.
 
-The teuthology code can be found in https://github.com/ceph/teuthology.git
+The teuthology code can be found in https://github.com/stonepros/teuthology.git

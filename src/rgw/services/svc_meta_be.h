@@ -3,7 +3,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -44,14 +44,14 @@ protected:
 
   int prepare_mutate(RGWSI_MetaBackend::Context *ctx,
                      const std::string& key,
-                     const ceph::real_time& mtime,
+                     const stone::real_time& mtime,
                      RGWObjVersionTracker *objv_tracker,
                      optional_yield y,
                      const DoutPrefixProvider *dpp);
 
   virtual int do_mutate(Context *ctx,
                      const std::string& key,
-                     const ceph::real_time& mtime, RGWObjVersionTracker *objv_tracker,
+                     const stone::real_time& mtime, RGWObjVersionTracker *objv_tracker,
                      RGWMDLogStatus op_type,
                      optional_yield y,
                      std::function<int()> f,
@@ -95,33 +95,33 @@ public:
   virtual Context *alloc_ctx() = 0;
 
   struct PutParams {
-    ceph::real_time mtime;
+    stone::real_time mtime;
 
     PutParams() {}
-    PutParams(const ceph::real_time& _mtime) : mtime(_mtime) {}
+    PutParams(const stone::real_time& _mtime) : mtime(_mtime) {}
     virtual ~PutParams() = 0;
   };
 
   struct GetParams {
     GetParams() {}
-    GetParams(ceph::real_time *_pmtime) : pmtime(_pmtime) {}
+    GetParams(stone::real_time *_pmtime) : pmtime(_pmtime) {}
     virtual ~GetParams();
 
-    ceph::real_time *pmtime{nullptr};
+    stone::real_time *pmtime{nullptr};
   };
 
   struct RemoveParams {
     virtual ~RemoveParams() = 0;
 
-    ceph::real_time mtime;
+    stone::real_time mtime;
   };
 
   struct MutateParams {
-    ceph::real_time mtime;
+    stone::real_time mtime;
     RGWMDLogStatus op_type;
 
     MutateParams() {}
-    MutateParams(const ceph::real_time& _mtime,
+    MutateParams(const stone::real_time& _mtime,
 		 RGWMDLogStatus _op_type) : mtime(_mtime), op_type(_op_type) {}
     virtual ~MutateParams() {}
   };
@@ -131,13 +131,13 @@ public:
     MDBE_OTP  = 1,
   };
 
-  RGWSI_MetaBackend(CephContext *cct) : RGWServiceInstance(cct) {}
+  RGWSI_MetaBackend(StoneContext *cct) : RGWServiceInstance(cct) {}
   virtual ~RGWSI_MetaBackend() {}
 
   virtual Type get_type() = 0;
 
   virtual RGWSI_MetaBackend_Handler *alloc_be_handler() = 0;
-  virtual int call_with_get_params(ceph::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)>) = 0;
+  virtual int call_with_get_params(stone::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)>) = 0;
 
   /* these should be implemented by backends */
   virtual int get_entry(RGWSI_MetaBackend::Context *ctx,

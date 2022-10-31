@@ -128,7 +128,7 @@ class icmp {
  public:
   using ipaddr = ipv4_address;
   using inet_type = ipv4_l4<ip_protocol_num::icmp>;
-  explicit icmp(StoneeContext *c, inet_type& inet)
+  explicit icmp(StoneContext *c, inet_type& inet)
       : cct(c), _inet(inet), _queue_space(c, "DPDK::icmp::_queue_space", 212992) {
     _inet.register_packet_provider([this] {
       Tub<ipv4_traits::l4packet> l4p;
@@ -143,7 +143,7 @@ class icmp {
   void received(Packet p, ipaddr from, ipaddr to);
 
  private:
-  StoneeContext *cct;
+  StoneContext *cct;
   // ipv4_l4<ip_protocol_num::icmp>
   inet_type& _inet;
   circular_buffer<ipv4_traits::l4packet> _packetq;
@@ -151,11 +151,11 @@ class icmp {
 };
 
 class ipv4_icmp final : public ip_protocol {
-  StoneeContext *cct;
+  StoneContext *cct;
   ipv4_l4<ip_protocol_num::icmp> _inet_l4;
   icmp _icmp;
  public:
-  ipv4_icmp(StoneeContext *c, ipv4& inet) : cct(c), _inet_l4(inet), _icmp(c, _inet_l4) {}
+  ipv4_icmp(StoneContext *c, ipv4& inet) : cct(c), _inet_l4(inet), _icmp(c, _inet_l4) {}
   virtual void received(Packet p, ipv4_address from, ipv4_address to) override {
     _icmp.received(std::move(p), from, to);
   }
@@ -207,7 +207,7 @@ class ipv4 {
   using proto_type = uint16_t;
   static address_type broadcast_address() { return ipv4_address(0xffffffff); }
   static proto_type arp_protocol_type() { return proto_type(eth_protocol_num::ipv4); }
-  StoneeContext *cct;
+  StoneContext *cct;
   EventCenter *center;
 
  private:
@@ -265,7 +265,7 @@ class ipv4 {
     frag_timefd.construct(center->create_time_event(tp.to_nsec() / 1000, frag_handler));
   }
   void frag_arm() {
-    auto now = ceph_clock_now();
+    auto now = stone_clock_now();
     frag_timefd.construct(center->create_time_event(now.to_nsec() / 1000, frag_handler));
   }
 
@@ -273,7 +273,7 @@ class ipv4 {
   void frag_timeout();
 
  public:
-  explicit ipv4(StoneeContext *c, EventCenter *cen, interface* netif);
+  explicit ipv4(StoneContext *c, EventCenter *cen, interface* netif);
   ~ipv4() {
     delete frag_handler;
   }

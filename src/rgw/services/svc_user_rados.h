@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -108,7 +108,7 @@ public:
     RGWSI_SyncModules *sync_modules{nullptr};
   } svc;
 
-  RGWSI_User_RADOS(CephContext *cct);
+  RGWSI_User_RADOS(StoneContext *cct);
   ~RGWSI_User_RADOS();
 
   void init(RGWSI_RADOS *_rados_svc,
@@ -174,7 +174,7 @@ public:
                  RGWSI_MetaBackend::Context *ctx,
                  const rgw_user& user,
                  const rgw_bucket& bucket,
-                 ceph::real_time creation_time,
+                 stone::real_time creation_time,
                  optional_yield y) override;
   int remove_bucket(const DoutPrefixProvider *dpp, 
                     RGWSI_MetaBackend::Context *ctx,
@@ -208,8 +208,8 @@ public:
   int read_stats(const DoutPrefixProvider *dpp, 
                  RGWSI_MetaBackend::Context *ctx,
 		 const rgw_user& user, RGWStorageStats *stats,
-		 ceph::real_time *last_stats_sync,              /* last time a full stats sync completed */
-		 ceph::real_time *last_stats_update,
+		 stone::real_time *last_stats_sync,              /* last time a full stats sync completed */
+		 stone::real_time *last_stats_update,
                  optional_yield y) override;  /* last time a stats update was done */
 
   int read_stats_async(const DoutPrefixProvider *dpp, RGWSI_MetaBackend::Context *ctx,

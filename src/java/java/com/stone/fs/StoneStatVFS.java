@@ -17,12 +17,12 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 /**
  * Holds struct statvfs fields.
  */
-public class CephStatVFS {
+public class StoneStatVFS {
   public long bsize;
   public long frsize;
   public long blocks;

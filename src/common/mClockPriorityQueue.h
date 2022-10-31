@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat Inc.
  *
@@ -26,11 +26,11 @@
 #include "dmclock/src/dmclock_server.h"
 
 // the following is done to unclobber _ASSERT_H so it returns to the
-// way ceph likes it
-#include "include/ceph_assert.h"
+// way stone likes it
+#include "include/stone_assert.h"
 
 
-namespace ceph {
+namespace stone {
 
   namespace dmc = crimson::dmclock;
 
@@ -121,20 +121,20 @@ namespace ceph {
       }
 
       const std::pair<cost_t, T>& front() const {
-	ceph_assert(!(q.empty()));
-	ceph_assert(cur != q.end());
+	stone_assert(!(q.empty()));
+	stone_assert(cur != q.end());
 	return cur->second.front();
       }
 
       std::pair<cost_t, T>& front() {
-	ceph_assert(!(q.empty()));
-	ceph_assert(cur != q.end());
+	stone_assert(!(q.empty()));
+	stone_assert(cur != q.end());
 	return cur->second.front();
       }
 
       void pop_front() {
-	ceph_assert(!(q.empty()));
-	ceph_assert(cur != q.end());
+	stone_assert(!(q.empty()));
+	stone_assert(cur != q.end());
 	cur->second.pop_front();
 	if (cur->second.empty()) {
 	  auto i = cur;
@@ -194,7 +194,7 @@ namespace ceph {
 	if (cur == q.end()) cur = q.begin();
       }
 
-      void dump(ceph::Formatter *f) const {
+      void dump(stone::Formatter *f) const {
 	f->dump_int("size", get_size_slow());
 	f->dump_int("num_keys", q.size());
       }
@@ -228,7 +228,7 @@ namespace ceph {
       total += queue_front.size();
       total += queue.request_count();
       for (auto i = high_queue.cbegin(); i != high_queue.cend(); ++i) {
-	ceph_assert(i->second.get_size_slow());
+	stone_assert(i->second.get_size_slow());
 	total += i->second.get_size_slow();
       }
       return total;
@@ -317,7 +317,7 @@ namespace ceph {
     }
 
     T dequeue() override final {
-      ceph_assert(!empty());
+      stone_assert(!empty());
 
       if (!high_queue.empty()) {
 	T ret = std::move(high_queue.rbegin()->second.front().second);
@@ -335,12 +335,12 @@ namespace ceph {
       }
 
       auto pr = queue.pull_request();
-      ceph_assert(pr.is_retn());
+      stone_assert(pr.is_retn());
       auto& retn = pr.get_retn();
       return std::move(*(retn.request));
     }
 
-    void dump(ceph::Formatter *f) const override final {
+    void dump(stone::Formatter *f) const override final {
       f->open_array_section("high_queues");
       for (typename SubQueues::const_iterator p = high_queue.begin();
 	   p != high_queue.end();
@@ -366,4 +366,4 @@ namespace ceph {
     }
   };
 
-} // namespace ceph
+} // namespace stone

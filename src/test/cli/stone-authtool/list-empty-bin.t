@@ -1,5 +1,5 @@
   $ touch empty
 
-  $ ceph-authtool --list empty
+  $ stone-authtool --list empty
 
-  $ ceph-authtool -l empty
+  $ stone-authtool -l empty

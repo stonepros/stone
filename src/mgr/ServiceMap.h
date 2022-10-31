@@ -12,7 +12,7 @@
 #include "include/buffer.h"
 #include "msg/msg_types.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -25,19 +25,19 @@ struct ServiceMap {
     std::map<std::string,std::string> metadata;  ///< static metadata
     std::map<std::string,std::string> task_status; ///< running task status
 
-    void encode(ceph::buffer::list& bl, uint64_t features) const;
-    void decode(ceph::buffer::list::const_iterator& p);
-    void dump(ceph::Formatter *f) const;
+    void encode(stone::buffer::list& bl, uint64_t features) const;
+    void decode(stone::buffer::list::const_iterator& p);
+    void dump(stone::Formatter *f) const;
     static void generate_test_instances(std::list<Daemon*>& ls);
   };
 
   struct Service {
     std::map<std::string,Daemon> daemons;
-    std::string summary;   ///< summary status std::string for 'ceph -s'
+    std::string summary;   ///< summary status std::string for 'stone -s'
 
-    void encode(ceph::buffer::list& bl, uint64_t features) const;
-    void decode(ceph::buffer::list::const_iterator& p);
-    void dump(ceph::Formatter *f) const;
+    void encode(stone::buffer::list& bl, uint64_t features) const;
+    void decode(stone::buffer::list::const_iterator& p);
+    void dump(stone::Formatter *f) const;
     static void generate_test_instances(std::list<Service*>& ls);
 
     std::string get_summary() const;
@@ -51,9 +51,9 @@ struct ServiceMap {
   utime_t modified;
   std::map<std::string,Service> services;
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ServiceMap*>& ls);
 
   std::pair<Daemon*,bool> get_daemon(const std::string& service,
@@ -80,7 +80,7 @@ struct ServiceMap {
     return true;
   }
 
-  static inline bool is_normal_ceph_entity(std::string_view type) {
+  static inline bool is_normal_stone_entity(std::string_view type) {
     if (type == "osd" ||
         type == "client" ||
         type == "mon" ||

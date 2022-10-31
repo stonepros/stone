@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -15,35 +15,35 @@
 #ifndef STONE_REFCOUNTEDOBJ_H
 #define STONE_REFCOUNTEDOBJ_H
  
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/ref.h"
 #include "include/common_fwd.h"
 
 #include <atomic>
 
 /* This class provides mechanisms to make a sub-class work with
- * boost::intrusive_ptr (aka ceph::ref_t).
+ * boost::intrusive_ptr (aka stone::ref_t).
  *
  * Generally, you'll want to inherit from RefCountedObjectSafe and not from
  * RefCountedObject directly. This is because the ::get and ::put methods are
  * public and can be used to create/delete references outside of the
- * ceph::ref_t pointers with the potential to leak memory.
+ * stone::ref_t pointers with the potential to leak memory.
  *
  * It is also suggested that you make constructors and destructors private in
  * your final class. This prevents instantiation of the object with assignment
- * to a raw pointer. Consequently, you'll want to use ceph::make_ref<> to
- * create a ceph::ref_t<> holding your object:
+ * to a raw pointer. Consequently, you'll want to use stone::make_ref<> to
+ * create a stone::ref_t<> holding your object:
  *
- *    auto ptr = ceph::make_ref<Foo>(...);
+ *    auto ptr = stone::make_ref<Foo>(...);
  *
- * Use FRIEND_MAKE_REF(ClassName) to allow ceph::make_ref to call the private
+ * Use FRIEND_MAKE_REF(ClassName) to allow stone::make_ref to call the private
  * constructors.
  *
  */
 namespace TOPNSPC::common {
 class RefCountedObject {
 public:
-  void set_cct(StoneeContext *c) {
+  void set_cct(StoneContext *c) {
     cct = c;
   }
 
@@ -67,7 +67,7 @@ protected:
   RefCountedObject& operator=(const RefCountedObject& o) = delete;
   RefCountedObject(RefCountedObject&&) = delete;
   RefCountedObject& operator=(RefCountedObject&&) = delete;
-  RefCountedObject(StoneeContext* c) : cct(c) {}
+  RefCountedObject(StoneContext* c) : cct(c) {}
 
   virtual ~RefCountedObject();
 
@@ -80,7 +80,7 @@ private:
 #else
   mutable std::atomic<uint64_t> nref{1};
 #endif
-  StoneeContext *cct{nullptr};
+  StoneContext *cct{nullptr};
 };
 
 class RefCountedObjectSafe : public RefCountedObject {
@@ -126,8 +126,8 @@ struct RefCountedCond : public RefCountedObject {
 
 private:
   bool complete = false;
-  ceph::mutex lock = ceph::make_mutex("RefCountedCond::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("RefCountedCond::lock");
+  stone::condition_variable cond;
   int rval = 0;
 };
 
@@ -194,6 +194,6 @@ static inline void intrusive_ptr_release(const RefCountedObject *p) {
   p->put();
 }
 }
-using RefCountedPtr = ceph::ref_t<TOPNSPC::common::RefCountedObject>;
+using RefCountedPtr = stone::ref_t<TOPNSPC::common::RefCountedObject>;
 
 #endif

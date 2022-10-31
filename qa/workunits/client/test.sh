@@ -2,4 +2,4 @@
 
 set -ex
 
-ceph_test_client
+stone_test_client

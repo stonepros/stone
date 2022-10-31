@@ -6,8 +6,8 @@
 
 extern PerfCounters *perfcounter;
 
-extern int rgw_perf_start(CephContext *cct);
-extern void rgw_perf_stop(CephContext *cct);
+extern int rgw_perf_start(StoneContext *cct);
+extern void rgw_perf_stop(StoneContext *cct);
 
 enum {
   l_rgw_first = 15000,

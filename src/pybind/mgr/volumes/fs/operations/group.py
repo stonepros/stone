@@ -3,7 +3,7 @@ import errno
 import logging
 from contextlib import contextmanager
 
-import cephfs
+import stonefs
 
 from .snapshot_util import mksnap, rmsnap
 from .pin_util import pin
@@ -91,7 +91,7 @@ def create_group(fs, vol_spec, groupname, pool, mode, uid, gid):
     """
     create a subvolume group.
 
-    :param fs: ceph filesystem handle
+    :param fs: stone filesystem handle
     :param vol_spec: volume specification
     :param groupname: subvolume group name
     :param pool: the RADOS pool where the data objects of the subvolumes will be stored
@@ -109,10 +109,10 @@ def create_group(fs, vol_spec, groupname, pool, mode, uid, gid):
     fs.mkdir(path, mode)
     try:
         if not pool:
-            pool = get_ancestor_xattr(fs, path, "ceph.dir.layout.pool")
+            pool = get_ancestor_xattr(fs, path, "stone.dir.layout.pool")
         try:
-            fs.setxattr(path, 'ceph.dir.layout.pool', pool.encode('utf-8'), 0)
-        except cephfs.InvalidValue:
+            fs.setxattr(path, 'stone.dir.layout.pool', pool.encode('utf-8'), 0)
+        except stonefs.InvalidValue:
             raise VolumeException(-errno.EINVAL,
                                   "Invalid pool layout '{0}'. It must be a valid data pool".format(pool))
         if uid is None:
@@ -134,14 +134,14 @@ def create_group(fs, vol_spec, groupname, pool, mode, uid, gid):
             except ValueError:
                 raise VolumeException(-errno.EINVAL, "invalid GID")
         fs.chown(path, uid, gid)
-    except (cephfs.Error, VolumeException) as e:
+    except (stonefs.Error, VolumeException) as e:
         try:
             # cleanup group path on best effort basis
             log.debug("cleaning up subvolume group path: {0}".format(path))
             fs.rmdir(path)
-        except cephfs.Error as ce:
+        except stonefs.Error as ce:
             log.debug("failed to clean up subvolume group {0} with path: {1} ({2})".format(groupname, path, ce))
-        if isinstance(e, cephfs.Error):
+        if isinstance(e, stonefs.Error):
             e = VolumeException(-e.args[0], e.args[1])
         raise e
 
@@ -149,7 +149,7 @@ def remove_group(fs, vol_spec, groupname):
     """
     remove a subvolume group.
 
-    :param fs: ceph filesystem handle
+    :param fs: stone filesystem handle
     :param vol_spec: volume specification
     :param groupname: subvolume group name
     :return: None
@@ -157,7 +157,7 @@ def remove_group(fs, vol_spec, groupname):
     group = Group(fs, vol_spec, groupname)
     try:
         fs.rmdir(group.path)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         if e.args[0] == errno.ENOENT:
             raise VolumeException(-errno.ENOENT, "subvolume group '{0}' does not exist".format(groupname))
         raise VolumeException(-e.args[0], e.args[1])
@@ -167,7 +167,7 @@ def open_group(fs, vol_spec, groupname):
     """
     open a subvolume group. This API is to be used as a context manager.
 
-    :param fs: ceph filesystem handle
+    :param fs: stone filesystem handle
     :param vol_spec: volume specification
     :param groupname: subvolume group name
     :return: yields a group object (subclass of GroupTemplate)
@@ -177,7 +177,7 @@ def open_group(fs, vol_spec, groupname):
         st = fs.stat(group.path)
         group.uid = int(st.st_uid)
         group.gid = int(st.st_gid)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         if e.args[0] == errno.ENOENT:
             if not group.is_default_group():
                 raise VolumeException(-errno.ENOENT, "subvolume group '{0}' does not exist".format(groupname))

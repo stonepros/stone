@@ -1,16 +1,16 @@
 # flake8: noqa
 import pytest
 
-from ceph.deployment.drive_selection.matchers import _MatchInvalid
-from ceph.deployment.inventory import Devices, Device
+from stone.deployment.drive_selection.matchers import _MatchInvalid
+from stone.deployment.inventory import Devices, Device
 
-from ceph.deployment.drive_group import DriveGroupSpec, DeviceSelection, \
+from stone.deployment.drive_group import DriveGroupSpec, DeviceSelection, \
         DriveGroupValidationError
 
-from ceph.deployment import drive_selection
-from ceph.deployment.service_spec import PlacementSpec
-from ceph.tests.factories import InventoryFactory
-from ceph.tests.utils import _mk_inventory, _mk_device
+from stone.deployment import drive_selection
+from stone.deployment.service_spec import PlacementSpec
+from stone.tests.factories import InventoryFactory
+from stone.tests.utils import _mk_inventory, _mk_device
 
 
 class TestMatcher(object):

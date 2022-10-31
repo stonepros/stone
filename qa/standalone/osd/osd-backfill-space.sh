@@ -15,19 +15,19 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7180" # git grep '\<7180\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
-    CEPH_ARGS+="--osd_min_pg_log_entries=5 --osd_max_pg_log_entries=10 "
-    CEPH_ARGS+="--fake_statfs_for_testing=3686400 "
-    CEPH_ARGS+="--osd_max_backfills=10 "
+    export STONE_MON="127.0.0.1:7180" # git grep '\<7180\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
+    STONE_ARGS+="--osd_min_pg_log_entries=5 --osd_max_pg_log_entries=10 "
+    STONE_ARGS+="--fake_statfs_for_testing=3686400 "
+    STONE_ARGS+="--osd_max_backfills=10 "
     export objects=600
     export poolprefix=test
 
@@ -44,7 +44,7 @@ function get_num_in_state() {
     local state=$1
     local expression
     expression+="select(contains(\"${state}\"))"
-    ceph --format json pg dump pgs 2>/dev/null | \
+    stone --format json pg dump pgs 2>/dev/null | \
         jq ".pg_stats | [.[] | .state | $expression] | length"
 }
 
@@ -68,7 +68,7 @@ function wait_for_not_state() {
             loop=0
             num_in_state=$cur_in_state
         elif (( $loop >= ${#delays[*]} )) ; then
-            ceph pg dump pgs
+            stone pg dump pgs
             return 1
         fi
         sleep ${delays[$loop]}
@@ -112,19 +112,19 @@ function TEST_backfill_test_simple() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
       run_osd $dir $osd || return 1
     done
 
-    ceph osd set-backfillfull-ratio .85
+    stone osd set-backfillfull-ratio .85
 
     for p in $(seq 1 $pools)
     do
       create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 1 --yes-i-really-mean-it
+      stone osd pool set "${poolprefix}$p" size 1 --yes-i-really-mean-it
     done
 
     wait_for_clean || return 1
@@ -141,11 +141,11 @@ function TEST_backfill_test_simple() {
       done
     done
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     for p in $(seq 1 $pools)
     do
-      ceph osd pool set "${poolprefix}$p" size 2
+      stone osd pool set "${poolprefix}$p" size 2
     done
     sleep 30
 
@@ -153,20 +153,20 @@ function TEST_backfill_test_simple() {
     wait_for_not_activating 60 || return 1
 
     ERRORS=0
-    if [ "$(ceph pg dump pgs | grep +backfill_toofull | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep +backfill_toofull | wc -l)" != "1" ];
     then
       echo "One pool should have been in backfill_toofull"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
     expected="$(expr $pools - 1)"
-    if [ "$(ceph pg dump pgs | grep active+clean | wc -l)" != "$expected" ];
+    if [ "$(stone pg dump pgs | grep active+clean | wc -l)" != "$expected" ];
     then
       echo "$expected didn't finish backfill"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     if [ $ERRORS != "0" ];
     then
@@ -194,19 +194,19 @@ function TEST_backfill_test_multi() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
       run_osd $dir $osd || return 1
     done
 
-    ceph osd set-backfillfull-ratio .85
+    stone osd set-backfillfull-ratio .85
 
     for p in $(seq 1 $pools)
     do
       create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 1 --yes-i-really-mean-it
+      stone osd pool set "${poolprefix}$p" size 1 --yes-i-really-mean-it
     done
 
     wait_for_clean || return 1
@@ -220,11 +220,11 @@ function TEST_backfill_test_multi() {
       done
     done
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     for p in $(seq 1 $pools)
     do
-      ceph osd pool set "${poolprefix}$p" size 2
+      stone osd pool set "${poolprefix}$p" size 2
     done
     sleep 30
 
@@ -232,7 +232,7 @@ function TEST_backfill_test_multi() {
     wait_for_not_activating 60 || return 1
 
     ERRORS=0
-    full="$(ceph pg dump pgs | grep +backfill_toofull | wc -l)"
+    full="$(stone pg dump pgs | grep +backfill_toofull | wc -l)"
     if [ "$full" -lt "1" ];
     then
       echo "At least one pool should have been in backfill_toofull"
@@ -240,16 +240,16 @@ function TEST_backfill_test_multi() {
     fi
 
     expected="$(expr $pools - $full)"
-    if [ "$(ceph pg dump pgs | grep active+clean | wc -l)" != "$expected" ];
+    if [ "$(stone pg dump pgs | grep active+clean | wc -l)" != "$expected" ];
     then
       echo "$expected didn't finish backfill"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
-    ceph pg dump pgs
-    ceph status
+    stone pg dump pgs
+    stone status
 
-    ceph status --format=json-pretty > $dir/stat.json
+    stone status --format=json-pretty > $dir/stat.json
 
     eval SEV=$(jq '.health.checks.PG_BACKFILL_FULL.severity' $dir/stat.json)
     if [ "$SEV" != "HEALTH_WARN" ]; then
@@ -272,7 +272,7 @@ function TEST_backfill_test_multi() {
     do
       delete_pool "${poolprefix}$i"
     done
-    # Work around for http://tracker.ceph.com/issues/38195
+    # Work around for http://tracker.stone.com/issues/38195
     kill_daemons $dir #|| return 1
     ! grep -q "num_bytes mismatch" $dir/osd.*.log || return 1
 }
@@ -297,25 +297,25 @@ function TEST_backfill_test_sametarget() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
       run_osd $dir $osd || return 1
     done
 
-    ceph osd set-backfillfull-ratio .85
+    stone osd set-backfillfull-ratio .85
 
     for p in $(seq 1 $pools)
     do
       create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 2
+      stone osd pool set "${poolprefix}$p" size 2
     done
     sleep 5
 
     wait_for_clean || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     # Find 2 pools with a pg that distinct primaries but second
     # replica on the same osd.
@@ -330,7 +330,7 @@ function TEST_backfill_test_sametarget() {
     local pool2
     for p in $(seq 1 $pools)
     do
-      ceph pg map ${p}.0 --format=json | jq '.acting[]' > $dir/acting
+      stone pg map ${p}.0 --format=json | jq '.acting[]' > $dir/acting
       local test_osd1=$(head -1 $dir/acting)
       local test_osd2=$(tail -1 $dir/acting)
       if [ $p = "1" ];
@@ -364,8 +364,8 @@ function TEST_backfill_test_sametarget() {
       fi
     done
 
-    ceph osd pool set $pool1 size 1 --yes-i-really-mean-it
-    ceph osd pool set $pool2 size 1 --yes-i-really-mean-it
+    stone osd pool set $pool1 size 1 --yes-i-really-mean-it
+    stone osd pool set $pool2 size 1 --yes-i-really-mean-it
 
     wait_for_clean || return 1
 
@@ -376,27 +376,27 @@ function TEST_backfill_test_sametarget() {
         rados -p $pool2 put obj$i $dir/datafile
     done
 
-    ceph osd pool set $pool1 size 2
-    ceph osd pool set $pool2 size 2
+    stone osd pool set $pool1 size 2
+    stone osd pool set $pool2 size 2
     sleep 30
 
     wait_for_not_backfilling 240 || return 1
     wait_for_not_activating 60 || return 1
 
     ERRORS=0
-    if [ "$(ceph pg dump pgs | grep +backfill_toofull | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep +backfill_toofull | wc -l)" != "1" ];
     then
       echo "One pool should have been in backfill_toofull"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
-    if [ "$(ceph pg dump pgs | grep active+clean | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep active+clean | wc -l)" != "1" ];
     then
       echo "One didn't finish backfill"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     if [ $ERRORS != "0" ];
     then
@@ -433,22 +433,22 @@ function TEST_backfill_multi_partial() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
       run_osd $dir $osd || return 1
     done
 
-    ceph osd set-backfillfull-ratio .85
+    stone osd set-backfillfull-ratio .85
 
-    ceph osd set-require-min-compat-client luminous
+    stone osd set-require-min-compat-client luminous
     create_pool fillpool 1 1
-    ceph osd pool set fillpool size 1 --yes-i-really-mean-it
+    stone osd pool set fillpool size 1 --yes-i-really-mean-it
     for p in $(seq 1 $pools)
     do
       create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 2
+      stone osd pool set "${poolprefix}$p" size 2
     done
 
     wait_for_clean || return 1
@@ -471,12 +471,12 @@ function TEST_backfill_multi_partial() {
     fi
 
     kill_daemon $dir/osd.$fillosd.pid TERM
-    ceph osd out osd.$fillosd
+    stone osd out osd.$fillosd
 
     _objectstore_tool_nodown $dir $fillosd --op export-remove --pgid 1.0 --file $dir/fillexport.out || return 1
     activate_osd $dir $fillosd || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     dd if=/dev/urandom of=$dir/datafile bs=1024 count=1
     for o in $(seq 1 $objects)
@@ -484,16 +484,16 @@ function TEST_backfill_multi_partial() {
       rados -p "${poolprefix}1" put obj-1-${o} $dir/datafile
     done
 
-    ceph pg dump pgs
+    stone pg dump pgs
     # The $osd OSD is started, but we don't wait so we can kill $fillosd at the same time
     _objectstore_tool_nowait $dir $osd --op export --pgid 2.0 --file $dir/export.out
     kill_daemon $dir/osd.$fillosd.pid TERM
     _objectstore_tool_nodown $dir $fillosd --force --op remove --pgid 2.0
     _objectstore_tool_nodown $dir $fillosd --op import --pgid 2.0 --file $dir/export.out || return 1
     _objectstore_tool_nodown $dir $fillosd --op import --pgid 1.0 --file $dir/fillexport.out || return 1
-    ceph pg dump pgs
+    stone pg dump pgs
     sleep 20
-    ceph pg dump pgs
+    stone pg dump pgs
 
     # re-write everything
     dd if=/dev/urandom of=$dir/datafile bs=2611 count=1
@@ -506,17 +506,17 @@ function TEST_backfill_multi_partial() {
     done
 
     kill_daemon $dir/osd.$osd.pid TERM
-    ceph osd out osd.$osd
+    stone osd out osd.$osd
 
     activate_osd $dir $fillosd || return 1
-    ceph osd in osd.$fillosd
+    stone osd in osd.$fillosd
     sleep 30
 
     wait_for_not_backfilling 240 || return 1
     wait_for_not_activating 60 || return 1
 
     flush_pg_stats || return 1
-    ceph pg dump pgs
+    stone pg dump pgs
 
     ERRORS=0
     if [ "$(get_num_in_state backfill_toofull)" != "1" ];
@@ -566,10 +566,10 @@ function TEST_backfill_grow() {
       run_osd $dir $osd || return 1
     done
 
-    ceph osd set-backfillfull-ratio .85
+    stone osd set-backfillfull-ratio .85
 
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 3
+    stone osd pool set $poolname size 3
     sleep 5
 
     wait_for_clean || return 1
@@ -585,7 +585,7 @@ function TEST_backfill_grow() {
     local primary=$(get_primary $poolname obj1)
     local otherosd=$(get_not_primary $poolname obj1)
 
-    ceph osd set noout
+    stone osd set noout
     kill_daemons $dir TERM $otherosd || return 1
 
     rmobjects=$(expr $objects / 4)
@@ -602,7 +602,7 @@ function TEST_backfill_grow() {
 
     activate_osd $dir $otherosd || return 1
 
-    ceph tell osd.$primary debug kick_recovery_wq 0
+    stone tell osd.$primary debug kick_recovery_wq 0
 
     sleep 2
 
@@ -630,16 +630,16 @@ function TEST_ec_backfill_simple() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
       run_osd $dir $osd || return 1
     done
 
-    ceph osd set-backfillfull-ratio .85
+    stone osd set-backfillfull-ratio .85
     create_pool fillpool 1 1
-    ceph osd pool set fillpool size 1 --yes-i-really-mean-it
+    stone osd pool set fillpool size 1 --yes-i-really-mean-it
 
     # Partially fill an osd
     # We have room for 200 18K replicated objects, if we create 13K objects
@@ -662,20 +662,20 @@ function TEST_ec_backfill_simple() {
 
     sleep 5
     kill_daemon $dir/osd.$fillosd.pid TERM
-    ceph osd out osd.$fillosd
+    stone osd out osd.$fillosd
     sleep 2
-    ceph osd erasure-code-profile set ec-profile k=$k m=$m crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
+    stone osd erasure-code-profile set ec-profile k=$k m=$m crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
 
     for p in $(seq 1 $pools)
     do
-        ceph osd pool create "${poolprefix}$p" 1 1 erasure ec-profile
+        stone osd pool create "${poolprefix}$p" 1 1 erasure ec-profile
     done
 
     # Can't wait for clean here because we created a stale pg
     #wait_for_clean || return 1
     sleep 5
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     dd if=/dev/urandom of=$dir/datafile bs=1024 count=18
     for o in $(seq 1 $ecobjects)
@@ -687,21 +687,21 @@ function TEST_ec_backfill_simple() {
     done
 
     kill_daemon $dir/osd.$osd.pid TERM
-    ceph osd out osd.$osd
+    stone osd out osd.$osd
 
     activate_osd $dir $fillosd || return 1
-    ceph osd in osd.$fillosd
+    stone osd in osd.$fillosd
     sleep 30
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     wait_for_not_backfilling 240 || return 1
     wait_for_not_activating 60 || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     ERRORS=0
-    if [ "$(ceph pg dump pgs | grep -v "^1.0" | grep +backfill_toofull | wc -l)" != "1" ]; then
+    if [ "$(stone pg dump pgs | grep -v "^1.0" | grep +backfill_toofull | wc -l)" != "1" ]; then
       echo "One pool should have been in backfill_toofull"
       ERRORS="$(expr $ERRORS + 1)"
     fi
@@ -755,7 +755,7 @@ function TEST_ec_backfill_multi() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
@@ -766,11 +766,11 @@ function TEST_ec_backfill_multi() {
     # fit on a given OSD, but both will not fix.  I'm using
     # making the fillosd plus 1 shard use 75% of the space,
     # leaving not enough to be under the 85% set here.
-    ceph osd set-backfillfull-ratio .85
+    stone osd set-backfillfull-ratio .85
 
-    ceph osd set-require-min-compat-client luminous
+    stone osd set-require-min-compat-client luminous
     create_pool fillpool 1 1
-    ceph osd pool set fillpool size 1 --yes-i-really-mean-it
+    stone osd pool set fillpool size 1 --yes-i-really-mean-it
 
     # Partially fill an osd
     # We have room for 200 18K replicated objects, if we create 9K objects
@@ -785,21 +785,21 @@ function TEST_ec_backfill_multi() {
     done
 
     local fillosd=$(get_primary fillpool obj1)
-    ceph osd erasure-code-profile set ec-profile k=3 m=2 crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
+    stone osd erasure-code-profile set ec-profile k=3 m=2 crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
 
     nonfillosds="$(osdlist $OSDS $fillosd)"
 
     for p in $(seq 1 $pools)
     do
-        ceph osd pool create "${poolprefix}$p" 1 1 erasure ec-profile
-        ceph osd pg-upmap "$(expr $p + 1).0" $nonfillosds
+        stone osd pool create "${poolprefix}$p" 1 1 erasure ec-profile
+        stone osd pg-upmap "$(expr $p + 1).0" $nonfillosds
     done
 
     # Can't wait for clean here because we created a stale pg
     #wait_for_clean || return 1
     sleep 15
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     dd if=/dev/urandom of=$dir/datafile bs=1024 count=12
     for o in $(seq 1 $ecobjects)
@@ -810,11 +810,11 @@ function TEST_ec_backfill_multi() {
       done
     done
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     for p in $(seq 1 $pools)
     do
-      ceph osd pg-upmap $(expr $p + 1).0 ${nonfillosds% *} $fillosd
+      stone osd pg-upmap $(expr $p + 1).0 ${nonfillosds% *} $fillosd
     done
 
     sleep 30
@@ -822,16 +822,16 @@ function TEST_ec_backfill_multi() {
     wait_for_not_backfilling 240 || return 1
     wait_for_not_activating 60 || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     ERRORS=0
-    if [ "$(ceph pg dump pgs | grep -v "^1.0" | grep +backfill_toofull | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep -v "^1.0" | grep +backfill_toofull | wc -l)" != "1" ];
     then
       echo "One pool should have been in backfill_toofull"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
-    if [ "$(ceph pg dump pgs | grep -v "^1.0" | grep active+clean | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep -v "^1.0" | grep active+clean | wc -l)" != "1" ];
     then
       echo "One didn't finish backfill"
       ERRORS="$(expr $ERRORS + 1)"
@@ -873,7 +873,7 @@ function SKIP_TEST_ec_backfill_multi_partial() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
@@ -884,13 +884,13 @@ function SKIP_TEST_ec_backfill_multi_partial() {
     # fit on a given OSD, but both will not fix.  I'm using
     # making the fillosd plus 1 shard use 75% of the space,
     # leaving not enough to be under the 85% set here.
-    ceph osd set-backfillfull-ratio .85
+    stone osd set-backfillfull-ratio .85
 
-    ceph osd set-require-min-compat-client luminous
+    stone osd set-require-min-compat-client luminous
     create_pool fillpool 1 1
-    ceph osd pool set fillpool size 1 --yes-i-really-mean-it
+    stone osd pool set fillpool size 1 --yes-i-really-mean-it
     # last osd
-    ceph osd pg-upmap 1.0 $lastosd
+    stone osd pg-upmap 1.0 $lastosd
 
     # Partially fill an osd
     # We have room for 200 18K replicated objects, if we create 9K objects
@@ -905,21 +905,21 @@ function SKIP_TEST_ec_backfill_multi_partial() {
     done
 
     local fillosd=$(get_primary fillpool obj1)
-    ceph osd erasure-code-profile set ec-profile k=3 m=2 crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
+    stone osd erasure-code-profile set ec-profile k=3 m=2 crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
 
     nonfillosds="$(osdlist $OSDS $fillosd)"
 
     for p in $(seq 1 $pools)
     do
-        ceph osd pool create "${poolprefix}$p" 1 1 erasure ec-profile
-        ceph osd pg-upmap "$(expr $p + 1).0" $(seq 0 $lastosd)
+        stone osd pool create "${poolprefix}$p" 1 1 erasure ec-profile
+        stone osd pg-upmap "$(expr $p + 1).0" $(seq 0 $lastosd)
     done
 
     # Can't wait for clean here because we created a stale pg
     #wait_for_clean || return 1
     sleep 15
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     dd if=/dev/urandom of=$dir/datafile bs=1024 count=1
     for o in $(seq 1 $ecobjects)
@@ -929,11 +929,11 @@ function SKIP_TEST_ec_backfill_multi_partial() {
 
     for p in $(seq 1 $pools)
     do
-        ceph osd pg-upmap "$(expr $p + 1).0" $(seq 0 $(expr $lastosd - 1))
+        stone osd pg-upmap "$(expr $p + 1).0" $(seq 0 $(expr $lastosd - 1))
     done
-    ceph pg dump pgs
+    stone pg dump pgs
 
-    #ceph osd set noout
+    #stone osd set noout
     #kill_daemons $dir TERM osd.$lastosd || return 1
 
     dd if=/dev/urandom of=$dir/datafile bs=1024 count=12
@@ -945,32 +945,32 @@ function SKIP_TEST_ec_backfill_multi_partial() {
       done
     done
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     # Now backfill lastosd by adding back into the upmap
     for p in $(seq 1 $pools)
     do
-        ceph osd pg-upmap "$(expr $p + 1).0" $(seq 0 $lastosd)
+        stone osd pg-upmap "$(expr $p + 1).0" $(seq 0 $lastosd)
     done
     #activate_osd $dir $lastosd || return 1
-    #ceph tell osd.0 debug kick_recovery_wq 0
+    #stone tell osd.0 debug kick_recovery_wq 0
 
     sleep 30
-    ceph pg dump pgs
+    stone pg dump pgs
 
     wait_for_not_backfilling 240 || return 1
     wait_for_not_activating 60 || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     ERRORS=0
-    if [ "$(ceph pg dump pgs | grep -v "^1.0" | grep +backfill_toofull | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep -v "^1.0" | grep +backfill_toofull | wc -l)" != "1" ];
     then
       echo "One pool should have been in backfill_toofull"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
-    if [ "$(ceph pg dump pgs | grep -v "^1.0" | grep active+clean | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep -v "^1.0" | grep active+clean | wc -l)" != "1" ];
     then
       echo "One didn't finish backfill"
       ERRORS="$(expr $ERRORS + 1)"
@@ -997,7 +997,7 @@ function SKIP_TEST_ec_backfill_multi_partial() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
@@ -1006,11 +1006,11 @@ function SKIP_TEST_ec_backfill_multi_partial() {
 
     # Below we need to fit 3200K in 3600K which is 88%
     # so set to 90%
-    ceph osd set-backfillfull-ratio .90
+    stone osd set-backfillfull-ratio .90
 
-    ceph osd set-require-min-compat-client luminous
+    stone osd set-require-min-compat-client luminous
     create_pool fillpool 1 1
-    ceph osd pool set fillpool size 1 --yes-i-really-mean-it
+    stone osd pool set fillpool size 1 --yes-i-really-mean-it
 
     # Partially fill an osd
     # We have room for 200 48K ec objects, if we create 4k replicated objects
@@ -1031,20 +1031,20 @@ function SKIP_TEST_ec_backfill_multi_partial() {
 
     sleep 5
     kill_daemon $dir/osd.$fillosd.pid TERM
-    ceph osd out osd.$fillosd
+    stone osd out osd.$fillosd
     sleep 2
-    ceph osd erasure-code-profile set ec-profile k=3 m=2 crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
+    stone osd erasure-code-profile set ec-profile k=3 m=2 crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
 
     for p in $(seq 1 $pools)
     do
-        ceph osd pool create "${poolprefix}$p" 1 1 erasure ec-profile
+        stone osd pool create "${poolprefix}$p" 1 1 erasure ec-profile
     done
 
     # Can't wait for clean here because we created a stale pg
     #wait_for_clean || return 1
     sleep 5
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     dd if=/dev/urandom of=$dir/datafile bs=1024 count=12
     for o in $(seq 1 $objects)
@@ -1055,34 +1055,34 @@ function SKIP_TEST_ec_backfill_multi_partial() {
       done
     done
 
-    #ceph pg map 2.0 --format=json | jq '.'
+    #stone pg map 2.0 --format=json | jq '.'
     kill_daemon $dir/osd.$osd.pid TERM
-    ceph osd out osd.$osd
+    stone osd out osd.$osd
 
     _objectstore_tool_nodown $dir $osd --op export --pgid 2.0 --file $dir/export.out
     _objectstore_tool_nodown $dir $fillosd --op import --pgid 2.0 --file $dir/export.out
 
     activate_osd $dir $fillosd || return 1
-    ceph osd in osd.$fillosd
+    stone osd in osd.$fillosd
     sleep 30
 
     wait_for_not_backfilling 240 || return 1
     wait_for_not_activating 60 || return 1
 
     ERRORS=0
-    if [ "$(ceph pg dump pgs | grep -v "^1.0" | grep +backfill_toofull | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep -v "^1.0" | grep +backfill_toofull | wc -l)" != "1" ];
     then
       echo "One pool should have been in backfill_toofull"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
-    if [ "$(ceph pg dump pgs | grep -v "^1.0" | grep active+clean | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep -v "^1.0" | grep active+clean | wc -l)" != "1" ];
     then
       echo "One didn't finish backfill"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     if [ $ERRORS != "0" ];
     then
@@ -1122,11 +1122,11 @@ function TEST_ec_backfill_grow() {
       run_osd $dir $osd || return 1
     done
 
-    ceph osd set-backfillfull-ratio .85
+    stone osd set-backfillfull-ratio .85
 
-    ceph osd set-require-min-compat-client luminous
-    ceph osd erasure-code-profile set ec-profile k=$k m=$m crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
-    ceph osd pool create $poolname 1 1 erasure ec-profile
+    stone osd set-require-min-compat-client luminous
+    stone osd erasure-code-profile set ec-profile k=$k m=$m crush-failure-domain=osd technique=reed_sol_van plugin=jerasure || return 1
+    stone osd pool create $poolname 1 1 erasure ec-profile
 
     wait_for_clean || return 1
 
@@ -1141,7 +1141,7 @@ function TEST_ec_backfill_grow() {
     local primary=$(get_primary $poolname obj1)
     local otherosd=$(get_not_primary $poolname obj1)
 
-    ceph osd set noout
+    stone osd set noout
     kill_daemons $dir TERM $otherosd || return 1
 
     rmobjects=$(expr $ecobjects / 4)
@@ -1158,7 +1158,7 @@ function TEST_ec_backfill_grow() {
 
     activate_osd $dir $otherosd || return 1
 
-    ceph tell osd.$primary debug kick_recovery_wq 0
+    stone tell osd.$primary debug kick_recovery_wq 0
 
     sleep 2
 

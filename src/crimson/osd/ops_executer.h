@@ -90,7 +90,7 @@ private:
   const MOSDOp& msg;
   std::optional<osd_op_params_t> osd_op_params;
   bool user_modify = false;
-  ceph::os::Transaction txn;
+  stone::os::Transaction txn;
 
   size_t num_read = 0;    ///< count read ops
   size_t num_write = 0;   ///< count update ops
@@ -110,23 +110,23 @@ private:
   watch_errorator::future<> do_op_watch(
     class OSDOp& osd_op,
     class ObjectState& os,
-    ceph::os::Transaction& txn);
+    stone::os::Transaction& txn);
   watch_errorator::future<> do_op_watch_subop_watch(
     class OSDOp& osd_op,
     class ObjectState& os,
-    ceph::os::Transaction& txn);
+    stone::os::Transaction& txn);
   watch_errorator::future<> do_op_watch_subop_reconnect(
     class OSDOp& osd_op,
     class ObjectState& os,
-    ceph::os::Transaction& txn);
+    stone::os::Transaction& txn);
   watch_errorator::future<> do_op_watch_subop_unwatch(
     class OSDOp& osd_op,
     class ObjectState& os,
-    ceph::os::Transaction& txn);
+    stone::os::Transaction& txn);
   watch_errorator::future<> do_op_watch_subop_ping(
     class OSDOp& osd_op,
     class ObjectState& os,
-    ceph::os::Transaction& txn);
+    stone::os::Transaction& txn);
   watch_errorator::future<> do_op_notify(
     class OSDOp& osd_op,
     const class ObjectState& os);

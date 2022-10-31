@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_MIRROR_DISABLE_REQUEST_H
 
 #include "include/buffer.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "cls/journal/cls_journal_types.h"
 #include "cls/rbd/cls_rbd_types.h"
 #include "librbd/mirror/Types.h"
@@ -89,8 +89,8 @@ private:
   std::map<std::string, int> m_ret;
   std::map<std::string, int> m_current_ops;
   int m_error_result = 0;
-  mutable ceph::mutex m_lock =
-    ceph::make_mutex("mirror::DisableRequest::m_lock");
+  mutable stone::mutex m_lock =
+    stone::make_mutex("mirror::DisableRequest::m_lock");
 
   void send_get_mirror_info();
   Context *handle_get_mirror_info(int *result);

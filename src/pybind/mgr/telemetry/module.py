@@ -1,7 +1,7 @@
 """
-Telemetry module for ceph-mgr
+Telemetry module for stone-mgr
 
-Collect statistics from Ceph cluster and send this back to the Ceph project
+Collect statistics from Stone cluster and send this back to the Stone project
 when user has opted-in
 """
 import errno
@@ -50,7 +50,7 @@ REVISION = 3
 # Version 3:
 #   - added device health metrics (i.e., SMART data, minus serial number)
 #   - remove crush_rule
-#   - added CephFS metadata (how many MDSs, fs features, how many data pools,
+#   - added StoneFS metadata (how many MDSs, fs features, how many data pools,
 #     how much metadata is cached, rfiles, rbytes, rsnapshots)
 #   - added more pool metadata (rep vs ec, cache tiering mode, ec profile)
 #   - added host count, and counts for hosts with each of (mon, osd, mds, mgr)
@@ -64,7 +64,7 @@ class Module(MgrModule):
 
     metadata_keys = [
             "arch",
-            "ceph_version",
+            "stone_version",
             "os",
             "cpu",
             "kernel_description",
@@ -77,12 +77,12 @@ class Module(MgrModule):
         {
             'name': 'url',
             'type': 'str',
-            'default': 'https://telemetry.ceph.com/report'
+            'default': 'https://telemetry.stone.com/report'
         },
         {
             'name': 'device_url',
             'type': 'str',
-            'default': 'https://telemetry.ceph.com/device'
+            'default': 'https://telemetry.stone.com/device'
         },
         {
             'name': 'enabled',
@@ -141,7 +141,7 @@ class Module(MgrModule):
             'name': 'channel_crash',
             'type': 'bool',
             'default': True,
-            'description': 'Share metadata about Ceph daemon crashes (version, stack straces, etc)',
+            'description': 'Share metadata about Stone daemon crashes (version, stack straces, etc)',
         },
         {
             'name': 'channel_device',
@@ -159,14 +159,14 @@ class Module(MgrModule):
         },
         {
             "cmd": "telemetry send "
-                   "name=endpoint,type=CephChoices,strings=ceph|device,n=N,req=false "
-                   "name=license,type=CephString,req=false",
-            "desc": "Force sending data to Ceph telemetry",
+                   "name=endpoint,type=StoneChoices,strings=stone|device,n=N,req=false "
+                   "name=license,type=StoneString,req=false",
+            "desc": "Force sending data to Stone telemetry",
             "perm": "rw"
         },
         {
             "cmd": "telemetry show "
-                   "name=channels,type=CephString,n=N,req=False",
+                   "name=channels,type=StoneString,n=N,req=False",
             "desc": "Show last report or report to be sent",
             "perm": "r"
         },
@@ -181,7 +181,7 @@ class Module(MgrModule):
             "perm": "r"
         },
         {
-            "cmd": "telemetry on name=license,type=CephString,req=false",
+            "cmd": "telemetry on name=license,type=StoneString,req=false",
             "desc": "Enable telemetry reports from this cluster",
             "perm": "rw",
         },
@@ -331,7 +331,7 @@ class Module(MgrModule):
             name = opt.get('name')
             if name:
                 cluster.add(name)
-        # daemon-reported options (which may include ceph.conf)
+        # daemon-reported options (which may include stone.conf)
         active = set()
         ls = self.get("modified_config_options");
         for opt in ls.get('options', {}):
@@ -555,7 +555,7 @@ class Module(MgrModule):
             # crush
             report['crush'] = self.gather_crush_info()
 
-            # cephfs
+            # stonefs
             report['fs'] = {
                 'count': len(fs_map['filesystems']),
                 'feature_flags': fs_map['feature_flags'],
@@ -709,20 +709,20 @@ class Module(MgrModule):
 
     def send(self, report, endpoint=None):
         if not endpoint:
-            endpoint = ['ceph', 'device']
+            endpoint = ['stone', 'device']
         failed = []
         success = []
         self.log.debug('Send endpoints %s' % endpoint)
         for e in endpoint:
-            if e == 'ceph':
-                fail_reason = self._try_post('ceph report', self.url, report)
+            if e == 'stone':
+                fail_reason = self._try_post('stone report', self.url, report)
                 if fail_reason:
                     failed.append(fail_reason)
                 else:
                     now = int(time.time())
                     self.last_upload = now
                     self.set_store('last_upload', str(now))
-                    success.append('Ceph report sent to {0}'.format(self.url))
+                    success.append('Stone report sent to {0}'.format(self.url))
                     self.log.info('Sent report to {0}'.format(self.url))
             elif e == 'device':
                 if 'device' in self.get_active_channels():
@@ -756,7 +756,7 @@ class Module(MgrModule):
             return 0, json.dumps(r, indent=4, sort_keys=True), ''
         elif command['prefix'] == 'telemetry on':
             if command.get('license') != LICENSE:
-                return -errno.EPERM, '', "Telemetry data is licensed under the " + LICENSE_NAME + " (" + LICENSE_URL + ").\nTo enable, add '--license " + LICENSE + "' to the 'ceph telemetry on' command."
+                return -errno.EPERM, '', "Telemetry data is licensed under the " + LICENSE_NAME + " (" + LICENSE_URL + ").\nTo enable, add '--license " + LICENSE + "' to the 'stone telemetry on' command."
             self.on()
             return 0, '', ''
         elif command['prefix'] == 'telemetry off':
@@ -765,7 +765,7 @@ class Module(MgrModule):
         elif command['prefix'] == 'telemetry send':
             if self.last_opt_revision < LAST_REVISION_RE_OPT_IN and command.get('license') != LICENSE:
                 self.log.debug('A telemetry send attempt while opted-out. Asking for license agreement')
-                return -errno.EPERM, '', "Telemetry data is licensed under the " + LICENSE_NAME + " (" + LICENSE_URL + ").\nTo manually send telemetry data, add '--license " + LICENSE + "' to the 'ceph telemetry send' command.\nPlease consider enabling the telemetry module with 'ceph telemetry on'."
+                return -errno.EPERM, '', "Telemetry data is licensed under the " + LICENSE_NAME + " (" + LICENSE_URL + ").\nTo manually send telemetry data, add '--license " + LICENSE + "' to the 'stone telemetry send' command.\nPlease consider enabling the telemetry module with 'stone telemetry on'."
             self.last_report = self.compile_report()
             return self.send(self.last_report, command.get('endpoint'))
 
@@ -773,7 +773,7 @@ class Module(MgrModule):
             report = self.get_report(channels=command.get('channels', None))
             report = json.dumps(report, indent=4, sort_keys=True)
             if self.channel_device:
-                report += '\n \nDevice report is generated separately. To see it run \'ceph telemetry show-device\'.'
+                report += '\n \nDevice report is generated separately. To see it run \'stone telemetry show-device\'.'
             return 0, report, ''
         elif command['prefix'] == 'telemetry show-device':
             return 0, json.dumps(self.get_report('device'), indent=4, sort_keys=True), ''

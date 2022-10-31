@@ -16,8 +16,8 @@
 #include "ShardedCache.h"
 #include "common/autovector.h"
 #include "common/dout.h"
-#include "include/ceph_assert.h"
-#include "common/ceph_context.h"
+#include "include/stone_assert.h"
+#include "common/stone_context.h"
 
 namespace rocksdb_cache {
 
@@ -48,7 +48,7 @@ namespace rocksdb_cache {
 // RUCache::Release (to move into state 2) or BinnedLRUCacheShard::Erase (for state 3)
 
 std::shared_ptr<rocksdb::Cache> NewBinnedLRUCache(
-    StoneeContext *c,
+    StoneContext *c,
     size_t capacity,
     int num_shard_bits = -1,
     bool strict_capacity_limit = false,
@@ -117,7 +117,7 @@ struct BinnedLRUHandle {
   void SetHit() { flags |= 8; }
 
   void Free() {
-    ceph_assert((refs == 1 && InCache()) || (refs == 0 && !InCache()));
+    stone_assert((refs == 1 && InCache()) || (refs == 0 && !InCache()));
     if (deleter) {
       (*deleter)(key(), value);
     }
@@ -146,7 +146,7 @@ class BinnedLRUHandleTable {
       BinnedLRUHandle* h = list_[i];
       while (h != nullptr) {
         auto n = h->next_hash;
-        ceph_assert(h->InCache());
+        stone_assert(h->InCache());
         func(h);
         h = n;
       }
@@ -171,7 +171,7 @@ class BinnedLRUHandleTable {
 // A single shard of sharded cache.
 class alignas(CACHE_LINE_SIZE) BinnedLRUCacheShard : public CacheShard {
  public:
-  BinnedLRUCacheShard(StoneeContext *c, size_t capacity, bool strict_capacity_limit,
+  BinnedLRUCacheShard(StoneContext *c, size_t capacity, bool strict_capacity_limit,
                 double high_pri_pool_ratio);
   virtual ~BinnedLRUCacheShard();
 
@@ -225,7 +225,7 @@ class alignas(CACHE_LINE_SIZE) BinnedLRUCacheShard : public CacheShard {
   size_t GetHighPriPoolUsage() const;
 
  private:
-  StoneeContext *cct;
+  StoneContext *cct;
   void LRU_Remove(BinnedLRUHandle* e);
   void LRU_Insert(BinnedLRUHandle* e);
 
@@ -241,7 +241,7 @@ class alignas(CACHE_LINE_SIZE) BinnedLRUCacheShard : public CacheShard {
   // to hold (usage_ + charge) is freed or the lru list is empty
   // This function is not thread safe - it needs to be executed while
   // holding the mutex_
-  void EvictFromLRU(size_t charge, ceph::autovector<BinnedLRUHandle*>* deleted);
+  void EvictFromLRU(size_t charge, stone::autovector<BinnedLRUHandle*>* deleted);
 
   // Initialized before use.
   size_t capacity_;
@@ -294,7 +294,7 @@ class alignas(CACHE_LINE_SIZE) BinnedLRUCacheShard : public CacheShard {
 
 class BinnedLRUCache : public ShardedCache {
  public:
-  BinnedLRUCache(StoneeContext *c, size_t capacity, int num_shard_bits,
+  BinnedLRUCache(StoneContext *c, size_t capacity, int num_shard_bits,
       bool strict_capacity_limit, double high_pri_pool_ratio);
   virtual ~BinnedLRUCache();
   virtual const char* Name() const override { return "BinnedLRUCache"; }
@@ -326,7 +326,7 @@ class BinnedLRUCache : public ShardedCache {
   }
 
  private:
-  StoneeContext *cct;
+  StoneContext *cct;
   BinnedLRUCacheShard* shards_;
   int num_shards_ = 0;
 };

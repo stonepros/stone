@@ -36,7 +36,7 @@ public:
     
     item(T i=0) : _prev(this), _next(this) {}
     ~item() { 
-      ceph_assert(!is_on_list());
+      stone_assert(!is_on_list());
     }
 
     item(const item& other) = delete;
@@ -48,7 +48,7 @@ public:
 
     bool remove_myself() {
       if (_next == this) {
-	ceph_assert(_prev == this);
+	stone_assert(_prev == this);
 	return false;
       }
       _next->_prev = _prev;
@@ -58,14 +58,14 @@ public:
     }
 
     void insert_after(item *other) {
-      ceph_assert(other->empty());
+      stone_assert(other->empty());
       other->_prev = this;
       other->_next = _next;
       _next->_prev = other;
       _next = other;
     }
     void insert_before(item *other) {
-      ceph_assert(other->empty());
+      stone_assert(other->empty());
       other->_next = this;
       other->_prev = _prev;
       _prev->_next = other;
@@ -73,7 +73,7 @@ public:
     }
 
     T get_item(size_t offset) {
-      ceph_assert(offset);
+      stone_assert(offset);
       return (T)(((char *)this) - offset); 
     }
   };
@@ -88,7 +88,7 @@ public:
 
   elist(size_t o) : _head(NULL), item_offset(o) {}
   ~elist() { 
-    ceph_assert(_head.empty());
+    stone_assert(_head.empty());
   }
 
   bool empty() const {
@@ -112,20 +112,20 @@ public:
   }
 
   T front(size_t o=0) {
-    ceph_assert(!_head.empty());
+    stone_assert(!_head.empty());
     return _head._next->get_item(o ? o : item_offset);
   }
   T back(size_t o=0) {
-    ceph_assert(!_head.empty());
+    stone_assert(!_head.empty());
     return _head._prev->get_item(o ? o : item_offset);
   }
 
   void pop_front() {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     _head._next->remove_myself();
   }
   void pop_back() {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     _head._prev->remove_myself();
   }
 
@@ -148,14 +148,14 @@ public:
     iterator(item *h, size_t o, mode_t m) :
       head(h), cur(h->_next), next(cur->_next), item_offset(o),
       mode(m) {
-      ceph_assert(item_offset > 0);
+      stone_assert(item_offset > 0);
     }
     T operator*() {
       return cur->get_item(item_offset);
     }
     iterator& operator++() {
-      ceph_assert(cur);
-      ceph_assert(cur != head);
+      stone_assert(cur);
+      stone_assert(cur != head);
       if (mode == MAGIC) {
 	// if 'cur' appears to be valid, use that.  otherwise,
 	// use cached 'next'.
@@ -169,7 +169,7 @@ public:
       else if (mode == CACHE_NEXT)
 	cur = next;
       else
-	ceph_abort();
+	stone_abort();
       next = cur->_next;
       return *this;
     }

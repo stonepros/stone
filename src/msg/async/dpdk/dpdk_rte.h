@@ -50,7 +50,7 @@ class eal {
   static std::mutex lock;
   static std::condition_variable cond;
   static std::list<std::function<void()>> funcs;
-  static int init(StoneeContext *c);
+  static int init(StoneContext *c);
   static void execute_on_master(std::function<void()> &&f) {
     bool done = false;
     std::unique_lock<std::mutex> l(lock);

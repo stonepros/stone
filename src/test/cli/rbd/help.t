@@ -1,7 +1,7 @@
   $ rbd --help
   usage: rbd <command> ...
   
-  Command-line interface for managing Ceph RBD images.
+  Command-line interface for managing Stone RBD images.
   
   Positional arguments:
     <command>

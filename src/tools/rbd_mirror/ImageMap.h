@@ -6,7 +6,7 @@
 
 #include <vector>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/Context.h"
 #include "common/AsyncOpTracker.h"
 #include "cls/rbd/cls_rbd_types.h"
@@ -66,7 +66,7 @@ private:
         mapped_time(mapped_time) {
     }
     Update(const std::string &global_image_id, const std::string &instance_id)
-      : Update(global_image_id, instance_id, ceph_clock_now()) {
+      : Update(global_image_id, instance_id, stone_clock_now()) {
     }
 
     friend std::ostream& operator<<(std::ostream& os,
@@ -89,7 +89,7 @@ private:
   std::unique_ptr<image_map::Policy> m_policy; // our mapping policy
 
   Context *m_timer_task = nullptr;
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   bool m_shutting_down = false;
   AsyncOpTracker m_async_op_tracker;
 
@@ -147,7 +147,7 @@ private:
   void schedule_action(const std::string &global_image_id);
 
   void schedule_update_task();
-  void schedule_update_task(const ceph::mutex &timer_lock);
+  void schedule_update_task(const stone::mutex &timer_lock);
   void process_updates();
   void update_image_mapping(Updates&& map_updates,
                             std::set<std::string>&& map_removals);

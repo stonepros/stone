@@ -8,7 +8,7 @@
 #include "include/buffer_fwd.h"
 #include "msg/Message.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -16,7 +16,7 @@ struct Dencoder {
   virtual ~Dencoder() {}
   virtual std::string decode(bufferlist bl, uint64_t seek) = 0;
   virtual void encode(bufferlist& out, uint64_t features) = 0;
-  virtual void dump(ceph::Formatter *f) = 0;
+  virtual void dump(stone::Formatter *f) = 0;
   virtual void copy() {
     std::cerr << "copy operator= not supported" << std::endl;
   }
@@ -30,7 +30,7 @@ struct Dencoder {
   unsigned get_struct_v(bufferlist bl, uint64_t seek) const {
     auto p = bl.cbegin(seek);
     uint8_t struct_v = 0;
-    ceph::decode(struct_v, p);
+    stone::decode(struct_v, p);
     return struct_v;
   }
   //virtual void print(ostream& out) = 0;
@@ -57,7 +57,7 @@ public:
     auto p = bl.cbegin();
     p.seek(seek);
     try {
-      using ceph::decode;
+      using stone::decode;
       decode(*m_object, p);
     }
     catch (buffer::error& e) {
@@ -73,7 +73,7 @@ public:
 
   void encode(bufferlist& out, uint64_t features) override = 0;
 
-  void dump(ceph::Formatter *f) override {
+  void dump(stone::Formatter *f) override {
     m_object->dump(f);
   }
   void generate() override {
@@ -104,7 +104,7 @@ public:
     : DencoderBase<T>(stray_ok, nondeterministic) {}
   void encode(bufferlist& out, uint64_t features) override {
     out.clear();
-    using ceph::encode;
+    using stone::encode;
     encode(*this->m_object, out);
   }
 };
@@ -134,7 +134,7 @@ public:
     : DencoderBase<T>(stray_ok, nondeterministic) {}
   void encode(bufferlist& out, uint64_t features) override {
     out.clear();
-    using ceph::encode;
+    using stone::encode;
     encode(*(this->m_object), out, features);
   }
 };
@@ -170,7 +170,7 @@ public:
     auto p = bl.cbegin();
     p.seek(seek);
     try {
-      ref_t<Message> n(decode_message(g_ceph_context, 0, p), false);
+      ref_t<Message> n(decode_message(g_stone_context, 0, p), false);
       if (!n)
 	throw std::runtime_error("failed to decode");
       if (n->get_type() != m_object->get_type()) {
@@ -196,7 +196,7 @@ public:
     encode_message(m_object.get(), features, out);
   }
 
-  void dump(ceph::Formatter *f) override {
+  void dump(stone::Formatter *f) override {
     m_object->dump(f);
   }
   void generate() override {

@@ -3,17 +3,17 @@
 Terminology
 -----------
 
-A Ceph cluster may have zero or more CephFS *file systems*.  CephFS
+A Stone cluster may have zero or more StoneFS *file systems*.  StoneFS
 file systems have a human readable name (set in ``fs new``)
 and an integer ID.  The ID is called the file system cluster ID,
 or *FSCID*.
 
-Each CephFS file system has a number of *ranks*, one by default,
+Each StoneFS file system has a number of *ranks*, one by default,
 which start at zero.  A rank may be thought of as a metadata shard.
 Controlling the number of ranks in a file system is described
 in :doc:`/cephfs/multimds`
 
-Each CephFS ceph-mds process (a *daemon*) initially starts up
+Each StoneFS ceph-mds process (a *daemon*) initially starts up
 without a rank.  It may be assigned one by the monitor cluster.
 A daemon may only hold one rank at a time.  Daemons only give up
 a rank when the ceph-mds process stops.
@@ -70,7 +70,7 @@ laggy daemon.
 Each file system may specify a number of standby daemons to be considered
 healthy. This number includes daemons in standby-replay waiting for a rank to
 fail (remember that a standby-replay daemon will not be assigned to take over a
-failure for another rank or a failure in a another CephFS file system). The
+failure for another rank or a failure in a another StoneFS file system). The
 pool of standby daemons not in replay count towards any file system count.
 Each file system may set the number of standby daemons wanted using:
 
@@ -86,7 +86,7 @@ Setting ``count`` to 0 will disable the health check.
 Configuring standby-replay
 --------------------------
 
-Each CephFS file system may be configured to add standby-replay daemons.  These
+Each StoneFS file system may be configured to add standby-replay daemons.  These
 standby daemons follow the active MDS's metadata journal to reduce failover
 time in the event the active MDS becomes unavailable. Each active MDS may have
 only one standby-replay daemon following it.
@@ -114,10 +114,10 @@ Configuring MDS file system affinity
 You may want to have an MDS used for a particular file system. Or, perhaps you
 have larger MDSs on better hardware that should be preferred over a last-resort
 standby on lesser or over-provisioned hardware. To express this preference,
-CephFS provides a configuration option for MDS called ``mds_join_fs`` which
+StoneFS provides a configuration option for MDS called ``mds_join_fs`` which
 enforces this `affinity`.
 
-As part of any failover, the Ceph monitors will prefer standby daemons with
+As part of any failover, the Stone monitors will prefer standby daemons with
 ``mds_join_fs`` equal to the file system name with the failed rank.  If no
 standby exists with ``mds_join_fs`` equal to the file system name, it will
 choose a `vanilla` standby (no setting for ``mds_join_fs``) for the replacement
@@ -125,7 +125,7 @@ or any other available standby as a last resort. Note, this does not change the
 behavior that ``standby-replay`` daemons are always selected before looking at
 other standbys.
 
-Even further, the monitors will regularly examine the CephFS file systems when
+Even further, the monitors will regularly examine the StoneFS file systems when
 stable to check if a standby with stronger affinity is available to replace an
 MDS with lower affinity. This process is also done for standby-replay daemons:
 if a regular standby has stronger affinity than the standby-replay MDS, it will

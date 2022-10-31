@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -17,7 +17,7 @@
 #define STONE_COND_H
 
 #include "common/Clock.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/Context.h"
 
 /**
@@ -27,11 +27,11 @@
  * assume the caller is holding the appropriate lock.
  */
 class C_Cond : public Context {
-  ceph::condition_variable& cond;   ///< Cond to signal
+  stone::condition_variable& cond;   ///< Cond to signal
   bool *done;   ///< true if finish() has been called
   int *rval;    ///< return value
 public:
-  C_Cond(ceph::condition_variable &c, bool *d, int *r) : cond(c), done(d), rval(r) {
+  C_Cond(stone::condition_variable &c, bool *d, int *r) : cond(c), done(d), rval(r) {
     *done = false;
   }
   void finish(int r) override {
@@ -49,12 +49,12 @@ public:
  * already hold it.
  */
 class C_SafeCond : public Context {
-  ceph::mutex& lock;    ///< Mutex to take
-  ceph::condition_variable& cond;     ///< Cond to signal
+  stone::mutex& lock;    ///< Mutex to take
+  stone::condition_variable& cond;     ///< Cond to signal
   bool *done;     ///< true after finish() has been called
   int *rval;      ///< return value (optional)
 public:
-  C_SafeCond(ceph::mutex& l, ceph::condition_variable& c, bool *d, int *r=0)
+  C_SafeCond(stone::mutex& l, stone::condition_variable& c, bool *d, int *r=0)
     : lock(l), cond(c), done(d), rval(r) {
     *done = false;
   }
@@ -74,8 +74,8 @@ public:
  * until wait() returns.
  */
 class C_SaferCond : public Context {
-  ceph::mutex lock;  ///< Mutex to take
-  ceph::condition_variable cond;     ///< Cond to signal
+  stone::mutex lock;  ///< Mutex to take
+  stone::condition_variable cond;     ///< Cond to signal
   bool done = false; ///< true after finish() has been called
   int rval = 0;      ///< return value
 public:
@@ -83,7 +83,7 @@ public:
     C_SaferCond("C_SaferCond")
   {}
   explicit C_SaferCond(const std::string &name)
-    : lock(ceph::make_mutex(name)) {}
+    : lock(stone::make_mutex(name)) {}
   void finish(int r) override { complete(r); }
 
   /// We overload complete in order to not delete the context
@@ -103,10 +103,10 @@ public:
 
   /// Wait until the \c secs expires or \c complete() is called
   int wait_for(double secs) {
-    return wait_for(ceph::make_timespan(secs));
+    return wait_for(stone::make_timespan(secs));
   }
 
-  int wait_for(ceph::timespan secs) {
+  int wait_for(stone::timespan secs) {
     std::unique_lock l{lock};
     if (done) {
       return rval;

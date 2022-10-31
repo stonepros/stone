@@ -168,7 +168,7 @@ if rbd help export | grep -q export-format; then
 fi
 
 tiered=0
-if ceph osd dump | grep ^pool | grep "'rbd'" | grep tier; then
+if stone osd dump | grep ^pool | grep "'rbd'" | grep tier; then
     tiered=1
 fi
 

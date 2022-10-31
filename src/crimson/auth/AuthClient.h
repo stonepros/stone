@@ -29,7 +29,7 @@ public:
   struct auth_request_t {
     method_t auth_method;
     std::vector<uint32_t> preferred_modes;
-    ceph::bufferlist auth_bl;
+    stone::bufferlist auth_bl;
   };
   /// Build an authentication request to begin the handshake
   ///
@@ -40,10 +40,10 @@ public:
   /// Handle server's request to continue the handshake
   ///
   /// @throw auth::error if unable to build the request
-  virtual ceph::bufferlist handle_auth_reply_more(
+  virtual stone::bufferlist handle_auth_reply_more(
     crimson::net::ConnectionRef conn,
     AuthConnectionMetaRef auth_meta,
-    const ceph::bufferlist& bl) = 0;
+    const stone::bufferlist& bl) = 0;
 
   /// Handle server's indication that authentication succeeded
   ///

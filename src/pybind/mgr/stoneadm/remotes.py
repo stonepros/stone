@@ -1,4 +1,4 @@
-# ceph-deploy ftw
+# stone-deploy ftw
 import os
 try:
     from typing import Optional

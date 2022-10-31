@@ -1,5 +1,5 @@
 commit 9411351cc8ce9ee03fbd46225102fe3d28ddf611
-Author: Jenkins Build Slave User <ceph-release-team@redhat.com>
+Author: Jenkins Build Slave User <stone-release-team@redhat.com>
 Date:   Mon Dec 5 22:15:20 2016 +0000
 
     10.2.4
@@ -38,7 +38,7 @@ Date:   Mon Nov 14 11:50:23 2016 -0800
     in that case, the real inst would see itself marked up, and then back
     down causing it to try booting again.
     
-    Fixes: http://tracker.ceph.com/issues/17899
+    Fixes: http://tracker.stone.com/issues/17899
     Signed-off-by: Samuel Just <sjust@redhat.com>
     (cherry picked from commit 033ad5b46c0492134e72a8372e44e3ef1358d2df)
 
@@ -79,7 +79,7 @@ Date:   Wed Nov 2 15:33:52 2016 +0000
 
     mon: MonmapMonitor: return success when monitor will be removed
     
-    Fixes: http://tracker.ceph.com/issues/17725
+    Fixes: http://tracker.stone.com/issues/17725
     
     Signed-off-by: Joao Eduardo Luis <joao@suse.de>
     (cherry picked from commit c9d46cfbf2512bc3495c6901de2b8f711bef9bae)
@@ -101,7 +101,7 @@ Date:   Mon Nov 28 22:06:56 2016 -0800
 
     librados: remove new setxattr overload to avoid breaking the C++ ABI
     
-    Fixes: http://tracker.ceph.com/issues/18058
+    Fixes: http://tracker.stone.com/issues/18058
     Signed-off-by: Josh Durgin <jdurgin@redhat.com>
     (cherry picked from commit b8ff781ddcf737882163cf56d7c9b11e815fb699)
     
@@ -139,7 +139,7 @@ Date:   Mon Nov 28 14:35:53 2016 -0500
     	src/crush/CrushWrapper.h
     	src/mgr/PyModules.cc
     	src/mon/OSDMonitor.cc
-    	src/tools/ceph_monstore_tool.cc
+    	src/tools/stone_monstore_tool.cc
 
 commit c5f5b94fc2e18b38d05f00fec04d2d7e3c35c54c
 Author: Sage Weil <sage@redhat.com>
@@ -198,7 +198,7 @@ Date:   Thu Nov 10 13:56:24 2016 -0500
     
     Broken by refactor in 921c4586f165ce39c17ef8b579c548dc8f6f4500.
     
-    Fixes: http://tracker.ceph.com/issues/17859
+    Fixes: http://tracker.stone.com/issues/17859
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit c5180262a086c2d3895aff4bf0fb0ff9a6666149)
 
@@ -209,7 +209,7 @@ Date:   Wed Nov 9 20:53:18 2016 +0100
 
     Merge pull request #11822 from SUSE/wip-17816-jewel
     
-    jewel: Missing comma in ceph-create-keys causes concatenation of arguments
+    jewel: Missing comma in stone-create-keys causes concatenation of arguments
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -217,14 +217,14 @@ commit 8b595f567407be2a759e4987f33ce79e3763ea49
 Author: Patrick Donnelly <pdonnell@redhat.com>
 Date:   Sun Sep 18 16:26:29 2016 -0400
 
-    ceph-create-keys: add missing argument comma
+    stone-create-keys: add missing argument comma
     
     The arguments "get" and "client.admin" were being concatenated into
     "getclient.admin".
     
-    Found using ceph-ansible + strace:
+    Found using stone-ansible + strace:
     
-        13031 execve("/usr/bin/ceph", ["ceph", "--cluster=ceph", "--name=mon.", "--keyring=/var/lib/ceph/mon/ceph-ceph-mon0/keyring", "auth", "getclient.admin"], ["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin", "LANG=en_US.UTF-8", "CLUSTER=ceph", "TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=134217728", "CEPH_AUTO_RESTART_ON_UPGRADE=no"] <unfinished ...>
+        13031 execve("/usr/bin/stone", ["stone", "--cluster=stone", "--name=mon.", "--keyring=/var/lib/stone/mon/stone-stone-mon0/keyring", "auth", "getclient.admin"], ["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin", "LANG=en_US.UTF-8", "CLUSTER=stone", "TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=134217728", "CEPH_AUTO_RESTART_ON_UPGRADE=no"] <unfinished ...>
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 482022233d845b75876b04ca23fb137281a9f6ab)
@@ -318,7 +318,7 @@ Date:   Fri Nov 4 15:31:05 2016 +0100
 
     Merge pull request #11742 from tchaikov/wip-17728-jewel
     
-    jewel: test/ceph_test_msgr: do not use Message::middle for holding transient…
+    jewel: test/stone_test_msgr: do not use Message::middle for holding transient…
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -329,7 +329,7 @@ Date:   Thu Nov 3 15:54:28 2016 +0100
 
     Merge pull request #11746 from liewegas/wip-post-file-key-jewel
     
-    jewel: ceph-post-file: use new ssh key
+    jewel: stone-post-file: use new ssh key
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
     Reviewed-by: Brad Hubbard <bhubbard@redhat.com>
@@ -338,7 +338,7 @@ commit eb30cc5ad6b439417298b7c615ff8ae15bf00fa2
 Author: David Galloway <dgallowa@redhat.com>
 Date:   Fri Aug 19 16:11:32 2016 -0400
 
-    ceph-post-file: Ignore keys offered by ssh-agent
+    stone-post-file: Ignore keys offered by ssh-agent
     
     In my case, I had multiple private keys in ssh-agent which resulted in
     the sftp connection failing despite explicitly specifying the private
@@ -351,15 +351,15 @@ commit 43282b0657ff19060dad25df79981ce17a76900f
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Nov 2 09:37:41 2016 -0400
 
-    ceph-post-file: migrate to RSA SSH keys
+    stone-post-file: migrate to RSA SSH keys
     
     DSA keys are being deprecated: http://www.openssh.com/legacy.html
     
-    drop.ceph.com will continue to allow the old DSA key but eventually,
-    users submitting logs using ceph-post-file will run into issues when
+    drop.stone.com will continue to allow the old DSA key but eventually,
+    users submitting logs using stone-post-file will run into issues when
     OpenSSH completely drops support for the algorithm.
     
-    Fixes: http://tracker.ceph.com/issues/14267
+    Fixes: http://tracker.stone.com/issues/14267
     
     Signed-off-by: David Galloway <dgallowa@redhat.com>
     (cherry picked from commit ecd02bf3f1c7a07a3271b2736a9e12dd6e897821)
@@ -427,7 +427,7 @@ Date:   Wed Sep 28 11:44:28 2016 -0400
     conceivable that there is some feature-dependent
     behavior in the message encode/decode that is important.
     
-    Fixes: http://tracker.ceph.com/issues/17365
+    Fixes: http://tracker.stone.com/issues/17365
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit d4f5e88f36e5388ae9e062c4bc49ac1c684a3f3c)
 
@@ -444,14 +444,14 @@ commit 3e1edde98610b11b94c59d23de979d6cd79dd8fe
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Sat Oct 29 01:54:58 2016 +0800
 
-    test/ceph_test_msgr: do not use Message::middle for holding transient data
+    test/stone_test_msgr: do not use Message::middle for holding transient data
     
     Message::middle is used for holding encoded data, so we we can not stuff
     it with payload and leave the "payload" field empty. this change
-    refactors the ceph_test_msgr by introducing a Payload class which
+    refactors the stone_test_msgr by introducing a Payload class which
     encodes all test data in it.
     
-    Fixes: http://tracker.ceph.com/issues/17728
+    Fixes: http://tracker.stone.com/issues/17728
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 56896a7ed20869ce91ade4c77c1d6cbab8d50de1)
     Conflicts:
@@ -463,13 +463,13 @@ commit 8f75bd64768b6984c537dd15b5d9159070b86d91
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Mon Aug 8 23:20:58 2016 +0800
 
-    test/ceph_test_msgr: fix circular locking dependency
+    test/stone_test_msgr: fix circular locking dependency
     
     * do not acquire lock when sending message
     * remove lock in session
     * reduce the scope guarded by locks for better performance.
     
-    Fixes: http://tracker.ceph.com/issues/16955
+    Fixes: http://tracker.stone.com/issues/16955
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit cf1801c260c42aa93850538eea7a194440ebe350)
 
@@ -477,9 +477,9 @@ commit f960db4646a9535bcee6d53740811b84e0678c93
 Author: Haomai Wang <haomai@xsky.com>
 Date:   Thu Jul 7 14:59:51 2016 +0800
 
-    ceph_test_msgr: use ceph log infrastructure to output
+    stone_test_msgr: use stone log infrastructure to output
     
-    because we want to get the right log sequence which mixes ceph logginer and
+    because we want to get the right log sequence which mixes stone logginer and
     cerr. Otherwise, cerr output make the logs a little disordered.
     
     Signed-off-by: Haomai Wang <haomai@xsky.com>
@@ -490,7 +490,7 @@ Merge: 5efb6b1 779af22
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Tue Nov 1 17:05:27 2016 -0700
 
-    Merge pull request #11728 from ceph/wip-librados-upgrade-jewel
+    Merge pull request #11728 from stone/wip-librados-upgrade-jewel
     
     qa: remove EnumerateObjects from librados upgrade tests
 
@@ -499,7 +499,7 @@ Merge: 3c9fe54 39b8e78
 Author: Loic Dachary <loic@dachary.org>
 Date:   Fri Oct 28 14:29:20 2016 +0200
 
-    Merge pull request #11669 from ceph/wip-jewel-11566
+    Merge pull request #11669 from stone/wip-jewel-11566
     
     rgw: fix put_acls for objects starting and ending with underscore
     
@@ -522,7 +522,7 @@ Date:   Wed Oct 19 21:51:01 2016 +0200
 
     rgw: fix put_acls for objects starting and ending with underscore
     
-    Fixes: http://tracker.ceph.com/issues/17625
+    Fixes: http://tracker.stone.com/issues/17625
     Signed-off-by: Orit Wasserman <owasserm@redhat.com>
     (cherry picked from commit 14d4d912c7b47c56b16ae0bdc6bc08d208de3461)
 
@@ -561,7 +561,7 @@ Merge: 0aee633 4cb83c1
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Oct 26 23:00:35 2016 +0200
 
-    Merge pull request #11644 from ceph/wip-17695
+    Merge pull request #11644 from stone/wip-17695
     
     jewel: librbd: discard after write can result in assertion failure
     
@@ -577,7 +577,7 @@ Date:   Tue Oct 25 09:43:06 2016 -0400
     a discard after write to overlapping extents. This issue is only present
     on the jewel branch due to design changes on the master branch.
     
-    Fixes: http://tracker.ceph.com/issues/17695
+    Fixes: http://tracker.stone.com/issues/17695
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
 
 commit dc2ffda7819d2ebeed3526d9e6da8f53221818de
@@ -586,7 +586,7 @@ Date:   Thu Oct 20 10:17:36 2016 -0700
 
     rgw: handle empty POST condition
     
-    Fixes: http://tracker.ceph.com/issues/17635
+    Fixes: http://tracker.stone.com/issues/17635
     
     Before accessing json entity, need to check that iterator is valid.
     If there is no entry return appropriate error code.
@@ -601,7 +601,7 @@ Date:   Wed Oct 26 16:47:03 2016 +0200
 
     Merge pull request #11657 from dachary/wip-17707-jewel
     
-    jewel: ceph-disk: using a regular file as a journal fails
+    jewel: stone-disk: using a regular file as a journal fails
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -621,7 +621,7 @@ Merge: 0fb486d 2f9a5be
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Oct 26 11:55:49 2016 +0200
 
-    Merge pull request #11626 from ceph/wip-jewel-11567
+    Merge pull request #11626 from stone/wip-jewel-11567
     
     jewel: don't loop forever when reading data from 0 sized segment.
     
@@ -642,20 +642,20 @@ commit cd99a642a088c7cd010e45a81d6680cdfca16ca6
 Author: Jayashree Candadai <jayaajay@indiana.edu>
 Date:   Fri Oct 21 13:52:05 2016 -0400
 
-    ceph-disk: allow using a regular file as a journal
+    stone-disk: allow using a regular file as a journal
     
-    Because of a missing return, ceph-disk prepare would fail if given a
-    regular file as a journal. If the journal file does not exist, ceph-disk
-    will create it but fail to ensure that the ceph user owns it. The
+    Because of a missing return, stone-disk prepare would fail if given a
+    regular file as a journal. If the journal file does not exist, stone-disk
+    will create it but fail to ensure that the stone user owns it. The
     symlink to the journal file is not set when the journal file is
     specified on the command line and the journal file does not exist at
-    all. The ceph-osd daemon will silently create it as a file but it will
+    all. The stone-osd daemon will silently create it as a file but it will
     not be the file given in argument.
     
     Add a test case to verify using a regular file as a journal works as
     expected.
     
-    Fixes: http://tracker.ceph.com/issues/17662
+    Fixes: http://tracker.stone.com/issues/17662
     
     Signed-off-by: Jayashree Candadai <jayaajay@indiana.edu>
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
@@ -665,19 +665,19 @@ commit a80040230cddc395809d2323392c87a4a1fef923
 Author: Anirudha Bose <ani07nov@gmail.com>
 Date:   Wed Aug 17 12:19:33 2016 +0530
 
-    ceph-disk: PEP8ify
+    stone-disk: PEP8ify
     
     Signed-off-by: Anirudha Bose <ani07nov@gmail.com>
     (cherry picked from commit f7a15ccfa2cc214c3688a2b41ac45be1abfb7700)
     
     Conflicts:
-    	src/ceph-disk/setup.py: python 2.7 restriction not backported
+    	src/stone-disk/setup.py: python 2.7 restriction not backported
 
 commit e200b17016a1a7cd103affde2d2b265916755498
 Author: Anirudha Bose <ani07nov@gmail.com>
 Date:   Wed Aug 17 12:15:25 2016 +0530
 
-    ceph-disk: Set space_symlink to the path, not file object
+    stone-disk: Set space_symlink to the path, not file object
     
     Signed-off-by: Anirudha Bose <ani07nov@gmail.com>
     (cherry picked from commit d290454cf5f660c1681eefd70a38e79da683525f)
@@ -686,7 +686,7 @@ commit 9191825c06b3d92e2caa26c9efdb69a79cc3964b
 Author: Anirudha Bose <ani07nov@gmail.com>
 Date:   Wed Aug 17 12:13:53 2016 +0530
 
-    ceph-disk: Use os.path.isabs instead of .startswith('/')
+    stone-disk: Use os.path.isabs instead of .startswith('/')
     
     Signed-off-by: Anirudha Bose <ani07nov@gmail.com>
     (cherry picked from commit 6f795356de00dd7c33282183b11a03da800fde7b)
@@ -695,7 +695,7 @@ commit f1c2de768535ce18259d4fc187cd370766c1e6cf
 Author: Anirudha Bose <ani07nov@gmail.com>
 Date:   Sun Jun 19 05:10:27 2016 +0530
 
-    ceph-disk: Use context manager with FileLock
+    stone-disk: Use context manager with FileLock
     
     acquire and release methods of FileLock are dropped
     
@@ -706,7 +706,7 @@ commit 26cb5b6bfbd6eee46bfa3cf005b1cd9f06b0e262
 Author: Anirudha Bose <ani07nov@gmail.com>
 Date:   Sun Jun 19 04:05:42 2016 +0530
 
-    ceph-disk: Fix bug in FileLock
+    stone-disk: Fix bug in FileLock
     
     Python fcntl.lockf() accepts a file descriptor, not a file object
     
@@ -717,7 +717,7 @@ commit 91a9ca374f646966e31b015928a2cc60bc5225aa
 Author: Anirudha Bose <ani07nov@gmail.com>
 Date:   Thu Jun 16 16:37:00 2016 +0530
 
-    ceph-disk: Use true integer division in get_dev_size
+    stone-disk: Use true integer division in get_dev_size
     
     Signed-off-by: Anirudha Bose <ani07nov@gmail.com>
     (cherry picked from commit f1bb72c82806cc03e85e0b19c83d61409c6b2d51)
@@ -726,33 +726,33 @@ commit 2373ccb7a991069406e344b91fa70c0b2d1aa5e0
 Author: Anirudha Bose <ani07nov@gmail.com>
 Date:   Tue Jun 14 21:42:02 2016 +0530
 
-    ceph-disk: Compatibility fixes for Python 3
+    stone-disk: Compatibility fixes for Python 3
     
-    ceph-disk: Misc cleanups
+    stone-disk: Misc cleanups
     
     Signed-off-by: Anirudha Bose <ani07nov@gmail.com>
     (cherry picked from commit d0e29c74f84a2ed3014a516c0106172619314bdc)
     
     Conflicts:
-         src/ceph-disk/tox.ini: python3 is not supported in jewel
+         src/stone-disk/tox.ini: python3 is not supported in jewel
 
 commit 79cf6330d67ad52af5690f4d4efd29aa2722acb2
 Author: Shylesh Kumar <shmohan@redhat.com>
 Date:   Thu Jul 7 20:45:57 2016 +0530
 
-    ceph-disk: change ownership of init file to ceph:ceph
+    stone-disk: change ownership of init file to stone:stone
     
-    Fixes: http://tracker.ceph.com/issues/16280
+    Fixes: http://tracker.stone.com/issues/16280
     Signed-off-by: Shylesh Kumar <shmohan@redhat.com>
     (cherry picked from commit aab9d03e1b50ba10a383663088400b9fabe306cb)
 
 commit 796418746ecd2a4971e365499c6952e131e74913
-Author: root <root@ceph-node1.homeoffice.wal-mart.com>
+Author: root <root@stone-node1.homeoffice.wal-mart.com>
 Date:   Mon Sep 12 14:30:43 2016 +0530
 
     rgw: Do not archive metadata by default
     
-    Fixes: http://tracker.ceph.com/issues/17256
+    Fixes: http://tracker.stone.com/issues/17256
     Signed-off-by: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     
@@ -789,7 +789,7 @@ Date:   Wed May 25 17:56:51 2016 +0100
     The JSON output was getting broken by continuing
     in the wrong place.
     
-    Fixes: http://tracker.ceph.com/issues/17685
+    Fixes: http://tracker.stone.com/issues/17685
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit c5700ce4b45b3a385fe4c2111da852bea7d86da2)
 
@@ -799,7 +799,7 @@ Date:   Mon Oct 17 09:48:20 2016 -0400
 
     journal: do not prematurely flag object recorder as closed
     
-    Fixes: http://tracker.ceph.com/issues/17590
+    Fixes: http://tracker.stone.com/issues/17590
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 2be6367cb0119d86dfecfa94eb4a3a102c40162a)
 
@@ -834,7 +834,7 @@ Date:   Mon Oct 24 12:03:01 2016 +0200
 
     Merge pull request #10759 from dachary/wip-16866-jewel
     
-    jewel: OSD: ceph osd df does not show summarized info correctly if one or more OSDs are out
+    jewel: OSD: stone osd df does not show summarized info correctly if one or more OSDs are out
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -855,7 +855,7 @@ Date:   Thu Oct 13 10:04:24 2016 -0400
 
     test: TestJournalReplay test cases need to wait for committed journal event
     
-    Fixes: http://tracker.ceph.com/issues/17566
+    Fixes: http://tracker.stone.com/issues/17566
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 1bdf7a425eb7436838c9445ea2c8ab42dfd3a1b6)
 
@@ -901,7 +901,7 @@ Date:   Mon Sep 5 10:01:45 2016 -0400
 
     rbd-nbd: fix kernel deadlock during teuthology testing
     
-    Fixes: http://tracker.ceph.com/issues/16921
+    Fixes: http://tracker.stone.com/issues/16921
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit ce7c1520a8019f011fa34dd898af317f78974577)
 
@@ -1020,7 +1020,7 @@ Merge: 07a8d8a d66bb7a
 Author: Loic Dachary <loic@dachary.org>
 Date:   Thu Oct 20 12:42:01 2016 +0200
 
-    Merge pull request #11431 from ceph/wip-jewel-tarball
+    Merge pull request #11431 from stone/wip-jewel-tarball
     
     jewel: build/ops: include more files in "make dist" tarball
     
@@ -1076,9 +1076,9 @@ Merge: fb74b16 de672a0
 Author: Loic Dachary <loic@dachary.org>
 Date:   Thu Oct 20 11:27:18 2016 +0200
 
-    Merge pull request #11201 from ceph/wip-backport-logrotate-jewel
+    Merge pull request #11201 from stone/wip-backport-logrotate-jewel
     
-    jewel: build/ops: backport 'logrotate: Run as root/ceph'
+    jewel: build/ops: backport 'logrotate: Run as root/stone'
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1099,7 +1099,7 @@ Merge: 0c83eb3 eb6c3cb
 Author: Loic Dachary <loic@dachary.org>
 Date:   Thu Oct 20 09:39:15 2016 +0200
 
-    Merge pull request #11563 from ceph/wip-jewel-acl-underscore
+    Merge pull request #11563 from stone/wip-jewel-acl-underscore
     
     rgw: fix regression with handling double underscore
     
@@ -1111,7 +1111,7 @@ Date:   Thu Sep 29 18:35:59 2016 -0700
 
     rgw: set correct instance on the object
     
-    Fixes: http://tracker.ceph.com/issues/17443
+    Fixes: http://tracker.stone.com/issues/17443
     
     This was broken by commit bc840afafdfe5e528e5c1b711e71420ac3cb5a67
     
@@ -1125,7 +1125,7 @@ Date:   Wed Oct 19 23:14:23 2016 +0200
 
     Merge pull request #11548 from dachary/wip-17609-jewel
     
-    jewel: tests: ceph-disk must ignore debug monc
+    jewel: tests: stone-disk must ignore debug monc
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -1147,7 +1147,7 @@ Date:   Wed Oct 19 23:11:04 2016 +0200
 
     Merge pull request #10884 from dachary/wip-17149-jewel
     
-    jewel: ceph-disk: expected systemd unit failures are confusing
+    jewel: stone-disk: expected systemd unit failures are confusing
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1157,7 +1157,7 @@ Date:   Wed Aug 31 22:25:57 2016 +0200
 
     rgw: fix regression with handling double underscore
     
-    Fixes: http://tracker.ceph.com/issues/16856
+    Fixes: http://tracker.stone.com/issues/16856
     Signed-off-by: Orit Wasserman <owasserm@redhat.com>
     (cherry picked from commit bc840afafdfe5e528e5c1b711e71420ac3cb5a67)
 
@@ -1168,7 +1168,7 @@ Date:   Wed Oct 19 16:50:44 2016 +0200
 
     Merge pull request #11408 from dachary/wip-17345-jewel
     
-    jewel: Ceph Status - Segmentation Fault
+    jewel: Stone Status - Segmentation Fault
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -1179,7 +1179,7 @@ Date:   Wed Oct 19 16:50:22 2016 +0200
 
     Merge pull request #11407 from dachary/wip-17360-jewel
     
-    jewel: ceph-objectstore-tool crashes if --journal-path <a-directory>
+    jewel: stone-objectstore-tool crashes if --journal-path <a-directory>
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -1201,7 +1201,7 @@ Date:   Wed Oct 19 09:46:19 2016 +0200
 
     Merge pull request #10862 from dachary/wip-17095-jewel
     
-    jewel: rpm: ceph installs stuff in %_udevrulesdir but does not own that directory
+    jewel: rpm: stone installs stuff in %_udevrulesdir but does not own that directory
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1209,12 +1209,12 @@ commit f400ff222e531feb00de3ebf1860a0d4bcca736e
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Oct 18 17:33:23 2016 +0200
 
-    tests: ceph-disk: force debug monc = 0
+    tests: stone-disk: force debug monc = 0
     
     The sh function will collect both stderr and stdout and debug
     will mess the json parsing.
     
-    Fixes: http://tracker.ceph.com/issues/17607
+    Fixes: http://tracker.stone.com/issues/17607
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit 469a53a4adc335ea4ff8e34a958b12f0f222a6c1)
@@ -1226,7 +1226,7 @@ Date:   Wed Oct 19 08:56:46 2016 +0200
 
     Merge pull request #10860 from dachary/wip-17121-jewel
     
-    jewel: the %USED of ceph df is wrong
+    jewel: the %USED of stone df is wrong
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
     Reviewed-by: Samuel Just <sjust@redhat.com>
@@ -1257,7 +1257,7 @@ commit 25a35d43a8bf7e1a7d78d5d1d2a5556dff98f5e8
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Mon Oct 10 18:43:39 2016 +0800
 
-    doc: fill keyring with caps before passing it to ceph-monstore-tool
+    doc: fill keyring with caps before passing it to stone-monstore-tool
     
     to make sure the recovered monitor store is ready for use.
     
@@ -1268,7 +1268,7 @@ commit 73ea9264803bdf53a5da64992c1b91e94633f5e3
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Mon Oct 10 16:32:27 2016 +0800
 
-    tools/ceph_monstore_tool: bail out if no caps found for a key
+    tools/stone_monstore_tool: bail out if no caps found for a key
     
     we take it as an error if no caps is granted to an entity in the
     specified keyring file when rebuilding the monitor db.
@@ -1280,11 +1280,11 @@ commit 4ebf87bccdb17bd04b2c615e6278a7816ae1ff43
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Fri Sep 30 17:58:14 2016 +0800
 
-    tools/ceph_monstore_tool: update pgmap_meta also when rebuilding store.db
+    tools/stone_monstore_tool: update pgmap_meta also when rebuilding store.db
     
     we should rebuild pgmap_meta table from the collected osdmaps
     
-    Fixes: http://tracker.ceph.com/issues/17400
+    Fixes: http://tracker.stone.com/issues/17400
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit cdfa7a69f63d047205dcfccd63b5d58ab0d4695b)
 
@@ -1296,12 +1296,12 @@ Date:   Sun Sep 18 11:40:56 2016 +0800
     
     As follow:
     
-    [ 72%] Building CXX object src/tools/CMakeFiles/ceph-objectstore-tool.dir/RadosDump.cc.o
-    /home/jenkins-build/build/workspace/ceph-pull-requests/src/tools/rebuild_mondb.cc: In function ‘int update_mon_db(ObjectStore&, OSDSuperblock&, const string&, const string&)’:
-    /home/jenkins-build/build/workspace/ceph-pull-requests/src/tools/rebuild_mondb.cc:289:22: warning: ‘crc’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+    [ 72%] Building CXX object src/tools/CMakeFiles/stone-objectstore-tool.dir/RadosDump.cc.o
+    /home/jenkins-build/build/workspace/stone-pull-requests/src/tools/rebuild_mondb.cc: In function ‘int update_mon_db(ObjectStore&, OSDSuperblock&, const string&, const string&)’:
+    /home/jenkins-build/build/workspace/stone-pull-requests/src/tools/rebuild_mondb.cc:289:22: warning: ‘crc’ may be used uninitialized in this function [-Wmaybe-uninitialized]
              if (have_crc && osdmap.get_crc() != crc) {
                           ^
-    /home/jenkins-build/build/workspace/ceph-pull-requests/src/tools/rebuild_mondb.cc:238:14: note: ‘crc’ was declared here
+    /home/jenkins-build/build/workspace/stone-pull-requests/src/tools/rebuild_mondb.cc:238:14: note: ‘crc’ was declared here
          uint32_t crc;
     
     Signed-off-by: xie xingguo <xie.xingguo@zte.com.cn>
@@ -1327,7 +1327,7 @@ Date:   Sat Oct 1 14:18:55 2016 +0800
     
     document the process to recover from leveldb corruption.
     
-    Fixes: http://tracker.ceph.com/issues/17179
+    Fixes: http://tracker.stone.com/issues/17179
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 79a9f299253e24d20547131b3c9c9e0667e3b869)
     Conflicts:
@@ -1339,9 +1339,9 @@ commit 8c8d5ce529fa826bc0d453edf5fb5e98e29294d3
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Mon Aug 29 19:53:11 2016 +0800
 
-    tools/ceph_monstore_tool: add "rebuild" command
+    tools/stone_monstore_tool: add "rebuild" command
     
-    Fixes: http://tracker.ceph.com/issues/17179
+    Fixes: http://tracker.stone.com/issues/17179
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit d909fa035c8fbbded786b2ca072acc10ea6b6052)
 
@@ -1349,9 +1349,9 @@ commit 1fcb0bb81a8989b31a79bc565354f6817ceb12d7
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Mon Aug 29 19:52:19 2016 +0800
 
-    tools/ceph-objectstore-tool: add "update-mon-db" command
+    tools/stone-objectstore-tool: add "update-mon-db" command
     
-    Fixes: http://tracker.ceph.com/issues/17179
+    Fixes: http://tracker.stone.com/issues/17179
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     Conflicts:
     	src/tools/CMakeLists.txt: this file was added in master, so
@@ -1369,10 +1369,10 @@ Date:   Wed Aug 31 13:11:24 2016 +0800
 
     mon/AuthMonitor: make AuthMonitor::IncType public
     
-    so ceph-objectstore-tool is able to use it when rebuilding monitor
+    so stone-objectstore-tool is able to use it when rebuilding monitor
     db.
     
-    Fixes: http://tracker.ceph.com/issues/17179
+    Fixes: http://tracker.stone.com/issues/17179
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 19ef4f16b3aba04119ac647cd6261c74a57ce829)
 
@@ -1438,7 +1438,7 @@ Date:   Mon Oct 17 17:54:55 2016 +0200
 
     Merge pull request #10652 from dachary/wip-16951-jewel
     
-    jewel: ceph 10.2.2 rbd status on image format 2 returns (2) No such file or directory
+    jewel: stone 10.2.2 rbd status on image format 2 returns (2) No such file or directory
     
     Reviewed-by: Jason Dillaman <dillaman@redhat.com>
 
@@ -1515,7 +1515,7 @@ Date:   Mon Oct 17 14:27:43 2016 +0200
 
     Merge pull request #11415 from dachary/wip-17476-jewel
     
-    jewel: Failure in snaptest-git-ceph.sh
+    jewel: Failure in snaptest-git-stone.sh
     
     Reviewed-by: John Spray <john.spray@redhat.com>
 
@@ -1548,7 +1548,7 @@ Date:   Mon Oct 17 14:27:04 2016 +0200
 
     Merge pull request #11419 from dachary/wip-17244-jewel
     
-    jewel: Failure in snaptest-git-ceph.sh
+    jewel: Failure in snaptest-git-stone.sh
     
     Reviewed-by: John Spray <john.spray@redhat.com>
 
@@ -1570,7 +1570,7 @@ Date:   Mon Oct 17 13:40:13 2016 +0200
 
     Merge pull request #10758 from dachary/wip-17007-jewel
     
-    jewel: ceph-disk should timeout when a lock cannot be acquired
+    jewel: stone-disk should timeout when a lock cannot be acquired
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1580,7 +1580,7 @@ Date:   Tue Oct 11 14:18:29 2016 +0200
 
     rgw: avoid corruption when running old radosgw-admin on a newer rgw
     
-    Fixes:http://tracker.ceph.com/issues/17371
+    Fixes:http://tracker.stone.com/issues/17371
     Signed-off-by: Orit Wasserman <owasserm@redhat.com>
     (cherry picked from commit 8eab9454b4d45ed8092a1292bd1904ef928c2120)
 
@@ -1590,7 +1590,7 @@ Date:   Tue Oct 11 11:19:01 2016 +0200
 
     rgw: Fix missing master zone for default region conversion
     
-    Fixes:http://tracker.ceph.com/issues/17371
+    Fixes:http://tracker.stone.com/issues/17371
     Signed-off-by: Orit Wasserman <owasserm@redhat.com>
     (cherry picked from commit cd3bccdef2ecd1d294ab1192ab3b9e731b5592e0)
 
@@ -1600,7 +1600,7 @@ Date:   Tue Oct 11 11:00:00 2016 +0200
 
     rgw: mark configuration as converted to avoid corruption when running older admins
     
-    Fixes: http://tracker.ceph.com/issues/17371
+    Fixes: http://tracker.stone.com/issues/17371
     Signed-off-by: Orit Wasserman <owasserm@redhat.com>
     (cherry picked from commit ceafa2863dd9c02da8a30c5a5324b472ed5d3404)
 
@@ -1622,7 +1622,7 @@ Date:   Fri Oct 14 09:26:32 2016 -0500
 
     Merge pull request #11417 from dachary/wip-17347-jewel
     
-    jewel: ceph-create-keys: sometimes blocks forever if mds allow is set
+    jewel: stone-create-keys: sometimes blocks forever if mds allow is set
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -1655,7 +1655,7 @@ Date:   Fri Oct 14 09:23:30 2016 -0500
 
     Merge pull request #10861 from dachary/wip-17135-jewel
     
-    jewel: ceph mon Segmentation fault after set crush_ruleset ceph 10.2.2
+    jewel: stone mon Segmentation fault after set crush_ruleset stone 10.2.2
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -1677,7 +1677,7 @@ Date:   Fri Oct 14 15:37:25 2016 +0200
 
     Merge pull request #11409 from dachary/wip-17341-jewel
     
-    jewel: librados memory leaks from ceph::crypto (WITH_NSS)
+    jewel: librados memory leaks from stone::crypto (WITH_NSS)
     
     Reviewed-by: Orit Wasserman <owasserm@redhat.com>
 
@@ -1827,7 +1827,7 @@ Merge: 79885ae cf47628
 Author: Loic Dachary <loic@dachary.org>
 Date:   Thu Oct 13 16:35:57 2016 +0200
 
-    Merge pull request #10832 from ceph/jewel-default-quota
+    Merge pull request #10832 from stone/jewel-default-quota
     
     jewel: rgw - default quota fixes
     
@@ -1853,13 +1853,13 @@ Date:   Tue Aug 23 12:17:00 2016 +0200
     
     The scsi_debug SCSI devices do not have a symlink in /dev/disk/by-partuuid
     because they are filtered out by 60-persistent-storage.rules. That was
-    worked around by 60-ceph-partuuid-workaround-rules which has been
+    worked around by 60-stone-partuuid-workaround-rules which has been
     removed by 9f76b9ff31525eac01f04450d72559ec99927496.
     
     Add create rules targetting this specific case, only for tests since the
     problem does not show in real use cases.
     
-    Fixes: http://tracker.ceph.com/issues/17100
+    Fixes: http://tracker.stone.com/issues/17100
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 7cbf1f0a5eced402e6c7242015550668e3b568f3)
@@ -1909,7 +1909,7 @@ Date:   Mon Sep 19 10:21:06 2016 +0530
     mentioned below from "rgw keystone make new tenants"
     to "rgw keystone implicit tenants"
     
-    Fixes: http://tracker.ceph.com/issues/17293
+    Fixes: http://tracker.stone.com/issues/17293
     
     Signed-off-by: SirishaGuduru <SGuduru@walmartlabs.com>
     (cherry picked from commit bd9695d50cfd472508a8a704f1ea5fc62dc08faf)
@@ -1930,7 +1930,7 @@ Date:   Tue Oct 4 09:18:09 2016 +0800
         When copy/get a object, 'tail_instance' should always be used to get the right
         tail objects.
     
-        Fixes: http://tracker.ceph.com/issues/17111
+        Fixes: http://tracker.stone.com/issues/17111
         Signed-off-by: Yang Honggang <joseph.yang@xtaotech.com>
     
     (cherry picked from commit d43b69e529328f73da6c29cd746557788a989ae0)
@@ -1941,7 +1941,7 @@ Date:   Fri Sep 30 16:13:00 2016 -0700
 
     rgw: don't fail if lost race when setting acls
     
-    Fixes: http://tracker.ceph.com/issues/16930
+    Fixes: http://tracker.stone.com/issues/16930
     
     When concurrently setting acls on object/bucket, we could lose in a race.
     Instead of retry, just return success (same effect as if we won and then
@@ -1965,7 +1965,7 @@ Date:   Sat Feb 27 04:28:14 2016 -0500
 
     rgw:user email can modify to empty
     
-    Fixes: http://tracker.ceph.com/issues/13286
+    Fixes: http://tracker.stone.com/issues/13286
     
     Signed-off-by: Weijun Duan <duanweijun@h3c.com>
     (cherry picked from commit ebfd713d9a40e1cb33dfdf2198c20d621e387e36)
@@ -1976,7 +1976,7 @@ Date:   Sat Sep 17 08:29:15 2016 -0400
 
     librbd: corrected use-after-free in ImageWatcher
     
-    Fixes: http://tracker.ceph.com/issues/17289
+    Fixes: http://tracker.stone.com/issues/17289
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 2f4d4868e3b721c932c35ae7e8f0dd96b36a37fc)
 
@@ -1986,7 +1986,7 @@ Date:   Fri Sep 9 10:42:50 2016 -0400
 
     librbd: possible deadlock if cluster connection closed after image
     
-    Fixes: http://tracker.ceph.com/issues/17254
+    Fixes: http://tracker.stone.com/issues/17254
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 818c2f2abc972f689acb7d783c2a684bcc9e6e51)
 
@@ -1999,7 +1999,7 @@ Date:   Tue Sep 20 07:25:36 2016 -0400
     The issue which resulted in too large v2 image ids was fixed
     under #16887.
     
-    Fixes: http://tracker.ceph.com/issues/17310
+    Fixes: http://tracker.stone.com/issues/17310
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 61734d266c6ee476c2f5fcfbbaefc7d0c7939617)
 
@@ -2009,7 +2009,7 @@ Date:   Tue Sep 20 10:19:45 2016 -0400
 
     librbd: potential deadlock closing image with in-flight readahead
     
-    Fixes: http://tracker.ceph.com/issues/17198
+    Fixes: http://tracker.stone.com/issues/17198
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit c971d58f8a5550b19374b74bb89d69143423479b)
 
@@ -2019,7 +2019,7 @@ Date:   Tue Sep 20 14:47:36 2016 -0400
 
     librbd: update_features should handle Infernalis OSDs
     
-    Fixes: http://tracker.ceph.com/issues/17330
+    Fixes: http://tracker.stone.com/issues/17330
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 8cb2ccda1b847e0f33c0d34bf57e9ec29bbbb43b)
 
@@ -2039,7 +2039,7 @@ Date:   Mon Jun 27 23:36:09 2016 +0530
     rbd: cleanup - Proxied operations shouldn't result
     in error messages if replayed
     
-    Fixes: http://tracker.ceph.com/issues/16130
+    Fixes: http://tracker.stone.com/issues/16130
     
     Signed-off-by: Vikhyat Umrao <vumrao@redhat.com>
     (cherry picked from commit d09c9c471f40f15c14f392a93a04353ca30b1c5e)
@@ -2050,7 +2050,7 @@ Date:   Wed Jun 15 09:24:43 2016 +0800
 
     librbd: enable/disable of features is not allowed when already enabled/disabled
     
-    Fixes: http://tracker.ceph.com/issues/16079
+    Fixes: http://tracker.stone.com/issues/16079
     
     Signed-off-by: Lu Shi <shi.lu@h3c.com>
     (cherry picked from commit a8a633396a4105991c9643c2b39391621934c26d)
@@ -2061,18 +2061,18 @@ Date:   Sat Jun 25 10:21:25 2016 +0800
 
     rbd: restrict mirror enable/disable actions on parents/clones
     
-    Fixes: http://tracker.ceph.com/issues/16056
+    Fixes: http://tracker.stone.com/issues/16056
     
     Signed-off-by: zhuangzeqiang zhuang.zeqiang@h3c.com
     (cherry picked from commit 11dee0bbf0a85f2c197192d0560bd486bc2ad6fc)
 
 commit cf476284ae9089e73e5fdf5ddfefdd5842246190
-Author: root <root@ceph-node1.homeoffice.wal-mart.com>
+Author: root <root@stone-node1.homeoffice.wal-mart.com>
 Date:   Sun Jun 19 13:06:06 2016 +0530
 
     rgw: Add documentation for RGW default quota
     
-    Fixes http://tracker.ceph.com/issues/16447
+    Fixes http://tracker.stone.com/issues/16447
     
     This was modified to use size in kB, rather than size in bytes, since
     Jewel has not yet been converted to use size in bytes.
@@ -2082,12 +2082,12 @@ Date:   Sun Jun 19 13:06:06 2016 +0530
     (cherry picked from commit e3ab3476146cf0fe604783e9e5a0d63237271735)
 
 commit 22348154ad51c20d73aa7715695244b8d85fac37
-Author: root <root@ceph-node1.homeoffice.wal-mart.com>
+Author: root <root@stone-node1.homeoffice.wal-mart.com>
 Date:   Sun Jun 19 12:48:42 2016 +0530
 
     rgw: Do not bother to check against conf values during quota handling
     
-    Fixes http://tracker.ceph.com/issues/16447
+    Fixes http://tracker.stone.com/issues/16447
     
     This was modified to use size in kB, rather than size in bytes, since
     Jewel has not yet been converted to use size in bytes.
@@ -2097,12 +2097,12 @@ Date:   Sun Jun 19 12:48:42 2016 +0530
     (cherry picked from commit 17d2c1712a5b72315a47ab0f8380331bfd478c0b)
 
 commit 0b8ecce6ac5abafe0175c941dbf55862b1515b1d
-Author: root <root@ceph-node1.homeoffice.wal-mart.com>
+Author: root <root@stone-node1.homeoffice.wal-mart.com>
 Date:   Mon May 23 15:34:58 2016 +0530
 
     rgw: Let the default quota settings take effect during user creation
     
-    Fixes http://tracker.ceph.com/issues/16447
+    Fixes http://tracker.stone.com/issues/16447
     
     Signed-off-by: Pavan Rallabhandi <PRallabhandi@walmartlabs.com>
     Signed-off-by: Daniel Gryniewicz <dang@redhat.com>
@@ -2114,7 +2114,7 @@ Date:   Sat Oct 1 11:21:21 2016 +0300
 
     journal: ensure in-flight ops are complete destroying journaler
     
-    Fixes: http://tracker.ceph.com/issues/17446
+    Fixes: http://tracker.stone.com/issues/17446
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit a25b1d7cbebb7b19cebee4cfb362cd744bbb4607)
 
@@ -2199,7 +2199,7 @@ Date:   Wed Sep 21 15:41:55 2016 -0400
 
     rbd-mirror: wait for in-flight event commit notifications
     
-    Fixes: http://tracker.ceph.com/issues/17355
+    Fixes: http://tracker.stone.com/issues/17355
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit f810c106ad4e9ae94494801fea6c580d81b9156b)
 
@@ -2237,7 +2237,7 @@ Date:   Thu Jul 28 16:35:48 2016 -0400
     The rbd-mirror daemon will use this API to delete images instead
     of attempting to use the local image name.
     
-    Fixes: http://tracker.ceph.com/issues/16227
+    Fixes: http://tracker.stone.com/issues/16227
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 87b32d15914207f61595c1c943817d983faceacd)
 
@@ -2247,7 +2247,7 @@ Date:   Wed Jul 13 14:49:06 2016 -0400
 
     rbd-mirror: use pool id + global image id as deletion primary key
     
-    Fixes: http://tracker.ceph.com/issues/16538
+    Fixes: http://tracker.stone.com/issues/16538
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 25203a8a9d59ff025d223ec1afaeb14946d54993)
 
@@ -2257,7 +2257,7 @@ Date:   Thu Sep 15 18:14:15 2016 -0400
 
     rbd-mirror: concurrent access of event might result in heap corruption
     
-    Fixes: http://tracker.ceph.com/issues/17283
+    Fixes: http://tracker.stone.com/issues/17283
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit ac9ad37ab80db8913f9f1149707bd0009f8235c4)
 
@@ -2312,7 +2312,7 @@ Date:   Tue Sep 13 21:54:46 2016 -0400
 
     librbd: new journal listener event for force promotion
     
-    Fixes: http://tracker.ceph.com/issues/16974
+    Fixes: http://tracker.stone.com/issues/16974
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit fd005490e95d7fca85be4cad34344a58986f64d6)
 
@@ -2367,7 +2367,7 @@ Date:   Tue Sep 20 13:31:36 2016 -0400
 
     test/rbd: fix possible mock journal race conditions
     
-    Fixes: http://tracker.ceph.com/issues/17317
+    Fixes: http://tracker.stone.com/issues/17317
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 471898392372ba4c404376410fb56f3af5287c80)
 
@@ -2381,7 +2381,7 @@ Date:   Wed Jul 6 12:59:25 2016 +0300
     daemon currently has the image open. The removal API will prevent the
     removal of any image that is opened by another client.
     
-    Works-around: http://tracker.ceph.com/issues/16555
+    Works-around: http://tracker.stone.com/issues/16555
     Signed-off-by: Mykola Golub <mgolub@mirantis.com>
     (cherry picked from commit 9737a8d6cbaf1b79bbc6008249d39acbae883941)
 
@@ -2422,7 +2422,7 @@ Date:   Mon Aug 8 23:45:46 2016 -0400
 
     rbd-mirror: demote/promote in same cluster results in split-brain
     
-    Fixes: http://tracker.ceph.com/issues/16855
+    Fixes: http://tracker.stone.com/issues/16855
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit a6901ca1a065419426b3ad704e27e43ba8d591b8)
 
@@ -2529,7 +2529,7 @@ Date:   Wed Jul 27 14:06:42 2016 +0300
 
     librbd: optionally flag "laggy" journal clients disconnected
     
-    Fixes: http://tracker.ceph.com/issues/14738
+    Fixes: http://tracker.stone.com/issues/14738
     Signed-off-by: Mykola Golub <mgolub@mirantis.com>
     (cherry picked from commit b8eafefba9f2221a0ce927568795cb1c3ac0fa9c)
 
@@ -2588,7 +2588,7 @@ Date:   Tue Oct 11 12:30:25 2016 +0200
 
     Merge pull request #10997 from batrick/i17105-backport
     
-    jewel: multimds: allow_multimds not required when max_mds is set in ceph.conf at startup
+    jewel: multimds: allow_multimds not required when max_mds is set in stone.conf at startup
     
     Reviewed-by: John Spray <john.spray@redhat.com>
 
@@ -2619,7 +2619,7 @@ Merge: f49bac2 494687b
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Oct 11 12:29:05 2016 +0200
 
-    Merge pull request #11400 from ceph/wip-rbd-cli-jewel
+    Merge pull request #11400 from stone/wip-rbd-cli-jewel
     
     jewel: krbd-related CLI patches
     
@@ -2630,7 +2630,7 @@ Merge: 2a348d2 5ab5e82
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Oct 11 11:03:40 2016 +0200
 
-    Merge pull request #11171 from ceph/wip-rasize-doc-jewel
+    Merge pull request #11171 from stone/wip-rasize-doc-jewel
     
     jewel: doc: fix description for rsize and rasize
     
@@ -2646,7 +2646,7 @@ Date:   Mon Oct 10 11:57:03 2016 -0400
     the general case, the removal of the header object will also fail the
     watcher which has its own recovery path.
     
-    Fixes: http://tracker.ceph.com/issues/17549
+    Fixes: http://tracker.stone.com/issues/17549
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit fe3e2eafa087f81c9ab59f3fbc39600d6adaa9c2)
 
@@ -2656,7 +2656,7 @@ Date:   Fri Sep 2 16:19:29 2016 +0800
 
     client: properly set inode number of created inode in replay request
     
-    Fixes: http://tracker.ceph.com/issues/17172
+    Fixes: http://tracker.stone.com/issues/17172
     Signed-off-by: Yan, Zheng <zyan@redhat.com>
     (cherry picked from commit e59385f16afc607ec700397b0bea5229ce69df30)
 
@@ -2671,7 +2671,7 @@ Date:   Tue Sep 6 13:16:04 2016 +0100
     object, as you couldn't readily resolve the parent
     path.
     
-    Fixes: http://tracker.ceph.com/issues/16973
+    Fixes: http://tracker.stone.com/issues/16973
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 439cd5e1b4725e594786785189a37184243828d9)
     
@@ -2742,7 +2742,7 @@ commit ca8fc6fc8baae2e4da842e16e25b91d304702cb5
 Author: John Spray <john.spray@redhat.com>
 Date:   Sat Jul 23 22:56:45 2016 +0100
 
-    ceph-create-keys: fix existing-but-different case
+    stone-create-keys: fix existing-but-different case
     
     We just have to refrain from calling get-or-create
     if the named key already exists, to avoid potentially
@@ -2750,7 +2750,7 @@ Date:   Sat Jul 23 22:56:45 2016 +0100
     match the key as it has already been created, such
     as on certain upgrades.
     
-    Fixes: http://tracker.ceph.com/issues/16255
+    Fixes: http://tracker.stone.com/issues/16255
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 278196d86c52b0be3cb9c17ed7f8f3e3502a217a)
 
@@ -2767,7 +2767,7 @@ Date:   Tue Sep 20 18:07:56 2016 +0800
     client send readdir request (frag 1*, offset 2, readdir_start 'A')
     MDS reply items (that are after item 'A') in frag *
     
-    Fixes: http://tracker.ceph.com/issues/17286
+    Fixes: http://tracker.stone.com/issues/17286
     Signed-off-by: Yan, Zheng <zyan@redhat.com>
     (cherry picked from commit feb63776d4f2b03ece189715fdd75da5cae2afc2)
 
@@ -2782,7 +2782,7 @@ Date:   Wed Sep 14 18:22:01 2016 +0800
     for execution. So the fail-safe code can queue an extra replay
     request. This can cause replay requests be processed out-of-order
     
-    Fixes: http://tracker.ceph.com/issues/17271
+    Fixes: http://tracker.stone.com/issues/17271
     Signed-off-by: Yan, Zheng <zyan@redhat.com>
     (cherry picked from commit d755a4a78242293dd3103bdd0748292df3034563)
 
@@ -2794,7 +2794,7 @@ Date:   Wed Sep 21 21:57:25 2016 +0800
     
     when umounting, root can be NULL
     
-    Fixes: http://tracker.ceph.com/issues/17253
+    Fixes: http://tracker.stone.com/issues/17253
     Signed-off-by: Yan, Zheng <zyan@redhat.com>
     (cherry picked from commit ddea9a5b78151c0abe834e4a9872f7cf5f918ebc)
 
@@ -2815,7 +2815,7 @@ Date:   Mon Sep 19 15:18:24 2016 +0100
     Simply fix this by having the DamageTable notify* functions
     check the key they're inserting doesn't already exist.
     
-    Fixes: http://tracker.ceph.com/issues/17173
+    Fixes: http://tracker.stone.com/issues/17173
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit c9cfaef104e9aaefad55583d7e54f8b4665904b3)
 
@@ -2823,9 +2823,9 @@ commit 5d0e2f8690b08418fc404dc43df7a3a16ac83309
 Author: Casey Bodley <cbodley@redhat.com>
 Date:   Fri Sep 2 14:13:19 2016 -0400
 
-    common: only call crypto::init once per CephContext
+    common: only call crypto::init once per StoneContext
     
-    Fixes: http://tracker.ceph.com/issues/17205
+    Fixes: http://tracker.stone.com/issues/17205
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 9dfc1537564c4ce65e4d0230a83f0d8d47503b16)
@@ -2834,10 +2834,10 @@ commit 483d8c41a241aa917878284765aef2ba2ced0bb3
 Author: Brad Hubbard <bhubbard@redhat.com>
 Date:   Tue Jun 14 17:34:44 2016 +1000
 
-    cephx: Fix multiple segfaults due to attempts to encrypt or decrypt
+    stonex: Fix multiple segfaults due to attempts to encrypt or decrypt
     an empty secret and a null CryptoKeyHandler
     
-    Fixes: http://tracker.ceph.com/issues/16266
+    Fixes: http://tracker.stone.com/issues/16266
     Signed-off-by: Brad Hubbard <bhubbard@redhat.com>
     (cherry picked from commit 009e777fbd18602e5fd66f97bdad95e977e6fecc)
 
@@ -2850,7 +2850,7 @@ Date:   Tue Sep 20 17:39:24 2016 +0800
     otherwise JournalingFileStore will assert when deleting FileJournal
     which still has the non block/regular file opened.
     
-    Fixes: http://tracker.ceph.com/issues/17307
+    Fixes: http://tracker.stone.com/issues/17307
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 7431eec6fd24cd08ca6c76a9893e3f6e8c63a916)
 
@@ -2861,7 +2861,7 @@ Date:   Mon Oct 10 20:30:54 2016 +0200
 
     Merge pull request #10812 from SUSE/wip-17094-jewel
     
-    jewel: build/ops: ceph-osd-prestart.sh fails confusingly when data directory does not exist
+    jewel: build/ops: stone-osd-prestart.sh fails confusingly when data directory does not exist
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -2889,12 +2889,12 @@ Date:   Mon Aug 29 16:25:10 2016 -0400
 
     mds: remove max_mds config option
     
-    It is now required that all changes to max_mds use the run-time `ceph fs
+    It is now required that all changes to max_mds use the run-time `stone fs
     set max_mds` command. The rationale for this change is that it is
     confusing to have a configuration for max_mds which is only observed at
     file system creation.
     
-    Fixes: http://tracker.ceph.com/issues/17105
+    Fixes: http://tracker.stone.com/issues/17105
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 52f4e545e0ce4782d5f2239d31080d392c12eba2)
@@ -2938,7 +2938,7 @@ Date:   Mon Oct 3 07:33:27 2016 +0100
 
     mon: don't crash on invalid standby_for_fscid
     
-    Fixes: http://tracker.ceph.com/issues/17466
+    Fixes: http://tracker.stone.com/issues/17466
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 92fdcf36bd7d57b97f5d887d0370a181860e388c)
 
@@ -2951,7 +2951,7 @@ Date:   Mon Oct 3 07:40:12 2016 +0100
     This was leaving garbage in some fields during decode
     when decoding messages with an older version.
     
-    Fixes: http://tracker.ceph.com/issues/17466
+    Fixes: http://tracker.stone.com/issues/17466
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit f1fb667dfd21cd241f4f45ce9ef3f8393d114c60)
 
@@ -2984,7 +2984,7 @@ Date:   Mon Oct 10 12:20:30 2016 +0200
 
     Merge pull request #9388 from vumrao/wip-vumrao-16069
     
-    jewel: mon: Display full flag in ceph status if full flag is set
+    jewel: mon: Display full flag in stone status if full flag is set
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -3004,7 +3004,7 @@ Merge: 84adafe f337a07
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Oct 10 09:31:29 2016 +0200
 
-    Merge pull request #11018 from ceph/wip-17223-jewel
+    Merge pull request #11018 from stone/wip-17223-jewel
     
     jewel: krbd qa scripts and concurrent.sh test fix
     
@@ -3017,21 +3017,21 @@ Date:   Mon Jul 4 15:29:22 2016 +0300
     init-radosgw: do not use systemd-run in sysvinit
     
     `systemd-run` logic in initscripts was introduced because of ticket
-    http://tracker.ceph.com/issues/7627.
+    http://tracker.stone.com/issues/7627.
     
     If we have systemd-based operating system, we should use systemd unit files
-    from systemd directory to start/stop ceph daemons.
+    from systemd directory to start/stop stone daemons.
     Otherwise, `daemon()` from `/etc/init.d/functions` on systemd distro starts service
     in `system.slice` and everything works well.
     
     `systemd-run` can not be run on non-systemd distros, so it's not needed
     on SysV systems.
     
-    also, ceph-disk is now able to run the "systemctl"
-    to enable and start the ceph-osd, and ceph-deploy is also now
-    playing well with systemd when it comes to ceph-mon and ceph-mds
+    also, stone-disk is now able to run the "systemctl"
+    to enable and start the stone-osd, and stone-deploy is also now
+    playing well with systemd when it comes to stone-mon and stone-mds
     
-    Fixes: http://tracker.ceph.com/issues/16440
+    Fixes: http://tracker.stone.com/issues/16440
     
     Signed-off-by: Vladislav Odintsov <odivlad@gmail.com>
     (cherry picked from commit 1fd4f92a025e80092b8d08d9b7da2e0b73a52f0f)
@@ -3042,7 +3042,7 @@ Date:   Thu Jun 30 17:36:16 2016 -0700
 
     rgw: forward input data when forwarding set_bucket_version to master
     
-    Fixes: http://tracker.ceph.com/issues/16494
+    Fixes: http://tracker.stone.com/issues/16494
     
     Needed to keep input data around to be forwarded correctly. Also, master
     does not send any data back, so don't try to parse anything.
@@ -3068,7 +3068,7 @@ Date:   Fri Aug 12 12:39:45 2016 -0400
 
     librbd: permit disabling journaling if in corrupt state
     
-    Fixes: http://tracker.ceph.com/issues/16740
+    Fixes: http://tracker.stone.com/issues/16740
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 6afb884d755697528684fad54dbb69b15d4386f1)
 
@@ -3105,12 +3105,12 @@ Date:   Wed Sep 21 17:18:20 2016 -0400
     time for buckets, objects in stat requests.  Regard any saved
     value of these in unix attributes as an overlay.
     
-    Fixes: http://tracker.ceph.com/issues/17367
+    Fixes: http://tracker.stone.com/issues/17367
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 969750e96380859a350e25015bc8cbf9bdf88512)
     
-    Fixes: http://tracker.ceph.com/issues/17394
+    Fixes: http://tracker.stone.com/issues/17394
 
 commit 0c932b9078a249bcb9dbb8c425788787f1cd48f2
 Author: Matt Benjamin <mbenjamin@redhat.com>
@@ -3127,7 +3127,7 @@ Date:   Tue Sep 20 17:32:03 2016 -0400
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 08afb40b2812270a6af3cd1965e8c03c10392ace)
     
-    Fixes: http://tracker.ceph.com/issues/17393
+    Fixes: http://tracker.stone.com/issues/17393
 
 commit 0de33909012f2a8305ff2038906669c78070cbcd
 Author: Matt Benjamin <mbenjamin@redhat.com>
@@ -3147,8 +3147,8 @@ Date:   Thu Apr 14 19:18:37 2016 -0400
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 4de1c3c260265f821ebee842d49cb35bf49d8e4e)
     
-    Fixes: http://tracker.ceph.com/issues/17311
-    Fixes: http://tracker.ceph.com/issues/17332
+    Fixes: http://tracker.stone.com/issues/17311
+    Fixes: http://tracker.stone.com/issues/17332
 
 commit 00f3fbe7dc940d8c9176a8da35fccd42e6ddc10f
 Author: zhangweibing <zhangweibing@unitedstack.com>
@@ -3159,7 +3159,7 @@ Date:   Fri Aug 26 10:49:48 2016 +0800
     Signed-off-by: Weibing Zhang <zhangweibing@unitedstack.com>
     (cherry picked from commit 87b550ed2fba472d4ef2e1f771bb5f9fd248804f)
     
-    Fixes: http://tracker.ceph.com/issues/17327
+    Fixes: http://tracker.stone.com/issues/17327
 
 commit c53992856d6058b71bed55337c3830dbaefb6823
 Author: Min Chen <chenmin@xsky.com>
@@ -3179,7 +3179,7 @@ Date:   Fri Aug 19 01:02:50 2016 -0400
     Signed-off-by: Min Chen <chenmin@xsky.com>
     (cherry picked from commit 9d813bafc8e197507457c58ab4f365ccdb7f3589)
     
-    Fixes: http://tracker.ceph.com/issues/17326
+    Fixes: http://tracker.stone.com/issues/17326
 
 commit 9f5c7377143c56b169a62a96dba5c6ff800e4d5c
 Author: Yan Jun <yan.jun8@zte.com.cn>
@@ -3193,7 +3193,7 @@ Date:   Tue Aug 23 12:51:10 2016 +0800
     Signed-off-by: Yan Jun <yan.jun8@zte.com.cn>
     (cherry picked from commit c979be7810793534715c24c6a9f7c8b0ed31de8d)
     
-    Fixes: http://tracker.ceph.com/issues/17325
+    Fixes: http://tracker.stone.com/issues/17325
 
 commit cf1353c24917ecb9056272da7f6b3e73bba11fa8
 Author: Matt Benjamin <mbenjamin@redhat.com>
@@ -3204,7 +3204,7 @@ Date:   Wed Aug 17 10:28:48 2016 -0400
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 31936caa09b46e86700faad969adfa9d43176206)
     
-    Fixes: http://tracker.ceph.com/issues/17323
+    Fixes: http://tracker.stone.com/issues/17323
 
 commit 7a648ed991630541b5875a329820b67b269af570
 Author: Matt Benjamin <mbenjamin@redhat.com>
@@ -3222,7 +3222,7 @@ commit 0135da74e2a08fccc2e2da9f1b7e55478bf79157
 Author: Matt Benjamin <mbenjamin@redhat.com>
 Date:   Tue Aug 23 15:57:06 2016 -0400
 
-    ceph_timer: prefer using directive to typedef
+    stone_timer: prefer using directive to typedef
     
     This change replaces the existing member-hook typedef as well as
     the new set-type typedefs, so committed separately.
@@ -3236,7 +3236,7 @@ Date:   Tue Aug 23 14:18:43 2016 -0400
 
     librgw: add API version defines for librgw and rgw_file
     
-    This change borrows the major, minor+extra format used by libcephfs.
+    This change borrows the major, minor+extra format used by libstonefs.
     The version numbering is starting at 1,1,0 on the theory that the
     implicit version at Jewel is 1,0,0.
     
@@ -3317,7 +3317,7 @@ Date:   Tue Aug 9 16:49:41 2016 -0400
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit ca33241286f52d849dbde8092507131b8b1108cc)
     
-    Fixes: http://tracker.ceph.com/issues/17321
+    Fixes: http://tracker.stone.com/issues/17321
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
 
 commit 8e1515b068991567136042fb11384fb0fd0620fe
@@ -3426,12 +3426,12 @@ commit a10d700697d8f432aca2b1bff6766e2478ac060d
 Author: Harald Klein <hari@vt100.at>
 Date:   Wed Aug 31 17:41:26 2016 +0200
 
-    add ldap auth custom search filter feature patch - http://tracker.ceph.com/issues/17185
+    add ldap auth custom search filter feature patch - http://tracker.stone.com/issues/17185
     
     Signed-off-by: Harald Klein <hari@vt100.at>
     (cherry picked from commit c935885ae9d5fd413495448a0b0e5fce899c9b73)
     
-    Fixes: http://tracker.ceph.com/issues/17185
+    Fixes: http://tracker.stone.com/issues/17185
 
 commit 7486638563c1eeda7781dcf58b0c536d11f17a0b
 Author: Matt Benjamin <mbenjamin@redhat.com>
@@ -3447,7 +3447,7 @@ Date:   Thu Aug 18 10:54:16 2016 -0400
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 0a4c91ec7652d02673a9b156cd16144d778a3844)
     
-    Fixes: http://tracker.ceph.com/issues/17324
+    Fixes: http://tracker.stone.com/issues/17324
 
 commit 68788fb898118c826b136b7cd7f60265a6dfef79
 Author: Matt Benjamin <mbenjamin@redhat.com>
@@ -3479,7 +3479,7 @@ Date:   Tue Aug 16 16:58:51 2016 -0400
 
     rgw: RGWDataSyncCR fails on errors from RGWListBucketIndexesCR
     
-    Fixes: http://tracker.ceph.com/issues/17073
+    Fixes: http://tracker.stone.com/issues/17073
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit e77a523f1d74768f4fef58c05cc167705d219036)
@@ -3551,7 +3551,7 @@ Date:   Wed Sep 14 07:36:43 2016 -0400
 
     mon: OSDMonitor: Missing nearfull flag set
     
-    Output from 'ceph -s -f json-pretty' wans't showing nearfull flag set.
+    Output from 'stone -s -f json-pretty' wans't showing nearfull flag set.
     
     Signed-off-by: Igor Podoski <igor.podoski@ts.fujitsu.com>
     (cherry picked from commit 754887b575795ef96cda095f7f0d8c898e20f00f)
@@ -3561,9 +3561,9 @@ Merge: 9c464a5 3cb0a5e
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Sep 29 15:54:05 2016 -0700
 
-    Merge pull request #11252 from ceph/wip-offline-split-jewel
+    Merge pull request #11252 from stone/wip-offline-split-jewel
     
-    ceph-objectstore-tool: add a way to split filestore directories offline
+    stone-objectstore-tool: add a way to split filestore directories offline
     
     Reviewed-by: Josh Durgin <jdurgin@redhat.com>
 
@@ -3607,7 +3607,7 @@ commit 3cb0a5e0b0517701ad3b44bdf6d4b60d6a51e8ee
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Fri Aug 5 11:45:00 2016 -0700
 
-    ceph-objectstore-tool: add a way to split filestore directories offline
+    stone-objectstore-tool: add a way to split filestore directories offline
     
     Use the usual split code, and split each dir that meets the
     usual split criteria.
@@ -3617,23 +3617,23 @@ Date:   Fri Aug 5 11:45:00 2016 -0700
     a load merge threshold (e.g. filestore merge threshold = 1), and
     adjust the split multiplier accordingly.
     
-    Fixes: http://tracker.ceph.com/issues/17220
+    Fixes: http://tracker.stone.com/issues/17220
     Signed-off-by: Josh Durgin <jdurgin@redhat.com>
     (cherry picked from commit e7b0428e0e8d8f5459311dc698d94a3ac4f04684)
     
     Conflicts:
     	src/os/filestore/FileStore.cc
-    	src/tools/ceph_objectstore_tool.cc
+    	src/tools/stone_objectstore_tool.cc
     (trivial resolution)
 
 commit de672a09f1e2b29de1e0e6e15d26be99315c41b9
 Author: Boris Ranto <branto@redhat.com>
 Date:   Fri Aug 5 11:14:53 2016 +0200
 
-    logrotate: Run as root/ceph
+    logrotate: Run as root/stone
     
-    Currently, we run the logrotate scripts as ceph/ceph but that way we
-    cannot rotate the scripts created by qemu (they are root/ceph and 644).
+    Currently, we run the logrotate scripts as stone/stone but that way we
+    cannot rotate the scripts created by qemu (they are root/stone and 644).
     The original su line was introduced in commit 73d7bed9 because logrotate
     complained that the directory was writable by a non-root group and it
     needed a su line to supress that error. This way, we keep the group
@@ -3659,7 +3659,7 @@ Date:   Tue May 10 16:44:44 2016 +1000
     LOG_DEBUG prio messages are not logged by a default syslog
     configuration so log at LOG_INFO instead.
     
-    Fixes: http://tracker.ceph.com/issues/15808
+    Fixes: http://tracker.stone.com/issues/15808
     Signed-off-by: Brad Hubbard <bhubbard@redhat.com>
     (cherry picked from commit 3ab5a660a45506d6c4c41bfeb5babdf188e62b3d)
 
@@ -3669,7 +3669,7 @@ Date:   Fri Apr 1 16:55:36 2016 +0530
 
     librados: modify Pipe::connect() to return the error code
     
-    Fixes: http://tracker.ceph.com/issues/15308
+    Fixes: http://tracker.stone.com/issues/15308
     
     Signed-off-by: Vikhyat Umrao <vumrao@redhat.com>
     (cherry picked from commit cad38dca0c90fb2ee4b589f336f8272122f50ad6)
@@ -3700,7 +3700,7 @@ Date:   Mon Sep 19 14:40:12 2016 -0400
     
     Add '--job-id' and '--max-concurrent-ios' to Orphan Search Options
     
-    Fixes: http://tracker.ceph.com/issues/17281
+    Fixes: http://tracker.stone.com/issues/17281
     Signed-off-by: Thomas Serlin <tserlin@redhat.com>
     (cherry picked from commit 697f30d86f49b73c981c06375ab2937570b1db01)
 
@@ -3715,7 +3715,7 @@ Date:   Thu Sep 15 12:56:39 2016 -0600
     sets the number of seconds to wait before declaring an object to be an
     orphan.
     
-    Fixes: http://tracker.ceph.com/issues/17280
+    Fixes: http://tracker.stone.com/issues/17280
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit 354059ae43b4f4cc797da1669715399cd96a4738)
 
@@ -3730,7 +3730,7 @@ Date:   Thu Sep 15 11:40:14 2016 -0600
     the number of seconds to wait before declaring an object to be an
     orphan.
     
-    Fixes: http://tracker.ceph.com/issues/17280
+    Fixes: http://tracker.stone.com/issues/17280
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit a676c516069cc448591018ecf4f7d1f7f7bc3bfd)
 
@@ -3772,7 +3772,7 @@ Date:   Tue Jul 19 15:32:03 2016 -0700
 
     rgw: back off bucket sync on failures, don't store marker
     
-    Fixes: http://tracker.ceph.com/issues/16742
+    Fixes: http://tracker.stone.com/issues/16742
     
     If we fail on any single entry in bucket, skip updating the marker tracker
     so that next time we'll go over that entry, and back off. This will trigger
@@ -3869,7 +3869,7 @@ Date:   Sun Jul 24 17:19:55 2016 +0100
     This piece of code was dereferencing an invalid
     iterator (invalidated by call to erase())
     
-    Fixes:  http://tracker.ceph.com/issues/16764
+    Fixes:  http://tracker.stone.com/issues/16764
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit d642b4faec3266f609e4871ccdccdcd73707dc23)
 
@@ -3925,8 +3925,8 @@ Date:   Wed Jun 29 15:45:30 2016 -0400
     This commit adds the client_lock for Client::get_root() and
     Client::get_root_ino() (which may not strictly be necessary but can't hurt).
     
-    [1] http://pulpito.ceph.com/pdonnell-2016-06-27_06:54:23-fs-wip-pdonnell-i16164---basic-smithi/280361/
-    [2] http://qa-proxy.ceph.com/teuthology/pdonnell-2016-06-27_06:54:23-fs-wip-pdonnell-i16164---basic-smithi/280361/remote/smithi058/log/ceph-client.0.23448.log.gz
+    [1] http://pulpito.stone.com/pdonnell-2016-06-27_06:54:23-fs-wip-pdonnell-i16164---basic-smithi/280361/
+    [2] http://qa-proxy.stone.com/teuthology/pdonnell-2016-06-27_06:54:23-fs-wip-pdonnell-i16164---basic-smithi/280361/remote/smithi058/log/stone-client.0.23448.log.gz
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 208e3b6fd58237b309aae15b18dcd82672b133af)
@@ -3939,7 +3939,7 @@ Date:   Wed Jul 20 13:02:03 2016 +0200
     
     We need to store the updated current period after adding the old converted regions
     
-    Fixes: http://tracker.ceph.com/issues/16751
+    Fixes: http://tracker.stone.com/issues/16751
     Signed-off-by: Orit Wasserman <owasserm@redhat.com>
     (cherry picked from commit 6d7841c6f050f6bd813d54df65d38e7f6934d22d)
 
@@ -3954,7 +3954,7 @@ Date:   Tue Aug 23 15:10:44 2016 -0400
     radosgw (and some radosgw-admin commands) will keep doing this on
     startup, overwriting any changes made to the period/zonegroup map
     
-    Fixes: http://tracker.ceph.com/issues/17051
+    Fixes: http://tracker.stone.com/issues/17051
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 215cd6f6ff7b8cb74df6dc3b94a5928f56ab9540)
@@ -3985,7 +3985,7 @@ Date:   Fri Aug 12 14:44:09 2016 -0400
 
     qa/workunits: support filtering cls_rbd unit test cases
     
-    Fixes: http://tracker.ceph.com/issues/16529
+    Fixes: http://tracker.stone.com/issues/16529
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 0891ede57cd254aa75c66301fde4a2eb6957a3d6)
 
@@ -4014,13 +4014,13 @@ commit dea93dc35859ebf31366dfe5f2b8c2ebebc4f6a6
 Author: Boris Ranto <branto@redhat.com>
 Date:   Mon Jun 27 11:48:17 2016 +0200
 
-    ceph-disk: do not activate device that is not ready
+    stone-disk: do not activate device that is not ready
     
     If the journal (or data) device is not ready when we are activating the
     data (or journal) device, just print an info message and exit with 0 so
-    that the ceph-disk systemd service won't fail in this case.
+    that the stone-disk systemd service won't fail in this case.
     
-    Fixes: http://tracker.ceph.com/issues/15990
+    Fixes: http://tracker.stone.com/issues/15990
     Signed-off-by: Boris Ranto <branto@redhat.com>
     (cherry picked from commit 73a7a65f65b1f6e90c4cae101bd43fabaeac3045)
 
@@ -4030,7 +4030,7 @@ Date:   Thu Aug 11 08:57:51 2016 -0700
 
     PG: use upset rather than up for _update_calc_stats
     
-    Fixes: http://tracker.ceph.com/issues/16998
+    Fixes: http://tracker.stone.com/issues/16998
     Signed-off-by: Samuel Just <sjust@redhat.com>
     (cherry picked from commit 200cae8c9db99b3dede377f74413cc0b15033e1f)
 
@@ -4047,7 +4047,7 @@ commit c0db9fb831dc67ae138056c2f03c31dcc7f6adbf
 Author: Jeff Layton <jlayton@redhat.com>
 Date:   Mon Aug 1 09:01:15 2016 -0400
 
-    ceph: don't fudge the ctime in stat() unless it's really older than the mtime
+    stone: don't fudge the ctime in stat() unless it's really older than the mtime
     
     The current code just looks at the sec field, but the difference may
     only be evident in the nsec field.
@@ -4065,7 +4065,7 @@ Date:   Mon Aug 1 09:01:15 2016 -0400
     lookup to get them regardless of whether we have a lease on the
     dentry.
     
-    Fixes: http://tracker.ceph.com/issues/16668
+    Fixes: http://tracker.stone.com/issues/16668
     Signed-off-by: Jeff Layton <jlayton@redhat.com>
     (cherry picked from commit 9e8476743eef195a0a9bc6ef82392a8781e82549)
 
@@ -4104,7 +4104,7 @@ Date:   Tue Aug 16 14:19:20 2016 +0800
     
     the rgw_user_st_syn thread use the pointer meta_mgr in RGWUserStatsCache::sync_all_users() fuction, so we should close the thread before delete the pointer in RGWRados::finalize() function when close storage before reopen_logs.
     
-    Fixes: http://tracker.ceph.com/issues/17036
+    Fixes: http://tracker.stone.com/issues/17036
     
     Signed-off-by: weiqiaomiao <wei.qiaomiao@zte.com.cn>
     (cherry picked from commit ea5d7fdd7fa978deadeee42bc0ea33fb11662e59)
@@ -4117,7 +4117,7 @@ Date:   Wed Aug 24 09:38:03 2016 +0800
     
     period commit return error when the current period has a zonegroup which doesn't have a master zone
     
-    Fixes: http://tracker.ceph.com/issues/17110
+    Fixes: http://tracker.stone.com/issues/17110
     Signed-off-by: weiqiaomiao <wei.qiaomiao@zte.com.cn>
     (cherry picked from commit fcedda6e5dfbaff3975b4474d8546cf77f78cc83)
 
@@ -4155,7 +4155,7 @@ Date:   Thu Jul 7 15:36:33 2016 -0700
 
     rgw: patch manifest to handle explicit objs copy issue
     
-    Fixes: http://tracker.ceph.com/issues/16435
+    Fixes: http://tracker.stone.com/issues/16435
     
     Signed-off-by: Yehuda Sadeh <yehuda@redhat.com>
     (cherry picked from commit b51476466e5bb03bbaa6e428bb6bb189a259b9fd)
@@ -4169,7 +4169,7 @@ Date:   Fri Jul 15 11:32:18 2016 +0800
     Make the last_write check in bh_write_adjacencies() match corresponding
     check in flush().
     
-    Fixes: http://tracker.ceph.com/issues/16610
+    Fixes: http://tracker.stone.com/issues/16610
     Signed-off-by: Yan, Zheng <zyan@redhat.com>
     (cherry picked from commit ce166c2cd706b8573deabd331d29544e75e85972)
 
@@ -4179,7 +4179,7 @@ Date:   Sun Aug 7 23:08:48 2016 +0200
 
     rpm: proper packaging of udev directories
     
-    The issue here is that ceph.spec.in does not package the directories
+    The issue here is that stone.spec.in does not package the directories
     /usr/lib/udev and /usr/lib/udev/rules.d. The problem was not showing because
     hdparm, which is brought in as a build dependency, packages these directories.
     However, in SUSE a recent update to hdparm changes that and the problem
@@ -4189,7 +4189,7 @@ Date:   Sun Aug 7 23:08:48 2016 +0200
     cover /usr/lib/udev, and by adding explicit "%dir %{_udevrulesdir}" to the
     packages that put files in this directory.
     
-    Fixes: http://tracker.ceph.com/issues/16949
+    Fixes: http://tracker.stone.com/issues/16949
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 1a164bc94d661b9d83b4a80e957712ed6f5cd122)
 
@@ -4221,7 +4221,7 @@ Date:   Fri Aug 5 14:27:43 2016 +0800
      USED / (USED + AVAIL)
     as the %USED. so once we have no AVAIL space left, %USED will be 100%.
     
-    Fixes: http://tracker.ceph.com/issues/16933
+    Fixes: http://tracker.stone.com/issues/16933
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 08532ea166dfd97c548d9f1fb478e163021cdda3)
 
@@ -4242,7 +4242,7 @@ Date:   Fri Aug 12 09:52:21 2016 -0400
 
     librbd: fix possible inconsistent state when disabling mirroring
     
-    Fixes: http://tracker.ceph.com/issues/16984
+    Fixes: http://tracker.stone.com/issues/16984
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 7cfedb54ea0cf496cc4b55d08a787abc2d6a4bbe)
 
@@ -4271,7 +4271,7 @@ Date:   Sun Jun 26 01:02:03 2016 +0800
     we can address this by instantiate the primitive type of `long long`
     instead of `in64_t`.
     
-    Fixes: http://tracker.ceph.com/issues/16398
+    Fixes: http://tracker.stone.com/issues/16398
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 31db4c5f9f725e13e38f3c90744e299e023d02a4)
 
@@ -4312,9 +4312,9 @@ commit 29a87012f560c213e34b893cd8dd9dedfd0b11da
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Mon Aug 22 11:52:45 2016 +0200
 
-    ceph-osd-prestart.sh: check existence of OSD data directory
+    stone-osd-prestart.sh: check existence of OSD data directory
     
-    Fixes: http://tracker.ceph.com/issues/17091
+    Fixes: http://tracker.stone.com/issues/17091
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit d6ffa770784f0efb88827ee7c65ff2e5f9029434)
 
@@ -4324,7 +4324,7 @@ Date:   Fri Aug 12 08:26:49 2016 -0400
 
     rbd: bench io-size should not be larger than image size
     
-    Fixes: http://tracker.ceph.com/issues/16967
+    Fixes: http://tracker.stone.com/issues/16967
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 113775eb583fa28a669c6dc1f8dbf47a8ecd789c)
     
@@ -4342,11 +4342,11 @@ Date:   Fri Aug 5 15:19:50 2016 +0200
     
     Remove value for test of suse_version in spec file
     and change related comment from SLES12 to SLE
-    as per comment in https://github.com/ceph/ceph/pull/10592
+    as per comment in https://github.com/stone/stone/pull/10592
     
     (1) https://en.opensuse.org/openSUSE:Build_Service_cross_distribution_howto#Detect_a_distribution_flavor_for_special_code
     
-    Fixes: http://tracker.ceph.com/issues/16937
+    Fixes: http://tracker.stone.com/issues/16937
     Signed-off-by: Michel Normand <normand@linux.vnet.ibm.com>
     (cherry picked from commit 7da19b6db7eaefb5fe159375cc5a465a722d3897)
 
@@ -4360,7 +4360,7 @@ Date:   Thu Jul 28 15:09:53 2016 -0400
     ops and instead will return -EOPNOTSUPP. In this case, librbd can take
     the lock and execute the operation.
     
-    Fixes: http://tracker.ceph.com/issues/16171
+    Fixes: http://tracker.stone.com/issues/16171
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit d2d2d90d64663905c2b81f7809f1d636db6b7fb1)
 
@@ -4382,7 +4382,7 @@ Date:   Mon Jul 18 13:57:08 2016 +0800
     If an osd is automatically marked as out, the output of "osd df"
     is not right, as follow:
     
-    -5 10.00999        -  5586G  2989G  2596G     0    0     host ceph192-9-9-8
+    -5 10.00999        -  5586G  2989G  2596G     0    0     host stone192-9-9-8
     11  0.90999  1.00000   931G   542G   388G 58.25 0.99         osd.11
     14  0.90999  1.00000   931G   530G   400G 56.97 0.97         osd.14
     20  0.90999  1.00000   931G   716G   214G 76.99 1.31         osd.20
@@ -4403,7 +4403,7 @@ Date:   Mon Jul 18 13:57:08 2016 +0800
     
     2. the average utilization/deviation are forced resetted.
     
-    Fixes: http://tracker.ceph.com/issues/16706
+    Fixes: http://tracker.stone.com/issues/16706
     Signed-off-by: xie xingguo <xie.xingguo@zte.com.cn>
     (cherry picked from commit 1e4735440ca329f4b95d9bd6f58d9efab7d28d20)
 
@@ -4420,18 +4420,18 @@ commit 430ab1b83e67dfb697b034e669b06b7a600bcc6b
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Jul 12 16:56:52 2016 +0200
 
-    ceph-disk: timeout ceph-disk to avoid blocking forever
+    stone-disk: timeout stone-disk to avoid blocking forever
     
-    When ceph-disk runs from udev or init script, it is in the background
+    When stone-disk runs from udev or init script, it is in the background
     and should it block for any reason, it may keep a lock forever. All
-    calls to ceph-disk in these context are changed to timeout.
+    calls to stone-disk in these context are changed to timeout.
     
     The TimeoutStartSec= and TimeoutStopSec= which are both set via
     TimeoutSec= do not apply to Type=oneshot services.
     
     https://www.freedesktop.org/software/systemd/man/systemd.service.html
     
-    Fixes: http://tracker.ceph.com/issues/16580
+    Fixes: http://tracker.stone.com/issues/16580
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit bed1a5cc05a9880b91fc9ac8d8a959efe3b3d512)
@@ -4482,7 +4482,7 @@ Date:   Thu Aug 4 20:40:10 2016 -0400
     The librbd API is capped at 24 characters for expressing the
     object prefix for data blocks (including trailing null byte).
     
-    Fixes: http://tracker.ceph.com/issues/16887
+    Fixes: http://tracker.stone.com/issues/16887
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 4de7c8d0a7222c83268d03b99015c6b9d25f124d)
 
@@ -4492,7 +4492,7 @@ Date:   Mon Jul 4 13:54:32 2016 +0300
 
     librbd: prevent creation of clone from non-primary mirrored image
     
-    Fixes: http://tracker.ceph.com/issues/16449
+    Fixes: http://tracker.stone.com/issues/16449
     Signed-off-by: Mykola Golub <mgolub@mirantis.com>
     (cherry picked from commit ba849e3b04a5c513849d40a7fe4151375265302a)
 
@@ -4502,7 +4502,7 @@ Date:   Wed Jun 22 18:09:29 2016 -0400
 
     librbd: journal::Replay no longer holds lock while completing callback
     
-    Fixes: http://tracker.ceph.com/issues/16433
+    Fixes: http://tracker.stone.com/issues/16433
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 3112a93b49c24f9ae101a7f252c8e708e0d3e260)
 
@@ -4517,7 +4517,7 @@ Date:   Fri Jul 1 20:44:35 2016 +0800
       the removed bucket disappears after the removal.
     * test: also add unittest_crush_wrapper::CrushWrapper.insert_item
     
-    Fixes: http://tracker.ceph.com/issues/16525
+    Fixes: http://tracker.stone.com/issues/16525
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit a7069c7aab6b3f605f3d8f909af96f87977e8698)
 
@@ -4538,15 +4538,15 @@ Date:   Wed Jun 8 17:47:58 2016 +0800
 
     client: kill QuotaTree
     
-    Multiple clients can modify cephfs at the same time. It is
+    Multiple clients can modify stonefs at the same time. It is
     very tricky to keep QuotaTree consistant with the global FS
     hiberarchy. This patch kills the quota tree.
     
     After removing the quota tree, we traverse inode's path to
     find quota root.
     
-    Fixes: http://tracker.ceph.com/issues/16066
-    Fixes: http://tracker.ceph.com/issues/16067
+    Fixes: http://tracker.stone.com/issues/16066
+    Fixes: http://tracker.stone.com/issues/16067
     Signed-off-by: Yan, Zheng <zyan@redhat.com>
     (cherry picked from commit 161954bbfeb13d5588668637d5258221948128ea)
 
@@ -4568,7 +4568,7 @@ Date:   Fri May 20 15:47:23 2016 +0530
 
     osd: add peer_addr in heartbeat_check log message
     
-    Fixes: http://tracker.ceph.com/issues/16337
+    Fixes: http://tracker.stone.com/issues/16337
     
     Signed-off-by: Vikhyat Umrao <vumrao@redhat.com>
     (cherry picked from commit f235b9cc1541d33c210e2d56e8061e8908b91ac9)
@@ -4577,10 +4577,10 @@ commit 5ffee353cb947bfb79925ca4d62daec248c3ba4a
 Author: Vikhyat Umrao <vumrao@redhat.com>
 Date:   Fri May 20 23:09:46 2016 +0530
 
-    mon : Display full flag in ceph status if
+    mon : Display full flag in stone status if
     full flag is set
     
-    Fixes: http://tracker.ceph.com/issues/16069
+    Fixes: http://tracker.stone.com/issues/16069
     
     Signed-off-by: Vikhyat Umrao <vumrao@redhat.com>
     (cherry picked from commit 6b1c894b2b083bf6cead21e9f96d304b2eb7887d)

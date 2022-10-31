@@ -65,11 +65,11 @@ protected:
     pg_shard_t from,
     const PushOp& pop,
     PullOp* response,
-    ceph::os::Transaction* t);
-  std::pair<interval_set<uint64_t>, ceph::bufferlist> trim_pushed_data(
+    stone::os::Transaction* t);
+  std::pair<interval_set<uint64_t>, stone::bufferlist> trim_pushed_data(
     const interval_set<uint64_t> &copy_subset,
     const interval_set<uint64_t> &intervals_received,
-    ceph::bufferlist data_received);
+    stone::bufferlist data_received);
   seastar::future<> submit_push_data(
     const ObjectRecoveryInfo &recovery_info,
     bool first,
@@ -77,11 +77,11 @@ protected:
     bool clear_omap,
     interval_set<uint64_t> data_zeros,
     const interval_set<uint64_t> &intervals_included,
-    ceph::bufferlist data_included,
-    ceph::bufferlist omap_header,
+    stone::bufferlist data_included,
+    stone::bufferlist omap_header,
     const std::map<string, bufferlist> &attrs,
     const std::map<string, bufferlist> &omap_entries,
-    ceph::os::Transaction *t);
+    stone::os::Transaction *t);
   void submit_push_complete(
     const ObjectRecoveryInfo &recovery_info,
     ObjectStore::Transaction *t);
@@ -89,7 +89,7 @@ protected:
     pg_shard_t from,
     const PushOp &pop,
     PushReplyOp *response,
-    ceph::os::Transaction *t);
+    stone::os::Transaction *t);
   seastar::future<std::optional<PushOp>> _handle_push_reply(
     pg_shard_t peer,
     const PushReplyOp &op);

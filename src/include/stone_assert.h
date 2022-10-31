@@ -25,7 +25,7 @@
 
 #include "include/common_fwd.h"
 
-namespace ceph {
+namespace stone {
 
 struct BackTrace;
 
@@ -41,7 +41,7 @@ struct BackTrace;
 # define __STONE_ASSERT_FUNCTION ((__const char *) 0)
 #endif
 
-extern void register_assert_context(StoneeContext *cct);
+extern void register_assert_context(StoneContext *cct);
 
 struct assert_data {
   const char *assertion;
@@ -50,19 +50,19 @@ struct assert_data {
   const char *function;
 };
 
-extern void __ceph_assert_fail(const char *assertion, const char *file, int line, const char *function)
+extern void __stone_assert_fail(const char *assertion, const char *file, int line, const char *function)
   __attribute__ ((__noreturn__));
-extern void __ceph_assert_fail(const assert_data &ctx)
+extern void __stone_assert_fail(const assert_data &ctx)
   __attribute__ ((__noreturn__));
 
-extern void __ceph_assertf_fail(const char *assertion, const char *file, int line, const char *function, const char* msg, ...)
+extern void __stone_assertf_fail(const char *assertion, const char *file, int line, const char *function, const char* msg, ...)
   __attribute__ ((__noreturn__));
-extern void __ceph_assert_warn(const char *assertion, const char *file, int line, const char *function);
+extern void __stone_assert_warn(const char *assertion, const char *file, int line, const char *function);
 
-[[noreturn]] void __ceph_abort(const char *file, int line, const char *func,
+[[noreturn]] void __stone_abort(const char *file, int line, const char *func,
                                const std::string& msg);
 
-[[noreturn]] void __ceph_abortf(const char *file, int line, const char *func,
+[[noreturn]] void __stone_abortf(const char *file, int line, const char *func,
                                 const char* msg, ...);
 
 #define _STONE_ASSERT_VOID_CAST static_cast<void>
@@ -70,60 +70,60 @@ extern void __ceph_assert_warn(const char *assertion, const char *file, int line
 #define assert_warn(expr)							\
   ((expr)								\
    ? _STONE_ASSERT_VOID_CAST (0)					\
-   : ::ceph::__ceph_assert_warn (__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION))
+   : ::stone::__stone_assert_warn (__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION))
 
 }
 
-using namespace ceph;
+using namespace stone;
 
 
 /*
- * ceph_abort aborts the program with a nice backtrace.
+ * stone_abort aborts the program with a nice backtrace.
  *
  * Currently, it's the same as assert(0), but we may one day make assert a
  * debug-only thing, like it is in many projects.
  */
-#define ceph_abort(msg, ...)                                            \
-  ::ceph::__ceph_abort( __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, "abort() called")
+#define stone_abort(msg, ...)                                            \
+  ::stone::__stone_abort( __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, "abort() called")
 
-#define ceph_abort_msg(msg)                                             \
-  ::ceph::__ceph_abort( __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, msg) 
+#define stone_abort_msg(msg)                                             \
+  ::stone::__stone_abort( __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, msg) 
 
-#define ceph_abort_msgf(...)                                             \
-  ::ceph::__ceph_abortf( __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, __VA_ARGS__)
+#define stone_abort_msgf(...)                                             \
+  ::stone::__stone_abortf( __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, __VA_ARGS__)
 
 #ifdef __SANITIZE_ADDRESS__
-#define ceph_assert(expr)                           \
+#define stone_assert(expr)                           \
   do {                                              \
     ((expr))                                        \
     ? _STONE_ASSERT_VOID_CAST (0)                    \
-      : ::ceph::__ceph_assert_fail(__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION); \
+      : ::stone::__stone_assert_fail(__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION); \
   } while (false)
 #else
-#define ceph_assert(expr)							\
-  do { static const ceph::assert_data assert_data_ctx = \
+#define stone_assert(expr)							\
+  do { static const stone::assert_data assert_data_ctx = \
    {__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION}; \
    ((expr) \
    ? _STONE_ASSERT_VOID_CAST (0) \
-    : ::ceph::__ceph_assert_fail(assert_data_ctx)); } while(false)
+    : ::stone::__stone_assert_fail(assert_data_ctx)); } while(false)
 #endif
 
 // this variant will *never* get compiled out to NDEBUG in the future.
-// (ceph_assert currently doesn't either, but in the future it might.)
+// (stone_assert currently doesn't either, but in the future it might.)
 #ifdef __SANITIZE_ADDRESS__
-#define ceph_assert_always(expr)                    \
+#define stone_assert_always(expr)                    \
   do {                                              \
     ((expr))                                        \
     ? _STONE_ASSERT_VOID_CAST (0)                    \
-      : ::ceph::__ceph_assert_fail(__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION); \
+      : ::stone::__stone_assert_fail(__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION); \
   } while(false)
 #else
-#define ceph_assert_always(expr)							\
-  do { static const ceph::assert_data assert_data_ctx = \
+#define stone_assert_always(expr)							\
+  do { static const stone::assert_data assert_data_ctx = \
    {__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION}; \
    ((expr) \
    ? _STONE_ASSERT_VOID_CAST (0) \
-    : ::ceph::__ceph_assert_fail(assert_data_ctx)); } while(false)
+    : ::stone::__stone_assert_fail(assert_data_ctx)); } while(false)
 #endif
 
 // Named by analogy with printf.  Along with an expression, takes a format
@@ -131,17 +131,17 @@ using namespace ceph;
 #define assertf(expr, ...)                  \
   ((expr)								\
    ? _STONE_ASSERT_VOID_CAST (0)					\
-   : ::ceph::__ceph_assertf_fail (__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, __VA_ARGS__))
-#define ceph_assertf(expr, ...)                  \
+   : ::stone::__stone_assertf_fail (__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, __VA_ARGS__))
+#define stone_assertf(expr, ...)                  \
   ((expr)								\
    ? _STONE_ASSERT_VOID_CAST (0)					\
-   : ::ceph::__ceph_assertf_fail (__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, __VA_ARGS__))
+   : ::stone::__stone_assertf_fail (__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, __VA_ARGS__))
 
 // this variant will *never* get compiled out to NDEBUG in the future.
-// (ceph_assertf currently doesn't either, but in the future it might.)
-#define ceph_assertf_always(expr, ...)                  \
+// (stone_assertf currently doesn't either, but in the future it might.)
+#define stone_assertf_always(expr, ...)                  \
   ((expr)								\
    ? _STONE_ASSERT_VOID_CAST (0)					\
-   : ::ceph::__ceph_assertf_fail (__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, __VA_ARGS__))
+   : ::stone::__stone_assertf_fail (__STRING(expr), __FILE__, __LINE__, __STONE_ASSERT_FUNCTION, __VA_ARGS__))
 
 #endif

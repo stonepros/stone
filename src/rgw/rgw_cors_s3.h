@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
  *
@@ -51,10 +51,10 @@ class RGWCORSConfiguration_S3 : public RGWCORSConfiguration, public XMLObj
 class RGWCORSXMLParser_S3 : public RGWXMLParser
 {
   const DoutPrefixProvider *dpp;
-  CephContext *cct;
+  StoneContext *cct;
 
   XMLObj *alloc_obj(const char *el) override;
 public:
-  explicit RGWCORSXMLParser_S3(const DoutPrefixProvider *_dpp, CephContext *_cct) : dpp(_dpp), cct(_cct) {}
+  explicit RGWCORSXMLParser_S3(const DoutPrefixProvider *_dpp, StoneContext *_cct) : dpp(_dpp), cct(_cct) {}
 };
 #endif /*STONE_RGW_CORS_S3_H*/

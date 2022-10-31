@@ -7,7 +7,7 @@ RGW Service
 Deploy RGWs
 ===========
 
-Cephadm deploys radosgw as a collection of daemons that manage a
+Stoneadm deploys radosgw as a collection of daemons that manage a
 single-cluster deployment or a particular *realm* and *zone* in a
 multisite deployment.  (For more information about realms and zones,
 see :ref:`multisite`.)

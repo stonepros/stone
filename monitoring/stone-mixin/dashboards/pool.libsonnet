@@ -79,7 +79,7 @@ local u = import 'utils.libsonnet';
         ) + { gridPos: { x: x, y: y, w: w, h: h } };
 
       u.dashboardSchema(
-        'Ceph Pools Overview',
+        'Stone Pools Overview',
         '',
         'z99hzWtmk',
         'now-1h',
@@ -416,7 +416,7 @@ local u = import 'utils.libsonnet';
         ) + { gridPos: { x: x, y: y, w: w, h: h } };
 
       u.dashboardSchema(
-        'Ceph Pool Details',
+        'Stone Pool Details',
         '',
         '-xyV8KCiz',
         'now-1h',

@@ -263,7 +263,7 @@ class interval_set {
 
   void intersection_size_asym(const interval_set &s, const interval_set &l) {
     auto ps = s.m.begin();
-    ceph_assert(ps != s.m.end());
+    stone_assert(ps != s.m.end());
     auto offset = ps->first;
     bool first = true;
     auto mi = m.begin();
@@ -299,7 +299,7 @@ class interval_set {
 
       auto start = std::max<T>(ps->first, pl->first);
       auto en = std::min<T>(ps->first + ps->second, offset);
-      ceph_assert(en > start);
+      stone_assert(en > start);
       mi = m.emplace_hint(mi, start, en - start);
       _size += mi->second;
       if (ps->first + ps->second <= offset) {
@@ -355,17 +355,17 @@ class interval_set {
   void bound_encode(size_t& p) const {
     denc_traits<Map>::bound_encode(m, p);
   }
-  void encode(ceph::buffer::list::contiguous_appender& p) const {
+  void encode(stone::buffer::list::contiguous_appender& p) const {
     denc(m, p);
   }
-  void decode(ceph::buffer::ptr::const_iterator& p) {
+  void decode(stone::buffer::ptr::const_iterator& p) {
     denc(m, p);
     _size = 0;
     for (const auto& p : m) {
       _size += p.second;
     }
   }
-  void decode(ceph::buffer::list::iterator& p) {
+  void decode(stone::buffer::list::iterator& p) {
     denc(m, p);
     _size = 0;
     for (const auto& p : m) {
@@ -373,10 +373,10 @@ class interval_set {
     }
   }
 
-  void encode_nohead(ceph::buffer::list::contiguous_appender& p) const {
+  void encode_nohead(stone::buffer::list::contiguous_appender& p) const {
     denc_traits<Map>::encode_nohead(m, p);
   }
-  void decode_nohead(int n, ceph::buffer::ptr::const_iterator& p) {
+  void decode_nohead(int n, stone::buffer::ptr::const_iterator& p) {
     denc_traits<Map>::decode_nohead(n, m, p);
     _size = 0;
     for (const auto& p : m) {
@@ -394,7 +394,7 @@ class interval_set {
     if (p == m.end()) return false;
     if (p->first > i) return false;
     if (p->first+p->second <= i) return false;
-    ceph_assert(p->first <= i && p->first+p->second > i);
+    stone_assert(p->first <= i && p->first+p->second > i);
     if (pstart)
       *pstart = p->first;
     if (plen)
@@ -406,7 +406,7 @@ class interval_set {
     if (p == m.end()) return false;
     if (p->first > start) return false;
     if (p->first+p->second <= start) return false;
-    ceph_assert(p->first <= start && p->first+p->second > start);
+    stone_assert(p->first <= start && p->first+p->second > start);
     if (p->first+p->second < start+len) return false;
     return true;
   }
@@ -424,32 +424,32 @@ class interval_set {
     return m.empty();
   }
   offset_type range_start() const {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     auto p = m.begin();
     return p->first;
   }
   offset_type range_end() const {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     auto p = m.rbegin();
     return p->first + p->second;
   }
 
   // interval start after p (where p not in set)
   bool starts_after(T i) const {
-    ceph_assert(!contains(i));
+    stone_assert(!contains(i));
     auto p = find_inc(i);
     if (p == m.end()) return false;
     return true;
   }
   offset_type start_after(T i) const {
-    ceph_assert(!contains(i));
+    stone_assert(!contains(i));
     auto p = find_inc(i);
     return p->first;
   }
 
   // interval end that contains start
   offset_type end_after(T start) const {
-    ceph_assert(contains(start));
+    stone_assert(contains(start));
     auto p = find_inc(start);
     return p->first+p->second;
   }
@@ -460,7 +460,7 @@ class interval_set {
 
   void insert(T start, T len, T *pstart=0, T *plen=0) {
     //cout << "insert " << start << "~" << len << endl;
-    ceph_assert(len > 0);
+    stone_assert(len > 0);
     _size += len;
     auto p = find_adj_m(start);
     if (p == m.end()) {
@@ -474,7 +474,7 @@ class interval_set {
         
         if (p->first + p->second != start) {
           //cout << "p is " << p->first << "~" << p->second << ", start is " << start << ", len is " << len << endl;
-          ceph_abort();
+          stone_abort();
         }
         
         p->second += len;               // append to end
@@ -503,7 +503,7 @@ class interval_set {
           m.erase(p);
           m[start] = len + psecond;  // append to front
         } else {
-          ceph_assert(p->first > start+len);
+          stone_assert(p->first > start+len);
 	  if (pstart)
 	    *pstart = start;
 	  if (plen)
@@ -534,11 +534,11 @@ class interval_set {
 
     _size -= len;
 
-    ceph_assert(p != m.end());
-    ceph_assert(p->first <= start);
+    stone_assert(p != m.end());
+    stone_assert(p->first <= start);
 
     T before = start - p->first;
-    ceph_assert(p->second >= before+len);
+    stone_assert(p->second >= before+len);
     T after = p->second - before - len;
     if (before) {
       if (claim && claim(p->first, before)) {
@@ -573,8 +573,8 @@ class interval_set {
 
 
   void intersection_of(const interval_set &a, const interval_set &b) {
-    ceph_assert(&a != this);
-    ceph_assert(&b != this);
+    stone_assert(&a != this);
+    stone_assert(&b != this);
     clear();
 
     const interval_set *s, *l;
@@ -623,7 +623,7 @@ class interval_set {
 
       T start = std::max(pa->first, pb->first);
       T en = std::min(pa->first+pa->second, pb->first+pb->second);
-      ceph_assert(en > start);
+      stone_assert(en > start);
       mi = m.emplace_hint(mi, start, en - start);
       _size += mi->second;
       if (pa->first+pa->second > pb->first+pb->second)
@@ -639,8 +639,8 @@ class interval_set {
   }
 
   void union_of(const interval_set &a, const interval_set &b) {
-    ceph_assert(&a != this);
-    ceph_assert(&b != this);
+    stone_assert(&a != this);
+    stone_assert(&b != this);
     clear();
     
     //cout << "union_of" << endl;
@@ -755,23 +755,23 @@ public:
     v.bound_encode(p);
   }
   static void encode(const container_t& v,
-		     ceph::buffer::list::contiguous_appender& p) {
+		     stone::buffer::list::contiguous_appender& p) {
     v.encode(p);
   }
-  static void decode(container_t& v, ceph::buffer::ptr::const_iterator& p) {
+  static void decode(container_t& v, stone::buffer::ptr::const_iterator& p) {
     v.decode(p);
   }
   template<typename U=T>
     static typename std::enable_if<sizeof(U) && !need_contiguous>::type
-  decode(container_t& v, ceph::buffer::list::iterator& p) {
+  decode(container_t& v, stone::buffer::list::iterator& p) {
     v.decode(p);
   }
   static void encode_nohead(const container_t& v,
-			    ceph::buffer::list::contiguous_appender& p) {
+			    stone::buffer::list::contiguous_appender& p) {
     v.encode_nohead(p);
   }
   static void decode_nohead(size_t n, container_t& v,
-			    ceph::buffer::ptr::const_iterator& p) {
+			    stone::buffer::ptr::const_iterator& p) {
     v.decode_nohead(n, p);
   }
 };

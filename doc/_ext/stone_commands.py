@@ -47,37 +47,37 @@ class Flags:
 
 class CmdParam(object):
     t = {
-        'CephInt': 'int',
-        'CephString': 'str',
-        'CephChoices': 'str',
-        'CephPgid': 'str',
-        'CephOsdName': 'str',
-        'CephPoolname': 'str',
-        'CephObjectname': 'str',
-        'CephUUID': 'str',
-        'CephEntityAddr': 'str',
-        'CephIPAddr': 'str',
-        'CephName': 'str',
-        'CephBool': 'bool',
-        'CephFloat': 'float',
-        'CephFilepath': 'str',
+        'StoneInt': 'int',
+        'StoneString': 'str',
+        'StoneChoices': 'str',
+        'StonePgid': 'str',
+        'StoneOsdName': 'str',
+        'StonePoolname': 'str',
+        'StoneObjectname': 'str',
+        'StoneUUID': 'str',
+        'StoneEntityAddr': 'str',
+        'StoneIPAddr': 'str',
+        'StoneName': 'str',
+        'StoneBool': 'bool',
+        'StoneFloat': 'float',
+        'StoneFilepath': 'str',
     }
 
     bash_example = {
-        'CephInt': '1',
-        'CephString': 'string',
-        'CephChoices': 'choice',
-        'CephPgid': '0',
-        'CephOsdName': 'osd.0',
-        'CephPoolname': 'poolname',
-        'CephObjectname': 'objectname',
-        'CephUUID': 'uuid',
-        'CephEntityAddr': 'entityaddr',
-        'CephIPAddr': '0.0.0.0',
-        'CephName': 'name',
-        'CephBool': 'true',
-        'CephFloat': '0.0',
-        'CephFilepath': '/path/to/file',
+        'StoneInt': '1',
+        'StoneString': 'string',
+        'StoneChoices': 'choice',
+        'StonePgid': '0',
+        'StoneOsdName': 'osd.0',
+        'StonePoolname': 'poolname',
+        'StoneObjectname': 'objectname',
+        'StoneUUID': 'uuid',
+        'StoneEntityAddr': 'entityaddr',
+        'StoneIPAddr': '0.0.0.0',
+        'StoneName': 'name',
+        'StoneBool': 'true',
+        'StoneFloat': '0.0',
+        'StoneFilepath': '/path/to/file',
     }
 
     def __init__(self, type, name,
@@ -96,7 +96,7 @@ class CmdParam(object):
 
     def help(self):
         advanced = []
-        if self.type != 'CephString':
+        if self.type != 'StoneString':
             advanced.append(self.type + ' ')
         if self.range:
             advanced.append('range= ``{}`` '.format('..'.join(self.range)))
@@ -111,7 +111,7 @@ class CmdParam(object):
         return ' '.join(advanced)
 
     def mk_example_value(self):
-        if self.type == 'CephChoices' and self.strings:
+        if self.type == 'StoneChoices' and self.strings:
             return self.strings[0]
         if self.range:
             return self.range[0]
@@ -120,12 +120,12 @@ class CmdParam(object):
     def mk_bash_example(self, simple):
         val = self.mk_example_value()
 
-        if self.type == 'CephBool':
+        if self.type == 'StoneBool':
             return '--' + self.name
         if simple:
-            if self.type == "CephChoices" and self.strings:
+            if self.type == "StoneChoices" and self.strings:
                 return val
-            elif self.type == "CephString" and self.name != 'who':
+            elif self.type == "StoneString" and self.name != 'who':
                 return 'my_' + self.name
             else:
                 return CmdParam.bash_example[self.type]
@@ -154,7 +154,7 @@ class CmdCommand(object):
 
     def mk_bash_example(self):
         simple = self.is_reasonably_simple()
-        line = ' '.join(['ceph', self.prefix] + [p.mk_bash_example(simple) for p in self.params])
+        line = ' '.join(['stone', self.prefix] + [p.mk_bash_example(simple) for p in self.params])
         return line
 
 
@@ -198,7 +198,7 @@ Parameters:
 
 {% for param in command.params %}* **{{param.name}}**: {{ param.help() | wordwrap(70) | indent(2) }}
 {% endfor %}{% endif %}
-Ceph Module:
+Stone Module:
 
 * *{{ command.module }}*
 
@@ -215,7 +215,7 @@ Required Permissions:
 '''
 
 
-class CephMgrCommands(Directive):
+class StoneMgrCommands(Directive):
     """
     extracts commands from specified mgr modules
     """
@@ -243,7 +243,7 @@ class CephMgrCommands(Directive):
         from tests import mock
         mock_imports = ['rados',
                         'rbd',
-                        'cephfs',
+                        'stonefs',
                         'dateutil',
                         'dateutil.parser']
         # make dashboard happy
@@ -253,7 +253,7 @@ class CephMgrCommands(Directive):
                          'scipy',
                          'jsonpatch',
                          'rook.rook_client',
-                         'rook.rook_client.ceph',
+                         'rook.rook_client.stone',
                          'rook.rook_client._helper',
                          'cherrypy=3.2.3']
 
@@ -387,7 +387,7 @@ class MyProcessor(Preprocessor):
         return _cmds
 
 
-class CephMonCommands(Directive):
+class StoneMonCommands(Directive):
     """
     extracts commands from specified header file
     """
@@ -431,8 +431,8 @@ class CephMonCommands(Directive):
 
 
 def setup(app):
-    app.add_directive("ceph-mgr-commands", CephMgrCommands)
-    app.add_directive("ceph-mon-commands", CephMonCommands)
+    app.add_directive("stone-mgr-commands", StoneMgrCommands)
+    app.add_directive("stone-mon-commands", StoneMonCommands)
 
     return {
         'version': '0.1',

@@ -41,7 +41,7 @@
 #
 # Among other things, the script assumes:
 #
-# 1. it is being run in the top-level directory of a Ceph git repo
+# 1. it is being run in the top-level directory of a Stone git repo
 # 2. the preferred web browser is Firefox and the command to open a browser
 #    tab is "firefox"
 # 3. if Firefox is running and '--no-browser' was not given, the Firefox window
@@ -102,9 +102,9 @@ from redminelib.exceptions import ResourceAttrError
 from git import Repo
 from git.exc import GitCommandError
 
-github_endpoint = "https://github.com/ceph/ceph"
-redmine_endpoint = "https://tracker.ceph.com"
-project_name = "Ceph"
+github_endpoint = "https://github.com/stone/stone"
+redmine_endpoint = "https://tracker.stone.com"
+project_name = "Stone"
 status2status_id = {}
 project_id2project = {}
 tracker2tracker_id = {}
@@ -112,7 +112,7 @@ version2version_id = {}
 delay_seconds = 5
 browser_cmd = "firefox"
 no_browser = False
-ceph_release = None
+stone_release = None
 dry_run = False
 redmine = None
 bri_tag = None
@@ -129,7 +129,7 @@ def browser_running():
         return True
     return False
 
-def ceph_version(repo, sha1=None):
+def stone_version(repo, sha1=None):
     if sha1:
         return repo.git.describe('--match', 'v*', sha1).split('-')[0]
     return repo.git.describe('--match', 'v*').split('-')[0]
@@ -183,7 +183,7 @@ def ensure_bri_tag_exists(repo, release):
         logging.error(err)
     logging.debug("git show-ref {} returned ->{}<-".format(bri_tag, bri_tag_exists))
     if not bri_tag_exists:
-        c_v = ceph_version(repo)
+        c_v = stone_version(repo)
         logging.info("No {} tag found: setting it to {}".format(bri_tag, c_v))
         repo.git.tag(bri_tag, c_v)
 
@@ -219,18 +219,18 @@ def parse_arguments():
                         help="GitHub PR ID, or last merge commit successfully processed")
     return parser.parse_args()
 
-def populate_ceph_release(repo):
-    global ceph_release
+def populate_stone_release(repo):
+    global stone_release
     current_branch = repo.git.rev_parse('--abbrev-ref', 'HEAD')
-    release_ver_full = ceph_version(repo)
+    release_ver_full = stone_version(repo)
     logging.info("Current git branch is {}, {}".format(current_branch, release_ver_full))
     release_ver = release_ver_full.split('.')[0] + '.' + release_ver_full.split('.')[1]
     try:
-        ceph_release = ver_to_release()[release_ver]
+        stone_release = ver_to_release()[release_ver]
     except KeyError:
         assert False, \
             "Release version {} does not correspond to any known stable release".format(release_ver)
-    logging.info("Ceph release is {}".format(ceph_release))
+    logging.info("Stone release is {}".format(stone_release))
 
 def populate_status_dict(r):
     for status in r.issue_status.all():
@@ -374,7 +374,7 @@ class Backport:
             27ff851953 Merge pull request #29678 from pdvian/wip-40948-nautilus
         '''
         global browser_cmd
-        global ceph_release
+        global stone_release
         global github_token
         global github_user
         self.repo = repo
@@ -407,7 +407,7 @@ class Backport:
         if github_token and github_user:
             curl_opt = "-u {}:{} {}".format(github_user, github_token, curl_opt)
         cmd = (
-            "curl {} https://api.github.com/repos/ceph/ceph/pulls/{}"
+            "curl {} https://api.github.com/repos/stone/stone/pulls/{}"
             .format(curl_opt, self.github_pr_id)
             )
         logging.debug("Running curl command ->{}<-".format(cmd))
@@ -433,7 +433,7 @@ GitHub PR URL:    {}
 GitHub PR title:  {}
 Merge commit:     {} ({})
 Merged:           {}
-Ceph version:     base {}, target {}'''
+Stone version:     base {}, target {}'''
               .format(self.github_url, pr_title_trunc, self.merge_commit_sha1,
                       self.merge_commit_gd, self.github_pr_merged, self.base_version,
                       self.target_version
@@ -450,7 +450,7 @@ Ceph version:     base {}, target {}'''
         #
         for bt in self.backport_trackers:
             # does the Backport Tracker description link back to the GitHub PR?
-            p = re.compile('http.?://github.com/ceph/ceph/pull/\\d+')
+            p = re.compile('http.?://github.com/stone/stone/pull/\\d+')
             bt.get_tracker_description()
             try:
                 bt.github_url_from_tracker = p.search(bt.tracker_description).group()
@@ -473,12 +473,12 @@ Ceph version:     base {}, target {}'''
                 logging.warning("Backport Tracker {} does not link to PR - will update"
                                 .format(bt.issue_id))
             #
-            # does the Backport Tracker's release field match the Ceph release?
+            # does the Backport Tracker's release field match the Stone release?
             tracker_release = get_issue_release(bt.redmine_issue)
-            assert ceph_release == tracker_release, \
+            assert stone_release == tracker_release, \
                 (
                     "Backport Tracker {} is a {} backport - expected {}"
-                    .format(bt.issue_id, tracker_release, ceph_release)
+                    .format(bt.issue_id, tracker_release, stone_release)
                 )
             #
             # is the Backport Tracker's "Target version" custom field populated?
@@ -513,7 +513,7 @@ Ceph version:     base {}, target {}'''
         print_outer_divider()
 
     def populate_base_version(self):
-        self.base_version = ceph_version(self.repo, self.merge_commit_sha1)
+        self.base_version = stone_version(self.repo, self.merge_commit_sha1)
 
     def populate_target_version(self):
         x, y, z = self.base_version.split('v')[1].split('.')
@@ -554,7 +554,7 @@ Ceph version:     base {}, target {}'''
 
     def extract_backport_trackers_from_github_pr_desc(self):
         global redmine_endpoint
-        p = re.compile('http.?://tracker.ceph.com/issues/\\d+')
+        p = re.compile('http.?://tracker.stone.com/issues/\\d+')
         matching_strings = p.findall(self.github_pr_desc)
         if not matching_strings:
             print_outer_divider()
@@ -678,8 +678,8 @@ if __name__ == '__main__':
     # set up Redmine variables
     redmine = connect_to_redmine(args)
     project = redmine.project.get(project_name)
-    ceph_project_id = project.id
-    logging.debug("Project {} has ID {}".format(project_name, ceph_project_id))
+    stone_project_id = project.id
+    logging.debug("Project {} has ID {}".format(project_name, stone_project_id))
     populate_status_dict(redmine)
     pending_backport_status_id = status2status_id["Pending Backport"]
     logging.debug(
@@ -687,12 +687,12 @@ if __name__ == '__main__':
         .format(pending_backport_status_id)
     )
     populate_tracker_dict(redmine)
-    populate_version_dict(redmine, ceph_project_id)
+    populate_version_dict(redmine, stone_project_id)
     #
     # construct github Repo object for the current directory
     repo = Repo('.')
     assert not repo.bare
-    populate_ceph_release(repo)
+    populate_stone_release(repo)
     #
     # if positional argument is an integer, assume it is a GitHub PR
     if args.pr_or_commit:
@@ -710,7 +710,7 @@ if __name__ == '__main__':
     #
     # get list of merges
     if tag_merge_commits:
-        ensure_bri_tag_exists(repo, ceph_release)
+        ensure_bri_tag_exists(repo, stone_release)
         c_r = commit_range(args)
         logging.info("Commit range is {}".format(c_r))
         #

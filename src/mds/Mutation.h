@@ -103,7 +103,7 @@ public:
 	emplace_back(lock, LockOp::WRLOCK);
     }
     void add_remote_wrlock(SimpleLock *lock, mds_rank_t rank) {
-      ceph_assert(rank != MDS_RANK_NONE);
+      stone_assert(rank != MDS_RANK_NONE);
       emplace_back(lock, LockOp::REMOTE_WRLOCK, rank);
     }
     void lock_scatter_gather(SimpleLock *lock) {
@@ -123,10 +123,10 @@ public:
       reqid(ri), attempt(att),
       peer_to_mds(peer_to) {}
   ~MutationImpl() override {
-    ceph_assert(!locking);
-    ceph_assert(!lock_cache);
-    ceph_assert(num_pins == 0);
-    ceph_assert(num_auth_pins == 0);
+    stone_assert(!locking);
+    stone_assert(!lock_cache);
+    stone_assert(num_pins == 0);
+    stone_assert(num_auth_pins == 0);
   }
 
   const ObjectState* find_object_state(MDSCacheObject *obj) const {
@@ -220,7 +220,7 @@ public:
     out << "mutation(" << this << ")";
   }
 
-  virtual void dump(ceph::Formatter *f) const {}
+  virtual void dump(stone::Formatter *f) const {}
   void _dump_op_descriptor_unlocked(std::ostream& stream) const override;
 
   metareqid_t reqid;
@@ -230,7 +230,7 @@ public:
   // flag mutation as peer
   mds_rank_t peer_to_mds = MDS_RANK_NONE;  // this is a peer request if >= 0.
 
-  ceph::unordered_map<MDSCacheObject*, ObjectState> object_states;
+  stone::unordered_map<MDSCacheObject*, ObjectState> object_states;
   int num_pins = 0;
   int num_auth_pins = 0;
   int num_remote_auth_pins = 0;
@@ -301,7 +301,7 @@ struct MDRequestImpl : public MutationImpl {
     // for rename
     std::set<mds_rank_t> extra_witnesses; // replica list from srcdn auth (rename)
     mds_rank_t srcdn_auth_mds = MDS_RANK_NONE;
-    ceph::buffer::list inode_import;
+    stone::buffer::list inode_import;
     version_t inode_import_v = 0;
     CInode* rename_inode = nullptr;
     bool is_freeze_authpin = false;
@@ -318,14 +318,14 @@ struct MDRequestImpl : public MutationImpl {
 
     // for snaps
     version_t stid = 0;
-    ceph::buffer::list snapidbl;
+    stone::buffer::list snapidbl;
 
     sr_t *srci_srnode = nullptr;
     sr_t *desti_srnode = nullptr;
 
     // called when peer commits or aborts
     Context *peer_commit = nullptr;
-    ceph::buffer::list rollback_bl;
+    stone::buffer::list rollback_bl;
 
     MDSContext::vec waiting_for_finish;
 
@@ -356,8 +356,8 @@ struct MDRequestImpl : public MutationImpl {
     }
     metareqid_t reqid;
     __u32 attempt = 0;
-    ceph::cref_t<MClientRequest> client_req;
-    ceph::cref_t<Message> triggering_peer_req;
+    stone::cref_t<MClientRequest> client_req;
+    stone::cref_t<Message> triggering_peer_req;
     mds_rank_t peer_to = MDS_RANK_NONE;
     utime_t initiated;
     utime_t throttled, all_read, dispatched;
@@ -396,16 +396,16 @@ struct MDRequestImpl : public MutationImpl {
   std::unique_ptr<BatchOp> release_batch_op();
 
   void print(std::ostream &out) const override;
-  void dump(ceph::Formatter *f) const override;
+  void dump(stone::Formatter *f) const override;
 
-  ceph::cref_t<MClientRequest> release_client_request();
-  void reset_peer_request(const ceph::cref_t<MMDSPeerRequest>& req=nullptr);
+  stone::cref_t<MClientRequest> release_client_request();
+  void reset_peer_request(const stone::cref_t<MMDSPeerRequest>& req=nullptr);
 
   Session *session = nullptr;
   elist<MDRequestImpl*>::item item_session_request;  // if not on list, op is aborted.
 
   // -- i am a client (leader) request
-  ceph::cref_t<MClientRequest> client_request; // client request (if any)
+  stone::cref_t<MClientRequest> client_request; // client request (if any)
 
   // tree and depth info of path1 and path2
   inodeno_t dir_root[2] = {0, 0};
@@ -430,13 +430,13 @@ struct MDRequestImpl : public MutationImpl {
   bool o_trunc = false;		///< request is an O_TRUNC mutation
   bool has_completed = false;	///< request has already completed
 
-  ceph::buffer::list reply_extra_bl;
+  stone::buffer::list reply_extra_bl;
 
   // inos we did a embedded cap release on, and may need to eval if we haven't since reissued
-  std::map<vinodeno_t, ceph_seq_t> cap_releases;
+  std::map<vinodeno_t, stone_seq_t> cap_releases;
 
   // -- i am a peer request
-  ceph::cref_t<MMDSPeerRequest> peer_request; // peer request (if one is pending; implies peer == true)
+  stone::cref_t<MMDSPeerRequest> peer_request; // peer request (if one is pending; implies peer == true)
 
   // -- i am an internal op
   int internal_op;
@@ -452,14 +452,14 @@ struct MDRequestImpl : public MutationImpl {
   bool waited_for_osdmap = false;
 
 protected:
-  void _dump(ceph::Formatter *f) const override;
+  void _dump(stone::Formatter *f) const override;
   void _dump_op_descriptor_unlocked(std::ostream& stream) const override;
 private:
-  mutable ceph::spinlock msg_lock;
+  mutable stone::spinlock msg_lock;
 };
 
 struct MDPeerUpdate {
-  MDPeerUpdate(int oo, ceph::buffer::list &rbl) :
+  MDPeerUpdate(int oo, stone::buffer::list &rbl) :
     origop(oo) {
     rollback = std::move(rbl);
   }
@@ -468,7 +468,7 @@ struct MDPeerUpdate {
       waiter->complete(0);
   }
   int origop;
-  ceph::buffer::list rollback;
+  stone::buffer::list rollback;
   Context *waiter = nullptr;
   std::set<CInode*> olddirs;
   std::set<CInode*> unlinked;

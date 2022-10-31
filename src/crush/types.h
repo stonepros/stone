@@ -11,7 +11,7 @@
 #include <linux/types.h>  /* just for int types */
 
 #ifndef BUG_ON
-# define BUG_ON(x) ceph_assert(!(x))
+# define BUG_ON(x) stone_assert(!(x))
 #endif
 
 #endif

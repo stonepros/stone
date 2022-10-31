@@ -17,7 +17,7 @@
 #
 
 # rbd-recover-tool is an offline recover tool for rbd image in replicated pool
-# when ceph cluster is stopped.
+# when stone cluster is stopped.
 # it is a simple disater recovery policy, just for urgent condition
 
 my_dir=$(dirname "$0")
@@ -180,7 +180,7 @@ function usage()
   local cmd_name="rbd-recover-tool"
   echo 
   echo "$cmd_name is used to recover rbd image of replicated pool, 
-	when all ceph services are stopped"
+	when all stone services are stopped"
   echo "Usage:"
   echo "$cmd_name database
 		 	gather pg info, object info, image metadata, 

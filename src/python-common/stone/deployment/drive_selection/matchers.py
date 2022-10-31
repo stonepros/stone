@@ -2,7 +2,7 @@
 
 from typing import Tuple, Optional, Any, Union, Iterator
 
-from ceph.deployment.inventory import Device
+from stone.deployment.inventory import Device
 
 import re
 import logging
@@ -39,10 +39,10 @@ class Matcher(object):
         """ Helper method to safely extract values form the disk dict
 
         There is a 'key' and a _optional_ 'fallback' key that can be used.
-        The reason for this is that the output of ceph-volume is not always
+        The reason for this is that the output of stone-volume is not always
         consistent (due to a bug currently, but you never know).
         There is also a safety measure for a disk_key not existing on
-        virtual environments. ceph-volume apparently sources its information
+        virtual environments. stone-volume apparently sources its information
         from udev which seems to not populate certain fields on VMs.
 
         :raises: A generic Exception when no disk_key could be found.
@@ -373,7 +373,7 @@ class SizeMatcher(Matcher):
             return False
         disk_value = self._get_disk_key(disk)
         # This doesn't neccessarily have to be a float.
-        # The current output from ceph-volume gives a float..
+        # The current output from stone-volume gives a float..
         # This may change in the future..
         # todo: harden this paragraph
         if not disk_value:

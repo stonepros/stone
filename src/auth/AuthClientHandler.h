@@ -50,14 +50,14 @@ public:
 
   virtual void reset() = 0;
   virtual void prepare_build_request() = 0;
-  virtual void build_initial_request(ceph::buffer::list *bl) const {
-    // this is empty for methods cephx and none.
+  virtual void build_initial_request(stone::buffer::list *bl) const {
+    // this is empty for methods stonex and none.
   }
-  virtual int build_request(ceph::buffer::list& bl) const = 0;
-  virtual int handle_response(int ret, ceph::buffer::list::const_iterator& iter,
+  virtual int build_request(stone::buffer::list& bl) const = 0;
+  virtual int handle_response(int ret, stone::buffer::list::const_iterator& iter,
 			      CryptoKey *session_key,
 			      std::string *connection_secret) = 0;
-  virtual bool build_rotating_request(ceph::buffer::list& bl) const = 0;
+  virtual bool build_rotating_request(stone::buffer::list& bl) const = 0;
 
   virtual AuthAuthorizer *build_authorizer(uint32_t service_id) const = 0;
 

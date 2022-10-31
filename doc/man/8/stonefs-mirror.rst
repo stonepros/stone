@@ -1,39 +1,39 @@
 :orphan:
 
 ============================================================
- cephfs-mirror -- Ceph daemon for mirroring CephFS snapshots
+ stonefs-mirror -- Stone daemon for mirroring StoneFS snapshots
 ============================================================
 
-.. program:: cephfs-mirror
+.. program:: stonefs-mirror
 
 Synopsis
 ========
 
-| **cephfs-mirror**
+| **stonefs-mirror**
 
 
 Description
 ===========
 
-:program:`cephfs-mirror` is a daemon for asynchronous mirroring of Ceph
-Filesystem snapshots among Ceph clusters.
+:program:`stonefs-mirror` is a daemon for asynchronous mirroring of Stone
+Filesystem snapshots among Stone clusters.
 
-It connects to remote clusters via libcephfs, relying on default search
-paths to find ceph.conf files, i.e. ``/etc/ceph/$cluster.conf`` where
+It connects to remote clusters via libstonefs, relying on default search
+paths to find stone.conf files, i.e. ``/etc/stone/$cluster.conf`` where
 ``$cluster`` is the human-friendly name of the cluster.
 
 
 Options
 =======
 
-.. option:: -c ceph.conf, --conf=ceph.conf
+.. option:: -c stone.conf, --conf=stone.conf
 
-   Use ``ceph.conf`` configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` to determine monitor addresses during startup.
+   Use ``stone.conf`` configuration file instead of the default
+   ``/etc/stone/stone.conf`` to determine monitor addresses during startup.
 
 .. option:: -i ID, --id ID
 
-   Set the ID portion of name for cephfs-mirror
+   Set the ID portion of name for stonefs-mirror
 
 .. option:: -n TYPE.ID, --name TYPE.ID
 
@@ -41,7 +41,7 @@ Options
 
 .. option:: --cluster NAME
 
-   Set the cluster name (default: ceph)
+   Set the cluster name (default: stone)
 
 .. option:: -d
 
@@ -55,12 +55,12 @@ Options
 Availability
 ============
 
-:program:`cephfs-mirror` is part of Ceph, a massively scalable, open-source, distributed
-storage system. Please refer to the Ceph documentation at http://ceph.com/docs for
+:program:`stonefs-mirror` is part of Stone, a massively scalable, open-source, distributed
+storage system. Please refer to the Stone documentation at http://stone.com/docs for
 more information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)

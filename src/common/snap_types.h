@@ -4,12 +4,12 @@
 #include "include/types.h"
 #include "include/fs_types.h"
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 
 struct SnapRealmInfo {
-  mutable ceph_mds_snap_realm h;
+  mutable stone_mds_snap_realm h;
   std::vector<snapid_t> my_snaps;
   std::vector<snapid_t> prior_parent_snaps;  // before parent_since
 
@@ -32,9 +32,9 @@ struct SnapRealmInfo {
   snapid_t parent_since() const { return snapid_t(h.parent_since); }
   snapid_t created() const { return snapid_t(h.created); }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<SnapRealmInfo*>& o);
 };
 WRITE_CLASS_ENCODER(SnapRealmInfo)
@@ -55,17 +55,17 @@ struct SnapContext {
   }
   bool empty() const { return seq == 0; }
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(seq, bl);
     encode(snaps, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     decode(seq, bl);
     decode(snaps, bl);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<SnapContext*>& o);
 };
 WRITE_CLASS_ENCODER(SnapContext)

@@ -6,7 +6,7 @@
 
 #include "include/int_types.h"
 #include "include/Context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/dout.h"
 #include "common/AsyncOpTracker.h"
 #include "librbd/Utils.h"
@@ -14,7 +14,7 @@
 #include "librbd/io/Types.h"
 #include <map>
 
-#define dout_subsys ceph_subsys_rbd
+#define dout_subsys stone_subsys_rbd
 #undef dout_prefix
 #define dout_prefix *_dout << "librbd::io::Dispatcher: " << this \
                            << " " << __func__ << ": "
@@ -31,13 +31,13 @@ public:
 
   Dispatcher(ImageCtxT* image_ctx)
     : m_image_ctx(image_ctx),
-      m_lock(ceph::make_shared_mutex(
+      m_lock(stone::make_shared_mutex(
         librbd::util::unique_lock_name("librbd::io::Dispatcher::lock",
                                        this))) {
   }
 
   virtual ~Dispatcher() {
-    ceph_assert(m_dispatches.empty());
+    stone_assert(m_dispatches.empty());
   }
 
   void shut_down(Context* on_finish) override {
@@ -65,7 +65,7 @@ public:
 
     auto result = m_dispatches.insert(
       {type, {dispatch, new AsyncOpTracker()}});
-    ceph_assert(result.second);
+    stone_assert(result.second);
   }
 
   bool exists(DispatchLayer dispatch_layer) override {
@@ -153,7 +153,7 @@ protected:
 
   ImageCtxT* m_image_ctx;
 
-  ceph::shared_mutex m_lock;
+  stone::shared_mutex m_lock;
   std::map<DispatchLayer, DispatchMeta> m_dispatches;
 
   virtual bool send_dispatch(Dispatch* dispatch,

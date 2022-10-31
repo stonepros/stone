@@ -15,8 +15,8 @@ done
 for f in `seq 1 8`
 do
     echo testing failure point $f
-    bash -c "pushd . ; cd $bindir ; sleep 10; ./ceph -c $conf mds tell \* injectargs \"--mds_kill_mdstable_at $f\" ; popd" &
-    bash -c "pushd . ; cd $bindir ; sleep 11 ; ./init-ceph -c $conf start mds ; popd" &
+    bash -c "pushd . ; cd $bindir ; sleep 10; ./stone -c $conf mds tell \* injectargs \"--mds_kill_mdstable_at $f\" ; popd" &
+    bash -c "pushd . ; cd $bindir ; sleep 11 ; ./init-stone -c $conf start mds ; popd" &
     for g in `seq 1 20`
     do
 	rm $f/$g

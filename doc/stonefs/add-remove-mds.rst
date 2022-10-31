@@ -2,7 +2,7 @@
  Deploying Metadata Servers
 ============================
 
-Each CephFS file system requires at least one MDS. The cluster operator will
+Each StoneFS file system requires at least one MDS. The cluster operator will
 generally use their automated deployment tool to launch required MDS servers as
 needed.  Rook and ansible (via the ceph-ansible playbooks) are recommended
 tools for doing this. For clarity, we also show the systemd commands here which
@@ -21,7 +21,7 @@ miscellaneous upkeep threads working in tandem.
 
 Even so, it is recommended that an MDS server be well provisioned with an
 advanced CPU with sufficient cores. Development is on-going to make better use
-of available CPU cores in the MDS; it is expected in future versions of Ceph
+of available CPU cores in the MDS; it is expected in future versions of Stone
 that the MDS server will improve performance by taking advantage of more cores.
 
 The other dimension to MDS performance is the available RAM for caching. The
@@ -47,13 +47,13 @@ become clear with workloads on the cluster that performance improves with
 multiple active MDS on the same node rather than over-provisioning a single
 MDS.
 
-Finally, be aware that CephFS is a highly-available file system by supporting
+Finally, be aware that StoneFS is a highly-available file system by supporting
 standby MDS (see also :ref:`mds-standby`) for rapid failover. To get a real
 benefit from deploying standbys, it is usually necessary to distribute MDS
 daemons across at least two nodes in the cluster. Otherwise, a hardware failure
 on a single node may result in the file system becoming unavailable.
 
-Co-locating the MDS with other Ceph daemons (hyperconverged) is an effective
+Co-locating the MDS with other Stone daemons (hyperconverged) is an effective
 and recommended way to accomplish this so long as all daemons are configured to
 use available hardware within certain limits.  For the MDS, this generally
 means limiting its cache size.
@@ -64,7 +64,7 @@ Adding an MDS
 
 #. Create an mds data point ``/var/lib/ceph/mds/ceph-${id}``. The daemon only uses this directory to store its keyring.
 
-#. Create the authentication key, if you use CephX: ::
+#. Create the authentication key, if you use StoneX: ::
 
 	$ sudo ceph auth get-or-create mds.${id} mon 'profile mds' mgr 'profile mds' mds 'allow *' osd 'allow *' > /var/lib/ceph/mds/ceph-${id}/keyring
 
@@ -97,7 +97,7 @@ the following method.
 
 	$ sudo systemctl stop ceph-mds@${id}
 
-   The MDS will automatically notify the Ceph monitors that it is going down.
+   The MDS will automatically notify the Stone monitors that it is going down.
    This enables the monitors to perform instantaneous failover to an available
    standby, if one exists. It is unnecessary to use administrative commands to
    effect this failover, e.g. through the use of ``ceph mds fail mds.${id}``.

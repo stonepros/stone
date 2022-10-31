@@ -17,7 +17,7 @@ later.
 
 Tag API
 -------
-The process of identifying logical volumes as part of Ceph relies on applying
+The process of identifying logical volumes as part of Stone relies on applying
 tags on all volumes. It follows a naming convention for the namespace that
 looks like::
 
@@ -34,7 +34,7 @@ in the context of lvm tags::
 
 Metadata
 --------
-The following describes all the metadata from Ceph OSDs that is stored on an
+The following describes all the metadata from Stone OSDs that is stored on an
 LVM volume:
 
 

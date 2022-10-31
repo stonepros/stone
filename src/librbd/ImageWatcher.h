@@ -6,7 +6,7 @@
 
 #include "cls/rbd/cls_rbd_types.h"
 #include "common/AsyncOpTracker.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/Context.h"
 #include "include/rbd/librbd.hpp"
 #include "librbd/Operations.h"
@@ -182,14 +182,14 @@ private:
 
   TaskFinisher<Task> *m_task_finisher;
 
-  ceph::shared_mutex m_async_request_lock;
+  stone::shared_mutex m_async_request_lock;
   std::map<watch_notify::AsyncRequestId, AsyncRequest> m_async_requests;
   std::set<watch_notify::AsyncRequestId> m_async_pending;
   std::map<watch_notify::AsyncRequestId, int> m_async_complete;
   std::set<std::pair<utime_t,
                      watch_notify::AsyncRequestId>> m_async_complete_expiration;
 
-  ceph::mutex m_owner_client_id_lock;
+  stone::mutex m_owner_client_id_lock;
   watch_notify::ClientId m_owner_client_id;
 
   AsyncOpTracker m_async_op_tracker;
@@ -214,7 +214,7 @@ private:
                                    int r);
   Context *remove_async_request(const watch_notify::AsyncRequestId &id);
   Context *remove_async_request(const watch_notify::AsyncRequestId &id,
-                                ceph::shared_mutex &lock);
+                                stone::shared_mutex &lock);
   void schedule_async_request_timed_out(const watch_notify::AsyncRequestId &id);
   void async_request_timed_out(const watch_notify::AsyncRequestId &id);
   void notify_async_request(const watch_notify::AsyncRequestId &id,

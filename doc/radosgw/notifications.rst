@@ -9,7 +9,7 @@ Bucket Notifications
 Bucket notifications provide a mechanism for sending information out of the radosgw when certain events are happening on the bucket.
 Currently, notifications could be sent to: HTTP, AMQP0.9.1 and Kafka endpoints.
 
-Note, that if the events should be stored in Ceph, in addition, or instead of being pushed to an endpoint,
+Note, that if the events should be stored in Stone, in addition, or instead of being pushed to an endpoint,
 the `PubSub Module`_ should be used instead of the bucket notification mechanism.
 
 A user can create different topics. A topic entity is defined by its name and is per tenant. A

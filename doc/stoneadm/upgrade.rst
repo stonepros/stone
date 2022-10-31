@@ -1,20 +1,20 @@
 ==============
-Upgrading Ceph
+Upgrading Stone
 ==============
 
-Cephadm can safely upgrade Ceph from one bugfix release to the next.  For
+Stoneadm can safely upgrade Stone from one bugfix release to the next.  For
 example, you can upgrade from v15.2.0 (the first Octopus release) to the next
 point release, v15.2.1.
 
-The automated upgrade process follows Ceph best practices.  For example:
+The automated upgrade process follows Stone best practices.  For example:
 
 * The upgrade order starts with managers, monitors, then other daemons.
-* Each daemon is restarted only after Ceph indicates that the cluster
+* Each daemon is restarted only after Stone indicates that the cluster
   will remain available.
 
 .. note::
 
-   The Ceph cluster health status is likely to switch to
+   The Stone cluster health status is likely to switch to
    ``HEALTH_WARNING`` during the upgrade.
 
 .. note:: 
@@ -25,7 +25,7 @@ The automated upgrade process follows Ceph best practices.  For example:
 Starting the upgrade
 ====================
 
-Before you use cephadm to upgrade Ceph, verify that all hosts are currently online and that your cluster is healthy by running the following command:
+Before you use cephadm to upgrade Stone, verify that all hosts are currently online and that your cluster is healthy by running the following command:
 
 .. prompt:: bash #
 
@@ -62,7 +62,7 @@ cluster is upgrading to by running the following command:
 
   ceph orch upgrade status
 
-Watching the progress bar during a Ceph upgrade
+Watching the progress bar during a Stone upgrade
 -----------------------------------------------
 
 During the upgrade, a progress bar is visible in the ceph status output. It
@@ -105,12 +105,12 @@ There are a few health alerts that can arise during the upgrade process.
 UPGRADE_NO_STANDBY_MGR
 ----------------------
 
-This alert (``UPGRADE_NO_STANDBY_MGR``) means that Ceph does not detect an
-active standby manager daemon. In order to proceed with the upgrade, Ceph
+This alert (``UPGRADE_NO_STANDBY_MGR``) means that Stone does not detect an
+active standby manager daemon. In order to proceed with the upgrade, Stone
 requires an active standby manager daemon (which you can think of in this
 context as "a second manager").
 
-You can ensure that Cephadm is configured to run 2 (or more) managers by
+You can ensure that Stoneadm is configured to run 2 (or more) managers by
 running the following command:
 
 .. prompt:: bash #
@@ -134,7 +134,7 @@ following command:
 UPGRADE_FAILED_PULL
 -------------------
 
-This alert (``UPGRADE_FAILED_PULL``) means that Ceph was unable to pull the
+This alert (``UPGRADE_FAILED_PULL``) means that Stone was unable to pull the
 container image for the target version. This can happen if you specify a
 version or container image that does not exist (e.g. "1.2.3"), or if the
 container registry can not be reached by one or more hosts in the cluster.
@@ -152,8 +152,8 @@ Using customized container images
 =================================
 
 For most users, upgrading requires nothing more complicated than specifying the
-Ceph version number to upgrade to.  In such cases, cephadm locates the specific
-Ceph container image to use by combining the ``container_image_base``
+Stone version number to upgrade to.  In such cases, cephadm locates the specific
+Stone container image to use by combining the ``container_image_base``
 configuration option (default: ``docker.io/ceph/ceph``) with a tag of
 ``vX.Y.Z``.
 

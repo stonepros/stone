@@ -16,7 +16,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -59,7 +59,7 @@ struct uuid_d {
     return (const char*)uuid.data;
   }
 
-  void encode(::ceph::buffer::list::contiguous_appender& p) const {
+  void encode(::stone::buffer::list::contiguous_appender& p) const {
     p.append(reinterpret_cast<const char *>(&uuid), sizeof(uuid));
   }
 
@@ -67,12 +67,12 @@ struct uuid_d {
     p += sizeof(uuid);
   }
 
-  void decode(::ceph::buffer::ptr::const_iterator& p) {
+  void decode(::stone::buffer::ptr::const_iterator& p) {
     assert((p.get_end() - p.get_pos()) >= (int)sizeof(*this));
     memcpy((char *)this, p.get_pos_add(sizeof(*this)), sizeof(*this));
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<uuid_d*>& o);
 };
 WRITE_CLASS_DENC_BOUNDED(uuid_d)

@@ -14,7 +14,7 @@
 #ifndef STONE_TYPES_H
 #define STONE_TYPES_H
 
-// this is needed for ceph_fs to compile in userland
+// this is needed for stone_fs to compile in userland
 #include "int_types.h"
 #include "byteorder.h"
 
@@ -24,8 +24,8 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "ceph_fs.h"
-#include "ceph_frag.h"
+#include "stone_fs.h"
+#include "stone_frag.h"
 #include "rbd_types.h"
 
 #ifdef __cplusplus
@@ -173,7 +173,7 @@ inline std::ostream& operator<<(std::ostream& out, const std::tuple<Ts...> &t) {
     if (++i != n)
       out << ",";
   };
-  ceph::for_each(t, f);
+  stone::for_each(t, f);
   return out;
 }
 
@@ -289,8 +289,8 @@ inline std::ostream& operator<<(std::ostream& out, const boost::container::flat_
 /*
  * comparators for stl containers
  */
-// for ceph::unordered_map:
-//   ceph::unordered_map<const char*, long, hash<const char*>, eqstr> vals;
+// for stone::unordered_map:
+//   stone::unordered_map<const char*, long, hash<const char*>, eqstr> vals;
 struct eqstr
 {
   bool operator()(const char* s1, const char* s2) const
@@ -309,49 +309,49 @@ struct ltstr
 };
 
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
 #include "encoding.h"
 
-WRITE_RAW_ENCODER(ceph_fsid)
-WRITE_RAW_ENCODER(ceph_file_layout)
-WRITE_RAW_ENCODER(ceph_dir_layout)
-WRITE_RAW_ENCODER(ceph_mds_session_head)
-WRITE_RAW_ENCODER(ceph_mds_request_head_legacy)
-WRITE_RAW_ENCODER(ceph_mds_request_head)
-WRITE_RAW_ENCODER(ceph_mds_request_release)
-WRITE_RAW_ENCODER(ceph_filelock)
-WRITE_RAW_ENCODER(ceph_mds_caps_head)
-WRITE_RAW_ENCODER(ceph_mds_caps_export_body)
-WRITE_RAW_ENCODER(ceph_mds_caps_non_export_body)
-WRITE_RAW_ENCODER(ceph_mds_cap_peer)
-WRITE_RAW_ENCODER(ceph_mds_cap_release)
-WRITE_RAW_ENCODER(ceph_mds_cap_item)
-WRITE_RAW_ENCODER(ceph_mds_lease)
-WRITE_RAW_ENCODER(ceph_mds_snap_head)
-WRITE_RAW_ENCODER(ceph_mds_snap_realm)
-WRITE_RAW_ENCODER(ceph_mds_reply_head)
-WRITE_RAW_ENCODER(ceph_mds_reply_cap)
-WRITE_RAW_ENCODER(ceph_mds_cap_reconnect)
-WRITE_RAW_ENCODER(ceph_mds_snaprealm_reconnect)
-WRITE_RAW_ENCODER(ceph_frag_tree_split)
-WRITE_RAW_ENCODER(ceph_osd_reply_head)
-WRITE_RAW_ENCODER(ceph_osd_op)
-WRITE_RAW_ENCODER(ceph_msg_header)
-WRITE_RAW_ENCODER(ceph_msg_footer)
-WRITE_RAW_ENCODER(ceph_msg_footer_old)
-WRITE_RAW_ENCODER(ceph_mon_subscribe_item)
+WRITE_RAW_ENCODER(stone_fsid)
+WRITE_RAW_ENCODER(stone_file_layout)
+WRITE_RAW_ENCODER(stone_dir_layout)
+WRITE_RAW_ENCODER(stone_mds_session_head)
+WRITE_RAW_ENCODER(stone_mds_request_head_legacy)
+WRITE_RAW_ENCODER(stone_mds_request_head)
+WRITE_RAW_ENCODER(stone_mds_request_release)
+WRITE_RAW_ENCODER(stone_filelock)
+WRITE_RAW_ENCODER(stone_mds_caps_head)
+WRITE_RAW_ENCODER(stone_mds_caps_export_body)
+WRITE_RAW_ENCODER(stone_mds_caps_non_export_body)
+WRITE_RAW_ENCODER(stone_mds_cap_peer)
+WRITE_RAW_ENCODER(stone_mds_cap_release)
+WRITE_RAW_ENCODER(stone_mds_cap_item)
+WRITE_RAW_ENCODER(stone_mds_lease)
+WRITE_RAW_ENCODER(stone_mds_snap_head)
+WRITE_RAW_ENCODER(stone_mds_snap_realm)
+WRITE_RAW_ENCODER(stone_mds_reply_head)
+WRITE_RAW_ENCODER(stone_mds_reply_cap)
+WRITE_RAW_ENCODER(stone_mds_cap_reconnect)
+WRITE_RAW_ENCODER(stone_mds_snaprealm_reconnect)
+WRITE_RAW_ENCODER(stone_frag_tree_split)
+WRITE_RAW_ENCODER(stone_osd_reply_head)
+WRITE_RAW_ENCODER(stone_osd_op)
+WRITE_RAW_ENCODER(stone_msg_header)
+WRITE_RAW_ENCODER(stone_msg_footer)
+WRITE_RAW_ENCODER(stone_msg_footer_old)
+WRITE_RAW_ENCODER(stone_mon_subscribe_item)
 
-WRITE_RAW_ENCODER(ceph_mon_statfs)
-WRITE_RAW_ENCODER(ceph_mon_statfs_reply)
+WRITE_RAW_ENCODER(stone_mon_statfs)
+WRITE_RAW_ENCODER(stone_mon_statfs_reply)
 
 // ----------------------
 // some basic types
 
-// NOTE: these must match ceph_fs.h typedefs
-typedef uint64_t ceph_tid_t; // transaction id
+// NOTE: these must match stone_fs.h typedefs
+typedef uint64_t stone_tid_t; // transaction id
 typedef uint64_t version_t;
 typedef __u32 epoch_t;       // map epoch  (32bits -> 13 epochs/second for 10 years)
 
@@ -364,12 +364,12 @@ struct client_t {
   // cppcheck-suppress noExplicitConstructor
   client_t(int64_t _v = -2) : v(_v) {}
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(v, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     decode(v, bl);
   }
 };
@@ -476,7 +476,7 @@ inline std::ostream& operator<<(std::ostream& out, const byte_u_t& b)
   return format_u(out, b.v, n, index, 1ULL << (10 * index), u[index]);
 }
 
-inline std::ostream& operator<<(std::ostream& out, const ceph_mon_subscribe_item& i)
+inline std::ostream& operator<<(std::ostream& out, const stone_mon_subscribe_item& i)
 {
   return out << i.start
 	     << ((i.flags & STONE_SUBSCRIBE_ONETIME) ? "" : "+");
@@ -510,12 +510,12 @@ struct shard_id_t {
 
   const static shard_id_t NO_SHARD;
 
-  void encode(ceph::buffer::list &bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list &bl) const {
+    using stone::encode;
     encode(id, bl);
   }
-  void decode(ceph::buffer::list::const_iterator &bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &bl) {
+    using stone::decode;
     decode(id, bl);
   }
 };
@@ -527,12 +527,12 @@ std::ostream &operator<<(std::ostream &lhs, const shard_id_t &rhs);
 #if defined(__sun) || defined(_AIX) || defined(__APPLE__) || \
     defined(__FreeBSD__) || defined(_WIN32)
 extern "C" {
-__s32  ceph_to_hostos_errno(__s32 e);
-__s32  hostos_to_ceph_errno(__s32 e);
+__s32  stone_to_hostos_errno(__s32 e);
+__s32  hostos_to_stone_errno(__s32 e);
 }
 #else
-#define  ceph_to_hostos_errno(e) (e)
-#define  hostos_to_ceph_errno(e) (e)
+#define  stone_to_hostos_errno(e) (e)
+#define  hostos_to_stone_errno(e) (e)
 #endif
 
 struct errorcode32_t {
@@ -550,15 +550,15 @@ struct errorcode32_t {
   int operator<(int i)  { return code < i; }
   int operator<=(int i) { return code <= i; }
 
-  void encode(ceph::buffer::list &bl) const {
-    using ceph::encode;
-    __s32 newcode = hostos_to_ceph_errno(code);
+  void encode(stone::buffer::list &bl) const {
+    using stone::encode;
+    __s32 newcode = hostos_to_stone_errno(code);
     encode(newcode, bl);
   }
-  void decode(ceph::buffer::list::const_iterator &bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &bl) {
+    using stone::decode;
     decode(code, bl);
-    code = ceph_to_hostos_errno(code);
+    code = stone_to_hostos_errno(code);
   }
 };
 WRITE_CLASS_ENCODER(errorcode32_t)
@@ -590,15 +590,15 @@ struct sha_digest_t {
     return ::memcmp(v, r.v, SIZE) != 0;
   }
 
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
     // copy to avoid reinterpret_cast, is_pod and other nasty things
-    using ceph::encode;
+    using stone::encode;
     std::array<unsigned char, SIZE> tmparr;
     memcpy(tmparr.data(), v, SIZE);
     encode(tmparr, bl);
   }
-  void decode(ceph::buffer::list::const_iterator &bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &bl) {
+    using stone::decode;
     std::array<unsigned char, SIZE> tmparr;
     decode(tmparr, bl);
     memcpy(v, tmparr.data(), SIZE);

@@ -2,8 +2,8 @@
  CPU Profiling
 ===============
 
-If you built Ceph from source and compiled Ceph for use with `oprofile`_
-you can profile Ceph's CPU usage. See `Installing Oprofile`_ for details.
+If you built Stone from source and compiled Stone for use with `oprofile`_
+you can profile Stone's CPU usage. See `Installing Oprofile`_ for details.
 
 
 Initializing oprofile
@@ -24,7 +24,7 @@ To start ``oprofile`` execute the following command::
 
 	opcontrol --start
 
-Once you start ``oprofile``, you may run some tests with Ceph. 
+Once you start ``oprofile``, you may run some tests with Stone. 
 
 
 Stopping oprofile

@@ -6,11 +6,11 @@ import json
 import logging
 import os
 from textwrap import dedent
-from ceph_volume import process, decorators, terminal, conf
-from ceph_volume.util import system, disk
-from ceph_volume.util import encryption as encryption_utils
-from ceph_volume.util import prepare as prepare_utils
-from ceph_volume.systemd import systemctl
+from stone_volume import process, decorators, terminal, conf
+from stone_volume.util import system, disk
+from stone_volume.util import encryption as encryption_utils
+from stone_volume.util import prepare as prepare_utils
+from stone_volume.systemd import systemctl
 
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ mlogger = terminal.MultiLogger(__name__)
 
 class Activate(object):
 
-    help = 'Enable systemd units to mount configured devices and start a Ceph OSD'
+    help = 'Enable systemd units to mount configured devices and start a Stone OSD'
 
     def __init__(self, argv, from_trigger=False):
         self.argv = argv
@@ -60,7 +60,7 @@ class Activate(object):
                 raise RuntimeError('Unable to activate filestore OSD due to missing devices')
         else:
             # This is a bit tricky, with newer bluestore we don't need data, older implementations
-            # do (e.g. with ceph-disk). ceph-volume just uses a tmpfs that doesn't require data.
+            # do (e.g. with stone-disk). stone-volume just uses a tmpfs that doesn't require data.
             if {'block', 'data'}.issubset(set(devices)):
                 return True
             else:
@@ -96,29 +96,29 @@ class Activate(object):
 
     def enable_systemd_units(self, osd_id, osd_fsid):
         """
-        * disables the ceph-disk systemd units to prevent them from running when
-          a UDEV event matches Ceph rules
+        * disables the stone-disk systemd units to prevent them from running when
+          a UDEV event matches Stone rules
         * creates the ``simple`` systemd units to handle the activation and
           startup of the OSD with ``osd_id`` and ``osd_fsid``
         * enables the OSD systemd unit and finally starts the OSD.
         """
         if not self.from_trigger and not self.skip_systemd:
             # means it was scanned and now activated directly, so ensure that
-            # ceph-disk units are disabled, and that the `simple` systemd unit
+            # stone-disk units are disabled, and that the `simple` systemd unit
             # is created and enabled
 
-            # enable the ceph-volume unit for this OSD
+            # enable the stone-volume unit for this OSD
             systemctl.enable_volume(osd_id, osd_fsid, 'simple')
 
-            # disable any/all ceph-disk units
-            systemctl.mask_ceph_disk()
+            # disable any/all stone-disk units
+            systemctl.mask_stone_disk()
             terminal.warning(
-                ('All ceph-disk systemd units have been disabled to '
+                ('All stone-disk systemd units have been disabled to '
                  'prevent OSDs getting triggered by UDEV events')
             )
         else:
             terminal.info('Skipping enabling of `simple` systemd unit')
-            terminal.info('Skipping masking of ceph-disk systemd units')
+            terminal.info('Skipping masking of stone-disk systemd units')
 
         if not self.skip_systemd:
             # enable the OSD
@@ -142,7 +142,7 @@ class Activate(object):
         osd_id = osd_metadata.get('whoami', args.osd_id)
         osd_fsid = osd_metadata.get('fsid', args.osd_fsid)
         data_uuid = osd_metadata.get('data', {}).get('uuid')
-        conf.cluster = osd_metadata.get('cluster_name', 'ceph')
+        conf.cluster = osd_metadata.get('cluster_name', 'stone')
         if not data_uuid:
             raise RuntimeError(
                 'Unable to activate OSD %s - no "uuid" key found for data' % args.osd_id
@@ -158,15 +158,15 @@ class Activate(object):
             # Store the secret around so that the decrypt method can reuse
             raw_dmcrypt_secret = encryption_utils.get_dmcrypt_key(osd_id, osd_fsid)
             # Note how both these calls need b64decode. For some reason, the
-            # way ceph-disk creates these keys, it stores them in the monitor
+            # way stone-disk creates these keys, it stores them in the monitor
             # *undecoded*, requiring this decode call again. The lvm side of
             # encryption doesn't need it, so we are assuming here that anything
-            # that `simple` scans, will come from ceph-disk and will need this
+            # that `simple` scans, will come from stone-disk and will need this
             # extra decode call here
             self.dmcrypt_secret = base64.b64decode(raw_dmcrypt_secret)
 
-        cluster_name = osd_metadata.get('cluster_name', 'ceph')
-        osd_dir = '/var/lib/ceph/osd/%s-%s' % (cluster_name, osd_id)
+        cluster_name = osd_metadata.get('cluster_name', 'stone')
+        osd_dir = '/var/lib/stone/osd/%s-%s' % (cluster_name, osd_id)
 
         # XXX there is no support for LVM here
         data_device = self.get_device(data_uuid)
@@ -214,26 +214,26 @@ class Activate(object):
         Activate OSDs by mounting devices previously configured to their
         appropriate destination::
 
-            ceph-volume simple activate {ID} {FSID}
+            stone-volume simple activate {ID} {FSID}
 
         Or using a JSON file directly::
 
-            ceph-volume simple activate --file /etc/ceph/osd/{ID}-{FSID}.json
+            stone-volume simple activate --file /etc/stone/osd/{ID}-{FSID}.json
 
-        The OSD must have been "scanned" previously (see ``ceph-volume simple
+        The OSD must have been "scanned" previously (see ``stone-volume simple
         scan``), so that all needed OSD device information and metadata exist.
 
         A previously scanned OSD would exist like::
 
-            /etc/ceph/osd/{ID}-{FSID}.json
+            /etc/stone/osd/{ID}-{FSID}.json
 
 
         Environment variables supported:
 
-        CEPH_VOLUME_SIMPLE_JSON_DIR: Directory location for scanned OSD JSON configs
+        STONE_VOLUME_SIMPLE_JSON_DIR: Directory location for scanned OSD JSON configs
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume simple activate',
+            prog='stone-volume simple activate',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=sub_command_help,
         )
@@ -272,14 +272,14 @@ class Activate(object):
         if not args.file and not args.all:
             if not args.osd_id and not args.osd_fsid:
                 terminal.error('ID and FSID are required to find the right OSD to activate')
-                terminal.error('from a scanned OSD location in /etc/ceph/osd/')
+                terminal.error('from a scanned OSD location in /etc/stone/osd/')
                 raise RuntimeError('Unable to activate without both ID and FSID')
         # don't allow a CLI flag to specify the JSON dir, because that might
         # implicitly indicate that it would be possible to activate a json file
         # at a non-default location which would not work at boot time if the
         # custom location is not exposed through an ENV var
         self.skip_systemd = args.skip_systemd
-        json_dir = os.environ.get('CEPH_VOLUME_SIMPLE_JSON_DIR', '/etc/ceph/osd/')
+        json_dir = os.environ.get('STONE_VOLUME_SIMPLE_JSON_DIR', '/etc/stone/osd/')
         if args.all:
             if args.file or args.osd_id:
                 mlogger.warn('--all was passed, ignoring --file and ID/FSID arguments')

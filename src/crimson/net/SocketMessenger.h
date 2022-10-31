@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc
  *
@@ -39,7 +39,7 @@ class SocketMessenger final : public Messenger {
   std::map<entity_addr_t, SocketConnectionRef> connections;
   std::set<SocketConnectionRef> accepting_conns;
   std::vector<SocketConnectionRef> closing_conns;
-  ceph::net::PolicySet<Throttle> policy_set;
+  stone::net::PolicySet<Throttle> policy_set;
   // Distinguish messengers with meaningful names for debugging
   const std::string logic_name;
   const uint32_t nonce;
@@ -54,7 +54,7 @@ class SocketMessenger final : public Messenger {
   SocketMessenger(const entity_name_t& myname,
                   const std::string& logic_name,
                   uint32_t nonce);
-  ~SocketMessenger() override { ceph_assert(!listener); }
+  ~SocketMessenger() override { stone_assert(!listener); }
 
   seastar::future<> set_myaddrs(const entity_addrvec_t& addr) override;
 

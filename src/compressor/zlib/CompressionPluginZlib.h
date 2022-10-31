@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -19,17 +19,17 @@
 #include "arch/probe.h"
 #include "arch/intel.h"
 #include "arch/arm.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "compressor/CompressionPlugin.h"
 #include "ZlibCompressor.h"
 
 // -----------------------------------------------------------------------------
 
-class CompressionPluginZlib : public ceph::CompressionPlugin {
+class CompressionPluginZlib : public stone::CompressionPlugin {
 public:
   bool has_isal = false;
 
-  explicit CompressionPluginZlib(StoneeContext *cct) : CompressionPlugin(cct)
+  explicit CompressionPluginZlib(StoneContext *cct) : CompressionPlugin(cct)
   {}
 
   int factory(CompressorRef *cs,
@@ -39,8 +39,8 @@ public:
 #if defined(__i386__) || defined(__x86_64__)
     // other arches or lack of support result in isal = false
     if (cct->_conf->compressor_zlib_isal) {
-      ceph_arch_probe();
-      isal = (ceph_arch_intel_pclmul && ceph_arch_intel_sse41);
+      stone_arch_probe();
+      isal = (stone_arch_intel_pclmul && stone_arch_intel_sse41);
     }
 #endif
     if (compressor == 0 || has_isal != isal) {

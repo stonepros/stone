@@ -19,7 +19,7 @@ from teuthology.packaging import install_package, remove_package
 log = logging.getLogger(__name__)
 
 DEFAULT_NUM_DISKS = 2
-DEFAULT_IMAGE_URL = 'http://download.ceph.com/qa/ubuntu-12.04.qcow2'
+DEFAULT_IMAGE_URL = 'http://download.stone.com/qa/ubuntu-12.04.qcow2'
 DEFAULT_IMAGE_SIZE = 10240 # in megabytes
 ENCRYPTION_HEADER_SIZE = 16 # in megabytes
 DEFAULT_CPUS = 1
@@ -188,7 +188,7 @@ def generate_iso(ctx, config):
     # through teuthology.replace_all_with_clients()
     refspec = get_refspec_after_overrides(ctx.config, {})
 
-    git_url = teuth_config.get_ceph_qa_suite_git_url()
+    git_url = teuth_config.get_stone_qa_suite_git_url()
     log.info('Pulling tests from %s ref %s', git_url, refspec)
 
     for client, client_config in config.items():
@@ -235,8 +235,8 @@ def generate_iso(ctx, config):
         user_data += """
 - |
   #!/bin/bash
-  test -d /etc/ceph || mkdir /etc/ceph
-  cp /mnt/cdrom/ceph.* /etc/ceph/
+  test -d /etc/stone || mkdir /etc/stone
+  cp /mnt/cdrom/stone.* /etc/stonepros/
 """
 
         cloud_config_archive = client_config.get('cloud_config_archive', [])
@@ -254,8 +254,8 @@ def generate_iso(ctx, config):
 """ + test_teardown
 
         user_data = user_data.format(
-            ceph_branch=ctx.config.get('branch'),
-            ceph_sha1=ctx.config.get('sha1'))
+            stone_branch=ctx.config.get('branch'),
+            stone_sha1=ctx.config.get('sha1'))
         remote.write_file(userdata_path, user_data)
 
         with open(os.path.join(src_dir, 'metadata.yaml'), 'rb') as f:
@@ -279,8 +279,8 @@ def generate_iso(ctx, config):
                 '-graft-points',
                 'user-data={userdata}'.format(userdata=userdata_path),
                 'meta-data={metadata}'.format(metadata=metadata_path),
-                'ceph.conf=/etc/ceph/ceph.conf',
-                'ceph.keyring=/etc/ceph/ceph.keyring',
+                'stone.conf=/etc/stonepros/stone.conf',
+                'stone.keyring=/etc/stonepros/stone.keyring',
                 'test.sh={file}'.format(file=test_file),
                 ],
             )
@@ -478,7 +478,7 @@ def run_qemu(ctx, config):
         _setup_nfs_mount(remote, client, nfs_service_name, log_dir)
 
         # Hack to make sure /dev/kvm permissions are set correctly
-        # See http://tracker.ceph.com/issues/17977 and
+        # See http://tracker.stone.com/issues/17977 and
         # https://bugzilla.redhat.com/show_bug.cgi?id=1333159
         remote.run(args='sudo udevadm control --reload')
         remote.run(args='sudo udevadm trigger /dev/kvm')
@@ -489,7 +489,7 @@ def run_qemu(ctx, config):
             qemu_cmd = "/usr/libexec/qemu-kvm"
         args=[
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             '{tdir}/archive/coverage'.format(tdir=testdir),
             'daemon-helper',
             'term',
@@ -501,11 +501,11 @@ def run_qemu(ctx, config):
             ]
 
         cachemode = 'none'
-        ceph_config = ctx.ceph['ceph'].conf.get('global', {})
-        ceph_config.update(ctx.ceph['ceph'].conf.get('client', {}))
-        ceph_config.update(ctx.ceph['ceph'].conf.get(client, {}))
-        if ceph_config.get('rbd cache', True):
-            if ceph_config.get('rbd cache max dirty', 1) > 0:
+        stone_config = ctx.stone['stone'].conf.get('global', {})
+        stone_config.update(ctx.stone['stone'].conf.get('client', {}))
+        stone_config.update(ctx.stone['stone'].conf.get(client, {}))
+        if stone_config.get('rbd cache', True):
+            if stone_config.get('rbd cache max dirty', 1) > 0:
                 cachemode = 'writeback'
             else:
                 cachemode = 'writethrough'
@@ -595,28 +595,28 @@ def task(ctx, config):
     For example, you can specify which clients to run on::
 
         tasks:
-        - ceph:
+        - stone:
         - qemu:
             client.0:
-              test: http://download.ceph.com/qa/test.sh
+              test: http://download.stone.com/qa/test.sh
             client.1:
-              test: http://download.ceph.com/qa/test2.sh
+              test: http://download.stone.com/qa/test2.sh
 
     Or use the same settings on all clients:
 
         tasks:
-        - ceph:
+        - stone:
         - qemu:
             all:
-              test: http://download.ceph.com/qa/test.sh
+              test: http://download.stone.com/qa/test.sh
 
     For tests that want to explicitly describe the RBD images to connect:
 
         tasks:
-        - ceph:
+        - stone:
         - qemu:
             client.0:
-                test: http://download.ceph.com/qa/test.sh
+                test: http://download.stone.com/qa/test.sh
                 clone: True/False (optionally clone all created disks),
                 image_url: <URL> (optional default image URL)
                 type: filesystem / block (optional default device type)
@@ -636,10 +636,10 @@ def task(ctx, config):
     4096 MB)::
 
         tasks:
-        - ceph:
+        - stone:
         - qemu:
             client.0:
-              test: http://download.ceph.com/qa/test.sh
+              test: http://download.stone.com/qa/test.sh
               cpus: 4
               memory: 512 # megabytes
 
@@ -647,10 +647,10 @@ def task(ctx, config):
     to the required data set::
 
         tasks:
-        - ceph
+        - stone
         - qemu:
             client.0:
-                test: http://ceph.com/qa/test.sh
+                test: http://stone.com/qa/test.sh
                 cloud_config_archive:
                     - |
                       #/bin/bash

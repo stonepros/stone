@@ -12,8 +12,8 @@ top_level = \
             os.path.abspath(__file__)))
 
 
-def parse_ceph_release():
-    with open(os.path.join(top_level, 'src/ceph_release')) as f:
+def parse_stone_release():
+    with open(os.path.join(top_level, 'src/stone_release')) as f:
         lines = f.readlines()
         assert(len(lines) == 3)
         # 16, pacific, dev
@@ -35,17 +35,17 @@ def is_release_eol(codename):
 
 
 # project information
-project = 'Ceph'
-copyright = ('2016, Ceph authors and contributors. '
+project = 'Stone'
+copyright = ('2016, Stone authors and contributors. '
              'Licensed under Creative Commons Attribution Share Alike 3.0 '
              '(CC-BY-SA-3.0)')
-version, codename, release = parse_ceph_release()
+version, codename, release = parse_stone_release()
 pygments_style = 'sphinx'
 
 # HTML output options
-html_theme = 'ceph'
+html_theme = 'stone'
 html_theme_path = ['_themes']
-html_title = "Ceph Documentation"
+html_title = "Stone Documentation"
 html_logo = 'logo.png'
 html_context = {'is_release_eol': is_release_eol(codename)}
 html_favicon = 'favicon.ico'
@@ -71,8 +71,8 @@ if tags.has('man'):             # noqa: F821
                          'glossary.rst',
                          'release*.rst',
                          'api/*',
-                         'cephadm/*',
-                         'cephfs/*',
+                         'stoneadm/*',
+                         'stonefs/*',
                          'dev/*',
                          'governance.rst',
                          'foundation.rst',
@@ -80,7 +80,7 @@ if tags.has('man'):             # noqa: F821
                          'mon/*',
                          'rados/*',
                          'mgr/*',
-                         'ceph-volume/*',
+                         'stone-volume/*',
                          'radosgw/*',
                          'rbd/*',
                          'start/*',
@@ -102,8 +102,8 @@ extensions = [
     'sphinx_autodoc_typehints',
     'sphinx_substitution_extensions',
     'breathe',
-    'ceph_commands',
-    'ceph_releases',
+    'stone_commands',
+    'stone_releases',
     'sphinxcontrib.openapi'
     ]
 
@@ -128,13 +128,13 @@ rst_prolog = f"""
 """
 
 # breath options
-breathe_default_project = "Ceph"
+breathe_default_project = "Stone"
 # see $(top_srcdir)/Doxyfile
 
 breathe_build_directory = os.path.join(top_level, "build-doc")
-breathe_projects = {"Ceph": os.path.join(top_level, breathe_build_directory)}
+breathe_projects = {"Stone": os.path.join(top_level, breathe_build_directory)}
 breathe_projects_source = {
-    "Ceph": (os.path.join(top_level, "src/include/rados"),
+    "Stone": (os.path.join(top_level, "src/include/rados"),
              ["rados_types.h", "librados.h"])
 }
 breathe_domain_by_extension = {'py': 'py',
@@ -143,15 +143,15 @@ breathe_domain_by_extension = {'py': 'py',
 breathe_doxygen_config_options = {
     'EXPAND_ONLY_PREDEF': 'YES',
     'MACRO_EXPANSION': 'YES',
-    'PREDEFINED': 'CEPH_RADOS_API= ',
+    'PREDEFINED': 'STONE_RADOS_API= ',
     'WARN_IF_UNDOCUMENTED': 'NO',
 }
 
 # edit_on_github options
 # the docs are rendered with github links pointing to master. the javascript
-# snippet in _static/ceph.js rewrites the edit links when a page is loaded, to
+# snippet in _static/stone.js rewrites the edit links when a page is loaded, to
 # point to the correct branch.
-edit_on_github_project = 'ceph/ceph'
+edit_on_github_project = 'stone/stone'
 edit_on_github_branch = 'master'
 
 # graphviz options
@@ -174,7 +174,7 @@ def generate_state_diagram(input_paths, output_path):
     return process
 
 
-# mocking ceph_module offered by ceph-mgr. `ceph_module` is required by
+# mocking stone_module offered by stone-mgr. `stone_module` is required by
 # mgr.mgr_module
 class Dummy(object):
     def __getattr__(self, _):
@@ -198,10 +198,10 @@ class Mock(object):
 
 
 # autodoc options
-sys.modules['ceph_module'] = Mock()
+sys.modules['stone_module'] = Mock()
 
 if build_with_rtd:
-    autodoc_mock_imports = ['ceph']
+    autodoc_mock_imports = ['stone']
     pybinds = ['pybind/mgr',
                'python-common']
 else:
@@ -217,7 +217,7 @@ for c in pybinds:
 
 # handles edit-on-github and old version warning display
 def setup(app):
-    app.add_js_file('js/ceph.js')
+    app.add_js_file('js/stone.js')
     if ditaa is None:
         # add "ditaa" as an alias of "diagram"
         from plantweb.directive import DiagramDirective

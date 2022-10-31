@@ -41,7 +41,7 @@ public:
   virtual ~TestCluster() {
   }
 
-  virtual TestRadosClient *create_rados_client(StoneeContext *cct) = 0;
+  virtual TestRadosClient *create_rados_client(StoneContext *cct) = 0;
 
   virtual int register_object_handler(int64_t pool_id,
                                       const ObjectLocator& locator,

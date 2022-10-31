@@ -1,4 +1,4 @@
-# {{ cephadm_managed }}
+# {{ stoneadm_managed }}
 NFS_CORE_PARAM {
         Enable_NLM = false;
         Enable_RQUOTA = false;
@@ -28,7 +28,7 @@ RADOS_URLS {
 }
 
 RGW {
-        cluster = "ceph";
+        cluster = "stone";
         name = "client.{{ rgw_user }}";
 }
 

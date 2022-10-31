@@ -1,5 +1,5 @@
 ======================
-  Ceph Release Process
+  Stone Release Process
 ======================
 
 1. Build environment
@@ -26,7 +26,7 @@ Prior to building, it's necessary to update the pbuilder seed tarballs::
 The release key should be present::
 
   pub   4096R/17ED316D 2012-05-20
-  uid   Ceph Release Key <sage@newdream.net>
+  uid   Stone Release Key <sage@newdream.net>
 
 
 3. Set up build area

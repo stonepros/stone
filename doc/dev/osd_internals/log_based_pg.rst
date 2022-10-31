@@ -19,7 +19,7 @@ Primary log-based replication
 
 Reads must return data written by any write which completed (where the
 client could possibly have received a commit message).  There are lots
-of ways to handle this, but Ceph's architecture makes it easy for
+of ways to handle this, but Stone's architecture makes it easy for
 everyone at any map epoch to know who the primary is.  Thus, the easy
 answer is to route all writes for a particular PG through a single
 ordering primary and then out to the replicas.  Though we only

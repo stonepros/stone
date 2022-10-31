@@ -12,7 +12,7 @@
 
 #include "include/types.h"
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "common/iso_8601.h"
 #include "common/Thread.h"
@@ -367,7 +367,7 @@ WRITE_CLASS_ENCODER(LCRule)
 struct transition_action
 {
   int days;
-  boost::optional<ceph::real_time> date;
+  boost::optional<stone::real_time> date;
   string storage_class;
   transition_action() : days(0) {}
   void dump(Formatter *f) const {
@@ -389,7 +389,7 @@ struct lc_op
   int expiration{0};
   int noncur_expiration{0};
   int mp_expiration{0};
-  boost::optional<ceph::real_time> expiration_date;
+  boost::optional<stone::real_time> expiration_date;
   boost::optional<RGWObjTags> obj_tags;
   map<string, transition_action> transitions;
   map<string, transition_action> noncur_transitions;
@@ -406,16 +406,16 @@ struct lc_op
 class RGWLifecycleConfiguration
 {
 protected:
-  CephContext *cct;
+  StoneContext *cct;
   multimap<string, lc_op> prefix_map;
   multimap<string, LCRule> rule_map;
   bool _add_rule(const LCRule& rule);
   bool has_same_action(const lc_op& first, const lc_op& second);
 public:
-  explicit RGWLifecycleConfiguration(CephContext *_cct) : cct(_cct) {}
+  explicit RGWLifecycleConfiguration(StoneContext *_cct) : cct(_cct) {}
   RGWLifecycleConfiguration() : cct(NULL) {}
 
-  void set_ctx(CephContext *ctx) {
+  void set_ctx(StoneContext *ctx) {
     cct = ctx;
   }
 
@@ -460,7 +460,7 @@ public:
 WRITE_CLASS_ENCODER(RGWLifecycleConfiguration)
 
 class RGWLC : public DoutPrefixProvider {
-  CephContext *cct;
+  StoneContext *cct;
   rgw::sal::RGWRadosStore *store;
   std::unique_ptr<rgw::sal::Lifecycle> sal_lc;
   int max_objs{0};
@@ -475,7 +475,7 @@ public:
   class LCWorker : public Thread
   {
     const DoutPrefixProvider *dpp;
-    CephContext *cct;
+    StoneContext *cct;
     RGWLC *lc;
     int ix;
     std::mutex lock;
@@ -487,7 +487,7 @@ public:
     using lock_guard = std::lock_guard<std::mutex>;
     using unique_lock = std::unique_lock<std::mutex>;
 
-    LCWorker(const DoutPrefixProvider* dpp, CephContext *_cct, RGWLC *_lc,
+    LCWorker(const DoutPrefixProvider* dpp, StoneContext *_cct, RGWLC *_lc,
 	     int ix);
     RGWLC* get_lc() { return lc; }
     void *entry() override;
@@ -508,7 +508,7 @@ public:
   RGWLC() : cct(nullptr), store(nullptr) {}
   ~RGWLC();
 
-  void initialize(CephContext *_cct, rgw::sal::RGWRadosStore *_store);
+  void initialize(StoneContext *_cct, rgw::sal::RGWRadosStore *_store);
   void finalize();
 
   int process(LCWorker* worker, bool once);
@@ -532,7 +532,7 @@ public:
   int remove_bucket_config(RGWBucketInfo& bucket_info,
                            const map<string, bufferlist>& bucket_attrs);
 
-  CephContext *get_cct() const override { return cct; }
+  StoneContext *get_cct() const override { return cct; }
   rgw::sal::Lifecycle *get_lc() const { return sal_lc.get(); }
   unsigned get_subsys() const;
   std::ostream& gen_prefix(std::ostream& out) const;
@@ -556,15 +556,15 @@ std::string s3_expiration_header(
   DoutPrefixProvider* dpp,
   const rgw_obj_key& obj_key,
   const RGWObjTags& obj_tagset,
-  const ceph::real_time& mtime,
+  const stone::real_time& mtime,
   const std::map<std::string, buffer::list>& bucket_attrs);
 
 bool s3_multipart_abort_header(
   DoutPrefixProvider* dpp,
   const rgw_obj_key& obj_key,
-  const ceph::real_time& mtime,
+  const stone::real_time& mtime,
   const std::map<std::string, buffer::list>& bucket_attrs,
-  ceph::real_time& abort_date,
+  stone::real_time& abort_date,
   std::string& rule_id);
 
 } // namespace rgw::lc

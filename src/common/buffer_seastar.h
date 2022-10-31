@@ -41,7 +41,7 @@ public:
   using parent::pointer;
   using parent::get_pos_add;
   using parent::get;
-  ceph::buffer::ptr get_ptr(size_t len);
+  stone::buffer::ptr get_ptr(size_t len);
 
 private:
   // keep the reference to buf around, so it can be "shared" by get_ptr()
@@ -58,5 +58,5 @@ public:
   using parent::pointer;
   using parent::get_pos_add;
   using parent::get;
-  ceph::buffer::ptr get_ptr(size_t len);
+  stone::buffer::ptr get_ptr(size_t len);
 };

@@ -2,7 +2,7 @@
  Debug logs
 ============
 
-The main debugging tool for Ceph is the dout and derr logging functions.
+The main debugging tool for Stone is the dout and derr logging functions.
 Collectively, these are referred to as "dout logging."
 
 Dout has several log faculties, which can be set at various log
@@ -31,7 +31,7 @@ the timing of events. Keep this in mind when debugging.
 Performance counters
 ====================
 
-Ceph daemons use performance counters to track key statistics like number of
+Stone daemons use performance counters to track key statistics like number of
 inodes pinned. Performance counters are essentially sets of integers and floats
 which can be set, incremented, and read using the PerfCounters API.
 
@@ -50,6 +50,6 @@ long-run average value.
 
 Performance counter information can be read in JSON format from the
 administrative socket (admin_sock). This is implemented as a UNIX domain
-socket. The Ceph performance counter plugin for collectd shows an example of how
+socket. The Stone performance counter plugin for collectd shows an example of how
 to access this information. Another example can be found in the unit tests for
 the administrative sockets.

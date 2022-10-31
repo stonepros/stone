@@ -8,7 +8,7 @@
 
 #include "OpRequest.h"
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 
@@ -182,9 +182,9 @@ struct ScrubPgIF {
 
   virtual void scrub_clear_state() = 0;
 
-  virtual void handle_query_state(ceph::Formatter* f) = 0;
+  virtual void handle_query_state(stone::Formatter* f) = 0;
 
-  virtual void dump(ceph::Formatter* f) const = 0;
+  virtual void dump(stone::Formatter* f) const = 0;
 
   /**
    * Return true if soid is currently being scrubbed and pending IOs should block.

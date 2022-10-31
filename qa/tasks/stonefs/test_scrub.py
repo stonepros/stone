@@ -1,19 +1,19 @@
 """
-Test CephFS scrub (distinct from OSD scrub) functionality
+Test StoneFS scrub (distinct from OSD scrub) functionality
 """
 
 from io import BytesIO
 import logging
 from collections import namedtuple
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 log = logging.getLogger(__name__)
 
 ValidationError = namedtuple("ValidationError", ["exception", "backtrace"])
 
 
-class Workload(CephFSTestCase):
+class Workload(StoneFSTestCase):
     def __init__(self, test, filesystem, mount):
         super().__init__()
         self._test =  test
@@ -111,7 +111,7 @@ class DupInodeWorkload(Workload):
         return self._errors
 
 
-class TestScrub(CephFSTestCase):
+class TestScrub(StoneFSTestCase):
     MDSS_REQUIRED = 1
 
     def setUp(self):
@@ -128,8 +128,8 @@ class TestScrub(CephFSTestCase):
         workload.write()
 
         # are off by default, but in QA we need to explicitly disable them)
-        self.fs.set_ceph_conf('mds', 'mds verify scatter', False)
-        self.fs.set_ceph_conf('mds', 'mds debug scatterstat', False)
+        self.fs.set_stone_conf('mds', 'mds verify scatter', False)
+        self.fs.set_stone_conf('mds', 'mds debug scatterstat', False)
 
         # Apply any data damage the workload wants
         workload.damage()

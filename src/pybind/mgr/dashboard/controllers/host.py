@@ -13,7 +13,7 @@ from orchestrator import HostSpec
 from .. import mgr
 from ..exceptions import DashboardException
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from ..services.exception import handle_orchestrator_error
 from ..services.orchestrator import OrchClient, OrchFeature
 from ..tools import TaskManager, merge_list_of_dicts_by_key, str_to_bool
@@ -29,12 +29,12 @@ LIST_HOST_SCHEMA = {
         "type": (str, "type of service"),
         "id": (str, "Service Id"),
     }], "Services related to the host"),
-    "ceph_version": (str, "Ceph version"),
+    "stone_version": (str, "Stone version"),
     "addr": (str, "Host address"),
     "labels": ([str], "Labels related to the host"),
     "service_type": (str, ""),
     "sources": ({
-        "ceph": (bool, ""),
+        "stone": (bool, ""),
         "orchestrator": (bool, "")
     }, "Host Sources"),
     "status": (str, "")
@@ -113,25 +113,25 @@ def host_task(name, metadata, wait_for=10.0):
     return Task("host/{}".format(name), metadata, wait_for)
 
 
-def merge_hosts_by_hostname(ceph_hosts, orch_hosts):
+def merge_hosts_by_hostname(stone_hosts, orch_hosts):
     # type: (List[dict], List[HostSpec]) -> List[dict]
     """
-    Merge Ceph hosts with orchestrator hosts by hostnames.
+    Merge Stone hosts with orchestrator hosts by hostnames.
 
-    :param ceph_hosts: hosts returned from mgr
-    :type ceph_hosts: list of dict
+    :param stone_hosts: hosts returned from mgr
+    :type stone_hosts: list of dict
     :param orch_hosts: hosts returned from ochestrator
     :type orch_hosts: list of HostSpec
     :return list of dict
     """
-    hosts = copy.deepcopy(ceph_hosts)
+    hosts = copy.deepcopy(stone_hosts)
     orch_hosts_map = {host.hostname: host.to_json() for host in orch_hosts}
 
     # Sort labels.
     for hostname in orch_hosts_map:
         orch_hosts_map[hostname]['labels'].sort()
 
-    # Hosts in both Ceph and Orchestrator.
+    # Hosts in both Stone and Orchestrator.
     for host in hosts:
         hostname = host['hostname']
         if hostname in orch_hosts_map:
@@ -143,10 +143,10 @@ def merge_hosts_by_hostname(ceph_hosts, orch_hosts):
     orch_hosts_only = [
         merge_dicts(
             {
-                'ceph_version': '',
+                'stone_version': '',
                 'services': [],
                 'sources': {
-                    'ceph': False,
+                    'stone': False,
                     'orchestrator': True
                 }
             }, orch_hosts_map[hostname]) for hostname in orch_hosts_map
@@ -159,22 +159,22 @@ def get_hosts(sources=None):
     """
     Get hosts from various sources.
     """
-    from_ceph = True
+    from_stone = True
     from_orchestrator = True
     if sources:
         _sources = sources.split(',')
-        from_ceph = 'ceph' in _sources
+        from_stone = 'stone' in _sources
         from_orchestrator = 'orchestrator' in _sources
 
-    ceph_hosts = []
-    if from_ceph:
-        ceph_hosts = [
+    stone_hosts = []
+    if from_stone:
+        stone_hosts = [
             merge_dicts(
                 server, {
                     'addr': '',
                     'labels': [],
                     'sources': {
-                        'ceph': True,
+                        'stone': True,
                         'orchestrator': False
                     },
                     'status': ''
@@ -183,13 +183,13 @@ def get_hosts(sources=None):
     if from_orchestrator:
         orch = OrchClient.instance()
         if orch.available():
-            return merge_hosts_by_hostname(ceph_hosts, orch.hosts.list())
-    return ceph_hosts
+            return merge_hosts_by_hostname(stone_hosts, orch.hosts.list())
+    return stone_hosts
 
 
 def get_host(hostname: str) -> Dict:
     """
-    Get a specific host from Ceph or Orchestrator (if available).
+    Get a specific host from Stone or Orchestrator (if available).
     :param hostname: The name of the host to fetch.
     :raises: cherrypy.HTTPError: If host not found.
     """
@@ -295,8 +295,8 @@ class Host(RESTController):
 
                 raise DashboardException(
                     code='invalid_orchestrator_backend',  # pragma: no cover
-                    msg="Please enable the cephadm orchestrator backend "
-                    "(try `ceph orch set backend cephadm`)",
+                    msg="Please enable the stoneadm orchestrator backend "
+                    "(try `stone orch set backend stoneadm`)",
                     component='orchestrator',
                     http_status_code=400)
 
@@ -356,12 +356,12 @@ class Host(RESTController):
     @RESTController.Resource('GET')
     def devices(self, hostname):
         # (str) -> List
-        return CephService.get_devices_by_host(hostname)
+        return StoneService.get_devices_by_host(hostname)
 
     @RESTController.Resource('GET')
     def smart(self, hostname):
         # type: (str) -> dict
-        return CephService.get_smart_data_by_host(hostname)
+        return StoneService.get_smart_data_by_host(hostname)
 
     @RESTController.Resource('GET')
     @raise_if_no_orchestrator([OrchFeature.DEVICE_LIST])
@@ -439,7 +439,7 @@ class Host(RESTController):
             force: bool = False, drain: bool = False):
         """
         Update the specified host.
-        Note, this is only supported when Ceph Orchestrator is enabled.
+        Note, this is only supported when Stone Orchestrator is enabled.
         :param hostname: The name of the host to be processed.
         :param update_labels: To update the labels.
         :param labels: List of labels.
@@ -487,8 +487,8 @@ class HostUi(BaseController):
     def labels(self) -> List[str]:
         """
         Get all host labels.
-        Note, host labels are only supported when Ceph Orchestrator is enabled.
-        If Ceph Orchestrator is not enabled, an empty list is returned.
+        Note, host labels are only supported when Stone Orchestrator is enabled.
+        If Stone Orchestrator is not enabled, an empty list is returned.
         :return: A list of all host labels.
         """
         labels = []

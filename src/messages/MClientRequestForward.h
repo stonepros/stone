@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -28,10 +28,10 @@ protected:
   MClientRequestForward()
     : SafeMessage{STONE_MSG_CLIENT_REQUEST_FORWARD},
       dest_mds(-1), num_fwd(-1), client_must_resend(false) {}
-  MClientRequestForward(ceph_tid_t t, int dm, int nf, bool cmr) :
+  MClientRequestForward(stone_tid_t t, int dm, int nf, bool cmr) :
     SafeMessage{STONE_MSG_CLIENT_REQUEST_FORWARD},
     dest_mds(dm), num_fwd(nf), client_must_resend(cmr) {
-    ceph_assert(client_must_resend);
+    stone_assert(client_must_resend);
     header.tid = t;
   }
   ~MClientRequestForward() final {}
@@ -51,14 +51,14 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(dest_mds, payload);
     encode(num_fwd, payload);
     encode(client_must_resend, payload);
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(dest_mds, p);
     decode(num_fwd, p);
@@ -66,7 +66,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

@@ -17,12 +17,12 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 /**
  * Holds struct stat fields.
  */
-public class CephStat {
+public class StoneStat {
 
   /* Set from native */
   private boolean is_file;       /* S_ISREG */

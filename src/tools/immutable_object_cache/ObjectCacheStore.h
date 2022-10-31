@@ -4,8 +4,8 @@
 #ifndef STONE_CACHE_OBJECT_CACHE_STORE_H
 #define STONE_CACHE_OBJECT_CACHE_STORE_H
 
-#include "common/ceph_context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_context.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "common/Throttle.h"
 #include "common/Cond.h"
@@ -18,7 +18,7 @@ using librados::Rados;
 using librados::IoCtx;
 class Context;
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 typedef shared_ptr<librados::Rados> RadosRef;
@@ -26,7 +26,7 @@ typedef shared_ptr<librados::IoCtx> IoCtxRef;
 
 class ObjectCacheStore {
  public:
-  ObjectCacheStore(CephContext *cct);
+  ObjectCacheStore(StoneContext *cct);
   ~ObjectCacheStore();
   int init(bool reset);
   int shutdown();
@@ -63,23 +63,23 @@ class ObjectCacheStore {
                                 uint64_t limit, uint64_t burst,
                                 std::chrono::seconds burst_seconds);
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   RadosRef m_rados;
   std::map<uint64_t, librados::IoCtx> m_ioctx_map;
-  ceph::mutex m_ioctx_map_lock =
-    ceph::make_mutex("ceph::cache::ObjectCacheStore::m_ioctx_map_lock");
+  stone::mutex m_ioctx_map_lock =
+    stone::make_mutex("stone::cache::ObjectCacheStore::m_ioctx_map_lock");
   Policy* m_policy;
   std::string m_cache_root_dir;
   // throttle mechanism
   uint64_t m_qos_enabled_flag{0};
   std::map<uint64_t, TokenBucketThrottle*> m_throttles;
   bool m_io_throttled{false};
-  ceph::mutex m_throttle_lock =
-    ceph::make_mutex("ceph::cache::ObjectCacheStore::m_throttle_lock");;
+  stone::mutex m_throttle_lock =
+    stone::make_mutex("stone::cache::ObjectCacheStore::m_throttle_lock");;
   uint64_t m_iops_tokens{0};
   uint64_t m_bps_tokens{0};
 };
 
 }  // namespace immutable_obj_cache
-}  // ceph
+}  // stone
 #endif  // STONE_CACHE_OBJECT_CACHE_STORE_H

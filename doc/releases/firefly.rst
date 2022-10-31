@@ -12,91 +12,91 @@ For more detailed information, see :download:`the complete changelog
 Notable Changes
 ---------------
 
-* build/ops: /etc/init.d/radosgw restart does not work correctly (`issue#11140 <http://tracker.ceph.com/issues/11140>`_, `pr#5831 <http://github.com/ceph/ceph/pull/5831>`_, Dmitry Yatsushkevich)
-* build/ops: Fix -Wno-format and -Werror=format-security options clash  (`issue#13417 <http://tracker.ceph.com/issues/13417>`_, `pr#6207 <http://github.com/ceph/ceph/pull/6207>`_, Boris Ranto)
-* build/ops: ceph-common needs python-argparse on older distros, but doesn't require it (`issue#12034 <http://tracker.ceph.com/issues/12034>`_, `pr#5217 <http://github.com/ceph/ceph/pull/5217>`_, Nathan Cutler)
-* build/ops: ceph.spec.in running fdupes unnecessarily (`issue#12301 <http://tracker.ceph.com/issues/12301>`_, `pr#5224 <http://github.com/ceph/ceph/pull/5224>`_, Nathan Cutler)
-* build/ops: ceph.spec.in: 50-rbd.rules conditional is wrong (`issue#12166 <http://tracker.ceph.com/issues/12166>`_, `pr#5225 <http://github.com/ceph/ceph/pull/5225>`_, Nathan Cutler)
-* build/ops: ceph.spec.in: useless %py_requires breaks SLE11-SP3 build (`issue#12351 <http://tracker.ceph.com/issues/12351>`_, `pr#5394 <http://github.com/ceph/ceph/pull/5394>`_, Nathan Cutler)
-* build/ops: fedora21 has junit, not junit4  (`issue#10728 <http://tracker.ceph.com/issues/10728>`_, `pr#6203 <http://github.com/ceph/ceph/pull/6203>`_, Ken Dreyer, Loic Dachary)
-* build/ops: upstart: configuration is too generous on restarts (`issue#11798 <http://tracker.ceph.com/issues/11798>`_, `pr#5992 <http://github.com/ceph/ceph/pull/5992>`_, Sage Weil)
-* common: Client admin socket leaks file descriptors (`issue#11535 <http://tracker.ceph.com/issues/11535>`_, `pr#4633 <http://github.com/ceph/ceph/pull/4633>`_, Jon Bernard)
-* common: FileStore calls syncfs(2) even it is not supported (`issue#12512 <http://tracker.ceph.com/issues/12512>`_, `pr#5529 <http://github.com/ceph/ceph/pull/5529>`_, Danny Al-Gaaf, Kefu Chai, Jianpeng Ma)
-* common: HeartBeat: include types (`issue#13088 <http://tracker.ceph.com/issues/13088>`_, `pr#6038 <http://github.com/ceph/ceph/pull/6038>`_, Sage Weil)
-* common: Malformed JSON command output when non-ASCII strings are present  (`issue#7387 <http://tracker.ceph.com/issues/7387>`_, `pr#4635 <http://github.com/ceph/ceph/pull/4635>`_, Kefu Chai, Tim Serong)
-* common: Memory leak in Mutex.cc, pthread_mutexattr_init without pthread_mutexattr_destroy (`issue#11762 <http://tracker.ceph.com/issues/11762>`_, `pr#5403 <http://github.com/ceph/ceph/pull/5403>`_, Ketor Meng)
-* common: Thread:pthread_attr_destroy(thread_attr) when done with it (`issue#12570 <http://tracker.ceph.com/issues/12570>`_, `pr#6325 <http://github.com/ceph/ceph/pull/6325>`_, Piotr Dałek, Zheng Qiankun)
-* common: ThreadPool add/remove work queue methods not thread safe (`issue#12662 <http://tracker.ceph.com/issues/12662>`_, `pr#5991 <http://github.com/ceph/ceph/pull/5991>`_, Jason Dillaman)
-* common: buffer: critical bufferlist::zero bug (`issue#12252 <http://tracker.ceph.com/issues/12252>`_, `pr#5388 <http://github.com/ceph/ceph/pull/5388>`_, Haomai Wang)
-* common: log: take mutex while opening fd (`issue#12465 <http://tracker.ceph.com/issues/12465>`_, `pr#5406 <http://github.com/ceph/ceph/pull/5406>`_, Samuel Just)
-* common: recursive lock of md_config_t (0) (`issue#12614 <http://tracker.ceph.com/issues/12614>`_, `pr#5814 <http://github.com/ceph/ceph/pull/5814>`_, Josh Durgin)
-* crush: take crashes due to invalid arg (`issue#11602 <http://tracker.ceph.com/issues/11602>`_, `pr#4769 <http://github.com/ceph/ceph/pull/4769>`_, Sage Weil)
-* doc: backport v0.80.10 release notes to firefly (`issue#11090 <http://tracker.ceph.com/issues/11090>`_, `pr#5307 <http://github.com/ceph/ceph/pull/5307>`_, Loic Dachary, Sage Weil)
-* doc: update docs to point to download.ceph.com (`issue#13162 <http://tracker.ceph.com/issues/13162>`_, `pr#5993 <http://github.com/ceph/ceph/pull/5993>`_, Alfredo Deza)
-* fs: MDSMonitor: handle MDSBeacon messages properly (`issue#11590 <http://tracker.ceph.com/issues/11590>`_, `pr#5199 <http://github.com/ceph/ceph/pull/5199>`_, Kefu Chai)
-* fs: client nonce collision due to unshared pid namespaces (`issue#13032 <http://tracker.ceph.com/issues/13032>`_, `pr#6087 <http://github.com/ceph/ceph/pull/6087>`_, Josh Durgin, Sage Weil)
-* librbd: Objectcacher setting max object counts too low (`issue#7385 <http://tracker.ceph.com/issues/7385>`_, `pr#4639 <http://github.com/ceph/ceph/pull/4639>`_, Jason Dillaman)
-* librbd: aio calls may block (`issue#11056 <http://tracker.ceph.com/issues/11056>`_, `pr#4854 <http://github.com/ceph/ceph/pull/4854>`_, Haomai Wang, Sage Weil, Jason Dillaman)
-* librbd: internal.cc: 1967: FAILED assert(watchers.size() == 1) (`issue#12176 <http://tracker.ceph.com/issues/12176>`_, `pr#5171 <http://github.com/ceph/ceph/pull/5171>`_, Jason Dillaman)
-* mon: Clock skew causes missing summary and confuses Calamari (`issue#11877 <http://tracker.ceph.com/issues/11877>`_, `pr#4867 <http://github.com/ceph/ceph/pull/4867>`_, Thorsten Behrens)
-* mon: EC pools are not allowed as cache pools, disallow in the mon (`issue#11650 <http://tracker.ceph.com/issues/11650>`_, `pr#5389 <http://github.com/ceph/ceph/pull/5389>`_, Samuel Just)
-* mon: Make it more difficult to delete pools in firefly (`issue#11800 <http://tracker.ceph.com/issues/11800>`_, `pr#4788 <http://github.com/ceph/ceph/pull/4788>`_, Sage Weil)
-* mon: MonitorDBStore: get_next_key() only if prefix matches (`issue#11786 <http://tracker.ceph.com/issues/11786>`_, `pr#5360 <http://github.com/ceph/ceph/pull/5360>`_, Joao Eduardo Luis)
-* mon: PaxosService: call post_refresh() instead of post_paxos_update() (`issue#11470 <http://tracker.ceph.com/issues/11470>`_, `pr#5358 <http://github.com/ceph/ceph/pull/5358>`_, Joao Eduardo Luis)
-* mon: add a cache layer over MonitorDBStore (`issue#12638 <http://tracker.ceph.com/issues/12638>`_, `pr#5698 <http://github.com/ceph/ceph/pull/5698>`_, Kefu Chai)
-* mon: adding exsting pool as tier with --force-nonempty clobbers removed_snaps (`issue#11493 <http://tracker.ceph.com/issues/11493>`_, `pr#5236 <http://github.com/ceph/ceph/pull/5236>`_, Sage Weil, Samuel Just)
-* mon: ceph fails to compile with boost 1.58 (`issue#11576 <http://tracker.ceph.com/issues/11576>`_, `pr#5129 <http://github.com/ceph/ceph/pull/5129>`_, Kefu Chai)
-* mon: does not check for IO errors on every transaction (`issue#13089 <http://tracker.ceph.com/issues/13089>`_, `pr#6091 <http://github.com/ceph/ceph/pull/6091>`_, Sage Weil)
-* mon: get pools health'info have error (`issue#12402 <http://tracker.ceph.com/issues/12402>`_, `pr#5410 <http://github.com/ceph/ceph/pull/5410>`_, renhwztetecs)
-* mon: increase globalid default for firefly (`issue#13255 <http://tracker.ceph.com/issues/13255>`_, `pr#6010 <http://github.com/ceph/ceph/pull/6010>`_, Sage Weil)
-* mon: pgmonitor: wrong at/near target max“ reporting (`issue#12401 <http://tracker.ceph.com/issues/12401>`_, `pr#5409 <http://github.com/ceph/ceph/pull/5409>`_, huangjun)
-* mon: register_new_pgs() should check ruleno instead of its index (`issue#12210 <http://tracker.ceph.com/issues/12210>`_, `pr#5404 <http://github.com/ceph/ceph/pull/5404>`_, Xinze Chi)
-* mon: scrub error (osdmap encoding mismatch?) upgrading from 0.80 to ~0.80.2 (`issue#8815 <http://tracker.ceph.com/issues/8815>`_, `issue#8674 <http://tracker.ceph.com/issues/8674>`_, `issue#9064 <http://tracker.ceph.com/issues/9064>`_, `pr#5200 <http://github.com/ceph/ceph/pull/5200>`_, Sage Weil, Zhiqiang Wang, Samuel Just)
-* mon: the output is wrong when runing ceph osd reweight (`issue#12251 <http://tracker.ceph.com/issues/12251>`_, `pr#5408 <http://github.com/ceph/ceph/pull/5408>`_, Joao Eduardo Luis)
-* objecter: can get stuck in redirect loop if osdmap epoch == last_force_op_resend (`issue#11026 <http://tracker.ceph.com/issues/11026>`_, `pr#4597 <http://github.com/ceph/ceph/pull/4597>`_, Jianpeng Ma, Sage Weil)
-* objecter: pg listing can deadlock when throttling is in use (`issue#9008 <http://tracker.ceph.com/issues/9008>`_, `pr#5043 <http://github.com/ceph/ceph/pull/5043>`_, Guang Yang)
-* objecter: resend linger ops on split (`issue#9806 <http://tracker.ceph.com/issues/9806>`_, `pr#5062 <http://github.com/ceph/ceph/pull/5062>`_, Josh Durgin, Samuel Just)
-* osd: Cleanup boost optionals for boost 1.56 (`issue#9983 <http://tracker.ceph.com/issues/9983>`_, `pr#5039 <http://github.com/ceph/ceph/pull/5039>`_, William A. Kennington III)
-* osd: LibRadosTwoPools[EC]PP.PromoteSnap failure (`issue#10052 <http://tracker.ceph.com/issues/10052>`_, `pr#5050 <http://github.com/ceph/ceph/pull/5050>`_, Sage Weil)
-* osd: Mutex Assert from PipeConnection::try_get_pipe (`issue#12437 <http://tracker.ceph.com/issues/12437>`_, `pr#5815 <http://github.com/ceph/ceph/pull/5815>`_, David Zafman)
-* osd: PG stuck with remapped (`issue#9614 <http://tracker.ceph.com/issues/9614>`_, `pr#5044 <http://github.com/ceph/ceph/pull/5044>`_, Guang Yang)
-* osd: PG::handle_advance_map: on_pool_change after handling the map change (`issue#12809 <http://tracker.ceph.com/issues/12809>`_, `pr#5988 <http://github.com/ceph/ceph/pull/5988>`_, Samuel Just)
-* osd: PGLog: split divergent priors as well (`issue#11069 <http://tracker.ceph.com/issues/11069>`_, `pr#4631 <http://github.com/ceph/ceph/pull/4631>`_, Samuel Just)
-* osd: PGLog::proc_replica_log: correctly handle case where entries between olog.head and log.tail were split out (`issue#11358 <http://tracker.ceph.com/issues/11358>`_, `pr#5287 <http://github.com/ceph/ceph/pull/5287>`_, Samuel Just)
-* osd: WBThrottle::clear_object: signal on cond when we reduce throttle values (`issue#12223 <http://tracker.ceph.com/issues/12223>`_, `pr#5822 <http://github.com/ceph/ceph/pull/5822>`_, Samuel Just)
-* osd: cache full mode still skips young objects (`issue#10006 <http://tracker.ceph.com/issues/10006>`_, `pr#5051 <http://github.com/ceph/ceph/pull/5051>`_, Xinze Chi, Zhiqiang Wang)
-* osd: crash creating/deleting pools (`issue#12429 <http://tracker.ceph.com/issues/12429>`_, `pr#5526 <http://github.com/ceph/ceph/pull/5526>`_, John Spray)
-* osd: explicitly specify OSD features in MOSDBoot (`issue#10911 <http://tracker.ceph.com/issues/10911>`_, `pr#4960 <http://github.com/ceph/ceph/pull/4960>`_, Sage Weil)
-* osd: is_new_interval() fixes (`issue#11771 <http://tracker.ceph.com/issues/11771>`_, `issue#10399 <http://tracker.ceph.com/issues/10399>`_, `pr#5726 <http://github.com/ceph/ceph/pull/5726>`_, Samuel Just, Jason Dillaman)
-* osd: make the all osd/filestore thread pool suicide timeouts separately configurable (`issue#11439 <http://tracker.ceph.com/issues/11439>`_, `pr#5823 <http://github.com/ceph/ceph/pull/5823>`_, Samuel Just)
-* osd: object creation by write cannot use an offset on an erasure coded pool (`issue#11507 <http://tracker.ceph.com/issues/11507>`_, `pr#4632 <http://github.com/ceph/ceph/pull/4632>`_, Jianpeng Ma, Loic Dachary)
-* osd: os/FileJournal: Fix journal write fail, align for direct io (`issue#12943 <http://tracker.ceph.com/issues/12943>`_, `pr#5619 <http://github.com/ceph/ceph/pull/5619>`_, Xie Rui)
-* osd: osd/PGLog.cc: 732: FAILED assert(log.log.size() == log_keys_debug.size()) (`issue#12652 <http://tracker.ceph.com/issues/12652>`_, `pr#5820 <http://github.com/ceph/ceph/pull/5820>`_, Sage Weil)
-* osd: read on chunk-aligned xattr not handled (`issue#12309 <http://tracker.ceph.com/issues/12309>`_, `pr#5235 <http://github.com/ceph/ceph/pull/5235>`_, Sage Weil)
-* rgw: Change variable length array of std::strings (not legal in C++) to std::vector<std::string> (`issue#12467 <http://tracker.ceph.com/issues/12467>`_, `pr#4583 <http://github.com/ceph/ceph/pull/4583>`_, Daniel J. Hofmann)
-* rgw: Civetweb RGW appears to report full size of object as downloaded when only partially downloaded (`issue#11851 <http://tracker.ceph.com/issues/11851>`_, `pr#5234 <http://github.com/ceph/ceph/pull/5234>`_, Yehuda Sadeh)
-* rgw: Keystone PKI token expiration is not enforced (`issue#11367 <http://tracker.ceph.com/issues/11367>`_, `pr#4765 <http://github.com/ceph/ceph/pull/4765>`_, Anton Aksola)
-* rgw: Object copy bug (`issue#11639 <http://tracker.ceph.com/issues/11639>`_, `pr#4762 <http://github.com/ceph/ceph/pull/4762>`_, Javier M. Mellid)
-* rgw: RGW returns requested bucket name raw in "Bucket" response header (`issue#11860 <http://tracker.ceph.com/issues/11860>`_, `issue#12537 <http://tracker.ceph.com/issues/12537>`_, `pr#5730 <http://github.com/ceph/ceph/pull/5730>`_, Yehuda Sadeh, Wido den Hollander)
-* rgw: Swift API: response for PUT on /container does not contain the mandatory Content-Length header when FCGI is used (`issue#11036 <http://tracker.ceph.com/issues/11036>`_, `pr#5170 <http://github.com/ceph/ceph/pull/5170>`_, Radoslaw Zarzynski)
-* rgw: content length parsing calls strtol() instead of strtoll() (`issue#10701 <http://tracker.ceph.com/issues/10701>`_, `pr#5997 <http://github.com/ceph/ceph/pull/5997>`_, Yehuda Sadeh)
-* rgw: delete bucket does not remove .bucket.meta file (`issue#11149 <http://tracker.ceph.com/issues/11149>`_, `pr#4641 <http://github.com/ceph/ceph/pull/4641>`_, Orit Wasserman)
-* rgw: doesn't return 'x-timestamp' in header which is used by 'View Details' of OpenStack (`issue#8911 <http://tracker.ceph.com/issues/8911>`_, `pr#4584 <http://github.com/ceph/ceph/pull/4584>`_, Yehuda Sadeh)
-* rgw: init some manifest fields when handling explicit objs (`issue#11455 <http://tracker.ceph.com/issues/11455>`_, `pr#5729 <http://github.com/ceph/ceph/pull/5729>`_, Yehuda Sadeh)
-* rgw: logfile does not get chowned properly (`issue#12073 <http://tracker.ceph.com/issues/12073>`_, `pr#5233 <http://github.com/ceph/ceph/pull/5233>`_, Thorsten Behrens)
-* rgw: logrotate.conf calls service with wrong init script name (`issue#12043 <http://tracker.ceph.com/issues/12043>`_, `pr#5390 <http://github.com/ceph/ceph/pull/5390>`_, wuxingyi)
-* rgw: quota not respected in POST object (`issue#11323 <http://tracker.ceph.com/issues/11323>`_, `pr#4642 <http://github.com/ceph/ceph/pull/4642>`_, Sergey Arkhipov)
-* rgw: swift smoke test fails on TestAccountUTF8 (`issue#11091 <http://tracker.ceph.com/issues/11091>`_, `issue#11438 <http://tracker.ceph.com/issues/11438>`_, `issue#12939 <http://tracker.ceph.com/issues/12939>`_, `issue#12157 <http://tracker.ceph.com/issues/12157>`_, `issue#12158 <http://tracker.ceph.com/issues/12158>`_, `issue#12363 <http://tracker.ceph.com/issues/12363>`_, `pr#5532 <http://github.com/ceph/ceph/pull/5532>`_, Radoslaw Zarzynski, Orit Wasserman, Robin H. Johnson)
-* rgw: use correct objv_tracker for bucket instance (`issue#11416 <http://tracker.ceph.com/issues/11416>`_, `pr#4535 <http://github.com/ceph/ceph/pull/4535>`_, Yehuda Sadeh)
-* tests: ceph-fuse crash in test_client_recovery (`issue#12673 <http://tracker.ceph.com/issues/12673>`_, `pr#5813 <http://github.com/ceph/ceph/pull/5813>`_, Loic Dachary)
-* tests: kernel_untar_build fails on EL7 (`issue#11758 <http://tracker.ceph.com/issues/11758>`_, `pr#6000 <http://github.com/ceph/ceph/pull/6000>`_, Greg Farnum)
-* tests: qemu workunit refers to apt-mirror.front.sepia.ceph.com (`issue#13420 <http://tracker.ceph.com/issues/13420>`_, `pr#6328 <http://github.com/ceph/ceph/pull/6328>`_, Yuan Zhou, Sage Weil)
-* tools:  src/ceph-disk : disk zap sgdisk invocation (`issue#11143 <http://tracker.ceph.com/issues/11143>`_, `pr#4636 <http://github.com/ceph/ceph/pull/4636>`_, Thorsten Behrens, Owen Synge)
-* tools: ceph-disk: sometimes the journal symlink is not created (`issue#10146 <http://tracker.ceph.com/issues/10146>`_, `pr#5541 <http://github.com/ceph/ceph/pull/5541>`_, Dan van der Ster)
-* tools: ceph-disk: support NVMe device partitions (`issue#11612 <http://tracker.ceph.com/issues/11612>`_, `pr#4771 <http://github.com/ceph/ceph/pull/4771>`_, Ilja Slepnev)
-* tools: ceph-post-file fails on rhel7 (`issue#11836 <http://tracker.ceph.com/issues/11836>`_, `pr#5037 <http://github.com/ceph/ceph/pull/5037>`_, Joseph McDonald, Sage Weil)
-* tools: ceph_argparse_flag has no regular 3rd parameter (`issue#11543 <http://tracker.ceph.com/issues/11543>`_, `pr#4582 <http://github.com/ceph/ceph/pull/4582>`_, Thorsten Behrens)
-* tools: use a new disk as journal disk,ceph-disk prepare fail (`issue#10983 <http://tracker.ceph.com/issues/10983>`_, `pr#4630 <http://github.com/ceph/ceph/pull/4630>`_, Loic Dachary)
+* build/ops: /etc/init.d/radosgw restart does not work correctly (`issue#11140 <http://tracker.stone.com/issues/11140>`_, `pr#5831 <http://github.com/stone/stone/pull/5831>`_, Dmitry Yatsushkevich)
+* build/ops: Fix -Wno-format and -Werror=format-security options clash  (`issue#13417 <http://tracker.stone.com/issues/13417>`_, `pr#6207 <http://github.com/stone/stone/pull/6207>`_, Boris Ranto)
+* build/ops: stone-common needs python-argparse on older distros, but doesn't require it (`issue#12034 <http://tracker.stone.com/issues/12034>`_, `pr#5217 <http://github.com/stone/stone/pull/5217>`_, Nathan Cutler)
+* build/ops: stone.spec.in running fdupes unnecessarily (`issue#12301 <http://tracker.stone.com/issues/12301>`_, `pr#5224 <http://github.com/stone/stone/pull/5224>`_, Nathan Cutler)
+* build/ops: stone.spec.in: 50-rbd.rules conditional is wrong (`issue#12166 <http://tracker.stone.com/issues/12166>`_, `pr#5225 <http://github.com/stone/stone/pull/5225>`_, Nathan Cutler)
+* build/ops: stone.spec.in: useless %py_requires breaks SLE11-SP3 build (`issue#12351 <http://tracker.stone.com/issues/12351>`_, `pr#5394 <http://github.com/stone/stone/pull/5394>`_, Nathan Cutler)
+* build/ops: fedora21 has junit, not junit4  (`issue#10728 <http://tracker.stone.com/issues/10728>`_, `pr#6203 <http://github.com/stone/stone/pull/6203>`_, Ken Dreyer, Loic Dachary)
+* build/ops: upstart: configuration is too generous on restarts (`issue#11798 <http://tracker.stone.com/issues/11798>`_, `pr#5992 <http://github.com/stone/stone/pull/5992>`_, Sage Weil)
+* common: Client admin socket leaks file descriptors (`issue#11535 <http://tracker.stone.com/issues/11535>`_, `pr#4633 <http://github.com/stone/stone/pull/4633>`_, Jon Bernard)
+* common: FileStore calls syncfs(2) even it is not supported (`issue#12512 <http://tracker.stone.com/issues/12512>`_, `pr#5529 <http://github.com/stone/stone/pull/5529>`_, Danny Al-Gaaf, Kefu Chai, Jianpeng Ma)
+* common: HeartBeat: include types (`issue#13088 <http://tracker.stone.com/issues/13088>`_, `pr#6038 <http://github.com/stone/stone/pull/6038>`_, Sage Weil)
+* common: Malformed JSON command output when non-ASCII strings are present  (`issue#7387 <http://tracker.stone.com/issues/7387>`_, `pr#4635 <http://github.com/stone/stone/pull/4635>`_, Kefu Chai, Tim Serong)
+* common: Memory leak in Mutex.cc, pthread_mutexattr_init without pthread_mutexattr_destroy (`issue#11762 <http://tracker.stone.com/issues/11762>`_, `pr#5403 <http://github.com/stone/stone/pull/5403>`_, Ketor Meng)
+* common: Thread:pthread_attr_destroy(thread_attr) when done with it (`issue#12570 <http://tracker.stone.com/issues/12570>`_, `pr#6325 <http://github.com/stone/stone/pull/6325>`_, Piotr Dałek, Zheng Qiankun)
+* common: ThreadPool add/remove work queue methods not thread safe (`issue#12662 <http://tracker.stone.com/issues/12662>`_, `pr#5991 <http://github.com/stone/stone/pull/5991>`_, Jason Dillaman)
+* common: buffer: critical bufferlist::zero bug (`issue#12252 <http://tracker.stone.com/issues/12252>`_, `pr#5388 <http://github.com/stone/stone/pull/5388>`_, Haomai Wang)
+* common: log: take mutex while opening fd (`issue#12465 <http://tracker.stone.com/issues/12465>`_, `pr#5406 <http://github.com/stone/stone/pull/5406>`_, Samuel Just)
+* common: recursive lock of md_config_t (0) (`issue#12614 <http://tracker.stone.com/issues/12614>`_, `pr#5814 <http://github.com/stone/stone/pull/5814>`_, Josh Durgin)
+* crush: take crashes due to invalid arg (`issue#11602 <http://tracker.stone.com/issues/11602>`_, `pr#4769 <http://github.com/stone/stone/pull/4769>`_, Sage Weil)
+* doc: backport v0.80.10 release notes to firefly (`issue#11090 <http://tracker.stone.com/issues/11090>`_, `pr#5307 <http://github.com/stone/stone/pull/5307>`_, Loic Dachary, Sage Weil)
+* doc: update docs to point to download.stone.com (`issue#13162 <http://tracker.stone.com/issues/13162>`_, `pr#5993 <http://github.com/stone/stone/pull/5993>`_, Alfredo Deza)
+* fs: MDSMonitor: handle MDSBeacon messages properly (`issue#11590 <http://tracker.stone.com/issues/11590>`_, `pr#5199 <http://github.com/stone/stone/pull/5199>`_, Kefu Chai)
+* fs: client nonce collision due to unshared pid namespaces (`issue#13032 <http://tracker.stone.com/issues/13032>`_, `pr#6087 <http://github.com/stone/stone/pull/6087>`_, Josh Durgin, Sage Weil)
+* librbd: Objectcacher setting max object counts too low (`issue#7385 <http://tracker.stone.com/issues/7385>`_, `pr#4639 <http://github.com/stone/stone/pull/4639>`_, Jason Dillaman)
+* librbd: aio calls may block (`issue#11056 <http://tracker.stone.com/issues/11056>`_, `pr#4854 <http://github.com/stone/stone/pull/4854>`_, Haomai Wang, Sage Weil, Jason Dillaman)
+* librbd: internal.cc: 1967: FAILED assert(watchers.size() == 1) (`issue#12176 <http://tracker.stone.com/issues/12176>`_, `pr#5171 <http://github.com/stone/stone/pull/5171>`_, Jason Dillaman)
+* mon: Clock skew causes missing summary and confuses Calamari (`issue#11877 <http://tracker.stone.com/issues/11877>`_, `pr#4867 <http://github.com/stone/stone/pull/4867>`_, Thorsten Behrens)
+* mon: EC pools are not allowed as cache pools, disallow in the mon (`issue#11650 <http://tracker.stone.com/issues/11650>`_, `pr#5389 <http://github.com/stone/stone/pull/5389>`_, Samuel Just)
+* mon: Make it more difficult to delete pools in firefly (`issue#11800 <http://tracker.stone.com/issues/11800>`_, `pr#4788 <http://github.com/stone/stone/pull/4788>`_, Sage Weil)
+* mon: MonitorDBStore: get_next_key() only if prefix matches (`issue#11786 <http://tracker.stone.com/issues/11786>`_, `pr#5360 <http://github.com/stone/stone/pull/5360>`_, Joao Eduardo Luis)
+* mon: PaxosService: call post_refresh() instead of post_paxos_update() (`issue#11470 <http://tracker.stone.com/issues/11470>`_, `pr#5358 <http://github.com/stone/stone/pull/5358>`_, Joao Eduardo Luis)
+* mon: add a cache layer over MonitorDBStore (`issue#12638 <http://tracker.stone.com/issues/12638>`_, `pr#5698 <http://github.com/stone/stone/pull/5698>`_, Kefu Chai)
+* mon: adding exsting pool as tier with --force-nonempty clobbers removed_snaps (`issue#11493 <http://tracker.stone.com/issues/11493>`_, `pr#5236 <http://github.com/stone/stone/pull/5236>`_, Sage Weil, Samuel Just)
+* mon: stone fails to compile with boost 1.58 (`issue#11576 <http://tracker.stone.com/issues/11576>`_, `pr#5129 <http://github.com/stone/stone/pull/5129>`_, Kefu Chai)
+* mon: does not check for IO errors on every transaction (`issue#13089 <http://tracker.stone.com/issues/13089>`_, `pr#6091 <http://github.com/stone/stone/pull/6091>`_, Sage Weil)
+* mon: get pools health'info have error (`issue#12402 <http://tracker.stone.com/issues/12402>`_, `pr#5410 <http://github.com/stone/stone/pull/5410>`_, renhwztetecs)
+* mon: increase globalid default for firefly (`issue#13255 <http://tracker.stone.com/issues/13255>`_, `pr#6010 <http://github.com/stone/stone/pull/6010>`_, Sage Weil)
+* mon: pgmonitor: wrong at/near target max“ reporting (`issue#12401 <http://tracker.stone.com/issues/12401>`_, `pr#5409 <http://github.com/stone/stone/pull/5409>`_, huangjun)
+* mon: register_new_pgs() should check ruleno instead of its index (`issue#12210 <http://tracker.stone.com/issues/12210>`_, `pr#5404 <http://github.com/stone/stone/pull/5404>`_, Xinze Chi)
+* mon: scrub error (osdmap encoding mismatch?) upgrading from 0.80 to ~0.80.2 (`issue#8815 <http://tracker.stone.com/issues/8815>`_, `issue#8674 <http://tracker.stone.com/issues/8674>`_, `issue#9064 <http://tracker.stone.com/issues/9064>`_, `pr#5200 <http://github.com/stone/stone/pull/5200>`_, Sage Weil, Zhiqiang Wang, Samuel Just)
+* mon: the output is wrong when runing stone osd reweight (`issue#12251 <http://tracker.stone.com/issues/12251>`_, `pr#5408 <http://github.com/stone/stone/pull/5408>`_, Joao Eduardo Luis)
+* objecter: can get stuck in redirect loop if osdmap epoch == last_force_op_resend (`issue#11026 <http://tracker.stone.com/issues/11026>`_, `pr#4597 <http://github.com/stone/stone/pull/4597>`_, Jianpeng Ma, Sage Weil)
+* objecter: pg listing can deadlock when throttling is in use (`issue#9008 <http://tracker.stone.com/issues/9008>`_, `pr#5043 <http://github.com/stone/stone/pull/5043>`_, Guang Yang)
+* objecter: resend linger ops on split (`issue#9806 <http://tracker.stone.com/issues/9806>`_, `pr#5062 <http://github.com/stone/stone/pull/5062>`_, Josh Durgin, Samuel Just)
+* osd: Cleanup boost optionals for boost 1.56 (`issue#9983 <http://tracker.stone.com/issues/9983>`_, `pr#5039 <http://github.com/stone/stone/pull/5039>`_, William A. Kennington III)
+* osd: LibRadosTwoPools[EC]PP.PromoteSnap failure (`issue#10052 <http://tracker.stone.com/issues/10052>`_, `pr#5050 <http://github.com/stone/stone/pull/5050>`_, Sage Weil)
+* osd: Mutex Assert from PipeConnection::try_get_pipe (`issue#12437 <http://tracker.stone.com/issues/12437>`_, `pr#5815 <http://github.com/stone/stone/pull/5815>`_, David Zafman)
+* osd: PG stuck with remapped (`issue#9614 <http://tracker.stone.com/issues/9614>`_, `pr#5044 <http://github.com/stone/stone/pull/5044>`_, Guang Yang)
+* osd: PG::handle_advance_map: on_pool_change after handling the map change (`issue#12809 <http://tracker.stone.com/issues/12809>`_, `pr#5988 <http://github.com/stone/stone/pull/5988>`_, Samuel Just)
+* osd: PGLog: split divergent priors as well (`issue#11069 <http://tracker.stone.com/issues/11069>`_, `pr#4631 <http://github.com/stone/stone/pull/4631>`_, Samuel Just)
+* osd: PGLog::proc_replica_log: correctly handle case where entries between olog.head and log.tail were split out (`issue#11358 <http://tracker.stone.com/issues/11358>`_, `pr#5287 <http://github.com/stone/stone/pull/5287>`_, Samuel Just)
+* osd: WBThrottle::clear_object: signal on cond when we reduce throttle values (`issue#12223 <http://tracker.stone.com/issues/12223>`_, `pr#5822 <http://github.com/stone/stone/pull/5822>`_, Samuel Just)
+* osd: cache full mode still skips young objects (`issue#10006 <http://tracker.stone.com/issues/10006>`_, `pr#5051 <http://github.com/stone/stone/pull/5051>`_, Xinze Chi, Zhiqiang Wang)
+* osd: crash creating/deleting pools (`issue#12429 <http://tracker.stone.com/issues/12429>`_, `pr#5526 <http://github.com/stone/stone/pull/5526>`_, John Spray)
+* osd: explicitly specify OSD features in MOSDBoot (`issue#10911 <http://tracker.stone.com/issues/10911>`_, `pr#4960 <http://github.com/stone/stone/pull/4960>`_, Sage Weil)
+* osd: is_new_interval() fixes (`issue#11771 <http://tracker.stone.com/issues/11771>`_, `issue#10399 <http://tracker.stone.com/issues/10399>`_, `pr#5726 <http://github.com/stone/stone/pull/5726>`_, Samuel Just, Jason Dillaman)
+* osd: make the all osd/filestore thread pool suicide timeouts separately configurable (`issue#11439 <http://tracker.stone.com/issues/11439>`_, `pr#5823 <http://github.com/stone/stone/pull/5823>`_, Samuel Just)
+* osd: object creation by write cannot use an offset on an erasure coded pool (`issue#11507 <http://tracker.stone.com/issues/11507>`_, `pr#4632 <http://github.com/stone/stone/pull/4632>`_, Jianpeng Ma, Loic Dachary)
+* osd: os/FileJournal: Fix journal write fail, align for direct io (`issue#12943 <http://tracker.stone.com/issues/12943>`_, `pr#5619 <http://github.com/stone/stone/pull/5619>`_, Xie Rui)
+* osd: osd/PGLog.cc: 732: FAILED assert(log.log.size() == log_keys_debug.size()) (`issue#12652 <http://tracker.stone.com/issues/12652>`_, `pr#5820 <http://github.com/stone/stone/pull/5820>`_, Sage Weil)
+* osd: read on chunk-aligned xattr not handled (`issue#12309 <http://tracker.stone.com/issues/12309>`_, `pr#5235 <http://github.com/stone/stone/pull/5235>`_, Sage Weil)
+* rgw: Change variable length array of std::strings (not legal in C++) to std::vector<std::string> (`issue#12467 <http://tracker.stone.com/issues/12467>`_, `pr#4583 <http://github.com/stone/stone/pull/4583>`_, Daniel J. Hofmann)
+* rgw: Civetweb RGW appears to report full size of object as downloaded when only partially downloaded (`issue#11851 <http://tracker.stone.com/issues/11851>`_, `pr#5234 <http://github.com/stone/stone/pull/5234>`_, Yehuda Sadeh)
+* rgw: Keystone PKI token expiration is not enforced (`issue#11367 <http://tracker.stone.com/issues/11367>`_, `pr#4765 <http://github.com/stone/stone/pull/4765>`_, Anton Aksola)
+* rgw: Object copy bug (`issue#11639 <http://tracker.stone.com/issues/11639>`_, `pr#4762 <http://github.com/stone/stone/pull/4762>`_, Javier M. Mellid)
+* rgw: RGW returns requested bucket name raw in "Bucket" response header (`issue#11860 <http://tracker.stone.com/issues/11860>`_, `issue#12537 <http://tracker.stone.com/issues/12537>`_, `pr#5730 <http://github.com/stone/stone/pull/5730>`_, Yehuda Sadeh, Wido den Hollander)
+* rgw: Swift API: response for PUT on /container does not contain the mandatory Content-Length header when FCGI is used (`issue#11036 <http://tracker.stone.com/issues/11036>`_, `pr#5170 <http://github.com/stone/stone/pull/5170>`_, Radoslaw Zarzynski)
+* rgw: content length parsing calls strtol() instead of strtoll() (`issue#10701 <http://tracker.stone.com/issues/10701>`_, `pr#5997 <http://github.com/stone/stone/pull/5997>`_, Yehuda Sadeh)
+* rgw: delete bucket does not remove .bucket.meta file (`issue#11149 <http://tracker.stone.com/issues/11149>`_, `pr#4641 <http://github.com/stone/stone/pull/4641>`_, Orit Wasserman)
+* rgw: doesn't return 'x-timestamp' in header which is used by 'View Details' of OpenStack (`issue#8911 <http://tracker.stone.com/issues/8911>`_, `pr#4584 <http://github.com/stone/stone/pull/4584>`_, Yehuda Sadeh)
+* rgw: init some manifest fields when handling explicit objs (`issue#11455 <http://tracker.stone.com/issues/11455>`_, `pr#5729 <http://github.com/stone/stone/pull/5729>`_, Yehuda Sadeh)
+* rgw: logfile does not get chowned properly (`issue#12073 <http://tracker.stone.com/issues/12073>`_, `pr#5233 <http://github.com/stone/stone/pull/5233>`_, Thorsten Behrens)
+* rgw: logrotate.conf calls service with wrong init script name (`issue#12043 <http://tracker.stone.com/issues/12043>`_, `pr#5390 <http://github.com/stone/stone/pull/5390>`_, wuxingyi)
+* rgw: quota not respected in POST object (`issue#11323 <http://tracker.stone.com/issues/11323>`_, `pr#4642 <http://github.com/stone/stone/pull/4642>`_, Sergey Arkhipov)
+* rgw: swift smoke test fails on TestAccountUTF8 (`issue#11091 <http://tracker.stone.com/issues/11091>`_, `issue#11438 <http://tracker.stone.com/issues/11438>`_, `issue#12939 <http://tracker.stone.com/issues/12939>`_, `issue#12157 <http://tracker.stone.com/issues/12157>`_, `issue#12158 <http://tracker.stone.com/issues/12158>`_, `issue#12363 <http://tracker.stone.com/issues/12363>`_, `pr#5532 <http://github.com/stone/stone/pull/5532>`_, Radoslaw Zarzynski, Orit Wasserman, Robin H. Johnson)
+* rgw: use correct objv_tracker for bucket instance (`issue#11416 <http://tracker.stone.com/issues/11416>`_, `pr#4535 <http://github.com/stone/stone/pull/4535>`_, Yehuda Sadeh)
+* tests: stone-fuse crash in test_client_recovery (`issue#12673 <http://tracker.stone.com/issues/12673>`_, `pr#5813 <http://github.com/stone/stone/pull/5813>`_, Loic Dachary)
+* tests: kernel_untar_build fails on EL7 (`issue#11758 <http://tracker.stone.com/issues/11758>`_, `pr#6000 <http://github.com/stone/stone/pull/6000>`_, Greg Farnum)
+* tests: qemu workunit refers to apt-mirror.front.sepia.stone.com (`issue#13420 <http://tracker.stone.com/issues/13420>`_, `pr#6328 <http://github.com/stone/stone/pull/6328>`_, Yuan Zhou, Sage Weil)
+* tools:  src/stone-disk : disk zap sgdisk invocation (`issue#11143 <http://tracker.stone.com/issues/11143>`_, `pr#4636 <http://github.com/stone/stone/pull/4636>`_, Thorsten Behrens, Owen Synge)
+* tools: stone-disk: sometimes the journal symlink is not created (`issue#10146 <http://tracker.stone.com/issues/10146>`_, `pr#5541 <http://github.com/stone/stone/pull/5541>`_, Dan van der Ster)
+* tools: stone-disk: support NVMe device partitions (`issue#11612 <http://tracker.stone.com/issues/11612>`_, `pr#4771 <http://github.com/stone/stone/pull/4771>`_, Ilja Slepnev)
+* tools: stone-post-file fails on rhel7 (`issue#11836 <http://tracker.stone.com/issues/11836>`_, `pr#5037 <http://github.com/stone/stone/pull/5037>`_, Joseph McDonald, Sage Weil)
+* tools: stone_argparse_flag has no regular 3rd parameter (`issue#11543 <http://tracker.stone.com/issues/11543>`_, `pr#4582 <http://github.com/stone/stone/pull/4582>`_, Thorsten Behrens)
+* tools: use a new disk as journal disk,stone-disk prepare fail (`issue#10983 <http://tracker.stone.com/issues/10983>`_, `pr#4630 <http://github.com/stone/stone/pull/4630>`_, Loic Dachary)
 
 
 v0.80.10 Firefly
@@ -111,73 +111,73 @@ For more detailed information, see :download:`the complete changelog <../changel
 Notable Changes
 ---------------
 
-* build/ops: ceph.spec.in: package mkcephfs on EL6 (`issue#11955 <http://tracker.ceph.com/issues/11955>`_, `pr#4924 <http://github.com/ceph/ceph/pull/4924>`_, Ken Dreyer)
-* build/ops: debian: ceph-test and rest-bench debug packages should require their respective binary packages (`issue#11673 <http://tracker.ceph.com/issues/11673>`_, `pr#4766 <http://github.com/ceph/ceph/pull/4766>`_, Ken Dreyer)
-* build/ops: run RGW as root (`issue#11453 <http://tracker.ceph.com/issues/11453>`_, `pr#4638 <http://github.com/ceph/ceph/pull/4638>`_, Ken Dreyer)
-* common: messages/MWatchNotify: include an error code in the message (`issue#9193 <http://tracker.ceph.com/issues/9193>`_, `pr#3944 <http://github.com/ceph/ceph/pull/3944>`_, Sage Weil)
-* common: Rados.shutdown() dies with Illegal instruction (core dumped) (`issue#10153 <http://tracker.ceph.com/issues/10153>`_, `pr#3963 <http://github.com/ceph/ceph/pull/3963>`_, Federico Simoncelli)
-* common: SimpleMessenger: allow RESETSESSION whenever we forget an endpoint (`issue#10080 <http://tracker.ceph.com/issues/10080>`_, `pr#3915 <http://github.com/ceph/ceph/pull/3915>`_, Greg Farnum)
-* common: WorkQueue: make wait timeout on empty queue configurable (`issue#10817 <http://tracker.ceph.com/issues/10817>`_, `pr#3941 <http://github.com/ceph/ceph/pull/3941>`_, Samuel Just)
-* crush: set_choose_tries = 100 for erasure code rulesets (`issue#10353 <http://tracker.ceph.com/issues/10353>`_, `pr#3824 <http://github.com/ceph/ceph/pull/3824>`_, Loic Dachary)
-* doc: backport ceph-disk man page to Firefly (`issue#10724 <http://tracker.ceph.com/issues/10724>`_, `pr#3936 <http://github.com/ceph/ceph/pull/3936>`_, Nilamdyuti Goswami)
-* doc: Fix ceph command manpage to match ceph -h (`issue#10676 <http://tracker.ceph.com/issues/10676>`_, `pr#3996 <http://github.com/ceph/ceph/pull/3996>`_, David Zafman)
-* fs: mount.ceph: avoid spurious error message (`issue#10351 <http://tracker.ceph.com/issues/10351>`_, `pr#3927 <http://github.com/ceph/ceph/pull/3927>`_, Yan, Zheng)
-* librados: Fix memory leak in python rados bindings (`issue#10723 <http://tracker.ceph.com/issues/10723>`_, `pr#3935 <http://github.com/ceph/ceph/pull/3935>`_, Josh Durgin)
-* librados: fix resources leakage in RadosClient::connect() (`issue#10425 <http://tracker.ceph.com/issues/10425>`_, `pr#3828 <http://github.com/ceph/ceph/pull/3828>`_, Radoslaw Zarzynski)
-* librados: Translate operation flags from C APIs (`issue#10497 <http://tracker.ceph.com/issues/10497>`_, `pr#3930 <http://github.com/ceph/ceph/pull/3930>`_, Matt Richards)
-* librbd: acquire cache_lock before refreshing parent (`issue#5488 <http://tracker.ceph.com/issues/5488>`_, `pr#4206 <http://github.com/ceph/ceph/pull/4206>`_, Jason Dillaman)
-* librbd: snap_remove should ignore -ENOENT errors (`issue#11113 <http://tracker.ceph.com/issues/11113>`_, `pr#4245 <http://github.com/ceph/ceph/pull/4245>`_, Jason Dillaman)
-* mds: fix assertion caused by system clock backwards (`issue#11053 <http://tracker.ceph.com/issues/11053>`_, `pr#3970 <http://github.com/ceph/ceph/pull/3970>`_, Yan, Zheng)
-* mon: ignore osd failures from before up_from (`issue#10762 <http://tracker.ceph.com/issues/10762>`_, `pr#3937 <http://github.com/ceph/ceph/pull/3937>`_, Sage Weil)
-* mon: MonCap: take EntityName instead when expanding profiles (`issue#10844 <http://tracker.ceph.com/issues/10844>`_, `pr#3942 <http://github.com/ceph/ceph/pull/3942>`_, Joao Eduardo Luis)
-* mon: Monitor: fix timecheck rounds period (`issue#10546 <http://tracker.ceph.com/issues/10546>`_, `pr#3932 <http://github.com/ceph/ceph/pull/3932>`_, Joao Eduardo Luis)
-* mon: OSDMonitor: do not trust small values in osd epoch cache (`issue#10787 <http://tracker.ceph.com/issues/10787>`_, `pr#3823 <http://github.com/ceph/ceph/pull/3823>`_, Sage Weil)
-* mon: OSDMonitor: fallback to json-pretty in case of invalid formatter (`issue#9538 <http://tracker.ceph.com/issues/9538>`_, `pr#4475 <http://github.com/ceph/ceph/pull/4475>`_, Loic Dachary)
-* mon: PGMonitor: several stats output error fixes (`issue#10257 <http://tracker.ceph.com/issues/10257>`_, `pr#3826 <http://github.com/ceph/ceph/pull/3826>`_, Joao Eduardo Luis)
-* objecter: fix map skipping (`issue#9986 <http://tracker.ceph.com/issues/9986>`_, `pr#3952 <http://github.com/ceph/ceph/pull/3952>`_, Ding Dinghua)
-* osd: cache tiering: fix the atime logic of the eviction (`issue#9915 <http://tracker.ceph.com/issues/9915>`_, `pr#3949 <http://github.com/ceph/ceph/pull/3949>`_, Zhiqiang Wang)
-* osd: cancel_pull: requeue waiters (`issue#11244 <http://tracker.ceph.com/issues/11244>`_, `pr#4415 <http://github.com/ceph/ceph/pull/4415>`_, Samuel Just)
-* osd: check that source OSD is valid for MOSDRepScrub (`issue#9555 <http://tracker.ceph.com/issues/9555>`_, `pr#3947 <http://github.com/ceph/ceph/pull/3947>`_, Sage Weil)
-* osd: DBObjectMap: lock header_lock on sync() (`issue#9891 <http://tracker.ceph.com/issues/9891>`_, `pr#3948 <http://github.com/ceph/ceph/pull/3948>`_, Samuel Just)
-* osd: do not ignore deleted pgs on startup (`issue#10617 <http://tracker.ceph.com/issues/10617>`_, `pr#3933 <http://github.com/ceph/ceph/pull/3933>`_, Sage Weil)
-* osd: ENOENT on clone (`issue#11199 <http://tracker.ceph.com/issues/11199>`_, `pr#4385 <http://github.com/ceph/ceph/pull/4385>`_, Samuel Just)
-* osd: erasure-code-profile set races with erasure-code-profile rm (`issue#11144 <http://tracker.ceph.com/issues/11144>`_, `pr#4383 <http://github.com/ceph/ceph/pull/4383>`_, Loic Dachary)
-* osd: FAILED assert(soid < scrubber.start || soid >= scrubber.end) (`issue#11156 <http://tracker.ceph.com/issues/11156>`_, `pr#4185 <http://github.com/ceph/ceph/pull/4185>`_, Samuel Just)
-* osd: FileJournal: fix journalq population in do_read_entry() (`issue#6003 <http://tracker.ceph.com/issues/6003>`_, `pr#3960 <http://github.com/ceph/ceph/pull/3960>`_, Samuel Just)
-* osd: fix negative degraded objects during backfilling (`issue#7737 <http://tracker.ceph.com/issues/7737>`_, `pr#4021 <http://github.com/ceph/ceph/pull/4021>`_, Guang Yang)
-* osd: get the currently atime of the object in cache pool for eviction (`issue#9985 <http://tracker.ceph.com/issues/9985>`_, `pr#3950 <http://github.com/ceph/ceph/pull/3950>`_, Sage Weil)
-* osd: load_pgs: we need to handle the case where an upgrade from earlier versions which ignored non-existent pgs resurrects a pg with a prehistoric osdmap (`issue#11429 <http://tracker.ceph.com/issues/11429>`_, `pr#4556 <http://github.com/ceph/ceph/pull/4556>`_, Samuel Just)
-* osd: ObjectStore: Don't use largest_data_off to calc data_align. (`issue#10014 <http://tracker.ceph.com/issues/10014>`_, `pr#3954 <http://github.com/ceph/ceph/pull/3954>`_, Jianpeng Ma)
-* osd: osd_types: op_queue_age_hist and fs_perf_stat should be in osd_stat_t::o... (`issue#10259 <http://tracker.ceph.com/issues/10259>`_, `pr#3827 <http://github.com/ceph/ceph/pull/3827>`_, Samuel Just)
-* osd: PG::actingset should be used when checking the number of acting OSDs for... (`issue#11454 <http://tracker.ceph.com/issues/11454>`_, `pr#4453 <http://github.com/ceph/ceph/pull/4453>`_, Guang Yang)
-* osd: PG::all_unfound_are_queried_or_lost for non-existent osds (`issue#10976 <http://tracker.ceph.com/issues/10976>`_, `pr#4416 <http://github.com/ceph/ceph/pull/4416>`_, Mykola Golub)
-* osd: PG: always clear_primary_state (`issue#10059 <http://tracker.ceph.com/issues/10059>`_, `pr#3955 <http://github.com/ceph/ceph/pull/3955>`_, Samuel Just)
-* osd: PGLog.h: 279: FAILED assert(log.log.size() == log_keys_debug.size()) (`issue#10718 <http://tracker.ceph.com/issues/10718>`_, `pr#4382 <http://github.com/ceph/ceph/pull/4382>`_, Samuel Just)
-* osd: PGLog: include rollback_info_trimmed_to in (read|write)_log (`issue#10157 <http://tracker.ceph.com/issues/10157>`_, `pr#3964 <http://github.com/ceph/ceph/pull/3964>`_, Samuel Just)
-* osd: pg stuck stale after create with activation delay (`issue#11197 <http://tracker.ceph.com/issues/11197>`_, `pr#4384 <http://github.com/ceph/ceph/pull/4384>`_, Samuel Just)
-* osd: ReplicatedPG: fail a non-blocking flush if the object is being scrubbed (`issue#8011 <http://tracker.ceph.com/issues/8011>`_, `pr#3943 <http://github.com/ceph/ceph/pull/3943>`_, Samuel Just)
-* osd: ReplicatedPG::on_change: clean up callbacks_for_degraded_object (`issue#8753 <http://tracker.ceph.com/issues/8753>`_, `pr#3940 <http://github.com/ceph/ceph/pull/3940>`_, Samuel Just)
-* osd: ReplicatedPG::scan_range: an object can disappear between the list and t... (`issue#10150 <http://tracker.ceph.com/issues/10150>`_, `pr#3962 <http://github.com/ceph/ceph/pull/3962>`_, Samuel Just)
-* osd: requeue blocked op before flush it was blocked on (`issue#10512 <http://tracker.ceph.com/issues/10512>`_, `pr#3931 <http://github.com/ceph/ceph/pull/3931>`_, Sage Weil)
-* rgw: check for timestamp for s3 keystone auth (`issue#10062 <http://tracker.ceph.com/issues/10062>`_, `pr#3958 <http://github.com/ceph/ceph/pull/3958>`_, Abhishek Lekshmanan)
-* rgw: civetweb should use unique request id (`issue#11720 <http://tracker.ceph.com/issues/11720>`_, `pr#4780 <http://github.com/ceph/ceph/pull/4780>`_, Orit Wasserman)
-* rgw: don't allow negative / invalid content length (`issue#11890 <http://tracker.ceph.com/issues/11890>`_, `pr#4829 <http://github.com/ceph/ceph/pull/4829>`_, Yehuda Sadeh)
-* rgw: fail s3 POST auth if keystone not configured (`issue#10698 <http://tracker.ceph.com/issues/10698>`_, `pr#3966 <http://github.com/ceph/ceph/pull/3966>`_, Yehuda Sadeh)
-* rgw: flush xml header on get acl request (`issue#10106 <http://tracker.ceph.com/issues/10106>`_, `pr#3961 <http://github.com/ceph/ceph/pull/3961>`_, Yehuda Sadeh)
-* rgw: generate new tag for object when setting object attrs (`issue#11256 <http://tracker.ceph.com/issues/11256>`_, `pr#4571 <http://github.com/ceph/ceph/pull/4571>`_, Yehuda Sadeh)
-* rgw: generate the "Date" HTTP header for civetweb. (`issue#11871,11891 <http://tracker.ceph.com/issues/11871,11891>`_, `pr#4851 <http://github.com/ceph/ceph/pull/4851>`_, Radoslaw Zarzynski)
-* rgw: keystone token cache does not work correctly (`issue#11125 <http://tracker.ceph.com/issues/11125>`_, `pr#4414 <http://github.com/ceph/ceph/pull/4414>`_, Yehuda Sadeh)
-* rgw: merge manifests correctly when there's prefix override (`issue#11622 <http://tracker.ceph.com/issues/11622>`_, `pr#4697 <http://github.com/ceph/ceph/pull/4697>`_, Yehuda Sadeh)
-* rgw: send appropriate op to cancel bucket index pending operation (`issue#10770 <http://tracker.ceph.com/issues/10770>`_, `pr#3938 <http://github.com/ceph/ceph/pull/3938>`_, Yehuda Sadeh)
-* rgw: shouldn't need to disable rgw_socket_path if frontend is configured (`issue#11160 <http://tracker.ceph.com/issues/11160>`_, `pr#4275 <http://github.com/ceph/ceph/pull/4275>`_, Yehuda Sadeh)
-* rgw: Swift API. Dump container's custom metadata. (`issue#10665 <http://tracker.ceph.com/issues/10665>`_, `pr#3934 <http://github.com/ceph/ceph/pull/3934>`_, Dmytro Iurchenko)
-* rgw: Swift API. Support for X-Remove-Container-Meta-{key} header. (`issue#10475 <http://tracker.ceph.com/issues/10475>`_, `pr#3929 <http://github.com/ceph/ceph/pull/3929>`_, Dmytro Iurchenko)
-* rgw: use correct objv_tracker for bucket instance (`issue#11416 <http://tracker.ceph.com/issues/11416>`_, `pr#4379 <http://github.com/ceph/ceph/pull/4379>`_, Yehuda Sadeh)
-* tests: force checkout of submodules (`issue#11157 <http://tracker.ceph.com/issues/11157>`_, `pr#4079 <http://github.com/ceph/ceph/pull/4079>`_, Loic Dachary)
-* tools: Backport ceph-objectstore-tool changes to firefly (`issue#12327 <http://tracker.ceph.com/issues/12327>`_, `pr#3866 <http://github.com/ceph/ceph/pull/3866>`_, David Zafman)
-* tools: ceph-objectstore-tool: Output only unsupported features when incomatible (`issue#11176 <http://tracker.ceph.com/issues/11176>`_, `pr#4126 <http://github.com/ceph/ceph/pull/4126>`_, David Zafman)
-* tools: ceph-objectstore-tool: Use exit status 11 for incompatible import attemp... (`issue#11139 <http://tracker.ceph.com/issues/11139>`_, `pr#4129 <http://github.com/ceph/ceph/pull/4129>`_, David Zafman)
-* tools: Fix do_autogen.sh so that -L is allowed (`issue#11303 <http://tracker.ceph.com/issues/11303>`_, `pr#4247 <http://github.com/ceph/ceph/pull/4247>`_, Alfredo Deza)
+* build/ops: stone.spec.in: package mkstonefs on EL6 (`issue#11955 <http://tracker.stone.com/issues/11955>`_, `pr#4924 <http://github.com/stone/stone/pull/4924>`_, Ken Dreyer)
+* build/ops: debian: stone-test and rest-bench debug packages should require their respective binary packages (`issue#11673 <http://tracker.stone.com/issues/11673>`_, `pr#4766 <http://github.com/stone/stone/pull/4766>`_, Ken Dreyer)
+* build/ops: run RGW as root (`issue#11453 <http://tracker.stone.com/issues/11453>`_, `pr#4638 <http://github.com/stone/stone/pull/4638>`_, Ken Dreyer)
+* common: messages/MWatchNotify: include an error code in the message (`issue#9193 <http://tracker.stone.com/issues/9193>`_, `pr#3944 <http://github.com/stone/stone/pull/3944>`_, Sage Weil)
+* common: Rados.shutdown() dies with Illegal instruction (core dumped) (`issue#10153 <http://tracker.stone.com/issues/10153>`_, `pr#3963 <http://github.com/stone/stone/pull/3963>`_, Federico Simoncelli)
+* common: SimpleMessenger: allow RESETSESSION whenever we forget an endpoint (`issue#10080 <http://tracker.stone.com/issues/10080>`_, `pr#3915 <http://github.com/stone/stone/pull/3915>`_, Greg Farnum)
+* common: WorkQueue: make wait timeout on empty queue configurable (`issue#10817 <http://tracker.stone.com/issues/10817>`_, `pr#3941 <http://github.com/stone/stone/pull/3941>`_, Samuel Just)
+* crush: set_choose_tries = 100 for erasure code rulesets (`issue#10353 <http://tracker.stone.com/issues/10353>`_, `pr#3824 <http://github.com/stone/stone/pull/3824>`_, Loic Dachary)
+* doc: backport stone-disk man page to Firefly (`issue#10724 <http://tracker.stone.com/issues/10724>`_, `pr#3936 <http://github.com/stone/stone/pull/3936>`_, Nilamdyuti Goswami)
+* doc: Fix stone command manpage to match stone -h (`issue#10676 <http://tracker.stone.com/issues/10676>`_, `pr#3996 <http://github.com/stone/stone/pull/3996>`_, David Zafman)
+* fs: mount.stone: avoid spurious error message (`issue#10351 <http://tracker.stone.com/issues/10351>`_, `pr#3927 <http://github.com/stone/stone/pull/3927>`_, Yan, Zheng)
+* librados: Fix memory leak in python rados bindings (`issue#10723 <http://tracker.stone.com/issues/10723>`_, `pr#3935 <http://github.com/stone/stone/pull/3935>`_, Josh Durgin)
+* librados: fix resources leakage in RadosClient::connect() (`issue#10425 <http://tracker.stone.com/issues/10425>`_, `pr#3828 <http://github.com/stone/stone/pull/3828>`_, Radoslaw Zarzynski)
+* librados: Translate operation flags from C APIs (`issue#10497 <http://tracker.stone.com/issues/10497>`_, `pr#3930 <http://github.com/stone/stone/pull/3930>`_, Matt Richards)
+* librbd: acquire cache_lock before refreshing parent (`issue#5488 <http://tracker.stone.com/issues/5488>`_, `pr#4206 <http://github.com/stone/stone/pull/4206>`_, Jason Dillaman)
+* librbd: snap_remove should ignore -ENOENT errors (`issue#11113 <http://tracker.stone.com/issues/11113>`_, `pr#4245 <http://github.com/stone/stone/pull/4245>`_, Jason Dillaman)
+* mds: fix assertion caused by system clock backwards (`issue#11053 <http://tracker.stone.com/issues/11053>`_, `pr#3970 <http://github.com/stone/stone/pull/3970>`_, Yan, Zheng)
+* mon: ignore osd failures from before up_from (`issue#10762 <http://tracker.stone.com/issues/10762>`_, `pr#3937 <http://github.com/stone/stone/pull/3937>`_, Sage Weil)
+* mon: MonCap: take EntityName instead when expanding profiles (`issue#10844 <http://tracker.stone.com/issues/10844>`_, `pr#3942 <http://github.com/stone/stone/pull/3942>`_, Joao Eduardo Luis)
+* mon: Monitor: fix timecheck rounds period (`issue#10546 <http://tracker.stone.com/issues/10546>`_, `pr#3932 <http://github.com/stone/stone/pull/3932>`_, Joao Eduardo Luis)
+* mon: OSDMonitor: do not trust small values in osd epoch cache (`issue#10787 <http://tracker.stone.com/issues/10787>`_, `pr#3823 <http://github.com/stone/stone/pull/3823>`_, Sage Weil)
+* mon: OSDMonitor: fallback to json-pretty in case of invalid formatter (`issue#9538 <http://tracker.stone.com/issues/9538>`_, `pr#4475 <http://github.com/stone/stone/pull/4475>`_, Loic Dachary)
+* mon: PGMonitor: several stats output error fixes (`issue#10257 <http://tracker.stone.com/issues/10257>`_, `pr#3826 <http://github.com/stone/stone/pull/3826>`_, Joao Eduardo Luis)
+* objecter: fix map skipping (`issue#9986 <http://tracker.stone.com/issues/9986>`_, `pr#3952 <http://github.com/stone/stone/pull/3952>`_, Ding Dinghua)
+* osd: cache tiering: fix the atime logic of the eviction (`issue#9915 <http://tracker.stone.com/issues/9915>`_, `pr#3949 <http://github.com/stone/stone/pull/3949>`_, Zhiqiang Wang)
+* osd: cancel_pull: requeue waiters (`issue#11244 <http://tracker.stone.com/issues/11244>`_, `pr#4415 <http://github.com/stone/stone/pull/4415>`_, Samuel Just)
+* osd: check that source OSD is valid for MOSDRepScrub (`issue#9555 <http://tracker.stone.com/issues/9555>`_, `pr#3947 <http://github.com/stone/stone/pull/3947>`_, Sage Weil)
+* osd: DBObjectMap: lock header_lock on sync() (`issue#9891 <http://tracker.stone.com/issues/9891>`_, `pr#3948 <http://github.com/stone/stone/pull/3948>`_, Samuel Just)
+* osd: do not ignore deleted pgs on startup (`issue#10617 <http://tracker.stone.com/issues/10617>`_, `pr#3933 <http://github.com/stone/stone/pull/3933>`_, Sage Weil)
+* osd: ENOENT on clone (`issue#11199 <http://tracker.stone.com/issues/11199>`_, `pr#4385 <http://github.com/stone/stone/pull/4385>`_, Samuel Just)
+* osd: erasure-code-profile set races with erasure-code-profile rm (`issue#11144 <http://tracker.stone.com/issues/11144>`_, `pr#4383 <http://github.com/stone/stone/pull/4383>`_, Loic Dachary)
+* osd: FAILED assert(soid < scrubber.start || soid >= scrubber.end) (`issue#11156 <http://tracker.stone.com/issues/11156>`_, `pr#4185 <http://github.com/stone/stone/pull/4185>`_, Samuel Just)
+* osd: FileJournal: fix journalq population in do_read_entry() (`issue#6003 <http://tracker.stone.com/issues/6003>`_, `pr#3960 <http://github.com/stone/stone/pull/3960>`_, Samuel Just)
+* osd: fix negative degraded objects during backfilling (`issue#7737 <http://tracker.stone.com/issues/7737>`_, `pr#4021 <http://github.com/stone/stone/pull/4021>`_, Guang Yang)
+* osd: get the currently atime of the object in cache pool for eviction (`issue#9985 <http://tracker.stone.com/issues/9985>`_, `pr#3950 <http://github.com/stone/stone/pull/3950>`_, Sage Weil)
+* osd: load_pgs: we need to handle the case where an upgrade from earlier versions which ignored non-existent pgs resurrects a pg with a prehistoric osdmap (`issue#11429 <http://tracker.stone.com/issues/11429>`_, `pr#4556 <http://github.com/stone/stone/pull/4556>`_, Samuel Just)
+* osd: ObjectStore: Don't use largest_data_off to calc data_align. (`issue#10014 <http://tracker.stone.com/issues/10014>`_, `pr#3954 <http://github.com/stone/stone/pull/3954>`_, Jianpeng Ma)
+* osd: osd_types: op_queue_age_hist and fs_perf_stat should be in osd_stat_t::o... (`issue#10259 <http://tracker.stone.com/issues/10259>`_, `pr#3827 <http://github.com/stone/stone/pull/3827>`_, Samuel Just)
+* osd: PG::actingset should be used when checking the number of acting OSDs for... (`issue#11454 <http://tracker.stone.com/issues/11454>`_, `pr#4453 <http://github.com/stone/stone/pull/4453>`_, Guang Yang)
+* osd: PG::all_unfound_are_queried_or_lost for non-existent osds (`issue#10976 <http://tracker.stone.com/issues/10976>`_, `pr#4416 <http://github.com/stone/stone/pull/4416>`_, Mykola Golub)
+* osd: PG: always clear_primary_state (`issue#10059 <http://tracker.stone.com/issues/10059>`_, `pr#3955 <http://github.com/stone/stone/pull/3955>`_, Samuel Just)
+* osd: PGLog.h: 279: FAILED assert(log.log.size() == log_keys_debug.size()) (`issue#10718 <http://tracker.stone.com/issues/10718>`_, `pr#4382 <http://github.com/stone/stone/pull/4382>`_, Samuel Just)
+* osd: PGLog: include rollback_info_trimmed_to in (read|write)_log (`issue#10157 <http://tracker.stone.com/issues/10157>`_, `pr#3964 <http://github.com/stone/stone/pull/3964>`_, Samuel Just)
+* osd: pg stuck stale after create with activation delay (`issue#11197 <http://tracker.stone.com/issues/11197>`_, `pr#4384 <http://github.com/stone/stone/pull/4384>`_, Samuel Just)
+* osd: ReplicatedPG: fail a non-blocking flush if the object is being scrubbed (`issue#8011 <http://tracker.stone.com/issues/8011>`_, `pr#3943 <http://github.com/stone/stone/pull/3943>`_, Samuel Just)
+* osd: ReplicatedPG::on_change: clean up callbacks_for_degraded_object (`issue#8753 <http://tracker.stone.com/issues/8753>`_, `pr#3940 <http://github.com/stone/stone/pull/3940>`_, Samuel Just)
+* osd: ReplicatedPG::scan_range: an object can disappear between the list and t... (`issue#10150 <http://tracker.stone.com/issues/10150>`_, `pr#3962 <http://github.com/stone/stone/pull/3962>`_, Samuel Just)
+* osd: requeue blocked op before flush it was blocked on (`issue#10512 <http://tracker.stone.com/issues/10512>`_, `pr#3931 <http://github.com/stone/stone/pull/3931>`_, Sage Weil)
+* rgw: check for timestamp for s3 keystone auth (`issue#10062 <http://tracker.stone.com/issues/10062>`_, `pr#3958 <http://github.com/stone/stone/pull/3958>`_, Abhishek Lekshmanan)
+* rgw: civetweb should use unique request id (`issue#11720 <http://tracker.stone.com/issues/11720>`_, `pr#4780 <http://github.com/stone/stone/pull/4780>`_, Orit Wasserman)
+* rgw: don't allow negative / invalid content length (`issue#11890 <http://tracker.stone.com/issues/11890>`_, `pr#4829 <http://github.com/stone/stone/pull/4829>`_, Yehuda Sadeh)
+* rgw: fail s3 POST auth if keystone not configured (`issue#10698 <http://tracker.stone.com/issues/10698>`_, `pr#3966 <http://github.com/stone/stone/pull/3966>`_, Yehuda Sadeh)
+* rgw: flush xml header on get acl request (`issue#10106 <http://tracker.stone.com/issues/10106>`_, `pr#3961 <http://github.com/stone/stone/pull/3961>`_, Yehuda Sadeh)
+* rgw: generate new tag for object when setting object attrs (`issue#11256 <http://tracker.stone.com/issues/11256>`_, `pr#4571 <http://github.com/stone/stone/pull/4571>`_, Yehuda Sadeh)
+* rgw: generate the "Date" HTTP header for civetweb. (`issue#11871,11891 <http://tracker.stone.com/issues/11871,11891>`_, `pr#4851 <http://github.com/stone/stone/pull/4851>`_, Radoslaw Zarzynski)
+* rgw: keystone token cache does not work correctly (`issue#11125 <http://tracker.stone.com/issues/11125>`_, `pr#4414 <http://github.com/stone/stone/pull/4414>`_, Yehuda Sadeh)
+* rgw: merge manifests correctly when there's prefix override (`issue#11622 <http://tracker.stone.com/issues/11622>`_, `pr#4697 <http://github.com/stone/stone/pull/4697>`_, Yehuda Sadeh)
+* rgw: send appropriate op to cancel bucket index pending operation (`issue#10770 <http://tracker.stone.com/issues/10770>`_, `pr#3938 <http://github.com/stone/stone/pull/3938>`_, Yehuda Sadeh)
+* rgw: shouldn't need to disable rgw_socket_path if frontend is configured (`issue#11160 <http://tracker.stone.com/issues/11160>`_, `pr#4275 <http://github.com/stone/stone/pull/4275>`_, Yehuda Sadeh)
+* rgw: Swift API. Dump container's custom metadata. (`issue#10665 <http://tracker.stone.com/issues/10665>`_, `pr#3934 <http://github.com/stone/stone/pull/3934>`_, Dmytro Iurchenko)
+* rgw: Swift API. Support for X-Remove-Container-Meta-{key} header. (`issue#10475 <http://tracker.stone.com/issues/10475>`_, `pr#3929 <http://github.com/stone/stone/pull/3929>`_, Dmytro Iurchenko)
+* rgw: use correct objv_tracker for bucket instance (`issue#11416 <http://tracker.stone.com/issues/11416>`_, `pr#4379 <http://github.com/stone/stone/pull/4379>`_, Yehuda Sadeh)
+* tests: force checkout of submodules (`issue#11157 <http://tracker.stone.com/issues/11157>`_, `pr#4079 <http://github.com/stone/stone/pull/4079>`_, Loic Dachary)
+* tools: Backport stone-objectstore-tool changes to firefly (`issue#12327 <http://tracker.stone.com/issues/12327>`_, `pr#3866 <http://github.com/stone/stone/pull/3866>`_, David Zafman)
+* tools: stone-objectstore-tool: Output only unsupported features when incomatible (`issue#11176 <http://tracker.stone.com/issues/11176>`_, `pr#4126 <http://github.com/stone/stone/pull/4126>`_, David Zafman)
+* tools: stone-objectstore-tool: Use exit status 11 for incompatible import attemp... (`issue#11139 <http://tracker.stone.com/issues/11139>`_, `pr#4129 <http://github.com/stone/stone/pull/4129>`_, David Zafman)
+* tools: Fix do_autogen.sh so that -L is allowed (`issue#11303 <http://tracker.stone.com/issues/11303>`_, `pr#4247 <http://github.com/stone/stone/pull/4247>`_, Alfredo Deza)
 
 v0.80.9 Firefly
 ===============
@@ -185,7 +185,7 @@ v0.80.9 Firefly
 This is a bugfix release for firefly.  It fixes a performance
 regression in librbd, an important CRUSH misbehavior (see below), and
 several RGW bugs.  We have also backported support for flock/fcntl
-locks to ceph-fuse and libcephfs.
+locks to stone-fuse and libstonefs.
 
 We recommend that all Firefly users upgrade.
 
@@ -207,7 +207,7 @@ Adjusting CRUSH maps
 
   In order to set the new tunable to correct the behavior::
 
-     ceph osd crush set-tunable straw_calc_version 1
+     stone osd crush set-tunable straw_calc_version 1
 
   Note that this change will have no immediate effect.  However, from
   this point forward, any 'straw' bucket in your CRUSH map that is
@@ -217,7 +217,7 @@ Adjusting CRUSH maps
   You can estimate how much rebalancing will eventually be necessary
   on your cluster with::
 
-     ceph osd getcrushmap -o /tmp/cm
+     stone osd getcrushmap -o /tmp/cm
      crushtool -i /tmp/cm --num-rep 3 --test --show-mappings > /tmp/a 2>&1
      crushtool -i /tmp/cm --set-straw-calc-version 1 -o /tmp/cm2
      crushtool -i /tmp/cm2 --reweight -o /tmp/cm2
@@ -230,7 +230,7 @@ Adjusting CRUSH maps
 
    You can force all of this rebalancing to happen at once with::
 
-     ceph osd crush reweight-all
+     stone osd crush reweight-all
 
    Otherwise, it will happen at some unknown point in the future when
    CRUSH weights are next adjusted.
@@ -238,7 +238,7 @@ Adjusting CRUSH maps
 Notable Changes
 ---------------
 
-* ceph-fuse: flock, fcntl lock support (Yan, Zheng, Greg Farnum)
+* stone-fuse: flock, fcntl lock support (Yan, Zheng, Greg Farnum)
 * crush: fix straw bucket weight calculation, add straw_calc_version tunable (#10095 Sage Weil)
 * crush: fix tree bucket (Rongzu Zhu)
 * crush: fix underflow of tree weights (Loic Dachary, Sage Weil)
@@ -287,17 +287,17 @@ Notable Changes
 ---------------
 
 * build: remove stack-execute bit from assembled code sections (#10114 Dan Mick)
-* ceph-disk: fix dmcrypt key permissions (#9785 Loic Dachary)
-* ceph-disk: fix keyring location (#9653 Loic Dachary)
-* ceph-disk: make partition checks more robust (#9721 #9665 Loic Dachary)
-* ceph: cleanly shut down librados context on shutdown (#8797 Dan Mick)
+* stone-disk: fix dmcrypt key permissions (#9785 Loic Dachary)
+* stone-disk: fix keyring location (#9653 Loic Dachary)
+* stone-disk: make partition checks more robust (#9721 #9665 Loic Dachary)
+* stone: cleanly shut down librados context on shutdown (#8797 Dan Mick)
 * common: add $cctid config metavariable (#6228 Adam Crume)
 * crush: align rule and ruleset ids (#9675 Xiaoxi Chen)
 * crush: fix negative weight bug during create_or_move_item (#9998 Pawel Sadowski)
 * crush: fix potential buffer overflow in erasure rules (#9492 Johnu George)
-* debian: fix python-ceph -> ceph file movement (Sage Weil)
-* libcephfs,ceph-fuse: fix flush tid wraparound bug (#9869 Greg Farnum, Yan, Zheng)
-* libcephfs: close fd befure umount (#10415 Yan, Zheng)
+* debian: fix python-stone -> stone file movement (Sage Weil)
+* libstonefs,stone-fuse: fix flush tid wraparound bug (#9869 Greg Farnum, Yan, Zheng)
+* libstonefs: close fd befure umount (#10415 Yan, Zheng)
 * librados: fix crash from C API when read timeout is enabled (#9582 Sage Weil)
 * librados: handle reply race with pool deletion (#10372 Sage Weil)
 * librbd: cap memory utilization for read requests (Jason Dillaman)
@@ -382,7 +382,7 @@ also important fixes in librados, with the watch/notify mechanism used
 by librbd, and in radosgw.
 
 A few pieces of new functionality of been backported, including improved
-'ceph df' output (view amount of writeable space per pool), support for
+'stone df' output (view amount of writeable space per pool), support for
 non-default cluster names when using sysvinit or systemd, and improved
 (and fixed) support for dmcrypt.
 
@@ -397,9 +397,9 @@ Notable Changes
 * build: fix build on alpha (Michael Cree, Dmitry Smirnov)
 * build: fix build on hppa (Dmitry Smirnov)
 * build: fix yasm detection on x32 arch (Sage Weil)
-* ceph-disk: fix 'list' function with dmcrypt (Sage Weil)
-* ceph-disk: fix dmcrypt support (Alfredo Deza)
-* ceph: allow non-default cluster to be specified (#8944)
+* stone-disk: fix 'list' function with dmcrypt (Sage Weil)
+* stone-disk: fix dmcrypt support (Alfredo Deza)
+* stone: allow non-default cluster to be specified (#8944)
 * common: fix dup log messages to mon (#9080 Sage Weil)
 * global: write pid file when -f is used (systemd, upstart) (Alexandre Oliva)
 * librados: fix crash when read timeout is enabled (#9362 Matthias Kiefer, Sage Weil)
@@ -419,7 +419,7 @@ Notable Changes
 * mon: fix cache tier rounding error on i386 (Sage Weil)
 * mon: fix occasional memory leak (#9176 Sage Weil)
 * mon: fix reported latency for 'osd perf' (#9269 Samuel Just)
-* mon: include 'max avail' in 'ceph df' output (Sage Weil, Xioaxi Chen)
+* mon: include 'max avail' in 'stone df' output (Sage Weil, Xioaxi Chen)
 * mon: persistently mark pools where scrub may find incomplete clones (#8882 Sage Weil)
 * mon: preload erasure plugins (Loic Dachary)
 * mon: prevent cache-specific settings on non-tier pools (#8696 Joao Eduardo Luis)
@@ -482,7 +482,7 @@ are using upstart, systemd, or radosgw.
 Notable Changes
 ---------------
 
-* ceph-dencoder: do not needlessly link to librgw, librados, etc. (Sage Weil)
+* stone-dencoder: do not needlessly link to librgw, librados, etc. (Sage Weil)
 * do not needlessly link binaries to leveldb (Sage Weil)
 * mon: fix mon crash when no auth keys are present (#8851, Joao Eduardo Luis)
 * osd: fix cleanup (and avoid occasional crash) during shutdown (#7981, Sage Weil)
@@ -498,7 +498,7 @@ v0.80.4 Firefly
 ===============
 
 This Firefly point release fixes an potential data corruption problem
-when ceph-osd daemons run on top of XFS and service Firefly librbd
+when stone-osd daemons run on top of XFS and service Firefly librbd
 clients.  A recently added allocation hint that RBD utilizes triggers
 an XFS bug on some kernels (Linux 3.2, and likely others) that leads
 to data corruption and deep-scrub errors (and inconsistent PGs).  This
@@ -545,9 +545,9 @@ bugs, and an irritating and unnecessary feature bit check that
 prevents older clients from communicating with a cluster with any
 erasure coded pools.
 
-One someone large change in this point release is that the ceph RPM
-package is separated into a ceph and ceph-common package, similar to
-Debian.  The ceph-common package contains just the client libraries
+One someone large change in this point release is that the stone RPM
+package is separated into a stone and stone-common package, similar to
+Debian.  The stone-common package contains just the client libraries
 without any of the server-side daemons.
 
 We recommend that all v0.80.x Firefly users skip this release and use
@@ -556,17 +556,17 @@ v0.80.3.
 Notable Changes
 ---------------
 
-* ceph-disk: better debug logging (Alfredo Deza)
-* ceph-disk: fix preparation of OSDs with dmcrypt (#6700, Stephen F Taylor)
-* ceph-disk: partprobe on prepare to fix dm-crypt (#6966, Eric Eastman)
+* stone-disk: better debug logging (Alfredo Deza)
+* stone-disk: fix preparation of OSDs with dmcrypt (#6700, Stephen F Taylor)
+* stone-disk: partprobe on prepare to fix dm-crypt (#6966, Eric Eastman)
 * do not require ERASURE_CODE feature from clients (#8556, Sage Weil)
-* libcephfs-java: build with older JNI headers (Greg Farnum)
-* libcephfs-java: fix build with gcj-jdk (Dmitry Smirnov)
+* libstonefs-java: build with older JNI headers (Greg Farnum)
+* libstonefs-java: fix build with gcj-jdk (Dmitry Smirnov)
 * librados: fix osd op tid for redirected ops (#7588, Samuel Just)
 * librados: fix rados_pool_list buffer bounds checks (#8447, Sage Weil)
 * librados: resend ops when pool overlay changes (#8305, Sage Weil)
-* librbd, ceph-fuse: reduce CPU overhead for clean object check in cache (Haomai Wang)
-* mon: allow deletion of cephfs pools (John Spray)
+* librbd, stone-fuse: reduce CPU overhead for clean object check in cache (Haomai Wang)
+* mon: allow deletion of stonefs pools (John Spray)
 * mon: fix default pool ruleset choice (#8373, John Spray)
 * mon: fix health summary for mon low disk warning (Sage Weil)
 * mon: fix 'osd pool set <pool> cache_target_full_ratio' (Geoffrey Hartz)
@@ -595,7 +595,7 @@ Notable Changes
 * rgw: fix buffer overflow for long instance ids (#8608, Yehuda Sadeh)
 * rgw: fix entity permission check on metadata put (#8428, Yehuda Sadeh)
 * rgw: fix multipart retry race (#8269, Yehuda Sadeh)
-* rpm: split ceph into ceph and ceph-common RPMs (Sandon Van Ness, Dan Mick)
+* rpm: split stone into stone and stone-common RPMs (Sandon Van Ness, Dan Mick)
 * sysvinit: continue startin daemons after failure doing mount (#8554, Sage Weil)
 
 For more detailed information, see :download:`the complete changelog <../changelog/v0.80.2.txt>`.
@@ -613,7 +613,7 @@ Notable Changes
 * rgw: fix stripe calculation for manifest objects (Yehuda Sadeh)
 * rgw: improve handling, memory usage for abort reads (Yehuda Sadeh)
 * rgw: send Swift user manifest HTTP header (Yehuda Sadeh)
-* libcephfs, ceph-fuse: expose MDS session state via admin socket (Yan, Zheng)
+* libstonefs, stone-fuse: expose MDS session state via admin socket (Yan, Zheng)
 * osd: add simple throttle for snap trimming (Sage Weil)
 * monclient: fix possible hang from ill-timed monitor connection failure (Sage Weil)
 * osd: fix trimming of past HitSets (Sage Weil)
@@ -638,12 +638,12 @@ and improvements have been made across the code base.  Highlights include:
   recently accessed objects with automatic demotion of colder data to
   a base tier.  Typically the cache pool is backed by faster storage
   devices like SSDs.
-* *Primary affinity*: Ceph now has the ability to skew selection of
+* *Primary affinity*: Stone now has the ability to skew selection of
   OSDs as the "primary" copy, which allows the read workload to be
   cheaply skewed away from parts of the cluster without migrating any
   data.
 * *Key/value OSD backend* (experimental): An alternative storage backend
-  for Ceph OSD processes that puts all data in a key/value database like
+  for Stone OSD processes that puts all data in a key/value database like
   leveldb.  This provides better performance for workloads dominated by
   key/value operations (like radosgw bucket indices).
 * *Standalone radosgw* (experimental): The radosgw process can now run
@@ -651,9 +651,9 @@ and improvements have been made across the code base.  Highlights include:
   fastcgi.  This simplifies deployment and can improve performance.
 
 We expect to maintain a series of stable releases based on v0.80
-Firefly for as much as a year.  In the meantime, development of Ceph
+Firefly for as much as a year.  In the meantime, development of Stone
 continues with the next release, Giant, which will feature work on the
-CephFS distributed file system, more alternative storage backends
+StoneFS distributed file system, more alternative storage backends
 (like RocksDB and f2fs), RDMA support, support for pyramid erasure
 codes, and additional functionality in the block device (RBD) like
 copy-on-read and multisite mirroring.
@@ -668,7 +668,7 @@ Upgrade Sequencing
   documentation.
 
 * We recommend adding the following to the [mon] section of your
-  ceph.conf prior to upgrade::
+  stone.conf prior to upgrade::
 
     mon warn on legacy crush tunables = false
 
@@ -685,9 +685,9 @@ Upgrade Sequencing
     #. OSDs
     #. MDSs and/or radosgw
 
-  If the ceph-mds daemon is restarted first, it will wait until all
+  If the stone-mds daemon is restarted first, it will wait until all
   OSDs have been upgraded before finishing its startup sequence.  If
-  the ceph-mon daemons are not restarted prior to the ceph-osd
+  the stone-mon daemons are not restarted prior to the stone-osd
   daemons, they will not correctly register their new capabilities
   with the cluster and new features may not be usable until they are
   restarted a second time.
@@ -721,7 +721,7 @@ Upgrading from v0.79
   values for the aio variants.
 
 * The radosgw init script (sysvinit) how requires that the 'host = ...' line in
-  ceph.conf, if present, match the short hostname (the output of 'hostname -s'),
+  stone.conf, if present, match the short hostname (the output of 'hostname -s'),
   not the fully qualified hostname or the (occasionally non-short) output of
   'hostname'.  Failure to adjust this when upgrading from emperor or dumpling
   may prevent the radosgw daemon from starting.
@@ -731,11 +731,11 @@ Upgrading from v0.72 Emperor
 
 * See notes above.
 
-* The 'ceph -s' or 'ceph status' command's 'num_in_osds' field in the
+* The 'stone -s' or 'stone status' command's 'num_in_osds' field in the
   JSON and XML output has been changed from a string to an int.
 
-* The recently added 'ceph mds set allow_new_snaps' command's syntax
-  has changed slightly; it is now 'ceph mds set allow_new_snaps true'.
+* The recently added 'stone mds set allow_new_snaps' command's syntax
+  has changed slightly; it is now 'stone mds set allow_new_snaps true'.
   The 'unset' command has been removed; instead, set the value to
   'false'.
 
@@ -749,30 +749,30 @@ Upgrading from v0.72 Emperor
   this behavior should be updated.
 
 * The MDS requires a new OSD operation TMAP2OMAP, added in this release.  When
-  upgrading, be sure to upgrade and restart the ceph-osd daemons before the
-  ceph-mds daemon.  The MDS will refuse to start if any up OSDs do not support
+  upgrading, be sure to upgrade and restart the stone-osd daemons before the
+  stone-mds daemon.  The MDS will refuse to start if any up OSDs do not support
   the new feature.
 
-* The 'ceph mds set_max_mds N' command is now deprecated in favor of
-  'ceph mds set max_mds N'.
+* The 'stone mds set_max_mds N' command is now deprecated in favor of
+  'stone mds set max_mds N'.
 
 * The 'osd pool create ...' syntax has changed for erasure pools.
 
 * The default CRUSH rules and layouts are now using the 'bobtail'
   tunables and defaults.  Upgaded clusters using the old values will
   now present with a health WARN state.  This can be disabled by
-  adding 'mon warn on legacy crush tunables = false' to ceph.conf and
+  adding 'mon warn on legacy crush tunables = false' to stone.conf and
   restarting the monitors.  Alternatively, you can switch to the new
-  tunables with 'ceph osd crush tunables firefly,' but keep in mind
+  tunables with 'stone osd crush tunables firefly,' but keep in mind
   that this will involve moving a *significant* portion of the data
   already stored in the cluster and in a large cluster may take
   several days to complete.  We do not recommend adjusting tunables on a
   production cluster.
 
 * We now default to the 'bobtail' CRUSH tunable values that are first supported
-  by Ceph clients in bobtail (v0.56) and Linux kernel version v3.9.  If you
-  plan to access a newly created Ceph cluster with an older kernel client, you
-  should use 'ceph osd crush tunables legacy' to switch back to the legacy
+  by Stone clients in bobtail (v0.56) and Linux kernel version v3.9.  If you
+  plan to access a newly created Stone cluster with an older kernel client, you
+  should use 'stone osd crush tunables legacy' to switch back to the legacy
   behavior.  Note that making that change will likely result in some data
   movement in the system, so adjust the setting before populating the new
   cluster with data.
@@ -781,11 +781,11 @@ Upgrading from v0.72 Emperor
   clusters) by default.  Support for this flag first appeared in
   v0.64; v0.67 Dumpling is the first major release that supports it.
   It is first supported by the Linux kernel version v3.9.  If you plan
-  to access a newly created Ceph cluster with an older kernel or
-  clients (e.g, librados, librbd) from a pre-dumpling Ceph release,
+  to access a newly created Stone cluster with an older kernel or
+  clients (e.g, librados, librbd) from a pre-dumpling Stone release,
   you should add 'osd pool default flag hashpspool = false' to the
-  '[global]' section of your 'ceph.conf' prior to creating your
-  monitors (e.g., after 'ceph-deploy new' but before 'ceph-deploy mon
+  '[global]' section of your 'stone.conf' prior to creating your
+  monitors (e.g., after 'stone-deploy new' but before 'stone-deploy mon
   create ...').
 
 * The configuration option 'osd pool default crush rule' is deprecated
@@ -793,13 +793,13 @@ Upgrading from v0.72 Emperor
   pool default crush rule' takes precedence for backward compatibility
   and a deprecation warning is displayed when it is used.
 
-* As part of fix for #6796, 'ceph osd pool set <pool> <var> <arg>' now
+* As part of fix for #6796, 'stone osd pool set <pool> <var> <arg>' now
   receives <arg> as an integer instead of a string.  This affects how
   'hashpspool' flag is set/unset: instead of 'true' or 'false', it now
   must be '0' or '1'.
 
 * The behavior of the CRUSH 'indep' choose mode has been changed.  No
-  ceph cluster should have been using this behavior unless someone has
+  stone cluster should have been using this behavior unless someone has
   manually extracted a crush map, modified a CRUSH rule to replace
   'firstn' with 'indep', recompiled, and reinjected the new map into
   the cluster.  If the 'indep' mode is currently in use on a cluster,
@@ -816,14 +816,14 @@ Upgrading from v0.67 Dumpling
 
 * See notes above.
 
-* ceph-fuse and radosgw now use the same default values for the admin
-  socket and log file paths that the other daemons (ceph-osd,
-  ceph-mon, etc.) do.  If you run these daemons as non-root, you may
-  need to adjust your ceph.conf to disable these options or to adjust
-  the permissions on /var/run/ceph and /var/log/ceph.
+* stone-fuse and radosgw now use the same default values for the admin
+  socket and log file paths that the other daemons (stone-osd,
+  stone-mon, etc.) do.  If you run these daemons as non-root, you may
+  need to adjust your stone.conf to disable these options or to adjust
+  the permissions on /var/run/stone and /var/log/stone.
 
 * The MDS now disallows snapshots by default as they are not
-  considered stable.  The command 'ceph mds set allow_snaps' will
+  considered stable.  The command 'stone mds set allow_snaps' will
   enable them.
 
 * For clusters that were created before v0.44 (pre-argonaut, Spring
@@ -848,8 +848,8 @@ Upgrading from v0.67 Dumpling
   care of that. This has never really worked correctly and we were leaking an
   object
 
-* 'ceph osd crush set <id> <weight> <loc..>' no longer adds the osd to the
-  specified location, as that's a job for 'ceph osd crush add'.  It will
+* 'stone osd crush set <id> <weight> <loc..>' no longer adds the osd to the
+  specified location, as that's a job for 'stone osd crush add'.  It will
   however continue to work just the same as long as the osd already exists
   in the crush map.
 
@@ -878,8 +878,8 @@ Upgrading from v0.67 Dumpling
 Notable changes since v0.79
 ---------------------------
 
-* ceph-fuse, libcephfs: fix several caching bugs (Yan, Zheng)
-* ceph-fuse: trim inodes in response to mds memory pressure (Yan, Zheng)
+* stone-fuse, libstonefs: fix several caching bugs (Yan, Zheng)
+* stone-fuse: trim inodes in response to mds memory pressure (Yan, Zheng)
 * librados: fix inconsistencies in API error values (David Zafman)
 * librados: fix watch operations with cache pools (Sage Weil)
 * librados: new snap rollback operation (David Zafman)
@@ -905,17 +905,17 @@ Notable changes since v0.72 Emperor
 
 * buffer: some zero-copy groundwork (Josh Durgin)
 * build: misc improvements (Ken Dreyer)
-* ceph-conf: stop creating bogus log files (Josh Durgin, Sage Weil)
-* ceph-crush-location: new hook for setting CRUSH location of osd daemons on start)
-* ceph-disk: avoid fd0 (Loic Dachary)
-* ceph-disk: generalize path names, add tests (Loic Dachary)
-* ceph-disk: misc improvements for puppet (Loic Dachary)
-* ceph-disk: several bug fixes (Loic Dachary)
-* ceph-fuse: fix race for sync reads (Sage Weil)
-* ceph-fuse, libcephfs: fix several caching bugs (Yan, Zheng)
-* ceph-fuse: trim inodes in response to mds memory pressure (Yan, Zheng)
-* ceph-kvstore-tool: expanded command set and capabilities (Joao Eduardo Luis)
-* ceph.spec: fix build dependency (Loic Dachary)
+* stone-conf: stop creating bogus log files (Josh Durgin, Sage Weil)
+* stone-crush-location: new hook for setting CRUSH location of osd daemons on start)
+* stone-disk: avoid fd0 (Loic Dachary)
+* stone-disk: generalize path names, add tests (Loic Dachary)
+* stone-disk: misc improvements for puppet (Loic Dachary)
+* stone-disk: several bug fixes (Loic Dachary)
+* stone-fuse: fix race for sync reads (Sage Weil)
+* stone-fuse, libstonefs: fix several caching bugs (Yan, Zheng)
+* stone-fuse: trim inodes in response to mds memory pressure (Yan, Zheng)
+* stone-kvstore-tool: expanded command set and capabilities (Joao Eduardo Luis)
+* stone.spec: fix build dependency (Loic Dachary)
 * common: bloom filter improvements (Sage Weil)
 * common: check preexisting admin socket for active daemon before removing (Loic Dachary)
 * common: fix aligned buffer allocation (Loic Dachary)
@@ -932,7 +932,7 @@ Notable changes since v0.72 Emperor
 * crush, osd: s/rep/replicated/ for less confusion (Loic Dachary)
 * crush: refactor descend_once behavior; support set_choose*_tries for replicated rules (Sage Weil)
 * crush: usability and test improvements (Loic Dachary)
-* debian: change directory ownership between ceph and ceph-common (Sage Weil)
+* debian: change directory ownership between stone and stone-common (Sage Weil)
 * debian: integrate misc fixes from downstream packaging (James Page)
 * doc: big update to install docs (John Wilkins)
 * doc: many many install doc improvements (John Wilkins)
@@ -941,7 +941,7 @@ Notable changes since v0.72 Emperor
 * erasure-code: improve buffer alignment (Loic Dachary)
 * erasure-code: rewrite region-xor using vector operations (Andreas Peters)
 * init: fix startup ordering/timeout problem with OSDs (Dmitry Smirnov)
-* libcephfs: fix resource leak (Zheng Yan)
+* libstonefs: fix resource leak (Zheng Yan)
 * librados: add C API coverage for atomic write operations (Christian Marie)
 * librados: fix inconsistencies in API error values (David Zafman)
 * librados: fix throttle leak (and eventual deadlock) (Josh Durgin)
@@ -971,7 +971,7 @@ Notable changes since v0.72 Emperor
 * mds: misc fixes for larger directories (Zheng Yan)
 * mds: misc fixes for multiple MDSs (Zheng Yan)
 * mds: misc multi-mds fixes (Yan, Zheng)
-* mds: remove .ceph directory (John Spray)
+* mds: remove .stone directory (John Spray)
 * mds: store directories in omap instead of tmap (Yan, Zheng)
 * mds: update old-format backtraces opportunistically (Zheng Yan)
 * mds: use shared_ptr for requests (Greg Farnum)
@@ -983,9 +983,9 @@ Notable changes since v0.72 Emperor
 * misc portability work (Noah Watkins)
 * mon: add erasure profiles and improve erasure pool creation (Loic Dachary)
 * mon: add 'mon getmap EPOCH' (Joao Eduardo Luis)
-* mon: allow adjustment of cephfs max file size via 'ceph mds set max_file_size' (Sage Weil)
+* mon: allow adjustment of stonefs max file size via 'stone mds set max_file_size' (Sage Weil)
 * mon: allow debug quorum_{enter,exit} commands via admin socket
-* mon: 'ceph osd pg-temp ...' and primary-temp commands (Ilya Dryomov)
+* mon: 'stone osd pg-temp ...' and primary-temp commands (Ilya Dryomov)
 * mon: change mds allow_new_snaps syntax to be more consistent (Sage Weil)
 * mon: clean up initial crush rule creation (Loic Dachary)
 * mon: collect misc metadata about osd (os, kernel, etc.), new 'osd metadata' command (Sage Weil)
@@ -994,7 +994,7 @@ Notable changes since v0.72 Emperor
 * mon: do not use keyring if auth = none (Loic Dachary)
 * mon: fix peer feature checks (Sage Weil)
 * mon: fix pg_temp leaks (Joao Eduardo Luis)
-* mon: fix pool count in 'ceph -s' output (Sage Weil)
+* mon: fix pool count in 'stone -s' output (Sage Weil)
 * mon: handle more whitespace (newline, tab) in mon capabilities (Sage Weil)
 * mon: improve (replicate or erasure) pool creation UX (Loic Dachary)
 * mon: infrastructure to handle mixed-version mon cluster and cli/rest API (Greg Farnum)
@@ -1013,7 +1013,7 @@ Notable changes since v0.72 Emperor
 * mon: track osd features in OSDMap (Joao Luis, David Zafman)
 * mon: trim MDSMaps (Joao Eduardo Luis)
 * mon: warn if crush has non-optimal tunables (Sage Weil)
-* mount.ceph: add -n for autofs support (Steve Stock)
+* mount.stone: add -n for autofs support (Steve Stock)
 * msgr: fix locking bug in authentication (Josh Durgin)
 * msgr: fix messenger restart race (Xihui He)
 * msgr: improve connection error detection between clients and monitors (Greg Farnum, Sage Weil)
@@ -1096,7 +1096,7 @@ Notable changes since v0.72 Emperor
 * rgw: user quotas (Yehuda Sadeh)
 * rpm: fix redhat-lsb dependency (Sage Weil, Alfredo Deza)
 * specfile: fix RPM build on RHEL6 (Ken Dreyer, Derek Yarnell)
-* specfile: ship libdir/ceph (Key Dreyer)
+* specfile: ship libdir/stone (Key Dreyer)
 * sysvinit, upstart: prevent both init systems from starting the same daemons (Josh Durgin)
 
 
@@ -1106,16 +1106,16 @@ Notable changes since v0.67 Dumpling
 * build cleanly under clang (Christophe Courtaut)
 * build: Makefile refactor (Roald J. van Loon)
 * build: fix [/usr]/sbin locations (Alan Somers)
-* ceph-disk: fix journal preallocation
-* ceph-fuse, radosgw: enable admin socket and logging by default
-* ceph-fuse: fix problem with readahead vs truncate race (Yan, Zheng)
-* ceph-fuse: trim deleted inodes from cache (Yan, Zheng)
-* ceph-fuse: use newer fuse api (Jianpeng Ma)
-* ceph-kvstore-tool: new tool for working with leveldb (copy, crc) (Joao Luis)
-* ceph-post-file: new command to easily share logs or other files with ceph devs
-* ceph: improve parsing of CEPH_ARGS (Benoit Knecht)
-* ceph: make -h behave when monitors are down
-* ceph: parse CEPH_ARGS env variable
+* stone-disk: fix journal preallocation
+* stone-fuse, radosgw: enable admin socket and logging by default
+* stone-fuse: fix problem with readahead vs truncate race (Yan, Zheng)
+* stone-fuse: trim deleted inodes from cache (Yan, Zheng)
+* stone-fuse: use newer fuse api (Jianpeng Ma)
+* stone-kvstore-tool: new tool for working with leveldb (copy, crc) (Joao Luis)
+* stone-post-file: new command to easily share logs or other files with stone devs
+* stone: improve parsing of CEPH_ARGS (Benoit Knecht)
+* stone: make -h behave when monitors are down
+* stone: parse CEPH_ARGS env variable
 * common: bloom_filter improvements, cleanups
 * common: cache crc32c values where possible
 * common: correct SI is kB not KB (Dan Mick)
@@ -1134,7 +1134,7 @@ Notable changes since v0.67 Dumpling
 * librados: hello_world example (Greg Farnum)
 * librados: sync calls now return on commit (instead of ack) (Greg Farnum)
 * librbd python bindings: fix parent image name limit (Josh Durgin)
-* librbd, ceph-fuse: avoid some sources of ceph-fuse, rbd cache stalls
+* librbd, stone-fuse: avoid some sources of stone-fuse, rbd cache stalls
 * mds: avoid leaking objects when deleting truncated files (Yan, Zheng)
 * mds: fix F_GETLK (Yan, Zheng)
 * mds: fix LOOKUPSNAP bug
@@ -1150,15 +1150,15 @@ Notable changes since v0.67 Dumpling
 * mds: several bug fixes with clustered mds (Yan, Zheng)
 * mon, osd: improve osdmap trimming logic (Samuel Just)
 * mon, osd: initial CLI for configuring tiering
-* mon: a few 'ceph mon add' races fixed (command is now idempotent) (Joao Luis)
+* mon: a few 'stone mon add' races fixed (command is now idempotent) (Joao Luis)
 * mon: allow (un)setting HASHPSPOOL flag on existing pools (Joao Luis)
 * mon: allow cap strings with . to be unquoted
-* mon: allow logging level of cluster log (/var/log/ceph/ceph.log) to be adjusted
+* mon: allow logging level of cluster log (/var/log/stone/stone.log) to be adjusted
 * mon: avoid rewriting full osdmaps on restart (Joao Luis)
 * mon: continue to discover peer addr info during election phase
-* mon: disallow CephFS snapshots until 'ceph mds set allow_new_snaps' (Greg Farnum)
+* mon: disallow StoneFS snapshots until 'stone mds set allow_new_snaps' (Greg Farnum)
 * mon: do not expose uncommitted state from 'osd crush {add,set} ...' (Joao Luis)
-* mon: fix 'ceph osd crush reweight ...' (Joao Luis)
+* mon: fix 'stone osd crush reweight ...' (Joao Luis)
 * mon: fix 'osd crush move ...' command for buckets (Joao Luis)
 * mon: fix byte counts (off by factor of 4) (Dan Mick, Joao Luis)
 * mon: fix paxos corner case
@@ -1166,7 +1166,7 @@ Notable changes since v0.67 Dumpling
 * mon: make 'osd pool rename' idempotent (Joao Luis)
 * mon: modify 'auth add' semantics to make a bit more sense (Joao Luis)
 * mon: new 'osd perf' command to dump recent performance information (Samuel Just)
-* mon: new and improved 'ceph -s' or 'ceph status' command (more info, easier to read)
+* mon: new and improved 'stone -s' or 'stone status' command (more info, easier to read)
 * mon: some auth check cleanups (Joao Luis)
 * mon: track per-pool stats (Joao Luis)
 * mon: warn about pools with bad pg_num
@@ -1263,7 +1263,7 @@ Upgrading
   that consists entirely of big-endian machines, you will need to
   upgrade all daemons and clients and restart.
 
-* The 'ceph.file.layout' and 'ceph.dir.layout' extended attributes are
+* The 'stone.file.layout' and 'stone.dir.layout' extended attributes are
   no longer included in the listxattr(2) results to prevent problems with
   'cp -a' and similar tools.
 
@@ -1272,17 +1272,17 @@ Upgrading
   and more recent development releases the 'r' cap was sufficient.  The
   affected commands are::
 
-    ceph auth export
-    ceph auth get
-    ceph auth get-key
-    ceph auth print-key
-    ceph auth list
+    stone auth export
+    stone auth get
+    stone auth get-key
+    stone auth print-key
+    stone auth list
 
 Notable Changes
 ---------------
-* ceph-conf: stop creating bogus log files (Josh Durgin, Sage Weil)
+* stone-conf: stop creating bogus log files (Josh Durgin, Sage Weil)
 * common: fix authentication on big-endian architectures (Dan Mick)
-* debian: change directory ownership between ceph and ceph-common (Sage Weil)
+* debian: change directory ownership between stone and stone-common (Sage Weil)
 * init: fix startup ordering/timeout problem with OSDs (Dmitry Smirnov)
 * librbd: skip zeroes/holes when copying sparse images (Josh Durgin)
 * mds: cope with MDS failure during creation (John Spray)
@@ -1290,11 +1290,11 @@ Notable Changes
 * mds: misc fixes for directory fragments (Zheng Yan)
 * mds: misc fixes for larger directories (Zheng Yan)
 * mds: misc fixes for multiple MDSs (Zheng Yan)
-* mds: remove .ceph directory (John Spray)
+* mds: remove .stone directory (John Spray)
 * misc coverity fixes, cleanups (Danny Al-Gaaf)
 * mon: add erasure profiles and improve erasure pool creation (Loic Dachary)
-* mon: 'ceph osd pg-temp ...' and primary-temp commands (Ilya Dryomov)
-* mon: fix pool count in 'ceph -s' output (Sage Weil)
+* mon: 'stone osd pg-temp ...' and primary-temp commands (Ilya Dryomov)
+* mon: fix pool count in 'stone -s' output (Sage Weil)
 * msgr: improve connection error detection between clients and monitors (Greg Farnum, Sage Weil)
 * osd: add/fix CPU feature detection for jerasure (Loic Dachary)
 * osd: improved scrub checks on clones (Sage Weil, Sam Just)
@@ -1334,9 +1334,9 @@ Upgrading
     #. OSDs
     #. MDSs and/or radosgw
 
-  If the ceph-mds daemon is restarted first, it will wait until all
+  If the stone-mds daemon is restarted first, it will wait until all
   OSDs have been upgraded before finishing its startup sequence.  If
-  the ceph-mon daemons are not restarted prior to the ceph-osd
+  the stone-mon daemons are not restarted prior to the stone-osd
   daemons, they will not correctly register their new capabilities
   with the cluster and new features may not be usable until they are
   restarted a second time.
@@ -1345,14 +1345,14 @@ Upgrading
   for multipart uploads that prevents a multipart request that was initiated
   with a new radosgw from being completed by an old radosgw.
 
-* CephFS recently added support for a new 'backtrace' attribute on
+* StoneFS recently added support for a new 'backtrace' attribute on
   file data objects that is used for lookup by inode number (i.e., NFS
   reexport and hard links), and will later be used by fsck repair.
   This replaces the existing anchor table mechanism that is used for
   hard link resolution.  In order to completely phase that out, any
   inode that has an outdated backtrace attribute will get updated when
   the inode itself is modified.  This will result in some extra workload
-  after a legacy CephFS file system is upgraded.
+  after a legacy StoneFS file system is upgraded.
 
 * The per-op return code in librados' ObjectWriteOperation interface
   is now filled in.
@@ -1363,23 +1363,23 @@ Upgrading
 * Compound operations in librados that create and then delete the same object
   are now explicitly disallowed (they fail with -EINVAL).
 
-* The default leveldb cache size for the ceph-osd daemon has been
+* The default leveldb cache size for the stone-osd daemon has been
   increased from 4 MB to 128 MB.  This will increase the memory
   footprint of that process but tends to increase performance of omap
-  (key/value) objects (used for CephFS and the radosgw).  If memory in your
+  (key/value) objects (used for StoneFS and the radosgw).  If memory in your
   deployment is tight, you can preserve the old behavio by adding::
 
     leveldb write buffer size = 0
     leveldb cache size = 0
 
-  to your ceph.conf to get back the (leveldb) defaults.
+  to your stone.conf to get back the (leveldb) defaults.
 
 Notable Changes
 ---------------
-* ceph-brag: new client and server tools (Sebastien Han, Babu Shanmugam)
-* ceph-disk: use partx on RHEL or CentOS instead of partprobe (Alfredo Deza)
-* ceph: fix combination of 'tell' and interactive mode (Joao Eduardo Luis)
-* ceph-fuse: fix bugs with inline data and multiple MDSs (Zheng Yan)
+* stone-brag: new client and server tools (Sebastien Han, Babu Shanmugam)
+* stone-disk: use partx on RHEL or CentOS instead of partprobe (Alfredo Deza)
+* stone: fix combination of 'tell' and interactive mode (Joao Eduardo Luis)
+* stone-fuse: fix bugs with inline data and multiple MDSs (Zheng Yan)
 * client: fix getcwd() to use new LOOKUPPARENT operation (Zheng Yan)
 * common: fall back to json-pretty for admin socket (Loic Dachary)
 * common: fix 'config dump' debug prefix (Danny Al-Gaaf)
@@ -1391,7 +1391,7 @@ Notable Changes
 * crush: prevent invalid buckets of type 0 (Sage Weil)
 * keyvaluestore: add perfcounters, misc bug fixes (Haomai Wang)
 * keyvaluestore: portability improvements (Noah Watkins)
-* libcephfs: API changes to better support NFS reexport via Ganesha (Matt Benjamin, Adam Emerson, Andrey Kuznetsov, Casey Bodley, David Zafman)
+* libstonefs: API changes to better support NFS reexport via Ganesha (Matt Benjamin, Adam Emerson, Andrey Kuznetsov, Casey Bodley, David Zafman)
 * librados: API documentation improvements (John Wilkins, Josh Durgin)
 * librados: fix object enumeration bugs; allow iterator assignment (Josh Durgin)
 * librados: streamline tests (Josh Durgin)
@@ -1415,10 +1415,10 @@ Notable Changes
 * mon: fix osd_epochs lower bound tracking for map trimming (Sage Weil)
 * mon: fix OSDMap encoding features (Sage Weil, Aaron Ten Clay)
 * mon: fix 'pg dump' JSON output (John Spray)
-* mon: include dirty stats in 'ceph df detail' (Sage Weil)
+* mon: include dirty stats in 'stone df detail' (Sage Weil)
 * mon: list quorum member names in quorum order (Sage Weil)
 * mon: prevent addition of non-empty cache tier (Sage Weil)
-* mon: prevent deletion of CephFS pools (John Spray)
+* mon: prevent deletion of StoneFS pools (John Spray)
 * mon: warn when cache tier approaches 'full' (Sage Weil)
 * osd: allocation hint, with XFS support (Ilya Dryomov)
 * osd: erasure coded pool support (Samuel Just)
@@ -1462,11 +1462,11 @@ appear in v0.78).
 Upgrading
 ---------
 
-* The 'ceph -s' or 'ceph status' command's 'num_in_osds' field in the
+* The 'stone -s' or 'stone status' command's 'num_in_osds' field in the
   JSON and XML output has been changed from a string to an int.
 
-* The recently added 'ceph mds set allow_new_snaps' command's syntax
-  has changed slightly; it is now 'ceph mds set allow_new_snaps true'.
+* The recently added 'stone mds set allow_new_snaps' command's syntax
+  has changed slightly; it is now 'stone mds set allow_new_snaps true'.
   The 'unset' command has been removed; instead, set the value to
   'false'.
 
@@ -1529,21 +1529,21 @@ Upgrading
   this behavior should be updated.
 
 * The MDS requires a new OSD operation TMAP2OMAP, added in this release.  When
-  upgrading, be sure to upgrade and restart the ceph-osd daemons before the
-  ceph-mds daemon.  The MDS will refuse to start if any up OSDs do not support
+  upgrading, be sure to upgrade and restart the stone-osd daemons before the
+  stone-mds daemon.  The MDS will refuse to start if any up OSDs do not support
   the new feature.
 
-* The 'ceph mds set_max_mds N' command is now deprecated in favor of
-  'ceph mds set max_mds N'.
+* The 'stone mds set_max_mds N' command is now deprecated in favor of
+  'stone mds set max_mds N'.
 
 Notable Changes
 ---------------
 
 * build: misc improvements (Ken Dreyer)
-* ceph-disk: generalize path names, add tests (Loic Dachary)
-* ceph-disk: misc improvements for puppet (Loic Dachary)
-* ceph-disk: several bug fixes (Loic Dachary)
-* ceph-fuse: fix race for sync reads (Sage Weil)
+* stone-disk: generalize path names, add tests (Loic Dachary)
+* stone-disk: misc improvements for puppet (Loic Dachary)
+* stone-disk: several bug fixes (Loic Dachary)
+* stone-fuse: fix race for sync reads (Sage Weil)
 * config: recursive metavariable expansion (Loic Dachary)
 * crush: usability and test improvements (Loic Dachary)
 * doc: misc fixes (David Moreau Simard, Kun Huang)
@@ -1555,7 +1555,7 @@ Notable Changes
 * many unit test improvements (Loic Dachary)
 * mds: always store backtrace in default pool (Yan, Zheng)
 * mds: store directories in omap instead of tmap (Yan, Zheng)
-* mon: allow adjustment of cephfs max file size via 'ceph mds set max_file_size' (Sage Weil)
+* mon: allow adjustment of stonefs max file size via 'stone mds set max_file_size' (Sage Weil)
 * mon: do not create erasure rules by default (Sage Weil)
 * mon: do not generate spurious MDSMaps in certain cases (Sage Weil)
 * mon: do not use keyring if auth = none (Loic Dachary)
@@ -1571,7 +1571,7 @@ Notable Changes
 * rgw: fix object placement read op (Yehuda Sadeh)
 * rgw: fix several CORS bugs (Robin H. Johnson)
 * specfile: fix RPM build on RHEL6 (Ken Dreyer, Derek Yarnell)
-* specfile: ship libdir/ceph (Key Dreyer)
+* specfile: ship libdir/stone (Key Dreyer)
 
 
 v0.75
@@ -1599,7 +1599,7 @@ Upgrading
 - The default CRUSH rules and layouts are now using the latest and
   greatest tunables and defaults.  Clusters using the old values will
   now present with a health WARN state.  This can be disabled by
-  adding 'mon warn on legacy crush tunables = false' to ceph.conf.
+  adding 'mon warn on legacy crush tunables = false' to stone.conf.
 
 
 Notable Changes
@@ -1627,7 +1627,7 @@ Notable Changes
 * mon: only seed new osdmaps to current OSDs (Sage Weil)
 * mon: track osd features in OSDMap (Joao Luis, David Zafman)
 * mon: warn if crush has non-optimal tunables (Sage Weil)
-* mount.ceph: add -n for autofs support (Steve Stock)
+* mount.stone: add -n for autofs support (Steve Stock)
 * msgr: fix messenger restart race (Xihui He)
 * osd, librados: fix full cluster handling (Josh Durgin)
 * osd: add HitSet tracking for read ops (Sage Weil, Greg Farnum)
@@ -1668,9 +1668,9 @@ Upgrading
 ---------
 
 * We now default to the 'bobtail' CRUSH tunable values that are first supported
-  by Ceph clients in bobtail (v0.56) and Linux kernel version v3.9.  If you
-  plan to access a newly created Ceph cluster with an older kernel client, you
-  should use 'ceph osd crush tunables legacy' to switch back to the legacy
+  by Stone clients in bobtail (v0.56) and Linux kernel version v3.9.  If you
+  plan to access a newly created Stone cluster with an older kernel client, you
+  should use 'stone osd crush tunables legacy' to switch back to the legacy
   behavior.  Note that making that change will likely result in some data
   movement in the system, so adjust the setting before populating the new
   cluster with data.
@@ -1679,11 +1679,11 @@ Upgrading
   clusters) by default.  Support for this flag first appeared in
   v0.64; v0.67 Dumpling is the first major release that supports it.
   It is first supported by the Linux kernel version v3.9.  If you plan
-  to access a newly created Ceph cluster with an older kernel or
-  clients (e.g, librados, librbd) from a pre-dumpling Ceph release,
+  to access a newly created Stone cluster with an older kernel or
+  clients (e.g, librados, librbd) from a pre-dumpling Stone release,
   you should add 'osd pool default flag hashpspool = false' to the
-  '[global]' section of your 'ceph.conf' prior to creating your
-  monitors (e.g., after 'ceph-deploy new' but before 'ceph-deploy mon
+  '[global]' section of your 'stone.conf' prior to creating your
+  monitors (e.g., after 'stone-deploy new' but before 'stone-deploy mon
   create ...').
 
 * The configuration option 'osd pool default crush rule' is deprecated
@@ -1695,14 +1695,14 @@ Notable Changes
 ---------------
 
 * buffer: some zero-copy groundwork (Josh Durgin)
-* ceph-disk: avoid fd0 (Loic Dachary)
+* stone-disk: avoid fd0 (Loic Dachary)
 * crush: default to bobtail tunables (Sage Weil)
 * crush: many additional tests (Loic Dachary)
 * crush: misc fixes, cleanups (Loic Dachary)
 * crush: new rule steps to adjust retry attempts (Sage Weil)
 * debian: integrate misc fixes from downstream packaging (James Page)
 * doc: big update to install docs (John Wilkins)
-* libcephfs: fix resource leak (Zheng Yan)
+* libstonefs: fix resource leak (Zheng Yan)
 * misc coverity fixes (Xing Lin, Li Wang, Danny Al-Gaaf)
 * misc portability fixes (Noah Watkins, Alan Somers)
 * mon, osd: new 'erasure' pool type (still not fully supported)
@@ -1730,13 +1730,13 @@ v0.74.
 Upgrading
 ---------
 
-- As part of fix for #6796, 'ceph osd pool set <pool> <var> <arg>' now
+- As part of fix for #6796, 'stone osd pool set <pool> <var> <arg>' now
   receives <arg> as an integer instead of a string.  This affects how
   'hashpspool' flag is set/unset: instead of 'true' or 'false', it now
   must be '0' or '1'.
 
 - The behavior of the CRUSH 'indep' choose mode has been changed.  No
-  ceph cluster should have been using this behavior unless someone has
+  stone cluster should have been using this behavior unless someone has
   manually extracted a crush map, modified a CRUSH rule to replace
   'firstn' with 'indep', recompiled, and reinjected the new map into
   the cluster.  If the 'indep' mode is currently in use on a cluster,
@@ -1748,7 +1748,7 @@ Upgrading
   object.
 
 - The radosgw init script (sysvinit) how requires that the 'host = ...' line in
-  ceph.conf, if present, match the short hostname (the output of 'hostname -s'),
+  stone.conf, if present, match the short hostname (the output of 'hostname -s'),
   not the fully qualified hostname or the (occasionally non-short) output of
   'hostname'.  Failure to adjust this when upgrading from emperor or dumpling
   may prevent the radosgw daemon from starting.
@@ -1757,9 +1757,9 @@ Upgrading
 Notable Changes
 ---------------
 
-* ceph-crush-location: new hook for setting CRUSH location of osd daemons on start
-* ceph-kvstore-tool: expanded command set and capabilities (Joao Eduardo Luis)
-* ceph.spec: fix build dependency (Loic Dachary)
+* stone-crush-location: new hook for setting CRUSH location of osd daemons on start
+* stone-kvstore-tool: expanded command set and capabilities (Joao Eduardo Luis)
+* stone.spec: fix build dependency (Loic Dachary)
 * common: fix aligned buffer allocation (Loic Dachary)
 * doc: many many install doc improvements (John Wilkins)
 * mds: fix readdir end check (Zheng Yan)

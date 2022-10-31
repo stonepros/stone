@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -17,7 +17,7 @@
 
 #include "msg/Message.h"
 #include "mds/mdstypes.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 
 
 class MClientReconnect final : public SafeMessage {
@@ -40,9 +40,9 @@ private:
   size_t approx_size = sizeof(__u32) + sizeof(__u32) + 1;
 
   void calc_item_size() {
-    using ceph::encode;
+    using stone::encode;
     {
-      ceph::buffer::list bl;
+      stone::buffer::list bl;
       inodeno_t ino;
       cap_reconnect_t cr;
       encode(ino, bl);
@@ -50,7 +50,7 @@ private:
       cap_size = bl.length();
     }
     {
-      ceph::buffer::list bl;
+      stone::buffer::list bl;
       snaprealm_reconnect_t sr;
       encode(sr, bl);
       realm_size = bl.length();
@@ -78,7 +78,7 @@ public:
   bool has_more() const { return more; }
 
   void add_cap(inodeno_t ino, uint64_t cap_id, inodeno_t pathbase, const std::string& path,
-	       int wanted, int issued, inodeno_t sr, snapid_t sf, ceph::buffer::list& lb)
+	       int wanted, int issued, inodeno_t sr, snapid_t sf, stone::buffer::list& lb)
   {
     caps[ino] = cap_reconnect_t(cap_id, pathbase, path, wanted, issued, sr, sf, lb);
     if (!cap_size)
@@ -106,7 +106,7 @@ public:
 	header.version = 1;
     }
 
-    using ceph::encode;
+    using stone::encode;
     data.clear();
 
     if (header.version >= 4) {
@@ -136,7 +136,7 @@ public:
     }
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = data.cbegin();
     if (header.version >= 4) {
       decode(caps, p);
@@ -169,7 +169,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 

@@ -1,12 +1,12 @@
 =============
- Ceph Mirrors
+ Stone Mirrors
 =============
 
-For improved user experience multiple mirrors for Ceph are available around the
+For improved user experience multiple mirrors for Stone are available around the
 world.
 
 These mirrors are kindly sponsored by various companies who want to support the
-Ceph project.
+Stone project.
 
 
 Locations
@@ -42,10 +42,10 @@ Change this to:
 Mirroring
 =========
 
-You can easily mirror Ceph yourself using a Bash script and rsync. A easy to use
+You can easily mirror Stone yourself using a Bash script and rsync. A easy to use
 script can be found at `Github`_.
 
-When mirroring Ceph, please keep the following guidelines in mind:
+When mirroring Stone, please keep the following guidelines in mind:
 
 - Choose a mirror close to you
 - Do not sync in a interval shorter than 3 hours
@@ -55,7 +55,7 @@ When mirroring Ceph, please keep the following guidelines in mind:
 Becoming a mirror
 =================
 
-If you want to provide a public mirror for other users of Ceph you can opt to
+If you want to provide a public mirror for other users of Stone you can opt to
 become a official mirror.
 
 To make sure all mirrors meet the same standards some requirements have been

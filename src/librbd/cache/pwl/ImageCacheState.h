@@ -9,7 +9,7 @@
 #include "librbd/cache/Types.h"
 #include <string>
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 

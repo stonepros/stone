@@ -1,20 +1,20 @@
-.. _configuring-ceph:
+.. _configuring-stone:
 
 ==================
- Configuring Ceph
+ Configuring Stone
 ==================
 
-When Ceph services start, the initialization process activates a series
-of daemons that run in the background. A :term:`Ceph Storage Cluster` runs 
+When Stone services start, the initialization process activates a series
+of daemons that run in the background. A :term:`Stone Storage Cluster` runs 
 at a minimum three types of daemons:
 
-- :term:`Ceph Monitor` (``ceph-mon``)
-- :term:`Ceph Manager` (``ceph-mgr``)
-- :term:`Ceph OSD Daemon` (``ceph-osd``)
+- :term:`Stone Monitor` (``stone-mon``)
+- :term:`Stone Manager` (``stone-mgr``)
+- :term:`Stone OSD Daemon` (``stone-osd``)
 
-Ceph Storage Clusters that support the :term:`Ceph File System` also run at
-least one :term:`Ceph Metadata Server` (``ceph-mds``). Clusters that
-support :term:`Ceph Object Storage` run Ceph RADOS Gateway daemons
+Stone Storage Clusters that support the :term:`Stone File System` also run at
+least one :term:`Stone Metadata Server` (``stone-mds``). Clusters that
+support :term:`Stone Object Storage` run Stone RADOS Gateway daemons
 (``radosgw``) as well.
 
 Each daemon has a number of configuration options, each of which has a
@@ -23,12 +23,12 @@ configuration options.  Be careful to understand the consequences before
 overriding default values, as it is possible to significantly degrade the
 performance and stability of your cluster.  Also note that default values
 sometimes change between releases, so it is best to review the version of
-this documentation that aligns with your Ceph release.
+this documentation that aligns with your Stone release.
 
 Option names
 ============
 
-All Ceph configuration options have a unique name consisting of words
+All Stone configuration options have a unique name consisting of words
 formed with lower-case characters and connected with underscore
 (``_``) characters.
 
@@ -44,7 +44,7 @@ throughout this documentation.
 Config sources
 ==============
 
-Each Ceph daemon, process, and library will pull its configuration
+Each Stone daemon, process, and library will pull its configuration
 from several sources, listed below.  Sources later in the list will
 override those earlier in the list when both are present.
 
@@ -55,7 +55,7 @@ override those earlier in the list when both are present.
 - command line arguments
 - runtime overrides set by an administrator
 
-One of the first things a Ceph process does on startup is parse the
+One of the first things a Stone process does on startup is parse the
 configuration options provided via the command line, environment, and
 local configuration file.  The process will then contact the monitor
 cluster to retrieve configuration stored centrally for the entire
@@ -75,10 +75,10 @@ in a local configuration file.  These options include:
   - ``mon_host``, the list of monitors for the cluster
   - ``mon_host_override``, the list of monitors for the cluster to
     **initially** contact when beginning a new instance of communication with the
-    Ceph cluster.  This overrides the known monitor list derived from MonMap
-    updates sent to older Ceph instances (like librados cluster handles).  It is
+    Stone cluster.  This overrides the known monitor list derived from MonMap
+    updates sent to older Stone instances (like librados cluster handles).  It is
     expected this option is primarily useful for debugging.
-  - ``mon_dns_srv_name`` (default: `ceph-mon`), the name of the DNS
+  - ``mon_dns_srv_name`` (default: `stone-mon`), the name of the DNS
     SRV record to check to identify the cluster monitors via DNS
   - ``mon_data``, ``osd_data``, ``mds_data``, ``mgr_data``, and
     similar options that define which local directory the daemon
@@ -91,7 +91,7 @@ in a local configuration file.  These options include:
 In the vast majority of cases the default values of these are
 appropriate, with the exception of the ``mon_host`` option that
 identifies the addresses of the cluster's monitors.  When DNS is used
-to identify monitors a local ceph configuration file can be avoided
+to identify monitors a local stone configuration file can be avoided
 entirely.
 
 Skipping monitor config
@@ -104,7 +104,7 @@ configuration files or where the monitor cluster is currently down but
 some maintenance activity needs to be done.
 
 
-.. _ceph-conf-file:
+.. _stone-conf-file:
 
 
 Configuration sections
@@ -112,7 +112,7 @@ Configuration sections
 
 Any given process or daemon has a single value for each configuration
 option.  However, values for an option may vary across different
-daemon types even daemons of the same type.  Ceph options that are
+daemon types even daemons of the same type.  Stone options that are
 stored in the monitor configuration database or in local configuration
 files are grouped into sections to indicate which daemons or clients
 they apply to.
@@ -122,14 +122,14 @@ These sections include:
 ``global``
 
 :Description: Settings under ``global`` affect all daemons and clients
-              in a Ceph Storage Cluster.
+              in a Stone Storage Cluster.
 
-:Example: ``log_file = /var/log/ceph/$cluster-$type.$id.log``
+:Example: ``log_file = /var/log/stone/$cluster-$type.$id.log``
 
 ``mon``
 
-:Description: Settings under ``mon`` affect all ``ceph-mon`` daemons in
-              the Ceph Storage Cluster, and override the same setting in 
+:Description: Settings under ``mon`` affect all ``stone-mon`` daemons in
+              the Stone Storage Cluster, and override the same setting in 
               ``global``.
 
 :Example: ``mon_cluster_log_to_syslog = true``
@@ -137,32 +137,32 @@ These sections include:
 
 ``mgr``
 
-:Description: Settings in the ``mgr`` section affect all ``ceph-mgr`` daemons in
-              the Ceph Storage Cluster, and override the same setting in 
+:Description: Settings in the ``mgr`` section affect all ``stone-mgr`` daemons in
+              the Stone Storage Cluster, and override the same setting in 
               ``global``.
 
 :Example: ``mgr_stats_period = 10``
 
 ``osd``
 
-:Description: Settings under ``osd`` affect all ``ceph-osd`` daemons in
-              the Ceph Storage Cluster, and override the same setting in
+:Description: Settings under ``osd`` affect all ``stone-osd`` daemons in
+              the Stone Storage Cluster, and override the same setting in
               ``global``.
 
 :Example: ``osd_op_queue = wpq``
 
 ``mds``
 
-:Description: Settings in the ``mds`` section affect all ``ceph-mds`` daemons in
-              the Ceph Storage Cluster, and override the same setting in
+:Description: Settings in the ``mds`` section affect all ``stone-mds`` daemons in
+              the Stone Storage Cluster, and override the same setting in
               ``global``.
 
 :Example: ``mds_cache_memory_limit = 10G``
 
 ``client``
 
-:Description: Settings under ``client`` affect all Ceph Clients
-              (e.g., mounted Ceph File Systems, mounted Ceph Block Devices,
+:Description: Settings under ``client`` affect all Stone Clients
+              (e.g., mounted Stone File Systems, mounted Stone Block Devices,
               etc.) as well as Rados Gateway (RGW) daemons.
 
 :Example: ``objecter_inflight_ops = 512``
@@ -187,32 +187,32 @@ precedence over values from the monitor configuration database,
 regardless of which section they appear in.
 
 
-.. _ceph-metavariables:
+.. _stone-metavariables:
 
 Metavariables
 =============
 
-Metavariables simplify Ceph Storage Cluster configuration
+Metavariables simplify Stone Storage Cluster configuration
 dramatically. When a metavariable is set in a configuration value,
-Ceph expands the metavariable into a concrete value at the time the
-configuration value is used. Ceph metavariables are similar to variable expansion in the Bash shell.
+Stone expands the metavariable into a concrete value at the time the
+configuration value is used. Stone metavariables are similar to variable expansion in the Bash shell.
 
-Ceph supports the following metavariables: 
+Stone supports the following metavariables: 
 
 ``$cluster``
 
-:Description: Expands to the Ceph Storage Cluster name. Useful when running 
-              multiple Ceph Storage Clusters on the same hardware.
+:Description: Expands to the Stone Storage Cluster name. Useful when running 
+              multiple Stone Storage Clusters on the same hardware.
 
-:Example: ``/etc/ceph/$cluster.keyring``
-:Default: ``ceph``
+:Example: ``/etc/stone/$cluster.keyring``
+:Default: ``stone``
 
 
 ``$type``
 
 :Description: Expands to a daemon or process type (e.g., ``mds``, ``osd``, or ``mon``)
 
-:Example: ``/var/lib/ceph/$type``
+:Example: ``/var/lib/stone/$type``
 
 
 ``$id``
@@ -221,7 +221,7 @@ Ceph supports the following metavariables:
               ``osd.0``, this would be ``0``; for ``mds.a``, it would
               be ``a``.
 
-:Example: ``/var/lib/ceph/$type/$cluster-$id``
+:Example: ``/var/lib/stone/$type/$cluster-$id``
 
 
 ``$host``
@@ -232,32 +232,32 @@ Ceph supports the following metavariables:
 ``$name``
 
 :Description: Expands to ``$type.$id``.
-:Example: ``/var/run/ceph/$cluster-$name.asok``
+:Example: ``/var/run/stone/$cluster-$name.asok``
 
 ``$pid``
 
 :Description: Expands to daemon pid.
-:Example: ``/var/run/ceph/$cluster-$name-$pid.asok``
+:Example: ``/var/run/stone/$cluster-$name-$pid.asok``
 
 
 
 The Configuration File
 ======================
 
-On startup, Ceph processes search for a configuration file in the
+On startup, Stone processes search for a configuration file in the
 following locations:
 
 #. ``$CEPH_CONF`` (*i.e.,* the path following the ``$CEPH_CONF``
    environment variable)
 #. ``-c path/path``  (*i.e.,* the ``-c`` command line argument)
-#. ``/etc/ceph/$cluster.conf``
-#. ``~/.ceph/$cluster.conf``
+#. ``/etc/stone/$cluster.conf``
+#. ``~/.stone/$cluster.conf``
 #. ``./$cluster.conf`` (*i.e.,* in the current working directory)
-#. On FreeBSD systems only, ``/usr/local/etc/ceph/$cluster.conf``
+#. On FreeBSD systems only, ``/usr/local/etc/stone/$cluster.conf``
 
-where ``$cluster`` is the cluster's name (default ``ceph``).
+where ``$cluster`` is the cluster's name (default ``stone``).
 
-The Ceph configuration file uses an *ini* style syntax. You can add comment
+The Stone configuration file uses an *ini* style syntax. You can add comment
 text after a pound sign (#) or a semi-colon (;).  For example:
 
 .. code-block:: ini
@@ -269,7 +269,7 @@ text after a pound sign (#) or a semi-colon (;).  For example:
 	# We recommend that you provide comments in your configuration file(s).
 
 
-.. _ceph-conf-settings:
+.. _stone-conf-settings:
 
 Config file section names
 -------------------------
@@ -404,7 +404,7 @@ Every configuration option is typed with one of the types below:
               * year: "y", "yr", "year", "years"
 :Example: ``1 m``, ``1m`` and ``1 week``
 
-.. _ceph-conf-database:
+.. _stone-conf-database:
 
 Monitor configuration database
 ==============================
@@ -455,24 +455,24 @@ Commands
 
 The following CLI commands are used to configure the cluster:
 
-* ``ceph config dump`` will dump the entire configuration database for
+* ``stone config dump`` will dump the entire configuration database for
   the cluster.
 
-* ``ceph config get <who>`` will dump the configuration for a specific
+* ``stone config get <who>`` will dump the configuration for a specific
   daemon or client (e.g., ``mds.a``), as stored in the monitors'
   configuration database.
 
-* ``ceph config set <who> <option> <value>`` will set a configuration
+* ``stone config set <who> <option> <value>`` will set a configuration
   option in the monitors' configuration database.
 
-* ``ceph config show <who>`` will show the reported running
+* ``stone config show <who>`` will show the reported running
   configuration for a running daemon.  These settings may differ from
   those stored by the monitors if there are also local configuration
   files in use or options have been overridden on the command line or
   at run time.  The source of the option values is reported as part
   of the output.
 
-* ``ceph config assimilate-conf -i <input file> -o <output file>``
+* ``stone config assimilate-conf -i <input file> -o <output file>``
   will ingest a configuration file from *input file* and move any
   valid options into the monitors' configuration database.  Any
   settings that are unrecognized, invalid, or cannot be controlled by
@@ -486,25 +486,25 @@ Help
 
 You can get help for a particular option with::
 
-  ceph config help <option>
+  stone config help <option>
 
 Note that this will use the configuration schema that is compiled into the running monitors.  If you have a mixed-version cluster (e.g., during an upgrade), you might also want to query the option schema from a specific running daemon::
 
-  ceph daemon <name> config help [option]
+  stone daemon <name> config help [option]
 
 For example,::
 
-  $ ceph config help log_file
+  $ stone config help log_file
   log_file - path to log file
     (std::string, basic)
     Default (non-daemon):
-    Default (daemon): /var/log/ceph/$cluster-$name.log
+    Default (daemon): /var/log/stone/$cluster-$name.log
     Can update at runtime: false
     See also: [log_to_stderr,err_to_stderr,log_to_syslog,err_to_syslog]
 
 or::
 
-  $ ceph config help log_file -f json-pretty
+  $ stone config help log_file -f json-pretty
   {
       "name": "log_file",
       "type": "std::string",
@@ -512,7 +512,7 @@ or::
       "desc": "path to log file",
       "long_desc": "",
       "default": "",
-      "daemon_default": "/var/log/ceph/$cluster-$name.log",
+      "daemon_default": "/var/log/stone/$cluster-$name.log",
       "tags": [],
       "services": [],
       "see_also": [
@@ -535,15 +535,15 @@ testing purposes, and are not recommended for use by operators.
 Runtime Changes
 ===============
 
-In most cases, Ceph allows you to make changes to the configuration of
+In most cases, Stone allows you to make changes to the configuration of
 a daemon at runtime. This capability is quite useful for
 increasing/decreasing logging output, enabling/disabling debug
 settings, and even for runtime optimization.
 
 Generally speaking, configuration options can be updated in the usual
-way via the ``ceph config set`` command.  For example, do enable the debug log level on a specific OSD,::
+way via the ``stone config set`` command.  For example, do enable the debug log level on a specific OSD,::
 
-  ceph config set osd.123 debug_ms 20
+  stone config set osd.123 debug_ms 20
 
 Note that if the same option is also customized in a local
 configuration file, the monitor setting will be ignored (it has a
@@ -553,7 +553,7 @@ Override values
 ---------------
 
 You can also temporarily set an option using the `tell` or `daemon`
-interfaces on the Ceph CLI.  These *override* values are ephemeral in
+interfaces on the Stone CLI.  These *override* values are ephemeral in
 that they only affect the running process and are discarded/lost if
 the daemon or process restarts.
 
@@ -561,57 +561,57 @@ Override values can be set in two ways:
 
 #. From any host, we can send a message to a daemon over the network with::
 
-     ceph tell <name> config set <option> <value>
+     stone tell <name> config set <option> <value>
 
    For example,::
 
-     ceph tell osd.123 config set debug_osd 20
+     stone tell osd.123 config set debug_osd 20
 
    The `tell` command can also accept a wildcard for the daemon
    identifier.  For example, to adjust the debug level on all OSD
    daemons,::
 
-     ceph tell osd.* config set debug_osd 20
+     stone tell osd.* config set debug_osd 20
 
 #. From the host the process is running on, we can connect directly to
-   the process via a socket in ``/var/run/ceph`` with::
+   the process via a socket in ``/var/run/stone`` with::
 
-     ceph daemon <name> config set <option> <value>
+     stone daemon <name> config set <option> <value>
 
    For example,::
 
-     ceph daemon osd.4 config set debug_osd 20
+     stone daemon osd.4 config set debug_osd 20
 
-Note that in the ``ceph config show`` command output these temporary
+Note that in the ``stone config show`` command output these temporary
 values will be shown with a source of ``override``.
 
 
 Viewing runtime settings
 ========================
 
-You can see the current options set for a running daemon with the ``ceph config show`` command.  For example,::
+You can see the current options set for a running daemon with the ``stone config show`` command.  For example,::
 
-  ceph config show osd.0
+  stone config show osd.0
 
 will show you the (non-default) options for that daemon.  You can also look at a specific option with::
 
-  ceph config show osd.0 debug_osd
+  stone config show osd.0 debug_osd
 
 or view all options (even those with default values) with::
 
-  ceph config show-with-defaults osd.0
+  stone config show-with-defaults osd.0
 
 You can also observe settings for a running daemon by connecting to it from the local host via the admin socket.  For example,::
 
-  ceph daemon osd.0 config show
+  stone daemon osd.0 config show
 
 will dump all current settings,::
 
-  ceph daemon osd.0 config diff
+  stone daemon osd.0 config diff
 
 will show only non-default settings (as well as where the value came from: a config file, the monitor, an override, etc.), and::
 
-  ceph daemon osd.0 config get debug_osd
+  stone daemon osd.0 config get debug_osd
 
 will report the value of a single option.
 

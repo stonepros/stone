@@ -11,11 +11,11 @@
 #include "include/interval_set.h"
 #include "os/bluestore/bluestore_types.h"
 #include "include/mempool.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 class StupidAllocator : public Allocator {
-  CephContext* cct;
-  ceph::mutex lock = ceph::make_mutex("StupidAllocator::lock");
+  StoneContext* cct;
+  stone::mutex lock = stone::make_mutex("StupidAllocator::lock");
 
   int64_t num_free;     ///< total bytes in freelist
   uint64_t bdev_block_size;
@@ -37,7 +37,7 @@ class StupidAllocator : public Allocator {
     uint64_t alloc_unit);
 
 public:
-  StupidAllocator(CephContext* cct,
+  StupidAllocator(StoneContext* cct,
                   const std::string& name,
                   int64_t size,
                   int64_t block_size);

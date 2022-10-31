@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -30,7 +30,7 @@ public:
    * force_loc is whether the mon cluster should replace a previously-known
    * location. Generally the monitor will force an update if it's given a
    * location from the CLI on boot-up, and then never force again (so that it
-   * can be moved/updated via the ceph tool from elsewhere). */
+   * can be moved/updated via the stone tool from elsewhere). */
   map<string,string> crush_loc;
   bool force_loc{false};
 
@@ -54,7 +54,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(fsid, payload);
     encode(name, payload);
@@ -71,7 +71,7 @@ public:
     }
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(fsid, p);

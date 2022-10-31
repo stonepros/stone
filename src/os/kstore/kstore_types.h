@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -21,7 +21,7 @@
 #include "include/utime.h"
 #include "common/hobject.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 /// collection metadata
@@ -30,9 +30,9 @@ struct kstore_cnode_t {
 
   explicit kstore_cnode_t(int b=0) : bits(b) {}
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<kstore_cnode_t*>& o);
 };
 WRITE_CLASS_ENCODER(kstore_cnode_t)
@@ -41,7 +41,7 @@ WRITE_CLASS_ENCODER(kstore_cnode_t)
 struct kstore_onode_t {
   uint64_t nid;                        ///< numeric id (locally unique)
   uint64_t size;                       ///< object size
-  std::map<std::string, ceph::buffer::ptr> attrs;        ///< attrs
+  std::map<std::string, stone::buffer::ptr> attrs;        ///< attrs
   uint64_t omap_head;                  ///< id for omap root node
   uint32_t stripe_size;                ///< stripe size
 
@@ -58,9 +58,9 @@ struct kstore_onode_t {
       expected_write_size(0),
       alloc_hint_flags(0) {}
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<kstore_onode_t*>& o);
 };
 WRITE_CLASS_ENCODER(kstore_onode_t)

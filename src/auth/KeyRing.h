@@ -21,12 +21,12 @@
 class KeyRing : public KeyStore {
   std::map<EntityName, EntityAuth> keys;
 
-  int set_modifier(const char *type, const char *val, EntityName& name, std::map<std::string, ceph::buffer::list>& caps);
+  int set_modifier(const char *type, const char *val, EntityName& name, std::map<std::string, stone::buffer::list>& caps);
 public:
-  void decode_plaintext(ceph::buffer::list::const_iterator& bl);
+  void decode_plaintext(stone::buffer::list::const_iterator& bl);
   /* Create a KeyRing from a Stone context.
    * We will use the configuration stored inside the context. */
-  int from_ceph_context(StoneContext *cct);
+  int from_stone_context(StoneContext *cct);
 
   std::map<EntityName, EntityAuth>& get_keys() { return keys; }  // yuck
 
@@ -61,7 +61,7 @@ public:
     std::map<EntityName, EntityAuth>::const_iterator k = keys.find(name);
     if (k == keys.end())
       return false;
-    std::map<std::string,ceph::buffer::list>::const_iterator i = k->second.caps.find(type);
+    std::map<std::string,stone::buffer::list>::const_iterator i = k->second.caps.find(type);
     if (i != k->second.caps.end()) {
       caps.caps = i->second;
     }
@@ -83,7 +83,7 @@ public:
   void remove(const EntityName& name) {
     keys.erase(name);
   }
-  void set_caps(EntityName& name, std::map<std::string, ceph::buffer::list>& caps) {
+  void set_caps(EntityName& name, std::map<std::string, stone::buffer::list>& caps) {
     keys[name].caps = caps;
   }
   void set_key(EntityName& ename, CryptoKey& key) {
@@ -92,16 +92,16 @@ public:
   void import(StoneContext *cct, KeyRing& other);
 
   // encoders
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void decode(stone::buffer::list::const_iterator& bl);
 
-  void encode_plaintext(ceph::buffer::list& bl);
-  void encode_formatted(std::string label, ceph::Formatter *f, ceph::buffer::list& bl);
+  void encode_plaintext(stone::buffer::list& bl);
+  void encode_formatted(std::string label, stone::Formatter *f, stone::buffer::list& bl);
 };
 
 // don't use WRITE_CLASS_ENCODER macro because we don't have an encode
 // macro.  don't juse encode_plaintext in that case because it is not
-// wrappable; it assumes it gets the entire ceph::buffer::list.
-static inline void decode(KeyRing& kr, ceph::buffer::list::const_iterator& p) {
+// wrappable; it assumes it gets the entire stone::buffer::list.
+static inline void decode(KeyRing& kr, stone::buffer::list::const_iterator& p) {
   kr.decode(p);
 }
 

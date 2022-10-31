@@ -1,8 +1,8 @@
 =========================
- Tracing Ceph With Blkin
+ Tracing Stone With Blkin
 =========================
 
-Ceph can use Blkin, a library created by Marios Kogias and others,
+Stone can use Blkin, a library created by Marios Kogias and others,
 which enables tracking a specific request from the time it enters
 the system at higher levels till it is finally served by RADOS.
 
@@ -38,17 +38,17 @@ configure and make files first.::
 .. _DistroReadyBlkin: https://github.com/agshew/blkin
 
 
-Configuring Ceph with Blkin
+Configuring Stone with Blkin
 ===========================
 
 If you built and installed Blkin by hand, rather than building and
 installing packages, then set these variables before configuring
-Ceph.::
+Stone.::
 
   export BLKIN_CFLAGS=-Iblkin/
   export BLKIN_LIBS=-lzipkin-cpp
 
-Blkin support in Ceph is disabled by default, so you may
+Blkin support in Stone is disabled by default, so you may
 want to configure with something like::
 
   ./do_cmake -DWITH_BLKIN=ON
@@ -62,10 +62,10 @@ traces from rbd through OSDC and OSD::
 Testing Blkin
 =============
 
-It's easy to test Ceph's Blkin tracing. Let's assume you don't have
-Ceph already running, and you compiled Ceph with Blkin support but
-you didn't install it. Then launch Ceph with the ``vstart.sh`` script
-in Ceph's src directory so you can see the possible tracepoints.::
+It's easy to test Stone's Blkin tracing. Let's assume you don't have
+Stone already running, and you compiled Stone with Blkin support but
+you didn't install it. Then launch Stone with the ``vstart.sh`` script
+in Stone's src directory so you can see the possible tracepoints.::
 
   cd src
   OSD=3 MON=3 RGW=1 ./vstart.sh -n
@@ -89,7 +89,7 @@ You'll see something like the following:::
 
   ...
 
-Next, stop Ceph so that the tracepoints can be enabled.::
+Next, stop Stone so that the tracepoints can be enabled.::
 
   ./stop.sh
 
@@ -101,7 +101,7 @@ Start up an LTTng session and enable the tracepoints.::
   lttng enable-event --userspace zipkin:keyval_string
   lttng start
 
-Then start up Ceph again.::
+Then start up Stone again.::
 
   OSD=3 MON=3 RGW=1 ./vstart.sh -n
 
@@ -147,7 +147,7 @@ Download Zipkin Package::
   java -jar zipkin.jar
 
 
-Show Ceph's Blkin Traces in Zipkin-web
+Show Stone's Blkin Traces in Zipkin-web
 ======================================
 Download babeltrace-zipkin project. This project takes the traces
 generated with blkin and sends them to a Zipkin collector using scribe::
@@ -163,7 +163,7 @@ Example::
 
   python3 babeltrace_zipkin.py ~/lttng-traces-dir/blkin-test-20150225-160222/ust/uid/0/64-bit/ -p 9410 -s 127.0.0.1
 
-Check Ceph traces on webpage::
+Check Stone traces on webpage::
 
   Browse http://${zipkin-collector-ip}:9411
   Click "Find traces"

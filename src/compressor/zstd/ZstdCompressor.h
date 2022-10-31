@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Haomai Wang <haomaiwang@gmail.com>
  *
@@ -24,23 +24,23 @@
 
 class ZstdCompressor : public Compressor {
  public:
-  ZstdCompressor(StoneeContext *cct) : Compressor(COMP_ALG_ZSTD, "zstd"), cct(cct) {}
+  ZstdCompressor(StoneContext *cct) : Compressor(COMP_ALG_ZSTD, "zstd"), cct(cct) {}
 
-  int compress(const ceph::buffer::list &src, ceph::buffer::list &dst, boost::optional<int32_t> &compressor_message) override {
+  int compress(const stone::buffer::list &src, stone::buffer::list &dst, boost::optional<int32_t> &compressor_message) override {
     ZSTD_CStream *s = ZSTD_createCStream();
     ZSTD_initCStream_srcSize(s, cct->_conf->compressor_zstd_level, src.length());
     auto p = src.begin();
     size_t left = src.length();
 
     size_t const out_max = ZSTD_compressBound(left);
-    ceph::buffer::ptr outptr = ceph::buffer::create_small_page_aligned(out_max);
+    stone::buffer::ptr outptr = stone::buffer::create_small_page_aligned(out_max);
     ZSTD_outBuffer_s outbuf;
     outbuf.dst = outptr.c_str();
     outbuf.size = outptr.length();
     outbuf.pos = 0;
 
     while (left) {
-      ceph_assert(!p.end());
+      stone_assert(!p.end());
       struct ZSTD_inBuffer_s inbuf;
       inbuf.pos = 0;
       inbuf.size = p.get_ptr_and_advance(left, (const char**)&inbuf.src);
@@ -51,33 +51,33 @@ class ZstdCompressor : public Compressor {
 	return -EINVAL;
       }
     }
-    ceph_assert(p.end());
+    stone_assert(p.end());
 
     ZSTD_freeCStream(s);
 
     // prefix with decompressed length
-    ceph::encode((uint32_t)src.length(), dst);
+    stone::encode((uint32_t)src.length(), dst);
     dst.append(outptr, 0, outbuf.pos);
     return 0;
   }
 
-  int decompress(const ceph::buffer::list &src, ceph::buffer::list &dst, boost::optional<int32_t> compressor_message) override {
+  int decompress(const stone::buffer::list &src, stone::buffer::list &dst, boost::optional<int32_t> compressor_message) override {
     auto i = std::cbegin(src);
     return decompress(i, src.length(), dst, compressor_message);
   }
 
-  int decompress(ceph::buffer::list::const_iterator &p,
+  int decompress(stone::buffer::list::const_iterator &p,
 		 size_t compressed_len,
-		 ceph::buffer::list &dst,
+		 stone::buffer::list &dst,
 		 boost::optional<int32_t> compressor_message) override {
     if (compressed_len < 4) {
       return -1;
     }
     compressed_len -= 4;
     uint32_t dst_len;
-    ceph::decode(dst_len, p);
+    stone::decode(dst_len, p);
 
-    ceph::buffer::ptr dstptr(dst_len);
+    stone::buffer::ptr dstptr(dst_len);
     ZSTD_outBuffer_s outbuf;
     outbuf.dst = dstptr.c_str();
     outbuf.size = dstptr.length();
@@ -101,7 +101,7 @@ class ZstdCompressor : public Compressor {
     return 0;
   }
  private:
-  StoneeContext *const cct;
+  StoneContext *const cct;
 };
 
 #endif

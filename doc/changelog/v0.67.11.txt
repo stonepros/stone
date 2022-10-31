@@ -8,7 +8,7 @@ commit 0e90b04d9452999d7d91305c80585782d492c91b (refs/remotes/gh/dumpling-jni)
 Author: Greg Farnum <greg@inktank.com>
 Date:   Wed May 21 21:41:23 2014 -0700
 
-    cephfs-java: build against older jni headers
+    stonefs-java: build against older jni headers
     
     Older versions of the JNI interface expected non-const parameters
     to their memory move functions. It's unpleasant, but won't actually

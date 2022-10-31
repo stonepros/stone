@@ -14,12 +14,12 @@ def task(ctx, config):
     Execute commands on a given role
 
         tasks:
-        - ceph:
+        - stone:
         - kclient: [client.a]
         - exec:
             client.a:
-              - "echo 'module libceph +p' > /sys/kernel/debug/dynamic_debug/control"
-              - "echo 'module ceph +p' > /sys/kernel/debug/dynamic_debug/control"
+              - "echo 'module libstone +p' > /sys/kernel/debug/dynamic_debug/control"
+              - "echo 'module stone +p' > /sys/kernel/debug/dynamic_debug/control"
         - interactive:
 
     It stops and fails with the first command that does not return on success. It means

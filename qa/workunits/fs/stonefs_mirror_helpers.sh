@@ -1,8 +1,8 @@
 PRIMARY_FS='dc'
 BACKUP_FS='dc-backup'
 
-REPO=ceph-qa-suite
-REPO_DIR=ceph_repo
+REPO=stone-qa-suite
+REPO_DIR=stone_repo
 REPO_PATH_PFX="$REPO_DIR/$REPO"
 
 NR_DIRECTORIES=4
@@ -50,7 +50,7 @@ exec_git_cmd()
 clone_repo()
 {
     local repo_name=$1
-    git clone --branch giant "http://github.com/ceph/$REPO" $repo_name
+    git clone --branch giant "http://github.com/stonepros/$REPO" $repo_name
 }
 
 setup_repos()

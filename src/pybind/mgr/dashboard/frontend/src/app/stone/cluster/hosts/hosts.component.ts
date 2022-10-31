@@ -480,7 +480,7 @@ export class HostsComponent extends ListWithDetails implements OnDestroy, OnInit
       return;
     }
     const typeToPermissionKey = {
-      mds: 'cephfs',
+      mds: 'stonefs',
       mon: 'monitor',
       osd: 'osd',
       rgw: 'rgw',

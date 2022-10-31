@@ -27,7 +27,7 @@ class PoolControllerTest(ControllerTestCase):
 
     @mock.patch('dashboard.services.progress.get_progress_tasks')
     @mock.patch('dashboard.controllers.pool.Pool._get')
-    @mock.patch('dashboard.services.ceph_service.CephService.send_command')
+    @mock.patch('dashboard.services.stone_service.StoneService.send_command')
     def test_creation(self, send_command, _get, get_progress_tasks):
         _get.side_effect = [{
             'pool_name': 'test-pool',

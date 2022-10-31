@@ -8,14 +8,14 @@ overrides:
         log to stderr: false
       # make these predictable
       client.mirror1:
-        admin socket: /var/run/stone/stonefs-mirror1.asok
-        pid file: /var/run/stone/stonefs-mirror1.pid
+        admin socket: /var/run/stonepros/stonefs-mirror1.asok
+        pid file: /var/run/stonepros/stonefs-mirror1.pid
       client.mirror2:
-        admin socket: /var/run/stone/stonefs-mirror2.asok
-        pid file: /var/run/stone/stonefs-mirror2.pid
+        admin socket: /var/run/stonepros/stonefs-mirror2.asok
+        pid file: /var/run/stonepros/stonefs-mirror2.pid
       client.mirror3:
-        admin socket: /var/run/stone/stonefs-mirror3.asok
-        pid file: /var/run/stone/stonefs-mirror3.pid
+        admin socket: /var/run/stonepros/stonefs-mirror3.asok
+        pid file: /var/run/stonepros/stonefs-mirror3.pid
 tasks:
 - exec:
     client.mirror1:

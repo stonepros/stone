@@ -20,7 +20,7 @@
 #include "bind_handler.h"
 #include "forward_handler.h"
 
-namespace ceph::async {
+namespace stone::async {
 
 /**
  * Abstract completion handler interface for use with boost::asio.
@@ -42,7 +42,7 @@ namespace ceph::async {
  * Example use:
  *
  *   // declare a Completion type with Signature = void(int, string)
- *   using MyCompletion = ceph::async::Completion<void(int, string)>;
+ *   using MyCompletion = stone::async::Completion<void(int, string)>;
  *
  *   // create a completion with the given callback:
  *   std::unique_ptr<MyCompletion> c;
@@ -315,6 +315,6 @@ void post(std::unique_ptr<Completion<Signature, T>>&& ptr, Args&& ...args)
   Completion<Signature, T>::post(std::move(ptr), std::forward<Args>(args)...);
 }
 
-} // namespace ceph::async
+} // namespace stone::async
 
 #endif // STONE_ASYNC_COMPLETION_H

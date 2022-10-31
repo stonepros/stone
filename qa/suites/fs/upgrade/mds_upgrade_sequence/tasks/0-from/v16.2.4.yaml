@@ -15,9 +15,9 @@ tasks:
 - print: "**** done install task..."
 - stoneadm:
     roleless: true
-    image: docker.io/stone/stone:v16.2.4
+    image: docker.io/stonepros/stone:v16.2.4
     stoneadm_branch: v16.2.4
-    stoneadm_git_url: https://github.com/stone/stone
+    stoneadm_git_url: https://github.com/stonepros/stone
     # needed for v16.2.4 due to --skip-admin-label
     avoid_pacific_features: true
 - print: "**** done starting v16.2.4"

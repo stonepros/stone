@@ -9,7 +9,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { NEVER, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
-import { Pool } from '~/app/ceph/pool/pool';
+import { Pool } from '~/app/stone/pool/pool';
 import { PoolService } from '~/app/shared/api/pool.service';
 import { RbdService } from '~/app/shared/api/rbd.service';
 import { ImageSpec } from '~/app/shared/models/image-spec';

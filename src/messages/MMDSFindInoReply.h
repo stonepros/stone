@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -22,12 +22,12 @@ class MMDSFindInoReply final : public MMDSOp {
   static constexpr int HEAD_VERSION = 1;
   static constexpr int COMPAT_VERSION = 1;
 public:
-  ceph_tid_t tid = 0;
+  stone_tid_t tid = 0;
   filepath path;
 
 protected:
   MMDSFindInoReply() : MMDSOp{MSG_MDS_FINDINOREPLY, HEAD_VERSION, COMPAT_VERSION} {}
-  MMDSFindInoReply(ceph_tid_t t) : MMDSOp{MSG_MDS_FINDINOREPLY, HEAD_VERSION, COMPAT_VERSION}, tid(t) {}
+  MMDSFindInoReply(stone_tid_t t) : MMDSOp{MSG_MDS_FINDINOREPLY, HEAD_VERSION, COMPAT_VERSION}, tid(t) {}
   ~MMDSFindInoReply() final {}
 
 public:
@@ -37,19 +37,19 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(tid, payload);
     encode(path, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(tid, p);
     decode(path, p);
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

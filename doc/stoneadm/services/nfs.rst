@@ -14,7 +14,7 @@ configurations.
 Deploying NFS ganesha
 =====================
 
-Cephadm deploys NFS Ganesha daemon (or set of daemons).  The configuration for
+Stoneadm deploys NFS Ganesha daemon (or set of daemons).  The configuration for
 NFS is stored in the ``nfs-ganesha`` pool and exports are managed via the
 ``ceph nfs export ...`` commands and via the dashboard.
 
@@ -116,5 +116,5 @@ A few notes:
 Further Reading
 ===============
 
-* CephFS: :ref:`cephfs-nfs`
+* StoneFS: :ref:`cephfs-nfs`
 * MGR: :ref:`mgr-nfs`

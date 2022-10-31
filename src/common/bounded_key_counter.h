@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc
  *
@@ -22,7 +22,7 @@
 #include <tuple>
 #include <vector>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 /**
  * BoundedKeyCounter
@@ -158,7 +158,7 @@ class BoundedKeyCounter {
       sorted.assign(const_pointer_iterator{counters.cbegin()},
                     const_pointer_iterator{counters.cend()});
       // entire range is unsorted
-      ceph_assert(sorted_position == sorted.begin());
+      stone_assert(sorted_position == sorted.begin());
     }
 
     const size_t sorted_count = get_num_sorted();

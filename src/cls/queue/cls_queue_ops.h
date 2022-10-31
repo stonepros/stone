@@ -9,11 +9,11 @@
 struct cls_queue_init_op {
   uint64_t queue_size{0};
   uint64_t max_urgent_data_size{0};
-  ceph::buffer::list bl_urgent_data;
+  stone::buffer::list bl_urgent_data;
 
   cls_queue_init_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(queue_size, bl);
     encode(max_urgent_data_size, bl);
@@ -21,7 +21,7 @@ struct cls_queue_init_op {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(queue_size, bl);
     decode(max_urgent_data_size, bl);
@@ -33,17 +33,17 @@ struct cls_queue_init_op {
 WRITE_CLASS_ENCODER(cls_queue_init_op)
 
 struct cls_queue_enqueue_op {
-  std::vector<ceph::buffer::list> bl_data_vec;
+  std::vector<stone::buffer::list> bl_data_vec;
 
   cls_queue_enqueue_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(bl_data_vec, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(bl_data_vec, bl);
     DECODE_FINISH(bl);
@@ -57,14 +57,14 @@ struct cls_queue_list_op {
 
   cls_queue_list_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(max, bl);
     encode(start_marker, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(max, bl);
     decode(start_marker, bl);
@@ -80,7 +80,7 @@ struct cls_queue_list_ret {
 
   cls_queue_list_ret() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(is_truncated, bl);
     encode(next_marker, bl);
@@ -88,7 +88,7 @@ struct cls_queue_list_ret {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(is_truncated, bl);
     decode(next_marker, bl);
@@ -103,13 +103,13 @@ struct cls_queue_remove_op {
 
   cls_queue_remove_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(end_marker, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(end_marker, bl);
     DECODE_FINISH(bl);
@@ -122,13 +122,13 @@ struct cls_queue_get_capacity_ret {
 
   cls_queue_get_capacity_ret() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(queue_capacity, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(queue_capacity, bl);
     DECODE_FINISH(bl);

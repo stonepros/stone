@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2008-2011 New Dream Network
  *
@@ -16,7 +16,7 @@
 #define STONE_ARGPARSE_H
 
 /*
- * Stonee argument parsing library
+ * Stone argument parsing library
  *
  * We probably should eventually replace this with something standard like popt.
  * Until we do that, though, this file is the place for argv parsing
@@ -29,10 +29,10 @@
 #include "common/entity_name.h"
 
 /////////////////////// Types ///////////////////////
-class StoneeInitParameters
+class StoneInitParameters
 {
 public:
-  explicit StoneeInitParameters(uint32_t module_type_);
+  explicit StoneInitParameters(uint32_t module_type_);
   std::list<std::string> get_conf_files() const;
 
   uint32_t module_type;
@@ -51,26 +51,26 @@ extern void vec_to_argv(const char *argv0, std::vector<const char*>& args,
 
 extern bool parse_ip_port_vec(const char *s, std::vector<entity_addrvec_t>& vec,
 			      int type=0);
-bool ceph_argparse_double_dash(std::vector<const char*> &args,
+bool stone_argparse_double_dash(std::vector<const char*> &args,
 	std::vector<const char*>::iterator &i);
-bool ceph_argparse_flag(std::vector<const char*> &args,
+bool stone_argparse_flag(std::vector<const char*> &args,
 	std::vector<const char*>::iterator &i, ...);
-bool ceph_argparse_witharg(std::vector<const char*> &args,
+bool stone_argparse_witharg(std::vector<const char*> &args,
 	std::vector<const char*>::iterator &i, std::string *ret,
 	std::ostream &oss, ...);
-bool ceph_argparse_witharg(std::vector<const char*> &args,
+bool stone_argparse_witharg(std::vector<const char*> &args,
 	std::vector<const char*>::iterator &i, std::string *ret, ...);
 template<class T>
-bool ceph_argparse_witharg(std::vector<const char*> &args,
+bool stone_argparse_witharg(std::vector<const char*> &args,
 	std::vector<const char*>::iterator &i, T *ret,
 	std::ostream &oss, ...);
-bool ceph_argparse_binary_flag(std::vector<const char*> &args,
+bool stone_argparse_binary_flag(std::vector<const char*> &args,
 	std::vector<const char*>::iterator &i, int *ret,
 	std::ostream *oss, ...);
-extern StoneeInitParameters ceph_argparse_early_args
+extern StoneInitParameters stone_argparse_early_args
 	    (std::vector<const char*>& args, uint32_t module_type,
 	     std::string *cluster, std::string *conf_file_list);
-extern bool ceph_argparse_need_usage(const std::vector<const char*>& args);
+extern bool stone_argparse_need_usage(const std::vector<const char*>& args);
 extern void generic_server_usage();
 extern void generic_client_usage();
 

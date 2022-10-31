@@ -90,20 +90,20 @@ class MsPlan(Plan):
         ls.append('# mode %s' % self.mode)
         if len(self.compat_ws) and \
            not CRUSHMap.have_default_choose_args(self.initial.crush_dump):
-            ls.append('ceph osd crush weight-set create-compat')
+            ls.append('stone osd crush weight-set create-compat')
         for osd, weight in self.compat_ws.items():
-            ls.append('ceph osd crush weight-set reweight-compat %s %f' %
+            ls.append('stone osd crush weight-set reweight-compat %s %f' %
                       (osd, weight))
         for osd, weight in self.osd_weights.items():
-            ls.append('ceph osd reweight osd.%d %f' % (osd, weight))
+            ls.append('stone osd reweight osd.%d %f' % (osd, weight))
         incdump = self.inc.dump()
         for pgid in incdump.get('old_pg_upmap_items', []):
-            ls.append('ceph osd rm-pg-upmap-items %s' % pgid)
+            ls.append('stone osd rm-pg-upmap-items %s' % pgid)
         for item in incdump.get('new_pg_upmap_items', []):
             osdlist = []
             for m in item['mappings']:
                 osdlist += [m['from'], m['to']]
-            ls.append('ceph osd pg-upmap-items %s %s' %
+            ls.append('stone osd pg-upmap-items %s %s' %
                       (item['pgid'], ' '.join([str(a) for a in osdlist])))
         return '\n'.join(ls)
 
@@ -339,7 +339,7 @@ class Module(MgrModule):
             "perm": "r",
         },
         {
-            "cmd": "balancer mode name=mode,type=CephChoices,strings=none|crush-compat|upmap",
+            "cmd": "balancer mode name=mode,type=StoneChoices,strings=none|crush-compat|upmap",
             "desc": "Set balancer mode",
             "perm": "rw",
         },
@@ -361,37 +361,37 @@ class Module(MgrModule):
             "perm": "r",
         },
         {
-            "cmd": "balancer pool add name=pools,type=CephString,n=N",
+            "cmd": "balancer pool add name=pools,type=StoneString,n=N",
             "desc": "Enable automatic balancing for specific pools",
             "perm": "rw",
         },
         {
-            "cmd": "balancer pool rm name=pools,type=CephString,n=N",
+            "cmd": "balancer pool rm name=pools,type=StoneString,n=N",
             "desc": "Disable automatic balancing for specific pools",
             "perm": "rw",
         },
         {
-            "cmd": "balancer eval name=option,type=CephString,req=false",
+            "cmd": "balancer eval name=option,type=StoneString,req=false",
             "desc": "Evaluate data distribution for the current cluster or specific pool or specific plan",
             "perm": "r",
         },
         {
-            "cmd": "balancer eval-verbose name=option,type=CephString,req=false",
+            "cmd": "balancer eval-verbose name=option,type=StoneString,req=false",
             "desc": "Evaluate data distribution for the current cluster or specific pool or specific plan (verbosely)",
             "perm": "r",
         },
         {
-            "cmd": "balancer optimize name=plan,type=CephString name=pools,type=CephString,n=N,req=false",
+            "cmd": "balancer optimize name=plan,type=StoneString name=pools,type=StoneString,n=N,req=false",
             "desc": "Run optimizer to create a new plan",
             "perm": "rw",
         },
         {
-            "cmd": "balancer show name=plan,type=CephString",
+            "cmd": "balancer show name=plan,type=StoneString",
             "desc": "Show details of an optimization plan",
             "perm": "r",
         },
         {
-            "cmd": "balancer rm name=plan,type=CephString",
+            "cmd": "balancer rm name=plan,type=StoneString",
             "desc": "Discard an optimization plan",
             "perm": "rw",
         },
@@ -401,7 +401,7 @@ class Module(MgrModule):
             "perm": "rw",
         },
         {
-            "cmd": "balancer dump name=plan,type=CephString",
+            "cmd": "balancer dump name=plan,type=StoneString",
             "desc": "Show an optimization plan",
             "perm": "r",
         },
@@ -411,7 +411,7 @@ class Module(MgrModule):
             "perm": "r",
         },
         {
-            "cmd": "balancer execute name=plan,type=CephString",
+            "cmd": "balancer execute name=plan,type=StoneString",
             "desc": "Execute an optimization plan",
             "perm": "rw",
         },
@@ -449,7 +449,7 @@ class Module(MgrModule):
                 if min_compat_client < 'luminous': # works well because version is alphabetized..
                     warn = 'min_compat_client "%s" ' \
                            '< "luminous", which is required for pg-upmap. ' \
-                           'Try "ceph osd set-require-min-compat-client luminous" ' \
+                           'Try "stone osd set-require-min-compat-client luminous" ' \
                            'before enabling this mode' % min_compat_client
                     return (-errno.EPERM, '', warn)
             elif command['mode'] == 'crush-compat':
@@ -929,7 +929,7 @@ class Module(MgrModule):
 
     def optimize(self, plan):
         self.log.info('Optimize plan %s' % plan.name)
-        max_misplaced = self.get_ceph_option('target_max_misplaced_ratio')
+        max_misplaced = self.get_stone_option('target_max_misplaced_ratio')
         self.log.info('Mode %s, max misplaced %f' %
                       (plan.mode, max_misplaced))
 
@@ -964,7 +964,7 @@ class Module(MgrModule):
             elif plan.mode == 'crush-compat':
                 return self.do_crush_compat(plan)
             elif plan.mode == 'none':
-                detail = 'Please do "ceph balancer mode" to choose a valid mode first'
+                detail = 'Please do "stone balancer mode" to choose a valid mode first'
                 self.log.info('Idle')
                 return -errno.ENOEXEC, detail
             else:
@@ -1046,7 +1046,7 @@ class Module(MgrModule):
         step = self.get_module_option('crush_compat_step')
         if step <= 0 or step >= 1.0:
             return -errno.EINVAL, '"crush_compat_step" must be in (0, 1)'
-        max_misplaced = self.get_ceph_option('target_max_misplaced_ratio')
+        max_misplaced = self.get_stone_option('target_max_misplaced_ratio')
         min_pg_per_osd = 2
 
         ms = plan.initial
@@ -1240,7 +1240,7 @@ class Module(MgrModule):
         if not have_choose_args or choose_args_len != len(ms.crush_dump['buckets']):
             # enable compat weight-set first
             self.log.debug('no choose_args or all buckets do not have weight-sets')
-            self.log.debug('ceph osd crush weight-set create-compat')
+            self.log.debug('stone osd crush weight-set create-compat')
             result = CommandResult('')
             self.send_command(result, 'mon', '', json.dumps({
                 'prefix': 'osd crush weight-set create-compat',
@@ -1301,7 +1301,7 @@ class Module(MgrModule):
         # compat weight-set
         if len(plan.compat_ws) and \
            not CRUSHMap.have_default_choose_args(plan.initial.crush_dump):
-            self.log.debug('ceph osd crush weight-set create-compat')
+            self.log.debug('stone osd crush weight-set create-compat')
             result = CommandResult('')
             self.send_command(result, 'mon', '', json.dumps({
                 'prefix': 'osd crush weight-set create-compat',
@@ -1313,7 +1313,7 @@ class Module(MgrModule):
                 return r, outs
 
         for osd, weight in plan.compat_ws.items():
-            self.log.info('ceph osd crush weight-set reweight-compat osd.%d %f',
+            self.log.info('stone osd crush weight-set reweight-compat osd.%d %f',
                           osd, weight)
             result = CommandResult('')
             self.send_command(result, 'mon', '', json.dumps({
@@ -1329,7 +1329,7 @@ class Module(MgrModule):
         for osd, weight in plan.osd_weights.items():
             reweightn[str(osd)] = str(int(weight * float(0x10000)))
         if len(reweightn):
-            self.log.info('ceph osd reweightn %s', reweightn)
+            self.log.info('stone osd reweightn %s', reweightn)
             result = CommandResult('')
             self.send_command(result, 'mon', '', json.dumps({
                 'prefix': 'osd reweightn',
@@ -1341,7 +1341,7 @@ class Module(MgrModule):
         # upmap
         incdump = plan.inc.dump()
         for item in incdump.get('new_pg_upmap', []):
-            self.log.info('ceph osd pg-upmap %s mappings %s', item['pgid'],
+            self.log.info('stone osd pg-upmap %s mappings %s', item['pgid'],
                           item['osds'])
             result = CommandResult('foo')
             self.send_command(result, 'mon', '', json.dumps({
@@ -1353,7 +1353,7 @@ class Module(MgrModule):
             commands.append(result)
 
         for pgid in incdump.get('old_pg_upmap', []):
-            self.log.info('ceph osd rm-pg-upmap %s', pgid)
+            self.log.info('stone osd rm-pg-upmap %s', pgid)
             result = CommandResult('foo')
             self.send_command(result, 'mon', '', json.dumps({
                 'prefix': 'osd rm-pg-upmap',
@@ -1363,7 +1363,7 @@ class Module(MgrModule):
             commands.append(result)
 
         for item in incdump.get('new_pg_upmap_items', []):
-            self.log.info('ceph osd pg-upmap-items %s mappings %s', item['pgid'],
+            self.log.info('stone osd pg-upmap-items %s mappings %s', item['pgid'],
                           item['mappings'])
             osdlist = []
             for m in item['mappings']:
@@ -1378,7 +1378,7 @@ class Module(MgrModule):
             commands.append(result)
 
         for pgid in incdump.get('old_pg_upmap_items', []):
-            self.log.info('ceph osd rm-pg-upmap-items %s', pgid)
+            self.log.info('stone osd rm-pg-upmap-items %s', pgid)
             result = CommandResult('foo')
             self.send_command(result, 'mon', '', json.dumps({
                 'prefix': 'osd rm-pg-upmap-items',

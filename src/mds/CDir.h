@@ -32,7 +32,7 @@
 #include "CInode.h"
 #include "MDSCacheObject.h"
 #include "MDSContext.h"
-#include "cephfs_features.h"
+#include "stonefs_features.h"
 #include "SessionMap.h"
 #include "messages/MClientReply.h"
 
@@ -239,7 +239,7 @@ public:
 
   version_t get_version() const { return fnode->version; }
   void update_projected_version() {
-    ceph_assert(projected_fnode.empty());
+    stone_assert(projected_fnode.empty());
     projected_version = fnode->version;
   }
   version_t get_projected_version() const { return projected_version; }
@@ -268,7 +268,7 @@ public:
 
   // fnode should have already been projected in caller's context
   fnode_t* _get_projected_fnode() {
-    ceph_assert(!projected_fnode.empty());
+    stone_assert(!projected_fnode.empty());
     return const_cast<fnode_t*>(projected_fnode.back().get());
   }
 
@@ -351,7 +351,7 @@ public:
 
   void inc_num_dirty() { num_dirty++; }
   void dec_num_dirty() { 
-    ceph_assert(num_dirty > 0);
+    stone_assert(num_dirty > 0);
     num_dirty--; 
   }
   int get_num_dirty() const {
@@ -431,9 +431,9 @@ public:
     }
   }
 
-  static void encode_dirstat(ceph::buffer::list& bl, const session_info_t& info, const DirStat& ds);
+  static void encode_dirstat(stone::buffer::list& bl, const session_info_t& info, const DirStat& ds);
 
-  void _encode_base(ceph::buffer::list& bl) {
+  void _encode_base(stone::buffer::list& bl) {
     ENCODE_START(1, 1, bl);
     encode(first, bl);
     encode(*fnode, bl);
@@ -441,7 +441,7 @@ public:
     encode(dir_rep_by, bl);
     ENCODE_FINISH(bl);
   }
-  void _decode_base(ceph::buffer::list::const_iterator& p) {
+  void _decode_base(stone::buffer::list::const_iterator& p) {
     DECODE_START(1, p);
     decode(first, p);
     {
@@ -508,12 +508,12 @@ public:
   mds_rank_t get_export_pin(bool inherit=true) const;
   bool is_exportable(mds_rank_t dest) const;
 
-  void encode_export(ceph::buffer::list& bl);
+  void encode_export(stone::buffer::list& bl);
   void finish_export();
   void abort_export() {
     put(PIN_TEMPEXPORTING);
   }
-  void decode_import(ceph::buffer::list::const_iterator& blp, LogSegment *ls);
+  void decode_import(stone::buffer::list::const_iterator& blp, LogSegment *ls);
   void abort_import();
 
   // -- auth pins --
@@ -597,15 +597,15 @@ public:
     return frozen_inode_suppressed;
   }
   void disable_frozen_inode() {
-    ceph_assert(num_frozen_inodes == 0);
+    stone_assert(num_frozen_inodes == 0);
     frozen_inode_suppressed++;
   }
   void enable_frozen_inode();
 
   std::ostream& print_db_line_prefix(std::ostream& out) override;
   void print(std::ostream& out) override;
-  void dump(ceph::Formatter *f, int flags = DUMP_DEFAULT) const;
-  void dump_load(ceph::Formatter *f);
+  void dump(stone::Formatter *f, int flags = DUMP_DEFAULT) const;
+  void dump_load(stone::Formatter *f);
 
   // context
   MDCache *mdcache;
@@ -651,7 +651,7 @@ protected:
       std::string_view key,
       std::string_view dname,
       snapid_t last,
-      ceph::buffer::list &bl,
+      stone::buffer::list &bl,
       int pos,
       const std::set<snapid_t> *snaps,
       double rand_threshold,
@@ -667,7 +667,7 @@ protected:
    */
   void go_bad(bool complete);
 
-  void _omap_fetched(ceph::buffer::list& hdrbl, std::map<std::string, ceph::buffer::list>& omap,
+  void _omap_fetched(stone::buffer::list& hdrbl, std::map<std::string, stone::buffer::list>& omap,
 		     bool complete, int r);
 
   // -- commit --
@@ -732,7 +732,7 @@ protected:
   dirfrag_load_vec_t pop_auth_subtree;
   dirfrag_load_vec_t pop_auth_subtree_nested;
 
-  ceph::coarse_mono_time last_popularity_sample = ceph::coarse_mono_clock::zero();
+  stone::coarse_mono_time last_popularity_sample = stone::coarse_mono_clock::zero();
 
   load_spread_t pop_spread;
 

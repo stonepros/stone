@@ -1,6 +1,6 @@
 
 """
-Teuthology task for exercising CephFS client recovery
+Teuthology task for exercising StoneFS client recovery
 """
 
 import logging
@@ -12,8 +12,8 @@ import os
 
 from teuthology.orchestra import run
 from teuthology.orchestra.run import CommandFailedError
-from tasks.cephfs.fuse_mount import FuseMount
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.fuse_mount import FuseMount
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 from teuthology.packaging import get_package_version
 
 log = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 MDS_RESTART_GRACE = 60
 
 
-class TestClientNetworkRecovery(CephFSTestCase):
+class TestClientNetworkRecovery(StoneFSTestCase):
     REQUIRE_KCLIENT_REMOTE = True
     REQUIRE_ONE_CLIENT_REMOTE = True
     CLIENTS_REQUIRED = 2
@@ -84,7 +84,7 @@ class TestClientNetworkRecovery(CephFSTestCase):
         self.assert_session_state(client_id, "open")
 
 
-class TestClientRecovery(CephFSTestCase):
+class TestClientRecovery(StoneFSTestCase):
     REQUIRE_KCLIENT_REMOTE = True
     CLIENTS_REQUIRED = 2
 
@@ -510,7 +510,7 @@ class TestClientRecovery(CephFSTestCase):
         self.assertEqual(current_readdirs, initial_readdirs);
 
         mount_b_gid = self.mount_b.get_global_id()
-        # stop ceph-fuse process of mount_b
+        # stop stone-fuse process of mount_b
         self.mount_b.suspend_netns()
 
         self.assert_session_state(mount_b_gid, "open")
@@ -519,7 +519,7 @@ class TestClientRecovery(CephFSTestCase):
         self.mount_a.run_shell(["touch", "testdir/file2"])
         self.assert_session_state(mount_b_gid, "stale")
 
-        # resume ceph-fuse process of mount_b
+        # resume stone-fuse process of mount_b
         self.mount_b.resume_netns()
         # Is the new file visible from mount_b? (caps become invalid after session stale)
         self.mount_b.run_shell(["ls", "testdir/file2"])
@@ -529,7 +529,7 @@ class TestClientRecovery(CephFSTestCase):
         Check that abort_conn() skips closing mds sessions.
         """
         if not isinstance(self.mount_a, FuseMount):
-            self.skipTest("Testing libcephfs function")
+            self.skipTest("Testing libstonefs function")
 
         self.fs.mds_asok(['config', 'set', 'mds_defer_session_stale', 'false'])
         session_timeout = self.fs.get_var("session_timeout")
@@ -538,11 +538,11 @@ class TestClientRecovery(CephFSTestCase):
         self.mount_b.umount_wait()
 
         gid_str = self.mount_a.run_python(dedent("""
-            import cephfs as libcephfs
-            cephfs = libcephfs.LibCephFS(conffile='')
-            cephfs.mount()
-            client_id = cephfs.get_instance_id()
-            cephfs.abort_conn()
+            import stonefs as libstonefs
+            stonefs = libstonefs.LibStoneFS(conffile='')
+            stonefs.mount()
+            client_id = stonefs.get_instance_id()
+            stonefs.abort_conn()
             print(client_id)
             """)
         )

@@ -62,7 +62,7 @@ struct RWState {
     }
     switch (state) {
     case RWNONE:
-      ceph_assert(count == 0);
+      stone_assert(count == 0);
       state = RWREAD;
       // fall through
     case RWREAD:
@@ -73,7 +73,7 @@ struct RWState {
     case RWEXCL:
       return false;
     default:
-      ceph_abort_msg("unhandled case");
+      stone_abort_msg("unhandled case");
       return false;
     }
   }
@@ -88,7 +88,7 @@ struct RWState {
     }
     switch (state) {
     case RWNONE:
-      ceph_assert(count == 0);
+      stone_assert(count == 0);
       state = RWWRITE;
       // fall through
     case RWWRITE:
@@ -99,14 +99,14 @@ struct RWState {
     case RWEXCL:
       return false;
     default:
-      ceph_abort_msg("unhandled case");
+      stone_abort_msg("unhandled case");
       return false;
     }
   }
   bool get_excl_lock() {
     switch (state) {
     case RWNONE:
-      ceph_assert(count == 0);
+      stone_assert(count == 0);
       state = RWEXCL;
       count = 1;
       return true;
@@ -117,7 +117,7 @@ struct RWState {
     case RWEXCL:
       return false;
     default:
-      ceph_abort_msg("unhandled case");
+      stone_abort_msg("unhandled case");
       return false;
     }
   }
@@ -130,7 +130,7 @@ struct RWState {
     return get_write_lock();
   }
   bool dec() {
-    ceph_assert(count > 0);
+    stone_assert(count > 0);
     count--;
     if (count == 0) {
       state = RWNONE;
@@ -140,15 +140,15 @@ struct RWState {
     }
   }
   bool put_read() {
-    ceph_assert(state == RWREAD);
+    stone_assert(state == RWREAD);
     return dec();
   }
   bool put_write() {
-    ceph_assert(state == RWWRITE);
+    stone_assert(state == RWWRITE);
     return dec();
   }
   bool put_excl() {
-    ceph_assert(state == RWEXCL);
+    stone_assert(state == RWEXCL);
     return dec();
   }
   void inc_waiters() {
@@ -158,7 +158,7 @@ struct RWState {
     waiters = 0;
   }
   void dec_waiters(int count) {
-    ceph_assert(waiters >= count);
+    stone_assert(waiters >= count);
     waiters -= count;
   }
   bool empty() const { return state == RWNONE; }

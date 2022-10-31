@@ -2,17 +2,17 @@
 
 SCRIPT_NAME=$(basename ${BASH_SOURCE[0]})
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CEPHADM_SRC_DIR=${SCRIPT_DIR}/../../../src/cephadm
+STONEADM_SRC_DIR=${SCRIPT_DIR}/../../../src/stoneadm
 CORPUS_COMMIT=9cd9ad020d93b0b420924fec55da307aff8bd422
 
 [ -z "$SUDO" ] && SUDO=sudo
-if [ -z "$CEPHADM" ]; then
-    CEPHADM=${CEPHADM_SRC_DIR}/cephadm
+if [ -z "$STONEADM" ]; then
+    STONEADM=${STONEADM_SRC_DIR}/stoneadm
 fi
 
-# at this point, we need $CEPHADM set
-if ! [ -x "$CEPHADM" ]; then
-    echo "cephadm not found. Please set \$CEPHADM"
+# at this point, we need $STONEADM set
+if ! [ -x "$STONEADM" ]; then
+    echo "stoneadm not found. Please set \$STONEADM"
     exit 1
 fi
 
@@ -29,16 +29,16 @@ if [ -z "$PYTHON_KLUDGE" ]; then
 
     TMPBINDIR=$(mktemp -d)
     trap "rm -rf $TMPBINDIR" EXIT
-    ORIG_CEPHADM="$CEPHADM"
-    CEPHADM="$TMPBINDIR/cephadm"
+    ORIG_STONEADM="$STONEADM"
+    STONEADM="$TMPBINDIR/stoneadm"
     for p in $PYTHONS; do
 	echo "=== re-running with $p ==="
 	ln -s `which $p` $TMPBINDIR/python
-	echo "#!$TMPBINDIR/python" > $CEPHADM
-	cat $ORIG_CEPHADM >> $CEPHADM
-	chmod 700 $CEPHADM
+	echo "#!$TMPBINDIR/python" > $STONEADM
+	cat $ORIG_STONEADM >> $STONEADM
+	chmod 700 $STONEADM
 	$TMPBINDIR/python --version
-	PYTHON_KLUDGE=1 CEPHADM=$CEPHADM $0
+	PYTHON_KLUDGE=1 STONEADM=$STONEADM $0
 	rm $TMPBINDIR/python
     done
     rm -rf $TMPBINDIR
@@ -47,13 +47,13 @@ if [ -z "$PYTHON_KLUDGE" ]; then
 fi
 
 # combine into a single var
-CEPHADM_BIN="$CEPHADM"
-CEPHADM="$SUDO $CEPHADM_BIN"
+STONEADM_BIN="$STONEADM"
+STONEADM="$SUDO $STONEADM_BIN"
 
 ## adopt
-CORPUS_GIT_SUBMOD="cephadm-adoption-corpus"
+CORPUS_GIT_SUBMOD="stoneadm-adoption-corpus"
 TMPDIR=$(mktemp -d)
-git clone https://github.com/ceph/$CORPUS_GIT_SUBMOD $TMPDIR
+git clone https://github.com/stonepros/$CORPUS_GIT_SUBMOD $TMPDIR
 trap "$SUDO rm -rf $TMPDIR" EXIT
 
 git -C $TMPDIR checkout $CORPUS_COMMIT
@@ -65,20 +65,20 @@ for subdir in `ls ${CORPUS_DIR}`; do
 	FSID_LEGACY=`echo "$tarfile" | cut -c 1-36`
 	TMP_TAR_DIR=`mktemp -d -p $TMPDIR`
 	$SUDO tar xzvf $tarball -C $TMP_TAR_DIR
-	NAMES=$($CEPHADM ls --legacy-dir $TMP_TAR_DIR | jq -r '.[].name')
+	NAMES=$($STONEADM ls --legacy-dir $TMP_TAR_DIR | jq -r '.[].name')
 	for name in $NAMES; do
-            $CEPHADM adopt \
+            $STONEADM adopt \
                      --style legacy \
                      --legacy-dir $TMP_TAR_DIR \
                      --name $name
             # validate after adopt
-            out=$($CEPHADM ls | jq '.[]' \
+            out=$($STONEADM ls | jq '.[]' \
                       | jq 'select(.name == "'$name'")')
-            echo $out | jq -r '.style' | grep 'cephadm'
+            echo $out | jq -r '.style' | grep 'stoneadm'
             echo $out | jq -r '.fsid' | grep $FSID_LEGACY
 	done
 	# clean-up before next iter
-	$CEPHADM rm-cluster --fsid $FSID_LEGACY --force
+	$STONEADM rm-cluster --fsid $FSID_LEGACY --force
 	$SUDO rm -rf $TMP_TAR_DIR
     done
 done

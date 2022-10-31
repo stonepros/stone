@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -34,14 +34,14 @@
 
 #include "include/cpp-btree/btree_set.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/interval_set.h"
 #include "include/unordered_map.h"
 #include "include/mempool.h"
 #include "include/hash.h"
 #include "common/bloom_filter.hpp"
 #include "common/Finisher.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Throttle.h"
 #include "common/perf_counters.h"
 #include "common/PriorityCache.h"
@@ -174,7 +174,7 @@ public:
 
   struct TransContext;
 
-  typedef std::map<uint64_t, ceph::buffer::list> ready_regions_t;
+  typedef std::map<uint64_t, stone::buffer::list> ready_regions_t;
 
 
   struct BufferSpace;
@@ -220,7 +220,7 @@ public:
     uint32_t flags;             ///< FLAG_*
     uint64_t seq;
     uint32_t offset, length;
-    ceph::buffer::list data;
+    stone::buffer::list data;
 
     boost::intrusive::list_member_hook<> lru_item;
     boost::intrusive::list_member_hook<> state_item;
@@ -228,7 +228,7 @@ public:
     Buffer(BufferSpace *space, unsigned s, uint64_t q, uint32_t o, uint32_t l,
 	   unsigned f = 0)
       : space(space), state(s), flags(f), seq(q), offset(o), length(l) {}
-    Buffer(BufferSpace *space, unsigned s, uint64_t q, uint32_t o, ceph::buffer::list& b,
+    Buffer(BufferSpace *space, unsigned s, uint64_t q, uint32_t o, stone::buffer::list& b,
 	   unsigned f = 0)
       : space(space), state(s), flags(f), seq(q), offset(o),
 	length(b.length()), data(b) {}
@@ -248,9 +248,9 @@ public:
     }
 
     void truncate(uint32_t newlen) {
-      ceph_assert(newlen < length);
+      stone_assert(newlen < length);
       if (data.length()) {
-	ceph::buffer::list t;
+	stone::buffer::list t;
 	t.substr_of(data, 0, newlen);
 	data = std::move(t);
       }
@@ -264,7 +264,7 @@ public:
       }
     }
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_string("state", get_state_name(state));
       f->dump_unsigned("seq", seq);
       f->dump_unsigned("offset", offset);
@@ -297,8 +297,8 @@ public:
     state_list_t writing;   ///< writing buffers, sorted by seq, ascending
 
     ~BufferSpace() {
-      ceph_assert(buffer_map.empty());
-      ceph_assert(writing.empty());
+      stone_assert(buffer_map.empty());
+      stone_assert(writing.empty());
     }
 
     void _add_buffer(BufferCacheShard* cache, Buffer* b, int level, Buffer* near) {
@@ -316,7 +316,7 @@ public:
             ++it;
           }
 
-          ceph_assert(it->seq >= b->seq);
+          stone_assert(it->seq >= b->seq);
           // note that this will insert b before it
           // hence the order is maintained
           writing.insert(it, *b);
@@ -332,7 +332,7 @@ public:
     }
     void _rm_buffer(BufferCacheShard* cache,
 		    std::map<uint32_t, std::unique_ptr<Buffer>>::iterator p) {
-      ceph_assert(p != buffer_map.end());
+      stone_assert(p != buffer_map.end());
       cache->_audit("_rm_buffer start");
       if (p->second->is_writing()) {
         writing.erase(writing.iterator_to(*p->second));
@@ -366,7 +366,7 @@ public:
     }
     int _discard(BufferCacheShard* cache, uint32_t offset, uint32_t length);
 
-    void write(BufferCacheShard* cache, uint64_t seq, uint32_t offset, ceph::buffer::list& bl,
+    void write(BufferCacheShard* cache, uint64_t seq, uint32_t offset, stone::buffer::list& bl,
 	       unsigned flags) {
       std::lock_guard l(cache->lock);
       Buffer *b = new Buffer(this, Buffer::STATE_WRITING, seq, offset, bl,
@@ -376,7 +376,7 @@ public:
       cache->_trim();
     }
     void _finish_write(BufferCacheShard* cache, uint64_t seq);
-    void did_read(BufferCacheShard* cache, uint32_t offset, ceph::buffer::list& bl) {
+    void did_read(BufferCacheShard* cache, uint32_t offset, stone::buffer::list& bl) {
       std::lock_guard l(cache->lock);
       Buffer *b = new Buffer(this, Buffer::STATE_CLEAN, 0, offset, bl);
       b->cache_private = _discard(cache, offset, bl.length());
@@ -395,12 +395,12 @@ public:
 
     void split(BufferCacheShard* cache, size_t pos, BufferSpace &r);
 
-    void dump(BufferCacheShard* cache, ceph::Formatter *f) const {
+    void dump(BufferCacheShard* cache, stone::Formatter *f) const {
       std::lock_guard l(cache->lock);
       f->open_array_section("buffers");
       for (auto& i : buffer_map) {
 	f->open_object_section("buffer");
-	ceph_assert(i.first == i.second->offset);
+	stone_assert(i.first == i.second->offset);
 	i.second->dump(f);
 	f->close_section();
       }
@@ -439,7 +439,7 @@ public:
     friend void intrusive_ptr_add_ref(SharedBlob *b) { b->get(); }
     friend void intrusive_ptr_release(SharedBlob *b) { b->put(); }
 
-    void dump(ceph::Formatter* f) const;
+    void dump(stone::Formatter* f) const;
     friend std::ostream& operator<<(std::ostream& out, const SharedBlob& sb);
 
     void get() {
@@ -475,7 +475,7 @@ public:
   /// a lookup table of SharedBlobs
   struct SharedBlobSet {
     /// protect lookup, insertion, removal
-    ceph::mutex lock = ceph::make_mutex("BlueStore::SharedBlobSet::lock");
+    stone::mutex lock = stone::make_mutex("BlueStore::SharedBlobSet::lock");
 
     // we use a bare pointer because we don't want to affect the ref
     // count
@@ -499,7 +499,7 @@ public:
 
     bool remove(SharedBlob *sb, bool verify_nref_is_zero=false) {
       std::lock_guard l(lock);
-      ceph_assert(sb->get_parent() == this);
+      stone_assert(sb->get_parent() == this);
       if (verify_nref_is_zero && sb->nref != 0) {
 	return false;
       }
@@ -518,7 +518,7 @@ public:
     }
 
     template <int LogLevelV>
-    void dump(CephContext *cct);
+    void dump(StoneContext *cct);
   };
 
 //#define CACHE_BLOB_BL  // not sure if this is a win yet or not... :/
@@ -535,7 +535,7 @@ public:
   private:
     mutable bluestore_blob_t blob;  ///< decoded blob metadata
 #ifdef CACHE_BLOB_BL
-    mutable ceph::buffer::list blob_bl;     ///< cached encoded blob, blob is dirty if empty
+    mutable stone::buffer::list blob_bl;     ///< cached encoded blob, blob is dirty if empty
 #endif
     /// refs from this shard.  ephemeral if id<0, persisted if spanning.
     bluestore_blob_use_tracker_t used_in_blob;
@@ -545,7 +545,7 @@ public:
     friend void intrusive_ptr_add_ref(Blob *b) { b->get(); }
     friend void intrusive_ptr_release(Blob *b) { b->put(); }
 
-    void dump(ceph::Formatter* f) const;
+    void dump(stone::Formatter* f) const;
     friend std::ostream& operator<<(std::ostream& out, const Blob &b);
 
     const bluestore_blob_use_tracker_t& get_blob_use_tracker() const {
@@ -624,7 +624,7 @@ public:
       if (blob_bl.length() == 0 ) {
 	encode(blob, blob_bl);
       } else {
-	ceph_assert(blob_bl.length());
+	stone_assert(blob_bl.length());
       }
     }
     void bound_encode(
@@ -637,7 +637,7 @@ public:
       }
     }
     void encode(
-      ceph::buffer::list::contiguous_appender& p,
+      stone::buffer::list::contiguous_appender& p,
       bool include_ref_map) const {
       _encode();
       p.append(blob_bl);
@@ -647,7 +647,7 @@ public:
     }
     void decode(
       Collection */*coll*/,
-      ceph::buffer::ptr::const_iterator& p,
+      stone::buffer::ptr::const_iterator& p,
       bool include_ref_map) {
       const char *start = p.get_pos();
       denc(blob, p);
@@ -673,7 +673,7 @@ public:
       }
     }
     void encode(
-      ceph::buffer::list::contiguous_appender& p,
+      stone::buffer::list::contiguous_appender& p,
       uint64_t struct_v,
       uint64_t sbid,
       bool include_ref_map) const {
@@ -687,7 +687,7 @@ public:
     }
     void decode(
       Collection *coll,
-      ceph::buffer::ptr::const_iterator& p,
+      stone::buffer::ptr::const_iterator& p,
       uint64_t struct_v,
       uint64_t* sbid,
       bool include_ref_map);
@@ -723,10 +723,10 @@ public:
       }
     }
 
-    void dump(ceph::Formatter* f) const;
+    void dump(stone::Formatter* f) const;
 
     void assign_blob(const BlobRef& b) {
-      ceph_assert(!blob);
+      stone_assert(!blob);
       blob = b;
       blob->shared_blob->get_cache()->add_extent();
     }
@@ -804,7 +804,7 @@ public:
     };
     mempool::bluestore_cache_meta::vector<Shard> shards;    ///< shards
 
-    ceph::buffer::list inline_bl;    ///< cached encoded map, if unsharded; empty=>dirty
+    stone::buffer::list inline_bl;    ///< cached encoded map, if unsharded; empty=>dirty
 
     uint32_t needs_reshard_begin = 0;
     uint32_t needs_reshard_end = 0;
@@ -843,19 +843,19 @@ public:
       clear_needs_reshard();
     }
 
-    void dump(ceph::Formatter* f) const;
+    void dump(stone::Formatter* f) const;
 
-    bool encode_some(uint32_t offset, uint32_t length, ceph::buffer::list& bl,
+    bool encode_some(uint32_t offset, uint32_t length, stone::buffer::list& bl,
 		     unsigned *pn);
-    unsigned decode_some(ceph::buffer::list& bl);
+    unsigned decode_some(stone::buffer::list& bl);
 
     void bound_encode_spanning_blobs(size_t& p);
-    void encode_spanning_blobs(ceph::buffer::list::contiguous_appender& p);
-    void decode_spanning_blobs(ceph::buffer::ptr::const_iterator& p);
+    void encode_spanning_blobs(stone::buffer::list::contiguous_appender& p);
+    void decode_spanning_blobs(stone::buffer::ptr::const_iterator& p);
 
     BlobRef get_spanning_blob(int id) {
       auto p = spanning_blob_map.find(id);
-      ceph_assert(p != spanning_blob_map.end());
+      stone_assert(p != spanning_blob_map.end());
       return p->second;
     }
 
@@ -898,7 +898,7 @@ public:
 	return false;
       }
       int s = seek_shard(offset);
-      ceph_assert(s >= 0);
+      stone_assert(s >= 0);
       if (s == (int)shards.size() - 1) {
 	return false; // last shard
       }
@@ -999,7 +999,7 @@ public:
     const interval_set<uint64_t>& get_extents_to_collect() const {
       return extents_to_collect;
     }
-    GarbageCollector(CephContext* _cct) : cct(_cct) {}
+    GarbageCollector(StoneContext* _cct) : cct(_cct) {}
 
   private:
     struct BlobInfo {
@@ -1021,7 +1021,7 @@ public:
         referenced_bytes(ref_bytes) {
       }
     };
-    CephContext* cct;
+    StoneContext* cct;
     std::map<Blob*, BlobInfo> affected_blobs; ///< compressed blobs and their ref_map
                                          ///< copies that are affected by the
                                          ///< specific write
@@ -1088,8 +1088,8 @@ public:
     std::atomic<int> flushing_count = {0};
     std::atomic<int> waiting_count = {0};
     /// protect flush_txns
-    ceph::mutex flush_lock = ceph::make_mutex("BlueStore::Onode::flush_lock");
-    ceph::condition_variable flush_cond;   ///< wait here for uncommitted txns
+    stone::mutex flush_lock = stone::make_mutex("BlueStore::Onode::flush_lock");
+    stone::condition_variable flush_cond;   ///< wait here for uncommitted txns
 
     Onode(Collection *c, const ghobject_t& o,
 	  const mempool::bluestore_cache_meta::string& k)
@@ -1129,21 +1129,21 @@ public:
       CollectionRef c,
       const ghobject_t& oid,
       const std::string& key,
-      const ceph::buffer::list& v);
+      const stone::buffer::list& v);
 
-    void dump(ceph::Formatter* f) const;
+    void dump(stone::Formatter* f) const;
 
     void flush();
     void get();
     void put();
 
     inline bool put_cache() {
-      ceph_assert(!cached);
+      stone_assert(!cached);
       cached = true;
       return !pinned;
     }
     inline bool pop_cache() {
-      ceph_assert(cached);
+      stone_assert(cached);
       cached = false;
       return !pinned;
     }
@@ -1186,17 +1186,17 @@ public:
 
   /// A generic Cache Shard
   struct CacheShard {
-    CephContext *cct;
+    StoneContext *cct;
     PerfCounters *logger;
 
     /// protect lru and other structures
-    ceph::recursive_mutex lock = {
-      ceph::make_recursive_mutex("BlueStore::CacheShard::lock") };
+    stone::recursive_mutex lock = {
+      stone::make_recursive_mutex("BlueStore::CacheShard::lock") };
 
     std::atomic<uint64_t> max = {0};
     std::atomic<uint64_t> num = {0};
 
-    CacheShard(CephContext* cct) : cct(cct), logger(nullptr) {}
+    CacheShard(StoneContext* cct) : cct(cct), logger(nullptr) {}
     virtual ~CacheShard() {}
 
     void set_max(uint64_t max_) {
@@ -1238,14 +1238,14 @@ public:
   struct OnodeCacheShard : public CacheShard {
     std::atomic<uint64_t> num_pinned = {0};
 
-    std::array<std::pair<ghobject_t, ceph::mono_clock::time_point>, 64> dumped_onodes;
+    std::array<std::pair<ghobject_t, stone::mono_clock::time_point>, 64> dumped_onodes;
 
     virtual void _pin(Onode* o) = 0;
     virtual void _unpin(Onode* o) = 0;
 
   public:
-    OnodeCacheShard(CephContext* cct) : CacheShard(cct) {}
-    static OnodeCacheShard *create(CephContext* cct, std::string type,
+    OnodeCacheShard(StoneContext* cct) : CacheShard(cct) {}
+    static OnodeCacheShard *create(StoneContext* cct, std::string type,
                                    PerfCounters *logger);
     virtual void _add(Onode* o, int level) = 0;
     virtual void _rm(Onode* o) = 0;
@@ -1265,8 +1265,8 @@ public:
     uint64_t buffer_bytes = 0;
 
   public:
-    BufferCacheShard(CephContext* cct) : CacheShard(cct) {}
-    static BufferCacheShard *create(CephContext* cct, std::string type, 
+    BufferCacheShard(StoneContext* cct) : CacheShard(cct) {}
+    static BufferCacheShard *create(StoneContext* cct, std::string type, 
                                     PerfCounters *logger);
     virtual void _add(Buffer *b, int level, Buffer *near) = 0;
     virtual void _rm(Buffer *b) = 0;
@@ -1329,22 +1329,22 @@ public:
     bool empty();
 
     template <int LogLevelV>
-    void dump(CephContext *cct);
+    void dump(StoneContext *cct);
 
     /// return true if f true for any item
     bool map_any(std::function<bool(Onode*)> f);
   };
 
   class OpSequencer;
-  using OpSequencerRef = ceph::ref_t<OpSequencer>;
+  using OpSequencerRef = stone::ref_t<OpSequencer>;
 
   struct Collection : public CollectionImpl {
     BlueStore *store;
     OpSequencerRef osr;
     BufferCacheShard *cache;       ///< our cache shard
     bluestore_cnode_t cnode;
-    ceph::shared_mutex lock =
-      ceph::make_shared_mutex("BlueStore::Collection::lock", true, false);
+    stone::shared_mutex lock =
+      stone::make_shared_mutex("BlueStore::Collection::lock", true, false);
 
     bool exists;
 
@@ -1425,7 +1425,7 @@ public:
     bool valid() override;
     int next() override;
     std::string key() override;
-    ceph::buffer::list value() override;
+    stone::buffer::list value() override;
     std::string tail_key() override {
       return tail;
     }
@@ -1510,15 +1510,15 @@ public:
 	values[STATFS_COMPRESSED_ORIGINAL] == 0 &&
 	values[STATFS_COMPRESSED_ALLOCATED] == 0;
     }
-    void decode(ceph::buffer::list::const_iterator& it) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& it) {
+      using stone::decode;
       for (size_t i = 0; i < STATFS_LAST; i++) {
 	decode(values[i], it);
       }
     }
 
-    void encode(ceph::buffer::list& bl) {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl) {
+      using stone::encode;
       for (size_t i = 0; i < STATFS_LAST; i++) {
 	encode(values[i], bl);
       }
@@ -1627,8 +1627,8 @@ public:
     bool had_ios = false;  ///< true if we submitted IOs before our kv txn
 
     uint64_t seq = 0;
-    ceph::mono_clock::time_point start;
-    ceph::mono_clock::time_point last_stamp;
+    stone::mono_clock::time_point start;
+    stone::mono_clock::time_point last_stamp;
 
     uint64_t last_nid = 0;     ///< if non-zero, highest new nid we allocated
     uint64_t last_blobid = 0;  ///< if non-zero, highest new blobid we allocated
@@ -1641,12 +1641,12 @@ public:
     ZTracer::Trace trace;
 #endif
 
-    explicit TransContext(CephContext* cct, Collection *c, OpSequencer *o,
+    explicit TransContext(StoneContext* cct, Collection *c, OpSequencer *o,
 			  std::list<Context*> *on_commits)
       : ch(c),
 	osr(o),
 	ioc(cct, this),
-	start(ceph::mono_clock::now()) {
+	start(stone::mono_clock::now()) {
       last_stamp = start;
       if (on_commits) {
 	oncommits.swap(*on_commits);
@@ -1684,7 +1684,7 @@ public:
     void zoned_note_new_object(OnodeRef &o) {
       auto [_, ok] = zoned_onode_to_offset_map.emplace(
 	  std::pair<OnodeRef, std::vector<int64_t>>(o, {o->zoned_get_ondisk_starting_offset()}));
-      ceph_assert(ok);
+      stone_assert(ok);
     }
 
     void zoned_note_updated_object(OnodeRef &o, int64_t prev_offset) {
@@ -1714,7 +1714,7 @@ public:
 
   class BlueStoreThrottle {
 #if defined(WITH_LTTNG)
-    const std::chrono::time_point<ceph::mono_clock> time_base = ceph::mono_clock::now();
+    const std::chrono::time_point<stone::mono_clock> time_base = stone::mono_clock::now();
 
     // Time of last chosen io (microseconds)
     std::atomic<uint64_t> previous_emitted_tp_time_mono_mcs = {0};
@@ -1739,8 +1739,8 @@ public:
 	return true;
       } else {
 	ios_started_since_last_traced++;
-	auto now_mcs = ceph::to_microseconds<uint64_t>(
-	  ceph::mono_clock::now() - time_base);
+	auto now_mcs = stone::to_microseconds<uint64_t>(
+	  stone::mono_clock::now() - time_base);
 	uint64_t previous_mcs = previous_emitted_tp_time_mono_mcs;
 	uint64_t period_mcs = now_mcs - previous_mcs;
 	if (period_mcs > min_period_mcs) {
@@ -1762,19 +1762,19 @@ public:
     void emit_initial_tracepoint(
       KeyValueDB &db,
       TransContext &txc,
-      ceph::mono_clock::time_point);
+      stone::mono_clock::time_point);
 #else
     void emit_initial_tracepoint(
       KeyValueDB &db,
       TransContext &txc,
-      ceph::mono_clock::time_point) {}
+      stone::mono_clock::time_point) {}
 #endif
 
     Throttle throttle_bytes;           ///< submit to commit
     Throttle throttle_deferred_bytes;  ///< submit to deferred complete
 
   public:
-    BlueStoreThrottle(CephContext *cct) :
+    BlueStoreThrottle(StoneContext *cct) :
       throttle_bytes(cct, "bluestore_throttle_bytes", 0),
       throttle_deferred_bytes(cct, "bluestore_throttle_deferred_bytes", 0)
     {
@@ -1789,16 +1789,16 @@ public:
     void complete(TransContext &txc) {}
 #endif
 
-    ceph::mono_clock::duration log_state_latency(
+    stone::mono_clock::duration log_state_latency(
       TransContext &txc, PerfCounters *logger, int state);
     bool try_start_transaction(
       KeyValueDB &db,
       TransContext &txc,
-      ceph::mono_clock::time_point);
+      stone::mono_clock::time_point);
     void finish_start_transaction(
       KeyValueDB &db,
       TransContext &txc,
-      ceph::mono_clock::time_point);
+      stone::mono_clock::time_point);
     void release_kv_throttle(uint64_t cost) {
       throttle_bytes.put(cost);
     }
@@ -1830,7 +1830,7 @@ public:
   struct DeferredBatch final : public AioContext {
     OpSequencer *osr;
     struct deferred_io {
-      ceph::buffer::list bl;    ///< data
+      stone::buffer::list bl;    ///< data
       uint64_t seq;     ///< deferred transaction seq
     };
     std::map<uint64_t,deferred_io> iomap; ///< map of ios in this batch
@@ -1839,16 +1839,16 @@ public:
     /// bytes of pending io for each deferred seq (may be 0)
     std::map<uint64_t,int> seq_bytes;
 
-    void _discard(CephContext *cct, uint64_t offset, uint64_t length);
-    void _audit(CephContext *cct);
+    void _discard(StoneContext *cct, uint64_t offset, uint64_t length);
+    void _audit(StoneContext *cct);
 
-    DeferredBatch(CephContext *cct, OpSequencer *osr)
+    DeferredBatch(StoneContext *cct, OpSequencer *osr)
       : osr(osr), ioc(cct, this) {}
 
     /// prepare a write
-    void prepare_write(CephContext *cct,
+    void prepare_write(StoneContext *cct,
 		       uint64_t seq, uint64_t offset, uint64_t length,
-		       ceph::buffer::list::const_iterator& p);
+		       stone::buffer::list::const_iterator& p);
 
     void aio_finish(BlueStore *store) override {
       store->_deferred_aio_finish(osr);
@@ -1857,8 +1857,8 @@ public:
 
   class OpSequencer : public RefCountedObject {
   public:
-    ceph::mutex qlock = ceph::make_mutex("BlueStore::OpSequencer::qlock");
-    ceph::condition_variable qcond;
+    stone::mutex qlock = stone::make_mutex("BlueStore::OpSequencer::qlock");
+    stone::condition_variable qcond;
     typedef boost::intrusive::list<
       TransContext,
       boost::intrusive::member_hook<
@@ -1872,7 +1872,7 @@ public:
     DeferredBatch *deferred_running = nullptr;
     DeferredBatch *deferred_pending = nullptr;
 
-    ceph::mutex deferred_lock = ceph::make_mutex("BlueStore::OpSequencer::deferred_lock");
+    stone::mutex deferred_lock = stone::make_mutex("BlueStore::OpSequencer::deferred_lock");
 
     BlueStore *store;
     coll_t cid;
@@ -1913,7 +1913,7 @@ public:
 
     bool _is_all_kv_submitted() {
       // caller must hold qlock & q.empty() must not empty
-      ceph_assert(!q.empty());
+      stone_assert(!q.empty());
       TransContext *txc = &q.back();
       if (txc->get_state() >= TransContext::STATE_KV_SUBMITTED) {
 	return true;
@@ -1980,7 +1980,7 @@ public:
 	store(store), cid(c), sequencer_id(sequencer_id) {
     }
     ~OpSequencer() {
-      ceph_assert(q.empty());
+      stone_assert(q.empty());
     }
   };
 
@@ -2036,7 +2036,7 @@ public:
     std::string get_value_slab_to_range(int slab);
     void update_hist_entry(std::map<std::string, std::map<int, struct key_dist> > &key_hist,
 			  const std::string &prefix, size_t key_size, size_t value_size);
-    void dump(ceph::Formatter *f);
+    void dump(stone::Formatter *f);
   };
 
   struct BigDeferredWriteContext {
@@ -2080,7 +2080,7 @@ private:
   int fsid_fd = -1;  ///< open handle (locked) to $path/fsid
   bool mounted = false;
 
-  ceph::shared_mutex coll_lock = ceph::make_shared_mutex("BlueStore::coll_lock");  ///< rwlock to protect coll_map
+  stone::shared_mutex coll_lock = stone::make_shared_mutex("BlueStore::coll_lock");  ///< rwlock to protect coll_map
   mempool::bluestore_cache_other::unordered_map<coll_t, CollectionRef> coll_map;
   bool collections_had_errors = false;
   std::map<coll_t,CollectionRef> new_coll_map;
@@ -2089,7 +2089,7 @@ private:
   std::vector<BufferCacheShard*> buffer_cache_shards;
 
   /// protect zombie_osr_set
-  ceph::mutex zombie_osr_lock = ceph::make_mutex("BlueStore::zombie_osr_lock");
+  stone::mutex zombie_osr_lock = stone::make_mutex("BlueStore::zombie_osr_lock");
   uint32_t next_sequencer_id = 0;
   std::map<coll_t,OpSequencerRef> zombie_osr_set; ///< std::set of OpSequencers for deleted collections
 
@@ -2098,9 +2098,9 @@ private:
   std::atomic<uint64_t> blobid_last = {0};
   std::atomic<uint64_t> blobid_max = {0};
 
-  ceph::mutex deferred_lock = ceph::make_mutex("BlueStore::deferred_lock");
-  ceph::mutex atomic_alloc_and_submit_lock =
-      ceph::make_mutex("BlueStore::atomic_alloc_and_submit_lock");
+  stone::mutex deferred_lock = stone::make_mutex("BlueStore::deferred_lock");
+  stone::mutex atomic_alloc_and_submit_lock =
+      stone::make_mutex("BlueStore::atomic_alloc_and_submit_lock");
   std::atomic<uint64_t> deferred_seq = {0};
   deferred_osr_queue_t deferred_queue; ///< osr's with deferred io pending
   std::atomic_int deferred_queue_size = {0};         ///< num txc's queued across all osrs
@@ -2109,8 +2109,8 @@ private:
   utime_t  deferred_last_submitted = utime_t();
 
   KVSyncThread kv_sync_thread;
-  ceph::mutex kv_lock = ceph::make_mutex("BlueStore::kv_lock");
-  ceph::condition_variable kv_cond;
+  stone::mutex kv_lock = stone::make_mutex("BlueStore::kv_lock");
+  stone::condition_variable kv_cond;
   bool _kv_only = false;
   bool kv_sync_started = false;
   bool kv_stop = false;
@@ -2123,15 +2123,15 @@ private:
   bool kv_sync_in_progress = false;
 
   KVFinalizeThread kv_finalize_thread;
-  ceph::mutex kv_finalize_lock = ceph::make_mutex("BlueStore::kv_finalize_lock");
-  ceph::condition_variable kv_finalize_cond;
+  stone::mutex kv_finalize_lock = stone::make_mutex("BlueStore::kv_finalize_lock");
+  stone::condition_variable kv_finalize_cond;
   std::deque<TransContext*> kv_committing_to_finalize;   ///< pending finalization
   std::deque<DeferredBatch*> deferred_stable_to_finalize; ///< pending finalization
   bool kv_finalize_in_progress = false;
 
   ZonedCleanerThread zoned_cleaner_thread;
-  ceph::mutex zoned_cleaner_lock = ceph::make_mutex("BlueStore::zoned_cleaner_lock");
-  ceph::condition_variable zoned_cleaner_cond;
+  stone::mutex zoned_cleaner_lock = stone::make_mutex("BlueStore::zoned_cleaner_lock");
+  stone::condition_variable zoned_cleaner_cond;
   bool zoned_cleaner_started = false;
   bool zoned_cleaner_stop = false;
   std::deque<uint64_t> zoned_cleaner_queue;
@@ -2140,8 +2140,8 @@ private:
 
   std::list<CollectionRef> removed_collections;
 
-  ceph::shared_mutex debug_read_error_lock =
-    ceph::make_shared_mutex("BlueStore::debug_read_error_lock");
+  stone::shared_mutex debug_read_error_lock =
+    stone::make_shared_mutex("BlueStore::debug_read_error_lock");
   std::set<ghobject_t> debug_data_error_objects;
   std::set<ghobject_t> debug_mdata_error_objects;
 
@@ -2206,7 +2206,7 @@ private:
 
   typedef std::map<uint64_t, volatile_statfs> osd_pools_map;
 
-  ceph::mutex vstatfs_lock = ceph::make_mutex("BlueStore::vstatfs_lock");
+  stone::mutex vstatfs_lock = stone::make_mutex("BlueStore::vstatfs_lock");
   volatile_statfs vstatfs;
   osd_pools_map osd_pools; // protected by vstatfs_lock as well
 
@@ -2216,8 +2216,8 @@ private:
   public:
     BlueStore *store;
 
-    ceph::condition_variable cond;
-    ceph::mutex lock = ceph::make_mutex("BlueStore::MempoolThread::lock");
+    stone::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("BlueStore::MempoolThread::lock");
     bool stop = false;
     std::shared_ptr<PriorityCache::PriCache> binned_kv_cache = nullptr;
     std::shared_ptr<PriorityCache::PriCache> binned_kv_onode_cache = nullptr;
@@ -2339,7 +2339,7 @@ private:
 
     void *entry() override;
     void init() {
-      ceph_assert(stop == false);
+      stone_assert(stop == false);
       create("bstore_mempool");
     }
     void shutdown() {
@@ -2437,9 +2437,9 @@ public:
     return deferred_last_submitted;
   }
 
-  static int _write_bdev_label(CephContext* cct,
+  static int _write_bdev_label(StoneContext* cct,
 			       std::string path, bluestore_bdev_label_t label);
-  static int _read_bdev_label(CephContext* cct, std::string path,
+  static int _read_bdev_label(StoneContext* cct, std::string path,
 			      bluestore_bdev_label_t *label);
 private:
   int _check_or_set_bdev_label(std::string path, uint64_t size, std::string desc,
@@ -2462,11 +2462,11 @@ private:
   uint64_t _assign_blobid(TransContext *txc);
 
   template <int LogLevelV>
-  friend void _dump_onode(CephContext *cct, const Onode& o);
+  friend void _dump_onode(StoneContext *cct, const Onode& o);
   template <int LogLevelV>
-  friend void _dump_extent_map(CephContext *cct, const ExtentMap& em);
+  friend void _dump_extent_map(StoneContext *cct, const ExtentMap& em);
   template <int LogLevelV>
-  friend void _dump_transaction(CephContext *cct, Transaction *t);
+  friend void _dump_transaction(StoneContext *cct, Transaction *t);
 
   TransContext *_txc_create(Collection *c, OpSequencer *osr,
 			    std::list<Context*> *on_commits,
@@ -2558,7 +2558,7 @@ private:
     TransContext *txc,
     BlobRef b,
     uint64_t offset,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     unsigned flags) {
     b->shared_blob->bc.write(b->shared_blob->get_cache(), txc->seq, offset, bl,
 			     flags);
@@ -2581,7 +2581,7 @@ private:
 
   void _apply_padding(uint64_t head_pad,
 		      uint64_t tail_pad,
-		      ceph::buffer::list& padded);
+		      stone::buffer::list& padded);
 
   void _record_onode(OnodeRef &o, KeyValueDB::Transaction &txn);
 
@@ -2600,8 +2600,8 @@ private:
 
   // --- public interface ---
 public:
-  BlueStore(CephContext *cct, const std::string& path);
-  BlueStore(CephContext *cct, const std::string& path, uint64_t min_alloc_size); // Ctor for UT only
+  BlueStore(StoneContext *cct, const std::string& path);
+  BlueStore(StoneContext *cct, const std::string& path, uint64_t min_alloc_size); // Ctor for UT only
   ~BlueStore() override;
 
   std::string get_type() override {
@@ -2637,7 +2637,7 @@ public:
     std::set<int> *nodes,
     std::set<std::string> *failed) override;
 
-  static int get_block_device_fsid(CephContext* cct, const std::string& path,
+  static int get_block_device_fsid(StoneContext* cct, const std::string& path,
 				   uuid_d *fsid);
 
   bool test_mount_in_use() override;
@@ -2671,7 +2671,7 @@ public:
   }
 
   void set_cache_shards(unsigned num) override;
-  void dump_cache_stats(ceph::Formatter *f) override {
+  void dump_cache_stats(stone::Formatter *f) override {
     int onode_count = 0, buffers_bytes = 0;
     for (auto i: onode_cache_shards) {
       onode_count += i->_get_num();
@@ -2706,11 +2706,11 @@ public:
     return 0;
   }
 
-  void get_db_statistics(ceph::Formatter *f) override;
-  void generate_db_histogram(ceph::Formatter *f) override;
+  void get_db_statistics(stone::Formatter *f) override;
+  void generate_db_histogram(stone::Formatter *f) override;
   void _shutdown_cache();
   int flush_cache(std::ostream *os = NULL) override;
-  void dump_perf_counters(ceph::Formatter *f) override {
+  void dump_perf_counters(stone::Formatter *f) override {
     f->open_object_section("perf_counters");
     logger->dump_formatted(f, false);
     f->close_section();
@@ -2749,7 +2749,7 @@ public:
     const ghobject_t& oid,
     uint64_t offset,
     size_t len,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     uint32_t op_flags = 0) override;
 
 private:
@@ -2785,7 +2785,7 @@ private:
   struct read_req_t {
     uint64_t r_off = 0;
     uint64_t r_len = 0;
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     std::list<region_t> regs; // original read regions
 
     read_req_t(uint64_t off, uint64_t len) : r_off(off), r_len(len) {}
@@ -2812,7 +2812,7 @@ private:
 
   int _prepare_read_ioc(
     blobs2read_t& blobs2read,
-    std::vector<ceph::buffer::list>* compressed_blob_bls,
+    std::vector<stone::buffer::list>* compressed_blob_bls,
     IOContext* ioc);
 
   int _generate_read_result_bl(
@@ -2820,18 +2820,18 @@ private:
     uint64_t offset,
     size_t length,
     ready_regions_t& ready_regions,
-    std::vector<ceph::buffer::list>& compressed_blob_bls,
+    std::vector<stone::buffer::list>& compressed_blob_bls,
     blobs2read_t& blobs2read,
     bool buffered,
     bool* csum_error,
-    ceph::buffer::list& bl);
+    stone::buffer::list& bl);
 
   int _do_read(
     Collection *c,
     OnodeRef o,
     uint64_t offset,
     size_t len,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     uint32_t op_flags = 0,
     uint64_t retry_count = 0);
 
@@ -2839,7 +2839,7 @@ private:
     Collection *c,
     OnodeRef o,
     const interval_set<uint64_t>& m,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     uint32_t op_flags = 0,
     uint64_t retry_count = 0);
 
@@ -2847,7 +2847,7 @@ private:
 	      uint64_t offset, size_t len, interval_set<uint64_t>& destset);
 public:
   int fiemap(CollectionHandle &c, const ghobject_t& oid,
-	     uint64_t offset, size_t len, ceph::buffer::list& bl) override;
+	     uint64_t offset, size_t len, stone::buffer::list& bl) override;
   int fiemap(CollectionHandle &c, const ghobject_t& oid,
 	     uint64_t offset, size_t len, std::map<uint64_t, uint64_t>& destmap) override;
 
@@ -2855,17 +2855,17 @@ public:
     CollectionHandle &c_,
     const ghobject_t& oid,
     interval_set<uint64_t>& m,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     uint32_t op_flags) override;
 
   int dump_onode(CollectionHandle &c, const ghobject_t& oid,
-    const std::string& section_name, ceph::Formatter *f) override;
+    const std::string& section_name, stone::Formatter *f) override;
 
   int getattr(CollectionHandle &c, const ghobject_t& oid, const char *name,
-	      ceph::buffer::ptr& value) override;
+	      stone::buffer::ptr& value) override;
 
   int getattrs(CollectionHandle &c, const ghobject_t& oid,
-	       std::map<std::string,ceph::buffer::ptr>& aset) override;
+	       std::map<std::string,stone::buffer::ptr>& aset) override;
 
   int list_collections(std::vector<coll_t>& ls) override;
 
@@ -2894,19 +2894,19 @@ public:
   int omap_get(
     CollectionHandle &c,     ///< [in] Collection containing oid
     const ghobject_t &oid,   ///< [in] Object containing omap
-    ceph::buffer::list *header,      ///< [out] omap header
-    std::map<std::string, ceph::buffer::list> *out /// < [out] Key to value map
+    stone::buffer::list *header,      ///< [out] omap header
+    std::map<std::string, stone::buffer::list> *out /// < [out] Key to value map
     ) override;
   int _omap_get(
     Collection *c,     ///< [in] Collection containing oid
     const ghobject_t &oid,   ///< [in] Object containing omap
-    ceph::buffer::list *header,      ///< [out] omap header
-    std::map<std::string, ceph::buffer::list> *out /// < [out] Key to value map
+    stone::buffer::list *header,      ///< [out] omap header
+    std::map<std::string, stone::buffer::list> *out /// < [out] Key to value map
     );
   int _onode_omap_get(
     const OnodeRef &o,           ///< [in] Object containing omap
-    ceph::buffer::list *header,          ///< [out] omap header
-    std::map<std::string, ceph::buffer::list> *out /// < [out] Key to value map
+    stone::buffer::list *header,          ///< [out] omap header
+    std::map<std::string, stone::buffer::list> *out /// < [out] Key to value map
   );
 
 
@@ -2914,7 +2914,7 @@ public:
   int omap_get_header(
     CollectionHandle &c,                ///< [in] Collection containing oid
     const ghobject_t &oid,   ///< [in] Object containing omap
-    ceph::buffer::list *header,      ///< [out] omap header
+    stone::buffer::list *header,      ///< [out] omap header
     bool allow_eio = false ///< [in] don't assert on eio
     ) override;
 
@@ -2930,7 +2930,7 @@ public:
     CollectionHandle &c,         ///< [in] Collection containing oid
     const ghobject_t &oid,       ///< [in] Object containing omap
     const std::set<std::string> &keys,     ///< [in] Keys to get
-    std::map<std::string, ceph::buffer::list> *out ///< [out] Returned keys and values
+    std::map<std::string, stone::buffer::list> *out ///< [out] Returned keys and values
     ) override;
 
 #ifdef WITH_SEASTAR
@@ -2938,7 +2938,7 @@ public:
     CollectionHandle &c,         ///< [in] Collection containing oid
     const ghobject_t &oid,       ///< [in] Object containing omap
     const std::optional<std::string> &start_after,     ///< [in] Keys to get
-    std::map<std::string, ceph::buffer::list> *out ///< [out] Returned keys and values
+    std::map<std::string, stone::buffer::list> *out ///< [out] Returned keys and values
     ) override;
 #endif
 
@@ -3012,7 +3012,7 @@ public:
 
   /// methods to inject various errors fsck can repair
   void inject_broken_shared_blob_key(const std::string& key,
-			 const ceph::buffer::list& bl);
+			 const stone::buffer::list& bl);
   void inject_no_shared_blob_key();
   void inject_stray_shared_blob_key(uint64_t sbid);
 
@@ -3034,7 +3034,7 @@ public:
 			  size_t new_size);
 
   void compact() override {
-    ceph_assert(db);
+    stone_assert(db);
     db->compact();
   }
   bool has_builtin_csum() const override {
@@ -3043,15 +3043,15 @@ public:
 
   inline void log_latency(const char* name,
     int idx,
-    const ceph::timespan& lat,
+    const stone::timespan& lat,
     double lat_threshold,
     const char* info = "") const;
 
   inline void log_latency_fn(const char* name,
     int idx,
-    const ceph::timespan& lat,
+    const stone::timespan& lat,
     double lat_threshold,
-    std::function<std::string (const ceph::timespan& lat)> fn) const;
+    std::function<std::string (const stone::timespan& lat)> fn) const;
 
 private:
   bool _debug_data_eio(const ghobject_t& o) {
@@ -3076,7 +3076,7 @@ private:
     }
   }
 private:
-  ceph::mutex qlock = ceph::make_mutex("BlueStore::Alerts::qlock");
+  stone::mutex qlock = stone::make_mutex("BlueStore::Alerts::qlock");
   std::string failed_cmode;
   std::set<std::string> failed_compressors;
   std::string spillover_alert;
@@ -3130,9 +3130,9 @@ private:
     OnodeRef& o,
     const bluestore_blob_t* blob,
     uint64_t blob_xoffset,
-    const ceph::buffer::list& bl,
+    const stone::buffer::list& bl,
     uint64_t logical_offset) const;
-  int _decompress(ceph::buffer::list& source, ceph::buffer::list* result);
+  int _decompress(stone::buffer::list& source, stone::buffer::list* result);
 
 
   // --------------------------------------------------------
@@ -3152,7 +3152,7 @@ private:
       BlobRef b;
       uint64_t blob_length;
       uint64_t b_off;
-      ceph::buffer::list bl;
+      stone::buffer::list bl;
       uint64_t b_off0; ///< original offset in a blob prior to padding
       uint64_t length0; ///< original data length prior to padding
 
@@ -3160,7 +3160,7 @@ private:
       bool new_blob; ///< whether new blob was created
 
       bool compressed = false;
-      ceph::buffer::list compressed_bl;
+      stone::buffer::list compressed_bl;
       size_t compressed_len = 0;
 
       write_item(
@@ -3168,7 +3168,7 @@ private:
         BlobRef b,
         uint64_t blob_len,
         uint64_t o,
-        ceph::buffer::list& bl,
+        stone::buffer::list& bl,
         uint64_t o0,
         uint64_t l0,
         bool _mark_unused,
@@ -3198,7 +3198,7 @@ private:
       BlobRef b,
       uint64_t blob_len,
       uint64_t o,
-      ceph::buffer::list& bl,
+      stone::buffer::list& bl,
       uint64_t o0,
       uint64_t len0,
       bool _mark_unused,
@@ -3226,7 +3226,7 @@ private:
     CollectionRef &c,
     OnodeRef o,
     uint64_t offset, uint64_t length,
-    ceph::buffer::list::iterator& blp,
+    stone::buffer::list::iterator& blp,
     WriteContext *wctx);
   void _do_write_big_apply_deferred(
     TransContext* txc,
@@ -3240,7 +3240,7 @@ private:
     CollectionRef &c,
     OnodeRef o,
     uint64_t offset, uint64_t length,
-    ceph::buffer::list::iterator& blp,
+    stone::buffer::list::iterator& blp,
     WriteContext *wctx);
   int _do_alloc_write(
     TransContext *txc,
@@ -3258,9 +3258,9 @@ private:
 	     CollectionRef& c,
 	     OnodeRef& o,
 	     uint64_t offset, size_t len,
-	     ceph::buffer::list& bl,
+	     stone::buffer::list& bl,
 	     uint32_t fadvise_flags);
-  void _pad_zeros(ceph::buffer::list *bl, uint64_t *offset,
+  void _pad_zeros(stone::buffer::list *bl, uint64_t *offset,
 		  uint64_t chunk_size);
 
   void _choose_write_options(CollectionRef& c,
@@ -3279,14 +3279,14 @@ private:
 		CollectionRef &c,
 		OnodeRef o,
 		uint64_t offset, uint64_t length,
-		ceph::buffer::list& bl,
+		stone::buffer::list& bl,
 		uint32_t fadvise_flags);
   void _do_write_data(TransContext *txc,
                       CollectionRef& c,
                       OnodeRef o,
                       uint64_t offset,
                       uint64_t length,
-                      ceph::buffer::list& bl,
+                      stone::buffer::list& bl,
                       WriteContext *wctx);
 
   int _touch(TransContext *txc,
@@ -3319,11 +3319,11 @@ private:
 	       CollectionRef& c,
 	       OnodeRef& o,
 	       const std::string& name,
-	       ceph::buffer::ptr& val);
+	       stone::buffer::ptr& val);
   int _setattrs(TransContext *txc,
 		CollectionRef& c,
 		OnodeRef& o,
-		const std::map<std::string,ceph::buffer::ptr>& aset);
+		const std::map<std::string,stone::buffer::ptr>& aset);
   int _rmattr(TransContext *txc,
 	      CollectionRef& c,
 	      OnodeRef& o,
@@ -3338,15 +3338,15 @@ private:
   int _omap_setkeys(TransContext *txc,
 		    CollectionRef& c,
 		    OnodeRef& o,
-		    ceph::buffer::list& bl);
+		    stone::buffer::list& bl);
   int _omap_setheader(TransContext *txc,
 		      CollectionRef& c,
 		      OnodeRef& o,
-		      ceph::buffer::list& header);
+		      stone::buffer::list& header);
   int _omap_rmkeys(TransContext *txc,
 		   CollectionRef& c,
 		   OnodeRef& o,
-		   ceph::buffer::list& bl);
+		   stone::buffer::list& bl);
   int _omap_rmkey_range(TransContext *txc,
 			CollectionRef& c,
 			OnodeRef& o,
@@ -3422,7 +3422,7 @@ public:
     mempool_dynamic_bitset* used_blocks;
     uint64_t_btree_t* used_omap_head;
 
-    ceph::mutex* sb_info_lock;
+    stone::mutex* sb_info_lock;
     sb_info_space_efficient_map_t& sb_info;
     // approximate amount of references per <shared blob, chunk>
     shared_blob_2hash_tracker_t& sb_ref_counts;
@@ -3441,7 +3441,7 @@ public:
                    mempool_dynamic_bitset* _ub,
                    uint64_t_btree_t* _used_omap_head,
 
-                   ceph::mutex* _sb_info_lock,
+                   stone::mutex* _sb_info_lock,
                    sb_info_space_efficient_map_t& _sb_info,
 		   shared_blob_2hash_tracker_t& _sb_ref_counts,
                    store_statfs_t& _store_statfs,
@@ -3471,7 +3471,7 @@ public:
     CollectionRef c,
     const ghobject_t& oid,
     const std::string& key,
-    const ceph::buffer::list& value,
+    const stone::buffer::list& value,
     mempool::bluestore_fsck::list<std::string>* expecting_shards,
     std::map<BlobRef, bluestore_blob_t::unused_t>* referenced,
     const BlueStore::FSCK_ObjectCtx& ctx);
@@ -3515,7 +3515,7 @@ static inline void intrusive_ptr_release(BlueStore::OpSequencer *o) {
 
 class BlueStoreRepairer
 {
-  ceph::mutex lock = ceph::make_mutex("BlueStore::BlueStoreRepairer::lock");
+  stone::mutex lock = stone::make_mutex("BlueStore::BlueStoreRepairer::lock");
 
 public:
   // to simplify future potential migration to mempools
@@ -3553,9 +3553,9 @@ public:
     void init(uint64_t total,
 	      uint64_t min_alloc_size,
 	      uint64_t mem_cap = DEF_MEM_CAP) {
-      ceph_assert(!granularity); // not initialized yet
-      ceph_assert(min_alloc_size && isp2(min_alloc_size));
-      ceph_assert(mem_cap);
+      stone_assert(!granularity); // not initialized yet
+      stone_assert(min_alloc_size && isp2(min_alloc_size));
+      stone_assert(mem_cap);
       
       total = round_up_to(total, min_alloc_size);
       granularity = total * BLOOM_FILTER_TABLE_SIZE * 2 / mem_cap;
@@ -3583,10 +3583,10 @@ public:
     }
     inline void set_used(uint64_t offset, uint64_t len,
 			 const coll_t& cid, const ghobject_t& oid) {
-      ceph_assert(granularity); // initialized
+      stone_assert(granularity); // initialized
       
       // can't call this func after filter_out has been applied
-      ceph_assert(!was_filtered_out);
+      stone_assert(!was_filtered_out);
       if (!len) {
 	return;
       }
@@ -3604,7 +3604,7 @@ public:
 
     // determines if collection's present after filtering-out 
     inline bool is_used(const coll_t& cid) const {
-      ceph_assert(was_filtered_out);
+      stone_assert(was_filtered_out);
       for(auto& bf : collections_bfs) {
         if (bf.contains(get_hash(cid))) {
           return true;
@@ -3614,7 +3614,7 @@ public:
     }
     // determines if object's present after filtering-out 
     inline bool is_used(const ghobject_t& oid) const {
-      ceph_assert(was_filtered_out);
+      stone_assert(was_filtered_out);
       for(auto& bf : objects_bfs) {
         if (bf.contains(oid.hobj.get_hash())) {
           return true;
@@ -3624,8 +3624,8 @@ public:
     }
     // determines if collection's present before filtering-out 
     inline bool is_used(const coll_t& cid, uint64_t offs) const {
-      ceph_assert(granularity); // initialized
-      ceph_assert(!was_filtered_out);
+      stone_assert(granularity); // initialized
+      stone_assert(!was_filtered_out);
       auto &bf = collections_bfs[offs / granularity];
       if (bf.contains(get_hash(cid))) {
         return true;
@@ -3634,8 +3634,8 @@ public:
     }
     // determines if object's present before filtering-out 
     inline bool is_used(const ghobject_t& oid, uint64_t offs) const {
-      ceph_assert(granularity); // initialized
-      ceph_assert(!was_filtered_out);
+      stone_assert(granularity); // initialized
+      stone_assert(!was_filtered_out);
       auto &bf = objects_bfs[offs / granularity];
       if (bf.contains(oid.hobj.get_hash())) {
         return true;
@@ -3743,8 +3743,8 @@ class RocksDBBlueFSVolumeSelector : public BlueFSVolumeSelector
       clear();
     }
     T& at(size_t x, size_t y) {
-      ceph_assert(x < MaxX);
-      ceph_assert(y < MaxY);
+      stone_assert(x < MaxX);
+      stone_assert(y < MaxY);
 
       return values[x][y];
     }
@@ -3879,21 +3879,21 @@ public:
     size_t pos = (size_t)hint - LEVEL_FIRST;
     for (auto& p : fnode.extents) {
       auto& cur = per_level_per_dev_usage.at(p.bdev, pos);
-      ceph_assert(cur >= p.length);
+      stone_assert(cur >= p.length);
       cur -= p.length;
 
       //update per-device totals
       auto& cur2 = per_level_per_dev_usage.at(p.bdev, LEVEL_MAX - LEVEL_FIRST);
-      ceph_assert(cur2 >= p.length);
+      stone_assert(cur2 >= p.length);
       cur2 -= p.length;
     }
     //update per-level actual totals
     auto& cur = per_level_per_dev_usage.at(BlueFS::MAX_BDEV, pos);
-    ceph_assert(cur >= fnode.size);
+    stone_assert(cur >= fnode.size);
     cur -= fnode.size;
-    ceph_assert(per_level_files[pos] > 0);
+    stone_assert(per_level_files[pos] > 0);
     --per_level_files[pos];
-    ceph_assert(per_level_files[LEVEL_MAX - LEVEL_FIRST] > 0);
+    stone_assert(per_level_files[LEVEL_MAX - LEVEL_FIRST] > 0);
     --per_level_files[LEVEL_MAX - LEVEL_FIRST];
   }
   void add_usage(void* hint, uint64_t fsize) override {
@@ -3914,7 +3914,7 @@ public:
     size_t pos = (size_t)hint - LEVEL_FIRST;
     //update per-level actual totals
     auto& cur = per_level_per_dev_usage.at(BlueFS::MAX_BDEV, pos);
-    ceph_assert(cur >= fsize);
+    stone_assert(cur >= fsize);
     per_level_per_dev_usage.at(BlueFS::MAX_BDEV, pos) -= fsize;
   }
 

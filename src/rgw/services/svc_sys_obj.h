@@ -50,13 +50,13 @@ public:
     struct ROp {
       Obj& source;
 
-      ceph::static_ptr<RGWSI_SysObj_Obj_GetObjState, sizeof(RGWSI_SysObj_Core_GetObjState)> state;
+      stone::static_ptr<RGWSI_SysObj_Obj_GetObjState, sizeof(RGWSI_SysObj_Core_GetObjState)> state;
       
       RGWObjVersionTracker *objv_tracker{nullptr};
       map<string, bufferlist> *attrs{nullptr};
       bool raw_attrs{false};
       boost::optional<obj_version> refresh_version{boost::none};
-      ceph::real_time *lastmod{nullptr};
+      stone::real_time *lastmod{nullptr};
       uint64_t *obj_size{nullptr};
       rgw_cache_entry_info *cache_info{nullptr};
 
@@ -65,7 +65,7 @@ public:
         return *this;
       }
 
-      ROp& set_last_mod(ceph::real_time *_lastmod) {
+      ROp& set_last_mod(stone::real_time *_lastmod) {
         lastmod = _lastmod;
         return *this;
       }
@@ -110,8 +110,8 @@ public:
 
       RGWObjVersionTracker *objv_tracker{nullptr};
       map<string, bufferlist> attrs;
-      ceph::real_time mtime;
-      ceph::real_time *pmtime{nullptr};
+      stone::real_time mtime;
+      stone::real_time *pmtime{nullptr};
       bool exclusive{false};
 
       WOp& set_objv_tracker(RGWObjVersionTracker *_objv_tracker) {
@@ -129,12 +129,12 @@ public:
         return *this;
       }
 
-      WOp& set_mtime(const ceph::real_time& _mtime) {
+      WOp& set_mtime(const stone::real_time& _mtime) {
         mtime = _mtime;
         return *this;
       }
 
-      WOp& set_pmtime(ceph::real_time *_pmtime) {
+      WOp& set_pmtime(stone::real_time *_pmtime) {
         pmtime = _pmtime;
         return *this;
       }
@@ -212,7 +212,7 @@ public:
     using ListImplInfo = RGWSI_SysObj_Pool_ListInfo;
 
     struct ListCtx {
-      ceph::static_ptr<ListImplInfo, sizeof(RGWSI_SysObj_Core_PoolListImplInfo)> impl; /* update this if creating new backend types */
+      stone::static_ptr<ListImplInfo, sizeof(RGWSI_SysObj_Core_PoolListImplInfo)> impl; /* update this if creating new backend types */
     };
 
   public:
@@ -267,7 +267,7 @@ protected:
   }
 
 public:
-  RGWSI_SysObj(CephContext *cct): RGWServiceInstance(cct) {}
+  RGWSI_SysObj(StoneContext *cct): RGWServiceInstance(cct) {}
 
   RGWSysObjectCtx init_obj_ctx();
   Obj get_obj(RGWSysObjectCtx& obj_ctx, const rgw_raw_obj& obj);

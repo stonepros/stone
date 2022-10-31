@@ -81,7 +81,7 @@ private:
   librbd::asio::ContextWQ *m_op_work_queue;
   Context *m_on_finish;
 
-  ceph::bufferlist m_out_bl;
+  stone::bufferlist m_out_bl;
   cls::rbd::TrashImageSpec m_trash_image_spec;
   bool m_has_snapshots = false;
   librbd::NoOpProgressContext m_progress_ctx;

@@ -21,12 +21,12 @@ def immutable_object_cache(ctx, config):
         # make sure that there is one immutable object cache daemon on the same node.
         remote.run(
             args=[
-                'sudo', 'killall', '-s', '9', 'ceph-immutable-object-cache', run.Raw('||'), 'true',
+                'sudo', 'killall', '-s', '9', 'stone-immutable-object-cache', run.Raw('||'), 'true',
                 ]
             )
         remote.run(
             args=[
-                'ceph-immutable-object-cache', '-b',
+                'stone-immutable-object-cache', '-b',
                 ]
             )
     try:
@@ -36,7 +36,7 @@ def immutable_object_cache(ctx, config):
         for client, client_config in config.items():
             client_config = client_config if client_config is not None else dict()
             (remote,) = ctx.cluster.only(client).remotes.keys()
-            cache_path = client_config.get('immutable object cache path', '/tmp/ceph-immutable-object-cache')
+            cache_path = client_config.get('immutable object cache path', '/tmp/stone-immutable-object-cache')
             ls_command = '"$(ls {} )"'.format(cache_path)
             remote.run(
                 args=[
@@ -45,7 +45,7 @@ def immutable_object_cache(ctx, config):
                 )
             remote.run(
                 args=[
-                    'sudo', 'killall', '-s', '9', 'ceph-immutable-object-cache', run.Raw('||'), 'true',
+                    'sudo', 'killall', '-s', '9', 'stone-immutable-object-cache', run.Raw('||'), 'true',
                     ]
                 )
             remote.run(

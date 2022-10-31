@@ -20,7 +20,7 @@ Policies and data can be loaded into OPA in the following ways::
   * OPA's *bundle* feature that downloads policies and data from remote HTTP servers
   * Filesystem
 
-Configure the Ceph Object Gateway
+Configure the Stone Object Gateway
 =================================
 
 The following configuration options are available for OPA integration::

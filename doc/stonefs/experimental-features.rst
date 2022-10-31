@@ -2,7 +2,7 @@
 Experimental Features
 =====================
 
-CephFS includes a number of experimental features which are not fully
+StoneFS includes a number of experimental features which are not fully
 stabilized or qualified for users to turn on in real deployments. We generally
 do our best to clearly demarcate these and fence them off so they cannot be
 used by mistake.
@@ -15,7 +15,7 @@ improve debugging and support processes.
 
 Inline data
 -----------
-By default, all CephFS file data is stored in RADOS objects. The inline data
+By default, all StoneFS file data is stored in RADOS objects. The inline data
 feature enables small files (generally <2KB) to be stored in the inode
 and served out of the MDS. This may improve small-file performance but increases
 load on the MDS. It is not sufficiently tested to support at this time, although

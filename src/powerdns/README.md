@@ -18,7 +18,7 @@ The HTTP Remote Backend from PowerDNS is used in this case: http://doc.powerdns.
 
 PowerDNS must be compiled with Remote HTTP backend support enabled, this is not default.
 
-For more information visit the [Blueprint](http://wiki.ceph.com/Planning/Blueprints/Firefly/PowerDNS_backend_for_RGW)
+For more information visit the [Blueprint](http://wiki.stone.com/Planning/Blueprints/Firefly/PowerDNS_backend_for_RGW)
 
 # Configuration
 

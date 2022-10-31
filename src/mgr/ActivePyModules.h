@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 John Spray <john.spray@inktank.com>
  *
@@ -16,7 +16,7 @@
 #include "ActivePyModule.h"
 
 #include "common/Finisher.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 #include "PyFormatter.h"
 
@@ -65,7 +65,7 @@ private:
 
   map<std::string,ProgressEvent> progress_events;
 
-  mutable ceph::mutex lock = ceph::make_mutex("ActivePyModules::lock");
+  mutable stone::mutex lock = stone::make_mutex("ActivePyModules::lock");
 
 public:
   ActivePyModules(
@@ -151,7 +151,7 @@ public:
   void update_progress_event(const std::string& evid,
 			     const std::string& desc,
 			     float progress,
-			     bool add_to_ceph_s);
+			     bool add_to_stone_s);
   void complete_progress_event(const std::string& evid);
   void clear_all_progress_events();
   void get_progress_events(std::map<std::string,ProgressEvent>* events);

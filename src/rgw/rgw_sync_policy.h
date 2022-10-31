@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -42,7 +42,7 @@ struct rgw_sync_symmetric_group {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 };
 WRITE_CLASS_ENCODER(rgw_sync_symmetric_group)
@@ -65,7 +65,7 @@ struct rgw_sync_directional_rule {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 };
 WRITE_CLASS_ENCODER(rgw_sync_directional_rule)
@@ -107,7 +107,7 @@ struct rgw_sync_bucket_entity {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   rgw_bucket get_bucket() const {
@@ -203,7 +203,7 @@ struct rgw_sync_pipe_filter_tag {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   bool from_str(const string& s);
@@ -234,7 +234,7 @@ struct rgw_sync_pipe_filter {
   void encode(bufferlist& bl) const;
   void decode(bufferlist::const_iterator& bl);
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   bool is_subset_of(const rgw_sync_pipe_filter& f) const;
@@ -262,7 +262,7 @@ struct rgw_sync_pipe_acl_translation {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   bool operator==(const rgw_sync_pipe_acl_translation& aclt) const {
@@ -286,7 +286,7 @@ struct rgw_sync_pipe_source_params {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 };
 WRITE_CLASS_ENCODER(rgw_sync_pipe_source_params)
@@ -322,7 +322,7 @@ struct rgw_sync_pipe_dest_params {
     }
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   bool operator==(const rgw_sync_pipe_dest_params& rhs) const {
@@ -364,7 +364,7 @@ struct rgw_sync_pipe_params {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 };
 WRITE_CLASS_ENCODER(rgw_sync_pipe_params)
@@ -414,7 +414,7 @@ struct rgw_sync_bucket_pipe {
     return (dest < p.dest);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 };
 WRITE_CLASS_ENCODER(rgw_sync_bucket_pipe)
@@ -442,7 +442,7 @@ struct rgw_sync_bucket_entities {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   bool match_bucket(std::optional<rgw_bucket> b) const {
@@ -533,7 +533,7 @@ struct rgw_sync_bucket_pipes {
     return (match_source(zone, b) || match_dest(zone, b));
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   std::vector<rgw_sync_bucket_pipe> expand() const;
@@ -571,7 +571,7 @@ struct rgw_sync_data_flow_group {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   bool empty() const {
@@ -623,7 +623,7 @@ struct rgw_sync_policy_group {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   bool set_status(const string& s) {
@@ -666,7 +666,7 @@ struct rgw_sync_policy_info {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 
   bool empty() const {

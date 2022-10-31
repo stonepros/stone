@@ -6,11 +6,11 @@ NFS
 
 .. note:: Only the NFSv4 protocol is supported when using a cephadm or rook based deployment.
 
-Ceph Object Gateway namespaces can be exported over the file-based
+Stone Object Gateway namespaces can be exported over the file-based
 NFSv4 protocols, alongside traditional HTTP access
 protocols (S3 and Swift).
 
-In particular, the Ceph Object Gateway can now be configured to
+In particular, the Stone Object Gateway can now be configured to
 provide file-based access when embedded in the NFS-Ganesha NFS server.
 
 The simplest and preferred way of managing nfs-ganesha clusters and rgw exports
@@ -20,7 +20,7 @@ librgw
 ======
 
 The librgw.so shared library (Unix) provides a loadable interface to
-Ceph Object Gateway services, and instantiates a full Ceph Object Gateway
+Stone Object Gateway services, and instantiates a full Stone Object Gateway
 instance on initialization.
 
 In turn, librgw.so exports rgw_file, a stateful API for file-oriented
@@ -107,9 +107,9 @@ Manually configuring an NFS-Ganesha Instance
 ============================================
 
 Each NFS RGW instance is an NFS-Ganesha server instance *embeddding*
-a full Ceph RGW instance.
+a full Stone RGW instance.
 
-Therefore, the RGW NFS configuration includes Ceph and Ceph Object
+Therefore, the RGW NFS configuration includes Stone and Stone Object
 Gateway-specific configuration in a local ceph.conf, as well as
 NFS-Ganesha-specific configuration in the NFS-Ganesha config file,
 ganesha.conf.
@@ -180,7 +180,7 @@ variables in the RGW config section::
      init_args = "-d --debug-rgw=16";
  }
 
-``cluster`` sets a Ceph cluster name (must match the cluster being exported)
+``cluster`` sets a Stone cluster name (must match the cluster being exported)
 
 ``name`` sets an RGW instance name (must match the cluster being exported)
 
@@ -288,7 +288,7 @@ NFS-Ganesha instances. However, this does not imply high availability.
 When regular gateway instances and NFS-Ganesha instances overlap the
 same data resources, they will be accessible from both the standard S3
 API and through the NFS-Ganesha instance as exported. You can
-co-locate the NFS-Ganesha instance with a Ceph Object Gateway instance
+co-locate the NFS-Ganesha instance with a Stone Object Gateway instance
 on the same host. 
 
 RGW vs RGW NFS
@@ -302,11 +302,11 @@ When adding objects and buckets outside of NFS, those objects will
 appear in the NFS namespace in the time set by
 ``rgw_nfs_namespace_expire_secs``, which defaults to 300 seconds (5 minutes).
 Override the default value for ``rgw_nfs_namespace_expire_secs`` in the
-Ceph configuration file to change the refresh rate.
+Stone configuration file to change the refresh rate.
 
 If exporting Swift containers that do not conform to valid S3 bucket
 naming requirements, set ``rgw_relaxed_s3_bucket_names`` to true in the
-[client.radosgw] section of the Ceph configuration file. For example,
+[client.radosgw] section of the Stone configuration file. For example,
 if a Swift container name contains underscores, it is not a valid S3
 bucket name and will be rejected unless ``rgw_relaxed_s3_bucket_names``
 is set to true.
@@ -363,7 +363,7 @@ starts a new upload when the first write is sent to a file at offset
 0, and finalizes the upload when no new writes to the file have been
 seen for a period of time, by default, 10 seconds. To change this
 timeout, set an alternate value for ``rgw_nfs_write_completion_interval_s``
-in the RGW section(s) of the Ceph configuration file. 
+in the RGW section(s) of the Stone configuration file. 
 
 References
 ==========

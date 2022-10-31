@@ -2,7 +2,7 @@
  Installing Oprofile
 =====================
 
-The easiest way to profile Ceph's CPU consumption is to use the `oprofile`_
+The easiest way to profile Stone's CPU consumption is to use the `oprofile`_
 system-wide profiler.
 
 .. _oprofile: http://oprofile.sourceforge.net/about/
@@ -16,10 +16,10 @@ executing the following::
 	sudo apt-get install oprofile oprofile-gui
 	
 
-Compiling Ceph for Profiling
+Compiling Stone for Profiling
 ============================
 
-To compile Ceph for profiling, first clean everything. :: 
+To compile Stone for profiling, first clean everything. :: 
 
 	make distclean
 	
@@ -27,7 +27,7 @@ Then, export the following settings so that you can see callgraph output. ::
 
 	export CFLAGS="-fno-omit-frame-pointer -O2 -g"
 
-Finally, compile Ceph. :: 
+Finally, compile Stone. :: 
 
 	./autogen.sh
 	./configure
@@ -39,14 +39,14 @@ example::
 	make -j4
 
 
-Ceph Configuration 
+Stone Configuration 
 ==================
 
 Ensure that you disable ``lockdep``. Consider setting logging to 
-levels appropriate for a production cluster. See `Ceph Logging and Debugging`_ 
+levels appropriate for a production cluster. See `Stone Logging and Debugging`_ 
 for details.
 
-.. _Ceph Logging and Debugging: ../../rados/troubleshooting/log-and-debug
+.. _Stone Logging and Debugging: ../../rados/troubleshooting/log-and-debug
 
 See the `CPU Profiling`_ section of the RADOS Troubleshooting documentation for details on using Oprofile.
 

@@ -11,13 +11,13 @@ Date:   Mon Nov 2 14:34:28 2015 -0800
 
     Merge pull request #6451 from jcsp/wip-firefly-urls
     
-    qa: http://ceph.com/qa -> http://download.ceph.com/qa
+    qa: http://stone.com/qa -> http://download.stone.com/qa
 
 commit a06179acb268b073fcf67fbbf19152c1a5a275af
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Sep 24 18:10:46 2015 -0400
 
-    qa: http://ceph.com/qa -> http://download.ceph.com/qa
+    qa: http://stone.com/qa -> http://download.stone.com/qa
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit d4d65fbd6ad15320339751c604613ac63511e645)
@@ -104,7 +104,7 @@ Date:   Wed Oct 21 10:03:13 2015 +0200
 
     Merge pull request #6328 from dachary/wip-13551-firefly
     
-    qemu workunit refers to apt-mirror.front.sepia.ceph.com
+    qemu workunit refers to apt-mirror.front.sepia.stone.com
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -123,7 +123,7 @@ commit d9ae7d80850b9ea4a84549c3afb4603cf9585b6a
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Apr 16 08:29:41 2015 -0700
 
-    use git://git.ceph.com
+    use git://git.stone.com
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 34c467ba06345eacd2fd0e79c162dfd0b22f0486)
@@ -238,7 +238,7 @@ Date:   Tue Oct 20 21:39:32 2015 +0200
 
     Merge pull request #5813 from SUSE/wip-12822-firefly
     
-    ceph-fuse crash in test_client_recovery
+    stone-fuse crash in test_client_recovery
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -247,7 +247,7 @@ Merge: 1c65d09 d3c9469
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Oct 20 21:37:58 2015 +0200
 
-    Merge pull request #5726 from ceph/wip-12752
+    Merge pull request #5726 from stone/wip-12752
     
     is_new_interval() fixes
     
@@ -281,7 +281,7 @@ Merge: f272435 de53add
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Oct 20 21:31:52 2015 +0200
 
-    Merge pull request #5360 from ceph/wip-11786.firefly
+    Merge pull request #5360 from stone/wip-11786.firefly
     
     mon: MonitorDBStore: get_next_key() only if prefix matches
     
@@ -349,7 +349,7 @@ Date:   Tue Oct 20 13:04:40 2015 +0200
 
     Merge pull request #5541 from dachary/wip-12418-firefly
     
-    ceph-disk: sometimes the journal symlink is not created
+    stone-disk: sometimes the journal symlink is not created
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -358,7 +358,7 @@ Merge: 3e0e3c5 644f213
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Oct 20 12:36:01 2015 +0200
 
-    Merge pull request #5729 from ceph/wip-11455-firefly
+    Merge pull request #5729 from stone/wip-11455-firefly
     
     rgw: init some manifest fields when handling explicit objs
     
@@ -369,7 +369,7 @@ Merge: e44a777 e7931a7
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Oct 20 12:35:22 2015 +0200
 
-    Merge pull request #5730 from ceph/wip-12537-firefly
+    Merge pull request #5730 from stone/wip-12537-firefly
     
     RGW returns requested bucket name raw in "Bucket" response header
     
@@ -417,7 +417,7 @@ Date:   Fri Aug 15 19:34:27 2014 +0200
 
     Fix -Wno-format and -Werror=format-security options clash
     
-    This causes build failure in latest fedora builds, ceph_test_librbd_fsx adds -Wno-format cflag but the default AM_CFLAGS already contain -Werror=format-security, in previous releases, this was tolerated but in the latest fedora rawhide it no longer is, ceph_test_librbd_fsx builds fine without -Wno-format on x86_64 so there is likely no need for the flag anymore
+    This causes build failure in latest fedora builds, stone_test_librbd_fsx adds -Wno-format cflag but the default AM_CFLAGS already contain -Werror=format-security, in previous releases, this was tolerated but in the latest fedora rawhide it no longer is, stone_test_librbd_fsx builds fine without -Wno-format on x86_64 so there is likely no need for the flag anymore
     
     Signed-off-by: Boris Ranto <branto@redhat.com>
     Reviewed-by: Sage Weil <sage@redhat.com>
@@ -430,7 +430,7 @@ commit 415335df53bf0d6b42f745b038c1c0c9c4aaa810
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Feb 3 16:14:23 2015 +0100
 
-    ceph.spec.in: junit always except for EPEL 6
+    stone.spec.in: junit always except for EPEL 6
     
     The package was renamed a long time ago (around the Fedora 15
     timeframe). The "junit4" name is only relevant for EPEL 6. For EPEL 7
@@ -438,7 +438,7 @@ Date:   Tue Feb 3 16:14:23 2015 +0100
     recently, in the junit package that ships in Fedora 21 and 22, the
     package maintainer dropped the old Provides: line.
     
-    http://tracker.ceph.com/issues/10728 Fixes: #10728
+    http://tracker.stone.com/issues/10728 Fixes: #10728
     
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
@@ -572,12 +572,12 @@ Date:   Wed Apr 29 12:34:25 2015 -0700
     (cherry picked from commit bbec53edf9e585af4e20bbc9ba9057d6fdfda342)
     
     Conflicts:
-    	qa/workunits/cephtool/test.sh
+    	qa/workunits/stonetool/test.sh
                properly co-exist with "# make sure we can't create an ec pool tier"
     	src/mon/OSDMonitor.cc
                properly co-exist with preceding "if (tp->ec_pool())"
             (The changes to both files would have applied cleanly if
-            https://github.com/ceph/ceph/pull/5389 had not been merged first.)
+            https://github.com/stone/stone/pull/5389 had not been merged first.)
 
 commit 028da252d85733fcc7d8495750b9ae97043cb0dd
 Merge: ecabc67 f71a6eb
@@ -586,7 +586,7 @@ Date:   Sat Oct 3 09:40:33 2015 +0200
 
     Merge pull request #5993 from SUSE/wip-13169-firefly
     
-    update docs to point to download.ceph.com
+    update docs to point to download.stone.com
     
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
 
@@ -594,7 +594,7 @@ commit 971eb3f6dddb509d15e5e4bcfd5e34d42ae2e75b
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Nov 13 22:33:10 2014 -0800
 
-    ceph_test_rados_api_tier: fix cleanup of whiteouts
+    stone_test_rados_api_tier: fix cleanup of whiteouts
     
     Doing a normal DELETE on a whiteout returns ENOENT.  Use the IGNORE_CACHE
     flag to make sure it removes the whiteout, too.
@@ -675,9 +675,9 @@ Date:   Mon Sep 21 15:46:42 2015 -0700
     (cherry picked from commit a3a8c85b79afef67681c32c57b591c0e0a87a349)
     
     Conflicts:
-    	src/ceph_fuse.cc
-    	src/ceph_syn.cc
-    	src/libcephfs.cc
+    	src/stone_fuse.cc
+    	src/stone_syn.cc
+    	src/libstonefs.cc
     	src/librados/RadosClient.cc
     	src/mds/MDSUtility.cc
     	src/mon/MonClient.cc
@@ -759,7 +759,7 @@ commit 741dd5b9433d1592ce91aea70ebec106a1354973
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Sep 22 13:03:49 2015 -0400
 
-    .gitmodules: fix ceph-object-corpus source url
+    .gitmodules: fix stone-object-corpus source url
     
     Fixes: #13196
     Signed-off-by: Sage Weil <sage@redhat.com>
@@ -860,7 +860,7 @@ commit f71a6ebf1b371f9389865a0a33652841726ff77b
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Sep 18 14:13:02 2015 -0400
 
-    doc: correct links to download.ceph.com
+    doc: correct links to download.stone.com
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 387d7800359154950431d0984c756f43f21dd9b4)
@@ -962,7 +962,7 @@ Date:   Wed Sep 9 06:10:09 2015 +0200
 
     Merge pull request #5408 from SUSE/wip-12492-firefly
     
-    the output is wrong when runing ceph osd reweight
+    the output is wrong when runing stone osd reweight
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -1015,7 +1015,7 @@ Merge: c4fa5ef 2f35a41
 Author: Nathan Cutler <presnypreklad@gmail.com>
 Date:   Mon Sep 7 14:22:52 2015 +0200
 
-    Merge pull request #5358 from ceph/wip-11470.firefly
+    Merge pull request #5358 from stone/wip-11470.firefly
     
     mon: PaxosService: call post_refresh() instead of post_paxos_update()
     
@@ -1052,7 +1052,7 @@ Date:   Sun Sep 6 21:19:55 2015 +0200
 
     Merge pull request #5225 from SUSE/wip-12266-firefly
     
-    ceph.spec.in: 50-rbd.rules conditional is wrong
+    stone.spec.in: 50-rbd.rules conditional is wrong
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1063,7 +1063,7 @@ Date:   Sun Sep 6 21:19:42 2015 +0200
 
     Merge pull request #5217 from SUSE/wip-12268-firefly
     
-    ceph-common needs python-argparse on older distros, but doesn't require it
+    stone-common needs python-argparse on older distros, but doesn't require it
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1200,7 +1200,7 @@ Date:   Fri Sep 4 11:50:22 2015 -0600
 
     Merge pull request #5224 from SUSE/wip-12304-firefly
     
-    ceph.spec.in running fdupes unnecessarily
+    stone.spec.in running fdupes unnecessarily
     
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
 
@@ -1211,7 +1211,7 @@ Date:   Fri Sep 4 11:47:49 2015 -0600
 
     Merge pull request #5394 from SUSE/wip-12447-firefly
     
-    ceph.spec.in: useless %py_requires breaks SLE11-SP3 build
+    stone.spec.in: useless %py_requires breaks SLE11-SP3 build
     
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
 
@@ -1250,13 +1250,13 @@ Date:   Thu Aug 13 19:41:47 2015 +0200
     Verify that an object promoted to a cache tier because of a proxy read
     is evicted as expected.
     
-    http://tracker.ceph.com/issues/12673 Refs: #12673
+    http://tracker.stone.com/issues/12673 Refs: #12673
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit 7924231930732bd297d3bd034c8295e96cb81088)
     
     Conflicts:
-    	qa/workunits/cephtool/test.sh
+    	qa/workunits/stonetool/test.sh
                 resolved by manually adding the new test to TESTS
 
 commit aa911767d9326c8aa37671883892b7d383596960
@@ -1276,7 +1276,7 @@ Date:   Thu Aug 13 13:47:24 2015 +0200
       * the agent does not reconsider and eviction does not happen
         although it should
     
-    http://tracker.ceph.com/issues/12673 Fixes: #12673
+    http://tracker.stone.com/issues/12673 Fixes: #12673
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit e1f58feb9b1d20b72f2eb2eefdea5982e0cddccd)
@@ -1330,7 +1330,7 @@ Merge: 99612e7 b8e3f6e
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Sep 4 09:42:03 2015 -0400
 
-    Merge pull request #5406 from ceph/wip-12465-firefly
+    Merge pull request #5406 from stone/wip-12465-firefly
     
     log: take mutex while opening fd
     
@@ -1341,7 +1341,7 @@ Merge: 7f8a397 4a709a4
 Author: Nathan Cutler <presnypreklad@gmail.com>
 Date:   Thu Sep 3 12:34:32 2015 +0200
 
-    Merge pull request #4854 from ceph/wip-11769-firefly
+    Merge pull request #4854 from stone/wip-11769-firefly
     
     librbd: aio calls may block
     
@@ -1540,7 +1540,7 @@ commit 04b2a878b1329202758465cf8e9b0f874cbeeef5
 Author: Dan van der Ster <daniel.vanderster@cern.ch>
 Date:   Tue Nov 18 15:51:46 2014 +0100
 
-    ceph-disk: don't change the journal partition uuid
+    stone-disk: don't change the journal partition uuid
     
     We observe that the new /dev/disk/by-partuuid/<journal_uuid>
     symlink is not always created by udev when reusing a journal
@@ -1558,11 +1558,11 @@ commit e57e6f5da10a62f2f4d7b1a6a734a095ed494ebe
 Author: Dan van der Ster <daniel.vanderster@cern.ch>
 Date:   Mon Sep 29 13:20:10 2014 +0200
 
-    ceph-disk: set guid if reusing a journal partition
+    stone-disk: set guid if reusing a journal partition
     
     When reusing a journal partition (e.g. /dev/sda2) we should set a
     new partition guid and link it correctly with the OSD. This way
-    the journal is symlinked by its persistent name and ceph-disk list
+    the journal is symlinked by its persistent name and stone-disk list
     works correctly.
     
     Signed-off-by: Dan van der Ster <daniel.vanderster@cern.ch>
@@ -1647,7 +1647,7 @@ commit 601eadbf707597d9a1572efbdf86b22ff6813602
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Thu Jul 9 11:51:13 2015 +0200
 
-    ceph.spec.in: drop SUSE-specific %py_requires macro
+    stone.spec.in: drop SUSE-specific %py_requires macro
     
     %py_requires expands to
     
@@ -1657,15 +1657,15 @@ Date:   Thu Jul 9 11:51:13 2015 +0200
     The BuildRequires: is already provided, and the PreReq is wrong because
     e.g. SLE11-SP3 (a platform we are trying to support) has Python 2.6.
     
-    http://tracker.ceph.com/issues/12351 Fixes: #12351
+    http://tracker.stone.com/issues/12351 Fixes: #12351
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit cbf6c7b46b42e163950bf7956e5b7565fca961c9)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
                 in master, the %py_requires is in the python-rados package,
-                while in firefly it is in the python-ceph package
+                while in firefly it is in the python-stone package
 
 commit a128ce37038ef6e44c8d7bd082ba196583974ef7
 Author: wuxingyi <wuxingyi2015@outlook.com>
@@ -1673,7 +1673,7 @@ Date:   Wed Mar 11 17:34:40 2015 +0800
 
     rgw/logrotate.conf: Rename service name
     
-    The service name for ceph rados gateway was changed to "ceph-radosgw",
+    The service name for stone rados gateway was changed to "stone-radosgw",
     the previous version of service name "radosgw" would cause a failed reload,
     and finally make it impossible to write any log data to the log file.
     
@@ -1691,7 +1691,7 @@ Date:   Fri May 15 13:05:40 2015 -0700
     (cherry picked from commit 11b7801bb57cb25cd2d26d58722d49691747725b)
     
     Conflicts:
-    	qa/workunits/cephtool/test.sh
+    	qa/workunits/stonetool/test.sh
                no "# make sure we can't clobber snapshot state" tests in firefly
     	src/mon/OSDMonitor.cc
                no tp->removed_snaps.empty() in firefly
@@ -2058,7 +2058,7 @@ commit 94aa947b33083bcfe3cb61f41bfdaea7df605cbb
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Dec 5 14:21:08 2014 -0800
 
-    common/ceph_context: don't import std namespace
+    common/stone_context: don't import std namespace
     
     This was broken by 7fed5dee4f96a83d1d6914f6fc0895bba2d15b99
     
@@ -2069,9 +2069,9 @@ commit b91e594401ab75987a370f6dee0ee8d212189c9f
 Author: Haomai Wang <haomaiwang@gmail.com>
 Date:   Mon Dec 1 23:54:16 2014 +0800
 
-    CephContext: Add AssociatedSingletonObject to allow CephContext's singleton
+    StoneContext: Add AssociatedSingletonObject to allow StoneContext's singleton
     
-    If some objects associated to CephContext want to create a singleton object,
+    If some objects associated to StoneContext want to create a singleton object,
     it can inherit AssociatedSingletonObject and implement destruction to get notified.
     
     Signed-off-by: Haomai Wang <haomaiwang@gmail.com>
@@ -2167,9 +2167,9 @@ Date:   Fri Feb 6 01:26:40 2015 +0100
     in a popup window:
     
       /api/v1/cluster/$FSID/health is populated (ultimately) with
-      status obtained via librados python bindings from the ceph
+      status obtained via librados python bindings from the stone
       cluster. In the case where there's clock skew, the summary
-      field supplied by the ceph cluster is empty.
+      field supplied by the stone cluster is empty.
     
     No summary field, no popup window with more health details.
     
@@ -2231,7 +2231,7 @@ Date:   Tue Jul 21 13:03:07 2015 +0200
 
     Merge pull request #5129 from SUSE/wip-12202-firefly
     
-    mon: ceph fails to compile with boost 1.58
+    mon: stone fails to compile with boost 1.58
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -2264,7 +2264,7 @@ Date:   Tue Jul 21 12:39:34 2015 +0200
 
     Merge pull request #5037 from SUSE/wip-11875-firefly
     
-    tools: ceph-post-file fails on rhel7
+    tools: stone-post-file fails on rhel7
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -2275,7 +2275,7 @@ Date:   Tue Jul 21 12:34:51 2015 +0200
 
     Merge pull request #4771 from SUSE/wip-11759-firefly
     
-    tools: ceph-disk: support NVMe device partitions
+    tools: stone-disk: support NVMe device partitions
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -2286,7 +2286,7 @@ Date:   Tue Jul 21 12:22:52 2015 +0200
 
     Merge pull request #4636 from SUSE/wip-11143-firefly
     
-    tools:  src/ceph-disk : disk zap sgdisk invocation
+    tools:  src/stone-disk : disk zap sgdisk invocation
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -2319,7 +2319,7 @@ Date:   Tue Jul 21 12:12:36 2015 +0200
 
     Merge pull request #4630 from SUSE/wip-10983-firefly
     
-    tools: use a new disk as journal disk,ceph-disk prepare fail
+    tools: use a new disk as journal disk,stone-disk prepare fail
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -2341,7 +2341,7 @@ Date:   Tue Jul 21 12:04:39 2015 +0200
 
     Merge pull request #4582 from SUSE/wip-11543-firefly
     
-    tools: ceph_argparse_flag has no regular 3rd parameter
+    tools: stone_argparse_flag has no regular 3rd parameter
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -2444,7 +2444,7 @@ commit 68508e28adffae64a52ea4c0046fbe8537e0d093
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Thu Jun 25 22:37:52 2015 +0200
 
-    ceph.spec.in: use _udevrulesdir to eliminate conditionals
+    stone.spec.in: use _udevrulesdir to eliminate conditionals
     
     The conditionals governing where 50-rbd.rules is installed were not doing the
     right thing on SUSE distros.
@@ -2453,27 +2453,27 @@ Date:   Thu Jun 25 22:37:52 2015 +0200
     and set to the right value. Use it to eliminate some conditionals around other
     udev rules files as well.
     
-    http://tracker.ceph.com/issues/12166 Fixes: #12166
+    http://tracker.stone.com/issues/12166 Fixes: #12166
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 8aa758ee7a14e93ded1d55b4aca7a54aa47d7174)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
                 master spec file has diverged significantly from firefly
 
 commit bd25136d45d32b8d419fbe60e39572038e33cc59
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Mon Jul 13 18:12:01 2015 +0200
 
-    ceph.spec.in: do not run fdupes, even on SLE/openSUSE
+    stone.spec.in: do not run fdupes, even on SLE/openSUSE
     
     In openSUSE there is a policy to use %fdupes in the spec file if RPMLINT
     complains about duplicate files wasting space in the filesystem.
     
     However, RPMLINT is not so complaining, so drop fdupes.
     
-    http://tracker.ceph.com/issues/12301 Fixes: #12301
+    http://tracker.stone.com/issues/12301 Fixes: #12301
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 53072b9019caf72e0313b2804ea174237ed7da33)
@@ -2482,10 +2482,10 @@ commit 2544a6fc59a86d3f02dcd67d3c84a72d7a1100a0
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Tue Jun 16 18:27:20 2015 +0200
 
-    ceph.spec.in: python-argparse only in Python 2.6
+    stone.spec.in: python-argparse only in Python 2.6
     
     argparse is a widely-used Python module for parsing command-line arguments.
-    Ceph makes heavy use of Python scripts, both in the build environment and on
+    Stone makes heavy use of Python scripts, both in the build environment and on
     cluster nodes and clients.
     
     Until Python 2.6, argparse was distributed separately from Python proper.
@@ -2499,17 +2499,17 @@ Date:   Tue Jun 16 18:27:20 2015 +0200
     Hat/CentOS and SUSE only, because the last Fedora version with Python 2.6
     was Fedora 13, which is EOL.
     
-    argparse is required by both the ceph and ceph-common packages, but since ceph
-    requires ceph-common, the argparse Requires and BuildRequires need only appear
-    once, under ceph-common.
+    argparse is required by both the stone and stone-common packages, but since stone
+    requires stone-common, the argparse Requires and BuildRequires need only appear
+    once, under stone-common.
     
-    http://tracker.ceph.com/issues/12034 Fixes: #12034
+    http://tracker.stone.com/issues/12034 Fixes: #12034
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 23171c952997d104cfa6b5700ec0bb658a8e0915)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
 
 commit 54264210f4ebec23b08dd6712e09aea49543b52b
 Author: Samuel Just <sam.just@inktank.com>
@@ -2530,7 +2530,7 @@ Date:   Mon Jul 28 14:06:06 2014 +0800
 
     osd: promotion on 2nd read for cache tiering
     
-    http://tracker.ceph.com/issues/8674 Fixes: #8674
+    http://tracker.stone.com/issues/8674 Fixes: #8674
     
     Signed-off-by: Zhiqiang Wang <wonzhq@hotmail.com>
     (cherry picked from commit 0ed3adc1e0a74bf9548d1d956aece11f019afee0)
@@ -2539,9 +2539,9 @@ commit 66f61cd9ae105948f653fd888812df270ff1e832
 Author: Signed-off-by: Zhiqiang Wang <wonzhq@hotmail.com>
 Date:   Thu Jul 31 15:49:44 2014 -0700
 
-    ceph_test_rados_api_tier: test promote-on-second-read behavior
+    stone_test_rados_api_tier: test promote-on-second-read behavior
     
-    http://tracker.ceph.com/issues/8674 References: #8674
+    http://tracker.stone.com/issues/8674 References: #8674
     
     Signed-off-by: Zhiqiang Wang <wonzhq@hotmail.com>
     Signed-off-by: Sage Weil <sage@redhat.com>
@@ -2723,7 +2723,7 @@ Date:   Fri May 8 15:21:20 2015 +0800
     mon: remove unused variable
     
     * as a side effect, this change silences
-      http://tracker.ceph.com/issues/11576
+      http://tracker.stone.com/issues/11576
     
     Fixes: #11576
     Signed-off-by: Kefu Chai <kchai@redhat.com>
@@ -2807,7 +2807,7 @@ commit a62c720dc783b40377dcd34d4e53aa778ac1a84b
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Jun 1 15:10:14 2015 -0700
 
-    Makefile: install ceph-post-file keys with mode 600
+    Makefile: install stone-post-file keys with mode 600
     
     Otherwise ssh (may) prompt for a password.
     
@@ -2818,7 +2818,7 @@ commit fc59ca391f639b2ef1b5c9dda202a3d7d718cf25
 Author: Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
 Date:   Mon Jun 1 15:05:32 2015 -0700
 
-    ceph-post-file: improve check for a source install
+    stone-post-file: improve check for a source install
     
     Signed-off-by: Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
     (cherry picked from commit ee170eadcdcb4b54d36a7d474558484de9d917eb)
@@ -2827,7 +2827,7 @@ commit 50bfb354d0648162f94c2659e8b915d69f27bf73
 Author: Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
 Date:   Mon Jun 1 15:00:39 2015 -0700
 
-    ceph-post-file: behave when sftp doesn't take -i
+    stone-post-file: behave when sftp doesn't take -i
     
     Fixes: #11836
     Signed-off-by: Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
@@ -2838,7 +2838,7 @@ Merge: ea6c958 254676b
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Jun 19 15:57:46 2015 -0700
 
-    Merge pull request #4960 from ceph/wip-10911-firefly
+    Merge pull request #4960 from stone/wip-10911-firefly
     
     osd,mon: explicitly specify OSD features in MOSDBoot
     
@@ -2882,7 +2882,7 @@ commit 90a1a7587fcb567e2cc6e9188fdd56ec1255a881
 Author: islepnev <islepnev@gmail.com>
 Date:   Fri Apr 17 22:33:01 2015 +0300
 
-    ceph-disk: support NVMe device partitions
+    stone-disk: support NVMe device partitions
     
     Linux nvme kernel module v0.9 enumerate devices as following:
     
@@ -2891,13 +2891,13 @@ Date:   Fri Apr 17 22:33:01 2015 +0300
     /dev/nvme0n1p1 - first partition
     /dev/nvme0n1p2 - second partition
     
-    http://tracker.ceph.com/issues/11612 Fixes: #11612
+    http://tracker.stone.com/issues/11612 Fixes: #11612
     
     Signed-off-by: Ilja Slepnev <islepnev@gmail.com>
     (cherry picked from commit 9b62cf254d02d30609793be8b1cb8a94f38891f1)
     
     Conflicts:
-    	src/ceph-disk
+    	src/stone-disk
 
 commit f93eadd793f9f4fded30df5589f98ccfc0e1839f
 Author: Sage Weil <sage@redhat.com>
@@ -3078,7 +3078,7 @@ Date:   Tue Mar 17 15:41:33 2015 +0100
     Splitting this up into two separate invocations to first zap everything
     and then clear it properly fixes this issue.
     
-    Based on patch by Lars Marowsky-Bree <lmb@suse.com> in ceph-deploy.
+    Based on patch by Lars Marowsky-Bree <lmb@suse.com> in stone-deploy.
     Created by Vincent Untz <vuntz@suse.com>
     
     Signed-off-by: Owen Synge <osynge@suse.com>
@@ -3109,7 +3109,7 @@ Date:   Fri Mar 6 15:54:07 2015 +0800
     
     Even if the offset is properly aligned.
     
-    http://tracker.ceph.com/issues/11507 Fixes: #11507
+    http://tracker.stone.com/issues/11507 Fixes: #11507
     
     Signed-off-by: Jianpeng Ma <jianpeng.ma@intel.com>
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
@@ -3119,7 +3119,7 @@ commit 909096713dcef5dc4fdbb22a9971609554688e23
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Sun Mar 8 15:15:35 2015 +0100
 
-    ceph-disk: more robust parted output parser
+    stone-disk: more robust parted output parser
     
     In some cases, depending on the implementation or the operating system,
     
@@ -3131,7 +3131,7 @@ Date:   Sun Mar 8 15:15:35 2015 +0100
     the dev entry) but handles the entire output instead of checking line by
     line.
     
-    http://tracker.ceph.com/issues/10983 Fixes: #10983
+    http://tracker.stone.com/issues/10983 Fixes: #10983
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit f5acf6bb6a342b05897605703d7d9cb7c09714fd)
@@ -3162,10 +3162,10 @@ commit 2cb2333ecdf2106925d74e024697f73ad947f378
 Author: Thorsten Behrens <tbehrens@suse.com>
 Date:   Thu Jul 3 00:15:03 2014 +0200
 
-    ceph_argparse_flag has no regular 3rd parameter.
+    stone_argparse_flag has no regular 3rd parameter.
     
     With clang warning: 'va_start' has undefined behavior with reference
-    types, noticing copy-paste mistake on ceph_argparse_flag.
+    types, noticing copy-paste mistake on stone_argparse_flag.
     
     Signed-off-by: Thorsten Behrens <tbehrens@suse.com>
     (cherry picked from commit 0c7c7223a2beb4ffb953d89d316f87d350677063)

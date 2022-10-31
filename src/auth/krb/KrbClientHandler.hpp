@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2018 SUSE LLC.
  * Author: Daniel Oliveira <doliveira@suse.com>
@@ -34,8 +34,8 @@ class Keyring;
 class KrbClientHandler : public AuthClientHandler {
 
   public:
-    KrbClientHandler(CephContext* ceph_ctx = nullptr) 
-      : AuthClientHandler(ceph_ctx) {
+    KrbClientHandler(StoneContext* stone_ctx = nullptr) 
+      : AuthClientHandler(stone_ctx) {
       reset();
     }
     ~KrbClientHandler() override;
@@ -44,7 +44,7 @@ class KrbClientHandler : public AuthClientHandler {
       return new KrbClientHandler(*this);
     }
 
-    int get_protocol() const override { return CEPH_AUTH_GSS; }
+    int get_protocol() const override { return STONE_AUTH_GSS; }
     void reset() override {
       m_gss_client_name = GSS_C_NO_NAME; 
       m_gss_service_name = GSS_C_NO_NAME; 

@@ -15,7 +15,7 @@
 #include "crimson/common/tri_mutex.h"
 #include "crimson/osd/osd_operation.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -35,12 +35,12 @@ struct obc_to_hoid {
   }
 };
 
-class ObjectContext : public ceph::common::intrusive_lru_base<
-  ceph::common::intrusive_lru_config<
+class ObjectContext : public stone::common::intrusive_lru_base<
+  stone::common::intrusive_lru_config<
     hobject_t, ObjectContext, obc_to_hoid<ObjectContext>>>
 {
 public:
-  Ref head; // Ref defined as part of ceph::common::intrusive_lru_base
+  Ref head; // Ref defined as part of stone::common::intrusive_lru_base
   ObjectState obs;
   std::optional<SnapSet> ss;
   bool loaded : 1;
@@ -62,23 +62,23 @@ public:
 
   const SnapSet &get_ro_ss() const {
     if (is_head()) {
-      ceph_assert(ss);
+      stone_assert(ss);
       return *ss;
     } else {
-      ceph_assert(head);
+      stone_assert(head);
       return head->get_ro_ss();
     }
   }
 
   void set_head_state(ObjectState &&_obs, SnapSet &&_ss) {
-    ceph_assert(is_head());
+    stone_assert(is_head());
     obs = std::move(_obs);
     ss = std::move(_ss);
     loaded = true;
   }
 
   void set_clone_state(ObjectState &&_obs, Ref &&_head) {
-    ceph_assert(!is_head());
+    stone_assert(!is_head());
     obs = std::move(_obs);
     head = _head;
     loaded = true;

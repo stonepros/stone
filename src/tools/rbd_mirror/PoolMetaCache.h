@@ -5,7 +5,7 @@
 #define STONE_RBD_MIRROR_POOL_META_CACHE_H
 
 #include "include/int_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "tools/rbd_mirror/Types.h"
 #include <map>
 
@@ -14,7 +14,7 @@ namespace mirror {
 
 class PoolMetaCache {
 public:
-  PoolMetaCache(CephContext* cct)
+  PoolMetaCache(StoneContext* cct)
     : m_cct(cct) {
   }
   PoolMetaCache(const PoolMetaCache&) = delete;
@@ -33,10 +33,10 @@ public:
   void remove_remote_pool_meta(int64_t pool_id);
 
 private:
-  CephContext* m_cct;
+  StoneContext* m_cct;
 
-  mutable ceph::shared_mutex m_lock =
-    ceph::make_shared_mutex("rbd::mirror::PoolMetaCache::m_lock");
+  mutable stone::shared_mutex m_lock =
+    stone::make_shared_mutex("rbd::mirror::PoolMetaCache::m_lock");
   std::map<int64_t, LocalPoolMeta> m_local_pool_metas;
   std::map<int64_t, RemotePoolMeta> m_remote_pool_metas;
 };

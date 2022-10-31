@@ -15,11 +15,11 @@ the QoS related parameters:
 * an mclock profile type to enable
 
 Using the settings in the specified profile, the OSD determines and applies the
-lower-level mclock and Ceph parameters. The parameters applied by the mclock
+lower-level mclock and Stone parameters. The parameters applied by the mclock
 profile make it possible to tune the QoS between client I/O, recovery/backfill
 operations, and other background operations (for example, scrub, snap trim, and
 PG deletion). These background activities are considered best-effort internal
-clients of Ceph.
+clients of Stone.
 
 
 .. index:: mclock; profile definition
@@ -28,7 +28,7 @@ mClock Profiles - Definition and Purpose
 ========================================
 
 A mclock profile is *“a configuration setting that when applied on a running
-Ceph cluster enables the throttling of the operations(IOPS) belonging to
+Stone cluster enables the throttling of the operations(IOPS) belonging to
 different client classes (background recovery, scrub, snaptrim, client op,
 osd subop)”*.
 
@@ -36,7 +36,7 @@ The mclock profile uses the capacity limits and the mclock profile type selected
 by the user to determine the low-level mclock resource control parameters.
 
 Depending on the profile type, lower-level mclock resource-control parameters
-and some Ceph-configuration parameters are transparently applied.
+and some Stone-configuration parameters are transparently applied.
 
 The low-level mclock resource control parameters are the *reservation*,
 *limit*, and *weight* that provide control of the resource shares, as
@@ -55,10 +55,10 @@ mclock profiles can be broadly classified into two types,
   - **high_client_ops** (*default*):
     This profile allocates more reservation and limit to external-client ops
     as compared to background recoveries and other internal clients within
-    Ceph. This profile is enabled by default.
+    Stone. This profile is enabled by default.
   - **high_recovery_ops**:
     This profile allocates more reservation to background recoveries as
-    compared to external clients and other internal clients within Ceph. For
+    compared to external clients and other internal clients within Stone. For
     example, an admin may enable this profile temporarily to speed-up background
     recoveries during non-peak hours.
   - **balanced**:
@@ -67,7 +67,7 @@ mclock profiles can be broadly classified into two types,
 
 - **Custom**: This profile gives users complete control over all the mclock
   configuration parameters. Using this profile is not recommended without
-  a deep understanding of mclock and related Ceph-configuration options.
+  a deep understanding of mclock and related Stone-configuration options.
 
 .. note:: Across the built-in profiles, internal clients of mclock (for example
           "scrub", "snap trim", and "pg deletion") are given slightly lower
@@ -97,7 +97,7 @@ config parameters cannot be modified when using any of the built-in profiles:
 - ``osd_mclock_scheduler_background_best_effort_wgt``
 - ``osd_mclock_scheduler_background_best_effort_lim``
 
-The following Ceph options will not be modifiable by the user:
+The following Stone options will not be modifiable by the user:
 
 - ``osd_max_backfills``
 - ``osd_recovery_max_active``
@@ -113,7 +113,7 @@ client ops or recovery ops. In order to deal with such a situation, you can
 enable one of the alternate built-in profiles by following the steps mentioned
 in the next section.
 
-If any mClock profile (including "custom") is active, the following Ceph config
+If any mClock profile (including "custom") is active, the following Stone config
 sleep options will be disabled,
 
 - ``osd_recovery_sleep``
@@ -151,14 +151,14 @@ command:
 
   .. prompt:: bash #
 
-    ceph config set osd.N osd_mclock_profile <value>
+    stone config set osd.N osd_mclock_profile <value>
 
 For example, to change the profile to allow faster recoveries on "osd.0", the
 following command can be used to switch to the *high_recovery_ops* profile:
 
   .. prompt:: bash #
 
-    ceph config set osd.0 osd_mclock_profile high_recovery_ops
+    stone config set osd.0 osd_mclock_profile high_recovery_ops
 
 .. note:: The *custom* profile is not recommended unless you are an advanced
           user.
@@ -179,14 +179,14 @@ cluster is brought up by using the following command:
 
   .. prompt:: bash #
 
-    ceph config show osd.N osd_mclock_max_capacity_iops_[hdd, ssd]
+    stone config show osd.N osd_mclock_max_capacity_iops_[hdd, ssd]
 
-For example, the following command shows the max capacity for "osd.0" on a Ceph
+For example, the following command shows the max capacity for "osd.0" on a Stone
 node whose underlying device type is SSD:
 
   .. prompt:: bash #
 
-    ceph config show osd.0 osd_mclock_max_capacity_iops_ssd
+    stone config show osd.0 osd_mclock_max_capacity_iops_ssd
 
 
 Steps to Manually Benchmark an OSD (Optional)
@@ -202,7 +202,7 @@ Steps to Manually Benchmark an OSD (Optional)
 
 
 Any existing benchmarking tool can be used for this purpose. In this case, the
-steps use the *Ceph OSD Bench* command described in the next section. Regardless
+steps use the *Stone OSD Bench* command described in the next section. Regardless
 of the tool/command used, the steps outlined further below remain the same.
 
 As already described in the :ref:`dmclock-qos` section, the number of
@@ -231,7 +231,7 @@ used for benchmarking is shown below :
 
 .. prompt:: bash #
 
-  ceph tell osd.N bench [TOTAL_BYTES] [BYTES_PER_WRITE] [OBJ_SIZE] [NUM_OBJS]
+  stone tell osd.N bench [TOTAL_BYTES] [BYTES_PER_WRITE] [OBJ_SIZE] [NUM_OBJS]
 
 where,
 
@@ -246,7 +246,7 @@ Benchmarking Test Steps Using OSD Bench
 The steps below use the default shards and detail the steps used to determine
 the correct bluestore throttle values (optional).
 
-#. Bring up your Ceph cluster and login to the Ceph node hosting the OSDs that
+#. Bring up your Stone cluster and login to the Stone node hosting the OSDs that
    you wish to benchmark.
 #. Run a simple 4KiB random write workload on an OSD using the following
    commands:
@@ -259,11 +259,11 @@ the correct bluestore throttle values (optional).
 
    .. prompt:: bash #
 
-     ceph tell osd.0 cache drop
+     stone tell osd.0 cache drop
 
    .. prompt:: bash #
 
-     ceph tell osd.0 bench 12288000 4096 4194304 100
+     stone tell osd.0 bench 12288000 4096 4194304 100
 
 #. Note the overall throughput(IOPS) obtained from the output of the osd bench
    command. This value is the baseline throughput(IOPS) when the default
@@ -297,18 +297,18 @@ following command:
 
   .. prompt:: bash #
 
-     ceph config set osd.N osd_mclock_max_capacity_iops_[hdd,ssd] <value>
+     stone config set osd.N osd_mclock_max_capacity_iops_[hdd,ssd] <value>
 
 For example, the following command sets the max capacity for a specific OSD
 (say "osd.0") whose underlying device type is HDD to 350 IOPS:
 
   .. prompt:: bash #
 
-    ceph config set osd.0 osd_mclock_max_capacity_iops_hdd 350
+    stone config set osd.0 osd_mclock_max_capacity_iops_hdd 350
 
-Alternatively, you may specify the max capacity for OSDs within the Ceph
+Alternatively, you may specify the max capacity for OSDs within the Stone
 configuration file under the respective [osd.N] section. See
-:ref:`ceph-conf-settings` for more details.
+:ref:`stone-conf-settings` for more details.
 
 
 .. index:: mclock; config settings
@@ -322,7 +322,7 @@ mClock Config Options
               based on operations belonging to different classes (background
               recovery, scrub, snaptrim, client op, osd subop). Once a built-in
               profile is enabled, the lower level mclock resource control
-              parameters [*reservation, weight, limit*] and some Ceph
+              parameters [*reservation, weight, limit*] and some Stone
               configuration parameters are set transparently. Note that the
               above does not apply for the *custom* profile.
 

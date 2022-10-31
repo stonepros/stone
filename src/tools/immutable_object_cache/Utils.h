@@ -7,7 +7,7 @@
 #include "include/rados/librados.hpp"
 #include "include/Context.h"
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 namespace detail {
 
@@ -27,5 +27,5 @@ librados::AioCompletion *create_rados_callback(T *obj) {
 }
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone
 #endif  // STONE_CACHE_UTILS_H

@@ -16,26 +16,26 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 MAX_PROPAGATION_TIME=30
 
 function run() {
     local dir=$1
     shift
     rm -f $dir/*.pid
-    export CEPH_MON="127.0.0.1:7126" # git grep '\<7126\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    export STONE_MON="127.0.0.1:7126" # git grep '\<7126\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
 
-    OLD_ARGS=$CEPH_ARGS
-    CEPH_ARGS+="--osd-fast-fail-on-connection-refused=false "
+    OLD_ARGS=$STONE_ARGS
+    STONE_ARGS+="--osd-fast-fail-on-connection-refused=false "
     echo "Ensuring old behavior is there..."
     test_fast_kill $dir && (echo "OSDs died too early! Old behavior doesn't work." ; return 1)
 
-    CEPH_ARGS=$OLD_ARGS"--osd-fast-fail-on-connection-refused=true "
-    OLD_ARGS=$CEPH_ARGS
+    STONE_ARGS=$OLD_ARGS"--osd-fast-fail-on-connection-refused=true "
+    OLD_ARGS=$STONE_ARGS
 
-    CEPH_ARGS=$OLD_ARGS"--ms_type=async --mon-host=$CEPH_MON"
+    STONE_ARGS=$OLD_ARGS"--ms_type=async --mon-host=$STONE_MON"
     echo "Testing async msgr..."
     test_fast_kill $dir || return 1
 
@@ -82,7 +82,7 @@ function test_fast_kill() {
          continue
        fi
 
-       down_osds=$(ceph osd tree | grep -c down)
+       down_osds=$(stone osd tree | grep -c down)
        if [ $down_osds -lt $i ]; then
          # osds not marked down yet, try again in a second
          continue
@@ -96,7 +96,7 @@ function test_fast_kill() {
 
      if [ $down_osds -lt $i ]; then
         echo Killed the OSD, yet it is not marked down
-        ceph osd tree
+        stone osd tree
         return 1
      fi
    done

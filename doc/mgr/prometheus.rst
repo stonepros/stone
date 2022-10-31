@@ -4,8 +4,8 @@
 Prometheus Module
 =================
 
-Provides a Prometheus exporter to pass on Ceph performance counters
-from the collection point in ceph-mgr.  Ceph-mgr receives MMgrReport
+Provides a Prometheus exporter to pass on Stone performance counters
+from the collection point in stone-mgr.  Stone-mgr receives MMgrReport
 messages from all MgrClient processes (mons and OSDs, for instance)
 with performance counter schema data and actual counter data, and keeps
 a circular buffer of the last N samples.  This module creates an HTTP
@@ -20,7 +20,7 @@ Enabling prometheus output
 
 The *prometheus* module is enabled with::
 
-  ceph mgr module enable prometheus
+  stone mgr module enable prometheus
 
 Configuration
 -------------
@@ -31,15 +31,15 @@ Configuration
 
 By default the module will accept HTTP requests on port ``9283`` on all IPv4
 and IPv6 addresses on the host.  The port and listen address are both
-configurable with ``ceph config set``, with keys
+configurable with ``stone config set``, with keys
 ``mgr/prometheus/server_addr`` and ``mgr/prometheus/server_port``.  This port
 is registered with Prometheus's `registry
 <https://github.com/prometheus/prometheus/wiki/Default-port-allocations>`_.
 
 ::
 
-    ceph config set mgr mgr/prometheus/server_addr 0.0.0.0
-    ceph config set mgr mgr/prometheus/server_port 9283
+    stone config set mgr mgr/prometheus/server_addr 0.0.0.0
+    stone config set mgr mgr/prometheus/server_port 9283
 
 .. warning::
 
@@ -56,15 +56,15 @@ might be useful to increase the scrape interval.
 To set a different scrape interval in the Prometheus module, set
 ``scrape_interval`` to the desired value::
 
-    ceph config set mgr mgr/prometheus/scrape_interval 20
+    stone config set mgr mgr/prometheus/scrape_interval 20
 
 On large clusters (>1000 OSDs), the time to fetch the metrics may become
 significant.  Without the cache, the Prometheus manager module could, especially
 in conjunction with multiple Prometheus instances, overload the manager and lead
-to unresponsive or crashing Ceph manager instances.  Hence, the cache is enabled
+to unresponsive or crashing Stone manager instances.  Hence, the cache is enabled
 by default.  This means that there is a possibility that the cache becomes
 stale.  The cache is considered stale when the time to fetch the metrics from
-Ceph exceeds the configured :confval:``mgr/prometheus/scrape_interval``.
+Stone exceeds the configured :confval:``mgr/prometheus/scrape_interval``.
 
 If that is the case, **a warning will be logged** and the module will either
 
@@ -72,45 +72,45 @@ If that is the case, **a warning will be logged** and the module will either
 * it will return the content of the cache, even though it might be stale.
 
 This behavior can be configured. By default, it will return a 503 HTTP status
-code (service unavailable). You can set other options using the ``ceph config
+code (service unavailable). You can set other options using the ``stone config
 set`` commands.
 
 To tell the module to respond with possibly stale data, set it to ``return``::
 
-    ceph config set mgr mgr/prometheus/stale_cache_strategy return
+    stone config set mgr mgr/prometheus/stale_cache_strategy return
 
 To tell the module to respond with "service unavailable", set it to ``fail``::
 
-    ceph config set mgr mgr/prometheus/stale_cache_strategy fail
+    stone config set mgr mgr/prometheus/stale_cache_strategy fail
 
 If you are confident that you don't require the cache, you can disable it::
 
-    ceph config set mgr mgr/prometheus/cache false
+    stone config set mgr mgr/prometheus/cache false
 
 If you are using the prometheus module behind some kind of reverse proxy or
 loadbalancer, you can simplify discovering the active instance by switching
 to ``error``-mode::
 
-    ceph config set mgr mgr/prometheus/standby_behaviour error
+    stone config set mgr mgr/prometheus/standby_behaviour error
 
 If set, the prometheus module will repond with a HTTP error when requesting ``/``
 from the standby instance. The default error code is 500, but you can configure
 the HTTP response code with::
 
-    ceph config set mgr mgr/prometheus/standby_error_status_code 503
+    stone config set mgr mgr/prometheus/standby_error_status_code 503
 
 Valid error codes are between 400-599.
 
 To switch back to the default behaviour, simply set the config key to ``default``::
 
-    ceph config set mgr mgr/prometheus/standby_behaviour default
+    stone config set mgr mgr/prometheus/standby_behaviour default
 
 .. _prometheus-rbd-io-statistics:
 
-Ceph Health Checks
+Stone Health Checks
 ------------------
 
-The mgr/prometheus module also tracks and maintains a history of Ceph health checks,
+The mgr/prometheus module also tracks and maintains a history of Stone health checks,
 exposing them to the Prometheus server as discrete metrics. This allows Prometheus
 alert rules to be configured for specific health check events.
 
@@ -118,11 +118,11 @@ The metrics take the following form;
 
 ::
 
-    # HELP ceph_health_detail healthcheck status by type (0=inactive, 1=active)
-    # TYPE ceph_health_detail gauge
-    ceph_health_detail{name="OSDMAP_FLAGS",severity="HEALTH_WARN"} 0.0
-    ceph_health_detail{name="OSD_DOWN",severity="HEALTH_WARN"} 1.0
-    ceph_health_detail{name="PG_DEGRADED",severity="HEALTH_WARN"} 1.0
+    # HELP stone_health_detail healthcheck status by type (0=inactive, 1=active)
+    # TYPE stone_health_detail gauge
+    stone_health_detail{name="OSDMAP_FLAGS",severity="HEALTH_WARN"} 0.0
+    stone_health_detail{name="OSD_DOWN",severity="HEALTH_WARN"} 1.0
+    stone_health_detail{name="PG_DEGRADED",severity="HEALTH_WARN"} 1.0
 
 The health check history is made available through the following commands;
 
@@ -136,7 +136,7 @@ encountered, or since the last ``clear`` command was issued. The example below;
 
 ::
 
-    [ceph: root@c8-node1 /]# ceph healthcheck history ls
+    [stone: root@c8-node1 /]# stone healthcheck history ls
     Healthcheck Name          First Seen (UTC)      Last seen (UTC)       Count  Active
     OSDMAP_FLAGS              2021/09/16 03:17:47   2021/09/16 22:07:40       2    No
     OSD_DOWN                  2021/09/17 00:11:59   2021/09/17 00:11:59       1   Yes
@@ -156,7 +156,7 @@ statistics are collected for all namespaces in the pool.
 
 Example to activate the RBD-enabled pools ``pool1``, ``pool2`` and ``poolN``::
 
-  ceph config set mgr mgr/prometheus/rbd_stats_pools "pool1,pool2,poolN"
+  stone config set mgr mgr/prometheus/rbd_stats_pools "pool1,pool2,poolN"
 
 The module makes the list of all available images scanning the specified
 pools and namespaces and refreshes it periodically. The period is
@@ -167,30 +167,30 @@ RBD image.
 
 Example to turn up the sync interval to 10 minutes::
 
-  ceph config set mgr mgr/prometheus/rbd_stats_pools_refresh_interval 600
+  stone config set mgr mgr/prometheus/rbd_stats_pools_refresh_interval 600
 
 Statistic names and labels
 ==========================
 
-The names of the stats are exactly as Ceph names them, with
+The names of the stats are exactly as Stone names them, with
 illegal characters ``.``, ``-`` and ``::`` translated to ``_``,
-and ``ceph_`` prefixed to all names.
+and ``stone_`` prefixed to all names.
 
 
-All *daemon* statistics have a ``ceph_daemon`` label such as "osd.123"
+All *daemon* statistics have a ``stone_daemon`` label such as "osd.123"
 that identifies the type and ID of the daemon they come from.  Some
 statistics can come from different types of daemon, so when querying
 e.g. an OSD's RocksDB stats, you would probably want to filter
-on ceph_daemon starting with "osd" to avoid mixing in the monitor
+on stone_daemon starting with "osd" to avoid mixing in the monitor
 rocksdb stats.
 
 
-The *cluster* statistics (i.e. those global to the Ceph cluster)
+The *cluster* statistics (i.e. those global to the Stone cluster)
 have labels appropriate to what they report on.  For example,
 metrics relating to pools have a ``pool_id`` label.
 
 
-The long running averages that represent the histograms from core Ceph
+The long running averages that represent the histograms from core Stone
 are represented by a pair of ``<name>_sum`` and ``<name>_count`` metrics.
 This is similar to how histograms are represented in `Prometheus <https://prometheus.io/docs/concepts/metric_types/#histogram>`_
 and they can also be treated `similarly <https://prometheus.io/docs/practices/histograms/>`_.
@@ -201,35 +201,35 @@ Pool and OSD metadata series
 Special series are output to enable displaying and querying on
 certain metadata fields.
 
-Pools have a ``ceph_pool_metadata`` field like this:
+Pools have a ``stone_pool_metadata`` field like this:
 
 ::
 
-    ceph_pool_metadata{pool_id="2",name="cephfs_metadata_a"} 1.0
+    stone_pool_metadata{pool_id="2",name="stonefs_metadata_a"} 1.0
 
-OSDs have a ``ceph_osd_metadata`` field like this:
+OSDs have a ``stone_osd_metadata`` field like this:
 
 ::
 
-    ceph_osd_metadata{cluster_addr="172.21.9.34:6802/19096",device_class="ssd",ceph_daemon="osd.0",public_addr="172.21.9.34:6801/19096",weight="1.0"} 1.0
+    stone_osd_metadata{cluster_addr="172.21.9.34:6802/19096",device_class="ssd",stone_daemon="osd.0",public_addr="172.21.9.34:6801/19096",weight="1.0"} 1.0
 
 
 Correlating drive statistics with node_exporter
 -----------------------------------------------
 
-The prometheus output from Ceph is designed to be used in conjunction
+The prometheus output from Stone is designed to be used in conjunction
 with the generic host monitoring from the Prometheus node_exporter.
 
-To enable correlation of Ceph OSD statistics with node_exporter's
+To enable correlation of Stone OSD statistics with node_exporter's
 drive statistics, special series are output like this:
 
 ::
 
-    ceph_disk_occupation_human{ceph_daemon="osd.0", device="sdd", exported_instance="myhost"}
+    stone_disk_occupation_human{stone_daemon="osd.0", device="sdd", exported_instance="myhost"}
 
 To use this to get disk statistics by OSD ID, use either the ``and`` operator or
 the ``*`` operator in your prometheus query. All metadata metrics (like ``
-ceph_disk_occupation_human`` have the value 1 so they act neutral with ``*``. Using ``*``
+stone_disk_occupation_human`` have the value 1 so they act neutral with ``*``. Using ``*``
 allows to use ``group_left`` and ``group_right`` grouping modifiers, so that
 the resulting metric has additional labels from one side of the query.
 
@@ -243,22 +243,22 @@ The goal is to run a query like
 ::
 
     rate(node_disk_bytes_written[30s]) and
-    on (device,instance) ceph_disk_occupation_human{ceph_daemon="osd.0"}
+    on (device,instance) stone_disk_occupation_human{stone_daemon="osd.0"}
 
 Out of the box the above query will not return any metrics since the ``instance`` labels of
-both metrics don't match. The ``instance`` label of ``ceph_disk_occupation_human``
+both metrics don't match. The ``instance`` label of ``stone_disk_occupation_human``
 will be the currently active MGR node.
 
 The following two section outline two approaches to remedy this.
 
 .. note::
 
-    If you need to group on the `ceph_daemon` label instead of `device` and
-    `instance` labels, using `ceph_disk_occupation_human` may not work reliably.
-    It is advised that you use `ceph_disk_occupation` instead.
+    If you need to group on the `stone_daemon` label instead of `device` and
+    `instance` labels, using `stone_disk_occupation_human` may not work reliably.
+    It is advised that you use `stone_disk_occupation` instead.
 
-    The difference is that `ceph_disk_occupation_human` may group several OSDs
-    into the value of a single `ceph_daemon` label in cases where multiple OSDs
+    The difference is that `stone_disk_occupation_human` may group several OSDs
+    into the value of a single `stone_daemon` label in cases where multiple OSDs
     share a disk.
 
 Use label_replace
@@ -278,7 +278,7 @@ To correlate an OSD and its disks write rate, the following query can be used:
         "$1",
         "instance",
         "(.*):.*"
-    ) and on (device, exported_instance) ceph_disk_occupation_human{ceph_daemon="osd.0"}
+    ) and on (device, exported_instance) stone_disk_occupation_human{stone_daemon="osd.0"}
 
 Configuring Prometheus server
 =============================
@@ -286,35 +286,35 @@ Configuring Prometheus server
 honor_labels
 ------------
 
-To enable Ceph to output properly-labeled data relating to any host,
-use the ``honor_labels`` setting when adding the ceph-mgr endpoints
+To enable Stone to output properly-labeled data relating to any host,
+use the ``honor_labels`` setting when adding the stone-mgr endpoints
 to your prometheus configuration.
 
-This allows Ceph to export the proper ``instance`` label without prometheus
+This allows Stone to export the proper ``instance`` label without prometheus
 overwriting it. Without this setting, Prometheus applies an ``instance`` label
 that includes the hostname and port of the endpoint that the series came from.
-Because Ceph clusters have multiple manager daemons, this results in an
+Because Stone clusters have multiple manager daemons, this results in an
 ``instance`` label that changes spuriously when the active manager daemon
 changes.
 
 If this is undesirable a custom ``instance`` label can be set in the
 Prometheus target configuration: you might wish to set it to the hostname
-of your first mgr daemon, or something completely arbitrary like "ceph_cluster".
+of your first mgr daemon, or something completely arbitrary like "stone_cluster".
 
 node_exporter hostname labels
 -----------------------------
 
-Set your ``instance`` labels to match what appears in Ceph's OSD metadata
+Set your ``instance`` labels to match what appears in Stone's OSD metadata
 in the ``instance`` field.  This is generally the short hostname of the node.
 
-This is only necessary if you want to correlate Ceph stats with host stats,
+This is only necessary if you want to correlate Stone stats with host stats,
 but you may find it useful to do it in all cases in case you want to do
 the correlation in the future.
 
 Example configuration
 ---------------------
 
-This example shows a single node configuration running ceph-mgr and
+This example shows a single node configuration running stone-mgr and
 node_exporter on a server called ``senta04``. Note that this requires one
 to add an appropriate and unique ``instance`` label to each ``node_exporter`` target.
 
@@ -335,14 +335,14 @@ prometheus.yml
         file_sd_configs:
           - files:
             - node_targets.yml
-      - job_name: 'ceph'
+      - job_name: 'stone'
         honor_labels: true
         file_sd_configs:
           - files:
-            - ceph_targets.yml
+            - stone_targets.yml
 
 
-ceph_targets.yml
+stone_targets.yml
 ~~~~~~~~~~~~~~~~
 
 
@@ -375,7 +375,7 @@ Notes
 =====
 
 Counters and gauges are exported; currently histograms and long-running
-averages are not.  It's possible that Ceph's 2-D histograms could be
+averages are not.  It's possible that Stone's 2-D histograms could be
 reduced to two separate 1-D histograms, and that long-running averages
 could be exported as Prometheus' Summary type.
 

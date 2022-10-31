@@ -5,7 +5,7 @@ from cherrypy import NotFound
 
 from .. import mgr
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from . import APIDoc, APIRouter, Endpoint, EndpointDoc, ReadPermission, RESTController, UIRouter
 
 LIST_CODE__SCHEMA = {
@@ -28,10 +28,10 @@ class ErasureCodeProfile(RESTController):
     @EndpointDoc("List Erasure Code Profile Information",
                  responses={'200': [LIST_CODE__SCHEMA]})
     def list(self):
-        return CephService.get_erasure_code_profiles()
+        return StoneService.get_erasure_code_profiles()
 
     def get(self, name):
-        profiles = CephService.get_erasure_code_profiles()
+        profiles = StoneService.get_erasure_code_profiles()
         for p in profiles:
             if p['name'] == name:
                 return p
@@ -39,11 +39,11 @@ class ErasureCodeProfile(RESTController):
 
     def create(self, name, **kwargs):
         profile = ['{}={}'.format(key, value) for key, value in kwargs.items()]
-        CephService.send_command('mon', 'osd erasure-code-profile set', name=name,
+        StoneService.send_command('mon', 'osd erasure-code-profile set', name=name,
                                  profile=profile)
 
     def delete(self, name):
-        CephService.send_command('mon', 'osd erasure-code-profile rm', name=name)
+        StoneService.send_command('mon', 'osd erasure-code-profile rm', name=name)
 
 
 @UIRouter('/erasure_code_profile', Scope.POOL)

@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <ostream>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 template<typename T>
 class xlist {
@@ -28,7 +28,7 @@ public:
   public:
     item(T i) : _item(i) {}
     ~item() { 
-      ceph_assert(!is_on_list());
+      stone_assert(!is_on_list());
     }
 
     item(const item& other) = delete;
@@ -41,17 +41,17 @@ public:
     bool remove_myself() {
       if (_list) {
 	_list->remove(this);
-	ceph_assert(_list == 0);
+	stone_assert(_list == 0);
 	return true;
       } else
 	return false;
     }
     void move_to_front() {
-      ceph_assert(_list);
+      stone_assert(_list);
       _list->push_front(this);
     }
     void move_to_back() {
-      ceph_assert(_list);
+      stone_assert(_list);
       _list->push_back(this);
     }
 
@@ -78,24 +78,24 @@ public:
 
   xlist() : _front(0), _back(0), _size(0) {}
   ~xlist() { 
-    ceph_assert(_size == 0);
-    ceph_assert(_front == 0);
-    ceph_assert(_back == 0);
+    stone_assert(_size == 0);
+    stone_assert(_front == 0);
+    stone_assert(_back == 0);
   }
 
   size_t size() const {
-    ceph_assert((bool)_front == (bool)_size);
+    stone_assert((bool)_front == (bool)_size);
     return _size;
   }
   bool empty() const { 
-    ceph_assert((bool)_front == (bool)_size);
+    stone_assert((bool)_front == (bool)_size);
     return _front == 0; 
   }
 
   void clear() {
     while (_front)
       remove(_front);
-    ceph_assert((bool)_front == (bool)_size);
+    stone_assert((bool)_front == (bool)_size);
   }
 
   void push_front(item *i) {
@@ -127,7 +127,7 @@ public:
     _size++;
   }
   void remove(item *i) {
-    ceph_assert(i->_list == this);
+    stone_assert(i->_list == this);
     
     if (i->_prev)
       i->_prev->_next = i->_next;
@@ -141,7 +141,7 @@ public:
 
     i->_list = 0;
     i->_next = i->_prev = 0;
-    ceph_assert((bool)_front == (bool)_size);
+    stone_assert((bool)_front == (bool)_size);
   }
 
   T front() { return static_cast<T>(_front->_item); }
@@ -151,11 +151,11 @@ public:
   const T back() const { return static_cast<const T>(_back->_item); }
 
   void pop_front() {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     remove(_front);
   }
   void pop_back() {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     remove(_back);
   }
 
@@ -166,8 +166,8 @@ public:
     iterator(item *i = 0) : cur(i) {}
     T operator*() { return static_cast<T>(cur->_item); }
     iterator& operator++() {
-      ceph_assert(cur);
-      ceph_assert(cur->_list);
+      stone_assert(cur);
+      stone_assert(cur->_list);
       cur = cur->_next;
       return *this;
     }
@@ -190,8 +190,8 @@ public:
     const_iterator(item *i = 0) : cur(i) {}
     const T operator*() { return static_cast<const T>(cur->_item); }
     const_iterator& operator++() {
-      ceph_assert(cur);
-      ceph_assert(cur->_list);
+      stone_assert(cur);
+      stone_assert(cur->_list);
       cur = cur->_next;
       return *this;
     }

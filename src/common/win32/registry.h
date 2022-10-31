@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 SUSE LINUX GmbH
  *
@@ -11,15 +11,15 @@
  */
 
 #include "include/compat.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 
 class RegistryKey {
 public:
-  RegistryKey(StoneeContext *cct_, HKEY hRootKey, LPCTSTR strKey, bool create_value);
+  RegistryKey(StoneContext *cct_, HKEY hRootKey, LPCTSTR strKey, bool create_value);
   ~RegistryKey();
 
-  static remove(StoneeContext *cct_, HKEY hRootKey, LPCTSTR strKey);
+  static remove(StoneContext *cct_, HKEY hRootKey, LPCTSTR strKey);
 
   int flush();
 
@@ -34,5 +34,5 @@ public:
   bool missingKey = false;
 
 private:
-  StoneeContext *cct;
+  StoneContext *cct;
 };

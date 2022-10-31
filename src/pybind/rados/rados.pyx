@@ -511,7 +511,7 @@ Rados object in state %s." % self.state)
 
     def conf_read_file(self, path: Optional[str] = None):
         """
-        Configure the cluster handle using a Ceph config file.
+        Configure the cluster handle using a Stone config file.
 
         :param path: path to the config file
         """
@@ -527,7 +527,7 @@ Rados object in state %s." % self.state)
     def conf_parse_argv(self, args: Sequence[str]):
         """
         Parse known arguments from args, and remove; returned
-        args contain only those unknown to ceph
+        args contain only those unknown to stone
         """
         self.require_state("configuring", "connected")
         if not args:
@@ -558,10 +558,10 @@ Rados object in state %s." % self.state)
             free(_argv)
             free(_remargv)
 
-    def conf_parse_env(self, var: Optional[str] = 'CEPH_ARGS'):
+    def conf_parse_env(self, var: Optional[str] = 'STONE_ARGS'):
         """
         Parse known arguments from an environment variable, normally
-        CEPH_ARGS.
+        STONE_ARGS.
         """
         self.require_state("configuring", "connected")
         if not var:
@@ -1027,7 +1027,7 @@ Rados object in state %s." % self.state)
         Example:
 
         >>> import json
-        >>> c = Rados(conffile='/etc/ceph/ceph.conf')
+        >>> c = Rados(conffile='/etc/stone/stone.conf')
         >>> c.connect()
         >>> cmd = json.dumps({"prefix": "osd safe-to-destroy", "ids": ["2"], "format": "json"})
         >>> c.mon_command(cmd, b'')
@@ -1324,7 +1324,7 @@ Rados object in state %s." % self.state)
         :param str service: service name (e.g. "rgw")
         :param str daemon: daemon name (e.g. "gwfoo")
         :param dict metadata: static metadata about the register daemon
-               (e.g., the version of Ceph, the kernel version.)
+               (e.g., the version of Stone, the kernel version.)
         """
         service_raw = cstr(service, 'service')
         daemon_raw = cstr(daemon, 'daemon')

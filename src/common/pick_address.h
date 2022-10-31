@@ -41,13 +41,13 @@ class entity_addrvec_t;
 
   This function will exit on error.
  */
-void pick_addresses(StoneeContext *cct, int needs);
+void pick_addresses(StoneContext *cct, int needs);
 
 #endif	// !WITH_SEASTAR
 
-int pick_addresses(StoneeContext *cct, unsigned flags, entity_addrvec_t *addrs,
+int pick_addresses(StoneContext *cct, unsigned flags, entity_addrvec_t *addrs,
 		   int preferred_numa_node = -1);
-int pick_addresses(StoneeContext *cct, unsigned flags, struct ifaddrs *ifa,
+int pick_addresses(StoneContext *cct, unsigned flags, struct ifaddrs *ifa,
 		   entity_addrvec_t *addrs,
 		   int preferred_numa_node = -1);
 
@@ -55,7 +55,7 @@ int pick_addresses(StoneeContext *cct, unsigned flags, struct ifaddrs *ifa,
  * Find a network interface whose address matches the address/netmask
  * in `network`.
  */
-std::string pick_iface(StoneeContext *cct, const struct sockaddr_storage &network);
+std::string pick_iface(StoneContext *cct, const struct sockaddr_storage &network);
 
 /**
  * check for a locally configured address
@@ -66,7 +66,7 @@ std::string pick_iface(StoneeContext *cct, const struct sockaddr_storage &networ
  * @param ls list of addresses
  * @param match [out] pointer to match, if an item in @a ls is found configured locally.
  */
-bool have_local_addr(StoneeContext *cct, const std::list<entity_addr_t>& ls, entity_addr_t *match);
+bool have_local_addr(StoneContext *cct, const std::list<entity_addr_t>& ls, entity_addr_t *match);
 
 /**
  * filter the addresses in @c ifa with specified interfaces, networks and IPv
@@ -83,7 +83,7 @@ bool have_local_addr(StoneeContext *cct, const std::list<entity_addr_t>& ls, ent
  * @param exclude_lo_iface filter out network interface named "lo"
  */
 const struct sockaddr *find_ip_in_subnet_list(
-  StoneeContext *cct,
+  StoneContext *cct,
   const struct ifaddrs *ifa,
   unsigned ipv,
   const std::string &networks,

@@ -27,7 +27,7 @@ namespace rgw {
   class RGWLibAdmin
   {
     rgw::sal::RGWRadosStore *store;
-    boost::intrusive_ptr<CephContext> cct;
+    boost::intrusive_ptr<StoneContext> cct;
 
   public:
     rgw::sal::RGWRadosStore* get_store()

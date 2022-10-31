@@ -9,7 +9,7 @@
 #include <boost/smart_ptr/intrusive_ref_counter.hpp>
 #include <seastar/core/future.hh>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "crimson/os/seastore/seastore_types.h"
 #include "include/buffer_fwd.h"
 #include "crimson/osd/exceptions.h"
@@ -69,7 +69,7 @@ public:
     crimson::ct_error::enospc              // write exceeds segment size
     >;
   virtual write_ertr::future<> write(
-    segment_off_t offset, ceph::bufferlist bl) = 0;
+    segment_off_t offset, stone::bufferlist bl) = 0;
 
   virtual ~Segment() {}
 };
@@ -99,11 +99,11 @@ public:
   virtual read_ertr::future<> read(
     paddr_t addr,
     size_t len,
-    ceph::bufferptr &out) = 0;
-  read_ertr::future<ceph::bufferptr> read(
+    stone::bufferptr &out) = 0;
+  read_ertr::future<stone::bufferptr> read(
     paddr_t addr,
     size_t len) {
-    auto ptrref = std::make_unique<ceph::bufferptr>(
+    auto ptrref = std::make_unique<stone::bufferptr>(
       buffer::create_page_aligned(len));
     return read(addr, len, *ptrref).safe_then(
       [ptrref=std::move(ptrref)]() mutable {
@@ -116,7 +116,7 @@ public:
   virtual segment_off_t get_block_size() const = 0;
   virtual segment_off_t get_segment_size() const = 0;
   virtual segment_id_t get_num_segments() const {
-    ceph_assert(get_size() % get_segment_size() == 0);
+    stone_assert(get_size() % get_segment_size() == 0);
     return ((segment_id_t)(get_size() / get_segment_size()));
   }
   virtual const seastore_meta_t &get_meta() const = 0;

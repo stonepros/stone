@@ -54,11 +54,11 @@ public:
 
   void reset() override;
   void prepare_build_request() override;
-  int build_request(ceph::buffer::list& bl) const override;
-  int handle_response(int ret, ceph::buffer::list::const_iterator& iter,
+  int build_request(stone::buffer::list& bl) const override;
+  int handle_response(int ret, stone::buffer::list::const_iterator& iter,
 		      CryptoKey *session_key,
 		      std::string *connection_secret) override;
-  bool build_rotating_request(ceph::buffer::list& bl) const override;
+  bool build_rotating_request(stone::buffer::list& bl) const override;
 
   int get_protocol() const override { return STONE_AUTH_STONEX; }
 

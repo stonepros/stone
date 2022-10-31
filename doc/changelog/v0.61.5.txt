@@ -8,9 +8,9 @@ commit 39bffac6b6c898882d03de392f7f2218933d942b
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Jul 16 13:14:50 2013 -0700
 
-    ceph-disk: rely on /dev/disk/by-partuuid instead of special-casing journal symlinks
+    stone-disk: rely on /dev/disk/by-partuuid instead of special-casing journal symlinks
     
-    This was necessary when ceph-disk-udev didn't create the by-partuuid (and
+    This was necessary when stone-disk-udev didn't create the by-partuuid (and
     other) symlinks for us, but now it is fragile and error-prone.  (It also
     appears to be broken on a certain customer RHEL VM.)  See
     d7f7d613512fe39ec883e11d201793c75ee05db1.
@@ -32,7 +32,7 @@ Date:   Tue Jul 16 16:49:48 2013 +0100
     The previous debug message outputted the function's name, as often our
     functions do.  This was however a source of bewilderment, as users would
     see those in logs and think their stores would need conversion.  Changing
-    this message is trivial enough and it will make ceph users happier log
+    this message is trivial enough and it will make stone users happier log
     readers.
     
     Backport: cuttlefish
@@ -46,7 +46,7 @@ Date:   Tue Jul 16 16:45:39 2013 +0100
 
     mon: Monitor: do not reopen MonitorDBStore during conversion
     
-    We already open the store on ceph_mon.cc, before we start the conversion.
+    We already open the store on stone_mon.cc, before we start the conversion.
     Given we are unable to reproduce this every time a conversion is triggered,
     we are led to believe that this causes a race in leveldb that will lead
     to 'store.db/LOCK' being locked upon the open this patch removes.
@@ -328,7 +328,7 @@ Date:   Mon Jul 1 14:57:17 2013 +0200
 
     rgw: Fix return value for swift user not found
     
-    http://tracker.ceph.com/issues/1779 fixes #1779
+    http://tracker.stone.com/issues/1779 fixes #1779
     
     Adjust the return value from rgw_get_user_info_by_swift call
     in RGW_SWIFT_Auth_Get::execute() to have the correct
@@ -438,7 +438,7 @@ commit c2b38291e706c9d1d4d337cee3a944f34bf66525
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Wed Jul 3 11:18:19 2013 -0700
 
-    ceph_features.h: declare all features as ULL
+    stone_features.h: declare all features as ULL
     
     Otherwise, the first 32 get |'d together as ints.  Then, the result
     ((int)-1) is sign extended to ((long long int)-1) before being |'d
@@ -473,7 +473,7 @@ Date:   Mon Jul 8 11:24:48 2013 -0700
     consistency without meaning to.
     
     It is highly unlikely that a real O_LAZY will ever exist, and we can
-    select it in the ceph case with the ioctl or libcephfs call, so drop
+    select it in the stone case with the ioctl or libstonefs call, so drop
     any support for doing this via open(2) flags.
     
     Update doc/lazy_posix.txt file re: lazy io.
@@ -625,7 +625,7 @@ Date:   Wed Jun 26 06:01:40 2013 -0700
     mon: do not reopen MonitorDBStore during startup
     
     level doesn't seem to like this when it races with an internal compaction
-    attempt (see below).  Instead, let the store get opened by the ceph_mon
+    attempt (see below).  Instead, let the store get opened by the stone_mon
     caller, and pull a bit of the logic into the caller to make the flow a
     little easier to follow.
     
@@ -634,17 +634,17 @@ Date:   Wed Jun 26 06:01:40 2013 -0700
          0> 2013-06-25 17:49:25.316908 7f4d3fe5b700 -1 *** Caught signal (Segmentation fault) **
      in thread 7f4d3fe5b700
     
-     ceph version 0.64-667-g089cba8 (089cba8fc0e8ae8aef9a3111cba7342ecd0f8314)
-     1: ceph-mon() [0x649f0a]
+     stone version 0.64-667-g089cba8 (089cba8fc0e8ae8aef9a3111cba7342ecd0f8314)
+     1: stone-mon() [0x649f0a]
      2: (()+0xfcb0) [0x7f4d435dccb0]
      3: (leveldb::Table::BlockReader(void*, leveldb::ReadOptions const&, leveldb::Slice const&)+0x154) [0x806e54]
-     4: ceph-mon() [0x808840]
-     5: ceph-mon() [0x808b39]
-     6: ceph-mon() [0x806540]
+     4: stone-mon() [0x808840]
+     5: stone-mon() [0x808b39]
+     6: stone-mon() [0x806540]
      7: (leveldb::DBImpl::DoCompactionWork(leveldb::DBImpl::CompactionState*)+0xdd) [0x7f363d]
      8: (leveldb::DBImpl::BackgroundCompaction()+0x2c0) [0x7f4210]
      9: (leveldb::DBImpl::BackgroundCall()+0x68) [0x7f4cc8]
-     10: ceph-mon() [0x80b3af]
+     10: stone-mon() [0x80b3af]
      11: (()+0x7e9a) [0x7f4d435d4e9a]
      12: (clone()+0x6d) [0x7f4d4196bccd]
      NOTE: a copy of the executable, or `objdump -rdS <executable>` is needed to interpret this.
@@ -656,11 +656,11 @@ commit 0143acc49bc5834836afc2c5a9d8f67030bec85f
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Jul 2 14:43:17 2013 -0700
 
-    sysvinit, upstart: handle symlinks to dirs in /var/lib/ceph/*
+    sysvinit, upstart: handle symlinks to dirs in /var/lib/stone/*
     
     Match a symlink to a dir, not just dirs.  This fixes the osd case of e.g.,
-    creating an osd in /data/osd$id in which ceph-disk makes a symlink from
-    /var/lib/ceph/osd/ceph-$id.
+    creating an osd in /data/osd$id in which stone-disk makes a symlink from
+    /var/lib/stone/osd/stone-$id.
     
     Fix proposed by Matt Thompson <matt.thompson@mandiant.com>; extended to
     include the upstart users too.
@@ -746,7 +746,7 @@ commit 90f5c448abeb127ae5a5528a79bd7bdbc74cb497
 Author: Greg Farnum <greg@inktank.com>
 Date:   Thu Jun 27 14:58:14 2013 -0700
 
-    ceph-disk: s/else if/elif/
+    stone-disk: s/else if/elif/
     
     Signed-off-by: Greg Farnum <greg@inktank.com>
     Reviewed-by: Joao Luis <joao.luis@inktank.com>
@@ -772,7 +772,7 @@ commit b2fb48762f32279e73feb83b220339fea31275e9
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jun 19 17:27:49 2013 -0700
 
-    ceph-disk: use unix lock instead of lockfile class
+    stone-disk: use unix lock instead of lockfile class
     
     The lockfile class relies on file system trickery to get safe mutual
     exclusion.  However, the unix syscalls do this for us.  More
@@ -789,12 +789,12 @@ commit 26e7a6fffde4abcb685f34247e8491c05ee2a68d
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jun 26 18:27:49 2013 -0700
 
-    ceph-disk: do not mount over an osd directly in /var/lib/ceph/osd/$cluster-$id
+    stone-disk: do not mount over an osd directly in /var/lib/stone/osd/$cluster-$id
     
     If we see a 'ready' file in the target OSD dir, do not mount our device
     on top of it.
     
-    Among other things, this prevents ceph-disk activate on stray disks from
+    Among other things, this prevents stone-disk activate on stray disks from
     stepping on teuthology osds.
     
     Fixes: #5445
@@ -840,7 +840,7 @@ Date:   Mon Jun 24 18:12:11 2013 -0700
     2013-06-24 01:09:33.676956 7fb9627e7700 -1 mon/Monitor.cc: In function 'void Monitor::probe_timeout(int)' thread 7fb9627e7700 time 2013-06-24 01:09:43.675904
     mon/Monitor.cc: 1888: FAILED assert(is_probing() || is_synchronizing())
     
-     ceph version 0.64-613-g134d08a (134d08a9654f66634b893d493e4a92f38acc63cf)
+     stone version 0.64-613-g134d08a (134d08a9654f66634b893d493e4a92f38acc63cf)
      1: (Monitor::probe_timeout(int)+0x161) [0x56f5c1]
      2: (Context::complete(int)+0xa) [0x574a2a]
      3: (SafeTimer::timer_thread()+0x425) [0x7059a5]
@@ -859,7 +859,7 @@ commit a8f601d543168f4cdbddf674479d8de4b8dfc732
 Author: Alexandre Maragone <alexandre.marangone@inktank.com>
 Date:   Tue Jun 18 16:18:01 2013 -0700
 
-    ceph-disk: make list_partition behave with unusual device names
+    stone-disk: make list_partition behave with unusual device names
     
     When you get device names like sdaa you do not want to mistakenly conclude that
     sdaa is a partition of sda.  Use /sys/block/$device/$partition existence
@@ -918,7 +918,7 @@ Date:   Mon Jun 24 12:52:44 2013 -0700
 
     common/pick_addresses: behave even after internal_safe_to_start_threads
     
-    ceph-mon recently started using Preforker to working around forking issues.
+    stone-mon recently started using Preforker to working around forking issues.
     As a result, internal_safe_to_start_threads got set sooner and calls to
     pick_addresses() which try to set string config values now fail because
     there are no config observers for them.

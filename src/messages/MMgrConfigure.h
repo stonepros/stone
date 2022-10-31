@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -20,8 +20,8 @@
 #include "mgr/OSDPerfMetricTypes.h"
 
 /**
- * This message is sent from ceph-mgr to MgrClient, instructing it
- * it about what data to send back to ceph-mgr at what frequency.
+ * This message is sent from stone-mgr to MgrClient, instructing it
+ * it about what data to send back to stone-mgr at what frequency.
  */
 class MMgrConfigure : public Message {
 private:
@@ -40,7 +40,7 @@ public:
 
   void decode_payload() override
   {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(stats_period, p);
     if (header.version >= 2) {
@@ -55,7 +55,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(stats_period, payload);
     encode(stats_threshold, payload);
     encode(osd_perf_metric_queries, payload);
@@ -80,7 +80,7 @@ private:
   using RefCountedObject::put;
   using RefCountedObject::get;
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

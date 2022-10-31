@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 John Spray <john.spray@inktank.com>
  *
@@ -14,7 +14,7 @@
 #ifndef STONE_MGR_H_
 #define STONE_MGR_H_
 
-// Python.h comes first because otherwise it clobbers ceph's assert
+// Python.h comes first because otherwise it clobbers stone's assert
 #include <Python.h>
 
 #include "mds/FSMap.h"
@@ -44,13 +44,13 @@ protected:
   Client    *client;
   Messenger *client_messenger;
 
-  mutable ceph::mutex lock = ceph::make_mutex("Mgr::lock");
+  mutable stone::mutex lock = stone::make_mutex("Mgr::lock");
   Finisher finisher;
 
   // Track receipt of initial data during startup
-  ceph::condition_variable fs_map_cond;
+  stone::condition_variable fs_map_cond;
   bool digest_received;
-  ceph::condition_variable digest_cond;
+  stone::condition_variable digest_cond;
 
   PyModuleRegistry *py_module_registry;
   DaemonStateIndex daemon_state;
@@ -82,16 +82,16 @@ public:
     return server.get_myaddrs();
   }
 
-  void handle_mgr_digest(ceph::ref_t<MMgrDigest> m);
-  void handle_fs_map(ceph::ref_t<MFSMap> m);
+  void handle_mgr_digest(stone::ref_t<MMgrDigest> m);
+  void handle_fs_map(stone::ref_t<MFSMap> m);
   void handle_osd_map();
-  void handle_log(ceph::ref_t<MLog> m);
-  void handle_service_map(ceph::ref_t<MServiceMap> m);
+  void handle_log(stone::ref_t<MLog> m);
+  void handle_service_map(stone::ref_t<MServiceMap> m);
   void handle_mon_map();
 
   bool got_mgr_map(const MgrMap& m);
 
-  bool ms_dispatch2(const ceph::ref_t<Message>& m);
+  bool ms_dispatch2(const stone::ref_t<Message>& m);
 
   void background_init(Context *completion);
   void shutdown();
@@ -105,7 +105,7 @@ public:
     const cmdmap_t& cmdmap,
     Formatter *f,
     std::ostream& errss,
-    ceph::buffer::list& out) override;
+    stone::buffer::list& out) override;
 };
 
 /**

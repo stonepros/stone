@@ -15,7 +15,7 @@ iSCSI Initiator for Microsoft Windows
    reboot.
 
 #. On the iSCSI Initiator Properties window, on the "Discovery" tab, add a target
-   portal. Enter the IP address or DNS name and Port of the Ceph iSCSI gateway.
+   portal. Enter the IP address or DNS name and Port of the Stone iSCSI gateway.
 
 #. On the “Targets” tab, select the target and click on “Connect”.
 
@@ -24,7 +24,7 @@ iSCSI Initiator for Microsoft Windows
 
 #. Under the "Connet using" section, select a “Target portal IP” . Select the
    “Enable CHAP login on” and enter the "Name" and "Target secret" values from the
-   Ceph iSCSI Ansible client credentials section, and click OK.
+   Stone iSCSI Ansible client credentials section, and click OK.
 
 #. Repeat steps 5 and 6 for each target portal defined when setting up
    the iSCSI gateway.

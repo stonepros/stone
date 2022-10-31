@@ -14,7 +14,7 @@ extern const std::string KV_PREFIX;
 class KVMonitor : public PaxosService
 {
   version_t version = 0;
-  std::map<std::string,boost::optional<ceph::buffer::list>> pending;
+  std::map<std::string,boost::optional<stone::buffer::list>> pending;
 
   bool _have_prefix(const string &prefix);
 

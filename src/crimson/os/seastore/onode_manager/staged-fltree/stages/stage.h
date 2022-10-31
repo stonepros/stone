@@ -107,7 +107,7 @@ inline void assert_mstat(
     }
     break;
    default:
-    ceph_abort("impossible path");
+    stone_abort("impossible path");
   }
   // key == index ...
   switch (mstat) {
@@ -446,17 +446,17 @@ struct staged {
       return container_t::trim_at(mut, container, _index, trimmed);
     }
 
-    void encode(const char* p_node_start, ceph::bufferlist& encoded) const {
+    void encode(const char* p_node_start, stone::bufferlist& encoded) const {
       container.encode(p_node_start, encoded);
-      ceph::encode(_index, encoded);
+      stone::encode(_index, encoded);
     }
 
     static me_t decode(const char* p_node_start,
-                       ceph::bufferlist::const_iterator& delta) {
+                       stone::bufferlist::const_iterator& delta) {
       auto container = container_t::decode(p_node_start, delta);
       auto ret = me_t(container);
       index_t index;
-      ceph::decode(index, delta);
+      stone::decode(index, delta);
       ret.seek_till_end(index);
       return ret;
     }
@@ -760,18 +760,18 @@ struct staged {
       return container_t::trim_at(mut, container, trimmed);
     }
 
-    void encode(const char* p_node_start, ceph::bufferlist& encoded) const {
+    void encode(const char* p_node_start, stone::bufferlist& encoded) const {
       container.encode(p_node_start, encoded);
       uint8_t is_end = _is_end;
-      ceph::encode(is_end, encoded);
+      stone::encode(is_end, encoded);
     }
 
     static me_t decode(const char* p_node_start,
-                       ceph::bufferlist::const_iterator& delta) {
+                       stone::bufferlist::const_iterator& delta) {
       auto container = container_t::decode(p_node_start, delta);
       auto ret = me_t(container);
       uint8_t is_end;
-      ceph::decode(is_end, delta);
+      stone::decode(is_end, delta);
       if (is_end) {
         ret.set_end();
       }
@@ -1082,7 +1082,7 @@ struct staged {
       auto match = compare_to<KeyT::VIEW>(key, iter.get_key());
       if (match == MatchKindCMP::EQ) {
         if constexpr (IS_BOTTOM) {
-          ceph_abort("insert conflict at current index!");
+          stone_abort("insert conflict at current index!");
         } else {
           // insert into the current index
           auto nxt_container = iter.get_nxt_container();
@@ -1111,8 +1111,8 @@ struct staged {
     } else {
       assert(match == MatchKindCMP::EQ);
       if constexpr (IS_BOTTOM) {
-        // ceph_abort?
-        ceph_abort("insert conflict at the previous index!");
+        // stone_abort?
+        stone_abort("insert conflict at the previous index!");
       } else {
         // insert into the previous index
         auto nxt_container = iter.get_nxt_container();
@@ -1133,7 +1133,7 @@ struct staged {
       return true;
     } else {
       if constexpr (IS_BOTTOM) {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       } else {
         assert(stage < STAGE);
         bool compensate = NXT_STAGE_T::
@@ -1287,7 +1287,7 @@ struct staged {
         iter.update_size(mut, _insert_size);
         return p_value;
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       }
     }
   }
@@ -1308,7 +1308,7 @@ struct staged {
         stage = STAGE;
         _insert_size = insert_size<KT>(key, value);
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       }
       if constexpr (IS_BOTTOM) {
         return container_t::template insert_at<KT>(
@@ -1489,14 +1489,14 @@ struct staged {
         }
         return this->_nxt;
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       }
     }
     typename NXT_STAGE_T::StagedIterator& get_nxt() {
       if constexpr (!IS_BOTTOM) {
         return this->_nxt;
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       }
     }
     StagedIterator& operator++() {
@@ -1550,9 +1550,9 @@ struct staged {
         return position_t::begin();
       }
     }
-    void encode(const char* p_node_start, ceph::bufferlist& encoded) const {
+    void encode(const char* p_node_start, stone::bufferlist& encoded) const {
       uint8_t present = static_cast<bool>(iter);
-      ceph::encode(present, encoded);
+      stone::encode(present, encoded);
       if (iter.has_value()) {
         iter->encode(p_node_start, encoded);
         if constexpr (!IS_BOTTOM) {
@@ -1561,10 +1561,10 @@ struct staged {
       }
     }
     static StagedIterator decode(const char* p_node_start,
-                                 ceph::bufferlist::const_iterator& delta) {
+                                 stone::bufferlist::const_iterator& delta) {
       StagedIterator ret;
       uint8_t present;
-      ceph::decode(present, delta);
+      stone::decode(present, delta);
       if (present) {
         ret.iter = iterator_t::decode(p_node_start, delta);
         if constexpr (!IS_BOTTOM) {
@@ -1779,7 +1779,7 @@ struct staged {
           return false;
         }
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
         return false;;
       }
     }
@@ -1871,7 +1871,7 @@ struct staged {
         this->_nxt.init(p_mut, p_append);
         return this->_nxt;
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       }
     }
     typename NXT_STAGE_T::template StagedAppender<KT>&
@@ -1883,7 +1883,7 @@ struct staged {
         this->_nxt.init(p_mut, p_append);
         return this->_nxt;
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       }
     }
     typename NXT_STAGE_T::template StagedAppender<KT>& get_nxt() {
@@ -1891,7 +1891,7 @@ struct staged {
         assert(require_wrap_nxt);
         return this->_nxt;
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       }
     }
     void wrap_nxt() {
@@ -1902,7 +1902,7 @@ struct staged {
         appender->wrap_nxt(p_append);
         ++_index;
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       }
     }
    private:
@@ -2018,7 +2018,7 @@ struct staged {
         }
         return false;
       } else {
-        ceph_abort("impossible path");
+        stone_abort("impossible path");
       }
     }
   }

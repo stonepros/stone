@@ -1,5 +1,5 @@
 /*
- * ceph-dokan - Win32 StoneeFS client based on Dokan
+ * stone-dokan - Win32 StoneFS client based on Dokan
  *
  * Copyright (C) 2021 SUSE LINUX GmbH
  *

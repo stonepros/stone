@@ -15,7 +15,7 @@ const summary: Record<string, any> = {
   rbd_pools: [],
   have_mon_connection: true,
   finished_tasks: [{ name: 'foo', metadata: {} }],
-  filesystems: [{ id: 1, name: 'cephfs_a' }]
+  filesystems: [{ id: 1, name: 'stonefs_a' }]
 };
 
 export class SummaryServiceMock {

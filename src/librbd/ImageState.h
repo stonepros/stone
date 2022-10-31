@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_IMAGE_STATE_H
 
 #include "include/int_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include <list>
 #include <string>
 #include <utility>
@@ -111,7 +111,7 @@ private:
   ImageCtxT *m_image_ctx;
   State m_state;
 
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
   ActionsContexts m_actions_contexts;
 
   uint64_t m_last_refresh;

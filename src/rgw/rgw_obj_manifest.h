@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -518,7 +518,7 @@ public:
   public:
     generator() : manifest(NULL), last_ofs(0), cur_part_ofs(0), cur_part_id(0), 
 		  cur_stripe(0), cur_stripe_size(0) {}
-    int create_begin(CephContext *cct, RGWObjManifest *manifest,
+    int create_begin(StoneContext *cct, RGWObjManifest *manifest,
                      const rgw_placement_rule& head_placement_rule,
                      const rgw_placement_rule *tail_placement_rule,
                      const rgw_bucket& bucket,

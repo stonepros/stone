@@ -1,8 +1,8 @@
 import pytest
 from copy import deepcopy
-from ceph_volume.devices.lvm import activate
-from ceph_volume.api import lvm as api
-from ceph_volume.tests.conftest import Capture
+from stone_volume.devices.lvm import activate
+from stone_volume.api import lvm as api
+from stone_volume.tests.conftest import Capture
 
 
 class Args(object):
@@ -25,7 +25,7 @@ class TestActivate(object):
     # with/without osd_id
     def test_no_osd_id_matches_fsid(self, is_root, monkeypatch, capture):
         FooVolume = api.Volume(lv_name='foo', lv_path='/dev/vg/foo',
-                               lv_tags="ceph.osd_fsid=1234")
+                               lv_tags="stone.osd_fsid=1234")
         volumes = []
         volumes.append(FooVolume)
         monkeypatch.setattr(api, 'get_lvs', lambda **kwargs: volumes)
@@ -36,7 +36,7 @@ class TestActivate(object):
 
     def test_no_osd_id_matches_fsid_bluestore(self, is_root, monkeypatch, capture):
         FooVolume = api.Volume(lv_name='foo', lv_path='/dev/vg/foo',
-                               lv_tags="ceph.osd_fsid=1234")
+                               lv_tags="stone.osd_fsid=1234")
         volumes = []
         volumes.append(FooVolume)
         monkeypatch.setattr(api, 'get_lvs', lambda **kwargs: volumes)
@@ -47,7 +47,7 @@ class TestActivate(object):
 
     def test_no_osd_id_no_matching_fsid(self, is_root, monkeypatch, capture):
         FooVolume = api.Volume(lv_name='foo', lv_path='/dev/vg/foo',
-                               lv_tags="ceph.osd_fsid=1111")
+                               lv_tags="stone.osd_fsid=1111")
         volumes = []
         volumes.append(FooVolume)
         monkeypatch.setattr(api, 'get_lvs', lambda **kwargs: [])
@@ -71,12 +71,12 @@ class TestActivate(object):
         assert result.value.args[0] == 'Please provide both osd_id and osd_fsid'
 
     def test_filestore_no_systemd(self, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.configuration.load', lambda: None)
+        monkeypatch.setattr('stone_volume.configuration.load', lambda: None)
         fake_enable = Capture()
         fake_start_osd = Capture()
-        monkeypatch.setattr('ceph_volume.util.system.device_is_mounted', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.util.system.chown', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.process.run', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.device_is_mounted', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.chown', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.process.run', lambda *a, **kw: True)
         monkeypatch.setattr(activate.systemctl, 'enable_volume', fake_enable)
         monkeypatch.setattr(activate.systemctl, 'start_osd', fake_start_osd)
         JournalVolume = api.Volume(
@@ -84,17 +84,17 @@ class TestActivate(object):
             lv_path='/dev/vg/journal',
             lv_uuid='000',
             lv_tags=','.join([
-                "ceph.cluster_name=ceph", "ceph.journal_device=/dev/vg/journal",
-                "ceph.journal_uuid=000", "ceph.type=journal",
-                "ceph.osd_id=0", "ceph.osd_fsid=1234"])
+                "stone.cluster_name=stone", "stone.journal_device=/dev/vg/journal",
+                "stone.journal_uuid=000", "stone.type=journal",
+                "stone.osd_id=0", "stone.osd_fsid=1234"])
         )
         DataVolume = api.Volume(
             lv_name='data',
             lv_path='/dev/vg/data',
             lv_uuid='001',
-            lv_tags="ceph.cluster_name=ceph,ceph.journal_device=/dev/vg/" + \
-                    "journal,ceph.journal_uuid=000,ceph.type=data," + \
-                    "ceph.osd_id=0,ceph.osd_fsid=1234")
+            lv_tags="stone.cluster_name=stone,stone.journal_device=/dev/vg/" + \
+                    "journal,stone.journal_uuid=000,stone.type=data," + \
+                    "stone.osd_id=0,stone.osd_fsid=1234")
         volumes = []
         volumes.append(DataVolume)
         volumes.append(JournalVolume)
@@ -106,12 +106,12 @@ class TestActivate(object):
         assert fake_start_osd.calls == []
 
     def test_filestore_no_systemd_autodetect(self, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.configuration.load', lambda: None)
+        monkeypatch.setattr('stone_volume.configuration.load', lambda: None)
         fake_enable = Capture()
         fake_start_osd = Capture()
-        monkeypatch.setattr('ceph_volume.util.system.device_is_mounted', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.util.system.chown', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.process.run', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.device_is_mounted', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.chown', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.process.run', lambda *a, **kw: True)
         monkeypatch.setattr(activate.systemctl, 'enable_volume', fake_enable)
         monkeypatch.setattr(activate.systemctl, 'start_osd', fake_start_osd)
         JournalVolume = api.Volume(
@@ -119,17 +119,17 @@ class TestActivate(object):
             lv_path='/dev/vg/journal',
             lv_uuid='000',
             lv_tags=','.join([
-                "ceph.cluster_name=ceph", "ceph.journal_device=/dev/vg/journal",
-                "ceph.journal_uuid=000", "ceph.type=journal",
-                "ceph.osd_id=0", "ceph.osd_fsid=1234"])
+                "stone.cluster_name=stone", "stone.journal_device=/dev/vg/journal",
+                "stone.journal_uuid=000", "stone.type=journal",
+                "stone.osd_id=0", "stone.osd_fsid=1234"])
         )
         DataVolume = api.Volume(
             lv_name='data',
             lv_path='/dev/vg/data',
             lv_uuid='001',
-            lv_tags="ceph.cluster_name=ceph,ceph.journal_device=/dev/vg/" + \
-                    "journal,ceph.journal_uuid=000,ceph.type=data," + \
-                    "ceph.osd_id=0,ceph.osd_fsid=1234")
+            lv_tags="stone.cluster_name=stone,stone.journal_device=/dev/vg/" + \
+                    "journal,stone.journal_uuid=000,stone.type=data," + \
+                    "stone.osd_id=0,stone.osd_fsid=1234")
         volumes = []
         volumes.append(DataVolume)
         volumes.append(JournalVolume)
@@ -144,10 +144,10 @@ class TestActivate(object):
     def test_filestore_systemd_autodetect(self, is_root, monkeypatch, capture):
         fake_enable = Capture()
         fake_start_osd = Capture()
-        monkeypatch.setattr('ceph_volume.configuration.load', lambda: None)
-        monkeypatch.setattr('ceph_volume.util.system.device_is_mounted', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.util.system.chown', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.process.run', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.configuration.load', lambda: None)
+        monkeypatch.setattr('stone_volume.util.system.device_is_mounted', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.chown', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.process.run', lambda *a, **kw: True)
         monkeypatch.setattr(activate.systemctl, 'enable_volume', fake_enable)
         monkeypatch.setattr(activate.systemctl, 'start_osd', fake_start_osd)
         JournalVolume = api.Volume(
@@ -155,17 +155,17 @@ class TestActivate(object):
             lv_path='/dev/vg/journal',
             lv_uuid='000',
             lv_tags=','.join([
-                "ceph.cluster_name=ceph", "ceph.journal_device=/dev/vg/journal",
-                "ceph.journal_uuid=000", "ceph.type=journal",
-                "ceph.osd_id=0","ceph.osd_fsid=1234"])
+                "stone.cluster_name=stone", "stone.journal_device=/dev/vg/journal",
+                "stone.journal_uuid=000", "stone.type=journal",
+                "stone.osd_id=0","stone.osd_fsid=1234"])
             )
         DataVolume = api.Volume(
             lv_name='data',
             lv_path='/dev/vg/data',
             lv_uuid='001',
-            lv_tags="ceph.cluster_name=ceph,ceph.journal_device=/dev/vg/" + \
-                    "journal,ceph.journal_uuid=000,ceph.type=data," + \
-                    "ceph.osd_id=0,ceph.osd_fsid=1234")
+            lv_tags="stone.cluster_name=stone,stone.journal_device=/dev/vg/" + \
+                    "journal,stone.journal_uuid=000,stone.type=data," + \
+                    "stone.osd_id=0,stone.osd_fsid=1234")
         volumes = []
         volumes.append(DataVolume)
         volumes.append(JournalVolume)
@@ -180,10 +180,10 @@ class TestActivate(object):
     def test_filestore_systemd(self, is_root, monkeypatch, capture):
         fake_enable = Capture()
         fake_start_osd = Capture()
-        monkeypatch.setattr('ceph_volume.configuration.load', lambda: None)
-        monkeypatch.setattr('ceph_volume.util.system.device_is_mounted', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.util.system.chown', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.process.run', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.configuration.load', lambda: None)
+        monkeypatch.setattr('stone_volume.util.system.device_is_mounted', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.chown', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.process.run', lambda *a, **kw: True)
         monkeypatch.setattr(activate.systemctl, 'enable_volume', fake_enable)
         monkeypatch.setattr(activate.systemctl, 'start_osd', fake_start_osd)
         JournalVolume = api.Volume(
@@ -191,17 +191,17 @@ class TestActivate(object):
             lv_path='/dev/vg/journal',
             lv_uuid='000',
             lv_tags=','.join([
-                "ceph.cluster_name=ceph", "ceph.journal_device=/dev/vg/journal",
-                "ceph.journal_uuid=000", "ceph.type=journal",
-                "ceph.osd_id=0","ceph.osd_fsid=1234"])
+                "stone.cluster_name=stone", "stone.journal_device=/dev/vg/journal",
+                "stone.journal_uuid=000", "stone.type=journal",
+                "stone.osd_id=0","stone.osd_fsid=1234"])
             )
         DataVolume = api.Volume(
             lv_name='data',
             lv_path='/dev/vg/data',
             lv_uuid='001',
-            lv_tags="ceph.cluster_name=ceph,ceph.journal_device=/dev/vg/" + \
-                    "journal,ceph.journal_uuid=000,ceph.type=data," + \
-                    "ceph.osd_id=0,ceph.osd_fsid=1234")
+            lv_tags="stone.cluster_name=stone,stone.journal_device=/dev/vg/" + \
+                    "journal,stone.journal_uuid=000,stone.type=data," + \
+                    "stone.osd_id=0,stone.osd_fsid=1234")
         volumes = []
         volumes.append(DataVolume)
         volumes.append(JournalVolume)
@@ -214,19 +214,19 @@ class TestActivate(object):
         assert fake_start_osd.calls != []
 
     def test_bluestore_no_systemd(self, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.configuration.load', lambda: None)
+        monkeypatch.setattr('stone_volume.configuration.load', lambda: None)
         fake_enable = Capture()
         fake_start_osd = Capture()
-        monkeypatch.setattr('ceph_volume.util.system.path_is_mounted', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.util.system.chown', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.process.run', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.path_is_mounted', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.chown', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.process.run', lambda *a, **kw: True)
         monkeypatch.setattr(activate.systemctl, 'enable_volume', fake_enable)
         monkeypatch.setattr(activate.systemctl, 'start_osd', fake_start_osd)
         DataVolume = api.Volume(
             lv_name='data',
             lv_path='/dev/vg/data',
-            lv_tags="ceph.cluster_name=ceph,,ceph.journal_uuid=000," + \
-                    "ceph.type=block,ceph.osd_id=0,ceph.osd_fsid=1234")
+            lv_tags="stone.cluster_name=stone,,stone.journal_uuid=000," + \
+                    "stone.type=block,stone.osd_id=0,stone.osd_fsid=1234")
         volumes = []
         volumes.append(DataVolume)
         monkeypatch.setattr(api, 'get_lvs', lambda **kwargs: deepcopy(volumes))
@@ -237,19 +237,19 @@ class TestActivate(object):
         assert fake_start_osd.calls == []
 
     def test_bluestore_systemd(self, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.configuration.load', lambda: None)
+        monkeypatch.setattr('stone_volume.configuration.load', lambda: None)
         fake_enable = Capture()
         fake_start_osd = Capture()
-        monkeypatch.setattr('ceph_volume.util.system.path_is_mounted', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.util.system.chown', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.process.run', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.path_is_mounted', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.chown', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.process.run', lambda *a, **kw: True)
         monkeypatch.setattr(activate.systemctl, 'enable_volume', fake_enable)
         monkeypatch.setattr(activate.systemctl, 'start_osd', fake_start_osd)
         DataVolume = api.Volume(
             lv_name='data',
             lv_path='/dev/vg/data',
-            lv_tags="ceph.cluster_name=ceph,,ceph.journal_uuid=000," + \
-                    "ceph.type=block,ceph.osd_id=0,ceph.osd_fsid=1234")
+            lv_tags="stone.cluster_name=stone,,stone.journal_uuid=000," + \
+                    "stone.type=block,stone.osd_id=0,stone.osd_fsid=1234")
         volumes = []
         volumes.append(DataVolume)
         monkeypatch.setattr(api, 'get_lvs', lambda **kwargs: deepcopy(volumes))
@@ -261,19 +261,19 @@ class TestActivate(object):
         assert fake_start_osd.calls != []
 
     def test_bluestore_no_systemd_autodetect(self, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.configuration.load', lambda: None)
+        monkeypatch.setattr('stone_volume.configuration.load', lambda: None)
         fake_enable = Capture()
         fake_start_osd = Capture()
-        monkeypatch.setattr('ceph_volume.util.system.path_is_mounted', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.util.system.chown', lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.process.run', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.path_is_mounted', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.util.system.chown', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.process.run', lambda *a, **kw: True)
         monkeypatch.setattr(activate.systemctl, 'enable_volume', fake_enable)
         monkeypatch.setattr(activate.systemctl, 'start_osd', fake_start_osd)
         DataVolume = api.Volume(
             lv_name='data',
             lv_path='/dev/vg/data',
-            lv_tags="ceph.cluster_name=ceph,,ceph.block_uuid=000," + \
-                    "ceph.type=block,ceph.osd_id=0,ceph.osd_fsid=1234")
+            lv_tags="stone.cluster_name=stone,,stone.block_uuid=000," + \
+                    "stone.type=block,stone.osd_id=0,stone.osd_fsid=1234")
         volumes = []
         volumes.append(DataVolume)
         monkeypatch.setattr(api, 'get_lvs', lambda **kwargs: deepcopy(volumes))
@@ -285,21 +285,21 @@ class TestActivate(object):
         assert fake_start_osd.calls == []
 
     def test_bluestore_systemd_autodetect(self, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.configuration.load', lambda: None)
+        monkeypatch.setattr('stone_volume.configuration.load', lambda: None)
         fake_enable = Capture()
         fake_start_osd = Capture()
-        monkeypatch.setattr('ceph_volume.util.system.path_is_mounted',
+        monkeypatch.setattr('stone_volume.util.system.path_is_mounted',
                             lambda *a, **kw: True)
-        monkeypatch.setattr('ceph_volume.util.system.chown', lambda *a, **kw:
+        monkeypatch.setattr('stone_volume.util.system.chown', lambda *a, **kw:
                             True)
-        monkeypatch.setattr('ceph_volume.process.run', lambda *a, **kw: True)
+        monkeypatch.setattr('stone_volume.process.run', lambda *a, **kw: True)
         monkeypatch.setattr(activate.systemctl, 'enable_volume', fake_enable)
         monkeypatch.setattr(activate.systemctl, 'start_osd', fake_start_osd)
         DataVolume = api.Volume(
             lv_name='data',
             lv_path='/dev/vg/data',
-            lv_tags="ceph.cluster_name=ceph,,ceph.journal_uuid=000," + \
-                    "ceph.type=block,ceph.osd_id=0,ceph.osd_fsid=1234")
+            lv_tags="stone.cluster_name=stone,,stone.journal_uuid=000," + \
+                    "stone.type=block,stone.osd_id=0,stone.osd_fsid=1234")
         volumes = []
         volumes.append(DataVolume)
         monkeypatch.setattr(api, 'get_lvs', lambda **kwargs: deepcopy(volumes))
@@ -343,7 +343,7 @@ class TestActivateFlags(object):
 class TestActivateAll(object):
 
     def test_does_not_detect_osds(self, capsys, is_root, capture, monkeypatch):
-        monkeypatch.setattr('ceph_volume.devices.lvm.activate.direct_report', lambda: {})
+        monkeypatch.setattr('stone_volume.devices.lvm.activate.direct_report', lambda: {})
         args = ['--all']
         activation = activate.Activate(args)
         activation.main()
@@ -352,8 +352,8 @@ class TestActivateAll(object):
         assert 'Verify OSDs are present with ' in err
 
     def test_detects_running_osds(self, capsys, is_root, capture, monkeypatch):
-        monkeypatch.setattr('ceph_volume.devices.lvm.activate.direct_report', lambda: direct_report)
-        monkeypatch.setattr('ceph_volume.devices.lvm.activate.systemctl.osd_is_active', lambda x: True)
+        monkeypatch.setattr('stone_volume.devices.lvm.activate.direct_report', lambda: direct_report)
+        monkeypatch.setattr('stone_volume.devices.lvm.activate.systemctl.osd_is_active', lambda x: True)
         args = ['--all']
         activation = activate.Activate(args)
         activation.main()
@@ -362,8 +362,8 @@ class TestActivateAll(object):
         assert 'b8218eaa1634 process is active. Skipping activation' in err
 
     def test_detects_osds_to_activate_systemd(self, is_root, capture, monkeypatch):
-        monkeypatch.setattr('ceph_volume.devices.lvm.activate.direct_report', lambda: direct_report)
-        monkeypatch.setattr('ceph_volume.devices.lvm.activate.systemctl.osd_is_active', lambda x: False)
+        monkeypatch.setattr('stone_volume.devices.lvm.activate.direct_report', lambda: direct_report)
+        monkeypatch.setattr('stone_volume.devices.lvm.activate.systemctl.osd_is_active', lambda x: False)
         args = ['--all']
         activation = activate.Activate(args)
         activation.activate = capture
@@ -375,7 +375,7 @@ class TestActivateAll(object):
         assert calls[1]['kwargs']['osd_fsid'] == 'd0f3e4ad-e52a-4520-afc0-a8789a96ce8b'
 
     def test_detects_osds_to_activate_no_systemd(self, is_root, capture, monkeypatch):
-        monkeypatch.setattr('ceph_volume.devices.lvm.activate.direct_report', lambda: direct_report)
+        monkeypatch.setattr('stone_volume.devices.lvm.activate.direct_report', lambda: direct_report)
         args = ['--all', '--no-systemd']
         activation = activate.Activate(args)
         activation.activate = capture
@@ -394,49 +394,49 @@ direct_report = {
     "0": [
         {
             "lv_name": "osd-block-957d22b7-24ce-466a-9883-b8218eaa1634",
-            "lv_path": "/dev/ceph-d4962338-46ff-4cd5-8ea6-c033dbdc5b44/osd-block-957d22b7-24ce-466a-9883-b8218eaa1634",
-            "lv_tags": "ceph.block_device=/dev/ceph-d4962338-46ff-4cd5-8ea6-c033dbdc5b44/osd-block-957d22b7-24ce-466a-9883-b8218eaa1634,ceph.block_uuid=6MixOd-2Q1I-f8K3-PPOq-UJGV-L3A0-0XwUm4,ceph.cephx_lockbox_secret=,ceph.cluster_fsid=d4962338-46ff-4cd5-8ea6-c033dbdc5b44,ceph.cluster_name=ceph,ceph.crush_device_class=,ceph.encrypted=0,ceph.osd_fsid=957d22b7-24ce-466a-9883-b8218eaa1634,ceph.osd_id=0,ceph.type=block",
+            "lv_path": "/dev/stone-d4962338-46ff-4cd5-8ea6-c033dbdc5b44/osd-block-957d22b7-24ce-466a-9883-b8218eaa1634",
+            "lv_tags": "stone.block_device=/dev/stone-d4962338-46ff-4cd5-8ea6-c033dbdc5b44/osd-block-957d22b7-24ce-466a-9883-b8218eaa1634,stone.block_uuid=6MixOd-2Q1I-f8K3-PPOq-UJGV-L3A0-0XwUm4,stone.stonex_lockbox_secret=,stone.cluster_fsid=d4962338-46ff-4cd5-8ea6-c033dbdc5b44,stone.cluster_name=stone,stone.crush_device_class=,stone.encrypted=0,stone.osd_fsid=957d22b7-24ce-466a-9883-b8218eaa1634,stone.osd_id=0,stone.type=block",
             "lv_uuid": "6MixOd-2Q1I-f8K3-PPOq-UJGV-L3A0-0XwUm4",
             "name": "osd-block-957d22b7-24ce-466a-9883-b8218eaa1634",
-            "path": "/dev/ceph-d4962338-46ff-4cd5-8ea6-c033dbdc5b44/osd-block-957d22b7-24ce-466a-9883-b8218eaa1634",
+            "path": "/dev/stone-d4962338-46ff-4cd5-8ea6-c033dbdc5b44/osd-block-957d22b7-24ce-466a-9883-b8218eaa1634",
             "tags": {
-                "ceph.block_device": "/dev/ceph-d4962338-46ff-4cd5-8ea6-c033dbdc5b44/osd-block-957d22b7-24ce-466a-9883-b8218eaa1634",
-                "ceph.block_uuid": "6MixOd-2Q1I-f8K3-PPOq-UJGV-L3A0-0XwUm4",
-                "ceph.cephx_lockbox_secret": "",
-                "ceph.cluster_fsid": "d4962338-46ff-4cd5-8ea6-c033dbdc5b44",
-                "ceph.cluster_name": "ceph",
-                "ceph.crush_device_class": "",
-                "ceph.encrypted": "0",
-                "ceph.osd_fsid": "957d22b7-24ce-466a-9883-b8218eaa1634",
-                "ceph.osd_id": "0",
-                "ceph.type": "block"
+                "stone.block_device": "/dev/stone-d4962338-46ff-4cd5-8ea6-c033dbdc5b44/osd-block-957d22b7-24ce-466a-9883-b8218eaa1634",
+                "stone.block_uuid": "6MixOd-2Q1I-f8K3-PPOq-UJGV-L3A0-0XwUm4",
+                "stone.stonex_lockbox_secret": "",
+                "stone.cluster_fsid": "d4962338-46ff-4cd5-8ea6-c033dbdc5b44",
+                "stone.cluster_name": "stone",
+                "stone.crush_device_class": "",
+                "stone.encrypted": "0",
+                "stone.osd_fsid": "957d22b7-24ce-466a-9883-b8218eaa1634",
+                "stone.osd_id": "0",
+                "stone.type": "block"
             },
             "type": "block",
-            "vg_name": "ceph-d4962338-46ff-4cd5-8ea6-c033dbdc5b44"
+            "vg_name": "stone-d4962338-46ff-4cd5-8ea6-c033dbdc5b44"
         }
     ],
     "1": [
         {
             "lv_name": "osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
-            "lv_path": "/dev/ceph-7538bcf0-f155-4d3f-a9fd-d8b15905e532/osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
-            "lv_tags": "ceph.block_device=/dev/ceph-7538bcf0-f155-4d3f-a9fd-d8b15905e532/osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b,ceph.block_uuid=1igwLb-ZlmV-eLgp-hapx-c1Hr-M5gz-sHjnyW,ceph.cephx_lockbox_secret=,ceph.cluster_fsid=d4962338-46ff-4cd5-8ea6-c033dbdc5b44,ceph.cluster_name=ceph,ceph.crush_device_class=,ceph.encrypted=0,ceph.osd_fsid=d0f3e4ad-e52a-4520-afc0-a8789a96ce8b,ceph.osd_id=1,ceph.type=block",
+            "lv_path": "/dev/stone-7538bcf0-f155-4d3f-a9fd-d8b15905e532/osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
+            "lv_tags": "stone.block_device=/dev/stone-7538bcf0-f155-4d3f-a9fd-d8b15905e532/osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b,stone.block_uuid=1igwLb-ZlmV-eLgp-hapx-c1Hr-M5gz-sHjnyW,stone.stonex_lockbox_secret=,stone.cluster_fsid=d4962338-46ff-4cd5-8ea6-c033dbdc5b44,stone.cluster_name=stone,stone.crush_device_class=,stone.encrypted=0,stone.osd_fsid=d0f3e4ad-e52a-4520-afc0-a8789a96ce8b,stone.osd_id=1,stone.type=block",
             "lv_uuid": "1igwLb-ZlmV-eLgp-hapx-c1Hr-M5gz-sHjnyW",
             "name": "osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
-            "path": "/dev/ceph-7538bcf0-f155-4d3f-a9fd-d8b15905e532/osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
+            "path": "/dev/stone-7538bcf0-f155-4d3f-a9fd-d8b15905e532/osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
             "tags": {
-                "ceph.block_device": "/dev/ceph-7538bcf0-f155-4d3f-a9fd-d8b15905e532/osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
-                "ceph.block_uuid": "1igwLb-ZlmV-eLgp-hapx-c1Hr-M5gz-sHjnyW",
-                "ceph.cephx_lockbox_secret": "",
-                "ceph.cluster_fsid": "d4962338-46ff-4cd5-8ea6-c033dbdc5b44",
-                "ceph.cluster_name": "ceph",
-                "ceph.crush_device_class": "",
-                "ceph.encrypted": "0",
-                "ceph.osd_fsid": "d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
-                "ceph.osd_id": "1",
-                "ceph.type": "block"
+                "stone.block_device": "/dev/stone-7538bcf0-f155-4d3f-a9fd-d8b15905e532/osd-block-d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
+                "stone.block_uuid": "1igwLb-ZlmV-eLgp-hapx-c1Hr-M5gz-sHjnyW",
+                "stone.stonex_lockbox_secret": "",
+                "stone.cluster_fsid": "d4962338-46ff-4cd5-8ea6-c033dbdc5b44",
+                "stone.cluster_name": "stone",
+                "stone.crush_device_class": "",
+                "stone.encrypted": "0",
+                "stone.osd_fsid": "d0f3e4ad-e52a-4520-afc0-a8789a96ce8b",
+                "stone.osd_id": "1",
+                "stone.type": "block"
             },
             "type": "block",
-            "vg_name": "ceph-7538bcf0-f155-4d3f-a9fd-d8b15905e532"
+            "vg_name": "stone-7538bcf0-f155-4d3f-a9fd-d8b15905e532"
         }
     ]
 }

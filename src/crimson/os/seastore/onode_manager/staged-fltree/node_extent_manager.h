@@ -48,8 +48,8 @@ class NodeExtent : public LogicalCachedExtent {
    * Abstracted interfaces to implement:
    * - CacheExtent::duplicate_for_write() -> CachedExtentRef
    * - CacheExtent::get_type() -> extent_types_t
-   * - CacheExtent::get_delta() -> ceph::bufferlist
-   * - LogicalCachedExtent::apply_delta(const ceph::bufferlist) -> void
+   * - CacheExtent::get_delta() -> stone::bufferlist
+   * - LogicalCachedExtent::apply_delta(const stone::bufferlist) -> void
    */
 
  private:

@@ -1,5 +1,5 @@
 commit b1e0532418e4631af01acbc0cedd426f1905f4af
-Author: Jenkins Build Slave User <ceph-release-team@redhat.com>
+Author: Jenkins Build Slave User <stone-release-team@redhat.com>
 Date:   Tue Feb 21 15:12:34 2017 +0000
 
     0.94.10
@@ -22,7 +22,7 @@ Date:   Mon Jan 23 12:26:27 2017 +0100
 
     Merge pull request #13022 from SUSE/wip-18602-hammer
 
-    hammer: cephfs test failures (ceph.com/qa is broken, should be download.ceph.com/qa)
+    hammer: stonefs test failures (stone.com/qa is broken, should be download.stone.com/qa)
 
     Reviewed-by: John Spray <john.spray@redhat.com>
 
@@ -41,9 +41,9 @@ commit eabe9064aed3693599e3b6053b57eafb835d35da
 Author: John Spray <john.spray@redhat.com>
 Date:   Tue Jan 17 17:12:46 2017 +0100
 
-    qa: update remaining ceph.com to download.ceph.com
+    qa: update remaining stone.com to download.stone.com
 
-    Fixes: http://tracker.ceph.com/issues/18574
+    Fixes: http://tracker.stone.com/issues/18574
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 549d993d3fd8ffffa280ed4a64aca41d1c6f2da1)
 
@@ -74,7 +74,7 @@ Date:   Sat Jan 21 10:00:04 2017 +0100
 
     Merge pull request #12824 from SUSE/wip-18449-hammer
 
-    hammer: [teuthology] update rbd/singleton/all/formatted-output.yaml to support ceph-ci
+    hammer: [teuthology] update rbd/singleton/all/formatted-output.yaml to support stone-ci
 
 commit 33c7ab7480aa8d0ee80d6a47f91f4488515e07f8
 Merge: ef8ae1f ef513a7
@@ -94,7 +94,7 @@ Date:   Fri Jan 20 23:02:05 2017 +0100
 
     Merge pull request #12805 from SUSE/wip-18432-hammer
 
-    hammer: ceph-create-keys loops forever
+    hammer: stone-create-keys loops forever
 
     Reviewed-by: Nathan Cutler <ncutler@suse.com>
 
@@ -105,7 +105,7 @@ Date:   Tue Jan 17 08:39:14 2017 -0500
 
     Merge pull request #12957 from SUSE/wip-18544-hammer
 
-    hammer: [teuthology] update Ubuntu image url after ceph.com refactor
+    hammer: [teuthology] update Ubuntu image url after stone.com refactor
 
     Reviewed-by: Jason Dillaman <dillaman@redhat.com>
 
@@ -113,9 +113,9 @@ commit 83e7f178c9a0b70305644ca30598c1b1ff4d0474
 Author: Jason Dillaman <dillaman@redhat.com>
 Date:   Mon Jan 16 22:12:51 2017 -0500
 
-    qa/tasks/qemu: update default image url after ceph.com redesign
+    qa/tasks/qemu: update default image url after stone.com redesign
 
-    Fixes: http://tracker.ceph.com/issues/18542
+    Fixes: http://tracker.stone.com/issues/18542
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 6d17befb3bbc3d83c9d23d763ad95e1e7b2e4be0)
 
@@ -131,7 +131,7 @@ Date:   Mon Dec 12 10:35:38 2016 -0800
     the gap did not remove any snapshots.
 
     Introduced: 5798fb3bf6d726d14a9c5cb99dc5902eba5b878a
-    Fixes: http://tracker.ceph.com/issues/15943
+    Fixes: http://tracker.stone.com/issues/15943
     Signed-off-by: Samuel Just <sjust@redhat.com>
     (cherry picked from commit 5642e7e1b3bb6ffceddacd2f4030eb13a17fcccc)
 
@@ -141,7 +141,7 @@ Date:   Sat Jan 7 13:48:51 2017 +0100
 
     tests: subst repo and branch in qemu test urls
 
-    References: http://tracker.ceph.com/issues/18440
+    References: http://tracker.stone.com/issues/18440
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 2484a5546160560a4050d35400a6edce37ae48ad)
 
@@ -155,7 +155,7 @@ Date:   Sat Jan 7 13:45:10 2017 +0100
 
     tests: subst branch and repo in qa/tasks/qemu.py
 
-    References: http://tracker.ceph.com/issues/18440
+    References: http://tracker.stone.com/issues/18440
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 74689df754561e11a3377998840efcea9e780755)
 
@@ -167,7 +167,7 @@ Date:   Fri Jan 6 21:06:11 2017 +0100
 
     Inspired by bcbe45d948f1c4da02e27b3be5f29a8b52745e28
 
-    Fixes: http://tracker.ceph.com/issues/18440
+    Fixes: http://tracker.stone.com/issues/18440
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 56e37e41f4dddd289dd3c1886b192cd328ed311b)
 
@@ -190,7 +190,7 @@ Merge: 61917cb ac62d79
 Author: Orit Wasserman <owasserm@redhat.com>
 Date:   Sun Jan 8 09:26:03 2017 +0200
 
-    Merge pull request #12227 from ceph/wip-orit-resharding-hammer
+    Merge pull request #12227 from stone/wip-orit-resharding-hammer
 
     Wip orit resharding hammer
     Reviewed-by: Orit Wasserman <owasserm@redhat.com>
@@ -199,7 +199,7 @@ commit 8bab74537f5891f2b97f0fb6722e2e00416b723a
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 2 12:28:49 2016 -0400
 
-    ceph-create-keys: wait 10 minutes to get or create the bootstrap key, not forever
+    stone-create-keys: wait 10 minutes to get or create the bootstrap key, not forever
 
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit bea802bd13df883d06b7b67a83ac6540e44ab6c1)
@@ -208,20 +208,20 @@ commit a7d919100e9e78b7f821da76b338bca24f374a0a
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 2 12:25:32 2016 -0400
 
-    ceph-create-keys: wait 10 minutes to get or create a key, not forever
+    stone-create-keys: wait 10 minutes to get or create a key, not forever
 
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 8f84681a4d97a7ea6bc04e759eccfc40204a2fdb)
 
     Conflicts:
-	src/ceph-create-keys ( hammer does not have
+	src/stone-create-keys ( hammer does not have
 		52e978e4b3660baa9f50b1bb8247909b672142e7 )
 
 commit 7b3bc5fbc55da3cb2ce036ef3df367832d7a59e2
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Nov 2 12:19:10 2016 -0400
 
-    ceph-create-keys: wait for quorum for ten minutes, not forever
+    stone-create-keys: wait for quorum for ten minutes, not forever
 
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 32cedd2c18e48d5f9a1547e5fd69c24c7eac1638)
@@ -310,7 +310,7 @@ Date:   Thu Jan 5 09:10:28 2017 -0800
 
     Merge pull request #12685 from SUSE/wip-18273-hammer
 
-    hammer: tests: Workunits needlessly wget from git.ceph.com
+    hammer: tests: Workunits needlessly wget from git.stone.com
 
     Reviewed-by: Samuel Just <sjust@redhat.com>
 
@@ -343,7 +343,7 @@ Date:   Wed Jan 4 20:15:21 2017 +0100
 
     Merge pull request #12744 from SUSE/wip-18385-hammer
 
-    hammer: tests: Cannot clone ceph/s3-tests.git (missing branch)
+    hammer: tests: Cannot clone stone/s3-tests.git (missing branch)
 
     Reviewed-by: Orit Wasserman <owasserm@redhat.com>
 
@@ -436,9 +436,9 @@ Date:   Tue Jan 3 14:53:27 2017 +0100
 
     qa/distros: add centos yaml; use that instead
 
-    Modeled after https://github.com/ceph/ceph/pull/12632
+    Modeled after https://github.com/stone/stone/pull/12632
 
-    Fixes: http://tracker.ceph.com/issues/18405
+    Fixes: http://tracker.stone.com/issues/18405
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
 
 commit e9311ddb60638c1dd39325e279b97c9a7d09b8a4
@@ -447,7 +447,7 @@ Date:   Thu Dec 15 13:35:02 2016 -0500
 
     qa/tasks/admin_socket: subst in repo name
 
-    It is either ceph.git or ceph-ci.git.
+    It is either stone.git or stone-ci.git.
 
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit bcbe45d948f1c4da02e27b3be5f29a8b52745e28)
@@ -473,7 +473,7 @@ Date:   Mon Jan 2 22:49:13 2017 +0100
     This commit fixes a regression introduced by
     cf294777ea92f0911813a7132068584d4f73a65a
 
-    Fixes: http://tracker.ceph.com/issues/18388
+    Fixes: http://tracker.stone.com/issues/18388
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 91231de16dbe4d0e493ec617165a2b38078d122b)
 
@@ -481,7 +481,7 @@ commit 0c5ebf4adf26274802ec4cff229b2272dc4a4266
 Author: Orit Wasserman <owasserm@redhat.com>
 Date:   Mon Jan 4 10:03:08 2016 +0100
 
-    use ceph-master branch for s3tests
+    use stone-master branch for s3tests
 
     Signed-off-by: Orit Wasserman <owasserm@redhat.com>
     (cherry picked from commit 21160124028ab123b5c547499d911b0a1397214f)
@@ -498,7 +498,7 @@ Date:   Mon Jan 2 20:34:42 2017 +0100
 
     Merge pull request #12743 from SUSE/wip-18383
 
-    hammer: tests: populate mnt_point in qa/tasks/ceph.py
+    hammer: tests: populate mnt_point in qa/tasks/stone.py
 
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -506,19 +506,19 @@ commit d18240f679840bdaeec1e3f7cdd9164b4406673c
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Mon Jan 2 14:22:43 2017 +0100
 
-    qa/tasks/ceph.py: populate mnt_point in hammer
+    qa/tasks/stone.py: populate mnt_point in hammer
 
     In hammer, there is no "mnt_point" variable, yet 53225d5 was cherry-picked to
-    hammer - see 87e0299448908775600c62130617bad503027768 and https://github.com/ceph/ceph/pull/12455
+    hammer - see 87e0299448908775600c62130617bad503027768 and https://github.com/stone/stone/pull/12455
 
     This caused lots of "NameError: global name 'mnt_point' is not defined" errors
     in hammer integration testing.
 
     This is not a cherry-pick, because the mnt_point variable was introduced by
-    a54ff597faa379c8fd369352fb924651be269f95 ("tasks/ceph: convert cluster creation
+    a54ff597faa379c8fd369352fb924651be269f95 ("tasks/stone: convert cluster creation
     to work with multiple clusters") which was not backported to hammer.
 
-    Fixes: http://tracker.ceph.com/issues/18383
+    Fixes: http://tracker.stone.com/issues/18383
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
 
 commit ac62d7996b95d8fdd5665e490fc09506c8fe9e68
@@ -527,7 +527,7 @@ Date:   Mon Oct 31 13:59:55 2016 +0800
 
     rgw: fix osd crashes when execute "radosgw-admin bi list --max-entries=1" command
 
-    Fixes: http://tracker.ceph.com/issues/17745
+    Fixes: http://tracker.stone.com/issues/17745
     Signed-off-by: weiqiaomiao <wei.qiaomiao@zte.com.cn>
     (cherry picked from commit 51a4405a1ef59671cbd51c530a84333359d3f3dd)
 
@@ -554,8 +554,8 @@ Date:   Thu Dec 22 13:05:22 2016 -0500
 
     qa/tasks/workunit: clear clone dir before retrying checkout
 
-    If we checkout ceph-ci.git, and don't find a branch,
-    we'll try again from ceph.git. But the checkout will
+    If we checkout stone-ci.git, and don't find a branch,
+    we'll try again from stone.git. But the checkout will
     already exist and the clone will fail, so we'll still
     fail to find the branch.
 
@@ -569,7 +569,7 @@ Date:   Thu Dec 22 13:05:22 2016 -0500
     want to switch to using a truly unique clonedir for each
     instantiation.
 
-    Fixes: http://tracker.ceph.com/issues/18336
+    Fixes: http://tracker.stone.com/issues/18336
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 2a7013cd5a033c5be43350505d75f088e831e201)
 
@@ -577,7 +577,7 @@ commit a70e0d58e10184b0903ba36c047a237be3c7cc19
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Dec 16 15:06:16 2016 -0500
 
-    qa/tasks/workunit: retry on ceph.git if checkout fails
+    qa/tasks/workunit: retry on stone.git if checkout fails
 
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 72d73b8c8836ae35c518fa09f44805a74038f02a)
@@ -590,7 +590,7 @@ Date:   Wed Dec 7 09:50:26 2016 -0500
 
     Also add PAUSEREC flag into the list.
 
-    Fixes: http://tracker.ceph.com/issues/18175
+    Fixes: http://tracker.stone.com/issues/18175
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 26220f0608f5ed4a7d97fb8d10d0d12a0fcf5583)
 
@@ -658,20 +658,20 @@ Date:   Wed Dec 14 11:40:08 2016 -0600
 
     Merge pull request #12455 from liewegas/qa-suite-hammer
 
-    hammer: merge ceph-qa-suite
+    hammer: merge stone-qa-suite
 
 commit 59878b3bf775fabf0f4c168e67d6f473e69c15a1
 Merge: 12d6781 7ed0dce
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Dec 14 11:30:00 2016 -0600
 
-    merge ceph-qa-suite
+    merge stone-qa-suite
 
 commit 7ed0dce3cf7ded278e59a9b36d3fd713e3c42b8d
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Dec 14 11:29:55 2016 -0600
 
-    move ceph-qa-suite dirs into qa/
+    move stone-qa-suite dirs into qa/
 
 commit 08ce5441dbad8754205717a20d6273c0a099777a
 Author: Sage Weil <sage@redhat.com>
@@ -694,10 +694,10 @@ commit 6bdc3bb6a00480b721b9795bd5e132b1dbf04ac0
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Dec 14 12:18:29 2016 -0500
 
-    tasks/workunit: remove kludge to use git.ceph.com
+    tasks/workunit: remove kludge to use git.stone.com
 
-    This was hard-coded to ceph.git (almost) and breaks when
-    you specify --ceph-repo.  Remove it entirely.  We'll see if
+    This was hard-coded to stone.git (almost) and breaks when
+    you specify --stone-repo.  Remove it entirely.  We'll see if
     github.com is better at handling our load than it used to
     be!
 
@@ -708,13 +708,13 @@ commit 87e0299448908775600c62130617bad503027768
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Sat Dec 10 02:36:52 2016 +0800
 
-    tasks/ceph: restore context of osd mount path before mkfs
+    tasks/stone: restore context of osd mount path before mkfs
 
     all newly created files and directories under the mount dir inherit the
     SELinux type of their parent directory. so we need to set it before
     mkfs.
 
-    Fixes: http://tracker.ceph.com/issues/16800
+    Fixes: http://tracker.stone.com/issues/16800
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 53225d5272a1d35d4183fcfa55a139f55f77e122)
 
@@ -723,7 +723,7 @@ Merge: bbb2615 107e9c3
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Dec 12 16:42:55 2016 -0600
 
-    Merge pull request #1278 from ceph/wip-16225-min
+    Merge pull request #1278 from stone/wip-16225-min
 
     hammer: SIGABRT in TrackedOp::dump() via dump_ops_in_flight()
 
@@ -740,7 +740,7 @@ Date:   Mon Dec 12 11:53:00 2016 -0500
     Hammer-specific implementation due to librbd refactoring during the
     Infernalis release.
 
-    Fixes: http://tracker.ceph.com/issues/18111
+    Fixes: http://tracker.stone.com/issues/18111
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
 
 commit 996fc2575ef988e6b20fda9ca771b2f6f141cbd3
@@ -752,7 +752,7 @@ Date:   Wed Dec 7 09:59:39 2016 -0500
     The test case is not stable due to racing console output. This
     results in spurious failures.
 
-    Fixes: http://tracker.ceph.com/issues/10773
+    Fixes: http://tracker.stone.com/issues/10773
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 2c70df978d605a45ff81971b86f5afbefbdaabb6)
 
@@ -771,7 +771,7 @@ Date:   Mon Nov 21 18:37:39 2016 -0500
 
     rgw/rgw_rados: do not omap_getvals with (u64)-1 max
 
-    Fixes: http://tracker.ceph.com/issues/17985
+    Fixes: http://tracker.stone.com/issues/17985
 
     This will make the OSD fall over if the object is big
     and the OSD doesn't impose it's own fail-safe limit.
@@ -812,7 +812,7 @@ Date:   Thu Dec 8 14:21:43 2016 +0800
      0> 2016-12-05 03:22:29.548138 7f6add05d700 -1 *** Caught signal (Aborted) **
      in thread 7f6add05d700 thread_name:civetweb-worker
 
-     ceph version 11.0.2-2168-gd2f8fb4 (d2f8fb4a6ba75af7e6da0f5a7f1b49ec998b1631)
+     stone version 11.0.2-2168-gd2f8fb4 (d2f8fb4a6ba75af7e6da0f5a7f1b49ec998b1631)
      1: (()+0x50720a) [0x7f6b147c420a]
      2: (()+0xf370) [0x7f6b09a33370]
      3: (gsignal()+0x37) [0x7f6b081ca1d7]
@@ -847,7 +847,7 @@ Merge: 8e5872b 4533623
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Dec 2 15:09:32 2016 -0500
 
-    Merge pull request #1276 from ceph/no-btrfs-on-hammer
+    Merge pull request #1276 from stone/no-btrfs-on-hammer
 
     rados: remove btrfs tests; use xfs instead
 
@@ -874,7 +874,7 @@ Date:   Tue Nov 29 21:50:52 2016 -0500
 
     msg/simple/Pipe: handle addr decode error
 
-    Fixes: http://tracker.ceph.com/issues/18072
+    Fixes: http://tracker.stone.com/issues/18072
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 2f5cfbc0de5464ab80581c416413a86c3d38dfb7)
 
@@ -895,7 +895,7 @@ Merge: bfda134 03af4aa
 Author: Nathan Cutler <presnypreklad@gmail.com>
 Date:   Tue Nov 29 22:12:46 2016 +0100
 
-    Merge pull request #11628 from ceph/wip-hammer-11567
+    Merge pull request #11628 from stone/wip-hammer-11567
 
     hammer: rgw: Don't loop forever when reading data from 0 sized segment.
 
@@ -928,7 +928,7 @@ commit 8d352358edc156f70b5eb68c37bb56cb2392fce2
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue May 24 14:02:14 2016 -0400
 
-    ceph_test_rados_api_misc: test rados op with bad flas
+    stone_test_rados_api_misc: test rados op with bad flas
 
     Pass the bad PARALLELEXEC flag to remove(), which takes a flags arg.
 
@@ -1051,7 +1051,7 @@ Date:   Fri Jul 17 10:44:06 2015 +0800
 
     osd: add dump_blocked_ops asok command.
 
-    From ceph health we can see there are blocked ops and from 'ceph health
+    From stone health we can see there are blocked ops and from 'stone health
     detai' we can see which osd has blocked ops. Later we only in log of osd
     to see the detail message of blocked ops.
     Now via asok dump blocked ops.
@@ -1136,7 +1136,7 @@ Date:   Wed Nov 23 22:18:42 2016 +0100
 
     Merge pull request #10905 from SUSE/wip-11101-hammer
 
-    hammer: build/ops: improve ceph.in error message
+    hammer: build/ops: improve stone.in error message
 
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -1147,7 +1147,7 @@ Date:   Wed Nov 23 22:16:48 2016 +0100
 
     Merge pull request #10987 from Vicente-Cheng/wip-16592-hammer
 
-    hammer: librbd: ceph 10.2.2 rbd status on image format 2 returns "(2) No such file or directory"
+    hammer: librbd: stone 10.2.2 rbd status on image format 2 returns "(2) No such file or directory"
 
     Reviewed-by: Jason Dillaman <dillaman@redhat.com>
 
@@ -1236,7 +1236,7 @@ Date:   Wed Nov 23 21:47:24 2016 +0100
 
     Merge pull request #11929 from SUSE/wip-17359-hammer
 
-    hammer: tools: ceph-objectstore-tool crashes if --journal-path <a-directory>
+    hammer: tools: stone-objectstore-tool crashes if --journal-path <a-directory>
 
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -1247,7 +1247,7 @@ Date:   Wed Nov 23 21:46:08 2016 +0100
 
     Merge pull request #11930 from SUSE/wip-17346-hammer
 
-    hammer: cephx: Fix multiple segfaults due to attempts to encrypt or decrypt
+    hammer: stonex: Fix multiple segfaults due to attempts to encrypt or decrypt
 
     Reviewed-by: Brad Hubbard <bhubbard@redhat.com>
     Reviewed-by: Kefu Chai <kchai@redhat.com>
@@ -1292,7 +1292,7 @@ Date:   Wed Nov 23 21:40:47 2016 +0100
 
     Merge pull request #11934 from SUSE/wip-17120-hammer
 
-    hammer: mon: %USED of ceph df is wrong
+    hammer: mon: %USED of stone df is wrong
 
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -1336,7 +1336,7 @@ Date:   Wed Nov 23 21:29:45 2016 +0100
 
     Merge pull request #11939 from SUSE/wip-13927-hammer
 
-    hammer: mds: fix cephfs-java ftruncate unit test failure
+    hammer: mds: fix stonefs-java ftruncate unit test failure
 
     Reviewed-by: John Spray <john.spray@redhat.com>
 
@@ -1347,7 +1347,7 @@ Date:   Mon Jul 20 15:37:09 2015 +0800
     rgw: doc: Mark S3 object version API as supported
 
     S3 object version is already in since Hammer.
-    Ref: http://marc.info/?l=ceph-devel&m=143715290627682
+    Ref: http://marc.info/?l=stone-devel&m=143715290627682
 
     Signed-off-by: Yuan Zhou <yuan.zhou@intel.com>
     (cherry picked from commit b62c3b9537e8ab33416a7fb0dd7b801a790d42ee)
@@ -1475,7 +1475,7 @@ commit 9473135aa65282499f67847edb52b7dfd8b374fb
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Mon Oct 10 18:43:39 2016 +0800
 
-    doc: fill keyring with caps before passing it to ceph-monstore-tool
+    doc: fill keyring with caps before passing it to stone-monstore-tool
 
     to make sure the recovered monitor store is ready for use.
 
@@ -1486,7 +1486,7 @@ commit 9c00ba17627c2b3526c558564954b8bb1d8472ef
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Mon Oct 10 16:32:27 2016 +0800
 
-    tools/ceph_monstore_tool: bail out if no caps found for a key
+    tools/stone_monstore_tool: bail out if no caps found for a key
 
     we take it as an error if no caps is granted to an entity in the
     specified keyring file when rebuilding the monitor db.
@@ -1498,15 +1498,15 @@ commit 48696e9d6d89f6b6e99fb76ffa61665c026d7a0e
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Fri Sep 30 17:58:14 2016 +0800
 
-    tools/ceph_monstore_tool: update pgmap_meta also when rebuilding store.db
+    tools/stone_monstore_tool: update pgmap_meta also when rebuilding store.db
 
     we should rebuild pgmap_meta table from the collected osdmaps
 
-    Fixes: http://tracker.ceph.com/issues/17400
+    Fixes: http://tracker.stone.com/issues/17400
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit cdfa7a69f63d047205dcfccd63b5d58ab0d4695b)
     Conflicts:
-	src/tools/ceph_monstore_tool.cc: remove C++11-ism
+	src/tools/stone_monstore_tool.cc: remove C++11-ism
 
 commit ca67e8e88c06a9a37e5dc9e8fe5a1dd1821f8452
 Author: xie xingguo <xie.xingguo@zte.com.cn>
@@ -1516,12 +1516,12 @@ Date:   Sun Sep 18 11:40:56 2016 +0800
 
     As follow:
 
-    [ 72%] Building CXX object src/tools/CMakeFiles/ceph-objectstore-tool.dir/RadosDump.cc.o
-    /home/jenkins-build/build/workspace/ceph-pull-requests/src/tools/rebuild_mondb.cc: In function ‘int update_mon_db(ObjectStore&, OSDSuperblock&, const string&, const string&)’:
-    /home/jenkins-build/build/workspace/ceph-pull-requests/src/tools/rebuild_mondb.cc:289:22: warning: ‘crc’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+    [ 72%] Building CXX object src/tools/CMakeFiles/stone-objectstore-tool.dir/RadosDump.cc.o
+    /home/jenkins-build/build/workspace/stone-pull-requests/src/tools/rebuild_mondb.cc: In function ‘int update_mon_db(ObjectStore&, OSDSuperblock&, const string&, const string&)’:
+    /home/jenkins-build/build/workspace/stone-pull-requests/src/tools/rebuild_mondb.cc:289:22: warning: ‘crc’ may be used uninitialized in this function [-Wmaybe-uninitialized]
 	     if (have_crc && osdmap.get_crc() != crc) {
 			  ^
-    /home/jenkins-build/build/workspace/ceph-pull-requests/src/tools/rebuild_mondb.cc:238:14: note: ‘crc’ was declared here
+    /home/jenkins-build/build/workspace/stone-pull-requests/src/tools/rebuild_mondb.cc:238:14: note: ‘crc’ was declared here
 	 uint32_t crc;
 
     Signed-off-by: xie xingguo <xie.xingguo@zte.com.cn>
@@ -1559,7 +1559,7 @@ Date:   Wed Aug 31 00:59:58 2016 +0800
 
     document the process to recover from leveldb corruption.
 
-    Fixes: http://tracker.ceph.com/issues/17179
+    Fixes: http://tracker.stone.com/issues/17179
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 79a9f299253e24d20547131b3c9c9e0667e3b869)
 
@@ -1567,29 +1567,29 @@ commit 3ef5dcd2b37055994794f9cf6139dc2d8807d637
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Mon Aug 29 19:53:11 2016 +0800
 
-    tools/ceph_monstore_tool: add "rebuild" command
+    tools/stone_monstore_tool: add "rebuild" command
 
-    Fixes: http://tracker.ceph.com/issues/17179
+    Fixes: http://tracker.stone.com/issues/17179
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit d909fa035c8fbbded786b2ca072acc10ea6b6052)
 
     Conflicts:
-	ceph_monstore_tool.cc: remove C++11ish
+	stone_monstore_tool.cc: remove C++11ish
 
 commit 6695d1792df9ca7cf5afd5a8c25a04f1eb9ff0fa
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Mon Aug 29 19:52:19 2016 +0800
 
-    tools/ceph-objectstore-tool: add "update-mon-db" command
+    tools/stone-objectstore-tool: add "update-mon-db" command
 
-    Fixes: http://tracker.ceph.com/issues/17179
+    Fixes: http://tracker.stone.com/issues/17179
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 24faea7ce446bbf09cbd4a9d3434dd5444a6c295)
 
     Conflicts:
 	src/tools/Makefile-server.am: add rebuild_mondb.{cc,h}, as autotools
 	      support is dropped in master
-	ceph_objectstore_tool.cc, rebuild_mondb.cc: remove C++11ish
+	stone_objectstore_tool.cc, rebuild_mondb.cc: remove C++11ish
 	      adapt to hammer
 
 commit e7d9c15871efcd17b9b1064a5ee49edfe4a159e9
@@ -1598,10 +1598,10 @@ Date:   Wed Aug 31 13:11:24 2016 +0800
 
     mon/AuthMonitor: make AuthMonitor::IncType public
 
-    so ceph-objectstore-tool is able to use it when rebuilding monitor
+    so stone-objectstore-tool is able to use it when rebuilding monitor
     db.
 
-    Fixes: http://tracker.ceph.com/issues/17179
+    Fixes: http://tracker.stone.com/issues/17179
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 19ef4f16b3aba04119ac647cd6261c74a57ce829)
 
@@ -1619,14 +1619,14 @@ Date:   Tue Mar 15 11:29:17 2016 -0700
     Excluded dynamic optracker testing with optrack_toggle_delay option
 
     Conflicts:
-	tasks/ceph_manager.py (trivial)
+	tasks/stone_manager.py (trivial)
 	tasks/thrashosds.py (trivial)
 
 commit b7c87ae74a7f3f3c0096fe6cfe36e1077f96ea1f
 Author: David Zafman <dzafman@redhat.com>
 Date:   Tue Apr 12 09:27:33 2016 -0700
 
-    ceph_manager: Add timeout to admin_socket/osd_admin_socket
+    stone_manager: Add timeout to admin_socket/osd_admin_socket
 
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 4ad3b866041a3a5391f46cd3d96297834b95956b)
@@ -1708,7 +1708,7 @@ Date:   Mon May 23 15:14:21 2016 -0700
     a much simpler comparison of the BufferHead's logical object offset to the
     incoming OSDOp's logical offset will do the trick nicely.
 
-    Fixes: http://tracker.ceph.com/issues/16002
+    Fixes: http://tracker.stone.com/issues/16002
 
     Signed-off-by: Greg Farnum <gfarnum@redhat.com>
     (cherry picked from commit 9ec6e7f608608088d51e449c9d375844631dcdde)
@@ -1720,7 +1720,7 @@ Date:   Fri Jun 10 17:01:09 2016 -0700
     hammer: test: build a correctness test for the ObjectCacher
 
     For now it's very specifically designed to reproduce
-    http://tracker.ceph.com/issues/16002, but it can
+    http://tracker.stone.com/issues/16002, but it can
     be extended to other patterns in the future.
 
     Signed-off-by: Greg Farnum <gfarnum@redhat.com>
@@ -1728,7 +1728,7 @@ Date:   Fri Jun 10 17:01:09 2016 -0700
 
     Hammer specific changes:
 
-    * use utime_t instead of ceph::real_time
+    * use utime_t instead of stone::real_time
     * ObjectCacher::prepare_write() has no journal_tid argument
     * rewrite the code in C++98
 
@@ -1752,7 +1752,7 @@ Date:   Thu Jun 23 13:41:46 2016 -0700
 
     Hammer specific changes:
 
-    * use utime_t instead of ceph::real_time
+    * use utime_t instead of stone::real_time
     * ObjectCacher::prepare_write() has no journal_tid argument
     * rewrite code in C++98
 
@@ -1822,7 +1822,7 @@ commit a3ba985c38c07f85056f90d125e32ea277c65932
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Jan 5 15:00:59 2016 +0800
 
-    ceph.in: improve the error message
+    stone.in: improve the error message
 
     Fixes: #11101
     Signed-off-by: Kefu Chai <kchai@redhat.com>
@@ -1847,7 +1847,7 @@ Date:   Mon Jul 11 12:37:25 2016 +0200
     message in two more cases, because is the last step
     of dispatch()
 
-    Fixes: http://tracker.ceph.com/issues/17285
+    Fixes: http://tracker.stone.com/issues/17285
     Signed-off-by: Igor Podoski <igor.podoski@ts.fujitsu.com>
 
 commit 4a36933df8b9338c0a32d582e005894442092d0f
@@ -1856,7 +1856,7 @@ Date:   Wed Sep 14 07:36:43 2016 -0400
 
     mon: OSDMonitor: Missing nearfull flag set
 
-    Output from 'ceph -s -f json-pretty' wans't showing nearfull flag set.
+    Output from 'stone -s -f json-pretty' wans't showing nearfull flag set.
 
     Signed-off-by: Igor Podoski <igor.podoski@ts.fujitsu.com>
     (cherry picked from commit 754887b575795ef96cda095f7f0d8c898e20f00f)
@@ -1872,7 +1872,7 @@ Date:   Thu Oct 13 13:19:27 2016 +0800
     so we need to send latest monmap to subscribes and update the
     subscription status accordingly when the monmap is updated.
 
-    http://tracker.ceph.com/issues/17558
+    http://tracker.stone.com/issues/17558
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit c2b348b12c47ba505f72228ae0ea9b1a1b674719)
     Conflicts:
@@ -1885,7 +1885,7 @@ Date:   Tue Sep 6 16:16:58 2016 +0800
 
     rbd: this command should be EXPORT_DIFF
 
-    Fixes: http://tracker.ceph.com/issues/17671
+    Fixes: http://tracker.stone.com/issues/17671
 
     Signed-off-by: liyankun <lioveni99@gmail.com>
 
@@ -1895,7 +1895,7 @@ Date:   Thu Oct 27 11:02:36 2016 +0800
 
     mon: update mon(peon)'s down_pending_out when osd up
 
-    Fixes: http://tracker.ceph.com/issues/17719
+    Fixes: http://tracker.stone.com/issues/17719
     Signed-off-by: Dong Wu <archer.wudong@gmail.com>
     (cherry picked from commit 664254a17afbad86983ea5b5b8d385662d89e65e)
 
@@ -1912,7 +1912,7 @@ Date:   Wed Nov 16 12:01:00 2016 +0200
     This is a direct commit to hammer due to librbd code has evolved
     significantly in the master.
 
-    Fixes: http://tracker.ceph.com/issues/17068
+    Fixes: http://tracker.stone.com/issues/17068
     Signed-off-by: Mykola Golub <mgolub@mirantis.com>
 
 commit 2b87a551c603291d6c018ed72b0c58e8e45bc334
@@ -1926,7 +1926,7 @@ Date:   Fri Jul 1 20:44:35 2016 +0800
       the removed bucket disappears after the removal.
     * test: also add unittest_crush_wrapper::CrushWrapper.insert_item
 
-    Fixes: http://tracker.ceph.com/issues/16525
+    Fixes: http://tracker.stone.com/issues/16525
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit a7069c7aab6b3f605f3d8f909af96f87977e8698)
 
@@ -1938,7 +1938,7 @@ Date:   Wed Nov 2 15:33:52 2016 +0000
 
     mon: MonmapMonitor: return success when monitor will be removed
 
-    Fixes: http://tracker.ceph.com/issues/17725
+    Fixes: http://tracker.stone.com/issues/17725
 
     Signed-off-by: Joao Eduardo Luis <joao@suse.de>
     (cherry picked from commit c9d46cfbf2512bc3495c6901de2b8f711bef9bae)
@@ -1956,7 +1956,7 @@ Date:   Thu Aug 4 20:40:10 2016 -0400
     The librbd API is capped at 24 characters for expressing the
     object prefix for data blocks (including trailing null byte).
 
-    Fixes: http://tracker.ceph.com/issues/16887
+    Fixes: http://tracker.stone.com/issues/16887
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 4de7c8d0a7222c83268d03b99015c6b9d25f124d)
 
@@ -1966,7 +1966,7 @@ Date:   Thu May 19 16:00:35 2016 -0700
 
     PG: update PGPool to detect map gaps and reset cached_removed_snaps
 
-    Fixes: http://tracker.ceph.com/issues/15943
+    Fixes: http://tracker.stone.com/issues/15943
     Signed-off-by: Samuel Just <sjust@redhat.com>
     (cherry picked from commit 5798fb3bf6d726d14a9c5cb99dc5902eba5b878a)
 
@@ -1980,7 +1980,7 @@ Date:   Mon Jan 18 15:58:07 2016 -0500
     rgw-admin: return error on email address conflict (add user)
 
     Fixes the error return inconsistency documented in upstream
-    Ceph issue #13598
+    Stone issue #13598
 
     Revised after upstream review, permits changing email address as
     originally (but use case-insensitive comp).
@@ -1999,7 +1999,7 @@ Date:   Mon Jan 18 15:06:19 2016 -0500
     rgw-admin: convert user email addresses to lower case
 
     Fixes the email address inconsistency documented in upstream
-    Ceph BUG #13598
+    Stone BUG #13598
 
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 4c438dbbc0e6eda6b9a3018d60019a1a780d6f65)
@@ -2058,7 +2058,7 @@ Date:   Thu Jul 7 15:36:33 2016 -0700
 
     rgw: patch manifest to handle explicit objs copy issue
 
-    Fixes: http://tracker.ceph.com/issues/16435
+    Fixes: http://tracker.stone.com/issues/16435
 
     Signed-off-by: Yehuda Sadeh <yehuda@redhat.com>
     (cherry picked from commit b51476466e5bb03bbaa6e428bb6bb189a259b9fd)
@@ -2072,7 +2072,7 @@ Date:   Tue Sep 20 07:25:36 2016 -0400
     The issue which resulted in too large v2 image ids was fixed
     under #16887.
 
-    Fixes: http://tracker.ceph.com/issues/17310
+    Fixes: http://tracker.stone.com/issues/17310
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 61734d266c6ee476c2f5fcfbbaefc7d0c7939617)
 
@@ -2099,7 +2099,7 @@ Date:   Tue Jun 7 17:15:05 2016 -0700
 
     OSDMonitor::prepare_pgtemp: only update up_thru if newer
 
-    Fixes: http://tracker.ceph.com/issues/16185
+    Fixes: http://tracker.stone.com/issues/16185
     Signed-off-by: Samuel Just <sjust@redhat.com>
     (cherry picked from commit 5f2bd7b6b28aad96d68444b22c04b8b24564616b)
 
@@ -2117,7 +2117,7 @@ Date:   Tue Sep 20 14:10:16 2016 +0800
     do not output compiled crush map if anything goes wrong when parsing
     crush map.
 
-    Fixes: http://tracker.ceph.com/issues/17306
+    Fixes: http://tracker.stone.com/issues/17306
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit b2c0a079dc074c907e1bc429861230096534f597)
 
@@ -2146,7 +2146,7 @@ Date:   Sat Nov 12 12:37:00 2016 +0100
     This patch is inspired by fabd6357e42e526d2704d7cb80375c12d731df8d but is not a
     cherry-pick.
 
-    Fixes: http://tracker.ceph.com/issues/16870
+    Fixes: http://tracker.stone.com/issues/16870
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
 
 commit 64eeb8d96cf295c8a3739d5d993b51f77c35e466
@@ -2168,7 +2168,7 @@ Date:   Fri Aug 5 14:27:43 2016 +0800
      USED / (USED + AVAIL)
     as the %USED. so once we have no AVAIL space left, %USED will be 100%.
 
-    Fixes: http://tracker.ceph.com/issues/16933
+    Fixes: http://tracker.stone.com/issues/16933
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 08532ea166dfd97c548d9f1fb478e163021cdda3)
 
@@ -2198,7 +2198,7 @@ Date:   Thu Aug 11 08:57:51 2016 -0700
 
     PG: use upset rather than up for _update_calc_stats
 
-    Fixes: http://tracker.ceph.com/issues/16998
+    Fixes: http://tracker.stone.com/issues/16998
     Signed-off-by: Samuel Just <sjust@redhat.com>
     (cherry picked from commit 200cae8c9db99b3dede377f74413cc0b15033e1f)
 
@@ -2230,10 +2230,10 @@ commit fbf51ba878c7a00c045fc97bf309c39b0d9c4fcc
 Author: Brad Hubbard <bhubbard@redhat.com>
 Date:   Tue Jun 14 17:34:44 2016 +1000
 
-    cephx: Fix multiple segfaults due to attempts to encrypt or decrypt
+    stonex: Fix multiple segfaults due to attempts to encrypt or decrypt
     an empty secret and a null CryptoKeyHandler
 
-    Fixes: http://tracker.ceph.com/issues/16266
+    Fixes: http://tracker.stone.com/issues/16266
     Signed-off-by: Brad Hubbard <bhubbard@redhat.com>
     (cherry picked from commit 009e777fbd18602e5fd66f97bdad95e977e6fecc)
 
@@ -2246,7 +2246,7 @@ Date:   Tue Sep 20 17:39:24 2016 +0800
     otherwise JournalingFileStore will assert when deleting FileJournal
     which still has the non block/regular file opened.
 
-    Fixes: http://tracker.ceph.com/issues/17307
+    Fixes: http://tracker.stone.com/issues/17307
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 7431eec6fd24cd08ca6c76a9893e3f6e8c63a916)
 
@@ -2256,7 +2256,7 @@ Date:   Sun Oct 9 18:31:54 2016 +0800
 
     osd/PGBackend: fix collection_list shadow return value
 
-    Fixes: http://tracker.ceph.com/issues/17713
+    Fixes: http://tracker.stone.com/issues/17713
     Signed-off-by: Haomai Wang <haomai@xsky.com>
     (cherry picked from commit 8a53a604f375eb568a6fc88a402a6afd83fa151a)
 
@@ -2279,7 +2279,7 @@ Date:   Tue Oct 11 19:32:43 2016 +0800
 
     rgw: fix the field 'total_time'  of log entry in log show opt
 
-    Fixes: http://tracker.ceph.com/issues/17598
+    Fixes: http://tracker.stone.com/issues/17598
 
     Signed-off-by: weiqiaomiao <wei.qiaomiao@zte.com.cn>
     (cherry picked from commit 8f4825c5f012c77a3a91e22706dcab9c6067d77e)
@@ -2290,7 +2290,7 @@ Date:   Thu Oct 20 10:17:36 2016 -0700
 
     rgw: handle empty POST condition
 
-    Fixes: http://tracker.ceph.com/issues/17635
+    Fixes: http://tracker.stone.com/issues/17635
 
     Before accessing json entity, need to check that iterator is valid.
     If there is no entry return appropriate error code.
@@ -2305,21 +2305,21 @@ Date:   Mon Jul 4 15:29:22 2016 +0300
     init-radosgw: do not use systemd-run in sysvinit
 
     `systemd-run` logic in initscripts was introduced because of ticket
-    http://tracker.ceph.com/issues/7627.
+    http://tracker.stone.com/issues/7627.
 
     If we have systemd-based operating system, we should use systemd unit files
-    from systemd directory to start/stop ceph daemons.
+    from systemd directory to start/stop stone daemons.
     Otherwise, `daemon()` from `/etc/init.d/functions` on systemd distro starts service
     in `system.slice` and everything works well.
 
     `systemd-run` can not be run on non-systemd distros, so it's not needed
     on SysV systems.
 
-    also, ceph-disk is now able to run the "systemctl"
-    to enable and start the ceph-osd, and ceph-deploy is also now
-    playing well with systemd when it comes to ceph-mon and ceph-mds
+    also, stone-disk is now able to run the "systemctl"
+    to enable and start the stone-osd, and stone-deploy is also now
+    playing well with systemd when it comes to stone-mon and stone-mds
 
-    Fixes: http://tracker.ceph.com/issues/16440
+    Fixes: http://tracker.stone.com/issues/16440
 
     Signed-off-by: Vladislav Odintsov <odivlad@gmail.com>
     (cherry picked from commit 1fd4f92a025e80092b8d08d9b7da2e0b73a52f0f)
@@ -2329,7 +2329,7 @@ Merge: 8e13e7c bfa7c14
 Author: Loic Dachary <loic@dachary.org>
 Date:   Sat Oct 29 10:24:18 2016 +0200
 
-    Merge pull request #11372 from ceph/wip-17386-hammer
+    Merge pull request #11372 from stone/wip-17386-hammer
 
     hammer: doc: add "Upgrading to Hammer" section
 
@@ -2342,7 +2342,7 @@ Date:   Thu Oct 27 15:44:09 2016 +0800
 
     doc: add "to Hammer" upgrade section
 
-    Fixes: http://tracker.ceph.com/issues/17534
+    Fixes: http://tracker.stone.com/issues/17534
     Signed-off-by: Kefu Chai <kchai@redhat.com>
 
 commit 8e5872bf6c18b410136fd76974ae11e645c09928
@@ -2352,18 +2352,18 @@ Date:   Wed Oct 19 11:36:07 2016 -0600
 
     Merge pull request #1215 from jcsp/wip-generate-caps-hammer
 
-    tasks/ceph: move generate_caps from teuthology
+    tasks/stone: move generate_caps from teuthology
 
 commit 2c27626c1e5d9989ac6942a94b6d9198ccbd28fb
 Author: John Spray <john.spray@redhat.com>
 Date:   Tue Sep 27 12:17:22 2016 +0100
 
-    tasks/ceph: move generate_caps from teuthology
+    tasks/stone: move generate_caps from teuthology
 
     This was only used in this task, and it is much too
-    ceph-specific to belong in teuthology.
+    stone-specific to belong in teuthology.
 
-    Fixes: http://tracker.ceph.com/issues/17614
+    Fixes: http://tracker.stone.com/issues/17614
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 298cc8f932a2a327e07f5b73708404588a611322)
 
@@ -2538,9 +2538,9 @@ Merge: c2a8f05 e4038a0
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Sep 29 21:34:49 2016 -0700
 
-    Merge pull request #1192 from ceph/wip-offline-split-hammer2
+    Merge pull request #1192 from stone/wip-offline-split-hammer2
 
-    ceph_manager: test offline split via ceph-objectstore-tool
+    stone_manager: test offline split via stone-objectstore-tool
 
     Reviewed-by: Josh Durgin <jdurgin@redhat.com>
 
@@ -2549,9 +2549,9 @@ Merge: e2d4f0a 99bb9f6
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Sep 29 21:34:26 2016 -0700
 
-    Merge pull request #11253 from ceph/wip-offline-split-hammer2
+    Merge pull request #11253 from stone/wip-offline-split-hammer2
 
-    ceph-objectstore-tool: add a way to split filestore directories offline
+    stone-objectstore-tool: add a way to split filestore directories offline
 
     Reviewed-by: Josh Durgin <jdurgin@redhat.com>
 
@@ -2559,7 +2559,7 @@ commit e4038a0c0068569cc1c7bcaf1b590fba31291610
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Fri Aug 5 18:16:20 2016 -0700
 
-    ceph_manager: test offline split via ceph-objectstore-tool
+    stone_manager: test offline split via stone-objectstore-tool
 
     When killing an osd, split all pools with a low threshold.
     This will slow down tests, but should not impact correctness.
@@ -2571,7 +2571,7 @@ commit 99bb9f603f2123e81470a819c1cd64df13a22425
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Fri Aug 5 11:45:00 2016 -0700
 
-    ceph-objectstore-tool: add a way to split filestore directories offline
+    stone-objectstore-tool: add a way to split filestore directories offline
 
     Use the usual split code, and split each dir that meets the
     usual split criteria.
@@ -2581,12 +2581,12 @@ Date:   Fri Aug 5 11:45:00 2016 -0700
     a load merge threshold (e.g. filestore merge threshold = 1), and
     adjust the split multiplier accordingly.
 
-    Fixes: http://tracker.ceph.com/issues/17220
+    Fixes: http://tracker.stone.com/issues/17220
     Signed-off-by: Josh Durgin <jdurgin@redhat.com>
     (cherry picked from commit e7b0428e0e8d8f5459311dc698d94a3ac4f04684)
 
     Conflicts:
-	src/tools/ceph_objectstore_tool.cc
+	src/tools/stone_objectstore_tool.cc
     * remove c++11 auto usage
     * change HashIndex::list_subdirs() call to use set instead of vector
     * adjust to hammer signature of coll_t::is_pg()
@@ -2671,7 +2671,7 @@ Date:   Mon Sep 19 14:40:12 2016 -0400
 
     Add '--job-id' and '--max-concurrent-ios' to Orphan Search Options
 
-    Fixes: http://tracker.ceph.com/issues/17281
+    Fixes: http://tracker.stone.com/issues/17281
     Signed-off-by: Thomas Serlin <tserlin@redhat.com>
     (cherry picked from commit 697f30d86f49b73c981c06375ab2937570b1db01)
 
@@ -2686,7 +2686,7 @@ Date:   Thu Sep 15 12:56:39 2016 -0600
     sets the number of seconds to wait before declaring an object to be an
     orphan.
 
-    Fixes: http://tracker.ceph.com/issues/17280
+    Fixes: http://tracker.stone.com/issues/17280
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit 354059ae43b4f4cc797da1669715399cd96a4738)
 
@@ -2712,7 +2712,7 @@ Date:   Thu Sep 15 11:40:14 2016 -0600
     the number of seconds to wait before declaring an object to be an
     orphan.
 
-    Fixes: http://tracker.ceph.com/issues/17280
+    Fixes: http://tracker.stone.com/issues/17280
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit a676c516069cc448591018ecf4f7d1f7f7bc3bfd)
 

@@ -21,7 +21,7 @@ export class DashboardForbiddenError extends DashboardError {
 
 export class DashboardUserDeniedError extends DashboardError {
   header = $localize`User Denied`;
-  message = $localize`Sorry, the user does not exist in Ceph.
+  message = $localize`Sorry, the user does not exist in Stone.
   You'll be logged out from the Identity Provider when you retry logging in.`;
   icon = Icons.warning;
 }

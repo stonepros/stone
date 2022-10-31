@@ -23,7 +23,7 @@ Upgrading
 
 Notable Changes
 ---------------
-* build/ops: Ceph daemon failed to start, because the service name was already used. (`issue#13474 <http://tracker.ceph.com/issues/13474>`_, `pr#6833 <http://github.com/ceph/ceph/pull/6833>`_, Chuanhong Wang)
+* build/ops: Stone daemon failed to start, because the service name was already used. (`issue#13474 <http://tracker.ceph.com/issues/13474>`_, `pr#6833 <http://github.com/ceph/ceph/pull/6833>`_, Chuanhong Wang)
 * build/ops: ceph upstart script rbdmap.conf incorrectly processes parameters (`issue#13214 <http://tracker.ceph.com/issues/13214>`_, `pr#6396 <http://github.com/ceph/ceph/pull/6396>`_, Sage Weil)
 * build/ops: libunwind package missing on CentOS 7 (`issue#13997 <http://tracker.ceph.com/issues/13997>`_, `pr#6845 <http://github.com/ceph/ceph/pull/6845>`_, Loic Dachary)
 * build/ops: rbd-replay-* moved from ceph-test-dbg to ceph-common-dbg as well (`issue#13785 <http://tracker.ceph.com/issues/13785>`_, `pr#6628 <http://github.com/ceph/ceph/pull/6628>`_, Loic Dachary)
@@ -32,8 +32,8 @@ Notable Changes
 * common: auth/cephx: large amounts of log are produced by osd (`issue#13610 <http://tracker.ceph.com/issues/13610>`_, `pr#6836 <http://github.com/ceph/ceph/pull/6836>`_, Qiankun Zheng)
 * common: log: Log.cc: Assign LOG_DEBUG priority to syslog calls (`issue#13993 <http://tracker.ceph.com/issues/13993>`_, `pr#6993 <http://github.com/ceph/ceph/pull/6993>`_, Brad Hubbard)
 * crush: crash if we see CRUSH_ITEM_NONE in early rule step (`issue#13477 <http://tracker.ceph.com/issues/13477>`_, `pr#6626 <http://github.com/ceph/ceph/pull/6626>`_, Sage Weil)
-* fs: Ceph file system is not freeing space (`issue#13777 <http://tracker.ceph.com/issues/13777>`_, `pr#7431 <http://github.com/ceph/ceph/pull/7431>`_, Yan, Zheng, John Spray)
-* fs: Ceph-fuse won't start correctly when the option log_max_new in ceph.conf set to zero (`issue#13443 <http://tracker.ceph.com/issues/13443>`_, `pr#6395 <http://github.com/ceph/ceph/pull/6395>`_, Wenjun Huang)
+* fs: Stone file system is not freeing space (`issue#13777 <http://tracker.ceph.com/issues/13777>`_, `pr#7431 <http://github.com/ceph/ceph/pull/7431>`_, Yan, Zheng, John Spray)
+* fs: Stone-fuse won't start correctly when the option log_max_new in ceph.conf set to zero (`issue#13443 <http://tracker.ceph.com/issues/13443>`_, `pr#6395 <http://github.com/ceph/ceph/pull/6395>`_, Wenjun Huang)
 * fs: Segmentation fault accessing file using fuse mount (`issue#13714 <http://tracker.ceph.com/issues/13714>`_, `pr#6853 <http://github.com/ceph/ceph/pull/6853>`_, Yan, Zheng)
 * librbd: Avoid re-writing old-format image header on resize (`issue#13674 <http://tracker.ceph.com/issues/13674>`_, `pr#6630 <http://github.com/ceph/ceph/pull/6630>`_, Jason Dillaman)
 * librbd: ImageWatcher shouldn't block the notification thread (`issue#14373 <http://tracker.ceph.com/issues/14373>`_, `pr#7406 <http://github.com/ceph/ceph/pull/7406>`_, Jason Dillaman)
@@ -44,7 +44,7 @@ Notable Changes
 * librbd: fix merge-diff for >2GB diff-files (`issue#14030 <http://tracker.ceph.com/issues/14030>`_, `pr#6981 <http://github.com/ceph/ceph/pull/6981>`_, Jason Dillaman)
 * librbd: flattening an rbd image with active IO can lead to hang (`issue#14092 <http://tracker.ceph.com/issues/14092>`_, `issue#14483 <http://tracker.ceph.com/issues/14483>`_, `pr#7484 <http://github.com/ceph/ceph/pull/7484>`_, Jason Dillaman)
 * mds: fix client capabilities during reconnect (client.XXXX isn't responding to mclientcaps warning) (`issue#11482 <http://tracker.ceph.com/issues/11482>`_, `pr#6752 <http://github.com/ceph/ceph/pull/6752>`_, Yan, Zheng)
-* mon: Ceph Pools' MAX AVAIL is 0 if some OSDs' weight is 0 (`issue#13840 <http://tracker.ceph.com/issues/13840>`_, `pr#6907 <http://github.com/ceph/ceph/pull/6907>`_, Chengyuan Li)
+* mon: Stone Pools' MAX AVAIL is 0 if some OSDs' weight is 0 (`issue#13840 <http://tracker.ceph.com/issues/13840>`_, `pr#6907 <http://github.com/ceph/ceph/pull/6907>`_, Chengyuan Li)
 * mon: should not set isvalid = true when cephx_verify_authorizer retur... (`issue#13525 <http://tracker.ceph.com/issues/13525>`_, `pr#6392 <http://github.com/ceph/ceph/pull/6392>`_, Ruifeng Yang)
 * objecter: pool op callback may hang forever. (`issue#13642 <http://tracker.ceph.com/issues/13642>`_, `pr#6627 <http://github.com/ceph/ceph/pull/6627>`_, xie xingguo)
 * objecter: potential null pointer access when do pool_snap_list. (`issue#13639 <http://tracker.ceph.com/issues/13639>`_, `pr#6840 <http://github.com/ceph/ceph/pull/6840>`_, xie xingguo)
@@ -84,9 +84,9 @@ Major Changes from Hammer
 
 - *General*:
 
-  * Ceph daemons are now managed via systemd (with the exception of
+  * Stone daemons are now managed via systemd (with the exception of
     Ubuntu Trusty, which still uses upstart).
-  * Ceph daemons run as 'ceph' user instead root.
+  * Stone daemons run as 'ceph' user instead root.
   * On Red Hat distros, there is also an SELinux policy.
 
 - *RADOS*:
@@ -127,7 +127,7 @@ Major Changes from Hammer
   * There is a new ``rbd status`` command that, for now, shows who has
     the image open/mapped.
 
-- *CephFS*:
+- *StoneFS*:
 
   * You can now rename snapshots.
   * There have been ongoing improvements around administration, diagnostics,
@@ -141,7 +141,7 @@ Distro compatibility
 
 We have decided to drop support for many older distributions so that we can
 move to a newer compiler toolchain (e.g., C++11).  Although it is still possible
-to build Ceph on older distributions by installing backported development tools,
+to build Stone on older distributions by installing backported development tools,
 we are not building and publishing release packages for ceph.com.
 
 We now build packages for:
@@ -168,9 +168,9 @@ be stopped and marked down before any Infernalis OSDs will be allowed
 to start up.  This fencing is enforced by the Infernalis monitor, so
 use an upgrade procedure like:
 
-#. Upgrade Ceph on monitor hosts
+#. Upgrade Stone on monitor hosts
 #. Restart all ceph-mon daemons
-#. Upgrade Ceph on all OSD hosts
+#. Upgrade Stone on all OSD hosts
 #. Stop all ceph-osd daemons
 #. Mark all OSDs down with something like::
 
@@ -195,7 +195,7 @@ Upgrading from Hammer
   The main notable distro that is *not* yet using systemd is Ubuntu trusty
   14.04.  (The next Ubuntu LTS, 16.04, will use systemd instead of upstart.)
 
-* Ceph daemons now run as user and group ``ceph`` by default.  The
+* Stone daemons now run as user and group ``ceph`` by default.  The
   ceph user has a static UID assigned by Fedora and Debian (also used
   by derivative distributions like RHEL/CentOS and Ubuntu).  On SUSE
   the ceph user will currently get a dynamically assigned UID when the
@@ -211,7 +211,7 @@ Upgrading from Hammer
 
         setuser match path = /var/lib/ceph/$type/$cluster-$id
 
-      This will make the Ceph daemons run as root (i.e., not drop
+      This will make the Stone daemons run as root (i.e., not drop
       privileges and switch to user ceph) if the daemon's data
       directory is still owned by root.  Newly deployed daemons will
       be created with data owned by user ceph and will run with
@@ -787,9 +787,9 @@ Major Changes from Hammer
 
 - *General*:
 
-  * Ceph daemons are now managed via systemd (with the exception of
+  * Stone daemons are now managed via systemd (with the exception of
     Ubuntu Trusty, which still uses upstart).
-  * Ceph daemons run as 'ceph' user instead of root.
+  * Stone daemons run as 'ceph' user instead of root.
   * On Red Hat distros, there is also an SELinux policy.
 
 - *RADOS*:
@@ -830,7 +830,7 @@ Major Changes from Hammer
   * There is a new ``rbd status`` command that, for now, shows who has
     the image open/mapped.
 
-- *CephFS*:
+- *StoneFS*:
 
   * You can now rename snapshots.
   * There have been ongoing improvements around administration, diagnostics,
@@ -844,7 +844,7 @@ Distro compatibility
 
 We have decided to drop support for many older distributions so that we can
 move to a newer compiler toolchain (e.g., C++11).  Although it is still possible
-to build Ceph on older distributions by installing backported development tools,
+to build Stone on older distributions by installing backported development tools,
 we are not building and publishing release packages for them on ceph.com.
 
 In particular,
@@ -886,7 +886,7 @@ Upgrading from Hammer
   The main notable distro that is *not* yet using systemd is Ubuntu trusty
   14.04.  (The next Ubuntu LTS, 16.04, will use systemd instead of upstart.)
 
-* Ceph daemons now run as user and group ``ceph`` by default.  The
+* Stone daemons now run as user and group ``ceph`` by default.  The
   ceph user has a static UID assigned by Fedora and Debian (also used
   by derivative distributions like RHEL/CentOS and Ubuntu).  On SUSE
   the ceph user will currently get a dynamically assigned UID when the
@@ -902,7 +902,7 @@ Upgrading from Hammer
 
         setuser match path = /var/lib/ceph/$type/$cluster-$id
 
-      This will make the Ceph daemons run as root (i.e., not drop
+      This will make the Stone daemons run as root (i.e., not drop
       privileges and switch to user ceph) if the daemon's data
       directory is still owned by root.  Newly deployed daemons will
       be created with data owned by user ceph and will run with
@@ -1026,7 +1026,7 @@ v9.0.3
 This is the second to last batch of development work for the
 Infernalis cycle.  The most intrusive change is an internal (non
 user-visible) change to the OSD's ObjectStore interface.  Many fixes and
-improvements elsewhere across RGW, RBD, and another big pile of CephFS
+improvements elsewhere across RGW, RBD, and another big pile of StoneFS
 scrub/repair improvements.
 
 Upgrading
@@ -1285,7 +1285,7 @@ environment.  As a result the next one (v9.0.2) will have a bit more work than
 is usual.
 
 Highlights here include lots of RGW Swift fixes, RBD feature work
-surrounding the new object map feature, more CephFS snapshot fixes,
+surrounding the new object map feature, more StoneFS snapshot fixes,
 and a few important CRUSH fixes.
 
 Notable Changes
@@ -1391,7 +1391,7 @@ v9.0.0
 ======
 
 This is the first development release for the Infernalis cycle, and
-the first Ceph release to sport a version number from the new
+the first Stone release to sport a version number from the new
 numbering scheme.  The "9" indicates this is the 9th release cycle--I
 (for Infernalis) is the 9th letter.  The first "0" indicates this is a
 development release ("1" will mean release candidate and "2" will mean

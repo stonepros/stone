@@ -147,7 +147,7 @@ export class MgrModuleListComponent extends ListWithDetails {
   }
 
   /**
-   * Update the Ceph Mgr module state to enabled or disabled.
+   * Update the Stone Mgr module state to enabled or disabled.
    */
   updateModuleState() {
     if (!this.selection.hasSelection) {
@@ -175,7 +175,7 @@ export class MgrModuleListComponent extends ListWithDetails {
       });
     };
 
-    // Note, the Ceph Mgr is always restarted when a module
+    // Note, the Stone Mgr is always restarted when a module
     // is enabled/disabled.
     const module = this.selection.first();
     if (module.enabled) {

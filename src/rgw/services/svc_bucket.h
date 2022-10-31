@@ -3,7 +3,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -24,7 +24,7 @@
 class RGWSI_Bucket : public RGWServiceInstance
 {
 public:
-  RGWSI_Bucket(CephContext *cct) : RGWServiceInstance(cct) {}
+  RGWSI_Bucket(StoneContext *cct) : RGWServiceInstance(cct) {}
   virtual ~RGWSI_Bucket() {}
 
   static string get_entrypoint_meta_key(const rgw_bucket& bucket);

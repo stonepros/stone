@@ -50,8 +50,8 @@ class CrushRuleTest(DashboardTestCase):
     @classmethod
     def tearDownClass(cls):
         super(CrushRuleTest, cls).tearDownClass()
-        cls._ceph_cmd(['osd', 'crush', 'rule', 'rm', 'some_rule'])
-        cls._ceph_cmd(['osd', 'crush', 'rule', 'rm', 'another_rule'])
+        cls._stone_cmd(['osd', 'crush', 'rule', 'rm', 'some_rule'])
+        cls._stone_cmd(['osd', 'crush', 'rule', 'rm', 'another_rule'])
 
     def test_list(self):
         self._get('/api/crush_rule')

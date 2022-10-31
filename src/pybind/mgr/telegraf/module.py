@@ -18,8 +18,8 @@ except ImportError:
 class Module(MgrModule):
     COMMANDS = [
         {
-            "cmd": "telegraf config-set name=key,type=CephString "
-                   "name=value,type=CephString",
+            "cmd": "telegraf config-set name=key,type=StoneString "
+                   "name=value,type=StoneString",
             "desc": "Set a configuration value",
             "perm": "rw"
         },
@@ -47,7 +47,7 @@ class Module(MgrModule):
         }
     ]
 
-    ceph_health_mapping = {'HEALTH_OK': 0, 'HEALTH_WARN': 1, 'HEALTH_ERR': 2}
+    stone_health_mapping = {'HEALTH_OK': 0, 'HEALTH_WARN': 1, 'HEALTH_ERR': 2}
 
     @property
     def config_keys(self):
@@ -87,7 +87,7 @@ class Module(MgrModule):
         for df_type in df_types:
             for pool in df['pools']:
                 yield {
-                    'measurement': 'ceph_pool_stats',
+                    'measurement': 'stone_pool_stats',
                     'tags': {
                         'pool_name': pool['name'],
                         'pool_id': pool['id'],
@@ -109,9 +109,9 @@ class Module(MgrModule):
                     continue
 
                 yield {
-                    'measurement': 'ceph_daemon_stats',
+                    'measurement': 'stone_daemon_stats',
                     'tags': {
-                        'ceph_daemon': daemon,
+                        'stone_daemon': daemon,
                         'type_instance': path,
                         'host': metadata['hostname'],
                         'fsid': self.get_fsid()
@@ -144,7 +144,7 @@ class Module(MgrModule):
         stats = dict()
 
         health = json.loads(self.get('health')['json'])
-        stats['health'] = self.ceph_health_mapping.get(health['status'])
+        stats['health'] = self.stone_health_mapping.get(health['status'])
 
         mon_status = json.loads(self.get('mon_status')['json'])
         stats['num_mon'] = len(mon_status['monmap']['mons'])
@@ -191,7 +191,7 @@ class Module(MgrModule):
 
         for key, value in stats.items():
             yield {
-                'measurement': 'ceph_cluster_stats',
+                'measurement': 'stone_cluster_stats',
                 'tags': {
                     'type_instance': key,
                     'fsid': self.get_fsid()

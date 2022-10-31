@@ -1,4 +1,4 @@
-_ceph-lazy()
+_stone-lazy()
 {
   local cur prev all_opts commands
   COMPREPLY=()
@@ -24,4 +24,4 @@ _ceph-lazy()
     return 0
   fi
 }
-complete -F _ceph-lazy ceph-lazy
+complete -F _stone-lazy stone-lazy

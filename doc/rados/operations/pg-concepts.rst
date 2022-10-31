@@ -2,8 +2,8 @@
  Placement Group Concepts
 ==========================
 
-When you execute commands like ``ceph -w``, ``ceph osd dump``, and other 
-commands related to placement groups, Ceph may return values using some
+When you execute commands like ``stone -w``, ``stone osd dump``, and other 
+commands related to placement groups, Stone may return values using some
 of the following terms: 
 
 *Peering*

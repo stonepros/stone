@@ -2,7 +2,7 @@
 
 # Run qemu-iotests against rbd. These are block-level tests that go
 # through qemu but do not involve running a full vm. Note that these
-# require the admin ceph user, as there's no way to pass the ceph user
+# require the admin stone user, as there's no way to pass the stone user
 # to qemu-iotests currently.
 
 testlist='001 002 003 004 005 008 009 010 011 021 025 032 033'

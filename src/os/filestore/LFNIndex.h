@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -24,7 +24,7 @@
 
 #include "osd/osd_types.h"
 #include "include/object.h"
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 
 #include "CollectionIndex.h"
 
@@ -56,7 +56,7 @@
     try {					\
       if (failed) {				\
 	r = cleanup();				\
-	ceph_assert(r == 0);				\
+	stone_assert(r == 0);				\
       }						\
       { x }					\
       out:					\
@@ -65,7 +65,7 @@
     } catch (RetryException&) {			\
       failed = true;				\
     } catch (...) {				\
-      ceph_abort();				\
+      stone_abort();				\
     }						\
   }						\
   return -1;					\
@@ -126,7 +126,7 @@ private:
 public:
   /// Constructor
   LFNIndex(
-    CephContext* cct,
+    StoneContext* cct,
     coll_t collection,
     const char *base_path, ///< [in] path to Index root
     uint32_t index_version,
@@ -406,14 +406,14 @@ protected:
   int add_attr_path(
     const std::vector<std::string> &path, ///< [in] Path to modify.
     const std::string &attr_name, 	///< [in] Name of attribute.
-    ceph::buffer::list &attr_value	///< [in] Value to save.
+    stone::buffer::list &attr_value	///< [in] Value to save.
     );
 
   /// Read into attr_value attribute attr_name on path.
   int get_attr_path(
     const std::vector<std::string> &path, ///< [in] Path to read.
     const std::string &attr_name, 	///< [in] Attribute to read.
-    ceph::buffer::list &attr_value	///< [out] Attribute value read.
+    stone::buffer::list &attr_value	///< [out] Attribute value read.
     );
 
   /// Remove attr from path

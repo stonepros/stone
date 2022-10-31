@@ -18,7 +18,7 @@ struct DaemonKey
 bool operator<(const DaemonKey& lhs, const DaemonKey& rhs);
 std::ostream& operator<<(std::ostream& os, const DaemonKey& key);
 
-namespace ceph {
+namespace stone {
   std::string to_string(const DaemonKey& key);
 }
 

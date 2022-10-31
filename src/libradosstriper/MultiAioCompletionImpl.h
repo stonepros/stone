@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Sebastien Ponce <sebastien.ponce@cern.ch>
  *
@@ -17,15 +17,15 @@
 
 #include <list>
 #include <mutex>
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/radosstriper/libradosstriper.hpp"
 
 namespace libradosstriper {
 
 struct MultiAioCompletionImpl {
 
-  ceph::mutex lock = ceph::make_mutex("MultiAioCompletionImpl lock", false);
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("MultiAioCompletionImpl lock", false);
+  stone::condition_variable cond;
   int ref, rval;
   int pending_complete, pending_safe;
   rados_callback_t callback_complete, callback_safe;
@@ -106,8 +106,8 @@ struct MultiAioCompletionImpl {
     _get();
   }
   void _get() {
-    ceph_assert(ceph_mutex_is_locked(lock));
-    ceph_assert(ref > 0);
+    stone_assert(stone_mutex_is_locked(lock));
+    stone_assert(ref > 0);
     ++ref;
   }
   void put() {
@@ -115,7 +115,7 @@ struct MultiAioCompletionImpl {
     put_unlock();
   }
   void put_unlock() {
-    ceph_assert(ref > 0);
+    stone_assert(ref > 0);
     int n = --ref;
     lock.unlock();
     if (!n)
@@ -134,7 +134,7 @@ struct MultiAioCompletionImpl {
     _get();
   }
   void complete() {
-    ceph_assert(ceph_mutex_is_locked(lock));
+    stone_assert(stone_mutex_is_locked(lock));
     if (callback_complete) {
       callback_complete(this, callback_complete_arg);
       callback_complete = 0;
@@ -142,7 +142,7 @@ struct MultiAioCompletionImpl {
     cond.notify_all();
   }
   void safe() {
-    ceph_assert(ceph_mutex_is_locked(lock));
+    stone_assert(stone_mutex_is_locked(lock));
     if (callback_safe) {
       callback_safe(this, callback_safe_arg);
       callback_safe = 0;

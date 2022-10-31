@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -58,7 +58,7 @@ public:
   std::string_view get_type_name() const override { return "PGnot"; }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     header.version = HEAD_VERSION;
     encode(epoch, payload);
     if (!HAVE_FEATURE(features, SERVER_OCTOPUS)) {
@@ -76,7 +76,7 @@ public:
 
   void decode_payload() override {
     auto p = payload.cbegin();
-    using ceph::decode;
+    using stone::decode;
     decode(epoch, p);
     if (header.version == 6) {
       // decode legacy vector<pair<pg_notify_t,PastIntervals>>
@@ -105,7 +105,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

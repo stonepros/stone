@@ -2,19 +2,19 @@ import pathlib
 
 import pytest
 
-from cephadm.template import TemplateMgr, UndefinedError, TemplateNotFoundError
+from stoneadm.template import TemplateMgr, UndefinedError, TemplateNotFoundError
 
 
-def test_render(cephadm_module, fs):
+def test_render(stoneadm_module, fs):
     template_base = (pathlib.Path(__file__).parent / '../templates').resolve()
     fake_template = template_base / 'foo/bar'
-    fs.create_file(fake_template, contents='{{ cephadm_managed }}{{ var }}')
+    fs.create_file(fake_template, contents='{{ stoneadm_managed }}{{ var }}')
 
-    template_mgr = TemplateMgr(cephadm_module)
+    template_mgr = TemplateMgr(stoneadm_module)
     value = 'test'
 
     # with base context
-    expected_text = '{}{}'.format(template_mgr.base_context['cephadm_managed'], value)
+    expected_text = '{}{}'.format(template_mgr.base_context['stoneadm_managed'], value)
     assert template_mgr.render('foo/bar', {'var': value}) == expected_text
 
     # without base context
@@ -23,7 +23,7 @@ def test_render(cephadm_module, fs):
 
     # override the base context
     context = {
-        'cephadm_managed': 'abc',
+        'stoneadm_managed': 'abc',
         'var': value
     }
     assert template_mgr.render('foo/bar', context) == 'abc{}'.format(value)

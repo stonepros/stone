@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -80,5 +80,5 @@ SUBSYS(dpdk, 1, 5)
 SUBSYS(eventtrace, 1, 5)
 SUBSYS(prioritycache, 1, 5)
 SUBSYS(test, 0, 5)
-SUBSYS(cephfs_mirror, 0, 5)
-SUBSYS(cephsqlite, 0, 5)
+SUBSYS(stonefs_mirror, 0, 5)
+SUBSYS(stonesqlite, 0, 5)

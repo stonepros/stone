@@ -20,7 +20,7 @@ export class DaemonService {
         container_image: null
       },
       {
-        headers: { Accept: 'application/vnd.ceph.api.v0.1+json' },
+        headers: { Accept: 'application/vnd.stone.api.v0.1+json' },
         observe: 'response'
       }
     );

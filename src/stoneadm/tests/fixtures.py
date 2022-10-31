@@ -11,7 +11,7 @@ from typing import Callable, Dict, List, Optional
 
 with mock.patch('builtins.open', create=True):
     from importlib.machinery import SourceFileLoader
-    cd = SourceFileLoader('cephadm', 'cephadm').load_module()
+    cd = SourceFileLoader('stoneadm', 'stoneadm').load_module()
 
 
 def mock_docker():
@@ -50,24 +50,24 @@ def _mock_run(obj):
     t = obj._create_thread(obj._scrape_host_facts, 'host', 5)
     time.sleep(1)
     if not t.is_alive():
-        obj.cephadm_cache.update_health('host', "inactive", "host thread stopped")
+        obj.stoneadm_cache.update_health('host', "inactive", "host thread stopped")
     
 
 @pytest.fixture
 def exporter():
-    with mock.patch('cephadm.CephadmDaemon.daemon_path', _daemon_path()), \
-       mock.patch('cephadm.CephadmDaemon.can_run', return_value=True), \
-       mock.patch('cephadm.CephadmDaemon.run', _mock_run), \
-       mock.patch('cephadm.CephadmDaemon._scrape_host_facts', _mock_scrape_host):
+    with mock.patch('stoneadm.StoneadmDaemon.daemon_path', _daemon_path()), \
+       mock.patch('stoneadm.StoneadmDaemon.can_run', return_value=True), \
+       mock.patch('stoneadm.StoneadmDaemon.run', _mock_run), \
+       mock.patch('stoneadm.StoneadmDaemon._scrape_host_facts', _mock_scrape_host):
 
-        ctx = cd.CephadmContext()
-        exporter = cd.CephadmDaemon(ctx, fsid='foobar', daemon_id='test')
+        ctx = cd.StoneadmContext()
+        exporter = cd.StoneadmDaemon(ctx, fsid='foobar', daemon_id='test')
         assert exporter.token == 'MyAccessToken' 
         yield exporter
 
 
 @pytest.fixture()
-def cephadm_fs(
+def stoneadm_fs(
     fs: fake_filesystem.FakeFilesystem,
 ):
     """
@@ -79,7 +79,7 @@ def cephadm_fs(
     with mock.patch('os.fchown'), \
          mock.patch('os.fchmod'), \
          mock.patch('platform.processor', return_value='x86_64'), \
-         mock.patch('cephadm.extract_uid_gid', return_value=(uid, gid)):
+         mock.patch('stoneadm.extract_uid_gid', return_value=(uid, gid)):
 
             fs.create_dir(cd.DATA_DIR)
             fs.create_dir(cd.LOG_DIR)
@@ -91,14 +91,14 @@ def cephadm_fs(
 
 
 @contextmanager
-def with_cephadm_ctx(
+def with_stoneadm_ctx(
     cmd: List[str],
     container_engine: Callable = mock_podman(),
     list_networks: Optional[Dict[str,Dict[str,List[str]]]] = None,
     hostname: Optional[str] = None,
 ):
     """
-    :param cmd: cephadm command argv
+    :param cmd: stoneadm command argv
     :param container_engine: container engine mock (podman or docker)
     :param list_networks: mock 'list-networks' return
     :param hostname: mock 'socket.gethostname' return
@@ -106,17 +106,17 @@ def with_cephadm_ctx(
     if not hostname:
         hostname = 'host1'
 
-    with mock.patch('cephadm.attempt_bind'), \
-         mock.patch('cephadm.call', return_value=('', '', 0)), \
-         mock.patch('cephadm.call_timeout', return_value=0), \
-         mock.patch('cephadm.find_executable', return_value='foo'), \
-         mock.patch('cephadm.is_available', return_value=True), \
-         mock.patch('cephadm.json_loads_retry', return_value={'epoch' : 1}), \
+    with mock.patch('stoneadm.attempt_bind'), \
+         mock.patch('stoneadm.call', return_value=('', '', 0)), \
+         mock.patch('stoneadm.call_timeout', return_value=0), \
+         mock.patch('stoneadm.find_executable', return_value='foo'), \
+         mock.patch('stoneadm.is_available', return_value=True), \
+         mock.patch('stoneadm.json_loads_retry', return_value={'epoch' : 1}), \
          mock.patch('socket.gethostname', return_value=hostname):
-        ctx: cd.CephadmContext = cd.cephadm_init_ctx(cmd)
+        ctx: cd.StoneadmContext = cd.stoneadm_init_ctx(cmd)
         ctx.container_engine = container_engine
         if list_networks is not None:
-            with mock.patch('cephadm.list_networks', return_value=list_networks):
+            with mock.patch('stoneadm.list_networks', return_value=list_networks):
                 yield ctx
         else:
             yield ctx

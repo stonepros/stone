@@ -3,7 +3,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -27,7 +27,7 @@ class RGWGetUserStats_CB;
 class RGWSI_User : public RGWServiceInstance
 {
 public:
-  RGWSI_User(CephContext *cct);
+  RGWSI_User(StoneContext *cct);
   virtual ~RGWSI_User();
 
   static string get_meta_key(const rgw_user& user) {
@@ -93,7 +93,7 @@ public:
                          RGWSI_MetaBackend::Context *ctx,
                          const rgw_user& user,
                          const rgw_bucket& bucket,
-                         ceph::real_time creation_time,
+                         stone::real_time creation_time,
                          optional_yield y) = 0;
   virtual int remove_bucket(const DoutPrefixProvider *dpp, 
                             RGWSI_MetaBackend::Context *ctx,
@@ -122,8 +122,8 @@ public:
   virtual int read_stats(const DoutPrefixProvider *dpp, 
                          RGWSI_MetaBackend::Context *ctx,
 			 const rgw_user& user, RGWStorageStats *stats,
-			 ceph::real_time *last_stats_sync,         /* last time a full stats sync completed */
-			 ceph::real_time *last_stats_update,
+			 stone::real_time *last_stats_sync,         /* last time a full stats sync completed */
+			 stone::real_time *last_stats_update,
                          optional_yield y) = 0;  /* last time a stats update was done */
 
   virtual int read_stats_async(const DoutPrefixProvider *dpp, RGWSI_MetaBackend::Context *ctx,

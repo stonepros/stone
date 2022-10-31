@@ -7,14 +7,14 @@
 
 #include "include/types.h"
 #include "include/common_fwd.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "objclass/objclass.h"
 
 //forward declaration
 class ClassHandler
 {
 public:
-  StoneeContext *cct;
+  StoneContext *cct;
   struct ClassData;
 
   struct ClassMethod {
@@ -25,8 +25,8 @@ public:
     ClassData *cls = nullptr;
 
     int exec(cls_method_context_t ctx,
-	     ceph::bufferlist& indata,
-	     ceph::bufferlist& outdata);
+	     stone::bufferlist& indata,
+	     stone::bufferlist& outdata);
     void unregister();
 
     int get_flags() {
@@ -106,10 +106,10 @@ private:
   static bool in_class_list(const std::string& cname,
       const std::string& list);
 
-  ceph::mutex mutex = ceph::make_mutex("ClassHandler");
+  stone::mutex mutex = stone::make_mutex("ClassHandler");
 
 public:
-  explicit ClassHandler(StoneeContext *cct) : cct(cct) {}
+  explicit ClassHandler(StoneContext *cct) : cct(cct) {}
 
   int open_all_classes();
   int open_class(const std::string& cname, ClassData **pcls);

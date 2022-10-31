@@ -6,7 +6,7 @@
 
 #include "librbd/crypto/DataCryptor.h"
 #include "common/allocator.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include <boost/lockfree/queue.hpp>
 
 namespace librbd {
@@ -46,7 +46,7 @@ public:
 
     typedef boost::lockfree::queue<
             T*,
-            boost::lockfree::allocator<ceph::allocator<void>>> ContextQueue;
+            boost::lockfree::allocator<stone::allocator<void>>> ContextQueue;
 
 private:
     DataCryptor<T>* m_data_cryptor;
@@ -60,7 +60,7 @@ private:
         case CIPHER_MODE_DEC:
           return m_decrypt_contexts;
         default:
-          ceph_assert(false);
+          stone_assert(false);
       }
     }
 };

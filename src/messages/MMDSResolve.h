@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -33,14 +33,14 @@ public:
     std::map<client_t,Capability::Export> cap_exports;
     peer_inode_cap() {}
     peer_inode_cap(inodeno_t a, map<client_t, Capability::Export> b) : ino(a), cap_exports(b) {}
-    void encode(ceph::buffer::list &bl) const 
+    void encode(stone::buffer::list &bl) const 
     {
       ENCODE_START(1, 1, bl);
       encode(ino, bl);
       encode(cap_exports, bl);
       ENCODE_FINISH(bl);
     }
-    void decode(ceph::buffer::list::const_iterator &blp)
+    void decode(stone::buffer::list::const_iterator &blp)
     {
       DECODE_START(1, blp);
       decode(ino, blp);
@@ -51,16 +51,16 @@ public:
   WRITE_CLASS_ENCODER(peer_inode_cap)
 
   struct peer_request {
-    ceph::buffer::list inode_caps;
+    stone::buffer::list inode_caps;
     bool committing;
     peer_request() : committing(false) {}
-    void encode(ceph::buffer::list &bl) const {
+    void encode(stone::buffer::list &bl) const {
       ENCODE_START(1, 1, bl);
       encode(inode_caps, bl);
       encode(committing, bl);
       ENCODE_FINISH(bl);
     }
-    void decode(ceph::buffer::list::const_iterator &blp) {
+    void decode(stone::buffer::list::const_iterator &blp) {
       DECODE_START(1, blp);
       decode(inode_caps, blp);
       decode(committing, blp);
@@ -79,13 +79,13 @@ public:
     table_client(int _type, const std::set<version_t>& commits)
       : type(_type), pending_commits(commits) {}
 
-    void encode(ceph::buffer::list& bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl) const {
+      using stone::encode;
       encode(type, bl);
       encode(pending_commits, bl);
     }
-    void decode(ceph::buffer::list::const_iterator& bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& bl) {
+      using stone::decode;
       decode(type, bl);
       decode(pending_commits, bl);
     }
@@ -122,7 +122,7 @@ public:
     peer_requests[reqid].committing = committing;
   }
 
-  void add_peer_request(metareqid_t reqid, ceph::buffer::list& bl) {
+  void add_peer_request(metareqid_t reqid, stone::buffer::list& bl) {
     peer_requests[reqid].inode_caps = std::move(bl);
   }
 
@@ -131,14 +131,14 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(subtrees, payload);
     encode(ambiguous_imports, payload);
     encode(peer_requests, payload);
     encode(table_clients, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(subtrees, p);
     decode(ambiguous_imports, p);
@@ -147,7 +147,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const MMDSResolve::peer_request&) {

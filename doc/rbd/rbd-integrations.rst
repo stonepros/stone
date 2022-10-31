@@ -1,5 +1,5 @@
 =========================================
- Ceph Block Device 3rd Party Integration
+ Stone Block Device 3rd Party Integration
 =========================================
 
 .. toctree::

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -30,7 +30,7 @@
 #include "common/detail/construct_suspended.h"
 
 namespace bi = boost::intrusive;
-namespace ceph {
+namespace stone {
 
 // Compared to the SafeTimer this does fewer allocations (you
 // don't have to allocate a new Context every time you
@@ -142,7 +142,7 @@ class timer {
 public:
   timer() : suspended(false) {
     thread = std::thread(&timer::timer_thread, this);
-    ceph_pthread_setname(thread.native_handle(), "ceph_timer");
+    stone_pthread_setname(thread.native_handle(), "stone_timer");
   }
 
   // Create a suspended timer, jobs will be executed in order when
@@ -307,6 +307,6 @@ public:
     }
   }
 }; // timer
-} // namespace ceph
+} // namespace stone
 
 #endif

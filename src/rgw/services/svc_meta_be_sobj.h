@@ -4,7 +4,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -54,7 +54,7 @@ struct RGWSI_MBSObj_GetParams : public RGWSI_MetaBackend::GetParams {
   RGWSI_MBSObj_GetParams() {}
   RGWSI_MBSObj_GetParams(bufferlist *_pbl,
                          std::map<string, bufferlist> *_pattrs,
-                         ceph::real_time *_pmtime) : RGWSI_MetaBackend::GetParams(_pmtime),
+                         stone::real_time *_pmtime) : RGWSI_MetaBackend::GetParams(_pmtime),
                                                      pbl(_pbl),
                                                      pattrs(_pattrs) {}
 
@@ -75,11 +75,11 @@ struct RGWSI_MBSObj_PutParams : public RGWSI_MetaBackend::PutParams {
 
   RGWSI_MBSObj_PutParams() {}
   RGWSI_MBSObj_PutParams(std::map<string, bufferlist> *_pattrs,
-                         const ceph::real_time& _mtime) : RGWSI_MetaBackend::PutParams(_mtime),
+                         const stone::real_time& _mtime) : RGWSI_MetaBackend::PutParams(_mtime),
                                                           pattrs(_pattrs) {}
   RGWSI_MBSObj_PutParams(bufferlist& _bl,
                          std::map<string, bufferlist> *_pattrs,
-                         const ceph::real_time& _mtime,
+                         const stone::real_time& _mtime,
                          bool _exclusive) : RGWSI_MetaBackend::PutParams(_mtime),
                                             bl(_bl),
                                             pattrs(_pattrs),
@@ -113,7 +113,7 @@ public:
     void init(RGWSI_MetaBackend_Handler *h) override;
   };
 
-  RGWSI_MetaBackend_SObj(CephContext *cct);
+  RGWSI_MetaBackend_SObj(StoneContext *cct);
   virtual ~RGWSI_MetaBackend_SObj();
 
   RGWSI_MetaBackend::Type get_type() {
@@ -130,7 +130,7 @@ public:
   RGWSI_MetaBackend::Context *alloc_ctx() override;
 
 
-  int call_with_get_params(ceph::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)> cb) override;
+  int call_with_get_params(stone::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)> cb) override;
 
   int pre_modify(const DoutPrefixProvider *dpp, 
                  RGWSI_MetaBackend::Context *ctx,

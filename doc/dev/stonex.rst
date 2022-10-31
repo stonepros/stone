@@ -1,5 +1,5 @@
 =====
-Cephx
+Stonex
 =====
 
 .. _cephx:
@@ -74,7 +74,7 @@ claims to be, and an initial cephx message from the monitor to the
 client/principal.::
 
   a->p : 
-    CephxServerChallenge {
+    StonexServerChallenge {
       u64 server_challenge     # random (by server)
     }
 
@@ -83,10 +83,10 @@ value derived from both challenges and its shared key
 principal_secret.::
 
   p->a :
-    CephxRequestHeader {
+    StonexRequestHeader {
       u16 CEPHX_GET_AUTH_SESSION_KEY
     }
-    CephXAuthenticate {
+    StoneXAuthenticate {
       u8 2                     # 2 means nautilus+
       u64 client_challenge     # random (by client)
       u64 key = {client_challenge ^ server_challenge}^principal_secret   # (roughly)
@@ -96,7 +96,7 @@ principal_secret.::
 
 Prior to nautilus,::
 
-    CephXAuthenticate {
+    StoneXAuthenticate {
       u8 1                     # 2 means nautilus+
       u64 client_challenge     # random (by client)
       u64 key = {client_challenge + server_challenge}^principal_secret   # (roughly)
@@ -109,7 +109,7 @@ can reuse the same global_id.  (Otherwise, a new global_id is assigned
 by the monitor.)::
 
   a->p :
-    CephxReplyHeader {
+    StonexReplyHeader {
       u16 CEPHX_GET_AUTH_SESSION_KEY
       s32 result (0)
     }
@@ -133,29 +133,29 @@ where::
     ticket_info {
       u32 service_id       # CEPH_ENTITY_TYPE_AUTH
       u8 msg_version (1)
-      {CephXServiceTicket service_ticket}^principal_secret
-      {CephxTicketBlob ticket_blob}^existing session_key   # if we are renewing a ticket,
-      CephxTicketBlob ticket_blob                          # otherwise
+      {StoneXServiceTicket service_ticket}^principal_secret
+      {StonexTicketBlob ticket_blob}^existing session_key   # if we are renewing a ticket,
+      StonexTicketBlob ticket_blob                          # otherwise
     }
 
     service_ticket_info {
       u32 service_id       # CEPH_ENTITY_TYPE_{OSD,MDS,MGR}
       u8 msg_version (1)
-      {CephXServiceTicket service_ticket}^principal_secret
-      CephxTicketBlob ticket_blob
+      {StoneXServiceTicket service_ticket}^principal_secret
+      StonexTicketBlob ticket_blob
     }
 
-    CephxServiceTicket {
+    StonexServiceTicket {
       CryptoKey session_key      # freshly generated (even if old_ticket is present)
       utime_t expiration         # now + auth_mon_ticket_ttl
     }
 
-    CephxTicketBlob {
+    StonexTicketBlob {
       u64 secret_id             # which service ticket encrypted this; -1 == monsecret, otherwise service's rotating key id
-      {CephXServiceTicketInfo ticket}^mon_secret
+      {StoneXServiceTicketInfo ticket}^mon_secret
     }
 
-    CephxServiceTicketInfo {
+    StonexServiceTicketInfo {
       CryptoKey session_key     # same session_key as above
       AuthTicket ticket
     }
@@ -169,9 +169,9 @@ where::
     }
 
 So: for each ticket, principal gets a part that it decrypts with its
-secret to get the session_key (CephxServiceTicket).  And the
-CephxTicketBlob is opaque (secured by the mon secret) but can be used
-later to prove who we are and what we can do (see CephxAuthorizer
+secret to get the session_key (StonexServiceTicket).  And the
+StonexTicketBlob is opaque (secured by the mon secret) but can be used
+later to prove who we are and what we can do (see StonexAuthorizer
 below).
 
 For Nautilus+, we also include the service tickets.
@@ -188,25 +188,25 @@ Now the client needs the keys used to talk to non-monitors (osd, mds,
 mgr).::
 
   p->a :
-    CephxRequestHeader {
+    StonexRequestHeader {
       u16 CEPHX_GET_PRINCIPAL_SESSION_KEY
     }
-    CephxAuthorizer authorizer      
-    CephxServiceTicketRequest {
+    StonexAuthorizer authorizer      
+    StonexServiceTicketRequest {
       u32 keys    # bitmask of CEPH_ENTITY_TYPE_NAME (MGR, OSD, MDS, etc)
     }
 
 where::
 
-    CephxAuthorizer {
+    StonexAuthorizer {
       u8 AUTH_MODE_AUTHORIZER (1)
       u64 global_id
       u32 service_id    # CEPH_ENTITY_TYPE_*
-      CephxTicketBlob auth_ticket
-      {CephxAuthorize msg}^session_key
+      StonexTicketBlob auth_ticket
+      {StonexAuthorize msg}^session_key
     }
 
-    CephxAuthorize msg {
+    StonexAuthorize msg {
       u8 2
       u64 nonce                         # random from client
       bool have_challenge = false       # not used here
@@ -215,7 +215,7 @@ where::
 
 The monitor validates the authorizer by decrypting the auth_ticket
 with ``mon_secret`` and confirming that it says this principal is who
-they say they are in the CephxAuthorizer fields.  Note that the nonce
+they say they are in the StonexAuthorizer fields.  Note that the nonce
 random bytes aren't used here (the field exists for Phase III below).
 
 Assuming all is well, the authorizer can generate service tickets
@@ -223,7 +223,7 @@ based on the CEPH_ENTITY_TYPE_* bits in the ``keys`` bitmask.
 
 The response looks like::
 
-    CephxResponseHeader {
+    StonexResponseHeader {
       u16 CEPHX_GET_PRINCIPAL_SESSION_KEY
       s32 result (= 0)
     }
@@ -236,21 +236,21 @@ Where, as above,::
     ticket_info {
       u32 service_id      # CEPH_ENTITY_TYPE_{OSD,MGR,MDS}
       u8 msg_version (1)
-      {CephXServiceTicket service_ticket}^principal_secret
-      CephxTicketBlob ticket_blob
+      {StoneXServiceTicket service_ticket}^principal_secret
+      StonexTicketBlob ticket_blob
     }
 
-    CephxServiceTicket {
+    StonexServiceTicket {
       CryptoKey session_key
       utime_t expiration
     }
 
-    CephxTicketBlob {
+    StonexTicketBlob {
       u64 secret_id       # which version of the (rotating) service ticket encrypted this
-      {CephXServiceTicketInfo ticket}^rotating_service_secret
+      {StoneXServiceTicketInfo ticket}^rotating_service_secret
     }
 
-    CephxServiceTicketInfo {
+    StonexServiceTicketInfo {
       CryptoKey session_key
       AuthTicket ticket
     }
@@ -274,15 +274,15 @@ Phase III: Opening a connection to a service
 When a connection is opened, an "authorizer" payload is sent::
 
   p->s :
-    CephxAuthorizer {
+    StonexAuthorizer {
       u8 AUTH_MODE_AUTHORIZER (1)
       u64 global_id
       u32 service_id    # CEPH_ENTITY_TYPE_*
-      CephxTicketBlob auth_ticket
-      {CephxAuthorize msg}^session_key
+      StonexTicketBlob auth_ticket
+      {StonexAuthorize msg}^session_key
     }
 
-    CephxAuthorize msg {
+    StonexAuthorize msg {
       u8 2
       u64 nonce               # random from client
       bool have_challenge = false
@@ -290,24 +290,24 @@ When a connection is opened, an "authorizer" payload is sent::
     }
 
 Note that prior to the Luminous v12.2.6 or Mimic v13.2.2 releases, the
-CephxAuthorize msg did not contain a challenge, and consisted only
+StonexAuthorize msg did not contain a challenge, and consisted only
 of::
 
-    CephxAuthorize msg {
+    StonexAuthorize msg {
       u8 1
       u64 nonce               # random from client
     }
     
-The server will inspect the auth_ticket CephxTicketBlob (by decrypting
+The server will inspect the auth_ticket StonexTicketBlob (by decrypting
 it with its current rotating service key).  If it is a pre-v12.2.6 or
 pre-v13.2.2 client, the server immediately replies with::
 
   s->p :
-    {CephxAuthorizeReply reply}^session_key
+    {StonexAuthorizeReply reply}^session_key
 
 where::
 
-    CephxAuthorizeReply {
+    StonexAuthorizeReply {
       u64 nonce_plus_one
     }
 
@@ -315,29 +315,29 @@ Otherwise, the server will respond with a challenge (to prevent replay
 attacks)::
 
   s->p :
-    {CephxAuthorizeChallenge challenge}^session_key
+    {StonexAuthorizeChallenge challenge}^session_key
 
 where::
 
-    CephxAuthorizeChallenge {
+    StonexAuthorizeChallenge {
       u64 server_challenge        # random from server
     }
 
-The client decrypts and updates its CephxAuthorize msg accordingly,
+The client decrypts and updates its StonexAuthorize msg accordingly,
 resending most of the same information as before::
 
   p->s :
-    CephxAuthorizer {
+    StonexAuthorizer {
       u8 AUTH_MODE_AUTHORIZER (1)
       u64 global_id
       u32 service_id    # CEPH_ENTITY_TYPE_*
-      CephxTicketBlob auth_ticket
-      {CephxAuthorize msg}^session_key
+      StonexTicketBlob auth_ticket
+      {StonexAuthorize msg}^session_key
     }
 
 where::
 
-    CephxAuthorize msg {
+    StonexAuthorize msg {
       u8 2
       u64 nonce                        # (new) random from client
       bool have_challenge = true
@@ -353,11 +353,11 @@ to the client.  It also includes some entropy to use for encryption of
 the session, if it is needed for the mode.::
 
   s->p :
-    {CephxAuthorizeReply reply}^session_key
+    {StonexAuthorizeReply reply}^session_key
 
 where::
 
-    CephxAuthorizeReply {
+    StonexAuthorizeReply {
       u64 nonce_plus_one
       u32 connection_secret_length
       connection secret
@@ -365,7 +365,7 @@ where::
 
 Prior to nautilus, there is no connection secret::
 
-    CephxAuthorizeReply {
+    StonexAuthorizeReply {
       u64 nonce_plus_one
     }
 
@@ -387,12 +387,12 @@ that after a period of time (auth_service_ticket_ttl) the key the
 attacker obtained will no longer be valid.::
 
   p->a :
-    CephxRequestHeader {
+    StonexRequestHeader {
       u16 CEPHX_GET_ROTATING_KEY
     }
 
   a->p :
-    CephxReplyHeader {
+    StonexReplyHeader {
       u16 CEPHX_GET_ROTATING_KEY
       s32 result = 0
     }

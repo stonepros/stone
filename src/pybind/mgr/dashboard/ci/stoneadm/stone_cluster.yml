@@ -1,11 +1,11 @@
 parameters:
  nodes: 4
  node_ip_offset: 100
- pool: ceph-dashboard
- network: ceph-dashboard
+ pool: stone-dashboard
+ network: stone-dashboard
  gateway: 192.168.100.1
  netmask: 255.255.255.0
- prefix: ceph
+ prefix: stone
  numcpus: 1
  memory: 2048
  image: fedora34
@@ -32,7 +32,7 @@ parameters:
     dns: {{ gateway }}
  disks: {{ disks }}
  pool: {{ pool }}
- sharedfolders: [{{ ceph_dev_folder }}]
+ sharedfolders: [{{ stone_dev_folder }}]
  files:
   - bootstrap-cluster.sh
  cmds:

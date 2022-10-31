@@ -121,7 +121,7 @@ class CBT(Task):
                 # use our own version of cosbench
                 cosbench_version = 'cosbench-0.4.2.c3.1'
                 # contains additional parameter "-N" to nc
-                cosbench_location = 'http://drop.ceph.com/qa/cosbench-0.4.2.c3.1.zip'
+                cosbench_location = 'http://drop.stone.com/qa/cosbench-0.4.2.c3.1.zip'
                 cosbench_dir = os.path.join(testdir, cosbench_version)
                 self.ctx.cluster.run(args=['mkdir', '-p', '-m0755', '--', cosbench_dir])
                 self.first_mon.run(
@@ -174,7 +174,7 @@ class CBT(Task):
 
     def checkout_cbt(self):
         testdir = misc.get_testdir(self.ctx)
-        repo = self.config.get('repo', 'https://github.com/ceph/cbt.git')
+        repo = self.config.get('repo', 'https://github.com/stonepros/cbt.git')
         branch = self.config.get('branch', 'master')
         branch = self.config.get('force-branch', branch)
         sha1 = self.config.get('sha1')

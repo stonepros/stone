@@ -41,8 +41,8 @@ ISCSI_SCHEMA = {
 @UIRouter('/iscsi', Scope.ISCSI)
 class IscsiUi(BaseController):
 
-    REQUIRED_CEPH_ISCSI_CONFIG_MIN_VERSION = 10
-    REQUIRED_CEPH_ISCSI_CONFIG_MAX_VERSION = 11
+    REQUIRED_STONE_ISCSI_CONFIG_MIN_VERSION = 10
+    REQUIRED_STONE_ISCSI_CONFIG_MAX_VERSION = 11
 
     @Endpoint()
     @ReadPermission
@@ -56,12 +56,12 @@ class IscsiUi(BaseController):
             return status
         try:
             config = IscsiClient.instance(gateway_name=gateway).get_config()
-            if config['version'] < IscsiUi.REQUIRED_CEPH_ISCSI_CONFIG_MIN_VERSION or \
-                    config['version'] > IscsiUi.REQUIRED_CEPH_ISCSI_CONFIG_MAX_VERSION:
-                status['message'] = 'Unsupported `ceph-iscsi` config version. ' \
+            if config['version'] < IscsiUi.REQUIRED_STONE_ISCSI_CONFIG_MIN_VERSION or \
+                    config['version'] > IscsiUi.REQUIRED_STONE_ISCSI_CONFIG_MAX_VERSION:
+                status['message'] = 'Unsupported `stone-iscsi` config version. ' \
                                     'Expected >= {} and <= {} but found' \
-                                    ' {}.'.format(IscsiUi.REQUIRED_CEPH_ISCSI_CONFIG_MIN_VERSION,
-                                                  IscsiUi.REQUIRED_CEPH_ISCSI_CONFIG_MAX_VERSION,
+                                    ' {}.'.format(IscsiUi.REQUIRED_STONE_ISCSI_CONFIG_MIN_VERSION,
+                                                  IscsiUi.REQUIRED_STONE_ISCSI_CONFIG_MAX_VERSION,
                                                   config['version'])
                 return status
             status['available'] = True
@@ -83,7 +83,7 @@ class IscsiUi(BaseController):
         gateway = get_available_gateway()
         config = IscsiClient.instance(gateway_name=gateway).get_config()
         return {
-            'ceph_iscsi_config_version': config['version']
+            'stone_iscsi_config_version': config['version']
         }
 
     @Endpoint()
@@ -580,8 +580,8 @@ class IscsiTarget(RESTController):
                                      code='portals_required',
                                      component='iscsi')
 
-        # 'target_controls_limits' was introduced in ceph-iscsi > 3.2
-        # When using an older `ceph-iscsi` version these validations will
+        # 'target_controls_limits' was introduced in stone-iscsi > 3.2
+        # When using an older `stone-iscsi` version these validations will
         # NOT be executed beforehand
         if 'target_controls_limits' in settings:
             for target_control_name, target_control_value in target_controls.items():
@@ -612,8 +612,8 @@ class IscsiTarget(RESTController):
             IscsiTarget._validate_image(pool, image, backstore, required_rbd_features,
                                         unsupported_rbd_features)
 
-            # 'disk_controls_limits' was introduced in ceph-iscsi > 3.2
-            # When using an older `ceph-iscsi` version these validations will
+            # 'disk_controls_limits' was introduced in stone-iscsi > 3.2
+            # When using an older `stone-iscsi` version these validations will
             # NOT be executed beforehand
             if 'disk_controls_limits' in settings:
                 for disk_control_name, disk_control_value in disk['controls'].items():
@@ -699,7 +699,7 @@ class IscsiTarget(RESTController):
 
     @staticmethod
     def _update_targetauth(config, target_iqn, auth, gateway_name):
-        # Target level authentication was introduced in ceph-iscsi config v11
+        # Target level authentication was introduced in stone-iscsi config v11
         if config['version'] > 10:
             user = auth['user']
             password = auth['password']
@@ -878,7 +878,7 @@ class IscsiTarget(RESTController):
                 'backstore': disk_config['backstore'],
                 'wwn': disk_config['wwn']
             }
-            # lun_id was introduced in ceph-iscsi config v11
+            # lun_id was introduced in stone-iscsi config v11
             if config['version'] > 10:
                 disk['lun'] = target_config['disks'][target_disk]['lun_id']
             disks.append(disk)
@@ -937,7 +937,7 @@ class IscsiTarget(RESTController):
             'target_controls': target_controls,
             'acl_enabled': acl_enabled
         }
-        # Target level authentication was introduced in ceph-iscsi config v11
+        # Target level authentication was introduced in stone-iscsi config v11
         if config['version'] > 10:
             target_user = target_config['auth']['username']
             target_password = target_config['auth']['password']
@@ -1052,7 +1052,7 @@ def validate_rest_api(gateways):
         except RequestException:
             raise DashboardException(msg='iSCSI REST Api not available for gateway '
                                          '{}'.format(gateway),
-                                     code='ceph_iscsi_rest_api_not_available_for_gateway',
+                                     code='stone_iscsi_rest_api_not_available_for_gateway',
                                      component='iscsi')
 
 

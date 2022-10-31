@@ -8,11 +8,11 @@ import time
 from teuthology.exceptions import CommandFailedError
 from teuthology.contextutil import safe_while
 import os
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 log = logging.getLogger(__name__)
 
-class TestScrubControls(CephFSTestCase):
+class TestScrubControls(StoneFSTestCase):
     """
     Test basic scrub control operations such as abort, pause and resume.
     """
@@ -30,7 +30,7 @@ class TestScrubControls(CephFSTestCase):
         res = self.fs.run_scrub(["resume"])
         self.assertEqual(res['return_code'], expected)
     def _check_task_status(self, expected_status, timo=120):
-        """ check scrub status for current active mds in ceph status """
+        """ check scrub status for current active mds in stone status """
         with safe_while(sleep=1, tries=120, action='wait for task status') as proceed:
             while proceed():
                 active = self.fs.get_active_names()
@@ -43,7 +43,7 @@ class TestScrubControls(CephFSTestCase):
                     pass
 
     def _check_task_status_na(self, timo=120):
-        """ check absence of scrub status in ceph status """
+        """ check absence of scrub status in stone status """
         with safe_while(sleep=1, tries=120, action='wait for task status') as proceed:
             while proceed():
                 active = self.fs.get_active_names()
@@ -180,7 +180,7 @@ done
 
         self._check_task_status_na()
 
-class TestScrubChecks(CephFSTestCase):
+class TestScrubChecks(StoneFSTestCase):
     """
     Run flush and scrub commands on the specified files in the filesystem. This
     task will run through a sequence of operations, but it is not comprehensive
@@ -233,7 +233,7 @@ class TestScrubChecks(CephFSTestCase):
         self.tell_command(mds_rank, "scrub start {nep}".format(nep=nep),
                           lambda j, r: self.json_validator(j, r, "return_code", -errno.ENOENT))
 
-        test_repo_path = "{test_path}/ceph-qa-suite".format(test_path=abs_test_path)
+        test_repo_path = "{test_path}/stone-qa-suite".format(test_path=abs_test_path)
         dirpath = "{repo_path}/suites".format(repo_path=test_repo_path)
 
         if run_seq == 0:
@@ -388,7 +388,7 @@ class TestScrubChecks(CephFSTestCase):
 
     @staticmethod
     def clone_repo(client_mount, path):
-        repo = "ceph-qa-suite"
+        repo = "stone-qa-suite"
         repo_path = os.path.join(path, repo)
         client_mount.run_shell(["mkdir", "-p", path])
 
@@ -397,7 +397,7 @@ class TestScrubChecks(CephFSTestCase):
         except CommandFailedError:
             client_mount.run_shell([
                 "git", "clone", '--branch', 'giant',
-                "http://github.com/ceph/{repo}".format(repo=repo),
+                "http://github.com/stonepros/{repo}".format(repo=repo),
                 "{path}/{repo}".format(path=path, repo=repo)
             ])
 

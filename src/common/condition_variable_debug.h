@@ -6,9 +6,9 @@
 #include <condition_variable>
 #include <ctime>
 #include <pthread.h>
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
-namespace ceph {
+namespace stone {
 
 namespace mutex_debug_detail {
   template<bool> class mutex_debug_impl;
@@ -45,9 +45,9 @@ public:
   std::cv_status wait_for(
     std::unique_lock<mutex_debug>& lock,
     const std::chrono::duration<Rep, Period>& awhile) {
-    ceph::real_time when{ceph::real_clock::now()};
+    stone::real_time when{stone::real_clock::now()};
     when += awhile;
-    timespec ts = ceph::real_clock::to_timespec(when);
+    timespec ts = stone::real_clock::to_timespec(when);
     return _wait_until(lock.mutex(), &ts);
   }
   template<class Rep, class Period, class Pred>
@@ -55,9 +55,9 @@ public:
     std::unique_lock<mutex_debug>& lock,
     const std::chrono::duration<Rep, Period>& awhile,
     Pred pred) {
-    ceph::real_time when{ceph::real_clock::now()};
+    stone::real_time when{stone::real_clock::now()};
     when += awhile;
-    timespec ts = ceph::real_clock::to_timespec(when);
+    timespec ts = stone::real_clock::to_timespec(when);
     while (!pred()) {
       if ( _wait_until(lock.mutex(), &ts) == std::cv_status::timeout) {
         return pred();
@@ -71,4 +71,4 @@ private:
   std::cv_status _wait_until(mutex_debug* mutex, timespec* ts);
 };
 
-} // namespace ceph
+} // namespace stone

@@ -15,8 +15,8 @@ Synopsis
 Description
 ===========
 
-**rados** is a utility for interacting with a Ceph object storage
-cluster (RADOS), part of the Ceph distributed storage system.
+**rados** is a utility for interacting with a Stone object storage
+cluster (RADOS), part of the Stone distributed storage system.
 
 
 Global Options
@@ -70,7 +70,7 @@ Global Options
 
 .. option:: -m monaddress[:port]
 
-   Connect to specified monitor (instead of looking through ceph.conf).
+   Connect to specified monitor (instead of looking through stone.conf).
 
 .. option:: -b block_size
 
@@ -210,11 +210,11 @@ Generic options
 
 .. option:: -n TYPE.ID, --name TYPE.ID
 
-   Set cephx user name.
+   Set stonex user name.
 
 .. option:: --cluster NAME
 
-   Set cluster name (default: ceph).
+   Set cluster name (default: stone).
 
 .. option:: --setuser USER
 
@@ -259,7 +259,7 @@ Pool specific commands
   Write object name with start offset (default:0) to the cluster with contents from infile.
   **Warning:** The put command creates a single RADOS object, sized just as
   large as your input file. Unless your objects are of reasonable and consistent sizes, that
-  is probably not what you want -- consider using RGW/S3, CephFS, or RBD instead.
+  is probably not what you want -- consider using RGW/S3, StoneFS, or RBD instead.
 
 :command:`append` *name* *infile*
   Append object name to the cluster with contents from infile.
@@ -394,11 +394,11 @@ To list inconsistent objects in PG 0.6::
 Availability
 ============
 
-**rados** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**rados** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)

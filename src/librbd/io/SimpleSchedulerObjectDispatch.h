@@ -4,7 +4,7 @@
 #ifndef STONE_LIBRBD_IO_SIMPLE_SCHEDULER_OBJECT_DISPATCH_H
 #define STONE_LIBRBD_IO_SIMPLE_SCHEDULER_OBJECT_DISPATCH_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/interval_set.h"
 #include "include/utime.h"
 
@@ -63,7 +63,7 @@ public:
       Context** on_finish, Context* on_dispatched) override;
 
   bool write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
       IOContext io_context, int op_flags, int write_flags,
       std::optional<uint64_t> assert_version,
       const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
@@ -72,15 +72,15 @@ public:
 
   bool write_same(
       uint64_t object_no, uint64_t object_off, uint64_t object_len,
-      LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+      LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
       IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
       uint64_t* journal_tid, DispatchResult* dispatch_result,
       Context** on_finish, Context* on_dispatched) override;
 
   bool compare_and_write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-      ceph::bufferlist&& write_data, IOContext io_context, int op_flags,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+      stone::bufferlist&& write_data, IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, uint64_t* mismatch_offset,
       int* object_dispatch_flags, uint64_t* journal_tid,
       DispatchResult* dispatch_result, Context** on_finish,
@@ -120,13 +120,13 @@ public:
 
 private:
   struct MergedRequests {
-    ceph::bufferlist data;
+    stone::bufferlist data;
     std::list<Context *> requests;
   };
 
   class ObjectRequests {
   public:
-    using clock_t = ceph::real_clock;
+    using clock_t = stone::real_clock;
 
     ObjectRequests(uint64_t object_no) : m_object_no(object_no) {
     }
@@ -163,13 +163,13 @@ private:
       return m_delayed_request_extents.intersects(object_off, len);
     }
 
-    bool try_delay_request(uint64_t object_off, ceph::bufferlist&& data,
+    bool try_delay_request(uint64_t object_off, stone::bufferlist&& data,
                            IOContext io_context, int op_flags,
                            int object_dispatch_flags, Context* on_dispatched);
 
     void dispatch_delayed_requests(ImageCtxT *image_ctx,
                                    LatencyStats *latency_stats,
-                                   ceph::mutex *latency_stats_lock);
+                                   stone::mutex *latency_stats_lock);
 
   private:
     uint64_t m_object_no;
@@ -193,9 +193,9 @@ private:
 
   FlushTracker<ImageCtxT>* m_flush_tracker;
 
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   SafeTimer *m_timer;
-  ceph::mutex *m_timer_lock;
+  stone::mutex *m_timer_lock;
   uint64_t m_max_delay;
   uint64_t m_dispatch_seq = 0;
 
@@ -205,7 +205,7 @@ private:
   std::unique_ptr<LatencyStats> m_latency_stats;
 
   bool try_delay_write(uint64_t object_no, uint64_t object_off,
-                       ceph::bufferlist&& data, IOContext io_context,
+                       stone::bufferlist&& data, IOContext io_context,
                        int op_flags, int object_dispatch_flags,
                        Context* on_dispatched);
   bool intersects(uint64_t object_no, uint64_t object_off, uint64_t len) const;

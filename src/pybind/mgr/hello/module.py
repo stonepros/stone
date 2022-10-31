@@ -14,13 +14,13 @@ class Hello(MgrModule):
     COMMANDS = [
         {
             "cmd": "hello "
-                   "name=person_name,type=CephString,req=false",
+                   "name=person_name,type=StoneString,req=false",
             "desc": "Say hello",
             "perm": "r"
         },
         {
             "cmd": "count "
-                   "name=num,type=CephInt",
+                   "name=num,type=StoneInt",
             "desc": "Do some counting",
             "perm": "r"
         },
@@ -28,11 +28,11 @@ class Hello(MgrModule):
 
     # These are module options we understand.  These can be set with
     #
-    #   ceph config set global mgr/hello/<name> <value>
+    #   stone config set global mgr/hello/<name> <value>
     #
     # e.g.,
     #
-    #   ceph config set global mgr/hello/place Earth
+    #   stone config set global mgr/hello/place Earth
     #
     MODULE_OPTIONS = [
         {
@@ -57,7 +57,7 @@ class Hello(MgrModule):
         },
     ]
 
-    # These are "native" Ceph options that this module cares about.
+    # These are "native" Stone options that this module cares about.
     NATIVE_OPTIONS = [
         'mgr_tick_period',
     ]
@@ -90,7 +90,7 @@ class Hello(MgrModule):
         for opt in self.NATIVE_OPTIONS:
             setattr(self,
                     opt,
-                    self.get_ceph_option(opt))
+                    self.get_stone_option(opt))
             self.log.debug(' native option %s = %s', opt, getattr(self, opt))
 
     def handle_command(self, inbuf, cmd):
@@ -130,7 +130,7 @@ class Hello(MgrModule):
             # Do some useful background work here.
 
             # Use mgr_tick_period (default: 2) here just to illustrate
-            # consuming native ceph options.  Any real background work
+            # consuming native stone options.  Any real background work
             # would presumably have some more appropriate frequency.
             sleep_interval = self.mgr_tick_period
             self.log.debug('Sleeping for %d seconds', sleep_interval)

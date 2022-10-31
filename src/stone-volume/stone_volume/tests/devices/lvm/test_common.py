@@ -1,4 +1,4 @@
-from ceph_volume.devices.lvm import common
+from stone_volume.devices.lvm import common
 
 
 class TestCommon(object):

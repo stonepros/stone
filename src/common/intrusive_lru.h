@@ -7,7 +7,7 @@
 #include <boost/intrusive/set.hpp>
 #include <boost/intrusive/list.hpp>
 
-namespace ceph::common {
+namespace stone::common {
 
 /**
  * intrusive_lru: lru implementation with embedded map and list hook

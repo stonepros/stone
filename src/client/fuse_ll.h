@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,10 +12,10 @@
  * 
  */
 
-class StoneeFuse {
+class StoneFuse {
 public:
-  StoneeFuse(Client *c, int fd);
-  ~StoneeFuse();
+  StoneFuse(Client *c, int fd);
+  ~StoneFuse();
   int init(int argc, const char *argv[]);
   int start();
   int mount();
@@ -24,5 +24,5 @@ public:
   class Handle;
   std::string get_mount_point() const;
 private:
-  StoneeFuse::Handle *_handle;
+  StoneFuse::Handle *_handle;
 };

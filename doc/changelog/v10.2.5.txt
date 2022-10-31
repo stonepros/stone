@@ -1,5 +1,5 @@
 commit c461ee19ecbc0c5c330aca20f7392c9a00730367
-Author: Jenkins Build Slave User <ceph-release-team@redhat.com>
+Author: Jenkins Build Slave User <stone-release-team@redhat.com>
 Date:   Fri Dec 9 20:08:24 2016 +0000
 
     10.2.5
@@ -32,6 +32,6 @@ Date:   Wed Dec 7 18:25:55 2016 -0600
     Fix by explicitly checking for a 0 return from poll(2) and returning
     EAGAIN in that case.
     
-    Fixes: http://tracker.ceph.com/issues/18184
+    Fixes: http://tracker.stone.com/issues/18184
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 6c3d015c6854a12cda40673848813d968ff6afae)

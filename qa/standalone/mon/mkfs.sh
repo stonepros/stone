@@ -20,11 +20,11 @@ PS4='${BASH_SOURCE[0]}:$LINENO: ${FUNCNAME[0]}:  '
 
 
 DIR=mkfs
-export CEPH_CONF=/dev/null
-unset CEPH_ARGS
+export STONE_CONF=/dev/null
+unset STONE_ARGS
 MON_ID=a
 MON_DIR=$DIR/$MON_ID
-CEPH_MON=127.0.0.1:7110 # git grep '\<7110\>' : there must be only one
+STONE_MON=127.0.0.1:7110 # git grep '\<7110\>' : there must be only one
 TIMEOUT=360
 
 EXTRAOPTS=""
@@ -42,19 +42,19 @@ function teardown() {
 function mon_mkfs() {
     local fsid=$(uuidgen)
 
-    ceph-mon \
+    stone-mon \
         --id $MON_ID \
         --fsid $fsid \
 	$EXTRAOPTS \
         --mkfs \
         --mon-data=$MON_DIR \
         --mon-initial-members=$MON_ID \
-        --mon-host=$CEPH_MON \
+        --mon-host=$STONE_MON \
         "$@"
 }
 
 function mon_run() {
-    ceph-mon \
+    stone-mon \
         --id $MON_ID \
         --chdir= \
         --mon-osd-full-ratio=.99 \
@@ -65,7 +65,7 @@ function mon_run() {
         --mon-cluster-log-file=$MON_DIR/log \
         --run-dir=$MON_DIR \
         --pid-file=$MON_DIR/pidfile \
-        --public-addr $CEPH_MON \
+        --public-addr $STONE_MON \
         "$@"
 }
 
@@ -82,7 +82,7 @@ function kill_daemons() {
 function auth_none() {
     mon_mkfs --auth-supported=none
 
-    ceph-mon \
+    stone-mon \
         --id $MON_ID \
         --mon-osd-full-ratio=.99 \
         --mon-data-avail-crit=1 \
@@ -96,10 +96,10 @@ function auth_none() {
 
     mon_run --auth-supported=none
 
-    timeout $TIMEOUT ceph --mon-host $CEPH_MON mon stat || return 1
+    timeout $TIMEOUT stone --mon-host $STONE_MON mon stat || return 1
 }
 
-function auth_cephx_keyring() {
+function auth_stonex_keyring() {
     cat > $DIR/keyring <<EOF
 [mon.]
 	key = AQDUS79S0AF9FRAA2cgRLFscVce0gROn/s9WMg==
@@ -112,19 +112,19 @@ EOF
 
     mon_run
 
-    timeout $TIMEOUT ceph \
+    timeout $TIMEOUT stone \
         --name mon. \
         --keyring $MON_DIR/keyring \
-        --mon-host $CEPH_MON mon stat || return 1
+        --mon-host $STONE_MON mon stat || return 1
 }
 
-function auth_cephx_key() {
-    if [ -f /etc/ceph/keyring ] ; then
-	echo "Please move /etc/ceph/keyring away for testing!"
+function auth_stonex_key() {
+    if [ -f /etc/stonepros/keyring ] ; then
+	echo "Please move /etc/stonepros/keyring away for testing!"
 	return 1
     fi
 
-    local key=$(ceph-authtool --gen-print-key)
+    local key=$(stone-authtool --gen-print-key)
 
     if mon_mkfs --key='corrupted key' ; then
         return 1
@@ -140,17 +140,17 @@ function auth_cephx_key() {
 
     mon_run
 
-    timeout $TIMEOUT ceph \
+    timeout $TIMEOUT stone \
         --name mon. \
         --keyring $MON_DIR/keyring \
-        --mon-host $CEPH_MON mon stat || return 1
+        --mon-host $STONE_MON mon stat || return 1
 }
 
 function makedir() {
     local toodeep=$MON_DIR/toodeep
 
     # fail if recursive directory creation is needed
-    ceph-mon \
+    stone-mon \
         --id $MON_ID \
         --mon-osd-full-ratio=.99 \
         --mon-data-avail-crit=1 \
@@ -176,8 +176,8 @@ function run() {
     local actions
     actions+="makedir "
     actions+="idempotent "
-    actions+="auth_cephx_key "
-    actions+="auth_cephx_keyring "
+    actions+="auth_stonex_key "
+    actions+="auth_stonex_keyring "
     actions+="auth_none "
     for action in $actions  ; do
         setup

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,7 +19,7 @@
 #include <set>
 
 #include "global/global_init.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "include/types.h"
 #include "mon/PaxosService.h"
 #include "mon/MonitorDBStore.h"
@@ -40,12 +40,12 @@ public:
     IncType inc_type;
     uint64_t max_global_id;
     uint32_t auth_type;
-    ceph::buffer::list auth_data;
+    stone::buffer::list auth_data;
 
     Incremental() : inc_type(GLOBAL_ID), max_global_id(0), auth_type(0) {}
 
-    void encode(ceph::buffer::list& bl, uint64_t features=-1) const {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl, uint64_t features=-1) const {
+      using stone::encode;
       ENCODE_START(2, 2, bl);
       __u32 _type = (__u32)inc_type;
       encode(_type, bl);
@@ -57,12 +57,12 @@ public:
       }
       ENCODE_FINISH(bl);
     }
-    void decode(ceph::buffer::list::const_iterator& bl) {
+    void decode(stone::buffer::list::const_iterator& bl) {
       DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, bl);
       __u32 _type;
       decode(_type, bl);
       inc_type = (IncType)_type;
-      ceph_assert(inc_type >= GLOBAL_ID && inc_type <= AUTH_DATA);
+      stone_assert(inc_type >= GLOBAL_ID && inc_type <= AUTH_DATA);
       if (_type == GLOBAL_ID) {
 	decode(max_global_id, bl);
       } else {
@@ -71,7 +71,7 @@ public:
       }
       DECODE_FINISH(bl);
     }
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_int("type", inc_type);
       f->dump_int("max_global_id", max_global_id);
       f->dump_int("auth_type", auth_type);
@@ -111,7 +111,7 @@ private:
   void export_keyring(KeyRing& keyring);
   int import_keyring(KeyRing& keyring);
 
-  void push_cephx_inc(KeyServerData::Incremental& auth_inc) {
+  void push_stonex_inc(KeyServerData::Incremental& auth_inc) {
     Incremental inc;
     inc.inc_type = AUTH_DATA;
     encode(auth_inc, inc.auth_data);
@@ -121,13 +121,13 @@ private:
 
   /* validate mon/osd/mds caps; fail on unrecognized service/type */
   bool valid_caps(const std::string& type, const std::string& caps, std::ostream *out);
-  bool valid_caps(const std::string& type, const ceph::buffer::list& bl, std::ostream *out) {
+  bool valid_caps(const std::string& type, const stone::buffer::list& bl, std::ostream *out) {
     auto p = bl.begin();
     std::string v;
     try {
-      using ceph::decode;
+      using stone::decode;
       decode(v, p);
-    } catch (ceph::buffer::error& e) {
+    } catch (stone::buffer::error& e) {
       *out << "corrupt capability encoding";
       return false;
     }
@@ -174,7 +174,7 @@ private:
   int exists_and_matches_entity(
       const EntityName& name,
       const EntityAuth& auth,
-      const std::map<std::string,ceph::buffer::list>& caps,
+      const std::map<std::string,stone::buffer::list>& caps,
       bool has_secret,
       std::stringstream& ss);
   int remove_entity(const EntityName &entity);
@@ -196,29 +196,29 @@ private:
   int validate_osd_destroy(
       int32_t id,
       const uuid_d& uuid,
-      EntityName& cephx_entity,
+      EntityName& stonex_entity,
       EntityName& lockbox_entity,
       std::stringstream& ss);
   int do_osd_destroy(
-      const EntityName& cephx_entity,
+      const EntityName& stonex_entity,
       const EntityName& lockbox_entity);
 
   int do_osd_new(
-      const auth_entity_t& cephx_entity,
+      const auth_entity_t& stonex_entity,
       const auth_entity_t& lockbox_entity,
       bool has_lockbox);
   int validate_osd_new(
       int32_t id,
       const uuid_d& uuid,
-      const std::string& cephx_secret,
+      const std::string& stonex_secret,
       const std::string& lockbox_secret,
-      auth_entity_t& cephx_entity,
+      auth_entity_t& stonex_entity,
       auth_entity_t& lockbox_entity,
       std::stringstream& ss);
 
-  void dump_info(ceph::Formatter *f);
+  void dump_info(stone::Formatter *f);
 
-  bool is_valid_cephx_key(const std::string& k) {
+  bool is_valid_stonex_key(const std::string& k) {
     if (k.empty())
       return false;
 
@@ -226,7 +226,7 @@ private:
     try {
       ea.key.decode_base64(k);
       return true;
-    } catch (ceph::buffer::error& e) { /* fallthrough */ }
+    } catch (stone::buffer::error& e) { /* fallthrough */ }
     return false;
   }
 };

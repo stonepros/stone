@@ -4,8 +4,8 @@ from contextlib import contextmanager
 from typing import Any, Dict, List, Optional
 from unittest import mock
 
-from ceph.deployment.drive_group import DeviceSelection, DriveGroupSpec  # type: ignore
-from ceph.deployment.service_spec import PlacementSpec  # type: ignore
+from stone.deployment.drive_group import DeviceSelection, DriveGroupSpec  # type: ignore
+from stone.deployment.service_spec import PlacementSpec  # type: ignore
 
 from .. import mgr
 from ..controllers.osd import Osd
@@ -34,7 +34,7 @@ class OsdHelper(object):
             },
             'host': {
                 'id': node_id,
-                'name': 'ceph-1',
+                'name': 'stone-1',
                 'type': 'host',
                 'type_id': 1,
                 'pool_weights': {},
@@ -241,8 +241,8 @@ class OsdTest(ControllerTestCase):
     def test_osd_list_aggregation(self):
         """
         This test emulates the state of a cluster where an OSD has only been
-        removed (with e.g. `ceph osd rm`), but it hasn't been removed from the
-        CRUSH map.  Ceph reports a health warning alongside a `1 osds exist in
+        removed (with e.g. `stone osd rm`), but it hasn't been removed from the
+        CRUSH map.  Stone reports a health warning alongside a `1 osds exist in
         the crush map but not in the osdmap` warning in such a case.
         """
         osds_actual = [0, 1]
@@ -253,9 +253,9 @@ class OsdTest(ControllerTestCase):
             self.assertEqual(len(self.json_body()), 2, 'It should display two OSDs without failure')
             self.assertStatus(200)
 
-    @mock.patch('dashboard.controllers.osd.CephService')
-    def test_osd_create_bare(self, ceph_service):
-        ceph_service.send_command.return_value = '5'
+    @mock.patch('dashboard.controllers.osd.StoneService')
+    def test_osd_create_bare(self, stone_service):
+        stone_service.send_command.return_value = '5'
         sample_data = {
             'uuid': 'f860ca2e-757d-48ce-b74a-87052cad563f',
             'svc_id': 5
@@ -268,7 +268,7 @@ class OsdTest(ControllerTestCase):
         }
         self._task_post('/api/osd', data)
         self.assertStatus(201)
-        ceph_service.send_command.assert_called()
+        stone_service.send_command.assert_called()
 
     @mock.patch('dashboard.controllers.orchestrator.OrchClient.instance')
     def test_osd_create_with_drive_groups(self, instance):
@@ -307,7 +307,7 @@ class OsdTest(ControllerTestCase):
         self._task_post('/api/osd', data)
         self.assertStatus(400)
 
-    @mock.patch('dashboard.controllers.osd.CephService')
+    @mock.patch('dashboard.controllers.osd.StoneService')
     def test_osd_mark_all_actions(self, instance):
         fake_client = mock.Mock()
         instance.return_value = fake_client

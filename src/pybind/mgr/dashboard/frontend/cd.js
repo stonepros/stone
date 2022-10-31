@@ -1,5 +1,5 @@
 /**
- * Ceph Dashboard node script
+ * Stone Dashboard node script
  * This file should be used to aggregate all external scripts we need.
  * Multiple flags can be used in the same call.
  *
@@ -59,7 +59,7 @@ function prepareLocales() {
 
   let angular = require(filename);
 
-  let allLocales = angular['projects']['ceph-dashboard']['i18n']['locales'];
+  let allLocales = angular['projects']['stone-dashboard']['i18n']['locales'];
   let locales = {};
 
   langs.forEach((lang) => {
@@ -82,7 +82,7 @@ function prepareLocales() {
     }
   });
 
-  angular['projects']['ceph-dashboard']['i18n']['locales'] = locales;
+  angular['projects']['stone-dashboard']['i18n']['locales'] = locales;
   const newAngular = JSON.stringify(angular, null, 2);
 
   fs.writeFile(filename, newAngular, (err) => {

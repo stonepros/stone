@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ceph-dashboard": {
+    "stone-dashboard": {
       "i18n": {
         "sourceLocale": { "code": "en-US", "baseHref": "" },
         "locales": {
@@ -140,58 +140,58 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ceph-dashboard:build",
+            "browserTarget": "stone-dashboard:build",
             "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {
-              "browserTarget": "ceph-dashboard:build:production"
+              "browserTarget": "stone-dashboard:build:production"
             },
             "cs": {
-              "browserTarget": "ceph-dashboard:build:cs"
+              "browserTarget": "stone-dashboard:build:cs"
             },
             "de": {
-              "browserTarget": "ceph-dashboard:build:de"
+              "browserTarget": "stone-dashboard:build:de"
             },
             "en-US": {
-              "browserTarget": "ceph-dashboard:build:en-US"
+              "browserTarget": "stone-dashboard:build:en-US"
             },
             "es": {
-              "browserTarget": "ceph-dashboard:build:es"
+              "browserTarget": "stone-dashboard:build:es"
             },
             "fr": {
-              "browserTarget": "ceph-dashboard:build:fr"
+              "browserTarget": "stone-dashboard:build:fr"
             },
             "id": {
-              "browserTarget": "ceph-dashboard:build:id"
+              "browserTarget": "stone-dashboard:build:id"
             },
             "it": {
-              "browserTarget": "ceph-dashboard:build:it"
+              "browserTarget": "stone-dashboard:build:it"
             },
             "ja": {
-              "browserTarget": "ceph-dashboard:build:ja"
+              "browserTarget": "stone-dashboard:build:ja"
             },
             "ko": {
-              "browserTarget": "ceph-dashboard:build:ko"
+              "browserTarget": "stone-dashboard:build:ko"
             },
             "pl": {
-              "browserTarget": "ceph-dashboard:build:pl"
+              "browserTarget": "stone-dashboard:build:pl"
             },
             "pt": {
-              "browserTarget": "ceph-dashboard:build:pt"
+              "browserTarget": "stone-dashboard:build:pt"
             },
             "zh-Hans": {
-              "browserTarget": "ceph-dashboard:build:zh-Hans"
+              "browserTarget": "stone-dashboard:build:zh-Hans"
             },
             "zh-Hant": {
-              "browserTarget": "ceph-dashboard:build:zh-Hant"
+              "browserTarget": "stone-dashboard:build:zh-Hant"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ceph-dashboard:build"
+            "browserTarget": "stone-dashboard:build"
           }
         },
         "lint": {
@@ -211,7 +211,7 @@
       "cli": {}
     }
   },
-  "defaultProject": "ceph-dashboard",
+  "defaultProject": "stone-dashboard",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "cd",

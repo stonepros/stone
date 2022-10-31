@@ -5,7 +5,7 @@
 #define RBD_MIRROR_IMAGE_REPLAYER_SNAPSHOT_REPLAYER_H
 
 #include "tools/rbd_mirror/image_replayer/Replayer.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/AsyncOpTracker.h"
 #include "cls/rbd/cls_rbd_types.h"
 #include "librbd/mirror/snapshot/Types.h"
@@ -206,7 +206,7 @@ private:
   StateBuilder<ImageCtxT>* m_state_builder;
   ReplayerListener* m_replayer_listener;
 
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
 
   State m_state = STATE_INIT;
 
@@ -263,8 +263,8 @@ private:
   void refresh_remote_image();
   void handle_refresh_remote_image(int r);
 
-  void scan_local_mirror_snapshots(std::unique_lock<ceph::mutex>* locker);
-  void scan_remote_mirror_snapshots(std::unique_lock<ceph::mutex>* locker);
+  void scan_local_mirror_snapshots(std::unique_lock<stone::mutex>* locker);
+  void scan_remote_mirror_snapshots(std::unique_lock<stone::mutex>* locker);
 
   void prune_non_primary_snapshot(uint64_t snap_id);
   void handle_prune_non_primary_snapshot(int r);
@@ -325,12 +325,12 @@ private:
   void handle_image_update_notify();
 
   void handle_replay_complete(int r, const std::string& description);
-  void handle_replay_complete(std::unique_lock<ceph::mutex>* locker,
+  void handle_replay_complete(std::unique_lock<stone::mutex>* locker,
                               int r, const std::string& description);
   void notify_status_updated();
 
   bool is_replay_interrupted();
-  bool is_replay_interrupted(std::unique_lock<ceph::mutex>* lock);
+  bool is_replay_interrupted(std::unique_lock<stone::mutex>* lock);
 
   void register_perf_counters();
   void unregister_perf_counters();

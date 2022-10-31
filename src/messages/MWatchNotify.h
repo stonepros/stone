@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -29,13 +29,13 @@ private:
   uint64_t ver;        ///< unused
   uint64_t notify_id;  ///< osd unique id for a notify notification
   uint8_t opcode;      ///< STONE_WATCH_EVENT_*
-  ceph::buffer::list bl;       ///< notify payload (osd->client)
+  stone::buffer::list bl;       ///< notify payload (osd->client)
   errorcode32_t return_code; ///< notify result (osd->client)
   uint64_t notifier_gid; ///< who sent the notify
 
   MWatchNotify()
     : Message{STONE_MSG_WATCH_NOTIFY, HEAD_VERSION, COMPAT_VERSION} { }
-  MWatchNotify(uint64_t c, uint64_t v, uint64_t i, uint8_t o, ceph::buffer::list b, uint64_t n=0)
+  MWatchNotify(uint64_t c, uint64_t v, uint64_t i, uint8_t o, stone::buffer::list b, uint64_t n=0)
     : Message{STONE_MSG_WATCH_NOTIFY, HEAD_VERSION, COMPAT_VERSION},
       cookie(c),
       ver(v),
@@ -49,7 +49,7 @@ private:
 
 public:
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     uint8_t msg_ver;
     auto p = payload.cbegin();
     decode(msg_ver, p);
@@ -69,7 +69,7 @@ public:
       notifier_gid = 0;
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     uint8_t msg_ver = 1;
     encode(msg_ver, payload);
     encode(opcode, payload);
@@ -84,7 +84,7 @@ public:
   std::string_view get_type_name() const override { return "watch-notify"; }
   void print(std::ostream& out) const override {
     out << "watch-notify("
-	<< ceph_watch_event_name(opcode) << " (" << (int)opcode << ")"
+	<< stone_watch_event_name(opcode) << " (" << (int)opcode << ")"
 	<< " cookie " << cookie
 	<< " notify " << notify_id
 	<< " ret " << return_code
@@ -92,7 +92,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

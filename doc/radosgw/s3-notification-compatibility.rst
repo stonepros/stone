@@ -2,7 +2,7 @@
 S3 Bucket Notifications Compatibility
 =====================================
 
-Ceph's `Bucket Notifications`_ and `PubSub Module`_ APIs follow `AWS S3 Bucket Notifications API`_. However, some differences exist, as listed below.
+Stone's `Bucket Notifications`_ and `PubSub Module`_ APIs follow `AWS S3 Bucket Notifications API`_. However, some differences exist, as listed below.
 
 
 .. note:: 
@@ -13,7 +13,7 @@ Supported Destination
 ---------------------
 
 AWS supports: **SNS**, **SQS** and **Lambda** as possible destinations (AWS internal destinations). 
-Currently, we support: **HTTP/S**, **Kafka** and **AMQP**. And also support pulling and acking of events stored in Ceph (as an intrenal destination).
+Currently, we support: **HTTP/S**, **Kafka** and **AMQP**. And also support pulling and acking of events stored in Stone (as an intrenal destination).
 
 We are using the **SNS** ARNs to represent the **HTTP/S**, **Kafka** and **AMQP** destinations.
 
@@ -33,7 +33,7 @@ Following tags (and the tags inside them) are not supported:
 REST API Extension 
 ------------------
 
-Ceph's bucket notification API has the following extensions:
+Stone's bucket notification API has the following extensions:
 
 - Deletion of a specific notification, or all notifications on a bucket, using the ``DELETE`` verb
 
@@ -98,11 +98,11 @@ Event Types
 +----------------------------------------------+-----------------+-------------------------------------------+
 | ``s3:ObjectRemoved:DeleteMarkerCreated``     | Supported                                                   |
 +----------------------------------------------+-----------------+-------------------------------------------+
-| ``s3:ObjectRestore:Post``                    | Not applicable to Ceph                                      |
+| ``s3:ObjectRestore:Post``                    | Not applicable to Stone                                      |
 +----------------------------------------------+-----------------+-------------------------------------------+
-| ``s3:ObjectRestore:Complete``                | Not applicable to Ceph                                      |
+| ``s3:ObjectRestore:Complete``                | Not applicable to Stone                                      |
 +----------------------------------------------+-----------------+-------------------------------------------+
-| ``s3:ReducedRedundancyLostObject``           | Not applicable to Ceph                                      |
+| ``s3:ReducedRedundancyLostObject``           | Not applicable to Stone                                      |
 +----------------------------------------------+-----------------+-------------------------------------------+
 
 .. note:: 
@@ -112,7 +112,7 @@ Event Types
 Topic Configuration
 -------------------
 In the case of bucket notifications, the topics management API will be derived from `AWS Simple Notification Service API`_. 
-Note that most of the API is not applicable to Ceph, and only the following actions are implemented:
+Note that most of the API is not applicable to Stone, and only the following actions are implemented:
 
  - ``CreateTopic``
  - ``DeleteTopic``

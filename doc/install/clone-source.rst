@@ -1,12 +1,12 @@
 =========================================
- Cloning the Ceph Source Code Repository
+ Cloning the Stone Source Code Repository
 =========================================
 
-You may clone a Ceph branch of the Ceph source code by going to `github Ceph
+You may clone a Stone branch of the Stone source code by going to `github Stone
 Repository`_,  selecting a branch (``master`` by default), and clicking the
 **Download ZIP** button.
 
-.. _github Ceph Repository: https://github.com/ceph/ceph
+.. _github Stone Repository: https://github.com/ceph/ceph
 
 
 To clone the entire git repository, install and configure ``git``.
@@ -37,7 +37,7 @@ Follow the directions for setting up git at
 Add SSH Keys (Optional)
 =======================
 
-If you intend to commit code to Ceph or to clone using SSH
+If you intend to commit code to Stone or to clone using SSH
 (``git@github.com:ceph/ceph.git``), you must generate SSH keys for github. 
 
 .. tip:: If you only intend to clone the repository, you may 
@@ -65,11 +65,11 @@ key you generated, and press the "Add key" button.
 Clone the Source
 ================
 
-To clone the Ceph source code repository, execute::
+To clone the Stone source code repository, execute::
 
 	git clone --recursive https://github.com/ceph/ceph.git
 
-Once ``git clone`` executes, you should have a full copy of the Ceph 
+Once ``git clone`` executes, you should have a full copy of the Stone 
 repository.
 
 .. tip:: Make sure you maintain the latest copies of the submodules
@@ -88,7 +88,7 @@ If your submodules are out of date, run::
 Choose a Branch
 ===============
 
-Once you clone the source code and submodules, your Ceph repository 
+Once you clone the source code and submodules, your Stone repository 
 will be on the ``master`` branch by default, which is the unstable 
 development branch. You may choose other branches too.
 

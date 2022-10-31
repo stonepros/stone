@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from ceph.utils import datetime_now, datetime_to_str, str_to_datetime
+from stone.utils import datetime_now, datetime_to_str, str_to_datetime
 
 
 def test_datetime_to_str_1():

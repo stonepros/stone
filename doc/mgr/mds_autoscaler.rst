@@ -7,7 +7,7 @@ the orchestrator backend of the MDS service. To enable, use:
 
 .. sh:
 
-   ceph mgr module enable mds_autoscaler
+   stone mgr module enable mds_autoscaler
 
 The module will monitor the following file system settings to inform
 placement count adjustments:
@@ -15,7 +15,7 @@ placement count adjustments:
 - ``max_mds`` file system setting
 - ``standby_count_wanted`` file system setting
 
-The Ceph monitor daemons are still responsible for promoting or stopping MDS
+The Stone monitor daemons are still responsible for promoting or stopping MDS
 according to these settings. The ``mds_autoscaler`` simply adjusts the
 number of MDS which are spawned by the orchestrator.
 

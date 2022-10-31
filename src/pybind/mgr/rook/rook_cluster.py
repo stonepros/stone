@@ -4,7 +4,7 @@ needed to implement an orchestrator module.  While the orchestrator
 module exposes an async API, this module simply exposes blocking API
 call methods.
 
-This module is runnable outside of ceph-mgr, useful for testing.
+This module is runnable outside of stone-mgr, useful for testing.
 """
 import datetime
 import threading
@@ -20,9 +20,9 @@ from urllib.parse import urljoin
 # to behave cleanly.
 from urllib3.exceptions import ProtocolError
 
-from ceph.deployment.drive_group import DriveGroupSpec
-from ceph.deployment.service_spec import ServiceSpec, NFSServiceSpec, RGWSpec
-from ceph.utils import datetime_now
+from stone.deployment.drive_group import DriveGroupSpec
+from stone.deployment.service_spec import ServiceSpec, NFSServiceSpec, RGWSpec
+from stone.utils import datetime_now
 from mgr_module import NFS_POOL_NAME
 from mgr_util import merge_dicts
 
@@ -36,10 +36,10 @@ except ImportError:
     class ApiException(Exception):  # type: ignore
         status = 0
 
-from .rook_client.ceph import cephfilesystem as cfs
-from .rook_client.ceph import cephnfs as cnfs
-from .rook_client.ceph import cephobjectstore as cos
-from .rook_client.ceph import cephcluster as ccl
+from .rook_client.stone import stonefilesystem as cfs
+from .rook_client.stone import stonenfs as cnfs
+from .rook_client.stone import stoneobjectstore as cos
+from .rook_client.stone import stonecluster as ccl
 from .rook_client._helper import CrdClass
 
 import orchestrator
@@ -208,7 +208,7 @@ class RookCluster(object):
         self.nodes: KubernetesResource[client.V1Node] = KubernetesResource(self.coreV1_api.list_node)
 
     def rook_url(self, path: str) -> str:
-        prefix = "/apis/ceph.rook.io/%s/namespaces/%s/" % (
+        prefix = "/apis/stone.rook.io/%s/namespaces/%s/" % (
             self.rook_env.crd_version, self.rook_env.namespace)
         return urljoin(prefix, path)
 
@@ -261,18 +261,18 @@ class RookCluster(object):
 
     def get_nfs_conf_url(self, nfs_cluster: str, instance: str) -> Optional[str]:
         #
-        # Fetch cephnfs object for "nfs_cluster" and then return a rados://
+        # Fetch stonenfs object for "nfs_cluster" and then return a rados://
         # URL for the instance within that cluster. If the fetch fails, just
         # return None.
         #
         try:
-            ceph_nfs = self.rook_api_get("cephnfses/{0}".format(nfs_cluster))
+            stone_nfs = self.rook_api_get("stonenfses/{0}".format(nfs_cluster))
         except ApiException as e:
-            log.info("Unable to fetch cephnfs object: {}".format(e.status))
+            log.info("Unable to fetch stonenfs object: {}".format(e.status))
             return None
 
-        pool = ceph_nfs['spec']['rados']['pool']
-        namespace = ceph_nfs['spec']['rados'].get('namespace', None)
+        pool = stone_nfs['spec']['rados']['pool']
+        namespace = stone_nfs['spec']['rados'].get('namespace', None)
 
         if namespace == None:
             url = "rados://{0}/conf-{1}.{2}".format(pool, nfs_cluster, instance)
@@ -289,7 +289,7 @@ class RookCluster(object):
         filesystem
 
         Example Rook Pod labels for a mgr daemon:
-        Labels:         app=rook-ceph-mgr
+        Labels:         app=rook-stone-mgr
                         pod-template-hash=2171958073
                         rook_cluster=rook
         And MDS containers additionally have `rook_filesystem` label
@@ -301,18 +301,18 @@ class RookCluster(object):
             # type: (client.V1Pod) -> bool
             metadata = item.metadata
             if service_type is not None:
-                if metadata.labels['app'] != "rook-ceph-{0}".format(service_type):
+                if metadata.labels['app'] != "rook-stone-{0}".format(service_type):
                     return False
 
                 if service_id is not None:
                     try:
                         k, v = {
                             "mds": ("rook_file_system", service_id),
-                            "osd": ("ceph-osd-id", service_id),
+                            "osd": ("stone-osd-id", service_id),
                             "mon": ("mon", service_id),
                             "mgr": ("mgr", service_id),
-                            "ceph_nfs": ("ceph_nfs", service_id),
-                            "rgw": ("ceph_rgw", service_id),
+                            "stone_nfs": ("stone_nfs", service_id),
+                            "rgw": ("stone_rgw", service_id),
                         }[service_type]
                     except KeyError:
                         raise orchestrator.OrchestratorValidationError(
@@ -372,8 +372,8 @@ class RookCluster(object):
         pods = [i for i in self.rook_pods.items]
         for p in pods:
             d = p.to_dict()
-            daemon_type = d['metadata']['labels']['app'].replace('rook-ceph-','')
-            daemon_id = d['metadata']['labels']['ceph_daemon_id']
+            daemon_type = d['metadata']['labels']['app'].replace('rook-stone-','')
+            daemon_id = d['metadata']['labels']['stone_daemon_id']
             name = daemon_type + '.' + daemon_id
             if name in names:
                 self.coreV1_api.delete_namespaced_pod(
@@ -401,12 +401,12 @@ class RookCluster(object):
         # TODO use spec.placement
         # TODO warn if spec.extended has entries we don't kow how
         #      to action.
-        def _update_fs(new: cfs.CephFilesystem) -> cfs.CephFilesystem:
+        def _update_fs(new: cfs.StoneFilesystem) -> cfs.StoneFilesystem:
             new.spec.metadataServer.activeCount = spec.placement.count or 1
             return new
 
-        def _create_fs() -> cfs.CephFilesystem:
-            return cfs.CephFilesystem(
+        def _create_fs() -> cfs.StoneFilesystem:
+            return cfs.StoneFilesystem(
                 apiVersion=self.rook_env.api_name,
                 metadata=dict(
                     name=spec.service_id,
@@ -421,7 +421,7 @@ class RookCluster(object):
             )
         assert spec.service_id is not None
         return self._create_or_patch(
-            cfs.CephFilesystem, 'cephfilesystems', spec.service_id,
+            cfs.StoneFilesystem, 'stonefilesystems', spec.service_id,
             _update_fs, _create_fs)
 
     def apply_objectstore(self, spec: RGWSpec) -> str:
@@ -439,14 +439,14 @@ class RookCluster(object):
 
         # FIXME: pass realm and/or zone through to the CR
 
-        def _create_zone() -> cos.CephObjectStore:
+        def _create_zone() -> cos.StoneObjectStore:
             port = None
             secure_port = None
             if spec.ssl:
                 secure_port = spec.get_port()
             else:
                 port = spec.get_port()
-            return cos.CephObjectStore(
+            return cos.StoneObjectStore(
                 apiVersion=self.rook_env.api_name,
                 metadata=dict(
                     name=name,
@@ -462,12 +462,12 @@ class RookCluster(object):
                 )
             )
 
-        def _update_zone(new: cos.CephObjectStore) -> cos.CephObjectStore:
+        def _update_zone(new: cos.StoneObjectStore) -> cos.StoneObjectStore:
             new.spec.gateway.instances = spec.placement.count or 1
             return new
 
         return self._create_or_patch(
-            cos.CephObjectStore, 'cephobjectstores', name,
+            cos.StoneObjectStore, 'stoneobjectstores', name,
             _update_zone, _create_zone)
 
     def apply_nfsgw(self, spec: NFSServiceSpec) -> str:
@@ -477,12 +477,12 @@ class RookCluster(object):
         # TODO Number of pods should be based on the list of hosts in the
         #      PlacementSpec.
         count = spec.placement.count or 1
-        def _update_nfs(new: cnfs.CephNFS) -> cnfs.CephNFS:
+        def _update_nfs(new: cnfs.StoneNFS) -> cnfs.StoneNFS:
             new.spec.server.active = count
             return new
 
-        def _create_nfs() -> cnfs.CephNFS:
-            rook_nfsgw = cnfs.CephNFS(
+        def _create_nfs() -> cnfs.StoneNFS:
+            rook_nfsgw = cnfs.StoneNFS(
                     apiVersion=self.rook_env.api_name,
                     metadata=dict(
                         name=spec.service_id,
@@ -503,7 +503,7 @@ class RookCluster(object):
             return rook_nfsgw
 
         assert spec.service_id is not None
-        return self._create_or_patch(cnfs.CephNFS, 'cephnfses', spec.service_id,
+        return self._create_or_patch(cnfs.StoneNFS, 'stonenfses', spec.service_id,
                 _update_nfs, _create_nfs)
 
     def rm_service(self, rooktype: str, service_id: str) -> str:
@@ -523,7 +523,7 @@ class RookCluster(object):
 
     def can_create_osd(self) -> bool:
         current_cluster = self.rook_api_get(
-            "cephclusters/{0}".format(self.rook_env.cluster_name))
+            "stoneclusters/{0}".format(self.rook_env.cluster_name))
         use_all_nodes = current_cluster['spec'].get('useAllNodes', False)
 
         # If useAllNodes is set, then Rook will not be paying attention
@@ -535,12 +535,12 @@ class RookCluster(object):
 
     def update_mon_count(self, newcount: Optional[int]) -> str:
         def _update_mon_count(current, new):
-            # type: (ccl.CephCluster, ccl.CephCluster) -> ccl.CephCluster
+            # type: (ccl.StoneCluster, ccl.StoneCluster) -> ccl.StoneCluster
             if newcount is None:
                 raise orchestrator.OrchestratorError('unable to set mon count to None')
             new.spec.mon.count = newcount
             return new
-        return self._patch(ccl.CephCluster, 'cephclusters', self.rook_env.cluster_name, _update_mon_count)
+        return self._patch(ccl.StoneCluster, 'stoneclusters', self.rook_env.cluster_name, _update_mon_count)
 
     def add_osds(self, drive_group, matching_hosts):
         # type: (DriveGroupSpec, List[str]) -> str
@@ -554,7 +554,7 @@ class RookCluster(object):
         assert drive_group.objectstore in ("bluestore", "filestore")
 
         def _add_osds(current_cluster, new_cluster):
-            # type: (ccl.CephCluster, ccl.CephCluster) -> ccl.CephCluster
+            # type: (ccl.StoneCluster, ccl.StoneCluster) -> ccl.StoneCluster
 
             # FIXME: this is all not really atomic, because jsonpatch doesn't
             # let us do "test" operations that would check if items with
@@ -604,7 +604,7 @@ class RookCluster(object):
                             )
             return new_cluster
 
-        return self._patch(ccl.CephCluster, 'cephclusters', self.rook_env.cluster_name, _add_osds)
+        return self._patch(ccl.StoneCluster, 'stoneclusters', self.rook_env.cluster_name, _add_osds)
 
     def _patch(self, crd: Type, crd_name: str, cr_name: str, func: Callable[[CrdClassT, CrdClassT], CrdClassT]) -> str:
         current_json = self.rook_api_get(
@@ -678,18 +678,18 @@ class RookCluster(object):
                 self.rook_api_post("{}/".format(crd_name),
                                    body=new.to_json())
             return "Created"
-    def get_ceph_image(self) -> str:
+    def get_stone_image(self) -> str:
         try:
             api_response = self.coreV1_api.list_namespaced_pod(self.rook_env.namespace,
-                                                               label_selector="app=rook-ceph-mon",
+                                                               label_selector="app=rook-stone-mon",
                                                                timeout_seconds=10)
             if api_response.items:
                 return api_response.items[-1].spec.containers[0].image
             else:
                 raise orchestrator.OrchestratorError(
-                        "Error getting ceph image. Cluster without monitors")
+                        "Error getting stone image. Cluster without monitors")
         except ApiException as e:
-            raise orchestrator.OrchestratorError("Error getting ceph image: {}".format(e))
+            raise orchestrator.OrchestratorError("Error getting stone image: {}".format(e))
 
 
     def _execute_blight_job(self, ident_fault: str, on: bool, loc: orchestrator.DeviceLightLoc) -> str:
@@ -701,9 +701,9 @@ class RookCluster(object):
                                            namespace= self.rook_env.namespace,
                                            labels={"ident": operation_id})
         pod_metadata = client.V1ObjectMeta(labels={"ident": operation_id})
-        pod_container = client.V1Container(name="ceph-lsmcli-command",
+        pod_container = client.V1Container(name="stone-lsmcli-command",
                                            security_context=client.V1SecurityContext(privileged=True),
-                                           image=self.get_ceph_image(),
+                                           image=self.get_stone_image(),
                                            command=["lsmcli",],
                                            args=['local-disk-%s-led-%s' % (ident_fault,'on' if on else 'off'),
                                                  '--path', loc.path or loc.dev,],

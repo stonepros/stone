@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -16,7 +16,7 @@
 
 #include <memory>
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/Cond.h"
 #include "mon/MonClient.h"
 
@@ -25,7 +25,7 @@ class Command
 protected:
   C_SaferCond cond;
 public:
-  ceph::buffer::list outbl;
+  stone::buffer::list outbl;
   std::string outs;
   int r;
 
@@ -35,7 +35,7 @@ public:
         &outbl, &outs, &cond);
   }
 
-  void run(MonClient *monc, const std::string &command, const ceph::buffer::list &inbl)
+  void run(MonClient *monc, const std::string &command, const stone::buffer::list &inbl)
   {
     monc->start_mon_command({command}, inbl,
         &outbl, &outs, &cond);

@@ -12,7 +12,7 @@
 #include "include/encoding.h"
 #include "include/int_types.h"
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 namespace rbd {
 namespace mirror {

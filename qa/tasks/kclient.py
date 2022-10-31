@@ -8,7 +8,7 @@ from teuthology.misc import deep_merge
 from teuthology.orchestra.run import CommandFailedError
 from teuthology import misc
 from teuthology.contextutil import MaxWhileTries
-from tasks.cephfs.kernel_mount import KernelMount
+from tasks.stonefs.kernel_mount import KernelMount
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ def task(ctx, config):
     The config is optional and defaults to mounting on all clients. If
     a config is given, it is expected to be a list of clients to do
     this operation on. This lets you e.g. set up one client with
-    ``ceph-fuse`` and another with ``kclient``.
+    ``stone-fuse`` and another with ``kclient``.
 
     ``brxnet`` should be a Private IPv4 Address range, default range is
     [192.168.0.0/16]
@@ -28,16 +28,16 @@ def task(ctx, config):
     Example that mounts all clients::
 
         tasks:
-        - ceph:
+        - stone:
         - kclient:
         - interactive:
         - brxnet: [192.168.0.0/16]
 
-    Example that uses both ``kclient` and ``ceph-fuse``::
+    Example that uses both ``kclient` and ``stone-fuse``::
 
         tasks:
-        - ceph:
-        - ceph-fuse: [client.0]
+        - stone:
+        - stone-fuse: [client.0]
         - kclient: [client.1]
         - interactive:
 
@@ -90,7 +90,7 @@ def task(ctx, config):
         deep_merge(client_config, client_config_overrides)
         log.info(f"{entity} config is {client_config}")
 
-        cephfs_name = client_config.get("cephfs_name")
+        stonefs_name = client_config.get("stonefs_name")
         if config.get("disabled", False) or not client_config.get('mounted', True):
             continue
 
@@ -101,13 +101,13 @@ def task(ctx, config):
             client_remote=remote,
             brxnet=ctx.teuthology_config.get('brxnet', None),
             config=client_config,
-            cephfs_name=cephfs_name)
+            stonefs_name=stonefs_name)
 
         mounts[id_] = kernel_mount
 
         if client_config.get('debug', False):
-            remote.run(args=["sudo", "bash", "-c", "echo 'module ceph +p' > /sys/kernel/debug/dynamic_debug/control"])
-            remote.run(args=["sudo", "bash", "-c", "echo 'module libceph +p' > /sys/kernel/debug/dynamic_debug/control"])
+            remote.run(args=["sudo", "bash", "-c", "echo 'module stone +p' > /sys/kernel/debug/dynamic_debug/control"])
+            remote.run(args=["sudo", "bash", "-c", "echo 'module libstone +p' > /sys/kernel/debug/dynamic_debug/control"])
 
         kernel_mount.mount(mntopts=client_config.get('mntopts', []))
 

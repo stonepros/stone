@@ -2,7 +2,7 @@
  Admin Guide
 =============
 
-Once you have your Ceph Object Storage service up and running, you may
+Once you have your Stone Object Storage service up and running, you may
 administer the service with user management, access controls, quotas 
 and usage tracking among other features.
 
@@ -10,10 +10,10 @@ and usage tracking among other features.
 User Management
 ===============
 
-Ceph Object Storage user management refers to users of the Ceph Object Storage
-service (i.e., not the Ceph Object Gateway as a user of the Ceph Storage
+Stone Object Storage user management refers to users of the Stone Object Storage
+service (i.e., not the Stone Object Gateway as a user of the Stone Storage
 Cluster). You must create a user, access key and secret to enable end users to
-interact with Ceph Object Gateway services.
+interact with Stone Object Gateway services.
 
 There are two user types: 
 
@@ -298,7 +298,7 @@ To remove the swift secret key. ::
 Add / Remove Admin Capabilities
 -------------------------------
 
-The Ceph Storage Cluster provides an administrative API that enables  users to
+The Stone Storage Cluster provides an administrative API that enables  users to
 execute administrative functions via the REST API. By default, users do NOT have
 access to this API. To enable a user to exercise  administrative functionality,
 provide the user with administrative capabilities.
@@ -326,7 +326,7 @@ To remove administrative capabilities from a user, execute the following::
 Quota Management
 ================
 
-The Ceph Object Gateway enables you to set quotas on users and buckets owned by
+The Stone Object Gateway enables you to set quotas on users and buckets owned by
 users. Quotas include the maximum number of objects in a bucket and the maximum
 storage size a bucket can hold.
 
@@ -436,7 +436,7 @@ creating a new user and have no effect on existing users. If the
 relevant default quota is set in config, then that quota is set on the
 new user, and that quota is enabled.  See ``rgw bucket default quota max objects``,
 ``rgw bucket default quota max size``, ``rgw user default quota max objects``, and
-``rgw user default quota max size`` in `Ceph Object Gateway Config Reference`_
+``rgw user default quota max size`` in `Stone Object Gateway Config Reference`_
 
 Quota Cache
 -----------
@@ -450,7 +450,7 @@ efficient quota operations are, but the more out-of-sync multiple instances
 will be.  The lower these values are, the closer to perfect enforcement
 multiple instances will achieve.  If all three are 0, then quota caching is
 effectively disabled, and multiple instances will have perfect quota
-enforcement.  See `Ceph Object Gateway Config Reference`_
+enforcement.  See `Stone Object Gateway Config Reference`_
 
 Reading / Writing Global Quotas
 -------------------------------
@@ -476,7 +476,7 @@ commands. ::
 Usage
 =====
 
-The Ceph Object Gateway logs usage for each user. You can track
+The Stone Object Gateway logs usage for each user. You can track
 user usage within date ranges too.
 
 - Add ``rgw enable usage log = true`` in [client.rgw] section of ceph.conf and restart the radosgw service. 
@@ -525,4 +525,4 @@ ranges for trim operations. ::
 
 .. _radosgw-admin: ../../man/8/radosgw-admin/
 .. _Pool Configuration: ../../rados/configuration/pool-pg-config-ref/
-.. _Ceph Object Gateway Config Reference: ../config-ref/
+.. _Stone Object Gateway Config Reference: ../config-ref/

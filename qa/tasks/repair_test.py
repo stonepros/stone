@@ -253,7 +253,7 @@ def task(ctx, config):
     tasks:
     - chef:
     - install:
-    - ceph:
+    - stone:
         log-ignorelist:
           - 'candidate had a stat error'
           - 'candidate had a read error'
@@ -282,7 +282,7 @@ def task(ctx, config):
     assert isinstance(config, dict), \
         'repair_test task only accepts a dict for config'
 
-    manager = ctx.managers['ceph']
+    manager = ctx.managers['stone']
     manager.wait_for_all_osds_up()
 
     manager.raw_cluster_cmd('osd', 'set', 'noscrub')

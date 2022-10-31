@@ -21,11 +21,11 @@ Initial Troubleshooting
 **Are the monitors running?**
 
   First of all, we need to make sure the monitor (*mon*) daemon processes
-  (``ceph-mon``) are running.  You would be amazed by how often Ceph admins
+  (``stone-mon``) are running.  You would be amazed by how often Stone admins
   forget to start the mons, or to restart them after an upgrade. There's no
   shame, but try to not lose a couple of hours looking for a deeper problem.
   When running Kraken or later releases also ensure that the manager
-  daemons (``ceph-mgr``) are running, usually alongside each ``ceph-mon``.
+  daemons (``stone-mgr``) are running, usually alongside each ``stone-mon``.
  
 
 **Are you able to reach to the mon nodes?**
@@ -36,27 +36,27 @@ Initial Troubleshooting
   the server and, if that succeeds, try connecting to the monitor's ports
   (``tcp/3300`` and ``tcp/6789``) using a ``telnet``, ``nc``, or similar tools.
 
-**Does ceph -s run and obtain a reply from the cluster?**
+**Does stone -s run and obtain a reply from the cluster?**
 
   If the answer is yes then your cluster is up and running.  One thing you
   can take for granted is that the monitors will only answer to a ``status``
   request if there is a formed quorum.  Also check that at least one ``mgr``
   daemon is reported as running, ideally all of them.
 
-  If ``ceph -s`` hangs without obtaining a reply from the cluster
+  If ``stone -s`` hangs without obtaining a reply from the cluster
   or showing ``fault`` messages, then it is likely that your monitors
   are either down completely or just a fraction are up -- a fraction
   insufficient to form a majority quorum.  This check will connect to an
   arbitrary mon; in rare cases it may be illuminating to bind to specific
   mons in sequence by adding e.g. ``-m mymon1`` to the command.
 
-**What if ceph -s doesn't come back?**
+**What if stone -s doesn't come back?**
 
   If you haven't gone through all the steps so far, please go back and do.
 
   You can contact each monitor individually asking them for their status,
   regardless of a quorum being formed. This can be achieved using
-  ``ceph tell mon.ID mon_status``, ID being the monitor's identifier. You should
+  ``stone tell mon.ID mon_status``, ID being the monitor's identifier. You should
   perform this for each monitor in the cluster. In section `Understanding
   mon_status`_ we will explain how to interpret the output of this command.
 
@@ -68,33 +68,33 @@ Using the monitor's admin socket
 
 The admin socket allows you to interact with a given daemon directly using a
 Unix socket file. This file can be found in your monitor's ``run`` directory.
-By default, the admin socket will be kept in ``/var/run/ceph/ceph-mon.ID.asok``
+By default, the admin socket will be kept in ``/var/run/stone/stone-mon.ID.asok``
 but this may be elsewhere if you have overridden the default directory. If you
-don't find it there, check your ``ceph.conf`` for an alternative path or
+don't find it there, check your ``stone.conf`` for an alternative path or
 run::
 
-  ceph-conf --name mon.ID --show-config-value admin_socket
+  stone-conf --name mon.ID --show-config-value admin_socket
 
 Bear in mind that the admin socket will be available only while the monitor
 daemon is running. When the monitor is properly shut down, the admin socket
 will be removed. If however the monitor is not running and the admin socket
 persists, it is likely that the monitor was improperly shut down.
 Regardless, if the monitor is not running, you will not be able to use the
-admin socket, with ``ceph`` likely returning ``Error 111: Connection Refused``.
+admin socket, with ``stone`` likely returning ``Error 111: Connection Refused``.
 
-Accessing the admin socket is as simple as running ``ceph tell`` on the daemon
+Accessing the admin socket is as simple as running ``stone tell`` on the daemon
 you are interested in. For example::
 
-  ceph tell mon.<id> mon_status
+  stone tell mon.<id> mon_status
 
 Under the hood, this passes the command ``help`` to the running MON daemon
 ``<id>`` via its "admin socket", which is a file ending in ``.asok``
-somewhere under ``/var/run/ceph``. Once you know the full path to the file,
+somewhere under ``/var/run/stone``. Once you know the full path to the file,
 you can even do this yourself::
 
-  ceph --admin-daemon <full_path_to_asok_file> <command>
+  stone --admin-daemon <full_path_to_asok_file> <command>
 
-Using ``help`` as the command to the ``ceph`` tool will show you the
+Using ``help`` as the command to the ``stone`` tool will show you the
 supported commands available through the admin socket. Please take a look
 at ``config get``, ``config show``, ``mon stat`` and ``quorum_status``,
 as those can be enlightening when troubleshooting a monitor.
@@ -107,7 +107,7 @@ Understanding mon_status
 output a multitude of information about the monitor, including the same output
 you would get with ``quorum_status``.
 
-Take the following example output of ``ceph tell mon.c mon_status``::
+Take the following example output of ``stone tell mon.c mon_status``::
 
   
   { "name": "c",
@@ -163,10 +163,10 @@ Most Common Monitor Issues
 Have Quorum but at least one Monitor is down
 ---------------------------------------------
 
-When this happens, depending on the version of Ceph you are running,
+When this happens, depending on the version of Stone you are running,
 you should be seeing something similar to::
 
-      $ ceph health detail
+      $ stone health detail
       [snip]
       mon.a (rank 0) addr 127.0.0.1:6789/0 is down (out of quorum)
 
@@ -190,7 +190,7 @@ How to troubleshoot this?
   ``probing``, ``electing`` or ``synchronizing``. If it happens to be either
   ``leader`` or ``peon``, then the monitor believes to be in quorum, while
   the remaining cluster is sure it is not; or maybe it got into the quorum
-  while we were troubleshooting the monitor, so check you ``ceph -s`` again
+  while we were troubleshooting the monitor, so check you ``stone -s`` again
   just to make sure. Proceed if the monitor is not yet in the quorum.
 
 What if the state is ``probing``?
@@ -222,7 +222,7 @@ What if the state is ``probing``?
 
 What if state is ``electing``?
 
-  This means the monitor is in the middle of an election. With recent Ceph
+  This means the monitor is in the middle of an election. With recent Stone
   releases these typically complete quickly, but at times the monitors can
   get stuck in what is known as an *election storm*. This can indicate
   clock skew among the monitor nodes; jump to
@@ -278,7 +278,7 @@ to be nullified.  Completely filled with zeros. This means that not even
 ``monmaptool`` would be able to make sense of cold, hard, inscrutable zeros.
 It's also possible to end up with a monitor with a severely outdated monmap,
 notably if the node has been down for months while you fight with your vendor's
-TAC.  The subject ``ceph-mon`` daemon might be unable to find the surviving
+TAC.  The subject ``stone-mon`` daemon might be unable to find the surviving
 monitors (e.g., say ``mon.c`` is down; you add a new monitor ``mon.d``,
 then remove ``mon.a``, then add a new monitor ``mon.e`` and remove
 ``mon.b``; you will end up with a totally different monmap from the one
@@ -304,19 +304,19 @@ Inject a monmap into the monitor
 
   1. Is there a formed quorum? If so, grab the monmap from the quorum::
 
-      $ ceph mon getmap -o /tmp/monmap
+      $ stone mon getmap -o /tmp/monmap
 
   2. No quorum? Grab the monmap directly from another monitor (this
      assumes the monitor you are grabbing the monmap from has id ID-FOO
      and has been stopped)::
 
-      $ ceph-mon -i ID-FOO --extract-monmap /tmp/monmap
+      $ stone-mon -i ID-FOO --extract-monmap /tmp/monmap
 
   3. Stop the monitor you are going to inject the monmap into.
 
   4. Inject the monmap::
 
-      $ ceph-mon -i ID --inject-monmap /tmp/monmap
+      $ stone-mon -i ID --inject-monmap /tmp/monmap
 
   5. Start the monitor
 
@@ -369,15 +369,15 @@ Can I increase the maximum tolerated clock skew?
 
 How do I know there's a clock skew?
 
-  The monitors will warn you via the cluster status ``HEALTH_WARN``. ``ceph health
-  detail`` or ``ceph status`` should show something like::
+  The monitors will warn you via the cluster status ``HEALTH_WARN``. ``stone health
+  detail`` or ``stone status`` should show something like::
 
       mon.c addr 10.10.0.1:6789/0 clock skew 0.08235s > max 0.05s (latency 0.0045s)
 
   That means that ``mon.c`` has been flagged as suffering from a clock skew.
 
   On releases beginning with Luminous you can issue the
-  ``ceph time-sync-status`` command to check status.  Note that the lead mon
+  ``stone time-sync-status`` command to check status.  Note that the lead mon
   is typically the one with the numerically lowest IP address.  It will always
   show ``0``: the reported offsets of other mons are relative to
   the lead mon, not to any external reference source.
@@ -400,14 +400,14 @@ Check your IP tables. Some OS install utilities add a ``REJECT`` rule to
 for ``ssh``. If your monitor host's IP tables have such a ``REJECT`` rule in
 place, clients connecting from a separate node will fail to mount with a timeout
 error. You need to address ``iptables`` rules that reject clients trying to
-connect to Ceph daemons.  For example, you would need to address rules that look
+connect to Stone daemons.  For example, you would need to address rules that look
 like this appropriately::
 
 	REJECT all -- anywhere anywhere reject-with icmp-host-prohibited
 
-You may also need to add rules to IP tables on your Ceph hosts to ensure
-that clients can access the ports associated with your Ceph monitors (i.e., port
-6789 by default) and Ceph OSDs (i.e., 6800 through 7300 by default). For
+You may also need to add rules to IP tables on your Stone hosts to ensure
+that clients can access the ports associated with your Stone monitors (i.e., port
+6789 by default) and Stone OSDs (i.e., 6800 through 7300 by default). For
 example::
 
 	iptables -A INPUT -m multiport -p tcp -s {ip-address}/{netmask} --dports 6789,6800:7300 -j ACCEPT
@@ -418,7 +418,7 @@ Monitor Store Failures
 Symptoms of store corruption
 ----------------------------
 
-Ceph monitor stores the :term:`Cluster Map` in a key/value store such as LevelDB. If
+Stone monitor stores the :term:`Cluster Map` in a key/value store such as LevelDB. If
 a monitor fails due to the key/value store corruption, following error messages
 might be found in the monitor log::
 
@@ -426,7 +426,7 @@ might be found in the monitor log::
 
 or::
 
-  Corruption: 1 missing files; e.g.: /var/lib/ceph/mon/mon.foo/store.db/1234567.ldb
+  Corruption: 1 missing files; e.g.: /var/lib/stone/mon/mon.foo/store.db/1234567.ldb
 
 Recovery using healthy monitor(s)
 ---------------------------------
@@ -441,7 +441,7 @@ Recovery using OSDs
 -------------------
 
 But what if all monitors fail at the same time? Since users are encouraged to
-deploy at least three (and preferably five) monitors in a Ceph cluster, the chance of simultaneous
+deploy at least three (and preferably five) monitors in a Stone cluster, the chance of simultaneous
 failure is rare. But unplanned power-downs in a data center with improperly
 configured disk/fs settings could fail the underlying file system, and hence
 kill all the monitors. In this case, we can recover the monitor store with the
@@ -455,41 +455,41 @@ information stored in OSDs.::
     rsync -avz $ms/. user@$host:$ms.remote
     rm -rf $ms
     ssh user@$host <<EOF
-      for osd in /var/lib/ceph/osd/ceph-*; do
-        ceph-objectstore-tool --data-path \$osd --no-mon-config --op update-mon-db --mon-store-path $ms.remote
+      for osd in /var/lib/stone/osd/stone-*; do
+        stone-objectstore-tool --data-path \$osd --no-mon-config --op update-mon-db --mon-store-path $ms.remote
       done
   EOF
     rsync -avz user@$host:$ms.remote/. $ms
   done
   
   # rebuild the monitor store from the collected map, if the cluster does not
-  # use cephx authentication, we can skip the following steps to update the
+  # use stonex authentication, we can skip the following steps to update the
   # keyring with the caps, and there is no need to pass the "--keyring" option.
-  # i.e. just use "ceph-monstore-tool $ms rebuild" instead
-  ceph-authtool /path/to/admin.keyring -n mon. \
+  # i.e. just use "stone-monstore-tool $ms rebuild" instead
+  stone-authtool /path/to/admin.keyring -n mon. \
     --cap mon 'allow *'
-  ceph-authtool /path/to/admin.keyring -n client.admin \
+  stone-authtool /path/to/admin.keyring -n client.admin \
     --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *'
-  # add one or more ceph-mgr's key to the keyring. in this case, an encoded key
+  # add one or more stone-mgr's key to the keyring. in this case, an encoded key
   # for mgr.x is added, you can find the encoded key in
-  # /etc/ceph/${cluster}.${mgr_name}.keyring on the machine where ceph-mgr is
+  # /etc/stone/${cluster}.${mgr_name}.keyring on the machine where stone-mgr is
   # deployed
-  ceph-authtool /path/to/admin.keyring --add-key 'AQDN8kBe9PLWARAAZwxXMr+n85SBYbSlLcZnMA==' -n mgr.x \
+  stone-authtool /path/to/admin.keyring --add-key 'AQDN8kBe9PLWARAAZwxXMr+n85SBYbSlLcZnMA==' -n mgr.x \
     --cap mon 'allow profile mgr' --cap osd 'allow *' --cap mds 'allow *'
   # if your monitors' ids are not single characters like 'a', 'b', 'c', please
   # specify them in the command line by passing them as arguments of the "--mon-ids"
-  # option. if you are not sure, please check your ceph.conf to see if there is any
+  # option. if you are not sure, please check your stone.conf to see if there is any
   # sections named like '[mon.foo]'. don't pass the "--mon-ids" option, if you are
   # using DNS SRV for looking up monitors.
-  ceph-monstore-tool $ms rebuild -- --keyring /path/to/admin.keyring --mon-ids alpha beta gamma
+  stone-monstore-tool $ms rebuild -- --keyring /path/to/admin.keyring --mon-ids alpha beta gamma
   
   # make a backup of the corrupted store.db just in case!  repeat for
   # all monitors.
-  mv /var/lib/ceph/mon/mon.foo/store.db /var/lib/ceph/mon/mon.foo/store.db.corrupted
+  mv /var/lib/stone/mon/mon.foo/store.db /var/lib/stone/mon/mon.foo/store.db.corrupted
 
   # move rebuild store.db into place.  repeat for all monitors.
-  mv $ms/store.db /var/lib/ceph/mon/mon.foo/store.db
-  chown -R ceph:ceph /var/lib/ceph/mon/mon.foo/store.db
+  mv $ms/store.db /var/lib/stone/mon/mon.foo/store.db
+  chown -R stone:stone /var/lib/stone/mon/mon.foo/store.db
 
 The steps above
 
@@ -503,12 +503,12 @@ Known limitations
 
 Following information are not recoverable using the steps above:
 
-- **some added keyrings**: all the OSD keyrings added using ``ceph auth add`` command
+- **some added keyrings**: all the OSD keyrings added using ``stone auth add`` command
   are recovered from the OSD's copy. And the ``client.admin`` keyring is imported
-  using ``ceph-monstore-tool``. But the MDS keyrings and other keyrings are missing
+  using ``stone-monstore-tool``. But the MDS keyrings and other keyrings are missing
   in the recovered monitor store. You might need to re-add them manually.
 
-- **creating pools**: If any RADOS pools were in the process of being creating, that state is lost.  The recovery tool assumes that all pools have been created.  If there are PGs that are stuck in the 'unknown' after the recovery for a partially created pool, you can force creation of the *empty* PG with the ``ceph osd force-create-pg`` command.  Note that this will create an *empty* PG, so only do this if you know the pool is empty.
+- **creating pools**: If any RADOS pools were in the process of being creating, that state is lost.  The recovery tool assumes that all pools have been created.  If there are PGs that are stuck in the 'unknown' after the recovery for a partially created pool, you can force creation of the *empty* PG with the ``stone osd force-create-pg`` command.  Note that this will create an *empty* PG, so only do this if you know the pool is empty.
 
 - **MDS Maps**: the MDS maps are lost.
 
@@ -520,8 +520,8 @@ Everything Failed! Now What?
 Reaching out for help
 ----------------------
 
-You can find us on IRC at #ceph and #ceph-devel at OFTC (server irc.oftc.net)
-and on ``ceph-devel@vger.kernel.org`` and ``ceph-users@lists.ceph.com``. Make
+You can find us on IRC at #stone and #stone-devel at OFTC (server irc.oftc.net)
+and on ``stone-devel@vger.kernel.org`` and ``stone-users@lists.stone.com``. Make
 sure you have grabbed your logs and have them ready if someone asks: the faster
 the interaction and lower the latency in response, the better chances everyone's
 time is optimized.
@@ -530,16 +530,16 @@ time is optimized.
 Preparing your logs
 ---------------------
 
-Monitor logs are, by default, kept in ``/var/log/ceph/ceph-mon.FOO.log*``. We
+Monitor logs are, by default, kept in ``/var/log/stone/stone-mon.FOO.log*``. We
 may want them. However, your logs may not have the necessary information. If
 you don't find your monitor logs at their default location, you can check
 where they should be by running::
 
-  ceph-conf --name mon.FOO --show-config-value log_file
+  stone-conf --name mon.FOO --show-config-value log_file
 
 The amount of information in the logs are subject to the debug levels being
 enforced by your configuration files. If you have not enforced a specific
-debug level then Ceph is using the default levels and your logs may not
+debug level then Stone is using the default levels and your logs may not
 contain important information to track down you issue.
 A first step in getting relevant information into your logs will be to raise
 debug levels. In this case we will be interested in the information from the
@@ -549,7 +549,7 @@ will output their debug information on different subsystems.
 
 You will have to raise the debug levels of those subsystems more closely
 related to your issue. This may not be an easy task for someone unfamiliar
-with troubleshooting Ceph. For most situations, setting the following options
+with troubleshooting Stone. For most situations, setting the following options
 on your monitors will be enough to pinpoint a potential source of the issue::
 
       debug mon = 10
@@ -569,29 +569,29 @@ You have quorum
 
   Either inject the debug option into the monitor you want to debug::
 
-        ceph tell mon.FOO config set debug_mon 10/10
+        stone tell mon.FOO config set debug_mon 10/10
 
   or into all monitors at once::
 
-        ceph tell mon.* config set debug_mon 10/10
+        stone tell mon.* config set debug_mon 10/10
 
 No quorum
 
   Use the monitor's admin socket and directly adjust the configuration
   options::
 
-      ceph daemon mon.FOO config set debug_mon 10/10
+      stone daemon mon.FOO config set debug_mon 10/10
 
 
 Going back to default values is as easy as rerunning the above commands
 using the debug level ``1/10`` instead.  You can check your current
 values using the admin socket and the following commands::
 
-      ceph daemon mon.FOO config show
+      stone daemon mon.FOO config show
 
 or::
 
-      ceph daemon mon.FOO config get 'OPTION_NAME'
+      stone daemon mon.FOO config get 'OPTION_NAME'
 
 
 Reproduced the problem with appropriate debug levels. Now what?
@@ -610,4 +610,4 @@ based on that.
 Finally, you should reach out to us on the mailing lists, on IRC or file
 a new issue on the `tracker`_.
 
-.. _tracker: http://tracker.ceph.com/projects/ceph/issues/new
+.. _tracker: http://tracker.stone.com/projects/stone/issues/new

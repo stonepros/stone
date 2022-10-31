@@ -270,14 +270,14 @@ class BaseController:
             if xml:
                 if version:
                     cherrypy.response.headers['Content-Type'] = \
-                        'application/vnd.ceph.api.v{}+xml'.format(version)
+                        'application/vnd.stone.api.v{}+xml'.format(version)
                 else:
                     cherrypy.response.headers['Content-Type'] = 'application/xml'
                 return ret.encode('utf8')
             if json_response:
                 if version:
                     cherrypy.response.headers['Content-Type'] = \
-                        'application/vnd.ceph.api.v{}+json'.format(version)
+                        'application/vnd.stone.api.v{}+json'.format(version)
                 else:
                     cherrypy.response.headers['Content-Type'] = 'application/json'
                 ret = json.dumps(ret).encode('utf8')

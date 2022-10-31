@@ -37,7 +37,7 @@ protected:
   bool append_op_event(T *request) {
     ImageCtxT &image_ctx = this->m_image_ctx;
 
-    ceph_assert(can_affect_io());
+    stone_assert(can_affect_io());
     std::scoped_lock locker{image_ctx.owner_lock, image_ctx.image_lock};
     if (image_ctx.journal != nullptr) {
       if (image_ctx.journal->is_journal_replaying()) {

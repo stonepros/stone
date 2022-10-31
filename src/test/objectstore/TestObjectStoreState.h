@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Stonee - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2012 New Dream Network
 *
@@ -70,8 +70,8 @@ public:
 
   int m_max_in_flight;
   std::atomic<int> m_in_flight = { 0 };
-  ceph::mutex m_finished_lock = ceph::make_mutex("Finished Lock");
-  ceph::condition_variable m_finished_cond;
+  stone::mutex m_finished_lock = stone::make_mutex("Finished Lock");
+  stone::condition_variable m_finished_cond;
 
   void rebuild_id_vec() {
     m_collections_ids.clear();

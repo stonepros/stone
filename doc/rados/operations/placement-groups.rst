@@ -8,7 +8,7 @@ Autoscaling placement groups
 ============================
 
 Placement groups (PGs) are an internal implementation detail of how
-Ceph distributes data.  You can allow the cluster to either make
+Stone distributes data.  You can allow the cluster to either make
 recommendations or automatically tune PGs based on how the cluster is
 used by enabling *pg-autoscaling*.
 
@@ -20,30 +20,30 @@ Each pool in the system has a ``pg_autoscale_mode`` property that can be set to 
 
 To set the autoscaling mode for existing pools,::
 
-  ceph osd pool set <pool-name> pg_autoscale_mode <mode>
+  stone osd pool set <pool-name> pg_autoscale_mode <mode>
 
 For example to enable autoscaling on pool ``foo``,::
 
-  ceph osd pool set foo pg_autoscale_mode on
+  stone osd pool set foo pg_autoscale_mode on
 
 You can also configure the default ``pg_autoscale_mode`` that is
 applied to any pools that are created in the future with::
 
-  ceph config set global osd_pool_default_pg_autoscale_mode <mode>
+  stone config set global osd_pool_default_pg_autoscale_mode <mode>
 
 You can disable or enable the autoscaler for all pools with
 the ``noautoscale`` flag. By default this flag is set to  be ``off``,
 but you can turn it ``on`` by using the command::
 
-  ceph osd pool set noautoscale
+  stone osd pool set noautoscale
 
 You can turn it ``off`` using the command::
 
-  ceph osd pool unset noautoscale
+  stone osd pool unset noautoscale
 
 To ``get`` the value of the flag use the command::
 
-  ceph osd pool get noautoscale
+  stone osd pool get noautoscale
 
 Viewing PG scaling recommendations
 ----------------------------------
@@ -51,7 +51,7 @@ Viewing PG scaling recommendations
 You can view each pool, its relative utilization, and any suggested changes to
 the PG count with this command::
 
-  ceph osd pool autoscale-status
+  stone osd pool autoscale-status
 
 Output will be something like::
 
@@ -117,7 +117,7 @@ Automated scaling
 -----------------
 
 Allowing the cluster to automatically scale PGs based on usage is the
-simplest approach.  Ceph will look at the total available storage and
+simplest approach.  Stone will look at the total available storage and
 target number of PGs for the whole system, look at how much data is
 stored in each pool, and try to apportion the PGs accordingly.  The
 system is relatively conservative with its approach, only making
@@ -128,11 +128,11 @@ The target number of PGs per OSD is based on the
 ``mon_target_pg_per_osd`` configurable (default: 100), which can be
 adjusted with::
 
-  ceph config set global mon_target_pg_per_osd 100
+  stone config set global mon_target_pg_per_osd 100
 
 The autoscaler analyzes pools and adjusts on a per-subtree basis.
 Because each pool may map to a different CRUSH rule, and each rule may
-distribute data across different devices, Ceph will consider
+distribute data across different devices, Stone will consider
 utilization of each subtree of the hierarchy independently.  For
 example, a pool that maps to OSDs of class `ssd` and a pool that maps
 to OSDs of class `hdd` will each have optimal PG counts that depend on
@@ -150,15 +150,15 @@ with the scaling process.
 
 To create pool with `bulk` flag::
 
-  ceph osd pool create <pool-name> --bulk
+  stone osd pool create <pool-name> --bulk
 
 To set/unset `bulk` flag of existing pool::
 
-  ceph osd pool set <pool-name> bulk <true/false/1/0>
+  stone osd pool set <pool-name> bulk <true/false/1/0>
 
 To get `bulk` flag of existing pool::
 
-  ceph osd pool get <pool-name> bulk
+  stone osd pool get <pool-name> bulk
 
 .. _specifying_pool_target_size:
 
@@ -170,7 +170,7 @@ fraction of the total cluster capacity and will appear to the system
 as if it should only need a small number of placement groups.
 However, in most cases cluster administrators have a good idea which
 pools are expected to consume most of the system capacity over time.
-By providing this information to Ceph, a more appropriate number of
+By providing this information to Stone, a more appropriate number of
 PGs can be used from the beginning, preventing subsequent changes in
 ``pg_num`` and the overhead associated with moving data around when
 those adjustments are made.
@@ -181,12 +181,12 @@ relative to other pools with a ``target_size_ratio`` set.
 
 For example,::
 
-  ceph osd pool set mypool target_size_bytes 100T
+  stone osd pool set mypool target_size_bytes 100T
 
 will tell the system that `mypool` is expected to consume 100 TiB of
 space.  Alternatively,::
 
-  ceph osd pool set mypool target_size_ratio 1.0
+  stone osd pool set mypool target_size_ratio 1.0
 
 will tell the system that `mypool` is expected to consume 1.0 relative
 to the other pools with ``target_size_ratio`` set. If `mypool` is the
@@ -194,7 +194,7 @@ only pool in the cluster, this means an expected use of 100% of the
 total capacity. If there is a second pool with ``target_size_ratio``
 1.0, both pools would expect to use 50% of the cluster capacity.
 
-You can also set the target size of a pool at creation time with the optional ``--target-size-bytes <bytes>`` or ``--target-size-ratio <ratio>`` arguments to the ``ceph osd pool create`` command.
+You can also set the target size of a pool at creation time with the optional ``--target-size-bytes <bytes>`` or ``--target-size-ratio <ratio>`` arguments to the ``stone osd pool create`` command.
 
 Note that if impossible target size values are specified (for example,
 a capacity larger than the total cluster) then a health warning
@@ -210,17 +210,17 @@ Specifying bounds on a pool's PGs
 It is also possible to specify a minimum number of PGs for a pool.
 This is useful for establishing a lower bound on the amount of
 parallelism client will see when doing IO, even when a pool is mostly
-empty.  Setting the lower bound prevents Ceph from reducing (or
+empty.  Setting the lower bound prevents Stone from reducing (or
 recommending you reduce) the PG number below the configured number.
 
 You can set the minimum or maximum number of PGs for a pool with::
 
-  ceph osd pool set <pool-name> pg_num_min <num>
-  ceph osd pool set <pool-name> pg_num_max <num>
+  stone osd pool set <pool-name> pg_num_min <num>
+  stone osd pool set <pool-name> pg_num_max <num>
 
 You can also specify the minimum or maximum PG count at pool creation
 time with the optional ``--pg-num-min <num>`` or ``--pg-num-max
-<num>`` arguments to the ``ceph osd pool create`` command.
+<num>`` arguments to the ``stone osd pool create`` command.
 
 .. _preselection:
 
@@ -229,7 +229,7 @@ A preselection of pg_num
 
 When creating a new pool with::
 
-        ceph osd pool create {pool-name} [pg_num]
+        stone osd pool create {pool-name} [pg_num]
 
 it is optional to choose the value of ``pg_num``.  If you do not
 specify ``pg_num``, the cluster can (by default) automatically tune it
@@ -240,7 +240,7 @@ whether you specify a ``pg_num`` value or not does not affect whether
 the value is automatically tuned by the cluster after the fact.  To
 enable or disable auto-tuning,::
 
-  ceph osd pool set {pool-name} pg_autoscale_mode (on|off|warn)
+  stone osd pool set {pool-name} pg_autoscale_mode (on|off|warn)
 
 The "rule of thumb" for PGs per OSD has traditionally be 100.  With
 the additional of the balancer (which is also enabled by default), a
@@ -281,7 +281,7 @@ cannot realistically track placement on a per-object basis.
                   |                       |
                   +-----------------------+
 
-The Ceph client will calculate which placement group an object should
+The Stone client will calculate which placement group an object should
 be in. It does this by hashing the object ID and applying an operation
 based on the number of PGs in the defined pool and the ID of the pool.
 See `Mapping PGs to OSDs`_ for details.
@@ -340,14 +340,14 @@ permanent data loss in a single placement group:
   For all objects within the placement group the number of replica
   suddenly drops from three to two.
 
-- Ceph starts recovery for this placement group by choosing a new OSD
+- Stone starts recovery for this placement group by choosing a new OSD
   to re-create the third copy of all objects.
 
 - Another OSD, within the same placement group, fails before the new
   OSD is fully populated with the third copy. Some objects will then
   only have one surviving copies.
 
-- Ceph picks yet another OSD and keeps copying objects to restore the
+- Stone picks yet another OSD and keeps copying objects to restore the
   desired number of copies.
 
 - A third OSD, within the same placement group, fails before recovery
@@ -367,7 +367,7 @@ receive some new objects to be stored because they became part of a
 new placement group.
 
 The amount of time it takes for this recovery to complete entirely
-depends on the architecture of the Ceph cluster. Let say each OSD is
+depends on the architecture of the Stone cluster. Let say each OSD is
 hosted by a 1TB SSD on a single machine and all of them are connected
 to a 10Gb/s switch and the recovery for a single OSD completes within
 M minutes. If there are two OSDs per machine using spinners with no
@@ -378,7 +378,7 @@ In a cluster of this size, the number of placement groups has almost
 no influence on data durability. It could be 128 or 8192 and the
 recovery would not be slower or faster.
 
-However, growing the same Ceph cluster to 20 OSDs instead of 10 OSDs
+However, growing the same Stone cluster to 20 OSDs instead of 10 OSDs
 is likely to speed up recovery and therefore improve data durability
 significantly. Each OSD now participates in only ~75 placement groups
 instead of ~150 when there were only 10 OSDs and it will still require
@@ -476,7 +476,7 @@ resources.
 Choosing the number of Placement Groups
 =======================================
 
-.. note: It is rarely necessary to do this math by hand.  Instead, use the ``ceph osd pool autoscale-status`` command in combination with the ``target_size_bytes`` or ``target_size_ratio`` pool properties.  See :ref:`pg-autoscaler` for more information.
+.. note: It is rarely necessary to do this math by hand.  Instead, use the ``stone osd pool autoscale-status`` command in combination with the ``target_size_bytes`` or ``target_size_ratio`` pool properties.  See :ref:`pg-autoscaler` for more information.
 
 If you have more than 50 OSDs, we recommend approximately 50-100
 placement groups per OSD to balance out resource usage, data
@@ -487,11 +487,11 @@ you can use the following formula to get a baseline
   Total PGs = :math:`\frac{OSDs \times 100}{pool \: size}`
 
 Where **pool size** is either the number of replicas for replicated
-pools or the K+M sum for erasure coded pools (as returned by **ceph
+pools or the K+M sum for erasure coded pools (as returned by **stone
 osd erasure-code-profile get**).
 
 You should then check if the result makes sense with the way you
-designed your Ceph cluster to maximize `data durability`_,
+designed your Stone cluster to maximize `data durability`_,
 `object distribution`_ and minimize `resource usage`_.
 
 The result should always be **rounded up to the nearest power of two**.
@@ -532,7 +532,7 @@ To set the number of placement groups in a pool, you must specify the
 number of placement groups at the time you create the pool.
 See `Create a Pool`_ for details.  Even after a pool is created you can also change the number of placement groups with::
 
-        ceph osd pool set {pool-name} pg_num {pg_num}
+        stone osd pool set {pool-name} pg_num {pg_num}
 
 After you increase the number of placement groups, you must also
 increase the number of placement groups for placement (``pgp_num``)
@@ -544,7 +544,7 @@ groups for placement, ie. ``pgp_num`` is increased. The ``pgp_num``
 should be equal to the ``pg_num``.  To increase the number of
 placement groups for placement, execute the following::
 
-        ceph osd pool set {pool-name} pgp_num {pgp_num}
+        stone osd pool set {pool-name} pgp_num {pgp_num}
 
 When decreasing the number of PGs, ``pgp_num`` is adjusted
 automatically for you.
@@ -554,7 +554,7 @@ Get the Number of Placement Groups
 
 To get the number of placement groups in a pool, execute the following::
 
-        ceph osd pool get {pool-name} pg_num
+        stone osd pool get {pool-name} pg_num
 
 
 Get a Cluster's PG Statistics
@@ -562,7 +562,7 @@ Get a Cluster's PG Statistics
 
 To get the statistics for the placement groups in your cluster, execute the following::
 
-        ceph pg dump [--format {format}]
+        stone pg dump [--format {format}]
 
 Valid formats are ``plain`` (default) and ``json``.
 
@@ -573,7 +573,7 @@ Get Statistics for Stuck PGs
 To get the statistics for all placement groups stuck in a specified state,
 execute the following::
 
-        ceph pg dump_stuck inactive|unclean|stale|undersized|degraded [--format <format>] [-t|--threshold <seconds>]
+        stone pg dump_stuck inactive|unclean|stale|undersized|degraded [--format <format>] [-t|--threshold <seconds>]
 
 **Inactive** Placement groups cannot process reads or writes because they are waiting for an OSD
 with the most up-to-date data to come up and in.
@@ -594,13 +594,13 @@ Get a PG Map
 
 To get the placement group map for a particular placement group, execute the following::
 
-        ceph pg map {pg-id}
+        stone pg map {pg-id}
 
 For example::
 
-        ceph pg map 1.6c
+        stone pg map 1.6c
 
-Ceph will return the placement group map, the placement group, and the OSD status::
+Stone will return the placement group map, the placement group, and the OSD status::
 
         osdmap e13 pg 1.6c (1.6c) -> up [1,0] acting [1,0]
 
@@ -610,7 +610,7 @@ Get a PGs Statistics
 
 To retrieve statistics for a particular placement group, execute the following::
 
-        ceph pg {pg-id} query
+        stone pg {pg-id} query
 
 
 Scrub a Placement Group
@@ -618,9 +618,9 @@ Scrub a Placement Group
 
 To scrub a placement group, execute the following::
 
-        ceph pg scrub {pg-id}
+        stone pg scrub {pg-id}
 
-Ceph checks the primary and any replica nodes, generates a catalog of all objects
+Stone checks the primary and any replica nodes, generates a catalog of all objects
 in the placement group and compares them to ensure that no objects are missing
 or mismatched, and their contents are consistent.  Assuming the replicas all
 match, a final semantic sweep ensures that all of the snapshot-related object
@@ -628,7 +628,7 @@ metadata is consistent. Errors are reported via logs.
 
 To scrub all placement groups from a specific pool, execute the following::
 
-        ceph osd pool scrub {pool-name}
+        stone osd pool scrub {pool-name}
 
 Prioritize backfill/recovery of a Placement Group(s)
 ====================================================
@@ -642,17 +642,17 @@ performance and/or availability of data stored on those groups is restored
 earlier. To do this (mark particular placement group(s) as prioritized during
 backfill or recovery), execute the following::
 
-        ceph pg force-recovery {pg-id} [{pg-id #2}] [{pg-id #3} ...]
-        ceph pg force-backfill {pg-id} [{pg-id #2}] [{pg-id #3} ...]
+        stone pg force-recovery {pg-id} [{pg-id #2}] [{pg-id #3} ...]
+        stone pg force-backfill {pg-id} [{pg-id #2}] [{pg-id #3} ...]
 
-This will cause Ceph to perform recovery or backfill on specified placement
+This will cause Stone to perform recovery or backfill on specified placement
 groups first, before other placement groups. This does not interrupt currently
 ongoing backfills or recovery, but causes specified PGs to be processed
 as soon as possible. If you change your mind or prioritize wrong groups,
 use::
 
-        ceph pg cancel-force-recovery {pg-id} [{pg-id #2}] [{pg-id #3} ...]
-        ceph pg cancel-force-backfill {pg-id} [{pg-id #2}] [{pg-id #3} ...]
+        stone pg cancel-force-recovery {pg-id} [{pg-id #2}] [{pg-id #3} ...]
+        stone pg cancel-force-backfill {pg-id} [{pg-id #2}] [{pg-id #3} ...]
 
 This will remove "force" flag from those PGs and they will be processed
 in default order. Again, this doesn't affect currently processed placement
@@ -661,27 +661,27 @@ group, only those that are still queued.
 The "force" flag is cleared automatically after recovery or backfill of group
 is done.
 
-Similarly, you may use the following commands to force Ceph to perform recovery
+Similarly, you may use the following commands to force Stone to perform recovery
 or backfill on all placement groups from a specified pool first::
 
-        ceph osd pool force-recovery {pool-name}
-        ceph osd pool force-backfill {pool-name}
+        stone osd pool force-recovery {pool-name}
+        stone osd pool force-backfill {pool-name}
 
 or::
 
-        ceph osd pool cancel-force-recovery {pool-name}
-        ceph osd pool cancel-force-backfill {pool-name}
+        stone osd pool cancel-force-recovery {pool-name}
+        stone osd pool cancel-force-backfill {pool-name}
 
 to restore to the default recovery or backfill priority if you change your mind.
 
-Note that these commands could possibly break the ordering of Ceph's internal
+Note that these commands could possibly break the ordering of Stone's internal
 priority computations, so use them with caution!
 Especially, if you have multiple pools that are currently sharing the same
 underlying OSDs, and some particular pools hold data more important than others,
 we recommend you use the following command to re-arrange all pools's
 recovery/backfill priority in a better order::
 
-        ceph osd pool set {pool-name} recovery_priority {value}
+        stone osd pool set {pool-name} recovery_priority {value}
 
 For example, if you have 10 pools you could make the most important one priority 10,
 next 9, etc. Or you could leave most pools alone and have say 3 important pools
@@ -704,7 +704,7 @@ Currently the only supported option is "revert", which will either roll back to
 a previous version of the object or (if it was a new object) forget about it
 entirely. To mark the "unfound" objects as "lost", execute the following::
 
-        ceph pg {pg-id} mark_unfound_lost revert|delete
+        stone pg {pg-id} mark_unfound_lost revert|delete
 
 .. important:: Use this feature with caution, because it may confuse
    applications that expect the object(s) to exist.
@@ -719,4 +719,4 @@ entirely. To mark the "unfound" objects as "lost", execute the following::
 
 .. _Create a Pool: ../pools#createpool
 .. _Mapping PGs to OSDs: ../../../architecture#mapping-pgs-to-osds
-.. _pgcalc: http://ceph.com/pgcalc/
+.. _pgcalc: http://stone.com/pgcalc/

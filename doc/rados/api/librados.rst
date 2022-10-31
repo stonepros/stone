@@ -29,7 +29,7 @@ using a configuration file (:c:func:`rados_conf_read_file()`), using
 command line options (:c:func:`rados_conf_parse_argv`), or an
 environment variable (:c:func:`rados_conf_parse_env()`)::
 
-	err = rados_conf_read_file(cluster, "/path/to/myceph.conf");
+	err = rados_conf_read_file(cluster, "/path/to/mystone.conf");
 	if (err < 0) {
 		fprintf(stderr, "%s: cannot read config file: %s\n", argv[0], strerror(-err));
 		exit(1);

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  *  Copyright (C) 2015 Intel <jianpeng.ma@intel.com>
  *
@@ -29,14 +29,14 @@ class PMEMDevice : public BlockDevice {
   char *addr; //the address of mmap
   std::string path;
 
-  ceph::mutex debug_lock = ceph::make_mutex("PMEMDevice::debug_lock");
+  stone::mutex debug_lock = stone::make_mutex("PMEMDevice::debug_lock");
   interval_set<uint64_t> debug_inflight;
 
   std::atomic_int injecting_crash;
   int _lock();
 
 public:
-  PMEMDevice(StoneeContext *cct, aio_callback_t cb, void *cbpriv);
+  PMEMDevice(StoneContext *cct, aio_callback_t cb, void *cbpriv);
 
 
   void aio_submit(IOContext *ioc) override;

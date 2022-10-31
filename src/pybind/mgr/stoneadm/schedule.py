@@ -4,7 +4,7 @@ import random
 from typing import List, Optional, Callable, TypeVar, Tuple, NamedTuple, Dict
 
 import orchestrator
-from ceph.deployment.service_spec import ServiceSpec
+from stone.deployment.service_spec import ServiceSpec
 from orchestrator._interface import DaemonDescription
 from orchestrator import OrchestratorValidationError
 from .utils import RESCHEDULE_FROM_OFFLINE_HOSTS_TYPES

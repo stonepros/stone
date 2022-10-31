@@ -96,7 +96,7 @@ public:
   }
 
   LogSegment *get_current_segment() { 
-    ceph_assert(!segments.empty());
+    stone_assert(!segments.empty());
     return segments.rbegin()->second;
   }
 
@@ -237,14 +237,14 @@ protected:
   void set_safe_pos(uint64_t pos)
   {
     std::lock_guard l(submit_mutex);
-    ceph_assert(pos >= safe_pos);
+    stone_assert(pos >= safe_pos);
     safe_pos = pos;
   }
 
   void _submit_thread();
 
   uint64_t get_last_segment_seq() const {
-    ceph_assert(!segments.empty());
+    stone_assert(!segments.empty());
     return segments.rbegin()->first;
   }
   LogSegment *get_oldest_segment() {
@@ -285,8 +285,8 @@ protected:
 
   int64_t mdsmap_up_features = 0;
   std::map<uint64_t,list<PendingEvent> > pending_events; // log segment -> event list
-  ceph::mutex submit_mutex = ceph::make_mutex("MDLog::submit_mutex");
-  ceph::condition_variable submit_cond;
+  stone::mutex submit_mutex = stone::make_mutex("MDLog::submit_mutex");
+  stone::condition_variable submit_cond;
 
 private:
   friend class C_MaybeExpiredSegment;

@@ -2,7 +2,7 @@
 set -e
 
 echo "getting iogen"
-wget http://download.ceph.com/qa/iogen_3.1p0.tar
+wget http://download.stone.com/qa/iogen_3.1p0.tar
 tar -xvzf iogen_3.1p0.tar
 cd iogen_3.1p0
 echo "making iogen"

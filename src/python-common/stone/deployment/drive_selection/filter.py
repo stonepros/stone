@@ -2,7 +2,7 @@
 
 import logging
 
-from ceph.deployment.drive_group import DeviceSelection
+from stone.deployment.drive_group import DeviceSelection
 
 try:
     from typing import Generator

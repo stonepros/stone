@@ -13,8 +13,8 @@
 //#include "../client/ioctl.h"
 
 #include <linux/ioctl.h>
-#define CEPH_IOCTL_MAGIC 0x97
-#define CEPH_IOC_SYNCIO _IO(CEPH_IOCTL_MAGIC, 5)
+#define STONE_IOCTL_MAGIC 0x97
+#define STONE_IOC_SYNCIO _IO(STONE_IOCTL_MAGIC, 5)
 
 void write_pattern()
 {
@@ -89,7 +89,7 @@ int read_file(int buf_align, uint64_t offset, int len, int direct) {
 	}
 
 	if (!direct)
-	   ioctl(fd, CEPH_IOC_SYNCIO);
+	   ioctl(fd, STONE_IOC_SYNCIO);
 
 	if ((r = posix_memalign(&rawbuf, 4096, len + buf_align)) != 0) {
 	   printf("read_file: error: posix_memalign failed with %d", r);
@@ -154,7 +154,7 @@ int write_file(int buf_align, uint64_t offset, int len, int direct)
 	}
 
 	if (!direct)
-	   ioctl(fd, CEPH_IOC_SYNCIO);
+	   ioctl(fd, STONE_IOC_SYNCIO);
 
 	void *buf = (char *)rawbuf + buf_align;
 

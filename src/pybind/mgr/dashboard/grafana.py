@@ -102,13 +102,13 @@ class Retrier(object):
 
 
 def load_local_dashboards():
-    if os.environ.get('CEPH_DEV') == '1' or 'UNITTEST' in os.environ:
+    if os.environ.get('STONE_DEV') == '1' or 'UNITTEST' in os.environ:
         path = os.path.abspath(os.path.join(
             os.path.dirname(__file__),
-            '../../../../monitoring/ceph-mixin/dashboards_out/'
+            '../../../../monitoring/stone-mixin/dashboards_out/'
         ))
     else:
-        path = '/etc/grafana/dashboards/ceph-dashboard'
+        path = '/etc/grafana/dashboards/stone-dashboard'
     dashboards = dict()
     for item in [p for p in os.listdir(path) if p.endswith('.json')]:
         db_path = os.path.join(path, item)

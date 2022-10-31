@@ -22,10 +22,10 @@ class CheckCounter(Task):
     Success condition is that for all of the named counters, at least
     one of the daemons of that type has the counter nonzero.
 
-    Example to check cephfs dirfrag splits are happening:
+    Example to check stonefs dirfrag splits are happening:
     - install:
-    - ceph:
-    - ceph-fuse:
+    - stone:
+    - stone-fuse:
     - check-counter:
         counters:
             mds:

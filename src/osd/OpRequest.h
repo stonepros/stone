@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 New Dream Network/Sage Weil <sage@newdream.net>
  *
@@ -54,7 +54,7 @@ public:
     return op_info.get_classes();
   }
 
-  void _dump(ceph::Formatter *f) const override;
+  void _dump(stone::Formatter *f) const override;
 
   bool has_feature(uint64_t f) const {
     return request->get_connection()->has_feature(f);

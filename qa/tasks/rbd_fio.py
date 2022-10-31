@@ -207,10 +207,10 @@ def run_fio(remote, config, rbd_test_dir):
         remote.run(args=['cd' , run.Raw(rbd_test_dir),
                          run.Raw(';'), 'wget', fio, run.Raw(';'), run.Raw('tar -xvf fio*tar.gz'), run.Raw(';'),
                          run.Raw('cd fio-fio*'), run.Raw(';'), './configure', run.Raw(';'), 'make'])
-        remote.run(args=['ceph', '-s'])
+        remote.run(args=['stone', '-s'])
         remote.run(args=[run.Raw('{tdir}/fio-fio-{v}/fio --showcmd {f}'.format(tdir=rbd_test_dir,v=fio_version,f=fio_config.name))])
         remote.run(args=['sudo', run.Raw('{tdir}/fio-fio-{v}/fio {f}'.format(tdir=rbd_test_dir,v=fio_version,f=fio_config.name))])
-        remote.run(args=['ceph', '-s'])
+        remote.run(args=['stone', '-s'])
     finally:
         out = remote.sh('rbd device list --format=json')
         mapped_images = json.loads(out)

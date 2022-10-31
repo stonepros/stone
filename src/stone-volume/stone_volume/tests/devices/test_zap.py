@@ -1,5 +1,5 @@
 import pytest
-from ceph_volume.devices import lvm
+from stone_volume.devices import lvm
 
 
 class TestZap(object):

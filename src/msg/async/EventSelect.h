@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -25,10 +25,10 @@ class SelectDriver : public EventDriver {
    * FD sets after select(). */
   fd_set _rfds, _wfds;
   int max_fd;
-  StoneeContext *cct;
+  StoneContext *cct;
 
  public:
-  explicit SelectDriver(StoneeContext *c): max_fd(0), cct(c) {}
+  explicit SelectDriver(StoneContext *c): max_fd(0), cct(c) {}
   ~SelectDriver() override {}
 
   int init(EventCenter *c, int nevent) override;

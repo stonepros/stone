@@ -21,7 +21,7 @@ class APIVersion(NamedTuple):
     NONE = ...  # type: ignore
 
     __MIME_TYPE_REGEX = re.compile(  # type: ignore
-        r'^application/vnd\.ceph\.api\.v(\d+\.\d+)\+json$')
+        r'^application/vnd\.stone\.api\.v(\d+\.\d+)\+json$')
 
     @classmethod
     def from_string(cls, version_string: str) -> 'APIVersion':
@@ -34,7 +34,7 @@ class APIVersion(NamedTuple):
     @classmethod
     def from_mime_type(cls, mime_type: str) -> 'APIVersion':
         """
-        >>> APIVersion.from_mime_type('application/vnd.ceph.api.v1.0+json')
+        >>> APIVersion.from_mime_type('application/vnd.stone.api.v1.0+json')
         APIVersion(major=1, minor=0)
 
         """
@@ -50,9 +50,9 @@ class APIVersion(NamedTuple):
     def to_mime_type(self, subtype='json'):
         """
         >>> APIVersion(1, 0).to_mime_type(subtype='xml')
-        'application/vnd.ceph.api.v1.0+xml'
+        'application/vnd.stone.api.v1.0+xml'
         """
-        return f'application/vnd.ceph.api.v{self!s}+{subtype}'
+        return f'application/vnd.stone.api.v{self!s}+{subtype}'
 
     def supports(self, client_version: "APIVersion") -> bool:
         """

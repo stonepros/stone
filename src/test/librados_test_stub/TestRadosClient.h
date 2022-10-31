@@ -23,7 +23,7 @@
 class Finisher;
 
 namespace boost { namespace asio { struct io_context; }}
-namespace ceph { namespace async { struct io_context_pool; }}
+namespace stone { namespace async { struct io_context_pool; }}
 
 namespace librados {
 
@@ -61,12 +61,12 @@ public:
     std::string oid;
   };
 
-  TestRadosClient(StoneeContext *cct, TestWatchNotify *watch_notify);
+  TestRadosClient(StoneContext *cct, TestWatchNotify *watch_notify);
 
   void get();
   void put();
 
-  virtual StoneeContext *cct();
+  virtual StoneContext *cct();
 
   virtual uint32_t get_nonce() = 0;
   virtual uint64_t get_instance_id() = 0;
@@ -143,7 +143,7 @@ protected:
 private:
   struct IOContextPool;
 
-  StoneeContext *m_cct;
+  StoneContext *m_cct;
   std::atomic<uint64_t> m_refcount = { 0 };
 
   TestWatchNotify *m_watch_notify;
@@ -154,7 +154,7 @@ private:
   std::vector<Finisher *> m_finishers;
   boost::hash<std::string> m_hash;
 
-  std::unique_ptr<ceph::async::io_context_pool> m_io_context_pool;
+  std::unique_ptr<stone::async::io_context_pool> m_io_context_pool;
 };
 
 } // namespace librados

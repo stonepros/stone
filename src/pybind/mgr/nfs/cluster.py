@@ -5,7 +5,7 @@ import socket
 from typing import cast, Dict, List, Any, Union, Optional, TYPE_CHECKING, Tuple
 
 from mgr_module import NFS_POOL_NAME as POOL_NAME
-from ceph.deployment.service_spec import NFSServiceSpec, PlacementSpec, IngressSpec
+from stone.deployment.service_spec import NFSServiceSpec, PlacementSpec, IngressSpec
 
 import orchestrator
 

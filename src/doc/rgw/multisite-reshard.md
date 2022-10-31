@@ -13,7 +13,7 @@
 
 ## Layout
 
-A layout describes a set of rados objects, along with some strategy to distribute things across them. A bucket index layout distributes object names across some number of shards via `ceph_str_hash_linux()`. Resharding a bucket enacts a transition from one such layout to another. Each layout could represent data differently. For example, a bucket index layout would be used with cls_rgw to write/delete keys. Whereas a datalog layout may be used with cls_log to append and trim log entries, then later transition to a layout based on some other primitive like cls_queue or cls_fifo.
+A layout describes a set of rados objects, along with some strategy to distribute things across them. A bucket index layout distributes object names across some number of shards via `stone_str_hash_linux()`. Resharding a bucket enacts a transition from one such layout to another. Each layout could represent data differently. For example, a bucket index layout would be used with cls_rgw to write/delete keys. Whereas a datalog layout may be used with cls_log to append and trim log entries, then later transition to a layout based on some other primitive like cls_queue or cls_fifo.
 
 ## Bucket Index Resharding
 

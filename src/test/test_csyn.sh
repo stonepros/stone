@@ -10,9 +10,9 @@ source "`dirname $0`/test_common.sh"
 
 # Functions
 setup() {
-        export CEPH_NUM_OSD=$1
+        export STONE_NUM_OSD=$1
 
-        # Start ceph
+        # Start stone
         ./stop.sh
 
         # set recovery start to a really long time to ensure that we don't start recovery
@@ -21,7 +21,7 @@ osd max scrubs = 0' || die "vstart failed"
 }
 
 csyn_simple1_impl() {
-  ./ceph-syn -c ./ceph.conf --syn writefile 100 1000 --syn writefile 100 1000 || die "csyn failed"
+  ./stone-syn -c ./stone.conf --syn writefile 100 1000 --syn writefile 100 1000 || die "csyn failed"
 }
 
 csyn_simple1() {

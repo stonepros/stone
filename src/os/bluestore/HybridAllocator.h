@@ -11,7 +11,7 @@
 class HybridAllocator : public AvlAllocator {
   BitmapAllocator* bmap_alloc = nullptr;
 public:
-  HybridAllocator(CephContext* cct, int64_t device_size, int64_t _block_size,
+  HybridAllocator(StoneContext* cct, int64_t device_size, int64_t _block_size,
                   uint64_t max_mem,
 	          const std::string& name) :
       AvlAllocator(cct, device_size, _block_size, max_mem, name) {

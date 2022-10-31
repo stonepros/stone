@@ -5,8 +5,8 @@ set -e
 
 case "$1" in
     remove)
-	[ -x /sbin/stop ] && stop ceph-osd-all || true
-	invoke-rc.d ceph stop osd || {
+	[ -x /sbin/stop ] && stop stone-osd-all || true
+	invoke-rc.d stone stop osd || {
 	    RESULT=$?
 	    if [ $RESULT != 100 ]; then
 		exit $RESULT

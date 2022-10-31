@@ -12,5 +12,5 @@ xterm-*color)
     ;;
 esac
 
-export MRUN_CEPH_ROOT=$HOME/ceph
+export MRUN_STONE_ROOT=$HOME/stone
 

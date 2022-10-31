@@ -99,7 +99,7 @@ osd and may take some time.
 v0.72 Emperor
 =============
 
-This is the fifth major release of Ceph, the fourth since adopting a
+This is the fifth major release of Stone, the fourth since adopting a
 3-month development cycle.  This release brings several new features,
 including multi-datacenter replication for the radosgw, improved
 usability, and lands a lot of incremental performance and internal
@@ -129,7 +129,7 @@ Highlights
 * rgw: performance improvements
 * rgw: validate S3 tokens against Keystone
 
-Coincident with core Ceph, the Emperor release also brings:
+Coincident with core Stone, the Emperor release also brings:
 
 * radosgw-agent: support for multi-datacenter replication for disaster recovery
 * tgt: improved support for iSCSI via upstream tgt
@@ -314,7 +314,7 @@ Notable Changes since v0.67 Dumpling
 * mon: allow logging level of cluster log (/var/log/ceph/ceph.log) to be adjusted
 * mon: avoid rewriting full osdmaps on restart (Joao Luis)
 * mon: continue to discover peer addr info during election phase
-* mon: disallow CephFS snapshots until 'ceph mds set allow_new_snaps' (Greg Farnum)
+* mon: disallow StoneFS snapshots until 'ceph mds set allow_new_snaps' (Greg Farnum)
 * mon: do not expose uncommitted state from 'osd crush {add,set} ...' (Joao Luis)
 * mon: fix 'ceph osd crush reweight ...' (Joao Luis)
 * mon: fix 'osd crush move ...' command for buckets (Joao Luis)
@@ -443,7 +443,7 @@ Notable Changes
 * mds: fix LOOKUPSNAP bug
 * mds: fix standby-replay when we fall behind (Yan, Zheng)
 * mds: fix stray directory purging (Yan, Zheng)
-* mon: disallow CephFS snapshots until 'ceph mds set allow_new_snaps' (Greg Farnum)
+* mon: disallow StoneFS snapshots until 'ceph mds set allow_new_snaps' (Greg Farnum)
 * mon, osd: improve osdmap trimming logic (Samuel Just)
 * mon: kv properties for pools to support EC (Loic Dachary)
 * mon: some auth check cleanups (Joao Luis)

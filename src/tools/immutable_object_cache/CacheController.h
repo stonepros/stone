@@ -4,17 +4,17 @@
 #ifndef STONE_CACHE_CACHE_CONTROLLER_H
 #define STONE_CACHE_CACHE_CONTROLLER_H
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/WorkQueue.h"
 #include "CacheServer.h"
 #include "ObjectCacheStore.h"
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 class CacheController {
  public:
-  CacheController(CephContext *cct, const std::vector<const char*> &args);
+  CacheController(StoneContext *cct, const std::vector<const char*> &args);
   ~CacheController();
 
   int init();
@@ -30,11 +30,11 @@ class CacheController {
  private:
   CacheServer *m_cache_server = nullptr;
   std::vector<const char*> m_args;
-  CephContext *m_cct;
+  StoneContext *m_cct;
   ObjectCacheStore *m_object_cache_store = nullptr;
 };
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone
 
 #endif  // STONE_CACHE_CACHE_CONTROLLER_H

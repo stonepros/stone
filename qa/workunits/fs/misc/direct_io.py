@@ -10,7 +10,7 @@ def main():
 
     ino = os.fstat(fd).st_ino
     obj_name = "{ino:x}.00000000".format(ino=ino)
-    pool_name = os.getxattr(path, "ceph.file.layout.pool")
+    pool_name = os.getxattr(path, "stone.file.layout.pool")
 
     buf = mmap.mmap(-1, 1)
     buf.write(b'1')

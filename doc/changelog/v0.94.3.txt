@@ -9,7 +9,7 @@ Merge: 88e7ee7 81a311a
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Tue Aug 18 12:43:57 2015 +0100
 
-    Merge pull request #5589 from ceph/hammer-12709
+    Merge pull request #5589 from stone/hammer-12709
     
     Workunits : fs/misc/chmod.sh : Include ACL characters in permission check
     
@@ -51,7 +51,7 @@ Merge: 78a4024 154f18c
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Aug 4 11:22:08 2015 +0200
 
-    Merge pull request #5405 from ceph/wip-12465-hammer
+    Merge pull request #5405 from stone/wip-12465-hammer
     
     Log::reopen_log_file: take m_flush_mutex
     
@@ -217,7 +217,7 @@ Date:   Wed Jul 22 10:54:53 2015 +0800
     
     The 3c8cdeacf46ae4031189d2ef6948aa3b6ab4ae43 backport introduced a leak.
     
-    http://tracker.ceph.com/issues/12319 Fixes: #12319
+    http://tracker.stone.com/issues/12319 Fixes: #12319
     
     Signed-off-by: Zhi Zhang <zhangz.david@outlook.com>
 
@@ -228,7 +228,7 @@ Date:   Thu Jul 30 21:43:48 2015 +0200
 
     Merge pull request #5120 from theanalyst/wip-11999-hammer
     
-    cephfs Dumper tries to load whole journal into memory at once
+    stonefs Dumper tries to load whole journal into memory at once
     
     Reviewed-by: Greg Farnum <gfarnum@redhat.com>
 
@@ -250,7 +250,7 @@ Date:   Thu Jul 30 17:00:14 2015 +0200
 
     Merge pull request #5417 from dachary/wip-11998-hammer
     
-    debian/control: ceph-common (>> 0.94.2) must be >= 0.94.2-2
+    debian/control: stone-common (>> 0.94.2) must be >= 0.94.2-2
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -258,20 +258,20 @@ commit 4c199bf57dc54dc5e5f45cd9b34878a8459d434e
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Thu Jul 30 09:43:20 2015 +0200
 
-    debian/control: ceph-common (>> 0.94.2) must be >= 0.94.2-2
+    debian/control: stone-common (>> 0.94.2) must be >= 0.94.2-2
     
     The d8733be2ef8874b9a858a7ffddfb81b9b656e9a6 backport introduced a
     regression by adding an incorrect Depends / Break combo supposed to
-    reflect the fact that ceph_argparse moved from ceph to ceph-common after
+    reflect the fact that stone_argparse moved from stone to stone-common after
     v0.94.2. It assumed the package is released under the 0.94.2 version
     where in reality it is released under the 0.94.2-1xxx version (where xxx
     is trusty, jessie etc.).
     
     The Depends / Break combo is changed to use 0.94.2-2 instead.
     
-    See also http://tracker.ceph.com/issues/12529 for a larger discussion.
+    See also http://tracker.stone.com/issues/12529 for a larger discussion.
     
-    http://tracker.ceph.com/issues/11998 Fixes: #11998
+    http://tracker.stone.com/issues/11998 Fixes: #11998
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
 
@@ -280,7 +280,7 @@ Merge: cbba706 89aa8ff
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Jul 29 16:22:36 2015 +0200
 
-    Merge pull request #5248 from ceph/wip-11833-hammer
+    Merge pull request #5248 from stone/wip-11833-hammer
     
     mon: add an "osd crush tree" command
     
@@ -291,7 +291,7 @@ Merge: 8355bda 3c8cdea
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Jul 29 10:49:08 2015 +0200
 
-    Merge pull request #5222 from ceph/hammer-12088
+    Merge pull request #5222 from stone/hammer-12088
     
     client: reference counting 'struct Fh'
     
@@ -335,7 +335,7 @@ Date:   Tue Jul 28 22:30:23 2015 +0200
 
     Merge pull request #5265 from SUSE/wip-12368-hammer
     
-    linking ceph to tcmalloc causes segfault on SUSE SLE11-SP3
+    linking stone to tcmalloc causes segfault on SUSE SLE11-SP3
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -344,7 +344,7 @@ Merge: d62c3ea f99f312
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Jul 28 22:27:40 2015 +0200
 
-    Merge pull request #5280 from ceph/wip-12384-hammer
+    Merge pull request #5280 from stone/wip-12384-hammer
     
     librbd: add valgrind memory checks for unit tests
     
@@ -355,7 +355,7 @@ Merge: 7b57ff8 b872882
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Jul 28 22:26:25 2015 +0200
 
-    Merge pull request #5279 from ceph/wip-12237-hammer
+    Merge pull request #5279 from stone/wip-12237-hammer
     
     A client opening an image mid-resize can result in the object map being invalidated
     
@@ -368,7 +368,7 @@ Date:   Tue Jul 28 22:10:03 2015 +0200
 
     Merge pull request #5283 from SUSE/wip-12397-hammer
     
-    ceph.spec.in: 95-ceph-osd.rules, mount.ceph, and mount.fuse.ceph not installed properly on SUSE
+    stone.spec.in: 95-stone-osd.rules, mount.stone, and mount.fuse.stone not installed properly on SUSE
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -379,7 +379,7 @@ Date:   Tue Jul 28 21:54:33 2015 +0200
 
     Merge pull request #5206 from SUSE/wip-11998-hammer
     
-    /usr/bin/ceph from ceph-common is broken without installing ceph
+    /usr/bin/stone from stone-common is broken without installing stone
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -412,7 +412,7 @@ Date:   Tue Jul 28 21:45:44 2015 +0200
 
     Merge pull request #5038 from SUSE/wip-11876-hammer
     
-    ceph-post-file fails on rhel7
+    stone-post-file fails on rhel7
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -434,7 +434,7 @@ Date:   Tue Jul 28 21:38:14 2015 +0200
 
     Merge pull request #5028 from SUSE/wip-12090-hammer
     
-    rcceph script is buggy
+    rcstone script is buggy
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -649,9 +649,9 @@ commit f819332e2826eae14849c5e68a380d1d87039d22
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Thu Jul 9 21:38:46 2015 +0200
 
-    ceph.spec.in: install 95-ceph-osd.rules, mount.ceph, and mount.fuse.ceph properly on SUSE
+    stone.spec.in: install 95-stone-osd.rules, mount.stone, and mount.fuse.stone properly on SUSE
     
-    http://tracker.ceph.com/issues/12261 Fixes: #12261
+    http://tracker.stone.com/issues/12261 Fixes: #12261
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 5ce38b9536efabf99a236c7a9d15c149fa4c16a6)
@@ -660,28 +660,28 @@ commit d8733be2ef8874b9a858a7ffddfb81b9b656e9a6
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Tue Apr 14 07:58:17 2015 -0600
 
-    debian: move ceph_argparse into ceph-common
+    debian: move stone_argparse into stone-common
     
-    Prior to this commit, if a user installed the "ceph-common" Debian
-    package without installing "ceph", then /usr/bin/ceph would crash
-    because it was missing the ceph_argparse library.
+    Prior to this commit, if a user installed the "stone-common" Debian
+    package without installing "stone", then /usr/bin/stone would crash
+    because it was missing the stone_argparse library.
     
-    Ship the ceph_argparse library in "ceph-common" instead of "ceph". (This
-    was the intention of the original commit that moved argparse to "ceph",
+    Ship the stone_argparse library in "stone-common" instead of "stone". (This
+    was the intention of the original commit that moved argparse to "stone",
     2a23eac54957e596d99985bb9e187a668251a9ec)
     
-    http://tracker.ceph.com/issues/11388 Refs: #11388
+    http://tracker.stone.com/issues/11388 Refs: #11388
     
     Reported-by: Jens Rosenboom <j.rosenboom@x-ion.de>
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit 110608e5bdd9e2f03020ad41f0c2d756684d4417)
     
     Conflicts:
-    	debian/ceph.install
-                There is no ceph_daemon.py in hammer
+    	debian/stone.install
+                There is no stone_daemon.py in hammer
             debian/control
                 Depends/Replaces/Breaks version adapted (from 9.0.0 to 0.94.2)
-                also adapted ceph-dbg Replaces/Breaks
+                also adapted stone-dbg Replaces/Breaks
 
 commit f99f3125ff76628e2525dca00bb7b983f941a08b (refs/remotes/gh/wip-12384-hammer)
 Author: Zhiqiang Wang <zhiqiang.wang@intel.com>
@@ -723,8 +723,8 @@ Date:   Tue Apr 28 10:56:15 2015 -0400
 
     krbd: fix incorrect types in the krbd API
     
-    The C API functions were referencing the C++ CephContext
-    instead of the C rados_config_t.  Additionally, the ceph
+    The C API functions were referencing the C++ StoneContext
+    instead of the C rados_config_t.  Additionally, the stone
     namespace was missing on the Formatter class.
     
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
@@ -804,7 +804,7 @@ Merge: 5e399b0 582cf73
 Author: Loic Dachary <loic@dachary.org>
 Date:   Fri Jul 17 19:48:05 2015 +0200
 
-    Merge pull request #5046 from ceph/wip-12109-hammer
+    Merge pull request #5046 from stone/wip-12109-hammer
     
     librbd: new QA client upgrade tests
     
@@ -858,7 +858,7 @@ Merge: daf5450 5e72479
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Jul 16 11:04:52 2015 -0400
 
-    Merge pull request #5252 from ceph/wip-12021-hammer
+    Merge pull request #5252 from stone/wip-12021-hammer
     
     OSDMonitor: allow addition of cache pool with non-empty snaps with co…
     
@@ -982,7 +982,7 @@ Date:   Tue Jul 14 16:42:12 2015 +0200
 
     Merge pull request #4883 from SUSE/wip-11638-hammer
     
-    ceph.spec.in: ceph-common subpackage def needs tweaking for SUSE/openSUSE
+    stone.spec.in: stone-common subpackage def needs tweaking for SUSE/openSUSE
     
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
 
@@ -1144,7 +1144,7 @@ Date:   Sat Jul 11 23:04:33 2015 +0800
     crush/CrushTester: return EINVAL if crushtool returns non-zero
     
     this backports a tiny part of ec02441, otherwise
-    CrushTester will return 1, and "ceph" cli will take it
+    CrushTester will return 1, and "stone" cli will take it
     as EPERM, which is miss leading, and fails
     osd-crush.sh:TEST_crush_reject_empty.
     
@@ -1164,13 +1164,13 @@ Date:   Fri Jul 10 16:23:47 2015 +0200
       unavailable
     
       This problem was introduced by cc1cc033930e8690a57674e842a003f6bbc7a242
-      from https://github.com/ceph/ceph/pull/4936
-    * replace test/mon/mon-test-helpers.sh with test/ceph-helpers.sh as
+      from https://github.com/stone/stone/pull/4936
+    * replace test/mon/mon-test-helpers.sh with test/stone-helpers.sh as
       we need run_osd() in this newly added test
-    * update the run-dir of commands: ceph-helpers.sh use the different
+    * update the run-dir of commands: stone-helpers.sh use the different
       convention for the run-dir of daemons.
     
-    http://tracker.ceph.com/issues/11975 Refs: #11975
+    http://tracker.stone.com/issues/11975 Refs: #11975
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1178,7 +1178,7 @@ commit 80afb81124a0d2ef25a23a12c86617ab1da3a4bd
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Apr 21 16:11:33 2015 +0200
 
-    ceph-helpers: implement test_expect_failure
+    stone-helpers: implement test_expect_failure
     
     To display the output in case the command did not fail with the expected
     output.
@@ -1225,7 +1225,7 @@ Date:   Fri Jul 10 10:16:25 2015 +0200
 
     Merge pull request #4776 from tchaikov/wip-11279-hammer
     
-    ceph: cli interactive mode does not understand quotes
+    stone: cli interactive mode does not understand quotes
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -1234,7 +1234,7 @@ Merge: e3b1f7b 0b6d442
 Author: Loic Dachary <loic@dachary.org>
 Date:   Fri Jul 10 10:14:42 2015 +0200
 
-    Merge pull request #4657 from ceph/wip-hammer-11535-admin-socket
+    Merge pull request #4657 from stone/wip-hammer-11535-admin-socket
     
     common/admin_socket: close socket descriptor in destructor
     
@@ -1258,7 +1258,7 @@ Date:   Fri Jul 10 16:00:00 2015 +0800
 
     Merge pull request #5122 from theanalyst/wip-11982-hammer
     
-    ceph fails to compile with boost 1.58
+    stone fails to compile with boost 1.58
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -1267,9 +1267,9 @@ Merge: adc7016 5141301
 Author: Kefu Chai <tchaikov@gmail.com>
 Date:   Fri Jul 10 15:59:35 2015 +0800
 
-    Merge pull request #4936 from ceph/wip-11975-hammer
+    Merge pull request #4936 from stone/wip-11975-hammer
     
-    mon crashes when "ceph osd tree 85 --format json"
+    mon crashes when "stone osd tree 85 --format json"
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -1280,7 +1280,7 @@ Date:   Fri Jul 10 09:48:44 2015 +0200
 
     Merge pull request #4892 from theanalyst/wip-11760-hammer
     
-    ceph-disk: get_partition_type fails on /dev/cciss...
+    stone-disk: get_partition_type fails on /dev/cciss...
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1378,7 +1378,7 @@ Date:   Tue May 26 12:08:36 2015 +0800
 
     crushtool: add the "--check-names" option
     
-    * so one is able to verify that the "ceph osd tree" won't chock on the
+    * so one is able to verify that the "stone osd tree" won't chock on the
       new crush map because of dangling name/type references
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
@@ -1394,7 +1394,7 @@ Date:   Tue May 26 12:08:09 2015 +0800
       buckets/items in the crush map.
     * also check for the references from Item(0, 0, 0) which does not
       necessarily exist in the crush map under testing. the rationale
-      behind this is: the "ceph osd tree" will also print stray OSDs
+      behind this is: the "stone osd tree" will also print stray OSDs
       whose id is greater or equal to 0. so it would be useful to
       check if the crush map offers the type name indexed by "0"
       (the name of OSDs is always "OSD.{id}", so we don't need to
@@ -1410,7 +1410,7 @@ Date:   Fri Jul 10 09:39:15 2015 +0200
 
     Merge pull request #4667 from SUSE/wip-11611-hammer
     
-    ceph.spec: update OpenSUSE BuildRequires
+    stone.spec: update OpenSUSE BuildRequires
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1420,8 +1420,8 @@ Date:   Tue Jul 7 11:43:01 2015 -0700
 
     OSDMonitor: allow addition of cache pool with non-empty snaps with config
     
-    We need to be able to allow the version of ceph_test_* from earlier
-    versions of ceph to continue to work.  This patch also adjusts the
+    We need to be able to allow the version of stone_test_* from earlier
+    versions of stone to continue to work.  This patch also adjusts the
     work unit to use a single rados snap to test the condition without
     --force-nonempty to ensure that we don't need to be careful about
     the config value when running that script.
@@ -1454,9 +1454,9 @@ Date:   Fri Feb 6 01:26:40 2015 +0100
     in a popup window:
     
       /api/v1/cluster/$FSID/health is populated (ultimately) with
-      status obtained via librados python bindings from the ceph
+      status obtained via librados python bindings from the stone
       cluster. In the case where there's clock skew, the summary
-      field supplied by the ceph cluster is empty.
+      field supplied by the stone cluster is empty.
     
     No summary field, no popup window with more health details.
     
@@ -1501,7 +1501,7 @@ Merge: 72ecd52 ed5442b
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Jul 8 15:30:48 2015 +0200
 
-    Merge pull request #4875 from ceph/wip-11770-hammer
+    Merge pull request #4875 from stone/wip-11770-hammer
     
     librbd: aio calls may block
     
@@ -1533,7 +1533,7 @@ Date:   Mon May 11 17:02:41 2015 +0800
     mon: s/recovery/recoverying/ in "pg ls*" commands' spec
     
     * also translate "repair" if specified as "states"
-    * update test_mon_pg in cephtool-test-mon.sh
+    * update test_mon_pg in stonetool-test-mon.sh
     
     Fixes: #11569
     Signed-off-by: Kefu Chai <kchai@redhat.com>
@@ -1606,7 +1606,7 @@ Date:   Fri May 8 15:21:20 2015 +0800
     mon: remove unused variable
     
     * as a side effect, this change silences
-      http://tracker.ceph.com/issues/11576
+      http://tracker.stone.com/issues/11576
     
     Fixes: #11576
     Signed-off-by: Kefu Chai <kchai@redhat.com>
@@ -1693,7 +1693,7 @@ Date:   Fri Apr 24 10:49:16 2015 -0700
     controlled by new configuration boolean, which defaults to false.
     rgw content length compat
     
-    X-URL: https://github.com/ceph/ceph/pull/4436#issuecomment-95994887
+    X-URL: https://github.com/stone/stone/pull/4436#issuecomment-95994887
     Signed-off-by: Robin H. Johnson <robbat2@gentoo.org>
     (cherry picked from commit 79d17af1a1ec0659884f768945a7bac6282b5e0b)
 
@@ -1740,7 +1740,7 @@ Merge: 53a2143 89d0266
 Author: Kefu Chai <tchaikov@gmail.com>
 Date:   Sat Jun 27 17:11:11 2015 +0800
 
-    Merge pull request #5095 from ceph/wip-fix-doc-hammer
+    Merge pull request #5095 from stone/wip-fix-doc-hammer
     
     doc: fix doc build
     
@@ -1761,7 +1761,7 @@ commit 2aa77b33a97e5a3ca134c9c555aa6e7a69ef50f7
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Sat Jun 27 14:43:01 2015 +0800
 
-    doc: remove orphan: directive in ceph-create-keys.rst
+    doc: remove orphan: directive in stone-create-keys.rst
     
     * it is used to silence the sphinx warning, but conf.py
       does not like it.
@@ -1794,7 +1794,7 @@ Date:   Thu Jun 25 20:03:42 2015 -0400
 
     Merge pull request #5069 from dachary/wip-11806-hammer
     
-    ceph / ceph-dbg steal ceph-objecstore-tool from ceph-test / ceph-test-dbg
+    stone / stone-dbg steal stone-objecstore-tool from stone-test / stone-test-dbg
     
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
 
@@ -1802,22 +1802,22 @@ commit 356bd2c68ca730e766d06c46a0364784f5d72275
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Jun 24 14:58:47 2015 -0400
 
-    debian: ceph-dbg steals ceph-objectstore-tool from ceph-test-dbg (take 2)
+    debian: stone-dbg steals stone-objectstore-tool from stone-test-dbg (take 2)
     
     968573b8930a7c8485bf53e3a989ce2f7d0a2fff incorrectly backported
     6f11fbf41fab10924b1e0e41fcf27864779d4073. It should instead reflect that
-    ceph-dbg in 0.94.2 and above will break ceph-test-dbg in all versions
+    stone-dbg in 0.94.2 and above will break stone-test-dbg in all versions
     prior to 0.94.2.
     
     In other words, 0.94-XXXX being lower than 0.94.1, upgrading from
-    0.94.1 to 0.94.2 will not notice that ceph-dbg breaks ceph-test-dbg.
+    0.94.1 to 0.94.2 will not notice that stone-dbg breaks stone-test-dbg.
     
     $ dpkg --compare-versions 0.94-XXXX lt 0.94.1 && echo yes || echo no
     yes
     $ dpkg --compare-versions 0.94.2 lt 0.94.1-xxx && echo yes || echo no
     no
     
-    http://tracker.ceph.com/issues/11806 Fixes: #11806
+    http://tracker.stone.com/issues/11806 Fixes: #11806
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
 
@@ -1827,7 +1827,7 @@ Date:   Wed Mar 11 17:34:40 2015 +0800
 
     rgw/logrotate.conf: Rename service name
     
-    The service name for ceph rados gateway was changed to "ceph-radosgw",
+    The service name for stone rados gateway was changed to "stone-radosgw",
     the previous version of service name "radosgw" would cause a failed reload,
     and finally make it impossible to write any log data to the log file.
     
@@ -1875,7 +1875,7 @@ Date:   Tue May 5 10:27:38 2015 -0400
     
     The QA client-upgrade test suite requires a librbd test
     that is dynamically linked to librbd.  Since the current
-    ceph_test_librbd includes tests against the non-public API,
+    stone_test_librbd includes tests against the non-public API,
     it is statically linked against librbd and thus cannot be
     used to test a client upgrade scenario.
     
@@ -1900,7 +1900,7 @@ commit 22f58ce2665f1ea6b38f6016dc585202a4595322
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Jun 1 15:10:14 2015 -0700
 
-    Makefile: install ceph-post-file keys with mode 600
+    Makefile: install stone-post-file keys with mode 600
     
     Otherwise ssh (may) prompt for a password.
     
@@ -1911,7 +1911,7 @@ commit 3e65a10bd2351744da199a4b076659191b4378a2
 Author: Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
 Date:   Mon Jun 1 15:05:32 2015 -0700
 
-    ceph-post-file: improve check for a source install
+    stone-post-file: improve check for a source install
     
     Signed-off-by: Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
     (cherry picked from commit ee170eadcdcb4b54d36a7d474558484de9d917eb)
@@ -1920,7 +1920,7 @@ commit c1f6743940250b04ae6dbea30d8805571add39b6
 Author: Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
 Date:   Mon Jun 1 15:00:39 2015 -0700
 
-    ceph-post-file: behave when sftp doesn't take -i
+    stone-post-file: behave when sftp doesn't take -i
     
     Fixes: #11836
     Signed-off-by: Joseph McDonald <joseph.mcdonald@alcatel-lucent.com>
@@ -1944,10 +1944,10 @@ Date:   Wed Apr 29 13:12:38 2015 +1000
 
     packaging: add SuSEfirewall2 service files
     
-    This adds SuSEfirewall2 service files for Ceph MON, OSD and MDS, for use
+    This adds SuSEfirewall2 service files for Stone MON, OSD and MDS, for use
     on SLES and openSUSE.  The MON template opens port 6789 and the OSD/MDS
     template opens the range 6800-7300 as per
-    http://docs.ceph.com/docs/master/rados/configuration/network-config-ref/
+    http://docs.stone.com/docs/master/rados/configuration/network-config-ref/
     
     Signed-off-by: Tim Serong <tserong@suse.com>
     (cherry picked from commit 77685f5b787c56bcb1c4d9f1e058e25312fa62fe)
@@ -1956,7 +1956,7 @@ commit 8acfb994f22efa07beeecccda300cbd50d683566
 Author: Owen Synge <osynge@suse.com>
 Date:   Thu May 7 12:02:41 2015 +0200
 
-    Bug fix to ceph systemV compatability script.
+    Bug fix to stone systemV compatability script.
     
     Was failing with more than one OSD / MON deamon on a single node.
     Fixes suse bugzilla #927862
@@ -1968,7 +1968,7 @@ commit bd3fd929e6f95e6d9840317aa3ac02f52711c94b
 Author: Owen Synge <osynge@suse.com>
 Date:   Thu Jun 18 14:16:03 2015 +0200
 
-    Fixes to rcceph script
+    Fixes to rcstone script
     
      - only start OSDs if mon daemons are also present
      - adds support for mask and unmask
@@ -2030,7 +2030,7 @@ Merge: 70bba62 f68bf94
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Jun 15 12:38:57 2015 -0700
 
-    Merge pull request #4961 from ceph/wip-11493-hammer
+    Merge pull request #4961 from stone/wip-11493-hammer
     
     backport 11493 fixes, and test, prevetning ec cache pools
     
@@ -2081,7 +2081,7 @@ Date:   Mon Jun 15 17:26:07 2015 +0200
 
     Merge pull request #4846 from SUSE/wip-11862-hammer
     
-    missing man pages for ceph-create-keys, ceph-disk-*
+    missing man pages for stone-create-keys, stone-disk-*
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
@@ -2352,7 +2352,7 @@ commit 82988d611bad6226138b94590275faadbca3554a
 Author: islepnev <islepnev@gmail.com>
 Date:   Fri Apr 17 22:33:01 2015 +0300
 
-    ceph-disk: support NVMe device partitions
+    stone-disk: support NVMe device partitions
     
     Linux nvme kernel module v0.9 enumerate devices as following:
     
@@ -2361,7 +2361,7 @@ Date:   Fri Apr 17 22:33:01 2015 +0300
     /dev/nvme0n1p1 - first partition
     /dev/nvme0n1p2 - second partition
     
-    http://tracker.ceph.com/issues/11612 Fixes: #11612
+    http://tracker.stone.com/issues/11612 Fixes: #11612
     
     Signed-off-by: Ilja Slepnev <islepnev@gmail.com>
     (cherry picked from commit 9b62cf254d02d30609793be8b1cb8a94f38891f1)
@@ -2467,12 +2467,12 @@ commit fdb43ebe2b1211acdb454836a64dbd589feeef45
 Author: Nathan Cutler <ncutler@suse.cz>
 Date:   Fri May 15 21:43:34 2015 +0200
 
-    ceph.spec.in: tweak ceph-common for SUSE/openSUSE
+    stone.spec.in: tweak stone-common for SUSE/openSUSE
     
-    ceph-common needs python-argparse in SUSE/openSUSE and
+    stone-common needs python-argparse in SUSE/openSUSE and
     needs redhat-lsb-core only in RHEL/CentOS/Fedora.
     
-    http://tracker.ceph.com/issues/11638 Fixes: #11638
+    http://tracker.stone.com/issues/11638 Fixes: #11638
     
     Signed-off-by: Nathan Cutler <ncutler@suse.cz>
     (cherry picked from commit 363d957d8fdd15a1674befbd8e485fd89b76d716)
@@ -2483,7 +2483,7 @@ Date:   Wed Jun 3 10:09:09 2015 +0100
 
     admin/build-doc: fix dependency checks
     
-    http://tracker.ceph.com/issues/11857 Fixes: #11857
+    http://tracker.stone.com/issues/11857 Fixes: #11857
     
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 539c1ba7211f579bad4f59ae824f1e68e620ecbd)
@@ -2496,7 +2496,7 @@ commit 5a60a034bf3015eaf468e5e3f9d8feb08b8fdd95
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Wed Jun 3 10:41:27 2015 +0200
 
-    man/ceph-create-keys.8: add missing file
+    man/stone-create-keys.8: add missing file
     
     This is the generated manpage, taken from a local build of master
     
@@ -2507,15 +2507,15 @@ commit 19305b897ac147602049752a2dfbe1fd39ba562c
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Apr 21 14:59:32 2015 +0800
 
-    doc: add ceph-create-keys.8
+    doc: add stone-create-keys.8
     
     Fixes: #10725
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 27cee2f1f46a9f47cda9dfeb56ff1259e982960c)
     
     Conflicts:
-        doc/man/8/ceph-create-keys.rst
-        Includes fixes from https://github.com/ceph/ceph/pull/4855
+        doc/man/8/stone-create-keys.rst
+        Includes fixes from https://github.com/stone/stone/pull/4855
 
 commit ffd0933dcc790d7cedc1048b664bf4e8c40464a3
 Author: Jason Dillaman <dillaman@redhat.com>
@@ -2552,7 +2552,7 @@ commit a62c3aa1df9e0f79ac75d94083d10b902dbba382
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Fri Apr 24 14:04:30 2015 +0800
 
-    ceph.in: handle unknown Exception correctly
+    stone.in: handle unknown Exception correctly
     
     * in case parse_cmdargs() throws
     
@@ -2563,19 +2563,19 @@ commit cc7f7441c1d0457e840bfdc3413f9bc6d5f5134a
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Fri Apr 24 01:27:44 2015 +0800
 
-    ceph.in: improve the interactive mode
+    stone.in: improve the interactive mode
     
-    * if ceph is not reading from a tty, expect EOF instead of "quit"
+    * if stone is not reading from a tty, expect EOF instead of "quit"
       as the end of input.
     * do not panic at seeing the EOF
     * update the test case test_mon_injectargs_SI(). since we disables
-      "ceph injectargs <args,...>" in a458bd83, in which the arguments
+      "stone injectargs <args,...>" in a458bd83, in which the arguments
       of "injectargs" are supposed to be consumed by "tell" instead.
-      so "ceph injectargs ..." is taken as an incomplete command, and
-      this command will bring ceph cli into the interactive mode,
-      redirecting its stdin to /dev/null helps ceph cli quit the loop,
+      so "stone injectargs ..." is taken as an incomplete command, and
+      this command will bring stone cli into the interactive mode,
+      redirecting its stdin to /dev/null helps stone cli quit the loop,
       but in a way of throwing EOFError exception. this change handles
-      the EOF, so the "ceph injectargs ..." does not throws anymore.
+      the EOF, so the "stone injectargs ..." does not throws anymore.
       but the side effect is that the test fails since it expects a
       non-zero return code. so replace it with an equivalent "tell"
       command which also fails but due to the non-SI postfix.
@@ -2587,7 +2587,7 @@ commit eb26388cb985456e8f6e07a52a20fa912cf4efaa
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Fri Apr 24 00:50:37 2015 +0800
 
-    ceph.in: parse quote correctly in interactive mode
+    stone.in: parse quote correctly in interactive mode
     
     Fixes: #11279
     Signed-off-by: Kefu Chai <kchai@redhat.com>
@@ -2636,7 +2636,7 @@ commit ef6641c0aa47c7f559aa56d7c35a5815afc2ba49
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Mon Mar 23 21:26:23 2015 +0100
 
-    ceph.spec: update OpenSUSE BuildRequires
+    stone.spec: update OpenSUSE BuildRequires
     
     OpenSUSE 13.2 needs libsnappy-devel but not bzip2-devel.
     

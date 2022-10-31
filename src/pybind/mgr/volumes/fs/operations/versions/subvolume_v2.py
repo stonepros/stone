@@ -4,7 +4,7 @@ import uuid
 import errno
 import logging
 
-import cephfs
+import stonefs
 
 from .metadata_manager import MetadataManager
 from .subvolume_attrs import SubvolumeTypes, SubvolumeStates, SubvolumeFeatures
@@ -84,24 +84,24 @@ class SubvolumeV2(SubvolumeV1):
         """per subvolume trash directory"""
         try:
             self.fs.stat(self.trash_dir)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             if e.args[0] == errno.ENOENT:
                 try:
                     self.fs.mkdir(self.trash_dir, 0o700)
-                except cephfs.Error as ce:
+                except stonefs.Error as ce:
                     raise VolumeException(-ce.args[0], ce.args[1])
             else:
                 raise VolumeException(-e.args[0], e.args[1])
 
     def mark_subvolume(self):
-        # set subvolume attr, on subvolume root, marking it as a CephFS subvolume
+        # set subvolume attr, on subvolume root, marking it as a StoneFS subvolume
         # subvolume root is where snapshots would be taken, and hence is the base_path for v2 subvolumes
         try:
             # MDS treats this as a noop for already marked subvolume
-            self.fs.setxattr(self.base_path, 'ceph.dir.subvolume', b'1', 0)
-        except cephfs.InvalidValue as e:
-            raise VolumeException(-errno.EINVAL, "invalid value specified for ceph.dir.subvolume")
-        except cephfs.Error as e:
+            self.fs.setxattr(self.base_path, 'stone.dir.subvolume', b'1', 0)
+        except stonefs.InvalidValue as e:
+            raise VolumeException(-errno.EINVAL, "invalid value specified for stone.dir.subvolume")
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     @staticmethod
@@ -124,12 +124,12 @@ class SubvolumeV2(SubvolumeV1):
                 while d:
                     if d.d_name not in (b".", b".."):
                         d_full_path = os.path.join(snap_base_path, d.d_name)
-                        stx = self.fs.statx(d_full_path, cephfs.CEPH_STATX_MODE, cephfs.AT_SYMLINK_NOFOLLOW)
+                        stx = self.fs.statx(d_full_path, stonefs.STONE_STATX_MODE, stonefs.AT_SYMLINK_NOFOLLOW)
                         if stat.S_ISDIR(stx.get('mode')):
                             if self.is_valid_uuid(d.d_name.decode('utf-8')):
                                 uuid_str = d.d_name
                     d = self.fs.readdir(dir_handle)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             if e.errno == errno.ENOENT:
                 raise VolumeException(-errno.ENOENT, "snapshot '{0}' does not exist".format(snapname))
             raise VolumeException(-e.args[0], e.args[1])
@@ -144,7 +144,7 @@ class SubvolumeV2(SubvolumeV1):
             log.info("cleaning up subvolume incarnation with path: {0}".format(subvol_path))
             try:
                 self.fs.rmdir(subvol_path)
-            except cephfs.Error as e:
+            except stonefs.Error as e:
                 raise VolumeException(-e.args[0], e.args[1])
         else:
             log.info("cleaning up subvolume with path: {0}".format(self.subvolname))
@@ -190,7 +190,7 @@ class SubvolumeV2(SubvolumeV1):
 
             # Create the subvolume metadata file which manages auth-ids if it doesn't exist
             self.auth_mdata_mgr.create_subvolume_metadata_file(self.group.groupname, self.subvolname)
-        except (VolumeException, MetadataMgrException, cephfs.Error) as e:
+        except (VolumeException, MetadataMgrException, stonefs.Error) as e:
             try:
                 self._remove_on_failure(subvol_path, retained)
             except VolumeException as ve:
@@ -199,7 +199,7 @@ class SubvolumeV2(SubvolumeV1):
             if isinstance(e, MetadataMgrException):
                 log.error("metadata manager exception: {0}".format(e))
                 e = VolumeException(-errno.EINVAL, "exception in subvolume metadata")
-            elif isinstance(e, cephfs.Error):
+            elif isinstance(e, stonefs.Error):
                 e = VolumeException(-e.args[0], e.args[1])
             raise e
 
@@ -220,7 +220,7 @@ class SubvolumeV2(SubvolumeV1):
             attrs = source_subvolume.get_attrs(source_subvolume.snapshot_data_path(snapname))
 
             # The source of the clone may have exceeded its quota limit as
-            # CephFS quotas are imprecise. Cloning such a source may fail if
+            # StoneFS quotas are imprecise. Cloning such a source may fail if
             # the quota on the destination is set before starting the clone
             # copy. So always set the quota on destination after cloning is
             # successful.
@@ -244,7 +244,7 @@ class SubvolumeV2(SubvolumeV1):
                 self.metadata_mgr.init(SubvolumeV2.VERSION, subvolume_type.value, qpath, initial_state.value)
             self.add_clone_source(source_volname, source_subvolume, snapname)
             self.metadata_mgr.flush()
-        except (VolumeException, MetadataMgrException, cephfs.Error) as e:
+        except (VolumeException, MetadataMgrException, stonefs.Error) as e:
             try:
                 self._remove_on_failure(subvol_path, retained)
             except VolumeException as ve:
@@ -253,7 +253,7 @@ class SubvolumeV2(SubvolumeV1):
             if isinstance(e, MetadataMgrException):
                 log.error("metadata manager exception: {0}".format(e))
                 e = VolumeException(-errno.EINVAL, "exception in subvolume metadata")
-            elif isinstance(e, cephfs.Error):
+            elif isinstance(e, stonefs.Error):
                 e = VolumeException(-e.args[0], e.args[1])
             raise e
 
@@ -328,10 +328,10 @@ class SubvolumeV2(SubvolumeV1):
             if me.errno == -errno.ENOENT:
                 raise VolumeException(-errno.ENOENT, "subvolume '{0}' does not exist".format(self.subvolname))
             raise VolumeException(me.args[0], me.args[1])
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             log.debug("missing subvolume path '{0}' for subvolume '{1}'".format(subvol_path, self.subvolname))
             raise VolumeException(-errno.ENOENT, "mount path missing for subvolume '{0}'".format(self.subvolname))
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     def trash_incarnation_dir(self):
@@ -343,7 +343,7 @@ class SubvolumeV2(SubvolumeV1):
             log.debug("trash: {0} -> {1}".format(self.path, tpath))
             self.fs.rename(self.path, tpath)
             self._link_dir(tpath, bname)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     @staticmethod

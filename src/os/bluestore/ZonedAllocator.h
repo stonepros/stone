@@ -14,7 +14,7 @@
 #include <mutex>
 
 #include "Allocator.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/btree_map.h"
 #include "include/interval_set.h"
 #include "include/mempool.h"
@@ -22,13 +22,13 @@
 #include "zoned_types.h"
 
 class ZonedAllocator : public Allocator {
-  CephContext* cct;
+  StoneContext* cct;
 
   // Currently only one thread at a time calls into ZonedAllocator due to
   // atomic_alloc_and_submit_lock in BlueStore.cc, but we do locking anyway
   // because eventually ZONE_APPEND support will land and
   // atomic_alloc_and_submit_lock will be removed.
-  ceph::mutex lock = ceph::make_mutex("ZonedAllocator::lock");
+  stone::mutex lock = stone::make_mutex("ZonedAllocator::lock");
 
   std::atomic<int64_t> num_free;     ///< total bytes in freelist
   uint64_t size;
@@ -59,7 +59,7 @@ class ZonedAllocator : public Allocator {
   }
 
 public:
-  ZonedAllocator(CephContext* cct, int64_t size, int64_t block_size,
+  ZonedAllocator(StoneContext* cct, int64_t size, int64_t block_size,
                  const std::string& name);
   ~ZonedAllocator() override;
 

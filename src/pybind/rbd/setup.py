@@ -80,7 +80,7 @@ def check_sanity():
     """
     Test if development headers and library for rbd is available by compiling a dummy C program.
     """
-    CEPH_SRC_DIR = os.path.join(
+    STONE_SRC_DIR = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
         '..',
         '..'
@@ -104,11 +104,11 @@ def check_sanity():
     compiler = new_compiler()
     distutils.sysconfig.customize_compiler(compiler)
 
-    if 'CEPH_LIBDIR' in os.environ:
-        # The setup.py has been invoked by a top-level Ceph make.
+    if 'STONE_LIBDIR' in os.environ:
+        # The setup.py has been invoked by a top-level Stone make.
         # Set the appropriate CFLAGS and LDFLAGS
-        compiler.set_include_dirs([os.path.join(CEPH_SRC_DIR, 'include')])
-        compiler.set_library_dirs([os.environ.get('CEPH_LIBDIR')])
+        compiler.set_include_dirs([os.path.join(STONE_SRC_DIR, 'include')])
+        compiler.set_library_dirs([os.environ.get('STONE_LIBDIR')])
     try:
         compiler.define_macro('_FILE_OFFSET_BITS', '64')
 
@@ -188,7 +188,7 @@ setup(
         "are striped over objects and stored in a RADOS object store. The size "
         "of the objects the image is striped over must be a power of two."
     ),
-    url='https://github.com/ceph/ceph/tree/master/src/pybind/rbd',
+    url='https://github.com/stone/stone/tree/master/src/pybind/rbd',
     license='LGPLv2+',
     platforms='Linux',
     ext_modules=cythonize(

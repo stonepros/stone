@@ -1,25 +1,25 @@
 #! /usr/bin/dh-exec
 
-lib/systemd/system/ceph-osd*
-lib/systemd/system/ceph-volume@.service
-usr/bin/ceph-bluestore-tool
-usr/bin/ceph-clsinfo
-usr/bin/ceph-erasure-code-tool
-usr/bin/ceph-objectstore-tool
-usr/bin/ceph-osdomap-tool
-<pkg.ceph.crimson> usr/bin/crimson-store-nbd
-usr/bin/${CEPH_OSD_BASENAME} => /usr/bin/ceph-osd
-usr/bin/ceph_objectstore_bench
-usr/libexec/ceph/ceph-osd-prestart.sh
+lib/systemd/system/stone-osd*
+lib/systemd/system/stone-volume@.service
+usr/bin/stone-bluestore-tool
+usr/bin/stone-clsinfo
+usr/bin/stone-erasure-code-tool
+usr/bin/stone-objectstore-tool
+usr/bin/stone-osdomap-tool
+<pkg.stone.crimson> usr/bin/crimson-store-nbd
+usr/bin/${STONE_OSD_BASENAME} => /usr/bin/stone-osd
+usr/bin/stone_objectstore_bench
+usr/libexec/stone/stone-osd-prestart.sh
 usr/lib/libos_tp.so*
 usr/lib/libosd_tp.so*
-usr/sbin/ceph-volume
-usr/sbin/ceph-volume-systemd
-usr/lib/python*/dist-packages/ceph_volume/*
-usr/lib/python*/dist-packages/ceph_volume-*
-usr/share/man/man8/ceph-clsinfo.8
-usr/share/man/man8/ceph-volume.8
-usr/share/man/man8/ceph-volume-systemd.8
-usr/share/man/man8/ceph-osd.8
-usr/share/man/man8/ceph-bluestore-tool.8
-etc/sysctl.d/30-ceph-osd.conf
+usr/sbin/stone-volume
+usr/sbin/stone-volume-systemd
+usr/lib/python*/dist-packages/stone_volume/*
+usr/lib/python*/dist-packages/stone_volume-*
+usr/share/man/man8/stone-clsinfo.8
+usr/share/man/man8/stone-volume.8
+usr/share/man/man8/stone-volume-systemd.8
+usr/share/man/man8/stone-osd.8
+usr/share/man/man8/stone-bluestore-tool.8
+etc/sysctl.d/30-stone-osd.conf

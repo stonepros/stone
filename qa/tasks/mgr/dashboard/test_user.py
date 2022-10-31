@@ -13,22 +13,22 @@ class UserTest(DashboardTestCase):
     @classmethod
     def setUpClass(cls):
         super(UserTest, cls).setUpClass()
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-enabled', 'true'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-length-enabled', 'true'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-oldpwd-enabled', 'true'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-username-enabled', 'true'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-exclusion-list-enabled', 'true'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-complexity-enabled', 'true'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-sequential-chars-enabled', 'true'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-repetitive-chars-enabled', 'true'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-enabled', 'true'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-length-enabled', 'true'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-oldpwd-enabled', 'true'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-username-enabled', 'true'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-exclusion-list-enabled', 'true'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-complexity-enabled', 'true'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-sequential-chars-enabled', 'true'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-repetitive-chars-enabled', 'true'])
 
     @classmethod
     def tearDownClass(cls):
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-username-enabled', 'false'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-exclusion-list-enabled', 'false'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-complexity-enabled', 'false'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-sequential-chars-enabled', 'false'])
-        cls._ceph_cmd(['dashboard', 'set-pwd-policy-check-repetitive-chars-enabled', 'false'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-username-enabled', 'false'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-exclusion-list-enabled', 'false'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-complexity-enabled', 'false'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-sequential-chars-enabled', 'false'])
+        cls._stone_cmd(['dashboard', 'set-pwd-policy-check-repetitive-chars-enabled', 'false'])
         super(UserTest, cls).tearDownClass()
 
     @classmethod
@@ -176,7 +176,7 @@ class UserTest(DashboardTestCase):
                           email='my@email.com',
                           roles=['administrator'])
         self.assertStatus(400)
-        self.assertError(code='ceph_type_not_valid',
+        self.assertError(code='stone_type_not_valid',
                          component='user')
 
     def test_delete_user_does_not_exist(self):
@@ -296,7 +296,7 @@ class UserTest(DashboardTestCase):
         self.assertError(code='invalid_credentials', component='auth')
 
     def test_create_user_password_cli(self):
-        exitcode = self._ceph_cmd_with_secret(['dashboard', 'ac-user-create',
+        exitcode = self._stone_cmd_with_secret(['dashboard', 'ac-user-create',
                                                'test1'],
                                               'mypassword10#',
                                               return_exit_code=True)
@@ -305,14 +305,14 @@ class UserTest(DashboardTestCase):
 
     @DashboardTestCase.RunAs('test2', 'foo_bar_10#', force_password=False, login=False)
     def test_change_user_password_cli(self):
-        exitcode = self._ceph_cmd_with_secret(['dashboard', 'ac-user-set-password',
+        exitcode = self._stone_cmd_with_secret(['dashboard', 'ac-user-set-password',
                                                'test2'],
                                               'foo_new-password01#',
                                               return_exit_code=True)
         self.assertEqual(exitcode, 0)
 
     def test_create_user_password_force_cli(self):
-        exitcode = self._ceph_cmd_with_secret(['dashboard', 'ac-user-create',
+        exitcode = self._stone_cmd_with_secret(['dashboard', 'ac-user-create',
                                                '--force-password', 'test11'],
                                               'bar',
                                               return_exit_code=True)
@@ -321,14 +321,14 @@ class UserTest(DashboardTestCase):
 
     @DashboardTestCase.RunAs('test22', 'foo_bar_10#', force_password=False, login=False)
     def test_change_user_password_force_cli(self):
-        exitcode = self._ceph_cmd_with_secret(['dashboard', 'ac-user-set-password',
+        exitcode = self._stone_cmd_with_secret(['dashboard', 'ac-user-set-password',
                                                '--force-password', 'test22'],
                                               'bar',
                                               return_exit_code=True)
         self.assertEqual(exitcode, 0)
 
     def test_create_user_password_cli_fail(self):
-        exitcode = self._ceph_cmd_with_secret(['dashboard', 'ac-user-create',
+        exitcode = self._stone_cmd_with_secret(['dashboard', 'ac-user-create',
                                                'test3'],
                                               'foo',
                                               return_exit_code=True)
@@ -336,7 +336,7 @@ class UserTest(DashboardTestCase):
 
     @DashboardTestCase.RunAs('test4', 'x1z_tst+_10#', force_password=False, login=False)
     def test_change_user_password_cli_fail(self):
-        exitcode = self._ceph_cmd_with_secret(['dashboard', 'ac-user-set-password',
+        exitcode = self._stone_cmd_with_secret(['dashboard', 'ac-user-set-password',
                                                'test4'],
                                               'bar',
                                               return_exit_code=True)
@@ -388,7 +388,7 @@ class UserTest(DashboardTestCase):
         future_date_2 = datetime.utcnow() + timedelta(days=11)
         future_date_2 = int(time.mktime(future_date_2.timetuple()))
 
-        self._ceph_cmd(['dashboard', 'set-user-pwd-expiration-span', '10'])
+        self._stone_cmd(['dashboard', 'set-user-pwd-expiration-span', '10'])
         self._create_user(username='user1',
                           password='mypassword10#',
                           name='My Name',
@@ -403,10 +403,10 @@ class UserTest(DashboardTestCase):
         self.assertLess(user['pwdExpirationDate'], future_date_2)
 
         self._delete('/api/user/user1')
-        self._ceph_cmd(['dashboard', 'set-user-pwd-expiration-span', '0'])
+        self._stone_cmd(['dashboard', 'set-user-pwd-expiration-span', '0'])
 
     def test_pwd_expiration_date_update(self):
-        self._ceph_cmd(['dashboard', 'set-user-pwd-expiration-span', '10'])
+        self._stone_cmd(['dashboard', 'set-user-pwd-expiration-span', '10'])
         self.create_user('user1', 'mypassword10#', ['administrator'])
 
         user_1 = self._get('/api/user/user1')
@@ -430,7 +430,7 @@ class UserTest(DashboardTestCase):
 
         # Cleanup
         self.delete_user('user1')
-        self._ceph_cmd(['dashboard', 'set-user-pwd-expiration-span', '0'])
+        self._stone_cmd(['dashboard', 'set-user-pwd-expiration-span', '0'])
 
     def test_pwd_update_required(self):
         self._create_user(username='user1',

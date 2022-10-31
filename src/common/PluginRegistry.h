@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -20,36 +20,36 @@
 
 #include <map>
 #include <string>
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
 
 extern "C" {
-  const char *__ceph_plugin_version();
-  int __ceph_plugin_init(StoneeContext *cct,
+  const char *__stone_plugin_version();
+  int __stone_plugin_init(StoneContext *cct,
 			 const std::string& type,
 			 const std::string& name);
 }
 
-namespace ceph {
+namespace stone {
 
   class Plugin {
   public:
     void *library;
-    StoneeContext *cct;
+    StoneContext *cct;
 
-    explicit Plugin(StoneeContext *cct) : library(NULL), cct(cct) {}
+    explicit Plugin(StoneContext *cct) : library(NULL), cct(cct) {}
     virtual ~Plugin() {}
   };
 
   class PluginRegistry {
   public:
-    StoneeContext *cct;
-    ceph::mutex lock = ceph::make_mutex("PluginRegistery::lock");
+    StoneContext *cct;
+    stone::mutex lock = stone::make_mutex("PluginRegistery::lock");
     bool loading;
     bool disable_dlclose;
     std::map<std::string,std::map<std::string,Plugin*> > plugins;
 
-    explicit PluginRegistry(StoneeContext *cct);
+    explicit PluginRegistry(StoneContext *cct);
     ~PluginRegistry();
 
     int add(const std::string& type, const std::string& name,

@@ -22,7 +22,7 @@ WAIT_FOR_CLEAN_TIMEOUT=90
 MAX_TIMEOUT=15
 PG_NUM=4
 TMPDIR=${TMPDIR:-/tmp}
-CEPH_BUILD_VIRTUALENV=${TMPDIR}
+STONE_BUILD_VIRTUALENV=${TMPDIR}
 TESTDIR=${TESTDIR:-${TMPDIR}}
 
 if type xmlstarlet > /dev/null 2>&1; then
@@ -52,13 +52,13 @@ fi
 
 EXTRA_OPTS=""
 
-#! @file ceph-helpers.sh
-#  @brief Toolbox to manage Ceph cluster dedicated to testing
+#! @file stone-helpers.sh
+#  @brief Toolbox to manage Stone cluster dedicated to testing
 #
 #  Example use case:
 #
 #  ~~~~~~~~~~~~~~~~{.sh}
-#  source ceph-helpers.sh
+#  source stone-helpers.sh
 #
 #  function mytest() {
 #    # cleanup leftovers and reset mydir
@@ -88,14 +88,14 @@ EXTRA_OPTS=""
 #  test for a given function can be run with
 #
 #  ~~~~~~~~~~~~~~~~{.sh}
-#    ceph-helpers.sh TESTS test_get_osds
+#    stone-helpers.sh TESTS test_get_osds
 #  ~~~~~~~~~~~~~~~~
 #
 #  and all the tests (i.e. all functions matching test_*) are run
 #  with:
 #
 #  ~~~~~~~~~~~~~~~~{.sh}
-#    ceph-helpers.sh TESTS
+#    stone-helpers.sh TESTS
 #  ~~~~~~~~~~~~~~~~
 #
 #  A test function takes a single argument : the directory dedicated
@@ -105,17 +105,17 @@ EXTRA_OPTS=""
 
 
 function get_asok_dir() {
-    if [ -n "$CEPH_ASOK_DIR" ]; then
-        echo "$CEPH_ASOK_DIR"
+    if [ -n "$STONE_ASOK_DIR" ]; then
+        echo "$STONE_ASOK_DIR"
     else
-        echo ${TMPDIR:-/tmp}/ceph-asok.$$
+        echo ${TMPDIR:-/tmp}/stone-asok.$$
     fi
 }
 
 function get_asok_path() {
     local name=$1
     if [ -n "$name" ]; then
-        echo $(get_asok_dir)/ceph-$name.asok
+        echo $(get_asok_dir)/stone-$name.asok
     else
         echo $(get_asok_dir)/\$cluster-\$name.asok
     fi
@@ -307,7 +307,7 @@ function test_kill_daemon() {
         # kill the mon and verify it cannot be reached
         #
         kill_daemon $pidfile TERM || return 1
-        ! timeout 5 ceph status || return 1
+        ! timeout 5 stone status || return 1
     done
 
     teardown $dir || return 1
@@ -387,7 +387,7 @@ function test_kill_daemons() {
     # kill the mon and verify it cannot be reached
     #
     kill_daemons $dir TERM || return 1
-    ! timeout 5 ceph status || return 1
+    ! timeout 5 stone status || return 1
     teardown $dir || return 1
 }
 
@@ -408,23 +408,23 @@ function get_unused_port() {
 # Run a monitor by the name mon.**id** with data in **dir**/**id**.
 # The logs can be found in **dir**/mon.**id**.log and the pid file
 # is **dir**/mon.**id**.pid and the admin socket is
-# **dir**/**id**/ceph-mon.**id**.asok.
+# **dir**/**id**/stone-mon.**id**.asok.
 #
-# The remaining arguments are passed verbatim to ceph-mon --mkfs
-# and the ceph-mon daemon.
+# The remaining arguments are passed verbatim to stone-mon --mkfs
+# and the stone-mon daemon.
 #
 # Two mandatory arguments must be provided: --fsid and --mon-host
 # Instead of adding them to every call to run_mon, they can be
-# set in the CEPH_ARGS environment variable to be read implicitly
-# by every ceph command.
+# set in the STONE_ARGS environment variable to be read implicitly
+# by every stone command.
 #
-# The CEPH_CONF variable is expected to be set to /dev/null to
+# The STONE_CONF variable is expected to be set to /dev/null to
 # only rely on arguments for configuration.
 #
 # Examples:
 #
-# CEPH_ARGS="--fsid=$(uuidgen) "
-# CEPH_ARGS+="--mon-host=127.0.0.1:7018 "
+# STONE_ARGS="--fsid=$(uuidgen) "
+# STONE_ARGS+="--mon-host=127.0.0.1:7018 "
 # run_mon $dir a # spawn a mon and bind port 7018
 # run_mon $dir a --debug-filestore=20 # spawn with filestore debugging
 #
@@ -434,14 +434,14 @@ function get_unused_port() {
 # is made to recreate the rbd pool because it would hang forever,
 # waiting for other mons to join.
 #
-# A **dir**/ceph.conf file is created but not meant to be used by any
+# A **dir**/stone.conf file is created but not meant to be used by any
 # function.  It is convenient for debugging a failure with:
 #
-#     ceph --conf **dir**/ceph.conf -s
+#     stone --conf **dir**/stone.conf -s
 #
 # @param dir path name of the environment
 # @param id mon identifier
-# @param ... can be any option valid for ceph-mon
+# @param ... can be any option valid for stone-mon
 # @return 0 on success, 1 on error
 #
 function run_mon() {
@@ -451,14 +451,14 @@ function run_mon() {
     shift
     local data=$dir/$id
 
-    ceph-mon \
+    stone-mon \
         --id $id \
         --mkfs \
         --mon-data=$data \
         --run-dir=$dir \
         "$@" || return 1
 
-    ceph-mon \
+    stone-mon \
         --id $id \
 	--osd-failsafe-full-ratio=.99 \
         --mon-osd-full-ratio=.99 \
@@ -484,7 +484,7 @@ function run_mon() {
 	--mon-warn-on-insecure-global-id-reclaim-allowed=false \
         "$@" || return 1
 
-    cat > $dir/ceph.conf <<EOF
+    cat > $dir/stone.conf <<EOF
 [global]
 fsid = $(get_config mon $id fsid)
 mon host = $(get_config mon $id mon_host)
@@ -497,7 +497,7 @@ function test_run_mon() {
     setup $dir || return 1
 
     run_mon $dir a --mon-initial-members=a || return 1
-    ceph mon dump | grep "mon.a" || return 1
+    stone mon dump | grep "mon.a" || return 1
     kill_daemons $dir || return 1
 
     run_mon $dir a --osd_pool_default_size=3 || return 1
@@ -505,25 +505,25 @@ function test_run_mon() {
     run_osd $dir 1 || return 1
     run_osd $dir 2 || return 1
     create_rbd_pool || return 1
-    ceph osd dump | grep "pool 1 'rbd'" || return 1
-    local size=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path mon.a) \
+    stone osd dump | grep "pool 1 'rbd'" || return 1
+    local size=$(STONE_ARGS='' stone --format=json daemon $(get_asok_path mon.a) \
         config get osd_pool_default_size)
     test "$size" = '{"osd_pool_default_size":"3"}' || return 1
 
-    ! CEPH_ARGS='' ceph status || return 1
-    CEPH_ARGS='' ceph --conf $dir/ceph.conf status || return 1
+    ! STONE_ARGS='' stone status || return 1
+    STONE_ARGS='' stone --conf $dir/stone.conf status || return 1
 
     kill_daemons $dir || return 1
 
     run_mon $dir a --osd_pool_default_size=1 --mon_allow_pool_size_one=true || return 1
-    local size=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path mon.a) \
+    local size=$(STONE_ARGS='' stone --format=json daemon $(get_asok_path mon.a) \
         config get osd_pool_default_size)
     test "$size" = '{"osd_pool_default_size":"1"}' || return 1
     kill_daemons $dir || return 1
 
-    CEPH_ARGS="$CEPH_ARGS --osd_pool_default_size=2" \
+    STONE_ARGS="$STONE_ARGS --osd_pool_default_size=2" \
         run_mon $dir a || return 1
-    local size=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path mon.a) \
+    local size=$(STONE_ARGS='' stone --format=json daemon $(get_asok_path mon.a) \
         config get osd_pool_default_size)
     test "$size" = '{"osd_pool_default_size":"2"}' || return 1
     kill_daemons $dir || return 1
@@ -532,19 +532,19 @@ function test_run_mon() {
 }
 
 function create_rbd_pool() {
-    ceph osd pool delete rbd rbd --yes-i-really-really-mean-it || return 1
+    stone osd pool delete rbd rbd --yes-i-really-really-mean-it || return 1
     create_pool rbd $PG_NUM || return 1
     rbd pool init rbd
 }
 
 function create_pool() {
-    ceph osd pool create "$@"
+    stone osd pool create "$@"
     sleep 1
 }
 
 function delete_pool() {
     local poolname=$1
-    ceph osd pool delete $poolname $poolname --yes-i-really-really-mean-it
+    stone osd pool delete $poolname $poolname --yes-i-really-really-mean-it
 }
 
 #######################################################################
@@ -556,8 +556,8 @@ function run_mgr() {
     shift
     local data=$dir/$id
 
-    ceph config set mgr mgr/devicehealth/enable_monitoring off --force
-    ceph-mgr \
+    stone config set mgr mgr/devicehealth/enable_monitoring off --force
+    stone-mgr \
         --id $id \
         $EXTRA_OPTS \
 	--osd-failsafe-full-ratio=.99 \
@@ -571,7 +571,7 @@ function run_mgr() {
         --admin-socket=$(get_asok_path) \
         --run-dir=$dir \
         --pid-file=$dir/\$name.pid \
-        --mgr-module-path=$(realpath ${CEPH_ROOT}/src/pybind/mgr) \
+        --mgr-module-path=$(realpath ${STONE_ROOT}/src/pybind/mgr) \
         "$@" || return 1
 }
 
@@ -582,7 +582,7 @@ function run_mds() {
     shift
     local data=$dir/$id
 
-    ceph-mds \
+    stone-mds \
         --id $id \
         $EXTRA_OPTS \
 	--debug-mds 20 \
@@ -603,16 +603,16 @@ function run_mds() {
 # Create (prepare) and run (activate) an osd by the name osd.**id**
 # with data in **dir**/**id**.  The logs can be found in
 # **dir**/osd.**id**.log, the pid file is **dir**/osd.**id**.pid and
-# the admin socket is **dir**/**id**/ceph-osd.**id**.asok.
+# the admin socket is **dir**/**id**/stone-osd.**id**.asok.
 #
-# The remaining arguments are passed verbatim to ceph-osd.
+# The remaining arguments are passed verbatim to stone-osd.
 #
 # Two mandatory arguments must be provided: --fsid and --mon-host
 # Instead of adding them to every call to run_osd, they can be
-# set in the CEPH_ARGS environment variable to be read implicitly
-# by every ceph command.
+# set in the STONE_ARGS environment variable to be read implicitly
+# by every stone command.
 #
-# The CEPH_CONF variable is expected to be set to /dev/null to
+# The STONE_CONF variable is expected to be set to /dev/null to
 # only rely on arguments for configuration.
 #
 # The run_osd function creates the OSD data directory on the **dir**/**id**
@@ -620,13 +620,13 @@ function run_mds() {
 #
 # Examples:
 #
-# CEPH_ARGS="--fsid=$(uuidgen) "
-# CEPH_ARGS+="--mon-host=127.0.0.1:7018 "
+# STONE_ARGS="--fsid=$(uuidgen) "
+# STONE_ARGS+="--mon-host=127.0.0.1:7018 "
 # run_osd $dir 0 # prepare and activate an osd using the monitor listening on 7018
 #
 # @param dir path name of the environment
 # @param id osd identifier
-# @param ... can be any option valid for ceph-osd
+# @param ... can be any option valid for stone-osd
 # @return 0 on success, 1 on error
 #
 function run_osd() {
@@ -636,35 +636,35 @@ function run_osd() {
     shift
     local osd_data=$dir/$id
 
-    local ceph_args="$CEPH_ARGS"
-    ceph_args+=" --osd-failsafe-full-ratio=.99"
-    ceph_args+=" --osd-journal-size=100"
-    ceph_args+=" --osd-scrub-load-threshold=2000"
-    ceph_args+=" --osd-data=$osd_data"
-    ceph_args+=" --osd-journal=${osd_data}/journal"
-    ceph_args+=" --chdir="
-    ceph_args+=$EXTRA_OPTS
-    ceph_args+=" --run-dir=$dir"
-    ceph_args+=" --admin-socket=$(get_asok_path)"
-    ceph_args+=" --debug-osd=20"
-    ceph_args+=" --debug-ms=1"
-    ceph_args+=" --debug-monc=20"
-    ceph_args+=" --log-file=$dir/\$name.log"
-    ceph_args+=" --pid-file=$dir/\$name.pid"
-    ceph_args+=" --osd-max-object-name-len=460"
-    ceph_args+=" --osd-max-object-namespace-len=64"
-    ceph_args+=" --enable-experimental-unrecoverable-data-corrupting-features=*"
-    ceph_args+=" "
-    ceph_args+="$@"
+    local stone_args="$STONE_ARGS"
+    stone_args+=" --osd-failsafe-full-ratio=.99"
+    stone_args+=" --osd-journal-size=100"
+    stone_args+=" --osd-scrub-load-threshold=2000"
+    stone_args+=" --osd-data=$osd_data"
+    stone_args+=" --osd-journal=${osd_data}/journal"
+    stone_args+=" --chdir="
+    stone_args+=$EXTRA_OPTS
+    stone_args+=" --run-dir=$dir"
+    stone_args+=" --admin-socket=$(get_asok_path)"
+    stone_args+=" --debug-osd=20"
+    stone_args+=" --debug-ms=1"
+    stone_args+=" --debug-monc=20"
+    stone_args+=" --log-file=$dir/\$name.log"
+    stone_args+=" --pid-file=$dir/\$name.pid"
+    stone_args+=" --osd-max-object-name-len=460"
+    stone_args+=" --osd-max-object-namespace-len=64"
+    stone_args+=" --enable-experimental-unrecoverable-data-corrupting-features=*"
+    stone_args+=" "
+    stone_args+="$@"
     mkdir -p $osd_data
 
     local uuid=`uuidgen`
     echo "add osd$id $uuid"
-    OSD_SECRET=$(ceph-authtool --gen-print-key)
-    echo "{\"cephx_secret\": \"$OSD_SECRET\"}" > $osd_data/new.json
-    ceph osd new $uuid -i $osd_data/new.json
+    OSD_SECRET=$(stone-authtool --gen-print-key)
+    echo "{\"stonex_secret\": \"$OSD_SECRET\"}" > $osd_data/new.json
+    stone osd new $uuid -i $osd_data/new.json
     rm $osd_data/new.json
-    ceph-osd -i $id $ceph_args --mkfs --key $OSD_SECRET --osd-uuid $uuid
+    stone-osd -i $id $stone_args --mkfs --key $OSD_SECRET --osd-uuid $uuid
 
     local key_fn=$osd_data/keyring
     cat > $key_fn<<EOF
@@ -672,12 +672,12 @@ function run_osd() {
 key = $OSD_SECRET
 EOF
     echo adding osd$id key to auth repository
-    ceph -i "$key_fn" auth add osd.$id osd "allow *" mon "allow profile osd" mgr "allow profile osd"
+    stone -i "$key_fn" auth add osd.$id osd "allow *" mon "allow profile osd" mgr "allow profile osd"
     echo start osd.$id
-    ceph-osd -i $id $ceph_args &
+    stone-osd -i $id $stone_args &
 
     # If noup is set, then can't wait for this osd
-    if ceph osd dump --format=json | jq '.flags_set[]' | grep -q '"noup"' ; then
+    if stone osd dump --format=json | jq '.flags_set[]' | grep -q '"noup"' ; then
       return 0
     fi
     wait_for_osd up $id || return 1
@@ -691,35 +691,35 @@ function run_osd_filestore() {
     shift
     local osd_data=$dir/$id
 
-    local ceph_args="$CEPH_ARGS"
-    ceph_args+=" --osd-failsafe-full-ratio=.99"
-    ceph_args+=" --osd-journal-size=100"
-    ceph_args+=" --osd-scrub-load-threshold=2000"
-    ceph_args+=" --osd-data=$osd_data"
-    ceph_args+=" --osd-journal=${osd_data}/journal"
-    ceph_args+=" --chdir="
-    ceph_args+=$EXTRA_OPTS
-    ceph_args+=" --run-dir=$dir"
-    ceph_args+=" --admin-socket=$(get_asok_path)"
-    ceph_args+=" --debug-osd=20"
-    ceph_args+=" --debug-ms=1"
-    ceph_args+=" --debug-monc=20"
-    ceph_args+=" --log-file=$dir/\$name.log"
-    ceph_args+=" --pid-file=$dir/\$name.pid"
-    ceph_args+=" --osd-max-object-name-len=460"
-    ceph_args+=" --osd-max-object-namespace-len=64"
-    ceph_args+=" --enable-experimental-unrecoverable-data-corrupting-features=*"
-    ceph_args+=" "
-    ceph_args+="$@"
+    local stone_args="$STONE_ARGS"
+    stone_args+=" --osd-failsafe-full-ratio=.99"
+    stone_args+=" --osd-journal-size=100"
+    stone_args+=" --osd-scrub-load-threshold=2000"
+    stone_args+=" --osd-data=$osd_data"
+    stone_args+=" --osd-journal=${osd_data}/journal"
+    stone_args+=" --chdir="
+    stone_args+=$EXTRA_OPTS
+    stone_args+=" --run-dir=$dir"
+    stone_args+=" --admin-socket=$(get_asok_path)"
+    stone_args+=" --debug-osd=20"
+    stone_args+=" --debug-ms=1"
+    stone_args+=" --debug-monc=20"
+    stone_args+=" --log-file=$dir/\$name.log"
+    stone_args+=" --pid-file=$dir/\$name.pid"
+    stone_args+=" --osd-max-object-name-len=460"
+    stone_args+=" --osd-max-object-namespace-len=64"
+    stone_args+=" --enable-experimental-unrecoverable-data-corrupting-features=*"
+    stone_args+=" "
+    stone_args+="$@"
     mkdir -p $osd_data
 
     local uuid=`uuidgen`
     echo "add osd$osd $uuid"
-    OSD_SECRET=$(ceph-authtool --gen-print-key)
-    echo "{\"cephx_secret\": \"$OSD_SECRET\"}" > $osd_data/new.json
-    ceph osd new $uuid -i $osd_data/new.json
+    OSD_SECRET=$(stone-authtool --gen-print-key)
+    echo "{\"stonex_secret\": \"$OSD_SECRET\"}" > $osd_data/new.json
+    stone osd new $uuid -i $osd_data/new.json
     rm $osd_data/new.json
-    ceph-osd -i $id $ceph_args --mkfs --key $OSD_SECRET --osd-uuid $uuid --osd-objectstore=filestore
+    stone-osd -i $id $stone_args --mkfs --key $OSD_SECRET --osd-uuid $uuid --osd-objectstore=filestore
 
     local key_fn=$osd_data/keyring
     cat > $key_fn<<EOF
@@ -727,12 +727,12 @@ function run_osd_filestore() {
 key = $OSD_SECRET
 EOF
     echo adding osd$id key to auth repository
-    ceph -i "$key_fn" auth add osd.$id osd "allow *" mon "allow profile osd" mgr "allow profile osd"
+    stone -i "$key_fn" auth add osd.$id osd "allow *" mon "allow profile osd" mgr "allow profile osd"
     echo start osd.$id
-    ceph-osd -i $id $ceph_args &
+    stone-osd -i $id $stone_args &
 
     # If noup is set, then can't wait for this osd
-    if ceph osd dump --format=json | jq '.flags_set[]' | grep -q '"noup"' ; then
+    if stone osd dump --format=json | jq '.flags_set[]' | grep -q '"noup"' ; then
       return 0
     fi
     wait_for_osd up $id || return 1
@@ -749,17 +749,17 @@ function test_run_osd() {
     run_mgr $dir x || return 1
 
     run_osd $dir 0 || return 1
-    local backfills=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path osd.0) \
+    local backfills=$(STONE_ARGS='' stone --format=json daemon $(get_asok_path osd.0) \
         config get osd_max_backfills)
     echo "$backfills" | grep --quiet 'osd_max_backfills' || return 1
 
     run_osd $dir 1 --osd-max-backfills 20 || return 1
-    local backfills=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path osd.1) \
+    local backfills=$(STONE_ARGS='' stone --format=json daemon $(get_asok_path osd.1) \
         config get osd_max_backfills)
     test "$backfills" = '{"osd_max_backfills":"20"}' || return 1
 
-    CEPH_ARGS="$CEPH_ARGS --osd-max-backfills 30" run_osd $dir 2 || return 1
-    local backfills=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path osd.2) \
+    STONE_ARGS="$STONE_ARGS --osd-max-backfills 30" run_osd $dir 2 || return 1
+    local backfills=$(STONE_ARGS='' stone --format=json daemon $(get_asok_path osd.2) \
         config get osd_max_backfills)
     test "$backfills" = '{"osd_max_backfills":"30"}' || return 1
 
@@ -783,10 +783,10 @@ function destroy_osd() {
     local dir=$1
     local id=$2
 
-    ceph osd out osd.$id || return 1
+    stone osd out osd.$id || return 1
     kill_daemons $dir TERM osd.$id || return 1
-    ceph osd down osd.$id || return 1
-    ceph osd purge osd.$id --yes-i-really-mean-it || return 1
+    stone osd down osd.$id || return 1
+    stone osd purge osd.$id --yes-i-really-mean-it || return 1
     teardown $dir/$id || return 1
     rm -fr $dir/$id
 }
@@ -799,7 +799,7 @@ function test_destroy_osd() {
     run_mgr $dir x || return 1
     run_osd $dir 0 || return 1
     destroy_osd $dir 0 || return 1
-    ! ceph osd dump | grep "osd.$id " || return 1
+    ! stone osd dump | grep "osd.$id " || return 1
     teardown $dir || return 1
 }
 
@@ -809,21 +809,21 @@ function test_destroy_osd() {
 # Run (activate) an osd by the name osd.**id** with data in
 # **dir**/**id**.  The logs can be found in **dir**/osd.**id**.log,
 # the pid file is **dir**/osd.**id**.pid and the admin socket is
-# **dir**/**id**/ceph-osd.**id**.asok.
+# **dir**/**id**/stone-osd.**id**.asok.
 #
-# The remaining arguments are passed verbatim to ceph-osd.
+# The remaining arguments are passed verbatim to stone-osd.
 #
 # Two mandatory arguments must be provided: --fsid and --mon-host
 # Instead of adding them to every call to activate_osd, they can be
-# set in the CEPH_ARGS environment variable to be read implicitly
-# by every ceph command.
+# set in the STONE_ARGS environment variable to be read implicitly
+# by every stone command.
 #
-# The CEPH_CONF variable is expected to be set to /dev/null to
+# The STONE_CONF variable is expected to be set to /dev/null to
 # only rely on arguments for configuration.
 #
 # The activate_osd function expects a valid OSD data directory
 # in **dir**/**id**, either just created via run_osd or re-using
-# one left by a previous run of ceph-osd. The ceph-osd daemon is
+# one left by a previous run of stone-osd. The stone-osd daemon is
 # run directly on the foreground
 #
 # The activate_osd function blocks until the monitor reports the osd
@@ -832,13 +832,13 @@ function test_destroy_osd() {
 #
 # Examples:
 #
-# CEPH_ARGS="--fsid=$(uuidgen) "
-# CEPH_ARGS+="--mon-host=127.0.0.1:7018 "
+# STONE_ARGS="--fsid=$(uuidgen) "
+# STONE_ARGS+="--mon-host=127.0.0.1:7018 "
 # activate_osd $dir 0 # activate an osd using the monitor listening on 7018
 #
 # @param dir path name of the environment
 # @param id osd identifier
-# @param ... can be any option valid for ceph-osd
+# @param ... can be any option valid for stone-osd
 # @return 0 on success, 1 on error
 #
 function activate_osd() {
@@ -848,33 +848,33 @@ function activate_osd() {
     shift
     local osd_data=$dir/$id
 
-    local ceph_args="$CEPH_ARGS"
-    ceph_args+=" --osd-failsafe-full-ratio=.99"
-    ceph_args+=" --osd-journal-size=100"
-    ceph_args+=" --osd-scrub-load-threshold=2000"
-    ceph_args+=" --osd-data=$osd_data"
-    ceph_args+=" --osd-journal=${osd_data}/journal"
-    ceph_args+=" --chdir="
-    ceph_args+=$EXTRA_OPTS
-    ceph_args+=" --run-dir=$dir"
-    ceph_args+=" --admin-socket=$(get_asok_path)"
-    ceph_args+=" --debug-osd=20"
-    ceph_args+=" --log-file=$dir/\$name.log"
-    ceph_args+=" --pid-file=$dir/\$name.pid"
-    ceph_args+=" --osd-max-object-name-len=460"
-    ceph_args+=" --osd-max-object-namespace-len=64"
-    ceph_args+=" --enable-experimental-unrecoverable-data-corrupting-features=*"
-    ceph_args+=" "
-    ceph_args+="$@"
+    local stone_args="$STONE_ARGS"
+    stone_args+=" --osd-failsafe-full-ratio=.99"
+    stone_args+=" --osd-journal-size=100"
+    stone_args+=" --osd-scrub-load-threshold=2000"
+    stone_args+=" --osd-data=$osd_data"
+    stone_args+=" --osd-journal=${osd_data}/journal"
+    stone_args+=" --chdir="
+    stone_args+=$EXTRA_OPTS
+    stone_args+=" --run-dir=$dir"
+    stone_args+=" --admin-socket=$(get_asok_path)"
+    stone_args+=" --debug-osd=20"
+    stone_args+=" --log-file=$dir/\$name.log"
+    stone_args+=" --pid-file=$dir/\$name.pid"
+    stone_args+=" --osd-max-object-name-len=460"
+    stone_args+=" --osd-max-object-namespace-len=64"
+    stone_args+=" --enable-experimental-unrecoverable-data-corrupting-features=*"
+    stone_args+=" "
+    stone_args+="$@"
     mkdir -p $osd_data
 
     echo start osd.$id
-    ceph-osd -i $id $ceph_args &
+    stone-osd -i $id $stone_args &
 
     [ "$id" = "$(cat $osd_data/whoami)" ] || return 1
 
     # If noup is set, then can't wait for this osd
-    if ceph osd dump --format=json | jq '.flags_set[]' | grep -q '"noup"' ; then
+    if stone osd dump --format=json | jq '.flags_set[]' | grep -q '"noup"' ; then
       return 0
     fi
     wait_for_osd up $id || return 1
@@ -889,7 +889,7 @@ function test_activate_osd() {
     run_mgr $dir x || return 1
 
     run_osd $dir 0 || return 1
-    local backfills=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path osd.0) \
+    local backfills=$(STONE_ARGS='' stone --format=json daemon $(get_asok_path osd.0) \
         config get osd_max_backfills)
     echo "$backfills" | grep --quiet 'osd_max_backfills' || return 1
 
@@ -897,7 +897,7 @@ function test_activate_osd() {
 
     activate_osd $dir 0 --osd-max-backfills 20 || return 1
     local scheduler=$(get_op_scheduler 0)
-    local backfills=$(CEPH_ARGS='' ceph --format=json daemon $(get_asok_path osd.0) \
+    local backfills=$(STONE_ARGS='' stone --format=json daemon $(get_asok_path osd.0) \
         config get osd_max_backfills)
     if [ "$scheduler" = "mclock_scheduler" ]; then
       test "$backfills" = '{"osd_max_backfills":"1000"}' || return 1
@@ -925,7 +925,7 @@ function wait_for_osd() {
     status=1
     for ((i=0; i < $TIMEOUT; i++)); do
         echo $i
-        if ! ceph osd dump | grep "osd.$id $state"; then
+        if ! stone osd dump | grep "osd.$id $state"; then
             sleep 1
         else
             status=0
@@ -954,7 +954,7 @@ function test_wait_for_osd() {
 
 ##
 # Display the list of OSD ids supporting the **objectname** stored in
-# **poolname**, as reported by ceph osd map.
+# **poolname**, as reported by stone osd map.
 #
 # @param poolname an existing pool
 # @param objectname an objectname (may or may not exist)
@@ -965,7 +965,7 @@ function get_osds() {
     local poolname=$1
     local objectname=$2
 
-    local osds=$(ceph --format json osd map $poolname $objectname 2>/dev/null | \
+    local osds=$(stone --format json osd map $poolname $objectname 2>/dev/null | \
         jq '.acting | .[]')
     # get rid of the trailing space
     echo $osds
@@ -1004,7 +1004,7 @@ function wait_for_quorum() {
     fi
 
     if [[ -z "$quorumsize" ]]; then
-      timeout $timeout ceph quorum_status --format=json >&/dev/null || return 1
+      timeout $timeout stone quorum_status --format=json >&/dev/null || return 1
       return 0
     fi
 
@@ -1012,7 +1012,7 @@ function wait_for_quorum() {
     wait_until=$((`date +%s` + $timeout))
     while [[ $(date +%s) -lt $wait_until ]]; do
         jqfilter='.quorum | length == '$quorumsize
-        jqinput="$(timeout $timeout ceph quorum_status --format=json 2>/dev/null)"
+        jqinput="$(timeout $timeout stone quorum_status --format=json 2>/dev/null)"
         res=$(echo $jqinput | jq "$jqfilter")
         if [[ "$res" == "true" ]]; then
           no_quorum=0
@@ -1026,7 +1026,7 @@ function wait_for_quorum() {
 
 ##
 # Return the PG of supporting the **objectname** stored in
-# **poolname**, as reported by ceph osd map.
+# **poolname**, as reported by stone osd map.
 #
 # @param poolname an existing pool
 # @param objectname an objectname (may or may not exist)
@@ -1037,7 +1037,7 @@ function get_pg() {
     local poolname=$1
     local objectname=$2
 
-    ceph --format json osd map $poolname $objectname 2>/dev/null | jq -r '.pgid'
+    stone --format json osd map $poolname $objectname 2>/dev/null | jq -r '.pgid'
 }
 
 function test_get_pg() {
@@ -1070,8 +1070,8 @@ function get_config() {
     local id=$2
     local config=$3
 
-    CEPH_ARGS='' \
-        ceph --format json daemon $(get_asok_path $daemon.$id) \
+    STONE_ARGS='' \
+        stone --format json daemon $(get_asok_path $daemon.$id) \
         config get $config 2> /dev/null | \
         jq -r ".$config"
 }
@@ -1107,7 +1107,7 @@ function set_config() {
     local config=$3
     local value=$4
 
-    test $(env CEPH_ARGS='' ceph --format json daemon $(get_asok_path $daemon.$id) \
+    test $(env STONE_ARGS='' stone --format json daemon $(get_asok_path $daemon.$id) \
                config set $config $value 2> /dev/null | \
            jq 'has("success")') == true
 }
@@ -1129,7 +1129,7 @@ function test_set_config() {
 
 ##
 # Return the OSD id of the primary OSD supporting the **objectname**
-# stored in **poolname**, as reported by ceph osd map.
+# stored in **poolname**, as reported by stone osd map.
 #
 # @param poolname an existing pool
 # @param objectname an objectname (may or may not exist)
@@ -1140,7 +1140,7 @@ function get_primary() {
     local poolname=$1
     local objectname=$2
 
-    ceph --format json osd map $poolname $objectname 2>/dev/null | \
+    stone --format json osd map $poolname $objectname 2>/dev/null | \
         jq '.acting_primary'
 }
 
@@ -1162,7 +1162,7 @@ function test_get_primary() {
 
 ##
 # Return the id of any OSD supporting the **objectname** stored in
-# **poolname**, as reported by ceph osd map, except the primary.
+# **poolname**, as reported by stone osd map, except the primary.
 #
 # @param poolname an existing pool
 # @param objectname an objectname (may or may not exist)
@@ -1174,7 +1174,7 @@ function get_not_primary() {
     local objectname=$2
 
     local primary=$(get_primary $poolname $objectname)
-    ceph --format json osd map $poolname $objectname 2>/dev/null | \
+    stone --format json osd map $poolname $objectname 2>/dev/null | \
         jq ".acting | map(select (. != $primary)) | .[0]"
 }
 
@@ -1204,7 +1204,7 @@ function _objectstore_tool_nodown() {
     shift
     local osd_data=$dir/$id
 
-    ceph-objectstore-tool \
+    stone-objectstore-tool \
         --data-path $osd_data \
         "$@" || return 1
 }
@@ -1218,24 +1218,24 @@ function _objectstore_tool_nowait() {
     kill_daemons $dir TERM osd.$id >&2 < /dev/null || return 1
 
     _objectstore_tool_nodown $dir $id "$@" || return 1
-    activate_osd $dir $id $ceph_osd_args >&2 || return 1
+    activate_osd $dir $id $stone_osd_args >&2 || return 1
 }
 
 ##
-# Run ceph-objectstore-tool against the OSD **id** using the data path
+# Run stone-objectstore-tool against the OSD **id** using the data path
 # **dir**. The OSD is killed with TERM prior to running
-# ceph-objectstore-tool because access to the data path is
+# stone-objectstore-tool because access to the data path is
 # exclusive. The OSD is restarted after the command completes. The
 # objectstore_tool returns after all PG are active+clean again.
 #
 # @param dir the data path of the OSD
 # @param id the OSD id
-# @param ... arguments to ceph-objectstore-tool
-# @param STDIN the input of ceph-objectstore-tool
-# @param STDOUT the output of ceph-objectstore-tool
+# @param ... arguments to stone-objectstore-tool
+# @param STDIN the input of stone-objectstore-tool
+# @param STDOUT the output of stone-objectstore-tool
 # @return 0 on success, 1 on error
 #
-# The value of $ceph_osd_args will be passed to restarted osds
+# The value of $stone_osd_args will be passed to restarted osds
 #
 function objectstore_tool() {
     local dir=$1
@@ -1269,7 +1269,7 @@ function test_objectstore_tool() {
 ##
 # Predicate checking if there is an ongoing recovery in the
 # cluster. If any of the recovering_{keys,bytes,objects}_per_sec
-# counters are reported by ceph status, it means recovery is in
+# counters are reported by stone status, it means recovery is in
 # progress.
 #
 # @return 0 if recovery in progress, 1 otherwise
@@ -1279,7 +1279,7 @@ function get_is_making_recovery_progress() {
     recovery_progress+=".recovering_keys_per_sec + "
     recovery_progress+=".recovering_bytes_per_sec + "
     recovery_progress+=".recovering_objects_per_sec"
-    local progress=$(ceph --format json status 2>/dev/null | \
+    local progress=$(stone --format json status 2>/dev/null | \
                      jq -r ".pgmap | $recovery_progress")
     test "$progress" != null
 }
@@ -1298,7 +1298,7 @@ function test_get_is_making_recovery_progress() {
 
 ##
 # Return the number of active PGs in the cluster. A PG is active if
-# ceph pg dump pgs reports it both **active** and **clean** and that
+# stone pg dump pgs reports it both **active** and **clean** and that
 # not **stale**.
 #
 # @param STDOUT the number of active PGs
@@ -1308,7 +1308,7 @@ function get_num_active_clean() {
     local expression
     expression+="select(contains(\"active\") and contains(\"clean\")) | "
     expression+="select(contains(\"stale\") | not)"
-    ceph --format json pg dump pgs 2>/dev/null | \
+    stone --format json pg dump pgs 2>/dev/null | \
         jq ".pg_stats | [.[] | .state | $expression] | length"
 }
 
@@ -1328,7 +1328,7 @@ function test_get_num_active_clean() {
 
 ##
 # Return the number of active or peered PGs in the cluster. A PG matches if
-# ceph pg dump pgs reports it is either **active** or **peered** and that
+# stone pg dump pgs reports it is either **active** or **peered** and that
 # not **stale**.
 #
 # @param STDOUT the number of active PGs
@@ -1338,7 +1338,7 @@ function get_num_active_or_peered() {
     local expression
     expression+="select(contains(\"active\") or contains(\"peered\")) | "
     expression+="select(contains(\"stale\") | not)"
-    ceph --format json pg dump pgs 2>/dev/null | \
+    stone --format json pg dump pgs 2>/dev/null | \
         jq ".pg_stats | [.[] | .state | $expression] | length"
 }
 
@@ -1360,13 +1360,13 @@ function test_get_num_active_or_peered() {
 
 ##
 # Return the number of PGs in the cluster, according to
-# ceph pg dump pgs.
+# stone pg dump pgs.
 #
 # @param STDOUT the number of PGs
 # @return 0 on success, 1 on error
 #
 function get_num_pgs() {
-    ceph --format json status 2>/dev/null | jq '.pgmap.num_pgs'
+    stone --format json status 2>/dev/null | jq '.pgmap.num_pgs'
 }
 
 function test_get_num_pgs() {
@@ -1387,7 +1387,7 @@ function test_get_num_pgs() {
 
 ##
 # Return the OSD ids in use by at least one PG in the cluster (either
-# in the up or the acting set), according to ceph pg dump pgs. Every
+# in the up or the acting set), according to stone pg dump pgs. Every
 # OSD id shows as many times as they are used in up and acting sets.
 # If an OSD id is in both the up and acting set of a given PG, it will
 # show twice.
@@ -1396,7 +1396,7 @@ function test_get_num_pgs() {
 # @return 0 on success, 1 on error
 #
 function get_osd_id_used_by_pgs() {
-    ceph --format json pg dump pgs 2>/dev/null | jq '.pg_stats | .[] | .up[], .acting[]' | sort
+    stone --format json pg dump pgs 2>/dev/null | jq '.pg_stats | .[] | .up[], .acting[]' | sort
 }
 
 function test_get_osd_id_used_by_pgs() {
@@ -1459,7 +1459,7 @@ function test_wait_osd_id_used_by_pgs() {
 
 ##
 # Return the date and time of the last completed scrub for **pgid**,
-# as reported by ceph pg dump pgs. Note that a repair also sets this
+# as reported by stone pg dump pgs. Note that a repair also sets this
 # date.
 #
 # @param pgid the id of the PG
@@ -1469,7 +1469,7 @@ function test_wait_osd_id_used_by_pgs() {
 function get_last_scrub_stamp() {
     local pgid=$1
     local sname=${2:-last_scrub_stamp}
-    ceph --format json pg dump pgs 2>/dev/null | \
+    stone --format json pg dump pgs 2>/dev/null | \
         jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
 }
 
@@ -1606,7 +1606,7 @@ function wait_for_clean() {
         elif get_is_making_recovery_progress ; then
             loop=0
         elif (( $loop >= ${#delays[*]} )) ; then
-            ceph report
+            stone report
             return 1
         fi
 	# eval is a no-op if cmd is empty
@@ -1663,7 +1663,7 @@ function wait_for_peered() {
         elif get_is_making_recovery_progress ; then
             loop=0
         elif (( $loop >= ${#delays[*]} )) ; then
-            ceph report
+            stone report
             return 1
         fi
 	# eval is a no-op if cmd is empty
@@ -1703,9 +1703,9 @@ function wait_for_health() {
     local -a delays=($(get_timeout_delays $TIMEOUT .1))
     local -i loop=0
 
-    while ! ceph health detail | grep "$grepstr" ; do
+    while ! stone health detail | grep "$grepstr" ; do
 	if (( $loop >= ${#delays[*]} )) ; then
-            ceph health detail
+            stone health detail
             return 1
         fi
         sleep ${delays[$loop]}
@@ -1734,7 +1734,7 @@ function test_wait_for_health_ok() {
     run_osd $dir 1 || return 1
     run_osd $dir 2 || return 1
     kill_daemons $dir TERM osd || return 1
-    ceph osd down 0 || return 1
+    stone osd down 0 || return 1
     # expect TOO_FEW_OSDS warning
     ! TIMEOUT=1 wait_for_health_ok || return 1
     # resurrect all OSDs
@@ -1759,7 +1759,7 @@ function test_wait_for_health_ok() {
 function repair() {
     local pgid=$1
     local last_scrub=$(get_last_scrub_stamp $pgid)
-    ceph pg repair $pgid
+    stone pg repair $pgid
     wait_for_scrub $pgid "$last_scrub"
 }
 
@@ -1792,14 +1792,14 @@ function test_repair() {
 function pg_scrub() {
     local pgid=$1
     local last_scrub=$(get_last_scrub_stamp $pgid)
-    ceph pg scrub $pgid
+    stone pg scrub $pgid
     wait_for_scrub $pgid "$last_scrub"
 }
 
 function pg_deep_scrub() {
     local pgid=$1
     local last_scrub=$(get_last_scrub_stamp $pgid last_deep_scrub_stamp)
-    ceph pg deep-scrub $pgid
+    stone pg deep-scrub $pgid
     wait_for_scrub $pgid "$last_scrub" last_deep_scrub_stamp
 }
 
@@ -1905,7 +1905,7 @@ function test_wait_for_scrub() {
     create_rbd_pool || return 1
     wait_for_clean || return 1
     local pgid=1.0
-    ceph pg repair $pgid
+    stone pg repair $pgid
     local last_scrub=$(get_last_scrub_stamp $pgid)
     wait_for_scrub $pgid "$last_scrub" || return 1
     kill_daemons $dir KILL osd || return 1
@@ -1933,10 +1933,10 @@ function erasure_code_plugin_exists() {
         *) grepstr="$plugin.*No such file" ;;
     esac
 
-    s=$(ceph osd erasure-code-profile set TESTPROFILE plugin=$plugin 2>&1)
+    s=$(stone osd erasure-code-profile set TESTPROFILE plugin=$plugin 2>&1)
     local status=$?
     if [ $status -eq 0 ]; then
-        ceph osd erasure-code-profile rm TESTPROFILE
+        stone osd erasure-code-profile rm TESTPROFILE
     elif ! echo $s | grep --quiet "$grepstr" ; then
         status=1
         # display why the string was rejected.
@@ -2072,10 +2072,10 @@ function flush_pg_stats()
 {
     local timeout=${1:-$TIMEOUT}
 
-    ids=`ceph osd ls`
+    ids=`stone osd ls`
     seqs=''
     for osd in $ids; do
-	    seq=`ceph tell osd.$osd flush_pg_stats`
+	    seq=`stone tell osd.$osd flush_pg_stats`
 	    if test -z "$seq"
 	    then
 		continue
@@ -2087,7 +2087,7 @@ function flush_pg_stats()
 	    osd=`echo $s | cut -d - -f 1`
 	    seq=`echo $s | cut -d - -f 2`
 	    echo "waiting osd.$osd seq $seq"
-	    while test $(ceph osd last-stat-seq $osd) -lt $seq; do
+	    while test $(stone osd last-stat-seq $osd) -lt $seq; do
             sleep 1
             if [ $((timeout--)) -eq 0 ]; then
                 return 1
@@ -2108,8 +2108,8 @@ function test_flush_pg_stats()
     rados -p rbd put obj /etc/group
     flush_pg_stats || return 1
     local jq_filter='.pools | .[] | select(.name == "rbd") | .stats'
-    stored=`ceph df detail --format=json | jq "$jq_filter.stored"`
-    stored_raw=`ceph df detail --format=json | jq "$jq_filter.stored_raw"`
+    stored=`stone df detail --format=json | jq "$jq_filter.stored"`
+    stored_raw=`stone df detail --format=json | jq "$jq_filter.stored_raw"`
     test $stored -gt 0 || return 1
     test $stored == $stored_raw || return 1
     teardown $dir
@@ -2125,8 +2125,8 @@ function test_flush_pg_stats()
 # are displayed for diagnostic purposes.
 #
 # **teardown** function is called when the **run** function returns
-# (on success or on error), to cleanup leftovers. The CEPH_CONF is set
-# to /dev/null and CEPH_ARGS is unset so that the tests are protected from
+# (on success or on error), to cleanup leftovers. The STONE_CONF is set
+# to /dev/null and STONE_ARGS is unset so that the tests are protected from
 # external interferences.
 #
 # It is the responsibility of the **run** function to call the
@@ -2149,8 +2149,8 @@ function main() {
 
     export PATH=.:$PATH # make sure program from sources are preferred
     export PYTHONWARNINGS=ignore
-    export CEPH_CONF=/dev/null
-    unset CEPH_ARGS
+    export STONE_CONF=/dev/null
+    unset STONE_ARGS
 
     local code
     if run $dir "$@" ; then
@@ -2170,14 +2170,14 @@ function run_tests() {
 
     export .:$PATH # make sure program from sources are preferred
 
-    export CEPH_MON="127.0.0.1:7109" # git grep '\<7109\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+=" --fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
-    export CEPH_CONF=/dev/null
+    export STONE_MON="127.0.0.1:7109" # git grep '\<7109\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+=" --fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
+    export STONE_CONF=/dev/null
 
     local funcs=${@:-$(set | sed -n -e 's/^\(test_[0-9a-z_]*\) .*/\1/p')}
-    local dir=td/ceph-helpers
+    local dir=td/stone-helpers
 
     for func in $funcs ; do
         if ! $func $dir; then
@@ -2255,7 +2255,7 @@ function inject_eio() {
     type=$(cat $dir/$osd_id/type)
     set_config osd $osd_id ${type}_debug_inject_read_err true || return 1
     local loop=0
-    while ( CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.$osd_id) \
+    while ( STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.$osd_id) \
              inject${which}err $poolname $objname $shard_id | grep -q Invalid ); do
         loop=$(expr $loop + 1)
         if [ $loop = "10" ]; then
@@ -2280,12 +2280,12 @@ function create_ec_pool() {
     local allow_overwrites=$1
     shift
 
-    ceph osd erasure-code-profile set myprofile crush-failure-domain=osd "$@" || return 1
+    stone osd erasure-code-profile set myprofile crush-failure-domain=osd "$@" || return 1
 
     create_pool "$poolname" 1 1 erasure myprofile || return 1
 
     if [ "$allow_overwrites" = "true" ]; then
-        ceph osd pool set "$poolname" allow_ec_overwrites true || return 1
+        stone osd pool set "$poolname" allow_ec_overwrites true || return 1
     fi
 
     wait_for_clean || return 1
@@ -2293,5 +2293,5 @@ function create_ec_pool() {
 }
 
 # Local Variables:
-# compile-command: "cd ../../src ; make -j4 && ../qa/standalone/ceph-helpers.sh TESTS # test_get_config"
+# compile-command: "cd ../../src ; make -j4 && ../qa/standalone/stone-helpers.sh TESTS # test_get_config"
 # End:

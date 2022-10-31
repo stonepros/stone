@@ -368,8 +368,8 @@ done
 testlog "TEST: remove mirroring pool"
 pool=pool_to_remove
 for cluster in ${CLUSTER1} ${CLUSTER2}; do
-    CEPH_ARGS='' ceph --cluster ${cluster} osd pool create ${pool} 16 16
-    CEPH_ARGS='' rbd --cluster ${cluster} pool init ${pool}
+    STONE_ARGS='' stone --cluster ${cluster} osd pool create ${pool} 16 16
+    STONE_ARGS='' rbd --cluster ${cluster} pool init ${pool}
     rbd --cluster ${cluster} mirror pool enable ${pool} pool
 done
 peer_add ${CLUSTER1} ${pool} ${CLUSTER2}
@@ -384,7 +384,7 @@ wait_for_status_in_pool_dir ${CLUSTER1} ${pool} ${image} 'up+replaying' 'primary
 wait_for_replay_complete ${CLUSTER1} ${CLUSTER2} ${POOL} ${rdp_image}
 wait_for_status_in_pool_dir ${CLUSTER1} ${POOL} ${rdp_image} 'up+replaying' 'primary_position'
 for cluster in ${CLUSTER1} ${CLUSTER2}; do
-    CEPH_ARGS='' ceph --cluster ${cluster} osd pool rm ${pool} ${pool} --yes-i-really-really-mean-it
+    STONE_ARGS='' stone --cluster ${cluster} osd pool rm ${pool} ${pool} --yes-i-really-really-mean-it
 done
 remove_image_retry ${CLUSTER2} ${POOL} ${rdp_image}
 wait_for_image_present ${CLUSTER1} ${POOL} ${rdp_image} 'deleted'
@@ -587,6 +587,6 @@ wait_for_image_in_omap ${CLUSTER2} ${POOL}
 if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
   # teuthology will trash the daemon
   testlog "TEST: no blocklists"
-  CEPH_ARGS='--id admin' ceph --cluster ${CLUSTER1} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
-  CEPH_ARGS='--id admin' ceph --cluster ${CLUSTER2} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
+  STONE_ARGS='--id admin' stone --cluster ${CLUSTER1} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
+  STONE_ARGS='--id admin' stone --cluster ${CLUSTER2} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
 fi

@@ -106,7 +106,7 @@ private:
 
   int m_acquire_lock_peer_ret_val = 0;
 
-  bool accept_ops(const ceph::mutex &lock) const;
+  bool accept_ops(const stone::mutex &lock) const;
 
   void handle_post_acquiring_lock(int r);
   void handle_post_acquired_lock(int r);

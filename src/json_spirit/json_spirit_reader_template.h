@@ -26,7 +26,7 @@
 #include <boost/spirit/include/classic_multi_pass.hpp>
 #include <boost/spirit/include/classic_position_iterator.hpp>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace json_spirit
 {
@@ -170,7 +170,7 @@ namespace json_spirit
     String_type get_str_( typename String_type::const_iterator begin, 
                        typename String_type::const_iterator end )
     {
-        ceph_assert( end - begin >= 2 );
+        stone_assert( end - begin >= 2 );
 
         typedef typename String_type::const_iterator Iter_type;
 
@@ -228,35 +228,35 @@ namespace json_spirit
 
         void begin_obj( Char_type c )
         {
-            ceph_assert( c == '{' );
+            stone_assert( c == '{' );
 
             begin_compound< Object_type >();
         }
 
         void end_obj( Char_type c )
         {
-            ceph_assert( c == '}' );
+            stone_assert( c == '}' );
 
             end_compound();
         }
 
         void begin_array( Char_type c )
         {
-            ceph_assert( c == '[' );
+            stone_assert( c == '[' );
      
             begin_compound< Array_type >();
         }
 
         void end_array( Char_type c )
         {
-            ceph_assert( c == ']' );
+            stone_assert( c == ']' );
 
             end_compound();
         }
 
         void new_name( Iter_type begin, Iter_type end )
         {
-            ceph_assert( current_p_->type() == obj_type );
+            stone_assert( current_p_->type() == obj_type );
 
             name_ = get_str< String_type >( begin, end );
         }
@@ -268,21 +268,21 @@ namespace json_spirit
 
         void new_true( Iter_type begin, Iter_type end )
         {
-            ceph_assert( is_eq( begin, end, "true" ) );
+            stone_assert( is_eq( begin, end, "true" ) );
 
             add_to_current( true );
         }
 
         void new_false( Iter_type begin, Iter_type end )
         {
-            ceph_assert( is_eq( begin, end, "false" ) );
+            stone_assert( is_eq( begin, end, "false" ) );
 
             add_to_current( false );
         }
 
         void new_null( Iter_type begin, Iter_type end )
         {
-            ceph_assert( is_eq( begin, end, "null" ) );
+            stone_assert( is_eq( begin, end, "null" ) );
 
             add_to_current( Value_type() );
         }
@@ -309,7 +309,7 @@ namespace json_spirit
 
         Value_type* add_first( const Value_type& value )
         {
-            ceph_assert( current_p_ == 0 );
+            stone_assert( current_p_ == 0 );
 
             value_ = value;
             current_p_ = &value_;
@@ -356,7 +356,7 @@ namespace json_spirit
                 return &current_p_->get_array().back(); 
             }
             
-            ceph_assert( current_p_->type() == obj_type );
+            stone_assert( current_p_->type() == obj_type );
 
             return &Config_type::add( current_p_->get_obj(), name_, value );
         }
@@ -581,7 +581,7 @@ namespace json_spirit
 
         if( !info.hit )
         {
-            ceph_assert( false ); // in theory exception should already have been thrown
+            stone_assert( false ); // in theory exception should already have been thrown
             throw_error( info.stop, "error" );
         }
 

@@ -18,13 +18,13 @@ class Module(MgrModule):
     COMMANDS = [
         {
             "cmd": "fs status "
-                   "name=fs,type=CephString,req=false",
-            "desc": "Show the status of a CephFS filesystem",
+                   "name=fs,type=StoneString,req=false",
+            "desc": "Show the status of a StoneFS filesystem",
             "perm": "r"
         },
         {
             "cmd": "osd status "
-                   "name=bucket,type=CephString,req=false",
+                   "name=bucket,type=StoneString,req=false",
             "desc": "Show the status of OSDs within a bucket, or all",
             "perm": "r"
         },
@@ -114,7 +114,7 @@ class Module(MgrModule):
 
                     defaults = defaultdict(lambda: None, {'version' : 'unknown'})
                     metadata = self.get_metadata('mds', info['name'], default=defaults)
-                    mds_versions[metadata['ceph_version']].append(info['name'])
+                    mds_versions[metadata['stone_version']].append(info['name'])
 
                     if output_format in ('json', 'json-pretty'):
                         json_output['mdsmap'].append({
@@ -163,7 +163,7 @@ class Module(MgrModule):
 
                 defaults = defaultdict(lambda: None, {'version' : 'unknown'})
                 metadata = self.get_metadata('mds', daemon_info['name'], default=defaults)
-                mds_versions[metadata['ceph_version']].append(daemon_info['name'])
+                mds_versions[metadata['stone_version']].append(daemon_info['name'])
 
                 if output_format in ('json', 'json-pretty'):
                     json_output['mdsmap'].append({
@@ -237,7 +237,7 @@ class Module(MgrModule):
         for standby in fsmap['standbys']:
             defaults = defaultdict(lambda: None, {'version' : 'unknown'})
             metadata = self.get_metadata('mds', standby['name'], default=defaults)
-            mds_versions[metadata['ceph_version']].append(standby['name'])
+            mds_versions[metadata['stone_version']].append(standby['name'])
 
             if output_format in ('json', 'json-pretty'):
                 json_output['mdsmap'].append({

@@ -21,7 +21,7 @@ export class ErasureCodeProfileService {
     plugins: {
       jerasure: {
         description: $localize`The jerasure plugin is the most generic and flexible plugin,
-          it is also the default for Ceph erasure coded pools.`,
+          it is also the default for Stone erasure coded pools.`,
         technique: $localize`The more flexible technique is reed_sol_van : it is enough to set k
           and m. The cauchy_good technique can be faster but you need to chose the packetsize
           carefully. All of reed_sol_r6_op, liberation, blaum_roth, liber8tion are RAID6 equivalents
@@ -55,7 +55,7 @@ export class ErasureCodeProfileService {
       },
       shec: {
         description: $localize`The shec plugin encapsulates the multiple SHEC library.
-          It allows ceph to recover data more efficiently than Reed Solomon codes.`,
+          It allows stone to recover data more efficiently than Reed Solomon codes.`,
         c: $localize`The number of parity chunks each of which includes each data chunk in its
           calculation range. The number is used as a durability estimator. For instance, if c=2,
           2 OSDs can be down without losing data.`

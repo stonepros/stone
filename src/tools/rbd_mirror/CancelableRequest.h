@@ -12,7 +12,7 @@ namespace mirror {
 
 class CancelableRequest : public RefCountedObject {
 public:
-  CancelableRequest(const std::string& name, CephContext *cct,
+  CancelableRequest(const std::string& name, StoneContext *cct,
                     Context *on_finish)
     : RefCountedObject(cct), m_name(name), m_cct(cct),
       m_on_finish(on_finish) {
@@ -34,7 +34,7 @@ protected:
 
 private:
   const std::string m_name;
-  CephContext *m_cct;
+  StoneContext *m_cct;
   Context *m_on_finish;
 };
 

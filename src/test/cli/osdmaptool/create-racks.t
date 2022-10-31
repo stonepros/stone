@@ -1,4 +1,4 @@
-  $ osdmaptool --create-from-conf om -c $TESTDIR/ceph.conf.withracks --with-default-pool
+  $ osdmaptool --create-from-conf om -c $TESTDIR/stone.conf.withracks --with-default-pool
   osdmaptool: osdmap file 'om'
   osdmaptool: writing epoch 1 to om
   $ osdmaptool --export-crush oc om
@@ -270,7 +270,7 @@
   type 11 root
   
   # buckets
-  host cephstore5522 {
+  host stonestore5522 {
   \tid -2\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -283,7 +283,7 @@
   \titem osd.6 weight 1.000 (esc)
   \titem osd.7 weight 1.000 (esc)
   }
-  host cephstore5523 {
+  host stonestore5523 {
   \tid -4\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -296,7 +296,7 @@
   \titem osd.8 weight 1.000 (esc)
   \titem osd.9 weight 1.000 (esc)
   }
-  host cephstore6238 {
+  host stonestore6238 {
   \tid -8\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -309,7 +309,7 @@
   \titem osd.118 weight 1.000 (esc)
   \titem osd.119 weight 1.000 (esc)
   }
-  host cephstore6240 {
+  host stonestore6240 {
   \tid -10\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -322,7 +322,7 @@
   \titem osd.132 weight 1.000 (esc)
   \titem osd.133 weight 1.000 (esc)
   }
-  host cephstore6242 {
+  host stonestore6242 {
   \tid -12\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -335,7 +335,7 @@
   \titem osd.146 weight 1.000 (esc)
   \titem osd.147 weight 1.000 (esc)
   }
-  host cephstore5524 {
+  host stonestore5524 {
   \tid -14\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -348,7 +348,7 @@
   \titem osd.20 weight 1.000 (esc)
   \titem osd.21 weight 1.000 (esc)
   }
-  host cephstore6244 {
+  host stonestore6244 {
   \tid -15\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -361,7 +361,7 @@
   \titem osd.160 weight 1.000 (esc)
   \titem osd.161 weight 1.000 (esc)
   }
-  host cephstore6246 {
+  host stonestore6246 {
   \tid -17\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -374,7 +374,7 @@
   \titem osd.174 weight 1.000 (esc)
   \titem osd.175 weight 1.000 (esc)
   }
-  host cephstore6337 {
+  host stonestore6337 {
   \tid -19\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -387,7 +387,7 @@
   \titem osd.188 weight 1.000 (esc)
   \titem osd.189 weight 1.000 (esc)
   }
-  host cephstore6341 {
+  host stonestore6341 {
   \tid -23\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -400,7 +400,7 @@
   \titem osd.216 weight 1.000 (esc)
   \titem osd.217 weight 1.000 (esc)
   }
-  host cephstore6342 {
+  host stonestore6342 {
   \tid -24\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -413,7 +413,7 @@
   \titem osd.223 weight 1.000 (esc)
   \titem osd.224 weight 1.000 (esc)
   }
-  host cephstore5525 {
+  host stonestore5525 {
   \tid -25\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -426,7 +426,7 @@
   \titem osd.27 weight 1.000 (esc)
   \titem osd.28 weight 1.000 (esc)
   }
-  host cephstore6345 {
+  host stonestore6345 {
   \tid -27\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -439,7 +439,7 @@
   \titem osd.237 weight 1.000 (esc)
   \titem osd.238 weight 1.000 (esc)
   }
-  host cephstore5526 {
+  host stonestore5526 {
   \tid -28\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -452,7 +452,7 @@
   \titem osd.34 weight 1.000 (esc)
   \titem osd.35 weight 1.000 (esc)
   }
-  host cephstore5527 {
+  host stonestore5527 {
   \tid -29\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -465,7 +465,7 @@
   \titem osd.41 weight 1.000 (esc)
   \titem osd.42 weight 1.000 (esc)
   }
-  host cephstore5529 {
+  host stonestore5529 {
   \tid -30\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -478,7 +478,7 @@
   \titem osd.48 weight 1.000 (esc)
   \titem osd.49 weight 1.000 (esc)
   }
-  host cephstore5530 {
+  host stonestore5530 {
   \tid -31\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -496,25 +496,25 @@
   \t# weight 119.000 (esc)
   \talg straw2 (esc)
   \thash 0\t# rjenkins1 (esc)
-  \titem cephstore5522 weight 7.000 (esc)
-  \titem cephstore5523 weight 7.000 (esc)
-  \titem cephstore6238 weight 7.000 (esc)
-  \titem cephstore6240 weight 7.000 (esc)
-  \titem cephstore6242 weight 7.000 (esc)
-  \titem cephstore5524 weight 7.000 (esc)
-  \titem cephstore6244 weight 7.000 (esc)
-  \titem cephstore6246 weight 7.000 (esc)
-  \titem cephstore6337 weight 7.000 (esc)
-  \titem cephstore6341 weight 7.000 (esc)
-  \titem cephstore6342 weight 7.000 (esc)
-  \titem cephstore5525 weight 7.000 (esc)
-  \titem cephstore6345 weight 7.000 (esc)
-  \titem cephstore5526 weight 7.000 (esc)
-  \titem cephstore5527 weight 7.000 (esc)
-  \titem cephstore5529 weight 7.000 (esc)
-  \titem cephstore5530 weight 7.000 (esc)
+  \titem stonestore5522 weight 7.000 (esc)
+  \titem stonestore5523 weight 7.000 (esc)
+  \titem stonestore6238 weight 7.000 (esc)
+  \titem stonestore6240 weight 7.000 (esc)
+  \titem stonestore6242 weight 7.000 (esc)
+  \titem stonestore5524 weight 7.000 (esc)
+  \titem stonestore6244 weight 7.000 (esc)
+  \titem stonestore6246 weight 7.000 (esc)
+  \titem stonestore6337 weight 7.000 (esc)
+  \titem stonestore6341 weight 7.000 (esc)
+  \titem stonestore6342 weight 7.000 (esc)
+  \titem stonestore5525 weight 7.000 (esc)
+  \titem stonestore6345 weight 7.000 (esc)
+  \titem stonestore5526 weight 7.000 (esc)
+  \titem stonestore5527 weight 7.000 (esc)
+  \titem stonestore5529 weight 7.000 (esc)
+  \titem stonestore5530 weight 7.000 (esc)
   }
-  host cephstore6236 {
+  host stonestore6236 {
   \tid -5\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -527,7 +527,7 @@
   \titem osd.105 weight 1.000 (esc)
   \titem osd.99 weight 1.000 (esc)
   }
-  host cephstore6237 {
+  host stonestore6237 {
   \tid -7\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -540,7 +540,7 @@
   \titem osd.111 weight 1.000 (esc)
   \titem osd.112 weight 1.000 (esc)
   }
-  host cephstore6239 {
+  host stonestore6239 {
   \tid -9\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -553,7 +553,7 @@
   \titem osd.125 weight 1.000 (esc)
   \titem osd.126 weight 1.000 (esc)
   }
-  host cephstore6241 {
+  host stonestore6241 {
   \tid -11\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -566,7 +566,7 @@
   \titem osd.139 weight 1.000 (esc)
   \titem osd.140 weight 1.000 (esc)
   }
-  host cephstore6243 {
+  host stonestore6243 {
   \tid -13\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -579,7 +579,7 @@
   \titem osd.153 weight 1.000 (esc)
   \titem osd.154 weight 1.000 (esc)
   }
-  host cephstore6245 {
+  host stonestore6245 {
   \tid -16\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -592,7 +592,7 @@
   \titem osd.167 weight 1.000 (esc)
   \titem osd.168 weight 1.000 (esc)
   }
-  host cephstore6336 {
+  host stonestore6336 {
   \tid -18\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -605,7 +605,7 @@
   \titem osd.181 weight 1.000 (esc)
   \titem osd.182 weight 1.000 (esc)
   }
-  host cephstore6338 {
+  host stonestore6338 {
   \tid -20\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -618,7 +618,7 @@
   \titem osd.195 weight 1.000 (esc)
   \titem osd.196 weight 1.000 (esc)
   }
-  host cephstore6339 {
+  host stonestore6339 {
   \tid -21\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -631,7 +631,7 @@
   \titem osd.202 weight 1.000 (esc)
   \titem osd.203 weight 1.000 (esc)
   }
-  host cephstore6340 {
+  host stonestore6340 {
   \tid -22\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -644,7 +644,7 @@
   \titem osd.209 weight 1.000 (esc)
   \titem osd.210 weight 1.000 (esc)
   }
-  host cephstore6343 {
+  host stonestore6343 {
   \tid -26\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -657,7 +657,7 @@
   \titem osd.230 weight 1.000 (esc)
   \titem osd.231 weight 1.000 (esc)
   }
-  host cephstore6230 {
+  host stonestore6230 {
   \tid -32\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -670,7 +670,7 @@
   \titem osd.62 weight 1.000 (esc)
   \titem osd.63 weight 1.000 (esc)
   }
-  host cephstore6231 {
+  host stonestore6231 {
   \tid -33\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -683,7 +683,7 @@
   \titem osd.69 weight 1.000 (esc)
   \titem osd.70 weight 1.000 (esc)
   }
-  host cephstore6232 {
+  host stonestore6232 {
   \tid -34\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -696,7 +696,7 @@
   \titem osd.76 weight 1.000 (esc)
   \titem osd.77 weight 1.000 (esc)
   }
-  host cephstore6233 {
+  host stonestore6233 {
   \tid -35\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -709,7 +709,7 @@
   \titem osd.83 weight 1.000 (esc)
   \titem osd.84 weight 1.000 (esc)
   }
-  host cephstore6234 {
+  host stonestore6234 {
   \tid -36\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -722,7 +722,7 @@
   \titem osd.90 weight 1.000 (esc)
   \titem osd.91 weight 1.000 (esc)
   }
-  host cephstore6235 {
+  host stonestore6235 {
   \tid -37\t\t# do not change unnecessarily (esc)
   \t# weight 7.000 (esc)
   \talg straw2 (esc)
@@ -740,23 +740,23 @@
   \t# weight 119.000 (esc)
   \talg straw2 (esc)
   \thash 0\t# rjenkins1 (esc)
-  \titem cephstore6236 weight 7.000 (esc)
-  \titem cephstore6237 weight 7.000 (esc)
-  \titem cephstore6239 weight 7.000 (esc)
-  \titem cephstore6241 weight 7.000 (esc)
-  \titem cephstore6243 weight 7.000 (esc)
-  \titem cephstore6245 weight 7.000 (esc)
-  \titem cephstore6336 weight 7.000 (esc)
-  \titem cephstore6338 weight 7.000 (esc)
-  \titem cephstore6339 weight 7.000 (esc)
-  \titem cephstore6340 weight 7.000 (esc)
-  \titem cephstore6343 weight 7.000 (esc)
-  \titem cephstore6230 weight 7.000 (esc)
-  \titem cephstore6231 weight 7.000 (esc)
-  \titem cephstore6232 weight 7.000 (esc)
-  \titem cephstore6233 weight 7.000 (esc)
-  \titem cephstore6234 weight 7.000 (esc)
-  \titem cephstore6235 weight 7.000 (esc)
+  \titem stonestore6236 weight 7.000 (esc)
+  \titem stonestore6237 weight 7.000 (esc)
+  \titem stonestore6239 weight 7.000 (esc)
+  \titem stonestore6241 weight 7.000 (esc)
+  \titem stonestore6243 weight 7.000 (esc)
+  \titem stonestore6245 weight 7.000 (esc)
+  \titem stonestore6336 weight 7.000 (esc)
+  \titem stonestore6338 weight 7.000 (esc)
+  \titem stonestore6339 weight 7.000 (esc)
+  \titem stonestore6340 weight 7.000 (esc)
+  \titem stonestore6343 weight 7.000 (esc)
+  \titem stonestore6230 weight 7.000 (esc)
+  \titem stonestore6231 weight 7.000 (esc)
+  \titem stonestore6232 weight 7.000 (esc)
+  \titem stonestore6233 weight 7.000 (esc)
+  \titem stonestore6234 weight 7.000 (esc)
+  \titem stonestore6235 weight 7.000 (esc)
   }
   root default {
   \tid -1\t\t# do not change unnecessarily (esc)
@@ -803,7 +803,7 @@
   max_osd 239
   
 
-  $ osdmaptool --clobber --create-from-conf --with-default-pool om -c $TESTDIR/ceph.conf.withracks
+  $ osdmaptool --clobber --create-from-conf --with-default-pool om -c $TESTDIR/stone.conf.withracks
   osdmaptool: osdmap file 'om'
   osdmaptool: writing epoch 1 to om
   $ osdmaptool --print om | grep 'pool 1'

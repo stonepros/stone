@@ -83,25 +83,25 @@ Client Config Reference
 
 ``client_mount_gid``
 
-:Description: Set the group ID of CephFS mount.
+:Description: Set the group ID of StoneFS mount.
 :Type: Integer
 :Default: ``-1``
 
 ``client_mount_timeout``
 
-:Description: Set the timeout for CephFS mount in seconds.
+:Description: Set the timeout for StoneFS mount in seconds.
 :Type: Float
 :Default: ``300.0``
 
 ``client_mount_uid``
 
-:Description: Set the user ID of CephFS mount.
+:Description: Set the user ID of StoneFS mount.
 :Type: Integer
 :Default: ``-1``
 
 ``client_mountpoint``
 
-:Description: Directory to mount on the CephFS file system. An alternative to the ``-r`` option of the ``ceph-fuse`` command.
+:Description: Directory to mount on the StoneFS file system. An alternative to the ``-r`` option of the ``ceph-fuse`` command.
 :Type: String
 :Default: ``"/"``
 
@@ -255,7 +255,7 @@ Developer Options
 
 ``client_trace``
 
-:Description: The path to the trace file for all file operations. The output is designed to be used by the Ceph `synthetic client <../../man/8/ceph-syn>`_.
+:Description: The path to the trace file for all file operations. The output is designed to be used by the Stone `synthetic client <../../man/8/ceph-syn>`_.
 :Type: String
 :Default: ``""`` (disabled)
 

@@ -18,7 +18,7 @@ system_access_key="1234567890"
 system_secret="pencil"
 
 # bring up first cluster
-x $(start_ceph_cluster c1) -n
+x $(start_stone_cluster c1) -n
 
 # create realm, zonegroup, zone, start rgw
 init_first_zone c1 $realm_name $zg ${zg}-1 8001 $system_access_key $system_secret
@@ -32,7 +32,7 @@ echo realm_status=$output
 
 i=2
 while [ $i -le $num_clusters ]; do
-  x $(start_ceph_cluster c$i) -n
+  x $(start_stone_cluster c$i) -n
 
   # create new zone, start rgw
   init_zone_in_existing_zg c$i $realm_name $zg ${zg}-${i} 8001 $((8000+$i)) $zone_port $system_access_key $system_secret

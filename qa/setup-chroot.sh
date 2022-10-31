@@ -8,7 +8,7 @@ die() {
 usage()
 {
         cat << EOF
-$0: sets up a chroot environment for building the ceph server
+$0: sets up a chroot environment for building the stone server
 usage:
 -h                      Show this message
 
@@ -16,7 +16,7 @@ usage:
                         example: -r /images/sepia/
 
 -s [src_dir]            location of the directory with the source code
-                        example: -s ./src/ceph
+                        example: -s ./src/stone
 EOF
 }
 

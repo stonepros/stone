@@ -2,7 +2,7 @@
 Application best practices for distributed file systems
 =======================================================
 
-CephFS is POSIX compatible, and therefore should work with any existing
+StoneFS is POSIX compatible, and therefore should work with any existing
 applications that expect a POSIX file system.  However, because it is a
 network file system (unlike e.g. XFS) and it is highly consistent (unlike
 e.g. NFS), there are some consequences that application authors may
@@ -41,14 +41,14 @@ Very large directories
 ----------------------
 
 Do you really need that 10,000,000 file directory?  While directory
-fragmentation enables CephFS to handle it, it is always going to be
+fragmentation enables StoneFS to handle it, it is always going to be
 less efficient than splitting your files into more modest-sized directories.
 
 Even standard userspace tools can become quite slow when operating on very
 large directories. For example, the default behaviour of ``ls``
 is to give an alphabetically ordered result, but ``readdir`` system
 calls do not give an ordered result (this is true in general, not just
-with CephFS).  So when you ``ls`` on a million file directory, it is
+with StoneFS).  So when you ``ls`` on a million file directory, it is
 loading a list of a million names into memory, sorting the list, then writing
 it out to the display.
 
@@ -57,7 +57,7 @@ Hard links
 
 Hard links have an intrinsic cost in terms of the internal housekeeping
 that a file system has to do to keep two references to the same data.  In
-CephFS there is a particular performance cost, because with normal files
+StoneFS there is a particular performance cost, because with normal files
 the inode is embedded in the directory (i.e. there is no extra fetch of
 the inode after looking up the path).
 
@@ -76,7 +76,7 @@ expect equivalent performance when you move to a much larger number of files.
 Do you need a file system?
 --------------------------
 
-Remember that Ceph also includes an object storage interface.  If your
+Remember that Stone also includes an object storage interface.  If your
 application needs to store huge flat collections of files where you just
 read and write whole files at once, then you might well be better off
 using the :ref:`Object Gateway <object-gateway>`

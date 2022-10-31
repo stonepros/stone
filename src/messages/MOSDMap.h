@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,7 +18,7 @@
 
 #include "msg/Message.h"
 #include "osd/OSDMap.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 
 class MOSDMap final : public Message {
 private:
@@ -28,8 +28,8 @@ private:
 public:
   uuid_d fsid;
   uint64_t encode_features = 0;
-  std::map<epoch_t, ceph::buffer::list> maps;
-  std::map<epoch_t, ceph::buffer::list> incremental_maps;
+  std::map<epoch_t, stone::buffer::list> maps;
+  std::map<epoch_t, stone::buffer::list> incremental_maps;
   epoch_t oldest_map =0, newest_map = 0;
 
   epoch_t get_first() const {
@@ -68,7 +68,7 @@ private:
 public:
   // marshalling
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(fsid, p);
     decode(incremental_maps, p);
@@ -87,7 +87,7 @@ public:
     }
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     header.version = HEAD_VERSION;
     header.compat_version = COMPAT_VERSION;
     encode(fsid, payload);
@@ -160,7 +160,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

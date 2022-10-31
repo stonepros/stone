@@ -2,17 +2,17 @@
  Snapshots
 ===========
 
-.. index:: Ceph Block Device; snapshots
+.. index:: Stone Block Device; snapshots
 
 A snapshot is a read-only logical copy of an image at a particular point in
-time: a checkpoint. One of the advanced features of Ceph block devices is
+time: a checkpoint. One of the advanced features of Stone block devices is
 that you can create snapshots of images to retain point-in-time state history.
-Ceph also supports snapshot layering, which allows you to clone images (e.g., a
-VM image) quickly and easily. Ceph block device snapshots are managed using the
+Stone also supports snapshot layering, which allows you to clone images (e.g., a
+VM image) quickly and easily. Stone block device snapshots are managed using the
 ``rbd``  command and multiple higher level interfaces, including `QEMU`_,
 `libvirt`_, `OpenStack`_ and `CloudStack`_.
 
-.. important:: To use RBD snapshots, you must have a running Ceph cluster.
+.. important:: To use RBD snapshots, you must have a running Stone cluster.
 
 .. note:: Because RBD does not know about any filesystem within an image
           (volume), snapshots are not `crash-consistent` unless they are
@@ -36,7 +36,7 @@ VM image) quickly and easily. Ceph block device snapshots are managed using the
            +------------+         +-------------+
 
 
-Cephx Notes
+Stonex Notes
 ===========
 
 When `cephx`_ authentication is enabled (it is by default), you must specify a
@@ -121,7 +121,7 @@ For example::
 	rbd snap rm rbd/foo@snapname
 
 
-.. note:: Ceph OSDs delete data asynchronously, so deleting a snapshot 
+.. note:: Stone OSDs delete data asynchronously, so deleting a snapshot 
    doesn't immediately free up the underlying OSDs' capacity.
 
 Purge Snapshots
@@ -137,13 +137,13 @@ For example::
 	rbd snap purge rbd/foo
 
 
-.. index:: Ceph Block Device; snapshot layering
+.. index:: Stone Block Device; snapshot layering
 
 Layering
 ========
 
-Ceph supports the ability to create many copy-on-write (COW) clones of a block
-device snapshot. Snapshot layering enables Ceph block device clients to create
+Stone supports the ability to create many copy-on-write (COW) clones of a block
+device snapshot. Snapshot layering enables Stone block device clients to create
 images very quickly. For example, you might create a block device image with a
 Linux VM written to it; then, snapshot the image, protect the snapshot, and
 create as many copy-on-write clones as you like. A snapshot is read-only, 
@@ -163,27 +163,27 @@ clones rapidly.
            
                Parent                        Child
 
-.. note:: The terms "parent" and "child" refer to a Ceph block device snapshot (parent),
+.. note:: The terms "parent" and "child" refer to a Stone block device snapshot (parent),
    and the corresponding image cloned from the snapshot (child). These terms are
    important for the command line usage below.
    
 Each cloned image (child) stores a reference to its parent image, which enables
 the cloned image to open the parent snapshot and read it.   
 
-A COW clone of a snapshot behaves exactly like any other Ceph block device
+A COW clone of a snapshot behaves exactly like any other Stone block device
 image. You can read to, write from, clone, and resize cloned images. There are
 no special restrictions with cloned images. However, the copy-on-write clone of
 a snapshot depends on the snapshot, so you **MUST** protect the snapshot before
 you clone it. The following diagram depicts the process.
 
-.. note:: Ceph only supports cloning of RBD format 2 images (i.e., created with
+.. note:: Stone only supports cloning of RBD format 2 images (i.e., created with
    ``rbd create --image-format 2``).  The kernel client supports cloned images
    beginning with the 3.10 release.
 
 Getting Started with Layering
 -----------------------------
 
-Ceph block device layering is a simple process. You must have an image. You must
+Stone block device layering is a simple process. You must have an image. You must
 create a snapshot of the image. You must protect the snapshot. Once you have 
 performed these steps, you can begin cloning the snapshot.
 

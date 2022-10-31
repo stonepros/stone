@@ -675,7 +675,7 @@ STONE_RBD_API int rbd_aio_open_by_id(rados_ioctx_t io, const char *id,
  * Open an image in read-only mode.
  *
  * This is intended for use by clients that cannot write to a block
- * device due to cephx restrictions. There will be no watch
+ * device due to stonex restrictions. There will be no watch
  * established on the header object, since a watch is a write. This
  * means the metadata reported about this image (parents, snapshots,
  * size, etc.) may become stale. This should not be used for

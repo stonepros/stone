@@ -12,7 +12,7 @@
 #include "include/random.h"
 #include "common/RefCountedObj.h"
 #include "common/RWLock.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/Timer.h"
 #include "rgw_common.h"
 #include "cls/rgw/cls_rgw_types.h"
@@ -82,7 +82,7 @@ static inline void get_obj_bucket_and_oid_loc(const rgw_obj& obj, string& oid, s
   }
 }
 
-int rgw_policy_from_attrset(const DoutPrefixProvider *dpp, CephContext *cct, map<string, bufferlist>& attrset, RGWAccessControlPolicy *policy);
+int rgw_policy_from_attrset(const DoutPrefixProvider *dpp, StoneContext *cct, map<string, bufferlist>& attrset, RGWAccessControlPolicy *policy);
 
 struct RGWOLHInfo {
   rgw_obj target;
@@ -109,7 +109,7 @@ struct RGWOLHInfo {
 WRITE_CLASS_ENCODER(RGWOLHInfo)
 
 struct RGWOLHPendingInfo {
-  ceph::real_time time;
+  stone::real_time time;
 
   RGWOLHPendingInfo() {}
 
@@ -130,9 +130,9 @@ struct RGWOLHPendingInfo {
 WRITE_CLASS_ENCODER(RGWOLHPendingInfo)
 
 struct RGWUsageBatch {
-  map<ceph::real_time, rgw_usage_log_entry> m;
+  map<stone::real_time, rgw_usage_log_entry> m;
 
-  void insert(ceph::real_time& t, rgw_usage_log_entry& entry, bool *account) {
+  void insert(stone::real_time& t, rgw_usage_log_entry& entry, bool *account) {
     bool exists = m.find(t) != m.end();
     *account = !exists;
     m[t].aggregate(entry);
@@ -160,7 +160,7 @@ struct RGWObjState {
   bool exists{false};
   uint64_t size{0}; //< size of raw object
   uint64_t accounted_size{0}; //< size before compression, encryption
-  ceph::real_time mtime;
+  stone::real_time mtime;
   uint64_t epoch{0};
   bufferlist obj_tag;
   bufferlist tail_tag;
@@ -201,7 +201,7 @@ class RGWFetchObjFilter {
 public:
   virtual ~RGWFetchObjFilter() {}
 
-  virtual int filter(CephContext *cct,
+  virtual int filter(StoneContext *cct,
                      const rgw_obj_key& source_key,
                      const RGWBucketInfo& dest_bucket_info,
                      std::optional<rgw_placement_rule> dest_placement_rule,
@@ -216,7 +216,7 @@ protected:
 public:
   RGWFetchObjFilter_Default() {}
 
-  int filter(CephContext *cct,
+  int filter(StoneContext *cct,
              const rgw_obj_key& source_key,
              const RGWBucketInfo& dest_bucket_info,
              std::optional<rgw_placement_rule> dest_placement_rule,
@@ -227,7 +227,7 @@ public:
 
 class RGWObjectCtx {
   rgw::sal::RGWRadosStore *store;
-  ceph::shared_mutex lock = ceph::make_shared_mutex("RGWObjectCtx");
+  stone::shared_mutex lock = stone::make_shared_mutex("RGWObjectCtx");
   void *s{nullptr};
 
   std::map<rgw_obj, RGWObjState> objs_state;
@@ -256,7 +256,7 @@ struct RGWRawObjState {
   bool has_attrs{false};
   bool exists{false};
   uint64_t size{0};
-  ceph::real_time mtime;
+  stone::real_time mtime;
   uint64_t epoch{0};
   bufferlist obj_tag;
   bool has_data{false};
@@ -306,7 +306,7 @@ struct objexp_hint_entry {
   string bucket_name;
   string bucket_id;
   rgw_obj_key obj_key;
-  ceph::real_time exp_time;
+  stone::real_time exp_time;
 
   void encode(bufferlist& bl) const {
     ENCODE_START(2, 1, bl);
@@ -424,7 +424,7 @@ class RGWRados
 		    bool mostly_omap);
 
 
-  ceph::mutex lock = ceph::make_mutex("rados_timer_lock");
+  stone::mutex lock = stone::make_mutex("rados_timer_lock");
   SafeTimer *timer;
 
   rgw::sal::RGWRadosStore *store;
@@ -446,8 +446,8 @@ class RGWRados
   boost::optional<rgw::BucketTrimManager> bucket_trim;
   RGWSyncLogTrimThread *sync_log_trimmer{nullptr};
 
-  ceph::mutex meta_sync_thread_lock = ceph::make_mutex("meta_sync_thread_lock");
-  ceph::mutex data_sync_thread_lock = ceph::make_mutex("data_sync_thread_lock");
+  stone::mutex meta_sync_thread_lock = stone::make_mutex("meta_sync_thread_lock");
+  stone::mutex data_sync_thread_lock = stone::make_mutex("data_sync_thread_lock");
 
   librados::IoCtx root_pool_ctx;      // .rgw
 
@@ -456,7 +456,7 @@ class RGWRados
 
   friend class RGWWatcher;
 
-  ceph::mutex bucket_id_lock = ceph::make_mutex("rados_bucket_id");
+  stone::mutex bucket_id_lock = stone::make_mutex("rados_bucket_id");
 
   // This field represents the number of bucket index object shards
   uint32_t bucket_index_max_shards;
@@ -481,7 +481,7 @@ class RGWRados
   void cls_obj_check_prefix_exist(librados::ObjectOperation& op, const string& prefix, bool fail_if_exist);
   void cls_obj_check_mtime(librados::ObjectOperation& op, const real_time& mtime, bool high_precision_time, RGWCheckMTimeType type);
 protected:
-  CephContext *cct;
+  StoneContext *cct;
 
   librados::Rados rados;
 
@@ -565,7 +565,7 @@ public:
   }
 
   uint64_t get_new_req_id() {
-    return ceph::util::generate_random_number<uint64_t>();
+    return stone::util::generate_random_number<uint64_t>();
   }
 
   librados::IoCtx* get_lc_pool_ctx() {
@@ -576,7 +576,7 @@ public:
     return notif_pool_ctx;
   }
 
-  void set_context(CephContext *_cct) {
+  void set_context(StoneContext *_cct) {
     cct = _cct;
   }
   void set_store(rgw::sal::RGWRadosStore *_store) {
@@ -630,9 +630,9 @@ public:
                        bool *is_truncated);
   string list_raw_objs_get_cursor(RGWListRawObjsCtx& ctx);
 
-  CephContext *ctx() { return cct; }
+  StoneContext *ctx() { return cct; }
   /** do all necessary setup of the storage device */
-  int initialize(CephContext *_cct, const DoutPrefixProvider *dpp) {
+  int initialize(StoneContext *_cct, const DoutPrefixProvider *dpp) {
     set_context(_cct);
     return initialize(dpp);
   }
@@ -682,7 +682,7 @@ public:
 		    RGWBucketInfo& bucket_info,
 		    obj_version *pobjv,
 		    obj_version *pep_objv,
-		    ceph::real_time creation_time,
+		    stone::real_time creation_time,
 		    rgw_bucket *master_bucket,
 		    uint32_t *master_num_shards,
 		    optional_yield y,
@@ -782,8 +782,8 @@ public:
       } state;
       
       struct ConditionParams {
-        const ceph::real_time *mod_ptr;
-        const ceph::real_time *unmod_ptr;
+        const stone::real_time *mod_ptr;
+        const stone::real_time *unmod_ptr;
         bool high_precision_time;
         uint32_t mod_zone_id;
         uint64_t mod_pg_ver;
@@ -796,7 +796,7 @@ public:
       } conds;
 
       struct Params {
-        ceph::real_time *lastmod;
+        stone::real_time *lastmod;
         uint64_t *obj_size;
         map<string, bufferlist> *attrs;
         rgw_obj *target_obj;
@@ -818,20 +818,20 @@ public:
       RGWRados::Object *target;
       
       struct MetaParams {
-        ceph::real_time *mtime;
+        stone::real_time *mtime;
         map<std::string, bufferlist>* rmattrs;
         const bufferlist *data;
         RGWObjManifest *manifest;
         const string *ptag;
         list<rgw_obj_index_key> *remove_objs;
-        ceph::real_time set_mtime;
+        stone::real_time set_mtime;
         rgw_user owner;
         RGWObjCategory category;
         int flags;
         const char *if_match;
         const char *if_nomatch;
         std::optional<uint64_t> olh_epoch;
-        ceph::real_time delete_at;
+        stone::real_time delete_at;
         bool canceled;
         const string *user_data;
         rgw_zone_set *zones_trace;
@@ -871,9 +871,9 @@ public:
         string marker_version_id;
         uint32_t bilog_flags;
         list<rgw_obj_index_key> *remove_objs;
-        ceph::real_time expiration_time;
-        ceph::real_time unmod_since;
-        ceph::real_time mtime; /* for setting delete marker mtime */
+        stone::real_time expiration_time;
+        stone::real_time unmod_since;
+        stone::real_time mtime; /* for setting delete marker mtime */
         bool high_precision_time;
         rgw_zone_set *zones_trace;
 	bool abortmp;
@@ -998,14 +998,14 @@ public:
 
       int prepare(const DoutPrefixProvider *dpp, RGWModifyOp, const string *write_tag, optional_yield y);
       int complete(const DoutPrefixProvider *dpp, int64_t poolid, uint64_t epoch, uint64_t size,
-                   uint64_t accounted_size, ceph::real_time& ut,
+                   uint64_t accounted_size, stone::real_time& ut,
                    const string& etag, const string& content_type,
                    const string& storage_class,
                    bufferlist *acl_bl, RGWObjCategory category,
 		   list<rgw_obj_index_key> *remove_objs, const string *user_data = nullptr, bool appendable = false);
       int complete_del(const DoutPrefixProvider *dpp, 
                        int64_t poolid, uint64_t epoch,
-                       ceph::real_time& removed_mtime, /* mtime of removed object */
+                       stone::real_time& removed_mtime, /* mtime of removed object */
                        list<rgw_obj_index_key> *remove_objs);
       int cancel(const DoutPrefixProvider *dpp);
 
@@ -1104,7 +1104,7 @@ public:
                               RGWRados::Object::Read& read_op,
                               const rgw_user& user_id,
                               rgw::sal::RGWObject* dest_obj,
-                              ceph::real_time *mtime);
+                              stone::real_time *mtime);
 
   enum AttrsMod {
     ATTRSMOD_NONE    = 0,
@@ -1143,10 +1143,10 @@ public:
 		       rgw::sal::RGWBucket* dest_bucket,
 		       rgw::sal::RGWBucket* src_bucket,
 		       std::optional<rgw_placement_rule> dest_placement,
-                       ceph::real_time *src_mtime,
-                       ceph::real_time *mtime,
-                       const ceph::real_time *mod_ptr,
-                       const ceph::real_time *unmod_ptr,
+                       stone::real_time *src_mtime,
+                       stone::real_time *mtime,
+                       const stone::real_time *mod_ptr,
+                       const stone::real_time *unmod_ptr,
                        bool high_precision_time,
                        const char *if_match,
                        const char *if_nomatch,
@@ -1155,7 +1155,7 @@ public:
                        rgw::sal::RGWAttrs& attrs,
                        RGWObjCategory category,
                        std::optional<uint64_t> olh_epoch,
-		       ceph::real_time delete_at,
+		       stone::real_time delete_at,
                        string *ptag,
                        string *petag,
                        void (*progress_cb)(off_t, void *),
@@ -1187,10 +1187,10 @@ public:
                rgw::sal::RGWBucket* dest_bucket,
                rgw::sal::RGWBucket* src_bucket,
                const rgw_placement_rule& dest_placement,
-               ceph::real_time *src_mtime,
-               ceph::real_time *mtime,
-               const ceph::real_time *mod_ptr,
-               const ceph::real_time *unmod_ptr,
+               stone::real_time *src_mtime,
+               stone::real_time *mtime,
+               const stone::real_time *mod_ptr,
+               const stone::real_time *unmod_ptr,
                bool high_precision_time,
                const char *if_match,
                const char *if_nomatch,
@@ -1199,7 +1199,7 @@ public:
                map<std::string, bufferlist>& attrs,
                RGWObjCategory category,
                uint64_t olh_epoch,
-	       ceph::real_time delete_at,
+	       stone::real_time delete_at,
                string *version_id,
                string *ptag,
                string *petag,
@@ -1213,11 +1213,11 @@ public:
                const rgw_placement_rule& dest_placement,
 	       RGWRados::Object::Read& read_op, off_t end,
                rgw::sal::RGWObject* dest_obj,
-	       ceph::real_time *mtime,
-	       ceph::real_time set_mtime,
+	       stone::real_time *mtime,
+	       stone::real_time set_mtime,
                map<string, bufferlist>& attrs,
                uint64_t olh_epoch,
-	       ceph::real_time delete_at,
+	       stone::real_time delete_at,
                string *petag,
                const DoutPrefixProvider *dpp,
                optional_yield y);
@@ -1257,13 +1257,13 @@ public:
 		 const rgw_obj& src_obj,
 		 int versioning_status, // versioning flags in enum RGWBucketFlags
 		 uint16_t bilog_flags = 0,
-		 const ceph::real_time& expiration_time = ceph::real_time(),
+		 const stone::real_time& expiration_time = stone::real_time(),
 		 rgw_zone_set *zones_trace = nullptr);
 
   int delete_raw_obj(const DoutPrefixProvider *dpp, const rgw_raw_obj& obj);
 
   /** Remove an object from the bucket index */
-  int delete_obj_index(const rgw_obj& obj, ceph::real_time mtime, const DoutPrefixProvider *dpp);
+  int delete_obj_index(const rgw_obj& obj, stone::real_time mtime, const DoutPrefixProvider *dpp);
 
   /**
    * Set an attr on an object.
@@ -1306,7 +1306,7 @@ public:
    */
 
   int raw_obj_stat(const DoutPrefixProvider *dpp, 
-                   rgw_raw_obj& obj, uint64_t *psize, ceph::real_time *pmtime, uint64_t *epoch,
+                   rgw_raw_obj& obj, uint64_t *psize, stone::real_time *pmtime, uint64_t *epoch,
                    map<string, bufferlist> *attrs, bufferlist *first_chunk,
                    RGWObjVersionTracker *objv_tracker, optional_yield y);
 
@@ -1332,7 +1332,7 @@ public:
                             const rgw_obj& obj_instance, bool delete_marker,
                             const string& op_tag, struct rgw_bucket_dir_entry_meta *meta,
                             uint64_t olh_epoch,
-                            ceph::real_time unmod_since, bool high_precision_time,
+                            stone::real_time unmod_since, bool high_precision_time,
                             rgw_zone_set *zones_trace = nullptr,
                             bool log_data_change = false);
   int bucket_index_unlink_instance(const DoutPrefixProvider *dpp, const RGWBucketInfo& bucket_info, const rgw_obj& obj_instance, const string& op_tag, const string& olh_tag, uint64_t olh_epoch, rgw_zone_set *zones_trace = nullptr);
@@ -1345,7 +1345,7 @@ public:
                     uint64_t *plast_ver, rgw_zone_set *zones_trace = nullptr);
   int update_olh(const DoutPrefixProvider *dpp, RGWObjectCtx& obj_ctx, RGWObjState *state, const RGWBucketInfo& bucket_info, const rgw_obj& obj, rgw_zone_set *zones_trace = nullptr);
   int set_olh(const DoutPrefixProvider *dpp, RGWObjectCtx& obj_ctx, const RGWBucketInfo& bucket_info, const rgw_obj& target_obj, bool delete_marker, rgw_bucket_dir_entry_meta *meta,
-              uint64_t olh_epoch, ceph::real_time unmod_since, bool high_precision_time,
+              uint64_t olh_epoch, stone::real_time unmod_since, bool high_precision_time,
               optional_yield y, rgw_zone_set *zones_trace = nullptr, bool log_data_change = false);
   int repair_olh(const DoutPrefixProvider *dpp, RGWObjState* state, const RGWBucketInfo& bucket_info,
                  const rgw_obj& obj);
@@ -1377,17 +1377,17 @@ public:
       map<RGWObjCategory, RGWStorageStats>& stats, string *max_marker, bool* syncstopped = NULL);
   int get_bucket_stats_async(const DoutPrefixProvider *dpp, RGWBucketInfo& bucket_info, int shard_id, RGWGetBucketStats_CB *cb);
 
-  int put_bucket_instance_info(RGWBucketInfo& info, bool exclusive, ceph::real_time mtime, map<string, bufferlist> *pattrs, const DoutPrefixProvider *dpp);
+  int put_bucket_instance_info(RGWBucketInfo& info, bool exclusive, stone::real_time mtime, map<string, bufferlist> *pattrs, const DoutPrefixProvider *dpp);
   /* xxx dang obj_ctx -> svc */
-  int get_bucket_instance_info(RGWSysObjectCtx& obj_ctx, const string& meta_key, RGWBucketInfo& info, ceph::real_time *pmtime, map<string, bufferlist> *pattrs, optional_yield y, const DoutPrefixProvider *dpp);
-  int get_bucket_instance_info(RGWSysObjectCtx& obj_ctx, const rgw_bucket& bucket, RGWBucketInfo& info, ceph::real_time *pmtime, map<string, bufferlist> *pattrs, optional_yield y, const DoutPrefixProvider *dpp);
+  int get_bucket_instance_info(RGWSysObjectCtx& obj_ctx, const string& meta_key, RGWBucketInfo& info, stone::real_time *pmtime, map<string, bufferlist> *pattrs, optional_yield y, const DoutPrefixProvider *dpp);
+  int get_bucket_instance_info(RGWSysObjectCtx& obj_ctx, const rgw_bucket& bucket, RGWBucketInfo& info, stone::real_time *pmtime, map<string, bufferlist> *pattrs, optional_yield y, const DoutPrefixProvider *dpp);
 
   static void make_bucket_entry_name(const string& tenant_name, const string& bucket_name, string& bucket_entry);
 
   int get_bucket_info(RGWServices *svc,
 		      const string& tenant_name, const string& bucket_name,
 		      RGWBucketInfo& info,
-		      ceph::real_time *pmtime, optional_yield y,
+		      stone::real_time *pmtime, optional_yield y,
                       const DoutPrefixProvider *dpp, map<string, bufferlist> *pattrs = NULL);
 
   // Returns 0 on successful refresh. Returns error code if there was
@@ -1395,11 +1395,11 @@ public:
   // presented in the BucketInfo structure.
   //
   int try_refresh_bucket_info(RGWBucketInfo& info,
-			      ceph::real_time *pmtime,
+			      stone::real_time *pmtime,
                               const DoutPrefixProvider *dpp,
 			      map<string, bufferlist> *pattrs = nullptr);
 
-  int put_linked_bucket_info(RGWBucketInfo& info, bool exclusive, ceph::real_time mtime, obj_version *pep_objv,
+  int put_linked_bucket_info(RGWBucketInfo& info, bool exclusive, stone::real_time mtime, obj_version *pep_objv,
 			     map<string, bufferlist> *pattrs, bool create_entry_point,
                              const DoutPrefixProvider *dpp);
 
@@ -1409,7 +1409,7 @@ public:
   int cls_obj_complete_add(BucketShard& bs, const rgw_obj& obj, string& tag, int64_t pool, uint64_t epoch, rgw_bucket_dir_entry& ent,
                            RGWObjCategory category, list<rgw_obj_index_key> *remove_objs, uint16_t bilog_flags, rgw_zone_set *zones_trace = nullptr);
   int cls_obj_complete_del(BucketShard& bs, string& tag, int64_t pool, uint64_t epoch, rgw_obj& obj,
-                           ceph::real_time& removed_mtime, list<rgw_obj_index_key> *remove_objs, uint16_t bilog_flags, rgw_zone_set *zones_trace = nullptr);
+                           stone::real_time& removed_mtime, list<rgw_obj_index_key> *remove_objs, uint16_t bilog_flags, rgw_zone_set *zones_trace = nullptr);
   int cls_obj_complete_cancel(BucketShard& bs, string& tag, rgw_obj& obj, uint16_t bilog_flags, rgw_zone_set *zones_trace = nullptr);
   int cls_obj_set_bucket_tag_timeout(const DoutPrefixProvider *dpp, RGWBucketInfo& bucket_info, uint64_t timeout);
 
@@ -1470,7 +1470,7 @@ public:
 
   int get_target_shard_id(const rgw::bucket_index_normal_layout& layout, const string& obj_key, int *shard_id);
 
-  int lock_exclusive(const rgw_pool& pool, const string& oid, ceph::timespan& duration, rgw_zone_id& zone_id, string& owner_id);
+  int lock_exclusive(const rgw_pool& pool, const string& oid, stone::timespan& duration, rgw_zone_id& zone_id, string& owner_id);
   int unlock(const rgw_pool& pool, const string& oid, rgw_zone_id& zone_id, string& owner_id);
 
   void update_gc_chain(const DoutPrefixProvider *dpp, rgw_obj& head_obj, RGWObjManifest& manifest, cls_rgw_obj_chain *chain);

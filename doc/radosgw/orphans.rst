@@ -11,7 +11,7 @@ RGW objects are removed. Normally these RADOS objects are removed
 automatically, either immediately or through a process known as
 "garbage collection". Over the history of RGW, however, there may have
 been bugs that prevented these RADOS objects from being deleted, and
-these RADOS objects may be consuming space on the Ceph cluster without
+these RADOS objects may be consuming space on the Stone cluster without
 being of any use. From the perspective of RGW, we call such RADOS
 objects "orphans".
 
@@ -54,7 +54,7 @@ to examine this file and the decide on a course of action, perhaps
 removing those RADOS objects from the designated pool.
 
 All intermediate results are stored on the local file system rather
-than the Ceph cluster. So running the 'rgw-orphan-list' tool should
+than the Stone cluster. So running the 'rgw-orphan-list' tool should
 have no appreciable impact on the amount of cluster storage consumed.
 
 WARNING: Experimental Status

@@ -4,7 +4,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -23,7 +23,7 @@
 class RGWSI_ConfigKey : public RGWServiceInstance
 {
 public:
-  RGWSI_ConfigKey(CephContext *cct) : RGWServiceInstance(cct) {}
+  RGWSI_ConfigKey(StoneContext *cct) : RGWServiceInstance(cct) {}
   virtual ~RGWSI_ConfigKey() {}
 
   virtual int get(const string& key, bool secure, bufferlist *result) = 0;

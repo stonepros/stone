@@ -1,38 +1,38 @@
 .. _mgr-dashboard:
 
-Ceph Dashboard
+Stone Dashboard
 ==============
 
 Overview
 --------
 
-The Ceph Dashboard is a built-in web-based Ceph management and monitoring
+The Stone Dashboard is a built-in web-based Stone management and monitoring
 application through which you can inspect and administer various aspects
-and resources within the cluster. It is implemented as a :ref:`ceph-manager-daemon` module.
+and resources within the cluster. It is implemented as a :ref:`stone-manager-daemon` module.
 
-The original Ceph Dashboard that was shipped with Ceph Luminous started
+The original Stone Dashboard that was shipped with Stone Luminous started
 out as a simple read-only view into run-time information and performance
-data of Ceph clusters. It used a very simple architecture to achieve the
+data of Stone clusters. It used a very simple architecture to achieve the
 original goal. However, there was growing demand for richer web-based
-management capabilities, to make it easier to administer Ceph for users that
+management capabilities, to make it easier to administer Stone for users that
 prefer a WebUI over the CLI.
 
-The new :term:`Ceph Dashboard` module adds web-based monitoring and
-administration to the Ceph Manager. The architecture and functionality of this new
+The new :term:`Stone Dashboard` module adds web-based monitoring and
+administration to the Stone Manager. The architecture and functionality of this new
 module are derived from
-and inspired by the `openATTIC Ceph management and monitoring tool
+and inspired by the `openATTIC Stone management and monitoring tool
 <https://openattic.org/>`_. Development is actively driven by the
 openATTIC team at `SUSE <https://www.suse.com/>`_, with support from
-companies including `Red Hat <https://redhat.com/>`_ and members of the Ceph
+companies including `Red Hat <https://redhat.com/>`_ and members of the Stone
 community.
 
 The dashboard module's backend code uses the CherryPy framework and implements
 a custom REST API. The WebUI implementation is based on
 Angular/TypeScript and includes both functionality from the original dashboard
 and new features originally developed for the standalone version
-of openATTIC. The Ceph Dashboard module is implemented as an
+of openATTIC. The Stone Dashboard module is implemented as an
 application that provides a graphical representation of information and statistics
-through a web server hosted by ``ceph-mgr``.
+through a web server hosted by ``stone-mgr``.
 
 Feature Overview
 ^^^^^^^^^^^^^^^^
@@ -54,16 +54,16 @@ The dashboard provides the following features:
   a built-in command, but it's also possible to import custom certificates
   signed and issued by a CA. See :ref:`dashboard-ssl-tls-support` for details.
 * **Auditing**: The dashboard backend can be configured to log all ``PUT``, ``POST``
-  and ``DELETE`` API requests in the Ceph audit log. See :ref:`dashboard-auditing`
+  and ``DELETE`` API requests in the Stone audit log. See :ref:`dashboard-auditing`
   for instructions on how to enable this feature.
 * **Internationalization (I18N)**: The language used for dashboard text can be
   selected at run-time.
 
-The Ceph Dashboard offers the following monitoring and management capabilities:
+The Stone Dashboard offers the following monitoring and management capabilities:
 
 * **Overall cluster health**: Display performance and capacity metrics as well
   as cluster status.
-* **Embedded Grafana Dashboards**: Ceph Dashboard
+* **Embedded Grafana Dashboards**: Stone Dashboard
   `Grafana`_ dashboards may be embedded in external applications and web pages
   to surface information and performance metrics gathered by
   the :ref:`mgr-prometheus` module. See
@@ -71,7 +71,7 @@ The Ceph Dashboard offers the following monitoring and management capabilities:
 * **Cluster logs**: Display the latest updates to the cluster's event and
   audit log files. Log entries can be filtered by priority, date or keyword.
 * **Hosts**: Display a list of all cluster hosts along with their
-  storage drives, which services are running, and which version of Ceph is
+  storage drives, which services are running, and which version of Stone is
   installed.
 * **Performance counters**: Display detailed service-specific statistics for
   each running service.
@@ -81,7 +81,7 @@ The Ceph Dashboard offers the following monitoring and management capabilities:
   configured and firing alerts. Show notifications for firing alerts.
 * **Configuration Editor**: Display all available configuration options,
   their descriptions, types, default and currently set values.  These may be edited as well.
-* **Pools**: List Ceph pools and their details (e.g. applications,
+* **Pools**: List Stone pools and their details (e.g. applications,
   pg-autoscaling, placement groups, replication size, EC profile, CRUSH
   rulesets, quotas etc.)
 * **OSDs**: List OSDs, their status and usage statistics as well as
@@ -97,7 +97,7 @@ The Ceph Dashboard offers the following monitoring and management capabilities:
   health predictions and SMART data. Blink enclosure LEDs.
 * **iSCSI**: List all hosts that run the TCMU runner service, display all
   images and their performance characteristics (read/write ops, traffic).
-  Create, modify, and delete iSCSI targets (via ``ceph-iscsi``). Display the
+  Create, modify, and delete iSCSI targets (via ``stone-iscsi``). Display the
   iSCSI gateway status and info about active initiators.
   See :ref:`dashboard-iscsi-management` for instructions on how to configure
   this feature.
@@ -107,21 +107,21 @@ The Ceph Dashboard offers the following monitoring and management capabilities:
   per-pool or per-image level. Create, delete and rollback snapshots of selected
   images, protect/unprotect these snapshots against modification. Copy or clone
   snapshots, flatten cloned images.
-* **RBD mirroring**: Enable and configure RBD mirroring to a remote Ceph server.
+* **RBD mirroring**: Enable and configure RBD mirroring to a remote Stone server.
   List active daemons and their status, pools and RBD images including
   sync progress.
-* **CephFS**: List active file system clients and associated pools,
-  including usage statistics. Evict active CephFS clients. Manage CephFS
-  quotas and snapshots. Browse a CephFS directory structure.
+* **StoneFS**: List active file system clients and associated pools,
+  including usage statistics. Evict active StoneFS clients. Manage StoneFS
+  quotas and snapshots. Browse a StoneFS directory structure.
 * **Object Gateway**: List all active object gateways and their performance
   counters. Display and manage (add/edit/delete) object gateway users and their
   details (e.g. quotas) as well as the users' buckets and their details (e.g.
   placement targets, owner, quotas, versioning, multi-factor authentication).
   See :ref:`dashboard-enabling-object-gateway` for configuration instructions.
-* **NFS**: Manage NFS exports of CephFS file systems and RGW S3 buckets via NFS
+* **NFS**: Manage NFS exports of StoneFS file systems and RGW S3 buckets via NFS
   Ganesha. See :ref:`dashboard-nfs-ganesha-management` for details on how to
   enable this functionality.
-* **Ceph Manager Modules**: Enable and disable Ceph Manager modules, manage
+* **Stone Manager Modules**: Enable and disable Stone Manager modules, manage
   module-specific configuration settings.
 
 Overview of the Dashboard Landing Page
@@ -142,16 +142,16 @@ Status
   links to a subpage that lists and describes each.
 * **Monitors**: Displays mons and their quorum status and
   open sessions.  Links to a subpage that lists and describes each.
-* **OSDs**: Displays object storage daemons (ceph-osds) and
+* **OSDs**: Displays object storage daemons (stone-osds) and
   the numbers of OSDs running (up), in service
   (in), and out of the cluster (out). Provides links to
   subpages providing a list of all OSDs and related management actions.
-* **Managers**: Displays active and standby Ceph Manager
-  daemons (ceph-mgr).
+* **Managers**: Displays active and standby Stone Manager
+  daemons (stone-mgr).
 * **Object Gateway**: Displays active object gateways (RGWs) and
   provides links to subpages that list all object gateway daemons.
-* **Metadata Servers**: Displays active and standby CephFS metadata
-  service daemons (ceph-mds).
+* **Metadata Servers**: Displays active and standby StoneFS metadata
+  service daemons (stone-mds).
 * **iSCSI Gateways**: Display iSCSI gateways available,
   active (up), and inactive (down). Provides a link to a subpage
   showing a list of all iSCSI Gateways.
@@ -180,14 +180,14 @@ Performance
 
 * **Client READ/Write**: Displays an overview of
   client input and output operations.
-* **Client Throughput**: Displays the data transfer rates to and from Ceph clients.
+* **Client Throughput**: Displays the data transfer rates to and from Stone clients.
 * **Recovery throughput**: Displays rate of cluster healing and balancing operations.
 * **Scrubbing**: Displays light and deep scrub status.
 
 Supported Browsers
 ^^^^^^^^^^^^^^^^^^
 
-Ceph Dashboard is primarily tested and developed using the following web
+Stone Dashboard is primarily tested and developed using the following web
 browsers:
 
 +---------------------------------------------------------------+---------------------------------------+
@@ -201,23 +201,23 @@ browsers:
 | `Firefox ESR <https://www.mozilla.org/firefox/enterprise/>`_  | latest major version                  |
 +---------------------------------------------------------------+---------------------------------------+
 
-While Ceph Dashboard might work in older browsers, we cannot guarantee compatibility and
+While Stone Dashboard might work in older browsers, we cannot guarantee compatibility and
 recommend keeping your browser up to date.
 
 Enabling
 --------
 
-If you have installed ``ceph-mgr-dashboard`` from distribution packages, the
+If you have installed ``stone-mgr-dashboard`` from distribution packages, the
 package management system should take care of installing all required
 dependencies.
 
-If you're building Ceph from source and want to start the dashboard from your
+If you're building Stone from source and want to start the dashboard from your
 development environment, please see the files ``README.rst`` and ``HACKING.rst``
 in the source directory ``src/pybind/mgr/dashboard``.
 
-Within a running Ceph cluster, the Ceph Dashboard is enabled with::
+Within a running Stone cluster, the Stone Dashboard is enabled with::
 
-  $ ceph mgr module enable dashboard
+  $ stone mgr module enable dashboard
 
 Configuration
 -------------
@@ -232,7 +232,7 @@ All HTTP connections to the dashboard are secured with SSL/TLS by default.
 To get the dashboard up and running quickly, you can generate and install a
 self-signed certificate::
 
-  $ ceph dashboard create-self-signed-cert
+  $ stone dashboard create-self-signed-cert
 
 Note that most web browsers will complain about self-signed certificates
 and require explicit confirmation before establishing a secure connection to the
@@ -244,25 +244,25 @@ certificate that is issued by a certificate authority (CA) should be used.
 For example, a key pair can be generated with a command similar to::
 
   $ openssl req -new -nodes -x509 \
-    -subj "/O=IT/CN=ceph-mgr-dashboard" -days 3650 \
+    -subj "/O=IT/CN=stone-mgr-dashboard" -days 3650 \
     -keyout dashboard.key -out dashboard.crt -extensions v3_ca
 
 The ``dashboard.crt`` file should then be signed by a CA. Once that is done, you
-can enable it for Ceph manager instances by running the following commands::
+can enable it for Stone manager instances by running the following commands::
 
-  $ ceph dashboard set-ssl-certificate -i dashboard.crt
-  $ ceph dashboard set-ssl-certificate-key -i dashboard.key
+  $ stone dashboard set-ssl-certificate -i dashboard.crt
+  $ stone dashboard set-ssl-certificate-key -i dashboard.key
 
 If unique certificates are desired for each manager instance,
 the name of the instance can be included as follows (where ``$name`` is the name
-of the ``ceph-mgr`` instance, usually the hostname)::
+of the ``stone-mgr`` instance, usually the hostname)::
 
-  $ ceph dashboard set-ssl-certificate $name -i dashboard.crt
-  $ ceph dashboard set-ssl-certificate-key $name -i dashboard.key
+  $ stone dashboard set-ssl-certificate $name -i dashboard.crt
+  $ stone dashboard set-ssl-certificate-key $name -i dashboard.key
 
 SSL can also be disabled by setting this configuration value::
 
-  $ ceph config set mgr mgr/dashboard/ssl false
+  $ stone config set mgr mgr/dashboard/ssl false
 
 This might be useful if the dashboard will be running behind a proxy which does
 not support SSL for its upstream servers or other situations where SSL is not
@@ -276,13 +276,13 @@ wanted or required. See :ref:`dashboard-proxy-configuration` for more details.
 
 .. note::
 
-  You must restart Ceph manager processes after changing the SSL
-  certificate and key. This can be accomplished by either running ``ceph mgr
+  You must restart Stone manager processes after changing the SSL
+  certificate and key. This can be accomplished by either running ``stone mgr
   fail mgr`` or by disabling and re-enabling the dashboard module (which also
   triggers the manager to respawn itself)::
 
-    $ ceph mgr module disable dashboard
-    $ ceph mgr module enable dashboard
+    $ stone mgr module disable dashboard
+    $ stone mgr module enable dashboard
 
 .. _dashboard-host-name-and-port:
 
@@ -291,7 +291,7 @@ Host Name and Port
 
 Like most web applications, the dashboard binds to a TCP/IP address and TCP port.
 
-By default, the ``ceph-mgr`` daemon hosting the dashboard (i.e., the currently
+By default, the ``stone-mgr`` daemon hosting the dashboard (i.e., the currently
 active manager) will bind to TCP port 8443 or 8080 when SSL is disabled.
 
 If no specific address has been configured, the web app will bind to ``::``,
@@ -300,23 +300,23 @@ which corresponds to all available IPv4 and IPv6 addresses.
 These defaults can be changed via the configuration key facility on a
 cluster-wide level (so they apply to all manager instances) as follows::
 
-  $ ceph config set mgr mgr/dashboard/server_addr $IP
-  $ ceph config set mgr mgr/dashboard/server_port $PORT
-  $ ceph config set mgr mgr/dashboard/ssl_server_port $PORT
+  $ stone config set mgr mgr/dashboard/server_addr $IP
+  $ stone config set mgr mgr/dashboard/server_port $PORT
+  $ stone config set mgr mgr/dashboard/ssl_server_port $PORT
 
-Since each ``ceph-mgr`` hosts its own instance of the dashboard, it may be
+Since each ``stone-mgr`` hosts its own instance of the dashboard, it may be
 necessary to configure them separately. The IP address and port for a specific
 manager instance can be changed with the following commands::
 
-  $ ceph config set mgr mgr/dashboard/$name/server_addr $IP
-  $ ceph config set mgr mgr/dashboard/$name/server_port $PORT
-  $ ceph config set mgr mgr/dashboard/$name/ssl_server_port $PORT
+  $ stone config set mgr mgr/dashboard/$name/server_addr $IP
+  $ stone config set mgr mgr/dashboard/$name/server_port $PORT
+  $ stone config set mgr mgr/dashboard/$name/ssl_server_port $PORT
 
-Replace ``$name`` with the ID of the ceph-mgr instance hosting the dashboard.
+Replace ``$name`` with the ID of the stone-mgr instance hosting the dashboard.
 
 .. note::
 
-  The command ``ceph mgr services`` will show you all endpoints that are
+  The command ``stone mgr services`` will show you all endpoints that are
   currently configured. Look for the ``dashboard`` key to obtain the URL for
   accessing the dashboard.
 
@@ -331,7 +331,7 @@ section.
 To create a user with the administrator role you can use the following
 commands::
 
-  $ ceph dashboard ac-user-create <username> -i <file-containing-password> administrator
+  $ stone dashboard ac-user-create <username> -i <file-containing-password> administrator
 
 Account Lock-out
 ^^^^^^^^^^^^^^^^
@@ -341,8 +341,8 @@ for multiple times. It is enabled by default to prevent brute-force or dictionar
 attacks. The user can get or set the default number of lock-out attempts using
 these commands respectively::
 
-  $ ceph dashboard get-account-lockout-attempts
-  $ ceph dashboard set-account-lockout-attempts <value:int>
+  $ stone dashboard get-account-lockout-attempts
+  $ stone dashboard set-account-lockout-attempts <value:int>
 
 .. warning::
 
@@ -350,7 +350,7 @@ these commands respectively::
   However, by disabling this feature, the account is more vulnerable to brute-force or
   dictionary based attacks. This can be disabled by::
 
-    $ ceph dashboard set-account-lockout-attempts 0
+    $ stone dashboard set-account-lockout-attempts 0
 
 Enable a Locked User
 ^^^^^^^^^^^^^^^^^^^^
@@ -359,7 +359,7 @@ If a user account is disabled as a result of multiple invalid login attempts, th
 it needs to be manually enabled by the administrator. This can be done by the following
 command::
 
-  $ ceph dashboard ac-user-enable <username>
+  $ stone dashboard ac-user-enable <username>
 
 Accessing the Dashboard
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -376,30 +376,30 @@ password.
 Enabling the Object Gateway Management Frontend
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When RGW is deployed with cephadm, the RGW credentials used by the
+When RGW is deployed with stoneadm, the RGW credentials used by the
 dashboard will be automatically configured. You can also manually force the
 credentials to be set up with::
 
-  $ ceph dashboard set-rgw-credentials
+  $ stone dashboard set-rgw-credentials
 
 This will create an RGW user with uid ``dashboard`` for each realm in
 the system.
 
 If you've configured a custom 'admin' resource in your RGW admin API, you should set it here also::
 
-  $ ceph dashboard set-rgw-api-admin-resource <admin_resource>
+  $ stone dashboard set-rgw-api-admin-resource <admin_resource>
 
 If you are using a self-signed certificate in your Object Gateway setup,
 you should disable certificate verification in the dashboard to avoid refused
 connections, e.g. caused by certificates signed by unknown CA or not matching
 the host name::
 
-  $ ceph dashboard set-rgw-api-ssl-verify False
+  $ stone dashboard set-rgw-api-ssl-verify False
 
 If the Object Gateway takes too long to process requests and the dashboard runs
 into timeouts, you can set the timeout value to your needs::
 
-  $ ceph dashboard set-rest-requests-timeout <seconds>
+  $ stone dashboard set-rest-requests-timeout <seconds>
 
 The default value is 45 seconds.
 
@@ -408,31 +408,31 @@ The default value is 45 seconds.
 Enabling iSCSI Management
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The Ceph Dashboard can manage iSCSI targets using the REST API provided by the
-``rbd-target-api`` service of the :ref:`ceph-iscsi`. Please make sure that it is
+The Stone Dashboard can manage iSCSI targets using the REST API provided by the
+``rbd-target-api`` service of the :ref:`stone-iscsi`. Please make sure that it is
 installed and enabled on the iSCSI gateways.
 
 .. note::
 
-  The iSCSI management functionality of Ceph Dashboard depends on the latest
-  version 3 of the `ceph-iscsi <https://github.com/ceph/ceph-iscsi>`_ project.
+  The iSCSI management functionality of Stone Dashboard depends on the latest
+  version 3 of the `stone-iscsi <https://github.com/stone/stone-iscsi>`_ project.
   Make sure that your operating system provides the correct version, otherwise
   the dashboard will not enable the management features.
 
-If the ``ceph-iscsi`` REST API is configured in HTTPS mode and its using a self-signed
+If the ``stone-iscsi`` REST API is configured in HTTPS mode and its using a self-signed
 certificate, you need to configure the dashboard to avoid SSL certificate
-verification when accessing ceph-iscsi API.
+verification when accessing stone-iscsi API.
 
 To disable API SSL verification run the following command::
 
-  $ ceph dashboard set-iscsi-api-ssl-verification false
+  $ stone dashboard set-iscsi-api-ssl-verification false
 
 The available iSCSI gateways must be defined using the following commands::
 
-  $ ceph dashboard iscsi-gateway-list
+  $ stone dashboard iscsi-gateway-list
   $ # Gateway URL format for a new gateway: <scheme>://<username>:<password>@<host>[:port]
-  $ ceph dashboard iscsi-gateway-add -i <file-containing-gateway-url> [<gateway_name>]
-  $ ceph dashboard iscsi-gateway-rm <gateway_name>
+  $ stone dashboard iscsi-gateway-add -i <file-containing-gateway-url> [<gateway_name>]
+  $ stone dashboard iscsi-gateway-rm <gateway_name>
 
 
 .. _dashboard-grafana:
@@ -443,7 +443,7 @@ Enabling the Embedding of Grafana Dashboards
 `Grafana`_ pulls data from `Prometheus <https://prometheus.io/>`_. Although
 Grafana can use other data sources, the Grafana dashboards we provide contain
 queries that are specific to Prometheus. Our Grafana dashboards therefore
-require Prometheus as the data source. The Ceph :ref:`mgr-prometheus`
+require Prometheus as the data source. The Stone :ref:`mgr-prometheus`
 module exports its data in the Prometheus exposition format. These Grafana
 dashboards rely on metric names from the Prometheus module and `Node exporter
 <https://prometheus.io/docs/guides/node-exporter/>`_. The Node exporter is a
@@ -465,13 +465,13 @@ separate application that provides machine metrics.
   <https://prometheus.io/docs/operating/security/>` for more detailed
   information.
 
-Installation and Configuration using cephadm
+Installation and Configuration using stoneadm
 """"""""""""""""""""""""""""""""""""""""""""
 
-Grafana and Prometheus can be installed using :ref:`cephadm`. They will
-automatically be configured by ``cephadm``. Please see
-:ref:`mgr-cephadm-monitoring` documentation for more details on how to use
-``cephadm`` for installing and configuring Prometheus and Grafana.
+Grafana and Prometheus can be installed using :ref:`stoneadm`. They will
+automatically be configured by ``stoneadm``. Please see
+:ref:`mgr-stoneadm-monitoring` documentation for more details on how to use
+``stoneadm`` for installing and configuring Prometheus and Grafana.
 
 Manual Installation and Configuration
 """""""""""""""""""""""""""""""""""""
@@ -480,9 +480,9 @@ The following process describes how to configure Grafana and Prometheus
 manually. After you have installed Prometheus, Grafana, and the Node exporter
 on appropriate hosts, proceed with the following steps.
 
-#.  Enable the Ceph Exporter which comes as Ceph Manager module by running::
+#.  Enable the Stone Exporter which comes as Stone Manager module by running::
 
-      $ ceph mgr module enable prometheus
+      $ stone mgr module enable prometheus
 
     More details can be found in the documentation of the :ref:`mgr-prometheus`.
 
@@ -496,7 +496,7 @@ on appropriate hosts, proceed with the following steps.
         - job_name: 'prometheus'
           static_configs:
             - targets: ['localhost:9090']
-        - job_name: 'ceph'
+        - job_name: 'stone'
           static_configs:
             - targets: ['localhost:9283']
         - job_name: 'node-exporter'
@@ -506,20 +506,20 @@ on appropriate hosts, proceed with the following steps.
     .. note::
 
       Please note that in the above example, Prometheus is configured
-      to scrape data from itself (port 9090), the Ceph manager module
-      `prometheus` (port 9283), which exports Ceph internal data, and the Node
+      to scrape data from itself (port 9090), the Stone manager module
+      `prometheus` (port 9283), which exports Stone internal data, and the Node
       Exporter (port 9100), which provides OS and hardware metrics for each host.
 
       Depending on your configuration, you may need to change the hostname in
       or add additional configuration entries for the Node
       Exporter. It is unlikely that you will need to change the default TCP ports.
 
-      Moreover, you don't *need* to have more than one target for Ceph specific
+      Moreover, you don't *need* to have more than one target for Stone specific
       data, provided by the `prometheus` mgr module. But it is recommended to
-      configure Prometheus to scrape Ceph specific data from all existing Ceph
+      configure Prometheus to scrape Stone specific data from all existing Stone
       managers. This enables a built-in high availability mechanism, so that
       services run on a manager host will be restarted automatically on a different
-      manager host if one Ceph Manager goes down.
+      manager host if one Stone Manager goes down.
 
 #.  Add Prometheus as data source to Grafana `using the Grafana Web UI
     <https://grafana.com/docs/grafana/latest/features/datasources/add-a-data-source/>`_.
@@ -534,14 +534,14 @@ on appropriate hosts, proceed with the following steps.
     Dashboards can be added to Grafana by importing dashboard JSON files.
     Use the following command to download the JSON files::
 
-      wget https://raw.githubusercontent.com/ceph/ceph/master/monitoring/ceph-mixin/dashboards_out/<Dashboard-name>.json
+      wget https://raw.githubusercontent.com/stone/stone/master/monitoring/stone-mixin/dashboards_out/<Dashboard-name>.json
 
-    You can find various dashboard JSON files `here <https://github.com/ceph/ceph/tree/
-    master/monitoring/ceph-mixin/dashboards_out>`_ .
+    You can find various dashboard JSON files `here <https://github.com/stone/stone/tree/
+    master/monitoring/stone-mixin/dashboards_out>`_ .
 
-    For Example, for ceph-cluster overview you can use::
+    For Example, for stone-cluster overview you can use::
 
-      wget https://raw.githubusercontent.com/ceph/ceph/master/monitoring/ceph-mixin/dashboards_out/ceph-cluster.json
+      wget https://raw.githubusercontent.com/stone/stone/master/monitoring/stone-mixin/dashboards_out/stone-cluster.json
 
     You may also author your own dashboards.
 
@@ -554,7 +554,7 @@ on appropriate hosts, proceed with the following steps.
 
     In newer versions of Grafana (starting with 6.2.0-beta1) a new setting named
     ``allow_embedding`` has been introduced. This setting must be explicitly
-    set to ``true`` for the Grafana integration in Ceph Dashboard to work, as the
+    set to ``true`` for the Grafana integration in Stone Dashboard to work, as the
     default is ``false``.
 
     ::
@@ -574,18 +574,18 @@ Configuring Dashboard
 """""""""""""""""""""
 
 After you have set up Grafana and Prometheus, you will need to configure the
-connection information that the Ceph Dashboard will use to access Grafana.
+connection information that the Stone Dashboard will use to access Grafana.
 
 You need to tell the dashboard on which URL the Grafana instance is
 running/deployed::
 
-  $ ceph dashboard set-grafana-api-url <grafana-server-url>  # default: ''
+  $ stone dashboard set-grafana-api-url <grafana-server-url>  # default: ''
 
 The format of url is : `<protocol>:<IP-address>:<port>`
 
 .. note::
 
-  The Ceph Dashboard embeds Grafana dashboards via ``iframe`` HTML elements.
+  The Stone Dashboard embeds Grafana dashboards via ``iframe`` HTML elements.
   If Grafana is configured without SSL/TLS support, most browsers will block the
   embedding of insecure content if SSL support is
   enabled for the dashboard (which is the default). If you
@@ -598,44 +598,44 @@ disable certificate verification in the dashboard to avoid refused connections,
 which can be a result of certificates signed by an unknown CA or that do not
 matchn the host name::
 
-  $ ceph dashboard set-grafana-api-ssl-verify False
+  $ stone dashboard set-grafana-api-ssl-verify False
 
 You can also access Grafana directly to monitor your cluster.
 
 .. note::
 
-  Ceph Dashboard configuration information can also be unset. For example, to
+  Stone Dashboard configuration information can also be unset. For example, to
   clear the Grafana API URL we configured above::
 
-    $ ceph dashboard reset-grafana-api-url
+    $ stone dashboard reset-grafana-api-url
 
 Alternative URL for Browsers
 """"""""""""""""""""""""""""
 
-The Ceph Dashboard backend requires the Grafana URL to be able to verify the
+The Stone Dashboard backend requires the Grafana URL to be able to verify the
 existence of Grafana Dashboards before the frontend even loads them. Due to the
-nature of how Grafana is implemented in Ceph Dashboard, this means that two
+nature of how Grafana is implemented in Stone Dashboard, this means that two
 working connections are required in order to be able to see Grafana graphs in
-Ceph Dashboard:
+Stone Dashboard:
 
-- The backend (Ceph Mgr module) needs to verify the existence of the requested
+- The backend (Stone Mgr module) needs to verify the existence of the requested
   graph. If this request succeeds, it lets the frontend know that it can safely
   access Grafana.
 - The frontend then requests the Grafana graphs directly from the user's
   browser using an iframe. The Grafana instance is accessed directly without any
-  detour through Ceph Dashboard.
+  detour through Stone Dashboard.
 
 Now, it might be the case that your environment makes it difficult for the
-user's browser to directly access the URL configured in Ceph Dashboard. To solve
+user's browser to directly access the URL configured in Stone Dashboard. To solve
 this issue, a separate URL can be configured which will solely be used to tell
 the frontend (the user's browser) which URL it should use to access Grafana.
 This setting won't ever be changed automatically, unlike the GRAFANA_API_URL
-which is set by :ref:`cephadm` (only if cephadm is used to deploy monitoring
+which is set by :ref:`stoneadm` (only if stoneadm is used to deploy monitoring
 services).
 
 To change the URL that is returned to the frontend issue the following command::
 
-  $ ceph dashboard set-grafana-frontend-api-url <grafana-server-url>
+  $ stone dashboard set-grafana-frontend-api-url <grafana-server-url>
 
 If no value is set for that option, it will simply fall back to the value of the
 GRAFANA_API_URL option. If set, it will instruct the browser to use this URL to
@@ -646,7 +646,7 @@ access Grafana.
 Enabling Single Sign-On (SSO)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The Ceph Dashboard supports external authentication of users via the
+The Stone Dashboard supports external authentication of users via the
 `SAML 2.0 <https://en.wikipedia.org/wiki/SAML_2.0>`_ protocol. You need to
 first create user accounts and associate them with desired roles, as
 authorization is performed by the Dashboard. However, the authentication
@@ -654,30 +654,30 @@ process can be performed by an existing Identity Provider (IdP).
 
 .. note::
 
-  Ceph Dashboard SSO support relies on onelogin's
+  Stone Dashboard SSO support relies on onelogin's
   `python-saml <https://pypi.org/project/python-saml/>`_ library.
   Please ensure that this library is installed on your system, either by using
   your distribution's package management or via Python's `pip` installer.
 
-To configure SSO on Ceph Dashboard, you should use the following command::
+To configure SSO on Stone Dashboard, you should use the following command::
 
-  $ ceph dashboard sso setup saml2 <ceph_dashboard_base_url> <idp_metadata> {<idp_username_attribute>} {<idp_entity_id>} {<sp_x_509_cert>} {<sp_private_key>}
+  $ stone dashboard sso setup saml2 <stone_dashboard_base_url> <idp_metadata> {<idp_username_attribute>} {<idp_entity_id>} {<sp_x_509_cert>} {<sp_private_key>}
 
 Parameters:
 
-* **<ceph_dashboard_base_url>**: Base URL where Ceph Dashboard is accessible (e.g., `https://cephdashboard.local`)
+* **<stone_dashboard_base_url>**: Base URL where Stone Dashboard is accessible (e.g., `https://stonedashboard.local`)
 * **<idp_metadata>**: URL to remote (`http://`, `https://`) or local (`file://`) path or content of the IdP metadata XML (e.g., `https://myidp/metadata`, `file:///home/myuser/metadata.xml`).
 * **<idp_username_attribute>** *(optional)*: Attribute that should be used to get the username from the authentication response. Defaults to `uid`.
 * **<idp_entity_id>** *(optional)*: Use this when more than one entity id exists on the IdP metadata.
-* **<sp_x_509_cert> / <sp_private_key>** *(optional)*: File path of the certificate that should be used by Ceph Dashboard (Service Provider) for signing and encryption.
+* **<sp_x_509_cert> / <sp_private_key>** *(optional)*: File path of the certificate that should be used by Stone Dashboard (Service Provider) for signing and encryption.
 
 .. note::
 
-  The issuer value of SAML requests will follow this pattern:  **<ceph_dashboard_base_url>**/auth/saml2/metadata
+  The issuer value of SAML requests will follow this pattern:  **<stone_dashboard_base_url>**/auth/saml2/metadata
 
 To display the current SAML 2.0 configuration, use the following command::
 
-  $ ceph dashboard sso show saml2
+  $ stone dashboard sso show saml2
 
 .. note::
 
@@ -685,15 +685,15 @@ To display the current SAML 2.0 configuration, use the following command::
 
 To disable SSO::
 
-  $ ceph dashboard sso disable
+  $ stone dashboard sso disable
 
 To check if SSO is enabled::
 
-  $ ceph dashboard sso status
+  $ stone dashboard sso status
 
 To enable SSO::
 
-  $ ceph dashboard sso enable saml2
+  $ stone dashboard sso enable saml2
 
 .. _dashboard-alerting:
 
@@ -732,10 +732,10 @@ in order to manage silences.
   configuration. This should look like::
 
     route:
-      receiver: 'ceph-dashboard'
+      receiver: 'stone-dashboard'
     ...
     receivers:
-      - name: 'ceph-dashboard'
+      - name: 'stone-dashboard'
         webhook_configs:
         - url: '<url-to-dashboard>/api/prometheus_receiver'
 
@@ -770,11 +770,11 @@ in order to manage silences.
 
   To use it, specify the host and port of the Alertmanager server::
 
-    $ ceph dashboard set-alertmanager-api-host <alertmanager-host:port>  # default: ''
+    $ stone dashboard set-alertmanager-api-host <alertmanager-host:port>  # default: ''
 
   For example::
 
-    $ ceph dashboard set-alertmanager-api-host 'http://localhost:9093'
+    $ stone dashboard set-alertmanager-api-host 'http://localhost:9093'
 
   To be able to see all configured alerts, you will need to configure the URL to
   the Prometheus API. Using this API, the UI will also help you in verifying
@@ -782,11 +782,11 @@ in order to manage silences.
 
   ::
 
-    $ ceph dashboard set-prometheus-api-host <prometheus-host:port>  # default: ''
+    $ stone dashboard set-prometheus-api-host <prometheus-host:port>  # default: ''
 
   For example::
 
-    $ ceph dashboard set-prometheus-api-host 'http://localhost:9090'
+    $ stone dashboard set-prometheus-api-host 'http://localhost:9090'
 
   After setting up the hosts, refresh your browser's dashboard window or tab.
 
@@ -803,11 +803,11 @@ an unknown CA or that do not match the host name.
 
 - For Prometheus::
 
-  $ ceph dashboard set-prometheus-api-ssl-verify False
+  $ stone dashboard set-prometheus-api-ssl-verify False
 
 - For Alertmanager::
 
-  $ ceph dashboard set-alertmanager-api-ssl-verify False
+  $ stone dashboard set-alertmanager-api-ssl-verify False
 
 .. _dashboard-user-role-management:
 
@@ -825,28 +825,28 @@ following checks:
 
 The password policy feature can be switched on or off completely::
 
-    $ ceph dashboard set-pwd-policy-enabled <true|false>
+    $ stone dashboard set-pwd-policy-enabled <true|false>
 
 The following individual checks can also be switched on or off::
 
-  $ ceph dashboard set-pwd-policy-check-length-enabled <true|false>
-  $ ceph dashboard set-pwd-policy-check-oldpwd-enabled <true|false>
-  $ ceph dashboard set-pwd-policy-check-username-enabled <true|false>
-  $ ceph dashboard set-pwd-policy-check-exclusion-list-enabled <true|false>
-  $ ceph dashboard set-pwd-policy-check-complexity-enabled <true|false>
-  $ ceph dashboard set-pwd-policy-check-sequential-chars-enabled <true|false>
-  $ ceph dashboard set-pwd-policy-check-repetitive-chars-enabled <true|false>
+  $ stone dashboard set-pwd-policy-check-length-enabled <true|false>
+  $ stone dashboard set-pwd-policy-check-oldpwd-enabled <true|false>
+  $ stone dashboard set-pwd-policy-check-username-enabled <true|false>
+  $ stone dashboard set-pwd-policy-check-exclusion-list-enabled <true|false>
+  $ stone dashboard set-pwd-policy-check-complexity-enabled <true|false>
+  $ stone dashboard set-pwd-policy-check-sequential-chars-enabled <true|false>
+  $ stone dashboard set-pwd-policy-check-repetitive-chars-enabled <true|false>
 
 Additionally the following options are available to configure password
 policy.
 
 - Minimum password length (defaults to 8)::
 
-  $ ceph dashboard set-pwd-policy-min-length <N>
+  $ stone dashboard set-pwd-policy-min-length <N>
 
 - Minimum password complexity (defaults to 10)::
 
-  $ ceph dashboard set-pwd-policy-min-complexity <N>
+  $ stone dashboard set-pwd-policy-min-complexity <N>
 
   Password complexity is calculated by classifying each character in
   the password. The complexity count starts by 0. A character is rated by
@@ -861,13 +861,13 @@ policy.
 - A list of comma separated words that are not allowed to be used in a
   password::
 
-  $ ceph dashboard set-pwd-policy-exclusion-list <word>[,...]
+  $ stone dashboard set-pwd-policy-exclusion-list <word>[,...]
 
 
 User Accounts
 ^^^^^^^^^^^^^
 
-The Ceph Dashboard supports multiple user accounts. Each user account
+The Stone Dashboard supports multiple user accounts. Each user account
 consists of a username, a password (stored in encrypted form using ``bcrypt``),
 an optional name, and an optional email address.
 
@@ -875,17 +875,17 @@ If a new user is created via the Web UI, it is possible to set an option that th
 user must assign a new password when they log in for the first time.
 
 User accounts are stored in the monitors' configuration database, and are
-available to all ``ceph-mgr`` instances.
+available to all ``stone-mgr`` instances.
 
 We provide a set of CLI commands to manage user accounts:
 
 - *Show User(s)*::
 
-  $ ceph dashboard ac-user-show [<username>]
+  $ stone dashboard ac-user-show [<username>]
 
 - *Create User*::
 
-  $ ceph dashboard ac-user-create [--enabled] [--force-password] [--pwd_update_required] <username> -i <file-containing-password> [<rolename>] [<name>] [<email>] [<pwd_expiration_date>]
+  $ stone dashboard ac-user-create [--enabled] [--force-password] [--pwd_update_required] <username> -i <file-containing-password> [<rolename>] [<name>] [<email>] [<pwd_expiration_date>]
 
   To bypass password policy checks use the `force-password` option.
   Add the option `pwd_update_required` so that a newly created user has
@@ -893,30 +893,30 @@ We provide a set of CLI commands to manage user accounts:
 
 - *Delete User*::
 
-  $ ceph dashboard ac-user-delete <username>
+  $ stone dashboard ac-user-delete <username>
 
 - *Change Password*::
 
-  $ ceph dashboard ac-user-set-password [--force-password] <username> -i <file-containing-password>
+  $ stone dashboard ac-user-set-password [--force-password] <username> -i <file-containing-password>
 
 - *Change Password Hash*::
 
-  $ ceph dashboard ac-user-set-password-hash <username> -i <file-containing-password-hash>
+  $ stone dashboard ac-user-set-password-hash <username> -i <file-containing-password-hash>
 
   The hash must be a bcrypt hash and salt, e.g. ``$2b$12$Pt3Vq/rDt2y9glTPSV.VFegiLkQeIpddtkhoFetNApYmIJOY8gau2``.
   This can be used to import users from an external database.
 
 - *Modify User (name, and email)*::
 
-  $ ceph dashboard ac-user-set-info <username> <name> <email>
+  $ stone dashboard ac-user-set-info <username> <name> <email>
 
 - *Disable User*::
 
-  $ ceph dashboard ac-user-disable <username>
+  $ stone dashboard ac-user-disable <username>
 
 - *Enable User*::
 
-  $ ceph dashboard ac-user-enable <username>
+  $ stone dashboard ac-user-enable <username>
 
 User Roles and Permissions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -930,7 +930,7 @@ scopes are:
 
 - **hosts**: includes all features related to the ``Hosts`` menu
   entry.
-- **config-opt**: includes all features related to management of Ceph
+- **config-opt**: includes all features related to management of Stone
   configuration options.
 - **pool**: includes all features related to pool management.
 - **osd**: includes all features related to OSD management.
@@ -941,11 +941,11 @@ scopes are:
   management.
 - **iscsi**: includes all features related to iSCSI management.
 - **rgw**: includes all features related to RADOS Gateway (RGW) management.
-- **cephfs**: includes all features related to CephFS management.
+- **stonefs**: includes all features related to StoneFS management.
 - **nfs-ganesha**: includes all features related to NFS Ganesha management.
-- **manager**: include all features related to Ceph Manager
+- **manager**: include all features related to Stone Manager
   management.
-- **log**: include all features related to Ceph logs management.
+- **log**: include all features related to Stone logs management.
 - **grafana**: include all features related to Grafana proxy.
 - **prometheus**: include all features related to Prometheus alert management.
 - **dashboard-settings**: allows to change dashboard settings.
@@ -975,7 +975,7 @@ features related to pool management, and has full permissions for
 features related to RBD image management.
 
 The Dashboard provides a set of predefined roles that we call
-*system roles*, which can be used right away by a fresh Ceph Dashboard
+*system roles*, which can be used right away by a fresh Stone Dashboard
 installation.
 
 The list of system roles are:
@@ -989,82 +989,82 @@ The list of system roles are:
 - **cluster-manager**: allows full permissions for the *hosts*, *osd*,
   *monitor*, *manager*, and *config-opt* scopes.
 - **pool-manager**: allows full permissions for the *pool* scope.
-- **cephfs-manager**: allows full permissions for the *cephfs* scope.
+- **stonefs-manager**: allows full permissions for the *stonefs* scope.
 
 The list of available roles can be retrieved with the following command::
 
-  $ ceph dashboard ac-role-show [<rolename>]
+  $ stone dashboard ac-role-show [<rolename>]
 
 You can also use the CLI to create new roles. The available commands are the
 following:
 
 - *Create Role*::
 
-  $ ceph dashboard ac-role-create <rolename> [<description>]
+  $ stone dashboard ac-role-create <rolename> [<description>]
 
 - *Delete Role*::
 
-  $ ceph dashboard ac-role-delete <rolename>
+  $ stone dashboard ac-role-delete <rolename>
 
 - *Add Scope Permissions to Role*::
 
-  $ ceph dashboard ac-role-add-scope-perms <rolename> <scopename> <permission> [<permission>...]
+  $ stone dashboard ac-role-add-scope-perms <rolename> <scopename> <permission> [<permission>...]
 
 - *Delete Scope Permission from Role*::
 
-  $ ceph dashboard ac-role-del-scope-perms <rolename> <scopename>
+  $ stone dashboard ac-role-del-scope-perms <rolename> <scopename>
 
 To assign roles to users, the following commands are available:
 
 - *Set User Roles*::
 
-  $ ceph dashboard ac-user-set-roles <username> <rolename> [<rolename>...]
+  $ stone dashboard ac-user-set-roles <username> <rolename> [<rolename>...]
 
 - *Add Roles To User*::
 
-  $ ceph dashboard ac-user-add-roles <username> <rolename> [<rolename>...]
+  $ stone dashboard ac-user-add-roles <username> <rolename> [<rolename>...]
 
 - *Delete Roles from User*::
 
-  $ ceph dashboard ac-user-del-roles <username> <rolename> [<rolename>...]
+  $ stone dashboard ac-user-del-roles <username> <rolename> [<rolename>...]
 
 
 Example of User and Custom Role Creation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In this section we show a complete example of the commands that
-create a user account that can manage RBD images, view and create Ceph pools,
+create a user account that can manage RBD images, view and create Stone pools,
 and has read-only access to other scopes.
 
 1. *Create the user*::
 
-   $ ceph dashboard ac-user-create bob -i <file-containing-password>
+   $ stone dashboard ac-user-create bob -i <file-containing-password>
 
 2. *Create role and specify scope permissions*::
 
-   $ ceph dashboard ac-role-create rbd/pool-manager
-   $ ceph dashboard ac-role-add-scope-perms rbd/pool-manager rbd-image read create update delete
-   $ ceph dashboard ac-role-add-scope-perms rbd/pool-manager pool read create
+   $ stone dashboard ac-role-create rbd/pool-manager
+   $ stone dashboard ac-role-add-scope-perms rbd/pool-manager rbd-image read create update delete
+   $ stone dashboard ac-role-add-scope-perms rbd/pool-manager pool read create
 
 3. *Associate roles to user*::
 
-   $ ceph dashboard ac-user-set-roles bob rbd/pool-manager read-only
+   $ stone dashboard ac-user-set-roles bob rbd/pool-manager read-only
 
 .. _dashboard-proxy-configuration:
 
 Proxy Configuration
 -------------------
 
-In a Ceph cluster with multiple ``ceph-mgr`` instances, only the dashboard
-running on the currently active ``ceph-mgr`` daemon will serve incoming requests.
-Connections to the dashboard's TCP port on standby ``ceph-mgr`` instances
+In a Stone cluster with multiple ``stone-mgr`` instances, only the dashboard
+running on the currently active ``stone-mgr`` daemon will serve incoming requests.
+Connections to the dashboard's TCP port on standby ``stone-mgr`` instances
 will receive an HTTP redirect (303) to the active manager's dashboard URL.
-This enables you to point your browser to any ``ceph-mgr`` instance in
+This enables you to point your browser to any ``stone-mgr`` instance in
 order to access the dashboard.
 
 If you want to establish a fixed URL to reach the dashboard or if you don't want
 to allow direct connections to the manager nodes, you could set up a proxy that
-automatically forwards incoming requests to the active ``ceph-mgr``
+automatically forwards incoming requests to the active ``stone-mgr``
 instance.
 
 Configuring a URL Prefix
@@ -1077,7 +1077,7 @@ to use hyperlinks that include your prefix, you can set the
 
 ::
 
-  ceph config set mgr mgr/dashboard/url_prefix $PREFIX
+  stone config set mgr mgr/dashboard/url_prefix $PREFIX
 
 so you can access the dashboard at ``http://$IP:$PORT/$PREFIX/``.
 
@@ -1090,11 +1090,11 @@ internal (unresolvable) URLs are published to the frontend client. Use the
 following command to get the dashboard to respond with an HTTP error (500 by default)
 instead of redirecting to the active dashboard::
 
-  $ ceph config set mgr mgr/dashboard/standby_behaviour "error"
+  $ stone config set mgr mgr/dashboard/standby_behaviour "error"
 
 To reset the setting to default redirection, use the following command::
 
-  $ ceph config set mgr mgr/dashboard/standby_behaviour "redirect"
+  $ stone config set mgr mgr/dashboard/standby_behaviour "redirect"
 
 Configure the error status code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1102,7 +1102,7 @@ Configure the error status code
 When redirection is disabled, you may want to customize the HTTP status
 code of standby dashboards. To do so you need to run the command::
 
-  $ ceph config set mgr mgr/dashboard/standby_error_status_code 503
+  $ stone config set mgr mgr/dashboard/standby_error_status_code 503
 
 HAProxy example configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1152,11 +1152,11 @@ redirection on standby nodes.
 Auditing API Requests
 ---------------------
 
-The REST API can log PUT, POST and DELETE requests to the Ceph
+The REST API can log PUT, POST and DELETE requests to the Stone
 audit log. This feature is disabled by default, but can be enabled with the
 following command::
 
-  $ ceph dashboard set-audit-api-enabled <true|false>
+  $ stone dashboard set-audit-api-enabled <true|false>
 
 If enabled, the following parameters are logged per each request:
 
@@ -1168,11 +1168,11 @@ If enabled, the following parameters are logged per each request:
 The logging of the request payload (the arguments and their values) is enabled
 by default. Execute the following command to disable this behaviour::
 
-  $ ceph dashboard set-audit-api-log-payload <true|false>
+  $ stone dashboard set-audit-api-log-payload <true|false>
 
 A log entry may look like this::
 
-  2018-10-22 15:27:01.302514 mgr.x [INF] [DASHBOARD] from='https://[::ffff:127.0.0.1]:37022' path='/api/rgw/user/klaus' method='PUT' user='admin' params='{"max_buckets": "1000", "display_name": "Klaus Mustermann", "uid": "klaus", "suspended": "0", "email": "klaus.mustermann@ceph.com"}'
+  2018-10-22 15:27:01.302514 mgr.x [INF] [DASHBOARD] from='https://[::ffff:127.0.0.1]:37022' path='/api/rgw/user/klaus' method='PUT' user='admin' params='{"max_buckets": "1000", "display_name": "Klaus Mustermann", "uid": "klaus", "suspended": "0", "email": "klaus.mustermann@stone.com"}'
 
 .. _dashboard-nfs-ganesha-management:
 
@@ -1185,7 +1185,7 @@ NFS clusters and NFS exports. For more information check :ref:`mgr-nfs`.
 Plug-ins
 --------
 
-Plug-ins extend the functionality of the Ceph Dashboard in a modular
+Plug-ins extend the functionality of the Stone Dashboard in a modular
 and loosely coupled fashion.
 
 .. _Grafana: https://grafana.com/
@@ -1201,16 +1201,16 @@ Troubleshooting the Dashboard
 Locating the Dashboard
 ^^^^^^^^^^^^^^^^^^^^^^
 
-If you are unsure of the location of the Ceph Dashboard, run the following command::
+If you are unsure of the location of the Stone Dashboard, run the following command::
 
-    $ ceph mgr services | jq .dashboard
+    $ stone mgr services | jq .dashboard
     "https://host:port"
 
-The command returns the URL where the Ceph Dashboard is located: ``https://<host>:<port>/``
+The command returns the URL where the Stone Dashboard is located: ``https://<host>:<port>/``
 
 .. note::
 
-    Many Ceph tools return results in JSON format. We suggest that
+    Many Stone tools return results in JSON format. We suggest that
     you install the `jq <https://stedolan.github.io/jq>`_ command-line
     utility to faciliate working with JSON data.
 
@@ -1218,14 +1218,14 @@ The command returns the URL where the Ceph Dashboard is located: ``https://<host
 Accessing the Dashboard
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-If you are unable to access the Ceph Dashboard, run the following
+If you are unable to access the Stone Dashboard, run the following
 commands:
 
-#. Verify the Ceph Dashboard module is enabled::
+#. Verify the Stone Dashboard module is enabled::
 
-    $ ceph mgr module ls | jq .enabled_modules
+    $ stone mgr module ls | jq .enabled_modules
 
-   Ensure the Ceph Dashboard module is listed in the return value of the
+   Ensure the Stone Dashboard module is listed in the return value of the
    command. Example snipped output from the command above::
 
     [
@@ -1236,60 +1236,60 @@ commands:
 
 #. If it is not listed, activate the module with the following command::
 
-    $ ceph mgr module enable dashboard
+    $ stone mgr module enable dashboard
 
-#. Check the Ceph Dashboard and/or ``ceph-mgr`` log files for any errors.
+#. Check the Stone Dashboard and/or ``stone-mgr`` log files for any errors.
 
-   * Check if ``ceph-mgr`` log messages are written to a file by::
+   * Check if ``stone-mgr`` log messages are written to a file by::
 
-        $ ceph config get mgr log_to_file
+        $ stone config get mgr log_to_file
         true
 
-   * Get the location of the log file (it's ``/var/log/ceph/<cluster-name>-<daemon-name>.log``
+   * Get the location of the log file (it's ``/var/log/stone/<cluster-name>-<daemon-name>.log``
      by default)::
 
-        $ ceph config get mgr log_file
-        /var/log/ceph/$cluster-$name.log
+        $ stone config get mgr log_file
+        /var/log/stone/$cluster-$name.log
 
 #. Ensure the SSL/TSL support is configured properly:
 
    * Check if the SSL/TSL support is enabled::
 
-       $ ceph config get mgr mgr/dashboard/ssl
+       $ stone config get mgr mgr/dashboard/ssl
 
    * If the command returns ``true``, verify a certificate exists by::
 
-       $ ceph config-key get mgr/dashboard/crt
+       $ stone config-key get mgr/dashboard/crt
 
      and::
 
-       $ ceph config-key get mgr/dashboard/key
+       $ stone config-key get mgr/dashboard/key
 
    * If it doesn't return ``true``, run the following command to generate a self-signed
      certificate or follow the instructions outlined in
      :ref:`dashboard-ssl-tls-support`::
 
-       $ ceph dashboard create-self-signed-cert
+       $ stone dashboard create-self-signed-cert
 
 
 Trouble Logging into the Dashboard
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you are unable to log into the Ceph Dashboard and you receive the following
+If you are unable to log into the Stone Dashboard and you receive the following
 error, run through the procedural checks below:
 
 .. image:: ../images/dashboard/invalid-credentials.png
    :align: center
 
 #. Check that your user credentials are correct. If you are seeing the
-   notification message above when trying to log into the Ceph Dashboard, it
+   notification message above when trying to log into the Stone Dashboard, it
    is likely you are using the wrong credentials. Double check your username
    and password, and ensure that your keyboard's caps lock is not enabled by accident.
 
 #. If your user credentials are correct, but you are experiencing the same
    error, check that the user account exists::
 
-    $ ceph dashboard ac-user-show <username>
+    $ stone dashboard ac-user-show <username>
 
    This command returns your user data. If the user does not exist, it will
    print::
@@ -1298,13 +1298,13 @@ error, run through the procedural checks below:
 
 #. Check if the user is enabled::
 
-    $ ceph dashboard ac-user-show <username> | jq .enabled
+    $ stone dashboard ac-user-show <username> | jq .enabled
     true
 
    Check if ``enabled`` is set to ``true`` for your user. If not the user is
    not enabled, run::
 
-    $ ceph dashboard ac-user-enable <username>
+    $ stone dashboard ac-user-enable <username>
 
 Please see :ref:`dashboard-user-role-management` for more information.
 
@@ -1315,14 +1315,14 @@ A Dashboard Feature is Not Working
 When an error occurs on the backend, you will usually receive an error
 notification on the frontend. Run through the following scenarios to debug.
 
-#. Check the Ceph Dashboard and ``ceph-mgr`` logfile(s) for any errors. These can
+#. Check the Stone Dashboard and ``stone-mgr`` logfile(s) for any errors. These can
    found by searching for keywords, such as *500 Internal Server Error*,
    followed by ``traceback``. The end of a traceback contains more details about
    what exact error occurred.
 #. Check your web browser's Javascript Console for any errors.
 
 
-Ceph Dashboard Logs
+Stone Dashboard Logs
 ^^^^^^^^^^^^^^^^^^^
 
 Dashboard Debug Flag
@@ -1330,13 +1330,13 @@ Dashboard Debug Flag
 
 With this flag enabled, error traceback is included in backend responses.
 
-To enable this flag via the Ceph Dashboard, navigate from *Cluster* to *Manager
+To enable this flag via the Stone Dashboard, navigate from *Cluster* to *Manager
 modules*. Select *Dashboard module* and click the edit button. Click the
 *debug* checkbox and update.
 
 To enable it via the CLI, run the following command::
 
-    $ ceph dashboard debug enable
+    $ stone dashboard debug enable
 
 
 Setting Logging Level of Dashboard Module
@@ -1347,25 +1347,25 @@ debugging.
 
 #. Increase the logging level of manager daemons::
 
-   $ ceph tell mgr config set debug_mgr 20
+   $ stone tell mgr config set debug_mgr 20
 
-#. Adjust the logging level of the Ceph Dashboard module via the Dashboard or
+#. Adjust the logging level of the Stone Dashboard module via the Dashboard or
    CLI:
 
    * Navigate from *Cluster* to *Manager modules*. Select *Dashboard module*
      and click the edit button. Modify the ``log_level`` configuration.
    * To adjust it via the CLI, run the following command::
 
-        $ bin/ceph config set mgr mgr/dashboard/log_level debug
+        $ bin/stone config set mgr mgr/dashboard/log_level debug
 
 #.  High log levels can result in considerable log volume, which can
 easily fill up your filesystem. Set a calendar reminder for an hour, a day,
 or a week in the future to revert this temporary logging increase.  This looks
 something like this::
 
-    $ ceph config log
+    $ stone config log
     ...
     --- 11 --- 2020-11-07 11:11:11.960659 --- mgr.x/dashboard/log_level = debug ---
     ...
-    $ ceph config reset 11
+    $ stone config reset 11
 

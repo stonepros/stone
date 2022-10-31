@@ -24,17 +24,17 @@ static const std::string RGW_SSE_KMS_KMIP_SE_KV = "kv";
 /**
  * Retrieves the actual server-side encryption key from a KMS system given a
  * key ID. Currently supported KMS systems are OpenStack Barbican and HashiCorp
- * Vault, but keys can also be retrieved from Ceph configuration file (if
+ * Vault, but keys can also be retrieved from Stone configuration file (if
  * kms is set to 'local').
  *
  * \params
  * TODO
  * \return
  */
-int make_actual_key_from_kms(CephContext *cct,
+int make_actual_key_from_kms(StoneContext *cct,
                             map<string, bufferlist>& attrs,
                             std::string& actual_key);
-int reconstitute_actual_key_from_kms(CephContext *cct,
+int reconstitute_actual_key_from_kms(StoneContext *cct,
                             map<string, bufferlist>& attrs,
                             std::string& actual_key);
 

@@ -15,7 +15,7 @@ ROLE_SCHEMA = [{
     "name": (str, "Role Name"),
     "description": (str, "Role Descriptions"),
     "scopes_permissions": ({
-        "cephfs": ([str], "")
+        "stonefs": ([str], "")
     }, ""),
     "system": (bool, "")
 }]

@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 SUSE LINUX GmbH
  *
@@ -11,12 +11,12 @@
  */
 
 #include "include/compat.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 class ServiceBase {
 
 public:
-  ServiceBase(StoneeContext *cct_);
+  ServiceBase(StoneContext *cct_);
   virtual ~ServiceBase() {};
 
   static int initialize(ServiceBase *service);
@@ -36,7 +36,7 @@ protected:
   /* Invoked when the system is shutting down. */
   virtual int shutdown_hook() = 0;
 
-  StoneeContext *cct;
+  StoneContext *cct;
 
 private:
   /* A handle used when reporting the current status. */

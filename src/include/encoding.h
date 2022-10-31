@@ -28,7 +28,7 @@
 
 #include "include/unordered_map.h"
 #include "include/unordered_set.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 #include "include/int_types.h"
 
@@ -42,9 +42,9 @@
 
 #include "assert.h"
 
-using namespace ceph;
+using namespace stone;
 
-namespace ceph {
+namespace stone {
 
 /*
  * Notes on feature encoding:
@@ -80,17 +80,17 @@ inline void decode_raw(T& t, bufferlist::const_iterator &p)
 }
 
 #define WRITE_RAW_ENCODER(type)						\
-  inline void encode(const type &v, ::ceph::bufferlist& bl, uint64_t features=0) { ::ceph::encode_raw(v, bl); } \
-  inline void decode(type &v, ::ceph::bufferlist::const_iterator& p) { ::ceph::decode_raw(v, p); }
+  inline void encode(const type &v, ::stone::bufferlist& bl, uint64_t features=0) { ::stone::encode_raw(v, bl); } \
+  inline void decode(type &v, ::stone::bufferlist::const_iterator& p) { ::stone::decode_raw(v, p); }
 
 WRITE_RAW_ENCODER(__u8)
 #ifndef _CHAR_IS_SIGNED
 WRITE_RAW_ENCODER(__s8)
 #endif
 WRITE_RAW_ENCODER(char)
-WRITE_RAW_ENCODER(ceph_le64)
-WRITE_RAW_ENCODER(ceph_le32)
-WRITE_RAW_ENCODER(ceph_le16)
+WRITE_RAW_ENCODER(stone_le64)
+WRITE_RAW_ENCODER(stone_le32)
+WRITE_RAW_ENCODER(stone_le16)
 
 inline void encode(const bool &v, bufferlist& bl) {
   __u8 vv = v;
@@ -107,14 +107,14 @@ inline void decode(bool &v, bufferlist::const_iterator& p) {
 // int types
 
 #define WRITE_INTTYPE_ENCODER(type, etype)				\
-  inline void encode(type v, ::ceph::bufferlist& bl, uint64_t features=0) { \
-    ceph_##etype e;					                \
+  inline void encode(type v, ::stone::bufferlist& bl, uint64_t features=0) { \
+    stone_##etype e;					                \
     e = v;                                                              \
-    ::ceph::encode_raw(e, bl);						\
+    ::stone::encode_raw(e, bl);						\
   }									\
-  inline void decode(type &v, ::ceph::bufferlist::const_iterator& p) {	\
-    ceph_##etype e;							\
-    ::ceph::decode_raw(e, p);						\
+  inline void decode(type &v, ::stone::bufferlist::const_iterator& p) {	\
+    stone_##etype e;							\
+    ::stone::decode_raw(e, p);						\
     v = e;								\
   }
 
@@ -136,20 +136,20 @@ WRITE_INTTYPE_ENCODER(int16_t, le16)
 // on little-endian machines, but we still need to perform a byte swap
 // on big-endian machines to ensure cross-architecture compatibility.
 // To achive that, we reinterpret the values as integers first, which are
-// byte-swapped via the ceph_le types as above.  The extra conversions
+// byte-swapped via the stone_le types as above.  The extra conversions
 // are optimized away on little-endian machines by the compiler.
 #define WRITE_FLTTYPE_ENCODER(type, itype, etype)			\
   static_assert(sizeof(type) == sizeof(itype));				\
   static_assert(std::numeric_limits<type>::is_iec559,			\
 	      "floating-point type not using IEEE754 format");		\
-  inline void encode(type v, ::ceph::bufferlist& bl, uint64_t features=0) { \
-    ceph_##etype e;							\
+  inline void encode(type v, ::stone::bufferlist& bl, uint64_t features=0) { \
+    stone_##etype e;							\
     e = *reinterpret_cast<itype *>(&v);					\
-    ::ceph::encode_raw(e, bl);						\
+    ::stone::encode_raw(e, bl);						\
   }									\
-  inline void decode(type &v, ::ceph::bufferlist::const_iterator& p) {	\
-    ceph_##etype e;							\
-    ::ceph::decode_raw(e, p);						\
+  inline void decode(type &v, ::stone::bufferlist::const_iterator& p) {	\
+    stone_##etype e;							\
+    ::stone::decode_raw(e, p);						\
     *reinterpret_cast<itype *>(&v) = e;					\
   }
 
@@ -173,7 +173,7 @@ WRITE_FLTTYPE_ENCODER(double, uint64_t, le64)
     snprintf(fn, sizeof(fn), ENCODE_STRINGIFY(ENCODE_DUMP_PATH) "/%s__%d.%x", #cl, getpid(), i++); \
     int fd = ::open(fn, O_WRONLY|O_TRUNC|O_CREAT|O_CLOEXEC|O_BINARY, 0644);		\
     if (fd >= 0) {							\
-      ::ceph::bufferlist sub;						\
+      ::stone::bufferlist sub;						\
       sub.substr_of(bl, pre_off, bl.length() - pre_off);		\
       sub.write_fd(fd);							\
       ::close(fd);							\
@@ -186,24 +186,24 @@ WRITE_FLTTYPE_ENCODER(double, uint64_t, le64)
 
 
 #define WRITE_CLASS_ENCODER(cl)						\
-  inline void encode(const cl& c, ::ceph::buffer::list &bl, uint64_t features=0) { \
+  inline void encode(const cl& c, ::stone::buffer::list &bl, uint64_t features=0) { \
     ENCODE_DUMP_PRE(); c.encode(bl); ENCODE_DUMP_POST(cl); }		\
-  inline void decode(cl &c, ::ceph::bufferlist::const_iterator &p) { c.decode(p); }
+  inline void decode(cl &c, ::stone::bufferlist::const_iterator &p) { c.decode(p); }
 
 #define WRITE_CLASS_MEMBER_ENCODER(cl)					\
-  inline void encode(const cl &c, ::ceph::bufferlist &bl) const {	\
+  inline void encode(const cl &c, ::stone::bufferlist &bl) const {	\
     ENCODE_DUMP_PRE(); c.encode(bl); ENCODE_DUMP_POST(cl); }		\
-  inline void decode(cl &c, ::ceph::bufferlist::const_iterator &p) { c.decode(p); }
+  inline void decode(cl &c, ::stone::bufferlist::const_iterator &p) { c.decode(p); }
 
 #define WRITE_CLASS_ENCODER_FEATURES(cl)				\
-  inline void encode(const cl &c, ::ceph::bufferlist &bl, uint64_t features) { \
+  inline void encode(const cl &c, ::stone::bufferlist &bl, uint64_t features) { \
     ENCODE_DUMP_PRE(); c.encode(bl, features); ENCODE_DUMP_POST(cl); }	\
-  inline void decode(cl &c, ::ceph::bufferlist::const_iterator &p) { c.decode(p); }
+  inline void decode(cl &c, ::stone::bufferlist::const_iterator &p) { c.decode(p); }
 
 #define WRITE_CLASS_ENCODER_OPTIONAL_FEATURES(cl)				\
-  inline void encode(const cl &c, ::ceph::bufferlist &bl, uint64_t features = 0) { \
+  inline void encode(const cl &c, ::stone::bufferlist &bl, uint64_t features = 0) { \
     ENCODE_DUMP_PRE(); c.encode(bl, features); ENCODE_DUMP_POST(cl); }	\
-  inline void decode(cl &c, ::ceph::bufferlist::const_iterator &p) { c.decode(p); }
+  inline void decode(cl &c, ::stone::bufferlist::const_iterator &p) { c.decode(p); }
 
 
 // string
@@ -310,7 +310,7 @@ inline void decode_nohead(int len, bufferlist& s, bufferlist::const_iterator& p)
 template<typename Clock, typename Duration,
          typename std::enable_if_t<converts_to_timespec_v<Clock>>* = nullptr>
 void encode(const std::chrono::time_point<Clock, Duration>& t,
-	    ceph::bufferlist &bl) {
+	    stone::bufferlist &bl) {
   auto ts = Clock::to_timespec(t);
   // A 32 bit count of seconds causes me vast unhappiness.
   uint32_t s = ts.tv_sec;
@@ -337,7 +337,7 @@ void decode(std::chrono::time_point<Clock, Duration>& t,
 template<typename Rep, typename Period,
          typename std::enable_if_t<std::is_integral_v<Rep>>* = nullptr>
 void encode(const std::chrono::duration<Rep, Period>& d,
-	    ceph::bufferlist &bl) {
+	    stone::bufferlist &bl) {
   using namespace std::chrono;
   int32_t s = duration_cast<seconds>(d).count();
   int32_t ns = (duration_cast<nanoseconds>(d) % seconds(1)).count();
@@ -545,9 +545,9 @@ inline void encode(const unordered_map<T,U,Hash,Pred,Alloc>& m, bufferlist& bl);
 template<class T, class U, class Hash, class Pred, class Alloc>
 inline void decode(unordered_map<T,U,Hash,Pred,Alloc>& m, bufferlist::const_iterator& p);
 template<class T, class Hash, class Pred, class Alloc>
-inline void encode(const ceph::unordered_set<T,Hash,Pred,Alloc>& m, bufferlist& bl);
+inline void encode(const stone::unordered_set<T,Hash,Pred,Alloc>& m, bufferlist& bl);
 template<class T, class Hash, class Pred, class Alloc>
-inline void decode(ceph::unordered_set<T,Hash,Pred,Alloc>& m, bufferlist::const_iterator& p);
+inline void decode(stone::unordered_set<T,Hash,Pred,Alloc>& m, bufferlist::const_iterator& p);
 template<class T, class Alloc>
 inline void encode(const std::deque<T,Alloc>& ls, bufferlist& bl, uint64_t features);
 template<class T, class Alloc>
@@ -570,7 +570,7 @@ inline void decode(T &o, const bufferlist& bl)
 {
   auto p = bl.begin();
   decode(o, p);
-  ceph_assert(p.end());
+  stone_assert(p.end());
 }
 
 // boost optional
@@ -631,14 +631,14 @@ inline void decode(std::optional<T> &p, bufferlist::const_iterator &bp)
 template<typename... Ts>
 inline void encode(const std::tuple<Ts...> &t, bufferlist& bl)
 {
-  ceph::for_each(t, [&bl](const auto& e) {
+  stone::for_each(t, [&bl](const auto& e) {
       encode(e, bl);
     });
 }
 template<typename... Ts>
 inline void decode(std::tuple<Ts...> &t, bufferlist::const_iterator &bp)
 {
-  ceph::for_each(t, [&bp](auto& e) {
+  stone::for_each(t, [&bp](auto& e) {
       decode(e, bp);
     });
 }
@@ -700,7 +700,7 @@ template<class T, class Alloc, typename traits>
 inline std::enable_if_t<!traits::supported>
   encode(const std::list<T,Alloc>& ls, bufferlist& bl, uint64_t features)
 {
-  using counter_encode_t = ceph_le32;
+  using counter_encode_t = stone_le32;
   unsigned n = 0;
   auto filler = bl.append_hole(sizeof(counter_encode_t));
   for (const auto& item : ls) {
@@ -1207,7 +1207,7 @@ inline void decode(std::multimap<T,U,Comp,Alloc>& m, bufferlist::const_iterator&
   }
 }
 
-// ceph::unordered_map
+// stone::unordered_map
 template<class T, class U, class Hash, class Pred, class Alloc>
 inline void encode(const unordered_map<T,U,Hash,Pred,Alloc>& m, bufferlist& bl,
 		   uint64_t features)
@@ -1242,9 +1242,9 @@ inline void decode(unordered_map<T,U,Hash,Pred,Alloc>& m, bufferlist::const_iter
   }
 }
 
-// ceph::unordered_set
+// stone::unordered_set
 template<class T, class Hash, class Pred, class Alloc>
-inline void encode(const ceph::unordered_set<T,Hash,Pred,Alloc>& m, bufferlist& bl)
+inline void encode(const stone::unordered_set<T,Hash,Pred,Alloc>& m, bufferlist& bl)
 {
   __u32 n = (__u32)(m.size());
   encode(n, bl);
@@ -1252,7 +1252,7 @@ inline void encode(const ceph::unordered_set<T,Hash,Pred,Alloc>& m, bufferlist& 
     encode(*p, bl);
 }
 template<class T, class Hash, class Pred, class Alloc>
-inline void decode(ceph::unordered_set<T,Hash,Pred,Alloc>& m, bufferlist::const_iterator& p)
+inline void decode(stone::unordered_set<T,Hash,Pred,Alloc>& m, bufferlist::const_iterator& p)
 {
   __u32 n;
   decode(n, p);
@@ -1332,11 +1332,11 @@ decode(std::array<T, N>& v, bufferlist::const_iterator& p)
 #define ENCODE_START(v, compat, bl)			     \
   __u8 struct_v = v;                                         \
   __u8 struct_compat = compat;		                     \
-  ceph_le32 struct_len;				             \
+  stone_le32 struct_len;				             \
   auto filler = (bl).append_hole(sizeof(struct_v) +	     \
     sizeof(struct_compat) + sizeof(struct_len));	     \
   const auto starting_bl_len = (bl).length();		     \
-  using ::ceph::encode;					     \
+  using ::stone::encode;					     \
   do {
 
 /**
@@ -1373,7 +1373,7 @@ decode(std::array<T, N>& v, bufferlist::const_iterator& p)
  */
 #define DECODE_OLDEST(oldestv)						\
   if (struct_v < oldestv)						\
-    throw ::ceph::buffer::malformed_input(DECODE_ERR_OLDVERSION(__PRETTY_FUNCTION__, v, oldestv)); 
+    throw ::stone::buffer::malformed_input(DECODE_ERR_OLDVERSION(__PRETTY_FUNCTION__, v, oldestv)); 
 
 /**
  * start a decoding block
@@ -1383,32 +1383,32 @@ decode(std::array<T, N>& v, bufferlist::const_iterator& p)
  */
 #define DECODE_START(v, bl)						\
   __u8 struct_v, struct_compat;						\
-  using ::ceph::decode;							\
+  using ::stone::decode;							\
   decode(struct_v, bl);						\
   decode(struct_compat, bl);						\
   if (v < struct_compat)						\
-    throw ::ceph::buffer::malformed_input(DECODE_ERR_OLDVERSION(__PRETTY_FUNCTION__, v, struct_compat)); \
+    throw ::stone::buffer::malformed_input(DECODE_ERR_OLDVERSION(__PRETTY_FUNCTION__, v, struct_compat)); \
   __u32 struct_len;							\
   decode(struct_len, bl);						\
   if (struct_len > bl.get_remaining())					\
-    throw ::ceph::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
+    throw ::stone::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
   unsigned struct_end = bl.get_off() + struct_len;			\
   do {
 
 /* BEWARE: any change to this macro MUST be also reflected in the duplicative
  * DECODE_START_LEGACY_COMPAT_LEN! */
 #define __DECODE_START_LEGACY_COMPAT_LEN(v, compatv, lenv, skip_v, bl)	\
-  using ::ceph::decode;							\
+  using ::stone::decode;							\
   __u8 struct_v;							\
   decode(struct_v, bl);						\
   if (struct_v >= compatv) {						\
     __u8 struct_compat;							\
     decode(struct_compat, bl);					\
     if (v < struct_compat)						\
-      throw ::ceph::buffer::malformed_input(DECODE_ERR_OLDVERSION(__PRETTY_FUNCTION__, v, struct_compat)); \
+      throw ::stone::buffer::malformed_input(DECODE_ERR_OLDVERSION(__PRETTY_FUNCTION__, v, struct_compat)); \
   } else if (skip_v) {							\
     if (bl.get_remaining() < skip_v)					\
-      throw ::ceph::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
+      throw ::stone::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
     bl +=  skip_v;							\
   }									\
   unsigned struct_end = 0;						\
@@ -1416,7 +1416,7 @@ decode(std::array<T, N>& v, bufferlist::const_iterator& p)
     __u32 struct_len;							\
     decode(struct_len, bl);						\
     if (struct_len > bl.get_remaining())				\
-      throw ::ceph::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
+      throw ::stone::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
     struct_end = bl.get_off() + struct_len;				\
   }									\
   do {
@@ -1440,14 +1440,14 @@ decode(std::array<T, N>& v, bufferlist::const_iterator& p)
  * MUST be changed altogether. For the rationale behind code duplication,
  * please `git blame` and refer to the commit message. */
 #define DECODE_START_LEGACY_COMPAT_LEN(v, compatv, lenv, bl)		\
-  using ::ceph::decode;							\
+  using ::stone::decode;							\
   __u8 struct_v;							\
   decode(struct_v, bl);							\
   if (struct_v >= compatv) {						\
     __u8 struct_compat;							\
     decode(struct_compat, bl);						\
     if (v < struct_compat)						\
-      throw ::ceph::buffer::malformed_input(DECODE_ERR_OLDVERSION(	\
+      throw ::stone::buffer::malformed_input(DECODE_ERR_OLDVERSION(	\
 	__PRETTY_FUNCTION__, v, struct_compat));			\
   }									\
   unsigned struct_end = 0;						\
@@ -1455,7 +1455,7 @@ decode(std::array<T, N>& v, bufferlist::const_iterator& p)
     __u32 struct_len;							\
     decode(struct_len, bl);						\
     if (struct_len > bl.get_remaining())				\
-      throw ::ceph::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
+      throw ::stone::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
     struct_end = bl.get_off() + struct_len;				\
   }									\
   do {
@@ -1492,12 +1492,12 @@ decode(std::array<T, N>& v, bufferlist::const_iterator& p)
   } while (false);							\
   if (struct_end) {							\
     if (bl.get_off() > struct_end)					\
-      throw ::ceph::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
+      throw ::stone::buffer::malformed_input(DECODE_ERR_PAST(__PRETTY_FUNCTION__)); \
     if (bl.get_off() < struct_end)					\
       bl += struct_end - bl.get_off();					\
   }
 
-namespace ceph {
+namespace stone {
 
 /*
  * Encoders/decoders to read from current offset in a file handle and

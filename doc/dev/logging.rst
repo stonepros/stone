@@ -18,7 +18,7 @@ aspect, such as a temporary degradation of service, or an unexpected internal
 value.  For example, a metadata error that can be auto-fixed, or a slow operation.
 
 Use INFO for ordinary cluster operations that do not indicate a fault in
-Ceph.  It is especially important that INFO level messages are clearly
+Stone.  It is especially important that INFO level messages are clearly
 worded and do not cause confusion or alarm.
 
 Frequency
@@ -39,7 +39,7 @@ the number of clients or level of activity on the system, or for
 events that occur regularly in normal operation.  For example, it
 would be inappropriate to emit a INFO message about every
 new client that connects (scales with #clients), or to emit and INFO
-message about every CephFS subtree migration (occurs regularly).
+message about every StoneFS subtree migration (occurs regularly).
 
 Language and formatting
 -----------------------

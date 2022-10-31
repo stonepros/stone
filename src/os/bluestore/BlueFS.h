@@ -11,7 +11,7 @@
 #include "blk/BlockDevice.h"
 
 #include "common/RefCountedObj.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "global/global_context.h"
 #include "include/common_fwd.h"
 
@@ -92,7 +92,7 @@ struct bluefs_shared_alloc_context_t {
 
 class BlueFS {
 public:
-  CephContext* cct;
+  StoneContext* cct;
   static constexpr unsigned MAX_BDEV = 5;
   static constexpr unsigned BDEV_WAL = 0;
   static constexpr unsigned BDEV_DB = 1;
@@ -137,13 +137,13 @@ public:
         vselector_hint(nullptr)
       {}
     ~File() override {
-      ceph_assert(num_readers.load() == 0);
-      ceph_assert(num_writers.load() == 0);
-      ceph_assert(num_reading.load() == 0);
-      ceph_assert(!locked);
+      stone_assert(num_readers.load() == 0);
+      stone_assert(num_writers.load() == 0);
+      stone_assert(num_reading.load() == 0);
+      stone_assert(!locked);
     }
   };
-  using FileRef = ceph::ref_t<File>;
+  using FileRef = stone::ref_t<File>;
 
   typedef boost::intrusive::list<
       File,
@@ -161,7 +161,7 @@ public:
     FRIEND_MAKE_REF(Dir);
     Dir() = default;
   };
-  using DirRef = ceph::ref_t<Dir>;
+  using DirRef = stone::ref_t<Dir>;
 
   struct FileWriter {
     MEMPOOL_CLASS_HELPERS();
@@ -169,23 +169,23 @@ public:
     FileRef file;
     uint64_t pos = 0;       ///< start offset for buffer
   private:
-    ceph::buffer::list buffer;      ///< new data to write (at end of file)
-    ceph::buffer::list tail_block;  ///< existing partial block at end of file, if any
+    stone::buffer::list buffer;      ///< new data to write (at end of file)
+    stone::buffer::list tail_block;  ///< existing partial block at end of file, if any
   public:
     unsigned get_buffer_length() const {
       return buffer.length();
     }
-    ceph::bufferlist flush_buffer(
-      CephContext* cct,
+    stone::bufferlist flush_buffer(
+      StoneContext* cct,
       const bool partial,
       const unsigned length,
       const bluefs_super_t& super);
-    ceph::buffer::list::page_aligned_appender buffer_appender;  //< for const char* only
+    stone::buffer::list::page_aligned_appender buffer_appender;  //< for const char* only
   public:
     int writer_type = 0;    ///< WRITER_*
     int write_hint = WRITE_LIFE_NOT_SET;
 
-    ceph::mutex lock = ceph::make_mutex("BlueFS::FileWriter::lock");
+    stone::mutex lock = stone::make_mutex("BlueFS::FileWriter::lock");
     std::array<IOContext*,MAX_BDEV> iocv; ///< for each bdev
     std::array<bool, MAX_BDEV> dirty_devs;
 
@@ -210,20 +210,20 @@ public:
     // offset will remain accurate).
     void append(const char *buf, size_t len) {
       uint64_t l0 = get_buffer_length();
-      ceph_assert(l0 + len <= std::numeric_limits<unsigned>::max());
+      stone_assert(l0 + len <= std::numeric_limits<unsigned>::max());
       buffer_appender.append(buf, len);
     }
 
     // note: used internally only, for ino 1 or 0.
-    void append(ceph::buffer::list& bl) {
+    void append(stone::buffer::list& bl) {
       uint64_t l0 = get_buffer_length();
-      ceph_assert(l0 + bl.length() <= std::numeric_limits<unsigned>::max());
+      stone_assert(l0 + bl.length() <= std::numeric_limits<unsigned>::max());
       buffer.claim_append(bl);
     }
 
     void append_zero(size_t len) {
       uint64_t l0 = get_buffer_length();
-      ceph_assert(l0 + len <= std::numeric_limits<unsigned>::max());
+      stone_assert(l0 + len <= std::numeric_limits<unsigned>::max());
       buffer_appender.append_zero(len);
     }
 
@@ -236,7 +236,7 @@ public:
     MEMPOOL_CLASS_HELPERS();
 
     uint64_t bl_off = 0;    ///< prefetch buffer logical offset
-    ceph::buffer::list bl;          ///< prefetch buffer
+    stone::buffer::list bl;          ///< prefetch buffer
     uint64_t pos = 0;       ///< current logical offset
     uint64_t max_prefetch;  ///< max allowed prefetch
 
@@ -274,8 +274,8 @@ public:
     bool random;
     bool ignore_eof;        ///< used when reading our log file
 
-    ceph::shared_mutex lock {
-     ceph::make_shared_mutex(std::string(), false, false, false)
+    stone::shared_mutex lock {
+     stone::make_shared_mutex(std::string(), false, false, false)
     };
 
 
@@ -299,7 +299,7 @@ public:
   };
 
 private:
-  ceph::mutex lock = ceph::make_mutex("BlueFS::lock");
+  stone::mutex lock = stone::make_mutex("BlueFS::lock");
 
   PerfCounters *logger = nullptr;
 
@@ -324,7 +324,7 @@ private:
   FileWriter *log_writer = 0;  ///< writer for the log
   bluefs_transaction_t log_t;  ///< pending, unwritten log transaction
   bool log_flushing = false;   ///< true while flushing the log
-  ceph::condition_variable log_cond;
+  stone::condition_variable log_cond;
 
   uint64_t new_log_jump_to = 0;
   uint64_t old_log_jump_to = 0;
@@ -368,7 +368,7 @@ private:
   void _init_alloc();
   void _stop_alloc();
 
-  void _pad_bl(ceph::buffer::list& bl);  ///< pad ceph::buffer::list to block size w/ zeros
+  void _pad_bl(stone::buffer::list& bl);  ///< pad stone::buffer::list to block size w/ zeros
 
   uint64_t _get_used(unsigned id) const;
   uint64_t _get_total(unsigned id) const;
@@ -389,16 +389,16 @@ private:
   /* signal replay log to include h->file in nearest log flush */
   int _signal_dirty_to_log(FileWriter *h);
   int _flush_range(FileWriter *h, uint64_t offset, uint64_t length);
-  int _flush(FileWriter *h, bool force, std::unique_lock<ceph::mutex>& l);
+  int _flush(FileWriter *h, bool force, std::unique_lock<stone::mutex>& l);
   int _flush(FileWriter *h, bool force, bool *flushed = nullptr);
-  int _fsync(FileWriter *h, std::unique_lock<ceph::mutex>& l);
+  int _fsync(FileWriter *h, std::unique_lock<stone::mutex>& l);
 
 #ifdef HAVE_LIBAIO
   void _claim_completed_aios(FileWriter *h, std::list<aio_t> *ls);
   void wait_for_aio(FileWriter *h);  // safe to call without a lock
 #endif
 
-  int _flush_and_sync_log(std::unique_lock<ceph::mutex>& l,
+  int _flush_and_sync_log(std::unique_lock<stone::mutex>& l,
 			  uint64_t want_seq = 0,
 			  uint64_t jump_to = 0);
   uint64_t _estimate_log_size();
@@ -413,7 +413,7 @@ private:
   void _compact_log_dump_metadata(bluefs_transaction_t *t,
 				  int flags);
   void _compact_log_sync();
-  void _compact_log_async(std::unique_lock<ceph::mutex>& l);
+  void _compact_log_async(std::unique_lock<stone::mutex>& l);
 
   void _rewrite_log_and_layout_sync(bool allocate_with_fallback,
 				    int super_dev,
@@ -435,7 +435,7 @@ private:
     FileReader *h,   ///< [in] read from here
     uint64_t offset, ///< [in] offset
     size_t len,      ///< [in] this many bytes
-    ceph::buffer::list *outbl,   ///< [out] optional: reference the result here
+    stone::buffer::list *outbl,   ///< [out] optional: reference the result here
     char *out);      ///< [out] optional: or copy it here
   int64_t _read_random(
     FileReader *h,   ///< [in] read from here
@@ -468,7 +468,7 @@ private:
   }
 
 public:
-  BlueFS(CephContext* cct);
+  BlueFS(StoneContext* cct);
   ~BlueFS();
 
   // the super is always stored on bdev 0
@@ -488,12 +488,12 @@ public:
   int fsck();
 
   int device_migrate_to_new(
-    CephContext *cct,
+    StoneContext *cct,
     const std::set<int>& devs_source,
     int dev_target,
     const bluefs_layout_t& layout);
   int device_migrate_to_existing(
-    CephContext *cct,
+    StoneContext *cct,
     const std::set<int>& devs_source,
     int dev_target,
     const bluefs_layout_t& layout);
@@ -502,7 +502,7 @@ public:
   uint64_t get_total(unsigned id);
   uint64_t get_free(unsigned id);
   uint64_t get_used(unsigned id);
-  void dump_perf_counters(ceph::Formatter *f);
+  void dump_perf_counters(stone::Formatter *f);
 
   void dump_block_extents(std::ostream& out);
 
@@ -548,7 +548,7 @@ public:
   /// sync any uncommitted state to disk
   void sync_metadata(bool avoid_compact);
   /// test and compact log, if necessary
-  void _maybe_compact_log(std::unique_lock<ceph::mutex>& l);
+  void _maybe_compact_log(std::unique_lock<stone::mutex>& l);
 
   void set_volume_selector(BlueFSVolumeSelector* s) {
     vselector.reset(s);
@@ -573,7 +573,7 @@ public:
   void flush(FileWriter *h, bool force = false) {
     std::unique_lock l(lock);
     int r = _flush(h, force, l);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 
   void append_try_flush(FileWriter *h, const char* buf, size_t len) {
@@ -592,7 +592,7 @@ public:
 	flush(h, true);
 	// make sure we've made any progress with flush hence the
 	// loop doesn't iterate forever
-	ceph_assert(h->get_buffer_length() < max_size);
+	stone_assert(h->get_buffer_length() < max_size);
       }
     }
   }
@@ -607,7 +607,7 @@ public:
     return r;
   }
   int64_t read(FileReader *h, uint64_t offset, size_t len,
-	   ceph::buffer::list *outbl, char *out) {
+	   stone::buffer::list *outbl, char *out) {
     // no need to hold the global lock here; we only touch h and
     // h->file, and read vs write or delete is already protected (via
     // atomics and asserts).
@@ -651,7 +651,7 @@ private:
   // Wrappers for BlockDevice::read(...) and BlockDevice::read_random(...)
   // They are used for checking if read values are all 0, and reread if so.
   int read(uint8_t ndev, uint64_t off, uint64_t len,
-	   ceph::buffer::list *pbl, IOContext *ioc, bool buffered);
+	   stone::buffer::list *pbl, IOContext *ioc, bool buffered);
   int read_random(uint8_t ndev, uint64_t off, uint64_t len, char *buf, bool buffered);
 };
 

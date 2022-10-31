@@ -66,7 +66,7 @@ private:
   }
 
   // TODO: move into auth_meta?
-  ceph::crypto::onwire::rxtx_t session_stream_handlers;
+  stone::crypto::onwire::rxtx_t session_stream_handlers;
 
   entity_name_t peer_name;
   State state;
@@ -94,20 +94,20 @@ private:
   using ProtFuncPtr = void (ProtocolV2::*)();
   Ct<ProtocolV2> *bannerExchangeCallback;
 
-  ceph::msgr::v2::FrameAssembler tx_frame_asm;
-  ceph::msgr::v2::FrameAssembler rx_frame_asm;
+  stone::msgr::v2::FrameAssembler tx_frame_asm;
+  stone::msgr::v2::FrameAssembler rx_frame_asm;
 
-  ceph::bufferlist rx_preamble;
-  ceph::bufferlist rx_epilogue;
-  ceph::msgr::v2::segment_bls_t rx_segments_data;
-  ceph::msgr::v2::Tag next_tag;
+  stone::bufferlist rx_preamble;
+  stone::bufferlist rx_epilogue;
+  stone::msgr::v2::segment_bls_t rx_segments_data;
+  stone::msgr::v2::Tag next_tag;
   utime_t backoff;  // backoff time
   utime_t recv_stamp;
   utime_t throttle_stamp;
 
   struct {
-    ceph::bufferlist rxbuf;
-    ceph::bufferlist txbuf;
+    stone::bufferlist rxbuf;
+    stone::bufferlist txbuf;
     bool enabled {true};
   } pre_auth;
 
@@ -126,7 +126,7 @@ private:
 			F &frame);
   Ct<ProtocolV2> *write(const std::string &desc,
                         CONTINUATION_TYPE<ProtocolV2> &next,
-                        ceph::bufferlist &buffer);
+                        stone::bufferlist &buffer);
 
   template <class F>
   bool append_frame(F& frame);
@@ -152,7 +152,7 @@ private:
   Ct<ProtocolV2> *_wait_for_peer_banner();
   Ct<ProtocolV2> *_handle_peer_banner(rx_buffer_t &&buffer, int r);
   Ct<ProtocolV2> *_handle_peer_banner_payload(rx_buffer_t &&buffer, int r);
-  Ct<ProtocolV2> *handle_hello(ceph::bufferlist &payload);
+  Ct<ProtocolV2> *handle_hello(stone::bufferlist &payload);
 
   CONTINUATION_DECL(ProtocolV2, read_frame);
   CONTINUATION_DECL(ProtocolV2, finish_auth);
@@ -182,10 +182,10 @@ private:
   Ct<ProtocolV2> *throttle_bytes();
   Ct<ProtocolV2> *throttle_dispatch_queue();
 
-  Ct<ProtocolV2> *handle_keepalive2(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_keepalive2_ack(ceph::bufferlist &payload);
+  Ct<ProtocolV2> *handle_keepalive2(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_keepalive2_ack(stone::bufferlist &payload);
 
-  Ct<ProtocolV2> *handle_message_ack(ceph::bufferlist &payload);
+  Ct<ProtocolV2> *handle_message_ack(stone::bufferlist &payload);
 
 public:
   uint64_t connection_features;
@@ -217,19 +217,19 @@ private:
     return send_auth_request(empty);
   }
   Ct<ProtocolV2> *send_auth_request(std::vector<uint32_t> &allowed_methods);
-  Ct<ProtocolV2> *handle_auth_bad_method(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_auth_reply_more(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_auth_done(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_auth_signature(ceph::bufferlist &payload);
+  Ct<ProtocolV2> *handle_auth_bad_method(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_auth_reply_more(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_auth_done(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_auth_signature(stone::bufferlist &payload);
   Ct<ProtocolV2> *send_client_ident();
   Ct<ProtocolV2> *send_reconnect();
-  Ct<ProtocolV2> *handle_ident_missing_features(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_session_reset(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_session_retry(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_session_retry_global(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_wait(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_reconnect_ok(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_server_ident(ceph::bufferlist &payload);
+  Ct<ProtocolV2> *handle_ident_missing_features(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_session_reset(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_session_retry(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_session_retry_global(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_wait(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_reconnect_ok(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_server_ident(stone::bufferlist &payload);
 
   // Server Protocol
   CONTINUATION_DECL(ProtocolV2, start_server_banner_exchange);
@@ -238,13 +238,13 @@ private:
 
   Ct<ProtocolV2> *start_server_banner_exchange();
   Ct<ProtocolV2> *post_server_banner_exchange();
-  Ct<ProtocolV2> *handle_auth_request(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *handle_auth_request_more(ceph::bufferlist &payload);
-  Ct<ProtocolV2> *_handle_auth_request(ceph::bufferlist& auth_payload, bool more);
+  Ct<ProtocolV2> *handle_auth_request(stone::bufferlist &payload);
+  Ct<ProtocolV2> *handle_auth_request_more(stone::bufferlist &payload);
+  Ct<ProtocolV2> *_handle_auth_request(stone::bufferlist& auth_payload, bool more);
   Ct<ProtocolV2> *_auth_bad_method(int r);
-  Ct<ProtocolV2> *handle_client_ident(ceph::bufferlist &payload);
+  Ct<ProtocolV2> *handle_client_ident(stone::bufferlist &payload);
   Ct<ProtocolV2> *handle_ident_missing_features_write(int r);
-  Ct<ProtocolV2> *handle_reconnect(ceph::bufferlist &payload);
+  Ct<ProtocolV2> *handle_reconnect(stone::bufferlist &payload);
   Ct<ProtocolV2> *handle_existing_connection(const AsyncConnectionRef& existing);
   Ct<ProtocolV2> *reuse_connection(const AsyncConnectionRef& existing,
                                    ProtocolV2 *exproto);

@@ -7,7 +7,7 @@ import logging
 from teuthology.exceptions import ConfigError
 from teuthology.parallel import parallel
 from teuthology import misc as teuthology
-from tasks.ceph_manager import get_valgrind_args
+from tasks.stone_manager import get_valgrind_args
 
 log = logging.getLogger(__name__)
 
@@ -22,14 +22,14 @@ def task(ctx, config):
     Specify which clients to run on as a list::
 
       tasks:
-        ceph:
+        stone:
         rbd_fsx:
           clients: [client.0, client.1]
 
     You can optionally change some properties of fsx:
 
       tasks:
-        ceph:
+        stone:
         rbd_fsx:
           clients: <list of clients>
           seed: <random seed number, or 0 to use the time>
@@ -55,7 +55,7 @@ def _run_one_client(ctx, config, role):
         args.append('sudo') # rbd(-nbd) map/unmap need privileges
     args.extend([
         'adjust-ulimits',
-        'ceph-coverage',
+        'stone-coverage',
         '{tdir}/archive/coverage'.format(tdir=testdir)
     ])
 
@@ -76,7 +76,7 @@ def _run_one_client(ctx, config, role):
         raise ConfigError(msg)
 
     args.extend([
-        'ceph_test_librbd_fsx',
+        'stone_test_librbd_fsx',
         '--cluster', cluster_name,
         '--id', client_id,
         '-d', # debug output for all operations

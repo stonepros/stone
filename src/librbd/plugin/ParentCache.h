@@ -26,7 +26,7 @@ public:
 
 private:
   void handle_init_parent_cache(int r, Context* on_finish);
-  using ceph::Plugin::cct;
+  using stone::Plugin::cct;
 
 };
 

@@ -39,7 +39,7 @@ class RGWAioCompletionNotifier;
 class RGWCompletionManager : public RefCountedObject {
   friend class RGWCoroutinesManager;
 
-  CephContext *cct;
+  StoneContext *cct;
 
   struct io_completion {
     rgw_io_id io_id;
@@ -50,8 +50,8 @@ class RGWCompletionManager : public RefCountedObject {
   using NotifierRef = boost::intrusive_ptr<RGWAioCompletionNotifier>;
   set<NotifierRef> cns;
 
-  ceph::mutex lock = ceph::make_mutex("RGWCompletionManager::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("RGWCompletionManager::lock");
+  stone::condition_variable cond;
 
   SafeTimer timer;
 
@@ -65,7 +65,7 @@ protected:
   void _wakeup(void *opaque);
   void _complete(RGWAioCompletionNotifier *cn, const rgw_io_id& io_id, void *user_info);
 public:
-  explicit RGWCompletionManager(CephContext *_cct);
+  explicit RGWCompletionManager(StoneContext *_cct);
   ~RGWCompletionManager() override;
 
   void complete(RGWAioCompletionNotifier *cn, const rgw_io_id& io_id, void *user_info);
@@ -90,7 +90,7 @@ class RGWAioCompletionNotifier : public RefCountedObject {
   RGWCompletionManager *completion_mgr;
   rgw_io_id io_id;
   void *user_data;
-  ceph::mutex lock = ceph::make_mutex("RGWAioCompletionNotifier");
+  stone::mutex lock = stone::make_mutex("RGWAioCompletionNotifier");
   bool registered;
 
 public:
@@ -200,15 +200,15 @@ class RGWCoroutine : public RefCountedObject, public boost::asio::coroutine {
 #define MAX_COROUTINE_HISTORY 10
 
   struct Status {
-    CephContext *cct;
-    ceph::shared_mutex lock =
-      ceph::make_shared_mutex("RGWCoroutine::Status::lock");
+    StoneContext *cct;
+    stone::shared_mutex lock =
+      stone::make_shared_mutex("RGWCoroutine::Status::lock");
     int max_history;
 
     utime_t timestamp;
     stringstream status;
 
-    explicit Status(CephContext *_cct) : cct(_cct), max_history(MAX_COROUTINE_HISTORY) {}
+    explicit Status(StoneContext *_cct) : cct(_cct), max_history(MAX_COROUTINE_HISTORY) {}
 
     deque<StatusItem> history;
 
@@ -232,7 +232,7 @@ protected:
     }
   } drain_status;
 
-  CephContext *cct;
+  StoneContext *cct;
 
   RGWCoroutinesStack *stack;
   int retcode;
@@ -276,7 +276,7 @@ protected:
     return operate(dpp);
   }
 public:
-  RGWCoroutine(CephContext *_cct) : status(_cct), _yield_ret(false), cct(_cct), stack(NULL), retcode(0), state(RGWCoroutine_Run) {}
+  RGWCoroutine(StoneContext *_cct) : status(_cct), _yield_ret(false), cct(_cct), stack(NULL), retcode(0), state(RGWCoroutine_Run) {}
   ~RGWCoroutine() override;
 
   virtual int operate(const DoutPrefixProvider *dpp) = 0;
@@ -397,7 +397,7 @@ class RGWConsumerCR : public RGWCoroutine {
   list<T> product;
 
 public:
-  explicit RGWConsumerCR(CephContext *_cct) : RGWCoroutine(_cct) {}
+  explicit RGWConsumerCR(StoneContext *_cct) : RGWCoroutine(_cct) {}
 
   bool has_product() {
     return !product.empty();
@@ -426,7 +426,7 @@ class RGWCoroutinesStack : public RefCountedObject {
   friend class RGWCoroutine;
   friend class RGWCoroutinesManager;
 
-  CephContext *cct;
+  StoneContext *cct;
 
   int64_t id{-1};
 
@@ -467,7 +467,7 @@ protected:
   bool collect(RGWCoroutine *op, int *ret, RGWCoroutinesStack *skip_stack, uint64_t *stack_id); /* returns true if needs to be called again */
   bool collect_next(RGWCoroutine *op, int *ret, RGWCoroutinesStack **collected_stack); /* returns true if found a stack to collect */
 public:
-  RGWCoroutinesStack(CephContext *_cct, RGWCoroutinesManager *_ops_mgr, RGWCoroutine *start = NULL);
+  RGWCoroutinesStack(StoneContext *_cct, RGWCoroutinesManager *_ops_mgr, RGWCoroutine *start = NULL);
   ~RGWCoroutinesStack() override;
 
   int64_t get_id() const {
@@ -597,16 +597,16 @@ void RGWConsumerCR<T>::receive(const T& p, bool wakeup)
 }
 
 class RGWCoroutinesManagerRegistry : public RefCountedObject, public AdminSocketHook {
-  CephContext *cct;
+  StoneContext *cct;
 
   set<RGWCoroutinesManager *> managers;
-  ceph::shared_mutex lock =
-    ceph::make_shared_mutex("RGWCoroutinesRegistry::lock");
+  stone::shared_mutex lock =
+    stone::make_shared_mutex("RGWCoroutinesRegistry::lock");
 
   string admin_command;
 
 public:
-  explicit RGWCoroutinesManagerRegistry(CephContext *_cct) : cct(_cct) {}
+  explicit RGWCoroutinesManagerRegistry(StoneContext *_cct) : cct(_cct) {}
   ~RGWCoroutinesManagerRegistry() override;
 
   void add(RGWCoroutinesManager *mgr);
@@ -622,7 +622,7 @@ public:
 };
 
 class RGWCoroutinesManager {
-  CephContext *cct;
+  StoneContext *cct;
   std::atomic<bool> going_down = { false };
 
   std::atomic<int64_t> run_context_count = { 0 };
@@ -631,8 +631,8 @@ class RGWCoroutinesManager {
   std::atomic<int64_t> max_io_id = { 0 };
   std::atomic<uint64_t> max_stack_id = { 0 };
 
-  mutable ceph::shared_mutex lock =
-    ceph::make_shared_mutex("RGWCoroutinesManager::lock");
+  mutable stone::shared_mutex lock =
+    stone::make_shared_mutex("RGWCoroutinesManager::lock");
 
   RGWIOIDProvider io_id_provider;
 
@@ -648,7 +648,7 @@ protected:
 
   void put_completion_notifier(RGWAioCompletionNotifier *cn);
 public:
-  RGWCoroutinesManager(CephContext *_cct, RGWCoroutinesManagerRegistry *_cr_registry) : cct(_cct),
+  RGWCoroutinesManager(StoneContext *_cct, RGWCoroutinesManagerRegistry *_cr_registry) : cct(_cct),
                                                                                         cr_registry(_cr_registry), ops_window(RGW_ASYNC_OPS_MGR_WINDOW) {
     completion_mgr = new RGWCompletionManager(cct);
     if (cr_registry) {
@@ -725,7 +725,7 @@ class RGWSimpleCoroutine : public RGWCoroutine {
   void call_cleanup();
 
 public:
-  RGWSimpleCoroutine(CephContext *_cct) : RGWCoroutine(_cct), called_cleanup(false) {}
+  RGWSimpleCoroutine(StoneContext *_cct) : RGWCoroutine(_cct), called_cleanup(false) {}
   ~RGWSimpleCoroutine() override;
 
   virtual int init() { return 0; }

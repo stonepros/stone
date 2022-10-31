@@ -12,23 +12,23 @@ In the following I'll use the `vstart` method.
 
 ::
 
-   # ../src/vstart.sh -n --cephadm
+   # ../src/vstart.sh -n --stoneadm
 
-*Note that when you specify `--cephadm` you have to have passwordless ssh access to localhost*
+*Note that when you specify `--stoneadm` you have to have passwordless ssh access to localhost*
 
 It will add your ~/.ssh/id_rsa and ~/.ssh/id_rsa.pub to `mgr/ssh/ssh_identity_{key, pub}`
 and add your $HOSTNAME to the list of known hosts.
 
-This will also enable the cephadm mgr module and enable it as the orchestrator backend.
+This will also enable the stoneadm mgr module and enable it as the orchestrator backend.
 
 *Optional:*
 
 While the above is sufficient for most operations, you may want to add a second host to the mix.
-There is `Vagrantfile` for creating a minimal cluster in `src/pybind/mgr/cephadm/`.
+There is `Vagrantfile` for creating a minimal cluster in `src/pybind/mgr/stoneadm/`.
 
 If you wish to extend the one-node-localhost cluster to i.e. test more sophisticated OSD deployments you can follow the next steps:
 
-From within the `src/pybind/mgr/cephadm` directory.
+From within the `src/pybind/mgr/stoneadm` directory.
 
 
 1) Spawn VMs
@@ -46,12 +46,12 @@ to set the environment variables you can now create as JSON see `./vagrant.confi
 for details.
 
 If will also come with the necessary packages preinstalled as well as your ~/.ssh/id_rsa.pub key
-injected. (to users root and vagrant; the cephadm-orchestrator currently connects as root)
+injected. (to users root and vagrant; the stoneadm-orchestrator currently connects as root)
 
 
 2) Update the ssh-config
 
-The cephadm orchestrator needs to understand how to connect to the new node. Most likely the VM
+The stoneadm orchestrator needs to understand how to connect to the new node. Most likely the VM
 isn't reachable with the default settings used:
 
 ```
@@ -67,11 +67,11 @@ You want to adjust this by retrieving an adapted ssh_config from Vagrant.
    # vagrant ssh-config > ssh-config
 
 
-Now set the newly created config for Ceph.
+Now set the newly created config for Stone.
 
 ::
 
-   # ceph cephadm set-ssh-config -i <path_to_ssh_conf>
+   # stone stoneadm set-ssh-config -i <path_to_ssh_conf>
 
 
 3) Add the new host
@@ -81,7 +81,7 @@ Add the newly created host(s) to the inventory.
 ::
 
 
-   # ceph orch host add <host>
+   # stone orch host add <host>
 
 
 4) Verify the inventory
@@ -90,7 +90,7 @@ You should see the hostname in the list.
 
 ::
 
-   # ceph orch host ls
+   # stone orch host ls
 
 
 5) Verify the devices
@@ -100,7 +100,7 @@ and can be found
 
 ::
 
-   # ceph orch device ls
+   # stone orch device ls
 
 
 6) Make a snapshot of all your VMs!

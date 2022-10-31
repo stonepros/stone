@@ -55,7 +55,7 @@ Date:   Fri Aug 16 10:52:02 2013 -0700
              0> 2013-07-16 14:21:27.189060 7fdf301e9700 -1 osd/osd_types.cc: In function 'void pg_pool_t::remove_snap(snapid_t)' thread 7fdf301e9700 time 2013-07-16 14:21:27.187095
         osd/osd_types.cc: 662: FAILED assert(snaps.count(s))
 
-         ceph version 0.66-602-gcd39d8a (cd39d8a6727d81b889869e98f5869e4227b50720)
+         stone version 0.66-602-gcd39d8a (cd39d8a6727d81b889869e98f5869e4227b50720)
          1: (pg_pool_t::remove_snap(snapid_t)+0x6d) [0x7ad6dd]
          2: (OSDMonitor::prepare_command(MMonCommand*)+0x6407) [0x5c1517]
          3: (OSDMonitor::prepare_update(PaxosServiceMessage*)+0x1fb) [0x5c41ab]
@@ -181,7 +181,7 @@ commit 0964d53ef3e8e386e0a1635d2240aefad7b8e2c1
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Aug 9 18:02:32 2013 -0700
 
-    ceph-disk: fix mount options passed to move_mount
+    stone-disk: fix mount options passed to move_mount
 
     Commit 6cbe0f021f62b3ebd5f68fcc01a12fde6f08cff5 added a mount_options but
     in certain cases it may be blank.  Fill in with the defaults, just as we
@@ -216,9 +216,9 @@ commit ecaa46a13837305b9382ab319d43890729c54f1e
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Jul 23 21:56:09 2013 +0200
 
-    ceph.spec.in: obsolete ceph-libs only on the affected distro
+    stone.spec.in: obsolete stone-libs only on the affected distro
 
-    The ceph-libs package existed only on Redhat based distro,
+    The stone-libs package existed only on Redhat based distro,
     there was e.g. never such a package on SUSE. Therefore: make
     sure the 'Obsoletes' is only set on these affected distros.
 
@@ -228,7 +228,7 @@ commit 81aa68c309a6d4eaecc54f8d735efde8843fed8c
 Author: Gary Lowell <glowell@inktank.com>
 Date:   Wed Jul 3 11:28:28 2013 -0700
 
-    ceph.spec.in:  Obsolete ceph-libs
+    stone.spec.in:  Obsolete stone-libs
 
     Signed-off-by: Gary Lowell  <gary.lowell@inktank.com>
     Reviewed-by: Sage Weil <sage@inktank.com>
@@ -295,7 +295,7 @@ Date:   Fri Jul 26 13:58:46 2013 -0700
 
     osd: load all classes on startup
 
-    This avoid creating a wide window between when ceph-osd is started and
+    This avoid creating a wide window between when stone-osd is started and
     when a request arrives needing a class and it is loaded.  In particular,
     upgrading the packages in that window may cause linkage errors (if the
     class API has changed, for example).
@@ -312,7 +312,7 @@ commit 7a1d6d3e727fd8b6947c658e171bf7ec31cd7966
 Author: Sage Weil <sage@inktank.com>
 Date:   Sun Jul 28 15:42:08 2013 -0700
 
-    ceph_test_rados: print version banner on startup
+    stone_test_rados: print version banner on startup
 
     It is helpful when looking at qa run logs to see what version of the
     tester is running.
@@ -324,7 +324,7 @@ commit 86769f05ccc54bfec403bb9ea9a3a951bbcea301
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jun 13 22:08:36 2013 -0700
 
-    ceph_test_rados: add --pool <name> arg
+    stone_test_rados: add --pool <name> arg
 
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit bcfbd0a3ffae6947464d930f636c8b35d1331e9d)
@@ -333,9 +333,9 @@ commit b70a9abc5e3ae01204256f414bd7e69d083ed7c6
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jul 26 14:07:02 2013 -0700
 
-    upstart: stop ceph-create-keys when the monitor stops
+    upstart: stop stone-create-keys when the monitor stops
 
-    This avoids lingering ceph-create-keys tasks.
+    This avoids lingering stone-create-keys tasks.
 
     Backport: cuttlefish
     Signed-off-by: Sage Weil <sage@inktank.com>

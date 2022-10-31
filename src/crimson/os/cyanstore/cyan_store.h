@@ -19,7 +19,7 @@
 #include "crimson/os/cyanstore/cyan_object.h"
 #include "crimson/os/futurized_store.h"
 
-namespace ceph::os {
+namespace stone::os {
 class Transaction;
 }
 
@@ -53,7 +53,7 @@ public:
     virtual seastar::future<std::string> tail_key(){
       return seastar::make_ready_future<std::string>((++obj->omap.end())->first);
     }
-    virtual ceph::buffer::list value() {
+    virtual stone::buffer::list value() {
       return iter->second;
     }
     virtual int status() const {
@@ -80,19 +80,19 @@ public:
     CollectionRef c,
     const ghobject_t& oid) final;
 
-  read_errorator::future<ceph::bufferlist> read(
+  read_errorator::future<stone::bufferlist> read(
     CollectionRef c,
     const ghobject_t& oid,
     uint64_t offset,
     size_t len,
     uint32_t op_flags = 0) final;
-  read_errorator::future<ceph::bufferlist> readv(
+  read_errorator::future<stone::bufferlist> readv(
     CollectionRef c,
     const ghobject_t& oid,
     interval_set<uint64_t>& m,
     uint32_t op_flags = 0) final;
 
-  get_attr_errorator::future<ceph::bufferptr> get_attr(
+  get_attr_errorator::future<stone::bufferptr> get_attr(
     CollectionRef c,
     const ghobject_t& oid,
     std::string_view name) const final;
@@ -118,7 +118,7 @@ public:
     const ghobject_t& end,
     uint64_t limit) const final;
 
-  read_errorator::future<ceph::bufferlist> omap_get_header(
+  read_errorator::future<stone::bufferlist> omap_get_header(
     CollectionRef c,
     const ghobject_t& oid) final;
 
@@ -127,7 +127,7 @@ public:
   seastar::future<std::vector<coll_t>> list_collections() final;
 
   seastar::future<> do_transaction(CollectionRef ch,
-				   ceph::os::Transaction&& txn) final;
+				   stone::os::Transaction&& txn) final;
 
   seastar::future<> write_meta(const std::string& key,
 		  const std::string& value) final;
@@ -149,7 +149,7 @@ private:
   int _remove(const coll_t& cid, const ghobject_t& oid);
   int _touch(const coll_t& cid, const ghobject_t& oid);
   int _write(const coll_t& cid, const ghobject_t& oid,
-	     uint64_t offset, size_t len, const ceph::bufferlist& bl,
+	     uint64_t offset, size_t len, const stone::bufferlist& bl,
 	     uint32_t fadvise_flags);
   int _zero(const coll_t& cid, const ghobject_t& oid,
 	    uint64_t offset, size_t len);
@@ -159,11 +159,11 @@ private:
   int _omap_set_values(
     const coll_t& cid,
     const ghobject_t& oid,
-    std::map<std::string, ceph::bufferlist> &&aset);
+    std::map<std::string, stone::bufferlist> &&aset);
   int _omap_set_header(
     const coll_t& cid,
     const ghobject_t& oid,
-    const ceph::bufferlist &header);
+    const stone::bufferlist &header);
   int _omap_rmkeys(
     const coll_t& cid,
     const ghobject_t& oid,

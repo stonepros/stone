@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -63,7 +63,7 @@ class RGWMetadataLogInfoCompletion : public RefCountedObject {
 };
 
 class RGWMetadataLog {
-  CephContext *cct;
+  StoneContext *cct;
   const string prefix;
 
   struct Svc {
@@ -82,7 +82,7 @@ class RGWMetadataLog {
 
   void mark_modified(int shard_id);
 public:
-  RGWMetadataLog(CephContext *_cct,
+  RGWMetadataLog(StoneContext *_cct,
                  RGWSI_Zone *_zone_svc,
                  RGWSI_Cls *_cls_svc,
                  const std::string& period)

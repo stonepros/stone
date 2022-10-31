@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,7 +18,7 @@
 #include "include/Context.h"
 #include "include/common_fwd.h"
 #include "common/Thread.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/perf_counters.h"
 #include "common/Cond.h"
 
@@ -37,10 +37,10 @@ enum {
  * contexts to complete is thread-safe.
  */
 class Finisher {
-  StoneeContext *cct;
-  ceph::mutex finisher_lock; ///< Protects access to queues and finisher_running.
-  ceph::condition_variable finisher_cond; ///< Signaled when there is something to process.
-  ceph::condition_variable finisher_empty_cond; ///< Signaled when the finisher has nothing more to process.
+  StoneContext *cct;
+  stone::mutex finisher_lock; ///< Protects access to queues and finisher_running.
+  stone::condition_variable finisher_cond; ///< Signaled when there is something to process.
+  stone::condition_variable finisher_empty_cond; ///< Signaled when the finisher has nothing more to process.
   bool         finisher_stop; ///< Set when the finisher should stop.
   bool         finisher_running; ///< True when the finisher is currently executing contexts.
   bool	       finisher_empty_wait; ///< True mean someone wait finisher empty.
@@ -137,15 +137,15 @@ class Finisher {
 
   /// Construct an anonymous Finisher.
   /// Anonymous finishers do not log their queue length.
-  explicit Finisher(StoneeContext *cct_) :
-    cct(cct_), finisher_lock(ceph::make_mutex("Finisher::finisher_lock")),
+  explicit Finisher(StoneContext *cct_) :
+    cct(cct_), finisher_lock(stone::make_mutex("Finisher::finisher_lock")),
     finisher_stop(false), finisher_running(false), finisher_empty_wait(false),
     thread_name("fn_anonymous"), logger(0),
     finisher_thread(this) {}
 
   /// Construct a named Finisher that logs its queue length.
-  Finisher(StoneeContext *cct_, std::string name, std::string tn) :
-    cct(cct_), finisher_lock(ceph::make_mutex("Finisher::" + name)),
+  Finisher(StoneContext *cct_, std::string name, std::string tn) :
+    cct(cct_), finisher_lock(stone::make_mutex("Finisher::" + name)),
     finisher_stop(false), finisher_running(false), finisher_empty_wait(false),
     thread_name(tn), logger(0),
     finisher_thread(this) {
@@ -173,8 +173,8 @@ class C_OnFinisher : public Context {
   Finisher *fin;
 public:
   C_OnFinisher(Context *c, Finisher *f) : con(c), fin(f) {
-    ceph_assert(fin != NULL);
-    ceph_assert(con != NULL);
+    stone_assert(fin != NULL);
+    stone_assert(con != NULL);
   }
 
   ~C_OnFinisher() override {
@@ -193,12 +193,12 @@ public:
 class ContextQueue {
   std::list<Context *> q;
   std::mutex q_mutex;
-  ceph::mutex& mutex;
-  ceph::condition_variable& cond;
+  stone::mutex& mutex;
+  stone::condition_variable& cond;
   std::atomic_bool q_empty = true;
 public:
-  ContextQueue(ceph::mutex& mut,
-	       ceph::condition_variable& con)
+  ContextQueue(stone::mutex& mut,
+	       stone::condition_variable& con)
     : mutex(mut), cond(con) {}
 
   void queue(std::list<Context *>& ls) {

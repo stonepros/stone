@@ -1,6 +1,6 @@
 import os
 import sys
-from ceph_volume import terminal, exceptions
+from stone_volume import terminal, exceptions
 from functools import wraps
 
 
@@ -11,7 +11,7 @@ def needs_root(func):
     """
     @wraps(func)
     def is_root(*a, **kw):
-        if not os.getuid() == 0 and not os.environ.get('CEPH_VOLUME_SKIP_NEEDS_ROOT', False):
+        if not os.getuid() == 0 and not os.environ.get('STONE_VOLUME_SKIP_NEEDS_ROOT', False):
             raise exceptions.SuperUserError()
         return func(*a, **kw)
     return is_root
@@ -59,9 +59,9 @@ def catches(catch=None, handler=None, exit=True):
                 return f(*a, **kw)
             except catch as e:
                 import logging
-                logger = logging.getLogger('ceph_volume')
+                logger = logging.getLogger('stone_volume')
                 logger.exception('exception caught by decorator')
-                if os.environ.get('CEPH_VOLUME_DEBUG'):
+                if os.environ.get('STONE_VOLUME_DEBUG'):
                     raise
                 if handler:
                     return handler(e)

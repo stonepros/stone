@@ -27,7 +27,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(ino, payload);
     encode(rstat.rctime, payload);
     encode(rstat.rbytes, payload);
@@ -36,7 +36,7 @@ public:
     encode(quota, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(ino, p);
     decode(rstat.rctime, p);
@@ -44,11 +44,11 @@ public:
     decode(rstat.rfiles, p);
     decode(rstat.rsubdirs, p);
     decode(quota, p);
-    ceph_assert(p.end());
+    stone_assert(p.end());
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

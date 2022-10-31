@@ -15,17 +15,17 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
     # Fix port????
-    export CEPH_MON="127.0.0.1:7114" # git grep '\<7114\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON --osd_max_backfills=1 --debug_reserver=20"
+    export STONE_MON="127.0.0.1:7114" # git grep '\<7114\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON --osd_max_backfills=1 --debug_reserver=20"
     export objects=200
     export poolprefix=test
     export FORCE_PRIO="255"    # See OSD_RECOVERY_PRIORITY_FORCED
@@ -48,7 +48,7 @@ function TEST_recovery_priority() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
@@ -58,13 +58,13 @@ function TEST_recovery_priority() {
     for p in $(seq 1 $pools)
     do
       create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 2
+      stone osd pool set "${poolprefix}$p" size 2
     done
     sleep 5
 
     wait_for_clean || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     # Find 3 pools with a pg with the same primaries but second
     # replica on another osd.
@@ -85,7 +85,7 @@ function TEST_recovery_priority() {
 
     for p in $(seq 1 $pools)
     do
-      ceph pg map ${p}.0 --format=json | jq '.acting[]' > $dir/acting
+      stone pg map ${p}.0 --format=json | jq '.acting[]' > $dir/acting
       local test_osd1=$(head -1 $dir/acting)
       local test_osd2=$(tail -1 $dir/acting)
       if [ -z "$PG1" ];
@@ -125,8 +125,8 @@ function TEST_recovery_priority() {
       fi
     done
 
-    ceph osd pool set $pool2 size 1 --yes-i-really-mean-it
-    ceph osd pool set $pool3 size 1 --yes-i-really-mean-it
+    stone osd pool set $pool2 size 1 --yes-i-really-mean-it
+    stone osd pool set $pool3 size 1 --yes-i-really-mean-it
     wait_for_clean || return 1
 
     dd if=/dev/urandom of=$dir/data bs=1M count=10
@@ -142,22 +142,22 @@ function TEST_recovery_priority() {
 
     local otherosd=$(get_not_primary $pool1 obj1-p1)
 
-    ceph pg dump pgs
+    stone pg dump pgs
     ERRORS=0
 
-    ceph osd set norecover
-    ceph osd set noout
+    stone osd set norecover
+    stone osd set noout
 
     # Get a pg to want to recover and quickly force it
     # to be preempted.
-    ceph osd pool set $pool3 size 2
+    stone osd pool set $pool3 size 2
     sleep 2
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
 
     # 3. Item is in progress, adjust priority with no higher priority waiting
     for i in $(seq 1 $max_tries)
     do
-      if ! ceph pg force-recovery $PG3 2>&1 | grep -q "doesn't require recovery"; then
+      if ! stone pg force-recovery $PG3 2>&1 | grep -q "doesn't require recovery"; then
         break
       fi
       if [ "$i" = "$max_tries" ]; then
@@ -167,20 +167,20 @@ function TEST_recovery_priority() {
       sleep 2
     done
     flush_pg_stats || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
 
-    ceph osd out osd.$chk_osd1_2
+    stone osd out osd.$chk_osd1_2
     sleep 2
     flush_pg_stats || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
-    ceph pg dump pgs
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
+    stone pg dump pgs
 
-    ceph osd pool set $pool2 size 2
+    stone osd pool set $pool2 size 2
     sleep 2
     flush_pg_stats || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
     cat $dir/out
-    ceph pg dump pgs
+    stone pg dump pgs
 
     PRIO=$(cat $dir/out | jq "(.local_reservations.queues[].items[] | select(.item == \"${PG1}\")).prio")
     if [ "$PRIO" != "$NORMAL_PRIO" ];
@@ -207,7 +207,7 @@ function TEST_recovery_priority() {
     # 1. Item is queued, re-queue with new priority
     for i in $(seq 1 $max_tries)
     do
-      if ! ceph pg force-recovery $PG2 2>&1 | grep -q "doesn't require recovery"; then
+      if ! stone pg force-recovery $PG2 2>&1 | grep -q "doesn't require recovery"; then
         break
       fi
       if [ "$i" = "$max_tries" ]; then
@@ -217,7 +217,7 @@ function TEST_recovery_priority() {
       sleep 2
     done
     sleep 2
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
     cat $dir/out
     PRIO=$(cat $dir/out | jq "(.local_reservations.queues[].items[] | select(.item == \"${PG2}\")).prio")
     if [ "$PRIO" != "$FORCE_PRIO" ];
@@ -228,11 +228,11 @@ function TEST_recovery_priority() {
     flush_pg_stats || return 1
 
     # 4. Item is in progress, if higher priority items waiting prempt item
-    #ceph osd unset norecover
-    ceph pg cancel-force-recovery $PG3 || return 1
+    #stone osd unset norecover
+    stone pg cancel-force-recovery $PG3 || return 1
     sleep 2
-    #ceph osd set norecover
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
+    #stone osd set norecover
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
     cat $dir/out
     PRIO=$(cat $dir/out | jq "(.local_reservations.queues[].items[] | select(.item == \"${PG3}\")).prio")
     if [ "$PRIO" != "$NORMAL_PRIO" ];
@@ -255,16 +255,16 @@ function TEST_recovery_priority() {
       fi
     fi
 
-    ceph pg cancel-force-recovery $PG2 || return 1
+    stone pg cancel-force-recovery $PG2 || return 1
     sleep 5
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations || return 1
 
     # 2. Item is queued, re-queue and preempt because new priority higher than an in progress item
     flush_pg_stats || return 1
-    ceph pg force-recovery $PG3 || return 1
+    stone pg force-recovery $PG3 || return 1
     sleep 2
 
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/out || return 1
     cat $dir/out
     PRIO=$(cat $dir/out | jq "(.local_reservations.queues[].items[] | select(.item == \"${PG2}\")).prio")
     if [ "$PRIO" != "$NORMAL_PRIO" ];
@@ -287,14 +287,14 @@ function TEST_recovery_priority() {
       fi
     fi
 
-    ceph osd unset noout
-    ceph osd unset norecover
+    stone osd unset noout
+    stone osd unset norecover
 
-    wait_for_clean "CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations" || return 1
+    wait_for_clean "STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations" || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_pgstate_history
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_pgstate_history
 
     if [ $ERRORS != "0" ];
     then
@@ -326,7 +326,7 @@ function TEST_recovery_pool_priority() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
@@ -336,13 +336,13 @@ function TEST_recovery_pool_priority() {
     for p in $(seq 1 $pools)
     do
       create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 2
+      stone osd pool set "${poolprefix}$p" size 2
     done
     sleep 5
 
     wait_for_clean || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     # Find 2 pools with different primaries which
     # means the replica must be on another osd.
@@ -360,7 +360,7 @@ function TEST_recovery_pool_priority() {
 
     for p in $(seq 1 $pools)
     do
-      ceph pg map ${p}.0 --format=json | jq '.acting[]' > $dir/acting
+      stone pg map ${p}.0 --format=json | jq '.acting[]' > $dir/acting
       local test_osd1=$(head -1 $dir/acting)
       local test_osd2=$(tail -1 $dir/acting)
       if [ -z "$PG1" ];
@@ -401,10 +401,10 @@ function TEST_recovery_pool_priority() {
     pool1_prio=$(expr $NORMAL_PRIO + $pool1_extra_prio)
     pool2_prio=$(expr $NORMAL_PRIO + $pool2_extra_prio)
 
-    ceph osd pool set $pool1 size 1 --yes-i-really-mean-it
-    ceph osd pool set $pool1 recovery_priority $pool1_extra_prio
-    ceph osd pool set $pool2 size 1 --yes-i-really-mean-it
-    ceph osd pool set $pool2 recovery_priority $pool2_extra_prio
+    stone osd pool set $pool1 size 1 --yes-i-really-mean-it
+    stone osd pool set $pool1 recovery_priority $pool1_extra_prio
+    stone osd pool set $pool2 size 1 --yes-i-really-mean-it
+    stone osd pool set $pool2 recovery_priority $pool2_extra_prio
     wait_for_clean || return 1
 
     dd if=/dev/urandom of=$dir/data bs=1M count=10
@@ -420,21 +420,21 @@ function TEST_recovery_pool_priority() {
 
     local otherosd=$(get_not_primary $pool1 obj1-p1)
 
-    ceph pg dump pgs
+    stone pg dump pgs
     ERRORS=0
 
-    ceph osd pool set $pool1 size 2
-    ceph osd pool set $pool2 size 2
+    stone osd pool set $pool1 size 2
+    stone osd pool set $pool2 size 2
 
     # Wait for both PGs to be in recovering state
-    ceph pg dump pgs
+    stone pg dump pgs
 
     # Wait for recovery to start
     set -o pipefail
     count=0
     while(true)
     do
-      if test $(ceph --format json pg dump pgs |
+      if test $(stone --format json pg dump pgs |
 	      jq '.pg_stats | .[] | .state | contains("recovering")' | grep -c true) == "2"
       then
         break
@@ -448,12 +448,12 @@ function TEST_recovery_pool_priority() {
       count=$(expr $count + 1)
     done
     set +o pipefail
-    ceph pg dump pgs
+    stone pg dump pgs
 
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/dump.${chk_osd1_1}.out
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_1}) dump_recovery_reservations > $dir/dump.${chk_osd1_1}.out
     echo osd.${chk_osd1_1}
     cat $dir/dump.${chk_osd1_1}.out
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${chk_osd1_2}) dump_recovery_reservations > $dir/dump.${chk_osd1_2}.out
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${chk_osd1_2}) dump_recovery_reservations > $dir/dump.${chk_osd1_2}.out
     echo osd.${chk_osd1_2}
     cat $dir/dump.${chk_osd1_2}.out
 

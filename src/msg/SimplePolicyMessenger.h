@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Portions Copyright (C) 2013 CohortFS, LLC
@@ -23,14 +23,14 @@ class SimplePolicyMessenger : public Messenger
 {
 private:
   /// lock protecting policy
-  ceph::mutex policy_lock =
-    ceph::make_mutex("SimplePolicyMessenger::policy_lock");
+  stone::mutex policy_lock =
+    stone::make_mutex("SimplePolicyMessenger::policy_lock");
   // entity_name_t::type -> Policy
-  ceph::net::PolicySet<Throttle> policy_set;
+  stone::net::PolicySet<Throttle> policy_set;
 
 public:
 
-  SimplePolicyMessenger(StoneeContext *cct, entity_name_t name)
+  SimplePolicyMessenger(StoneContext *cct, entity_name_t name)
     : Messenger(cct, name)
     {
     }

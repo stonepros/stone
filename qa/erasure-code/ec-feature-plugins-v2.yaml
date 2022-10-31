@@ -83,7 +83,7 @@ tasks:
 - exec:
     osd.2: 
       - |-
-        grep "protocol feature.*missing 100000000000" /var/log/stone/stone-osd.2.log
+        grep "protocol feature.*missing 100000000000" /var/log/stonepros/stone-osd.2.log
 #
 # mon.c won't be able to join the because it does not support the feature
 #
@@ -95,4 +95,4 @@ tasks:
 - exec:
     mon.c: 
       - |-
-        grep "missing.*feature" /var/log/stone/stone-mon.c.log
+        grep "missing.*feature" /var/log/stonepros/stone-mon.c.log

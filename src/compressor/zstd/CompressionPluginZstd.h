@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -16,16 +16,16 @@
 #define STONE_COMPRESSION_PLUGIN_ZSTD_H
 
 // -----------------------------------------------------------------------------
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "compressor/CompressionPlugin.h"
 #include "ZstdCompressor.h"
 // -----------------------------------------------------------------------------
 
-class CompressionPluginZstd : public ceph::CompressionPlugin {
+class CompressionPluginZstd : public stone::CompressionPlugin {
 
 public:
 
-  explicit CompressionPluginZstd(StoneeContext* cct) : CompressionPlugin(cct)
+  explicit CompressionPluginZstd(StoneContext* cct) : CompressionPlugin(cct)
   {}
 
   int factory(CompressorRef *cs,

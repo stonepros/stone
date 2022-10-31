@@ -7,7 +7,7 @@
 #include "include/utime.h"
 #include "include/Context.h"
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/RefCountedObj.h"
 #include "common/WorkQueue.h"
 #include "common/Timer.h"
@@ -16,13 +16,13 @@
 #include <map>
 #include <set>
 #include <boost/noncopyable.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace journal {
 
 class ObjectRecorder;
 
-typedef std::pair<ceph::ref_t<FutureImpl>, bufferlist> AppendBuffer;
+typedef std::pair<stone::ref_t<FutureImpl>, bufferlist> AppendBuffer;
 typedef std::list<AppendBuffer> AppendBuffers;
 
 class ObjectRecorder : public RefCountedObject, boost::noncopyable {
@@ -46,17 +46,17 @@ public:
 
   bool append(AppendBuffers &&append_buffers);
   void flush(Context *on_safe);
-  void flush(const ceph::ref_t<FutureImpl> &future);
+  void flush(const stone::ref_t<FutureImpl> &future);
 
   void claim_append_buffers(AppendBuffers *append_buffers);
 
   bool is_closed() const {
-    ceph_assert(ceph_mutex_is_locked(*m_lock));
+    stone_assert(stone_mutex_is_locked(*m_lock));
     return (m_object_closed && m_in_flight_appends.empty());
   }
   bool close();
 
-  inline StoneeContext *cct() const {
+  inline StoneContext *cct() const {
     return m_cct;
   }
 
@@ -68,7 +68,7 @@ public:
 private:
   FRIEND_MAKE_REF(ObjectRecorder);
   ObjectRecorder(librados::IoCtx &ioctx, std::string_view oid,
-                 uint64_t object_number, ceph::mutex* lock,
+                 uint64_t object_number, stone::mutex* lock,
                  ContextWQ *work_queue, Handler *handler, uint8_t order,
                  int32_t max_in_flight_appends);
   ~ObjectRecorder() override;
@@ -77,16 +77,16 @@ private:
   typedef std::map<uint64_t, AppendBuffers> InFlightAppends;
 
   struct FlushHandler : public FutureImpl::FlushHandler {
-    ceph::ref_t<ObjectRecorder> object_recorder;
-    virtual void flush(const ceph::ref_t<FutureImpl> &future) override {
+    stone::ref_t<ObjectRecorder> object_recorder;
+    virtual void flush(const stone::ref_t<FutureImpl> &future) override {
       object_recorder->flush(future);
     }
-    FlushHandler(ceph::ref_t<ObjectRecorder> o) : object_recorder(std::move(o)) {}
+    FlushHandler(stone::ref_t<ObjectRecorder> o) : object_recorder(std::move(o)) {}
   };
   struct C_AppendFlush : public Context {
-    ceph::ref_t<ObjectRecorder> object_recorder;
+    stone::ref_t<ObjectRecorder> object_recorder;
     uint64_t tid;
-    C_AppendFlush(ceph::ref_t<ObjectRecorder> o, uint64_t _tid)
+    C_AppendFlush(stone::ref_t<ObjectRecorder> o, uint64_t _tid)
         : object_recorder(std::move(o)), tid(_tid) {
     }
     void finish(int r) override {
@@ -97,7 +97,7 @@ private:
   librados::IoCtx m_ioctx;
   std::string m_oid;
   uint64_t m_object_number;
-  StoneeContext *m_cct = nullptr;
+  StoneContext *m_cct = nullptr;
 
   ContextWQ *m_op_work_queue;
 
@@ -124,7 +124,7 @@ private:
     return h;
   }
 
-  mutable ceph::mutex* m_lock;
+  mutable stone::mutex* m_lock;
   AppendBuffers m_pending_buffers;
   uint64_t m_pending_bytes = 0;
   utime_t m_last_flush_time;
@@ -143,15 +143,15 @@ private:
   bufferlist m_prefetch_bl;
 
   uint32_t m_in_flight_callbacks = 0;
-  ceph::condition_variable m_in_flight_callbacks_cond;
+  stone::condition_variable m_in_flight_callbacks_cond;
   uint64_t m_in_flight_bytes = 0;
 
-  bool send_appends(bool force, ceph::ref_t<FutureImpl> flush_sentinal);
+  bool send_appends(bool force, stone::ref_t<FutureImpl> flush_sentinal);
   void handle_append_flushed(uint64_t tid, int r);
   void append_overflowed();
 
   void wake_up_flushes();
-  void notify_handler_unlock(std::unique_lock<ceph::mutex>& locker,
+  void notify_handler_unlock(std::unique_lock<stone::mutex>& locker,
                              bool notify_overflowed);
 };
 

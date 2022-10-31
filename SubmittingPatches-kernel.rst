@@ -1,12 +1,12 @@
-Submitting Patches to Ceph - Kernel Components
+Submitting Patches to Stone - Kernel Components
 ==============================================
 
-Submission of patches to the Ceph kernel code is subject to the same rules
+Submission of patches to the Stone kernel code is subject to the same rules
 and guidelines as any other patches to the Linux Kernel. These are set out in
 ``Documentation/process/submitting-patches.rst`` in the kernel source tree.
 
 What follows is a condensed version of those rules and guidelines, updated based
-on the Ceph project's best practices.
+on the Stone project's best practices.
 
 
 .. contents::
@@ -210,7 +210,7 @@ email list ``ceph-devel@vger.kernel.org`` (note: *not* ``dev@ceph.io``) and revi
 in the email list.
 
 The best way to generate a patch for manual submission is to work from
-a Git checkout of the Ceph kernel client (kernel modules) repository located at
+a Git checkout of the Stone kernel client (kernel modules) repository located at
 https://github.com/ceph/ceph-client. You can then generate patches
 with the 'git format-patch' command. For example,
 

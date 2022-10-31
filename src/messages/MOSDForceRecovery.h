@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 OVH
  *
@@ -68,7 +68,7 @@ public:
   }
 
   void encode_payload(uint64_t features) {
-    using ceph::encode;
+    using stone::encode;
     if (!HAVE_FEATURE(features, SERVER_MIMIC)) {
       header.version = 1;
       header.compat_version = 1;
@@ -88,7 +88,7 @@ public:
     encode(options, payload);
   }
   void decode_payload() {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     if (header.version == 1) {
       std::vector<pg_t> pgs;
@@ -108,7 +108,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif /* STONE_MOSDFORCERECOVERY_H_ */

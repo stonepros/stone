@@ -19,22 +19,22 @@
 test -d dev/osd0/. && test -e dev/sudo && SUDO="sudo"
 
 if [ -e CMakeCache.txt ]; then
-  [ -z "$CEPH_BIN" ] && CEPH_BIN=bin
+  [ -z "$STONE_BIN" ] && STONE_BIN=bin
 fi
 
 if [ -n "$VSTART_DEST" ]; then
-  CEPH_CONF_PATH=$VSTART_DEST
+  STONE_CONF_PATH=$VSTART_DEST
 else
-  CEPH_CONF_PATH="$PWD"
+  STONE_CONF_PATH="$PWD"
 fi
-conf_fn="$CEPH_CONF_PATH/ceph.conf"
-CEPHADM_DIR_PATH="$CEPH_CONF_PATH/../src/cephadm"
+conf_fn="$STONE_CONF_PATH/stone.conf"
+STONEADM_DIR_PATH="$STONE_CONF_PATH/../src/stoneadm"
 
 MYUID=$(id -u)
 MYNAME=$(id -nu)
 
 do_killall() {
-    local pname="ceph-run.*$1"
+    local pname="stone-run.*$1"
     if [ $1 == "ganesha.nfsd" ]; then
 	    pname=$1
     fi
@@ -43,15 +43,15 @@ do_killall() {
     $SUDO killall -u $MYNAME $1
 }
 
-do_killcephadm() {
-    FSID=$($CEPH_BIN/ceph -c $conf_fn fsid)
-    sudo $CEPHADM_DIR_PATH/cephadm rm-cluster --fsid $FSID --force
+do_killstoneadm() {
+    FSID=$($STONE_BIN/stone -c $conf_fn fsid)
+    sudo $STONEADM_DIR_PATH/stoneadm rm-cluster --fsid $FSID --force
 }
 
 do_umountall() {
     #VSTART_IP_PORTS is of the format as below
     #"[v[num]:IP:PORT/0,v[num]:IP:PORT/0][v[num]:IP:PORT/0,v[num]:IP:PORT/0]..."
-    VSTART_IP_PORTS=$("${CEPH_BIN}"/ceph -c $conf_fn mon metadata 2>/dev/null | jq -j '.[].addrs')
+    VSTART_IP_PORTS=$("${STONE_BIN}"/stone -c $conf_fn mon metadata 2>/dev/null | jq -j '.[].addrs')
 
     #SRC_MNT_ARRAY is of the format as below
     #SRC_MNT_ARRAY[0] = IP:PORT,IP:PORT,IP:PORT:/
@@ -59,7 +59,7 @@ do_umountall() {
     #SRC_MNT_ARRAY[2] = IP:PORT:/ #Could be mounted using single mon IP
     #SRC_MNT_ARRAY[3] = MNT_POINT2
     #...
-    SRC_MNT_ARRAY=($(findmnt -t ceph -n --raw --output=source,target))
+    SRC_MNT_ARRAY=($(findmnt -t stone -n --raw --output=source,target))
     LEN_SRC_MNT_ARRAY=${#SRC_MNT_ARRAY[@]}
 
     for (( i=0; i<${LEN_SRC_MNT_ARRAY}; i=$((i+2)) ))
@@ -68,17 +68,17 @@ do_umountall() {
       IP_PORT1=$(echo ${SRC_MNT_ARRAY[$i]} | awk -F ':/' '{print $1}' | awk -F ',' '{print $1}')
       if [[ "$VSTART_IP_PORTS" == *"$IP_PORT1"* ]]
       then
-        CEPH_MNT=${SRC_MNT_ARRAY[$((i+1))]}
-        [ -n "$CEPH_MNT" ] && sudo umount -f $CEPH_MNT
+        STONE_MNT=${SRC_MNT_ARRAY[$((i+1))]}
+        [ -n "$STONE_MNT" ] && sudo umount -f $STONE_MNT
       fi
     done
 
     #Get fuse mounts of the cluster
-    CEPH_FUSE_MNTS=$("${CEPH_BIN}"/ceph -c $conf_fn tell mds.* client ls 2>/dev/null | grep mount_point | tr -d '",' | awk '{print $2}')
-    [ -n "$CEPH_FUSE_MNTS" ] && sudo umount -f $CEPH_FUSE_MNTS
+    STONE_FUSE_MNTS=$("${STONE_BIN}"/stone -c $conf_fn tell mds.* client ls 2>/dev/null | grep mount_point | tr -d '",' | awk '{print $2}')
+    [ -n "$STONE_FUSE_MNTS" ] && sudo umount -f $STONE_FUSE_MNTS
 }
 
-usage="usage: $0 [all] [mon] [mds] [osd] [rgw] [nfs] [--crimson] [--cephadm]\n"
+usage="usage: $0 [all] [mon] [mds] [osd] [rgw] [nfs] [--crimson] [--stoneadm]\n"
 
 stop_all=1
 stop_mon=0
@@ -87,31 +87,31 @@ stop_osd=0
 stop_mgr=0
 stop_rgw=0
 stop_ganesha=0
-ceph_osd=ceph-osd
-stop_cephadm=0
+stone_osd=stone-osd
+stop_stoneadm=0
 
 while [ $# -ge 1 ]; do
     case $1 in
         all )
             stop_all=1
             ;;
-        mon | ceph-mon )
+        mon | stone-mon )
             stop_mon=1
             stop_all=0
             ;;
-        mgr | ceph-mgr )
+        mgr | stone-mgr )
             stop_mgr=1
             stop_all=0
             ;;
-        mds | ceph-mds )
+        mds | stone-mds )
             stop_mds=1
             stop_all=0
             ;;
-        osd | ceph-osd )
+        osd | stone-osd )
             stop_osd=1
             stop_all=0
             ;;
-        rgw | ceph-rgw )
+        rgw | stone-rgw )
             stop_rgw=1
             stop_all=0
             ;;
@@ -120,10 +120,10 @@ while [ $# -ge 1 ]; do
             stop_all=0
             ;;
         --crimson)
-            ceph_osd=crimson-osd
+            stone_osd=crimson-osd
             ;;
-        --cephadm)
-            stop_cephadm=1
+        --stoneadm)
+            stop_stoneadm=1
             stop_all=0
             ;;
         * )
@@ -134,13 +134,13 @@ while [ $# -ge 1 ]; do
 done
 
 if [ $stop_all -eq 1 ]; then
-    if "${CEPH_BIN}"/ceph -s --connect-timeout 1 -c $conf_fn >/dev/null 2>&1; then
+    if "${STONE_BIN}"/stone -s --connect-timeout 1 -c $conf_fn >/dev/null 2>&1; then
         # Umount mounted filesystems from vstart cluster
         do_umountall
     fi
 
-    if "${CEPH_BIN}"/rbd device list -c $conf_fn >/dev/null 2>&1; then
-        "${CEPH_BIN}"/rbd device list -c $conf_fn | tail -n +2 |
+    if "${STONE_BIN}"/rbd device list -c $conf_fn >/dev/null 2>&1; then
+        "${STONE_BIN}"/rbd device list -c $conf_fn | tail -n +2 |
         while read DEV; do
             # While it is currently possible to create an rbd image with
             # whitespace chars in its name, krbd will refuse mapping such
@@ -148,20 +148,20 @@ if [ $stop_all -eq 1 ]; then
             # same goes for whitespace chars in names of the pools that
             # contain rbd images).
             DEV="$(echo "${DEV}" | tr -s '[:space:]' | awk '{ print $5 }')"
-            sudo "${CEPH_BIN}"/rbd device unmap "${DEV}" -c $conf_fn
+            sudo "${STONE_BIN}"/rbd device unmap "${DEV}" -c $conf_fn
         done
 
-        if [ -n "$("${CEPH_BIN}"/rbd device list -c $conf_fn)" ]; then
+        if [ -n "$("${STONE_BIN}"/rbd device list -c $conf_fn)" ]; then
             echo "WARNING: Some rbd images are still mapped!" >&2
         fi
     fi
 
-    daemons="$($CEPHADM_DIR_PATH/cephadm ls 2> /dev/null)"
+    daemons="$($STONEADM_DIR_PATH/stoneadm ls 2> /dev/null)"
     if [ $? -eq 0 -a "$daemons" != "[]" ]; then
-        do_killcephadm
+        do_killstoneadm
     fi
 
-    for p in $ceph_osd ceph-mon ceph-mds ceph-mgr radosgw lt-radosgw apache2 ganesha.nfsd ; do
+    for p in $stone_osd stone-mon stone-mds stone-mgr radosgw lt-radosgw apache2 ganesha.nfsd ; do
         for try in 0 1 1 1 1 ; do
             if ! pkill -u $MYUID $p ; then
                 break
@@ -170,17 +170,17 @@ if [ $stop_all -eq 1 ]; then
         done
     done
 
-    pkill -u $MYUID -f valgrind.bin.\*ceph-mon
-    $SUDO pkill -u $MYUID -f valgrind.bin.\*$ceph_osd
-    pkill -u $MYUID -f valgrind.bin.\*ceph-mds
-    asok_dir=`dirname $("${CEPH_BIN}"/ceph-conf -c ${conf_fn} --show-config-value admin_socket)`
+    pkill -u $MYUID -f valgrind.bin.\*stone-mon
+    $SUDO pkill -u $MYUID -f valgrind.bin.\*$stone_osd
+    pkill -u $MYUID -f valgrind.bin.\*stone-mds
+    asok_dir=`dirname $("${STONE_BIN}"/stone-conf -c ${conf_fn} --show-config-value admin_socket)`
     rm -rf "${asok_dir}"
 else
-    [ $stop_mon -eq 1 ] && do_killall ceph-mon
-    [ $stop_mds -eq 1 ] && do_killall ceph-mds
-    [ $stop_osd -eq 1 ] && do_killall $ceph_osd
-    [ $stop_mgr -eq 1 ] && do_killall ceph-mgr
+    [ $stop_mon -eq 1 ] && do_killall stone-mon
+    [ $stop_mds -eq 1 ] && do_killall stone-mds
+    [ $stop_osd -eq 1 ] && do_killall $stone_osd
+    [ $stop_mgr -eq 1 ] && do_killall stone-mgr
     [ $stop_ganesha -eq 1 ] && do_killall ganesha.nfsd
     [ $stop_rgw -eq 1 ] && do_killall radosgw lt-radosgw apache2
-    [ $stop_cephadm -eq 1 ] && do_killcephadm
+    [ $stop_stoneadm -eq 1 ] && do_killstoneadm
 fi

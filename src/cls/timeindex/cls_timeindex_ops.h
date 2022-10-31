@@ -11,13 +11,13 @@ struct cls_timeindex_add_op {
 
   cls_timeindex_add_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(entries, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(entries, bl);
     DECODE_FINISH(bl);
@@ -34,7 +34,7 @@ struct cls_timeindex_list_op {
 
   cls_timeindex_list_op() : max_entries(0) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(from_time, bl);
     encode(marker, bl);
@@ -43,7 +43,7 @@ struct cls_timeindex_list_op {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(from_time, bl);
     decode(marker, bl);
@@ -61,7 +61,7 @@ struct cls_timeindex_list_ret {
 
   cls_timeindex_list_ret() : truncated(false) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(entries, bl);
     encode(marker, bl);
@@ -69,7 +69,7 @@ struct cls_timeindex_list_ret {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(entries, bl);
     decode(marker, bl);
@@ -92,7 +92,7 @@ struct cls_timeindex_trim_op {
 
   cls_timeindex_trim_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(from_time, bl);
     encode(to_time, bl);
@@ -101,7 +101,7 @@ struct cls_timeindex_trim_op {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(from_time, bl);
     decode(to_time, bl);

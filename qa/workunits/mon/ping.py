@@ -52,7 +52,7 @@ def expect(cmd, expected_ret):
 
 
 def get_quorum_status(timeout=300):
-    cmd = 'ceph quorum_status'
+    cmd = 'stone quorum_status'
     if timeout > 0:
         cmd += ' --connect-timeout {0}'.format(timeout)
 
@@ -68,7 +68,7 @@ def main():
     print('ping all monitors')
     for m in mon_names:
         print('ping mon.{0}'.format(m))
-        out = expect('ceph ping mon.{0}'.format(m), 0)
+        out = expect('stone ping mon.{0}'.format(m), 0)
         reply = json.loads(out)
 
         assert reply['mon_status']['name'] == m, \
@@ -78,14 +78,14 @@ def main():
     print('test out-of-quorum reply')
     for m in mon_names:
         print('testing mon.{0}'.format(m))
-        expect('ceph daemon mon.{0} quorum exit'.format(m), 0)
+        expect('stone daemon mon.{0} quorum exit'.format(m), 0)
 
         quorum_status = get_quorum_status()
         assert m not in quorum_status['quorum_names'], \
             'mon.{0} was not supposed to be in quorum ({1})'.format(
                 m, quorum_status['quorum_names'])
 
-        out = expect('ceph ping mon.{0}'.format(m), 0)
+        out = expect('stone ping mon.{0}'.format(m), 0)
         reply = json.loads(out)
         mon_status = reply['mon_status']
 
@@ -97,7 +97,7 @@ def main():
             'mon.{0} is in state {1}, expected electing'.format(
                 m, mon_status['state'])
 
-        expect('ceph daemon mon.{0} quorum enter'.format(m), 0)
+        expect('stone daemon mon.{0} quorum enter'.format(m), 0)
 
     print('OK')
 

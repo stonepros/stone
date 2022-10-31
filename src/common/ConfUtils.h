@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -25,7 +25,7 @@
 #include "include/buffer_fwd.h"
 
 /*
- * Stonee configuration file support.
+ * Stone configuration file support.
  *
  * This class loads an INI-style configuration from a file or bufferlist, and
  * holds it in memory. In general, an INI configuration file is composed of
@@ -69,7 +69,7 @@ public:
   {}
   ConfFile(const std::vector<conf_section_t>& sections);
   int parse_file(const std::string &fname, std::ostream *warnings);
-  int parse_bufferlist(ceph::bufferlist *bl, std::ostream *warnings);
+  int parse_bufferlist(stone::bufferlist *bl, std::ostream *warnings);
   bool parse_buffer(std::string_view buf, std::ostream* warning);
   int read(std::string_view section, std::string_view key,
 	   std::string &val) const;

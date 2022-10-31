@@ -80,7 +80,7 @@ class IncompleteWriteError(Error):
     pass
 
 
-class LibCephFSStateError(Error):
+class LibStoneFSStateError(Error):
     pass
 
 class WouldBlock(Error):
@@ -173,7 +173,7 @@ except? -9000 with gil:
     return True
 
 
-class LibCephFSStateError(Error):
+class LibStoneFSStateError(Error):
     pass
 
 
@@ -190,7 +190,7 @@ cdef class LibRGWFS(object):
     def require_state(self, *args):
         if self.state in args:
             return
-        raise LibCephFSStateError("You cannot perform that operation on a "
+        raise LibStoneFSStateError("You cannot perform that operation on a "
                                   "RGWFS object in state %s." % (self.state))
 
     def __cinit__(self, uid, key, secret):
@@ -205,7 +205,7 @@ cdef class LibRGWFS(object):
 
     def shutdown(self):
         """
-        Unmount and destroy the ceph mount handle.
+        Unmount and destroy the stone mount handle.
         """
         if self.state in ["mounted"]:
             with nogil:
@@ -229,7 +229,7 @@ cdef class LibRGWFS(object):
         Get the version number of the ``librgwfile`` C library.
 
         :returns: a tuple of ``(major, minor, extra)`` components of the
-                  libcephfs version
+                  libstonefs version
         """
         cdef:
             int major = 0

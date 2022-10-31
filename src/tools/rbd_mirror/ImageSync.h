@@ -7,7 +7,7 @@
 #include "include/int_types.h"
 #include "librbd/ImageCtx.h"
 #include "librbd/Types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "tools/rbd_mirror/CancelableRequest.h"
 #include "tools/rbd_mirror/image_sync/Types.h"
 
@@ -98,7 +98,7 @@ private:
   InstanceWatcher<ImageCtxT> *m_instance_watcher;
   ProgressContext *m_progress_ctx;
 
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   bool m_canceled = false;
 
   librbd::DeepCopyRequest<ImageCtxT> *m_image_copy_request = nullptr;

@@ -1,7 +1,7 @@
 :orphan:
 
 ===================================================
- rbd-mirror -- Ceph daemon for mirroring RBD images
+ rbd-mirror -- Stone daemon for mirroring RBD images
 ===================================================
 
 .. program:: rbd-mirror
@@ -16,14 +16,14 @@ Description
 ===========
 
 :program:`rbd-mirror` is a daemon for asynchronous mirroring of RADOS
-block device (rbd) images among Ceph clusters. It replays changes to
+block device (rbd) images among Stone clusters. It replays changes to
 images in remote clusters in a local cluster, for disaster recovery.
 
 It connects to remote clusters via the RADOS protocol, relying on
-default search paths to find ceph.conf files, monitor addresses and
-authentication information for them, i.e. ``/etc/ceph/$cluster.conf``,
-``/etc/ceph/$cluster.keyring``, and
-``/etc/ceph/$cluster.$name.keyring``, where ``$cluster`` is the
+default search paths to find stone.conf files, monitor addresses and
+authentication information for them, i.e. ``/etc/stone/$cluster.conf``,
+``/etc/stone/$cluster.keyring``, and
+``/etc/stone/$cluster.$name.keyring``, where ``$cluster`` is the
 human-friendly name of the cluster, and ``$name`` is the rados user to
 connect as, e.g. ``client.rbd-mirror``.
 
@@ -31,14 +31,14 @@ connect as, e.g. ``client.rbd-mirror``.
 Options
 =======
 
-.. option:: -c ceph.conf, --conf=ceph.conf
+.. option:: -c stone.conf, --conf=stone.conf
 
-   Use ``ceph.conf`` configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` to determine monitor addresses during startup.
+   Use ``stone.conf`` configuration file instead of the default
+   ``/etc/stone/stone.conf`` to determine monitor addresses during startup.
 
 .. option:: -m monaddress[:port]
 
-   Connect to specified monitor (instead of looking through ``ceph.conf``).
+   Connect to specified monitor (instead of looking through ``stone.conf``).
 
 .. option:: -i ID, --id ID
 
@@ -50,7 +50,7 @@ Options
 
 .. option:: --cluster NAME
 
-   Set the cluster name (default: ceph)
+   Set the cluster name (default: stone)
 
 .. option:: -d
 
@@ -64,8 +64,8 @@ Options
 Availability
 ============
 
-:program:`rbd-mirror` is part of Ceph, a massively scalable, open-source, distributed
-storage system. Please refer to the Ceph documentation at http://ceph.com/docs for
+:program:`rbd-mirror` is part of Stone, a massively scalable, open-source, distributed
+storage system. Please refer to the Stone documentation at http://stone.com/docs for
 more information.
 
 

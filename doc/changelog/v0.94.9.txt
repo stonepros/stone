@@ -9,7 +9,7 @@ Merge: b97a974 27d8055
 Author: Alfredo Deza <alfredo@deza.pe>
 Date:   Tue Aug 30 07:12:09 2016 -0400
 
-    Merge pull request #10913 from ceph/wip-revert-random-uuid-hammer
+    Merge pull request #10913 from stone/wip-revert-random-uuid-hammer
     
     hammer: revert use of boost for uuids
     

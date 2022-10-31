@@ -10,7 +10,7 @@ from mgr_module import MgrModule, NFS_POOL_NAME
 
 from rados import ObjectNotFound
 
-from ceph.deployment.service_spec import NFSServiceSpec
+from stone.deployment.service_spec import NFSServiceSpec
 from nfs import Module
 from nfs.export import ExportMgr, normalize_path
 from nfs.export_utils import GaneshaConfParser, Export, RawBlock
@@ -25,14 +25,14 @@ EXPORT {
     Export_ID=1;
     Protocols = 4;
     Path = /;
-    Pseudo = /cephfs_a/;
+    Pseudo = /stonefs_a/;
     Access_Type = RW;
     Protocols = 4;
     Attr_Expiration_Time = 0;
     # Squash = root;
 
     FSAL {
-        Name = CEPH;
+        Name = STONE;
         Filesystem = "a";
         User_Id = "ganesha";
         # Secret_Access_Key = "YOUR SECRET KEY HERE";
@@ -75,7 +75,7 @@ EXPORT
     export_3 = """
 EXPORT {
     FSAL {
-        name = "CEPH";
+        name = "STONE";
         user_id = "nfs.foo.1";
         filesystem = "a";
         secret_access_key = "AQCjU+hgjyReLBAAddJa0Dza/ZHqjX5+JiePMA==";
@@ -306,13 +306,13 @@ NFS_CORE_PARAM {
     def _validate_export_1(self, export: Export):
         assert export.export_id == 1
         assert export.path == "/"
-        assert export.pseudo == "/cephfs_a/"
+        assert export.pseudo == "/stonefs_a/"
         assert export.access_type == "RW"
         # assert export.squash == "root_squash"  # probably correct value
         assert export.squash == "no_root_squash"
         assert export.protocols == [4]
         #        assert export.transports == {"TCP", "UDP"}
-        assert export.fsal.name == "CEPH"
+        assert export.fsal.name == "STONE"
         assert export.fsal.user_id == "ganesha"
         assert export.fsal.fs_name == "a"
         assert export.fsal.sec_label_xattr == None
@@ -406,10 +406,10 @@ NFS_CORE_PARAM {
                                         'squash': 'All'}],
                            'cluster_id': self.cluster_id,
                            'export_id': 1,
-                           'fsal': {'fs_name': 'a', 'name': 'CEPH', 'user_id': 'ganesha'},
+                           'fsal': {'fs_name': 'a', 'name': 'STONE', 'user_id': 'ganesha'},
                            'path': '/',
                            'protocols': [4],
-                           'pseudo': '/cephfs_a/',
+                           'pseudo': '/stonefs_a/',
                            'security_label': True,
                            'squash': 'no_root_squash',
                            'transports': []}
@@ -439,7 +439,7 @@ NFS_CORE_PARAM {
             'export_id': 1,
             'path': '/',
             'cluster_id': self.cluster_id,
-            'pseudo': '/cephfs_a',
+            'pseudo': '/stonefs_a',
             'access_type': 'RW',
             'squash': 'root_squash',
             'security_label': True,
@@ -455,7 +455,7 @@ NFS_CORE_PARAM {
                 'squash': 'all_squash'
             }],
             'fsal': {
-                'name': 'CEPH',
+                'name': 'STONE',
                 'user_id': 'ganesha',
                 'fs_name': 'a',
                 'sec_label_xattr': 'security.selinux'
@@ -464,12 +464,12 @@ NFS_CORE_PARAM {
 
         assert export.export_id == 1
         assert export.path == "/"
-        assert export.pseudo == "/cephfs_a"
+        assert export.pseudo == "/stonefs_a"
         assert export.access_type == "RW"
         assert export.squash == "root_squash"
         assert set(export.protocols) == {4}
         assert set(export.transports) == {"TCP", "UDP"}
-        assert export.fsal.name == "CEPH"
+        assert export.fsal.name == "STONE"
         assert export.fsal.user_id == "ganesha"
         assert export.fsal.fs_name == "a"
         assert export.fsal.sec_label_xattr == 'security.selinux'
@@ -928,10 +928,10 @@ NFS_CORE_PARAM {
         assert export.clients[0].addresses == ["192.168.0.0/16"]
         assert export.cluster_id == self.cluster_id
         
-    def test_create_export_cephfs(self):
-        self._do_mock_test(self._do_test_create_export_cephfs)
+    def test_create_export_stonefs(self):
+        self._do_mock_test(self._do_test_create_export_stonefs)
 
-    def _do_test_create_export_cephfs(self):
+    def _do_test_create_export_stonefs(self):
         nfs_mod = Module('nfs', '', '')
         conf = ExportMgr(nfs_mod)
 
@@ -940,11 +940,11 @@ NFS_CORE_PARAM {
         assert len(ls) == 2
 
         r = conf.create_export(
-            fsal_type='cephfs',
+            fsal_type='stonefs',
             cluster_id=self.cluster_id,
             fs_name='myfs',
             path='/',
-            pseudo_path='/cephfs2',
+            pseudo_path='/stonefs2',
             read_only=False,
             squash='root',
             addr=["192.168.1.0/8"],
@@ -955,17 +955,17 @@ NFS_CORE_PARAM {
         ls = json.loads(exports[1])
         assert len(ls) == 3
 
-        export = conf._fetch_export('foo', '/cephfs2')
+        export = conf._fetch_export('foo', '/stonefs2')
         assert export.export_id
         assert export.path == "/"
-        assert export.pseudo == "/cephfs2"
+        assert export.pseudo == "/stonefs2"
         assert export.access_type == "none"
         assert export.squash == "none"
         assert export.protocols == [4]
         assert export.transports == ["TCP"]
-        assert export.fsal.name == "CEPH"
+        assert export.fsal.name == "STONE"
         assert export.fsal.user_id == "nfs.foo.3"
-        assert export.fsal.cephx_key == "thekeyforclientabc"
+        assert export.fsal.stonex_key == "thekeyforclientabc"
         assert len(export.clients) == 1
         assert export.clients[0].squash == 'root'
         assert export.clients[0].access_type == 'rw'

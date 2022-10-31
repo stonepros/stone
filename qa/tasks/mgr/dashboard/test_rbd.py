@@ -145,7 +145,7 @@ class RbdTest(DashboardTestCase):
         cls.create_image('rbd_iscsi', None, 'img1', 2**30)
         cls.create_image('rbd_iscsi', None, 'img2', 2*2**30)
 
-        osd_metadata = cls.ceph_cluster.mon_manager.get_osd_metadata()
+        osd_metadata = cls.stone_cluster.mon_manager.get_osd_metadata()
         cls.bluestore_support = True
         for osd in osd_metadata:
             if osd['osd_objectstore'] != 'bluestore':
@@ -155,10 +155,10 @@ class RbdTest(DashboardTestCase):
     @classmethod
     def tearDownClass(cls):
         super(RbdTest, cls).tearDownClass()
-        cls._ceph_cmd(['osd', 'pool', 'delete', 'rbd', 'rbd', '--yes-i-really-really-mean-it'])
-        cls._ceph_cmd(['osd', 'pool', 'delete', 'rbd_iscsi', 'rbd_iscsi',
+        cls._stone_cmd(['osd', 'pool', 'delete', 'rbd', 'rbd', '--yes-i-really-really-mean-it'])
+        cls._stone_cmd(['osd', 'pool', 'delete', 'rbd_iscsi', 'rbd_iscsi',
                        '--yes-i-really-really-mean-it'])
-        cls._ceph_cmd(['osd', 'pool', 'delete', 'rbd_data', 'rbd_data',
+        cls._stone_cmd(['osd', 'pool', 'delete', 'rbd_data', 'rbd_data',
                        '--yes-i-really-really-mean-it'])
 
     def create_image_in_trash(self, pool, name, delay=0):
@@ -382,7 +382,7 @@ class RbdTest(DashboardTestCase):
 
         self.remove_image('rbd', None, rbd_name)
         self.assertStatus(204)
-        self._ceph_cmd(['osd', 'pool', 'delete', 'data_pool', 'data_pool',
+        self._stone_cmd(['osd', 'pool', 'delete', 'data_pool', 'data_pool',
                         '--yes-i-really-really-mean-it'])
 
     def test_create_rbd_twice(self):

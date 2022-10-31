@@ -26,12 +26,12 @@
 #include "osd/scheduler/OpScheduler.h"
 #include "common/config.h"
 #include "include/cmp.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/mClockPriorityQueue.h"
 #include "osd/scheduler/OpSchedulerItem.h"
 
 
-namespace ceph::osd::scheduler {
+namespace stone::osd::scheduler {
 
 constexpr uint64_t default_min = 1;
 constexpr uint64_t default_max = 999999;
@@ -187,7 +187,7 @@ public:
   }
 
   // Formatted output of the queue
-  void dump(ceph::Formatter &f) const final;
+  void dump(stone::Formatter &f) const final;
 
   void print(std::ostream &ostream) const final {
     ostream << "mClockScheduler";

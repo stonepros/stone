@@ -28,29 +28,29 @@ class HostControllerTest(ControllerTestCase):
         hosts = [{
             'hostname': 'host-0',
             'sources': {
-                'ceph': True,
+                'stone': True,
                 'orchestrator': False
             }
         }, {
             'hostname': 'host-1',
             'sources': {
-                'ceph': False,
+                'stone': False,
                 'orchestrator': True
             }
         }, {
             'hostname': 'host-2',
             'sources': {
-                'ceph': True,
+                'stone': True,
                 'orchestrator': True
             }
         }]
 
         def _get_hosts(sources=None):
-            if sources == 'ceph':
+            if sources == 'stone':
                 return hosts[0]
             if sources == 'orchestrator':
                 return hosts[1:]
-            if sources == 'ceph, orchestrator':
+            if sources == 'stone, orchestrator':
                 return hosts[2]
             return hosts
 
@@ -60,7 +60,7 @@ class HostControllerTest(ControllerTestCase):
         self.assertStatus(200)
         self.assertJsonBody(hosts)
 
-        self._get('{}?sources=ceph'.format(self.URL_HOST), version=APIVersion(1, 1))
+        self._get('{}?sources=stone'.format(self.URL_HOST), version=APIVersion(1, 1))
         self.assertStatus(200)
         self.assertJsonBody(hosts[0])
 
@@ -68,7 +68,7 @@ class HostControllerTest(ControllerTestCase):
         self.assertStatus(200)
         self.assertJsonBody(hosts[1:])
 
-        self._get('{}?sources=ceph,orchestrator'.format(self.URL_HOST), version=APIVersion(1, 1))
+        self._get('{}?sources=stone,orchestrator'.format(self.URL_HOST), version=APIVersion(1, 1))
         self.assertStatus(200)
         self.assertJsonBody(hosts)
 
@@ -77,13 +77,13 @@ class HostControllerTest(ControllerTestCase):
         hosts_without_facts = [{
             'hostname': 'host-0',
             'sources': {
-                'ceph': True,
+                'stone': True,
                 'orchestrator': False
             }
         }, {
             'hostname': 'host-1',
             'sources': {
-                'ceph': False,
+                'stone': False,
                 'orchestrator': True
             }
         }]
@@ -101,7 +101,7 @@ class HostControllerTest(ControllerTestCase):
         hosts_with_facts = [{
             'hostname': 'host-0',
             'sources': {
-                'ceph': True,
+                'stone': True,
                 'orchestrator': False
             },
             'cpu_count': 1,
@@ -109,7 +109,7 @@ class HostControllerTest(ControllerTestCase):
         }, {
             'hostname': 'host-1',
             'sources': {
-                'ceph': False,
+                'stone': False,
                 'orchestrator': True
             },
             'cpu_count': 2,
@@ -123,17 +123,17 @@ class HostControllerTest(ControllerTestCase):
             self._get('{}?facts=true'.format(self.URL_HOST), version=APIVersion(1, 1))
             self.assertStatus(200)
             self.assertHeader('Content-Type',
-                              'application/vnd.ceph.api.v1.1+json')
+                              'application/vnd.stone.api.v1.1+json')
             self.assertJsonBody(hosts_with_facts)
 
             # test with ?facts=false
             self._get('{}?facts=false'.format(self.URL_HOST), version=APIVersion(1, 1))
             self.assertStatus(200)
             self.assertHeader('Content-Type',
-                              'application/vnd.ceph.api.v1.1+json')
+                              'application/vnd.stone.api.v1.1+json')
             self.assertJsonBody(hosts_without_facts)
 
-        # test with orchestrator available but orch backend!=cephadm
+        # test with orchestrator available but orch backend!=stoneadm
         with patch_orch(True, missing_features=['get_facts']) as fake_client:
             mock_get_hosts.return_value = hosts_without_facts
             # test with ?facts=true
@@ -152,7 +152,7 @@ class HostControllerTest(ControllerTestCase):
             self._get('{}?facts=false'.format(self.URL_HOST), version=APIVersion(1, 1))
             self.assertStatus(200)
             self.assertHeader('Content-Type',
-                              'application/vnd.ceph.api.v1.1+json')
+                              'application/vnd.stone.api.v1.1+json')
             self.assertJsonBody(hosts_without_facts)
 
     def test_get_1(self):
@@ -208,7 +208,7 @@ class HostControllerTest(ControllerTestCase):
             self._put('{}/node0'.format(self.URL_HOST), payload, version=APIVersion(0, 1))
             self.assertStatus(200)
             self.assertHeader('Content-Type',
-                              'application/vnd.ceph.api.v0.1+json')
+                              'application/vnd.stone.api.v0.1+json')
             fake_client.hosts.remove_label.assert_called_once_with('node0', 'aaa')
             fake_client.hosts.add_label.assert_called_once_with('node0', 'ccc')
 
@@ -230,7 +230,7 @@ class HostControllerTest(ControllerTestCase):
                       version=APIVersion(0, 1))
             self.assertStatus(200)
             self.assertHeader('Content-Type',
-                              'application/vnd.ceph.api.v0.1+json')
+                              'application/vnd.stone.api.v0.1+json')
 
             # force enter maintenance mode
             self._put('{}/node1'.format(self.URL_HOST), {'maintenance': True, 'force': True},
@@ -315,7 +315,7 @@ class HostControllerTest(ControllerTestCase):
                       version=APIVersion(0, 1))
             self.assertStatus(200)
             self.assertHeader('Content-Type',
-                              'application/vnd.ceph.api.v0.1+json')
+                              'application/vnd.stone.api.v0.1+json')
 
         # maintenance without orchestrator service
         with patch_orch(False):
@@ -390,21 +390,21 @@ class TestHosts(unittest.TestCase):
             checks = {
                 'localhost': {
                     'sources': {
-                        'ceph': True,
+                        'stone': True,
                         'orchestrator': False
                     },
                     'labels': []
                 },
                 'node1': {
                     'sources': {
-                        'ceph': True,
+                        'stone': True,
                         'orchestrator': True
                     },
                     'labels': ['bar', 'foo']
                 },
                 'node2': {
                     'sources': {
-                        'ceph': False,
+                        'stone': False,
                         'orchestrator': True
                     },
                     'labels': ['bar']

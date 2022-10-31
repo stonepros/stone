@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
  *
@@ -23,8 +23,8 @@
 #include "common/async/context_pool.h"
 #include "common/config_fwd.h"
 #include "common/Cond.h"
-#include "common/ceph_mutex.h"
-#include "common/ceph_time.h"
+#include "common/stone_mutex.h"
+#include "common/stone_time.h"
 #include "common/config_obs.h"
 #include "include/common_fwd.h"
 #include "include/rados/librados.h"
@@ -49,12 +49,12 @@ class librados::RadosClient : public Dispatcher,
 public:
   using Dispatcher::cct;
 private:
-  std::unique_ptr<StoneeContext,
-		  std::function<void(StoneeContext*)>> cct_deleter;
+  std::unique_ptr<StoneContext,
+		  std::function<void(StoneContext*)>> cct_deleter;
 
 public:
   const ConfigProxy& conf{cct->_conf};
-  ceph::async::io_context_pool poolctx;
+  stone::async::io_context_pool poolctx;
 private:
   enum {
     DISCONNECTED,
@@ -78,8 +78,8 @@ private:
 
   Objecter *objecter{nullptr};
 
-  ceph::mutex lock = ceph::make_mutex("librados::RadosClient::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("librados::RadosClient::lock");
+  stone::condition_variable cond;
   int refcnt{1};
 
   version_t log_last_version{0};
@@ -91,14 +91,14 @@ private:
   bool service_daemon = false;
   string daemon_name, service_name;
   map<string,string> daemon_metadata;
-  ceph::timespan rados_mon_op_timeout{};
+  stone::timespan rados_mon_op_timeout{};
 
   int wait_for_osdmap();
 
 public:
   boost::asio::io_context::strand finish_strand{poolctx.get_io_context()};
 
-  explicit RadosClient(StoneeContext *cct);
+  explicit RadosClient(StoneContext *cct);
   ~RadosClient() override;
   int ping_monitor(std::string mon_id, std::string *result);
   int connect();
@@ -130,7 +130,7 @@ public:
   int pool_list(std::list<std::pair<int64_t, string> >& ls);
   int get_pool_stats(std::list<string>& ls, map<string,::pool_stat_t> *result,
     bool *per_pool);
-  int get_fs_stats(ceph_statfs& result);
+  int get_fs_stats(stone_statfs& result);
   bool get_pool_is_selfmanaged_snaps_mode(const std::string& pool);
 
   /*

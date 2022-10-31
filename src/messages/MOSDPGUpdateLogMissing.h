@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -27,7 +27,7 @@ public:
   epoch_t map_epoch = 0, min_epoch = 0;
   spg_t pgid;
   shard_id_t from;
-  ceph_tid_t rep_tid = 0;
+  stone_tid_t rep_tid = 0;
   mempool::osd_pglog::list<pg_log_entry_t> entries;
   // piggybacked osd/pg state
   eversion_t pg_trim_to; // primary->replica: trim to here
@@ -36,7 +36,7 @@ public:
   epoch_t get_epoch() const { return map_epoch; }
   spg_t get_pgid() const { return pgid; }
   epoch_t get_query_epoch() const { return map_epoch; }
-  ceph_tid_t get_tid() const { return rep_tid; }
+  stone_tid_t get_tid() const { return rep_tid; }
 
   epoch_t get_map_epoch() const override {
     return map_epoch;
@@ -57,7 +57,7 @@ public:
     shard_id_t from,
     epoch_t epoch,
     epoch_t min_epoch,
-    ceph_tid_t rep_tid,
+    stone_tid_t rep_tid,
     eversion_t pg_trim_to,
     eversion_t pg_roll_forward_to)
     : MOSDFastDispatchOp{MSG_OSD_PG_UPDATE_LOG_MISSING, HEAD_VERSION,
@@ -88,7 +88,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(map_epoch, payload);
     encode(pgid, payload);
     encode(from, payload);
@@ -99,7 +99,7 @@ public:
     encode(pg_roll_forward_to, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(map_epoch, p);
     decode(pgid, p);
@@ -118,7 +118,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

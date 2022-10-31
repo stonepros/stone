@@ -2,10 +2,10 @@
  Storage Devices
 =================
 
-There are two Ceph daemons that store data on devices:
+There are two Stone daemons that store data on devices:
 
-* **Ceph OSDs** (or Object Storage Daemons) are where most of the
-  data is stored in Ceph.  Generally speaking, each OSD is backed by
+* **Stone OSDs** (or Object Storage Daemons) are where most of the
+  data is stored in Stone.  Generally speaking, each OSD is backed by
   a single storage device, like a traditional hard disk (HDD) or
   solid state disk (SSD).  OSDs can also be backed by a combination
   of devices, like a HDD for most data and an SSD (or partition of an
@@ -13,7 +13,7 @@ There are two Ceph daemons that store data on devices:
   generally a function of how much data will be stored, how big each
   storage device will be, and the level and type of redundancy
   (replication or erasure coding).
-* **Ceph Monitor** daemons manage critical cluster state like cluster
+* **Stone Monitor** daemons manage critical cluster state like cluster
   membership and authentication information.  For smaller clusters a
   few gigabytes is all that is needed, although for larger clusters
   the monitor database can reach tens or possibly hundreds of
@@ -32,7 +32,7 @@ BlueStore
 ---------
 
 BlueStore is a special-purpose storage backend designed specifically
-for managing data on disk for Ceph OSD workloads.  It is motivated by
+for managing data on disk for Stone OSD workloads.  It is motivated by
 experience supporting and managing OSDs using FileStore over the
 last ten years.  Key BlueStore features include:
 
@@ -54,7 +54,7 @@ last ten years.  Key BlueStore features include:
   device (like an SSD, NVMe, or NVDIMM) to increased performance.  If
   a significant amount of faster storage is available, internal
   metadata can also be stored on the faster device.
-* Efficient copy-on-write.  RBD and CephFS snapshots rely on a
+* Efficient copy-on-write.  RBD and StoneFS snapshots rely on a
   copy-on-write *clone* mechanism that is implemented efficiently in
   BlueStore.  This results in efficient IO both for regular snapshots
   and for erasure coded pools (which rely on cloning to implement
@@ -65,7 +65,7 @@ For more information, see :doc:`bluestore-config-ref` and :doc:`/rados/operation
 FileStore
 ---------
 
-FileStore is the legacy approach to storing objects in Ceph.  It
+FileStore is the legacy approach to storing objects in Stone.  It
 relies on a standard file system (normally XFS) in combination with a
 key/value database (traditionally LevelDB, now RocksDB) for some
 metadata.
@@ -77,7 +77,7 @@ reliance on a traditional file system for storing object data.
 Although FileStore is generally capable of functioning on most
 POSIX-compatible file systems (including btrfs and ext4), we only
 recommend that XFS be used.  Both btrfs and ext4 have known bugs and
-deficiencies and their use may lead to data loss.  By default all Ceph
+deficiencies and their use may lead to data loss.  By default all Stone
 provisioning tools will use XFS.
 
 For more information, see :doc:`filestore-config-ref`.

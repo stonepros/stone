@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -18,7 +18,7 @@
 #ifndef STONE_ERASURE_CODE_PLUGIN_H
 #define STONE_ERASURE_CODE_PLUGIN_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "ErasureCodeInterface.h"
 
 extern "C" {
@@ -26,7 +26,7 @@ extern "C" {
   int __erasure_code_init(char *plugin_name, char *directory);
 }
 
-namespace ceph {
+namespace stone {
 
   class ErasureCodePlugin {
   public:
@@ -44,7 +44,7 @@ namespace ceph {
 
   class ErasureCodePluginRegistry {
   public:
-    ceph::mutex lock = ceph::make_mutex("ErasureCodePluginRegistry::lock");
+    stone::mutex lock = stone::make_mutex("ErasureCodePluginRegistry::lock");
     bool loading = false;
     bool disable_dlclose = false;
     std::map<std::string,ErasureCodePlugin*> plugins;

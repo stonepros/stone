@@ -1,8 +1,8 @@
 import re
 
-from ceph_volume.util.disk import human_readable_size
-from ceph_volume import process
-from ceph_volume import sys_info
+from stone_volume.util.disk import human_readable_size
+from stone_volume import process
+from stone_volume import sys_info
 
 report_template = """
 /dev/{geomname:<16} {mediasize:<16} {rotational!s:<7} {descr}"""

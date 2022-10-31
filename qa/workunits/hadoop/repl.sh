@@ -12,11 +12,11 @@ set -x
 # create pools with different replication factors
 for repl in 2 3 7 8 9; do
   name=hadoop.$repl
-  ceph osd pool create $name 8 8
-  ceph osd pool set $name size $repl
+  stone osd pool create $name 8 8
+  stone osd pool set $name size $repl
 
-  id=`ceph osd dump | sed -n "s/^pool \([0-9]*\) '$name'.*/\1/p"`
-  ceph fs add_data_pool cephfs $id
+  id=`stone osd dump | sed -n "s/^pool \([0-9]*\) '$name'.*/\1/p"`
+  stone fs add_data_pool stonefs $id
 done
 
 # create a file in each of the pools
@@ -24,7 +24,7 @@ for repl in 2 3 7 8 9; do
   name=hadoop.$repl
   $HADOOP_PREFIX/bin/hadoop fs -rm -f /$name.dat
   dd if=/dev/zero bs=1048576 count=1 | \
-    $HADOOP_PREFIX/bin/hadoop fs -Dceph.data.pools="$name" \
+    $HADOOP_PREFIX/bin/hadoop fs -Dstone.data.pools="$name" \
     -put - /$name.dat
 done
 

@@ -4,11 +4,11 @@ from unittest import mock
 
 import pytest
 
-from tests.fixtures import with_cephadm_ctx, cephadm_fs
+from tests.fixtures import with_stoneadm_ctx, stoneadm_fs
 
 with mock.patch('builtins.open', create=True):
     from importlib.machinery import SourceFileLoader
-    cd = SourceFileLoader('cephadm', 'cephadm').load_module()
+    cd = SourceFileLoader('stoneadm', 'stoneadm').load_module()
 
 
 class TestCommandListNetworks:
@@ -191,7 +191,7 @@ class TestCommandListNetworks:
         (
             dedent("""
             ::1 dev lo proto kernel metric 256 pref medium
-            fe80::/64 dev ceph-brx proto kernel metric 256 pref medium
+            fe80::/64 dev stone-brx proto kernel metric 256 pref medium
             fe80::/64 dev brx.0 proto kernel metric 256 pref medium
             default via fe80::327c:5e00:6487:71e0 dev enp3s0f1 proto ra metric 1024 expires 1790sec hoplimit 64 pref medium            """),
             dedent("""
@@ -201,7 +201,7 @@ class TestCommandListNetworks:
             5: enp3s0f1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000
                 inet6 fe80::ec4:7aff:fe8f:cb83/64 scope link noprefixroute
                    valid_lft forever preferred_lft forever
-            6: ceph-brx: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000
+            6: stone-brx: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000
                 inet6 fe80::d8a1:69ff:fede:8f58/64 scope link
                    valid_lft forever preferred_lft forever
             7: brx.0@eno1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 1000
@@ -211,7 +211,7 @@ class TestCommandListNetworks:
             {
                 'fe80::/64': {
                     'brx.0': {'fe80::a4cb:54ff:fecc:f2a2'},
-                    'ceph-brx': {'fe80::d8a1:69ff:fede:8f58'}
+                    'stone-brx': {'fe80::d8a1:69ff:fede:8f58'}
                 }
             }
         ),
@@ -220,8 +220,8 @@ class TestCommandListNetworks:
         assert cd._parse_ipv6_route(test_routes, test_ips) == expected
 
     @mock.patch.object(cd, 'call_throws', return_value=('10.4.0.1 dev tun0 proto kernel scope link src 10.4.0.2 metric 50\n', '', ''))
-    def test_command_list_networks(self, cephadm_fs, capsys):
-        with with_cephadm_ctx([]) as ctx:
+    def test_command_list_networks(self, stoneadm_fs, capsys):
+        with with_stoneadm_ctx([]) as ctx:
             cd.command_list_networks(ctx)
             assert json.loads(capsys.readouterr().out) == {
                 '10.4.0.1': {'tun0': ['10.4.0.2']}

@@ -315,7 +315,7 @@ using ACLGrantMap = std::multimap<std::string, ACLGrant>;
 class RGWAccessControlList
 {
 protected:
-  CephContext *cct;
+  StoneContext *cct;
   /* FIXME: in the feature we should consider switching to uint32_t also
    * in data structures. */
   map<string, int> acl_user_map;
@@ -324,10 +324,10 @@ protected:
   ACLGrantMap grant_map;
   void _add_grant(ACLGrant *grant);
 public:
-  explicit RGWAccessControlList(CephContext *_cct) : cct(_cct) {}
+  explicit RGWAccessControlList(StoneContext *_cct) : cct(_cct) {}
   RGWAccessControlList() : cct(NULL) {}
 
-  void set_ctx(CephContext *ctx) {
+  void set_ctx(StoneContext *ctx) {
     cct = ctx;
   }
 
@@ -438,16 +438,16 @@ WRITE_CLASS_ENCODER(ACLOwner)
 class RGWAccessControlPolicy
 {
 protected:
-  CephContext *cct;
+  StoneContext *cct;
   RGWAccessControlList acl;
   ACLOwner owner;
 
 public:
-  explicit RGWAccessControlPolicy(CephContext *_cct) : cct(_cct), acl(_cct) {}
+  explicit RGWAccessControlPolicy(StoneContext *_cct) : cct(_cct), acl(_cct) {}
   RGWAccessControlPolicy() : cct(NULL), acl(NULL) {}
   virtual ~RGWAccessControlPolicy() {}
 
-  void set_ctx(CephContext *ctx) {
+  void set_ctx(StoneContext *ctx) {
     cct = ctx;
     acl.set_ctx(ctx);
   }

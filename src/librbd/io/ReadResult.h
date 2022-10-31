@@ -63,8 +63,8 @@ public:
   ReadResult();
   ReadResult(char *buf, size_t buf_len);
   ReadResult(const struct iovec *iov, int iov_count);
-  ReadResult(ceph::bufferlist *bl);
-  ReadResult(Extents* extent_map, ceph::bufferlist* bl);
+  ReadResult(stone::bufferlist *bl);
+  ReadResult(Extents* extent_map, stone::bufferlist* bl);
 
   void set_image_extents(const Extents& image_extents);
 
@@ -92,19 +92,19 @@ private:
   };
 
   struct Bufferlist {
-    ceph::bufferlist *bl;
+    stone::bufferlist *bl;
 
-    Bufferlist(ceph::bufferlist *bl) : bl(bl) {
+    Bufferlist(stone::bufferlist *bl) : bl(bl) {
     }
   };
 
   struct SparseBufferlist {
     Extents *extent_map;
-    ceph::bufferlist *bl;
+    stone::bufferlist *bl;
 
     Extents image_extents;
 
-    SparseBufferlist(Extents* extent_map, ceph::bufferlist* bl)
+    SparseBufferlist(Extents* extent_map, stone::bufferlist* bl)
       : extent_map(extent_map), bl(bl) {
     }
   };

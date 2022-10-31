@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -133,7 +133,7 @@ class SyntheticClient {
 
   filepath n1;
   const char *get_random_subdir() {
-    ceph_assert(!subdirs.empty());
+    stone_assert(!subdirs.empty());
     int r = ((rand() % subdirs.size()) + (rand() % subdirs.size())) / 2;  // non-uniform distn
     set<string>::iterator it = subdirs.begin();
     while (r--) ++it;
@@ -144,7 +144,7 @@ class SyntheticClient {
   }
   filepath n2;
   const char *get_random_sub() {
-    ceph_assert(!contents.empty());
+    stone_assert(!contents.empty());
     int r = ((rand() % contents.size()) + (rand() % contents.size())) / 2;  // non-uniform distn
     if (cwd.depth() && cwd.last_dentry().length()) 
       r += cwd.last_dentry().c_str()[0];                                         // slightly permuted
@@ -208,7 +208,7 @@ class SyntheticClient {
   }
 
   bool time_to_stop() {
-    utime_t now = ceph_clock_now();
+    utime_t now = stone_clock_now();
     if (0) cout << "time_to_stop .. now " << now
 		<< " until " << run_until
 		<< " start " << run_start

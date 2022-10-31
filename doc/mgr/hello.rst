@@ -8,24 +8,24 @@ Enabling
 
 The *hello* module is enabled with::
 
-  ceph mgr module enable hello
+  stone mgr module enable hello
 
 To check that it is enabled, run::
 
-  ceph mgr module ls
+  stone mgr module ls
 
 After editing the module file (found in ``src/pybind/mgr/hello/module.py``), you can see changes by running::
 
-  ceph mgr module disable hello
-  ceph mgr module enable hello
+  stone mgr module disable hello
+  stone mgr module enable hello
 
 or::
 
-  init-ceph restart mgr
+  init-stone restart mgr
 
 To execute the module, run::
 
-  ceph hello
+  stone hello
 
 The log is found at::
 

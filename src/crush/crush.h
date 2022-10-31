@@ -399,7 +399,7 @@ struct crush_map {
 	__u32 chooseleaf_descend_once;
 	/*! Backward compatibility tunable. It is a fix for bad
          *  mappings implemented in 2014 at
-         *  https://github.com/ceph/ceph/pull/1185. It should always
+         *  https://github.com/stone/stone/pull/1185. It should always
          *  be set to 1 except for backward compatibility.
          *
          *  If non-zero, feed r into chooseleaf, bit-shifted right by
@@ -412,10 +412,10 @@ struct crush_map {
 
 	/*! Backward compatibility tunable. It is an improvement that
          *  avoids unnecessary mapping changes, implemented at
-         *  https://github.com/ceph/ceph/pull/6572 and explained in
+         *  https://github.com/stone/stone/pull/6572 and explained in
          *  this post: "chooseleaf may cause some unnecessary pg
          *  migrations" in October 2015
-         *  https://www.mail-archive.com/ceph-devel@vger.kernel.org/msg26075.html
+         *  https://www.mail-archive.com/stone-devel@vger.kernel.org/msg26075.html
          *  It should always be set to 1 except for backward compatibility.
          */
 	__u8 chooseleaf_stable;
@@ -439,7 +439,7 @@ struct crush_map {
 	/*! Backward compatibility tunable. It is a fix for the straw
          *  scaler values for the straw algorithm which is deprecated
          *  (straw2 replaces it) implemented at
-         *  https://github.com/ceph/ceph/pull/3057. It should always
+         *  https://github.com/stone/stone/pull/3057. It should always
          *  be set to 1 except for backward compatibility.
          *
 	 */

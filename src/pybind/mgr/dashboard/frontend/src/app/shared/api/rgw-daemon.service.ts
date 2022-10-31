@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { mergeMap, take, tap } from 'rxjs/operators';
 
-import { RgwDaemon } from '~/app/ceph/rgw/models/rgw-daemon';
+import { RgwDaemon } from '~/app/stone/rgw/models/rgw-daemon';
 import { cdEncode } from '~/app/shared/decorators/cd-encode';
 
 @cdEncode

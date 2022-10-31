@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 
 import _ from 'lodash';
 
-import { CephServiceService } from '~/app/shared/api/ceph-service.service';
+import { StoneServiceService } from '~/app/shared/api/stone-service.service';
 import { HostService } from '~/app/shared/api/host.service';
 import { OsdService } from '~/app/shared/api/osd.service';
-import { CephServiceSpec } from '~/app/shared/models/service.interface';
+import { StoneServiceSpec } from '~/app/shared/models/service.interface';
 import { DimlessBinaryPipe } from '~/app/shared/pipes/dimless-binary.pipe';
 import { WizardStepsService } from '~/app/shared/services/wizard-steps.service';
 
@@ -19,13 +19,13 @@ export class CreateClusterReviewComponent implements OnInit {
   hostsCount: number;
   totalDevices: number;
   totalCapacity = 0;
-  services: Array<CephServiceSpec> = [];
+  services: Array<StoneServiceSpec> = [];
   totalCPUs = 0;
   totalMemory = 0;
 
   constructor(
     public wizardStepsService: WizardStepsService,
-    public cephServiceService: CephServiceService,
+    public stoneServiceService: StoneServiceService,
     private dimlessBinary: DimlessBinaryPipe,
     public hostService: HostService,
     private osdService: OsdService

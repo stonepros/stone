@@ -99,7 +99,7 @@ protected:
   void set_enabled(bool status);
 
 public:
-  RGWSI_SysObj_Cache(const DoutPrefixProvider *dpp, CephContext *cct) : RGWSI_SysObj_Core(cct), asocket(dpp, this) {
+  RGWSI_SysObj_Cache(const DoutPrefixProvider *dpp, StoneContext *cct) : RGWSI_SysObj_Core(cct), asocket(dpp, this) {
     cache.set_ctx(cct);
   }
 
@@ -146,10 +146,10 @@ public:
 template <class T>
 class RGWChainedCacheImpl : public RGWChainedCache {
   RGWSI_SysObj_Cache *svc{nullptr};
-  ceph::timespan expiry;
+  stone::timespan expiry;
   RWLock lock;
 
-  std::unordered_map<std::string, std::pair<T, ceph::coarse_mono_time>> entries;
+  std::unordered_map<std::string, std::pair<T, stone::coarse_mono_time>> entries;
 
 public:
   RGWChainedCacheImpl() : lock("RGWChainedCacheImpl::lock") {}
@@ -181,7 +181,7 @@ public:
       return boost::none;
     }
     if (expiry.count() &&
-	(ceph::coarse_mono_clock::now() - iter->second.second) > expiry) {
+	(stone::coarse_mono_clock::now() - iter->second.second) > expiry) {
       return boost::none;
     }
 
@@ -205,7 +205,7 @@ public:
     std::unique_lock wl{lock};
     entries[key].first = *entry;
     if (expiry.count() > 0) {
-      entries[key].second = ceph::coarse_mono_clock::now();
+      entries[key].second = stone::coarse_mono_clock::now();
     }
   }
 

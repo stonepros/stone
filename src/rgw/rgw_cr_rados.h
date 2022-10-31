@@ -5,7 +5,7 @@
 #define STONE_RGW_CR_RADOS_H
 
 #include <boost/intrusive_ptr.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "rgw_coroutine.h"
 #include "rgw_sal.h"
 #include "rgw_sal_rados.h"
@@ -17,7 +17,7 @@
 #include "services/svc_sys_obj.h"
 #include "services/svc_bucket.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 class RGWAsyncRadosRequest : public RefCountedObject {
   RGWCoroutine *caller;
@@ -25,7 +25,7 @@ class RGWAsyncRadosRequest : public RefCountedObject {
 
   int retcode;
 
-  ceph::mutex lock = ceph::make_mutex("RGWAsyncRadosRequest::lock");
+  stone::mutex lock = stone::make_mutex("RGWAsyncRadosRequest::lock");
 
 protected:
   virtual int _send_request(const DoutPrefixProvider *dpp) = 0;
@@ -72,20 +72,20 @@ class RGWAsyncRadosProcessor {
   deque<RGWAsyncRadosRequest *> m_req_queue;
   std::atomic<bool> going_down = { false };
 protected:
-  CephContext *cct;
+  StoneContext *cct;
   ThreadPool m_tp;
   Throttle req_throttle;
 
   struct RGWWQ : public DoutPrefixProvider, public ThreadPool::WorkQueue<RGWAsyncRadosRequest> {
     RGWAsyncRadosProcessor *processor;
     RGWWQ(RGWAsyncRadosProcessor *p,
-	  ceph::timespan timeout, ceph::timespan suicide_timeout,
+	  stone::timespan timeout, stone::timespan suicide_timeout,
 	  ThreadPool *tp)
       : ThreadPool::WorkQueue<RGWAsyncRadosRequest>("RGWWQ", timeout, suicide_timeout, tp), processor(p) {}
 
     bool _enqueue(RGWAsyncRadosRequest *req) override;
     void _dequeue(RGWAsyncRadosRequest *req) override {
-      ceph_abort();
+      stone_abort();
     }
     bool _empty() override;
     RGWAsyncRadosRequest *_dequeue() override;
@@ -93,17 +93,17 @@ protected:
     void _process(RGWAsyncRadosRequest *req, ThreadPool::TPHandle& handle) override;
     void _dump_queue();
     void _clear() override {
-      ceph_assert(processor->m_req_queue.empty());
+      stone_assert(processor->m_req_queue.empty());
     }
 
-  CephContext *get_cct() const { return processor->cct; }
-  unsigned get_subsys() const { return ceph_subsys_rgw; }
+  StoneContext *get_cct() const { return processor->cct; }
+  unsigned get_subsys() const { return stone_subsys_rgw; }
   std::ostream& gen_prefix(std::ostream& out) const { return out << "rgw async rados processor: ";}
 
   } req_wq;
 
 public:
-  RGWAsyncRadosProcessor(CephContext *_cct, int num_threads);
+  RGWAsyncRadosProcessor(StoneContext *_cct, int num_threads);
   ~RGWAsyncRadosProcessor() {}
   void start();
   void stop();
@@ -279,13 +279,13 @@ private:
   } *req{nullptr};
 
  public:
-  RGWGenericAsyncCR(CephContext *_cct,
+  RGWGenericAsyncCR(StoneContext *_cct,
 		    RGWAsyncRadosProcessor *_async_rados,
 		    std::shared_ptr<Action>& _action) : RGWSimpleCoroutine(_cct),
                                                   async_rados(_async_rados),
                                                   action(_action) {}
   template<typename T>
-  RGWGenericAsyncCR(CephContext *_cct,
+  RGWGenericAsyncCR(StoneContext *_cct,
 		    RGWAsyncRadosProcessor *_async_rados,
 		    std::shared_ptr<T>& _action) : RGWSimpleCoroutine(_cct),
                                                   async_rados(_async_rados),
@@ -737,7 +737,7 @@ public:
   int send_request(const DoutPrefixProvider *dpp) override;
   int request_complete() override;
 
-  static std::string gen_random_cookie(CephContext* cct) {
+  static std::string gen_random_cookie(StoneContext* cct) {
 #define COOKIE_LEN 16
     char buf[COOKIE_LEN + 1];
     gen_rand_alphanumeric(cct, buf, sizeof(buf) - 1);
@@ -983,7 +983,7 @@ public:
 };
 
 class RGWFetchRemoteObjCR : public RGWSimpleCoroutine {
-  CephContext *cct;
+  StoneContext *cct;
   RGWAsyncRadosProcessor *async_rados;
   rgw::sal::RGWRadosStore *store;
   rgw_zone_id source_zone;
@@ -1071,7 +1071,7 @@ class RGWAsyncStatRemoteObj : public RGWAsyncRadosRequest {
   rgw_bucket src_bucket;
   rgw_obj_key key;
 
-  ceph::real_time *pmtime;
+  stone::real_time *pmtime;
   uint64_t *psize;
   string *petag;
   map<string, bufferlist> *pattrs;
@@ -1084,7 +1084,7 @@ public:
                          const rgw_zone_id& _source_zone,
                          rgw_bucket& _src_bucket,
                          const rgw_obj_key& _key,
-                         ceph::real_time *_pmtime,
+                         stone::real_time *_pmtime,
                          uint64_t *_psize,
                          string *_petag,
                          map<string, bufferlist> *_pattrs,
@@ -1100,7 +1100,7 @@ public:
 };
 
 class RGWStatRemoteObjCR : public RGWSimpleCoroutine {
-  CephContext *cct;
+  StoneContext *cct;
   RGWAsyncRadosProcessor *async_rados;
   rgw::sal::RGWRadosStore *store;
   rgw_zone_id source_zone;
@@ -1108,7 +1108,7 @@ class RGWStatRemoteObjCR : public RGWSimpleCoroutine {
   rgw_bucket src_bucket;
   rgw_obj_key key;
 
-  ceph::real_time *pmtime;
+  stone::real_time *pmtime;
   uint64_t *psize;
   string *petag;
   map<string, bufferlist> *pattrs;
@@ -1121,7 +1121,7 @@ public:
                       const rgw_zone_id& _source_zone,
                       rgw_bucket& _src_bucket,
                       const rgw_obj_key& _key,
-                      ceph::real_time *_pmtime,
+                      stone::real_time *_pmtime,
                       uint64_t *_psize,
                       string *_petag,
                       map<string, bufferlist> *_pattrs,
@@ -1176,7 +1176,7 @@ class RGWAsyncRemoveObj : public RGWAsyncRadosRequest {
   string marker_version_id;
 
   bool del_if_older;
-  ceph::real_time timestamp;
+  stone::real_time timestamp;
   rgw_zone_set zones_trace;
 
 protected:
@@ -1216,7 +1216,7 @@ public:
 
 class RGWRemoveObjCR : public RGWSimpleCoroutine {
   const DoutPrefixProvider *dpp;
-  CephContext *cct;
+  StoneContext *cct;
   RGWAsyncRadosProcessor *async_rados;
   rgw::sal::RGWRadosStore *store;
   rgw_zone_id source_zone;
@@ -1381,7 +1381,7 @@ class RGWRadosTimelogTrimCR : public RGWSimpleCoroutine {
 
 // wrapper to update last_trim_marker on success
 class RGWSyncLogTrimCR : public RGWRadosTimelogTrimCR {
-  CephContext *cct;
+  StoneContext *cct;
   std::string *last_trim_marker;
  public:
   static constexpr const char* max_marker = "99999999";

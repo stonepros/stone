@@ -4,7 +4,7 @@ import os
 
 @pytest.fixture()
 def node(host, request):
-    """ This fixture represents a single node in the ceph cluster. Using the
+    """ This fixture represents a single node in the stone cluster. Using the
     host.ansible fixture provided by testinfra it can access all the ansible
     variables provided to it by the specific test scenario being ran.
 
@@ -16,10 +16,10 @@ def node(host, request):
     # tox/jenkins/user will pass in this environment variable. we need to do it this way
     # because testinfra does not collect and provide ansible config passed in
     # from using --extra-vars
-    ceph_dev_branch = os.environ.get("CEPH_DEV_BRANCH", "master")
+    stone_dev_branch = os.environ.get("STONE_DEV_BRANCH", "master")
     group_names = ansible_vars["group_names"]
     num_osd_ports = 4
-    if 'mimic' in ceph_dev_branch or 'luminous' in ceph_dev_branch:
+    if 'mimic' in stone_dev_branch or 'luminous' in stone_dev_branch:
         num_osd_ports = 2
 
     # capture the initial/default state
@@ -52,14 +52,14 @@ def node(host, request):
     # If number of devices doesn't map to number of OSDs, allow tests to define
     # that custom number, defaulting it to ``num_devices``
     num_osds = ansible_vars.get('num_osds', num_osds)
-    cluster_name = ansible_vars.get("cluster", "ceph")
-    conf_path = "/etc/ceph/{}.conf".format(cluster_name)
+    cluster_name = ansible_vars.get("cluster", "stone")
+    conf_path = "/etc/stone/{}.conf".format(cluster_name)
     if "osds" in group_names:
         # I can assume eth2 because I know all the vagrant
         # boxes we test with use that interface. OSDs are the only
         # nodes that have this interface.
         cluster_address = host.interface("eth2").addresses[0]
-        cmd = host.run('sudo ls /var/lib/ceph/osd/ | sed "s/.*-//"')
+        cmd = host.run('sudo ls /var/lib/stone/osd/ | sed "s/.*-//"')
         if cmd.rc == 0:
             osd_ids = cmd.stdout.rstrip("\n").split("\n")
             osds = osd_ids

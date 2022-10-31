@@ -39,7 +39,7 @@ struct health_check_t {
     return !(l == r);
   }
 
-  void dump(ceph::Formatter *f, bool want_detail=true) const {
+  void dump(stone::Formatter *f, bool want_detail=true) const {
     f->dump_stream("severity") << severity;
 
     f->open_object_section("summary");
@@ -87,7 +87,7 @@ struct health_mute_t {
     DENC_FINISH(p);
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_string("code", code);
     if (ttl != utime_t()) {
       f->dump_stream("ttl") << ttl;
@@ -118,7 +118,7 @@ struct health_check_map_t {
     DENC_FINISH(p);
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     for (auto& [code, check] : checks) {
       f->dump_object(code, check);
     }
@@ -154,7 +154,7 @@ struct health_check_map_t {
 		      health_status_t severity,
 		      const std::string& summary,
 		      int64_t count) {
-    ceph_assert(checks.count(code) == 0);
+    stone_assert(checks.count(code) == 0);
     health_check_t& r = checks[code];
     r.severity = severity;
     r.summary = summary;

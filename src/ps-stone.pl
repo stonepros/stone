@@ -2,7 +2,7 @@
 use strict;
 
 #
-# ps-ceph.pl: Displays a list of ceph processes running locally
+# ps-stone.pl: Displays a list of stone processes running locally
 #
 # Copyright (C) 2010, Dreamhost
 #
@@ -12,18 +12,18 @@ use strict;
 # Foundation.  See file COPYING.
 #
 
-sub is_ceph_proc {
+sub is_stone_proc {
         my $cmdline = @_[0];
-        return 0 if $cmdline =~ /\bps-ceph.pl\b/;
+        return 0 if $cmdline =~ /\bps-stone.pl\b/;
 
-        return 1 if $cmdline =~ /\bceph\b/;
-        return 1 if $cmdline =~ /\bceph-fuse\b/;
+        return 1 if $cmdline =~ /\bstone\b/;
+        return 1 if $cmdline =~ /\bstone-fuse\b/;
         return 1 if $cmdline =~ /\brbd-nbd\b/;
         return 1 if $cmdline =~ /\brbd-fuse\b/;
-        return 1 if $cmdline =~ /\bceph-mds\b/;
-        return 1 if $cmdline =~ /\bceph-mon\b/;
-        return 1 if $cmdline =~ /\bceph-osd\b/;
-        return 1 if $cmdline =~ /\bceph-mgr\b/;
+        return 1 if $cmdline =~ /\bstone-mds\b/;
+        return 1 if $cmdline =~ /\bstone-mon\b/;
+        return 1 if $cmdline =~ /\bstone-osd\b/;
+        return 1 if $cmdline =~ /\bstone-mgr\b/;
         return 1 if $cmdline =~ /\brbd-mirror\b/;
         return 1 if $cmdline =~ /\bradosgw\b/;
         return 1 if $cmdline =~ /\bosdmaptool\b/;
@@ -42,7 +42,7 @@ while(my $pid = readdir PROC) {
         my $cmdline = <CMDLINE>;
         $cmdline =~ s/[^\x20-\x7e]/ /g;
         close CMDLINE;
-        if (is_ceph_proc($cmdline)) {
+        if (is_stone_proc($cmdline)) {
                 print "$pid\t$cmdline\n";
         }
 }

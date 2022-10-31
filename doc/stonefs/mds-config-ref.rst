@@ -29,7 +29,7 @@
 
 ``mds_dir_commit_ratio``
 
-:Description: The fraction of directory that is dirty before Ceph commits using 
+:Description: The fraction of directory that is dirty before Stone commits using 
               a full update (instead of partial update).
 
 :Type:  Float
@@ -38,7 +38,7 @@
 
 ``mds_dir_max_commit_size``
 
-:Description: The maximum size of a directory update before Ceph breaks it into 
+:Description: The maximum size of a directory update before Stone breaks it into 
               smaller transactions (MB).
               
 :Type:  32-bit Integer
@@ -68,7 +68,7 @@
 
 ``mds_beacon_grace``
 
-:Description: The interval without beacons before Ceph declares an MDS laggy 
+:Description: The interval without beacons before Stone declares an MDS laggy 
               (and possibly replace it).
               
 :Type:  Float
@@ -179,7 +179,7 @@
 
 ``mds_bal_replicate_threshold``
 
-:Description: The maximum temperature before Ceph attempts to replicate 
+:Description: The maximum temperature before Stone attempts to replicate 
               metadata to other nodes.
               
 :Type:  Float
@@ -188,7 +188,7 @@
 
 ``mds_bal_unreplicate_threshold``
 
-:Description: The minimum temperature before Ceph stops replicating 
+:Description: The minimum temperature before Stone stops replicating 
               metadata to other nodes.
               
 :Type:  Float
@@ -206,7 +206,7 @@
 
 ``mds_bal_split_rd``
 
-:Description: The maximum directory read temperature before Ceph splits 
+:Description: The maximum directory read temperature before Stone splits 
               a directory fragment.
               
 :Type:  Float
@@ -215,7 +215,7 @@
 
 ``mds_bal_split_wr``
 
-:Description: The maximum directory write temperature before Ceph splits 
+:Description: The maximum directory write temperature before Stone splits 
               a directory fragment.
               
 :Type:  Float
@@ -231,7 +231,7 @@
 
 ``mds_bal_merge_size``
 
-:Description: The minimum directory size before Ceph tries to merge 
+:Description: The minimum directory size before Stone tries to merge 
               adjacent directory fragments.
               
 :Type:  32-bit Integer
@@ -269,7 +269,7 @@
 
 ``mds_bal_idle_threshold``
 
-:Description: The minimum temperature before Ceph migrates a subtree 
+:Description: The minimum temperature before Stone migrates a subtree 
               back to its parent.
               
 :Type:  Float
@@ -278,7 +278,7 @@
 
 ``mds_bal_max``
 
-:Description: The number of iterations to run balancer before Ceph stops. 
+:Description: The number of iterations to run balancer before Stone stops. 
               (used for testing purposes only)
 
 :Type:  32-bit Integer
@@ -287,7 +287,7 @@
 
 ``mds_bal_max_until``
 
-:Description: The number of seconds to run balancer before Ceph stops. 
+:Description: The number of seconds to run balancer before Stone stops. 
               (used for testing purposes only)
 
 :Type:  32-bit Integer
@@ -308,14 +308,14 @@
 
 ``mds_bal_min_rebalance``
 
-:Description: The minimum subtree temperature before Ceph migrates.
+:Description: The minimum subtree temperature before Stone migrates.
 :Type:  Float
 :Default: ``0.1``
 
 
 ``mds_bal_min_start``
 
-:Description: The minimum subtree temperature before Ceph searches a subtree.
+:Description: The minimum subtree temperature before Stone searches a subtree.
 :Type:  Float
 :Default: ``0.2``
 
@@ -336,7 +336,7 @@
 
 ``mds_bal_midchunk``
 
-:Description: Ceph will migrate any subtree that is larger than this fraction 
+:Description: Stone will migrate any subtree that is larger than this fraction 
               of the target subtree size.
               
 :Type:  Float
@@ -345,7 +345,7 @@
 
 ``mds_bal_minchunk``
 
-:Description: Ceph will ignore any subtree that is smaller than this fraction 
+:Description: Stone will ignore any subtree that is smaller than this fraction 
               of the target subtree size.
               
 :Type:  Float
@@ -354,7 +354,7 @@
 
 ``mds_bal_target_removal_min``
 
-:Description: The minimum number of balancer iterations before Ceph removes
+:Description: The minimum number of balancer iterations before Stone removes
               an old MDS target from the MDS map.
               
 :Type:  32-bit Integer
@@ -363,7 +363,7 @@
 
 ``mds_bal_target_removal_max``
 
-:Description: The maximum number of balancer iterations before Ceph removes 
+:Description: The maximum number of balancer iterations before Stone removes 
               an old MDS target from the MDS map.
               
 :Type:  32-bit Integer
@@ -388,28 +388,28 @@
 
 ``mds_thrash_exports``
 
-:Description: Ceph will randomly export subtrees between nodes (testing only).
+:Description: Stone will randomly export subtrees between nodes (testing only).
 :Type:  32-bit Integer
 :Default: ``0``
 
 
 ``mds_thrash_fragments``
 
-:Description: Ceph will randomly fragment or merge directories.
+:Description: Stone will randomly fragment or merge directories.
 :Type:  32-bit Integer
 :Default: ``0``
 
 
 ``mds_dump_cache_on_map``
 
-:Description: Ceph will dump the MDS cache contents to a file on each MDSMap.
+:Description: Stone will dump the MDS cache contents to a file on each MDSMap.
 :Type:  Boolean
 :Default:  ``false``
 
 
 ``mds_dump_cache_after_rejoin``
 
-:Description: Ceph will dump MDS cache contents to a file after 
+:Description: Stone will dump MDS cache contents to a file after 
               rejoining the cache (during recovery).
               
 :Type:  Boolean
@@ -418,7 +418,7 @@
 
 ``mds_verify_scatter``
 
-:Description: Ceph will assert that various scatter/gather invariants 
+:Description: Stone will assert that various scatter/gather invariants 
               are ``true`` (developers only).
               
 :Type:  Boolean
@@ -427,7 +427,7 @@
 
 ``mds_debug_scatterstat``
 
-:Description: Ceph will assert that various recursive stat invariants 
+:Description: Stone will assert that various recursive stat invariants 
               are ``true`` (for developers only).
               
 :Type:  Boolean
@@ -436,7 +436,7 @@
 
 ``mds_debug_frag``
 
-:Description: Ceph will verify directory fragmentation invariants 
+:Description: Stone will verify directory fragmentation invariants 
               when convenient (developers only).
               
 :Type:  Boolean
@@ -459,7 +459,7 @@
 
 ``mds_kill_mdstable_at``
 
-:Description: Ceph will inject MDS failure in MDSTable code 
+:Description: Stone will inject MDS failure in MDSTable code 
               (for developers only).
               
 :Type:  32-bit Integer
@@ -468,7 +468,7 @@
 
 ``mds_kill_export_at``
 
-:Description: Ceph will inject MDS failure in the subtree export code 
+:Description: Stone will inject MDS failure in the subtree export code 
               (for developers only).
               
 :Type:  32-bit Integer
@@ -477,7 +477,7 @@
 
 ``mds_kill_import_at``
 
-:Description: Ceph will inject MDS failure in the subtree import code 
+:Description: Stone will inject MDS failure in the subtree import code 
               (for developers only).
               
 :Type:  32-bit Integer
@@ -486,7 +486,7 @@
 
 ``mds_kill_link_at``
 
-:Description: Ceph will inject MDS failure in hard link code 
+:Description: Stone will inject MDS failure in hard link code 
               (for developers only).
               
 :Type:  32-bit Integer
@@ -495,7 +495,7 @@
 
 ``mds_kill_rename_at``
 
-:Description: Ceph will inject MDS failure in the rename code 
+:Description: Stone will inject MDS failure in the rename code 
               (for developers only).
               
 :Type:  32-bit Integer
@@ -504,7 +504,7 @@
 
 ``mds_wipe_sessions``
 
-:Description: Ceph will delete all client sessions on startup 
+:Description: Stone will delete all client sessions on startup 
               (for testing only).
               
 :Type:  Boolean
@@ -513,7 +513,7 @@
 
 ``mds_wipe_ino_prealloc``
 
-:Description: Ceph will delete ino preallocation metadata on startup 
+:Description: Stone will delete ino preallocation metadata on startup 
               (for testing only).
               
 :Type:  Boolean

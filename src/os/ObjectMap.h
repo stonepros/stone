@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -30,26 +30,26 @@ class SequencerPosition;
  */
 class ObjectMap {
 public:
-  CephContext* cct;
+  StoneContext* cct;
   boost::scoped_ptr<KeyValueDB> db;
   /// std::Set keys and values from specified map
   virtual int set_keys(
     const ghobject_t &oid,              ///< [in] object containing map
-    const std::map<std::string, ceph::buffer::list> &set,  ///< [in] key to value map to set
+    const std::map<std::string, stone::buffer::list> &set,  ///< [in] key to value map to set
     const SequencerPosition *spos=0     ///< [in] sequencer position
     ) = 0;
 
   /// std::Set header
   virtual int set_header(
     const ghobject_t &oid,              ///< [in] object containing map
-    const ceph::buffer::list &bl,               ///< [in] header to set
+    const stone::buffer::list &bl,               ///< [in] header to set
     const SequencerPosition *spos=0     ///< [in] sequencer position
     ) = 0;
 
   /// Retrieve header
   virtual int get_header(
     const ghobject_t &oid,              ///< [in] object containing map
-    ceph::buffer::list *bl                      ///< [out] header to set
+    stone::buffer::list *bl                      ///< [out] header to set
     ) = 0;
 
   /// Clear all map keys and values from oid
@@ -74,8 +74,8 @@ public:
   /// Get all keys and values
   virtual int get(
     const ghobject_t &oid,             ///< [in] object containing map
-    ceph::buffer::list *header,                ///< [out] Returned Header
-    std::map<std::string, ceph::buffer::list> *out       ///< [out] Returned keys and values
+    stone::buffer::list *header,                ///< [out] Returned Header
+    std::map<std::string, stone::buffer::list> *out       ///< [out] Returned keys and values
     ) = 0;
 
   /// Get values for supplied keys
@@ -88,7 +88,7 @@ public:
   virtual int get_values(
     const ghobject_t &oid,             ///< [in] object containing map
     const std::set<std::string> &keys,           ///< [in] Keys to get
-    std::map<std::string, ceph::buffer::list> *out       ///< [out] Returned keys and values
+    std::map<std::string, stone::buffer::list> *out       ///< [out] Returned keys and values
     ) = 0;
 
   /// Check key existence
@@ -102,7 +102,7 @@ public:
   virtual int get_xattrs(
     const ghobject_t &oid,             ///< [in] object
     const std::set<std::string> &to_get,         ///< [in] keys to get
-    std::map<std::string, ceph::buffer::list> *out       ///< [out] subset of attrs/vals defined
+    std::map<std::string, stone::buffer::list> *out       ///< [out] subset of attrs/vals defined
     ) = 0;
 
   /// Get all xattrs
@@ -114,7 +114,7 @@ public:
   /// std::set xattrs in to_set
   virtual int set_xattrs(
     const ghobject_t &oid,                ///< [in] object
-    const std::map<std::string, ceph::buffer::list> &to_set,///< [in] attrs/values to set
+    const std::map<std::string, stone::buffer::list> &to_set,///< [in] attrs/values to set
     const SequencerPosition *spos=0     ///< [in] sequencer position
     ) = 0;
 
@@ -165,7 +165,7 @@ public:
 
   virtual KeyValueDB *get_db() { return nullptr; }
 
-  ObjectMap(CephContext* cct, KeyValueDB *db) : cct(cct), db(db) {}
+  ObjectMap(StoneContext* cct, KeyValueDB *db) : cct(cct), db(db) {}
   virtual ~ObjectMap() {}
 };
 

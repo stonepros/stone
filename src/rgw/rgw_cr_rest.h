@@ -5,7 +5,7 @@
 
 #include <boost/intrusive_ptr.hpp>
 #include <mutex>
-#include "include/ceph_assert.h" // boost header clobbers our assert.h
+#include "include/stone_assert.h" // boost header clobbers our assert.h
 
 #include "rgw_coroutine.h"
 #include "rgw_rest_conn.h"
@@ -33,21 +33,21 @@ class RGWReadRawRESTResourceCR : public RGWSimpleCoroutine {
   param_vec_t extra_headers;
 public:
   boost::intrusive_ptr<RGWRESTReadResource> http_op;
-  RGWReadRawRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWReadRawRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                            RGWHTTPManager *_http_manager, const string& _path,
                            rgw_http_param_pair *params, bufferlist *_result)
     : RGWSimpleCoroutine(_cct), result(_result), conn(_conn), http_manager(_http_manager),
     path(_path), params(make_param_list(params))
   {}
 
- RGWReadRawRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+ RGWReadRawRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                           RGWHTTPManager *_http_manager, const string& _path,
                           rgw_http_param_pair *params)
    : RGWSimpleCoroutine(_cct), conn(_conn), http_manager(_http_manager),
     path(_path), params(make_param_list(params))
   {}
 
-  RGWReadRawRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWReadRawRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                            RGWHTTPManager *_http_manager, const string& _path,
                            rgw_http_param_pair *params, param_vec_t &hdrs)
     : RGWSimpleCoroutine(_cct), conn(_conn), http_manager(_http_manager),
@@ -55,7 +55,7 @@ public:
       extra_headers(hdrs)
   {}
 
- RGWReadRawRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+ RGWReadRawRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                           RGWHTTPManager *_http_manager, const string& _path,
                           rgw_http_param_pair *params,
                           std::map <std::string, std::string> *hdrs)
@@ -122,13 +122,13 @@ template <class T>
 class RGWReadRESTResourceCR : public RGWReadRawRESTResourceCR {
   T *result;
  public:
- RGWReadRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+ RGWReadRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                        RGWHTTPManager *_http_manager, const string& _path,
                        rgw_http_param_pair *params, T *_result)
    : RGWReadRawRESTResourceCR(_cct, _conn, _http_manager, _path, params), result(_result)
   {}
 
-  RGWReadRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWReadRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                         RGWHTTPManager *_http_manager, const string& _path,
                         rgw_http_param_pair *params,
                         std::map <std::string, std::string> *hdrs,
@@ -159,7 +159,7 @@ class RGWSendRawRESTResourceCR: public RGWSimpleCoroutine {
   boost::intrusive_ptr<RGWRESTSendResource> http_op;
 
  public:
- RGWSendRawRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+ RGWSendRawRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                           RGWHTTPManager *_http_manager,
                           const string& _method, const string& _path,
                           rgw_http_param_pair *_params,
@@ -173,7 +173,7 @@ class RGWSendRawRESTResourceCR: public RGWSimpleCoroutine {
      result(_result), err_result(_err_result),
      input_bl(_input), send_content_length(_send_content_length) {}
 
-  RGWSendRawRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWSendRawRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                           RGWHTTPManager *_http_manager,
                           const string& _method, const string& _path,
                           rgw_http_param_pair *_params, map<string, string> *_attrs,
@@ -234,7 +234,7 @@ class RGWSendRawRESTResourceCR: public RGWSimpleCoroutine {
 template <class S, class T, class E = int>
 class RGWSendRESTResourceCR : public RGWSendRawRESTResourceCR<T, E> {
  public:
-  RGWSendRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWSendRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                            RGWHTTPManager *_http_manager,
                            const string& _method, const string& _path,
                         rgw_http_param_pair *_params, map<string, string> *_attrs,
@@ -254,7 +254,7 @@ class RGWSendRESTResourceCR : public RGWSendRawRESTResourceCR<T, E> {
 template <class S, class T, class E = int>
 class RGWPostRESTResourceCR : public RGWSendRESTResourceCR<S, T, E> {
 public:
-  RGWPostRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWPostRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                         RGWHTTPManager *_http_manager,
                         const string& _path,
                         rgw_http_param_pair *_params, S& _input,
@@ -268,7 +268,7 @@ public:
 template <class T, class E = int>
 class RGWPutRawRESTResourceCR: public RGWSendRawRESTResourceCR <T, E> {
  public:
-  RGWPutRawRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWPutRawRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                           RGWHTTPManager *_http_manager,
                           const string& _path,
                           rgw_http_param_pair *_params, bufferlist& _input,
@@ -281,7 +281,7 @@ class RGWPutRawRESTResourceCR: public RGWSendRawRESTResourceCR <T, E> {
 template <class T, class E = int>
 class RGWPostRawRESTResourceCR: public RGWSendRawRESTResourceCR <T, E> {
  public:
-  RGWPostRawRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWPostRawRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                           RGWHTTPManager *_http_manager,
                           const string& _path,
                           rgw_http_param_pair *_params,
@@ -297,7 +297,7 @@ class RGWPostRawRESTResourceCR: public RGWSendRawRESTResourceCR <T, E> {
 template <class S, class T, class E = int>
 class RGWPutRESTResourceCR : public RGWSendRESTResourceCR<S, T, E> {
 public:
-  RGWPutRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWPutRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                         RGWHTTPManager *_http_manager,
                         const string& _path,
                         rgw_http_param_pair *_params, S& _input,
@@ -307,7 +307,7 @@ public:
                                   _params, nullptr, _input,
                                   _result, _err_result) {}
 
-  RGWPutRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWPutRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                        RGWHTTPManager *_http_manager,
                        const string& _path,
                        rgw_http_param_pair *_params,
@@ -329,7 +329,7 @@ class RGWDeleteRESTResourceCR : public RGWSimpleCoroutine {
   boost::intrusive_ptr<RGWRESTDeleteResource> http_op;
 
 public:
-  RGWDeleteRESTResourceCR(CephContext *_cct, RGWRESTConn *_conn,
+  RGWDeleteRESTResourceCR(StoneContext *_cct, RGWRESTConn *_conn,
                         RGWHTTPManager *_http_manager,
                         const string& _path,
                         rgw_http_param_pair *_params)
@@ -385,7 +385,7 @@ public:
 };
 
 class RGWCRHTTPGetDataCB : public RGWHTTPStreamRWRequest::ReceiveCB {
-  ceph::mutex lock = ceph::make_mutex("RGWCRHTTPGetDataCB");
+  stone::mutex lock = stone::make_mutex("RGWCRHTTPGetDataCB");
   RGWCoroutinesEnv *env;
   RGWCoroutine *cr;
   RGWHTTPStreamRWRequest *req;
@@ -445,7 +445,7 @@ public:
 };
 
 class RGWStreamReadHTTPResourceCRF : public RGWStreamReadResourceCRF {
-  CephContext *cct;
+  StoneContext *cct;
   RGWCoroutinesEnv *env;
   RGWCoroutine *caller;
   RGWHTTPManager *http_manager;
@@ -470,11 +470,11 @@ protected:
     uint64_t size;
   } range;
 
-  ceph::real_time mtime;
+  stone::real_time mtime;
   string etag;
 
 public:
-  RGWStreamReadHTTPResourceCRF(CephContext *_cct,
+  RGWStreamReadHTTPResourceCRF(StoneContext *_cct,
                                RGWCoroutinesEnv *_env,
                                RGWCoroutine *_caller,
                                RGWHTTPManager *_http_manager,
@@ -537,7 +537,7 @@ protected:
   } write_drain_notify_cb;
 
 public:
-  RGWStreamWriteHTTPResourceCRF(CephContext *_cct,
+  RGWStreamWriteHTTPResourceCRF(StoneContext *_cct,
                                RGWCoroutinesEnv *_env,
                                RGWCoroutine *_caller,
                                RGWHTTPManager *_http_manager) : env(_env),
@@ -570,7 +570,7 @@ public:
 };
 
 class RGWStreamSpliceCR : public RGWCoroutine {
-  CephContext *cct;
+  StoneContext *cct;
   RGWHTTPManager *http_manager;
   string url;
   std::shared_ptr<RGWStreamReadHTTPResourceCRF> in_crf;
@@ -581,7 +581,7 @@ class RGWStreamSpliceCR : public RGWCoroutine {
   uint64_t total_read{0};
   int ret{0};
 public:
-  RGWStreamSpliceCR(CephContext *_cct, RGWHTTPManager *_mgr,
+  RGWStreamSpliceCR(StoneContext *_cct, RGWHTTPManager *_mgr,
                     std::shared_ptr<RGWStreamReadHTTPResourceCRF>& _in_crf,
                     std::shared_ptr<RGWStreamWriteHTTPResourceCRF>& _out_crf);
   ~RGWStreamSpliceCR();

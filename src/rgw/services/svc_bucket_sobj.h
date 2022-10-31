@@ -3,7 +3,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -81,7 +81,7 @@ public:
     RGWSI_Bucket_Sync *bucket_sync{nullptr};
   } svc;
 
-  RGWSI_Bucket_SObj(CephContext *cct);
+  RGWSI_Bucket_SObj(StoneContext *cct);
   ~RGWSI_Bucket_SObj();
 
   RGWSI_Bucket_BE_Handler& get_ep_be_handler() override {

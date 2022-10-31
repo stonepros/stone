@@ -13,14 +13,14 @@
  * glibc shipped with GNU/Linux for the return type of pthread_self().
  *
  * Introduced a conversion function in include/compat.h
- *     (uint64_t)ceph_pthread_self()
+ *     (uint64_t)stone_pthread_self()
  *
  * libc returns an opague pthread_t that is not default convertable
  * to a uint64_t, which is what gtest expects.
  * And tests using gtest will not compile because of this difference.
  * 
  */
-static uint64_t ceph_pthread_self() {
+static uint64_t stone_pthread_self() {
   auto me = pthread_self();
   static_assert(std::is_convertible_v<decltype(me), uint64_t> ||
                 std::is_pointer_v<decltype(me)>,

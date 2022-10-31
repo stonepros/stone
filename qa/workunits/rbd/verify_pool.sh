@@ -4,13 +4,13 @@ POOL_NAME=rbd_test_validate_pool
 PG_NUM=32
 
 tear_down () {
-  ceph osd pool delete $POOL_NAME $POOL_NAME --yes-i-really-really-mean-it || true
+  stone osd pool delete $POOL_NAME $POOL_NAME --yes-i-really-really-mean-it || true
 }
 
 set_up () {
   tear_down
-  ceph osd pool create $POOL_NAME $PG_NUM
-  ceph osd pool mksnap $POOL_NAME snap
+  stone osd pool create $POOL_NAME $PG_NUM
+  stone osd pool mksnap $POOL_NAME snap
   rbd pool init $POOL_NAME
 }
 

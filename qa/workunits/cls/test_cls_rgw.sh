@@ -1,8 +1,8 @@
 #!/bin/sh -e
 
-ceph_test_cls_rgw
-#ceph_test_cls_rgw_meta
-#ceph_test_cls_rgw_log
-#ceph_test_cls_rgw_opstate
+stone_test_cls_rgw
+#stone_test_cls_rgw_meta
+#stone_test_cls_rgw_log
+#stone_test_cls_rgw_opstate
 
 exit 0

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -23,7 +23,7 @@
 #include <vector>
 #include <thread>
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/debug.h"
 #include "common/errno.h"
 #include "msg/async/Stack.h"
@@ -39,7 +39,7 @@ class RDMADispatcher {
   typedef Infiniband::QueuePair QueuePair;
 
   std::thread t;
-  StoneeContext *cct;
+  StoneContext *cct;
   std::shared_ptr<Infiniband> ib;
   Infiniband::CompletionQueue* tx_cq = nullptr;
   Infiniband::CompletionQueue* rx_cq = nullptr;
@@ -47,7 +47,7 @@ class RDMADispatcher {
   bool done = false;
   std::atomic<uint64_t> num_qp_conn = {0};
   // protect `qp_conns`, `dead_queue_pairs`
-  ceph::mutex lock = ceph::make_mutex("RDMADispatcher::lock");
+  stone::mutex lock = stone::make_mutex("RDMADispatcher::lock");
   // qp_num -> InfRcConnection
   // The main usage of `qp_conns` is looking up connection by qp_num,
   // so the lifecycle of element in `qp_conns` is the lifecycle of qp.
@@ -61,7 +61,7 @@ class RDMADispatcher {
    *
    * @param qp The qp needed to dead
    */
-  ceph::unordered_map<uint32_t, std::pair<QueuePair*, RDMAConnectedSocketImpl*> > qp_conns;
+  stone::unordered_map<uint32_t, std::pair<QueuePair*, RDMAConnectedSocketImpl*> > qp_conns;
 
   /// if a queue pair is closed when transmit buffers are active
   /// on it, the transmit buffers never get returned via tx_cq.  To
@@ -72,8 +72,8 @@ class RDMADispatcher {
 
   std::atomic<uint64_t> num_pending_workers = {0};
   // protect pending workers
-  ceph::mutex w_lock =
-    ceph::make_mutex("RDMADispatcher::for worker pending list");
+  stone::mutex w_lock =
+    stone::make_mutex("RDMADispatcher::for worker pending list");
   // fixme: lockfree
   std::list<RDMAWorker*> pending_workers;
   void enqueue_dead_qp_lockless(uint32_t qp);
@@ -82,7 +82,7 @@ class RDMADispatcher {
  public:
   PerfCounters *perf_logger;
 
-  explicit RDMADispatcher(StoneeContext* c, std::shared_ptr<Infiniband>& ib);
+  explicit RDMADispatcher(StoneContext* c, std::shared_ptr<Infiniband>& ib);
   virtual ~RDMADispatcher();
   void handle_async_event();
 
@@ -125,7 +125,7 @@ class RDMAWorker : public Worker {
   EventCallbackRef tx_handler;
   std::list<RDMAConnectedSocketImpl*> pending_sent_conns;
   std::shared_ptr<RDMADispatcher> dispatcher;
-  ceph::mutex lock = ceph::make_mutex("RDMAWorker::lock");
+  stone::mutex lock = stone::make_mutex("RDMAWorker::lock");
 
   class C_handle_cq_tx : public EventCallback {
     RDMAWorker *worker;
@@ -138,7 +138,7 @@ class RDMAWorker : public Worker {
 
  public:
   PerfCounters *perf_logger;
-  explicit RDMAWorker(StoneeContext *c, unsigned i);
+  explicit RDMAWorker(StoneContext *c, unsigned i);
   virtual ~RDMAWorker();
   virtual int listen(entity_addr_t &addr,
 		     unsigned addr_slot,
@@ -147,7 +147,7 @@ class RDMAWorker : public Worker {
   virtual void initialize() override;
   int get_reged_mem(RDMAConnectedSocketImpl *o, std::vector<Chunk*> &c, size_t bytes);
   void remove_pending_conn(RDMAConnectedSocketImpl *o) {
-    ceph_assert(center.in_thread());
+    stone_assert(center.in_thread());
     pending_sent_conns.remove(o);
   }
   void handle_pending_message();
@@ -173,7 +173,7 @@ class RDMAConnectedSocketImpl : public ConnectedSocketImpl {
   typedef Infiniband::CompletionQueue CompletionQueue;
 
  protected:
-  StoneeContext *cct;
+  StoneContext *cct;
   Infiniband::QueuePair *qp;
   uint32_t peer_qpn = 0;
   uint32_t local_qpn = 0;
@@ -184,9 +184,9 @@ class RDMAConnectedSocketImpl : public ConnectedSocketImpl {
   RDMAWorker* worker;
   std::vector<Chunk*> buffers;
   int notify_fd = -1;
-  ceph::buffer::list pending_bl;
+  stone::buffer::list pending_bl;
 
-  ceph::mutex lock = ceph::make_mutex("RDMAConnectedSocketImpl::lock");
+  stone::mutex lock = stone::make_mutex("RDMAConnectedSocketImpl::lock");
   std::vector<ibv_wc> wc;
   bool is_server;
   EventCallbackRef read_handler;
@@ -205,7 +205,7 @@ class RDMAConnectedSocketImpl : public ConnectedSocketImpl {
       const decltype(std::cbegin(pending_bl.buffers()))& end);
 
  public:
-  RDMAConnectedSocketImpl(StoneeContext *cct, std::shared_ptr<Infiniband>& ib,
+  RDMAConnectedSocketImpl(StoneContext *cct, std::shared_ptr<Infiniband>& ib,
 			  std::shared_ptr<RDMADispatcher>& rdma_dispatcher, RDMAWorker *w);
   virtual ~RDMAConnectedSocketImpl();
 
@@ -214,7 +214,7 @@ class RDMAConnectedSocketImpl : public ConnectedSocketImpl {
   virtual int is_connected() override { return connected; }
 
   virtual ssize_t read(char* buf, size_t len) override;
-  virtual ssize_t send(ceph::buffer::list &bl, bool more) override;
+  virtual ssize_t send(stone::buffer::list &bl, bool more) override;
   virtual void shutdown() override;
   virtual void close() override;
   virtual int fd() const override { return notify_fd; }
@@ -251,7 +251,7 @@ enum RDMA_CM_STATUS {
 
 class RDMAIWARPConnectedSocketImpl : public RDMAConnectedSocketImpl {
   public:
-  RDMAIWARPConnectedSocketImpl(StoneeContext *cct, std::shared_ptr<Infiniband>& ib,
+  RDMAIWARPConnectedSocketImpl(StoneContext *cct, std::shared_ptr<Infiniband>& ib,
 			       std::shared_ptr<RDMADispatcher>& rdma_dispatcher,
 			       RDMAWorker *w, RDMACMInfo *info = nullptr);
     ~RDMAIWARPConnectedSocketImpl();
@@ -285,8 +285,8 @@ class RDMAIWARPConnectedSocketImpl : public RDMAConnectedSocketImpl {
 
 class RDMAServerSocketImpl : public ServerSocketImpl {
   protected:
-    StoneeContext *cct;
-    ceph::NetHandler net;
+    StoneContext *cct;
+    stone::NetHandler net;
     int server_setup_socket;
     std::shared_ptr<Infiniband> ib;
     std::shared_ptr<RDMADispatcher> dispatcher;
@@ -294,7 +294,7 @@ class RDMAServerSocketImpl : public ServerSocketImpl {
     entity_addr_t sa;
 
  public:
-  RDMAServerSocketImpl(StoneeContext *cct, std::shared_ptr<Infiniband>& ib,
+  RDMAServerSocketImpl(StoneContext *cct, std::shared_ptr<Infiniband>& ib,
                        std::shared_ptr<RDMADispatcher>& rdma_dispatcher,
 		       RDMAWorker *w, entity_addr_t& a, unsigned slot);
 
@@ -307,7 +307,7 @@ class RDMAServerSocketImpl : public ServerSocketImpl {
 class RDMAIWARPServerSocketImpl : public RDMAServerSocketImpl {
   public:
     RDMAIWARPServerSocketImpl(
-      StoneeContext *cct, std::shared_ptr<Infiniband>& ib,
+      StoneContext *cct, std::shared_ptr<Infiniband>& ib,
       std::shared_ptr<RDMADispatcher>& rdma_dispatcher,
       RDMAWorker* w, entity_addr_t& addr, unsigned addr_slot);
     virtual int listen(entity_addr_t &sa, const SocketOptions &opt) override;
@@ -326,12 +326,12 @@ class RDMAStack : public NetworkStack {
 
   std::atomic<bool> fork_finished = {false};
 
-  virtual Worker* create_worker(StoneeContext *c, unsigned worker_id) override {
+  virtual Worker* create_worker(StoneContext *c, unsigned worker_id) override {
     return new RDMAWorker(c, worker_id);
   }
 
  public:
-  explicit RDMAStack(StoneeContext *cct);
+  explicit RDMAStack(StoneContext *cct);
   virtual ~RDMAStack();
   virtual bool nonblock_connect_need_writable_event() const override { return false; }
 

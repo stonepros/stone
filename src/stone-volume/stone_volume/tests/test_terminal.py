@@ -8,8 +8,8 @@ except ImportError:
     from StringIO import StringIO
 import pytest
 import sys
-from ceph_volume import terminal
-from ceph_volume.log import setup_console
+from stone_volume import terminal
+from stone_volume.log import setup_console
 
 
 class SubCommand(object):

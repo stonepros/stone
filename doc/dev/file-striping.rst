@@ -1,13 +1,13 @@
 File striping
 =============
 
-The text below describes how files from Ceph file system clients are
+The text below describes how files from Stone file system clients are
 stored across objects stored in RADOS.
 
 ceph_file_layout
 ----------------
 
-Ceph distributes (stripes) the data for a given file across a number
+Stone distributes (stripes) the data for a given file across a number
 of underlying objects.  The way file data is mapped to those objects
 is defined by the ceph_file_layout structure.  The data distribution
 is a modified RAID 0, where data is striped across a set of objects up
@@ -16,11 +16,11 @@ holds the file's data.  The second set also holds no more than the
 fixed amount of data, and then another set is used, and so on.
 
 Defining some terminology will go a long way toward explaining the
-way file data is laid out across Ceph objects.
+way file data is laid out across Stone objects.
 
 - file
     A collection of contiguous data, named from the perspective of
-    the Ceph client (i.e., a file on a Linux system using Ceph
+    the Stone client (i.e., a file on a Linux system using Stone
     storage).  The data for a file is divided into fixed-size
     "stripe units," which are stored in ceph "objects."
 - stripe unit
@@ -36,8 +36,8 @@ way file data is laid out across Ceph objects.
     A contiguous range of file data, RAID 0 striped across "stripe
     count" objects in fixed-size "stripe unit" blocks.
 - object
-    A collection of data maintained by Ceph storage.  Objects are
-    used to hold portions of Ceph client files.
+    A collection of data maintained by Stone storage.  Objects are
+    used to hold portions of Stone client files.
 - object set
     A set of objects that together represent a contiguous portion of
     a file.
@@ -63,7 +63,7 @@ data will exceed the file's designated object size, so after some
 fixed number of complete stripes, a new object set is used to store
 subsequent file data.
 
-Note that by default, Ceph uses a simple striping strategy in which
+Note that by default, Stone uses a simple striping strategy in which
 object_size equals stripe_unit and stripe_count is 1.  This simply
 puts one stripe_unit in each object.  
 

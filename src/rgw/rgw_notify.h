@@ -4,7 +4,7 @@
 #pragma once
 
 #include <string>
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "include/common_fwd.h"
 #include "rgw_notify_event_type.h"
 #include "common/async/yield_context.h"
@@ -25,7 +25,7 @@ namespace rgw::notify {
 // initialize the notification manager
 // notification manager is dequeing the 2-phase-commit queues
 // and send the notifications to the endpoints
-bool init(CephContext* cct, rgw::sal::RGWRadosStore* store, const DoutPrefixProvider *dpp);
+bool init(StoneContext* cct, rgw::sal::RGWRadosStore* store, const DoutPrefixProvider *dpp);
 
 // shutdown the notification manager
 void shutdown();
@@ -79,7 +79,7 @@ int publish_reserve(const DoutPrefixProvider *dpp,
 // commit the reservation to the queue
 int publish_commit(rgw::sal::RGWObject* obj,
         uint64_t size,
-        const ceph::real_time& mtime, 
+        const stone::real_time& mtime, 
         const std::string& etag, 
         EventType event_type,
         reservation_t& reservation,

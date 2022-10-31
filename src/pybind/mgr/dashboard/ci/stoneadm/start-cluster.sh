@@ -6,8 +6,8 @@ cleanup() {
     set +x
     if [[ -n "$JENKINS_HOME" ]]; then
         printf "\n\nStarting cleanup...\n\n"
-        kcli delete plan -y ceph || true
-        kcli delete network ceph-dashboard -y
+        kcli delete plan -y stone || true
+        kcli delete network stone-dashboard -y
         docker container prune -f
         printf "\n\nCleanup completed.\n\n"
     fi
@@ -19,10 +19,10 @@ on_error() {
         printf "\n\nERROR $1 thrown on line $2\n\n"
         printf "\n\nCollecting info...\n\n"
         printf "\n\nDisplaying MGR logs:\n\n"
-        kcli ssh -u root -- ceph-node-00 'cephadm logs -n \$(cephadm ls | grep -Eo "mgr\.ceph[0-9a-z.-]+" | head -n 1) -- --no-tail --no-pager'
+        kcli ssh -u root -- stone-node-00 'stoneadm logs -n \$(stoneadm ls | grep -Eo "mgr\.stone[0-9a-z.-]+" | head -n 1) -- --no-tail --no-pager'
         for vm_id in 0 1 2
         do
-            local vm="ceph-node-0${vm_id}"
+            local vm="stone-node-0${vm_id}"
             printf "\n\nDisplaying journalctl from VM ${vm}:\n\n"
             kcli ssh -u root -- ${vm} 'journalctl --no-tail --no-pager -t cloud-init' || true
             printf "\n\nEnd of journalctl from VM ${vm}\n\n"
@@ -36,9 +36,9 @@ on_error() {
 trap 'on_error $? $LINENO' ERR
 trap 'cleanup $? $LINENO' EXIT
 
-sed -i '/ceph-node-/d' $HOME/.ssh/known_hosts
+sed -i '/stone-node-/d' $HOME/.ssh/known_hosts
 
-: ${CEPH_DEV_FOLDER:=${PWD}}
+: ${STONE_DEV_FOLDER:=${PWD}}
 EXTRA_PARAMS=''
 DEV_MODE=''
 # Check script args/options.
@@ -50,10 +50,10 @@ for arg in "$@"; do
   esac
 done
 
-kcli delete plan -y ceph || true
+kcli delete plan -y stone || true
 
 # Build dashboard frontend (required to start the module).
-cd ${CEPH_DEV_FOLDER}/src/pybind/mgr/dashboard/frontend
+cd ${STONE_DEV_FOLDER}/src/pybind/mgr/dashboard/frontend
 export NG_CLI_ANALYTICS=false
 if [[ -n "$JENKINS_HOME" ]]; then
     npm cache clean --force
@@ -65,23 +65,23 @@ if [[ -n "${DEV_MODE}" ]]; then
 fi
 npm run build ${FRONTEND_BUILD_OPTS} &
 
-cd ${CEPH_DEV_FOLDER}
+cd ${STONE_DEV_FOLDER}
 : ${VM_IMAGE:='fedora34'}
 : ${VM_IMAGE_URL:='https://fedora.mirror.liteserver.nl/linux/releases/34/Cloud/x86_64/images/Fedora-Cloud-Base-34-1.2.x86_64.qcow2'}
-kcli download image -p ceph-dashboard -u ${VM_IMAGE_URL} ${VM_IMAGE}
-kcli delete plan -y ceph || true
-kcli create plan -f src/pybind/mgr/dashboard/ci/cephadm/ceph_cluster.yml \
-    -P ceph_dev_folder=${CEPH_DEV_FOLDER} \
-    ${EXTRA_PARAMS} ceph
+kcli download image -p stone-dashboard -u ${VM_IMAGE_URL} ${VM_IMAGE}
+kcli delete plan -y stone || true
+kcli create plan -f src/pybind/mgr/dashboard/ci/stoneadm/stone_cluster.yml \
+    -P stone_dev_folder=${STONE_DEV_FOLDER} \
+    ${EXTRA_PARAMS} stone
 
 : ${CLUSTER_DEBUG:=0}
 : ${DASHBOARD_CHECK_INTERVAL:=10}
-while [[ -z $(kcli ssh -u root -- ceph-node-00 'journalctl --no-tail --no-pager -t cloud-init' | grep "kcli boot finished") ]]; do
+while [[ -z $(kcli ssh -u root -- stone-node-00 'journalctl --no-tail --no-pager -t cloud-init' | grep "kcli boot finished") ]]; do
     sleep ${DASHBOARD_CHECK_INTERVAL}
     kcli list vm
     if [[ ${CLUSTER_DEBUG} != 0 ]]; then
-        kcli ssh -u root -- ceph-node-00 'podman ps -a'
-        kcli ssh -u root -- ceph-node-00 'podman logs --names --since 30s \$(podman ps -aq)'
+        kcli ssh -u root -- stone-node-00 'podman ps -a'
+        kcli ssh -u root -- stone-node-00 'podman logs --names --since 30s \$(podman ps -aq)'
     fi
-    kcli ssh -u root -- ceph-node-00 'journalctl -n 100 --no-pager -t cloud-init'
+    kcli ssh -u root -- stone-node-00 'journalctl -n 100 --no-pager -t cloud-init'
 done

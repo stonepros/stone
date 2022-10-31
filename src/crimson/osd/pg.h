@@ -125,11 +125,11 @@ public:
   std::ostream& gen_prefix(std::ostream& out) const final {
     return out << *this;
   }
-  crimson::common::CephContext *get_cct() const final {
+  crimson::common::StoneContext *get_cct() const final {
     return shard_services.get_cct();
   }
   unsigned get_subsys() const final {
-    return ceph_subsys_osd;
+    return stone_subsys_osd;
   }
 
   crimson::os::CollectionRef get_collection_ref() {
@@ -145,7 +145,7 @@ public:
     bool dirty_info,
     bool dirty_big_info,
     bool need_write_epoch,
-    ceph::os::Transaction &t) final;
+    stone::os::Transaction &t) final;
 
   void on_info_history_change() final {
     // Not needed yet -- mainly for scrub scheduling
@@ -170,7 +170,7 @@ public:
   bool try_flush_or_schedule_async() final;
 
   void start_flush_on_transaction(
-    ceph::os::Transaction &t) final {
+    stone::os::Transaction &t) final {
     t.register_on_commit(
       new LambdaContext([this](int r){
 	peering_state.complete_flush();
@@ -250,7 +250,7 @@ public:
   }
 
   void schedule_event_on_commit(
-    ceph::os::Transaction &t,
+    stone::os::Transaction &t,
     PGPeeringEventRef on_commit) final {
     t.register_on_commit(
       make_lambda_context(
@@ -297,7 +297,7 @@ public:
   }
 
   void queue_check_readable(epoch_t last_peering_reset,
-			    ceph::timespan delay) final;
+			    stone::timespan delay) final;
   void recheck_readable() final;
 
   unsigned get_target_pg_log_entries() const final;
@@ -308,7 +308,7 @@ public:
   void on_role_change() final {
     // Not needed yet
   }
-  void on_change(ceph::os::Transaction &t) final;
+  void on_change(stone::os::Transaction &t) final;
   void on_activate(interval_set<snapid_t> to_trim) final;
   void on_activate_complete() final;
   void on_new_interval() final {
@@ -325,11 +325,11 @@ public:
     // Not needed yet
   }
 
-  void on_removal(ceph::os::Transaction &t) final {
+  void on_removal(stone::os::Transaction &t) final {
     // TODO
   }
   std::pair<ghobject_t, bool>
-  do_delete_work(ceph::os::Transaction &t, ghobject_t _next) final;
+  do_delete_work(stone::os::Transaction &t, ghobject_t _next) final;
 
   // merge/split not ready
   void clear_ready_to_merge() final {}
@@ -353,7 +353,7 @@ public:
     recovery_handler->on_backfill_reserved();
   }
   void on_backfill_canceled() final {
-    ceph_assert(0 == "Not implemented");
+    stone_assert(0 == "Not implemented");
   }
 
   void on_recovery_reserved() final {
@@ -370,8 +370,8 @@ public:
 
   struct PGLogEntryHandler : public PGLog::LogEntryHandler {
     PG *pg;
-    ceph::os::Transaction *t;
-    PGLogEntryHandler(PG *pg, ceph::os::Transaction *t) : pg(pg), t(t) {}
+    stone::os::Transaction *t;
+    PGLogEntryHandler(PG *pg, stone::os::Transaction *t) : pg(pg), t(t) {}
 
     // LogEntryHandler
     void remove(const hobject_t &hoid) override {
@@ -391,12 +391,12 @@ public:
     }
   };
   PGLog::LogEntryHandlerRef get_log_handler(
-    ceph::os::Transaction &t) final {
+    stone::os::Transaction &t) final {
     return std::make_unique<PG::PGLogEntryHandler>(this, &t);
   }
 
   void rebuild_missing_set_with_deletes(PGLog &pglog) final {
-    ceph_assert(0 == "Impossible for crimson");
+    stone_assert(0 == "Impossible for crimson");
   }
 
   PerfCounters &get_peering_perf() final {
@@ -427,9 +427,9 @@ public:
     return OstreamTemp(CLOG_ERROR, nullptr);
   }
 
-  ceph::signedspan get_mnow() final;
+  stone::signedspan get_mnow() final;
   HeartbeatStampsRef get_hb_stamps(int peer) final;
-  void schedule_renew_lease(epoch_t plr, ceph::timespan delay) final;
+  void schedule_renew_lease(epoch_t plr, stone::timespan delay) final;
 
 
   // Utility
@@ -453,7 +453,7 @@ public:
       false,
       pg_stat_t(),
       object_stat_collection_t());
-    ceph_assert(stats);
+    stone_assert(stats);
     return *stats;
   }
   bool get_need_up_thru() const {
@@ -480,7 +480,7 @@ public:
     const pg_history_t& history,
     const PastIntervals& pim,
     bool backfill,
-    ceph::os::Transaction &t);
+    stone::os::Transaction &t);
 
   seastar::future<> read_state(crimson::os::FuturizedStore* store);
 
@@ -555,7 +555,7 @@ private:
   seastar::future<> submit_transaction(const OpInfo& op_info,
 				       const std::vector<OSDOp>& ops,
 				       ObjectContextRef&& obc,
-				       ceph::os::Transaction&& txn,
+				       stone::os::Transaction&& txn,
 				       const osd_op_params_t& oop);
 
 private:

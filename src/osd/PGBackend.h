@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013,2014 Inktank Storage, Inc.
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -52,7 +52,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
   */
  class PGBackend {
  public:
-   StoneeContext* cct;
+   StoneContext* cct;
  protected:
    ObjectStore *store;
    const coll_t coll;
@@ -187,7 +187,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
      }
      virtual const pg_missing_const_i &get_shard_missing(pg_shard_t peer) const {
        auto m = maybe_get_shard_missing(peer);
-       ceph_assert(m);
+       stone_assert(m);
        return *m;
      }
 
@@ -198,7 +198,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
        } else {
 	 std::map<pg_shard_t, pg_info_t>::const_iterator i =
 	   get_shard_info().find(peer);
-	 ceph_assert(i != get_shard_info().end());
+	 stone_assert(i != get_shard_info().end());
 	 return i->second;
        }
      }
@@ -212,7 +212,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
 
      virtual ObjectContextRef get_obc(
        const hobject_t &hoid,
-       const std::map<std::string, ceph::buffer::list> &attrs) = 0;
+       const std::map<std::string, stone::buffer::list> &attrs) = 0;
 
      virtual bool try_lock_for_read(
        const hobject_t &hoid,
@@ -290,7 +290,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
 
      virtual PerfCounters *get_logger() = 0;
 
-     virtual ceph_tid_t get_tid() = 0;
+     virtual stone_tid_t get_tid() = 0;
 
      virtual OstreamTemp clog_error() = 0;
      virtual OstreamTemp clog_warn() = 0;
@@ -309,7 +309,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
    };
    Listener *parent;
    Listener *get_parent() const { return parent; }
-   PGBackend(StoneeContext* cct, Listener *l, ObjectStore *store, const coll_t &coll,
+   PGBackend(StoneContext* cct, Listener *l, ObjectStore *store, const coll_t &coll,
 	     ObjectStore::CollectionHandle &ch) :
      cct(cct),
      store(store),
@@ -418,7 +418,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
    virtual int get_ec_data_chunk_count() const { return 0; };
    virtual int get_ec_stripe_chunk_size() const { return 0; };
 
-   virtual void dump_recovery_info(ceph::Formatter *f) const = 0;
+   virtual void dump_recovery_info(stone::Formatter *f) const = 0;
 
  private:
    std::set<hobject_t> temp_contents;
@@ -456,7 +456,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
      /// [in] hitset history (if updated with this transaction)
      std::optional<pg_hit_set_history_t> &hset_history,
      Context *on_all_commit,              ///< [in] called when all commit
-     ceph_tid_t tid,                      ///< [in] tid
+     stone_tid_t tid,                      ///< [in] tid
      osd_reqid_t reqid,                   ///< [in] reqid
      OpRequestRef op                      ///< [in] op
      ) = 0;
@@ -494,7 +494,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
    /// Reapply old attributes
    void rollback_setattrs(
      const hobject_t &hoid,
-     std::map<std::string, std::optional<ceph::buffer::list> > &old_attrs,
+     std::map<std::string, std::optional<stone::buffer::list> > &old_attrs,
      ObjectStore::Transaction *t);
 
    /// Truncate object to rollback append
@@ -553,31 +553,31 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
    int objects_get_attr(
      const hobject_t &hoid,
      const std::string &attr,
-     ceph::buffer::list *out);
+     stone::buffer::list *out);
 
    virtual int objects_get_attrs(
      const hobject_t &hoid,
-     std::map<std::string, ceph::buffer::list> *out);
+     std::map<std::string, stone::buffer::list> *out);
 
    virtual int objects_read_sync(
      const hobject_t &hoid,
      uint64_t off,
      uint64_t len,
      uint32_t op_flags,
-     ceph::buffer::list *bl) = 0;
+     stone::buffer::list *bl) = 0;
 
    virtual int objects_readv_sync(
      const hobject_t &hoid,
      std::map<uint64_t, uint64_t>&& m,
      uint32_t op_flags,
-     ceph::buffer::list *bl) {
+     stone::buffer::list *bl) {
      return -EOPNOTSUPP;
    }
 
    virtual void objects_read_async(
      const hobject_t &hoid,
      const std::list<std::pair<boost::tuple<uint64_t, uint64_t, uint32_t>,
-		std::pair<ceph::buffer::list*, Context*> > > &to_read,
+		std::pair<stone::buffer::list*, Context*> > > &to_read,
      Context *on_complete, bool fast_read = false) = 0;
 
    virtual bool auto_repair_supported() const = 0;
@@ -635,7 +635,7 @@ typedef std::shared_ptr<const OSDMap> OSDMapRef;
      coll_t coll,
      ObjectStore::CollectionHandle &ch,
      ObjectStore *store,
-     StoneeContext *cct);
+     StoneContext *cct);
 };
 
 #endif

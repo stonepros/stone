@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -72,8 +72,8 @@ protected:
    * @param r The return code that will be provided to the next stage
    */
   bool immediate(int stage, int r) {
-    ceph_assert(!stages_in_flight.count(stage));
-    ceph_assert(!stages_processing.count(stage));
+    stone_assert(!stages_in_flight.count(stage));
+    stone_assert(!stages_processing.count(stage));
     stages_in_flight.insert(stage);
     stages_processing.insert(stage);
     return _continue_function(r, stage);
@@ -104,7 +104,7 @@ protected:
    * @param func The function to use
    */
   void set_callback(int stage, stagePtr func) {
-    ceph_assert(callbacks.find(stage) == callbacks.end());
+    stone_assert(callbacks.find(stage) == callbacks.end());
     callbacks[stage] = func;
   }
   
@@ -123,8 +123,8 @@ private:
 
   bool _continue_function(int r, int n) {
     set<int>::iterator stage_iter = stages_in_flight.find(n);
-    ceph_assert(stage_iter != stages_in_flight.end());
-    ceph_assert(callbacks.count(n));
+    stone_assert(stage_iter != stages_in_flight.end());
+    stone_assert(callbacks.count(n));
     stagePtr p = callbacks[n];
 
     pair<set<int>::iterator,bool> insert_r = stages_processing.insert(n);
@@ -165,7 +165,7 @@ public:
   /**
    * Clean up.
    */
-  virtual ~Continuation() { ceph_assert(on_finish == NULL); }
+  virtual ~Continuation() { stone_assert(on_finish == NULL); }
   /**
    * Begin running the Continuation.
    */

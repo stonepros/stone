@@ -180,7 +180,7 @@ sub test_user_quota_max_size{
 }
 
 #== Main starts here===
-ceph_os_info();
+stone_os_info();
 check();
 quota_set_max_obj_per_user('0', '10Mb', 'usr1');
 quota_set_max_obj_per_user('1', '10Mb', 'usr2');

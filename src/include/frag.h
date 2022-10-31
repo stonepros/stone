@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -25,9 +25,9 @@
 #include "buffer.h"
 #include "compact_map.h"
 
-#include "ceph_frag.h"
+#include "stone_frag.h"
 #include "include/encoding.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "common/dout.h"
 
@@ -78,66 +78,66 @@
 
 class frag_t {
   /*
-   * encoding is dictated by frag_* functions in ceph_fs.h.  use those
+   * encoding is dictated by frag_* functions in stone_fs.h.  use those
    * helpers _exclusively_.
    */
 public:
   using _frag_t = uint32_t;
   
   frag_t() = default;
-  frag_t(unsigned v, unsigned b) : _enc(ceph_frag_make(b, v)) { }
+  frag_t(unsigned v, unsigned b) : _enc(stone_frag_make(b, v)) { }
   frag_t(_frag_t e) : _enc(e) { }
 
   // constructors
   void from_unsigned(unsigned e) { _enc = e; }
   
   // accessors
-  unsigned value() const { return ceph_frag_value(_enc); }
-  unsigned bits() const { return ceph_frag_bits(_enc); }
-  unsigned mask() const { return ceph_frag_mask(_enc); }
-  unsigned mask_shift() const { return ceph_frag_mask_shift(_enc); }
+  unsigned value() const { return stone_frag_value(_enc); }
+  unsigned bits() const { return stone_frag_bits(_enc); }
+  unsigned mask() const { return stone_frag_mask(_enc); }
+  unsigned mask_shift() const { return stone_frag_mask_shift(_enc); }
 
   operator _frag_t() const { return _enc; }
 
   // tests
-  bool contains(unsigned v) const { return ceph_frag_contains_value(_enc, v); }
-  bool contains(frag_t sub) const { return ceph_frag_contains_frag(_enc, sub._enc); }
+  bool contains(unsigned v) const { return stone_frag_contains_value(_enc, v); }
+  bool contains(frag_t sub) const { return stone_frag_contains_frag(_enc, sub._enc); }
   bool is_root() const { return bits() == 0; }
   frag_t parent() const {
-    ceph_assert(bits() > 0);
-    return frag_t(ceph_frag_parent(_enc));
+    stone_assert(bits() > 0);
+    return frag_t(stone_frag_parent(_enc));
   }
 
   // splitting
   frag_t make_child(int i, int nb) const {
-    ceph_assert(i < (1<<nb));
-    return frag_t(ceph_frag_make_child(_enc, nb, i));
+    stone_assert(i < (1<<nb));
+    return frag_t(stone_frag_make_child(_enc, nb, i));
   }
   template<typename T>
   void split(int nb, T& fragments) const {
-    ceph_assert(nb > 0);
+    stone_assert(nb > 0);
     unsigned nway = 1 << nb;
     for (unsigned i=0; i<nway; i++) 
       fragments.push_back(make_child(i, nb));
   }
 
   // binary splitting
-  frag_t left_child() const { return frag_t(ceph_frag_left_child(_enc)); }
-  frag_t right_child() const { return frag_t(ceph_frag_right_child(_enc)); }
+  frag_t left_child() const { return frag_t(stone_frag_left_child(_enc)); }
+  frag_t right_child() const { return frag_t(stone_frag_right_child(_enc)); }
 
-  bool is_left() const { return ceph_frag_is_left_child(_enc); }
-  bool is_right() const { return ceph_frag_is_right_child(_enc); }
+  bool is_left() const { return stone_frag_is_left_child(_enc); }
+  bool is_right() const { return stone_frag_is_right_child(_enc); }
   frag_t get_sibling() const {
-    ceph_assert(!is_root());
-    return frag_t(ceph_frag_sibling(_enc));
+    stone_assert(!is_root());
+    return frag_t(stone_frag_sibling(_enc));
   }
 
   // sequencing
-  bool is_leftmost() const { return ceph_frag_is_leftmost(_enc); }
-  bool is_rightmost() const { return ceph_frag_is_rightmost(_enc); }
+  bool is_leftmost() const { return stone_frag_is_leftmost(_enc); }
+  bool is_rightmost() const { return stone_frag_is_rightmost(_enc); }
   frag_t next() const {
-    ceph_assert(!is_rightmost());
-    return frag_t(ceph_frag_next(_enc));
+    stone_assert(!is_rightmost());
+    return frag_t(stone_frag_next(_enc));
   }
 
   // parse
@@ -151,12 +151,12 @@ public:
     return false;
   }
 
-  void encode(ceph::buffer::list& bl) const {
-    ceph::encode_raw(_enc, bl);
+  void encode(stone::buffer::list& bl) const {
+    stone::encode_raw(_enc, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     __u32 v;
-    ceph::decode_raw(v, p);
+    stone::decode_raw(v, p);
     _enc = v;
   }
   bool operator<(const frag_t& b) const
@@ -345,7 +345,7 @@ public:
   frag_t operator[](unsigned v) const {
     frag_t t;
     while (1) {
-      ceph_assert(t.contains(v));
+      stone_assert(t.contains(v));
       int nb = get_split(t);
 
       // is this a leaf?
@@ -361,7 +361,7 @@ public:
 	  break;
 	}
       }
-      ceph_assert(i < nway);
+      stone_assert(i < nway);
     }
   }
 
@@ -369,15 +369,15 @@ public:
   // ---------------
   // modifiers
   void split(frag_t x, int b, bool simplify=true) {
-    ceph_assert(is_leaf(x));
+    stone_assert(is_leaf(x));
     _splits[x] = b;
     
     if (simplify)
       try_assimilate_children(get_branch_above(x));
   }
   void merge(frag_t x, int b, bool simplify=true) {
-    ceph_assert(!is_leaf(x));
-    ceph_assert(_splits[x] == b);
+    stone_assert(!is_leaf(x));
+    stone_assert(_splits[x] == b);
     _splits.erase(x);
 
     if (simplify)
@@ -406,14 +406,14 @@ public:
     _splits[x] += childbits;
   }
 
-  bool force_to_leaf(StoneeContext *cct, frag_t x) {
+  bool force_to_leaf(StoneContext *cct, frag_t x) {
     if (is_leaf(x))
       return false;
 
     lgeneric_dout(cct, 10) << "force_to_leaf " << x << " on " << _splits << dendl;
 
     frag_t parent = get_branch_or_leaf(x);
-    ceph_assert(parent.bits() <= x.bits());
+    stone_assert(parent.bits() <= x.bits());
     lgeneric_dout(cct, 10) << "parent is " << parent << dendl;
 
     // do we need to split from parent to x?
@@ -425,10 +425,10 @@ public:
 	// easy: split parent (a leaf) by the difference
 	lgeneric_dout(cct, 10) << "splitting parent " << parent << " by spread " << spread << dendl;
 	split(parent, spread);
-	ceph_assert(is_leaf(x));
+	stone_assert(is_leaf(x));
 	return true;
       }
-      ceph_assert(nb > spread);
+      stone_assert(nb > spread);
       
       // add an intermediary split
       merge(parent, nb, false);
@@ -458,21 +458,21 @@ public:
     }
 
     lgeneric_dout(cct, 10) << "force_to_leaf done" << dendl;
-    ceph_assert(is_leaf(x));
+    stone_assert(is_leaf(x));
     return true;
   }
 
   // encoding
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(_splits, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& p) {
+    using stone::decode;
     decode(_splits, p);
   }
-  void encode_nohead(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode_nohead(stone::buffer::list& bl) const {
+    using stone::encode;
     for (compact_map<frag_t,int32_t>::const_iterator p = _splits.begin();
 	 p != _splits.end();
 	 ++p) {
@@ -480,8 +480,8 @@ public:
       encode(p->second, bl);
     }
   }
-  void decode_nohead(int n, ceph::buffer::list::const_iterator& p) {
-    using ceph::decode;
+  void decode_nohead(int n, stone::buffer::list::const_iterator& p) {
+    using stone::decode;
     _splits.clear();
     while (n-- > 0) {
       frag_t f;
@@ -513,7 +513,7 @@ public:
     out << ")";
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->open_array_section("splits");
     for (auto p = _splits.begin(); p != _splits.end(); ++p) {
       f->open_object_section("split");
@@ -597,11 +597,11 @@ public:
     }
   }
 
-  void encode(ceph::buffer::list& bl) const {
-    ceph::encode(_set, bl);
+  void encode(stone::buffer::list& bl) const {
+    stone::encode(_set, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
-    ceph::decode(_set, p);
+  void decode(stone::buffer::list::const_iterator& p) {
+    stone::decode(_set, p);
   }
 };
 WRITE_CLASS_ENCODER(fragset_t)

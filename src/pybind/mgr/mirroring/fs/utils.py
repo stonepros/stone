@@ -3,11 +3,11 @@ import logging
 import threading
 
 import rados
-import cephfs
+import stonefs
 
 from .exception import MirrorException
 
-MIRROR_OBJECT_PREFIX = 'cephfs_mirror'
+MIRROR_OBJECT_PREFIX = 'stonefs_mirror'
 MIRROR_OBJECT_NAME = MIRROR_OBJECT_PREFIX
 
 INSTANCE_ID_PREFIX = "instance_"
@@ -19,10 +19,10 @@ def connect_to_cluster(client_name, cluster_name, conf_dct, desc=''):
     try:
         log.debug(f'connecting to {desc} cluster: {client_name}/{cluster_name}')
         mon_host = conf_dct.get('mon_host', '')
-        cephx_key = conf_dct.get('key', '')
-        if mon_host and cephx_key:
+        stonex_key = conf_dct.get('key', '')
+        if mon_host and stonex_key:
             r_rados = rados.Rados(rados_id=client_name, conf={'mon_host': mon_host,
-                                                              'key': cephx_key})
+                                                              'key': stonex_key})
         else:
             r_rados = rados.Rados(rados_id=client_name, clustername=cluster_name)
             r_rados.conf_read_file()
@@ -48,17 +48,17 @@ def connect_to_filesystem(client_name, cluster_name, fs_name, desc, conf_dct={})
     try:
         cluster = connect_to_cluster(client_name, cluster_name, conf_dct, desc)
         log.debug(f'connecting to {desc} filesystem: {fs_name}')
-        fs = cephfs.LibCephFS(rados_inst=cluster)
+        fs = stonefs.LibStoneFS(rados_inst=cluster)
         fs.conf_set("client_mount_uid", "0")
         fs.conf_set("client_mount_gid", "0")
         fs.conf_set("client_check_pool_perm", "false")
-        log.debug('CephFS initializing...')
+        log.debug('StoneFS initializing...')
         fs.init()
-        log.debug('CephFS mounting...')
+        log.debug('StoneFS mounting...')
         fs.mount(filesystem_name=fs_name.encode('utf-8'))
-        log.debug(f'Connection to cephfs {fs_name} complete')
+        log.debug(f'Connection to stonefs {fs_name} complete')
         return (cluster, fs)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         if e.errno == errno.ENOENT:
             raise MirrorException(-e.errno, f'filesystem {fs_name} does not exist')
         else:

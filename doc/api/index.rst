@@ -2,50 +2,50 @@
  API Documentation
 ===================
 
-Ceph RESTful API
+Stone RESTful API
 ================
 
-See `Ceph REST API`_.
+See `Stone REST API`_.
 
-.. _Ceph REST API: ../mgr/ceph_api/
+.. _Stone REST API: ../mgr/stone_api/
 
-Ceph Storage Cluster APIs
+Stone Storage Cluster APIs
 =========================
 
-See `Ceph Storage Cluster APIs`_.
+See `Stone Storage Cluster APIs`_.
 
-.. _Ceph Storage Cluster APIs: ../rados/api/
+.. _Stone Storage Cluster APIs: ../rados/api/
 
 
-Ceph File System APIs
+Stone File System APIs
 =====================
 
-See `libcephfs`_
+See `libstonefs`_
 
-.. _libcephfs: ../cephfs/api
+.. _libstonefs: ../stonefs/api
 
-Ceph Block Device APIs
+Stone Block Device APIs
 ======================
 
 See `librbdpy`_.
 
 .. _librbdpy: ../rbd/api/librbdpy
 
-Ceph RADOS Gateway APIs
+Stone RADOS Gateway APIs
 =======================
 
 See `librgw-py`_.
 
 .. _librgw-py: ../radosgw/api
 
-Ceph Object Store APIs
+Stone Object Store APIs
 ======================
 
 - See `S3-compatible API`_.
 - See `Swift-compatible API`_.
 - See `Admin Ops API`_.
 
-Ceph MON Command API
+Stone MON Command API
 ====================
 
 - See `Mon command API`_.

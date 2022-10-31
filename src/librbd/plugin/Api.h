@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_PLUGIN_API_H
 
 #include "common/Timer.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
 #include "include/int_types.h"
 #include "include/rados/librados.hpp"
@@ -50,7 +50,7 @@ struct Api {
 
   virtual void get_image_timer_instance(
       StoneContext *cct, SafeTimer **timer,
-      ceph::mutex **timer_lock);
+      stone::mutex **timer_lock);
 
   virtual bool test_image_features(
       ImageCtxT *image_ctx,

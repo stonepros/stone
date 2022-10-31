@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,7 +18,7 @@
 
 #include "msg/Message.h"
 #include "mds/MDSMap.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 
 class MMDSMap final : public SafeMessage {
 private:
@@ -27,11 +27,11 @@ private:
 public:
   uuid_d fsid;
   epoch_t epoch = 0;
-  ceph::buffer::list encoded;
+  stone::buffer::list encoded;
   std::string map_fs_name;
 
   version_t get_epoch() const { return epoch; }
-  const ceph::buffer::list& get_encoded() const { return encoded; }
+  const stone::buffer::list& get_encoded() const { return encoded; }
 
 protected:
   MMDSMap() : 
@@ -55,7 +55,7 @@ public:
 
   // marshalling
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(fsid, p);
     decode(epoch, p);
@@ -65,7 +65,7 @@ public:
     }
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(fsid, payload);
     encode(epoch, payload);
     if ((features & STONE_FEATURE_PGID64) == 0 ||
@@ -83,7 +83,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

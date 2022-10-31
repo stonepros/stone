@@ -2,7 +2,7 @@ Running Tests in the Cloud
 ==========================
 
 In this chapter, we will explain in detail how use an OpenStack
-tenant as an environment for Ceph `integration testing`_.
+tenant as an environment for Stone `integration testing`_.
 
 Assumptions and caveat
 ----------------------
@@ -175,7 +175,7 @@ Since the teuthology instance in OpenStack is only semi-permanent, with
 limited space for storing logs, ``teuthology-openstack`` provides an
 ``--upload`` option which, if included in the ``ceph-workbench ceph-qa-suite``
 command, will cause logs from all failed jobs to be uploaded to the log
-archive server maintained by the Ceph project. The logs will appear at the
+archive server maintained by the Stone project. The logs will appear at the
 URL::
 
     http://teuthology-logs.public.ceph.com/$RUN
@@ -227,7 +227,7 @@ Deploy a cluster for manual testing
 -----------------------------------
 
 The `teuthology framework`_ and ``ceph-workbench ceph-qa-suite`` are
-versatile tools that automatically provision Ceph clusters in the cloud and
+versatile tools that automatically provision Stone clusters in the cloud and
 run various tests on them in an automated fashion. This enables a single
 engineer, in a matter of hours, to perform thousands of tests that would
 keep dozens of human testers occupied for days or weeks if conducted
@@ -235,7 +235,7 @@ manually.
 
 However, there are times when the automated tests do not cover a particular
 scenario and manual testing is desired. It turns out that it is simple to
-adapt a test to stop and wait after the Ceph installation phase, and the
+adapt a test to stop and wait after the Stone installation phase, and the
 engineer can then ssh into the running cluster. Simply add the following
 snippet in the desired place within the test YAML and schedule a run with the
 test::

@@ -1,55 +1,55 @@
 #!/usr/bin/env bash
 set -ex
 
-# this should be run from the src directory in the ceph.git
+# this should be run from the src directory in the stone.git
 
 source $(dirname $0)/detect-build-env-vars.sh
-CEPH_SRC=$CEPH_ROOT/src
+STONE_SRC=$STONE_ROOT/src
 if [ -e CMakeCache.txt ]; then
-    CYTHON_MODULES_DIR=$CEPH_LIB/cython_modules
+    CYTHON_MODULES_DIR=$STONE_LIB/cython_modules
 else
-    CYTHON_MODULES_DIR=$CEPH_SRC/build
+    CYTHON_MODULES_DIR=$STONE_SRC/build
 fi
 
-export PYTHONPATH="$CEPH_SRC/pybind:$CEPH_SRC/test/pybind:$CYTHON_MODULES_DIR/lib.3"
+export PYTHONPATH="$STONE_SRC/pybind:$STONE_SRC/test/pybind:$CYTHON_MODULES_DIR/lib.3"
 
 recreate_pool() {
     POOL_NAME=$1
     PG_NUM=100
-    ceph osd pool delete $POOL_NAME $POOL_NAME --yes-i-really-really-mean-it
-    ceph osd pool create $POOL_NAME $PG_NUM
+    stone osd pool delete $POOL_NAME $POOL_NAME --yes-i-really-really-mean-it
+    stone osd pool create $POOL_NAME $PG_NUM
     rbd pool init $POOL_NAME
 }
 
 run_cli_tests() {
     recreate_pool rbd
-    $CEPH_SRC/../qa/workunits/rbd/import_export.sh
+    $STONE_SRC/../qa/workunits/rbd/import_export.sh
     recreate_pool rbd
-    $CEPH_SRC/../qa/workunits/rbd/cli_generic.sh
+    $STONE_SRC/../qa/workunits/rbd/cli_generic.sh
     recreate_pool rbd
-    $CEPH_SRC/../qa/workunits/rbd/journal.sh
+    $STONE_SRC/../qa/workunits/rbd/journal.sh
     recreate_pool rbd
-    $CEPH_SRC/../qa/workunits/rbd/luks-encryption.sh
+    $STONE_SRC/../qa/workunits/rbd/luks-encryption.sh
 }
 
 # tests that do not depend on image format / features
 run_generic_tests() {
-    $CEPH_SRC/../qa/workunits/rbd/verify_pool.sh
+    $STONE_SRC/../qa/workunits/rbd/verify_pool.sh
 
     recreate_pool rbd
-    $CEPH_SRC/../qa/workunits/rbd/journal.sh
+    $STONE_SRC/../qa/workunits/rbd/journal.sh
     recreate_pool rbd
-    $CEPH_SRC/../qa/workunits/rbd/test_admin_socket.sh
+    $STONE_SRC/../qa/workunits/rbd/test_admin_socket.sh
 }
 
 run_api_tests() {
     # skip many_snaps since it takes several minutes
     python3 -m nose -v test_rbd -e '.*many_snaps'
-    # ceph_test_librbd creates its own pools
-    ceph_test_librbd
+    # stone_test_librbd creates its own pools
+    stone_test_librbd
 }
 
-ceph_test_cls_rbd
+stone_test_cls_rbd
 run_generic_tests
 run_api_tests
 run_cli_tests

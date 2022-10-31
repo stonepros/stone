@@ -5,7 +5,7 @@ import re
 from functools import wraps
 
 import cherrypy
-from ceph_argparse import ArgumentFormat  # pylint: disable=import-error
+from stone_argparse import ArgumentFormat  # pylint: disable=import-error
 
 from ..exceptions import DashboardException
 from ..tools import getargspec
@@ -110,17 +110,17 @@ def allow_empty_body(func):  # noqa: N802
     return func
 
 
-def validate_ceph_type(validations, component=''):
+def validate_stone_type(validations, component=''):
     def decorator(func):
         @wraps(func)
         def validate_args(*args, **kwargs):
             input_values = kwargs
-            for key, ceph_type in validations:
+            for key, stone_type in validations:
                 try:
-                    ceph_type.valid(input_values[key])
+                    stone_type.valid(input_values[key])
                 except ArgumentFormat as e:
                     raise DashboardException(msg=e,
-                                             code='ceph_type_not_valid',
+                                             code='stone_type_not_valid',
                                              component=component)
             return func(*args, **kwargs)
         return validate_args

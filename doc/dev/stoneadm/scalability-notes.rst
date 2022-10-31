@@ -1,5 +1,5 @@
 #############################################
- Notes and Thoughts on Cephadm's scalability
+ Notes and Thoughts on Stoneadm's scalability
 #############################################
 
 *********************
@@ -16,7 +16,7 @@ cephadm enhacements.
 
 Current situation:
 
-Cephadm manages all registered hosts. This means that it periodically
+Stoneadm manages all registered hosts. This means that it periodically
 scrapes data from each host to identify changes on the host like:
 
 -  disk added/removed

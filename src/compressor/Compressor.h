@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Haomai Wang <haomaiwang@gmail.com>
  *
@@ -19,7 +19,7 @@
 #include <string>
 #include <string_view>
 #include <boost/optional.hpp>
-#include "include/ceph_assert.h"    // boost clobbers this
+#include "include/stone_assert.h"    // boost clobbers this
 #include "include/common_fwd.h"
 #include "include/buffer.h"
 #include "include/int_types.h"
@@ -90,14 +90,14 @@ public:
   CompressionAlgorithm get_type() const {
     return alg;
   }
-  virtual int compress(const ceph::bufferlist &in, ceph::bufferlist &out, boost::optional<int32_t> &compressor_message) = 0;
-  virtual int decompress(const ceph::bufferlist &in, ceph::bufferlist &out, boost::optional<int32_t> compressor_message) = 0;
+  virtual int compress(const stone::bufferlist &in, stone::bufferlist &out, boost::optional<int32_t> &compressor_message) = 0;
+  virtual int decompress(const stone::bufferlist &in, stone::bufferlist &out, boost::optional<int32_t> compressor_message) = 0;
   // this is a bit weird but we need non-const iterator to be in
   // alignment with decode methods
-  virtual int decompress(ceph::bufferlist::const_iterator &p, size_t compressed_len, ceph::bufferlist &out, boost::optional<int32_t> compressor_message) = 0;
+  virtual int decompress(stone::bufferlist::const_iterator &p, size_t compressed_len, stone::bufferlist &out, boost::optional<int32_t> compressor_message) = 0;
 
-  static CompressorRef create(StoneeContext *cct, const std::string &type);
-  static CompressorRef create(StoneeContext *cct, int alg);
+  static CompressorRef create(StoneContext *cct, const std::string &type);
+  static CompressorRef create(StoneContext *cct, int alg);
 
 protected:
   CompressionAlgorithm alg;

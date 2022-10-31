@@ -15,7 +15,7 @@
 namespace crimson::os::seastore {
 
 using depth_t = int32_t;
-using depth_le_t = ceph_les32;
+using depth_le_t = stone_les32;
 
 using checksum_t = uint32_t;
 
@@ -173,11 +173,11 @@ constexpr paddr_t make_fake_paddr(segment_off_t off) {
 }
 
 struct paddr_le_t {
-  ceph_le32 segment = init_le32(NULL_SEG_ID);
-  ceph_les32 offset = init_les32(NULL_SEG_OFF);
+  stone_le32 segment = init_le32(NULL_SEG_ID);
+  stone_les32 offset = init_les32(NULL_SEG_OFF);
 
   paddr_le_t() = default;
-  paddr_le_t(ceph_le32 segment, ceph_les32 offset)
+  paddr_le_t(stone_le32 segment, stone_les32 offset)
     : segment(segment), offset(offset) {}
   paddr_le_t(segment_id_t segment, segment_off_t offset)
     : segment(init_le32(segment)), offset(init_les32(offset)) {}
@@ -226,7 +226,7 @@ constexpr laddr_t L_ADDR_ROOT = std::numeric_limits<laddr_t>::max() - 1;
 constexpr laddr_t L_ADDR_LBAT = std::numeric_limits<laddr_t>::max() - 2;
 
 struct laddr_le_t {
-  ceph_le64 laddr = init_le64(L_ADDR_NULL);
+  stone_le64 laddr = init_le64(L_ADDR_NULL);
 
   laddr_le_t() = default;
   laddr_le_t(const laddr_le_t &) = default;
@@ -237,7 +237,7 @@ struct laddr_le_t {
     return laddr_t(laddr);
   }
   laddr_le_t& operator=(laddr_t addr) {
-    ceph_le64 val;
+    stone_le64 val;
     val = addr;
     laddr = val;
     return *this;
@@ -249,7 +249,7 @@ using extent_len_t = uint32_t;
 constexpr extent_len_t EXTENT_LEN_MAX =
   std::numeric_limits<extent_len_t>::max();
 
-using extent_len_le_t = ceph_le32;
+using extent_len_le_t = stone_le32;
 inline extent_len_le_t init_extent_len_le_t(extent_len_t len) {
   return init_le32(len);
 }
@@ -308,7 +308,7 @@ std::ostream &operator<<(std::ostream &out, extent_types_t t);
 struct extent_t {
   extent_types_t type;  ///< type of extent
   laddr_t addr;         ///< laddr of extent (L_ADDR_NULL for non-logical)
-  ceph::bufferlist bl;  ///< payload, bl.length() == length, aligned
+  stone::bufferlist bl;  ///< payload, bl.length() == length, aligned
 };
 
 using extent_version_t = uint32_t;
@@ -323,7 +323,7 @@ struct delta_info_t {
   uint32_t final_crc = 0;
   segment_off_t length = NULL_SEG_OFF;         ///< extent length
   extent_version_t pversion;                   ///< prior version
-  ceph::bufferlist bl;                         ///< payload
+  stone::bufferlist bl;                         ///< payload
 
   DENC(delta_info_t, v, p) {
     DENC_START(1, 1, p);

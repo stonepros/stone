@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013- Sage Weil <sage@inktank.com>
  *
@@ -51,13 +51,13 @@ struct Page {
       return lhs.offset < rhs.offset;
     }
   };
-  void encode(ceph::buffer::list &bl, size_t page_size) const {
-    using ceph::encode;
-    bl.append(ceph::buffer::copy(data, page_size));
+  void encode(stone::buffer::list &bl, size_t page_size) const {
+    using stone::encode;
+    bl.append(stone::buffer::copy(data, page_size));
     encode(offset, bl);
   }
-  void decode(ceph::buffer::list::const_iterator &p, size_t page_size) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &p, size_t page_size) {
+    using stone::decode;
     p.copy(page_size, data);
     decode(offset, p);
   }
@@ -186,7 +186,7 @@ class PageSet {
       length -= c;
     }
     // make sure we sized the vector correctly
-    ceph_assert(out == range.rend());
+    stone_assert(out == range.rend());
   }
 
   // return all allocated pages that intersect the range [offset,length)
@@ -206,17 +206,17 @@ class PageSet {
     free_pages(cur, pages.end());
   }
 
-  void encode(ceph::buffer::list &bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list &bl) const {
+    using stone::encode;
     encode(page_size, bl);
     unsigned count = pages.size();
     encode(count, bl);
     for (auto p = pages.rbegin(); p != pages.rend(); ++p)
       p->encode(bl, page_size);
   }
-  void decode(ceph::buffer::list::const_iterator &p) {
-    using ceph::decode;
-    ceph_assert(empty());
+  void decode(stone::buffer::list::const_iterator &p) {
+    using stone::decode;
+    stone_assert(empty());
     decode(page_size, p);
     unsigned count;
     decode(count, p);

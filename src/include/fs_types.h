@@ -64,12 +64,12 @@ struct inodeno_t {
   inodeno_t operator+=(inodeno_t o) { val += o.val; return *this; }
   operator _inodeno_t() const { return val; }
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(val, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& p) {
+    using stone::decode;
     decode(val, p);
   }
 } __attribute__ ((__may_alias__));
@@ -84,10 +84,10 @@ struct denc_traits<inodeno_t> {
   static void bound_encode(const inodeno_t &o, size_t& p) {
     denc(o.val, p);
   }
-  static void encode(const inodeno_t &o, ceph::buffer::list::contiguous_appender& p) {
+  static void encode(const inodeno_t &o, stone::buffer::list::contiguous_appender& p) {
     denc(o.val, p);
   }
-  static void decode(inodeno_t& o, ceph::buffer::ptr::const_iterator &p) {
+  static void decode(inodeno_t& o, stone::buffer::ptr::const_iterator &p) {
     denc(o.val, p);
   }
 };
@@ -118,11 +118,11 @@ inline bool file_mode_is_readonly(int mode) {
 #define MAX_DENTRY_LEN 255
 
 // --
-namespace ceph {
+namespace stone {
   class Formatter;
 }
-void dump(const ceph_file_layout& l, ceph::Formatter *f);
-void dump(const ceph_dir_layout& l, ceph::Formatter *f);
+void dump(const stone_file_layout& l, stone::Formatter *f);
+void dump(const stone_dir_layout& l, stone::Formatter *f);
 
 
 
@@ -152,14 +152,14 @@ struct file_layout_t {
     return static_cast<uint64_t>(stripe_count) * object_size;
   }
 
-  void from_legacy(const ceph_file_layout& fl);
-  void to_legacy(ceph_file_layout *fl) const;
+  void from_legacy(const stone_file_layout& fl);
+  void to_legacy(stone_file_layout *fl) const;
 
   bool is_valid() const;
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
   static void generate_test_instances(std::list<file_layout_t*>& o);
 };

@@ -6,8 +6,8 @@ import re
 from teuthology.contextutil import MaxWhileTries
 from teuthology.exceptions import CommandFailedError
 from teuthology.orchestra.run import wait
-from tasks.cephfs.fuse_mount import FuseMount
-from tasks.cephfs.cephfs_test_case import CephFSTestCase, for_teuthology
+from tasks.stonefs.fuse_mount import FuseMount
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase, for_teuthology
 
 DAMAGED_ON_START = "damaged_on_start"
 DAMAGED_ON_LS = "damaged_on_ls"
@@ -27,7 +27,7 @@ EIO_NO_DAMAGE = "eio without damage entry"
 log = logging.getLogger(__name__)
 
 
-class TestDamage(CephFSTestCase):
+class TestDamage(StoneFSTestCase):
     def _simple_workload_write(self):
         self.mount_a.run_shell(["mkdir", "subdir"])
         self.mount_a.write_n_mb("subdir/sixmegs", 6)
@@ -443,7 +443,7 @@ class TestDamage(CephFSTestCase):
         else:
             raise AssertionError("Expected EIO")
 
-        nfiles = self.mount_a.getfattr("./subdir", "ceph.dir.files")
+        nfiles = self.mount_a.getfattr("./subdir", "stone.dir.files")
         self.assertEqual(nfiles, "2")
 
         self.mount_a.umount_wait()
@@ -458,7 +458,7 @@ class TestDamage(CephFSTestCase):
 
         # Check that the file count is now correct
         self.mount_a.mount_wait()
-        nfiles = self.mount_a.getfattr("./subdir", "ceph.dir.files")
+        nfiles = self.mount_a.getfattr("./subdir", "stone.dir.files")
         self.assertEqual(nfiles, "1")
 
         # Clean up the omap object

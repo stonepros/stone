@@ -4,7 +4,7 @@
 #ifndef STONE_RBD_MIRROR_SERVICE_DAEMON_H
 #define STONE_RBD_MIRROR_SERVICE_DAEMON_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
 #include "tools/rbd_mirror/Types.h"
 #include "tools/rbd_mirror/service_daemon/Types.h"
@@ -22,7 +22,7 @@ template <typename> struct Threads;
 template <typename ImageCtxT = librbd::ImageCtx>
 class ServiceDaemon {
 public:
-  ServiceDaemon(CephContext *cct, RadosRef rados, Threads<ImageCtxT>* threads);
+  ServiceDaemon(StoneContext *cct, RadosRef rados, Threads<ImageCtxT>* threads);
   ~ServiceDaemon();
 
   int init();
@@ -72,11 +72,11 @@ private:
 
   typedef std::map<int64_t, Pool> Pools;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   RadosRef m_rados;
   Threads<ImageCtxT>* m_threads;
 
-  ceph::mutex m_lock = ceph::make_mutex("rbd::mirror::ServiceDaemon");
+  stone::mutex m_lock = stone::make_mutex("rbd::mirror::ServiceDaemon");
   Pools m_pools;
   uint64_t m_callout_id = service_daemon::CALLOUT_ID_NONE;
 

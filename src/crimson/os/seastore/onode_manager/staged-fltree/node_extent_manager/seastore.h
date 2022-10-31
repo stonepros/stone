@@ -28,7 +28,7 @@ class SeastoreSuper final: public Super {
   void write_root_laddr(context_t c, laddr_t addr) override;
  private:
   static seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
   laddr_t root_addr;
   TransactionManager& tm;
@@ -36,7 +36,7 @@ class SeastoreSuper final: public Super {
 
 class SeastoreNodeExtent final: public NodeExtent {
  public:
-  SeastoreNodeExtent(ceph::bufferptr &&ptr)
+  SeastoreNodeExtent(stone::bufferptr &&ptr)
     : NodeExtent(std::move(ptr)) {}
   SeastoreNodeExtent(const SeastoreNodeExtent& other)
     : NodeExtent(other) {}
@@ -54,11 +54,11 @@ class SeastoreNodeExtent final: public NodeExtent {
   extent_types_t get_type() const override {
     return extent_types_t::ONODE_BLOCK_STAGED;
   }
-  ceph::bufferlist get_delta() override {
+  stone::bufferlist get_delta() override {
     assert(recorder);
     return recorder->get_delta();
   }
-  void apply_delta(const ceph::bufferlist&) override;
+  void apply_delta(const stone::bufferlist&) override;
  private:
   DeltaRecorderURef recorder;
 };
@@ -117,7 +117,7 @@ class SeastoreNodeExtentManager final: public NodeExtentManager {
 
  private:
   static seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
   TransactionManager& tm;
   const laddr_t addr_min;

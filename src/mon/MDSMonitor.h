@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -32,8 +32,8 @@ class FileSystemCommandHandler;
 
 class MDSMonitor : public PaxosService, public PaxosFSMap, protected CommandHandler {
  public:
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
 
   MDSMonitor(Monitor &mn, Paxos &p, std::string service_name);
 
@@ -65,8 +65,8 @@ class MDSMonitor : public PaxosService, public PaxosFSMap, protected CommandHand
   void check_subs();
   void check_sub(Subscription *sub);
 
-  void dump_info(ceph::Formatter *f);
-  int print_nodes(ceph::Formatter *f);
+  void dump_info(stone::Formatter *f);
+  int print_nodes(stone::Formatter *f);
 
   /**
    * Return true if a blocklist was done (i.e. OSD propose needed)
@@ -106,10 +106,10 @@ class MDSMonitor : public PaxosService, public PaxosFSMap, protected CommandHand
 
   // beacons
   struct beacon_info_t {
-    ceph::mono_time stamp = ceph::mono_clock::zero();
+    stone::mono_time stamp = stone::mono_clock::zero();
     uint64_t seq = 0;
     beacon_info_t() {}
-    beacon_info_t(ceph::mono_time stamp, uint64_t seq) : stamp(stamp), seq(seq) {}
+    beacon_info_t(stone::mono_time stamp, uint64_t seq) : stamp(stamp), seq(seq) {}
   };
   std::map<mds_gid_t, beacon_info_t> last_beacon;
 
@@ -121,13 +121,13 @@ class MDSMonitor : public PaxosService, public PaxosFSMap, protected CommandHand
   bool check_health(FSMap &fsmap, bool* osd_propose);
   void tick() override;     // check state, take actions
 
-  int dump_metadata(const FSMap &fsmap, const std::string &who, ceph::Formatter *f,
+  int dump_metadata(const FSMap &fsmap, const std::string &who, stone::Formatter *f,
 		    std::ostream& err);
 
   void update_metadata(mds_gid_t gid, const Metadata& metadata);
   void remove_from_metadata(const FSMap &fsmap, MonitorDBStore::TransactionRef t);
   int load_metadata(std::map<mds_gid_t, Metadata>& m);
-  void count_metadata(const std::string& field, ceph::Formatter *f);
+  void count_metadata(const std::string& field, stone::Formatter *f);
 
 public:
   void print_fs_summary(ostream& out) {
@@ -148,7 +148,7 @@ protected:
   // When did the mon last call into our tick() method?  Used for detecting
   // when the mon was not updating us for some period (e.g. during slow
   // election) to reset last_beacon timeouts
-  ceph::mono_time last_tick = ceph::mono_clock::zero();
+  stone::mono_time last_tick = stone::mono_clock::zero();
 
 private:
   time last_fsmap_struct_flush = clock::zero();

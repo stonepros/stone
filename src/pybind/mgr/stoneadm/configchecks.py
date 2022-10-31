@@ -7,7 +7,7 @@ from mgr_module import ServiceInfoT
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast, Tuple, Callable
 
 if TYPE_CHECKING:
-    from cephadm.module import CephadmOrchestrator
+    from stoneadm.module import StoneadmOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -117,8 +117,8 @@ class SubnetLookup:
         })
 
 
-class CephadmCheckDefinition:
-    def __init__(self, mgr: "CephadmOrchestrator", healthcheck_name: str, description: str, name: str, func: Callable) -> None:
+class StoneadmCheckDefinition:
+    def __init__(self, mgr: "StoneadmOrchestrator", healthcheck_name: str, description: str, name: str, func: Callable) -> None:
         self.mgr = mgr
         self.log = logger
         self.healthcheck_name = healthcheck_name
@@ -154,40 +154,40 @@ class CephadmCheckDefinition:
         }
 
 
-class CephadmConfigChecks:
-    def __init__(self, mgr: "CephadmOrchestrator"):
-        self.mgr: "CephadmOrchestrator" = mgr
-        self.health_checks: List[CephadmCheckDefinition] = [
-            CephadmCheckDefinition(mgr, "CEPHADM_CHECK_KERNEL_LSM",
+class StoneadmConfigChecks:
+    def __init__(self, mgr: "StoneadmOrchestrator"):
+        self.mgr: "StoneadmOrchestrator" = mgr
+        self.health_checks: List[StoneadmCheckDefinition] = [
+            StoneadmCheckDefinition(mgr, "STONEADM_CHECK_KERNEL_LSM",
                                    "checks SELINUX/Apparmor profiles are consistent across cluster hosts",
                                    "kernel_security",
                                    self._check_kernel_lsm),
-            CephadmCheckDefinition(mgr, "CEPHADM_CHECK_SUBSCRIPTION",
+            StoneadmCheckDefinition(mgr, "STONEADM_CHECK_SUBSCRIPTION",
                                    "checks subscription states are consistent for all cluster hosts",
                                    "os_subscription",
                                    self._check_subscription),
-            CephadmCheckDefinition(mgr, "CEPHADM_CHECK_PUBLIC_MEMBERSHIP",
-                                   "check that all hosts have a NIC on the Ceph public_netork",
+            StoneadmCheckDefinition(mgr, "STONEADM_CHECK_PUBLIC_MEMBERSHIP",
+                                   "check that all hosts have a NIC on the Stone public_netork",
                                    "public_network",
                                    self._check_public_network),
-            CephadmCheckDefinition(mgr, "CEPHADM_CHECK_MTU",
+            StoneadmCheckDefinition(mgr, "STONEADM_CHECK_MTU",
                                    "check that OSD hosts share a common MTU setting",
                                    "osd_mtu_size",
                                    self._check_osd_mtu),
-            CephadmCheckDefinition(mgr, "CEPHADM_CHECK_LINKSPEED",
+            StoneadmCheckDefinition(mgr, "STONEADM_CHECK_LINKSPEED",
                                    "check that OSD hosts share a common linkspeed",
                                    "osd_linkspeed",
                                    self._check_osd_linkspeed),
-            CephadmCheckDefinition(mgr, "CEPHADM_CHECK_NETWORK_MISSING",
-                                   "checks that the cluster/public networks defined exist on the Ceph hosts",
+            StoneadmCheckDefinition(mgr, "STONEADM_CHECK_NETWORK_MISSING",
+                                   "checks that the cluster/public networks defined exist on the Stone hosts",
                                    "network_missing",
                                    self._check_network_missing),
-            CephadmCheckDefinition(mgr, "CEPHADM_CHECK_CEPH_RELEASE",
-                                   "check for Ceph version consistency - ceph daemons should be on the same release (unless upgrade is active)",
-                                   "ceph_release",
+            StoneadmCheckDefinition(mgr, "STONEADM_CHECK_STONE_RELEASE",
+                                   "check for Stone version consistency - stone daemons should be on the same release (unless upgrade is active)",
+                                   "stone_release",
                                    self._check_release_parity),
-            CephadmCheckDefinition(mgr, "CEPHADM_CHECK_KERNEL_VERSION",
-                                   "checks that the MAJ.MIN of the kernel on Ceph hosts is consistent",
+            StoneadmCheckDefinition(mgr, "STONEADM_CHECK_KERNEL_VERSION",
+                                   "checks that the MAJ.MIN of the kernel on Stone hosts is consistent",
                                    "kernel_version",
                                    self._check_kernel_version),
         ]
@@ -244,7 +244,7 @@ class CephadmConfigChecks:
                 else:
                     self.log.debug("config_checks match module definition")
 
-    def lookup_check(self, key_value: str, key_name: str = 'name') -> Optional[CephadmCheckDefinition]:
+    def lookup_check(self, key_value: str, key_name: str = 'name') -> Optional[StoneadmCheckDefinition]:
 
         for c in self.health_checks:
             if getattr(c, key_name) == key_value:
@@ -344,7 +344,7 @@ class CephadmConfigChecks:
                 majority_key = key
         return majority_key, majority_count
 
-    def get_ceph_metadata(self) -> Dict[str, Optional[Dict[str, str]]]:
+    def get_stone_metadata(self) -> Dict[str, Optional[Dict[str, str]]]:
         """Build a map of service -> service metadata"""
         service_map: Dict[str, Optional[Dict[str, str]]] = {}
 
@@ -372,7 +372,7 @@ class CephadmConfigChecks:
                         f"{host} has inconsistent KSM settings compared to the "
                         f"majority of hosts({majority_hosts_count}) in the cluster")
             host_sfx = 's' if len(details) > 1 else ''
-            self.mgr.health_checks['CEPHADM_CHECK_KERNEL_LSM'] = {
+            self.mgr.health_checks['STONEADM_CHECK_KERNEL_LSM'] = {
                 'severity': 'warning',
                 'summary': f"Kernel Security Module (SELinux/AppArmor) is inconsistent for "
                            f"{len(details)} host{host_sfx}",
@@ -381,15 +381,15 @@ class CephadmConfigChecks:
             }
             self.health_check_raised = True
         else:
-            self.mgr.health_checks.pop('CEPHADM_CHECK_KERNEL_LSM', None)
+            self.mgr.health_checks.pop('STONEADM_CHECK_KERNEL_LSM', None)
 
     def _check_subscription(self) -> None:
         if len(self.subscribed['yes']) > 0 and len(self.subscribed['no']) > 0:
-            # inconsistent subscription states - CEPHADM_CHECK_SUBSCRIPTION
+            # inconsistent subscription states - STONEADM_CHECK_SUBSCRIPTION
             details = []
             for host in self.subscribed['no']:
                 details.append(f"{host} does not have an active subscription")
-            self.mgr.health_checks['CEPHADM_CHECK_SUBSCRIPTION'] = {
+            self.mgr.health_checks['STONEADM_CHECK_SUBSCRIPTION'] = {
                 'severity': 'warning',
                 'summary': f"Support subscriptions inactive on {len(details)} host(s)"
                            f"({len(self.subscribed['yes'])} subscriptions active)",
@@ -398,7 +398,7 @@ class CephadmConfigChecks:
             }
             self.health_check_raised = True
         else:
-            self.mgr.health_checks.pop('CEPHADM_CHECK_SUBSCRIPTION', None)
+            self.mgr.health_checks.pop('STONEADM_CHECK_SUBSCRIPTION', None)
 
     def _check_public_network(self) -> None:
         hosts_remaining: List[str] = list(self.mgr.cache.facts.keys())
@@ -430,7 +430,7 @@ class CephadmConfigChecks:
                 details = [
                     f"{host} does not have an interface on any public network" for host in hosts_remaining]
 
-                self.mgr.health_checks['CEPHADM_CHECK_PUBLIC_MEMBERSHIP'] = {
+                self.mgr.health_checks['STONEADM_CHECK_PUBLIC_MEMBERSHIP'] = {
                     'severity': 'warning',
                     'summary': f"Public network(s) is not directly accessible from {len(hosts_remaining)} "
                                 "cluster hosts",
@@ -439,7 +439,7 @@ class CephadmConfigChecks:
                 }
                 self.health_check_raised = True
         else:
-            self.mgr.health_checks.pop('CEPHADM_CHECK_PUBLIC_MEMBERSHIP', None)
+            self.mgr.health_checks.pop('STONEADM_CHECK_PUBLIC_MEMBERSHIP', None)
 
     def _check_osd_mtu(self) -> None:
         osd_hosts = set(self.hosts_with_role('osd'))
@@ -479,7 +479,7 @@ class CephadmConfigChecks:
                                 f"{bad_mtu} on {osd_net}, NICs on other hosts use {mtu_ptr}")
 
         if mtu_errors:
-            self.mgr.health_checks['CEPHADM_CHECK_MTU'] = {
+            self.mgr.health_checks['STONEADM_CHECK_MTU'] = {
                 'severity': 'warning',
                 'summary': f"MTU setting inconsistent on osd network NICs on {len(mtu_errors)} host(s)",
                 'count': len(mtu_errors),
@@ -487,7 +487,7 @@ class CephadmConfigChecks:
             }
             self.health_check_raised = True
         else:
-            self.mgr.health_checks.pop('CEPHADM_CHECK_MTU', None)
+            self.mgr.health_checks.pop('STONEADM_CHECK_MTU', None)
 
     def _check_osd_linkspeed(self) -> None:
         osd_hosts = set(self.hosts_with_role('osd'))
@@ -532,7 +532,7 @@ class CephadmConfigChecks:
                                 f"{bad_speed} on {osd_net}, NICs on other hosts use {speed_ptr}")
 
         if linkspeed_errors:
-            self.mgr.health_checks['CEPHADM_CHECK_LINKSPEED'] = {
+            self.mgr.health_checks['STONEADM_CHECK_LINKSPEED'] = {
                 'severity': 'warning',
                 'summary': "Link speed is inconsistent on osd network NICs for "
                            f"{len(linkspeed_errors)} host(s)",
@@ -541,7 +541,7 @@ class CephadmConfigChecks:
             }
             self.health_check_raised = True
         else:
-            self.mgr.health_checks.pop('CEPHADM_CHECK_LINKSPEED', None)
+            self.mgr.health_checks.pop('STONEADM_CHECK_LINKSPEED', None)
 
     def _check_network_missing(self) -> None:
         all_networks = self.public_network_list.copy()
@@ -558,7 +558,7 @@ class CephadmConfigChecks:
 
         if missing_networks:
             net_sfx = 's' if len(missing_networks) > 1 else ''
-            self.mgr.health_checks['CEPHADM_CHECK_NETWORK_MISSING'] = {
+            self.mgr.health_checks['STONEADM_CHECK_NETWORK_MISSING'] = {
                 'severity': 'warning',
                 'summary': f"Public/cluster network{net_sfx} defined, but can not be found on "
                            "any host",
@@ -567,23 +567,23 @@ class CephadmConfigChecks:
             }
             self.health_check_raised = True
         else:
-            self.mgr.health_checks.pop('CEPHADM_CHECK_NETWORK_MISSING', None)
+            self.mgr.health_checks.pop('STONEADM_CHECK_NETWORK_MISSING', None)
 
     def _check_release_parity(self) -> None:
         upgrade_status = self.mgr.upgrade.upgrade_status()
         if upgrade_status.in_progress:
             # skip version consistency checks during an upgrade cycle
-            self.skipped_checks.append('ceph_release')
+            self.skipped_checks.append('stone_release')
             return
 
-        services = self.get_ceph_metadata()
+        services = self.get_stone_metadata()
         self.log.debug(json.dumps(services))
         version_to_svcs: Dict[str, List[str]] = {}
 
         for svc in services:
             if services[svc]:
                 metadata = cast(Dict[str, str], services[svc])
-                v = metadata.get('ceph_release', '')
+                v = metadata.get('stone_release', '')
                 if v in version_to_svcs:
                     version_to_svcs[v].append(svc)
                 else:
@@ -599,17 +599,17 @@ class CephadmConfigChecks:
                     details.append(
                         f"{svc} is running {v} (majority of cluster is using {majority_ptr})")
 
-            self.mgr.health_checks['CEPHADM_CHECK_CEPH_RELEASE'] = {
+            self.mgr.health_checks['STONEADM_CHECK_STONE_RELEASE'] = {
                 'severity': 'warning',
-                'summary': 'Ceph cluster running mixed ceph releases',
+                'summary': 'Stone cluster running mixed stone releases',
                 'count': len(details),
                 'detail': details,
             }
             self.health_check_raised = True
             self.log.warning(
-                f"running with {len(version_to_svcs)} different ceph releases within this cluster")
+                f"running with {len(version_to_svcs)} different stone releases within this cluster")
         else:
-            self.mgr.health_checks.pop('CEPHADM_CHECK_CEPH_RELEASE', None)
+            self.mgr.health_checks.pop('STONEADM_CHECK_STONE_RELEASE', None)
 
     def _check_kernel_version(self) -> None:
         if len(self.kernel_to_hosts.keys()) > 1:
@@ -624,7 +624,7 @@ class CephadmConfigChecks:
                         f"running {majority_hosts_ptr}")
 
             self.log.warning("mixed kernel versions detected")
-            self.mgr.health_checks['CEPHADM_CHECK_KERNEL_VERSION'] = {
+            self.mgr.health_checks['STONEADM_CHECK_KERNEL_VERSION'] = {
                 'severity': 'warning',
                 'summary': f"{len(details)} host(s) running different kernel versions",
                 'count': len(details),
@@ -632,7 +632,7 @@ class CephadmConfigChecks:
             }
             self.health_check_raised = True
         else:
-            self.mgr.health_checks.pop('CEPHADM_CHECK_KERNEL_VERSION', None)
+            self.mgr.health_checks.pop('STONEADM_CHECK_KERNEL_VERSION', None)
 
     def _process_hosts(self) -> None:
         self.log.debug(f"processing data from {len(self.mgr.cache.facts)} hosts")
@@ -687,7 +687,7 @@ class CephadmConfigChecks:
                 check_config.update(json.loads(checks_raw))
             except json.JSONDecodeError:
                 self.log.exception(
-                    "mgr/cephadm/config_checks is not JSON serializable - all checks will run")
+                    "mgr/stoneadm/config_checks is not JSON serializable - all checks will run")
 
         # build lookup "maps" by walking the host facts, once
         self._process_hosts()

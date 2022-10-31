@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# Install a simple ceph cluster upon which openstack images will be stored.
+# Install a simple stone cluster upon which openstack images will be stored.
 #
 set -fv
-ceph_node=${1}
+stone_node=${1}
 source copy_func.sh
-copy_file files/$OS_CEPH_ISO $ceph_node .
-copy_file execs/ceph_cluster.sh $ceph_node . 0777 
-copy_file execs/ceph-pool-create.sh $ceph_node . 0777
-ssh $ceph_node ./ceph_cluster.sh $*
+copy_file files/$OS_STONE_ISO $stone_node .
+copy_file execs/stone_cluster.sh $stone_node . 0777 
+copy_file execs/stone-pool-create.sh $stone_node . 0777
+ssh $stone_node ./stone_cluster.sh $*

@@ -12,7 +12,7 @@
 #include <boost/program_options.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 namespace rbd {
 namespace argument_types {
@@ -113,7 +113,7 @@ struct TypedValue {
 };
 
 struct Format : public TypedValue<std::string> {
-  typedef boost::shared_ptr<ceph::Formatter> Formatter;
+  typedef boost::shared_ptr<stone::Formatter> Formatter;
 
   Format(const std::string &format) : TypedValue<std::string>(format) {}
 

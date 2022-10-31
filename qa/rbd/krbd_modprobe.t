@@ -1,7 +1,7 @@
 
   $ sudo modprobe -r rbd
-  $ sudo modprobe -r libceph
-  $ lsmod | grep libceph
+  $ sudo modprobe -r libstone
+  $ lsmod | grep libstone
   [1]
   $ rbd create --size 1 img
   $ DEV=$(sudo rbd map img)

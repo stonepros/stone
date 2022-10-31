@@ -9,8 +9,8 @@ import os
 import logging
 import json
 import time
-from ceph_volume import process, conf, __release__, terminal
-from ceph_volume.util import system, constants, str_to_int, disk
+from stone_volume import process, conf, __release__, terminal
+from stone_volume.util import system, constants, str_to_int, disk
 
 logger = logging.getLogger(__name__)
 mlogger = terminal.MultiLogger(__name__)
@@ -18,7 +18,7 @@ mlogger = terminal.MultiLogger(__name__)
 
 def create_key():
     stdout, stderr, returncode = process.call(
-        ['ceph-authtool', '--gen-print-key'],
+        ['stone-authtool', '--gen-print-key'],
         show_command=True)
     if returncode != 0:
         raise RuntimeError('Unable to generate a new auth key')
@@ -27,7 +27,7 @@ def create_key():
 
 def write_keyring(osd_id, secret, keyring_name='keyring', name=None):
     """
-    Create a keyring file with the ``ceph-authtool`` utility. Constructs the
+    Create a keyring file with the ``stone-authtool`` utility. Constructs the
     path over well-known conventions for the OSD, and allows any other custom
     ``name`` to be set.
 
@@ -38,11 +38,11 @@ def write_keyring(osd_id, secret, keyring_name='keyring', name=None):
     :param keyring_name: Alternative keyring name, for supporting other
                          types of keys like for lockbox
     """
-    osd_keyring = '/var/lib/ceph/osd/%s-%s/%s' % (conf.cluster, osd_id, keyring_name)
+    osd_keyring = '/var/lib/stone/osd/%s-%s/%s' % (conf.cluster, osd_id, keyring_name)
     name = name or 'osd.%s' % str(osd_id)
     process.run(
         [
-            'ceph-authtool', osd_keyring,
+            'stone-authtool', osd_keyring,
             '--create-keyring',
             '--name', name,
             '--add-key', secret
@@ -52,7 +52,7 @@ def write_keyring(osd_id, secret, keyring_name='keyring', name=None):
 
 def get_journal_size(lv_format=True):
     """
-    Helper to retrieve the size (defined in megabytes in ceph.conf) to create
+    Helper to retrieve the size (defined in megabytes in stone.conf) to create
     the journal logical volume, it "translates" the string into a float value,
     then converts that into gigabytes, and finally (optionally) it formats it
     back as a string so that it can be used for creating the LV.
@@ -60,7 +60,7 @@ def get_journal_size(lv_format=True):
     :param lv_format: Return a string to be used for ``lv_create``. A 5 GB size
     would result in '5G', otherwise it will return a ``Size`` object.
     """
-    conf_journal_size = conf.ceph.get_safe('osd', 'osd_journal_size', '5120')
+    conf_journal_size = conf.stone.get_safe('osd', 'osd_journal_size', '5120')
     logger.debug('osd_journal_size set to %s' % conf_journal_size)
     journal_size = disk.Size(mb=str_to_int(conf_journal_size))
 
@@ -74,7 +74,7 @@ def get_journal_size(lv_format=True):
 
 def get_block_db_size(lv_format=True):
     """
-    Helper to retrieve the size (defined in megabytes in ceph.conf) to create
+    Helper to retrieve the size (defined in megabytes in stone.conf) to create
     the block.db logical volume, it "translates" the string into a float value,
     then converts that into gigabytes, and finally (optionally) it formats it
     back as a string so that it can be used for creating the LV.
@@ -87,9 +87,9 @@ def get_block_db_size(lv_format=True):
     """
     conf_db_size = None
     try:
-        conf_db_size = conf.ceph.get_safe('osd', 'bluestore_block_db_size', None)
+        conf_db_size = conf.stone.get_safe('osd', 'bluestore_block_db_size', None)
     except RuntimeError:
-        logger.exception("failed to load ceph configuration, will use defaults")
+        logger.exception("failed to load stone configuration, will use defaults")
 
     if not conf_db_size:
         logger.debug(
@@ -109,7 +109,7 @@ def get_block_db_size(lv_format=True):
 
 def get_block_wal_size(lv_format=True):
     """
-    Helper to retrieve the size (defined in megabytes in ceph.conf) to create
+    Helper to retrieve the size (defined in megabytes in stone.conf) to create
     the block.wal logical volume, it "translates" the string into a float value,
     then converts that into gigabytes, and finally (optionally) it formats it
     back as a string so that it can be used for creating the LV.
@@ -122,9 +122,9 @@ def get_block_wal_size(lv_format=True):
     """
     conf_wal_size = None
     try:
-        conf_wal_size = conf.ceph.get_safe('osd', 'bluestore_block_wal_size', None)
+        conf_wal_size = conf.stone.get_safe('osd', 'bluestore_block_wal_size', None)
     except RuntimeError:
-        logger.exception("failed to load ceph configuration, will use defaults")
+        logger.exception("failed to load stone configuration, will use defaults")
 
     if not conf_wal_size:
         logger.debug(
@@ -150,9 +150,9 @@ def create_id(fsid, json_secrets, osd_id=None):
     :param osd_id: Reuse an existing ID from an OSD that's been destroyed, if the
                    id does not exist in the cluster a new ID will be created
     """
-    bootstrap_keyring = '/var/lib/ceph/bootstrap-osd/%s.keyring' % conf.cluster
+    bootstrap_keyring = '/var/lib/stone/bootstrap-osd/%s.keyring' % conf.cluster
     cmd = [
-        'ceph',
+        'stone',
         '--cluster', conf.cluster,
         '--name', 'client.bootstrap-osd',
         '--keyring', bootstrap_keyring,
@@ -184,10 +184,10 @@ def osd_id_available(osd_id):
     if osd_id is None:
         return False
 
-    bootstrap_keyring = '/var/lib/ceph/bootstrap-osd/%s.keyring' % conf.cluster
+    bootstrap_keyring = '/var/lib/stone/bootstrap-osd/%s.keyring' % conf.cluster
     stdout, stderr, returncode = process.call(
         [
-            'ceph',
+            'stone',
             '--cluster', conf.cluster,
             '--name', 'client.bootstrap-osd',
             '--keyring', bootstrap_keyring,
@@ -221,8 +221,8 @@ def mount_tmpfs(path):
 
 
 def create_osd_path(osd_id, tmpfs=False):
-    path = '/var/lib/ceph/osd/%s-%s' % (conf.cluster, osd_id)
-    system.mkdir_p('/var/lib/ceph/osd/%s-%s' % (conf.cluster, osd_id))
+    path = '/var/lib/stone/osd/%s-%s' % (conf.cluster, osd_id)
+    system.mkdir_p('/var/lib/stone/osd/%s-%s' % (conf.cluster, osd_id))
     if tmpfs:
         mount_tmpfs(path)
 
@@ -233,7 +233,7 @@ def format_device(device):
 
     # get the mkfs options if any for xfs,
     # fallback to the default options defined in constants.mkfs
-    flags = conf.ceph.get_list(
+    flags = conf.stone.get_list(
         'osd',
         'osd_mkfs_options_xfs',
         default=constants.mkfs.get('xfs'),
@@ -252,10 +252,10 @@ def format_device(device):
 def _normalize_mount_flags(flags, extras=None):
     """
     Mount flag options have to be a single string, separated by a comma. If the
-    flags are separated by spaces, or with commas and spaces in ceph.conf, the
+    flags are separated by spaces, or with commas and spaces in stone.conf, the
     mount options will be passed incorrectly.
 
-    This will help when parsing ceph.conf values return something like::
+    This will help when parsing stone.conf values return something like::
 
         ["rw,", "exec,"]
 
@@ -303,9 +303,9 @@ def mount_osd(device, osd_id, **kw):
     is_vdo = kw.get('is_vdo', '0')
     if is_vdo == '1':
         extras = ['discard']
-    destination = '/var/lib/ceph/osd/%s-%s' % (conf.cluster, osd_id)
+    destination = '/var/lib/stone/osd/%s-%s' % (conf.cluster, osd_id)
     command = ['mount', '-t', 'xfs', '-o']
-    flags = conf.ceph.get_list(
+    flags = conf.stone.get_list(
         'osd',
         'osd_mount_options_xfs',
         default=constants.mount.get('xfs'),
@@ -328,7 +328,7 @@ def _link_device(device, device_type, osd_id):
     source, with an absolute path and ``device_type`` will be the destination
     name, like 'journal', or 'block'
     """
-    device_path = '/var/lib/ceph/osd/%s-%s/%s' % (
+    device_path = '/var/lib/stone/osd/%s-%s/%s' % (
         conf.cluster,
         osd_id,
         device_type
@@ -343,16 +343,16 @@ def _validate_bluestore_device(device, excepted_device_type, osd_uuid):
     Validate whether the given device is truly what it is supposed to be
     """
 
-    out, err, ret = process.call(['ceph-bluestore-tool', 'show-label', '--dev', device])
+    out, err, ret = process.call(['stone-bluestore-tool', 'show-label', '--dev', device])
     if err:
-        terminal.error('ceph-bluestore-tool failed to run. %s'% err)
+        terminal.error('stone-bluestore-tool failed to run. %s'% err)
         raise SystemExit(1)
     if ret:
         terminal.error('no label on %s'% device)
         raise SystemExit(1)
     oj = json.loads(''.join(out))
     if device not in oj:
-        terminal.error('%s not in the output of ceph-bluestore-tool, buggy?'% device)
+        terminal.error('%s not in the output of stone-bluestore-tool, buggy?'% device)
         raise SystemExit(1)
     current_device_type = oj[device]['description']
     if current_device_type != excepted_device_type:
@@ -386,16 +386,16 @@ def get_monmap(osd_id):
     Before creating the OSD files, a monmap needs to be retrieved so that it
     can be used to tell the monitor(s) about the new OSD. A call will look like::
 
-        ceph --cluster ceph --name client.bootstrap-osd \
-             --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring \
-             mon getmap -o /var/lib/ceph/osd/ceph-0/activate.monmap
+        stone --cluster stone --name client.bootstrap-osd \
+             --keyring /var/lib/stone/bootstrap-osd/stone.keyring \
+             mon getmap -o /var/lib/stone/osd/stone-0/activate.monmap
     """
-    path = '/var/lib/ceph/osd/%s-%s/' % (conf.cluster, osd_id)
-    bootstrap_keyring = '/var/lib/ceph/bootstrap-osd/%s.keyring' % conf.cluster
+    path = '/var/lib/stone/osd/%s-%s/' % (conf.cluster, osd_id)
+    bootstrap_keyring = '/var/lib/stone/bootstrap-osd/%s.keyring' % conf.cluster
     monmap_destination = os.path.join(path, 'activate.monmap')
 
     process.run([
-        'ceph',
+        'stone',
         '--cluster', conf.cluster,
         '--name', 'client.bootstrap-osd',
         '--keyring', bootstrap_keyring,
@@ -404,30 +404,30 @@ def get_monmap(osd_id):
 
 
 def get_osdspec_affinity():
-    return os.environ.get('CEPH_VOLUME_OSDSPEC_AFFINITY', '')
+    return os.environ.get('STONE_VOLUME_OSDSPEC_AFFINITY', '')
 
 
 def osd_mkfs_bluestore(osd_id, fsid, keyring=None, wal=False, db=False):
     """
     Create the files for the OSD to function. A normal call will look like:
 
-          ceph-osd --cluster ceph --mkfs --mkkey -i 0 \
-                   --monmap /var/lib/ceph/osd/ceph-0/activate.monmap \
-                   --osd-data /var/lib/ceph/osd/ceph-0 \
+          stone-osd --cluster stone --mkfs --mkkey -i 0 \
+                   --monmap /var/lib/stone/osd/stone-0/activate.monmap \
+                   --osd-data /var/lib/stone/osd/stone-0 \
                    --osd-uuid 8d208665-89ae-4733-8888-5d3bfbeeec6c \
-                   --keyring /var/lib/ceph/osd/ceph-0/keyring \
-                   --setuser ceph --setgroup ceph
+                   --keyring /var/lib/stone/osd/stone-0/keyring \
+                   --setuser stone --setgroup stone
 
     In some cases it is required to use the keyring, when it is passed in as
-    a keyword argument it is used as part of the ceph-osd command
+    a keyword argument it is used as part of the stone-osd command
     """
-    path = '/var/lib/ceph/osd/%s-%s/' % (conf.cluster, osd_id)
+    path = '/var/lib/stone/osd/%s-%s/' % (conf.cluster, osd_id)
     monmap = os.path.join(path, 'activate.monmap')
 
     system.chown(path)
 
     base_command = [
-        'ceph-osd',
+        'stone-osd',
         '--cluster', conf.cluster,
         '--osd-objectstore', 'bluestore',
         '--mkfs',
@@ -438,8 +438,8 @@ def osd_mkfs_bluestore(osd_id, fsid, keyring=None, wal=False, db=False):
     supplementary_command = [
         '--osd-data', path,
         '--osd-uuid', fsid,
-        '--setuser', 'ceph',
-        '--setgroup', 'ceph'
+        '--setuser', 'stone',
+        '--setgroup', 'stone'
     ]
 
     if keyring is not None:
@@ -465,7 +465,7 @@ def osd_mkfs_bluestore(osd_id, fsid, keyring=None, wal=False, db=False):
     """
     When running in containers the --mkfs on raw device sometimes fails
     to acquire a lock through flock() on the device because systemd-udevd holds one temporarily.
-    See KernelDevice.cc and _lock() to understand how ceph-osd acquires the lock.
+    See KernelDevice.cc and _lock() to understand how stone-osd acquires the lock.
     Because this is really transient, we retry up to 5 times and wait for 1 sec in-between
     """
     for retry in range(5):
@@ -485,16 +485,16 @@ def osd_mkfs_filestore(osd_id, fsid, keyring):
     """
     Create the files for the OSD to function. A normal call will look like:
 
-          ceph-osd --cluster ceph --mkfs --mkkey -i 0 \
-                   --monmap /var/lib/ceph/osd/ceph-0/activate.monmap \
-                   --osd-data /var/lib/ceph/osd/ceph-0 \
-                   --osd-journal /var/lib/ceph/osd/ceph-0/journal \
+          stone-osd --cluster stone --mkfs --mkkey -i 0 \
+                   --monmap /var/lib/stone/osd/stone-0/activate.monmap \
+                   --osd-data /var/lib/stone/osd/stone-0 \
+                   --osd-journal /var/lib/stone/osd/stone-0/journal \
                    --osd-uuid 8d208665-89ae-4733-8888-5d3bfbeeec6c \
-                   --keyring /var/lib/ceph/osd/ceph-0/keyring \
-                   --setuser ceph --setgroup ceph
+                   --keyring /var/lib/stone/osd/stone-0/keyring \
+                   --setuser stone --setgroup stone
 
     """
-    path = '/var/lib/ceph/osd/%s-%s/' % (conf.cluster, osd_id)
+    path = '/var/lib/stone/osd/%s-%s/' % (conf.cluster, osd_id)
     monmap = os.path.join(path, 'activate.monmap')
     journal = os.path.join(path, 'journal')
 
@@ -502,7 +502,7 @@ def osd_mkfs_filestore(osd_id, fsid, keyring):
     system.chown(path)
 
     command = [
-        'ceph-osd',
+        'stone-osd',
         '--cluster', conf.cluster,
         '--osd-objectstore', 'filestore',
         '--mkfs',
@@ -521,8 +521,8 @@ def osd_mkfs_filestore(osd_id, fsid, keyring):
         '--osd-data', path,
         '--osd-journal', journal,
         '--osd-uuid', fsid,
-        '--setuser', 'ceph',
-        '--setgroup', 'ceph'
+        '--setuser', 'stone',
+        '--setgroup', 'stone'
     ])
 
     _, _, returncode = process.call(

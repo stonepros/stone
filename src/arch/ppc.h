@@ -13,9 +13,9 @@
 extern "C" {
 #endif
 
-extern int ceph_arch_ppc_crc32;
+extern int stone_arch_ppc_crc32;
 
-extern int ceph_arch_ppc_probe(void);
+extern int stone_arch_ppc_probe(void);
 
 #ifdef __cplusplus
 }

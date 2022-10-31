@@ -12,11 +12,11 @@ Logical volumes are not altered except for adding extra metadata.
           a single-call way, please see :ref:`ceph-volume-lvm-create`
 
 To help identify volumes, the process of preparing a volume (or volumes) to
-work with Ceph, the tool will assign a few pieces of metadata information using
+work with Stone, the tool will assign a few pieces of metadata information using
 :term:`LVM tags`.
 
 :term:`LVM tags` makes volumes easy to discover later, and help identify them as
-part of a Ceph system, and what role they have (journal, filestore, bluestore,
+part of a Stone system, and what role they have (journal, filestore, bluestore,
 etc...)
 
 Although :term:`bluestore` is the default, the back end can be specified with:
@@ -308,7 +308,7 @@ To recap the ``prepare`` process for :term:`bluestore`:
 #. ``block``, ``block.wal``, and ``block.db`` are symlinked if defined.
 #. monmap is fetched for activation
 #. Data directory is populated by ``ceph-osd``
-#. Logical Volumes are assigned all the Ceph metadata using lvm tags
+#. Logical Volumes are assigned all the Stone metadata using lvm tags
 
 
 And the ``prepare`` process for :term:`filestore`:
@@ -320,4 +320,4 @@ And the ``prepare`` process for :term:`filestore`:
 #. Journal is symlinked from data volume to journal location
 #. monmap is fetched for activation
 #. devices is mounted and data directory is populated by ``ceph-osd``
-#. data and journal volumes are assigned all the Ceph metadata using lvm tags
+#. data and journal volumes are assigned all the Stone metadata using lvm tags

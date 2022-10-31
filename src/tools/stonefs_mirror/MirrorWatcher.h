@@ -6,7 +6,7 @@
 
 #include <string_view>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/Context.h"
 #include "include/rados/librados.hpp"
 #include "Watcher.h"
@@ -14,12 +14,12 @@
 class ContextWQ;
 class Messenger;
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 class FSMirror;
 
-// watch for notifications via cephfs_mirror object (in metadata
+// watch for notifications via stonefs_mirror object (in metadata
 // pool). this is used sending keepalived with keepalive payload
 // being the rados instance address (used by the manager module
 // to blocklist when needed).
@@ -57,7 +57,7 @@ private:
   FSMirror *m_fs_mirror;
   ContextWQ *m_work_queue;
 
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   std::string m_instance_id;
 
   Context *m_on_init_finish = nullptr;
@@ -74,6 +74,6 @@ private:
 };
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_MIRROR_WATCHER_H

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -41,7 +41,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/dout.h"
 #include "net_handler.h"
 
@@ -90,7 +90,7 @@ class EventCenter {
   static const int MAX_EVENTCENTER = 24;
 
  private:
-  using clock_type = ceph::coarse_mono_clock;
+  using clock_type = stone::coarse_mono_clock;
 
   struct AssociatedCenters {
     EventCenter *centers[MAX_EVENTCENTER];
@@ -152,7 +152,7 @@ class EventCenter {
   };
 
  private:
-  StoneeContext *cct;
+  StoneContext *cct;
   std::string type;
   int nevent;
   // Used only to external event
@@ -171,19 +171,19 @@ class EventCenter {
   uint64_t time_event_next_id;
   int notify_receive_fd;
   int notify_send_fd;
-  ceph::NetHandler net;
+  stone::NetHandler net;
   EventCallbackRef notify_handler;
   unsigned center_id;
   AssociatedCenters *global_centers = nullptr;
 
   int process_time_events();
   FileEvent *_get_file_event(int fd) {
-    ceph_assert(fd < nevent);
+    stone_assert(fd < nevent);
     return &file_events[fd];
   }
 
  public:
-  explicit EventCenter(StoneeContext *c):
+  explicit EventCenter(StoneContext *c):
     cct(c), nevent(0),
     external_num_events(0),
     driver(NULL), time_event_next_id(1),
@@ -204,7 +204,7 @@ class EventCenter {
   uint64_t create_time_event(uint64_t milliseconds, EventCallbackRef ctxt);
   void delete_file_event(int fd, int mask);
   void delete_time_event(uint64_t id);
-  int process_events(unsigned timeout_microseconds, ceph::timespan *working_dur = nullptr);
+  int process_events(unsigned timeout_microseconds, stone::timespan *working_dur = nullptr);
   void wakeup();
 
   // Used by external thread
@@ -235,7 +235,7 @@ class EventCenter {
         delete this;
     }
     void wait() {
-      ceph_assert(!nonwait);
+      stone_assert(!nonwait);
       std::unique_lock<std::mutex> l(lock);
       while (!done)
         cond.wait(l);
@@ -245,9 +245,9 @@ class EventCenter {
  public:
   template <typename func>
   void submit_to(int i, func &&f, bool always_async = false) {
-    ceph_assert(i < MAX_EVENTCENTER && global_centers);
+    stone_assert(i < MAX_EVENTCENTER && global_centers);
     EventCenter *c = global_centers->centers[i];
-    ceph_assert(c);
+    stone_assert(c);
     if (always_async) {
       C_submit_event<func> *event = new C_submit_event<func>(std::move(f), true);
       c->dispatch_event_external(event);

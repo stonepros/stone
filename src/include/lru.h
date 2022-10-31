@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -60,12 +60,12 @@ public:
     while (!pintail.empty()) {
       lru_remove(pintail.front());
     }
-    ceph_assert(num_pinned == 0);
+    stone_assert(num_pinned == 0);
   }
 
   // insert at top of lru
   void lru_insert_top(LRUObject *o) {
-    ceph_assert(!o->lru);
+    stone_assert(!o->lru);
     o->lru = this;
     top.push_front(&o->lru_link);
     if (o->lru_pinned) num_pinned++;
@@ -74,7 +74,7 @@ public:
 
   // insert at mid point in lru
   void lru_insert_mid(LRUObject *o) {
-    ceph_assert(!o->lru);
+    stone_assert(!o->lru);
     o->lru = this;
     bottom.push_front(&o->lru_link);
     if (o->lru_pinned) num_pinned++;
@@ -83,7 +83,7 @@ public:
 
   // insert at bottom of lru
   void lru_insert_bot(LRUObject *o) {
-    ceph_assert(!o->lru);
+    stone_assert(!o->lru);
     o->lru = this;
     bottom.push_back(&o->lru_link);
     if (o->lru_pinned) num_pinned++;
@@ -94,7 +94,7 @@ public:
   LRUObject *lru_remove(LRUObject *o) {
     if (!o->lru) return o;
     auto list = o->lru_link.get_list();
-    ceph_assert(list == &top || list == &bottom || list == &pintail);
+    stone_assert(list == &top || list == &bottom || list == &pintail);
     o->lru_link.remove_myself();
     if (o->lru_pinned) num_pinned--;
     o->lru = nullptr;
@@ -107,9 +107,9 @@ public:
     if (!o->lru) {
       lru_insert_top(o);
     } else {
-      ceph_assert(o->lru == this);
+      stone_assert(o->lru == this);
       auto list = o->lru_link.get_list();
-      ceph_assert(list == &top || list == &bottom || list == &pintail);
+      stone_assert(list == &top || list == &bottom || list == &pintail);
       top.push_front(&o->lru_link);
       adjust();
     }
@@ -121,9 +121,9 @@ public:
     if (!o->lru) {
       lru_insert_mid(o);
     } else {
-      ceph_assert(o->lru == this);
+      stone_assert(o->lru == this);
       auto list = o->lru_link.get_list();
-      ceph_assert(list == &top || list == &bottom || list == &pintail);
+      stone_assert(list == &top || list == &bottom || list == &pintail);
       if (list == &top) return false;
       bottom.push_front(&o->lru_link);
       adjust();
@@ -136,9 +136,9 @@ public:
     if (!o->lru) {
       lru_insert_bot(o);
     } else {
-      ceph_assert(o->lru == this);
+      stone_assert(o->lru == this);
       auto list = o->lru_link.get_list();
-      ceph_assert(list == &top || list == &bottom || list == &pintail);
+      stone_assert(list == &top || list == &bottom || list == &pintail);
       bottom.push_back(&o->lru_link);
       adjust();
     }

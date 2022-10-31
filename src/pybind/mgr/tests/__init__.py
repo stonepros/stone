@@ -7,7 +7,7 @@ import os
 
 if 'UNITTEST' in os.environ:
 
-    # Mock ceph_module. Otherwise every module that is involved in a testcase and imports it will
+    # Mock stone_module. Otherwise every module that is involved in a testcase and imports it will
     # raise an ImportError
 
     import sys
@@ -25,7 +25,7 @@ if 'UNITTEST' in os.environ:
 
         * self.set_store() populates self._store
         * self.set_module_option() populates self._store[module_name]
-        * self.get(thing) comes from self._store['_ceph_get' + thing]
+        * self.get(thing) comes from self._store['_stone_get' + thing]
 
         """
 
@@ -54,16 +54,16 @@ if 'UNITTEST' in os.environ:
                 if k.startswith(full_prefix)
             }
 
-        def _ceph_get_store(self, k):
+        def _stone_get_store(self, k):
             return self.mock_store_get('store', k, None)
 
-        def _ceph_set_store(self, k, v):
+        def _stone_set_store(self, k, v):
             self.mock_store_set('store', k, v)
 
-        def _ceph_get_store_prefix(self, prefix):
+        def _stone_get_store_prefix(self, prefix):
             return self.mock_store_prefix('store', prefix)
 
-        def _ceph_get_module_option(self, module, key, localized_prefix= None):
+        def _stone_get_module_option(self, module, key, localized_prefix= None):
             try:
                 _, val, _ = self.check_mon_command({
                     'prefix': 'config get',
@@ -89,7 +89,7 @@ if 'UNITTEST' in os.environ:
             else:
                 return val if val is not None else ''
 
-        def _ceph_set_module_option(self, module, key, val):
+        def _stone_set_module_option(self, module, key, val):
             _, _, _ = self.check_mon_command({
                 'prefix': 'config set',
                 'who': 'mgr',
@@ -98,10 +98,10 @@ if 'UNITTEST' in os.environ:
             })
             return val
 
-        def _ceph_get(self, data_name):
-            return self.mock_store_get('_ceph_get', data_name, mock.MagicMock())
+        def _stone_get(self, data_name):
+            return self.mock_store_get('_stone_get', data_name, mock.MagicMock())
 
-        def _ceph_send_command(self, res, svc_type, svc_id, command, tag, inbuf):
+        def _stone_send_command(self, res, svc_type, svc_id, command, tag, inbuf):
 
             cmd = json.loads(command)
             getattr(self, '_mon_commands_sent', []).append(cmd)
@@ -150,7 +150,7 @@ if 'UNITTEST' in os.environ:
 
             res.complete(0, outb, '')
 
-        def _ceph_get_foreign_option(self, entity, name):
+        def _stone_get_foreign_option(self, entity, name):
             who = entity.split('.')
             whos = ['global'] + ['.'.join(who[:i+1]) for i in range(len(who))]
             for attepmt in reversed(whos):
@@ -183,25 +183,25 @@ if 'UNITTEST' in os.environ:
                 M_classes.add(self.__class__)
 
             super(M, self).__init__()
-            self._ceph_get_version = mock.Mock()
-            self._ceph_get_ceph_conf_path = mock.MagicMock()
-            self._ceph_get_option = mock.MagicMock()
-            self._ceph_get_context = mock.MagicMock()
-            self._ceph_register_client = mock.MagicMock()
-            self._ceph_set_health_checks = mock.MagicMock()
+            self._stone_get_version = mock.Mock()
+            self._stone_get_stone_conf_path = mock.MagicMock()
+            self._stone_get_option = mock.MagicMock()
+            self._stone_get_context = mock.MagicMock()
+            self._stone_register_client = mock.MagicMock()
+            self._stone_set_health_checks = mock.MagicMock()
             self._configure_logging = lambda *_: None
             self._unconfigure_logging = mock.MagicMock()
-            self._ceph_log = mock.MagicMock()
-            self._ceph_dispatch_remote = lambda *_: None
-            self._ceph_get_mgr_id = mock.MagicMock()
+            self._stone_log = mock.MagicMock()
+            self._stone_dispatch_remote = lambda *_: None
+            self._stone_get_mgr_id = mock.MagicMock()
 
 
     cm = mock.Mock()
     cm.BaseMgrModule = M
     cm.BaseMgrStandbyModule = M
-    sys.modules['ceph_module'] = cm
+    sys.modules['stone_module'] = cm
 
-    def mock_ceph_modules():
+    def mock_stone_modules():
         class MockRadosError(Exception):
             def __init__(self, message, errno=None):
                 super(MockRadosError, self).__init__(message)
@@ -222,8 +222,8 @@ if 'UNITTEST' in os.environ:
                 OSError=MockRadosError,
                 ObjectNotFound=MockObjectNotFound),
             'rbd': mock.Mock(),
-            'cephfs': mock.Mock(),
+            'stonefs': mock.Mock(),
         })
 
     # Unconditionally mock the rados objects when we're imported
-    mock_ceph_modules()  # type: ignore
+    mock_stone_modules()  # type: ignore

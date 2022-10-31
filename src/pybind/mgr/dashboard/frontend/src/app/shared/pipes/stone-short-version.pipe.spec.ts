@@ -1,7 +1,7 @@
-import { CephShortVersionPipe } from './ceph-short-version.pipe';
+import { StoneShortVersionPipe } from './stone-short-version.pipe';
 
-describe('CephShortVersionPipe', () => {
-  const pipe = new CephShortVersionPipe();
+describe('StoneShortVersionPipe', () => {
+  const pipe = new StoneShortVersionPipe();
 
   it('create an instance', () => {
     expect(pipe).toBeTruthy();
@@ -9,7 +9,7 @@ describe('CephShortVersionPipe', () => {
 
   it('transforms with correct version format', () => {
     const value =
-      'ceph version 13.1.0-534-g23d3751b89 \
+      'stone version 13.1.0-534-g23d3751b89 \
        (23d3751b897b31d2bda57aeaf01acb5ff3c4a9cd) nautilus (dev)';
     expect(pipe.transform(value)).toBe('13.1.0-534-g23d3751b89');
   });

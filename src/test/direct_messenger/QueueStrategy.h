@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 CohortFS, LLC
  *
@@ -25,7 +25,7 @@
 namespace bi = boost::intrusive;
 
 class QueueStrategy : public DispatchStrategy {
-  ceph::mutex lock = ceph::make_mutex("QueueStrategy::lock");
+  stone::mutex lock = stone::make_mutex("QueueStrategy::lock");
   const int n_threads;
   bool stop;
 
@@ -35,7 +35,7 @@ class QueueStrategy : public DispatchStrategy {
   public:
     bi::list_member_hook<> thread_q;
     QueueStrategy *dq;
-    ceph::condition_variable cond;
+    stone::condition_variable cond;
     explicit QSThread(QueueStrategy *dq) : thread_q(), dq(dq) {}
     void* entry() {
       dq->entry(this);

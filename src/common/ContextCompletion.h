@@ -5,7 +5,7 @@
 
 #include "include/Context.h"
 
-namespace ceph {
+namespace stone {
 
 class ContextCompletion {
 public:
@@ -17,7 +17,7 @@ public:
   void finish_op(int r);
 
 private:
-  ceph::mutex m_lock = ceph::make_mutex("ContextCompletion::m_lock");
+  stone::mutex m_lock = stone::make_mutex("ContextCompletion::m_lock");
   Context *m_ctx;
   bool m_ignore_enoent;
   int m_ret;
@@ -41,6 +41,6 @@ private:
   ContextCompletion &m_context_completion;
 };
 
-} // namespace ceph
+} // namespace stone
 
 #endif // STONE_ASYNC_COMPLETION_H

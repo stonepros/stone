@@ -482,15 +482,15 @@ which are as follows:
 Options
 =======
 
-.. option:: -c ceph.conf, --conf=ceph.conf
+.. option:: -c stone.conf, --conf=stone.conf
 
-   Use ``ceph.conf`` configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` to determine monitor addresses during
+   Use ``stone.conf`` configuration file instead of the default
+   ``/etc/stone/stone.conf`` to determine monitor addresses during
    startup.
 
 .. option:: -m monaddress[:port]
 
-   Connect to specified monitor (instead of looking through ceph.conf).
+   Connect to specified monitor (instead of looking through stone.conf).
 
 .. option:: --tenant=<tenant>
 
@@ -1011,13 +1011,13 @@ Trim usage information for user until March 1st, 2012::
 Availability
 ============
 
-:program:`radosgw-admin` is part of Ceph, a massively scalable, open-source,
-distributed storage system.  Please refer to the Ceph documentation at
-http://ceph.com/docs for more information.
+:program:`radosgw-admin` is part of Stone, a massively scalable, open-source,
+distributed storage system.  Please refer to the Stone documentation at
+http://stone.com/docs for more information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)
 :doc:`radosgw <radosgw>`\(8)

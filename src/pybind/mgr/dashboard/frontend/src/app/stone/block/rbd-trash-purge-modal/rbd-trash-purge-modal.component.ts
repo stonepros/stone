@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { Pool } from '~/app/ceph/pool/pool';
+import { Pool } from '~/app/stone/pool/pool';
 import { PoolService } from '~/app/shared/api/pool.service';
 import { RbdService } from '~/app/shared/api/rbd.service';
 import { ActionLabelsI18n } from '~/app/shared/constants/app.constants';

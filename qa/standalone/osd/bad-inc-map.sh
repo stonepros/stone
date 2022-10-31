@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 mon_port=$(get_unused_port)
 
@@ -8,10 +8,10 @@ function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:$mon_port"
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:$mon_port"
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
     set -e
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
@@ -31,12 +31,12 @@ function TEST_bad_inc_map() {
     run_osd $dir 1
     run_osd $dir 2
 
-    ceph config set osd.2 osd_inject_bad_map_crc_probability 1
+    stone config set osd.2 osd_inject_bad_map_crc_probability 1
 
     # osd map churn
     create_pool foo 8
-    ceph osd pool set foo min_size 1
-    ceph osd pool set foo min_size 2
+    stone osd pool set foo min_size 1
+    stone osd pool set foo min_size 2
 
     sleep 5
 

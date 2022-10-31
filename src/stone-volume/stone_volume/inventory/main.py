@@ -3,7 +3,7 @@
 import argparse
 import json
 
-from ceph_volume.util.device import Devices, Device
+from stone_volume.util.device import Devices, Device
 
 
 class Inventory(object):
@@ -15,7 +15,7 @@ class Inventory(object):
 
     def main(self):
         parser = argparse.ArgumentParser(
-            prog='ceph-volume inventory',
+            prog='stone-volume inventory',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self.help,
         )

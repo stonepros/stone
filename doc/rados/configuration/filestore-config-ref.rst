@@ -24,9 +24,9 @@ Additionally, in some cases, the file system may not be as fast as an alternativ
 method of storing XATTRs. The following settings may help improve performance
 by using a method of storing XATTRs that is extrinsic to the underlying file system.
 
-Ceph XATTRs are stored as ``inline xattr``, using the XATTRs provided
+Stone XATTRs are stored as ``inline xattr``, using the XATTRs provided
 by the underlying file system, if it does not impose a size limit. If
-there is a size limit (4KB total on ext4, for instance), some Ceph
+there is a size limit (4KB total on ext4, for instance), some Stone
 XATTRs will be stored in a key/value database when either the
 ``filestore_max_inline_xattr_size`` or ``filestore_max_inline_xattrs``
 threshold is reached.
@@ -319,7 +319,7 @@ Misc
                too many (expensive) Filestore splits occurring at once. See
                ``filestore_split_multiple`` for details.
                This can only be changed offline for an existing OSD,
-               via the ``ceph-objectstore-tool apply-layout-settings`` command.
+               via the ``stone-objectstore-tool apply-layout-settings`` command.
 
 :Type: Unsigned 32-bit Integer
 :Required: No

@@ -31,7 +31,7 @@ describe('ModuleStatusGuardService', () => {
     getResult: {},
     activateResult: boolean,
     urlResult: string,
-    backend = 'cephadm',
+    backend = 'stoneadm',
     configOptPermission = true
   ) => {
     let result: boolean;

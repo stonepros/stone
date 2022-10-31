@@ -6,7 +6,7 @@ Advanced: Metadata repair tools
 
 .. warning::
 
-    If you do not have expert knowledge of CephFS internals, you will
+    If you do not have expert knowledge of StoneFS internals, you will
     need to seek assistance before using any of these tools.
 
     The tools mentioned here can easily cause damage as well as fixing it.

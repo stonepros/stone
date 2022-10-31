@@ -6,7 +6,7 @@
 
 #include "include/int_types.h"
 #include "common/bit_vector.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/object_map/Types.h"
 #include <set>
 
@@ -72,7 +72,7 @@ private:
 
   bufferlist m_out_bl;
 
-  void load_object_map(std::shared_lock<ceph::shared_mutex>* image_locker);
+  void load_object_map(std::shared_lock<stone::shared_mutex>* image_locker);
   void handle_load_object_map(int r);
 
   void finish(int r);

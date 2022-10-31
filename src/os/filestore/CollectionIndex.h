@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -27,7 +27,7 @@
  */
 class CollectionIndex {
 public:
-  CephContext* cct;
+  StoneContext* cct;
 protected:
   /**
    * Object encapsulating a returned path.
@@ -74,8 +74,8 @@ protected:
   };
  public:
 
-  ceph::shared_mutex access_lock =
-    ceph::make_shared_mutex("CollectionIndex::access_lock", true, false);
+  stone::shared_mutex access_lock =
+    stone::make_shared_mutex("CollectionIndex::access_lock", true, false);
   /// Type of returned paths
   typedef std::shared_ptr<Path> IndexedPath;
 
@@ -161,12 +161,12 @@ protected:
     uint32_t match,                             //< [in] value to match
     uint32_t bits,                              //< [in] bits to check
     CollectionIndex* dest  //< [in] destination index
-    ) { ceph_abort(); return 0; }
+    ) { stone_abort(); return 0; }
 
   virtual int merge(
     uint32_t bits,                              //< [in] common (target) bits
     CollectionIndex* dest  //< [in] destination index
-    ) { ceph_abort(); return 0; }
+    ) { stone_abort(); return 0; }
 
 
   /// List contents of collection by hash
@@ -181,7 +181,7 @@ protected:
   /// Call prior to removing directory
   virtual int prep_delete() { return 0; }
 
-  CollectionIndex(CephContext* cct, const coll_t& collection)
+  CollectionIndex(StoneContext* cct, const coll_t& collection)
     : cct(cct) {}
 
   /*
@@ -194,9 +194,9 @@ protected:
   virtual int pre_hash_collection(
       uint32_t pg_num,            ///< [in] pg number of the pool this collection belongs to
       uint64_t expected_num_objs  ///< [in] expected number of objects this collection has
-      ) { ceph_abort(); return 0; }
+      ) { stone_abort(); return 0; }
 
-  virtual int apply_layout_settings(int target_level) { ceph_abort(); return 0; }
+  virtual int apply_layout_settings(int target_level) { stone_abort(); return 0; }
 
   /// Read index-wide settings (should be called after construction)
   virtual int read_settings() { return 0; }

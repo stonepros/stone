@@ -6,7 +6,7 @@ import sys
 from boto.s3.connection import S3Connection, OrdinaryCallingFormat
 
 # XXX once we're done, break out the common code into a library module
-#     See  https://github.com/ceph/ceph/pull/8646
+#     See  https://github.com/stone/stone/pull/8646
 import test_multi as t
 
 class TestException(Exception):

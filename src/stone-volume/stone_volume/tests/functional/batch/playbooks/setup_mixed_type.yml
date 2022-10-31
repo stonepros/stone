@@ -53,15 +53,15 @@
 
           [Service]
           Type=simple
-          ExecStart=/bin/bash /opt/ceph-nvme.sh
+          ExecStart=/bin/bash /opt/stone-nvme.sh
           StandardOutput=journal
           StandardError=journal
 
           [Install]
           WantedBy=multi-user.target
-        dest: "/etc/systemd/system/ceph-nvme.service"
+        dest: "/etc/systemd/system/stone-nvme.service"
 
-    - name: create the ceph-nvme startup script
+    - name: create the stone-nvme startup script
       copy:
         content: |
           set -x
@@ -79,11 +79,11 @@
           nvme connect -t loop -n testnqn1 -q hostnqn
           nvme connect -t loop -n testnqn2 -q hostnqn
           nvme list
-        dest: "/opt/ceph-nvme.sh"
+        dest: "/opt/stone-nvme.sh"
 
-    - name: ensure ceph-nvme is enabled
+    - name: ensure stone-nvme is enabled
       service:
-        name: ceph-nvme
+        name: stone-nvme
         state: stopped
         enabled: yes
 

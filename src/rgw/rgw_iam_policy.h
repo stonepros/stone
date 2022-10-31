@@ -18,7 +18,7 @@
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/variant.hpp>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/iso_8601.h"
 
 #include "rapidjson/error/error.h"
@@ -266,7 +266,7 @@ std::ostream& operator <<(std::ostream& m, const MaskedIP& ip);
 inline bool operator ==(const MaskedIP& l, const MaskedIP& r) {
   auto shift = std::max((l.v6 ? 128 : 32) - ((int) l.prefix),
 			(r.v6 ? 128 : 32) - ((int) r.prefix));
-  ceph_assert(shift >= 0);
+  stone_assert(shift >= 0);
   return (l.addr >> shift) == (r.addr >> shift);
 }
 
@@ -305,13 +305,13 @@ struct Condition {
     }
   }
 
-  static boost::optional<ceph::real_time> as_date(const std::string& s) {
+  static boost::optional<stone::real_time> as_date(const std::string& s) {
     std::size_t p = 0;
 
     try {
       double d = std::stod(s, &p);
       if (p == s.length()) {
-	return ceph::real_time(
+	return stone::real_time(
 	  std::chrono::seconds(static_cast<uint64_t>(d)) +
 	  std::chrono::nanoseconds(
 	    static_cast<uint64_t>((d - static_cast<uint64_t>(d))
@@ -343,19 +343,19 @@ struct Condition {
     return true;
   }
 
-  static boost::optional<ceph::bufferlist> as_binary(const std::string& s) {
+  static boost::optional<stone::bufferlist> as_binary(const std::string& s) {
     // In a just world
-    ceph::bufferlist base64;
+    stone::bufferlist base64;
     // I could populate a bufferlist
     base64.push_back(buffer::create_static(
 		       s.length(),
 		       const_cast<char*>(s.data()))); // Yuck
     // From a base64 encoded std::string.
-    ceph::bufferlist bin;
+    stone::bufferlist bin;
 
     try {
       bin.decode_base64(base64);
-    } catch (const ceph::buffer::malformed_input& e) {
+    } catch (const stone::buffer::malformed_input& e) {
       return boost::none;
     }
     return bin;
@@ -472,7 +472,7 @@ struct Policy {
 
   std::vector<Statement> statements;
 
-  Policy(CephContext* cct, const std::string& tenant,
+  Policy(StoneContext* cct, const std::string& tenant,
 	 const bufferlist& text);
 
   Effect eval(const Environment& e,

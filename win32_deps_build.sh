@@ -165,7 +165,7 @@ export PTW32_LIB=${PTW32Lib}
 echo "Patching boost."
 # Fix getting Windows page size
 # TODO: send this upstream and maybe use a fork until it merges.
-# Meanwhile, we might consider moving those to ceph/cmake/modules/BuildBoost.cmake.
+# Meanwhile, we might consider moving those to stone/cmake/modules/BuildBoost.cmake.
 # This cmake module will first have to be updated to support Mingw though.
 patch -N boost/thread/pthread/thread_data.hpp <<EOL
 --- boost/thread/pthread/thread_data.hpp        2019-10-11 15:26:15.678703586 +0300
@@ -311,5 +311,5 @@ $MINGW_DLLTOOL -d $dokanSrcDir/dokan/dokan.def \
 # sys/public.h without the "sys" prefix.
 cp $dokanSrcDir/sys/public.h $dokanSrcDir/dokan
 
-echo "Finished building Ceph dependencies."
+echo "Finished building Stone dependencies."
 touch $depsToolsetDir/completed

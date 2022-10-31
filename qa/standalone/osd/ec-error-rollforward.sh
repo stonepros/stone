@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
     # Fix port????
-    export CEPH_MON="127.0.0.1:7132" # git grep '\<7132\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7132" # git grep '\<7132\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
     export margin=10
     export objects=200
     export poolname=test
@@ -32,8 +32,8 @@ function TEST_ec_error_rollforward() {
     run_osd $dir 2 || return 1
     run_osd $dir 3 || return 1
 
-    ceph osd erasure-code-profile set ec-profile m=2 k=2 crush-failure-domain=osd
-    ceph osd pool create ec 1 1 erasure ec-profile
+    stone osd erasure-code-profile set ec-profile m=2 k=2 crush-failure-domain=osd
+    stone osd pool create ec 1 1 erasure ec-profile
 
     rados -p ec put foo /etc/passwd
 

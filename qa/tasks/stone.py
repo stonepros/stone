@@ -1,7 +1,7 @@
 """
-Ceph cluster task.
+Stone cluster task.
 
-Handle the setup, starting, and clean-up of a Ceph cluster.
+Handle the setup, starting, and clean-up of a Stone cluster.
 """
 from copy import deepcopy
 from io import BytesIO
@@ -21,19 +21,19 @@ import socket
 import yaml
 
 from paramiko import SSHException
-from tasks.ceph_manager import CephManager, write_conf, get_valgrind_args
+from tasks.stone_manager import StoneManager, write_conf, get_valgrind_args
 from tarfile import ReadError
-from tasks.cephfs.filesystem import MDSCluster, Filesystem
+from tasks.stonefs.filesystem import MDSCluster, Filesystem
 from teuthology import misc as teuthology
 from teuthology import contextutil
 from teuthology import exceptions
 from teuthology.orchestra import run
-from tasks import ceph_client as cclient
+from tasks import stone_client as cclient
 from teuthology.orchestra.daemon import DaemonGroup
 from tasks.daemonwatchdog import DaemonWatchdog
 
-CEPH_ROLE_TYPES = ['mon', 'mgr', 'osd', 'mds', 'rgw']
-DATA_PATH = '/var/lib/ceph/{type_}/{cluster}-{id_}'
+STONE_ROLE_TYPES = ['mon', 'mgr', 'osd', 'mds', 'rgw']
+DATA_PATH = '/var/lib/stonepros/{type_}/{cluster}-{id_}'
 
 log = logging.getLogger(__name__)
 
@@ -91,13 +91,13 @@ def update_archive_setting(ctx, key, value):
 
 
 @contextlib.contextmanager
-def ceph_crash(ctx, config):
+def stone_crash(ctx, config):
     """
-    Gather crash dumps from /var/lib/ceph/crash
+    Gather crash dumps from /var/lib/stonepros/crash
     """
 
     # Add crash directory to job's archive
-    update_archive_setting(ctx, 'crash', '/var/lib/ceph/crash')
+    update_archive_setting(ctx, 'crash', '/var/lib/stonepros/crash')
 
     try:
         yield
@@ -117,40 +117,40 @@ def ceph_crash(ctx, config):
                 except OSError:
                     pass
                 try:
-                    teuthology.pull_directory(remote, '/var/lib/ceph/crash',
+                    teuthology.pull_directory(remote, '/var/lib/stonepros/crash',
                                               os.path.join(sub, 'crash'))
                 except ReadError:
                     pass
 
 
 @contextlib.contextmanager
-def ceph_log(ctx, config):
+def stone_log(ctx, config):
     """
-    Create /var/log/ceph log directory that is open to everyone.
+    Create /var/log/stone log directory that is open to everyone.
     Add valgrind and profiling-logger directories.
 
     :param ctx: Context
     :param config: Configuration
     """
-    log.info('Making ceph log dir writeable by non-root...')
+    log.info('Making stone log dir writeable by non-root...')
     run.wait(
         ctx.cluster.run(
             args=[
                 'sudo',
                 'chmod',
                 '777',
-                '/var/log/ceph',
+                '/var/log/stone',
             ],
             wait=False,
         )
     )
-    log.info('Disabling ceph logrotate...')
+    log.info('Disabling stone logrotate...')
     run.wait(
         ctx.cluster.run(
             args=[
                 'sudo',
                 'rm', '-f', '--',
-                '/etc/logrotate.d/ceph',
+                '/etc/logrotate.d/stone',
             ],
             wait=False,
         )
@@ -161,27 +161,27 @@ def ceph_log(ctx, config):
             args=[
                 'sudo',
                 'install', '-d', '-m0777', '--',
-                '/var/log/ceph/valgrind',
-                '/var/log/ceph/profiling-logger',
+                '/var/log/stonepros/valgrind',
+                '/var/log/stonepros/profiling-logger',
             ],
             wait=False,
         )
     )
 
     # Add logs directory to job's info log file
-    update_archive_setting(ctx, 'log', '/var/log/ceph')
+    update_archive_setting(ctx, 'log', '/var/log/stone')
 
     class Rotater(object):
         stop_event = gevent.event.Event()
 
         def invoke_logrotate(self):
-            # 1) install ceph-test.conf in /etc/logrotate.d
-            # 2) continuously loop over logrotate invocation with ceph-test.conf
+            # 1) install stone-test.conf in /etc/logrotate.d
+            # 2) continuously loop over logrotate invocation with stone-test.conf
             while not self.stop_event.is_set():
                 self.stop_event.wait(timeout=30)
                 try:
                     procs = ctx.cluster.run(
-                          args=['sudo', 'logrotate', '/etc/logrotate.d/ceph-test.conf'],
+                          args=['sudo', 'logrotate', '/etc/logrotate.d/stone-test.conf'],
                           wait=False,
                           stderr=StringIO()
                     )
@@ -222,7 +222,7 @@ def ceph_log(ctx, config):
 
     def write_rotate_conf(ctx, daemons):
         testdir = teuthology.get_testdir(ctx)
-        remote_logrotate_conf = '%s/logrotate.ceph-test.conf' % testdir
+        remote_logrotate_conf = '%s/logrotate.stone-test.conf' % testdir
         rotate_conf_path = os.path.join(os.path.dirname(__file__), 'logrotate.conf')
         with open(rotate_conf_path) as f:
             conf = ""
@@ -235,10 +235,10 @@ def ceph_log(ctx, config):
             for remote in ctx.cluster.remotes.keys():
                 remote.write_file(remote_logrotate_conf, BytesIO(conf.encode()))
                 remote.sh(
-                    f'sudo mv {remote_logrotate_conf} /etc/logrotate.d/ceph-test.conf && '
-                    'sudo chmod 0644 /etc/logrotate.d/ceph-test.conf && '
-                    'sudo chown root.root /etc/logrotate.d/ceph-test.conf')
-                remote.chcon('/etc/logrotate.d/ceph-test.conf',
+                    f'sudo mv {remote_logrotate_conf} /etc/logrotate.d/stone-test.conf && '
+                    'sudo chmod 0644 /etc/logrotate.d/stone-test.conf && '
+                    'sudo chown root.root /etc/logrotate.d/stone-test.conf')
+                remote.chcon('/etc/logrotate.d/stone-test.conf',
                              'system_u:object_r:etc_t:s0')
 
     if ctx.config.get('log-rotate'):
@@ -254,7 +254,7 @@ def ceph_log(ctx, config):
         if ctx.config.get('log-rotate'):
             log.info('Shutting down logrotate')
             logrotater.end()
-            ctx.cluster.sh('sudo rm /etc/logrotate.d/ceph-test.conf')
+            ctx.cluster.sh('sudo rm /etc/logrotate.d/stone-test.conf')
         if ctx.archive is not None and \
                 not (ctx.config.get('archive-on-error') and ctx.summary['success']):
             # and logs
@@ -264,7 +264,7 @@ def ceph_log(ctx, config):
                     args=[
                         'sudo',
                         'find',
-                        '/var/log/ceph',
+                        '/var/log/stone',
                         '-name',
                         '*.log',
                         '-print0',
@@ -293,7 +293,7 @@ def ceph_log(ctx, config):
                     os.makedirs(sub)
                 except OSError:
                     pass
-                teuthology.pull_directory(remote, '/var/log/ceph',
+                teuthology.pull_directory(remote, '/var/log/stone',
                                           os.path.join(sub, 'log'))
 
 
@@ -326,7 +326,7 @@ def valgrind_post(ctx, config):
         for remote in ctx.cluster.remotes.keys():
             # look at valgrind logs for each node
             proc = remote.run(
-                args="sudo zgrep '<kind>' /var/log/ceph/valgrind/* "
+                args="sudo zgrep '<kind>' /var/log/stonepros/valgrind/* "
                      # include a second file so that we always get
                      # a filename prefix on the output
                      "/dev/null | sort | uniq",
@@ -371,7 +371,7 @@ def crush_setup(ctx, config):
     profile = config.get('crush_tunables', 'default')
     log.info('Setting crush tunables to %s', profile)
     mon_remote.run(
-        args=['sudo', 'ceph', '--cluster', cluster_name,
+        args=['sudo', 'stone', '--cluster', cluster_name,
               'osd', 'crush', 'tunables', profile])
     yield
 
@@ -382,10 +382,10 @@ def setup_manager(ctx, config):
     (mon,) = ctx.cluster.only(first_mon).remotes.keys()
     if not hasattr(ctx, 'managers'):
         ctx.managers = {}
-    ctx.managers[config['cluster']] = CephManager(
+    ctx.managers[config['cluster']] = StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager.' + config['cluster']),
+        logger=log.getChild('stone_manager.' + config['cluster']),
         cluster=config['cluster'],
     )
     yield
@@ -400,16 +400,16 @@ def create_rbd_pool(ctx, config):
         ctx,
         cluster=ctx.cluster,
         remote=mon_remote,
-        ceph_cluster=cluster_name,
+        stone_cluster=cluster_name,
     )
     if config.get('create_rbd_pool', True):
         log.info('Creating RBD pool')
         mon_remote.run(
-            args=['sudo', 'ceph', '--cluster', cluster_name,
+            args=['sudo', 'stone', '--cluster', cluster_name,
                   'osd', 'pool', 'create', 'rbd', '8'])
         mon_remote.run(
             args=[
-                'sudo', 'ceph', '--cluster', cluster_name,
+                'sudo', 'stone', '--cluster', cluster_name,
                 'osd', 'pool', 'application', 'enable',
                 'rbd', 'rbd', '--yes-i-really-mean-it'
             ],
@@ -417,7 +417,7 @@ def create_rbd_pool(ctx, config):
     yield
 
 @contextlib.contextmanager
-def cephfs_setup(ctx, config):
+def stonefs_setup(ctx, config):
     cluster_name = config['cluster']
 
     first_mon = teuthology.get_first_mon(ctx, config, cluster_name)
@@ -426,9 +426,9 @@ def cephfs_setup(ctx, config):
     # If there are any MDSs, then create a filesystem for them to use
     # Do this last because requires mon cluster to be up and running
     if mdss.remotes:
-        log.info('Setting up CephFS filesystem(s)...')
-        cephfs_config = config.get('cephfs', {})
-        fs_configs =  cephfs_config.pop('fs', [{'name': 'cephfs'}])
+        log.info('Setting up StoneFS filesystem(s)...')
+        stonefs_config = config.get('stonefs', {})
+        fs_configs =  stonefs_config.pop('fs', [{'name': 'stonefs'}])
         set_allow_multifs = len(fs_configs) > 1
 
         # wait for standbys to become available (slow due to valgrind, perhaps)
@@ -443,7 +443,7 @@ def cephfs_setup(ctx, config):
         for fs_config in fs_configs:
             assert isinstance(fs_config, dict)
             name = fs_config.pop('name')
-            temp = deepcopy(cephfs_config)
+            temp = deepcopy(stonefs_config)
             teuthology.deep_merge(temp, fs_config)
             fs = Filesystem(ctx, fs_config=temp, name=name, create=True)
             if set_allow_multifs:
@@ -460,9 +460,9 @@ def cephfs_setup(ctx, config):
 
 @contextlib.contextmanager
 def watchdog_setup(ctx, config):
-    ctx.ceph[config['cluster']].thrashers = []
-    ctx.ceph[config['cluster']].watchdog = DaemonWatchdog(ctx, config, ctx.ceph[config['cluster']].thrashers)
-    ctx.ceph[config['cluster']].watchdog.start()
+    ctx.stone[config['cluster']].thrashers = []
+    ctx.stone[config['cluster']].watchdog = DaemonWatchdog(ctx, config, ctx.stone[config['cluster']].thrashers)
+    ctx.stone[config['cluster']].watchdog.start()
     yield
 
 def get_mons(roles, ips, cluster_name,
@@ -509,7 +509,7 @@ def get_mons(roles, ips, cluster_name,
     assert mons
     return mons
 
-def skeleton_config(ctx, roles, ips, mons, cluster='ceph'):
+def skeleton_config(ctx, roles, ips, mons, cluster='stone'):
     """
     Returns a ConfigObj that is prefilled with a skeleton config.
 
@@ -517,14 +517,14 @@ def skeleton_config(ctx, roles, ips, mons, cluster='ceph'):
 
     Use conf.write to write it out, override .filename first if you want.
     """
-    path = os.path.join(os.path.dirname(__file__), 'ceph.conf.template')
+    path = os.path.join(os.path.dirname(__file__), 'stone.conf.template')
     conf = configobj.ConfigObj(path, file_error=True)
     mon_hosts = []
     for role, addr in mons.items():
         mon_cluster, _, _ = teuthology.split_role(role)
         if mon_cluster != cluster:
             continue
-        name = teuthology.ceph_role(role)
+        name = teuthology.stone_role(role)
         conf.setdefault(name, {})
         mon_hosts.append(addr)
     conf.setdefault('global', {})
@@ -534,7 +534,7 @@ def skeleton_config(ctx, roles, ips, mons, cluster='ceph'):
     for roles_subset in roles:
         for role in roles_subset:
             if is_mds(role):
-                name = teuthology.ceph_role(role)
+                name = teuthology.stone_role(role)
                 conf.setdefault(name, {})
     return conf
 
@@ -542,10 +542,10 @@ def create_simple_monmap(ctx, remote, conf, mons,
                          path=None,
                          mon_bind_addrvec=False):
     """
-    Writes a simple monmap based on current ceph.conf into path, or
+    Writes a simple monmap based on current stone.conf into path, or
     <testdir>/monmap by default.
 
-    Assumes ceph_conf is up to date.
+    Assumes stone_conf is up to date.
 
     Assumes mon sections are named "mon.*", with the dot.
 
@@ -554,21 +554,21 @@ def create_simple_monmap(ctx, remote, conf, mons,
 
     addresses = list(mons.items())
     assert addresses, "There are no monitors in config!"
-    log.debug('Ceph mon addresses: %s', addresses)
+    log.debug('Stone mon addresses: %s', addresses)
 
     try:
         log.debug('writing out conf {c}'.format(c=conf))
     except:
         log.debug('my conf logging attempt failed')
     testdir = teuthology.get_testdir(ctx)
-    tmp_conf_path = '{tdir}/ceph.tmp.conf'.format(tdir=testdir)
+    tmp_conf_path = '{tdir}/stone.tmp.conf'.format(tdir=testdir)
     conf_fp = BytesIO()
     conf.write(conf_fp)
     conf_fp.seek(0)
     teuthology.write_file(remote, tmp_conf_path, conf_fp)
     args = [
         'adjust-ulimits',
-        'ceph-coverage',
+        'stone-coverage',
         '{tdir}/archive/coverage'.format(tdir=testdir),
         'monmaptool',
         '-c',
@@ -612,7 +612,7 @@ def maybe_redirect_stderr(config, type_, args, log_path):
 @contextlib.contextmanager
 def cluster(ctx, config):
     """
-    Handle the creation and removal of a ceph cluster.
+    Handle the creation and removal of a stone cluster.
 
     On startup:
         Create directories needed for the cluster.
@@ -628,7 +628,7 @@ def cluster(ctx, config):
     On exit:
         If errors occurred, extract a failure message and store in ctx.summary.
         Unmount all test files and temporary journaling files.
-        Save the monitor information and archive all ceph logs.
+        Save the monitor information and archive all stone logs.
         Cleanup the keyring setup, and remove all monitor map and data files left over.
 
     :param ctx: Context
@@ -641,7 +641,7 @@ def cluster(ctx, config):
     testdir = teuthology.get_testdir(ctx)
     cluster_name = config['cluster']
     data_dir = '{tdir}/{cluster}.data'.format(tdir=testdir, cluster=cluster_name)
-    log.info('Creating ceph cluster %s...', cluster_name)
+    log.info('Creating stone cluster %s...', cluster_name)
     log.info('config %s', config)
     log.info('ctx.config %s', ctx.config)
     run.wait(
@@ -658,7 +658,7 @@ def cluster(ctx, config):
         ctx.cluster.run(
             args=[
                 'sudo',
-                'install', '-d', '-m0777', '--', '/var/run/ceph',
+                'install', '-d', '-m0777', '--', '/var/run/stone',
             ],
             wait=False,
         )
@@ -701,13 +701,13 @@ def cluster(ctx, config):
                 conf[section] = {}
             conf[section][key] = value
 
-    if not hasattr(ctx, 'ceph'):
-        ctx.ceph = {}
-    ctx.ceph[cluster_name] = argparse.Namespace()
-    ctx.ceph[cluster_name].conf = conf
-    ctx.ceph[cluster_name].mons = mons
+    if not hasattr(ctx, 'stone'):
+        ctx.stone = {}
+    ctx.stone[cluster_name] = argparse.Namespace()
+    ctx.stone[cluster_name].conf = conf
+    ctx.stone[cluster_name].mons = mons
 
-    default_keyring = '/etc/ceph/{cluster}.keyring'.format(cluster=cluster_name)
+    default_keyring = '/etc/stonepros/{cluster}.keyring'.format(cluster=cluster_name)
     keyring_path = config.get('keyring_path', default_keyring)
 
     coverage_dir = '{tdir}/archive/coverage'.format(tdir=testdir)
@@ -719,9 +719,9 @@ def cluster(ctx, config):
         args=[
             'sudo',
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             coverage_dir,
-            'ceph-authtool',
+            'stone-authtool',
             '--create-keyring',
             keyring_path,
         ],
@@ -730,9 +730,9 @@ def cluster(ctx, config):
         args=[
             'sudo',
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             coverage_dir,
-            'ceph-authtool',
+            'stone-authtool',
             '--gen-key',
             '--name=mon.',
             keyring_path,
@@ -757,12 +757,12 @@ def cluster(ctx, config):
         path=monmap_path,
         mon_bind_addrvec=config.get('mon_bind_addrvec'),
     )
-    ctx.ceph[cluster_name].fsid = fsid
+    ctx.stone[cluster_name].fsid = fsid
     if not 'global' in conf:
         conf['global'] = {}
     conf['global']['fsid'] = fsid
 
-    default_conf_path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster_name)
+    default_conf_path = '/etc/stonepros/{cluster}.conf'.format(cluster=cluster_name)
     conf_path = config.get('conf_path', default_conf_path)
     log.info('Writing %s for FSID %s...' % (conf_path, fsid))
     write_conf(ctx, conf_path, cluster_name)
@@ -772,9 +772,9 @@ def cluster(ctx, config):
         args=[
             'sudo',
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             coverage_dir,
-            'ceph-authtool',
+            'stone-authtool',
             '--gen-key',
             '--name=client.admin',
             '--cap', 'mon', 'allow *',
@@ -816,9 +816,9 @@ def cluster(ctx, config):
                         run.Raw('&&'),
                         'sudo',
                         'adjust-ulimits',
-                        'ceph-coverage',
+                        'stone-coverage',
                         coverage_dir,
-                        'ceph-authtool',
+                        'stone-authtool',
                         '--create-keyring',
                         '--gen-key',
                         '--name=mgr.{id}'.format(id=id_),
@@ -843,9 +843,9 @@ def cluster(ctx, config):
                     run.Raw('&&'),
                     'sudo',
                     'adjust-ulimits',
-                    'ceph-coverage',
+                    'stone-coverage',
                     coverage_dir,
-                    'ceph-authtool',
+                    'stone-authtool',
                     '--create-keyring',
                     '--gen-key',
                     '--name=mds.{id}'.format(id=id_),
@@ -853,7 +853,7 @@ def cluster(ctx, config):
                 ],
             )
             remote.run(args=[
-                'sudo', 'chown', '-R', 'ceph:ceph', mds_dir
+                'sudo', 'chown', '-R', 'stone:stone', mds_dir
             ])
 
     cclient.create_keyring(ctx, cluster_name)
@@ -962,15 +962,15 @@ def cluster(ctx, config):
                 args = ['sudo',
                         'MALLOC_CHECK_=3',
                         'adjust-ulimits',
-                        'ceph-coverage', coverage_dir,
-                        'ceph-osd',
+                        'stone-coverage', coverage_dir,
+                        'stone-osd',
                         '--no-mon-config',
                         '--cluster', cluster_name,
                         '--mkfs',
                         '--mkkey',
                         '-i', id_,
                         '--monmap', monmap_path]
-                log_path = f'/var/log/ceph/{cluster_name}-osd.{id_}.log'
+                log_path = f'/var/log/stonepros/{cluster_name}-osd.{id_}.log'
                 create_log_cmd, args = \
                     maybe_redirect_stderr(config, 'osd', args, log_path)
                 if create_log_cmd:
@@ -983,9 +983,9 @@ def cluster(ctx, config):
                         'sudo',
                         'MALLOC_CHECK_=3',
                         'adjust-ulimits',
-                        'ceph-coverage',
+                        'stone-coverage',
                         coverage_dir,
-                        'ceph-osd',
+                        'stone-osd',
                         '--cluster',
                         cluster_name,
                         '--mkfs',
@@ -997,7 +997,7 @@ def cluster(ctx, config):
             mnt_point = DATA_PATH.format(
                 type_='osd', cluster=cluster_name, id_=id_)
             remote.run(args=[
-                'sudo', 'chown', '-R', 'ceph:ceph', mnt_point
+                'sudo', 'chown', '-R', 'stone:stone', mnt_point
             ])
 
     log.info('Reading keys from all nodes...')
@@ -1023,7 +1023,7 @@ def cluster(ctx, config):
         for role in teuthology.cluster_roles_of_type(roles_for_host, 'client', cluster_name):
             _, _, id_ = teuthology.split_role(role)
             data = remote.read_file(
-                '/etc/ceph/{cluster}.client.{id}.keyring'.format(id=id_, cluster=cluster_name)
+                '/etc/stonepros/{cluster}.client.{id}.keyring'.format(id=id_, cluster=cluster_name)
             )
             keys.append(('client', id_, data))
             keys_fp.write(data)
@@ -1047,9 +1047,9 @@ def cluster(ctx, config):
                 args=[
                          'sudo',
                          'adjust-ulimits',
-                         'ceph-coverage',
+                         'stone-coverage',
                          coverage_dir,
-                         'ceph-authtool',
+                         'stone-authtool',
                          keyring_path,
                          '--name={type}.{id}'.format(
                              type=type_,
@@ -1078,9 +1078,9 @@ def cluster(ctx, config):
                 args=[
                     'sudo',
                     'adjust-ulimits',
-                    'ceph-coverage',
+                    'stone-coverage',
                     coverage_dir,
-                    'ceph-mon',
+                    'stone-mon',
                     '--cluster', cluster_name,
                     '--mkfs',
                     '-i', id_,
@@ -1089,7 +1089,7 @@ def cluster(ctx, config):
                 ],
             )
             remote.run(args=[
-                'sudo', 'chown', '-R', 'ceph:ceph', mnt_point
+                'sudo', 'chown', '-R', 'stone:stone', mnt_point
             ])
 
     run.wait(
@@ -1114,9 +1114,9 @@ def cluster(ctx, config):
 
         log.info('Checking cluster log for badness...')
 
-        def first_in_ceph_log(pattern, excludes):
+        def first_in_stone_log(pattern, excludes):
             """
-            Find the first occurrence of the pattern specified in the Ceph log,
+            Find the first occurrence of the pattern specified in the Stone log,
             Returns None if none found.
 
             :param pattern: Pattern scanned for.
@@ -1126,7 +1126,7 @@ def cluster(ctx, config):
             args = [
                 'sudo',
                 'egrep', pattern,
-                '/var/log/ceph/{cluster}.log'.format(cluster=cluster_name),
+                '/var/log/stonepros/{cluster}.log'.format(cluster=cluster_name),
             ]
             for exclude in excludes:
                 args.extend([run.Raw('|'), 'egrep', '-v', exclude])
@@ -1136,14 +1136,14 @@ def cluster(ctx, config):
             stdout = mon0_remote.sh(args)
             return stdout or None
 
-        if first_in_ceph_log('\[ERR\]|\[WRN\]|\[SEC\]',
+        if first_in_stone_log('\[ERR\]|\[WRN\]|\[SEC\]',
                              config['log_ignorelist']) is not None:
             log.warning('Found errors (ERR|WRN|SEC) in cluster log')
             ctx.summary['success'] = False
             # use the most severe problem as the failure reason
             if 'failure_reason' not in ctx.summary:
                 for pattern in ['\[SEC\]', '\[ERR\]', '\[WRN\]']:
-                    match = first_in_ceph_log(pattern, config['log_ignorelist'])
+                    match = first_in_stone_log(pattern, config['log_ignorelist'])
                     if match is not None:
                         ctx.summary['failure_reason'] = \
                             '"{match}" in cluster log'.format(
@@ -1200,7 +1200,7 @@ def cluster(ctx, config):
                             mon_dir,
                             path + '/' + role + '.tgz')
 
-        log.info('Cleaning ceph cluster...')
+        log.info('Cleaning stone cluster...')
         run.wait(
             ctx.cluster.run(
                 args=[
@@ -1344,7 +1344,7 @@ def run_daemon(ctx, config, type_):
 
 
             if type_ == 'osd':
-                datadir='/var/lib/ceph/osd/{cluster}-{id}'.format(
+                datadir='/var/lib/stonepros/osd/{cluster}-{id}'.format(
                     cluster=cluster_name, id=id_)
                 osd_uuid = remote.read_file(
                     datadir + '/fsid', sudo=True).decode().strip()
@@ -1355,7 +1355,7 @@ def run_daemon(ctx, config, type_):
         try:
             remote.run(
                 args=[
-                'sudo', 'ceph', '--cluster', cluster_name,
+                'sudo', 'stone', '--cluster', cluster_name,
                     'osd', 'new', osd_uuid, id_,
                 ]
             )
@@ -1363,14 +1363,14 @@ def run_daemon(ctx, config, type_):
             # fallback to pre-luminous (jewel)
             remote.run(
                 args=[
-                'sudo', 'ceph', '--cluster', cluster_name,
+                'sudo', 'stone', '--cluster', cluster_name,
                     'osd', 'create', osd_uuid,
                 ]
             )
             if config.get('add_osds_to_crush'):
                 remote.run(
                 args=[
-                    'sudo', 'ceph', '--cluster', cluster_name,
+                    'sudo', 'stone', '--cluster', cluster_name,
                     'osd', 'crush', 'create-or-move', 'osd.' + id_,
                     '1.0', 'host=localhost', 'root=default',
                 ]
@@ -1386,19 +1386,19 @@ def run_daemon(ctx, config, type_):
             run_cmd = [
                 'sudo',
                 'adjust-ulimits',
-                'ceph-coverage',
+                'stone-coverage',
                 coverage_dir,
                 'daemon-helper',
                 daemon_signal,
             ]
             run_cmd_tail = [
-                'ceph-%s' % (type_),
+                'stone-%s' % (type_),
                 '-f',
                 '--cluster', cluster_name,
                 '-i', id_]
 
             if type_ in config.get('cpu_profile', []):
-                profile_path = '/var/log/ceph/profiling-logger/%s.prof' % (role)
+                profile_path = '/var/log/stonepros/profiling-logger/%s.prof' % (role)
                 run_cmd.extend(['env', 'CPUPROFILE=%s' % profile_path])
 
             vc = config.get('valgrind')
@@ -1413,7 +1413,7 @@ def run_daemon(ctx, config, type_):
                     exit_on_first_error=exit_on_first_error)
 
             run_cmd.extend(run_cmd_tail)
-            log_path = f'/var/log/ceph/{cluster_name}-{type_}.{id_}.log'
+            log_path = f'/var/log/stonepros/{cluster_name}-{type_}.{id_}.log'
             create_log_cmd, run_cmd = \
                 maybe_redirect_stderr(config, type_, run_cmd, log_path)
             if create_log_cmd:
@@ -1446,13 +1446,13 @@ def run_daemon(ctx, config, type_):
 
 def healthy(ctx, config):
     """
-    Wait for all osd's to be up, and for the ceph health monitor to return HEALTH_OK.
+    Wait for all osd's to be up, and for the stone health monitor to return HEALTH_OK.
 
     :param ctx: Context
     :param config: Configuration
     """
     config = config if isinstance(config, dict) else dict()
-    cluster_name = config.get('cluster', 'ceph')
+    cluster_name = config.get('cluster', 'stone')
     log.info('Waiting until %s daemons up and pgs clean...', cluster_name)
     manager = ctx.managers[cluster_name]
     try:
@@ -1469,35 +1469,35 @@ def healthy(ctx, config):
     manager.wait_for_clean()
 
     if config.get('wait-for-healthy', True):
-        log.info('Waiting until ceph cluster %s is healthy...', cluster_name)
+        log.info('Waiting until stone cluster %s is healthy...', cluster_name)
         manager.wait_until_healthy(timeout=300)
 
     if ctx.cluster.only(teuthology.is_type('mds', cluster_name)).remotes:
         # Some MDSs exist, wait for them to be healthy
-        ceph_fs = Filesystem(ctx) # TODO: make Filesystem cluster-aware
-        ceph_fs.wait_for_daemons(timeout=300)
+        stone_fs = Filesystem(ctx) # TODO: make Filesystem cluster-aware
+        stone_fs.wait_for_daemons(timeout=300)
 
 
 def wait_for_mon_quorum(ctx, config):
     """
-    Check renote ceph status until all monitors are up.
+    Check renote stone status until all monitors are up.
 
     :param ctx: Context
     :param config: Configuration
     """
     if isinstance(config, dict):
         mons = config['daemons']
-        cluster_name = config.get('cluster', 'ceph')
+        cluster_name = config.get('cluster', 'stone')
     else:
         assert isinstance(config, list)
         mons = config
-        cluster_name = 'ceph'
+        cluster_name = 'stone'
     firstmon = teuthology.get_first_mon(ctx, config, cluster_name)
     (remote,) = ctx.cluster.only(firstmon).remotes.keys()
     with contextutil.safe_while(sleep=10, tries=60,
                                 action='wait for monitor quorum') as proceed:
         while proceed():
-            quorum_status = remote.sh('sudo ceph quorum_status',
+            quorum_status = remote.sh('sudo stone quorum_status',
                                       logger=log.getChild('quorum_status'))
             j = json.loads(quorum_status)
             q = j.get('quorum_names', [])
@@ -1508,12 +1508,12 @@ def wait_for_mon_quorum(ctx, config):
 
 def created_pool(ctx, config):
     """
-    Add new pools to the dictionary of pools that the ceph-manager
+    Add new pools to the dictionary of pools that the stone-manager
     knows about.
     """
     for new_pool in config:
-        if new_pool not in ctx.managers['ceph'].pools:
-            ctx.managers['ceph'].pools[new_pool] = ctx.managers['ceph'].get_pool_int_property(
+        if new_pool not in ctx.managers['stone'].pools:
+            ctx.managers['stone'].pools[new_pool] = ctx.managers['stone'].get_pool_int_property(
                 new_pool, 'pg_num')
 
 
@@ -1527,7 +1527,7 @@ def suppress_mon_health_to_clog(ctx, config):
     restore the tweaked option at the /end/ of 'tasks' block.
     """
     if config.get('mon-health-to-clog', 'true') == 'false':
-        cluster = config.get('cluster', 'ceph')
+        cluster = config.get('cluster', 'stone')
         manager = ctx.managers[cluster]
         manager.raw_cluster_command(
             'config', 'set', 'mon', 'mon_health_to_clog', 'false'
@@ -1542,20 +1542,20 @@ def suppress_mon_health_to_clog(ctx, config):
 @contextlib.contextmanager
 def restart(ctx, config):
     """
-   restart ceph daemons
+   restart stone daemons
 
    For example::
       tasks:
-      - ceph.restart: [all]
+      - stone.restart: [all]
 
    For example::
       tasks:
-      - ceph.restart: [osd.0, mon.1, mds.*]
+      - stone.restart: [osd.0, mon.1, mds.*]
 
    or::
 
       tasks:
-      - ceph.restart:
+      - stone.restart:
           daemons: [osd.0, mon.1]
           wait-for-healthy: false
           wait-for-osds-up: true
@@ -1568,7 +1568,7 @@ def restart(ctx, config):
     elif isinstance(config, list):
         config = {'daemons': config}
 
-    daemons = ctx.daemons.resolve_role_list(config.get('daemons', None), CEPH_ROLE_TYPES, True)
+    daemons = ctx.daemons.resolve_role_list(config.get('daemons', None), STONE_ROLE_TYPES, True)
     clusters = set()
 
     with suppress_mon_health_to_clog(ctx, config):
@@ -1592,17 +1592,17 @@ def restart(ctx, config):
 @contextlib.contextmanager
 def stop(ctx, config):
     """
-    Stop ceph daemons
+    Stop stone daemons
 
     For example::
       tasks:
-      - ceph.stop: [mds.*]
+      - stone.stop: [mds.*]
 
       tasks:
-      - ceph.stop: [osd.0, osd.2]
+      - stone.stop: [osd.0, osd.2]
 
       tasks:
-      - ceph.stop:
+      - stone.stop:
           daemons: [osd.0, osd.2]
 
     """
@@ -1611,7 +1611,7 @@ def stop(ctx, config):
     elif isinstance(config, list):
         config = {'daemons': config}
 
-    daemons = ctx.daemons.resolve_role_list(config.get('daemons', None), CEPH_ROLE_TYPES, True)
+    daemons = ctx.daemons.resolve_role_list(config.get('daemons', None), STONE_ROLE_TYPES, True)
     clusters = set()
 
     for role in daemons:
@@ -1621,8 +1621,8 @@ def stop(ctx, config):
 
 
     for cluster in clusters:
-        ctx.ceph[cluster].watchdog.stop()
-        ctx.ceph[cluster].watchdog.join()
+        ctx.stone[cluster].watchdog.stop()
+        ctx.stone[cluster].watchdog.join()
 
     yield
 
@@ -1630,17 +1630,17 @@ def stop(ctx, config):
 @contextlib.contextmanager
 def wait_for_failure(ctx, config):
     """
-    Wait for a failure of a ceph daemon
+    Wait for a failure of a stone daemon
 
     For example::
       tasks:
-      - ceph.wait_for_failure: [mds.*]
+      - stone.wait_for_failure: [mds.*]
 
       tasks:
-      - ceph.wait_for_failure: [osd.0, osd.2]
+      - stone.wait_for_failure: [osd.0, osd.2]
 
       tasks:
-      - ceph.wait_for_failure:
+      - stone.wait_for_failure:
           daemons: [osd.0, osd.2]
 
     """
@@ -1649,7 +1649,7 @@ def wait_for_failure(ctx, config):
     elif isinstance(config, list):
         config = {'daemons': config}
 
-    daemons = ctx.daemons.resolve_role_list(config.get('daemons', None), CEPH_ROLE_TYPES, True)
+    daemons = ctx.daemons.resolve_role_list(config.get('daemons', None), STONE_ROLE_TYPES, True)
     for role in daemons:
         cluster, type_, id_ = teuthology.split_role(role)
         try:
@@ -1687,64 +1687,64 @@ def validate_config(ctx, config):
 @contextlib.contextmanager
 def task(ctx, config):
     """
-    Set up and tear down a Ceph cluster.
+    Set up and tear down a Stone cluster.
 
     For example::
 
         tasks:
-        - ceph:
+        - stone:
         - interactive:
 
     You can also specify what branch to run::
 
         tasks:
-        - ceph:
+        - stone:
             branch: foo
 
     Or a tag::
 
         tasks:
-        - ceph:
+        - stone:
             tag: v0.42.13
 
     Or a sha1::
 
         tasks:
-        - ceph:
+        - stone:
             sha1: 1376a5ab0c89780eab39ffbbe436f6a6092314ed
 
     Or a local source dir::
 
         tasks:
-        - ceph:
-            path: /home/sage/ceph
+        - stone:
+            path: /home/sage/stone
 
     To capture code coverage data, use::
 
         tasks:
-        - ceph:
+        - stone:
             coverage: true
 
     To use btrfs, ext4, or xfs on the target's scratch disks, use::
 
         tasks:
-        - ceph:
+        - stone:
             fs: xfs
             mkfs_options: [-b,size=65536,-l,logdev=/dev/sdc1]
             mount_options: [nobarrier, inode64]
 
-    To change the cephfs's default max_mds (1), use::
+    To change the stonefs's default max_mds (1), use::
 
         tasks:
-        - ceph:
-            cephfs:
+        - stone:
+            stonefs:
               max_mds: 2
 
     To change the max_mds of a specific filesystem, use::
 
         tasks:
-        - ceph:
-            cephfs:
+        - stone:
+            stonefs:
               max_mds: 2
               fs:
                 - name: a
@@ -1757,8 +1757,8 @@ def task(ctx, config):
     To change the mdsmap's default session_timeout (60 seconds), use::
 
         tasks:
-        - ceph:
-            cephfs:
+        - stone:
+            stonefs:
               session_timeout: 300
 
     Note, this will cause the task to check the /scratch_devs file on each node
@@ -1768,7 +1768,7 @@ def task(ctx, config):
     and the tool/args to use in a valgrind section::
 
         tasks:
-        - ceph:
+        - stone:
           valgrind:
             mds.1: --tool=memcheck
             osd.1: [--tool=memcheck, --leak-check=no]
@@ -1779,7 +1779,7 @@ def task(ctx, config):
     To adjust or modify config options, use::
 
         tasks:
-        - ceph:
+        - stone:
             conf:
               section:
                 key: value
@@ -1787,7 +1787,7 @@ def task(ctx, config):
     For example::
 
         tasks:
-        - ceph:
+        - stone:
             conf:
               mds.0:
                 some option: value
@@ -1801,24 +1801,24 @@ def task(ctx, config):
     entries by giving a list of egrep compatible regexes, i.e.:
 
         tasks:
-        - ceph:
+        - stone:
             log-ignorelist: ['foo.*bar', 'bad message']
 
-    To run multiple ceph clusters, use multiple ceph tasks, and roles
+    To run multiple stone clusters, use multiple stone tasks, and roles
     with a cluster name prefix, e.g. cluster1.client.0. Roles with no
-    cluster use the default cluster name, 'ceph'. OSDs from separate
+    cluster use the default cluster name, 'stone'. OSDs from separate
     clusters must be on separate hosts. Clients and non-osd daemons
     from multiple clusters may be colocated. For each cluster, add an
-    instance of the ceph task with the cluster name specified, e.g.::
+    instance of the stone task with the cluster name specified, e.g.::
 
         roles:
         - [mon.a, osd.0, osd.1]
         - [backup.mon.a, backup.osd.0, backup.osd.1]
         - [client.0, backup.client.0]
         tasks:
-        - ceph:
-            cluster: ceph
-        - ceph:
+        - stone:
+            cluster: stone
+        - stone:
             cluster: backup
 
     :param ctx: Context
@@ -1828,14 +1828,14 @@ def task(ctx, config):
     if config is None:
         config = {}
     assert isinstance(config, dict), \
-        "task ceph only supports a dictionary for configuration"
+        "task stone only supports a dictionary for configuration"
 
     overrides = ctx.config.get('overrides', {})
-    teuthology.deep_merge(config, overrides.get('ceph', {}))
+    teuthology.deep_merge(config, overrides.get('stone', {}))
 
-    first_ceph_cluster = False
+    first_stone_cluster = False
     if not hasattr(ctx, 'daemons'):
-        first_ceph_cluster = True
+        first_stone_cluster = True
         ctx.daemons = DaemonGroup()
 
     testdir = teuthology.get_testdir(ctx)
@@ -1853,17 +1853,17 @@ def task(ctx, config):
         )
 
     if 'cluster' not in config:
-        config['cluster'] = 'ceph'
+        config['cluster'] = 'stone'
 
     validate_config(ctx, config)
 
     subtasks = []
-    if first_ceph_cluster:
+    if first_stone_cluster:
         # these tasks handle general log setup and parsing on all hosts,
         # so they should only be run once
         subtasks = [
-            lambda: ceph_log(ctx=ctx, config=None),
-            lambda: ceph_crash(ctx=ctx, config=None),
+            lambda: stone_log(ctx=ctx, config=None),
+            lambda: stone_crash(ctx=ctx, config=None),
             lambda: valgrind_post(ctx=ctx, config=config),
         ]
 
@@ -1887,7 +1887,7 @@ def task(ctx, config):
         lambda: setup_manager(ctx=ctx, config=config),
         lambda: create_rbd_pool(ctx=ctx, config=config),
         lambda: run_daemon(ctx=ctx, config=config, type_='mds'),
-        lambda: cephfs_setup(ctx=ctx, config=config),
+        lambda: stonefs_setup(ctx=ctx, config=config),
         lambda: watchdog_setup(ctx=ctx, config=config),
     ]
 
@@ -1915,7 +1915,7 @@ def task(ctx, config):
             mon0_remote.run(
                 args=[
                     'sudo',
-                    'ceph',
+                    'stone',
                     '--cluster', config['cluster'],
                     'config', 'set', 'global',
                     'mon_health_to_clog', 'false',

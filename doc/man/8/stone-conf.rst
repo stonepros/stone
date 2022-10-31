@@ -1,38 +1,38 @@
 :orphan:
 
 ==================================
- ceph-conf -- ceph conf file tool
+ stone-conf -- stone conf file tool
 ==================================
 
-.. program:: ceph-conf
+.. program:: stone-conf
 
 Synopsis
 ========
 
-| **ceph-conf** -c *conffile* --list-all-sections
-| **ceph-conf** -c *conffile* -L
-| **ceph-conf** -c *conffile* -l *prefix*
-| **ceph-conf** *key* -s *section1* ...
-| **ceph-conf** [-s *section* ] [-r] --lookup *key*
-| **ceph-conf** [-s *section* ] *key*
+| **stone-conf** -c *conffile* --list-all-sections
+| **stone-conf** -c *conffile* -L
+| **stone-conf** -c *conffile* -l *prefix*
+| **stone-conf** *key* -s *section1* ...
+| **stone-conf** [-s *section* ] [-r] --lookup *key*
+| **stone-conf** [-s *section* ] *key*
 
 
 Description
 ===========
 
-**ceph-conf** is a utility for getting information from a ceph
-configuration file. As with most Ceph programs, you can specify which
-Ceph configuration file to use with the ``-c`` flag.
+**stone-conf** is a utility for getting information from a stone
+configuration file. As with most Stone programs, you can specify which
+Stone configuration file to use with the ``-c`` flag.
 
-Note that unlike other ceph tools, **ceph-conf** will *only* read from
+Note that unlike other stone tools, **stone-conf** will *only* read from
 config files (or return compiled-in default values)--it will *not*
 fetch config values from the monitor cluster.  For this reason it is
-recommended that **ceph-conf** only be used in legacy environments
+recommended that **stone-conf** only be used in legacy environments
 that are strictly config-file based.  New deployments and tools should
 instead rely on either querying the monitor explicitly for
-configuration (e.g., ``ceph config get <daemon> <option>``) or use
+configuration (e.g., ``stone config get <daemon> <option>``) or use
 daemons themselves to fetch effective config options (e.g.,
-``ceph-osd -i 123 --show-config-value osd_data``).  The latter option
+``stone-osd -i 123 --show-config-value osd_data``).  The latter option
 has the advantages of drawing from compiled-in defaults (which
 occasionally vary between daemons), config files, and the monitor's
 config database, providing the exact value that that daemon would be
@@ -41,7 +41,7 @@ using if it were started.
 Actions
 =======
 
-**ceph-conf** performs one of the following actions:
+**stone-conf** performs one of the following actions:
 
 .. option:: -L, --list-all-sections
 
@@ -68,7 +68,7 @@ Options
 
 .. option:: -c *conffile*
 
-   the Ceph configuration file.
+   the Stone configuration file.
 
 .. option:: --filter-key *key*
 
@@ -80,7 +80,7 @@ Options
 
 .. option:: --name *type.id*
 
-   the Ceph name in which the sections are searched (default 'client.admin').
+   the Stone name in which the sections are searched (default 'client.admin').
    For example, if we specify ``--name osd.0``, the following sections will be
    searched: [osd.0], [osd], [global]
 
@@ -88,7 +88,7 @@ Options
 
    override the ``$pid`` when expanding options. For example, if an option is
    configured like ``/var/log/$name.$pid.log``, the ``$pid`` portion in its
-   value will be substituded using the PID of **ceph-conf** instead of the
+   value will be substituded using the PID of **stone-conf** instead of the
    PID of the process specfied using the ``--name`` option.
 
 .. option:: -r, --resolve-search
@@ -108,42 +108,42 @@ Examples
 
 To find out what value osd 0 will use for the "osd data" option::
 
-        ceph-conf -c foo.conf  --name osd.0 --lookup "osd data"
+        stone-conf -c foo.conf  --name osd.0 --lookup "osd data"
 
 To find out what value will mds a use for the "log file" option::
 
-        ceph-conf -c foo.conf  --name mds.a "log file"
+        stone-conf -c foo.conf  --name mds.a "log file"
 
 To list all sections that begin with "osd"::
 
-        ceph-conf -c foo.conf -l osd
+        stone-conf -c foo.conf -l osd
 
 To list all sections::
 
-        ceph-conf -c foo.conf -L
+        stone-conf -c foo.conf -L
 
 To print the path of the "keyring" used by "client.0"::
 
-       ceph-conf --name client.0 -r -l keyring
+       stone-conf --name client.0 -r -l keyring
 
 
 Files
 =====
 
-``/etc/ceph/$cluster.conf``, ``~/.ceph/$cluster.conf``, ``$cluster.conf``
+``/etc/stone/$cluster.conf``, ``~/.stone/$cluster.conf``, ``$cluster.conf``
 
-the Ceph configuration files to use if not specified.
+the Stone configuration files to use if not specified.
 
 
 Availability
 ============
 
-**ceph-conf** is part of Ceph, a massively scalable, open-source, distributed storage system.  Please refer
-to the Ceph documentation at http://ceph.com/docs for more
+**stone-conf** is part of Stone, a massively scalable, open-source, distributed storage system.  Please refer
+to the Stone documentation at http://stone.com/docs for more
 information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8),
+:doc:`stone <stone>`\(8),

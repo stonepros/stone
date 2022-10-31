@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# http://tracker.ceph.com/issues/3964
+# http://tracker.stone.com/issues/3964
 
 set -ex
 

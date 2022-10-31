@@ -14,7 +14,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library Public License for more details.
 #
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 # Test development and debugging
 # Set to "yes" in order to ignore diff errors and save results to update test
@@ -27,12 +27,12 @@ function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7121" # git grep '\<7121\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7121" # git grep '\<7121\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
-    export -n CEPH_CLI_TEST_DUP_COMMAND
+    export -n STONE_CLI_TEST_DUP_COMMAND
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
         setup $dir || return 1
@@ -89,80 +89,80 @@ function create_scenario() {
 
     kill_daemons $dir TERM osd || return 1
 
-    # Don't need to use ceph_objectstore_tool() function because osd stopped
+    # Don't need to use stone_objectstore_tool() function because osd stopped
 
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj1)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" --force remove || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj1)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" --force remove || return 1
 
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --op list obj5 | grep \"snapid\":2)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" remove || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --op list obj5 | grep \"snapid\":2)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" remove || return 1
 
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --op list obj5 | grep \"snapid\":1)"
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --op list obj5 | grep \"snapid\":1)"
     OBJ5SAVE="$JSON"
     # Starts with a snapmap
-    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
+    stone-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
     grep SNA_ $dir/drk.log
     grep "^[pm].*SNA_.*[.]1[.]obj5[.][.]$" $dir/drk.log || return 1
-    ceph-objectstore-tool --data-path $dir/${osd} --rmtype nosnapmap "$JSON" remove || return 1
+    stone-objectstore-tool --data-path $dir/${osd} --rmtype nosnapmap "$JSON" remove || return 1
     # Check that snapmap is stil there
-    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
+    stone-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
     grep SNA_ $dir/drk.log
     grep "^[pm].*SNA_.*[.]1[.]obj5[.][.]$" $dir/drk.log || return 1
     rm -f $dir/drk.log
 
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --op list obj5 | grep \"snapid\":4)"
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --op list obj5 | grep \"snapid\":4)"
     dd if=/dev/urandom of=$TESTDATA bs=256 count=18
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" set-bytes $TESTDATA || return 1
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" set-bytes $TESTDATA || return 1
 
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj3)"
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj3)"
     dd if=/dev/urandom of=$TESTDATA bs=256 count=15
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" set-bytes $TESTDATA || return 1
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" set-bytes $TESTDATA || return 1
 
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --op list obj4 | grep \"snapid\":7)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" remove || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --op list obj4 | grep \"snapid\":7)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" remove || return 1
 
     # Starts with a snapmap
-    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
+    stone-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
     grep SNA_ $dir/drk.log
     grep "^[pm].*SNA_.*[.]7[.]obj16[.][.]$" $dir/drk.log || return 1
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --op list obj16 | grep \"snapid\":7)"
-    ceph-objectstore-tool --data-path $dir/${osd} --rmtype snapmap "$JSON" remove || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --op list obj16 | grep \"snapid\":7)"
+    stone-objectstore-tool --data-path $dir/${osd} --rmtype snapmap "$JSON" remove || return 1
     # Check that snapmap is now removed
-    ceph-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
+    stone-kvstore-tool bluestore-kv $dir/${osd} list 2> /dev/null > $dir/drk.log
     grep SNA_ $dir/drk.log
     ! grep "^[pm].*SNA_.*[.]7[.]obj16[.][.]$" $dir/drk.log || return 1
     rm -f $dir/drk.log
 
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj2)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" rm-attr snapset || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj2)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" rm-attr snapset || return 1
 
     # Create a clone which isn't in snapset and doesn't have object info
     JSON="$(echo "$OBJ5SAVE" | sed s/snapid\":1/snapid\":7/)"
     dd if=/dev/urandom of=$TESTDATA bs=256 count=7
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" set-bytes $TESTDATA || return 1
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" set-bytes $TESTDATA || return 1
 
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj6)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset || return 1
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj7)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset corrupt || return 1
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj8)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset seq || return 1
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj9)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset clone_size || return 1
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj10)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset clone_overlap || return 1
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj11)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset clones || return 1
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj12)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset head || return 1
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj13)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset snaps || return 1
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj14)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset size || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj6)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj7)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset corrupt || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj8)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset seq || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj9)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset clone_size || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj10)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset clone_overlap || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj11)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset clones || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj12)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset head || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj13)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset snaps || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj14)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" clear-snapset size || return 1
 
     echo "garbage" > $dir/bad
-    JSON="$(ceph-objectstore-tool --data-path $dir/${osd} --head --op list obj15)"
-    ceph-objectstore-tool --data-path $dir/${osd} "$JSON" set-attr snapset $dir/bad || return 1
+    JSON="$(stone-objectstore-tool --data-path $dir/${osd} --head --op list obj15)"
+    stone-objectstore-tool --data-path $dir/${osd} "$JSON" set-attr snapset $dir/bad || return 1
     rm -f $dir/bad
     return 0
 }
@@ -183,13 +183,13 @@ function TEST_scrub_snaps() {
     done
 
     # All scrubs done manually.  Don't want any unexpected scheduled scrubs.
-    ceph osd set noscrub || return 1
-    ceph osd set nodeep-scrub || return 1
+    stone osd set noscrub || return 1
+    stone osd set nodeep-scrub || return 1
 
     # Create a pool with a single pg
     create_pool $poolname 1 1
     wait_for_clean || return 1
-    poolid=$(ceph osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
+    poolid=$(stone osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
     for i in `seq 1 $OBJS`
@@ -628,7 +628,7 @@ EOF
 
     if test "$LOCALRUN" = "yes" && which jsonschema > /dev/null;
     then
-      jsonschema -i $dir/json $CEPH_ROOT/doc/rados/command/list-inconsistent-snap.json || return 1
+      jsonschema -i $dir/json $STONE_ROOT/doc/rados/command/list-inconsistent-snap.json || return 1
     fi
 
     pidfiles=$(find $dir 2>/dev/null | grep 'osd[^/]*\.pid')
@@ -646,9 +646,9 @@ EOF
     done
     sleep 5
     local -i loop=0
-    while ceph pg dump pgs | grep -q snaptrim;
+    while stone pg dump pgs | grep -q snaptrim;
     do
-        if ceph pg dump pgs | grep -q snaptrim_error;
+        if stone pg dump pgs | grep -q snaptrim_error;
         then
             break
         fi
@@ -659,7 +659,7 @@ EOF
             break
         fi
     done
-    ceph pg dump pgs
+    stone pg dump pgs
 
     for pid in $pids
     do
@@ -733,13 +733,13 @@ function _scrub_snaps_multi() {
     done
 
     # All scrubs done manually.  Don't want any unexpected scheduled scrubs.
-    ceph osd set noscrub || return 1
-    ceph osd set nodeep-scrub || return 1
+    stone osd set noscrub || return 1
+    stone osd set nodeep-scrub || return 1
 
     # Create a pool with a single pg
     create_pool $poolname 1 1
     wait_for_clean || return 1
-    poolid=$(ceph osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
+    poolid=$(stone osd dump | grep "^pool.*[']test[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
     for i in `seq 1 $OBJS`
@@ -1055,7 +1055,7 @@ fi
 
     if test "$LOCALRUN" = "yes" && which jsonschema > /dev/null;
     then
-      jsonschema -i $dir/json $CEPH_ROOT/doc/rados/command/list-inconsistent-snap.json || return 1
+      jsonschema -i $dir/json $STONE_ROOT/doc/rados/command/list-inconsistent-snap.json || return 1
     fi
 
     pidfiles=$(find $dir 2>/dev/null | grep 'osd[^/]*\.pid')
@@ -1068,7 +1068,7 @@ fi
     ERRORS=0
 
     # When removing snapshots with a corrupt replica, it crashes.
-    # See http://tracker.ceph.com/issues/23875
+    # See http://tracker.stone.com/issues/23875
     if [ $which = "primary" ];
     then
         for i in `seq 1 7`
@@ -1077,9 +1077,9 @@ fi
         done
         sleep 5
         local -i loop=0
-        while ceph pg dump pgs | grep -q snaptrim;
+        while stone pg dump pgs | grep -q snaptrim;
         do
-            if ceph pg dump pgs | grep -q snaptrim_error;
+            if stone pg dump pgs | grep -q snaptrim_error;
             then
                 break
             fi
@@ -1091,7 +1091,7 @@ fi
             fi
         done
     fi
-    ceph pg dump pgs
+    stone pg dump pgs
 
     for pid in $pids
     do
@@ -1148,21 +1148,21 @@ fi
 
 function TEST_scrub_snaps_replica() {
     local dir=$1
-    ORIG_ARGS=$CEPH_ARGS
-    CEPH_ARGS+=" --osd_scrub_chunk_min=3 --osd_scrub_chunk_max=3"
+    ORIG_ARGS=$STONE_ARGS
+    STONE_ARGS+=" --osd_scrub_chunk_min=3 --osd_scrub_chunk_max=3"
     _scrub_snaps_multi $dir replica
     err=$?
-    CEPH_ARGS=$ORIG_ARGS
+    STONE_ARGS=$ORIG_ARGS
     return $err
 }
 
 function TEST_scrub_snaps_primary() {
     local dir=$1
-    ORIG_ARGS=$CEPH_ARGS
-    CEPH_ARGS+=" --osd_scrub_chunk_min=3 --osd_scrub_chunk_max=3"
+    ORIG_ARGS=$STONE_ARGS
+    STONE_ARGS+=" --osd_scrub_chunk_min=3 --osd_scrub_chunk_max=3"
     _scrub_snaps_multi $dir primary
     err=$?
-    CEPH_ARGS=$ORIG_ARGS
+    STONE_ARGS=$ORIG_ARGS
     return $err
 }
 

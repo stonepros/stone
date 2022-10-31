@@ -46,7 +46,7 @@ Merge: 222aa22 91515e7
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Feb 11 00:11:57 2015 +0100
 
-    Merge pull request #3407 from ceph/wip-9854-giant
+    Merge pull request #3407 from stone/wip-9854-giant
     
     osdc: Constrain max number of in-flight read requests
 
@@ -73,7 +73,7 @@ Merge: 94889cf d125743
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Feb 10 21:59:17 2015 +0100
 
-    Merge pull request #3191 from ceph/giant-10277
+    Merge pull request #3191 from stone/giant-10277
     
     Giant 10277
 
@@ -82,7 +82,7 @@ Merge: d7b10d8 d28c8e0
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Feb 10 21:58:52 2015 +0100
 
-    Merge pull request #3186 from ceph/wip-giant-mon-backports
+    Merge pull request #3186 from stone/wip-giant-mon-backports
     
     mon: backports for #9987 against giant
 
@@ -118,7 +118,7 @@ Merge: fca9ead 319f9c9
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Feb 10 21:57:18 2015 +0100
 
-    Merge pull request #3168 from ceph/wip-8797-giant
+    Merge pull request #3168 from stone/wip-8797-giant
     
     Wip 8797 giant
 
@@ -253,7 +253,7 @@ Merge: cae1de2 14cdb9b
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Feb 10 21:50:34 2015 +0100
 
-    Merge pull request #3443 from ceph/wip-10590-giant
+    Merge pull request #3443 from stone/wip-10590-giant
     
     rbd: ensure aio_write buffer isn't invalidated during image import
 
@@ -280,7 +280,7 @@ Merge: 1d97c7c 081f49b
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Feb 10 21:49:20 2015 +0100
 
-    Merge pull request #3405 from ceph/wip-10299-giant
+    Merge pull request #3405 from stone/wip-10299-giant
     
     librbd: complete all pending aio ops prior to closing image
 
@@ -289,7 +289,7 @@ Merge: 53dec0e 436923c
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Feb 10 21:48:49 2015 +0100
 
-    Merge pull request #3403 from ceph/wip-10270-giant
+    Merge pull request #3403 from stone/wip-10270-giant
     
     librbd: gracefully handle deleted/renamed pools
 
@@ -337,7 +337,7 @@ Date:   Mon Dec 22 19:57:19 2014 +0530
     rgw: check keystone auth also for s3 post requests
     
     This patch adds keystone auth for s3 post requests, once a user fails in
-    cephx authentication, they are checked for keystone if configured.
+    stonex authentication, they are checked for keystone if configured.
     
     Fixes #10062
     Signed-off-by: Abhishek Lekshmanan <abhishek.lekshmanan@gmail.com>
@@ -611,7 +611,7 @@ Date:   Thu Jan 29 10:15:02 2015 -0700
     without the _io having been included, what got dumped was an implicit
     bool conversion.
     
-    http://tracker.ceph.com/issues/10688 Refs: #10688
+    http://tracker.stone.com/issues/10688 Refs: #10688
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit 85717394c33137eb703a7b88608ec9cf3287f67a)
     
@@ -674,7 +674,7 @@ Merge: a463b92 9f865fa
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Tue Jan 27 09:40:16 2015 -0800
 
-    Merge pull request #3502 from ceph/wip-10382-giant
+    Merge pull request #3502 from stone/wip-10382-giant
     
     [giant backport] mds: handle heartbeat_reset during shutdown
     
@@ -698,7 +698,7 @@ commit a463b92e475cd1f4cdb963e402033ebc9d37dbdc
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Jan 19 18:28:20 2015 -0800
 
-    ceph_test_rados_api_misc: do not assert rbd feature match
+    stone_test_rados_api_misc: do not assert rbd feature match
     
     This test fails on upgrades when we (or the server) have new
     features.  Make it less fragile.
@@ -915,7 +915,7 @@ Date:   Tue Dec 16 13:31:30 2014 +0100
     8, 16 or 32 was added incorrectly while refactoring parameter parsing in
     the jerasure plugin and must be relaxed.
     
-    http://tracker.ceph.com/issues/10325 Fixes: #10325
+    http://tracker.stone.com/issues/10325 Fixes: #10325
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit bb80437f247345502203ad87a7e7bbb5b5602b9a)
@@ -934,7 +934,7 @@ Date:   Sun Nov 23 18:50:51 2014 -0800
     
     Backport: giant, firefly
     Fixes: #9998
-    Reported-by: Pawel Sadowski <ceph@sadziu.pl>
+    Reported-by: Pawel Sadowski <stone@sadziu.pl>
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 9902383c690dca9ed5ba667800413daa8332157e)
 
@@ -957,7 +957,7 @@ Date:   Fri Nov 21 17:37:03 2014 -0800
 
     crush/CrushWrapper: fix _search_item_exists
     
-    Reported-by: Pawel Sadowski <ceph@sadziu.pl>
+    Reported-by: Pawel Sadowski <stone@sadziu.pl>
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit eeadd60714d908a3a033aeb7fd542c511e63122b)
 
@@ -976,9 +976,9 @@ Merge: abdbbd6 910ec62
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Dec 29 10:55:22 2014 -0800
 
-    Merge pull request #3266 from ceph/giant-10415
+    Merge pull request #3266 from stone/giant-10415
     
-    libcephfs/test.cc: close fd before umount
+    libstonefs/test.cc: close fd before umount
 
 commit b1e48820785a1d3153fc926ad21355b3927b44e9
 Author: Loic Dachary <ldachary@redhat.com>
@@ -995,7 +995,7 @@ commit 910ec624156d26a1830078161f47328a950a4eee
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Tue Dec 23 10:22:00 2014 +0800
 
-    libcephfs/test.cc: close fd before umount
+    libstonefs/test.cc: close fd before umount
     
     Fixes: #10415
     Signed-off-by: Yan, Zheng <zyan@redhat.com>
@@ -1066,7 +1066,7 @@ Merge: 758d9cf 7bbf80f
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Thu Dec 11 17:03:07 2014 -0800
 
-    Merge pull request #3159 from ceph/wip-10229-giant
+    Merge pull request #3159 from stone/wip-10229-giant
     
     osdc/Filer: use finisher to execute C_Probe and C_PurgeRange [giant backport]
     
@@ -1097,7 +1097,7 @@ Merge: a8e5638 994dcbb
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Thu Dec 11 10:47:38 2014 -0800
 
-    Merge pull request #3151 from ceph/wip-10288-giant
+    Merge pull request #3151 from stone/wip-10288-giant
     
     mon: fix `fs ls` on peons [giant backport]
     
@@ -1138,7 +1138,7 @@ Date:   Wed Dec 10 13:19:16 2014 -0800
     rados.py: remove Rados.__del__(); it just causes problems
     
     Recent versions of Python contain a change to thread shutdown that
-    causes ceph to hang on exit; see http://bugs.python.org/issue21963.
+    causes stone to hang on exit; see http://bugs.python.org/issue21963.
     As it turns out, this is relatively easy to avoid by not spawning
     threads on exit, as Rados.__del__() will certainly do by calling
     shutdown(); I suspect, but haven't proven, that the problem is
@@ -1170,7 +1170,7 @@ Merge: 3372060 309fd5f
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Mon Dec 8 12:36:48 2014 -0800
 
-    Merge pull request #3110 from ceph/giant-10263
+    Merge pull request #3110 from stone/giant-10263
     
     mds: store backtrace for straydir
     
@@ -1202,7 +1202,7 @@ Date:   Fri Dec 5 17:33:12 2014 -0800
 
     Merge pull request #3095 from dachary/wip-9785-dmcrypt-keys-permissions-giant
     
-    ceph-disk: dmcrypt file permissions (giant)
+    stone-disk: dmcrypt file permissions (giant)
 
 commit 3b65226df806958f6a2f24df6099ee3a86d2a71f
 Merge: 691f011 36c7484
@@ -1217,12 +1217,12 @@ commit 1ec557c0eab94cb898ad3f5448482bd7afc53e09
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Thu Dec 4 22:21:32 2014 +0100
 
-    ceph-disk: dmcrypt file permissions
+    stone-disk: dmcrypt file permissions
     
     The directory in which key files are stored for dmcrypt must be 700 and
     the file 600.
     
-    http://tracker.ceph.com/issues/9785 Fixes: #9785
+    http://tracker.stone.com/issues/9785 Fixes: #9785
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit 58682d1776ab1fd4daddd887d921ca9cc312bf50)
@@ -1243,12 +1243,12 @@ Date:   Fri Nov 14 01:16:10 2014 +0100
     common: do not omit shard when ghobject NO_GEN is set
     
     Do not silence the display of shard_id when generation is NO_GEN.
-    Erasure coded objects JSON representation used by ceph_objectstore_tool
+    Erasure coded objects JSON representation used by stone_objectstore_tool
     need the shard_id to find the file containing the chunk.
     
-    Minimal testing is added to ceph_objectstore_tool.py
+    Minimal testing is added to stone_objectstore_tool.py
     
-    http://tracker.ceph.com/issues/10063 Fixes: #10063
+    http://tracker.stone.com/issues/10063 Fixes: #10063
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit dcf09aed121f566221f539106d10283a09f15cf5)
@@ -1261,7 +1261,7 @@ Date:   Tue Dec 2 18:10:48 2014 +0100
     
     Same as sysv.
     
-    http://tracker.ceph.com/issues/10125 Fixes: #10125
+    http://tracker.stone.com/issues/10125 Fixes: #10125
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 7b621f4abf63456272dec3449aa108c89504a7a5)
@@ -1274,7 +1274,7 @@ Merge: 8046359 3ff94ed
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Dec 4 11:32:01 2014 -0800
 
-    Merge pull request #3077 from ceph/wip-10030-giant
+    Merge pull request #3077 from stone/wip-10030-giant
     
     librbd: don't close an already closed parent image upon failure
     
@@ -1314,7 +1314,7 @@ Date:   Tue Dec 2 01:07:34 2014 +0100
     using the bufferlist::rebuild_aligned_size_and_memory function instead of
     bufferlist::rebuild_aligned.
     
-    http://tracker.ceph.com/issues/10211 Fixes: #10211
+    http://tracker.stone.com/issues/10211 Fixes: #10211
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 4e955f41297283798236c505c3d21bdcabb5caa0)
@@ -1337,7 +1337,7 @@ Merge: 26e8cf1 3dc6298
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Dec 3 23:02:43 2014 -0800
 
-    Merge pull request #3062 from ceph/wip-10123-giant
+    Merge pull request #3062 from stone/wip-10123-giant
     
     librbd: protect list_children from invalid child pool IoCtxs
     
@@ -1348,7 +1348,7 @@ Merge: aac7946 7cd8c3f
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Wed Dec 3 06:44:56 2014 -0800
 
-    Merge pull request #3055 from ceph/wip-10135-giant
+    Merge pull request #3055 from stone/wip-10135-giant
     
     mon: OSDMonitor: allow adding tiers to FS pools
     
@@ -1388,7 +1388,7 @@ Merge: 65f6814 c8b46d6
 Author: John Spray <jcspray@gmail.com>
 Date:   Tue Dec 2 11:35:59 2014 +0000
 
-    Merge pull request #2990 from ceph/wip-10151-giant
+    Merge pull request #2990 from stone/wip-10151-giant
     
     mon: fix MDS health status from peons
     
@@ -1414,7 +1414,7 @@ Merge: 28e2708 9158326
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Mon Dec 1 17:59:19 2014 -0800
 
-    Merge pull request #3047 from ceph/wip-10011-giant
+    Merge pull request #3047 from stone/wip-10011-giant
     
     osdc: fix Journaler write error handling [giant backport]
     
@@ -1444,9 +1444,9 @@ Merge: 37ffccb cb1d681
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Nov 25 21:18:59 2014 -0800
 
-    Merge pull request #3005 from dachary/wip-9665-ceph-disk-partprobe-giant
+    Merge pull request #3005 from dachary/wip-9665-stone-disk-partprobe-giant
     
-    ceph disk zap must call partprobe
+    stone disk zap must call partprobe
 
 commit e7faed5d903cf7681d77a6af53cf8137eeb2fc69
 Author: Loic Dachary <loic-201408@dachary.org>
@@ -1456,7 +1456,7 @@ Date:   Thu Nov 6 17:11:20 2014 +0100
     
     Instead it should set read_error.
     
-    http://tracker.ceph.com/issues/10018 Fixes: #10018
+    http://tracker.stone.com/issues/10018 Fixes: #10018
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 9d84d2e8309d26e39ca849a75166d2d7f2dec9ea)
@@ -1474,7 +1474,7 @@ Date:   Thu Sep 25 14:46:07 2014 +0200
     (cherry picked from commit 2d7adb23bc52e7c0753f4571fecd8eefa209ef02)
     
     Conflicts:
-    	src/test/erasure-code/ceph_erasure_code_benchmark.h
+    	src/test/erasure-code/stone_erasure_code_benchmark.h
 
 commit 32daa9b0f4d39f8a49512b18d5c19437aca5fec6
 Author: Loic Dachary <loic-201408@dachary.org>
@@ -1486,14 +1486,14 @@ Date:   Mon Sep 29 11:17:13 2014 +0200
     (cherry picked from commit 3ff2816b3eecfb7277295583387549dac5429628)
     
     Conflicts:
-    	src/test/erasure-code/ceph_erasure_code_benchmark.cc
-    	src/test/erasure-code/ceph_erasure_code_benchmark.h
+    	src/test/erasure-code/stone_erasure_code_benchmark.cc
+    	src/test/erasure-code/stone_erasure_code_benchmark.h
 
 commit da9a7f07787d7f8c20b0c3e7a53fcaf95ed7ca20
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Tue Sep 23 14:37:57 2014 +0200
 
-    erasure_code: implement ceph_erasure_code to assert the existence of a plugin
+    erasure_code: implement stone_erasure_code to assert the existence of a plugin
     
     This is handy when scripting in the context of teuthology and only
     conditionally run tests for the isa plugin, for instance.
@@ -1505,10 +1505,10 @@ commit c855f3958fb8c10bd824075c1739f40799f6d74b
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Tue Sep 23 14:36:08 2014 +0200
 
-    erasure-code: ceph_erasure_code does not need to avoid dlclose
+    erasure-code: stone_erasure_code does not need to avoid dlclose
     
     The only reason for not dlclosing plugins at exit is for callgrind but
-    ceph_erasure_code has no workload that would require callgrind.
+    stone_erasure_code has no workload that would require callgrind.
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 49613cb2aab6e73e3ea50fa164735b55e80121cd)
@@ -1552,9 +1552,9 @@ Date:   Sat Sep 13 13:36:09 2014 +0200
     erasure-code: workunit to check for encoding regression
     
     Clone the archive of encoded objects and decode all archived objects, up
-    to and including the current ceph version.
+    to and including the current stone version.
     
-    http://tracker.ceph.com/issues/9420 Refs: #9420
+    http://tracker.stone.com/issues/9420 Refs: #9420
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 7638b15f23976c3265cf766e16cf93af1a7e0091)
@@ -1565,11 +1565,11 @@ Date:   Sat Sep 13 10:16:31 2014 +0200
 
     erasure-code: store and compare encoded contents
     
-    Introduce ceph_erasure_code_non_regression to check and compare how an
+    Introduce stone_erasure_code_non_regression to check and compare how an
     erasure code plugin encodes and decodes content with a given set of
     parameters. For instance:
     
-    ./ceph_erasure_code_non_regression \
+    ./stone_erasure_code_non_regression \
           --plugin jerasure \
           --parameter technique=reed_sol_van \
           --parameter k=2 \
@@ -1587,10 +1587,10 @@ Date:   Sat Sep 13 10:16:31 2014 +0200
     encodes it and compares the result with the content of the chunks read
     from the files. It also attempts recover from one or two erasures.
     
-    Chunks encoded by a given version of Ceph are expected to be encoded
-    exactly in the same way by all Ceph versions going forward.
+    Chunks encoded by a given version of Stone are expected to be encoded
+    exactly in the same way by all Stone versions going forward.
     
-    http://tracker.ceph.com/issues/9420 Refs: #9420
+    http://tracker.stone.com/issues/9420 Refs: #9420
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit f5901303dbf50e9d08f2f1e510a1936a20037909)
@@ -1599,21 +1599,21 @@ commit cb1d68113477cf9c2028a65372d2d4a3e6a8bdc1
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Thu Oct 9 18:52:17 2014 +0200
 
-    ceph-disk: run partprobe after zap
+    stone-disk: run partprobe after zap
     
     Not running partprobe after zapping a device can lead to the following:
     
-    * ceph-disk prepare /dev/loop2
+    * stone-disk prepare /dev/loop2
     * links are created in /dev/disk/by-partuuid
-    * ceph-disk zap /dev/loop2
+    * stone-disk zap /dev/loop2
     * links are not removed from /dev/disk/by-partuuid
-    * ceph-disk prepare /dev/loop2
+    * stone-disk prepare /dev/loop2
     * some links are not created in /dev/disk/by-partuuid
     
     This is assuming there is a bug in the way udev events are handled by
     the operating system.
     
-    http://tracker.ceph.com/issues/9665 Fixes: #9665
+    http://tracker.stone.com/issues/9665 Fixes: #9665
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit fed3b06c47a5ef22cb3514c7647544120086d1e7)
@@ -1622,12 +1622,12 @@ commit d9c04b880d8bf867aa454132117119be5bd550ad
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Fri Oct 10 10:26:31 2014 +0200
 
-    ceph-disk: use update_partition in prepare_dev and main_prepare
+    stone-disk: use update_partition in prepare_dev and main_prepare
     
     In the case of prepare_dev the partx alternative was missing and is not
     added because update_partition does it.
     
-    http://tracker.ceph.com/issues/9721 Fixes: #9721
+    http://tracker.stone.com/issues/9721 Fixes: #9721
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 23e71b1ee816c0ec8bd65891998657c46e364fbe)
@@ -1636,7 +1636,7 @@ commit 5c9cd3c2a292ae540fd0a487defaf4d712e41e62
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Fri Oct 10 10:23:34 2014 +0200
 
-    ceph-disk: encapsulate partprobe / partx calls
+    stone-disk: encapsulate partprobe / partx calls
     
     Add the update_partition function to reduce code duplication.
     The action is made an argument although it always is -a because it will
@@ -1671,7 +1671,7 @@ Merge: b13a56a 65c5657
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Nov 20 13:13:33 2014 -0800
 
-    Merge pull request #2975 from ceph/wip-9936-giant
+    Merge pull request #2975 from stone/wip-9936-giant
     
     rbd: Fix the rbd export when image size more than 2G
     
@@ -1682,7 +1682,7 @@ Merge: 828c1a2 46bd344
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Wed Nov 19 02:40:47 2014 +0100
 
-    Merge pull request #2963 from ceph/wip-10114-giant
+    Merge pull request #2963 from stone/wip-10114-giant
     
     Wip 10114 giant
     
@@ -1693,9 +1693,9 @@ Merge: ccfd241 6cb9a24
 Author: David Zafman <david.zafman@inktank.com>
 Date:   Tue Nov 18 15:48:16 2014 -0800
 
-    Merge pull request #2958 from ceph/wip-10128-giant
+    Merge pull request #2958 from stone/wip-10128-giant
     
-    ceph_objectstore_tool: When exporting to stdout, don't cout messages
+    stone_objectstore_tool: When exporting to stdout, don't cout messages
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1718,7 +1718,7 @@ Date:   Fri Nov 14 17:59:57 2014 -0800
 
     Add annotation to all assembly files to turn off stack-execute bit
     
-    See discussion in http://tracker.ceph.com/issues/10114
+    See discussion in http://tracker.stone.com/issues/10114
     
     Building with these changes allows output from readelf like this:
     
@@ -1736,7 +1736,7 @@ commit 6cb9a2499cac2645e2cc6903ab29dfd95aac26c7
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Nov 17 23:02:50 2014 -0800
 
-    ceph_objectstore_tool: When exporting to stdout, don't cout messages
+    stone_objectstore_tool: When exporting to stdout, don't cout messages
     
     Fixes: #10128
     Caused by a2bd2aa7
@@ -1831,7 +1831,7 @@ Merge: b27f5db a6c02a1
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Nov 11 08:28:19 2014 -0800
 
-    Merge pull request #2804 from ceph/wip-9301-giant
+    Merge pull request #2804 from stone/wip-9301-giant
     
     mon: backport paxos off-by-one bug (9301) to giant
 
@@ -1840,7 +1840,7 @@ Merge: 97e423f fc5354d
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Mon Nov 10 22:41:19 2014 -0800
 
-    Merge pull request #2887 from ceph/wip-9977-backport
+    Merge pull request #2887 from stone/wip-9977-backport
     
     tools: skip up to expire_pos in journal-tool
     
@@ -1891,14 +1891,14 @@ Date:   Mon Nov 3 19:19:45 2014 +0000
     (cherry picked from commit 65c33503c83ff8d88781c5c3ae81d88d84c8b3e4)
     
     Conflicts:
-    	src/tools/cephfs/JournalScanner.cc
+    	src/tools/stonefs/JournalScanner.cc
 
 commit 9680613141b3eef62f35a6728e654efa5f6ba8e8
 Merge: fd4363d a5984ba
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Fri Nov 7 16:26:54 2014 -0800
 
-    Merge pull request #2876 from ceph/giant-readdir-fix
+    Merge pull request #2876 from stone/giant-readdir-fix
     
     Giant readdir fix
 
@@ -1907,7 +1907,7 @@ Merge: f66bf31 7166ff8
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Fri Nov 7 14:10:40 2014 -0800
 
-    Merge pull request #2879 from ceph/wip-10025-giant
+    Merge pull request #2879 from stone/wip-10025-giant
     
     #10025/giant -- tools: fix MDS journal import
     
@@ -1999,7 +1999,7 @@ Merge: f410d76 f111bc8
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Wed Nov 5 08:51:18 2014 +0100
 
-    Merge pull request #2858 from ceph/wip-9909
+    Merge pull request #2858 from stone/wip-9909
     
     tools: rados put /dev/null should write() and not create()
     
@@ -2056,7 +2056,7 @@ Date:   Fri Oct 31 00:49:21 2014 +0100
     
     The acting array was incorrectly including the primary and up_primary.
     
-    http://tracker.ceph.com/issues/9752 Fixes: #9752
+    http://tracker.stone.com/issues/9752 Fixes: #9752
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit c5f8d6eded52da451fdd1d807bd4700221e4c41c)
@@ -2066,7 +2066,7 @@ Merge: ebe1637 905aba2
 Author: Yan, Zheng <ukernel@gmail.com>
 Date:   Thu Oct 30 17:01:12 2014 -0700
 
-    Merge pull request #2841 from ceph/giant-9869
+    Merge pull request #2841 from stone/giant-9869
     
     Backport "client: cast m->get_client_tid() to compare to 16-bit Inode::flushing_cap_tid"
 
@@ -2093,7 +2093,7 @@ Merge: c51c8f9 b704f0d
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Oct 30 10:05:22 2014 -0700
 
-    Merge pull request #2838 from ceph/wip-9945-giant
+    Merge pull request #2838 from stone/wip-9945-giant
     
     messages: fix COMPAT_VERSION on MClientSession
     

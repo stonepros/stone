@@ -69,7 +69,7 @@ class internal_sub_items_t {
     return (p_first_item - index)->get_p_value();
   }
   node_offset_t size_overhead_at(index_t index) const { return 0u; }
-  void encode(const char* p_node_start, ceph::bufferlist& encoded) const {
+  void encode(const char* p_node_start, stone::bufferlist& encoded) const {
     auto p_end = reinterpret_cast<const char*>(p_first_item) +
                  sizeof(internal_sub_item_t);
     auto p_start = p_end - num_items * sizeof(internal_sub_item_t);
@@ -78,16 +78,16 @@ class internal_sub_items_t {
     assert(start_offset > 0 &&
            start_offset < end_offset &&
            end_offset < NODE_BLOCK_SIZE);
-    ceph::encode(static_cast<node_offset_t>(start_offset), encoded);
-    ceph::encode(static_cast<node_offset_t>(end_offset), encoded);
+    stone::encode(static_cast<node_offset_t>(start_offset), encoded);
+    stone::encode(static_cast<node_offset_t>(end_offset), encoded);
   }
 
   static internal_sub_items_t decode(
-      const char* p_node_start, ceph::bufferlist::const_iterator& delta) {
+      const char* p_node_start, stone::bufferlist::const_iterator& delta) {
     node_offset_t start_offset;
-    ceph::decode(start_offset, delta);
+    stone::decode(start_offset, delta);
     node_offset_t end_offset;
-    ceph::decode(end_offset, delta);
+    stone::decode(end_offset, delta);
     assert(start_offset < end_offset);
     assert(end_offset <= NODE_BLOCK_SIZE);
     return internal_sub_items_t({p_node_start + start_offset,
@@ -229,7 +229,7 @@ class leaf_sub_items_t {
     assert(pointer + value->size + sizeof(snap_gen_t) == get_item_end(index));
     return value;
   }
-  void encode(const char* p_node_start, ceph::bufferlist& encoded) const {
+  void encode(const char* p_node_start, stone::bufferlist& encoded) const {
     auto p_end = reinterpret_cast<const char*>(p_num_keys) +
                   sizeof(num_keys_t);
     int start_offset = p_start() - p_node_start;
@@ -237,16 +237,16 @@ class leaf_sub_items_t {
     assert(start_offset > 0 &&
            start_offset < end_offset &&
            end_offset < NODE_BLOCK_SIZE);
-    ceph::encode(static_cast<node_offset_t>(start_offset), encoded);
-    ceph::encode(static_cast<node_offset_t>(end_offset), encoded);
+    stone::encode(static_cast<node_offset_t>(start_offset), encoded);
+    stone::encode(static_cast<node_offset_t>(end_offset), encoded);
   }
 
   static leaf_sub_items_t decode(
-      const char* p_node_start, ceph::bufferlist::const_iterator& delta) {
+      const char* p_node_start, stone::bufferlist::const_iterator& delta) {
     node_offset_t start_offset;
-    ceph::decode(start_offset, delta);
+    stone::decode(start_offset, delta);
     node_offset_t end_offset;
-    ceph::decode(end_offset, delta);
+    stone::decode(end_offset, delta);
     assert(start_offset < end_offset);
     assert(end_offset <= NODE_BLOCK_SIZE);
     return leaf_sub_items_t({p_node_start + start_offset,

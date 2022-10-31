@@ -4,8 +4,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TableColumnProp } from '@swimlane/ngx-datatable';
 import _ from 'lodash';
 
-import { InventoryDevice } from '~/app/ceph/cluster/inventory/inventory-devices/inventory-device.model';
-import { InventoryDevicesComponent } from '~/app/ceph/cluster/inventory/inventory-devices/inventory-devices.component';
+import { InventoryDevice } from '~/app/stone/cluster/inventory/inventory-devices/inventory-device.model';
+import { InventoryDevicesComponent } from '~/app/stone/cluster/inventory/inventory-devices/inventory-devices.component';
 import { ActionLabelsI18n } from '~/app/shared/constants/app.constants';
 import { Icons } from '~/app/shared/enum/icons.enum';
 import { CdFormBuilder } from '~/app/shared/forms/cd-form-builder';

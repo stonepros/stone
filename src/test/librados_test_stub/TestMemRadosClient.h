@@ -5,7 +5,7 @@
 #define STONE_TEST_MEM_RADOS_CLIENT_H
 
 #include "test/librados_test_stub/TestRadosClient.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include <list>
 #include <string>
 
@@ -16,7 +16,7 @@ class TestMemCluster;
 
 class TestMemRadosClient : public TestRadosClient {
 public:
-  TestMemRadosClient(StoneeContext *cct, TestMemCluster *test_mem_cluster);
+  TestMemRadosClient(StoneContext *cct, TestMemCluster *test_mem_cluster);
   ~TestMemRadosClient() override;
 
   TestIoCtxImpl *create_ioctx(int64_t pool_id,

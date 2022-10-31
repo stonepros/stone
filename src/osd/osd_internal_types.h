@@ -41,7 +41,7 @@ public:
   std::map<std::pair<uint64_t, entity_name_t>, WatchRef> watchers;
 
   // attr cache
-  std::map<std::string, ceph::buffer::list> attr_cache;
+  std::map<std::string, stone::buffer::list> attr_cache;
 
   RWState rwstate;
   std::list<OpRequestRef> waiters;  ///< ops waiting on state change
@@ -104,7 +104,7 @@ public:
     case RWState::RWEXCL:
       return get_excl(op);
     default:
-      ceph_abort_msg("invalid lock type");
+      stone_abort_msg("invalid lock type");
       return true;
     }
   }
@@ -121,7 +121,7 @@ public:
     return rwstate.get_read_lock();
   }
   void drop_recovery_read(std::list<OpRequestRef> *ls) {
-    ceph_assert(rwstate.recovery_read_marker);
+    stone_assert(rwstate.recovery_read_marker);
     put_read(ls);
     rwstate.recovery_read_marker = false;
   }
@@ -141,7 +141,7 @@ public:
       put_excl(to_wake);
       break;
     default:
-      ceph_abort_msg("invalid lock type");
+      stone_abort_msg("invalid lock type");
     }
     if (rwstate.empty() && rwstate.recovery_read_marker) {
       rwstate.recovery_read_marker = false;
@@ -162,17 +162,17 @@ public:
       blocked(false), requeue_scrub_on_unblock(false) {}
 
   ~ObjectContext() {
-    ceph_assert(rwstate.empty());
+    stone_assert(rwstate.empty());
     if (destructor_callback)
       destructor_callback->complete(0);
   }
 
   void start_block() {
-    ceph_assert(!blocked);
+    stone_assert(!blocked);
     blocked = true;
   }
   void stop_block() {
-    ceph_assert(blocked);
+    stone_assert(blocked);
     blocked = false;
   }
   bool is_blocked() const {
@@ -221,7 +221,7 @@ public:
     const hobject_t &hoid,
     ObjectContextRef& obc,
     OpRequestRef& op) {
-    ceph_assert(locks.find(hoid) == locks.end());
+    stone_assert(locks.find(hoid) == locks.end());
     if (obc->get_lock_type(op, type)) {
       locks.insert(std::make_pair(hoid, ObjectLockState(obc, type)));
       return true;
@@ -233,7 +233,7 @@ public:
   bool take_write_lock(
     const hobject_t &hoid,
     ObjectContextRef obc) {
-    ceph_assert(locks.find(hoid) == locks.end());
+    stone_assert(locks.find(hoid) == locks.end());
     if (obc->rwstate.take_write_lock()) {
       locks.insert(
 	std::make_pair(
@@ -248,7 +248,7 @@ public:
     const hobject_t &hoid,
     ObjectContextRef obc,
     bool mark_if_unsuccessful) {
-    ceph_assert(locks.find(hoid) == locks.end());
+    stone_assert(locks.find(hoid) == locks.end());
     if (obc->get_snaptrimmer_write(mark_if_unsuccessful)) {
       locks.insert(
 	std::make_pair(
@@ -263,7 +263,7 @@ public:
     const hobject_t &hoid,
     ObjectContextRef obc,
     OpRequestRef op) {
-    ceph_assert(locks.find(hoid) == locks.end());
+    stone_assert(locks.find(hoid) == locks.end());
     if (obc->get_write_greedy(op)) {
       locks.insert(
 	std::make_pair(
@@ -278,7 +278,7 @@ public:
   bool try_get_read_lock(
     const hobject_t &hoid,
     ObjectContextRef obc) {
-    ceph_assert(locks.find(hoid) == locks.end());
+    stone_assert(locks.find(hoid) == locks.end());
     if (obc->try_get_read_lock()) {
       locks.insert(
 	std::make_pair(
@@ -311,7 +311,7 @@ public:
     locks.clear();
   }
   ~ObcLockManager() {
-    ceph_assert(locks.empty());
+    stone_assert(locks.empty());
   }
 };
 

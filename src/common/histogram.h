@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
 
 #include "include/encoding.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -118,9 +118,9 @@ public:
   /// decay histogram by N bits (default 1, for a halflife)
   void decay(int bits = 1);
 
-  void dump(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
   static void generate_test_instances(std::list<pow2_hist_t*>& o);
 };
 WRITE_CLASS_ENCODER(pow2_hist_t)

@@ -38,8 +38,8 @@ class DamageEntry
   public:
     DamageEntry()
     {
-      id = ceph::util::generate_random_number<damage_entry_id_t>(0, 0xffffffff);
-      reported_at = ceph_clock_now();
+      id = stone::util::generate_random_number<damage_entry_id_t>(0, 0xffffffff);
+      reported_at = stone_clock_now();
     }
 
     virtual ~DamageEntry();
@@ -123,7 +123,7 @@ class DamageTable
     explicit DamageTable(const mds_rank_t rank_)
       : rank(rank_)
     {
-      ceph_assert(rank_ != MDS_RANK_NONE);
+      stone_assert(rank_ != MDS_RANK_NONE);
     }
 
     /**

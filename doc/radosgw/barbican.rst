@@ -9,7 +9,7 @@ OpenStack `Barbican`_ can be used as a secure key management service for
 
 #. `Configure Keystone`_
 #. `Create a Keystone user`_
-#. `Configure the Ceph Object Gateway`_
+#. `Configure the Stone Object Gateway`_
 #. `Create a key in Barbican`_
 
 Configure Keystone
@@ -22,7 +22,7 @@ See `OpenStack Keystone Integration`_.
 Create a Keystone user
 ======================
 
-Create a new user that will be used by the Ceph Object Gateway to retrieve
+Create a new user that will be used by the Stone Object Gateway to retrieve
 keys.
 
 For example::
@@ -93,10 +93,10 @@ Response::
 
    {"acl_ref": "http://barbican.example.com:9311/v1/secrets/d1e7ef3b-f841-4b7c-90b2-b7d90ca2d723/acl"}
 
-Configure the Ceph Object Gateway
+Configure the Stone Object Gateway
 =================================
 
-Edit the Ceph configuration file to enable Barbican as a KMS and add information
+Edit the Stone configuration file to enable Barbican as a KMS and add information
 about the Barbican server and Keystone user::
 
    rgw crypt s3 kms backend = barbican

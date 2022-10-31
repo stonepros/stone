@@ -49,7 +49,7 @@ public:
   inline void set_state(uint64_t object_no, uint8_t new_state,
                         const boost::optional<uint8_t> &current_state) {
     std::unique_lock locker{m_lock};
-    ceph_assert(object_no < m_object_map.size());
+    stone_assert(object_no < m_object_map.size());
     if (current_state && m_object_map[object_no] != *current_state) {
       return;
     }
@@ -58,7 +58,7 @@ public:
 
   void open(Context *on_finish);
   void close(Context *on_finish);
-  bool set_object_map(ceph::BitVector<2> &target_object_map);
+  bool set_object_map(stone::BitVector<2> &target_object_map);
   bool object_may_exist(uint64_t object_no) const;
   bool object_may_not_exist(uint64_t object_no) const;
 
@@ -82,7 +82,7 @@ public:
                   const boost::optional<uint8_t> &current_state,
                   const ZTracer::Trace &parent_trace, bool ignore_enoent,
                   T *callback_object) {
-    ceph_assert(start_object_no < end_object_no);
+    stone_assert(start_object_no < end_object_no);
     std::unique_lock locker{m_lock};
 
     if (snap_id == STONE_NOSNAP) {
@@ -149,8 +149,8 @@ private:
   ImageCtxT &m_image_ctx;
   uint64_t m_snap_id;
 
-  mutable ceph::shared_mutex m_lock;
-  ceph::BitVector<2> m_object_map;
+  mutable stone::shared_mutex m_lock;
+  stone::BitVector<2> m_object_map;
 
   AsyncOpTracker m_async_op_tracker;
   UpdateGuard *m_update_guard = nullptr;
@@ -164,7 +164,7 @@ private:
                   const boost::optional<uint8_t> &current_state,
                   const ZTracer::Trace &parent_trace, bool ignore_enoent,
                   Context *on_finish);
-  bool update_required(const ceph::BitVector<2>::Iterator &it,
+  bool update_required(const stone::BitVector<2>::Iterator &it,
                        uint8_t new_state);
 
 };

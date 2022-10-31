@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat Ltd
  *
@@ -36,7 +36,7 @@ protected:
     POOL_DATA_EXTRA,
   };
   /**
-   * Return 0 if the pool is suitable for use with CephFS, or
+   * Return 0 if the pool is suitable for use with StoneFS, or
    * in case of errors return a negative error code, and populate
    * the passed ostream with an explanation.
    *

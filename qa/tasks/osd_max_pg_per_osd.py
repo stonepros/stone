@@ -31,7 +31,7 @@ def test_create_from_mon(ctx, config):
     4. all pg belonging to pool.b should be active+clean
     """
     pg_num = config.get('pg_num', 2)
-    manager = ctx.managers['ceph']
+    manager = ctx.managers['stone']
     log.info('1. creating pool.a')
     pool_a = manager.create_pool_with_unique_name(pg_num)
     pg_states = manager.wait_till_pg_convergence(300)
@@ -78,7 +78,7 @@ def test_create_from_peer(ctx, config):
     pg_num = config.get('pg_num', 1)
     from_primary = config.get('from_primary', True)
 
-    manager = ctx.managers['ceph']
+    manager = ctx.managers['stone']
     log.info('1. creating pool.a')
     pool_a = manager.create_pool_with_unique_name(pg_num)
     pg_states = manager.wait_till_pg_convergence(300)

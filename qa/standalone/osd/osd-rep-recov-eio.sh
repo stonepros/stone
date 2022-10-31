@@ -17,7 +17,7 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 warnings=10
 
@@ -25,10 +25,10 @@ function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7140" # git grep '\<7140\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7140" # git grep '\<7140\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
@@ -37,7 +37,7 @@ function run() {
 	# set warning amount in case default changes
         run_mon $dir a --mon_osd_warn_num_repaired=$warnings || return 1
 	run_mgr $dir x || return 1
-	ceph osd pool create foo 8 || return 1
+	stone osd pool create foo 8 || return 1
 
         $func $dir || return 1
         teardown $dir || return 1
@@ -58,7 +58,7 @@ function setup_osds() {
 function get_state() {
     local pgid=$1
     local sname=state
-    ceph --format json pg dump pgs 2>/dev/null | \
+    stone --format json pg dump pgs 2>/dev/null | \
         jq -r ".pg_stats | .[] | select(.pgid==\"$pgid\") | .$sname"
 }
 
@@ -121,10 +121,10 @@ function rados_get_data() {
     rados_get $dir $poolname $objname || return 1
 
     wait_for_clean
-    COUNT=$(ceph pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
+    COUNT=$(stone pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
     test "$COUNT" = "1" || return 1
     flush_pg_stats
-    COUNT=$(ceph pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
+    COUNT=$(stone pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
     test "$COUNT" = "1" || return 1
 
     local object_osds=($(get_osds $poolname $objname))
@@ -144,10 +144,10 @@ function rados_get_data() {
     rados_get $dir $poolname $objname || return 1
 
     wait_for_clean
-    COUNT=$(ceph pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
+    COUNT=$(stone pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
     test "$COUNT" = "3" || return 1
     flush_pg_stats
-    COUNT=$(ceph pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
+    COUNT=$(stone pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
     test "$COUNT" = "4" || return 1
 
     inject_$inject rep data $poolname $objname $dir 0 || return 1
@@ -157,10 +157,10 @@ function rados_get_data() {
 
     wait_for_clean
     # After hang another repair couldn't happen, so count stays the same
-    COUNT=$(ceph pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
+    COUNT=$(stone pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
     test "$COUNT" = "3" || return 1
     flush_pg_stats
-    COUNT=$(ceph pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
+    COUNT=$(stone pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
     test "$COUNT" = "4" || return 1
 }
 
@@ -204,19 +204,19 @@ function TEST_rados_repair_warning() {
     local bad_peer=${object_osds[1]}
 
     wait_for_clean
-    COUNT=$(ceph pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
+    COUNT=$(stone pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
     test "$COUNT" = "$OBJS" || return 1
     flush_pg_stats
-    COUNT=$(ceph pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
+    COUNT=$(stone pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
     test "$COUNT" = "$OBJS" || return 1
 
-    ceph health | grep -q "Too many repaired reads on 1 OSDs" || return 1
-    ceph health detail | grep -q "osd.$primary had $OBJS reads repaired" || return 1
+    stone health | grep -q "Too many repaired reads on 1 OSDs" || return 1
+    stone health detail | grep -q "osd.$primary had $OBJS reads repaired" || return 1
 
-    ceph health mute OSD_TOO_MANY_REPAIRS
+    stone health mute OSD_TOO_MANY_REPAIRS
     set -o pipefail
     # Should mute this
-    ceph health | $(! grep -q "Too many repaired reads on 1 OSDs") || return 1
+    stone health | $(! grep -q "Too many repaired reads on 1 OSDs") || return 1
     set +o pipefail
 
     for i in $(seq 1 $OBJS)
@@ -229,10 +229,10 @@ function TEST_rados_repair_warning() {
     done
 
     wait_for_clean
-    COUNT=$(ceph pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
+    COUNT=$(stone pg $pgid query | jq '.info.stats.stat_sum.num_objects_repaired')
     test "$COUNT" = "$(expr $OBJS \* 2)" || return 1
     flush_pg_stats
-    COUNT=$(ceph pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
+    COUNT=$(stone pg dump --format=json-pretty | jq ".pg_map.osd_stats_sum.num_shards_repaired")
     test "$COUNT" = "$(expr $OBJS \* 3)" || return 1
 
     # Give mon a chance to notice additional OSD and unmute
@@ -242,7 +242,7 @@ function TEST_rados_repair_warning() {
     while(true)
     do
       sleep 1
-      if ceph health | grep -q "Too many repaired reads on 2 OSDs"
+      if stone health | grep -q "Too many repaired reads on 2 OSDs"
       then
 	      break
       fi
@@ -253,8 +253,8 @@ function TEST_rados_repair_warning() {
 	      return 1
       fi
     done
-    ceph health detail | grep -q "osd.$primary had $(expr $OBJS \* 2) reads repaired" || return 1
-    ceph health detail | grep -q "osd.$bad_peer had $OBJS reads repaired" || return 1
+    stone health detail | grep -q "osd.$primary had $(expr $OBJS \* 2) reads repaired" || return 1
+    stone health detail | grep -q "osd.$bad_peer had $OBJS reads repaired" || return 1
 
     delete_pool $poolname
 }
@@ -267,25 +267,25 @@ function TEST_rep_backfill_unfound() {
     # Must be between 1 and $lastobj
     local testobj=obj250
 
-    export CEPH_ARGS
-    CEPH_ARGS+=' --osd_min_pg_log_entries=5 --osd_max_pg_log_entries=10'
+    export STONE_ARGS
+    STONE_ARGS+=' --osd_min_pg_log_entries=5 --osd_max_pg_log_entries=10'
     setup_osds 3 || return 1
 
     local poolname=test-pool
     create_pool $poolname 1 1 || return 1
     wait_for_clean || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     rados_put $dir $poolname $objname || return 1
 
     local -a initial_osds=($(get_osds $poolname $objname))
     local last_osd=${initial_osds[-1]}
     kill_daemons $dir TERM osd.${last_osd} 2>&2 < /dev/null || return 1
-    ceph osd down ${last_osd} || return 1
-    ceph osd out ${last_osd} || return 1
+    stone osd down ${last_osd} || return 1
+    stone osd out ${last_osd} || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     dd if=/dev/urandom of=${dir}/ORIGINAL bs=1024 count=4
     for i in $(seq 1 $lastobj)
@@ -297,7 +297,7 @@ function TEST_rep_backfill_unfound() {
     inject_eio rep data $poolname $testobj $dir 1 || return 1
 
     activate_osd $dir ${last_osd} || return 1
-    ceph osd in ${last_osd} || return 1
+    stone osd in ${last_osd} || return 1
 
     sleep 15
 
@@ -311,14 +311,14 @@ function TEST_rep_backfill_unfound() {
       sleep 1
     done
 
-    ceph pg dump pgs
-    ceph pg 2.0 list_unfound | grep -q $testobj || return 1
+    stone pg dump pgs
+    stone pg 2.0 list_unfound | grep -q $testobj || return 1
 
     # Command should hang because object is unfound
     timeout 5 rados -p $poolname get $testobj $dir/CHECK
     test $? = "124" || return 1
 
-    ceph pg 2.0 mark_unfound_lost delete
+    stone pg 2.0 mark_unfound_lost delete
 
     wait_for_clean || return 1
 
@@ -352,17 +352,17 @@ function TEST_rep_recovery_unfound() {
     create_pool $poolname 1 1 || return 1
     wait_for_clean || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     rados_put $dir $poolname $objname || return 1
 
     local -a initial_osds=($(get_osds $poolname $objname))
     local last_osd=${initial_osds[-1]}
     kill_daemons $dir TERM osd.${last_osd} 2>&2 < /dev/null || return 1
-    ceph osd down ${last_osd} || return 1
-    ceph osd out ${last_osd} || return 1
+    stone osd down ${last_osd} || return 1
+    stone osd out ${last_osd} || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     dd if=/dev/urandom of=${dir}/ORIGINAL bs=1024 count=4
     for i in $(seq 1 $lastobj)
@@ -374,7 +374,7 @@ function TEST_rep_recovery_unfound() {
     inject_eio rep data $poolname $testobj $dir 1 || return 1
 
     activate_osd $dir ${last_osd} || return 1
-    ceph osd in ${last_osd} || return 1
+    stone osd in ${last_osd} || return 1
 
     sleep 15
 
@@ -388,14 +388,14 @@ function TEST_rep_recovery_unfound() {
       sleep 1
     done
 
-    ceph pg dump pgs
-    ceph pg 2.0 list_unfound | grep -q $testobj || return 1
+    stone pg dump pgs
+    stone pg 2.0 list_unfound | grep -q $testobj || return 1
 
     # Command should hang because object is unfound
     timeout 5 rados -p $poolname get $testobj $dir/CHECK
     test $? = "124" || return 1
 
-    ceph pg 2.0 mark_unfound_lost delete
+    stone pg 2.0 mark_unfound_lost delete
 
     wait_for_clean || return 1
 
@@ -422,13 +422,13 @@ function TEST_rep_read_unfound() {
 
     setup_osds 3 _filestore || return 1
 
-    ceph osd pool delete foo foo --yes-i-really-really-mean-it || return 1
+    stone osd pool delete foo foo --yes-i-really-really-mean-it || return 1
     local poolname=test-pool
     create_pool $poolname 1 1 || return 1
-    ceph osd pool set $poolname size 2
+    stone osd pool set $poolname size 2
     wait_for_clean || return 1
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     dd if=/dev/urandom bs=8k count=1 of=$dir/ORIGINAL
     rados -p $poolname put $objname $dir/ORIGINAL
@@ -445,9 +445,9 @@ function TEST_rep_read_unfound() {
     sleep 5
 
     flush_pg_stats
-    ceph --format=json pg dump pgs | jq '.'
+    stone --format=json pg dump pgs | jq '.'
 
-    if ! ceph --format=json pg dump pgs | jq '.pg_stats | .[0].state' | grep -q recovery_unfound
+    if ! stone --format=json pg dump pgs | jq '.pg_stats | .[0].state' | grep -q recovery_unfound
     then
       echo "Failure to get to recovery_unfound state"
       return 1

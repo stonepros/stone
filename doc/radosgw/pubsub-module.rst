@@ -12,8 +12,8 @@ can be pulled from them. Events need to be acked. Also, events will expire and d
 after a period of time. 
 
 A push notification mechanism exists too, currently supporting HTTP,
-AMQP0.9.1 and Kafka endpoints. In this case, the events are pushed to an endpoint on top of storing them in Ceph. If events should only be pushed to an endpoint
-and do not need to be stored in Ceph, the `Bucket Notification`_ mechanism should be used instead of pubsub sync module. 
+AMQP0.9.1 and Kafka endpoints. In this case, the events are pushed to an endpoint on top of storing them in Stone. If events should only be pushed to an endpoint
+and do not need to be stored in Stone, the `Bucket Notification`_ mechanism should be used instead of pubsub sync module. 
 
 A user can create different topics. A topic entity is defined by its name and is per tenant. A
 user can only associate its topics (via notification configuration) with buckets it owns.

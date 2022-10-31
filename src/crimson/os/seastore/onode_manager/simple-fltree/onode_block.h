@@ -40,9 +40,9 @@ struct OnodeBlock final : LogicalCachedExtent {
   // otherwise we could pollute the extent with pending mutations
   // before the transaction carrying these mutations is committed to
   // disk
-  ceph::bufferlist get_delta() final;
+  stone::bufferlist get_delta() final;
   void logical_on_delta_write() final;
-  void apply_delta(const ceph::bufferlist &bl) final;
+  void apply_delta(const stone::bufferlist &bl) final;
 
   void sync() {
     apply_pending_changes(false);

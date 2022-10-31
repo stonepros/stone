@@ -4,12 +4,12 @@ import re
 import pytest
 import yaml
 
-from ceph.deployment import drive_selection, translate
-from ceph.deployment.hostspec import HostSpec, SpecValidationError
-from ceph.deployment.inventory import Device
-from ceph.deployment.service_spec import PlacementSpec
-from ceph.tests.utils import _mk_inventory, _mk_device
-from ceph.deployment.drive_group import DriveGroupSpec, DeviceSelection, \
+from stone.deployment import drive_selection, translate
+from stone.deployment.hostspec import HostSpec, SpecValidationError
+from stone.deployment.inventory import Device
+from stone.deployment.service_spec import PlacementSpec
+from stone.tests.utils import _mk_inventory, _mk_device
+from stone.deployment.drive_group import DriveGroupSpec, DeviceSelection, \
     DriveGroupValidationError
 
 @pytest.mark.parametrize("test_input",
@@ -136,7 +136,7 @@ def test_drive_selection():
         ds.validate('')
 
 
-def test_ceph_volume_command_0():
+def test_stone_volume_command_0():
     spec = DriveGroupSpec(placement=PlacementSpec(host_pattern='*'),
                           service_id='foobar',
                           data_devices=DeviceSelection(all=True)
@@ -144,11 +144,11 @@ def test_ceph_volume_command_0():
     spec.validate()
     inventory = _mk_inventory(_mk_device()*2)
     sel = drive_selection.DriveSelection(spec, inventory)
-    cmd = translate.to_ceph_volume(sel, []).run()
+    cmd = translate.to_stone_volume(sel, []).run()
     assert cmd == 'lvm batch --no-auto /dev/sda /dev/sdb --yes --no-systemd'
 
 
-def test_ceph_volume_command_1():
+def test_stone_volume_command_1():
     spec = DriveGroupSpec(placement=PlacementSpec(host_pattern='*'),
                           service_id='foobar',
                           data_devices=DeviceSelection(rotational=True),
@@ -157,12 +157,12 @@ def test_ceph_volume_command_1():
     spec.validate()
     inventory = _mk_inventory(_mk_device(rotational=True)*2 + _mk_device(rotational=False)*2)
     sel = drive_selection.DriveSelection(spec, inventory)
-    cmd = translate.to_ceph_volume(sel, []).run()
+    cmd = translate.to_stone_volume(sel, []).run()
     assert cmd == ('lvm batch --no-auto /dev/sda /dev/sdb '
                    '--db-devices /dev/sdc /dev/sdd --yes --no-systemd')
 
 
-def test_ceph_volume_command_2():
+def test_stone_volume_command_2():
     spec = DriveGroupSpec(placement=PlacementSpec(host_pattern='*'),
                           service_id='foobar',
                           data_devices=DeviceSelection(size='200GB:350GB', rotational=True),
@@ -175,13 +175,13 @@ def test_ceph_volume_command_2():
                               _mk_device(size="10.0 GB", rotational=False)*2
                               )
     sel = drive_selection.DriveSelection(spec, inventory)
-    cmd = translate.to_ceph_volume(sel, []).run()
+    cmd = translate.to_stone_volume(sel, []).run()
     assert cmd == ('lvm batch --no-auto /dev/sda /dev/sdb '
                    '--db-devices /dev/sdc /dev/sdd --wal-devices /dev/sde /dev/sdf '
                    '--yes --no-systemd')
 
 
-def test_ceph_volume_command_3():
+def test_stone_volume_command_3():
     spec = DriveGroupSpec(placement=PlacementSpec(host_pattern='*'),
                           service_id='foobar',
                           data_devices=DeviceSelection(size='200GB:350GB', rotational=True),
@@ -195,14 +195,14 @@ def test_ceph_volume_command_3():
                               _mk_device(size="10.0 GB", rotational=False)*2
                               )
     sel = drive_selection.DriveSelection(spec, inventory)
-    cmd = translate.to_ceph_volume(sel, []).run()
+    cmd = translate.to_stone_volume(sel, []).run()
     assert cmd == ('lvm batch --no-auto /dev/sda /dev/sdb '
                    '--db-devices /dev/sdc /dev/sdd '
                    '--wal-devices /dev/sde /dev/sdf --dmcrypt '
                    '--yes --no-systemd')
 
 
-def test_ceph_volume_command_4():
+def test_stone_volume_command_4():
     spec = DriveGroupSpec(placement=PlacementSpec(host_pattern='*'),
                           service_id='foobar',
                           data_devices=DeviceSelection(size='200GB:350GB', rotational=True),
@@ -219,14 +219,14 @@ def test_ceph_volume_command_4():
                               _mk_device(size="10.0 GB", rotational=False)*2
                               )
     sel = drive_selection.DriveSelection(spec, inventory)
-    cmd = translate.to_ceph_volume(sel, []).run()
+    cmd = translate.to_stone_volume(sel, []).run()
     assert cmd == ('lvm batch --no-auto /dev/sda /dev/sdb '
                    '--db-devices /dev/sdc /dev/sdd --wal-devices /dev/sde /dev/sdf '
                    '--block-wal-size 500M --block-db-size 500M --dmcrypt '
                    '--osds-per-device 3 --yes --no-systemd')
 
 
-def test_ceph_volume_command_5():
+def test_stone_volume_command_5():
     spec = DriveGroupSpec(placement=PlacementSpec(host_pattern='*'),
                           service_id='foobar',
                           data_devices=DeviceSelection(rotational=True),
@@ -236,11 +236,11 @@ def test_ceph_volume_command_5():
         spec.validate()
     inventory = _mk_inventory(_mk_device(rotational=True)*2)
     sel = drive_selection.DriveSelection(spec, inventory)
-    cmd = translate.to_ceph_volume(sel, []).run()
+    cmd = translate.to_stone_volume(sel, []).run()
     assert cmd == 'lvm batch --no-auto /dev/sda /dev/sdb --filestore --yes --no-systemd'
 
 
-def test_ceph_volume_command_6():
+def test_stone_volume_command_6():
     spec = DriveGroupSpec(placement=PlacementSpec(host_pattern='*'),
                           service_id='foobar',
                           data_devices=DeviceSelection(rotational=False),
@@ -252,13 +252,13 @@ def test_ceph_volume_command_6():
         spec.validate()
     inventory = _mk_inventory(_mk_device(rotational=True)*2 + _mk_device(rotational=False)*2)
     sel = drive_selection.DriveSelection(spec, inventory)
-    cmd = translate.to_ceph_volume(sel, []).run()
+    cmd = translate.to_stone_volume(sel, []).run()
     assert cmd == ('lvm batch --no-auto /dev/sdc /dev/sdd '
                    '--journal-size 500M --journal-devices /dev/sda /dev/sdb '
                    '--filestore --yes --no-systemd')
 
 
-def test_ceph_volume_command_7():
+def test_stone_volume_command_7():
     spec = DriveGroupSpec(placement=PlacementSpec(host_pattern='*'),
                           service_id='foobar',
                           data_devices=DeviceSelection(all=True),
@@ -267,11 +267,11 @@ def test_ceph_volume_command_7():
     spec.validate()
     inventory = _mk_inventory(_mk_device(rotational=True)*2)
     sel = drive_selection.DriveSelection(spec, inventory)
-    cmd = translate.to_ceph_volume(sel, ['0', '1']).run()
+    cmd = translate.to_stone_volume(sel, ['0', '1']).run()
     assert cmd == 'lvm batch --no-auto /dev/sda /dev/sdb --osd-ids 0 1 --yes --no-systemd'
 
 
-def test_ceph_volume_command_8():
+def test_stone_volume_command_8():
     spec = DriveGroupSpec(placement=PlacementSpec(host_pattern='*'),
                           service_id='foobar',
                           data_devices=DeviceSelection(rotational=True, model='INTEL SSDS'),
@@ -285,5 +285,5 @@ def test_ceph_volume_command_8():
                               _mk_device(rotational=False, size="349.0 GB", model='INTEL SSDPED1K375GA')  # wal/db
                               )
     sel = drive_selection.DriveSelection(spec, inventory)
-    cmd = translate.to_ceph_volume(sel, []).run()
+    cmd = translate.to_stone_volume(sel, []).run()
     assert cmd == 'lvm batch --no-auto /dev/sda /dev/sdb --db-devices /dev/sdc --yes --no-systemd'

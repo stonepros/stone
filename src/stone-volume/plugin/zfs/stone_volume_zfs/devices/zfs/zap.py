@@ -1,7 +1,7 @@
 import argparse
 
 from textwrap import dedent
-# from ceph_volume.util import arg_validators
+# from stone_volume.util import arg_validators
 
 class Zap(object):
 
@@ -15,7 +15,7 @@ class Zap(object):
 	Zap a device
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume zfs inventory',
+            prog='stone-volume zfs inventory',
             description=sub_command_help,
         )
         parser.add_argument(

@@ -1,8 +1,8 @@
-# Runs a 64k random write test against the ceph FileStore.
+# Runs a 64k random write test against the stone FileStore.
 [global]
-ioengine=libfio_ceph_objectstore.so # must be found in your LD_LIBRARY_PATH
+ioengine=libfio_stone_objectstore.so # must be found in your LD_LIBRARY_PATH
 
-conf=ceph-filestore.conf # must point to a valid ceph configuration file
+conf=stone-filestore.conf # must point to a valid stone configuration file
 directory=/mnt/fio-filestore # directory for osd_data
 
 rw=randwrite

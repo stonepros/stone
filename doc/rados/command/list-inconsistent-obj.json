@@ -12,7 +12,7 @@
         "type": "object",
         "properties": {
           "object": {
-            "description": "Identify a Ceph object",
+            "description": "Identify a Stone object",
             "type": "object",
             "properties": {
               "name": {

@@ -11,7 +11,7 @@ def create_subvol(mgr, fs, vol_spec, group, subvolname, size, isolate_nspace, po
     """
     create a subvolume (create a subvolume with the max known version).
 
-    :param fs: ceph filesystem handle
+    :param fs: stone filesystem handle
     :param vol_spec: volume specification
     :param group: group object for the subvolume
     :param size: In bytes, or None for no size limit
@@ -29,7 +29,7 @@ def create_clone(mgr, fs, vol_spec, group, subvolname, pool, source_volume, sour
     """
     create a cloned subvolume.
 
-    :param fs: ceph filesystem handle
+    :param fs: stone filesystem handle
     :param vol_spec: volume specification
     :param group: group object for the clone
     :param subvolname: clone subvolume nam
@@ -46,7 +46,7 @@ def remove_subvol(mgr, fs, vol_spec, group, subvolname, force=False, retainsnaps
     """
     remove a subvolume.
 
-    :param fs: ceph filesystem handle
+    :param fs: stone filesystem handle
     :param vol_spec: volume specification
     :param group: group object for the subvolume
     :param subvolname: subvolume name
@@ -62,7 +62,7 @@ def open_subvol(mgr, fs, vol_spec, group, subvolname, op_type):
     """
     open a subvolume. This API is to be used as a context manager.
 
-    :param fs: ceph filesystem handle
+    :param fs: stone filesystem handle
     :param vol_spec: volume specification
     :param group: group object for the subvolume
     :param subvolname: subvolume name

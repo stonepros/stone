@@ -29,7 +29,7 @@ about a nodes physical disk inventory.
 
 Migrating
 ---------
-Starting on Ceph version 13.0.0, ``ceph-disk`` is deprecated. Deprecation
+Starting on Stone version 13.0.0, ``ceph-disk`` is deprecated. Deprecation
 warnings will show up that will link to this page. It is strongly suggested
 that users start consuming ``ceph-volume``. There are two paths for migrating:
 

@@ -1,7 +1,7 @@
 groups:
   - name: cluster health
     rules:
-      - alert: CephHealthError
+      - alert: StoneHealthError
         expr: ceph_health_status == 2
         for: 5m
         labels:
@@ -11,10 +11,10 @@ groups:
         annotations:
           summary: Cluster is in an ERROR state
           description: >
-            Ceph in HEALTH_ERROR state for more than 5 minutes.
+            Stone in HEALTH_ERROR state for more than 5 minutes.
             Please check "ceph health detail" for more information.
 
-      - alert: CephHealthWarning
+      - alert: StoneHealthWarning
         expr: ceph_health_status == 1
         for: 15m
         labels:
@@ -23,12 +23,12 @@ groups:
         annotations:
           summary: Cluster is in a WARNING state
           description: >
-            Ceph has been in HEALTH_WARN for more than 15 minutes.
+            Stone has been in HEALTH_WARN for more than 15 minutes.
             Please check "ceph health detail" for more information.
 
   - name: mon
     rules:
-      - alert: CephMonDownQuorumAtRisk
+      - alert: StoneMonDownQuorumAtRisk
         expr: ((ceph_health_detail{name="MON_DOWN"} == 1) * on() (count(ceph_mon_quorum_status == 1) == bool (floor(count(ceph_mon_metadata) / 2) + 1))) == 1
         for: 30s
         labels:
@@ -46,7 +46,7 @@ groups:
             {{- range query "(ceph_mon_quorum_status == 0) + on(ceph_daemon) group_left(hostname) (ceph_mon_metadata * 0)" }}
               - {{ .Labels.ceph_daemon }} on {{ .Labels.hostname }}
             {{- end }}
-      - alert: CephMonDown
+      - alert: StoneMonDown
         expr: (count(ceph_mon_quorum_status == 0) <= (count(ceph_mon_metadata) - floor(count(ceph_mon_metadata) / 2) + 1))
         for: 30s
         labels:
@@ -63,7 +63,7 @@ groups:
             {{- range query "(ceph_mon_quorum_status == 0) + on(ceph_daemon) group_left(hostname) (ceph_mon_metadata * 0)" }}
               - {{ .Labels.ceph_daemon }} on {{ .Labels.hostname }}
             {{- end }}
-      - alert: CephMonDiskspaceCritical
+      - alert: StoneMonDiskspaceCritical
         expr: ceph_health_detail{name="MON_DISK_CRIT"} == 1
         for: 1m
         labels:
@@ -81,7 +81,7 @@ groups:
               - {{ .Labels.hostname }}
             {{- end }}
 
-      - alert: CephMonDiskspaceLow
+      - alert: StoneMonDiskspaceLow
         expr: ceph_health_detail{name="MON_DISK_LOW"} == 1
         for: 5m
         labels:
@@ -98,7 +98,7 @@ groups:
               - {{ .Labels.hostname }}
             {{- end }}
 
-      - alert: CephMonClockSkew
+      - alert: StoneMonClockSkew
         expr: ceph_health_detail{name="MON_CLOCK_SKEW"} == 1
         for: 1m
         labels:
@@ -117,7 +117,7 @@ groups:
 
   - name: osd
     rules:
-      - alert: CephOSDDownHigh
+      - alert: StoneOSDDownHigh
         expr: count(ceph_osd_up == 0) / count(ceph_osd_up) * 100 >= 10
         labels:
           severity: critical
@@ -132,7 +132,7 @@ groups:
             {{- range query "(ceph_osd_up * on(ceph_daemon) group_left(hostname) ceph_osd_metadata) == 0" }}
               - {{ .Labels.ceph_daemon }} on {{ .Labels.hostname }}
             {{- end }}
-      - alert: CephOSDHostDown
+      - alert: StoneOSDHostDown
         expr: ceph_health_detail{name="OSD_HOST_DOWN"} == 1
         for: 5m
         labels:
@@ -146,7 +146,7 @@ groups:
             {{- range query "(ceph_osd_up * on(ceph_daemon) group_left(hostname) ceph_osd_metadata) == 0" }}
             - {{ .Labels.hostname }} : {{ .Labels.ceph_daemon }}
             {{- end }}
-      - alert: CephOSDDown
+      - alert: StoneOSDDown
         expr: ceph_health_detail{name="OSD_DOWN"} == 1
         for: 5m
         labels:
@@ -164,7 +164,7 @@ groups:
               - {{ .Labels.ceph_daemon }} on {{ .Labels.hostname }}
               {{- end }}
 
-      - alert: CephOSDNearFull
+      - alert: StoneOSDNearFull
         expr: ceph_health_detail{name="OSD_NEARFULL"} == 1
         for: 5m
         labels:
@@ -179,7 +179,7 @@ groups:
 
             Use 'ceph health detail' to identify which OSDs have reached this threshold.
             To resolve, either add capacity to the cluster, or delete unwanted data
-      - alert: CephOSDFull
+      - alert: StoneOSDFull
         expr: ceph_health_detail{name="OSD_FULL"} > 0
         for: 1m
         labels:
@@ -194,7 +194,7 @@ groups:
             affected OSD will be blocked.
 
             To resolve, either add capacity to the cluster, or delete unwanted data
-      - alert: CephOSDBackfillFull
+      - alert: StoneOSDBackfillFull
         expr: ceph_health_detail{name="OSD_BACKFILLFULL"} > 0
         for: 1m
         labels:
@@ -208,7 +208,7 @@ groups:
             completing for some pools. Check the current capacity utilisation with 'ceph df'
 
             To resolve, either add capacity to the cluster, or delete unwanted data
-      - alert: CephOSDTooManyRepairs
+      - alert: StoneOSDTooManyRepairs
         expr: ceph_health_detail{name="OSD_TOO_MANY_REPAIRS"} == 1
         for: 30s
         labels:
@@ -220,7 +220,7 @@ groups:
           description: |
             Reads from an OSD have used a secondary PG to return data to the client, indicating
             a potential failing disk.
-      - alert: CephOSDTimeoutsPublicNetwork
+      - alert: StoneOSDTimeoutsPublicNetwork
         expr: ceph_health_detail{name="OSD_SLOW_PING_TIME_FRONT"} == 1
         for: 1m
         labels:
@@ -231,7 +231,7 @@ groups:
           description: |
             OSD heartbeats on the cluster's 'public' network (frontend) are running slow. Investigate the network
             for any latency issues on this subnet. Use 'ceph health detail' to show the affected OSDs.
-      - alert: CephOSDTimeoutsClusterNetwork
+      - alert: StoneOSDTimeoutsClusterNetwork
         expr: ceph_health_detail{name="OSD_SLOW_PING_TIME_BACK"} == 1
         for: 1m
         labels:
@@ -242,7 +242,7 @@ groups:
           description: |
             OSD heartbeats on the cluster's 'cluster' network (backend) are running slow. Investigate the network
             for any latency issues on this subnet. Use 'ceph health detail' to show the affected OSDs.
-      - alert: CephOSDInternalDiskSizeMismatch
+      - alert: StoneOSDInternalDiskSizeMismatch
         expr: ceph_health_detail{name="BLUESTORE_DISK_SIZE_MISMATCH"} == 1
         for: 1m
         labels:
@@ -254,7 +254,7 @@ groups:
           description: |
             One or more OSDs have an internal inconsistency between the size of the physical device and it's metadata.
             This could lead to the OSD(s) crashing in future. You should redeploy the effected OSDs.
-      - alert: CephDeviceFailurePredicted
+      - alert: StoneDeviceFailurePredicted
         expr: ceph_health_detail{name="DEVICE_HEALTH"} == 1
         for: 1m
         labels:
@@ -270,7 +270,7 @@ groups:
 
             Mark the OSD as out (so data may migrate to other OSDs in the cluster). Once
             the osd is empty remove and replace the OSD.
-      - alert: CephDeviceFailurePredictionTooHigh
+      - alert: StoneDeviceFailurePredictionTooHigh
         expr: ceph_health_detail{name="DEVICE_HEALTH_TOOMANY"} == 1
         for: 1m
         labels:
@@ -285,7 +285,7 @@ groups:
             fail can not be remediated automatically, since it would take too many osd's out of
             the cluster, impacting performance and potentially availabililty. You should add new
             OSDs to the cluster to allow data to be relocated to avoid the data integrity issues.
-      - alert: CephDeviceFailureRelocationIncomplete
+      - alert: StoneDeviceFailureRelocationIncomplete
         expr: ceph_health_detail{name="DEVICE_HEALTH_IN_USE"} == 1
         for: 1m
         labels:
@@ -303,7 +303,7 @@ groups:
             more disks to the cluster to allow the data from the failing device to
             successfully migrate.
 
-      - alert: CephOSDFlapping
+      - alert: StoneOSDFlapping
         expr: |
           (
             rate(ceph_osd_up[5m])
@@ -323,7 +323,7 @@ groups:
             packet drop, disruption) on the clusters "cluster network". Check the
             network environment on the listed host(s).
 
-      - alert: CephOSDReadErrors
+      - alert: StoneOSDReadErrors
         expr: ceph_health_detail{name="BLUESTORE_SPURIOUS_READ_ERRORS"} == 1
         for: 30s
         labels:
@@ -336,7 +336,7 @@ groups:
             An OSD has encountered read errors, but the OSD has recovered by retrying
             the reads. This may indicate an issue with the Hardware or Kernel.
       # alert on high deviation from average PG count
-      - alert: CephPGImbalance
+      - alert: StonePGImbalance
         expr: |
           abs(
             (
@@ -357,7 +357,7 @@ groups:
 
   - name: mds
     rules:
-      - alert: CephFilesystemDamaged
+      - alert: StoneFilesystemDamaged
         expr: ceph_health_detail{name="MDS_DAMAGE"} > 0
         for: 1m
         labels:
@@ -366,14 +366,14 @@ groups:
           oid: 1.3.6.1.4.1.50495.1.2.1.5.1
         annotations:
           documentation: https://docs.ceph.com/en/latest/cephfs/health-messages#cephfs-health-messages
-          summary: Ceph filesystem is damaged.
+          summary: Stone filesystem is damaged.
           description: >
             The filesystems metadata has been corrupted. Data access
             may be blocked.
 
             Either analyse the output from the mds daemon admin socket, or
             escalate to support
-      - alert: CephFilesystemOffline
+      - alert: StoneFilesystemOffline
         expr: ceph_health_detail{name="MDS_ALL_DOWN"} > 0
         for: 1m
         labels:
@@ -382,11 +382,11 @@ groups:
           oid: 1.3.6.1.4.1.50495.1.2.1.5.3
         annotations:
           documentation: https://docs.ceph.com/en/latest/cephfs/health-messages/#mds-all-down
-          summary: Ceph filesystem is offline
+          summary: Stone filesystem is offline
           description: >
             All MDS ranks are unavailable. The ceph daemons providing the metadata
-            for the Ceph filesystem are all down, rendering the filesystem offline.
-      - alert: CephFilesystemDegraded
+            for the Stone filesystem are all down, rendering the filesystem offline.
+      - alert: StoneFilesystemDegraded
         expr: ceph_health_detail{name="FS_DEGRADED"} > 0
         for: 1m
         labels:
@@ -395,12 +395,12 @@ groups:
           oid: 1.3.6.1.4.1.50495.1.2.1.5.4
         annotations:
           documentation: https://docs.ceph.com/en/latest/cephfs/health-messages/#fs-degraded
-          summary: Ceph filesystem is degraded
+          summary: Stone filesystem is degraded
           description: >
             One or more metadata daemons (MDS ranks) are failed or in a
             damaged state. At best the filesystem is partially available,
             worst case is the filesystem is completely unusable.
-      - alert: CephFilesystemMDSRanksLow
+      - alert: StoneFilesystemMDSRanksLow
         expr: ceph_health_detail{name="MDS_UP_LESS_THAN_MAX"} > 0
         for: 1m
         labels:
@@ -408,12 +408,12 @@ groups:
           type: ceph_default
         annotations:
           documentation: https://docs.ceph.com/en/latest/cephfs/health-messages/#mds-up-less-than-max
-          summary: Ceph MDS daemon count is lower than configured
+          summary: Stone MDS daemon count is lower than configured
           description: >
             The filesystem's "max_mds" setting defined the number of MDS ranks in
             the filesystem. The current number of active MDS daemons is less than
             this setting.
-      - alert: CephFilesystemInsufficientStandby
+      - alert: StoneFilesystemInsufficientStandby
         expr: ceph_health_detail{name="MDS_INSUFFICIENT_STANDBY"} > 0
         for: 1m
         labels:
@@ -421,12 +421,12 @@ groups:
           type: ceph_default
         annotations:
           documentation: https://docs.ceph.com/en/latest/cephfs/health-messages/#mds-insufficient-standby
-          summary: Ceph filesystem standby daemons too low
+          summary: Stone filesystem standby daemons too low
           description: >
             The minimum number of standby daemons determined by standby_count_wanted
             is less than the actual number of standby daemons. Adjust the standby count
             or increase the number of mds daemons within the filesystem.
-      - alert: CephFilesystemFailureNoStandby
+      - alert: StoneFilesystemFailureNoStandby
         expr: ceph_health_detail{name="FS_WITH_FAILED_MDS"} > 0
         for: 1m
         labels:
@@ -435,12 +435,12 @@ groups:
           oid: 1.3.6.1.4.1.50495.1.2.1.5.5
         annotations:
           documentation: https://docs.ceph.com/en/latest/cephfs/health-messages/#fs-with-failed-mds
-          summary: Ceph MDS daemon failed, no further standby available
+          summary: Stone MDS daemon failed, no further standby available
           description: >
             An MDS daemon has failed, leaving only one active rank without
             further standby. Investigate the cause of the failure or add a
             standby daemon
-      - alert: CephFilesystemReadOnly
+      - alert: StoneFilesystemReadOnly
         expr: ceph_health_detail{name="MDS_HEALTH_READ_ONLY"} > 0
         for: 1m
         labels:
@@ -449,7 +449,7 @@ groups:
           oid: 1.3.6.1.4.1.50495.1.2.1.5.2
         annotations:
           documentation: https://docs.ceph.com/en/latest/cephfs/health-messages#cephfs-health-messages
-          summary: Ceph filesystem in read only mode, due to write error(s)
+          summary: Stone filesystem in read only mode, due to write error(s)
           description: >
             The filesystem has switched to READ ONLY due to an unexpected
             write error, when writing to the metadata pool
@@ -459,7 +459,7 @@ groups:
 
   - name: mgr
     rules:
-      - alert: CephMgrModuleCrash
+      - alert: StoneMgrModuleCrash
         expr: ceph_health_detail{name="RECENT_MGR_MODULE_CRASH"} == 1
         for: 5m
         labels:
@@ -473,7 +473,7 @@ groups:
             One or more mgr modules have crashed and are yet to be acknowledged by the administrator. A
             crashed module may impact functionality within the cluster. Use the 'ceph crash' commands to
             investigate which module has failed, and archive it to acknowledge the failure.
-      - alert: CephMgrPrometheusModuleInactive
+      - alert: StoneMgrPrometheusModuleInactive
         expr: up{job="ceph"} == 0
         for: 1m
         labels:
@@ -481,7 +481,7 @@ groups:
           type: ceph_default
           oid: 1.3.6.1.4.1.50495.1.2.1.6.2
         annotations:
-          summary: Ceph's mgr/prometheus module is not available
+          summary: Stone's mgr/prometheus module is not available
           description: >
             The mgr/prometheus module at {{ $labels.instance }} is unreachable. This
             could mean that the module has been disabled or the mgr itself is down.
@@ -494,7 +494,7 @@ groups:
 
   - name: pgs
     rules:
-      - alert: CephPGsInactive
+      - alert: StonePGsInactive
         expr: ceph_pool_metadata * on(pool_id,instance) group_left() (ceph_pg_total - ceph_pg_active) > 0
         for: 5m
         labels:
@@ -507,7 +507,7 @@ groups:
             {{ $value }} PGs have been inactive for more than 5 minutes in pool {{ $labels.name }}.
             Inactive placement groups aren't able to serve read/write
             requests.
-      - alert: CephPGsUnclean
+      - alert: StonePGsUnclean
         expr: ceph_pool_metadata * on(pool_id,instance) group_left() (ceph_pg_total - ceph_pg_clean) > 0
         for: 15m
         labels:
@@ -519,7 +519,7 @@ groups:
           description: >
             {{ $value }} PGs haven't been clean for more than 15 minutes in pool {{ $labels.name }}.
             Unclean PGs haven't been able to completely recover from a previous failure.
-      - alert: CephPGsDamaged
+      - alert: StonePGsDamaged
         expr: ceph_health_detail{name=~"PG_DAMAGED|OSD_SCRUB_ERRORS"} == 1
         for: 5m
         labels:
@@ -536,7 +536,7 @@ groups:
             Check to see which PG is affected, and attempt a manual repair if necessary. To list
             problematic placement groups, use 'rados list-inconsistent-pg <pool>'. To repair PGs use
             the 'ceph pg repair <pg_num>' command.
-      - alert: CephPGRecoveryAtRisk
+      - alert: StonePGRecoveryAtRisk
         expr: ceph_health_detail{name="PG_RECOVERY_FULL"} == 1
         for: 1m
         labels:
@@ -549,7 +549,7 @@ groups:
           description: >
             Data redundancy may be reduced, or is at risk, since one or more OSDs are at or above their
             'full' threshold. Add more capacity to the cluster, or delete unwanted data.
-      - alert: CephPGUnavilableBlockingIO
+      - alert: StonePGUnavilableBlockingIO
         # PG_AVAILABILITY, but an OSD is not in a DOWN state
         expr: ((ceph_health_detail{name="PG_AVAILABILITY"} == 1) - scalar(ceph_health_detail{name="OSD_DOWN"})) == 1
         for: 1m
@@ -563,7 +563,7 @@ groups:
           description: >
             Data availability is reduced impacting the clusters ability to service I/O to some data. One or
             more placement groups (PGs) are in a state that blocks IO.
-      - alert: CephPGBackfillAtRisk
+      - alert: StonePGBackfillAtRisk
         expr: ceph_health_detail{name="PG_BACKFILL_FULL"} == 1
         for: 1m
         labels:
@@ -576,7 +576,7 @@ groups:
           description: >
             Data redundancy may be at risk due to lack of free space within the cluster. One or more OSDs
             have breached their 'backfillfull' threshold. Add more capacity, or delete unwanted data.
-      - alert: CephPGNotScrubbed
+      - alert: StonePGNotScrubbed
         expr: ceph_health_detail{name="PG_NOT_SCRUBBED"} == 1
         for: 5m
         labels:
@@ -593,7 +593,7 @@ groups:
             scrub window.
 
             You can manually initiate a scrub with: ceph pg scrub <pgid>
-      - alert: CephPGsHighPerOSD
+      - alert: StonePGsHighPerOSD
         expr: ceph_health_detail{name="TOO_MANY_PGS"} == 1
         for: 1m
         labels:
@@ -609,7 +609,7 @@ groups:
             and that the profile selected is appropriate. You may also adjust the target_size_ratio of a pool to guide
             the autoscaler based on the expected relative size of the pool
             (i.e. 'ceph osd pool set cephfs.cephfs.meta target_size_ratio .1')
-      - alert: CephPGNotDeepScrubbed
+      - alert: StonePGNotDeepScrubbed
         expr: ceph_health_detail{name="PG_NOT_DEEP_SCRUBBED"} == 1
         for: 5m
         labels:
@@ -629,7 +629,7 @@ groups:
 
   - name: nodes
     rules:
-      - alert: CephNodeRootFilesystemFull
+      - alert: StoneNodeRootFilesystemFull
         expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100 < 5
         for: 5m
         labels:
@@ -642,7 +642,7 @@ groups:
             Root volume (OSD and MON store) is dangerously full: {{ $value | humanize }}% free.
 
       # alert on nic packet errors and drops rates > 1% packets/s
-      - alert: CephNodeNetworkPacketDrops
+      - alert: StoneNodeNetworkPacketDrops
         expr: |
           (
             increase(node_network_receive_drop_total{device!="lo"}[1m]) +
@@ -664,7 +664,7 @@ groups:
             Node {{ $labels.instance }} experiences packet drop > 0.01% or >
             10 packets/s on interface {{ $labels.device }}.
 
-      - alert: CephNodeNetworkPacketErrors
+      - alert: StoneNodeNetworkPacketErrors
         expr: |
           (
             increase(node_network_receive_errs_total{device!="lo"}[1m]) +
@@ -688,7 +688,7 @@ groups:
 
       # Restrict to device names beginning with '/' to skip false alarms from
       # tmpfs, overlay type filesystems
-      - alert: CephNodeDiskspaceWarning
+      - alert: StoneNodeDiskspaceWarning
         expr: |
           predict_linear(node_filesystem_free_bytes{device=~"/.*"}[2d], 3600 * 24 * 5) *
           on(instance) group_left(nodename) node_uname_info < 0
@@ -703,7 +703,7 @@ groups:
             will be full in less than 5 days assuming the average fill-up
             rate of the past 48 hours.
 
-      - alert: CephNodeInconsistentMTU
+      - alert: StoneNodeInconsistentMTU
         expr: |
           node_network_mtu_bytes * (node_network_up{device!="lo"} > 0) ==
             scalar(
@@ -720,14 +720,14 @@ groups:
           severity: warning
           type: ceph_default
         annotations:
-          summary: MTU settings across Ceph hosts are inconsistent
+          summary: MTU settings across Stone hosts are inconsistent
           description: >
             Node {{ $labels.instance }} has a different MTU size ({{ $value }})
             than the median of devices named {{ $labels.device }}.
 
   - name: pools
     rules:
-      - alert: CephPoolGrowthWarning
+      - alert: StonePoolGrowthWarning
         expr: |
           (predict_linear(ceph_pool_percent_used[2d], 3600 * 24 * 5) * on(pool_id)
               group_right ceph_pool_metadata) >= 95
@@ -740,7 +740,7 @@ groups:
           description: >
             Pool '{{ $labels.name }}' will be full in less than 5 days
             assuming the average fill-up rate of the past 48 hours.
-      - alert: CephPoolBackfillFull
+      - alert: StonePoolBackfillFull
         expr: ceph_health_detail{name="POOL_BACKFILLFULL"} > 0
         labels:
           severity: warning
@@ -752,7 +752,7 @@ groups:
             prevent rebalance operations from completing. You should
             consider adding more capacity to the pool.
 
-      - alert: CephPoolFull
+      - alert: StonePoolFull
         expr: ceph_health_detail{name="POOL_FULL"} > 0
         for: 1m
         labels:
@@ -772,14 +772,14 @@ groups:
             {{- end }}
             Either increase the pools quota, or add capacity to the cluster first
             then increase it's quota (e.g. ceph osd pool set quota <pool_name> max_bytes <bytes>)
-      - alert: CephPoolNearFull
+      - alert: StonePoolNearFull
         expr: ceph_health_detail{name="POOL_NEAR_FULL"} > 0
         for: 5m
         labels:
           severity: warning
           type: ceph_default
         annotations:
-          summary: One or more Ceph pools are getting full
+          summary: One or more Stone pools are getting full
           description: |
             A pool has exceeeded it warning (percent full) threshold, or the OSDs
             supporting the pool have reached their NEARFULL thresholds. Writes may
@@ -792,7 +792,7 @@ groups:
             (e.g. ceph osd pool set quota <pool_name> max_bytes <bytes>)
   - name: healthchecks
     rules:
-      - alert: CephSlowOps
+      - alert: StoneSlowOps
         expr: ceph_healthcheck_slow_ops > 0
         for: 30s
         labels:
@@ -806,7 +806,7 @@ groups:
 # cephadm alerts
   - name: cephadm
     rules:
-      - alert: CephadmUpgradeFailed
+      - alert: StoneadmUpgradeFailed
         expr: ceph_health_detail{name="UPGRADE_EXCEPTION"} > 0
         for: 30s
         labels:
@@ -814,13 +814,13 @@ groups:
           type: ceph_default
           oid: 1.3.6.1.4.1.50495.1.2.1.11.2
         annotations:
-          summary: Ceph version upgrade has failed
+          summary: Stone version upgrade has failed
           description: >
             The cephadm cluster upgrade process has failed. The cluster remains in
             an undetermined state.
 
             Please review the cephadm logs, to understand the nature of the issue
-      - alert: CephadmDaemonFailed
+      - alert: StoneadmDaemonFailed
         expr: ceph_health_detail{name="CEPHADM_FAILED_DAEMON"} > 0
         for: 30s
         labels:
@@ -833,7 +833,7 @@ groups:
             A daemon managed by cephadm is no longer active. Determine, which
             daemon is down with 'ceph health detail'. you may start daemons with
             the 'ceph orch daemon start <daemon_id>'
-      - alert: CephadmPaused
+      - alert: StoneadmPaused
         expr: ceph_health_detail{name="CEPHADM_PAUSED"} > 0
         for: 1m
         labels:
@@ -858,9 +858,9 @@ groups:
           type: ceph_default
           oid: 1.3.6.1.4.1.50495.1.2.1.12.1
         annotations:
-          summary: The scrape job for Ceph is missing from Prometheus
+          summary: The scrape job for Stone is missing from Prometheus
           description: |
-            The prometheus job that scrapes from Ceph is no longer defined, this
+            The prometheus job that scrapes from Stone is no longer defined, this
             will effectively mean you'll have no metrics or alerts for the cluster.
 
             Please review the job definitions in the prometheus.yml file of the prometheus
@@ -868,7 +868,7 @@ groups:
 # Object related events
   - name: rados
     rules:
-      - alert: CephObjectMissing
+      - alert: StoneObjectMissing
         expr: (ceph_health_detail{name="OBJECT_UNFOUND"} == 1) * on() (count(ceph_osd_up == 1) == bool count(ceph_osd_metadata)) == 1
         for: 30s
         labels:
@@ -885,7 +885,7 @@ groups:
 # Generic
   - name: generic
     rules:
-      - alert: CephDaemonCrash
+      - alert: StoneDaemonCrash
         expr: ceph_health_detail{name="RECENT_CRASH"} == 1
         for: 1m
         labels:
@@ -894,7 +894,7 @@ groups:
           oid: 1.3.6.1.4.1.50495.1.2.1.1.2
         annotations:
           documentation: https://docs.ceph.com/en/latest/rados/operations/health-checks/#recent-crash
-          summary: One or more Ceph daemons have crashed, and are pending acknowledgement
+          summary: One or more Stone daemons have crashed, and are pending acknowledgement
           description: |
             One or more daemons have crashed recently, and need to be acknowledged. This notification
             ensures that software crashes don't go unseen. To acknowledge a crash, use the

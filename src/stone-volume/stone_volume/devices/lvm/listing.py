@@ -4,8 +4,8 @@ import json
 import logging
 import os.path
 from textwrap import dedent
-from ceph_volume import decorators
-from ceph_volume.api import lvm as api
+from stone_volume import decorators
+from stone_volume.api import lvm as api
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def direct_report():
 # TODO: Perhaps, get rid of this class and simplify this module further?
 class List(object):
 
-    help = 'list logical volumes and devices associated with Ceph'
+    help = 'list logical volumes and devices associated with Stone'
 
     def __init__(self, argv):
         self.argv = argv
@@ -86,13 +86,13 @@ class List(object):
         if args.format == 'json':
             # If the report is empty, we don't return a non-zero exit status
             # because it is assumed this is going to be consumed by automated
-            # systems like ceph-ansible which would be forced to ignore the
+            # systems like stone-ansible which would be forced to ignore the
             # non-zero exit status if all they need is the information in the
             # JSON object
             print(json.dumps(report, indent=4, sort_keys=True))
         else:
             if not report:
-                raise SystemExit('No valid Ceph lvm devices found')
+                raise SystemExit('No valid Stone lvm devices found')
             pretty_report(report)
 
     def create_report(self, lvs):
@@ -103,10 +103,10 @@ class List(object):
         report = {}
 
         for lv in lvs:
-            if not api.is_ceph_device(lv):
+            if not api.is_stone_device(lv):
                 continue
 
-            osd_id = lv.tags['ceph.osd_id']
+            osd_id = lv.tags['stone.osd_id']
             report.setdefault(osd_id, [])
             lv_report = lv.as_dict()
 
@@ -122,13 +122,13 @@ class List(object):
 
     def create_report_non_lv_device(self, lv):
         report = {}
-        if lv.tags.get('ceph.type', '') in ['data', 'block']:
+        if lv.tags.get('stone.type', '') in ['data', 'block']:
             for dev_type in ['journal', 'wal', 'db']:
-                dev = lv.tags.get('ceph.{}_device'.format(dev_type), '')
+                dev = lv.tags.get('stone.{}_device'.format(dev_type), '')
                 # counting / in the device name seems brittle but should work,
                 # lvs will have 3
                 if dev and dev.count('/') == 2:
-                    device_uuid = lv.tags.get('ceph.{}_uuid'.format(dev_type))
+                    device_uuid = lv.tags.get('stone.{}_uuid'.format(dev_type))
                     report = {'tags': {'PARTUUID': device_uuid},
                               'type': dev_type,
                               'path': dev}
@@ -136,7 +136,7 @@ class List(object):
 
     def full_report(self):
         """
-        Create a report of all Ceph LVs. Returns '{}' to denote failure.
+        Create a report of all Stone LVs. Returns '{}' to denote failure.
         """
         return self.create_report(api.get_lvs())
 
@@ -165,12 +165,12 @@ class List(object):
             # check if device is a non-lvm journals or wal/db
             for dev_type in ['journal', 'wal', 'db']:
                 lvs = api.get_lvs(tags={
-                    'ceph.{}_device'.format(dev_type): device})
+                    'stone.{}_device'.format(dev_type): device})
                 if lvs:
                     # just taking the first lv here should work
                     lv = lvs[0]
                     phys_dev = self.create_report_non_lv_device(lv)
-                    osd_id = lv.tags.get('ceph.osd_id')
+                    osd_id = lv.tags.get('stone.osd_id')
                     if osd_id:
                         report[osd_id] = [phys_dev]
 
@@ -179,7 +179,7 @@ class List(object):
 
     def main(self):
         sub_command_help = dedent("""
-        List devices or logical volumes associated with Ceph. An association is
+        List devices or logical volumes associated with Stone. An association is
         determined if a device has information relating to an OSD. This is
         verified by querying LVM's metadata and correlating it with devices.
 
@@ -188,19 +188,19 @@ class List(object):
 
         Full listing of all system devices associated with a cluster::
 
-            ceph-volume lvm list
+            stone-volume lvm list
 
         List a particular device, reporting all metadata about it::
 
-            ceph-volume lvm list /dev/sda1
+            stone-volume lvm list /dev/sda1
 
         List a logical volume, along with all its metadata (vg is a volume
         group, and lv the logical volume name)::
 
-            ceph-volume lvm list {vg/lv}
+            stone-volume lvm list {vg/lv}
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume lvm list',
+            prog='stone-volume lvm list',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=sub_command_help,
         )

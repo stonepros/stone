@@ -15,7 +15,7 @@ set -e
 # 	deconfigured's-postinst abort-deconfigure in-favour <failed-install-package> <version> [<removing conflicting-package> <version>]
 #
 # The current action is to simply remove the mistakenly-added
-# /etc/init/ceph.conf file; this could be done in any of these cases,
+# /etc/init/stone.conf file; this could be done in any of these cases,
 # although technically it will leave the system in a different state
 # than the original install that included that file.  So instead we
 # only remove on "configure", since that's the only time we know we're
@@ -24,17 +24,17 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-[ -f "/etc/default/ceph" ] && . /etc/default/ceph
-[ -z "$SERVER_USER" ] && SERVER_USER=ceph
-[ -z "$SERVER_GROUP" ] && SERVER_GROUP=ceph
+[ -f "/etc/default/stone" ] && . /etc/default/stone
+[ -z "$SERVER_USER" ] && SERVER_USER=stone
+[ -z "$SERVER_GROUP" ] && SERVER_GROUP=stone
 
 case "$1" in
     configure)
 	[ -x /sbin/start ] && start radosgw-all || :
 
-	if ! dpkg-statoverride --list /var/lib/ceph/radosgw >/dev/null
+	if ! dpkg-statoverride --list /var/lib/stone/radosgw >/dev/null
 	then
-            chown $SERVER_USER:$SERVER_GROUP /var/lib/ceph/radosgw
+            chown $SERVER_USER:$SERVER_GROUP /var/lib/stone/radosgw
 	fi
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)

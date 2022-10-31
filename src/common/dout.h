@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2010 Sage Weil <sage@newdream.net>
  * Copyright (C) 2010 Dreamhost
@@ -18,7 +18,7 @@
 
 #include <type_traits>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/common_fwd.h"
 #if defined(WITH_SEASTAR) && !defined(WITH_ALIEN)
 #include <seastar/util/log.hh>
@@ -26,7 +26,7 @@
 #include "crimson/common/config_proxy.h"
 #else
 #include "global/global_context.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "common/likely.h"
 #include "common/Clock.h"
@@ -40,27 +40,27 @@ extern void dout_emergency(const std::string &str);
 class _bad_endl_use_dendl_t { public: _bad_endl_use_dendl_t(int) {} };
 static const _bad_endl_use_dendl_t endl = 0;
 inline std::ostream& operator<<(std::ostream& out, _bad_endl_use_dendl_t) {
-  ceph_abort_msg("you are using the wrong endl.. use std::endl or dendl");
+  stone_abort_msg("you are using the wrong endl.. use std::endl or dendl");
   return out;
 }
 
 class DoutPrefixProvider {
 public:
   virtual std::ostream& gen_prefix(std::ostream& out) const = 0;
-  virtual StoneeContext *get_cct() const = 0;
+  virtual StoneContext *get_cct() const = 0;
   virtual unsigned get_subsys() const = 0;
   virtual ~DoutPrefixProvider() {}
 };
 
 // a prefix provider with empty prefix
 class NoDoutPrefix : public DoutPrefixProvider {
-  StoneeContext *const cct;
+  StoneContext *const cct;
   const unsigned subsys;
  public:
-  NoDoutPrefix(StoneeContext *cct, unsigned subsys) : cct(cct), subsys(subsys) {}
+  NoDoutPrefix(StoneContext *cct, unsigned subsys) : cct(cct), subsys(subsys) {}
 
   std::ostream& gen_prefix(std::ostream& out) const override { return out; }
-  StoneeContext *get_cct() const override { return cct; }
+  StoneContext *get_cct() const override { return cct; }
   unsigned get_subsys() const override { return subsys; }
 };
 
@@ -68,7 +68,7 @@ class NoDoutPrefix : public DoutPrefixProvider {
 class DoutPrefix : public NoDoutPrefix {
   const char *const prefix;
  public:
-  DoutPrefix(StoneeContext *cct, unsigned subsys, const char *prefix)
+  DoutPrefix(StoneContext *cct, unsigned subsys, const char *prefix)
     : NoDoutPrefix(cct, subsys), prefix(prefix) {}
 
   std::ostream& gen_prefix(std::ostream& out) const override {
@@ -87,14 +87,14 @@ class DoutPrefixPipe : public DoutPrefixProvider {
     add_prefix(out);
     return out;
   }
-  StoneeContext *get_cct() const override { return dpp.get_cct(); }
+  StoneContext *get_cct() const override { return dpp.get_cct(); }
   unsigned get_subsys() const override { return dpp.get_subsys(); }
 
   virtual void add_prefix(std::ostream& out) const = 0;
 };
 
 // helpers
-namespace ceph::dout {
+namespace stone::dout {
 
 template<typename T>
 struct dynamic_marker_t {
@@ -114,7 +114,7 @@ struct is_dynamic : public std::false_type {};
 template<typename T>
 struct is_dynamic<dynamic_marker_t<T>> : public std::true_type {};
 
-} // ceph::dout
+} // stone::dout
 
 // generic macros
 #define dout_prefix *_dout
@@ -137,7 +137,7 @@ struct is_dynamic<dynamic_marker_t<T>> : public std::true_type {};
 #define dout_impl(cct, sub, v)						\
   do {									\
   if (0) {							\
-    ceph::logging::MutableEntry _dout_e(v, sub);                        \
+    stone::logging::MutableEntry _dout_e(v, sub);                        \
     std::ostream* _dout = &_dout_e.get_ostream();
 
 #define dendl_impl std::flush;                                          \
@@ -147,8 +147,8 @@ struct is_dynamic<dynamic_marker_t<T>> : public std::true_type {};
 #define dout_impl(cct, sub, v)						\
   do {									\
   const bool should_gather = [&](const auto cctX) {			\
-    if constexpr (ceph::dout::is_dynamic<decltype(sub)>::value ||	\
-		  ceph::dout::is_dynamic<decltype(v)>::value) {		\
+    if constexpr (stone::dout::is_dynamic<decltype(sub)>::value ||	\
+		  stone::dout::is_dynamic<decltype(v)>::value) {		\
       return cctX->_conf->subsys.should_gather(sub, v);			\
     } else {								\
       /* The parentheses are **essential** because commas in angle	\
@@ -159,10 +159,10 @@ struct is_dynamic<dynamic_marker_t<T>> : public std::true_type {};
   }(cct);								\
 									\
   if (should_gather) {							\
-    ceph::logging::MutableEntry _dout_e(v, sub);                        \
+    stone::logging::MutableEntry _dout_e(v, sub);                        \
     static_assert(std::is_convertible<decltype(&*cct), 			\
-				      StoneeContext* >::value,		\
-		  "provided cct must be compatible with StoneeContext*"); \
+				      StoneContext* >::value,		\
+		  "provided cct must be compatible with StoneContext*"); \
     auto _dout_cct = cct;						\
     std::ostream* _dout = &_dout_e.get_ostream();
 
@@ -172,23 +172,23 @@ struct is_dynamic<dynamic_marker_t<T>> : public std::true_type {};
   } while (0)
 #endif	// WITH_SEASTAR
 
-#define lsubdout(cct, sub, v)  dout_impl(cct, ceph_subsys_##sub, v) dout_prefix
+#define lsubdout(cct, sub, v)  dout_impl(cct, stone_subsys_##sub, v) dout_prefix
 #define ldout(cct, v)  dout_impl(cct, dout_subsys, v) dout_prefix
-#define lderr(cct) dout_impl(cct, ceph_subsys_, -1) dout_prefix
+#define lderr(cct) dout_impl(cct, stone_subsys_, -1) dout_prefix
 
 #define ldpp_subdout(dpp, sub, v) 						\
   if (decltype(auto) pdpp = (dpp); pdpp) /* workaround -Wnonnull-compare for 'this' */ \
-    dout_impl(pdpp->get_cct(), ceph_subsys_##sub, v) \
+    dout_impl(pdpp->get_cct(), stone_subsys_##sub, v) \
       pdpp->gen_prefix(*_dout)
 
 #define ldpp_dout(dpp, v) 						\
   if (decltype(auto) pdpp = (dpp); pdpp) /* workaround -Wnonnull-compare for 'this' */ \
-    dout_impl(pdpp->get_cct(), ceph::dout::need_dynamic(pdpp->get_subsys()), v) \
+    dout_impl(pdpp->get_cct(), stone::dout::need_dynamic(pdpp->get_subsys()), v) \
       pdpp->gen_prefix(*_dout)
 
-#define lgeneric_subdout(cct, sub, v) dout_impl(cct, ceph_subsys_##sub, v) *_dout
-#define lgeneric_dout(cct, v) dout_impl(cct, ceph_subsys_, v) *_dout
-#define lgeneric_derr(cct) dout_impl(cct, ceph_subsys_, -1) *_dout
+#define lgeneric_subdout(cct, sub, v) dout_impl(cct, stone_subsys_##sub, v) *_dout
+#define lgeneric_dout(cct, v) dout_impl(cct, stone_subsys_, v) *_dout
+#define lgeneric_derr(cct) dout_impl(cct, stone_subsys_, -1) *_dout
 
 #define ldlog_p1(cct, sub, lvl)                 \
   (cct->_conf->subsys.should_gather((sub), (lvl)))

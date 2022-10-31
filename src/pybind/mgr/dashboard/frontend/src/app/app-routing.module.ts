@@ -3,31 +3,31 @@ import { ActivatedRouteSnapshot, PreloadAllModules, RouterModule, Routes } from 
 
 import _ from 'lodash';
 
-import { CephfsListComponent } from './ceph/cephfs/cephfs-list/cephfs-list.component';
-import { ConfigurationFormComponent } from './ceph/cluster/configuration/configuration-form/configuration-form.component';
-import { ConfigurationComponent } from './ceph/cluster/configuration/configuration.component';
-import { CreateClusterComponent } from './ceph/cluster/create-cluster/create-cluster.component';
-import { CrushmapComponent } from './ceph/cluster/crushmap/crushmap.component';
-import { HostFormComponent } from './ceph/cluster/hosts/host-form/host-form.component';
-import { HostsComponent } from './ceph/cluster/hosts/hosts.component';
-import { InventoryComponent } from './ceph/cluster/inventory/inventory.component';
-import { LogsComponent } from './ceph/cluster/logs/logs.component';
-import { MgrModuleFormComponent } from './ceph/cluster/mgr-modules/mgr-module-form/mgr-module-form.component';
-import { MgrModuleListComponent } from './ceph/cluster/mgr-modules/mgr-module-list/mgr-module-list.component';
-import { MonitorComponent } from './ceph/cluster/monitor/monitor.component';
-import { OsdFormComponent } from './ceph/cluster/osd/osd-form/osd-form.component';
-import { OsdListComponent } from './ceph/cluster/osd/osd-list/osd-list.component';
-import { ActiveAlertListComponent } from './ceph/cluster/prometheus/active-alert-list/active-alert-list.component';
-import { RulesListComponent } from './ceph/cluster/prometheus/rules-list/rules-list.component';
-import { SilenceFormComponent } from './ceph/cluster/prometheus/silence-form/silence-form.component';
-import { SilenceListComponent } from './ceph/cluster/prometheus/silence-list/silence-list.component';
-import { ServiceFormComponent } from './ceph/cluster/services/service-form/service-form.component';
-import { ServicesComponent } from './ceph/cluster/services/services.component';
-import { TelemetryComponent } from './ceph/cluster/telemetry/telemetry.component';
-import { DashboardComponent } from './ceph/dashboard/dashboard/dashboard.component';
-import { NfsFormComponent } from './ceph/nfs/nfs-form/nfs-form.component';
-import { NfsListComponent } from './ceph/nfs/nfs-list/nfs-list.component';
-import { PerformanceCounterComponent } from './ceph/performance-counter/performance-counter/performance-counter.component';
+import { StonefsListComponent } from './stone/stonefs/stonefs-list/stonefs-list.component';
+import { ConfigurationFormComponent } from './stone/cluster/configuration/configuration-form/configuration-form.component';
+import { ConfigurationComponent } from './stone/cluster/configuration/configuration.component';
+import { CreateClusterComponent } from './stone/cluster/create-cluster/create-cluster.component';
+import { CrushmapComponent } from './stone/cluster/crushmap/crushmap.component';
+import { HostFormComponent } from './stone/cluster/hosts/host-form/host-form.component';
+import { HostsComponent } from './stone/cluster/hosts/hosts.component';
+import { InventoryComponent } from './stone/cluster/inventory/inventory.component';
+import { LogsComponent } from './stone/cluster/logs/logs.component';
+import { MgrModuleFormComponent } from './stone/cluster/mgr-modules/mgr-module-form/mgr-module-form.component';
+import { MgrModuleListComponent } from './stone/cluster/mgr-modules/mgr-module-list/mgr-module-list.component';
+import { MonitorComponent } from './stone/cluster/monitor/monitor.component';
+import { OsdFormComponent } from './stone/cluster/osd/osd-form/osd-form.component';
+import { OsdListComponent } from './stone/cluster/osd/osd-list/osd-list.component';
+import { ActiveAlertListComponent } from './stone/cluster/prometheus/active-alert-list/active-alert-list.component';
+import { RulesListComponent } from './stone/cluster/prometheus/rules-list/rules-list.component';
+import { SilenceFormComponent } from './stone/cluster/prometheus/silence-form/silence-form.component';
+import { SilenceListComponent } from './stone/cluster/prometheus/silence-list/silence-list.component';
+import { ServiceFormComponent } from './stone/cluster/services/service-form/service-form.component';
+import { ServicesComponent } from './stone/cluster/services/services.component';
+import { TelemetryComponent } from './stone/cluster/telemetry/telemetry.component';
+import { DashboardComponent } from './stone/dashboard/dashboard/dashboard.component';
+import { NfsFormComponent } from './stone/nfs/nfs-form/nfs-form.component';
+import { NfsListComponent } from './stone/nfs/nfs-list/nfs-list.component';
+import { PerformanceCounterComponent } from './stone/performance-counter/performance-counter/performance-counter.component';
 import { LoginPasswordFormComponent } from './core/auth/login-password-form/login-password-form.component';
 import { LoginComponent } from './core/auth/login/login.component';
 import { UserPasswordFormComponent } from './core/auth/user-password-form/user-password-form.component';
@@ -98,7 +98,7 @@ const routes: Routes = [
           moduleStatusGuardConfig: {
             apiPath: 'orchestrator',
             redirectTo: 'dashboard',
-            backend: 'cephadm'
+            backend: 'stoneadm'
           },
           breadcrumbs: 'Expand Cluster'
         }
@@ -277,18 +277,18 @@ const routes: Routes = [
       {
         path: 'pool',
         data: { breadcrumbs: 'Pools' },
-        loadChildren: () => import('./ceph/pool/pool.module').then((m) => m.RoutedPoolModule)
+        loadChildren: () => import('./stone/pool/pool.module').then((m) => m.RoutedPoolModule)
       },
       // Block
       {
         path: 'block',
         data: { breadcrumbs: true, text: 'Block', path: null },
-        loadChildren: () => import('./ceph/block/block.module').then((m) => m.RoutedBlockModule)
+        loadChildren: () => import('./stone/block/block.module').then((m) => m.RoutedBlockModule)
       },
       // File Systems
       {
-        path: 'cephfs',
-        component: CephfsListComponent,
+        path: 'stonefs',
+        component: StonefsListComponent,
         canActivate: [FeatureTogglesGuardService],
         data: { breadcrumbs: 'File Systems' }
       },
@@ -308,7 +308,7 @@ const routes: Routes = [
           text: 'Object Gateway',
           path: null
         },
-        loadChildren: () => import('./ceph/rgw/rgw.module').then((m) => m.RoutedRgwModule)
+        loadChildren: () => import('./stone/rgw/rgw.module').then((m) => m.RoutedRgwModule)
       },
       // User/Role Management
       {

@@ -2,12 +2,12 @@
  Developer Guide (Quick)
 =================================
 
-This guide will describe how to build and test Ceph for development.
+This guide will describe how to build and test Stone for development.
 
 Development
 -----------
 
-The ``run-make-check.sh`` script will install Ceph dependencies,
+The ``run-make-check.sh`` script will install Stone dependencies,
 compile everything in debug mode and run a number of tests to verify
 the result behaves as expected.
 
@@ -15,8 +15,8 @@ the result behaves as expected.
 
    ./run-make-check.sh
 
-Optionally if you want to work on a specific component of Ceph,
-install the dependencies and build Ceph in debug mode with required cmake flags.
+Optionally if you want to work on a specific component of Stone,
+install the dependencies and build Stone in debug mode with required cmake flags.
 
 Example:
 
@@ -27,7 +27,7 @@ Example:
 
 Running a development deployment
 --------------------------------
-Ceph contains a script called ``vstart.sh`` (see also :doc:`/dev/dev_cluster_deployement`) which allows developers to quickly test their code using
+Stone contains a script called ``vstart.sh`` (see also :doc:`/dev/dev_cluster_deployement`) which allows developers to quickly test their code using
 a simple deployment on your development system. Once the build finishes successfully, start the ceph
 deployment using the following command:
 

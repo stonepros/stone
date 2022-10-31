@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 Stanislav Sedov <stas@FreeBSD.org>
  *
@@ -26,18 +26,18 @@ extern "C" {
 
 #include <stddef.h>
 
-int ceph_os_setxattr(const char *path, const char *name,
+int stone_os_setxattr(const char *path, const char *name,
                   const void *value, size_t size);
-int ceph_os_fsetxattr(int fd, const char *name, const void *value,
+int stone_os_fsetxattr(int fd, const char *name, const void *value,
                    size_t size);
-ssize_t ceph_os_getxattr(const char *path, const char *name,
+ssize_t stone_os_getxattr(const char *path, const char *name,
                          void *value, size_t size);
-ssize_t ceph_os_fgetxattr(int fd, const char *name, void *value,
+ssize_t stone_os_fgetxattr(int fd, const char *name, void *value,
                           size_t size);
-ssize_t ceph_os_listxattr(const char *path, char *list, size_t size);
-ssize_t ceph_os_flistxattr(int fd, char *list, size_t size);
-int ceph_os_removexattr(const char *path, const char *name);
-int ceph_os_fremovexattr(int fd, const char *name);
+ssize_t stone_os_listxattr(const char *path, char *list, size_t size);
+ssize_t stone_os_flistxattr(int fd, char *list, size_t size);
+int stone_os_removexattr(const char *path, const char *name);
+int stone_os_fremovexattr(int fd, const char *name);
 
 #ifdef __cplusplus
 }

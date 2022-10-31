@@ -73,13 +73,13 @@ class Alerts(MgrModule):
         },
         {
             'name': 'smtp_from_name',
-            'default': 'Ceph',
+            'default': 'Stone',
             'desc': 'Email From: name',
             'runtime': True,
         },
     ]
 
-    # These are "native" Ceph options that this module cares about.
+    # These are "native" Stone options that this module cares about.
     NATIVE_OPTIONS = [
     ]
 
@@ -113,7 +113,7 @@ class Alerts(MgrModule):
         for opt in self.NATIVE_OPTIONS:
             setattr(self,
                     opt,
-                    self.get_ceph_option(opt))
+                    self.get_stone_option(opt))
             self.log.debug(' native option %s = %s', opt, getattr(self, opt))
 
     def handle_command(self, inbuf, cmd):

@@ -15,14 +15,14 @@ To enable the module, use the following command:
 
 ::
 
-    ceph mgr module enable influx
+    stone mgr module enable influx
 
 If you wish to subsequently disable the module, you can use the equivalent
 *disable* command:
 
 ::
 
-    ceph mgr module disable influx
+    stone mgr module disable influx
 
 -------------
 Configuration 
@@ -36,7 +36,7 @@ Set configuration values using the following command:
 
 ::
 
-    ceph config set mgr mgr/influx/<key> <value>
+    stone config set mgr mgr/influx/<key> <value>
 
 
 The most important settings are ``hostname``, ``username`` and ``password``.  
@@ -44,14 +44,14 @@ For example, a typical configuration might look like this:
 
 ::
 
-    ceph config set mgr mgr/influx/hostname influx.mydomain.com
-    ceph config set mgr mgr/influx/username admin123
-    ceph config set mgr mgr/influx/password p4ssw0rd
+    stone config set mgr mgr/influx/hostname influx.mydomain.com
+    stone config set mgr mgr/influx/username admin123
+    stone config set mgr mgr/influx/password p4ssw0rd
     
 Additional optional configuration settings are:
 
 :interval: Time between reports to InfluxDB.  Default 30 seconds.
-:database: InfluxDB database name.  Default "ceph".  You will need to create this database and grant write privileges to the configured username or the username must have admin privileges to create it.  
+:database: InfluxDB database name.  Default "stone".  You will need to create this database and grant write privileges to the configured username or the username must have admin privileges to create it.  
 :port: InfluxDB server port.  Default 8086
 :ssl: Use https connection for InfluxDB server. Use "true" or "false". Default false
 :verify_ssl: Verify https cert for InfluxDB server. Use "true" or "false". Default true
@@ -65,12 +65,12 @@ Debugging
 By default, a few debugging statements as well as error statements have been set to print in the log files. Users can add more if necessary.
 To make use of the debugging option in the module:
 
-- Add this to the ceph.conf file.::
+- Add this to the stone.conf file.::
 
     [mgr]
         debug_mgr = 20  
 
-- Use this command ``ceph influx self-test``.
+- Use this command ``stone influx self-test``.
 - Check the log files. Users may find it easier to filter the log files using *mgr[influx]*.
 
 --------------------

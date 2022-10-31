@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -28,7 +28,7 @@
 #include "include/types.h"
 #include "include/timegm.h"
 #include "common/strtol.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/safe_io.h"
 #include "common/SubProcess.h"
 #include "include/denc.h"
@@ -66,19 +66,19 @@ public:
   // cons
   utime_t() { tv.tv_sec = 0; tv.tv_nsec = 0; }
   utime_t(time_t s, int n) { tv.tv_sec = s; tv.tv_nsec = n; normalize(); }
-  utime_t(const struct ceph_timespec &v) {
+  utime_t(const struct stone_timespec &v) {
     decode_timeval(&v);
   }
   utime_t(const struct timespec v)
   {
-    // NOTE: this is used by ceph_clock_now() so should be kept
+    // NOTE: this is used by stone_clock_now() so should be kept
     // as thin as possible.
     tv.tv_sec = v.tv_sec;
     tv.tv_nsec = v.tv_nsec;
   }
-  // conversion from ceph::real_time/coarse_real_time
+  // conversion from stone::real_time/coarse_real_time
   template <typename Clock, typename std::enable_if_t<
-            ceph::converts_to_timespec_v<Clock>>* = nullptr>
+            stone::converts_to_timespec_v<Clock>>* = nullptr>
   explicit utime_t(const std::chrono::time_point<Clock>& t)
     : utime_t(Clock::to_timespec(t)) {} // forward to timespec ctor
 
@@ -118,10 +118,10 @@ public:
     tv.tv_nsec = (__u32)((d - (double)tv.tv_sec) * 1000000000.0);
   }
 
-  ceph::real_time to_real_time() const {
-    ceph_timespec ts;
+  stone::real_time to_real_time() const {
+    stone_timespec ts;
     encode_timeval(&ts);
-    return ceph::real_clock::from_ceph_timespec(ts);
+    return stone::real_clock::from_stone_timespec(ts);
   }
 
   // accessors
@@ -156,20 +156,20 @@ public:
       ,
       "utime_t have padding");
   }
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
 #if defined(STONE_LITTLE_ENDIAN)
     bl.append((char *)(this), sizeof(__u32) + sizeof(__u32));
 #else
-    using ceph::encode;
+    using stone::encode;
     encode(tv.tv_sec, bl);
     encode(tv.tv_nsec, bl);
 #endif
   }
-  void decode(ceph::buffer::list::const_iterator &p) {
+  void decode(stone::buffer::list::const_iterator &p) {
 #if defined(STONE_LITTLE_ENDIAN)
     p.copy(sizeof(__u32) + sizeof(__u32), (char *)(this));
 #else
-    using ceph::decode;
+    using stone::decode;
     decode(tv.tv_sec, p);
     decode(tv.tv_nsec, p);
 #endif
@@ -180,14 +180,14 @@ public:
     denc(v.tv.tv_nsec, p);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<utime_t*>& o);
   
-  void encode_timeval(struct ceph_timespec *t) const {
+  void encode_timeval(struct stone_timespec *t) const {
     t->tv_sec = tv.tv_sec;
     t->tv_nsec = tv.tv_nsec;
   }
-  void decode_timeval(const struct ceph_timespec *t) {
+  void decode_timeval(const struct stone_timespec *t) {
     tv.tv_sec = t->tv_sec;
     tv.tv_nsec = t->tv_nsec;
   }
@@ -226,8 +226,8 @@ public:
   operator double() const {
     return (double)sec() + ((double)nsec() / 1000000000.0L);
   }
-  operator ceph_timespec() const {
-    ceph_timespec ts;
+  operator stone_timespec() const {
+    stone_timespec ts;
     ts.tv_sec = sec();
     ts.tv_nsec = nsec();
     return ts;
@@ -595,8 +595,8 @@ inline std::ostream& operator<<(std::ostream& out, const utime_t& t)
 }
 
 inline std::string utimespan_str(const utime_t& age) {
-  auto age_ts = ceph::timespan(age.nsec()) + std::chrono::seconds(age.sec());
-  return ceph::timespan_str(age_ts);
+  auto age_ts = stone::timespan(age.nsec()) + std::chrono::seconds(age.sec());
+  return stone::timespan_str(age_ts);
 }
 
 #endif

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,7 +16,7 @@
 #ifndef STONE_MMONELECTION_H
 #define STONE_MMONELECTION_H
 
-#include "common/ceph_releases.h"
+#include "common/stone_releases.h"
 #include "msg/Message.h"
 #include "mon/MonMap.h"
 #include "mon/mon_types.h"
@@ -37,20 +37,20 @@ public:
     case OP_ACK: return "ack";
     case OP_NAK: return "nak";
     case OP_VICTORY: return "victory";
-    default: ceph_abort(); return 0;
+    default: stone_abort(); return 0;
     }
   }
 
   uuid_d fsid;
   int32_t op;
   epoch_t epoch;
-  ceph::buffer::list monmap_bl;
+  stone::buffer::list monmap_bl;
   std::set<int32_t> quorum;
   uint64_t quorum_features;
   mon_feature_t mon_features;
-  ceph_release_t mon_release{ceph_release_t::unknown};
-  ceph::buffer::list sharing_bl;
-  ceph::buffer::list scoring_bl;
+  stone_release_t mon_release{stone_release_t::unknown};
+  stone::buffer::list sharing_bl;
+  stone::buffer::list scoring_bl;
   uint8_t strategy;
   std::map<std::string,std::string> metadata;
   
@@ -82,7 +82,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     if (monmap_bl.length() && (features != STONE_FEATURES_ALL)) {
       // reencode old-format monmap
       MonMap t;
@@ -107,7 +107,7 @@ public:
     encode(strategy, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(fsid, p);
     decode(op, p);
@@ -128,7 +128,7 @@ public:
     if (header.version >= 8)
       decode(mon_release, p);
     else
-      mon_release = infer_ceph_release_from_mon_features(mon_features);
+      mon_release = infer_stone_release_from_mon_features(mon_features);
     if (header.version >= 9) {
       decode(scoring_bl, p);
       decode(strategy, p);
@@ -138,7 +138,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);  
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);  
 };
 
 #endif

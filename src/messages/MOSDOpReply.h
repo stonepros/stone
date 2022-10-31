@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -97,7 +97,7 @@ public:
   void add_flags(int f) { flags |= f; }
 
   void claim_op_out_data(std::vector<OSDOp>& o) {
-    ceph_assert(ops.size() == o.size());
+    stone_assert(ops.size() == o.size());
     for (unsigned i = 0; i < o.size(); i++) {
       ops[i].outdata = std::move(o[i].outdata);
     }
@@ -108,7 +108,7 @@ public:
   }
   void set_op_returns(const std::vector<pg_log_op_return_item_t>& op_returns) {
     if (op_returns.size()) {
-      ceph_assert(ops.empty() || ops.size() == op_returns.size());
+      stone_assert(ops.empty() || ops.size() == op_returns.size());
       ops.resize(op_returns.size());
       for (unsigned i = 0; i < op_returns.size(); ++i) {
 	ops[i].rval = op_returns[i].rval;
@@ -169,7 +169,7 @@ private:
 
 public:
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     if(false == bdata_encode) {
       OSDOp::merge_osd_op_vector_out_data(ops, data);
       bdata_encode = true;
@@ -177,7 +177,7 @@ public:
 
     if ((features & STONE_FEATURE_PGID64) == 0) {
       header.version = 1;
-      ceph_osd_reply_head head;
+      stone_osd_reply_head head;
       memset(&head, 0, sizeof(head));
       head.layout.ol_pgid = pgid.get_old_pg().v;
       head.flags = flags;
@@ -190,7 +190,7 @@ public:
       for (unsigned i = 0; i < head.num_ops; i++) {
 	encode(ops[i].op, payload);
       }
-      ceph::encode_nohead(oid.name, payload);
+      stone::encode_nohead(oid.name, payload);
     } else {
       header.version = HEAD_VERSION;
       encode(oid, payload);
@@ -226,7 +226,7 @@ public:
     }
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
 
     // Always keep here the newest version of decoding order/rule
@@ -257,13 +257,13 @@ public:
 	decode(redirect, p);
       decode_trace(p);
     } else if (header.version < 2) {
-      ceph_osd_reply_head head;
+      stone_osd_reply_head head;
       decode(head, p);
       ops.resize(head.num_ops);
       for (unsigned i = 0; i < head.num_ops; i++) {
 	decode(ops[i].op, p);
       }
-      ceph::decode_nohead(head.object_len, oid.name, p);
+      stone::decode_nohead(head.object_len, oid.name, p);
       pgid = pg_t(head.layout.ol_pgid);
       result = (int32_t)head.result;
       flags = head.flags;
@@ -346,7 +346,7 @@ public:
 
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 

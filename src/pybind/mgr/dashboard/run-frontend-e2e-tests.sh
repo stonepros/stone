@@ -2,7 +2,7 @@
 
 set -e
 
-start_ceph() {
+start_stone() {
     cd $FULL_PATH_BUILD_DIR
 
     MGR=2 RGW=1 ../src/vstart.sh -n -d
@@ -11,12 +11,12 @@ start_ceph() {
     set -x
 
     # Create an Object Gateway User
-    ./bin/ceph dashboard set-rgw-credentials
+    ./bin/stone dashboard set-rgw-credentials
 
     # Set SSL verify to False
-    ./bin/ceph dashboard set-rgw-api-ssl-verify False
+    ./bin/stone dashboard set-rgw-api-ssl-verify False
 
-    CYPRESS_BASE_URL=$(./bin/ceph mgr services | jq -r .dashboard)
+    CYPRESS_BASE_URL=$(./bin/stone mgr services | jq -r .dashboard)
 
     set +x
 }
@@ -88,7 +88,7 @@ export CYPRESS_BASE_URL CYPRESS_CACHE_FOLDER CYPRESS_LOGIN_USER CYPRESS_LOGIN_PW
 check_device_available
 
 if [ "$CYPRESS_BASE_URL" == "" ]; then
-    start_ceph
+    start_stone
 fi
 
 cd $DASH_DIR/frontend

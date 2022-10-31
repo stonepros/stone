@@ -13,7 +13,7 @@ Status
 
 The current status of the balancer can be checked at any time with::
 
-  ceph balancer status
+  stone balancer status
 
 
 Automatic balancing
@@ -23,7 +23,7 @@ The automatic balancing feature is enabled by default in ``upmap``
 mode. Please refer to :ref:`upmap` for more details. The balancer can be
 turned off with::
 
-  ceph balancer off
+  stone balancer off
 
 The balancer mode can be changed to ``crush-compat`` mode, which is
 backward compatible with older clients, and will make small changes to
@@ -42,35 +42,35 @@ such that the percentage of PGs that are misplaced (i.e., that need to
 be moved) is below a threshold of (by default) 5%.  The
 ``target_max_misplaced_ratio`` threshold can be adjusted with::
 
-  ceph config set mgr target_max_misplaced_ratio .07   # 7%
+  stone config set mgr target_max_misplaced_ratio .07   # 7%
 
 Set the number of seconds to sleep in between runs of the automatic balancer::
 
-  ceph config set mgr mgr/balancer/sleep_interval 60
+  stone config set mgr mgr/balancer/sleep_interval 60
 
 Set the time of day to begin automatic balancing in HHMM format::
 
-  ceph config set mgr mgr/balancer/begin_time 0000
+  stone config set mgr mgr/balancer/begin_time 0000
 
 Set the time of day to finish automatic balancing in HHMM format::
 
-  ceph config set mgr mgr/balancer/end_time 2400
+  stone config set mgr mgr/balancer/end_time 2400
 
 Restrict automatic balancing to this day of the week or later. 
 Uses the same conventions as crontab, 0 or 7 is Sunday, 1 is Monday, and so on::
 
-  ceph config set mgr mgr/balancer/begin_weekday 0
+  stone config set mgr mgr/balancer/begin_weekday 0
 
 Restrict automatic balancing to this day of the week or earlier. 
 Uses the same conventions as crontab, 0 or 7 is Sunday, 1 is Monday, and so on::
 
-  ceph config set mgr mgr/balancer/end_weekday 7
+  stone config set mgr mgr/balancer/end_weekday 7
 
 Pool IDs to which the automatic balancing will be limited. 
 The default for this is an empty string, meaning all pools will be balanced. 
-The numeric pool IDs can be gotten with the :command:`ceph osd pool ls detail` command::
+The numeric pool IDs can be gotten with the :command:`stone osd pool ls detail` command::
 
-  ceph config set mgr mgr/balancer/pool_ids 1,2,3
+  stone config set mgr mgr/balancer/pool_ids 1,2,3
 
 
 Modes
@@ -114,7 +114,7 @@ There are currently two supported balancer modes:
 
 The default mode is ``upmap``.  The mode can be adjusted with::
 
-  ceph balancer mode crush-compat
+  stone balancer mode crush-compat
 
 Supervised optimization
 -----------------------
@@ -127,41 +127,41 @@ The balancer operation is broken into a few distinct phases:
 
 To evaluate and score the current distribution::
 
-  ceph balancer eval
+  stone balancer eval
 
 You can also evaluate the distribution for a single pool with::
 
-  ceph balancer eval <pool-name>
+  stone balancer eval <pool-name>
 
 Greater detail for the evaluation can be seen with::
 
-  ceph balancer eval-verbose ...
+  stone balancer eval-verbose ...
   
 The balancer can generate a plan, using the currently configured mode, with::
 
-  ceph balancer optimize <plan-name>
+  stone balancer optimize <plan-name>
 
 The name is provided by the user and can be any useful identifying string.  The contents of a plan can be seen with::
 
-  ceph balancer show <plan-name>
+  stone balancer show <plan-name>
 
 All plans can be shown with::
 
-  ceph balancer ls
+  stone balancer ls
 
 Old plans can be discarded with::
 
-  ceph balancer rm <plan-name>
+  stone balancer rm <plan-name>
 
 Currently recorded plans are shown as part of the status command::
 
-  ceph balancer status
+  stone balancer status
 
 The quality of the distribution that would result after executing a plan can be calculated with::
 
-  ceph balancer eval <plan-name>
+  stone balancer eval <plan-name>
 
 Assuming the plan is expected to improve the distribution (i.e., it has a lower score than the current cluster state), the user can execute that plan with::
 
-  ceph balancer execute <plan-name>
+  stone balancer execute <plan-name>
 

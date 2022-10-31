@@ -8,19 +8,19 @@ commit 24a56a9637afd8c64b71d264359c78a25d52be02
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jul 24 14:46:24 2013 -0700
 
-    ceph-disk: use new get_dev_path helper for list
+    stone-disk: use new get_dev_path helper for list
     
     Backport: cuttlefish
     Signed-off-by: Sage Weil <sage@inktank.com>
     Reviewed-by: Dan Mick <dan.mick@inktank.com>
-    Tested-by: Olivier Bonvalet <ob.ceph@daevel.fr>
+    Tested-by: Olivier Bonvalet <ob.stone@daevel.fr>
     (cherry picked from commit fd1fd664d6102a2a96b27e8ca9933b54ac626ecb)
 
 commit 1f8e4b15eeb132fd7f389318009b19f8f13adbf5
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jul 11 12:59:56 2013 -0700
 
-    ceph-disk: use /sys/block to determine partition device names
+    stone-disk: use /sys/block to determine partition device names
     
     Not all devices are basename + number; some have intervening character(s),
     like /dev/cciss/c0d1p2.
@@ -32,7 +32,7 @@ commit 0a08c8226cb3e461301beade9bab2e264d1b960e
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jul 3 11:01:58 2013 -0700
 
-    ceph-disk: reimplement is_partition() using /sys/block
+    stone-disk: reimplement is_partition() using /sys/block
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit 5b031e100b40f597752b4917cdbeebb366eb98d7)
@@ -41,7 +41,7 @@ commit 056000346db09ea7274a22e57cf4b86a7ea4090e
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jul 3 11:01:39 2013 -0700
 
-    ceph-disk: use get_dev_name() helper throughout
+    stone-disk: use get_dev_name() helper throughout
     
     This is more robust than the broken split trick.
     
@@ -52,7 +52,7 @@ commit f3ee3e690c42769229a6cd9ae8dec43f2aa22ecd
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jul 3 10:55:36 2013 -0700
 
-    ceph-disk: refactor list_[all_]partitions
+    stone-disk: refactor list_[all_]partitions
     
     Make these methods work in terms of device *names*, not paths, and fix up
     the only direct list_partitions() caller to do the same.
@@ -64,7 +64,7 @@ commit be12811b4cb98ff1c2c691c67af7ad3586c436ff
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jul 3 10:52:29 2013 -0700
 
-    ceph-disk: add get_dev_name, path helpers
+    stone-disk: add get_dev_name, path helpers
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit e0401591e352ea9653e3276d66aebeb41801eeb3)
@@ -73,7 +73,7 @@ commit f46dbc462f623e9ab6c00394abb4d890e5d90890
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Jun 18 16:21:48 2013 -0700
 
-    ceph-disk: handle /dev/foo/bar devices throughout
+    stone-disk: handle /dev/foo/bar devices throughout
     
     Assume the last component is the unique device name, even if it appears
     under a subdir of /dev.
@@ -85,7 +85,7 @@ commit f799dac7bdf7cf0824a177131473cf59ef3c5205
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Jun 17 20:54:15 2013 -0700
 
-    ceph-disk: make is_held() smarter about full disks
+    stone-disk: make is_held() smarter about full disks
     
     Handle the case where the device is a full disk.  Make the partition
     check a bit more robust (don't make assumptions about naming aside from

@@ -6,13 +6,13 @@
 
 #include <string_view>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/Context.h"
 #include "include/rados/librados.hpp"
 
 class ContextWQ;
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 // generic watcher class -- establish watch on a given rados object
@@ -78,7 +78,7 @@ private:
   librados::IoCtx &m_ioctx;
   ContextWQ *m_work_queue;
 
-  mutable ceph::shared_mutex m_lock;
+  mutable stone::shared_mutex m_lock;
   State m_state;
   bool m_watch_error = false;
   bool m_watch_blocklisted = false;
@@ -97,6 +97,6 @@ private:
 };
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_WATCHER_H

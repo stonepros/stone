@@ -11,7 +11,7 @@ Date:   Fri May 29 09:49:43 2015 +0200
 
     Merge pull request #4795 from dachary/wip-11806-hammer
     
-    ceph / ceph-dbg steal ceph-objecstore-tool from ceph-test / ceph-test-dbg
+    stone / stone-dbg steal stone-objecstore-tool from stone-test / stone-test-dbg
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -19,16 +19,16 @@ commit 968573b8930a7c8485bf53e3a989ce2f7d0a2fff
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Thu May 28 10:35:51 2015 +0200
 
-    debian: ceph-dbg steals ceph-objectstore-tool from ceph-test-dbg
+    debian: stone-dbg steals stone-objectstore-tool from stone-test-dbg
     
-    When ceph-objectstore-tool was moved from ceph-test to
-    ceph by 61cf5da0b51e2d9578c7b4bca85184317e30f4ca, the ceph package in
+    When stone-objectstore-tool was moved from stone-test to
+    stone by 61cf5da0b51e2d9578c7b4bca85184317e30f4ca, the stone package in
     debian/control was updated accordingly, as recommended by
     https://www.debian.org/doc/debian-policy/ch-relationships.html#s-replaces
     
-    The same must be done for the ceph-dbg package because
-    /usr/lib/debug/usr/bin/ceph-objectstore-too is no longer in
-    ceph-test-dbg.
+    The same must be done for the stone-dbg package because
+    /usr/lib/debug/usr/bin/stone-objectstore-too is no longer in
+    stone-test-dbg.
     
     Although the change was merged may 6th, 2015
     8f23382064c189b657564d58c3f9d17720e891ed, teuthology jobs were not
@@ -36,10 +36,10 @@ Date:   Thu May 28 10:35:51 2015 +0200
     the installation. The missing dependencies that were responsible for
     this upgrade problem were fixed by
     f898ec1e4e3472b0202280f09653a769fc62c8d3 on may 18th, 2015 and all
-    upgrade tests relying on ceph-*-dbg packages started to fail
+    upgrade tests relying on stone-*-dbg packages started to fail
     systematically after this date.
     
-    http://tracker.ceph.com/issues/11546 Fixes: #11546
+    http://tracker.stone.com/issues/11546 Fixes: #11546
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit 6f11fbf41fab10924b1e0e41fcf27864779d4073)
@@ -51,7 +51,7 @@ Date:   Tue May 26 19:52:59 2015 -0600
 
     Merge pull request #4773 from dachary/wip-11733-hammer
     
-    Debian: ceph-test and rest-bench debug packages should require their respective binary packages
+    Debian: stone-test and rest-bench debug packages should require their respective binary packages
     
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
 
@@ -59,16 +59,16 @@ commit 344328de584ac707b59ab857f1f3dd4165adfcf5
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Mon May 18 10:50:58 2015 -0600
 
-    debian: set rest-bench-dbg ceph-test-dbg dependencies
+    debian: set rest-bench-dbg stone-test-dbg dependencies
     
     Debian's debug packages ought to depend on their respective binary
-    packages. This was the case for many of our ceph packages, but it was
-    not the case for ceph-test-dbg or rest-bench-dbg.
+    packages. This was the case for many of our stone packages, but it was
+    not the case for stone-test-dbg or rest-bench-dbg.
     
     Add the dependencies on the relevant binary packages, pinned to
     "= ${binary:Version}" per convention.
     
-    http://tracker.ceph.com/issues/11673 Fixes: #11673
+    http://tracker.stone.com/issues/11673 Fixes: #11673
     
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit f898ec1e4e3472b0202280f09653a769fc62c8d3)
@@ -78,7 +78,7 @@ Merge: 195884e 293affe
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon May 18 14:26:16 2015 +0200
 
-    Merge pull request #4696 from ceph/wip-11622-hammer
+    Merge pull request #4696 from stone/wip-11622-hammer
     
     Wip 11622 hammer
     
@@ -89,9 +89,9 @@ Merge: b69fb89 95818da
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri May 15 13:47:04 2015 -0700
 
-    Merge pull request #4649 from ceph/wip-hammer-package-perf-objectstore
+    Merge pull request #4649 from stone/wip-hammer-package-perf-objectstore
     
-    packaging: include ceph_perf_objectstore
+    packaging: include stone_perf_objectstore
 
 commit 293affe992118ed6e04f685030b2d83a794ca624 (refs/remotes/gh/wip-11622-hammer)
 Author: Yehuda Sadeh <yehuda@redhat.com>
@@ -132,17 +132,17 @@ commit 95818dac1522c218662ec12bd42c470d8394b3b9
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Fri Mar 13 16:08:35 2015 -0600
 
-    packaging: include ceph_perf_objectstore
+    packaging: include stone_perf_objectstore
     
-    The /usr/bin/ceph_perf_objectstore file is installed by default. Prior
+    The /usr/bin/stone_perf_objectstore file is installed by default. Prior
     to this commit it was missing from the packaging. This caused the RPM to
     fail to build in mock.
     
-    Add ceph_perf_objectstore to the "ceph-test" RPM and Debian package.
+    Add stone_perf_objectstore to the "stone-test" RPM and Debian package.
     
-    If we end up developing further ceph_perf_* utilities, it would make
+    If we end up developing further stone_perf_* utilities, it would make
     sense to glob them all with a wildcard, similar to what we are doing
-    with all the ceph_test_* utilities in ceph-test.
+    with all the stone_test_* utilities in stone-test.
     
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit 338b44bc74bc4597939c5c58f2a6f2cb08de7d9c)
@@ -165,7 +165,7 @@ Merge: 7df3eb5 6e2dd40
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon May 11 14:08:53 2015 +0200
 
-    Merge pull request #4629 from ceph/hammer-uclient-checking
+    Merge pull request #4629 from stone/hammer-uclient-checking
     
     Hammer uclient checking
     
@@ -341,7 +341,7 @@ Merge: 9d97946 02a3813
 Author: Loic Dachary <loic@dachary.org>
 Date:   Fri May 8 17:32:35 2015 +0200
 
-    Merge pull request #4585 from ceph/wip-11370-hammer
+    Merge pull request #4585 from stone/wip-11370-hammer
     
     A retransmit of proxied flatten request can result in -EINVAL
     
@@ -354,7 +354,7 @@ Date:   Fri May 8 20:39:29 2015 +0800
 
     Merge pull request #4618 from dachary/wip-11398-kill-daemons-hammer
     
-    tests: ceph-helpers kill_daemons fails when kill fails
+    tests: stone-helpers kill_daemons fails when kill fails
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -362,14 +362,14 @@ commit c548d8d44baae78b868391e3c6fb7294f024b082
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed May 6 20:14:37 2015 +0200
 
-    tests: ceph-helpers kill_daemons fails when kill fails
+    tests: stone-helpers kill_daemons fails when kill fails
     
     Instead of silently leaving the daemons running, it returns failure so
     the caller can decide what to do with this situation. The timeout is
     also extended to minutes instead of seconds to gracefully handle the
     rare situations when a machine is extra slow for some reason.
     
-    http://tracker.ceph.com/issues/11398 Fixes: #11398
+    http://tracker.stone.com/issues/11398 Fixes: #11398
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit 0e26e9f72bc14417266b87ac1159607e1b109303)
@@ -378,7 +378,7 @@ commit fb10594f2ab2427a2bf1d2f2b164a3a0928e3335
 Author: Yuri Weinstein <yuri.weinstein@inktank.com>
 Date:   Thu May 7 17:12:35 2015 -0700
 
-    Added a "ceph hello world" for a simple check for ceph-deploy qa suite
+    Added a "stone hello world" for a simple check for stone-deploy qa suite
     
     Signed-off-by: Yuri Weinstein <yweinste@redhat.com>
     (cherry picked from commit 13abae186357f4e9bb40990a7a212f93ec2e1e79)
@@ -403,7 +403,7 @@ Date:   Thu May 7 21:45:53 2015 +0200
 
     Merge pull request #4562 from dachary/wip-11376-hammer
     
-    ceph-objectstore-tool should be in the ceph server package
+    stone-objectstore-tool should be in the stone server package
     
     
     
@@ -413,19 +413,19 @@ commit 46a4e8af5be54d8348a920c4a3a58e24dbf35988
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Thu Apr 30 15:53:22 2015 -0600
 
-    packaging: mv ceph-objectstore-tool to main ceph pkg
+    packaging: mv stone-objectstore-tool to main stone pkg
     
-    This change ensures that the ceph-objectstore-tool utility is present on
+    This change ensures that the stone-objectstore-tool utility is present on
     all OSDs.  This makes it easier for users to run this tool to do manual
     debugging/recovery in some scenarios.
     
-    http://tracker.ceph.com/issues/11376 Refs: #11376
+    http://tracker.stone.com/issues/11376 Refs: #11376
     
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit 61cf5da0b51e2d9578c7b4bca85184317e30f4ca)
         Conflicts:
                 debian/control
-                because file layout changes from ceph-test and ceph << 0.94.1-46
+                because file layout changes from stone-test and stone << 0.94.1-46
 
 commit 3bd8e4fa17d8acfd645b8a553bf58de48d59d648
 Merge: 76f6db2 6a04b55
@@ -434,7 +434,7 @@ Date:   Thu May 7 19:05:48 2015 +0200
 
     Merge pull request #4561 from dachary/wip-11143-hammer
     
-    src/ceph-disk : disk zap sgdisk invocation
+    src/stone-disk : disk zap sgdisk invocation
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -886,7 +886,7 @@ Date:   Tue May 5 18:08:48 2015 -0500
 
     mon: Total size of OSDs is a maginitude less than it is supposed to be.
     
-    When dumping statistics of OSDs such as running command "ceph osd df",
+    When dumping statistics of OSDs such as running command "stone osd df",
     the sum of OSDs' size is 2^10 times less than their real size.
     
     Fixes: #11534
@@ -908,7 +908,7 @@ Date:   Tue Mar 17 15:41:33 2015 +0100
     Splitting this up into two separate invocations to first zap everything
     and then clear it properly fixes this issue.
     
-    Based on patch by Lars Marowsky-Bree <lmb@suse.com> in ceph-deploy.
+    Based on patch by Lars Marowsky-Bree <lmb@suse.com> in stone-deploy.
     Created by Vincent Untz <vuntz@suse.com>
     
     Signed-off-by: Owen Synge <osynge@suse.com>
@@ -923,7 +923,7 @@ Date:   Fri Mar 6 15:54:07 2015 +0800
     
     Even if the offset is properly aligned.
     
-    http://tracker.ceph.com/issues/11507 Fixes: #11507
+    http://tracker.stone.com/issues/11507 Fixes: #11507
     
     Signed-off-by: Jianpeng Ma <jianpeng.ma@intel.com>
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
@@ -934,7 +934,7 @@ Merge: bc51476 3a58e30
 Author: Yan, Zheng <ukernel@gmail.com>
 Date:   Wed May 6 16:01:57 2015 +0800
 
-    Merge pull request #4481 from ceph/hammer-11482
+    Merge pull request #4481 from stone/hammer-11482
     
     mds: remove caps from revoking list when caps are voluntarily released
 
@@ -942,7 +942,7 @@ commit bc51476181429d7d95d2bba5f774d8b60c47fb1f
 Author: Yehuda Sadeh <yehuda@redhat.com>
 Date:   Mon Apr 13 16:33:17 2015 -0700
 
-    ceph_json: add decode / encoder for multimap
+    stone_json: add decode / encoder for multimap
     
     Signed-off-by: Yehuda Sadeh <yehuda@redhat.com>
     (cherry picked from commit 55594623e2a478c3c023336b924bfdef0017d97f)
@@ -980,7 +980,7 @@ commit 7387c43382e7f114c43db3cc26ca77d081749d8e
 Author: Noah Watkins <noahwatkins@gmail.com>
 Date:   Fri Mar 27 19:34:12 2015 -0700
 
-    java: libcephfs_jni.so is in /usr/lib64 on rhel
+    java: libstonefs_jni.so is in /usr/lib64 on rhel
     
     Signed-off-by: Noah Watkins <noahwatkins@gmail.com>
     (cherry picked from commit aed3434dc7c5161c72c7d5655faa3bc693fc9777)
@@ -1075,7 +1075,7 @@ Date:   Mon May 4 11:46:13 2015 +0200
 
     Merge pull request #4504 from dachary/wip-10691-hammer
     
-    ceph-dencoder links to libtcmalloc, and shouldn't
+    stone-dencoder links to libtcmalloc, and shouldn't
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -1086,7 +1086,7 @@ Date:   Mon May 4 11:44:11 2015 +0200
 
     Merge pull request #4503 from dachary/wip-10983-hammer
     
-    use a new disk as journal disk,ceph-disk prepare fail
+    use a new disk as journal disk,stone-disk prepare fail
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1106,7 +1106,7 @@ Merge: ee61a61 856b2fa
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Apr 30 17:10:29 2015 -0700
 
-    Merge pull request #4515 from ceph/hammer-next
+    Merge pull request #4515 from stone/hammer-next
     
     rgw: critical fixes for hammer
 
@@ -1198,9 +1198,9 @@ commit 478968670caecd67f7995a09b60f6208729e3de3
 Author: Boris Ranto <branto@redhat.com>
 Date:   Mon Apr 13 12:38:58 2015 +0200
 
-    Move ceph-dencoder build to client
+    Move stone-dencoder build to client
     
-    The patch simply moves the ceph-dencoder build from server part of the
+    The patch simply moves the stone-dencoder build from server part of the
     Makefiles to client part of the Makefiles.
     
     Refs: #10691
@@ -1288,7 +1288,7 @@ Date:   Mon Apr 13 12:32:30 2015 +0200
     Dencoder should never be built with tcmalloc
     
     The patch adds disabled perfglue stubs to DENCODER sources in order to
-    avoid tcmalloc-enabled ceph-dencoder builds.
+    avoid tcmalloc-enabled stone-dencoder builds.
     
     Refs: #10691
     
@@ -1299,7 +1299,7 @@ commit 8709e34f931809f7129cdac1203ec4e774e3eb4c
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Sun Mar 8 15:15:35 2015 +0100
 
-    ceph-disk: more robust parted output parser
+    stone-disk: more robust parted output parser
     
     In some cases, depending on the implementation or the operating system,
     
@@ -1311,7 +1311,7 @@ Date:   Sun Mar 8 15:15:35 2015 +0100
     the dev entry) but handles the entire output instead of checking line by
     line.
     
-    http://tracker.ceph.com/issues/10983 Fixes: #10983
+    http://tracker.stone.com/issues/10983 Fixes: #10983
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit f5acf6bb6a342b05897605703d7d9cb7c09714fd)
@@ -1451,7 +1451,7 @@ Merge: 8a58d83 f30fa4a
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Apr 24 16:13:56 2015 -0700
 
-    Merge pull request #4463 from ceph/wip-11453-hammer-rgw-init-as-root
+    Merge pull request #4463 from stone/wip-11453-hammer-rgw-init-as-root
     
     rgw: init-radosgw: run RGW as root
     
@@ -1463,14 +1463,14 @@ Date:   Wed Apr 22 16:36:42 2015 -0600
 
     init-radosgw: run RGW as root
     
-    The ceph-radosgw service fails to start if the httpd package is not
+    The stone-radosgw service fails to start if the httpd package is not
     installed. This is because the init.d file attempts to start the RGW
     process with the "apache" UID. If a user is running civetweb, there is
     no reason for the httpd or apache2 package to be present on the system.
     
     Switch the init scripts to use "root" as is done on Ubuntu.
     
-    http://tracker.ceph.com/issues/11453 Refs: #11453
+    http://tracker.stone.com/issues/11453 Refs: #11453
     
     Reported-by: Vickey Singh <vickey.singh22693@gmail.com>
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
@@ -1494,7 +1494,7 @@ commit 8a58d83b0d039d2c2be353fee9c57c4e6181b662
 Author: Haomai Wang <haomaiwang@gmail.com>
 Date:   Sun Mar 22 23:59:19 2015 +0800
 
-    Fix ceph_test_async_driver failed
+    Fix stone_test_async_driver failed
     
     This test will create 10000 sockets which will failed because of limited system fd. Actually we only need to create several hundreds sockets and it's enough to get the test's goal.
     

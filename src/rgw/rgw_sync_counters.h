@@ -20,6 +20,6 @@ enum {
   l_last,
 };
 
-PerfCountersRef build(CephContext *cct, const std::string& name);
+PerfCountersRef build(StoneContext *cct, const std::string& name);
 
 } // namespace sync_counters

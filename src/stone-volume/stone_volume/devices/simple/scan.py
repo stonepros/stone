@@ -5,11 +5,11 @@ import json
 import logging
 import os
 from textwrap import dedent
-from ceph_volume import decorators, terminal, conf
-from ceph_volume.api import lvm
-from ceph_volume.systemd import systemctl
-from ceph_volume.util import arg_validators, system, disk, encryption
-from ceph_volume.util.device import Device
+from stone_volume import decorators, terminal, conf
+from stone_volume.api import lvm
+from stone_volume.systemd import systemctl
+from stone_volume.util import arg_validators, system, disk, encryption
+from stone_volume.util.device import Device
 
 
 logger = logging.getLogger(__name__)
@@ -41,11 +41,11 @@ def parse_keyring(file_contents):
 
 class Scan(object):
 
-    help = 'Capture metadata from all running ceph-disk OSDs, OSD data partition or directory'
+    help = 'Capture metadata from all running stone-disk OSDs, OSD data partition or directory'
 
     def __init__(self, argv):
         self.argv = argv
-        self._etc_path = '/etc/ceph/osd/'
+        self._etc_path = '/etc/stone/osd/'
 
     @property
     def etc_path(self):
@@ -166,7 +166,7 @@ class Scan(object):
         if self.device_mounts.get(lockbox):
             lockbox_path = self.device_mounts.get(lockbox)[0]
             lockbox_metadata = self.scan_directory(lockbox_path)
-            # ceph-disk stores the fsid as osd-uuid in the lockbox, thanks ceph-disk
+            # stone-disk stores the fsid as osd-uuid in the lockbox, thanks stone-disk
             dmcrypt_secret = encryption.get_dmcrypt_key(
                 None,  # There is no ID stored in the lockbox
                 lockbox_metadata['osd-uuid'],
@@ -175,7 +175,7 @@ class Scan(object):
         else:
             with system.tmp_mount(lockbox) as lockbox_path:
                 lockbox_metadata = self.scan_directory(lockbox_path)
-                # ceph-disk stores the fsid as osd-uuid in the lockbox, thanks ceph-disk
+                # stone-disk stores the fsid as osd-uuid in the lockbox, thanks stone-disk
                 dmcrypt_secret = encryption.get_dmcrypt_key(
                     None,  # There is no ID stored in the lockbox
                     lockbox_metadata['osd-uuid'],
@@ -184,10 +184,10 @@ class Scan(object):
 
         if not device_status:
             # Note how both these calls need b64decode. For some reason, the
-            # way ceph-disk creates these keys, it stores them in the monitor
+            # way stone-disk creates these keys, it stores them in the monitor
             # *undecoded*, requiring this decode call again. The lvm side of
             # encryption doesn't need it, so we are assuming here that anything
-            # that `simple` scans, will come from ceph-disk and will need this
+            # that `simple` scans, will come from stone-disk and will need this
             # extra decode call here
             dmcrypt_secret = base64.b64decode(dmcrypt_secret)
             if encryption_type == 'luks':
@@ -277,9 +277,9 @@ class Scan(object):
                 )
             )
             terminal.success(
-                'To take over management of this scanned OSD, and disable ceph-disk and udev, run:'
+                'To take over management of this scanned OSD, and disable stone-disk and udev, run:'
             )
-            terminal.success('    ceph-volume simple activate %s %s' % (osd_id, osd_fsid))
+            terminal.success('    stone-volume simple activate %s %s' % (osd_id, osd_fsid))
 
         if not osd_metadata.get('data'):
             msg = 'Unable to determine device mounted on %s' % args.osd_path
@@ -295,33 +295,33 @@ class Scan(object):
         that will allow to take over the management of the OSD.
 
         Scanned OSDs will get their configurations stored in
-        /etc/ceph/osd/<id>-<fsid>.json
+        /etc/stone/osd/<id>-<fsid>.json
 
         For an OSD ID of 0 with fsid of ``a9d50838-e823-43d6-b01f-2f8d0a77afc2``
         that could mean a scan command that looks like::
 
-            ceph-volume simple scan /var/lib/ceph/osd/ceph-0
+            stone-volume simple scan /var/lib/stone/osd/stone-0
 
         Which would store the metadata in a JSON file at::
 
-            /etc/ceph/osd/0-a9d50838-e823-43d6-b01f-2f8d0a77afc2.json
+            /etc/stone/osd/0-a9d50838-e823-43d6-b01f-2f8d0a77afc2.json
 
         To scan all running OSDs:
 
-            ceph-volume simple scan
+            stone-volume simple scan
 
         To a scan a specific running OSD:
 
-            ceph-volume simple scan /var/lib/ceph/osd/{cluster}-{osd id}
+            stone-volume simple scan /var/lib/stone/osd/{cluster}-{osd id}
 
         And to scan a device (mounted or unmounted) that has OSD data in it, for example /dev/sda1
 
-            ceph-volume simple scan /dev/sda1
+            stone-volume simple scan /dev/sda1
 
-        Scanning a device or directory that belongs to an OSD not created by ceph-disk will be ingored.
+        Scanning a device or directory that belongs to an OSD not created by stone-disk will be ingored.
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume simple scan',
+            prog='stone-volume simple scan',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=sub_command_help,
         )
@@ -354,7 +354,7 @@ class Scan(object):
         else:
             osd_ids = systemctl.get_running_osd_ids()
             for osd_id in osd_ids:
-                paths.append("/var/lib/ceph/osd/{}-{}".format(
+                paths.append("/var/lib/stone/osd/{}-{}".format(
                     conf.cluster,
                     osd_id,
                 ))
@@ -367,9 +367,9 @@ class Scan(object):
             args.osd_path = path
             device = Device(args.osd_path)
             if device.is_partition:
-                if device.ceph_disk.type != 'data':
-                    label = device.ceph_disk.partlabel
-                    msg = 'Device must be the ceph data partition, but PARTLABEL reported: "%s"' % label
+                if device.stone_disk.type != 'data':
+                    label = device.stone_disk.partlabel
+                    msg = 'Device must be the stone data partition, but PARTLABEL reported: "%s"' % label
                     raise RuntimeError(msg)
 
             self.encryption_metadata = encryption.legacy_encrypted(args.osd_path)
@@ -377,9 +377,9 @@ class Scan(object):
 
             if self.encryption_metadata['device'] != "tmpfs":
                 device = Device(self.encryption_metadata['device'])
-                if not device.is_ceph_disk_member:
-                    terminal.warning("Ignoring %s because it's not a ceph-disk created osd." % path)
+                if not device.is_stone_disk_member:
+                    terminal.warning("Ignoring %s because it's not a stone-disk created osd." % path)
                 else:
                     self.scan(args)
             else:
-                terminal.warning("Ignoring %s because it's not a ceph-disk created osd." % path)
+                terminal.warning("Ignoring %s because it's not a stone-disk created osd." % path)

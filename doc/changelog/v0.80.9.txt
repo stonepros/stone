@@ -112,7 +112,7 @@ Merge: d971c95 da95149
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Sat Feb 28 16:46:42 2015 +0100
 
-    Merge pull request #3772 from ceph/wip-10883-firefly
+    Merge pull request #3772 from stone/wip-10883-firefly
     
     osd: Fix FileJournal wrap to get header out first
     
@@ -144,9 +144,9 @@ Merge: 6565774 702dbc0
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Thu Feb 26 15:59:24 2015 -0800
 
-    Merge pull request #3730 from ceph/wip-firefly-flock
+    Merge pull request #3730 from stone/wip-firefly-flock
     
-    backport ceph-fuse file locking patches to Firefly
+    backport stone-fuse file locking patches to Firefly
     
     Reviewed-by: Yan, Zheng <zyan@redhat.com>
 
@@ -155,7 +155,7 @@ Merge: 7ab02ee 08c2fda
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Feb 26 14:18:10 2015 -0800
 
-    Merge pull request #3406 from ceph/wip-10299-firefly
+    Merge pull request #3406 from stone/wip-10299-firefly
     
     librbd: complete all pending aio ops prior to closing image
     
@@ -180,7 +180,7 @@ Merge: 0c0a552 c23e42e
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Feb 26 14:12:29 2015 -0800
 
-    Merge pull request #3404 from ceph/wip-10270-firefly
+    Merge pull request #3404 from stone/wip-10270-firefly
     
     librbd: gracefully handle deleted/renamed pools
     
@@ -191,7 +191,7 @@ Merge: 9ef7743 836ab86
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Feb 26 13:31:37 2015 -0800
 
-    Merge pull request #3410 from ceph/wip-9854-firefly
+    Merge pull request #3410 from stone/wip-9854-firefly
     
     osdc: Constrain max number of in-flight read requests
     
@@ -339,7 +339,7 @@ Date:   Thu Oct 2 18:02:50 2014 +0800
 
     common: link mds/flock.o to libcommon
     
-    later commit will use this code to track file locks held by cephfs
+    later commit will use this code to track file locks held by stonefs
     client.
     
     Signed-off-by: Yan, Zheng <zyan@redhat.com>
@@ -355,7 +355,7 @@ Merge: 1205867 b668566
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Fri Feb 13 18:34:11 2015 +0100
 
-    Merge pull request #3684 from ceph/wip-crush-straw-firefly
+    Merge pull request #3684 from stone/wip-crush-straw-firefly
     
     osd: backport straw bucket fixes and all other recent crush goodness to firefly
     
@@ -567,7 +567,7 @@ Date:   Fri Oct 10 19:18:00 2014 +0800
     
     adjust_item_weight method will adjust all buckets which the item
     inside. If the osd.0 in host=fake01 and host=fake02, we execute
-    "ceph osd crush osd.0 10 host=fake01", it not only will adjust fake01's
+    "stone osd crush osd.0 10 host=fake01", it not only will adjust fake01's
     weight, but also will adjust fake02's weight.
     
     the patch add adjust_item_weightf_in_loc method and fix remove_item,
@@ -772,7 +772,7 @@ commit e539971e2d528b4de6009ea44565f037acb2be66 (refs/remotes/gh/wip-10676)
 Author: Nilamdyuti Goswami <ngoswami@redhat.com>
 Date:   Thu Dec 18 17:13:27 2014 +0530
 
-    doc: Adds updated man page for ceph under man/
+    doc: Adds updated man page for stone under man/
     
     Signed-off-by: Nilamdyuti Goswami <ngoswami@redhat.com>
     (cherry picked from commit 8de9a0f437822c770600c19a9f61977745b7e530)
@@ -781,7 +781,7 @@ commit 15596ffe388147b7984457041a38cbb9f472556c
 Author: Nilamdyuti Goswami <ngoswami@redhat.com>
 Date:   Sat Dec 13 02:27:45 2014 +0530
 
-    doc: Adds man page for ceph under man/.
+    doc: Adds man page for stone under man/.
     
     Signed-off-by: Nilamdyuti Goswami <ngoswami@redhat.com>
     (cherry picked from commit ffd6c7e49686f8f92ddb400ffdec62520708e64b)
@@ -790,7 +790,7 @@ commit 893e5cd1f4fd5ea77d65f0e78cc8cff88eb19c1a
 Author: Nilamdyuti Goswami <ngoswami@redhat.com>
 Date:   Sat Dec 13 02:24:41 2014 +0530
 
-    doc: Adds man page for ceph.
+    doc: Adds man page for stone.
     
     Signed-off-by: Nilamdyuti Goswami <ngoswami@redhat.com>
     (cherry picked from commit 76da87a64ca6b3cc0ceeaf63e19a9f440d6f4161)
@@ -820,7 +820,7 @@ commit 8ba48d10c252b28cde5b4da1286421db12b57cc2
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Jan 19 18:28:20 2015 -0800
 
-    ceph_test_rados_api_misc: do not assert rbd feature match
+    stone_test_rados_api_misc: do not assert rbd feature match
     
     This test fails on upgrades when we (or the server) have new
     features.  Make it less fragile.

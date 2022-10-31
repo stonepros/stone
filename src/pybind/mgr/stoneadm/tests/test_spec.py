@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from ceph.deployment.service_spec import ServiceSpec, NFSServiceSpec, RGWSpec, \
+from stone.deployment.service_spec import ServiceSpec, NFSServiceSpec, RGWSpec, \
     IscsiServiceSpec, HostPlacementSpec, CustomContainerSpec
 from orchestrator import DaemonDescription, OrchestratorError
 
@@ -60,7 +60,7 @@ from orchestrator import DaemonDescription, OrchestratorError
   "placement": {
     "hosts": [
       {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "network": "",
         "name": ""
       }
@@ -91,7 +91,7 @@ from orchestrator import DaemonDescription, OrchestratorError
 """)
 )
 def test_spec_octopus(spec_json):
-    # https://tracker.ceph.com/issues/44934
+    # https://tracker.stone.com/issues/44934
     # Those are real user data from early octopus.
     # Please do not modify those JSON values.
 
@@ -125,11 +125,11 @@ def test_spec_octopus(spec_json):
     "dd_json",
     json.loads("""[
     {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "container_id": "d94d7969094d",
         "container_image_id": "0881eb8f169f5556a292b4e2c01d683172b12830a62a9225a98a8e206bb734f0",
         "container_image_name": "docker.io/prom/alertmanager:latest",
-        "daemon_id": "ceph-001",
+        "daemon_id": "stone-001",
         "daemon_type": "alertmanager",
         "version": "0.20.0",
         "status": 1,
@@ -140,11 +140,11 @@ def test_spec_octopus(spec_json):
         "is_active": false
     },
     {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "container_id": "c4b036202241",
         "container_image_id": "204a01f9b0b6710dd0c0af7f37ce7139c47ff0f0105d778d7104c69282dfbbf1",
-        "container_image_name": "docker.io/ceph/ceph:v15",
-        "daemon_id": "ceph-001",
+        "container_image_name": "docker.io/stone/stone:v15",
+        "daemon_id": "stone-001",
         "daemon_type": "crash",
         "version": "15.2.0",
         "status": 1,
@@ -155,11 +155,11 @@ def test_spec_octopus(spec_json):
         "is_active": false
     },
     {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "container_id": "5b7b94b48f31",
         "container_image_id": "87a51ecf0b1c9a7b187b21c1b071425dafea0d765a96d5bc371c791169b3d7f4",
-        "container_image_name": "docker.io/ceph/ceph-grafana:latest",
-        "daemon_id": "ceph-001",
+        "container_image_name": "docker.io/stone/stone-grafana:latest",
+        "daemon_id": "stone-001",
         "daemon_type": "grafana",
         "version": "6.6.2",
         "status": 1,
@@ -170,11 +170,11 @@ def test_spec_octopus(spec_json):
         "is_active": false
     },
     {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "container_id": "9ca007280456",
         "container_image_id": "204a01f9b0b6710dd0c0af7f37ce7139c47ff0f0105d778d7104c69282dfbbf1",
-        "container_image_name": "docker.io/ceph/ceph:v15",
-        "daemon_id": "ceph-001.gkjwqp",
+        "container_image_name": "docker.io/stone/stone:v15",
+        "daemon_id": "stone-001.gkjwqp",
         "daemon_type": "mgr",
         "version": "15.2.0",
         "status": 1,
@@ -185,11 +185,11 @@ def test_spec_octopus(spec_json):
         "is_active": false
     },
     {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "container_id": "3d1ba9a2b697",
         "container_image_id": "204a01f9b0b6710dd0c0af7f37ce7139c47ff0f0105d778d7104c69282dfbbf1",
-        "container_image_name": "docker.io/ceph/ceph:v15",
-        "daemon_id": "ceph-001",
+        "container_image_name": "docker.io/stone/stone:v15",
+        "daemon_id": "stone-001",
         "daemon_type": "mon",
         "version": "15.2.0",
         "status": 1,
@@ -200,11 +200,11 @@ def test_spec_octopus(spec_json):
         "is_active": false
     },
     {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "container_id": "36d026c68ba1",
         "container_image_id": "e5a616e4b9cf68dfcad7782b78e118be4310022e874d52da85c55923fb615f87",
         "container_image_name": "docker.io/prom/node-exporter:latest",
-        "daemon_id": "ceph-001",
+        "daemon_id": "stone-001",
         "daemon_type": "node-exporter",
         "version": "0.18.1",
         "status": 1,
@@ -215,10 +215,10 @@ def test_spec_octopus(spec_json):
         "is_active": false
     },
     {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "container_id": "faf76193cbfe",
         "container_image_id": "204a01f9b0b6710dd0c0af7f37ce7139c47ff0f0105d778d7104c69282dfbbf1",
-        "container_image_name": "docker.io/ceph/ceph:v15",
+        "container_image_name": "docker.io/stone/stone:v15",
         "daemon_id": "0",
         "daemon_type": "osd",
         "version": "15.2.0",
@@ -230,10 +230,10 @@ def test_spec_octopus(spec_json):
         "is_active": false
     },
     {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "container_id": "f82505bae0f1",
         "container_image_id": "204a01f9b0b6710dd0c0af7f37ce7139c47ff0f0105d778d7104c69282dfbbf1",
-        "container_image_name": "docker.io/ceph/ceph:v15",
+        "container_image_name": "docker.io/stone/stone:v15",
         "daemon_id": "1",
         "daemon_type": "osd",
         "version": "15.2.0",
@@ -245,11 +245,11 @@ def test_spec_octopus(spec_json):
         "is_active": false
     },
     {
-        "hostname": "ceph-001",
+        "hostname": "stone-001",
         "container_id": "2708d84cd484",
         "container_image_id": "358a0d2395fe711bb8258e8fb4b2d7865c0a9a6463969bcd1452ee8869ea6653",
         "container_image_name": "docker.io/prom/prometheus:latest",
-        "daemon_id": "ceph-001",
+        "daemon_id": "stone-001",
         "daemon_type": "prometheus",
         "version": "2.17.1",
         "status": 1,
@@ -260,8 +260,8 @@ def test_spec_octopus(spec_json):
         "is_active": false
     },
     {
-        "hostname": "ceph-001",
-        "daemon_id": "default-rgw-realm.eu-central-1.1.ceph-001.ytywjo",
+        "hostname": "stone-001",
+        "daemon_id": "default-rgw-realm.eu-central-1.1.stone-001.ytywjo",
         "daemon_type": "rgw",
         "status": 1,
         "status_desc": "starting",
@@ -270,7 +270,7 @@ def test_spec_octopus(spec_json):
 ]""")
 )
 def test_dd_octopus(dd_json):
-    # https://tracker.ceph.com/issues/44934
+    # https://tracker.stone.com/issues/44934
     # Those are real user data from early octopus.
     # Please do not modify those JSON values.
 
@@ -290,7 +290,7 @@ def test_dd_octopus(dd_json):
 
 @pytest.mark.parametrize("spec,dd,valid",
 [   # noqa: E128
-    # https://tracker.ceph.com/issues/44934
+    # https://tracker.stone.com/issues/44934
     (
         RGWSpec(
             service_id="foo",
@@ -299,8 +299,8 @@ def test_dd_octopus(dd_json):
         ),
         DaemonDescription(
             daemon_type='rgw',
-            daemon_id="foo.ceph-001.ytywjo",
-            hostname="ceph-001",
+            daemon_id="foo.stone-001.ytywjo",
+            hostname="stone-001",
         ),
         True
     ),
@@ -312,8 +312,8 @@ def test_dd_octopus(dd_json):
         ),
         DaemonDescription(
             daemon_type='rgw',
-            daemon_id="foo.bar.ceph-001.ytywjo",
-            hostname="ceph-001",
+            daemon_id="foo.bar.stone-001.ytywjo",
+            hostname="stone-001",
         ),
         True
     ),
@@ -369,19 +369,19 @@ def test_dd_octopus(dd_json):
     ),
     (
         # service_id contains hostname
-        # (sort of) https://tracker.ceph.com/issues/45294
+        # (sort of) https://tracker.stone.com/issues/45294
         RGWSpec(
-            service_id="default.rgw.realm.ceph.001",
+            service_id="default.rgw.realm.stone.001",
         ),
         DaemonDescription(
             daemon_type='rgw',
-            daemon_id="default.rgw.realm.ceph.001.ceph.001.ytywjo",
-            hostname="ceph.001",
+            daemon_id="default.rgw.realm.stone.001.stone.001.ytywjo",
+            hostname="stone.001",
         ),
         True
     ),
 
-    # https://tracker.ceph.com/issues/45293
+    # https://tracker.stone.com/issues/45293
     (
         ServiceSpec(
             service_type='mds',
@@ -408,7 +408,7 @@ def test_dd_octopus(dd_json):
         True
     ),
 
-    # https://tracker.ceph.com/issues/45617
+    # https://tracker.stone.com/issues/45617
     (
         # daemon_id does not contain hostname
         ServiceSpec(
@@ -436,7 +436,7 @@ def test_dd_octopus(dd_json):
         True
     ),
 
-    # https://tracker.ceph.com/issues/45399
+    # https://tracker.stone.com/issues/45399
     (
         # daemon_id only contains hostname
         ServiceSpec(
@@ -462,7 +462,7 @@ def test_dd_octopus(dd_json):
         True
     ),
 
-    # https://tracker.ceph.com/issues/45293
+    # https://tracker.stone.com/issues/45293
     (
         NFSServiceSpec(
             service_id="a",
@@ -523,7 +523,7 @@ def test_dd_octopus(dd_json):
         False
     ),
 
-    # https://tracker.ceph.com/issues/45293
+    # https://tracker.stone.com/issues/45293
     (
         IscsiServiceSpec(
             service_type='iscsi',
@@ -580,10 +580,10 @@ def test_dd_octopus(dd_json):
     (
         # daemon_id only contains hostname
         ServiceSpec(
-            service_type='cephadm-exporter',
+            service_type='stoneadm-exporter',
         ),
         DaemonDescription(
-            daemon_type='cephadm-exporter',
+            daemon_type='stoneadm-exporter',
             daemon_id="testhost",
             hostname="testhost",
         ),

@@ -262,11 +262,11 @@ struct node_fields_2_t {
   static void insert_at(
       NodeExtentMutable& mut, const full_key_t<KT>& key,
       const node_fields_2_t& node, index_t index, node_offset_t size_right) {
-    ceph_abort("not implemented");
+    stone_abort("not implemented");
   }
   static void update_size_at(
       NodeExtentMutable& mut, const node_fields_2_t& node, index_t index, int change) {
-    ceph_abort("not implemented");
+    stone_abort("not implemented");
   }
   static void append_key(
       NodeExtentMutable& mut, const key_t& key, char*& p_append) {
@@ -345,11 +345,11 @@ struct _internal_fields_3_t {
   static void insert_at(
       NodeExtentMutable& mut, const full_key_t<KT>& key,
       const me_t& node, index_t index, node_offset_t size_right) {
-    ceph_abort("not implemented");
+    stone_abort("not implemented");
   }
   static void update_size_at(
       NodeExtentMutable& mut, const me_t& node, index_t index, int change) {
-    ceph_abort("not implemented");
+    stone_abort("not implemented");
   }
 
   node_header_t header;

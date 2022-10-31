@@ -23,8 +23,8 @@ public:
                 uint64_t block_size, uint64_t data_offset);
     ~BlockCrypto();
 
-    int encrypt(ceph::bufferlist* data, uint64_t image_offset) override;
-    int decrypt(ceph::bufferlist* data, uint64_t image_offset) override;
+    int encrypt(stone::bufferlist* data, uint64_t image_offset) override;
+    int decrypt(stone::bufferlist* data, uint64_t image_offset) override;
 
     uint64_t get_block_size() const override {
       return m_block_size;
@@ -49,7 +49,7 @@ private:
     uint64_t m_data_offset;
     uint32_t m_iv_size;
 
-    int crypt(ceph::bufferlist* data, uint64_t image_offset, CipherMode mode);
+    int crypt(stone::bufferlist* data, uint64_t image_offset, CipherMode mode);
 };
 
 } // namespace crypto

@@ -2,7 +2,7 @@
  BlueStore Migration
 =====================
 
-Each OSD can run either BlueStore or FileStore, and a single Ceph
+Each OSD can run either BlueStore or FileStore, and a single Stone
 cluster can contain a mix of both.  Users who have previously deployed
 FileStore are likely to want to transition to BlueStore in order to
 take advantage of the improved performance and robustness.  There are
@@ -43,48 +43,48 @@ more data migration than should be necessary, so it is not optimal.
 
    You can tell whether a given OSD is FileStore or BlueStore with::
 
-     ceph osd metadata $ID | grep osd_objectstore
+     stone osd metadata $ID | grep osd_objectstore
 
    You can get a current count of filestore vs bluestore with::
 
-     ceph osd count-metadata osd_objectstore
+     stone osd count-metadata osd_objectstore
 
 #. Mark the filestore OSD out::
 
-     ceph osd out $ID
+     stone osd out $ID
 
 #. Wait for the data to migrate off the OSD in question::
 
-     while ! ceph osd safe-to-destroy $ID ; do sleep 60 ; done
+     while ! stone osd safe-to-destroy $ID ; do sleep 60 ; done
 
 #. Stop the OSD::
 
-     systemctl kill ceph-osd@$ID
+     systemctl kill stone-osd@$ID
 
 #. Make note of which device this OSD is using::
 
-     mount | grep /var/lib/ceph/osd/ceph-$ID
+     mount | grep /var/lib/stone/osd/stone-$ID
 
 #. Unmount the OSD::
 
-     umount /var/lib/ceph/osd/ceph-$ID
+     umount /var/lib/stone/osd/stone-$ID
 
 #. Destroy the OSD data. Be *EXTREMELY CAREFUL* as this will destroy
    the contents of the device; be certain the data on the device is
    not needed (i.e., that the cluster is healthy) before proceeding. ::
 
-     ceph-volume lvm zap $DEVICE
+     stone-volume lvm zap $DEVICE
 
 #. Tell the cluster the OSD has been destroyed (and a new OSD can be
    reprovisioned with the same ID)::
 
-     ceph osd destroy $ID --yes-i-really-mean-it
+     stone osd destroy $ID --yes-i-really-mean-it
 
 #. Reprovision a BlueStore OSD in its place with the same OSD ID.
    This requires you do identify which device to wipe based on what you saw
    mounted above. BE CAREFUL! ::
 
-     ceph-volume lvm create --bluestore --data $DEVICE --osd-id $ID
+     stone-volume lvm create --bluestore --data $DEVICE --osd-id $ID
 
 #. Repeat.
 
@@ -129,9 +129,9 @@ doesn't strictly matter). ::
 
 Add the host to the CRUSH hierarchy, but do not attach it to the root::
 
-  ceph osd crush add-bucket $NEWHOST host
+  stone osd crush add-bucket $NEWHOST host
 
-Make sure the ceph packages are installed.
+Make sure the stone packages are installed.
 
 Use an existing host
 ^^^^^^^^^^^^^^^^^^^^
@@ -142,14 +142,14 @@ space on that host so that all of its data can be migrated off,
 then you can instead do::
 
   OLDHOST=<existing-cluster-host-to-offload>
-  ceph osd crush unlink $OLDHOST default
+  stone osd crush unlink $OLDHOST default
 
 where "default" is the immediate ancestor in the CRUSH map. (For
 smaller clusters with unmodified configurations this will normally
 be "default", but it might also be a rack name.)  You should now
 see the host at the top of the OSD tree output with no parent::
 
-  $ bin/ceph osd tree
+  $ bin/stone osd tree
   ID CLASS WEIGHT  TYPE NAME     STATUS REWEIGHT PRI-AFF
   -5             0 host oldhost
   10   ssd 1.00000     osd.10        up  1.00000 1.00000
@@ -174,18 +174,18 @@ jump to step #5 below.
 
 #. Provision new BlueStore OSDs for all devices::
 
-     ceph-volume lvm create --bluestore --data /dev/$DEVICE
+     stone-volume lvm create --bluestore --data /dev/$DEVICE
 
 #. Verify OSDs join the cluster with::
 
-     ceph osd tree
+     stone osd tree
 
    You should see the new host ``$NEWHOST`` with all of the OSDs beneath
    it, but the host should *not* be nested beneath any other node in
    hierarchy (like ``root default``).  For example, if ``newhost`` is
    the empty host, you might see something like::
 
-     $ bin/ceph osd tree
+     $ bin/stone osd tree
      ID CLASS WEIGHT  TYPE NAME     STATUS REWEIGHT PRI-AFF
      -5             0 host newhost
      10   ssd 1.00000     osd.10        up  1.00000 1.00000
@@ -204,7 +204,7 @@ jump to step #5 below.
 
 #. Swap the new host into the old host's position in the cluster::
 
-     ceph osd crush swap-bucket $NEWHOST $OLDHOST
+     stone osd crush swap-bucket $NEWHOST $OLDHOST
 
    At this point all data on ``$OLDHOST`` will start migrating to OSDs
    on ``$NEWHOST``.  If there is a difference in the total capacity of
@@ -214,24 +214,24 @@ jump to step #5 below.
 
 #. Wait for data migration to complete::
 
-     while ! ceph osd safe-to-destroy $(ceph osd ls-tree $OLDHOST); do sleep 60 ; done
+     while ! stone osd safe-to-destroy $(stone osd ls-tree $OLDHOST); do sleep 60 ; done
 
 #. Stop all old OSDs on the now-empty ``$OLDHOST``::
 
      ssh $OLDHOST
-     systemctl kill ceph-osd.target
-     umount /var/lib/ceph/osd/ceph-*
+     systemctl kill stone-osd.target
+     umount /var/lib/stone/osd/stone-*
 
 #. Destroy and purge the old OSDs::
 
-     for osd in `ceph osd ls-tree $OLDHOST`; do
-         ceph osd purge $osd --yes-i-really-mean-it
+     for osd in `stone osd ls-tree $OLDHOST`; do
+         stone osd purge $osd --yes-i-really-mean-it
      done
 
 #. Wipe the old OSD devices. This requires you do identify which
    devices are to be wiped manually (BE CAREFUL!). For each device,::
 
-     ceph-volume lvm zap $DEVICE
+     stone-volume lvm zap $DEVICE
 
 #. Use the now-empty host as the new host, and repeat::
 
@@ -256,7 +256,7 @@ Per-OSD device copy
 -------------------
 
 A single logical OSD can be converted by using the ``copy`` function
-of ``ceph-objectstore-tool``.  This requires that the host have a free
+of ``stone-objectstore-tool``.  This requires that the host have a free
 device (or devices) to provision a new, empty BlueStore OSD.  For
 example, if each host in your cluster has 12 OSDs, then you'd need a
 13th available device so that each OSD can be converted in turn before the
@@ -265,7 +265,7 @@ old device is reclaimed to convert the next OSD.
 Caveats:
 
 * This strategy requires that a blank BlueStore OSD be prepared
-  without allocating a new OSD ID, something that the ``ceph-volume``
+  without allocating a new OSD ID, something that the ``stone-volume``
   tool doesn't support.  More importantly, the setup of *dmcrypt* is
   closely tied to the OSD identity, which means that this approach
   does not work with encrypted OSDs.

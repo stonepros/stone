@@ -1,5 +1,5 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "include/rados/librados.hpp"
 
@@ -10,7 +10,7 @@ class TestOp;
 
 class TestOpStat {
 public:
-  mutable ceph::mutex stat_lock = ceph::make_mutex("TestOpStat lock");
+  mutable stone::mutex stat_lock = stone::make_mutex("TestOpStat lock");
 
   TestOpStat() = default;
     
@@ -27,13 +27,13 @@ public:
     multiset<uint64_t> latencies;
     void begin(TestOp *in)
     {
-      ceph_assert(!inflight.count(in));
+      stone_assert(!inflight.count(in));
       inflight[in] = gettime();
     }
 
     void end(TestOp *in)
     {
-      ceph_assert(inflight.count(in));
+      stone_assert(inflight.count(in));
       uint64_t curtime = gettime();
       latencies.insert(curtime - inflight[in]);
       inflight.erase(in);

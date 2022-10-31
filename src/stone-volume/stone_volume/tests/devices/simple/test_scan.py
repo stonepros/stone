@@ -1,6 +1,6 @@
 import os
 import pytest
-from ceph_volume.devices.simple import scan
+from stone_volume.devices.simple import scan
 
 
 class TestGetContents(object):

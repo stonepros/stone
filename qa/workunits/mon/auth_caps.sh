@@ -8,15 +8,15 @@ combinations="r w x rw rx wx rwx"
 
 for i in ${combinations}; do
   k="foo_$i"
-  k=`ceph auth get-or-create-key client.$i mon "allow $i"` || exit 1
+  k=`stone auth get-or-create-key client.$i mon "allow $i"` || exit 1
   keymap["$i"]=$k
 done
 
 # add special caps
-keymap["all"]=`ceph auth get-or-create-key client.all mon 'allow *'` || exit 1
+keymap["all"]=`stone auth get-or-create-key client.all mon 'allow *'` || exit 1
 
 tmp=`mktemp`
-ceph auth export > $tmp
+stone auth export > $tmp
 
 trap "rm $tmp" INT ERR EXIT QUIT 0
 
@@ -64,13 +64,13 @@ read_ops() {
 
   args="--id $caps --key ${keymap[$caps]}"
  
-  expect $ret ceph auth get client.admin $args
-  expect $ret ceph auth get-key client.admin $args
-  expect $ret ceph auth export $args
-  expect $ret ceph auth export client.admin $args
-  expect $ret ceph auth ls $args
-  expect $ret ceph auth print-key client.admin $args
-  expect $ret ceph auth print_key client.admin $args
+  expect $ret stone auth get client.admin $args
+  expect $ret stone auth get-key client.admin $args
+  expect $ret stone auth export $args
+  expect $ret stone auth export client.admin $args
+  expect $ret stone auth ls $args
+  expect $ret stone auth print-key client.admin $args
+  expect $ret stone auth print_key client.admin $args
 }
 
 write_ops() {
@@ -97,14 +97,14 @@ write_ops() {
 
   args="--id $caps --key ${keymap[$caps]}"
 
-  expect $ret ceph auth add client.foo $args
-  expect $ret "ceph auth caps client.foo mon 'allow *' $args"
-  expect $ret ceph auth get-or-create client.admin $args
-  expect $ret ceph auth get-or-create-key client.admin $args
-  expect $ret ceph auth get-or-create-key client.baz $args
-  expect $ret ceph auth del client.foo $args
-  expect $ret ceph auth del client.baz $args
-  expect $ret ceph auth import -i $tmp $args
+  expect $ret stone auth add client.foo $args
+  expect $ret "stone auth caps client.foo mon 'allow *' $args"
+  expect $ret stone auth get-or-create client.admin $args
+  expect $ret stone auth get-or-create-key client.admin $args
+  expect $ret stone auth get-or-create-key client.baz $args
+  expect $ret stone auth del client.foo $args
+  expect $ret stone auth del client.baz $args
+  expect $ret stone auth import -i $tmp $args
 }
 
 echo "running combinations: ${!keymap[@]}"
@@ -124,7 +124,7 @@ done
 
 # cleanup
 for i in ${combinations} all; do
-  ceph auth del client.$i || exit 1
+  stone auth del client.$i || exit 1
 done
 
 echo "OK"

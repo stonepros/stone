@@ -1,26 +1,26 @@
 :orphan:
 
 =========================================
- ceph-mds -- ceph metadata server daemon
+ stone-mds -- stone metadata server daemon
 =========================================
 
-.. program:: ceph-mds
+.. program:: stone-mds
 
 Synopsis
 ========
 
-| **ceph-mds** -i <*ID*> [flags]
+| **stone-mds** -i <*ID*> [flags]
 
 
 Description
 ===========
 
-**ceph-mds** is the metadata server daemon for the Ceph distributed file
-system. One or more instances of ceph-mds collectively manage the file
+**stone-mds** is the metadata server daemon for the Stone distributed file
+system. One or more instances of stone-mds collectively manage the file
 system namespace, coordinating access to the shared OSD cluster.
 
-Each ceph-mds daemon instance should have a unique name. The name is used
-to identify daemon instances in the ceph.conf.
+Each stone-mds daemon instance should have a unique name. The name is used
+to identify daemon instances in the stone.conf.
 
 Once the daemon has started, the monitor cluster will normally assign
 it a logical rank, or put it in a standby pool to take over for
@@ -34,8 +34,8 @@ Options
 .. option:: -f, --foreground
 
    Foreground: do not daemonize after startup (run in foreground). Do
-   not generate a pid file. Useful when run via :doc:`ceph-run
-   <ceph-run>`\(8).
+   not generate a pid file. Useful when run via :doc:`stone-run
+   <stone-run>`\(8).
 
 .. option:: -d
 
@@ -52,16 +52,16 @@ Options
    Set gid after starting.  If a group name is specified the group
    record is looked up to get a gid.
 
-.. option:: -c ceph.conf, --conf=ceph.conf
+.. option:: -c stone.conf, --conf=stone.conf
 
-   Use *ceph.conf* configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` to determine monitor addresses during
+   Use *stone.conf* configuration file instead of the default
+   ``/etc/stone/stone.conf`` to determine monitor addresses during
    startup.
 
 .. option:: -m monaddress[:port]
 
    Connect to specified monitor (instead of looking through
-   ``ceph.conf``).
+   ``stone.conf``).
 
 .. option:: --id/-i ID
 
@@ -70,13 +70,13 @@ Options
 Availability
 ============
 
-**ceph-mds** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to the Ceph documentation at
-http://ceph.com/docs for more information.
+**stone-mds** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to the Stone documentation at
+http://stone.com/docs for more information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8),
-:doc:`ceph-mon <ceph-mon>`\(8),
-:doc:`ceph-osd <ceph-osd>`\(8)
+:doc:`stone <stone>`\(8),
+:doc:`stone-mon <stone-mon>`\(8),
+:doc:`stone-osd <stone-osd>`\(8)

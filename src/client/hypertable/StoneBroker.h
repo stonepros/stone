@@ -33,19 +33,19 @@ extern "C" {
 
 #include "DfsBroker/Lib/Broker.h"
 
-#include <cephfs/libcephfs.h>
+#include <stonefs/libstonefs.h>
 
 namespace Hypertable {
   using namespace DfsBroker;
   /**
    *
    */
-  class OpenFileDataStonee : public OpenFileData {
+  class OpenFileDataStone : public OpenFileData {
   public:
-    OpenFileDataStonee(struct ceph_mount_info *cmount_, const String& fname,
+    OpenFileDataStone(struct stone_mount_info *cmount_, const String& fname,
 		     int _fd, int _flags);
-    virtual ~OpenFileDataStonee();
-    struct ceph_mount_info *cmount;
+    virtual ~OpenFileDataStone();
+    struct stone_mount_info *cmount;
     int fd;
     int flags;
     String filename;
@@ -54,20 +54,20 @@ namespace Hypertable {
   /**
    *
    */
-  class OpenFileDataStoneePtr : public OpenFileDataPtr {
+  class OpenFileDataStonePtr : public OpenFileDataPtr {
   public:
-    OpenFileDataStoneePtr() : OpenFileDataPtr() { }
-    explicit OpenFileDataStoneePtr(OpenFileDatStonene *ofdl) : OpenFileDataPtr(ofdl, true) { }
-    OpenFileDataStonee *operator->() const { return static_cast<OpenFileDatStonene *>(get()); }
+    OpenFileDataStonePtr() : OpenFileDataPtr() { }
+    explicit OpenFileDataStonePtr(OpenFileDatStone *ofdl) : OpenFileDataPtr(ofdl, true) { }
+    OpenFileDataStone *operator->() const { return static_cast<OpenFileDatStone *>(get()); }
   };
 
   /**
    *
    */
-  class StoneeBroker : public DfsBroker::Broker {
+  class StoneBroker : public DfsBroker::Broker {
   public:
-    explicit StoneeBroker(PropertiesPtr& cfg);
-    virtual ~StoneeBroker();
+    explicit StoneBroker(PropertiesPtr& cfg);
+    virtual ~StoneBroker();
 
     virtual void open(ResponseCallbackOpen *cb, const char *fname,
                       uint32_t flags, uint32_t bufsz);
@@ -95,7 +95,7 @@ namespace Hypertable {
                        StaticBuffer &serialized_parameters);
 
   private:
-    struct ceph_mount_info *cmount;
+    struct stone_mount_info *cmount;
     static std::atomic<int> ms_next_fd;
 
     virtual void report_error(ResponseCallback *cb, int error);

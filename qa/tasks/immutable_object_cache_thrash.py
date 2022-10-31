@@ -32,23 +32,23 @@ def thrashes_immutable_object_cache_daemon(ctx, config):
     live_time = client_config.get('live_time', DEFAULT_LIVE_TIME)
 
     for i in range(kill_daemon_time):
-        log.info("ceph-immutable-object-cache crash....")
+        log.info("stone-immutable-object-cache crash....")
         remote.run(
             args=[
-                'sudo', 'killall', '-s', '9', 'ceph-immutable-object-cache', run.Raw('||'), 'true',
+                'sudo', 'killall', '-s', '9', 'stone-immutable-object-cache', run.Raw('||'), 'true',
                  ]
             )
-        # librbd shoud normally run when ceph-immutable-object-cache
+        # librbd shoud normally run when stone-immutable-object-cache
         remote.run(
             args=[
                 'sleep', '{dead_time}'.format(dead_time=dead_time),
                  ]
             )
         # librbd should reconnect daemon
-        log.info("startup ceph-immutable-object-cache")
+        log.info("startup stone-immutable-object-cache")
         remote.run(
             args=[
-                'ceph-immutable-object-cache', '-b',
+                'stone-immutable-object-cache', '-b',
                  ]
             )
         remote.run(

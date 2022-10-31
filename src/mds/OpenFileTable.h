@@ -46,14 +46,14 @@ public:
   void load(MDSContext *c);
   bool is_loaded() const { return load_done; }
   void wait_for_load(MDSContext *c) {
-    ceph_assert(!load_done);
+    stone_assert(!load_done);
     waiting_for_load.push_back(c);
   }
 
   bool prefetch_inodes();
   bool is_prefetched() const { return prefetch_state == DONE; }
   void wait_for_prefetch(MDSContext *c) {
-    ceph_assert(!is_prefetched());
+    stone_assert(!is_prefetched());
     waiting_for_prefetch.push_back(c);
   }
 

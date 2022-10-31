@@ -6,7 +6,7 @@
  * outgoing pings and responses to those. If you set the
  * min_message in the constructor, the message will inflate itself
  * to the specified size -- this is good for dealing with network
- * issues with jumbo frames. See http://tracker.ceph.com/issues/20087
+ * issues with jumbo frames. See http://tracker.stone.com/issues/20087
  *
  */
 
@@ -69,7 +69,7 @@ public:
     min_message_size = size + payload_mid_length;
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(op, payload);
     encode(stamp, payload);
     encode(tracker_bl, payload);
@@ -103,7 +103,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

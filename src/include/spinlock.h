@@ -19,15 +19,15 @@
 
 #include <atomic>
 
-namespace ceph {
+namespace stone {
 inline namespace version_1_0 {
 
 class spinlock;
 
 inline void spin_lock(std::atomic_flag& lock);
 inline void spin_unlock(std::atomic_flag& lock);
-inline void spin_lock(ceph::spinlock& lock);
-inline void spin_unlock(ceph::spinlock& lock);
+inline void spin_lock(stone::spinlock& lock);
+inline void spin_unlock(stone::spinlock& lock);
 
 /* A pre-packaged spinlock type modelling BasicLockable: */
 class spinlock final
@@ -36,11 +36,11 @@ class spinlock final
 
   public:
   void lock() {
-    ceph::spin_lock(af);
+    stone::spin_lock(af);
   }
  
   void unlock() noexcept {
-    ceph::spin_unlock(af);
+    stone::spin_unlock(af);
   }
 };
 
@@ -66,27 +66,27 @@ inline void spin_unlock(std::atomic_flag *lock)
  spin_unlock(*lock);
 }
 
-inline void spin_lock(ceph::spinlock& lock)
+inline void spin_lock(stone::spinlock& lock)
 {
  lock.lock();
 }
 
-inline void spin_unlock(ceph::spinlock& lock)
+inline void spin_unlock(stone::spinlock& lock)
 {
  lock.unlock();
 }
 
-inline void spin_lock(ceph::spinlock *lock)
+inline void spin_lock(stone::spinlock *lock)
 {
  spin_lock(*lock);
 }
 
-inline void spin_unlock(ceph::spinlock *lock)
+inline void spin_unlock(stone::spinlock *lock)
 {
  spin_unlock(*lock);
 }
 
 } // inline namespace (version)
-} // namespace ceph
+} // namespace stone
 
 #endif

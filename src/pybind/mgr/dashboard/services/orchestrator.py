@@ -5,7 +5,7 @@ import logging
 from functools import wraps
 from typing import Any, Dict, List, Optional
 
-from ceph.deployment.service_spec import ServiceSpec
+from stone.deployment.service_spec import ServiceSpec
 from orchestrator import DaemonDescription, DeviceLightLoc, HostSpec, \
     InventoryFilter, OrchestratorClientMixin, OrchestratorError, OrchResult, \
     ServiceDescription, raise_if_exception

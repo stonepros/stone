@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,8 +16,8 @@
 #ifndef STONE_MMONPROBE_H
 #define STONE_MMONPROBE_H
 
-#include "include/ceph_features.h"
-#include "common/ceph_releases.h"
+#include "include/stone_features.h"
+#include "common/stone_releases.h"
 #include "msg/Message.h"
 #include "mon/MonMap.h"
 
@@ -43,7 +43,7 @@ public:
     case OP_SLURP_LATEST: return "slurp_latest";
     case OP_DATA: return "data";
     case OP_MISSING_FEATURES: return "missing_features";
-    default: ceph_abort(); return 0;
+    default: stone_abort(); return 0;
     }
   }
   
@@ -52,16 +52,16 @@ public:
   std::string name;
   std::set<int32_t> quorum;
   int leader = -1;
-  ceph::buffer::list monmap_bl;
+  stone::buffer::list monmap_bl;
   version_t paxos_first_version = 0;
   version_t paxos_last_version = 0;
   bool has_ever_joined = 0;
   uint64_t required_features = 0;
-  ceph_release_t mon_release{ceph_release_t::unknown};
+  stone_release_t mon_release{stone_release_t::unknown};
 
   MMonProbe()
     : Message{MSG_MON_PROBE, HEAD_VERSION, COMPAT_VERSION} {}
-  MMonProbe(const uuid_d& f, int o, const std::string& n, bool hej, ceph_release_t mr)
+  MMonProbe(const uuid_d& f, int o, const std::string& n, bool hej, stone_release_t mr)
     : Message{MSG_MON_PROBE, HEAD_VERSION, COMPAT_VERSION},
       fsid(f),
       op(o),
@@ -91,13 +91,13 @@ public:
       out << " new";
     if (required_features)
       out << " required_features " << required_features;
-    if (mon_release != ceph_release_t::unknown)
+    if (mon_release != stone_release_t::unknown)
       out << " mon_release " << mon_release;
     out << ")";
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     if (monmap_bl.length() &&
 	((features & STONE_FEATURE_MONENC) == 0 ||
 	 (features & STONE_FEATURE_MSG_ADDR2) == 0)) {
@@ -121,7 +121,7 @@ public:
     encode(leader, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(fsid, p);
     decode(op, p);
@@ -138,7 +138,7 @@ public:
     if (header.version >= 7)
       decode(mon_release, p);
     else
-      mon_release = ceph_release_t::unknown;
+      mon_release = stone_release_t::unknown;
     if (header.version >= 8) {
       decode(leader, p);
     } else if (quorum.size()) {
@@ -147,7 +147,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

@@ -1,6 +1,6 @@
 [
   {
-    "hostname": "ceph-master",
+    "hostname": "stone-master",
     "services": [
       { "type": "mds", "id": "a" },
       { "type": "mds", "id": "b" },
@@ -13,17 +13,17 @@
       { "type": "osd", "id": "1" },
       { "type": "osd", "id": "2" }
     ],
-    "ceph_version": "ceph version Development (no_version) pacific (dev)",
+    "stone_version": "stone version Development (no_version) pacific (dev)",
     "addr": "",
     "labels": [],
     "service_type": "",
-    "sources": { "ceph": true, "orchestrator": false },
+    "sources": { "stone": true, "orchestrator": false },
     "status": ""
   },
   {
-    "ceph_version": "",
+    "stone_version": "",
     "services": [],
-    "sources": { "ceph": false, "orchestrator": true },
+    "sources": { "stone": false, "orchestrator": true },
     "hostname": "mgr0",
     "addr": "mgr0",
     "labels": [],

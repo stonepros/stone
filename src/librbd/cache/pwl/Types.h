@@ -14,7 +14,7 @@
 #include "librbd/BlockGuard.h"
 #include "librbd/io/Types.h"
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 
@@ -275,7 +275,7 @@ struct WriteLogCacheEntry {
     DENC_FINISH(p);
   }
   #endif
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(list<WriteLogCacheEntry*>& ls);
 };
 
@@ -316,7 +316,7 @@ struct WriteLogPoolRoot {
   }
   #endif
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(list<WriteLogPoolRoot*>& ls);
 };
 

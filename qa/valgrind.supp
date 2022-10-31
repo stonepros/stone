@@ -191,7 +191,7 @@
 	...
 }
 {
-	ceph global: deliberate onexit leak
+	stone global: deliberate onexit leak
 	Memcheck:Leak
 	...
 	fun:*set_flush_on_exit*
@@ -411,7 +411,7 @@
 	fun:_ZNSs12_S_constructIPKcEEPcT_S3_RKSaIcESt20forward_iterator_tag
 	...
 	fun:_ZN11md_config_tC1Ev
-	fun:_ZN11CephContextC1Eji
+	fun:_ZN11StoneContextC1Eji
 	...
 }
 {
@@ -529,7 +529,7 @@
 }
 
 {
-  dlopen() with -lceph-common https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=700899
+  dlopen() with -lstone-common https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=700899
   Memcheck:Leak
   match-leak-kinds: reachable
   fun:*alloc
@@ -578,7 +578,7 @@
 }
 
 {
-  ignore *all* ceph-mgr python crap.  this is overkill, but better than nothing
+  ignore *all* stone-mgr python crap.  this is overkill, but better than nothing
   Memcheck:Leak
   match-leak-kinds: all
   ...
@@ -606,8 +606,8 @@
    Memcheck:Cond
    ...
    fun:EVP_DecryptFinal_ex
-   fun:_ZN4ceph6crypto6onwire25AES128GCM_OnWireRxHandler34authenticated_decrypt_update_finalEONS_6buffer7v*4listEj
-   fun:_ZN10ProtocolV231handle_read_frame_epilogue_mainEOSt10unique_ptrIN4ceph6buffer7v*8ptr_nodeENS4_8disposerEEi
+   fun:_ZN4stone6crypto6onwire25AES128GCM_OnWireRxHandler34authenticated_decrypt_update_finalEONS_6buffer7v*4listEj
+   fun:_ZN10ProtocolV231handle_read_frame_epilogue_mainEOSt10unique_ptrIN4stone6buffer7v*8ptr_nodeENS4_8disposerEEi
    fun:_ZN10ProtocolV216run_continuationER2CtIS_E
    ...
    fun:_ZN15AsyncConnection7processEv
@@ -618,8 +618,8 @@
 {
    uninitialised gcm.Xi in aes-128-gcm with AES-NI for msgr, part 2
    Memcheck:Cond
-   fun:_ZN4ceph6crypto6onwire25AES128GCM_OnWireRxHandler34authenticated_decrypt_update_finalEONS_6buffer7v*4listEj
-   fun:_ZN10ProtocolV231handle_read_frame_epilogue_mainEOSt10unique_ptrIN4ceph6buffer7v*8ptr_nodeENS4_8disposerEEi
+   fun:_ZN4stone6crypto6onwire25AES128GCM_OnWireRxHandler34authenticated_decrypt_update_finalEONS_6buffer7v*4listEj
+   fun:_ZN10ProtocolV231handle_read_frame_epilogue_mainEOSt10unique_ptrIN4stone6buffer7v*8ptr_nodeENS4_8disposerEEi
    fun:_ZN10ProtocolV216run_continuationER2CtIS_E
    ...
    fun:_ZN11EventCenter14process_eventsEjPNSt6chrono8durationImSt5ratioILl1ELl1000000000EEEE

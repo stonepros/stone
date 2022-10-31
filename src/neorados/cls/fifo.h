@@ -49,11 +49,11 @@
 namespace neorados::cls::fifo {
 namespace ba = boost::asio;
 namespace bs = boost::system;
-namespace ca = ceph::async;
-namespace cb = ceph::buffer;
+namespace ca = stone::async;
+namespace cb = stone::buffer;
 namespace fifo = rados::cls::fifo;
 
-inline constexpr auto dout_subsys = ceph_subsys_rados;
+inline constexpr auto dout_subsys = stone_subsys_rados;
 inline constexpr std::uint64_t default_max_part_size = 4 * 1024 * 1024;
 inline constexpr std::uint64_t default_max_entry_size = 32 * 1024;
 inline constexpr auto MAX_RACE_RETRIES = 10;
@@ -146,7 +146,7 @@ struct marker {
 struct list_entry {
   cb::list data;
   std::string marker;
-  ceph::real_time mtime;
+  stone::real_time mtime;
 };
 
 using part_info = fifo::part_header;
@@ -241,7 +241,7 @@ class JournalProcessor;
 /// Blocking calls
 /// --------------
 ///
-/// ceph::async::use_blocked, defined in src/common/async/blocked_completion.h
+/// stone::async::use_blocked, defined in src/common/async/blocked_completion.h
 /// Suspends the current thread of execution, returning the results of
 /// the operation on resumption. Its calling convention is analogous to
 /// that of yield_context.
@@ -557,7 +557,7 @@ public:
     }
 
     using handler_type = decltype(init.completion_handler);
-    auto ls = ceph::allocate_unique<Lister<handler_type>>(
+    auto ls = stone::allocate_unique<Lister<handler_type>>(
       a, this, part_num, ofs, max_entries,
       std::move(init.completion_handler));
     ls.release()->list();
@@ -584,7 +584,7 @@ public:
       return init.result.get();
     } else {
       using handler_type = decltype(init.completion_handler);
-      auto t = ceph::allocate_unique<Trimmer<handler_type>>(
+      auto t = stone::allocate_unique<Trimmer<handler_type>>(
 	a, this, m->num, m->ofs, exclusive, std::move(init.completion_handler));
       t.release()->trim();
     }
@@ -626,7 +626,7 @@ public:
     auto e = ba::get_associated_executor(init.completion_handler,
 					 get_executor());
     auto a = ba::get_associated_allocator(init.completion_handler);
-    auto reply = ceph::allocate_unique<
+    auto reply = stone::allocate_unique<
       ExecDecodeCB<fifo::op::get_part_info_reply>>(a);
 
     op.exec(fifo::op::CLASS, fifo::op::GET_PART_INFO, in,
@@ -693,7 +693,7 @@ private:
       }
       try {
         auto p = r.begin();
-        using ceph::decode;
+        using stone::decode;
         decode(result, p);
       } catch (const cb::error& err) {
         ec = err.code();
@@ -706,7 +706,7 @@ private:
     Handler handler;
     using allocator_type = boost::asio::associated_allocator_t<Handler>;
     using decoder_type = ExecDecodeCB<fifo::op::get_meta_reply>;
-    using decoder_ptr = ceph::allocated_unique_ptr<decoder_type, allocator_type>;
+    using decoder_ptr = stone::allocated_unique_ptr<decoder_type, allocator_type>;
     decoder_ptr decoder;
   public:
     MetaReader(Handler&& handler, decoder_ptr&& decoder)
@@ -743,7 +743,7 @@ private:
 
     auto a = ba::get_associated_allocator(handler);
     auto reply =
-      ceph::allocate_unique<ExecDecodeCB<fifo::op::get_meta_reply>>(a);
+      stone::allocate_unique<ExecDecodeCB<fifo::op::get_meta_reply>>(a);
 
     auto e = ba::get_associated_executor(handler);
     op.exec(fifo::op::CLASS, fifo::op::GET_META, in, std::ref(*reply));
@@ -840,7 +840,7 @@ private:
   template<typename Handler>
   auto _process_journal(Handler&& handler /* error_code */) {
     auto a = ba::get_associated_allocator(std::ref(handler));
-    auto j = ceph::allocate_unique<detail::JournalProcessor<Handler>>(
+    auto j = stone::allocate_unique<detail::JournalProcessor<Handler>>(
       a, this, std::move(handler));
     auto p = j.release();
     p->process();
@@ -1048,7 +1048,7 @@ private:
     Handler handler;
     using allocator_type = boost::asio::associated_allocator_t<Handler>;
     using decoder_type = ExecHandleCB<int>;
-    using decoder_ptr = ceph::allocated_unique_ptr<decoder_type, allocator_type>;
+    using decoder_ptr = stone::allocated_unique_ptr<decoder_type, allocator_type>;
     decoder_ptr decoder;
 
   public:
@@ -1078,7 +1078,7 @@ private:
     l.unlock();
 
     auto a = ba::get_associated_allocator(handler);
-    auto reply = ceph::allocate_unique<ExecHandleCB<int>>(a);
+    auto reply = stone::allocate_unique<ExecHandleCB<int>>(a);
 
     auto e = ba::get_associated_executor(handler, get_executor());
     push_part(op, tag, data_bufs, std::ref(*reply));
@@ -1482,7 +1482,7 @@ private:
     Handler handler;
     using allocator_type = boost::asio::associated_allocator_t<Handler>;
     using decoder_type = ExecDecodeCB<fifo::op::get_part_info_reply>;
-    using decoder_ptr = ceph::allocated_unique_ptr<decoder_type, allocator_type>;
+    using decoder_ptr = stone::allocated_unique_ptr<decoder_type, allocator_type>;
     decoder_ptr decoder;
   public:
     PartInfoGetter(Handler&& handler, decoder_ptr&& decoder)

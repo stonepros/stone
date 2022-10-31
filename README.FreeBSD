@@ -1,48 +1,48 @@
 
 Last updated: 2017-04-08
 
-The FreeBSD build will build most of the tools in Ceph.
+The FreeBSD build will build most of the tools in Stone.
 Note that the (kernel) RBD dependent items will not work
 
-I started looking into Ceph, because the HAST solution with CARP and 
+I started looking into Stone, because the HAST solution with CARP and 
 ggate did not really do what I was looking for. But I'm aiming for 
-running a Ceph storage cluster on storage nodes that are running ZFS.
+running a Stone storage cluster on storage nodes that are running ZFS.
 In the end the cluster would be running bhyve on RBD disk that are stored in 
-Ceph.
+Stone.
 
-The FreeBSD build will build most of the tools in Ceph.
+The FreeBSD build will build most of the tools in Stone.
 	
 Progress from last report:
 ==========================
 
 Most important change:
-  -	A port is submitted: net/ceph-devel.
+  -	A port is submitted: net/stone-devel.
 
 Other improvements:
 
-	* A new ceph-devel update will be submitted in April
+	* A new stone-devel update will be submitted in April
 
-  -	Ceph-Fuse works, allowing to mount a CephFS on a FreeBSD system and do
+  -	Stone-Fuse works, allowing to mount a StoneFS on a FreeBSD system and do
 	some work on it. 
-  -	Ceph-disk prepare and activate work for FileStore on ZFS, allowing 
+  -	Stone-disk prepare and activate work for FileStore on ZFS, allowing 
 	easy creation of OSDs.
   -	RBD is actually buildable and can be used to manage RADOS BLOCK 
 	DEVICEs.
   -	Most of the awkward dependencies on Linux-isms are deleted only
 	/bin/bash is there to stay.
 
-Getting the FreeBSD work on Ceph:
+Getting the FreeBSD work on Stone:
 =================================
 
-	pkg install net/ceph-devel
+	pkg install net/stone-devel
 
 Or:
 	cd "place to work on this"
-	git clone https://github.com/wjwithagen/ceph.git
-	cd ceph
+	git clone https://github.com/wjwithagen/stone.git
+	cd stone
 	git checkout wip.FreeBSD
 
-Building Ceph
+Building Stone
 =============
   - 	Go and start building
 	  ./do_freebsd.sh
@@ -59,14 +59,14 @@ Parts not (yet) included:
 	 FreeBSD and Linux have different AIO API, and that needs to be made 
 	 compatible Next to that is there discussion in FreeBSD about 
 	 aio_cancel not working for all devicetypes
- - CephFS as native filesystem
-	 (Ceph-fuse does work.)
+ - StoneFS as native filesystem
+	 (Stone-fuse does work.)
 	 Cython tries to access an internal field in dirent which does not 
 	 compile
 Build Prerequisites
 ===================
 
-	Compiling and building Ceph is tested on 12-CURRENT, but I guess/expect 
+	Compiling and building Stone is tested on 12-CURRENT, but I guess/expect 
 	11-RELEASE will also work. And Clang is at 3.8.0.
 	It uses the CLANG toolset that is available, 3.7 is no longer tested, 
 	but was working when that was with 11-CURRENT. 
@@ -81,15 +81,15 @@ The following setup will get things running for FreeBSD:
 	sudo pkg install bash
 	sudo ln -s /usr/local/bin/bash /bin/bash
 
-Getting the FreeBSD work on Ceph:
+Getting the FreeBSD work on Stone:
 =================================
 
  - 	cd "place to work on this"
-	git clone https://github.com/wjwithagen/ceph.git
-	cd ceph
+	git clone https://github.com/wjwithagen/stone.git
+	cd stone
 	git checkout wip.FreeBSD.201702
 
-Building Ceph
+Building Stone
 =============
  - 	Go and start building
 	./do_freebsd.sh
@@ -107,7 +107,7 @@ Parts not (yet) included:
 	FreeBSD and Linux have different AIO API, and that needs to be made 
 	compatible Next to that is there discussion in FreeBSD about 
 	aio_cancel not working for all devicetypes
- -	CephFS
+ -	StoneFS
 	Cython tries to access an internal field in dirent which does not 
 	compile
 
@@ -122,17 +122,17 @@ Tests not (yet) include:
  
 Task to do:
 ===========
- -	Build an automated test platform that will build ceph/master on 
-	FreeBSD and report the results back to the Ceph developers. This will 
+ -	Build an automated test platform that will build stone/master on 
+	FreeBSD and report the results back to the Stone developers. This will 
 	increase the maintainability of the FreeBSD side of things. 
 	Developers are signalled that they are using Linux-isms that will not
-	compile/run on FreeBSD Ceph has several projects for this: Jenkins, 
+	compile/run on FreeBSD Stone has several projects for this: Jenkins, 
 	teuthology, pulpito, ...
 	But even just a while { compile } loop and report the build data on a 
 	static webpage would do for starters.
 
  -	Run integration tests to see if the FreeBSD daemons will work with a 
-	Linux Ceph platform.
+	Linux Stone platform.
 
  -	Compile and test the user space RBD (Rados Block Device).
 
@@ -140,16 +140,16 @@ Task to do:
 	'ggate'
 
  -	Investigate the keystore, which could be kernel embedded on Linux an 
-	currently prevents building Cephfs and some other parts.
+	currently prevents building Stonefs and some other parts.
 
  -	Scheduler information is not used atm, because the schedulers work 
 	rather different. But at a certain point in time, this would need some 
 	attention:
 	in: ./src/common/Thread.cc
 
- -	Improve the FreeBSD /etc/rc.d initscripts in the Ceph stack. Both 
-	for testing, but mainly for running Ceph on production machines.
-	Work on ceph-disk and ceph-deploy to make it more FreeBSD and ZFS 
+ -	Improve the FreeBSD /etc/rc.d initscripts in the Stone stack. Both 
+	for testing, but mainly for running Stone on production machines.
+	Work on stone-disk and stone-deploy to make it more FreeBSD and ZFS 
 	compatible. 
 
  -	Build test-cluster and start running some of the teuthology integration 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -22,7 +22,7 @@
 #include "MClientRequest.h"
 
 #include "msg/Message.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "common/errno.h"
 #include "common/strescape.h"
 
@@ -48,7 +48,7 @@
 
 
 struct LeaseStat {
-  // this matches ceph_mds_reply_lease
+  // this matches stone_mds_reply_lease
   __u16 mask = 0;
   __u32 duration_ms = 0;
   __u32 seq = 0;
@@ -57,8 +57,8 @@ struct LeaseStat {
   LeaseStat() = default;
   LeaseStat(__u16 msk, __u32 dur, __u32 sq) : mask{msk}, duration_ms{dur}, seq{sq} {}
 
-  void decode(ceph::buffer::list::const_iterator &bl, const uint64_t features) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &bl, const uint64_t features) {
+    using stone::decode;
     if (features == (uint64_t)-1) {
       DECODE_START(2, bl);
       decode(mask, bl);
@@ -91,12 +91,12 @@ struct DirStat {
   std::set<__s32> dist;
   
   DirStat() : auth(CDIR_AUTH_PARENT) {}
-  DirStat(ceph::buffer::list::const_iterator& p, const uint64_t features) {
+  DirStat(stone::buffer::list::const_iterator& p, const uint64_t features) {
     decode(p, features);
   }
 
-  void decode(ceph::buffer::list::const_iterator& p, const uint64_t features) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& p, const uint64_t features) {
+    using stone::decode;
     if (features == (uint64_t)-1) {
       DECODE_START(1, p);
       decode(frag, p);
@@ -119,7 +119,7 @@ struct InodeStat {
   uint32_t rdev = 0;
   version_t version = 0;
   version_t xattr_version = 0;
-  ceph_mds_reply_cap cap;
+  stone_mds_reply_cap cap;
   file_layout_t layout;
   utime_t ctime, btime, mtime, atime, snap_btime;
   uint32_t time_warp_seq = 0;
@@ -134,11 +134,11 @@ struct InodeStat {
   fragtree_t dirfragtree;
   std::string  symlink;   // symlink content (if symlink)
 
-  ceph_dir_layout dir_layout;
+  stone_dir_layout dir_layout;
 
-  ceph::buffer::list xattrbl;
+  stone::buffer::list xattrbl;
 
-  ceph::buffer::list inline_data;
+  stone::buffer::list inline_data;
   version_t inline_version;
 
   quota_info_t quota;
@@ -150,12 +150,12 @@ struct InodeStat {
 
  public:
   InodeStat() {}
-  InodeStat(ceph::buffer::list::const_iterator& p, const uint64_t features) {
+  InodeStat(stone::buffer::list::const_iterator& p, const uint64_t features) {
     decode(p, features);
   }
 
-  void decode(ceph::buffer::list::const_iterator &p, const uint64_t features) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &p, const uint64_t features) {
+    using stone::decode;
     if (features == (uint64_t)-1) {
       DECODE_START(6, p);
       decode(vino.ino, p);
@@ -165,7 +165,7 @@ struct InodeStat {
       decode(xattr_version, p);
       decode(cap, p);
       {
-        ceph_file_layout legacy_layout;
+        stone_file_layout legacy_layout;
         decode(legacy_layout, p);
         layout.from_legacy(legacy_layout);
       }
@@ -224,7 +224,7 @@ struct InodeStat {
       decode(xattr_version, p);
       decode(cap, p);
       {
-        ceph_file_layout legacy_layout;
+        stone_file_layout legacy_layout;
         decode(legacy_layout, p);
         layout.from_legacy(legacy_layout);
       }
@@ -288,15 +288,15 @@ struct openc_response_t {
   interval_set<inodeno_t>	delegated_inos;
 
 public:
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(created_ino, bl);
     encode(delegated_inos, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator &p) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &p) {
+    using stone::decode;
     DECODE_START(1, p);
     decode(created_ino, p);
     decode(delegated_inos, p);
@@ -308,10 +308,10 @@ WRITE_CLASS_ENCODER(openc_response_t)
 class MClientReply final : public SafeMessage {
 public:
   // reply data
-  struct ceph_mds_reply_head head {};
-  ceph::buffer::list trace_bl;
-  ceph::buffer::list extra_bl;
-  ceph::buffer::list snapbl;
+  struct stone_mds_reply_head head {};
+  stone::buffer::list trace_bl;
+  stone::buffer::list extra_bl;
+  stone::buffer::list snapbl;
 
   int get_op() const { return head.op; }
 
@@ -319,7 +319,7 @@ public:
   epoch_t get_mdsmap_epoch() const { return head.mdsmap_epoch; }
 
   int get_result() const {
-    return ceph_to_hostos_errno((__s32)(__u32)head.result);
+    return stone_to_hostos_errno((__s32)(__u32)head.result);
   }
 
   void set_result(int r) { head.result = r; }
@@ -359,16 +359,16 @@ public:
 
   // serialization
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(head, p);
     decode(trace_bl, p);
     decode(extra_bl, p);
     decode(snapbl, p);
-    ceph_assert(p.end());
+    stone_assert(p.end());
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(head, payload);
     encode(trace_bl, payload);
     encode(extra_bl, payload);
@@ -377,29 +377,29 @@ public:
 
 
   // dir contents
-  void set_extra_bl(ceph::buffer::list& bl) {
+  void set_extra_bl(stone::buffer::list& bl) {
     extra_bl = std::move(bl);
   }
-  ceph::buffer::list& get_extra_bl() {
+  stone::buffer::list& get_extra_bl() {
     return extra_bl;
   }
-  const ceph::buffer::list& get_extra_bl() const {
+  const stone::buffer::list& get_extra_bl() const {
     return extra_bl;
   }
 
   // trace
-  void set_trace(ceph::buffer::list& bl) {
+  void set_trace(stone::buffer::list& bl) {
     trace_bl = std::move(bl);
   }
-  ceph::buffer::list& get_trace_bl() {
+  stone::buffer::list& get_trace_bl() {
     return trace_bl;
   }
-  const ceph::buffer::list& get_trace_bl() const {
+  const stone::buffer::list& get_trace_bl() const {
     return trace_bl;
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

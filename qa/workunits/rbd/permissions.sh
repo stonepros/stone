@@ -9,15 +9,15 @@ clone_v2_enabled() {
 }
 
 create_pools() {
-    ceph osd pool create images 32
+    stone osd pool create images 32
     rbd pool init images
-    ceph osd pool create volumes 32
+    stone osd pool create volumes 32
     rbd pool init volumes
 }
 
 delete_pools() {
-    (ceph osd pool delete images images --yes-i-really-really-mean-it || true) >/dev/null 2>&1
-    (ceph osd pool delete volumes volumes --yes-i-really-really-mean-it || true) >/dev/null 2>&1
+    (stone osd pool delete images images --yes-i-really-really-mean-it || true) >/dev/null 2>&1
+    (stone osd pool delete volumes volumes --yes-i-really-really-mean-it || true) >/dev/null 2>&1
 
 }
 
@@ -27,32 +27,32 @@ recreate_pools() {
 }
 
 delete_users() {
-    (ceph auth del client.volumes || true) >/dev/null 2>&1
-    (ceph auth del client.images || true) >/dev/null 2>&1
+    (stone auth del client.volumes || true) >/dev/null 2>&1
+    (stone auth del client.images || true) >/dev/null 2>&1
 
-    (ceph auth del client.snap_none || true) >/dev/null 2>&1
-    (ceph auth del client.snap_all || true) >/dev/null 2>&1
-    (ceph auth del client.snap_pool || true) >/dev/null 2>&1
-    (ceph auth del client.snap_profile_all || true) >/dev/null 2>&1
-    (ceph auth del client.snap_profile_pool || true) >/dev/null 2>&1
+    (stone auth del client.snap_none || true) >/dev/null 2>&1
+    (stone auth del client.snap_all || true) >/dev/null 2>&1
+    (stone auth del client.snap_pool || true) >/dev/null 2>&1
+    (stone auth del client.snap_profile_all || true) >/dev/null 2>&1
+    (stone auth del client.snap_profile_pool || true) >/dev/null 2>&1
 
-    (ceph auth del client.mon_write || true) >/dev/null 2>&1
+    (stone auth del client.mon_write || true) >/dev/null 2>&1
 }
 
 create_users() {
-    ceph auth get-or-create client.volumes \
+    stone auth get-or-create client.volumes \
 	mon 'profile rbd' \
 	osd 'profile rbd pool=volumes, profile rbd-read-only pool=images' \
 	mgr 'profile rbd pool=volumes, profile rbd-read-only pool=images' >> $KEYRING
-    ceph auth get-or-create client.images mon 'profile rbd' osd 'profile rbd pool=images' >> $KEYRING
+    stone auth get-or-create client.images mon 'profile rbd' osd 'profile rbd pool=images' >> $KEYRING
 
-    ceph auth get-or-create client.snap_none mon 'allow r' >> $KEYRING
-    ceph auth get-or-create client.snap_all mon 'allow r' osd 'allow w' >> $KEYRING
-    ceph auth get-or-create client.snap_pool mon 'allow r' osd 'allow w pool=images' >> $KEYRING
-    ceph auth get-or-create client.snap_profile_all mon 'allow r' osd 'profile rbd' >> $KEYRING
-    ceph auth get-or-create client.snap_profile_pool mon 'allow r' osd 'profile rbd pool=images' >> $KEYRING
+    stone auth get-or-create client.snap_none mon 'allow r' >> $KEYRING
+    stone auth get-or-create client.snap_all mon 'allow r' osd 'allow w' >> $KEYRING
+    stone auth get-or-create client.snap_pool mon 'allow r' osd 'allow w pool=images' >> $KEYRING
+    stone auth get-or-create client.snap_profile_all mon 'allow r' osd 'profile rbd' >> $KEYRING
+    stone auth get-or-create client.snap_profile_pool mon 'allow r' osd 'profile rbd pool=images' >> $KEYRING
 
-    ceph auth get-or-create client.mon_write mon 'allow *' >> $KEYRING
+    stone auth get-or-create client.mon_write mon 'allow *' >> $KEYRING
 }
 
 expect() {
@@ -165,7 +165,7 @@ create_self_managed_snapshot() {
   ID=$1
   POOL=$2
 
-  cat << EOF | CEPH_ARGS="-k $KEYRING" python3
+  cat << EOF | STONE_ARGS="-k $KEYRING" python3
 import rados
 
 with rados.Rados(conffile="", rados_id="${ID}") as cluster:
@@ -180,7 +180,7 @@ remove_self_managed_snapshot() {
   ID=$1
   POOL=$2
 
-  cat << EOF | CEPH_ARGS="-k $KEYRING" python3
+  cat << EOF | STONE_ARGS="-k $KEYRING" python3
 import rados
 
 with rados.Rados(conffile="", rados_id="mon_write") as cluster1, \
@@ -233,13 +233,13 @@ test_remove_self_managed_snapshots() {
 
 test_rbd_support() {
     # read-only commands should work on both pools
-    ceph -k $KEYRING --id volumes rbd perf image stats volumes
-    ceph -k $KEYRING --id volumes rbd perf image stats images
+    stone -k $KEYRING --id volumes rbd perf image stats volumes
+    stone -k $KEYRING --id volumes rbd perf image stats images
 
     # read/write commands should only work on 'volumes'
     rbd -k $KEYRING --id volumes create --image-format 2 --image-feature $IMAGE_FEATURES -s 1 volumes/foo
-    ceph -k $KEYRING --id volumes rbd task add remove volumes/foo
-    expect 13 ceph -k $KEYRING --id volumes rbd task add remove images/foo
+    stone -k $KEYRING --id volumes rbd task add remove volumes/foo
+    expect 13 stone -k $KEYRING --id volumes rbd task add remove images/foo
 }
 
 cleanup() {

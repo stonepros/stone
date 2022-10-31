@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 
 import { RbdMirroringService } from '~/app/shared/api/rbd-mirroring.service';
 import { TableStatusViewCache } from '~/app/shared/classes/table-status-view-cache';
-import { CephShortVersionPipe } from '~/app/shared/pipes/ceph-short-version.pipe';
+import { StoneShortVersionPipe } from '~/app/shared/pipes/stone-short-version.pipe';
 
 @Component({
   selector: 'cd-mirroring-daemons',
@@ -24,7 +24,7 @@ export class DaemonListComponent implements OnInit, OnDestroy {
 
   constructor(
     private rbdMirroringService: RbdMirroringService,
-    private cephShortVersionPipe: CephShortVersionPipe
+    private stoneShortVersionPipe: StoneShortVersionPipe
   ) {}
 
   ngOnInit() {
@@ -35,7 +35,7 @@ export class DaemonListComponent implements OnInit, OnDestroy {
       {
         prop: 'version',
         name: $localize`Version`,
-        pipe: this.cephShortVersionPipe,
+        pipe: this.stoneShortVersionPipe,
         flexGrow: 2
       },
       {

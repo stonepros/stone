@@ -13,9 +13,9 @@ using std::stack;
 #include "mds/events/EMetaBlob.h"
 
 #include "include/rados/librados.hpp"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
-using ::ceph::bufferlist;
+using ::stone::bufferlist;
 class MetaTool : public MDSUtility
 {
 public:
@@ -37,7 +37,7 @@ public:
       return _t;
     }
     void decode_json(JSONObj *obj);
-    void encode(::ceph::bufferlist& bl, uint64_t features);
+    void encode(::stone::bufferlist& bl, uint64_t features);
   private:
     snapid_t _f;
     char _t;

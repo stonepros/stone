@@ -95,7 +95,7 @@ class RankEvicter(threading.Thread):
             if ret == 0:
                 return True
             elif ret == -errno.ETIMEDOUT:
-                # Oh no, the MDS went laggy (that's how libcephfs knows to emit this error)
+                # Oh no, the MDS went laggy (that's how libstonefs knows to emit this error)
                 self._mds_map = get_mds_map(self.mgr, self.volname)
                 try:
                     self._wait_for_ready()

@@ -8,10 +8,10 @@ commit b38cbabb2a38e4476de1135c33c25c673d62cd67
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Thu Apr 4 18:23:40 2013 +0200
 
-    ceph.spec.in: fix udev rules.d files handling
+    stone.spec.in: fix udev rules.d files handling
     
-    Move 50-rbd.rules into the ceph base package since the related
-    ceph-rbdnamer binary is part of this package. Use correct install
+    Move 50-rbd.rules into the stone base package since the related
+    stone-rbdnamer binary is part of this package. Use correct install
     pattern.
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
@@ -28,13 +28,13 @@ Date:   Mon Apr 29 17:01:55 2013 -0700
     (cherry picked from commit 030bf8aaa15837f898e453161eeaf1d52fc5779d)
     
     Conflicts:
-    	debian/ceph-mds.postinst
+    	debian/stone-mds.postinst
 
 commit 209ce34a420cc5cdbe7219393f2f150ac28f612c
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Mar 11 17:09:37 2013 -0700
 
-    debian: stop ceph-mds before uninstalling ceph-mds
+    debian: stop stone-mds before uninstalling stone-mds
     
     Fixes: #4384
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -64,7 +64,7 @@ commit fdc05346177a60f064fe351ca81c6078cd065179
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Apr 25 11:13:33 2013 -0700
 
-    init-ceph: use remote config when starting daemons on remote nodes (-a)
+    init-stone: use remote config when starting daemons on remote nodes (-a)
     
     If you use -a to start a remote daemon, assume the remote config is present
     instead of pushing the local config.  This makes more sense and simplifies
@@ -173,7 +173,7 @@ commit 1a6b87ea48c3bcd3904d888a2ad1e5774aa2de8e
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Apr 26 15:37:21 2013 -0700
 
-    ceph.spec.in: put ceph-disk-* et al in correct sbindir
+    stone.spec.in: put stone-disk-* et al in correct sbindir
     
     Signed-off-by: Sage Weil <sage@inktank.com>
 
@@ -181,7 +181,7 @@ commit 86337936059d6b17c887e82f79167324eafa083c
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Apr 26 15:29:12 2013 -0700
 
-    debian: fix ceph.install
+    debian: fix stone.install
     
     This got out of sync somewhere in cherry-picking all of these patches.
     
@@ -191,9 +191,9 @@ commit 0b42b1edb306a9763bcd02bd962bd284f6b7b3a3
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Thu Apr 4 15:54:31 2013 +0200
 
-    Makefile.am: install ceph-* python scripts to /usr/bin directly
+    Makefile.am: install stone-* python scripts to /usr/bin directly
     
-    Install ceph-* scripts directly to $(prefix)$(sbindir) (which
+    Install stone-* scripts directly to $(prefix)$(sbindir) (which
     normaly would be /usr/sbin) instead of moving it around after
     installation in SPEC file or debian files.
     
@@ -204,7 +204,7 @@ commit c71fb8d5b39667fc2c9f7e898ced53059d3f1eec
 Author: Gary Lowell <glowell@inktank.com>
 Date:   Tue Apr 2 12:11:10 2013 -0700
 
-    ceph-disk:  CalledProcessError has no output keyword on 2.6
+    stone-disk:  CalledProcessError has no output keyword on 2.6
     
     Signed-off-by: Gary Lowell  <gary.lowell@inktank.com>
     (cherry picked from commit a793853850ee135de14b9237f7023cadcdb8575c)
@@ -213,7 +213,7 @@ commit 1b86b1c7618b1ab93e25e1abf79bbe0a992c8526
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Apr 2 17:54:53 2013 +0200
 
-    ceph-disk: fix some (local) variable names
+    stone-disk: fix some (local) variable names
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit c4eb7e6ddd593cd45ab8343da01355be7382723e)
@@ -222,7 +222,7 @@ commit ee452ebe6ff37087714c085dacd1ca2bcf66bd49
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Apr 2 17:36:37 2013 +0200
 
-    ceph-disk: fix naming of local variable in is_mounted()
+    stone-disk: fix naming of local variable in is_mounted()
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 3dd8b461219e64bb0f7a210dba5a9ab7c644f014)
@@ -231,7 +231,7 @@ commit 0e47d312dcec2deb26a960e6097708d8742d85cb
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Apr 2 17:33:08 2013 +0200
 
-    ceph-disk: merge twice defined function is_mounted(dev)
+    stone-disk: merge twice defined function is_mounted(dev)
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit eaf31bf9f90ba9709a57a6870dbafa21142dae2c)
@@ -240,7 +240,7 @@ commit 7326ea6397160607d78914444f7f0598a6ba346f
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Apr 2 17:26:12 2013 +0200
 
-    ceph-disk: define exception type
+    stone-disk: define exception type
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 4c6d6442a89adc5b56e99cb4d2ed572f2ad192c9)
@@ -249,7 +249,7 @@ commit 14a348dc8ea9c012b6843825fd7beb5896a6d92e
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Apr 2 17:17:38 2013 +0200
 
-    ceph-disk: fix Redefining name 'uuid' from outer scope
+    stone-disk: fix Redefining name 'uuid' from outer scope
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 058eb923c5b7dab611901fdd1724ce2a7c180827)
@@ -258,7 +258,7 @@ commit 9419dca69292146ea1fd216a1ad08b2e07bdc1a0
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Apr 2 17:14:23 2013 +0200
 
-    ceph-disk: add missing space after comma
+    stone-disk: add missing space after comma
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 0080d1df7c7950e051840a543fc4bdabe6cc53e5)
@@ -267,7 +267,7 @@ commit 7406981aa5515a3be8af0b9a0abef83a40c432b2
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 29 17:30:28 2013 -0700
 
-    ceph-disk list: say 'unknown cluster $UUID' when cluster is unknown
+    stone-disk list: say 'unknown cluster $UUID' when cluster is unknown
     
     This makes it clearer that an old osd is in fact old.
     
@@ -278,7 +278,7 @@ commit 0182973b66d449552d17248e27cd12c470137ea9
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 29 13:59:04 2013 -0700
 
-    ceph-disk: handle missing journal_uuid field gracefully
+    stone-disk: handle missing journal_uuid field gracefully
     
     Only lower if we know it's not None.
     
@@ -289,11 +289,11 @@ commit 24d729c591430349b033992f87141e596dcd6bff
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Mar 28 20:49:24 2013 -0700
 
-    ceph-disk: implement 'list'
+    stone-disk: implement 'list'
     
     This is based on Sandon's initial patch, but much-modified.
     
-    Mounts ceph data volumes temporarily to see what is inside.  Attempts to
+    Mounts stone data volumes temporarily to see what is inside.  Attempts to
     associated journals with osds.
     
     Resolves: #3120
@@ -305,7 +305,7 @@ commit bf3f8702c580c6b9647878837355688a2a4f954c
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Mar 27 18:44:32 2013 -0700
 
-    ceph-disk: reimplement list_all_partitions
+    stone-disk: reimplement list_all_partitions
     
     Use /dev/disk/by-id to list disks and their partitions.  This is more
     accurate and correct than the previous (as-yet unused) implementation.
@@ -317,7 +317,7 @@ commit 9da81e4e798b8e5593f3a7eda6dfa8586307121f
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Mar 27 18:43:59 2013 -0700
 
-    ceph-disk: reimplement is_partition
+    stone-disk: reimplement is_partition
     
     Previously we were assuming any device that ended in a digit was a
     partition, but this is not at all correct (e.g., /dev/sr0, /dev/rbd1).
@@ -333,7 +333,7 @@ commit 0c8efc0664f068a1952fe54b8034d005cf3f9ce8
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Mar 27 12:45:29 2013 -0700
 
-    ceph-disk: conditionally remove mount path
+    stone-disk: conditionally remove mount path
     
     umount removes it on success; only remove it here if it is still there.
     
@@ -344,7 +344,7 @@ commit 153994cdcf9bc4a9719849d951bec5f4983340b5
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Mar 26 17:04:14 2013 -0700
 
-    ceph-disk: ignore udevadm settle return code
+    stone-disk: ignore udevadm settle return code
     
     If we time out, just continue and let the next step fail.
     
@@ -355,7 +355,7 @@ commit d714049d530dc9611cf5f2fcb9b272c355dbe9f1
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Mon Mar 25 17:45:32 2013 +0100
 
-    ceph-disk: rename some local variabels in list_*partitions
+    stone-disk: rename some local variabels in list_*partitions
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit b7d7e6894c550a7afa8dfb5bfa2bc54b5d331178)
@@ -364,7 +364,7 @@ commit ecb34b81b843adaf9455503eb3ecc69ea94652a3
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Mon Mar 25 16:24:00 2013 +0100
 
-    ceph-disk: fix naming of a local variable in find_cluster_by_uuid
+    stone-disk: fix naming of a local variable in find_cluster_by_uuid
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 0b5fcfffe6d2f69bd4318cc93ef73195d948b9c5)
@@ -373,7 +373,7 @@ commit 63eb85072f6a61552725bd04dfb261e5cd52a60a
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Mon Mar 25 16:18:17 2013 +0100
 
-    ceph-disk: rename some constants to upper case variable names
+    stone-disk: rename some constants to upper case variable names
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 8a999ded088e688fd3f4a7c27127b7c06f0b2f66)
@@ -382,7 +382,7 @@ commit d26a03422a37f16d609de12f8973f3c32ffedae0
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Mon Mar 25 16:15:29 2013 +0100
 
-    ceph-disk: add some more docstrings
+    stone-disk: add some more docstrings
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 86e55f5448c4b5b46b74d2d89b01d1e64b1ea826)
@@ -391,7 +391,7 @@ commit bd8bb984806a1dbc3514c3a2a8980a03cfb2bc23
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Mon Mar 25 14:36:41 2013 +0100
 
-    ceph-disk: print subprocess.CalledProcessError on error
+    stone-disk: print subprocess.CalledProcessError on error
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 543327b1f2a9efe8083bb196433c4bcf83883269)
@@ -400,7 +400,7 @@ commit 970348fc46a7e100731ffdc63d20f343dcb1b787
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Mon Mar 25 13:55:56 2013 +0100
 
-    ceph-disk: fix indention
+    stone-disk: fix indention
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 2d26bcc07162a5176cdbc1748b829e3f39653697)
@@ -409,7 +409,7 @@ commit 0113e5335e1552294bbf075cfff85c204b164e95
 Author: Gary Lowell <glowell@inktank.com>
 Date:   Tue Mar 26 11:31:16 2013 -0700
 
-    ceph-disk:  udevadm settle before partprobe
+    stone-disk:  udevadm settle before partprobe
     
     After changing the partition table, allow the udev event to be
     processed before calling partprobe.  This helps prevent partprobe
@@ -422,7 +422,7 @@ commit 02d48351f73330917185d8980f8ad123b99138b5
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 22 10:09:55 2013 -0700
 
-    ceph-disk: re-add python 2.7 dependency comment
+    stone-disk: re-add python 2.7 dependency comment
     
     FIXME!
     
@@ -433,7 +433,7 @@ commit e92baf5081a43ff3290eb934612a11fbed946469
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Wed Mar 20 14:36:58 2013 +0100
 
-    ceph-disk: cast output of subprocess.Popen() to str()
+    stone-disk: cast output of subprocess.Popen() to str()
     
     Cast output of subprocess.Popen() to str() to be able to use
     str.split() and str.splitlines() without warnings from pylint.
@@ -445,7 +445,7 @@ commit 1ffc89af1954643426708987a09291463bd7525b
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Wed Mar 20 14:02:28 2013 +0100
 
-    ceph-disk: fix adjust_symlink() replace 'journal' with 'target'
+    stone-disk: fix adjust_symlink() replace 'journal' with 'target'
     
     Replace 'journal' variable with 'target' since journal doesn't
     exist in this function.
@@ -457,7 +457,7 @@ commit 690ab6b3e284e9beed74b3e77612e804464e467d
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Wed Mar 20 14:01:02 2013 +0100
 
-    ceph-disk: fix adjust_symlink() replace 'canonical' with 'path'
+    stone-disk: fix adjust_symlink() replace 'canonical' with 'path'
     
     Replace 'canonical' variable with 'path' since canonical doesn't
     exist in this function.
@@ -469,7 +469,7 @@ commit 329f279cd108c837e434ee3aae6c8ad502ba802f
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Wed Mar 20 13:56:23 2013 +0100
 
-    ceph-disk: there is no os.path.lstat use os.lstat
+    stone-disk: there is no os.path.lstat use os.lstat
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 6d3247b5c02c39a66666a5833106dbc23044e436)
@@ -478,7 +478,7 @@ commit ffe024b8b5024cdac256bacb9df433b69385cc0a
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Wed Mar 20 13:30:21 2013 +0100
 
-    ceph-disk: remove unused variable key from prepare_journal_dev()
+    stone-disk: remove unused variable key from prepare_journal_dev()
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 97b4f8d66bef2328fa53f9e508eb38f8b8d49632)
@@ -487,7 +487,7 @@ commit 9464284f3ac9737345c595847e165db48adc0a70
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Wed Mar 20 13:27:27 2013 +0100
 
-    ceph-disk: fix except to catch OSError
+    stone-disk: fix except to catch OSError
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 9daf6cfce2d57509d896eae28bb97146a682a306)
@@ -496,7 +496,7 @@ commit 01152115f7bf4a307296c9126174ce09bb0ce22d
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Wed Mar 20 13:15:36 2013 +0100
 
-    ceph-disk: add missing space after >> operator
+    stone-disk: add missing space after >> operator
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 0ada43f79d2b1f9f84367e558c6d1a3e90e5c9b2)
@@ -514,7 +514,7 @@ commit 6fa6cd85b55935739e16b8ba537f7848dbb0218f
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Wed Mar 20 12:17:45 2013 +0100
 
-    ceph-disk: remove unused variables from list_partitions()
+    stone-disk: remove unused variables from list_partitions()
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 6a8120d4b0c4cfa851d473532eb2366534f8653d)
@@ -523,7 +523,7 @@ commit 0b4e85fe23e8aa24e8aef8548df2b508bda24752
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Wed Mar 20 12:10:22 2013 +0100
 
-    ceph-disk: fix /dev/dm-[0-9] handling list_all_partitions()
+    stone-disk: fix /dev/dm-[0-9] handling list_all_partitions()
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 3af7a1ac5bf24bf832d7180002281d6b5853e85a)
@@ -532,7 +532,7 @@ commit 3ec61f85f6a8a8af8a2b921f94e77a77be77a1d7
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Mar 19 22:07:36 2013 +0100
 
-    ceph-disk: rename local variable shadowing builtin
+    stone-disk: rename local variable shadowing builtin
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 9bcf5b64f45ab6c4bdedf820ed111319b2dbd778)
@@ -541,7 +541,7 @@ commit bd1036dd83fa2ee4807047fb9c2b414ccc9375eb
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Mar 19 22:05:23 2013 +0100
 
-    ceph-disk: remove twice defined identical function unmount
+    stone-disk: remove twice defined identical function unmount
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 4adf088107586be7b356d1e963570cdab232809e)
@@ -550,7 +550,7 @@ commit 8dd8cbac6f88fcb9d2c6838b9f961c70cccb9288
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Mar 19 22:02:49 2013 +0100
 
-    ceph-disk: remove twice defined function mount
+    stone-disk: remove twice defined function mount
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit ea26ea0d81a23aa76076ad5441c3b1aadfba3b44)
@@ -559,7 +559,7 @@ commit 0da87db1c0e4b44b69c19b718d89e7a621979009
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Mar 19 21:58:22 2013 +0100
 
-    ceph-disk: remove double defined function get_conf
+    stone-disk: remove double defined function get_conf
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit c57daa3c6e03e8974e133d3a2d9bc3d6f06f4faf)
@@ -568,7 +568,7 @@ commit 9c46dfb2512d3b55345faed1bebb9204ba07d030
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Mar 19 21:51:54 2013 +0100
 
-    ceph-disk: rename local variable shadowing builtin
+    stone-disk: rename local variable shadowing builtin
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 57dde5c8b18ff4ccd53a30bb94119c0ffceb52b7)
@@ -577,20 +577,20 @@ commit b807d8ba0a0c23c7dab6893bc5297e07c0fd902f
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Mar 18 14:55:24 2013 -0700
 
-    ceph-disk: install and package
+    stone-disk: install and package
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit c2602d749023b24ac22d8cfce6e04889078f14d8)
     
     Conflicts:
     
-    	debian/ceph.install
+    	debian/stone.install
 
 commit 8901e02db05837b12d5e1d0ec6f14f909cc03315
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 15 16:50:05 2013 -0700
 
-    ceph-disk: simplify command dispatch
+    stone-disk: simplify command dispatch
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit f287c6f90af0dfdd41358846b069aa3c54b600b3)
@@ -599,7 +599,7 @@ commit 3cbc0d0c92ad19d5022c94d9d1ac00aff4eb9b2d
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 15 16:40:32 2013 -0700
 
-    ceph-disk: consolidate exceptions
+    stone-disk: consolidate exceptions
     
     Use a single exception type, and catch it at the top level.
     
@@ -610,11 +610,11 @@ commit b4176bafa2b0721664332a1bb8b73da54151f685
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 15 16:36:45 2013 -0700
 
-    ceph-disk: consolidate ceph-disk-* into a single binary
+    stone-disk: consolidate stone-disk-* into a single binary
     
-     ceph-disk prepare ...
-     ceph-disk activate ...
-     ceph-disk ...
+     stone-disk prepare ...
+     stone-disk activate ...
+     stone-disk ...
     
     This let's us share code (we were already duplicating a bunch of stuff!)
     and to add new commands easily.
@@ -626,7 +626,7 @@ commit 455cb32543df8036a605dc7b6c194e58b10bc4ec
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Mar 18 21:13:34 2013 -0700
 
-    ceph-disk-prepare: 'mkfs -t' instead of 'mkfs --type='
+    stone-disk-prepare: 'mkfs -t' instead of 'mkfs --type='
     
     Older mkfs (el6) doesn't like --type=.
     
@@ -639,14 +639,14 @@ commit 19a2cf58504a3305ac9afe3d6642cf68e1b0f6c1
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Mar 14 21:05:07 2013 -0700
 
-    ceph-disk-activate: identify cluster .conf by fsid
+    stone-disk-activate: identify cluster .conf by fsid
     
     Determine what cluster the disk belongs to by checking the fsid defined
-    in /etc/ceph/*.conf.  Previously we hard-coded 'ceph'.
+    in /etc/stone/*.conf.  Previously we hard-coded 'stone'.
     
     Note that this has the nice side-effect that if we have a disk with a
     bad/different fsid, we now fail to activate it.  Previously, we would
-    mount and start ceph-osd, but the daemon would fail to authenticate
+    mount and start stone-osd, but the daemon would fail to authenticate
     because it was part of the wrong cluster.
     
     Fixes: #3253
@@ -657,7 +657,7 @@ commit 568485bea8ae9f0f36571de259c7254fa4227b15
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Mar 14 16:18:26 2013 -0700
 
-    ceph-disk-activate: abort if target position is already mounted
+    stone-disk-activate: abort if target position is already mounted
     
     If the target position is already a mount point, fail to move our mount
     over to it.  This usually indicates that a different osd.N from a
@@ -670,7 +670,7 @@ commit a6ecf9288af248656bc712c1a4de910ff107a9a2
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Mar 14 12:05:52 2013 -0700
 
-    Revert "ceph-disk-activate: rely on default/configured keyring path"
+    Revert "stone-disk-activate: rely on default/configured keyring path"
     
     This reverts commit 936b8f20af1d390976097c427b6e92da4b39b218.
     
@@ -683,7 +683,7 @@ commit 7c1edc0c927a27c07b6f1611c2cf9c48f2dc95f6
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Mar 14 12:04:44 2013 -0700
 
-    Revert "ceph-disk-activate: don't override default or configured osd journal path"
+    Revert "stone-disk-activate: don't override default or configured osd journal path"
     
     This reverts commit 813e9fe2b4291a1c1922ef78f031daa9b78fe53b.
     
@@ -691,7 +691,7 @@ Date:   Thu Mar 14 12:04:44 2013 -0700
     necessary to explicitly pass in these paths.
     
     If we want to support journals in a different location, we need to make
-    ceph-disk-prepare update the journal symlink accordingly.. not control it via
+    stone-disk-prepare update the journal symlink accordingly.. not control it via
     the config option.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -701,7 +701,7 @@ commit 739b013cfa4b84d36750b80ce44579498e7ea4f4
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Mar 11 21:15:11 2013 -0700
 
-    ceph-disk-activate: rely on default/configured keyring path
+    stone-disk-activate: rely on default/configured keyring path
     
     No reason to override the default or configured value here.
     
@@ -712,7 +712,7 @@ commit 897413f90c0e802c6824c0ee8d06bdae33979293
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Mar 11 21:14:53 2013 -0700
 
-    ceph-disk-activate: don't override default or configured osd journal path
+    stone-disk-activate: don't override default or configured osd journal path
     
     There is no reason not to rely on the default or obey any configured
     value here.
@@ -725,7 +725,7 @@ commit 35eac085182e569b17c287c86e1415880909be22
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Mar 5 13:08:26 2013 -0800
 
-    ceph-disk-prepare: move in-use checks to the top, before zap
+    stone-disk-prepare: move in-use checks to the top, before zap
     
     Move the in-use checks to the very top, before we (say) zap!
     
@@ -736,7 +736,7 @@ commit 5ad4120a4825d6615778a005cff990afccf30691
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Mar 4 20:57:52 2013 -0800
 
-    ceph-disk-prepare: verify device is not in use by device-mapper
+    stone-disk-prepare: verify device is not in use by device-mapper
     
     Be nice and tell the user which devices/mappings are consuming the device,
     too.
@@ -748,7 +748,7 @@ commit e4a520029196cc76f1ec45695554ca6330bf14aa
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Mar 4 16:38:57 2013 -0800
 
-    ceph-disk-prepare: verify device is not mounted before using
+    stone-disk-prepare: verify device is not mounted before using
     
     Make sure the data and/or journal device(s) are not in use (mounted)
     before using them.  Make room for additional "in-use" checks in the future.
@@ -761,7 +761,7 @@ commit d05b439142a24d28f35c6a09a8ab7c9eed503cd5
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Mar 4 16:29:57 2013 -0800
 
-    ceph-disk-prepare: clean up stupid check for a digit
+    stone-disk-prepare: clean up stupid check for a digit
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit f03f62697f170d42b4b62c53d2860ff2f24a2d73)
@@ -770,7 +770,7 @@ commit ea07b0e1047a4ac1b4dde88c795709190bd048be
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Mar 4 16:08:15 2013 -0800
 
-    ceph-disk-prepare: use os.path.realpath()
+    stone-disk-prepare: use os.path.realpath()
     
     My janky symlink resolution is broken in various ways.
     
@@ -781,9 +781,9 @@ commit 8f7e3e7dbbb9cab869366927c1687c38c012a1ef
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Thu Feb 28 14:16:26 2013 +0100
 
-    ceph.spec.in: add new Requires from ceph-disk-prepare
+    stone.spec.in: add new Requires from stone-disk-prepare
     
-    Added new Requires from ceph-disk-prepare: cryptsetup, gptfdisk,
+    Added new Requires from stone-disk-prepare: cryptsetup, gptfdisk,
     parted and util-linux.
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
@@ -791,7 +791,7 @@ Date:   Thu Feb 28 14:16:26 2013 +0100
     
     Conflicts:
     
-    	ceph.spec.in
+    	stone.spec.in
 
 commit 3441acf3749dbd99f1e00e5306e8180647085d2a
 Author: Sage Weil <sage@inktank.com>
@@ -799,7 +799,7 @@ Date:   Wed Feb 27 13:31:12 2013 -0800
 
     debian: require cryptsetup-bin
     
-    This is needed for ceph-disk-prepare's dmcrypt support.
+    This is needed for stone-disk-prepare's dmcrypt support.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit cfcaceac44d6b7b7c55e81d0bfb05f4893f3b1d0)
@@ -824,7 +824,7 @@ commit d1775daf68d9aa887116a357cbcaf7c44e091cce
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Feb 16 20:55:03 2013 -0800
 
-    ceph-disk-prepare: -f for mkfs.xfs only
+    stone-disk-prepare: -f for mkfs.xfs only
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit fecc3c3abf1176f4c7938e161559ea2db59f1cff)
@@ -833,9 +833,9 @@ commit 405e0ea1c692b1d62f948734e07c4f919b90d4e0
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Feb 16 16:49:50 2013 -0800
 
-    debian: fix start of ceph-all
+    debian: fix start of stone-all
     
-    Tolerate failure, and do ceph-all, not ceph-osd-all.
+    Tolerate failure, and do stone-all, not stone-osd-all.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit aff0bb6fdc8ca358f7ac1e941bb9cfecbefb4bb6)
@@ -844,7 +844,7 @@ commit 632be442261cabd56da0dc897b8a47a8e5493dce
 Author: Alexandre Marangone <alexandre.marangone@inktank.com>
 Date:   Fri Feb 15 12:24:01 2013 -0800
 
-    ceph-disk-prepare: always force mkfs.xfs
+    stone-disk-prepare: always force mkfs.xfs
     
     Signed-off-by: Alexandre Marangone <alexandre.marangone@inktank.com>
     (cherry picked from commit d950d83250db3a179c4b629fd32cd7bc8149997e)
@@ -858,9 +858,9 @@ Date:   Wed Feb 13 18:22:45 2013 -0800
     Automatically map encrypted journal partitions.
     
     For encrypted OSD partitions, map them, wait for the mapped device to
-    appear, and then ceph-disk-activate.
+    appear, and then stone-disk-activate.
     
-    This is much simpler than doing the work in ceph-disk-activate.
+    This is much simpler than doing the work in stone-disk-activate.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit e090a92a20f4161f473d16bc966f7d6aacac75ee)
@@ -869,9 +869,9 @@ commit 5c5021b43ab70a08d791020262f76879dc77effb
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Feb 12 21:35:56 2013 -0800
 
-    ceph-disk-prepare: add initial support for dm-crypt
+    stone-disk-prepare: add initial support for dm-crypt
     
-    Keep keys in /etc/ceph/dmcrypt-keys.
+    Keep keys in /etc/stone/dmcrypt-keys.
     
     Identify partition instances by the partition UUID.  Identify encrypted
     partitions by a parallel set of type UUIDs.
@@ -884,7 +884,7 @@ commit d7084037d7a2395acfe8181f94963c1337c0f95b
 Author: Alexandre Marangone <alexandre.marangone@inktank.com>
 Date:   Fri Feb 15 12:22:33 2013 -0800
 
-    ceph-disk-activate: pull mount options from ceph.conf
+    stone-disk-activate: pull mount options from stone.conf
     
     Signed-off-by: Alexandre Marangone <alexandre.marangone@inktank.com>
     (cherry picked from commit e7040f55f01db3de7d5cebfc79de50c8b6ad5d45)
@@ -893,7 +893,7 @@ commit 34fba357ca8b662c7b943d426ed37875c173003f
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Feb 14 17:05:32 2013 -0800
 
-    ceph-disk-activate: use full paths for everything
+    stone-disk-activate: use full paths for everything
     
     We are run from udev, which doesn't get a decent PATH.
     
@@ -904,7 +904,7 @@ commit caad18745cd8553a012d9e7f92e59d5b4450dcf2
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Feb 14 17:04:55 2013 -0800
 
-    ceph-disk-prepare: do partprobe after setting final partition type
+    stone-disk-prepare: do partprobe after setting final partition type
     
     This is necessary to kick udev into processing the updated partition and
     running its rules.
@@ -916,11 +916,11 @@ commit e1624e4626b4e67909f3bb83920c99ad323ed083
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Feb 13 21:47:30 2013 -0800
 
-    debian: start/stop ceph-all event on install/uninstall
+    debian: start/stop stone-all event on install/uninstall
     
     This helps us avoid the confusing situation with upstart where an individual
-    daemon job is running (like ceph-osd id=2) but the container jobs ceph-osd-all
-    and ceph-all are not.
+    daemon job is running (like stone-osd id=2) but the container jobs stone-osd-all
+    and stone-all are not.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit b7b9af5c0d531dcee7ce9b10043a29b0a1b31f47)
@@ -929,7 +929,7 @@ commit 656305f65eb33d68b95f4d29f37b031cf6cf889a
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Feb 13 21:37:08 2013 -0800
 
-    ceph-disk-activate: catch daemon start errors
+    stone-disk-activate: catch daemon start errors
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit 690ae05309db118fb3fe390a48df33355fd068a0)
@@ -938,7 +938,7 @@ commit 8b771bf929c4a9ab3fd4eb6f40b9222a463fd1a4
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Feb 13 17:30:19 2013 -0800
 
-    udev: trigger ceph-disk-activate directly from udev
+    udev: trigger stone-disk-activate directly from udev
     
     There is no need to depend on upstart for this.
     
@@ -947,15 +947,15 @@ Date:   Wed Feb 13 17:30:19 2013 -0800
     
     Conflicts:
     
-    	ceph.spec.in
+    	stone.spec.in
 
 commit ffb0613efaa9cf919992640322785eedf95ca25f
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Feb 13 16:02:10 2013 -0800
 
-    ceph-disk-activate: auto detect init system
+    stone-disk-activate: auto detect init system
     
-    Look for an option 'init' in ceph.conf.  Otherwise, check if we're ubuntu.
+    Look for an option 'init' in stone.conf.  Otherwise, check if we're ubuntu.
     If so, use upstart.  Otherwise, use sysvinit.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -965,7 +965,7 @@ commit 74b562703c422890c67b2a88d7b18242f64949dc
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Feb 13 15:49:42 2013 -0800
 
-    ceph-disk-activate: specify full path for blkid, initctl, service
+    stone-disk-activate: specify full path for blkid, initctl, service
     
     /sbin apparently isn't in the path when udev runs us.
     
@@ -976,7 +976,7 @@ commit 9ea32e5f066bee75923212d8009fb37a365ef32e
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jan 26 19:18:23 2013 -0800
 
-    upstart: ceph-hotplug -> ceph-osd-activate
+    upstart: stone-hotplug -> stone-osd-activate
     
     This is a more meaningful name.
     
@@ -987,7 +987,7 @@ commit 494533a55010a59a52f6dcbe64f76e677a7dfe8e
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jan 26 19:14:22 2013 -0800
 
-    upstart/ceph-hotplug: tell activate to start via upstart
+    upstart/stone-hotplug: tell activate to start via upstart
     
     This will mark the OSD data dir as upstart-managed.
     
@@ -998,7 +998,7 @@ commit 5e0892fd8cbc2571d94cffc0b64daaa4ec6c38f8
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jan 26 19:08:22 2013 -0800
 
-    ceph-disk-prepare: refactor to support DIR, DISK, or PARTITION for data or journal
+    stone-disk-prepare: refactor to support DIR, DISK, or PARTITION for data or journal
     
     Lots of code reorganization collapsed into a single commit here.
     
@@ -1014,9 +1014,9 @@ commit aa428017e4aad9872a54cd87036ef2bb528aac7b
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jan 26 20:33:16 2013 -0800
 
-    ceph-disk-activate: detect whether PATH is mount or dir
+    stone-disk-activate: detect whether PATH is mount or dir
     
-    remove in-the-way symlinks in /var/lib/ceph/osd
+    remove in-the-way symlinks in /var/lib/stone/osd
     
     This is simpler.  Just detect what the path is and Do The Right Thing.
     
@@ -1029,7 +1029,7 @@ commit e6d5aa053dbaaf07c94e35406c23f4ca009fe2da
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jan 26 20:32:47 2013 -0800
 
-    ceph-disk-activate: add --mark-init INITSYSTEM option
+    stone-disk-activate: add --mark-init INITSYSTEM option
     
     Do not assume we will manage via upstart; let that be passed down via the
     command line.
@@ -1041,7 +1041,7 @@ commit fa23919eae363291b4807afe3fadd34f94e9ddcb
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jan 26 14:44:26 2013 -0800
 
-    ceph-disk-activate: factor mounting out of activate
+    stone-disk-activate: factor mounting out of activate
     
     The activate stuff is generic for any OSD, regardless of whether we want
     to mount it or not.  Pull that part out.
@@ -1053,7 +1053,7 @@ commit 181ebdee0addfe3d13c13342def94ecf9415d6d5
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Feb 12 18:17:55 2013 -0800
 
-    debian: put ceph-mds upstart conf in ceph-mds package
+    debian: put stone-mds upstart conf in stone-mds package
     
     Fixes: #3157
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -1063,7 +1063,7 @@ commit 919b0aedf7286e85e6ddc23f99f80f29e1d35db6
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Feb 12 17:02:52 2013 -0800
 
-    debian: include /var/lib/ceph/bootstrap-mds in package
+    debian: include /var/lib/stone/bootstrap-mds in package
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit e80675a0f333c04452d4822fd0eb3c6e92eda3df)
@@ -1072,7 +1072,7 @@ commit f97f49b1e7ca8555c945b93fbc8241f5fa620dd8
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Feb 12 16:26:14 2013 -0800
 
-    ceph-create-keys: create mds bootstrap key
+    stone-create-keys: create mds bootstrap key
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit 809143f16c70483ba5bb429dea812d31b67f2b49)
@@ -1081,11 +1081,11 @@ commit f43c339d67b78e6afc3737d26cea4bc05dcea900
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jan 26 14:45:43 2013 -0800
 
-    upstart/ceph-hotplug: drop -- in ceph-disk-activate args
+    upstart/stone-hotplug: drop -- in stone-disk-activate args
     
     We would like to transition to
     
-     ceph-disk-activate --mount DEV
+     stone-disk-activate --mount DEV
     
     and away from a generic multi-definition PATH argument.
     
@@ -1096,9 +1096,9 @@ commit 39df4c81f2166b7e9ac89c591b268b60de4042e6
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jan 25 22:53:23 2013 -0800
 
-    init-ceph: iterate/locate local sysvinit-tagged directories
+    init-stone: iterate/locate local sysvinit-tagged directories
     
-    Search /var/lib/ceph/$type/ceph-$id and start/stop those daemons if
+    Search /var/lib/stone/$type/stone-$id and start/stop those daemons if
     present and tagged with the sysvinit file.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -1108,10 +1108,10 @@ commit 05efb7ab5b289472a1af05d6aa100a7385be304e
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jan 25 22:52:03 2013 -0800
 
-    init-ceph: consider sysvinit-tagged dirs as local
+    init-stone: consider sysvinit-tagged dirs as local
     
     If there is a 'sysvinit' file in the daemon directory in the default
-    location (/var/lib/ceph/$type/ceph-$id), consider it sysvinit-managed.
+    location (/var/lib/stone/$type/stone-$id), consider it sysvinit-managed.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit b8aa4769a62e0d88174678cbefd89d9ee2baceea)
@@ -1120,7 +1120,7 @@ commit 8c4c53abf84d30ff4a605225a22575f56d946971
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Feb 11 17:39:03 2013 -0800
 
-    ceph-disk-prepare: align mkfs, mount config options with mkcephfs
+    stone-disk-prepare: align mkfs, mount config options with mkstonefs
     
     'osd mkfs ...', not 'osd fs mkfs ...'.  Sigh.  Support both.
     
@@ -1131,7 +1131,7 @@ commit a8e7e9df61a7229d9e2b4b4dedc68b5c1bf15c38
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Apr 23 10:00:38 2013 -0700
 
-    init-ceph: fix (and simplify) pushing ceph.conf to remote unique name
+    init-stone: fix (and simplify) pushing stone.conf to remote unique name
     
     The old code would only do the push once per remote node (due to the
     list in $pushed_to) but would reset $unique on each attempt.  This would
@@ -1149,7 +1149,7 @@ Merge: b6b4ebe aa37726
 Author: Josh Durgin <josh.durgin@inktank.com>
 Date:   Tue Apr 23 12:04:45 2013 -0700
 
-    Merge pull request #238 from ceph/wip-bobtail-rbd-backports-req-order
+    Merge pull request #238 from stone/wip-bobtail-rbd-backports-req-order
     
     Reviewed-by: Sage Weil <sage.weil@inktank.com>
 
@@ -1746,7 +1746,7 @@ commit c073bd25610ba556f3b30e6c583d1d74a10f09e2
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Apr 19 13:05:43 2013 -0700
 
-    init-ceph: do not stop start on first failure
+    init-stone: do not stop start on first failure
     
     When starting we often loop over many daemon instances.  Currently we stop
     on the first error and do not try to start other daemons.
@@ -1760,7 +1760,7 @@ Date:   Fri Apr 19 13:05:43 2013 -0700
     
     Conflicts:
     
-    	src/init-ceph.in
+    	src/init-stone.in
 
 commit daa6ed2bfe790f83f986f51d0917d6268d3e9d78
 Merge: 1d0bf61 9fe57e2
@@ -1806,7 +1806,7 @@ commit 3769250acf42a751ee8dfa95207a4ffafd25574a
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Mon Apr 8 13:49:22 2013 -0700
 
-    ceph_argparse: add _daemon versions of argparse calls
+    stone_argparse: add _daemon versions of argparse calls
     
     mon needs to call argparse for a couple of -- options, and the
     argparse_witharg routines were attempting to cerr/exit on missing

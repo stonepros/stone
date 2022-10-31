@@ -33,7 +33,7 @@ PROGNAME=$(basename $0)
 
 # xfstests is downloaded from this git repository and then built.
 # XFSTESTS_REPO="git://oss.sgi.com/xfs/cmds/xfstests.git"
-XFSTESTS_REPO="git://git.ceph.com/xfstests.git"
+XFSTESTS_REPO="git://git.stone.com/xfstests.git"
 
 # Default command line option values
 COUNT="1"
@@ -245,13 +245,13 @@ function parseargs() {
 
 ################################################################
 
-[ -z "$TESTDIR" ] && export TESTDIR="/tmp/cephtest"
+[ -z "$TESTDIR" ] && export TESTDIR="/tmp/stonetest"
 
 # Set up some environment for normal teuthology test setup.
 # This really should not be necessary but I found it was.
-export CEPH_ARGS="--conf ${TESTDIR}/ceph.conf"
-export CEPH_ARGS="${CEPH_ARGS} --keyring ${TESTDIR}/data/client.0.keyring"
-export CEPH_ARGS="${CEPH_ARGS} --name client.0"
+export STONE_ARGS="--conf ${TESTDIR}/stone.conf"
+export STONE_ARGS="${STONE_ARGS} --keyring ${TESTDIR}/data/client.0.keyring"
+export STONE_ARGS="${STONE_ARGS} --name client.0"
 
 export LD_LIBRARY_PATH="${TESTDIR}/binary/usr/local/lib:${LD_LIBRARY_PATH}"
 export PATH="${TESTDIR}/binary/usr/local/bin:${PATH}"

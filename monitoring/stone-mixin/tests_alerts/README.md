@@ -11,7 +11,7 @@ The alert rules should adhere to the following principles
 - alerts that have a corresponding section within docs.ceph.com must include a 
   documentation field in the annotations section
 - critical alerts should declare an oid in the labels section
-- critical alerts should have a corresponding entry in the Ceph MIB
+- critical alerts should have a corresponding entry in the Stone MIB
 
 &nbsp;
 ## Testing Prometheus Rules
@@ -58,12 +58,12 @@ Problem Report
   -----       --------  ----------                                          -------------------
   cephadm     Warning   Cluster upgrade has failed                          critical level alert is missing an SNMP oid entry
   cephadm     Warning   A daemon managed by cephadm is down                 critical level alert is missing an SNMP oid entry
-  mds         Warning   Ceph Filesystem damage detected                     critical level alert is missing an SNMP oid entry
-  mds         Warning   Ceph Filesystem switched to READ ONLY               critical level alert is missing an SNMP oid entry
+  mds         Warning   Stone Filesystem damage detected                     critical level alert is missing an SNMP oid entry
+  mds         Warning   Stone Filesystem switched to READ ONLY               critical level alert is missing an SNMP oid entry
   mgr         Warning   mgr module failure                                  critical level alert is missing an SNMP oid entry
   mgr         Warning   mgr prometheus module is not active                 critical level alert is missing an SNMP oid entry
   mon         Error     Monitor down, quorum is at risk                     documentation link error: #mon-downwah not found on the page
-  mon         Warning   Ceph mon disk space critically low                  critical level alert is missing an SNMP oid entry
+  mon         Warning   Stone mon disk space critically low                  critical level alert is missing an SNMP oid entry
   nodes       Error     network packets dropped                             invalid alert structure. Missing field: for
   nodes       Error     network packet errors                               invalid alert structure. Missing field: for
   nodes       Error     storage filling up                                  invalid alert structure. Missing field: for
@@ -78,8 +78,8 @@ Problem Report
   pgs         Warning   Cluster too full, automatic data recovery impaired  critical level alert is missing an SNMP oid entry
   pools       Error     pool full                                           invalid alert structure. Missing field: for
   pools       Error     pool filling up (growth forecast)                   invalid alert structure. Missing field: for
-  pools       Error     Ceph pool is too full for recovery/rebalance        invalid alert structure. Missing field: for
-  pools       Warning   Ceph pool is full - writes blocked                  critical level alert is missing an SNMP oid entry
+  pools       Error     Stone pool is too full for recovery/rebalance        invalid alert structure. Missing field: for
+  pools       Warning   Stone pool is full - writes blocked                  critical level alert is missing an SNMP oid entry
   prometheus  Warning   Scrape job is missing                               critical level alert is missing an SNMP oid entry
   rados       Warning   Data not found/missing                              critical level alert is missing an SNMP oid entry
 

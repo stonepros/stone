@@ -5,7 +5,7 @@ set -e
 
 KERNEL=linux-4.0.5
 
-wget -q http://download.ceph.com/qa/$KERNEL.tar.xz
+wget -q http://download.stone.com/qa/$KERNEL.tar.xz
 
 mkdir untar_tar
 cd untar_tar

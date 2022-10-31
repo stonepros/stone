@@ -1,18 +1,18 @@
 """
-CephFS sub-tasks.
+StoneFS sub-tasks.
 """
 
 import logging
 import re
 
-from tasks.cephfs.filesystem import Filesystem, MDSCluster
+from tasks.stonefs.filesystem import Filesystem, MDSCluster
 
 log = logging.getLogger(__name__)
 
-# Everything up to CEPH_MDSMAP_ALLOW_STANDBY_REPLAY
-CEPH_MDSMAP_ALLOW_STANDBY_REPLAY = (1<<5)
-CEPH_MDSMAP_LAST = CEPH_MDSMAP_ALLOW_STANDBY_REPLAY
-UPGRADE_FLAGS_MASK = ((CEPH_MDSMAP_LAST<<1) - 1)
+# Everything up to STONE_MDSMAP_ALLOW_STANDBY_REPLAY
+STONE_MDSMAP_ALLOW_STANDBY_REPLAY = (1<<5)
+STONE_MDSMAP_LAST = STONE_MDSMAP_ALLOW_STANDBY_REPLAY
+UPGRADE_FLAGS_MASK = ((STONE_MDSMAP_LAST<<1) - 1)
 def pre_upgrade_save(ctx, config):
     """
     That the upgrade procedure doesn't clobber state: save state.
@@ -61,7 +61,7 @@ def post_upgrade_checks(ctx, config):
         assert pre_upgrade_epoch < epoch
         should_decrease_max_mds = fs_state['max_mds'] > 1
         did_decrease_max_mds = False
-        should_disable_allow_standby_replay = fs_state['flags'] & CEPH_MDSMAP_ALLOW_STANDBY_REPLAY
+        should_disable_allow_standby_replay = fs_state['flags'] & STONE_MDSMAP_ALLOW_STANDBY_REPLAY
         did_disable_allow_standby_replay = False
         for i in range(pre_upgrade_epoch+1, mdsmap['epoch']):
             old_status = mdsc.status(epoch=i)
@@ -70,7 +70,7 @@ def post_upgrade_checks(ctx, config):
             if should_decrease_max_mds and old_mdsmap['max_mds'] == 1:
                 log.debug(f"max_mds reduced in epoch {i}")
                 did_decrease_max_mds = True
-            if should_disable_allow_standby_replay and not (old_mdsmap['flags'] & CEPH_MDSMAP_ALLOW_STANDBY_REPLAY):
+            if should_disable_allow_standby_replay and not (old_mdsmap['flags'] & STONE_MDSMAP_ALLOW_STANDBY_REPLAY):
                 log.debug(f"allow_standby_replay disabled in epoch {i}")
                 did_disable_allow_standby_replay = True
         assert not should_decrease_max_mds or did_decrease_max_mds

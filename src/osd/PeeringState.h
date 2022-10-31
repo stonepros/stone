@@ -13,7 +13,7 @@
 #include <string>
 #include <atomic>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/common_fwd.h"
 
 #include "PGLog.h"
@@ -45,14 +45,14 @@ struct PGPool {
 
   void update(OSDMapRef map);
 
-  ceph::timespan get_readable_interval(ConfigProxy &conf) const {
+  stone::timespan get_readable_interval(ConfigProxy &conf) const {
     double v = 0;
     if (info.opts.get(pool_opts_t::READ_LEASE_INTERVAL, &v)) {
-      return ceph::make_timespan(v);
+      return stone::make_timespan(v);
     } else {
       auto hbi = conf->osd_heartbeat_grace;
       auto fac = conf->osd_pool_default_read_lease_ratio;
-      return ceph::make_timespan(hbi * fac);
+      return stone::make_timespan(hbi * fac);
     }
   }
 };
@@ -61,13 +61,13 @@ struct PeeringCtx;
 
 // [primary only] content recovery state
 struct BufferedRecoveryMessages {
-  ceph_release_t require_osd_release;
+  stone_release_t require_osd_release;
   std::map<int, std::vector<MessageRef>> message_map;
 
-  BufferedRecoveryMessages(ceph_release_t r)
+  BufferedRecoveryMessages(stone_release_t r)
     : require_osd_release(r) {
   }
-  BufferedRecoveryMessages(ceph_release_t r, PeeringCtx &ctx);
+  BufferedRecoveryMessages(stone_release_t r, PeeringCtx &ctx);
 
   void accept_buffered_messages(BufferedRecoveryMessages &m) {
     for (auto &[target, ls] : m.message_map) {
@@ -93,7 +93,7 @@ struct BufferedRecoveryMessages {
 };
 
 struct HeartbeatStamps : public RefCountedObject {
-  mutable ceph::mutex lock = ceph::make_mutex("HeartbeatStamps::lock");
+  mutable stone::mutex lock = stone::make_mutex("HeartbeatStamps::lock");
 
   const int osd;
 
@@ -113,10 +113,10 @@ struct HeartbeatStamps : public RefCountedObject {
   // lb and ub values.
 
   /// lower bound on peer clock - local clock
-  std::optional<ceph::signedspan> peer_clock_delta_lb;
+  std::optional<stone::signedspan> peer_clock_delta_lb;
 
   /// upper bound on peer clock - local clock
-  std::optional<ceph::signedspan> peer_clock_delta_ub;
+  std::optional<stone::signedspan> peer_clock_delta_ub;
 
   /// highest up_from we've seen from this rank
   epoch_t up_from = 0;
@@ -135,7 +135,7 @@ struct HeartbeatStamps : public RefCountedObject {
     out << "])";
   }
 
-  void sent_ping(std::optional<ceph::signedspan> *delta_ub) {
+  void sent_ping(std::optional<stone::signedspan> *delta_ub) {
     std::lock_guard l(lock);
     // the non-primaries need a lower bound on remote clock - local clock.  if
     // we assume the transit for the last ping_reply was
@@ -147,10 +147,10 @@ struct HeartbeatStamps : public RefCountedObject {
   }
 
   void got_ping(epoch_t this_up_from,
-		ceph::signedspan now,
-		ceph::signedspan peer_send_stamp,
-		std::optional<ceph::signedspan> delta_ub,
-		ceph::signedspan *out_delta_ub) {
+		stone::signedspan now,
+		stone::signedspan peer_send_stamp,
+		std::optional<stone::signedspan> delta_ub,
+		stone::signedspan *out_delta_ub) {
     std::lock_guard l(lock);
     if (this_up_from < up_from) {
       return;
@@ -163,9 +163,9 @@ struct HeartbeatStamps : public RefCountedObject {
     *out_delta_ub = - *peer_clock_delta_lb;
   }
 
-  void got_ping_reply(ceph::signedspan now,
-		      ceph::signedspan peer_send_stamp,
-		      std::optional<ceph::signedspan> delta_ub) {
+  void got_ping_reply(stone::signedspan now,
+		      stone::signedspan peer_send_stamp,
+		      std::optional<stone::signedspan> delta_ub) {
     std::lock_guard l(lock);
     peer_clock_delta_lb = peer_send_stamp - now;
     peer_clock_delta_ub = delta_ub;
@@ -177,7 +177,7 @@ private:
     : RefCountedObject(NULL),
       osd(o) {}
 };
-using HeartbeatStampsRef = ceph::ref_t<HeartbeatStamps>;
+using HeartbeatStampsRef = stone::ref_t<HeartbeatStamps>;
 
 inline std::ostream& operator<<(std::ostream& out, const HeartbeatStamps& hb)
 {
@@ -190,7 +190,7 @@ struct PeeringCtx : BufferedRecoveryMessages {
   ObjectStore::Transaction transaction;
   HBHandle* handle = nullptr;
 
-  PeeringCtx(ceph_release_t r)
+  PeeringCtx(stone_release_t r)
     : BufferedRecoveryMessages(r) {}
 
   PeeringCtx(const PeeringCtx &) = delete;
@@ -274,10 +274,10 @@ public:
     /// Send pg_created to mon
     virtual void send_pg_created(pg_t pgid) = 0;
 
-    virtual ceph::signedspan get_mnow() = 0;
+    virtual stone::signedspan get_mnow() = 0;
     virtual HeartbeatStampsRef get_hb_stamps(int peer) = 0;
-    virtual void schedule_renew_lease(epoch_t plr, ceph::timespan delay) = 0;
-    virtual void queue_check_readable(epoch_t lpr, ceph::timespan delay) = 0;
+    virtual void schedule_renew_lease(epoch_t plr, stone::timespan delay) = 0;
+    virtual void queue_check_readable(epoch_t lpr, stone::timespan delay) = 0;
     virtual void recheck_readable() = 0;
 
     virtual unsigned get_target_pg_log_entries() const = 0;
@@ -417,7 +417,7 @@ public:
     virtual void log_state_exit(
       const char *state_name, utime_t enter_time,
       uint64_t events, utime_t event_dur) = 0;
-    virtual void dump_recovery_info(ceph::Formatter *f) const = 0;
+    virtual void dump_recovery_info(stone::Formatter *f) const = 0;
 
     virtual OstreamTemp get_clog_info() = 0;
     virtual OstreamTemp get_clog_error() = 0;
@@ -427,16 +427,16 @@ public:
   };
 
   struct QueryState : boost::statechart::event< QueryState > {
-    ceph::Formatter *f;
-    explicit QueryState(ceph::Formatter *f) : f(f) {}
+    stone::Formatter *f;
+    explicit QueryState(stone::Formatter *f) : f(f) {}
     void print(std::ostream *out) const {
       *out << "Query";
     }
   };
 
   struct QueryUnfound : boost::statechart::event< QueryUnfound > {
-    ceph::Formatter *f;
-    explicit QueryUnfound(ceph::Formatter *f) : f(f) {}
+    stone::Formatter *f;
+    explicit QueryUnfound(stone::Formatter *f) : f(f) {}
     void print(std::ostream *out) const {
       *out << "QueryUnfound";
     }
@@ -566,7 +566,7 @@ public:
   public:
     PeeringState *state;
     PGStateHistory *state_history;
-    StoneeContext *cct;
+    StoneContext *cct;
     spg_t spgid;
     DoutPrefixProvider *dpp;
     PeeringListener *pl;
@@ -583,7 +583,7 @@ public:
     void log_exit(const char *state_name, utime_t duration);
 
     PeeringMachine(
-      PeeringState *state, StoneeContext *cct,
+      PeeringState *state, StoneContext *cct,
       spg_t spgid,
       DoutPrefixProvider *dpp,
       PeeringListener *pl,
@@ -596,7 +596,7 @@ public:
 
     /* Accessor functions for state methods */
     ObjectStore::Transaction& get_cur_transaction() {
-      ceph_assert(state->rctx);
+      stone_assert(state->rctx);
       return state->rctx->transaction;
     }
 
@@ -606,7 +606,7 @@ public:
     }
 
     void send_notify(int to, const pg_notify_t &n) {
-      ceph_assert(state->rctx);
+      stone_assert(state->rctx);
       state->rctx->send_notify(to, n);
     }
     void send_query(int to, const pg_query_t &query) {
@@ -1361,7 +1361,7 @@ public:
   };
 
   PGStateHistory state_history;
-  StoneeContext* cct;
+  StoneContext* cct;
   spg_t spgid;
   DoutPrefixProvider *dpp;
   PeeringListener *pl;
@@ -1406,28 +1406,28 @@ public:
 
   std::vector<HeartbeatStampsRef> hb_stamps;
 
-  ceph::signedspan readable_interval = ceph::signedspan::zero();
+  stone::signedspan readable_interval = stone::signedspan::zero();
 
   /// how long we can service reads in this interval
-  ceph::signedspan readable_until = ceph::signedspan::zero();
+  stone::signedspan readable_until = stone::signedspan::zero();
 
   /// upper bound on any acting OSDs' readable_until in this interval
-  ceph::signedspan readable_until_ub = ceph::signedspan::zero();
+  stone::signedspan readable_until_ub = stone::signedspan::zero();
 
   /// upper bound from prior interval(s)
-  ceph::signedspan prior_readable_until_ub = ceph::signedspan::zero();
+  stone::signedspan prior_readable_until_ub = stone::signedspan::zero();
 
   /// pg instances from prior interval(s) that may still be readable
   std::set<int> prior_readable_down_osds;
 
   /// [replica] upper bound we got from the primary (primary's clock)
-  ceph::signedspan readable_until_ub_from_primary = ceph::signedspan::zero();
+  stone::signedspan readable_until_ub_from_primary = stone::signedspan::zero();
 
   /// [primary] last upper bound shared by primary to replicas
-  ceph::signedspan readable_until_ub_sent = ceph::signedspan::zero();
+  stone::signedspan readable_until_ub_sent = stone::signedspan::zero();
 
   /// [primary] readable ub acked by acting set members
-  std::vector<ceph::signedspan> acting_readable_until_ub;
+  std::vector<stone::signedspan> acting_readable_until_ub;
 
   bool send_notify = false; ///< True if a notify needs to be sent to the primary
 
@@ -1470,7 +1470,7 @@ public:
   uint64_t upacting_features = STONE_FEATURES_SUPPORTED_DEFAULT;
 
   /// most recently consumed osdmap's require_osd_version
-  ceph_release_t last_require_osd_release = ceph_release_t::unknown;
+  stone_release_t last_require_osd_release = stone_release_t::unknown;
 
   std::vector<int> want_acting; ///< non-empty while peering needs a new acting set
 
@@ -1656,7 +1656,7 @@ public:
 
   void calc_min_last_complete_ondisk() {
     eversion_t min = last_complete_ondisk;
-    ceph_assert(!acting_recovery_backfill.empty());
+    stone_assert(!acting_recovery_backfill.empty());
     for (std::set<pg_shard_t>::iterator i = acting_recovery_backfill.begin();
 	 i != acting_recovery_backfill.end();
 	 ++i) {
@@ -1692,7 +1692,7 @@ public:
 
 public:
   PeeringState(
-    StoneeContext *cct,
+    StoneContext *cct,
     pg_shard_t pg_whoami,
     spg_t spgid,
     const PGPool &pool,
@@ -2057,12 +2057,12 @@ public:
   }
 
   /// Get current interval's readable_until
-  ceph::signedspan get_readable_until() const {
+  stone::signedspan get_readable_until() const {
     return readable_until;
   }
 
   /// Get prior intervals' readable_until upper bound
-  ceph::signedspan get_prior_readable_until_ub() const {
+  stone::signedspan get_prior_readable_until_ub() const {
     return prior_readable_until_ub;
   }
 
@@ -2073,12 +2073,12 @@ public:
 
   /// Reset prior intervals' readable_until upper bound (e.g., bc it passed)
   void clear_prior_readable_until_ub() {
-    prior_readable_until_ub = ceph::signedspan::zero();
+    prior_readable_until_ub = stone::signedspan::zero();
     prior_readable_down_osds.clear();
-    info.history.prior_readable_until_ub = ceph::signedspan::zero();
+    info.history.prior_readable_until_ub = stone::signedspan::zero();
   }
 
-  void renew_lease(ceph::signedspan now) {
+  void renew_lease(stone::signedspan now) {
     bool was_min = (readable_until_ub == readable_until);
     readable_until_ub_sent = now + readable_interval;
     if (was_min) {
@@ -2120,7 +2120,7 @@ public:
   }
   /// Returns reference to current osdmap
   const OSDMapRef &get_osdmap() const {
-    ceph_assert(osdmap_ref);
+    stone_assert(osdmap_ref);
     return osdmap_ref;
   }
   /// Returns epoch of current osdmap
@@ -2266,7 +2266,7 @@ public:
     return backfill_reserving;
   }
 
-  ceph_release_t get_last_require_osd_release() const {
+  stone_release_t get_last_require_osd_release() const {
     return last_require_osd_release;
   }
 
@@ -2303,7 +2303,7 @@ public:
    * Returns whether a particular object can be safely read on this replica
    */
   bool can_serve_replica_read(const hobject_t &hoid) {
-    ceph_assert(!is_primary());
+    stone_assert(!is_primary());
     return !pg_log.get_log().has_write_since(
       hoid, get_min_last_complete_ondisk());
   }
@@ -2391,12 +2391,12 @@ public:
 	<< ")/" << past_intervals.size();
   }
 
-  void dump_history(ceph::Formatter *f) const {
+  void dump_history(stone::Formatter *f) const {
     state_history.dump(f);
   }
 
   /// Dump formatted peering status
-  void dump_peering_state(ceph::Formatter *f);
+  void dump_peering_state(stone::Formatter *f);
 
 private:
   /// Mask feature vector with feature set from new peer

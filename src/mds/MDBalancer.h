@@ -32,8 +32,8 @@ class MonClient;
 
 class MDBalancer {
 public:
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
   friend class C_Bal_SendHeartbeat;
 
   MDBalancer(MDSRank *m, Messenger *msgr, MonClient *monc);

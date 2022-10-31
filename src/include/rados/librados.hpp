@@ -23,7 +23,7 @@ namespace neorados { class RADOS; }
 
 namespace librados {
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 struct AioCompletionImpl;
 struct IoCtxImpl;
@@ -57,7 +57,7 @@ inline namespace v14_2_0 {
   class IoCtx;
   class RadosClient;
 
-  class CEPH_RADOS_API ListObject
+  class STONE_RADOS_API ListObject
   {
   public:
     const std::string& get_nspace() const;
@@ -76,11 +76,11 @@ inline namespace v14_2_0 {
 
     ListObjectImpl *impl;
   };
-  CEPH_RADOS_API std::ostream& operator<<(std::ostream& out, const librados::ListObject& lop);
+  STONE_RADOS_API std::ostream& operator<<(std::ostream& out, const librados::ListObject& lop);
 
-  class CEPH_RADOS_API NObjectIterator;
+  class STONE_RADOS_API NObjectIterator;
 
-  class CEPH_RADOS_API ObjectCursor
+  class STONE_RADOS_API ObjectCursor
   {
     public:
     ObjectCursor();
@@ -102,9 +102,9 @@ inline namespace v14_2_0 {
     protected:
     rados_object_list_cursor c_cursor;
   };
-  CEPH_RADOS_API std::ostream& operator<<(std::ostream& os, const librados::ObjectCursor& oc);
+  STONE_RADOS_API std::ostream& operator<<(std::ostream& os, const librados::ObjectCursor& oc);
 
-  class CEPH_RADOS_API NObjectIterator : public std::iterator <std::forward_iterator_tag, ListObject> {
+  class STONE_RADOS_API NObjectIterator : public std::iterator <std::forward_iterator_tag, ListObject> {
   public:
     static const NObjectIterator __EndObjectIterator;
     NObjectIterator(): impl(NULL) {}
@@ -146,7 +146,7 @@ inline namespace v14_2_0 {
     NObjectIteratorImpl *impl;
   };
 
-  class CEPH_RADOS_API ObjectItem
+  class STONE_RADOS_API ObjectItem
   {
     public:
     std::string oid;
@@ -155,13 +155,13 @@ inline namespace v14_2_0 {
   };
 
   /// DEPRECATED; do not use
-  class CEPH_RADOS_API WatchCtx {
+  class STONE_RADOS_API WatchCtx {
   public:
     virtual ~WatchCtx();
     virtual void notify(uint8_t opcode, uint64_t ver, bufferlist& bl) = 0;
   };
 
-  class CEPH_RADOS_API WatchCtx2 {
+  class STONE_RADOS_API WatchCtx2 {
   public:
     virtual ~WatchCtx2();
     /**
@@ -191,7 +191,7 @@ inline namespace v14_2_0 {
     virtual void handle_error(uint64_t cookie, int err) = 0;
   };
 
-  struct CEPH_RADOS_API AioCompletion {
+  struct STONE_RADOS_API AioCompletion {
     AioCompletion(AioCompletionImpl *pc_) : pc(pc_) {}
     ~AioCompletion();
     int set_complete_callback(void *cb_arg, callback_t cb);
@@ -212,7 +212,7 @@ inline namespace v14_2_0 {
     AioCompletionImpl *pc;
   };
 
-  struct CEPH_RADOS_API PoolAsyncCompletion {
+  struct STONE_RADOS_API PoolAsyncCompletion {
     PoolAsyncCompletion(PoolAsyncCompletionImpl *pc_) : pc(pc_) {}
     ~PoolAsyncCompletion();
     int set_callback(void *cb_arg, callback_t cb);
@@ -237,7 +237,7 @@ inline namespace v14_2_0 {
     OP_FADVISE_NOCACHE = LIBRADOS_OP_FLAG_FADVISE_NOCACHE,
   };
 
-  class CEPH_RADOS_API ObjectOperationCompletion {
+  class STONE_RADOS_API ObjectOperationCompletion {
   public:
     virtual ~ObjectOperationCompletion() {}
     virtual void handle_completion(int r, bufferlist& outbl) = 0;
@@ -304,7 +304,7 @@ inline namespace v14_2_0 {
    * Batch multiple object operations into a single request, to be applied
    * atomically.
    */
-  class CEPH_RADOS_API ObjectOperation
+  class STONE_RADOS_API ObjectOperation
   {
   public:
     ObjectOperation();
@@ -352,7 +352,7 @@ inline namespace v14_2_0 {
      * @param prval [out] place error code in prval upon completion
      *
      * assertions has the form of mappings from keys to (comparison rval, assertion)
-     * The assertion field may be CEPH_OSD_CMPXATTR_OP_[GT|LT|EQ].
+     * The assertion field may be STONE_OSD_CMPXATTR_OP_[GT|LT|EQ].
      *
      * That is, to assert that the value at key 'foo' is greater than 'bar':
      *
@@ -360,7 +360,7 @@ inline namespace v14_2_0 {
      * int r;
      * map<string, pair<bufferlist, int> > assertions;
      * bufferlist bar(string('bar'));
-     * assertions['foo'] = make_pair(bar, CEPH_OSD_CMP_XATTR_OP_GT);
+     * assertions['foo'] = make_pair(bar, STONE_OSD_CMP_XATTR_OP_GT);
      * op.omap_cmp(assertions, &r);
      */
     void omap_cmp(
@@ -378,7 +378,7 @@ inline namespace v14_2_0 {
    * Batch multiple object operations into a single request, to be applied
    * atomically.
    */
-  class CEPH_RADOS_API ObjectWriteOperation : public ObjectOperation
+  class STONE_RADOS_API ObjectWriteOperation : public ObjectOperation
   {
   protected:
     time_t *unused;
@@ -527,7 +527,7 @@ inline namespace v14_2_0 {
    * Batch multiple object operations into a single request, to be applied
    * atomically.
    */
-  class CEPH_RADOS_API ObjectReadOperation : public ObjectOperation
+  class STONE_RADOS_API ObjectReadOperation : public ObjectOperation
   {
   public:
     ObjectReadOperation() {}
@@ -774,7 +774,7 @@ inline namespace v14_2_0 {
    * that is used for watch events to ensure that racing callbacks
    * have completed.
    */
-  class CEPH_RADOS_API IoCtx
+  class STONE_RADOS_API IoCtx
   {
   public:
     IoCtx();
@@ -1370,7 +1370,7 @@ inline namespace v14_2_0 {
     IoCtxImpl *io_ctx_impl;
   };
 
-  struct CEPH_RADOS_API PlacementGroup {
+  struct STONE_RADOS_API PlacementGroup {
     PlacementGroup();
     PlacementGroup(const PlacementGroup&);
     ~PlacementGroup();
@@ -1378,9 +1378,9 @@ inline namespace v14_2_0 {
     std::unique_ptr<PlacementGroupImpl> impl;
   };
 
-  CEPH_RADOS_API std::ostream& operator<<(std::ostream&, const PlacementGroup&);
+  STONE_RADOS_API std::ostream& operator<<(std::ostream&, const PlacementGroup&);
 
-  class CEPH_RADOS_API Rados
+  class STONE_RADOS_API Rados
   {
   public:
     static void version(int *major, int *minor, int *extra);

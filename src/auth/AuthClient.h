@@ -21,14 +21,14 @@ public:
     AuthConnectionMeta *auth_meta,
     uint32_t *method,
     std::vector<uint32_t> *preferred_modes,
-    ceph::buffer::list *out) = 0;
+    stone::buffer::list *out) = 0;
 
   /// Handle server's request to continue the handshake
   virtual int handle_auth_reply_more(
     Connection *con,
     AuthConnectionMeta *auth_meta,
-    const ceph::buffer::list& bl,
-    ceph::buffer::list *reply) = 0;
+    const stone::buffer::list& bl,
+    stone::buffer::list *reply) = 0;
 
   /// Handle server's indication that authentication succeeded
   virtual int handle_auth_done(
@@ -36,7 +36,7 @@ public:
     AuthConnectionMeta *auth_meta,
     uint64_t global_id,
     uint32_t con_mode,
-    const ceph::buffer::list& bl,
+    const stone::buffer::list& bl,
     CryptoKey *session_key,
     std::string *connection_secret) = 0;
 

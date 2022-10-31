@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc.
  *
@@ -18,7 +18,7 @@
 #include <utility>
 #include <type_traits>
 
-namespace ceph {
+namespace stone {
 // `static_ptr`
 // ===========
 //

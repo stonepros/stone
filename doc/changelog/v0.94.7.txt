@@ -31,7 +31,7 @@ Date:   Thu Apr 28 13:47:48 2016 -0700
 
     OSDMonitor: avoid underflow in reweight-by-utilization if max_change=1
     
-    Fixes: http://tracker.ceph.com/issues/15655
+    Fixes: http://tracker.stone.com/issues/15655
     Signed-off-by: Samuel Just <sjust@redhat.com>
     (cherry picked from commit c121bc51a5a877a49094cfbd3bd16af1f3ae5090)
 
@@ -56,7 +56,7 @@ Date:   Mon Sep 28 08:23:22 2015 +0800
     Backport Change:
     We do not use the rgw_user structure and remove the `tenant` parameter
     because this feature is not introduced on hammer version.
-    The rgw multi-tenant feature is introduced on pr#6784 (https://github.com/ceph/ceph/pull/6784)
+    The rgw multi-tenant feature is introduced on pr#6784 (https://github.com/stone/stone/pull/6784)
     This feature is supported from v10.0.2 and later version.
 
 commit e219e85be00088eecde7b1f29d7699493a79bc4d
@@ -84,7 +84,7 @@ Date:   Wed Apr 6 10:41:41 2016 -0400
 
     Merge pull request #8051 from xiaoxichen/wip-15024-hammer
     
-    hammer: clock skew report is incorrect by ceph health detail command
+    hammer: clock skew report is incorrect by stone health detail command
 
 commit ba5c75a33ba10bbe7796715f2d8500ec1fe209fd
 Merge: dc09055 ac3569c
@@ -122,9 +122,9 @@ Merge: add1674 0830275
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Apr 6 16:18:11 2016 +0200
 
-    Merge pull request #7917 from ceph/wip-10794-hammer
+    Merge pull request #7917 from stone/wip-10794-hammer
     
-    hammer: ceph-objectstore-tool, osd: Fix import handling
+    hammer: stone-objectstore-tool, osd: Fix import handling
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -198,7 +198,7 @@ commit 77a4ed0a8986b2529edd8059dd3efa38f778c6f2
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Apr 5 11:53:54 2016 +0200
 
-    ceph.spec.in: disable lttng and babeltrace explicitly
+    stone.spec.in: disable lttng and babeltrace explicitly
     
     before this change, we do not pacakge tracepoint probe shared libraries
     on rhel7. but "configure" script enables them if lttng is detected. and
@@ -216,7 +216,7 @@ Date:   Tue Apr 5 11:53:54 2016 +0200
     (cherry picked from commit f1a44907a2f83cb8080cd8ab5980a30306a33fbd)
     
     Conflicts:
-    	ceph.spec.in: trivial resolution, the context changed
+    	stone.spec.in: trivial resolution, the context changed
             (other packages, files etc.) but the semantic did not
 
 commit 97f474fb6b26ae7b7e2fdd21de4f4bd98cdd56ab
@@ -318,7 +318,7 @@ Date:   Fri Aug 28 00:32:38 2015 +0800
     (cherry picked from commit 5a4f6a866bb675195ad83c38fd23238d078c78ed)
     
     Conflicts:
-    	src/include/ceph_features.h
+    	src/include/stone_features.h
     		minor changes to resolve conflicts
 
 commit 370434136ef076c350db3db4fca6489f88f70453
@@ -338,7 +338,7 @@ commit 64bca2a43b34b265621bad2ec1fb980217223847
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Aug 18 16:53:50 2015 +0800
 
-    mon: print use_gmt_hitset in "ceph osd pool get"
+    mon: print use_gmt_hitset in "stone osd pool get"
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit cc2bcf760f2d2f20fc4a2fa78ba52475a23e55bf)
@@ -351,9 +351,9 @@ commit 87df212cfca33efbbee6376f528cb7d4895d1dc0
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Aug 18 00:04:23 2015 +0800
 
-    mon: add "ceph osd pool set $pool use_gmt_hitset true" cmd
+    mon: add "stone osd pool set $pool use_gmt_hitset true" cmd
     
-    allow "ceph osd pool set $pool use_gmt_hitset <true|1>" as long as
+    allow "stone osd pool set $pool use_gmt_hitset <true|1>" as long as
     the cluster supports gmt hitset.
     
     Fixes: #9732
@@ -384,7 +384,7 @@ Date:   Fri Jun 5 21:06:48 2015 +0800
     (cherry picked from commit 42f8c5daad16aa849a0b99871d50161673c0c370)
     
      Conflicts:
-    	src/include/ceph_features.h
+    	src/include/stone_features.h
     	src/osd/ReplicatedPG.cc
     	src/osd/osd_types.cc
     	src/osd/osd_types.h
@@ -522,7 +522,7 @@ Date:   Wed Nov 25 19:20:51 2015 -0800
     a new crush rule named after the pool, but only removing the
     pool.  Remove the crush rule as well.
     
-    http://tracker.ceph.com/issues/13878 Fixes: #13878
+    http://tracker.stone.com/issues/13878 Fixes: #13878
     
     Signed-off-by: Dan Mick <dan.mick@redhat.com>
     Signed-off-by: Loic Dachary <loic@dachary.org>
@@ -536,7 +536,7 @@ Date:   Wed Mar 2 12:15:48 2016 +0100
     
     The command:
     
-    sudo ceph-mon --cluster ceph --mkfs -i $NODE_NAME --keyring $PATH_MON_KEYRING
+    sudo stone-mon --cluster stone --mkfs -i $NODE_NAME --keyring $PATH_MON_KEYRING
     
     Writes a new keyring with permissions set to "0644".
     
@@ -551,7 +551,7 @@ Date:   Fri Mar 11 10:05:42 2016 +0700
 
     Merge pull request #7911 from dzafman/wip-meta-list-hammer
     
-    hammer: tools, test: Add ceph-objectstore-tool to operate on the meta collection
+    hammer: tools, test: Add stone-objectstore-tool to operate on the meta collection
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -605,7 +605,7 @@ commit 1b922e5431339d12e661de9fd4b16e8cf2c08ad5
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Mar 10 08:50:57 2016 -0500
 
-    test/pybind/test_ceph_argparse: fix reweight-by-utilization tests
+    test/pybind/test_stone_argparse: fix reweight-by-utilization tests
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit d0f87131962b26cef9e31fa11651771856c41164)
@@ -614,7 +614,7 @@ commit 06a2a7596b876a5c2addb184a48222bcb6e23b9a
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Thu Mar 10 21:41:15 2016 +0800
 
-    man/8/ceph.rst: remove invalid option for reweight-by-*
+    man/8/stone.rst: remove invalid option for reweight-by-*
     
     --yes-i-really-mean-it is not valid option for reweight-by-*
     
@@ -667,7 +667,7 @@ commit 76eb3c8fbdb614a4cdde937a1dec680b4be82470
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Mar 2 17:34:48 2016 -0500
 
-    qa/workunits/cephtool/test.sh: test reweight-by-x commands
+    qa/workunits/stonetool/test.sh: test reweight-by-x commands
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 28b33a5b57e3f898808bd8ccc5e314667f84912a)
@@ -835,7 +835,7 @@ Merge: 522e3e8 b2393dc
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Mar 8 09:58:30 2016 +0700
 
-    Merge pull request #6551 from ceph/hammer-client-inoderef
+    Merge pull request #6551 from stone/hammer-client-inoderef
     
     hammer: client inoderef
     
@@ -863,7 +863,7 @@ Date:   Fri Mar 4 10:25:00 2016 +0700
 
     Merge pull request #7797 from SUSE/wip-14861-hammer
     
-    hammer: ceph init script unconditionally sources /lib/lsb/init-functions
+    hammer: stone init script unconditionally sources /lib/lsb/init-functions
     
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
 
@@ -889,11 +889,11 @@ Date:   Wed Nov 25 19:03:03 2015 +0800
     
     Program received signal SIGSEGV, Segmentation fault.
     [Switching to Thread 0x7fffed10e700 (LWP 25051)]
-    0x00007ffff59896c6 in CryptoKey::encrypt (this=0x7fffed10d4f0, cct=0x555555829c30, in=..., out=..., error=0x7fffed10d440) at auth/cephx/../Crypto.h:110
+    0x00007ffff59896c6 in CryptoKey::encrypt (this=0x7fffed10d4f0, cct=0x555555829c30, in=..., out=..., error=0x7fffed10d440) at auth/stonex/../Crypto.h:110
     110	    return ckh->encrypt(in, out, error);
     (gdb) bt
-        at auth/cephx/../Crypto.h:110
-        at auth/cephx/CephxProtocol.h:464
+        at auth/stonex/../Crypto.h:110
+        at auth/stonex/StonexProtocol.h:464
     
     Signed-off-by: Dunrong Huang <riegamaths@gmail.com>
     (cherry picked from commit a7f520caabf997b3753f1200f19f21830531b3f5)
@@ -913,7 +913,7 @@ commit c3f031a32df5d434721a2b00f2c8961759b1a916 (refs/remotes/markhpc/wip-10794-
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed May 20 14:09:02 2015 -0700
 
-    ceph-objectstore-tool, osd: Fix import handling
+    stone-objectstore-tool, osd: Fix import handling
     
     Use same_interval_since set to zero to communicate that an import has happened
     and the correct value needs to be computed.
@@ -930,13 +930,13 @@ commit 647723ecd283273657bdb8b35dbb904e55c37add
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Jun 4 10:37:42 2015 -0700
 
-    tools, test: Add ceph-objectstore-tool to operate on the meta collection
+    tools, test: Add stone-objectstore-tool to operate on the meta collection
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 31fa89f24997c3e9b4f8795ea28938ab65493d10)
     
     Conflicts:
-    	src/tools/ceph_objectstore_tool.cc
+    	src/tools/stone_objectstore_tool.cc
     is_pg() still needs snap argument
 
 commit d8756208a3213e099574e57e9b654feab84b0497
@@ -1023,7 +1023,7 @@ Date:   Fri Feb 26 15:01:11 2016 +0300
             lc.cond.Wait(lock);
           }
     
-    http://tracker.ceph.com/issues/14873 Fixes: #14873
+    http://tracker.stone.com/issues/14873 Fixes: #14873
     
     Signed-off-by: Alexey Sheplyakov <asheplyakov@mirantis.com>
 
@@ -1048,7 +1048,7 @@ Date:   Thu Mar 3 15:30:23 2016 +0300
       to the missing (or wrong sized) objects can be easily worked around, and
       the changes required to fix this problem are way too intrusive for hammer.
     
-    http://tracker.ceph.com/issues/14873 Related: #14873
+    http://tracker.stone.com/issues/14873 Related: #14873
 
 commit c4ba93a6529ab549d42b601432ec88d8243909bf
 Author: Yan, Zheng <zyan@redhat.com>
@@ -1065,7 +1065,7 @@ Date:   Tue Sep 29 15:11:24 2015 +0800
 
     client: use thread local data to track fuse request
     
-    When handling an operation, libcephfs code may want to access fuse
+    When handling an operation, libstonefs code may want to access fuse
     request for extra information. by tracking fuse request in thread
     local data, we can avoid adding extra parameter to Client::ll_foo
     functions.
@@ -1124,7 +1124,7 @@ commit e014ea88861f4f27b4a5db14c32133a3b864411e
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Thu Jul 23 15:07:45 2015 +0800
 
-    init-ceph: check if /lib/lsb/init-functions exists
+    init-stone: check if /lib/lsb/init-functions exists
     
     On OSX/FreeBSD, /lib/lsb/init-functions does not exist
     
@@ -1147,7 +1147,7 @@ Merge: 546a7b9 28d42dc
 Author: Loic Dachary <loic@dachary.org>
 Date:   Thu Mar 3 11:51:33 2016 +0700
 
-    Merge pull request #7702 from ceph/wip-14077-hammer
+    Merge pull request #7702 from stone/wip-14077-hammer
     
     hammer: scrub bogus results when missing a clone
     
@@ -1169,13 +1169,13 @@ Date:   Fri Feb 26 18:30:49 2016 +0100
     as reinstating the dependency for RHEL/Fedora after it was dropped in
     15600572265bed397fbd80bdd2b7d83a0e9bd918.
     
-    http://tracker.ceph.com/issues/14906 Fixes: #14906
+    http://tracker.stone.com/issues/14906 Fixes: #14906
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit b87f4efb5689a8db77e06baf4f469afcd9df3677)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
                  The jewel specfile has diverged considerably from hammer:
                  systemd, package split, etc. This is more of a hand backport
                  than a cherry-pick.
@@ -1203,7 +1203,7 @@ Date:   Mon Feb 1 19:32:13 2016 +0700
       will read nothing.
     
     * tests_pidfile was missing an argument when failing
-      TEST_without_pidfile and killed all process with ceph in their name,
+      TEST_without_pidfile and killed all process with stone in their name,
       leading to chaos and no useful error message.
     
     * lstat(fd) cannot possibly return a result different from the one
@@ -1223,7 +1223,7 @@ Date:   Mon Feb 1 19:32:13 2016 +0700
     More test cases are added to test_pidfile to verify the bugs above are
     fixed.
     
-    http://tracker.ceph.com/issues/13422 Fixes: #13422
+    http://tracker.stone.com/issues/13422 Fixes: #13422
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 9828d49d6f3ccfc78d496153d263ea39b1722d4b)
@@ -1281,7 +1281,7 @@ Date:   Thu Feb 25 14:23:14 2016 -0800
 
     Merge backport 6 commits from pull request #5197 into wip-14077-hammer
     
-    Excludes the ceph-objectstore-tool meta-list op
+    Excludes the stone-objectstore-tool meta-list op
 
 commit c8057c693bf0ae7bb01ef238f4ef9f23454a2e33
 Merge: ecbf6d2 df0e11e
@@ -1332,7 +1332,7 @@ Merge: c3d938d 18c49b6
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Feb 25 14:13:37 2016 -0800
 
-    Merge backport branch 'wip-journal-header' of git://github.com/XinzeChi/ceph into wip-14077-hammer
+    Merge backport branch 'wip-journal-header' of git://github.com/XinzeChi/stone into wip-14077-hammer
     
     Includes a change to the code in the original merge commit itself
 
@@ -1347,7 +1347,7 @@ commit 9282c1d01c4f2d99fb3832a3cf495f99fdc6487e
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Nov 5 19:06:17 2015 -0800
 
-    ceph-objectstore-tool: Add dry-run checking to ops missing it
+    stone-objectstore-tool: Add dry-run checking to ops missing it
     
     Update test to check most operations
     
@@ -1355,7 +1355,7 @@ Date:   Thu Nov 5 19:06:17 2015 -0800
     (cherry picked from commit e89f0e1c5e8a378809bec7c705ea2c23235d4b28)
     
     Conflicts:
-    	src/tools/ceph_objectstore_tool.cc (trivial)
+    	src/tools/stone_objectstore_tool.cc (trivial)
 
 commit efc2183bafacfcd29fbb1b42231d4c147199e528
 Author: David Zafman <dzafman@redhat.com>
@@ -1370,12 +1370,12 @@ commit 322661547ec437a9cdb893fcd280a48cd60ec990
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Oct 28 21:34:44 2015 -0700
 
-    test: osd-scrub-snaps.sh uses ceph-helpers.sh and added to make check
+    test: osd-scrub-snaps.sh uses stone-helpers.sh and added to make check
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit d712737be1aadb38ecc3882200999d79d748cdb8)
     
-    ceph-helpers.sh in different location in Hammer
+    stone-helpers.sh in different location in Hammer
 
 commit 995a0042a1b8ed04b77e6bc4757a10552450dc7f
 Author: David Zafman <dzafman@redhat.com>
@@ -1419,7 +1419,7 @@ commit 59fee8a65c1a39d7e3806852aabbf68d7ca37feb
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Nov 9 20:02:21 2015 -0800
 
-    test: Add test cases for xattr and omap ceph-objectstore-tool operations
+    test: Add test cases for xattr and omap stone-objectstore-tool operations
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit cbaed6a8c737f77e68a0eb7f1fca32ec4155f045)
@@ -1458,7 +1458,7 @@ commit e92505bec093cb3070e4962bc86b82a257c64171
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Oct 14 20:34:28 2015 -0700
 
-    ceph-objectstore-tool: Add new remove-clone-metadata object op
+    stone-objectstore-tool: Add new remove-clone-metadata object op
     
     Fixes: #12740
     
@@ -1485,7 +1485,7 @@ commit 78b13f5d591d9d9676939abc4febeb7d2eebb1a3
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Oct 14 13:12:17 2015 -0700
 
-    ceph-objectstore-tool: Improve object spec error handling
+    stone-objectstore-tool: Improve object spec error handling
     
     Add test cases
     
@@ -1493,13 +1493,13 @@ Date:   Wed Oct 14 13:12:17 2015 -0700
     (cherry picked from commit caf2d5970b0a3e3ce4ef941d1955b7821a0fc916)
     
     Conflicts:
-    	src/test/ceph_objectstore_tool.py (trivial)
+    	src/test/stone_objectstore_tool.py (trivial)
 
 commit 7b800b7c3efb5403d03fc0c4386821b433b85268
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Oct 7 17:25:44 2015 -0700
 
-    ceph-objectstore-tool: Add undocumented clear-snapset command for testing
+    stone-objectstore-tool: Add undocumented clear-snapset command for testing
     
     Add test cases using new feature to corrupt SnapSet
     
@@ -1512,7 +1512,7 @@ commit 7f398bd2a3264d1ac5bf40a5470c43454dbad571
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Oct 14 21:59:50 2015 -0700
 
-    ceph-objectstore-tool: Add set-size command for objects
+    stone-objectstore-tool: Add set-size command for objects
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 138a33b8946e6fea1e09527b8bc45b7aa4bee1d6)
@@ -1523,7 +1523,7 @@ commit 53dc87f82642de769a7ea11554552e6db06a3e65
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Oct 14 22:04:05 2015 -0700
 
-    ceph-objectstore-tool: Enhanced dump command replaces dump-info
+    stone-objectstore-tool: Enhanced dump command replaces dump-info
     
     Show object stat information from objectstore
     Show SnapSet if present
@@ -1536,7 +1536,7 @@ commit a46fc6613e1f1f6709184d68f23bccab0fd03bd6
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Oct 2 13:39:29 2015 -0700
 
-    test: Add some clones to ceph-objectstore-tool test
+    test: Add some clones to stone-objectstore-tool test
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit b4ba3e66548a5dee58553df071b916c85d701caf)
@@ -1545,19 +1545,19 @@ commit fd518e704e0e5c01f3b7efa8905ddde1e64cc842
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Oct 1 19:28:54 2015 -0700
 
-    ceph-objectstore-tool: For corrupt objectstores, don't abort listing on errors
+    stone-objectstore-tool: For corrupt objectstores, don't abort listing on errors
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit d276d3286504ea702ae561b91dff4121c99feb9a)
     
     Conflicts:
-    	src/tools/ceph_objectstore_tool.cc (trivial)
+    	src/tools/stone_objectstore_tool.cc (trivial)
 
 commit ad7825a4beba879f6a38ef3eda0648f11f8783bd
 Author: David Zafman <dzafman@redhat.com>
 Date:   Tue Oct 13 13:02:40 2015 -0700
 
-    ceph-objectstore-tool: Improve some error messages
+    stone-objectstore-tool: Improve some error messages
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit b0c884ba8b51eedf9def093c61f0f06398101ecc)
@@ -1566,7 +1566,7 @@ commit 26cbf14ef1e44936f48fdb2be40b59ae2117666f
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Sep 3 14:22:20 2015 -0700
 
-    ceph-objectstore-tool: White space fixes
+    stone-objectstore-tool: White space fixes
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 0564f398269d920d90f6d6ecb008ebcd6609d611)
@@ -1581,7 +1581,7 @@ Date:   Tue Oct 13 15:33:26 2015 -0700
     (cherry picked from commit 9222f56403cf52ec161a38fc437a3f04c24d1625)
     
     Conflicts:
-    	src/tools/rados/RadosImport.cc (Code in ceph_objectstore_tool.cc in Hammer)
+    	src/tools/rados/RadosImport.cc (Code in stone_objectstore_tool.cc in Hammer)
 
 commit c8e27725249cf587e65af323e3ae0ba43c740c10
 Author: David Zafman <dzafman@redhat.com>
@@ -1643,7 +1643,7 @@ commit 3a1b58838dba6bd482aa5786dc44962c4a977c17
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Sep 30 17:17:15 2015 -0700
 
-    osd: Fix log message name of ceph-objectstore-tool
+    osd: Fix log message name of stone-objectstore-tool
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 545e4b2c582625f8b93502266ca59ee40e0d0e5f)
@@ -1652,14 +1652,14 @@ commit 0fe3dfe8768b27743189add73cde9a44095f2a62
 Author: Mykola Golub <mgolub@mirantis.com>
 Date:   Tue Jun 16 11:57:08 2015 +0300
 
-    ceph-objectstore-tool: add mark-complete operation
+    stone-objectstore-tool: add mark-complete operation
     
     It is supposed to be used as a last resort to fix a cluster that has
     PGs in 'incomplete' state, using the following procedure:
     
     1) stop the osd that is primary for the incomplete PG;
     2) run:
-      ceph-objectstore-tool --data-path ... --journal-path ... --pgid $PGID --op mark-complete
+      stone-objectstore-tool --data-path ... --journal-path ... --pgid $PGID --op mark-complete
     3) start the osd.
     
     Fixes: #10098
@@ -1667,8 +1667,8 @@ Date:   Tue Jun 16 11:57:08 2015 +0300
     (cherry picked from commit 6907778d767ba08bb80c495785056ed122b023fe)
     
     Conflicts:
-    	src/test/ceph_objectstore_tool.py (trivial)
-    	src/tools/ceph_objectstore_tool.cc (trivial)
+    	src/test/stone_objectstore_tool.py (trivial)
+    	src/tools/stone_objectstore_tool.cc (trivial)
 
 commit 1bc88827fc40f124f570dd8b7865c687f1b1f5a8
 Author: David Zafman <dzafman@redhat.com>
@@ -1691,13 +1691,13 @@ Date:   Fri Jul 17 14:46:16 2015 +0800
     (cherry picked from commit 818de1a2c89272d98610328a958fea06d1cc41cc)
     
     Conflicts:
-    	src/test/ceph_objectstore_tool.py (trivial)
+    	src/test/stone_objectstore_tool.py (trivial)
 
 commit de80bbf4d7c1b78017cf447a7f511ceefac39e50
 Author: David Zafman <dzafman@redhat.com>
 Date:   Tue Jun 23 16:51:27 2015 -0700
 
-    test: Add debug argument to the ceph-objectstore-tool test
+    test: Add debug argument to the stone-objectstore-tool test
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit a3b14ede9e829ec85c49980ecbff11f584ca70ae)
@@ -1721,13 +1721,13 @@ Date:   Wed Jul 8 15:51:55 2015 +0800
     (cherry picked from commit 0257c150fe552300c0d9f5a22a27aaa49fb6cc64)
     
     Conflicts:
-    	src/test/ceph_objectstore_tool.py (trivial)
+    	src/test/stone_objectstore_tool.py (trivial)
 
 commit 3276258b1a9123caec8d635aa1a2de3ef02201e6
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Jun 25 17:15:39 2015 -0700
 
-    tools, test: Some ceph-objectstore-tool error handling fixes
+    tools, test: Some stone-objectstore-tool error handling fixes
     
     Improve various error messages generated with invalid syntax
     Add test cases for most of these error messages
@@ -1736,19 +1736,19 @@ Date:   Thu Jun 25 17:15:39 2015 -0700
     (cherry picked from commit 127a5f191d3d2442edd3a3fa820006bca3a08c93)
     
     Conflicts:
-    	src/test/ceph_objectstore_tool.py (trivial)
+    	src/test/stone_objectstore_tool.py (trivial)
 
 commit cfabcc1066a06644b619fa027e27d338411120c9
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Jul 14 10:33:47 2015 +0800
 
-    tools/ceph-objectstore-tool: add get-inc-osdmap command
+    tools/stone-objectstore-tool: add get-inc-osdmap command
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 7801bb20d23ce83fc4093c23331bcb75e43c878f)
     
     Conflicts:
-    	src/tools/ceph_objectstore_tool.cc (trivial)
+    	src/tools/stone_objectstore_tool.cc (trivial)
 
 commit c7d0fda01efc29d81723d4edfba2bfbbe6765760
 Author: David Zafman <dzafman@redhat.com>
@@ -1760,20 +1760,20 @@ Date:   Mon Jun 22 20:11:10 2015 -0700
     (cherry picked from commit d8460714fab61d0a3092b3e7b290c0c19ad58beb)
     
     Conflicts:
-    	src/test/ceph_objectstore_tool.py (trivial)
-    	src/tools/ceph_objectstore_tool.cc (meta-list op not in Hammer)
+    	src/test/stone_objectstore_tool.py (trivial)
+    	src/tools/stone_objectstore_tool.cc (meta-list op not in Hammer)
 
 commit be24c50bb74aa6cd7bb08519cdaf267d4107eef3
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Sat Jul 11 16:27:47 2015 +0800
 
-    tools/ceph-objectstore-tool: add set-inc-osdmap command
+    tools/stone-objectstore-tool: add set-inc-osdmap command
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 95344d07c3a1a9a6b1246e5eca3f7daeb062dd06)
     
     Conflicts:
-    	src/tools/ceph_objectstore_tool.cc (trivial)
+    	src/tools/stone_objectstore_tool.cc (trivial)
 
 commit 06dcf74374f57224536522ef46dba8a53a0d755d
 Author: David Zafman <dzafman@redhat.com>
@@ -1788,13 +1788,13 @@ commit e44c042c3dffc4ca396dbdfac24fa65914c0b73b
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Fri Jul 3 23:09:54 2015 +0800
 
-    tools/ceph-objectstore-tool: add "get-osdmap" command
+    tools/stone-objectstore-tool: add "get-osdmap" command
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit f0c130d6b1bc2a8a0cce6d78a6e69995fe00a427)
     
     Conflicts:
-    	src/tools/ceph_objectstore_tool.cc (trivial)
+    	src/tools/stone_objectstore_tool.cc (trivial)
 
 commit 3f9e46779addaa07d04d501113eb95cea95b802b
 Author: David Zafman <dzafman@redhat.com>
@@ -1813,14 +1813,14 @@ commit c60eee1dcd64d4452e96ed937f94a3ec41faf9fe
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Thu Jul 2 19:14:55 2015 +0800
 
-    tools/ceph-objectstore-tool: add "set-osdmap" command
+    tools/stone-objectstore-tool: add "set-osdmap" command
     
     Fixes: #12193
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 3e30c1746fb8d90b04e4776849069db0b7737c87)
     
     Conflicts:
-    	src/tools/ceph_objectstore_tool.cc (trivial)
+    	src/tools/stone_objectstore_tool.cc (trivial)
 
 commit cfe7d47d38fd103601c09eceb98b9c7365869fba
 Author: David Zafman <dzafman@redhat.com>
@@ -1848,7 +1848,7 @@ commit 6c8884b11b8211642662bfd7d612872621ffd8ff
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Jun 11 12:57:10 2015 -0700
 
-    test, tools: Improve ceph-objectstore-tool import error handling and add tests
+    test, tools: Improve stone-objectstore-tool import error handling and add tests
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit ddc4d52782a04d99a4293c9fc278894dfe328515)
@@ -1866,7 +1866,7 @@ commit 9ca2f35d02169e6f82e3d45e00fe880c02cbd8ce
 Author: John Spray <john.spray@redhat.com>
 Date:   Mon Apr 20 17:28:15 2015 +0100
 
-    tools: clean up errors in ceph-objectstore-tool
+    tools: clean up errors in stone-objectstore-tool
     
     We use negative error codes everywhere else, should
     use them here too.  Also add a couple of strategically
@@ -1882,7 +1882,7 @@ commit 78a59f8b0c43adbd9a7a1db68dafcbf7bd2ad74d
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Jun 1 17:22:18 2015 -0700
 
-    test/ceph-objectstore-tool: Don't need stderr noise
+    test/stone-objectstore-tool: Don't need stderr noise
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit d7858c66454093dd6f2fab60e33e5b2472bcd80a)
@@ -1915,7 +1915,7 @@ commit efc402ea9846d3995bf3d4c98188842cb69870cf
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Jun 1 17:15:21 2015 -0700
 
-    test/ceph-objectstore-tool: Show command that should have failed
+    test/stone-objectstore-tool: Show command that should have failed
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 23551deea66673c35d7183d18b63b5a8438ebf00)
@@ -1947,7 +1947,7 @@ commit 13360d3a55818fc5b63a2bb9889a67f3fc98d286
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri May 22 17:41:40 2015 -0700
 
-    test/ceph_objectstore_tool: Improve dump-journal testing
+    test/stone_objectstore_tool: Improve dump-journal testing
     
     Fix false failure when journal has no entries
     Test dump-journal on all osds in 2 places
@@ -1959,7 +1959,7 @@ commit 444ce0ac718e903b39c25cf58d0a503ead491790
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri May 22 11:52:00 2015 -0700
 
-    ceph-objectstore-tool: Allow --pgid specified on import (for post split)
+    stone-objectstore-tool: Allow --pgid specified on import (for post split)
     
     Revamp split import testing to use --pgid option post split
     
@@ -1970,7 +1970,7 @@ commit aed1c49e7d3631d797776be1020f6df0f77ea1f3
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri May 22 10:53:48 2015 -0700
 
-    ceph-objectstore-tool: Invalidate pg stats when objects were skipped during pg import
+    stone-objectstore-tool: Invalidate pg stats when objects were skipped during pg import
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 51e27984ec131fd21bbc26411ae1540b9047eb37)
@@ -1979,7 +1979,7 @@ commit af3f8ae1d9e210499fd0165e473f9b5d87666f75
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon May 18 20:22:03 2015 -0700
 
-    ceph-objectstore-tool: Add dump-super to show OSDSuperblock in format specified
+    stone-objectstore-tool: Add dump-super to show OSDSuperblock in format specified
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 99d7663f870abfa82711dbf0451334f7d6c883d8)
@@ -1999,7 +1999,7 @@ commit feecacfb34dfd831291fc736ea39dbcf69e7d765
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon May 18 20:08:14 2015 -0700
 
-    ceph-objectstore-tool: Add dump-journal as not requiring --pgid in usage
+    stone-objectstore-tool: Add dump-journal as not requiring --pgid in usage
     
     Additional comment describes --pgid requirement checking
     
@@ -2010,7 +2010,7 @@ commit 5e8fbb1858f7a8dd65d1b9f873aaca05f3ddb1eb
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Mar 5 16:37:46 2015 -0800
 
-    test: ceph_test_filejournal: Conform to test infrastructure requirements
+    test: stone_test_filejournal: Conform to test infrastructure requirements
     
     Only call RUN_ALL_TESTS() once
     
@@ -2021,7 +2021,7 @@ commit c161cbf81a29e523bb4ffb897f6d02112eb49b09
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Mar 5 16:13:50 2015 -0800
 
-    test: ceph_test_filejournal need to force aio because testing with a file
+    test: stone_test_filejournal need to force aio because testing with a file
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit d540dde1faee47d01ee358ae384fa301fa59f00f)
@@ -2030,7 +2030,7 @@ commit 06d3f512149dc9aa38d959ac31891b81634d0ea4
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Mar 5 16:04:36 2015 -0800
 
-    test: ceph_test_filejournal fix missing argument to FileJournal constructor
+    test: stone_test_filejournal fix missing argument to FileJournal constructor
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit c94fe8db36e7d54227edde94a99bc1aa236b8ec8)
@@ -2039,7 +2039,7 @@ commit 2078f639d91fbaa9b89832811315c7c41da25a4b
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Feb 19 19:48:11 2015 -0800
 
-    test: ceph_test_filejournal  Add check of journalq in WriteTrim test
+    test: stone_test_filejournal  Add check of journalq in WriteTrim test
     
     Commit all journal entries and check for empty journalq
     
@@ -2050,7 +2050,7 @@ commit ab893d769d2728368f94b035edde750a3fa5e617
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Jan 29 17:14:39 2015 -0800
 
-    test: Fix ceph-objectstore-tool test missing fd.close()
+    test: Fix stone-objectstore-tool test missing fd.close()
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit ece630d5a741ba8c82f55f964f1887cb7fcaa493)
@@ -2059,7 +2059,7 @@ commit b5f2ccd5bd77c7a473f38fdab183fd52577b7331
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Jan 29 17:13:41 2015 -0800
 
-    test: Fix ceph-objectstore-tool test error message
+    test: Fix stone-objectstore-tool test error message
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 11c13eb7c182870727fbcb25a83f3348ac0bad13)
@@ -2068,7 +2068,7 @@ commit 848822db38e000a7e7bfe49ae0fe03996bb7e8c1
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Apr 1 10:32:32 2015 -0700
 
-    test: ceph-objectstore-tool: Remove duplicate debug messages, keep cmd/log/call together
+    test: stone-objectstore-tool: Remove duplicate debug messages, keep cmd/log/call together
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 94b3d7632f2548c19beca5a2e024c95f601b61f3)
@@ -2077,7 +2077,7 @@ commit 771dcd945281a091b165c0b1a90c1f6058dbf923
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Mar 27 19:47:01 2015 -0700
 
-    test: ceph-objectstore-tool import after split testing
+    test: stone-objectstore-tool import after split testing
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit d80ce6668c1aa3c9898ab49e847c4dadafe256f0)
@@ -2095,7 +2095,7 @@ commit b337d677daf5b6098a2dbcf2d8966703cf8db449
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Mar 30 17:35:07 2015 -0700
 
-    test: Limit how long ceph-objectstore-tool test will wait for health
+    test: Limit how long stone-objectstore-tool test will wait for health
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 868cf457a3990ba9989aef55823630e3189acf4a)
@@ -2113,19 +2113,19 @@ commit b4ac42be79bb11cb27282d97aec9e6ca8f658e5c
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Mar 5 19:35:27 2015 -0800
 
-    test: Test ceph-objectstore-tool --op dump-journal output
+    test: Test stone-objectstore-tool --op dump-journal output
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 9b08bcf95caf77fb7f9bd293559534ed8ff3eded)
     
     Conflicts:
-    	src/test/ceph_objectstore_tool.py (trivial)
+    	src/test/stone_objectstore_tool.py (trivial)
 
 commit 729abf5a83a656ac2a95ad147909bf7c8fa18999
 Author: David Zafman <dzafman@redhat.com>
 Date:   Tue Mar 17 14:56:06 2015 -0700
 
-    test: Pep8 fixes for ceph-objectstore-tool test
+    test: Pep8 fixes for stone-objectstore-tool test
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit b0141108c0596b535d25792a9102787b1cd3eca3)
@@ -2134,7 +2134,7 @@ commit 33813b66fa4402fe0d66d95d6f9b790b11c9f1f1
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Mar 5 18:37:44 2015 -0800
 
-    test: Fix ceph-objectstore-tool test, overwrite OTHERFILE so second check is meaningful
+    test: Fix stone-objectstore-tool test, overwrite OTHERFILE so second check is meaningful
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 1b9f85befa1efff3b05b2af0e62d568eea37d790)
@@ -2227,7 +2227,7 @@ commit 4ae3f88cc4493413c4aab54e21759507b0d572b0
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Apr 27 15:37:14 2015 -0700
 
-    ceph-objectstore-tool: For import/export --debug dump the log
+    stone-objectstore-tool: For import/export --debug dump the log
     
     Move log dumping code to common function dump_log()
     
@@ -2238,7 +2238,7 @@ commit cc5fa68c184f66d3ca6ff736eb308cba0a0d10b0
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Jan 30 16:56:10 2015 -0800
 
-    ceph-objectstore-tool: If object re-appears after removal, just skip it
+    stone-objectstore-tool: If object re-appears after removal, just skip it
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit c6e41663e7434b4dcbb1abbe62ac008388da268a)
@@ -2247,7 +2247,7 @@ commit d8ae1a9b842b6871225f0cc2d8a8dbdcf01238e4
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Jan 30 16:11:13 2015 -0800
 
-    ceph-objectstore-tool: Add --no-overwrite flag for import-rados
+    stone-objectstore-tool: Add --no-overwrite flag for import-rados
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 35cdcabbdad7dc7249029630c64022c822c67ddc)
@@ -2256,7 +2256,7 @@ commit 2dbf843560de2b9b74d9b0d0baf2a303e6c4e86b
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Feb 2 16:23:18 2015 -0800
 
-    ceph-objectstore-tool: Remove list-lost because now we have --dry-run flag
+    stone-objectstore-tool: Remove list-lost because now we have --dry-run flag
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 3e7fe7e85716f80e055ffbc5305f406b3e020608)
@@ -2265,7 +2265,7 @@ commit 35991747c4cf5c4f9c150aae128f63c7b8c8a5cd
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Jan 23 07:34:11 2015 -0800
 
-    ceph-objectstore-tool: Add --dry-run option
+    stone-objectstore-tool: Add --dry-run option
     
     Fixes: #10290
     
@@ -2276,7 +2276,7 @@ commit 05d3b73ac6ef841af5037336996d1ed6bfdac4b5
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Jan 22 10:07:09 2015 -0800
 
-    ceph-objectstore-tool: Add dump-info command to show object info
+    stone-objectstore-tool: Add dump-info command to show object info
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 244092d034781d2e980f9de7c6f9eea227967c5a)
@@ -2285,7 +2285,7 @@ commit 2d764c54d4b028455be8b592712c6424f5f9f19e
 Author: David Zafman <dzafman@redhat.com>
 Date:   Tue Jan 27 14:32:42 2015 -0800
 
-    ceph-objectstore-tool: Use empty string for <object> to specify pgmeta object
+    stone-objectstore-tool: Use empty string for <object> to specify pgmeta object
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit c00290b836adba12212e8a57f13b0c9193ac0ef8)
@@ -2294,7 +2294,7 @@ commit 3a533d767bafc466e653bdd89d064b5f2b9aa257
 Author: John Spray <john.spray@redhat.com>
 Date:   Mon Apr 20 17:28:15 2015 +0100
 
-    ceph-objectstore-tool: Add a couple of strategically placed prints
+    stone-objectstore-tool: Add a couple of strategically placed prints
     
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit fdb1a4b676765c5d3ca5d436f34230dd6996d7a7)
@@ -2303,7 +2303,7 @@ commit 7947f4f72f4bb6441ea5c353757d9ea3f464cff4
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Apr 20 16:10:18 2015 -0700
 
-    ceph-objectstore-tool: Clean up error handling
+    stone-objectstore-tool: Clean up error handling
     
     Use negative errors throughout and positive error to specify exit status
     cpp_strerror() handles negative errors
@@ -2320,7 +2320,7 @@ commit 83de86e4e9dedc05fd65201715dadbd46074b7e0
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Apr 15 15:40:41 2015 -0700
 
-    ceph-objectstore-tool: Create section around log/missing/divergent_priors of --op log
+    stone-objectstore-tool: Create section around log/missing/divergent_priors of --op log
     
     Remove extra new lines in the output
     
@@ -2331,7 +2331,7 @@ commit ddfaa70ade3b6d7ff061083fcd610b588fbd4dd7
 Author: David Zafman <dzafman@redhat.com>
 Date:   Tue Apr 14 13:49:26 2015 -0700
 
-    ceph-objectstore-tool: Add divergent_priors handling
+    stone-objectstore-tool: Add divergent_priors handling
     
     Add to --op log output
     Add to metadata_section for export
@@ -2346,7 +2346,7 @@ commit add937c437a4bd86c932ef49525aff039d9bee90
 Author: David Zafman <dzafman@redhat.com>
 Date:   Wed Mar 18 10:05:24 2015 -0700
 
-    ceph-objectstore-tool: Add --force option which is used for import only
+    stone-objectstore-tool: Add --force option which is used for import only
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 2f4090daaea715b896e49f678933abb8a13b5c98)
@@ -2355,7 +2355,7 @@ commit f33274894a83072a483b0646a91b5182a72c7c90
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Mar 13 00:41:39 2015 -0700
 
-    ceph-objectstore-tool: Fix pgid scan to skip snapdirs
+    stone-objectstore-tool: Fix pgid scan to skip snapdirs
     
     Long standing bug where it wasn't skipping snapdirs if !debug
     For debug output use stderr like all other cases
@@ -2367,7 +2367,7 @@ commit 3e68825e60a2e69a20198439347aadf8742d4ea6
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Feb 9 12:24:19 2015 -0800
 
-    ceph-objectstore-tool: Add dump-journal op
+    stone-objectstore-tool: Add dump-journal op
     
     Have dump-journal op directly dump a filestore journal without
     mounting or try to dump after mounting.
@@ -2381,9 +2381,9 @@ commit aaff4d7bcbc3e48aa6c0342d66a9c30c93744064
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Feb 9 12:46:20 2015 -0800
 
-    ceph-objectstore-tool: On any exit release CephContext so logging can flush
+    stone-objectstore-tool: On any exit release StoneContext so logging can flush
     
-    Add myexit() which will put() the g_ceph_context if present before exit
+    Add myexit() which will put() the g_stone_context if present before exit
     Must umount() once the objectstore has been mounted
     
     Fixes: #10809
@@ -2395,7 +2395,7 @@ commit 7445cf5a04d396dbc36e21aecd44bc4aadaff397
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Feb 9 17:28:04 2015 -0800
 
-    ceph-objectstore-tool: Check for keyvaluestore experimental feature
+    stone-objectstore-tool: Check for keyvaluestore experimental feature
     
     Don't list keyvaluestore as a valid type if feature not enabled
     
@@ -2406,7 +2406,7 @@ commit 9da6c01b5e59e59a80d00e3d17cf5da05dd84f72
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Feb 9 17:14:50 2015 -0800
 
-    ceph-objectstore-tool: Eliminate obscure "Invalid params" error
+    stone-objectstore-tool: Eliminate obscure "Invalid params" error
     
     Will fail later with "No such file or directory" for an empty data-path
     because we've already checked for vm.count("data-path")
@@ -2418,7 +2418,7 @@ commit c5ac7ce09bc5b96722738a1884c6046aba6518f2
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Feb 9 15:37:57 2015 -0800
 
-    ceph-objectstore-tool: Check pgid validity earlier like we did before
+    stone-objectstore-tool: Check pgid validity earlier like we did before
     
     This code was not doing the umount() even though it was moved after mount()
     
@@ -2429,7 +2429,7 @@ commit 18c49b6474a563b5f7f7cef671050d46ac4c3c4f
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri May 1 09:22:01 2015 -0700
 
-    Backport the merge commit of branch 'wip-journal-header' of git://github.com/XinzeChi/ceph
+    Backport the merge commit of branch 'wip-journal-header' of git://github.com/XinzeChi/stone
     
     (cherry picked from commit 8d596bfa24c9c3e2aadbb87494284cb5fd824e55)
     
@@ -2447,7 +2447,7 @@ Date:   Thu Feb 25 22:39:06 2016 +0700
 
     Merge pull request #7656 from dzafman/wip-14769-hammer
     
-    ceph.in: Notify user that 'tell' can't be used in interactive mode
+    stone.in: Notify user that 'tell' can't be used in interactive mode
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
@@ -2498,7 +2498,7 @@ Date:   Mon Jan 26 15:57:33 2015 -0800
     Conflicts:
     	src/test/crypto.cc : complements the incorrect cherry-pick
                df3f971eafda9c54881c13dcf47f996f18e17028 see
-               http://tracker.ceph.com/issues/14863 for more information
+               http://tracker.stone.com/issues/14863 for more information
 
 commit ec33aec31fcac3b09bf06256b95c841a8c20d56f
 Merge: 4b46182 17d1b0d
@@ -2594,7 +2594,7 @@ Merge: ee014d8 df3f971
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Feb 24 12:55:18 2016 +0700
 
-    Merge pull request #7488 from ceph/wip-auth-hammer
+    Merge pull request #7488 from stone/wip-auth-hammer
     
     hammer: auth: use libnss more safely
     
@@ -2607,7 +2607,7 @@ Date:   Wed Feb 24 12:48:05 2016 +0700
 
     Merge pull request #7475 from dachary/wip-14602-hammer
     
-    hammer: ceph-disk: use blkid instead of sgdisk -i
+    hammer: stone-disk: use blkid instead of sgdisk -i
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -2638,9 +2638,9 @@ Merge: e832001 f209819
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Feb 24 12:37:55 2016 +0700
 
-    Merge pull request #7110 from david-z/wip-hammer-fix-logrotate-ceph-fuse
+    Merge pull request #7110 from david-z/wip-hammer-fix-logrotate-stone-fuse
     
-    [ceph-fuse] fix ceph-fuse writing to stale log file after log rotation
+    [stone-fuse] fix stone-fuse writing to stale log file after log rotation
     
     Reviewed-by: Sage Weil <sage@redhat.com>
     Reviewed-by: Greg Farnum <gfarnum@redhat.com>
@@ -2663,13 +2663,13 @@ Date:   Tue Mar 3 11:24:50 2015 +0000
 
     osd: write journal header by force when journal write close
     
-    osd update the journal header when ceph call FileStore::sync_entry(
+    osd update the journal header when stone call FileStore::sync_entry(
     ApplyManager::commit_finish -> FileJournal::committed_thru).
     But, it doesnot write the journal head until the next transaction
     (calling do_write or do_aio_write).
     
     So write jouranl header when journal write close, so that
-    committed_up_to in journal header is new enough. ceph may
+    committed_up_to in journal header is new enough. stone may
     not replay some transaction which has been writen to filestore.
     
     Signed-off-by: Xinze Chi <xmdxcxz@gmail.com>
@@ -2693,13 +2693,13 @@ commit 3352b144e0b1500651d8a194c3ebe2aae2f078d0
 Author: David Zafman <dzafman@redhat.com>
 Date:   Tue Oct 20 18:10:39 2015 -0700
 
-    ceph.in: Notify user that 'tell' can't be used in interactive mode
+    stone.in: Notify user that 'tell' can't be used in interactive mode
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit a341d977d42a3010267b64e15cebae3085507297)
     
     Conflicts:
-    	src/ceph.in (trivial resolution)
+    	src/stone.in (trivial resolution)
 
 commit 14b5feab80f07b4ed2b8f6d77ea1fa920e98be05
 Author: Kefu Chai <kchai@redhat.com>
@@ -2738,7 +2738,7 @@ Date:   Sun Feb 7 18:50:29 2016 +0800
     tmp.apply_incremental(pending_inc);
     
     This Op would change the tmp osd_primary_affinity, but the osd_primary_affinity
-    is declared as ceph::shared_ptr, so this would change the osdmap too. When this
+    is declared as stone::shared_ptr, so this would change the osdmap too. When this
     round encode_pending is proposed fail. We may call encode_pending again, but the
     osdmap is changed last round, so the pending_inc would be wrong.
     
@@ -2853,7 +2853,7 @@ commit 88ffcc2cbd73602819ad653695de7e8718f6707d
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Fri Dec 18 17:03:21 2015 +0100
 
-    ceph-disk: use blkid instead of sgdisk -i
+    stone-disk: use blkid instead of sgdisk -i
     
     sgdisk -i 1 /dev/vdb opens /dev/vdb in write mode which indirectly
     triggers a BLKRRPART ioctl from udev (starting version 214 and up) when
@@ -2862,7 +2862,7 @@ Date:   Fri Dec 18 17:03:21 2015 +0100
     all partitions and adds them again (similar to what partprobe does
     explicitly).
     
-    The side effects of partitions disappearing while ceph-disk is running
+    The side effects of partitions disappearing while stone-disk is running
     are devastating.
     
     sgdisk is replaced by blkid which only opens the device in read mode and
@@ -2890,14 +2890,14 @@ Date:   Fri Dec 18 17:03:21 2015 +0100
               devices, or might need to disable it entirely. Device Mapper
               devices are excluded from this logic.
     
-    http://tracker.ceph.com/issues/14094 Fixes: #14094
+    http://tracker.stone.com/issues/14094 Fixes: #14094
     
     Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 9dce05a8cdfc564c5162885bbb67a04ad7b95c5a)
     
     Conflicts:
-    	src/ceph-disk: keep get_partition_type as it is because
+    	src/stone-disk: keep get_partition_type as it is because
             some hammer users may rely on the fact that it is able
             to fallback to sgdisk if blkid is old. Chances are an
             old blkid also means an old udev that does not have the
@@ -2908,9 +2908,9 @@ commit f209819fb676eadf099cc764e3ed3b20fd17b688
 Author: Zhi Zhang <willzzhang@tencent.com>
 Date:   Mon Feb 1 11:03:30 2016 +0800
 
-    [ceph-fuse] fix ceph-fuse writing to stale log file after log rotation
+    [stone-fuse] fix stone-fuse writing to stale log file after log rotation
     
-    This fix should be applied to hammer branch. It can't be directly applied to master branch, because logrotate.conf is changed on matser since ceph-osd, ceph-mon, etc, is controlled by systemd with user/group as 'ceph' by default, while ceph-fuse might be started as root privilege by external users.
+    This fix should be applied to hammer branch. It can't be directly applied to master branch, because logrotate.conf is changed on matser since stone-osd, stone-mon, etc, is controlled by systemd with user/group as 'stone' by default, while stone-fuse might be started as root privilege by external users.
     
     Signed-off-by: Zhi Zhang <zhangz.david@outlook.com>
 
@@ -3021,7 +3021,7 @@ commit 3249f48a07391c98634aebd87f18fc2edbe95ca2
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Jan 22 15:49:25 2015 -0800
 
-    auth/cephx: optimize signature check
+    auth/stonex: optimize signature check
     
     The encode_encrypt() helper will generate a bufferlist with a simple
     structure.  Profiles seem to indicate this is taking a large amount of time
@@ -3038,13 +3038,13 @@ commit 51eaf98e25287705c9c25d2d3a5df248ba066f2d
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Jan 22 15:40:23 2015 -0800
 
-    auth/cephx: move signature calc into helper
+    auth/stonex: move signature calc into helper
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 4e14a5fedbfacd164639f6a59a4d152404f3f9d1)
     
     Conflicts:
-    	src/auth/cephx/CephxSessionHandler.cc (trivial, const changes)
+    	src/auth/stonex/StonexSessionHandler.cc (trivial, const changes)
 
 commit c240da9e0693dc627162a0c70569dda519ec25e8
 Author: Sage Weil <sage@redhat.com>
@@ -3080,14 +3080,14 @@ Date:   Tue Dec 15 18:28:29 2015 +0100
     it creates log files that are too big.
     
     The problem has been fixed in infernalis as part of
-    https://github.com/ceph/ceph/pull/5173 and backporting it is non
+    https://github.com/stone/stone/pull/5173 and backporting it is non
     trivial.
     
     The error condition is modified to make it easy for the system
     administrator to identify which object is causing the crash and what
     steps must be taken to fix the issue.
     
-    http://tracker.ceph.com/issues/14009 Refs: #14009
+    http://tracker.stone.com/issues/14009 Refs: #14009
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
 

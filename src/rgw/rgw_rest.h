@@ -8,31 +8,31 @@
 #include <string_view>
 #include <boost/container/flat_set.hpp>
 #include "common/sstring.hh"
-#include "common/ceph_json.h"
-#include "include/ceph_assert.h" /* needed because of common/ceph_json.h */
+#include "common/stone_json.h"
+#include "include/stone_assert.h" /* needed because of common/stone_json.h */
 #include "rgw_op.h"
 #include "rgw_formats.h"
 #include "rgw_client_io.h"
 
 extern std::map<std::string, std::string> rgw_to_http_attrs;
 
-extern void rgw_rest_init(CephContext *cct, const RGWZoneGroup& zone_group);
+extern void rgw_rest_init(StoneContext *cct, const RGWZoneGroup& zone_group);
 
 extern void rgw_flush_formatter_and_reset(struct req_state *s,
-					 ceph::Formatter *formatter);
+					 stone::Formatter *formatter);
 
 extern void rgw_flush_formatter(struct req_state *s,
-				ceph::Formatter *formatter);
+				stone::Formatter *formatter);
 
 std::tuple<int, bufferlist > rgw_rest_read_all_input(struct req_state *s,
                                         const uint64_t max_len,
                                         const bool allow_chunked=true);
 
-inline std::string_view rgw_sanitized_hdrval(ceph::buffer::list& raw)
+inline std::string_view rgw_sanitized_hdrval(stone::buffer::list& raw)
 {
   /* std::string and thus std::string_view ARE OBLIGED to carry multiple
    * 0x00 and count them to the length of a string. We need to take that
-   * into consideration and sanitize the size of a ceph::buffer::list used
+   * into consideration and sanitize the size of a stone::buffer::list used
    * to store metadata values (x-amz-meta-*, X-Container-Meta-*, etags).
    * Otherwise we might send 0x00 to clients. */
   const char* const data = raw.c_str();
@@ -49,7 +49,7 @@ inline std::string_view rgw_sanitized_hdrval(ceph::buffer::list& raw)
 }
 
 template <class T>
-int rgw_rest_get_json_input(CephContext *cct, req_state *s, T& out,
+int rgw_rest_get_json_input(StoneContext *cct, req_state *s, T& out,
 			    uint64_t max_len, bool *empty)
 {
   if (empty)
@@ -86,7 +86,7 @@ int rgw_rest_get_json_input(CephContext *cct, req_state *s, T& out,
 }
 
 template <class T>
-std::tuple<int, bufferlist > rgw_rest_get_json_input_keep_data(CephContext *cct, req_state *s, T& out, uint64_t max_len)
+std::tuple<int, bufferlist > rgw_rest_get_json_input_keep_data(StoneContext *cct, req_state *s, T& out, uint64_t max_len)
 {
   int rv = 0;
   bufferlist data;
@@ -278,7 +278,7 @@ public:
   struct post_form_part {
     std::string name;
     std::map<std::string, post_part_field, ltstr_nocase> fields;
-    ceph::bufferlist data;
+    stone::bufferlist data;
   };
 
 protected:
@@ -286,20 +286,20 @@ protected:
     std::map<std::string, post_form_part, const ltstr_nocase>;
 
   std::string err_msg;
-  ceph::bufferlist in_data;
+  stone::bufferlist in_data;
 
-  int read_with_boundary(ceph::bufferlist& bl,
+  int read_with_boundary(stone::bufferlist& bl,
                          uint64_t max,
                          bool check_eol,
                          bool& reached_boundary,
                          bool& done);
 
-  int read_line(ceph::bufferlist& bl,
+  int read_line(stone::bufferlist& bl,
                 uint64_t max,
                 bool& reached_boundary,
                 bool& done);
 
-  int read_data(ceph::bufferlist& bl,
+  int read_data(stone::bufferlist& bl,
                 uint64_t max,
                 bool& reached_boundary,
                 bool& done);
@@ -326,7 +326,7 @@ protected:
 
   static bool part_bl(parts_collection_t& parts,
                       const std::string& name,
-                      ceph::bufferlist *pbl);
+                      stone::bufferlist *pbl);
 
 public:
   RGWPostObj_ObjStore() {}
@@ -732,7 +732,7 @@ extern void dump_header(struct req_state* s,
                         const std::string_view& val);
 extern void dump_header(struct req_state* s,
                         const std::string_view& name,
-                        ceph::buffer::list& bl);
+                        stone::buffer::list& bl);
 extern void dump_header(struct req_state* s,
                         const std::string_view& name,
                         long long val);
@@ -835,6 +835,6 @@ extern void dump_access_control(struct req_state *s, const char *origin,
 extern void dump_access_control(req_state *s, RGWOp *op);
 
 extern int dump_body(struct req_state* s, const char* buf, size_t len);
-extern int dump_body(struct req_state* s, /* const */ ceph::buffer::list& bl);
+extern int dump_body(struct req_state* s, /* const */ stone::buffer::list& bl);
 extern int dump_body(struct req_state* s, const std::string& str);
 extern int recv_body(struct req_state* s, char* buf, size_t max);

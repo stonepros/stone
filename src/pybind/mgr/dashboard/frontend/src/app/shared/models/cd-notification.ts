@@ -8,7 +8,7 @@ export class CdNotificationConfig {
   isFinishedTask = false;
 
   private classes = {
-    Ceph: 'ceph-icon',
+    Stone: 'stone-icon',
     Prometheus: 'prometheus-icon'
   };
 
@@ -17,7 +17,7 @@ export class CdNotificationConfig {
     public title?: string,
     public message?: string, // Use this for additional information only
     public options?: any | IndividualConfig,
-    public application: string = 'Ceph'
+    public application: string = 'Stone'
   ) {
     this.applicationClass = this.classes[this.application];
   }

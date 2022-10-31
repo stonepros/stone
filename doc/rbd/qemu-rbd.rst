@@ -2,14 +2,14 @@
  QEMU and Block Devices
 ========================
 
-.. index:: Ceph Block Device; QEMU KVM
+.. index:: Stone Block Device; QEMU KVM
 
-The most frequent Ceph Block Device use case involves providing block device
+The most frequent Stone Block Device use case involves providing block device
 images to virtual machines. For example, a user may create  a "golden" image
 with an OS and any relevant software in an ideal configuration. Then the user
 takes a snapshot of the image. Finally the user clones the snapshot (potentially
 many times). See `Snapshots`_ for details. The ability to make copy-on-write
-clones of a snapshot means that Ceph can provision block device images to
+clones of a snapshot means that Stone can provision block device images to
 virtual machines quickly, because the client doesn't have to download the entire
 image each time it spins up a new virtual machine.
 
@@ -27,24 +27,24 @@ image each time it spins up a new virtual machine.
             +------------------------+ +------------------------+
 
 
-Ceph Block Devices attach to QEMU virtual machines. For details on
+Stone Block Devices attach to QEMU virtual machines. For details on
 QEMU, see  `QEMU Open Source Processor Emulator`_. For QEMU documentation, see
 `QEMU Manual`_. For installation details, see `Installation`_.
 
-.. important:: To use Ceph Block Devices with QEMU, you must have access to a 
-   running Ceph cluster.
+.. important:: To use Stone Block Devices with QEMU, you must have access to a 
+   running Stone cluster.
 
 
 Usage
 =====
 
-The QEMU command line expects you to specify the Ceph pool and image name. You
+The QEMU command line expects you to specify the Stone pool and image name. You
 may also specify a snapshot. 
 
-QEMU will assume that Ceph configuration resides in the default
+QEMU will assume that Stone configuration resides in the default
 location (e.g., ``/etc/ceph/$cluster.conf``) and that you are executing
 commands as the default ``client.admin`` user unless you expressly specify
-another Ceph configuration file path or another user. When specifying a user,
+another Stone configuration file path or another user. When specifying a user,
 QEMU uses the ``ID`` rather than the full ``TYPE:ID``. See `User Management -
 User`_ for details. Do not prepend the client type (i.e., ``client.``) to the
 beginning of the user  ``ID``, or you will receive an authentication error. You
@@ -120,7 +120,7 @@ the host. Instead, QEMU attaches an image as a virtual block
 device directly via ``librbd``. This strategy increases performance
 by avoiding context switches and taking advantage of `RBD caching`_.
 
-You can use ``qemu-img`` to convert existing virtual machine images to Ceph
+You can use ``qemu-img`` to convert existing virtual machine images to Stone
 block device images. For example, if you have a qcow2 image, you could run::
 
     qemu-img convert -f qcow2 -O raw debian_squeeze.qcow2 rbd:data/squeeze
@@ -135,7 +135,7 @@ Since QEMU 1.2, QEMU's cache options control ``librbd`` caching::
     qemu -m 1024 -drive format=rbd,file=rbd:data/squeeze,cache=writeback
 
 If you have an older version of QEMU, you can set the ``librbd`` cache
-configuration (like any Ceph configuration option) as part of the
+configuration (like any Stone configuration option) as part of the
 'file' parameter::
 
     qemu -m 1024 -drive format=raw,file=rbd:data/squeeze:rbd_cache=true,cache=writeback
@@ -148,13 +148,13 @@ configuration (like any Ceph configuration option) as part of the
 .. _RBD caching: ../rbd-config-ref/#rbd-cache-config-settings
 
 
-.. index:: Ceph Block Device; discard trim and libvirt
+.. index:: Stone Block Device; discard trim and libvirt
 
 Enabling Discard/TRIM
 =====================
 
-Since Ceph version 0.46 and QEMU version 1.1, Ceph Block Devices support the
-discard operation. This means that a guest can send TRIM requests to let a Ceph
+Since Stone version 0.46 and QEMU version 1.1, Stone Block Devices support the
+discard operation. This means that a guest can send TRIM requests to let a Stone
 block device reclaim unused space. This can be enabled in the guest by mounting
 ``ext4`` or ``XFS`` with the ``discard`` option.
 
@@ -185,12 +185,12 @@ devices with ``qemu id=`` to different ``discard_granularity`` values.
 	</domain>
 
 
-.. index:: Ceph Block Device; cache options
+.. index:: Stone Block Device; cache options
 
 QEMU Cache Options
 ==================
 
-QEMU's cache options correspond to the following Ceph `RBD Cache`_ settings.
+QEMU's cache options correspond to the following Stone `RBD Cache`_ settings.
 
 Writeback::
 
@@ -205,11 +205,11 @@ None::
 
    rbd_cache = false
 
-QEMU's cache settings override Ceph's cache settings (including settings that
-are explicitly set in the Ceph configuration file).
+QEMU's cache settings override Stone's cache settings (including settings that
+are explicitly set in the Stone configuration file).
 
 .. note:: Prior to QEMU v2.4.0, if you explicitly set `RBD Cache`_ settings
-   in the Ceph configuration file, your Ceph settings override the QEMU cache
+   in the Stone configuration file, your Stone settings override the QEMU cache
    settings.
 
 .. _QEMU Open Source Processor Emulator: http://wiki.qemu.org/Main_Page

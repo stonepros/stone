@@ -51,19 +51,19 @@ Examples
 
 Typical usage::
 
-       rbd-replay-many host-0 host-1 --original-image=image -- -c ceph.conf replay.bin
+       rbd-replay-many host-0 host-1 --original-image=image -- -c stone.conf replay.bin
 
 This results in the following commands being executed::
 
-       ssh host-0 'rbd-replay' --map-image 'image=image-0' -c ceph.conf replay.bin
-       ssh host-1 'rbd-replay' --map-image 'image=image-1' -c ceph.conf replay.bin
+       ssh host-0 'rbd-replay' --map-image 'image=image-0' -c stone.conf replay.bin
+       ssh host-1 'rbd-replay' --map-image 'image=image-1' -c stone.conf replay.bin
 
 
 Availability
 ============
 
-**rbd-replay-many** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**rbd-replay-many** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 
 See also

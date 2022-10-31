@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -28,12 +28,12 @@ protected:
 
 
   class SubmitManager {
-    CephContext* cct;
-    ceph::mutex lock = ceph::make_mutex("JOS::SubmitManager::lock");
+    StoneContext* cct;
+    stone::mutex lock = stone::make_mutex("JOS::SubmitManager::lock");
     uint64_t op_seq;
     uint64_t op_submitted;
   public:
-    SubmitManager(CephContext* cct) :
+    SubmitManager(StoneContext* cct) :
       cct(cct),
       op_seq(0), op_submitted(0)
     {}
@@ -49,30 +49,30 @@ protected:
   } submit_manager;
 
   class ApplyManager {
-    CephContext* cct;
+    StoneContext* cct;
     Journal *&journal;
     Finisher &finisher;
 
-    ceph::mutex apply_lock = ceph::make_mutex("JOS::ApplyManager::apply_lock");
+    stone::mutex apply_lock = stone::make_mutex("JOS::ApplyManager::apply_lock");
     bool blocked;
-    ceph::condition_variable blocked_cond;
+    stone::condition_variable blocked_cond;
     int open_ops;
     uint64_t max_applied_seq;
 
-    ceph::mutex com_lock = ceph::make_mutex("JOS::ApplyManager::com_lock");
+    stone::mutex com_lock = stone::make_mutex("JOS::ApplyManager::com_lock");
     std::map<version_t, std::vector<Context*> > commit_waiters;
     uint64_t committing_seq, committed_seq;
 
   public:
-    ApplyManager(CephContext* cct, Journal *&j, Finisher &f) :
+    ApplyManager(StoneContext* cct, Journal *&j, Finisher &f) :
       cct(cct), journal(j), finisher(f),
       blocked(false),
       open_ops(0),
       max_applied_seq(0),
       committing_seq(0), committed_seq(0) {}
     void reset() {
-      ceph_assert(open_ops == 0);
-      ceph_assert(blocked == false);
+      stone_assert(open_ops == 0);
+      stone_assert(blocked == false);
       max_applied_seq = 0;
       committing_seq = 0;
       committed_seq = 0;
@@ -116,7 +116,7 @@ protected:
   void journal_write_close();
   int journal_replay(uint64_t fs_op_seq);
 
-  void _op_journal_transactions(ceph::buffer::list& tls, uint32_t orig_len, uint64_t op,
+  void _op_journal_transactions(stone::buffer::list& tls, uint32_t orig_len, uint64_t op,
 				Context *onjournal, TrackedOpRef osd_op);
 
   virtual int do_transactions(std::vector<ObjectStore::Transaction>& tls, uint64_t op_seq) = 0;
@@ -130,7 +130,7 @@ public:
   }
 
 public:
-  JournalingObjectStore(CephContext* cct, const std::string& path)
+  JournalingObjectStore(StoneContext* cct, const std::string& path)
     : ObjectStore(cct, path),
       journal(NULL),
       finisher(cct, "JournalObjectStore", "fn_jrn_objstore"),

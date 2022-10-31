@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 FUJITSU LIMITED
  * Copyright (C) 2013, 2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -24,7 +24,7 @@
 #include "erasure-code/ErasureCode.h"
 #include "ErasureCodeShecTableCache.h"
 
-class ErasureCodeShec : public ceph::ErasureCode {
+class ErasureCodeShec : public stone::ErasureCode {
 
 public:
   enum {
@@ -80,19 +80,19 @@ public:
 				  std::set<int> *minimum) override;
 
   int encode(const std::set<int> &want_to_encode,
-		     const ceph::buffer::list &in,
-		     std::map<int, ceph::buffer::list> *encoded) override;
+		     const stone::buffer::list &in,
+		     std::map<int, stone::buffer::list> *encoded) override;
   int encode_chunks(const std::set<int> &want_to_encode,
-			    std::map<int, ceph::buffer::list> *encoded) override;
+			    std::map<int, stone::buffer::list> *encoded) override;
 
   int _decode(const std::set<int> &want_to_read,
-	      const std::map<int, ceph::buffer::list> &chunks,
-	      std::map<int, ceph::buffer::list> *decoded) override;
+	      const std::map<int, stone::buffer::list> &chunks,
+	      std::map<int, stone::buffer::list> *decoded) override;
   int decode_chunks(const std::set<int> &want_to_read,
-		    const std::map<int, ceph::buffer::list> &chunks,
-		    std::map<int, ceph::buffer::list> *decoded) override;
+		    const std::map<int, stone::buffer::list> &chunks,
+		    std::map<int, stone::buffer::list> *decoded) override;
 
-  int init(ceph::ErasureCodeProfile &profile, std::ostream *ss) override;
+  int init(stone::ErasureCodeProfile &profile, std::ostream *ss) override;
   virtual void shec_encode(char **data,
 			   char **coding,
 			   int blocksize) = 0;
@@ -109,7 +109,7 @@ public:
   virtual int* shec_reedsolomon_coding_matrix(int is_single);
 
 private:
-  virtual int parse(const ceph::ErasureCodeProfile &profile) = 0;
+  virtual int parse(const stone::ErasureCodeProfile &profile) = 0;
 
   virtual double shec_calc_recovery_efficiency1(int k, int m1, int m2, int c1, int c2);
   virtual int shec_make_decoding_matrix(bool prepare,
@@ -141,7 +141,7 @@ public:
   unsigned get_alignment() const override;
   void prepare() override;
 private:
-  int parse(const ceph::ErasureCodeProfile &profile) override;
+  int parse(const stone::ErasureCodeProfile &profile) override;
 };
 
 #endif

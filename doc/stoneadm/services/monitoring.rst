@@ -3,17 +3,17 @@
 Monitoring Services
 ===================
 
-Ceph Dashboard uses `Prometheus <https://prometheus.io/>`_, `Grafana
+Stone Dashboard uses `Prometheus <https://prometheus.io/>`_, `Grafana
 <https://grafana.com/>`_, and related tools to store and visualize detailed
-metrics on cluster utilization and performance.  Ceph users have three options:
+metrics on cluster utilization and performance.  Stone users have three options:
 
 #. Have cephadm deploy and configure these services.  This is the default
    when bootstrapping a new cluster unless the ``--skip-monitoring-stack``
    option is used.
 #. Deploy and configure these services manually.  This is recommended for users
    with existing prometheus services in their environment (and in cases where
-   Ceph is running in Kubernetes with Rook).
-#. Skip the monitoring stack completely.  Some Ceph dashboard graphs will
+   Stone is running in Kubernetes with Rook).
+#. Skip the monitoring stack completely.  Some Stone dashboard graphs will
    not be available.
 
 The monitoring stack consists of `Prometheus <https://prometheus.io/>`_,
@@ -42,14 +42,14 @@ Deploying monitoring with cephadm
 ---------------------------------
 
 The default behavior of ``cephadm`` is to deploy a basic monitoring stack.  It
-is however possible that you have a Ceph cluster without a monitoring stack,
+is however possible that you have a Stone cluster without a monitoring stack,
 and you would like to add a monitoring stack to it. (Here are some ways that
-you might have come to have a Ceph cluster without a monitoring stack: You
+you might have come to have a Stone cluster without a monitoring stack: You
 might have passed the ``--skip-monitoring stack`` option to ``cephadm`` during
 the installation of the cluster, or you might have converted an existing
 cluster (which had no monitoring stack) to cephadm management.)
 
-To set up monitoring on a Ceph cluster that has no monitoring, follow the
+To set up monitoring on a Stone cluster that has no monitoring, follow the
 steps below:
 
 #. Deploy a node-exporter service on every node of the cluster.  The node-exporter provides host-level metrics like CPU and memory utilization:
@@ -182,7 +182,7 @@ preserved and automatically applied on future deployments of these services.
 
   The configuration of the custom template is also preserved when the default
   configuration of cephadm changes. If the updated configuration is to be used,
-  the custom template needs to be migrated *manually* after each upgrade of Ceph.
+  the custom template needs to be migrated *manually* after each upgrade of Stone.
 
 Option names
 """"""""""""
@@ -244,7 +244,7 @@ Deploying monitoring without cephadm
 ------------------------------------
 
 If you have an existing prometheus monitoring infrastructure, or would like
-to manage it yourself, you need to configure it to integrate with your Ceph
+to manage it yourself, you need to configure it to integrate with your Stone
 cluster.
 
 * Enable the prometheus module in the ceph-mgr daemon
@@ -288,14 +288,14 @@ Setting up Grafana
 Manually setting the Grafana URL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Cephadm automatically configures Prometheus, Grafana, and Alertmanager in
+Stoneadm automatically configures Prometheus, Grafana, and Alertmanager in
 all cases except one.
 
 In a some setups, the Dashboard user's browser might not be able to access the
-Grafana URL that is configured in Ceph Dashboard. This can happen when the
+Grafana URL that is configured in Stone Dashboard. This can happen when the
 cluster and the accessing user are in different DNS zones.
 
-If this is the case, you can use a configuration option for Ceph Dashboard
+If this is the case, you can use a configuration option for Stone Dashboard
 to set the URL that the user's browser will use to access Grafana. This
 value will never be altered by cephadm. To set this configuration option,
 issue the following command:
@@ -338,7 +338,7 @@ update its configuration:
 
   ceph orch reconfig grafana
 
-The ``reconfig`` command also sets the proper URL for Ceph Dashboard.
+The ``reconfig`` command also sets the proper URL for Stone Dashboard.
 
 Setting the initial admin password
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

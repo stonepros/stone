@@ -7,11 +7,11 @@ import errno
 
 from teuthology.contextutil import safe_while
 from teuthology.exceptions import CommandFailedError
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 log = logging.getLogger(__name__)
 
-class TestMDSMetrics(CephFSTestCase):
+class TestMDSMetrics(StoneFSTestCase):
     CLIENTS_REQUIRED = 2
     MDSS_REQUIRED = 3
 
@@ -67,7 +67,7 @@ class TestMDSMetrics(CephFSTestCase):
         for rank in ranks:
             dirname = "{0}_{1}".format(TestMDSMetrics.TEST_DIR_PERFIX, rank)
             self.mount_a.run_shell(["mkdir", dirname])
-            self.mount_a.setfattr(dirname, "ceph.dir.pin", str(rank))
+            self.mount_a.setfattr(dirname, "stone.dir.pin", str(rank))
             log.info("pinning directory {0} to rank {1}".format(dirname, rank))
             for i in range(16):
                 filename = "{0}.{1}".format("test", i)

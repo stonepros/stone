@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2015 Mirantis Inc
  *
@@ -190,7 +190,7 @@ namespace CrushTreeDumper {
 
   inline void dump_item_fields(const CrushWrapper *crush,
 			       const name_map_t& weight_set_names,
-			       const Item &qi, ceph::Formatter *f) {
+			       const Item &qi, stone::Formatter *f) {
     f->dump_int("id", qi.id);
     const char *c = crush->get_item_class(qi.id);
     if (c)
@@ -246,7 +246,7 @@ namespace CrushTreeDumper {
   }
 
   inline void dump_bucket_children(const CrushWrapper *crush,
-				   const Item &qi, ceph::Formatter *f) {
+				   const Item &qi, stone::Formatter *f) {
     if (!qi.is_bucket())
       return;
 
@@ -259,29 +259,29 @@ namespace CrushTreeDumper {
     f->close_section();
   }
 
-  class FormattingDumper : public Dumper<ceph::Formatter> {
+  class FormattingDumper : public Dumper<stone::Formatter> {
   public:
     explicit FormattingDumper(const CrushWrapper *crush,
 			      const name_map_t& weight_set_names)
-      : Dumper<ceph::Formatter>(crush, weight_set_names) {}
+      : Dumper<stone::Formatter>(crush, weight_set_names) {}
     explicit FormattingDumper(const CrushWrapper *crush,
                               const name_map_t& weight_set_names,
                               bool show_shadow)
-      : Dumper<ceph::Formatter>(crush, weight_set_names, show_shadow) {}
+      : Dumper<stone::Formatter>(crush, weight_set_names, show_shadow) {}
 
   protected:
-    void dump_item(const Item &qi, ceph::Formatter *f) override {
+    void dump_item(const Item &qi, stone::Formatter *f) override {
       f->open_object_section("item");
       dump_item_fields(qi, f);
       dump_bucket_children(qi, f);
       f->close_section();
     }
 
-    virtual void dump_item_fields(const Item &qi, ceph::Formatter *f) {
+    virtual void dump_item_fields(const Item &qi, stone::Formatter *f) {
       CrushTreeDumper::dump_item_fields(crush, weight_set_names, qi, f);
     }
 
-    virtual void dump_bucket_children(const Item &qi, ceph::Formatter *f) {
+    virtual void dump_bucket_children(const Item &qi, stone::Formatter *f) {
       CrushTreeDumper::dump_bucket_children(crush, qi, f);
     }
   };

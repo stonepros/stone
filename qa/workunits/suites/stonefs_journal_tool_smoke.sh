@@ -3,7 +3,7 @@
 set -e
 set -x
 
-export BIN="${BIN:-cephfs-journal-tool --rank=cephfs:0}"
+export BIN="${BIN:-stonefs-journal-tool --rank=stonefs:0}"
 export JOURNAL_FILE=/tmp/journal.bin
 export JSON_OUTPUT=/tmp/json.tmp
 export BINARY_OUTPUT=/tmp/binary.tmp
@@ -88,5 +88,5 @@ $BIN event splice summary
 # Journal is no long consistent with respect to metadata objects (especially inotable).
 # To ensure mds successfully replays its journal, we need to do journal reset.
 $BIN journal reset
-cephfs-table-tool all reset session
+stonefs-table-tool all reset session
 

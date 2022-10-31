@@ -1,9 +1,9 @@
 [Unit]
-Description=ceph target allowing to start/stop all ceph-mgr@.service instances at once
-PartOf=ceph.target
-After=ceph-mon.target
-Before=ceph.target
-Wants=ceph.target ceph-mon.target
+Description=stone target allowing to start/stop all stone-mgr@.service instances at once
+PartOf=stone.target
+After=stone-mon.target
+Before=stone.target
+Wants=stone.target stone-mon.target
 
 [Install]
-WantedBy=multi-user.target ceph.target
+WantedBy=multi-user.target stone.target

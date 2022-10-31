@@ -1,5 +1,5 @@
 #!/bin/sh
-# postrm script for ceph-common
+# postrm script for stone-common
 #
 # see: dh_installdeb(1)
 
@@ -24,11 +24,11 @@ case "$1" in
     ;;
 
     purge)
-        [ -f "/etc/default/ceph" ] && . /etc/default/ceph
-        [ -z "$SERVER_USER" ] && SERVER_USER=ceph
+        [ -f "/etc/default/stone" ] && . /etc/default/stone
+        [ -z "$SERVER_USER" ] && SERVER_USER=stone
 
-        rm -rf /var/log/ceph
-        rm -rf /etc/ceph
+        rm -rf /var/log/stone
+        rm -rf /etc/stone
 
         if [ -f /etc/shadow ]; then
             usermod -L -e 1 $SERVER_USER

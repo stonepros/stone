@@ -1,7 +1,7 @@
 :orphan:
 
 ===============================
-Troubleshooting Ceph on Windows
+Troubleshooting Stone on Windows
 ===============================
 
 MSI installer
@@ -41,7 +41,7 @@ Windows Event Log, having Event ID 1000. The entry will also include the process
 the faulting module name and path as well as the exception code.
 
 Please note that in order to analyze crash dumps, the debug symbols are required.
-We're currently buidling Ceph using ``MinGW``, so by default ``DWARF`` symbols will
+We're currently buidling Stone using ``MinGW``, so by default ``DWARF`` symbols will
 be embedded in the binaries. ``windbg`` does not support such symbols but ``gdb``
 can be used.
 
@@ -88,7 +88,7 @@ Note that the ``wnbd-client`` mapping identifier will be the full RBD image spec
 Missing libraries
 ~~~~~~~~~~~~~~~~~
 
-The Ceph tools can silently exit with a -1073741515 return code if one of the
+The Stone tools can silently exit with a -1073741515 return code if one of the
 required DLLs is missing or unsupported.
 
 The `Dependency Walker`_ tool can be used to determine the missing library.

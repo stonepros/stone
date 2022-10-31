@@ -5,14 +5,14 @@ overrides:
     conf:
       # override to make these names predictable
       client.mirror.4:
-        admin socket: /var/run/stone/rbd-mirror.$cluster-$name.asok
-        pid file: /var/run/stone/rbd-mirror.$cluster-$name.pid
+        admin socket: /var/run/stonepros/rbd-mirror.$cluster-$name.asok
+        pid file: /var/run/stonepros/rbd-mirror.$cluster-$name.pid
       client.mirror.5:
-        admin socket: /var/run/stone/rbd-mirror.$cluster-$name.asok
-        pid file: /var/run/stone/rbd-mirror.$cluster-$name.pid
+        admin socket: /var/run/stonepros/rbd-mirror.$cluster-$name.asok
+        pid file: /var/run/stonepros/rbd-mirror.$cluster-$name.pid
       client.mirror.6:
-        admin socket: /var/run/stone/rbd-mirror.$cluster-$name.asok
-        pid file: /var/run/stone/rbd-mirror.$cluster-$name.pid
+        admin socket: /var/run/stonepros/rbd-mirror.$cluster-$name.asok
+        pid file: /var/run/stonepros/rbd-mirror.$cluster-$name.pid
 tasks:
 - exec:
     cluster1.client.mirror.0:

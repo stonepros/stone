@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -18,14 +18,14 @@
 #define STONE_COMMON_NET_UTILS_H
 #include "common/config.h"
 
-namespace ceph {
+namespace stone {
   class NetHandler {
     int generic_connect(const entity_addr_t& addr, const entity_addr_t& bind_addr, bool nonblock);
 
-    StoneeContext *cct;
+    StoneContext *cct;
    public:
     int create_socket(int domain, bool reuse_addr=false);
-    explicit NetHandler(StoneeContext *c): cct(c) {}
+    explicit NetHandler(StoneContext *c): cct(c) {}
     int set_nonblock(int sd);
     int set_socket_options(int sd, bool nodelay, int size);
     int connect(const entity_addr_t &addr, const entity_addr_t& bind_addr);

@@ -8,7 +8,7 @@
 #include <shared_mutex>
 #include <system_error>
 
-namespace ceph {
+namespace stone {
 // This is a 'lock' class in the style of shared_lock and
 // unique_lock. Like shared_mutex it implements both Lockable and
 // SharedLockable.
@@ -163,11 +163,11 @@ public:
     o = ownership::shared;
   }
 
-  void lock(ceph::acquire_unique_t) {
+  void lock(stone::acquire_unique_t) {
     lock();
   }
 
-  void lock(ceph::acquire_shared_t) {
+  void lock(stone::acquire_shared_t) {
     lock_shared();
   }
 
@@ -189,11 +189,11 @@ public:
     return false;
   }
 
-  bool try_lock(ceph::acquire_unique_t) {
+  bool try_lock(stone::acquire_unique_t) {
     return try_lock();
   }
 
-  bool try_lock(ceph::acquire_shared_t) {
+  bool try_lock(stone::acquire_shared_t) {
     return try_lock_shared();
   }
 
@@ -218,13 +218,13 @@ public:
   }
 
   template<typename Rep, typename Period>
-  bool try_lock_for(ceph::acquire_unique_t,
+  bool try_lock_for(stone::acquire_unique_t,
 		    const std::chrono::duration<Rep, Period>& dur) {
     return try_lock_for(dur);
   }
 
   template<typename Rep, typename Period>
-  bool try_lock_for(ceph::acquire_shared_t,
+  bool try_lock_for(stone::acquire_shared_t,
 		    const std::chrono::duration<Rep, Period>& dur) {
     return try_lock_shared_for(dur);
   }
@@ -251,13 +251,13 @@ public:
   }
 
   template<typename Clock, typename Duration>
-  bool try_lock_until(ceph::acquire_unique_t,
+  bool try_lock_until(stone::acquire_unique_t,
 		      const std::chrono::time_point<Clock, Duration>& time) {
     return try_lock_until(time);
   }
 
   template<typename Clock, typename Duration>
-  bool try_lock_until(ceph::acquire_shared_t,
+  bool try_lock_until(stone::acquire_shared_t,
 		      const std::chrono::time_point<Clock, Duration>& time) {
     return try_lock_shared_until(time);
   }
@@ -380,12 +380,12 @@ private:
       };
   ownership o;
 };
-} // namespace ceph
+} // namespace stone
 
 namespace std {
   template<typename Mutex>
-  void swap(ceph::shunique_lock<Mutex> sh1,
-	    ceph::shunique_lock<Mutex> sha) {
+  void swap(stone::shunique_lock<Mutex> sh1,
+	    stone::shunique_lock<Mutex> sha) {
     sh1.swap(sha);
   }
 } // namespace std

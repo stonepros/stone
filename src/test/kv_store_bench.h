@@ -26,7 +26,7 @@
 #include <iostream>
 
 using namespace std;
-using ceph::bufferlist;
+using stone::bufferlist;
 
 /**
  * stores pairings from op type to time taken for that op (for latency), and to
@@ -49,10 +49,10 @@ struct StopWatch {
   utime_t end_time;
 
   void start_time() {
-    begin_time = ceph_clock_now();
+    begin_time = stone_clock_now();
   }
   void stop_time() {
-    end_time = ceph_clock_now();
+    end_time = stone_clock_now();
   }
   double get_time() {
     return (end_time - begin_time) * 1000;
@@ -116,11 +116,11 @@ protected:
   set<string> key_set;//set of keys already in the data set
   KeyValueStructure * kvs;
   kv_bench_data data;//stores throughput and latency from completed tests
-  ceph::mutex data_lock = ceph::make_mutex("data lock");
-  ceph::condition_variable op_avail; // signaled when an op completes
+  stone::mutex data_lock = stone::make_mutex("data lock");
+  stone::condition_variable op_avail; // signaled when an op completes
   int ops_in_flight;//number of operations currently in progress
-  ceph::mutex ops_in_flight_lock =
-    ceph::make_mutex("KvStoreBench::ops_in_flight_lock");
+  stone::mutex ops_in_flight_lock =
+    stone::make_mutex("KvStoreBench::ops_in_flight_lock");
   //these are used for cleanup and setup purposes - they are NOT passed to kvs!
   librados::Rados rados;
   string rados_id;

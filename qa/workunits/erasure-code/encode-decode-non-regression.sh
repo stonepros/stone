@@ -16,8 +16,8 @@
 #
 set -ex
 
-: ${CORPUS:=https://github.com/ceph/ceph-erasure-code-corpus.git}
-: ${DIRECTORY:=$CEPH_ROOT/ceph-erasure-code-corpus}
+: ${CORPUS:=https://github.com/stonepros/stone-erasure-code-corpus.git}
+: ${DIRECTORY:=$STONE_ROOT/stone-erasure-code-corpus}
 
 # when running from sources, the current directory must have precedence
 export PATH=:$PATH
@@ -26,7 +26,7 @@ if ! test -d $DIRECTORY ; then
     git clone $CORPUS $DIRECTORY
 fi
 
-my_version=v$(ceph --version | cut -f3 -d ' ')
+my_version=v$(stone --version | cut -f3 -d ' ')
 
 all_versions=$((ls -d $DIRECTORY/v* ; echo $DIRECTORY/$my_version ) | sort)
 

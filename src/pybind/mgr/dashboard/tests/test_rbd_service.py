@@ -33,7 +33,7 @@ class RbdServiceTest(unittest.TestCase):
 
     @mock.patch('dashboard.services.rbd.RbdConfiguration._rbd.config_list')
     @mock.patch('dashboard.mgr.get')
-    @mock.patch('dashboard.services.ceph_service.CephService.get_pool_list')
+    @mock.patch('dashboard.services.stone_service.StoneService.get_pool_list')
     def test_pool_rbd_configuration_with_different_pg_states(self, get_pool_list, get, config_list):
         get_pool_list.return_value = [{
             'pool_name': 'good-pool',

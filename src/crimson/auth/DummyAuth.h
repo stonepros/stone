@@ -20,8 +20,8 @@ public:
   uint32_t pick_con_mode(int peer_type,
 			 uint32_t auth_method,
 			 const std::vector<uint32_t>& preferred_modes) final {
-    ceph_assert(auth_method == STONE_AUTH_NONE);
-    ceph_assert(preferred_modes.size() &&
+    stone_assert(auth_method == STONE_AUTH_NONE);
+    stone_assert(preferred_modes.size() &&
                 preferred_modes[0] == STONE_CON_MODE_CRC);
     return STONE_CON_MODE_CRC;
   }
@@ -37,11 +37,11 @@ public:
     return {STONE_AUTH_NONE, {STONE_CON_MODE_CRC}, {}};
   }
 
-  ceph::bufferlist handle_auth_reply_more(
+  stone::bufferlist handle_auth_reply_more(
     crimson::net::ConnectionRef conn,
     AuthConnectionMetaRef auth_meta,
     const bufferlist& bl) override {
-    ceph_abort();
+    stone_abort();
   }
 
   int handle_auth_done(
@@ -60,7 +60,7 @@ public:
     int result,
     const std::vector<uint32_t>& allowed_methods,
     const std::vector<uint32_t>& allowed_modes) override {
-    ceph_abort();
+    stone_abort();
   }
 
   // server

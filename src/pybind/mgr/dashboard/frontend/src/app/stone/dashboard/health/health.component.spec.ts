@@ -6,7 +6,7 @@ import { By } from '@angular/platform-browser';
 import _ from 'lodash';
 import { of } from 'rxjs';
 
-import { PgCategoryService } from '~/app/ceph/shared/pg-category.service';
+import { PgCategoryService } from '~/app/stone/shared/pg-category.service';
 import { HealthService } from '~/app/shared/api/health.service';
 import { CssHelper } from '~/app/shared/classes/css-helper';
 import { Permissions } from '~/app/shared/models/permissions';
@@ -73,7 +73,7 @@ describe('HealthComponent', () => {
         rbd: true,
         mirroring: true,
         iscsi: true,
-        cephfs: true,
+        stonefs: true,
         rgw: true
       })
     );
@@ -104,7 +104,7 @@ describe('HealthComponent', () => {
           rbd: false,
           mirroring: false,
           iscsi: false,
-          cephfs: false,
+          stonefs: false,
           rgw: false
         })
       );

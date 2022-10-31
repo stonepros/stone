@@ -20,8 +20,8 @@
 #prepare:
 # - write config files: config/osd_host, config/mon_host, config/storage_path, config/mds_host if exist mds
 #step 1. rbd export all images as you need
-#step 2. stop all ceph services
-#step 3. use ceph_rbd_recover_tool to recover all images
+#step 2. stop all stone services
+#step 3. use stone_rbd_recover_tool to recover all images
 #step 4. compare md5sum of recover image with that of export image who has the same image name
 
 ssh_opt="-o ConnectTimeout=1"
@@ -37,7 +37,7 @@ test_dir= # `cat $storage_path`
 export_dir= #$test_dir/export
 recover_dir= #$test_dir/recover
 image_names= #$test_dir/image_names
-online_images= #$test_dir/online_images, all images on ceph rbd pool
+online_images= #$test_dir/online_images, all images on stone rbd pool
 gen_db= #$test_dir/gen_db, label database if exist
 pool=rbd
 pool_id=2
@@ -45,7 +45,7 @@ pool_id=2
 function get_pool_id()
 {
   local pool_id_file=/tmp/pool_id_file.$$$$
-  ceph osd pool stats $pool|head -n 1|awk '{print $4}' >$pool_id_file
+  stone osd pool stats $pool|head -n 1|awk '{print $4}' >$pool_id_file
   if [ $? -ne 0 ];then
     echo "$func: get pool id failed: pool = $pool"
     rm -f $pool_id_file
@@ -82,8 +82,8 @@ function init()
   online_images=$test_dir/online_images
   gen_db=$test_dir/gen_db
 
-  trap 'echo "ceph cluster is stopped ..."; exit;' INT
-  ceph -s >/dev/null
+  trap 'echo "stone cluster is stopped ..."; exit;' INT
+  stone -s >/dev/null
   get_pool_id
 
   mkdir -p $test_dir
@@ -104,24 +104,24 @@ function do_gen_database()
   echo 1 >$gen_db 
 }
 
-#check if all ceph processes are stopped
-function check_ceph_service()
+#check if all stone processes are stopped
+function check_stone_service()
 {
-  local func="check_ceph_service"
-  local res=`cat $osd_host $mon_host $mds_host|sort -u|tr -d [:blank:]|xargs -n 1 -I @ ssh $ssh_opt @ "ps aux|grep -E \"(ceph-osd|ceph-mon|ceph-mds)\"|grep -v grep"`
+  local func="check_stone_service"
+  local res=`cat $osd_host $mon_host $mds_host|sort -u|tr -d [:blank:]|xargs -n 1 -I @ ssh $ssh_opt @ "ps aux|grep -E \"(stone-osd|stone-mon|stone-mds)\"|grep -v grep"`
   if [ "$res"x != ""x ];then
-    echo "$func: NOT all ceph services are stopped"
+    echo "$func: NOT all stone services are stopped"
     return 1
     exit
   fi
-  echo "$func: all ceph services are stopped"
+  echo "$func: all stone services are stopped"
   return 0
 }
 
-function stop_ceph()
+function stop_stone()
 {
-  local func="stop_ceph"
-  #cat osd_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall ceph-osd" 
+  local func="stop_stone"
+  #cat osd_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall stone-osd" 
   while read osd
   do
   {
@@ -129,17 +129,17 @@ function stop_ceph()
     if [ "$osd"x = ""x ];then
       continue
     fi
-    #ssh $ssh_opt $osd "killall ceph-osd ceph-mon ceph-mds" </dev/null
-    ssh $ssh_opt $osd "killall ceph-osd" </dev/null
+    #ssh $ssh_opt $osd "killall stone-osd stone-mon stone-mds" </dev/null
+    ssh $ssh_opt $osd "killall stone-osd" </dev/null
   } &
   done < $osd_host
   wait
   echo "waiting kill all osd ..."
   sleep 1
-  #cat $mon_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall ceph-mon ceph-osd ceph-mds" 
-  cat $mon_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall ceph-mon" 
-  #cat $mds_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall ceph-mds ceph-mon ceph-osd" 
-  cat $mds_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall ceph-mds" 
+  #cat $mon_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall stone-mon stone-osd stone-mds" 
+  cat $mon_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall stone-mon" 
+  #cat $mds_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall stone-mds stone-mon stone-osd" 
+  cat $mds_host|xargs -n 1 -I @ ssh $ssh_opt @ "killall stone-mds" 
 }
 
 function create_image()
@@ -445,19 +445,19 @@ function do_export_snap()
   export_snapshots  image_v2_snap 2
 }
 
-# step 2: stop ceph cluster and gen database
+# step 2: stop stone cluster and gen database
 function stop_cluster_gen_database()
 {
-  trap 'echo stop ceph cluster failed; exit;' INT HUP
-  stop_ceph 
+  trap 'echo stop stone cluster failed; exit;' INT HUP
+  stop_stone 
   sleep 2
-  check_ceph_service
+  check_stone_service
   local res=$?
   while [ $res -ne 0 ]
   do
-    stop_ceph
+    stop_stone
     sleep 2
-    check_ceph_service
+    check_stone_service
     res=$?
   done
 

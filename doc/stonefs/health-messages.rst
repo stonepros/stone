@@ -2,13 +2,13 @@
 .. _cephfs-health-messages:
 
 ======================
-CephFS health messages
+StoneFS health messages
 ======================
 
 Cluster health checks
 =====================
 
-The Ceph monitor daemons will generate health messages in response
+The Stone monitor daemons will generate health messages in response
 to certain states of the file system map structure (and the enclosed MDS maps).
 
 Message: mds rank(s) *ranks* have failed
@@ -31,7 +31,7 @@ Message: mds *names* are laggy
 Description: The named MDS daemons have failed to send beacon messages
 to the monitor for at least ``mds_beacon_grace`` (default 15s), while
 they are supposed to send beacon messages every ``mds_beacon_interval``
-(default 4s).  The daemons may have crashed.  The Ceph monitor will
+(default 4s).  The daemons may have crashed.  The Stone monitor will
 automatically replace laggy daemons with standbys if any are available.
 
 Message: insufficient standby daemons available
@@ -77,7 +77,7 @@ other daemons, please see :ref:`health-checks`.
   Message
     "Behind on trimming..."
   Description
-    CephFS maintains a metadata journal that is divided into
+    StoneFS maintains a metadata journal that is divided into
     *log segments*.  The length of journal (in number of segments) is controlled
     by the setting ``mds_log_max_segments``, and when the number of segments
     exceeds that setting the MDS starts writing back metadata so that it
@@ -90,7 +90,7 @@ other daemons, please see :ref:`health-checks`.
   Message
     "Client *name* failing to respond to capability release"
   Description
-    CephFS clients are issued *capabilities* by the MDS, which
+    StoneFS clients are issued *capabilities* by the MDS, which
     are like locks.  Sometimes, for example when another client needs access,
     the MDS will request clients release their capabilities.  If the client
     is unresponsive or buggy, it might fail to do so promptly or fail to do
@@ -116,7 +116,7 @@ other daemons, please see :ref:`health-checks`.
   Message
     "Client *name* failing to advance its oldest client/flush tid"
   Description
-    The CephFS client-MDS protocol uses a field called the
+    The StoneFS client-MDS protocol uses a field called the
     *oldest tid* to inform the MDS of which client requests are fully
     complete and may therefore be forgotten about by the MDS.  If a buggy
     client is failing to advance this field, then the MDS may be prevented

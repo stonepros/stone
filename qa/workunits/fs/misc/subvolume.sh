@@ -9,7 +9,7 @@ set -e
 mkdir group
 mkdir group/subvol1
 
-setfattr -n ceph.dir.subvolume -v 1 group/subvol1
+setfattr -n stone.dir.subvolume -v 1 group/subvol1
 
 # rename subvolume
 mv group/subvol1 group/subvol2
@@ -36,7 +36,7 @@ mkdir group/subvol2/dir
 expect_failure mkdir group/subvol2/dir/.snap/s2
 
 mkdir group/subvol3
-setfattr -n ceph.dir.subvolume -v 1 group/subvol3
+setfattr -n stone.dir.subvolume -v 1 group/subvol3
 
 # move file across subvolumes
 expect_failure python3 -c "import os; os.rename('group/subvol2/file1', 'group/subvol3/file1')"
@@ -45,15 +45,15 @@ expect_failure python3 -c "import os; os.rename('group/subvol2/file1', 'group/su
 expect_failure ln group/subvol2/file1 group/subvol3/file1
 
 # create subvolume inside existing subvolume
-expect_failure setfattr -n ceph.dir.subvolume -v 1 group/subvol2/dir
+expect_failure setfattr -n stone.dir.subvolume -v 1 group/subvol2/dir
 
 # clear subvolume flag
-setfattr -n ceph.dir.subvolume -v 0 group/subvol2
+setfattr -n stone.dir.subvolume -v 0 group/subvol2
 mkdir group/subvol2/dir/.snap/s2
 
 # parent subvolume override child subvolume
-setfattr -n ceph.dir.subvolume -v 1 group/subvol2/dir
-setfattr -n ceph.dir.subvolume -v 1 group/subvol2
+setfattr -n stone.dir.subvolume -v 1 group/subvol2/dir
+setfattr -n stone.dir.subvolume -v 1 group/subvol2
 expect_failure mkdir group/subvol2/dir/.snap/s3
 
 rmdir group/subvol2/.snap/s1

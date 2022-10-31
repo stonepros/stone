@@ -45,9 +45,9 @@ class HostControllerTest(DashboardTestCase):
         for server in data:
             self.assertIn('services', server)
             self.assertIn('hostname', server)
-            self.assertIn('ceph_version', server)
+            self.assertIn('stone_version', server)
             self.assertIsNotNone(server['hostname'])
-            self.assertIsNotNone(server['ceph_version'])
+            self.assertIsNotNone(server['stone_version'])
             for service in server['services']:
                 self.assertIn('type', service)
                 self.assertIn('id', service)
@@ -55,8 +55,8 @@ class HostControllerTest(DashboardTestCase):
                 self.assertIsNotNone(service['id'])
 
             self.assertIn('sources', server)
-            in_ceph, in_orchestrator = server['sources']['ceph'], server['sources']['orchestrator']
-            if in_ceph:
+            in_stone, in_orchestrator = server['sources']['stone'], server['sources']['orchestrator']
+            if in_stone:
                 self.assertGreaterEqual(len(server['services']), 1)
                 if not in_orchestrator:
                     self.assertNotIn(server['hostname'], orch_hostnames)
@@ -72,7 +72,7 @@ class HostControllerTest(DashboardTestCase):
         resp_hostnames = {host['hostname'] for host in data}
         self.assertEqual(test_hostnames, resp_hostnames)
 
-        data = self._get('{}?sources=ceph'.format(self.URL_HOST), version='1.1')
+        data = self._get('{}?sources=stone'.format(self.URL_HOST), version='1.1')
         self.assertStatus(200)
         test_hostnames = {inventory_node['name'] for inventory_node in
                           self.ORCHESTRATOR_TEST_DATA['inventory']}

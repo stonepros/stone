@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
  *
@@ -128,7 +128,7 @@ public:
 
   int encode_chunks(const set<int> &want_to_encode,
 			    map<int, bufferlist> *encoded) override {
-    ceph_abort();
+    stone_abort();
     return 0;
   }
 
@@ -181,7 +181,7 @@ public:
   int decode_chunks(const set<int> &want_to_read,
 			    const map<int, bufferlist> &chunks,
 			    map<int, bufferlist> *decoded) override {
-    ceph_abort();
+    stone_abort();
     return 0;
   }
 

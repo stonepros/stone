@@ -10,15 +10,15 @@ from typing import TYPE_CHECKING, List, Callable, TypeVar, \
 
 from mgr_module import HandleCommandResult, MonCommandFailed
 
-from ceph.deployment.service_spec import ServiceSpec, RGWSpec
-from ceph.deployment.utils import is_ipv6, unwrap_ipv6
+from stone.deployment.service_spec import ServiceSpec, RGWSpec
+from stone.deployment.utils import is_ipv6, unwrap_ipv6
 from mgr_util import build_url
 from orchestrator import OrchestratorError, DaemonDescription, DaemonDescriptionStatus
 from orchestrator._interface import daemon_type_to_service
-from cephadm import utils
+from stoneadm import utils
 
 if TYPE_CHECKING:
-    from cephadm.module import CephadmOrchestrator
+    from stoneadm.module import StoneadmOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +26,14 @@ ServiceSpecs = TypeVar('ServiceSpecs', bound=ServiceSpec)
 AuthEntity = NewType('AuthEntity', str)
 
 
-class CephadmDaemonDeploySpec:
+class StoneadmDaemonDeploySpec:
     # typing.NamedTuple + Generic is broken in py36
     def __init__(self, host: str, daemon_id: str,
                  service_name: str,
                  network: Optional[str] = None,
                  keyring: Optional[str] = None,
                  extra_args: Optional[List[str]] = None,
-                 ceph_conf: str = '',
+                 stone_conf: str = '',
                  extra_files: Optional[Dict[str, Any]] = None,
                  daemon_type: Optional[str] = None,
                  ip: Optional[str] = None,
@@ -42,7 +42,7 @@ class CephadmDaemonDeploySpec:
                  rank_generation: Optional[int] = None,
                  extra_container_args: Optional[List[str]] = None):
         """
-        A data struction to encapsulate `cephadm deploy ...
+        A data struction to encapsulate `stoneadm deploy ...
         """
         self.host: str = host
         self.daemon_id = daemon_id
@@ -54,13 +54,13 @@ class CephadmDaemonDeploySpec:
         # mons
         self.network = network
 
-        # for run_cephadm.
+        # for run_stoneadm.
         self.keyring: Optional[str] = keyring
 
-        # For run_cephadm. Would be great to have more expressive names.
+        # For run_stoneadm. Would be great to have more expressive names.
         self.extra_args: List[str] = extra_args or []
 
-        self.ceph_conf = ceph_conf
+        self.stone_conf = stone_conf
         self.extra_files = extra_files or {}
 
         # TCP ports used by the daemon
@@ -68,7 +68,7 @@ class CephadmDaemonDeploySpec:
         self.ip: Optional[str] = ip
 
         # values to be populated during generate_config calls
-        # and then used in _run_cephadm
+        # and then used in _run_stoneadm
         self.final_config: Dict[str, Any] = {}
         self.deps: List[str] = []
 
@@ -82,17 +82,17 @@ class CephadmDaemonDeploySpec:
 
     def config_get_files(self) -> Dict[str, Any]:
         files = self.extra_files
-        if self.ceph_conf:
-            files['config'] = self.ceph_conf
+        if self.stone_conf:
+            files['config'] = self.stone_conf
 
         return files
 
     @staticmethod
-    def from_daemon_description(dd: DaemonDescription) -> 'CephadmDaemonDeploySpec':
+    def from_daemon_description(dd: DaemonDescription) -> 'StoneadmDaemonDeploySpec':
         assert dd.hostname
         assert dd.daemon_id
         assert dd.daemon_type
-        return CephadmDaemonDeploySpec(
+        return StoneadmDaemonDeploySpec(
             host=dd.hostname,
             daemon_id=dd.daemon_id,
             daemon_type=dd.daemon_type,
@@ -120,7 +120,7 @@ class CephadmDaemonDeploySpec:
         )
 
 
-class CephadmService(metaclass=ABCMeta):
+class StoneadmService(metaclass=ABCMeta):
     """
     Base class for service types. Often providing a create() and config() fn.
     """
@@ -130,8 +130,8 @@ class CephadmService(metaclass=ABCMeta):
     def TYPE(self) -> str:
         pass
 
-    def __init__(self, mgr: "CephadmOrchestrator"):
-        self.mgr: "CephadmOrchestrator" = mgr
+    def __init__(self, mgr: "StoneadmOrchestrator"):
+        self.mgr: "StoneadmOrchestrator" = mgr
 
     def allow_colo(self) -> bool:
         """
@@ -177,12 +177,12 @@ class CephadmService(metaclass=ABCMeta):
             ip: Optional[str] = None,
             rank: Optional[int] = None,
             rank_generation: Optional[int] = None,
-    ) -> CephadmDaemonDeploySpec:
+    ) -> StoneadmDaemonDeploySpec:
         try:
             eca = spec.extra_container_args
         except AttributeError:
             eca = None
-        return CephadmDaemonDeploySpec(
+        return StoneadmDaemonDeploySpec(
             host=host,
             daemon_id=daemon_id,
             service_name=spec.service_name(),
@@ -195,10 +195,10 @@ class CephadmService(metaclass=ABCMeta):
             extra_container_args=eca,
         )
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         raise NotImplementedError()
 
-    def generate_config(self, daemon_spec: CephadmDaemonDeploySpec) -> Tuple[Dict[str, Any], List[str]]:
+    def generate_config(self, daemon_spec: StoneadmDaemonDeploySpec) -> Tuple[Dict[str, Any], List[str]]:
         raise NotImplementedError()
 
     def config(self, spec: ServiceSpec) -> None:
@@ -284,7 +284,7 @@ class CephadmService(metaclass=ABCMeta):
               gateways.
             - Parse or deserialize previous output. e.g. Dashboard command returns a JSON string.
             - Determine if the config need to be update. NOTE: This step is important because if a
-              Dashboard command modified Ceph config, cephadm's config_notify() is called. Which
+              Dashboard command modified Stone config, stoneadm's config_notify() is called. Which
               kicks the serve() loop and the logic using this method is likely to be called again.
               A config should be updated only when needed.
             - Update a config in Dashboard by using a Dashboard command.
@@ -432,20 +432,20 @@ class CephadmService(metaclass=ABCMeta):
         logger.debug(f'Purge called for {self.TYPE} - no action taken')
 
 
-class CephService(CephadmService):
-    def generate_config(self, daemon_spec: CephadmDaemonDeploySpec) -> Tuple[Dict[str, Any], List[str]]:
-        # Ceph.daemons (mon, mgr, mds, osd, etc)
-        cephadm_config = self.get_config_and_keyring(
+class StoneService(StoneadmService):
+    def generate_config(self, daemon_spec: StoneadmDaemonDeploySpec) -> Tuple[Dict[str, Any], List[str]]:
+        # Stone.daemons (mon, mgr, mds, osd, etc)
+        stoneadm_config = self.get_config_and_keyring(
             daemon_spec.daemon_type,
             daemon_spec.daemon_id,
             host=daemon_spec.host,
             keyring=daemon_spec.keyring,
-            extra_ceph_config=daemon_spec.ceph_conf)
+            extra_stone_config=daemon_spec.stone_conf)
 
         if daemon_spec.config_get_files():
-            cephadm_config.update({'files': daemon_spec.config_get_files()})
+            stoneadm_config.update({'files': daemon_spec.config_get_files()})
 
-        return cephadm_config, []
+        return stoneadm_config, []
 
     def post_remove(self, daemon: DaemonDescription, is_failed_deploy: bool) -> None:
         super().post_remove(daemon, is_failed_deploy=is_failed_deploy)
@@ -453,11 +453,11 @@ class CephService(CephadmService):
 
     def get_auth_entity(self, daemon_id: str, host: str = "") -> AuthEntity:
         """
-        Map the daemon id to a cephx keyring entity name
+        Map the daemon id to a stonex keyring entity name
         """
         # despite this mapping entity names to daemons, self.TYPE within
-        # the CephService class refers to service types, not daemon types
-        if self.TYPE in ['rgw', 'rbd-mirror', 'cephfs-mirror', 'nfs', "iscsi", 'ingress']:
+        # the StoneService class refers to service types, not daemon types
+        if self.TYPE in ['rgw', 'rbd-mirror', 'stonefs-mirror', 'nfs', "iscsi", 'ingress']:
             return AuthEntity(f'client.{self.TYPE}.{daemon_id}')
         elif self.TYPE == 'crash':
             if host == "":
@@ -475,7 +475,7 @@ class CephService(CephadmService):
                                daemon_id: str,
                                host: str,
                                keyring: Optional[str] = None,
-                               extra_ceph_config: Optional[str] = None
+                               extra_stone_config: Optional[str] = None
                                ) -> Dict[str, Any]:
         # keyring
         if not keyring:
@@ -485,10 +485,10 @@ class CephService(CephadmService):
                 'entity': entity,
             })
 
-        config = self.mgr.get_minimal_ceph_conf()
+        config = self.mgr.get_minimal_stone_conf()
 
-        if extra_ceph_config:
-            config += extra_ceph_config
+        if extra_stone_config:
+            config += extra_stone_config
 
         return {
             'config': config,
@@ -512,10 +512,10 @@ class CephService(CephadmService):
         })
 
 
-class MonService(CephService):
+class MonService(StoneService):
     TYPE = 'mon'
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         """
         Create a new monitor on the given host.
         """
@@ -541,7 +541,7 @@ class MonService(CephService):
                 extra_config += 'public addr = %s\n' % network
             else:
                 raise OrchestratorError(
-                    'Must specify a CIDR network, ceph addrvec, or plain IP: \'%s\'' % network)
+                    'Must specify a CIDR network, stone addrvec, or plain IP: \'%s\'' % network)
         else:
             # try to get the public_network from the config
             ret, network, err = self.mgr.check_mon_command({
@@ -552,13 +552,13 @@ class MonService(CephService):
             network = network.strip() if network else network
             if not network:
                 raise OrchestratorError(
-                    'Must set public_network config option or specify a CIDR network, ceph addrvec, or plain IP')
+                    'Must set public_network config option or specify a CIDR network, stone addrvec, or plain IP')
             if '/' not in network:
                 raise OrchestratorError(
                     'public_network is set but does not look like a CIDR network: \'%s\'' % network)
             extra_config += 'public network = %s\n' % network
 
-        daemon_spec.ceph_conf = extra_config
+        daemon_spec.stone_conf = extra_config
         daemon_spec.keyring = keyring
 
         daemon_spec.final_config, daemon_spec.deps = self.generate_config(daemon_spec)
@@ -608,11 +608,11 @@ class MonService(CephService):
         pass
 
 
-class MgrService(CephService):
+class MgrService(StoneService):
     TYPE = 'mgr'
 
     def allow_colo(self) -> bool:
-        if self.mgr.get_ceph_option('mgr_standby_modules'):
+        if self.mgr.get_stone_option('mgr_standby_modules'):
             # traditional mgr mode: standby daemons' modules listen on
             # ports and redirect to the primary.  we must not schedule
             # multiple mgrs on the same host or else ports will
@@ -623,7 +623,7 @@ class MgrService(CephService):
             # are not a concern.
             return True
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         """
         Create a new manager instance on a host.
         """
@@ -722,13 +722,13 @@ class MgrService(CephService):
         mgr_daemons = self.mgr.cache.get_daemons_by_type(self.TYPE)
         active = self.get_active_daemon(mgr_daemons).daemon_id
         if active in daemon_ids:
-            warn_message = 'ALERT: Cannot stop active Mgr daemon, Please switch active Mgrs with \'ceph mgr fail %s\'' % active
+            warn_message = 'ALERT: Cannot stop active Mgr daemon, Please switch active Mgrs with \'stone mgr fail %s\'' % active
             return HandleCommandResult(-errno.EBUSY, '', warn_message)
 
         return HandleCommandResult(0, warn_message, '')
 
 
-class MdsService(CephService):
+class MdsService(StoneService):
     TYPE = 'mds'
 
     def allow_colo(self) -> bool:
@@ -746,14 +746,14 @@ class MdsService(CephService):
             'value': spec.service_id,
         })
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         assert self.TYPE == daemon_spec.daemon_type
         mds_id, _ = daemon_spec.daemon_id, daemon_spec.host
 
         # get mds. key
         keyring = self.get_keyring_with_caps(self.get_auth_entity(mds_id),
                                              ['mon', 'profile mds',
-                                              'osd', 'allow rw tag cephfs *=*',
+                                              'osd', 'allow rw tag stonefs *=*',
                                               'mds', 'allow'])
         daemon_spec.keyring = keyring
 
@@ -784,7 +784,7 @@ class MdsService(CephService):
         })
 
 
-class RgwService(CephService):
+class RgwService(StoneService):
     TYPE = 'rgw'
 
     def allow_colo(self) -> bool:
@@ -830,7 +830,7 @@ class RgwService(CephService):
         self.mgr.spec_store.save(spec)
         self.mgr.trigger_connect_dashboard_rgw()
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         assert self.TYPE == daemon_spec.daemon_type
         rgw_id, _ = daemon_spec.daemon_id, daemon_spec.host
         spec = cast(RGWSpec, self.mgr.spec_store[daemon_spec.service_name].spec)
@@ -959,13 +959,13 @@ class RgwService(CephService):
         self.mgr.trigger_connect_dashboard_rgw()
 
 
-class RbdMirrorService(CephService):
+class RbdMirrorService(StoneService):
     TYPE = 'rbd-mirror'
 
     def allow_colo(self) -> bool:
         return True
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         assert self.TYPE == daemon_spec.daemon_type
         daemon_id, _ = daemon_spec.daemon_id, daemon_spec.host
 
@@ -993,10 +993,10 @@ class RbdMirrorService(CephService):
         return HandleCommandResult(0, warn_message, '')
 
 
-class CrashService(CephService):
+class CrashService(StoneService):
     TYPE = 'crash'
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         assert self.TYPE == daemon_spec.daemon_type
         daemon_id, host = daemon_spec.daemon_id, daemon_spec.host
 
@@ -1011,8 +1011,8 @@ class CrashService(CephService):
         return daemon_spec
 
 
-class CephfsMirrorService(CephService):
-    TYPE = 'cephfs-mirror'
+class StonefsMirrorService(StoneService):
+    TYPE = 'stonefs-mirror'
 
     def config(self, spec: ServiceSpec) -> None:
         # make sure mirroring module is enabled
@@ -1026,15 +1026,15 @@ class CephfsMirrorService(CephService):
             # we shouldn't get here (mon will tell the mgr to respawn), but no
             # harm done if we do.
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         assert self.TYPE == daemon_spec.daemon_type
 
         ret, keyring, err = self.mgr.check_mon_command({
             'prefix': 'auth get-or-create',
             'entity': self.get_auth_entity(daemon_spec.daemon_id),
-            'caps': ['mon', 'profile cephfs-mirror',
+            'caps': ['mon', 'profile stonefs-mirror',
                      'mds', 'allow r',
-                     'osd', 'allow rw tag cephfs metadata=*, allow r tag cephfs data=*',
+                     'osd', 'allow rw tag stonefs metadata=*, allow r tag stonefs data=*',
                      'mgr', 'allow r'],
         })
 

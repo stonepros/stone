@@ -44,6 +44,6 @@ Thumbs.db
 # Package lock files
 yarn.lock
 
-# Ceph
+# Stone
 !core
 !*.core

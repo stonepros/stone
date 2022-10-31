@@ -1,4 +1,4 @@
-  $ ceph osd pool create xrbddiff1
+  $ stone osd pool create xrbddiff1
   pool 'xrbddiff1' created
   $ rbd pool init xrbddiff1
   $ rbd create --thick-provision --size 1M xrbddiff1/xtestdiff1 --no-progress
@@ -44,5 +44,5 @@
   $ rbd snap rollback xrbddiff1/xtestdiff1@allzeroes --no-progress
   $ rbd diff --from-snap=allzeroes xrbddiff1/xtestdiff1 --format json
   [{"offset":0,"length":1048576,"exists":"false"}]
-  $ ceph osd pool rm xrbddiff1 xrbddiff1 --yes-i-really-really-mean-it
+  $ stone osd pool rm xrbddiff1 xrbddiff1 --yes-i-really-really-mean-it
   pool 'xrbddiff1' removed

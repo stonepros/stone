@@ -103,7 +103,7 @@ describe('RoleFormComponent', () => {
     });
 
     it('should check all perms for a scope', () => {
-      formHelper.setValue('scopes_permissions', { cephfs: ['read'] });
+      formHelper.setValue('scopes_permissions', { stonefs: ['read'] });
       component.onClickCellCheckbox('grafana', 'scope');
       const scopes_permissions = form.getValue('scopes_permissions');
       expect(Object.keys(scopes_permissions)).toContain('grafana');
@@ -111,16 +111,16 @@ describe('RoleFormComponent', () => {
     });
 
     it('should uncheck all perms for a scope', () => {
-      formHelper.setValue('scopes_permissions', { cephfs: ['read', 'create', 'update', 'delete'] });
-      component.onClickCellCheckbox('cephfs', 'scope');
+      formHelper.setValue('scopes_permissions', { stonefs: ['read', 'create', 'update', 'delete'] });
+      component.onClickCellCheckbox('stonefs', 'scope');
       const scopes_permissions = form.getValue('scopes_permissions');
-      expect(Object.keys(scopes_permissions)).not.toContain('cephfs');
+      expect(Object.keys(scopes_permissions)).not.toContain('stonefs');
     });
 
     it('should uncheck all scopes and perms', () => {
-      component.scopes = ['cephfs', 'grafana'];
+      component.scopes = ['stonefs', 'grafana'];
       formHelper.setValue('scopes_permissions', {
-        cephfs: ['read', 'delete'],
+        stonefs: ['read', 'delete'],
         grafana: ['update']
       });
       component.onClickHeaderCheckbox('scope', ({
@@ -131,15 +131,15 @@ describe('RoleFormComponent', () => {
     });
 
     it('should check all scopes and perms', () => {
-      component.scopes = ['cephfs', 'grafana'];
+      component.scopes = ['stonefs', 'grafana'];
       formHelper.setValue('scopes_permissions', {
-        cephfs: ['create', 'update'],
+        stonefs: ['create', 'update'],
         grafana: ['delete']
       });
       component.onClickHeaderCheckbox('scope', ({ target: { checked: true } } as unknown) as Event);
       const scopes_permissions = form.getValue('scopes_permissions');
       const keys = Object.keys(scopes_permissions);
-      expect(keys).toEqual(['cephfs', 'grafana']);
+      expect(keys).toEqual(['stonefs', 'grafana']);
       keys.forEach((key) => {
         expect(scopes_permissions[key].sort()).toEqual(['create', 'delete', 'read', 'update']);
       });

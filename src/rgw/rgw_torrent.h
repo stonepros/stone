@@ -9,12 +9,12 @@
 #include <map>
 #include <set>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 #include "rgw_rados.h"
 #include "rgw_common.h"
 
-using ceph::crypto::SHA1;
+using stone::crypto::SHA1;
 
 struct req_state;
 
@@ -120,13 +120,13 @@ public:
   void init(struct req_state *p_req, rgw::sal::RGWRadosStore *p_store);
   int get_torrent_file(rgw::sal::RGWObject* object,
                        uint64_t &total_len,
-                       ceph::bufferlist &bl_data,
+                       stone::bufferlist &bl_data,
                        rgw_obj &obj);
   
   off_t get_data_len();
   bool get_flag();
 
-  void set_create_date(ceph::real_time& value);
+  void set_create_date(stone::real_time& value);
   void set_info_name(const string& value);
   void update(bufferlist &bl);
   int complete(optional_yield y);

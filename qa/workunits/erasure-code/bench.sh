@@ -17,7 +17,7 @@
 #
 # Test that it works from sources with:
 #
-#  CEPH_ERASURE_CODE_BENCHMARK=src/ceph_erasure_code_benchmark  \
+#  STONE_ERASURE_CODE_BENCHMARK=src/stone_erasure_code_benchmark  \
 #  PLUGIN_DIRECTORY=build/lib \
 #      qa/workunits/erasure-code/bench.sh fplot jerasure |
 #      tee qa/workunits/erasure-code/bench.js
@@ -37,7 +37,7 @@
 # volume of data so that the measures are more reliable:
 #
 #  TOTAL_SIZE=$((4 * 1024 * 1024 * 1024)) \
-#  CEPH_ERASURE_CODE_BENCHMARK=src/ceph_erasure_code_benchmark  \
+#  STONE_ERASURE_CODE_BENCHMARK=src/stone_erasure_code_benchmark  \
 #  PLUGIN_DIRECTORY=build/lib \
 #      qa/workunits/erasure-code/bench.sh fplot jerasure |
 #      tee qa/workunits/erasure-code/bench.js
@@ -47,8 +47,8 @@ set -e
 export PATH=/sbin:$PATH
 
 : ${VERBOSE:=false}
-: ${CEPH_ERASURE_CODE_BENCHMARK:=ceph_erasure_code_benchmark}
-: ${PLUGIN_DIRECTORY:=/usr/lib/ceph/erasure-code}
+: ${STONE_ERASURE_CODE_BENCHMARK:=stone_erasure_code_benchmark}
+: ${PLUGIN_DIRECTORY:=/usr/lib/stonepros/erasure-code}
 : ${PLUGINS:=isa jerasure}
 : ${TECHNIQUES:=vandermonde cauchy}
 : ${TOTAL_SIZE:=$((1024 * 1024))}
@@ -74,7 +74,7 @@ function bench() {
     shift
     local erasures=$1
     shift
-    command=$(echo $CEPH_ERASURE_CODE_BENCHMARK \
+    command=$(echo $STONE_ERASURE_CODE_BENCHMARK \
         --plugin $plugin \
         --workload $workload \
         --iterations $iterations \
@@ -185,7 +185,7 @@ else
 fi
 # Local Variables:
 # compile-command: "\
-#   CEPH_ERASURE_CODE_BENCHMARK=../../../src/ceph_erasure_code_benchmark \
+#   STONE_ERASURE_CODE_BENCHMARK=../../../src/stone_erasure_code_benchmark \
 #   PLUGIN_DIRECTORY=../../../build/lib \
 #   ./bench.sh
 # "

@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -20,11 +20,11 @@
 #include "SnappyCompressor.h"
 // -----------------------------------------------------------------------------
 
-class CompressionPluginSnappy : public ceph::CompressionPlugin {
+class CompressionPluginSnappy : public stone::CompressionPlugin {
 
 public:
 
-  explicit CompressionPluginSnappy(StoneeContext* cct) : CompressionPlugin(cct)
+  explicit CompressionPluginSnappy(StoneContext* cct) : CompressionPlugin(cct)
   {}
 
   int factory(CompressorRef *cs,

@@ -4,21 +4,21 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { Daemon } from '../models/daemon.interface';
-import { CephServiceSpec } from '../models/service.interface';
+import { StoneServiceSpec } from '../models/service.interface';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CephServiceService {
+export class StoneServiceService {
   private url = 'api/service';
 
   constructor(private http: HttpClient) {}
 
-  list(serviceName?: string): Observable<CephServiceSpec[]> {
+  list(serviceName?: string): Observable<StoneServiceSpec[]> {
     const options = serviceName
       ? { params: new HttpParams().set('service_name', serviceName) }
       : {};
-    return this.http.get<CephServiceSpec[]>(this.url, options);
+    return this.http.get<StoneServiceSpec[]>(this.url, options);
   }
 
   getDaemons(serviceName?: string): Observable<Daemon[]> {

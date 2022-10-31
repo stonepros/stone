@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -22,7 +22,7 @@
 
 struct ECSubWrite {
   pg_shard_t from;
-  ceph_tid_t tid;
+  stone_tid_t tid;
   osd_reqid_t reqid;
   hobject_t soid;
   pg_stat_t stats;
@@ -38,7 +38,7 @@ struct ECSubWrite {
   ECSubWrite() : tid(0) {}
   ECSubWrite(
     pg_shard_t from,
-    ceph_tid_t tid,
+    stone_tid_t tid,
     osd_reqid_t reqid,
     hobject_t soid,
     const pg_stat_t &stats,
@@ -77,9 +77,9 @@ struct ECSubWrite {
     updated_hit_set_history = other.updated_hit_set_history;
     backfill_or_async_recovery = other.backfill_or_async_recovery;
   }
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ECSubWrite*>& o);
 private:
   // no outside copying -- slow
@@ -90,40 +90,40 @@ WRITE_CLASS_ENCODER(ECSubWrite)
 
 struct ECSubWriteReply {
   pg_shard_t from;
-  ceph_tid_t tid;
+  stone_tid_t tid;
   eversion_t last_complete;
   bool committed;
   bool applied;
   ECSubWriteReply() : tid(0), committed(false), applied(false) {}
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ECSubWriteReply*>& o);
 };
 WRITE_CLASS_ENCODER(ECSubWriteReply)
 
 struct ECSubRead {
   pg_shard_t from;
-  ceph_tid_t tid;
+  stone_tid_t tid;
   std::map<hobject_t, std::list<boost::tuple<uint64_t, uint64_t, uint32_t> >> to_read;
   std::set<hobject_t> attrs_to_read;
   std::map<hobject_t, std::vector<std::pair<int, int>>> subchunks;
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ECSubRead*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(ECSubRead)
 
 struct ECSubReadReply {
   pg_shard_t from;
-  ceph_tid_t tid;
-  std::map<hobject_t, std::list<std::pair<uint64_t, ceph::buffer::list> >> buffers_read;
-  std::map<hobject_t, std::map<std::string, ceph::buffer::list>> attrs_read;
+  stone_tid_t tid;
+  std::map<hobject_t, std::list<std::pair<uint64_t, stone::buffer::list> >> buffers_read;
+  std::map<hobject_t, std::map<std::string, stone::buffer::list>> attrs_read;
   std::map<hobject_t, int> errors;
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ECSubReadReply*>& o);
 };
 WRITE_CLASS_ENCODER(ECSubReadReply)

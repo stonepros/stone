@@ -1,4 +1,4 @@
-export interface CephServiceStatus {
+export interface StoneServiceStatus {
   container_image_id: string;
   container_image_name: string;
   size: number;
@@ -8,17 +8,17 @@ export interface CephServiceStatus {
 }
 
 // This will become handy when creating arbitrary services
-export interface CephServiceSpec {
+export interface StoneServiceSpec {
   service_name: string;
   service_type: string;
   service_id: string;
   unmanaged: boolean;
-  status: CephServiceStatus;
-  spec: CephServiceAdditionalSpec;
-  placement: CephServicePlacement;
+  status: StoneServiceStatus;
+  spec: StoneServiceAdditionalSpec;
+  placement: StoneServicePlacement;
 }
 
-export interface CephServiceAdditionalSpec {
+export interface StoneServiceAdditionalSpec {
   backend_service: string;
   api_user: string;
   api_password: string;
@@ -37,7 +37,7 @@ export interface CephServiceAdditionalSpec {
   ssl_key: string;
 }
 
-export interface CephServicePlacement {
+export interface StoneServicePlacement {
   count: number;
   placement: string;
   hosts: string[];

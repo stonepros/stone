@@ -140,7 +140,7 @@ public:
 private:
   ImageCtxT &m_image_ctx;
 
-  mutable ceph::mutex m_queue_lock;
+  mutable stone::mutex m_queue_lock;
   std::set<Operation> m_in_flight_ops;
   std::map<Operation, std::list<Context *>> m_queued_ops;
 

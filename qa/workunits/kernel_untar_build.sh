@@ -2,7 +2,7 @@
 
 set -e
 
-wget -O linux.tar.gz http://download.ceph.com/qa/linux-5.4.tar.gz
+wget -O linux.tar.gz http://download.stone.com/qa/linux-5.4.tar.gz
 
 mkdir t
 cd t

@@ -20,14 +20,14 @@ namespace util {
 
 struct C_DecodeTag : public Context {
   StoneContext *cct;
-  ceph::mutex *lock;
+  stone::mutex *lock;
   uint64_t *tag_tid;
   TagData *tag_data;
   Context *on_finish;
 
   cls::journal::Tag tag;
 
-  C_DecodeTag(StoneContext *cct, ceph::mutex *lock, uint64_t *tag_tid,
+  C_DecodeTag(StoneContext *cct, stone::mutex *lock, uint64_t *tag_tid,
               TagData *tag_data, Context *on_finish)
     : cct(cct), lock(lock), tag_tid(tag_tid), tag_data(tag_data),
       on_finish(on_finish) {
@@ -50,14 +50,14 @@ struct C_DecodeTags : public Context {
   typedef std::list<cls::journal::Tag> Tags;
 
   StoneContext *cct;
-  ceph::mutex *lock;
+  stone::mutex *lock;
   uint64_t *tag_tid;
   TagData *tag_data;
   Context *on_finish;
 
   Tags tags;
 
-  C_DecodeTags(StoneContext *cct, ceph::mutex *lock, uint64_t *tag_tid,
+  C_DecodeTags(StoneContext *cct, stone::mutex *lock, uint64_t *tag_tid,
                TagData *tag_data, Context *on_finish)
     : cct(cct), lock(lock), tag_tid(tag_tid), tag_data(tag_data),
       on_finish(on_finish) {

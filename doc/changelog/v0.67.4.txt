@@ -111,7 +111,7 @@ commit beb366302a125dd422c4f092b12eb541cb3bc788
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Sep 23 09:04:34 2013 -0700
 
-    Revert "ceph: parse CEPH_ARGS environment variable"
+    Revert "stone: parse CEPH_ARGS environment variable"
     
     This reverts commit 67a95b9880c9bc6e858150352318d68d64ed74ad.
     
@@ -126,7 +126,7 @@ Date:   Mon Sep 23 15:58:42 2013 +0200
 
     Add CEPH_ARGS at the end of sys.argv
     
-    This allows, for instance, to pass a different client name to ceph by
+    This allows, for instance, to pass a different client name to stone by
     exporting CEPH_ARGS="--id client_id".
     
     Signed-off-by: Benoît Knecht <benoit.knecht@fsfe.org>
@@ -137,7 +137,7 @@ commit 94548b4b67cca37366c7d8719209a6d2e7956811
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Sep 24 15:26:03 2013 -0700
 
-    mon/OSDMonitor: fix 'ceph osd crush reweight ...'
+    mon/OSDMonitor: fix 'stone osd crush reweight ...'
     
     The adjust method returns a count of adjusted items.
     
@@ -153,7 +153,7 @@ commit 00ff7f5c20e13869d0694379739ba4e61d44b97c
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Tue Sep 10 00:20:41 2013 +0100
 
-    qa: workunits: mon: crush_ops: test 'ceph osd crush move'
+    qa: workunits: mon: crush_ops: test 'stone osd crush move'
     
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 3bc618b7b46496c5110edde0da9cae5d3e68e0e1)
@@ -169,7 +169,7 @@ Date:   Tue Sep 24 19:04:23 2013 +0200
     
     Backport: cuttlefish, dumpling
     
-    http://tracker.ceph.com/issues/6370 fixes #6370
+    http://tracker.stone.com/issues/6370 fixes #6370
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 1bce1f009bffd3e28025a08775fec189907a81db)
@@ -194,7 +194,7 @@ commit 410db3f30c6eb54b807908c1f251ad4026e7d446
 Author: Joao Eduardo Luis <jecluis@gmail.com>
 Date:   Fri Sep 20 17:06:30 2013 +0100
 
-    qa: workunits: cephtool: check if 'heap' commands are parseable
+    qa: workunits: stonetool: check if 'heap' commands are parseable
     
     Signed-off-by: Joao Eduardo Luis <jecluis@gmail.com>
     (cherry picked from commit b1eeaddd5f214c1b0883b44fc8cae07c649be7c4)
@@ -271,7 +271,7 @@ commit 471233e98a9f64ad513a4a196b7661b80534cb00
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Mon Sep 9 23:14:11 2013 +0100
 
-    mon: MonCommands: expect a CephString as 1st arg for 'osd crush move'
+    mon: MonCommands: expect a StoneString as 1st arg for 'osd crush move'
     
     Fixes: #6230
     

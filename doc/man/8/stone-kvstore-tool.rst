@@ -1,27 +1,27 @@
 :orphan:
 
 =====================================================
- ceph-kvstore-tool -- ceph kvstore manipulation tool
+ stone-kvstore-tool -- stone kvstore manipulation tool
 =====================================================
 
-.. program:: ceph-kvstore-tool
+.. program:: stone-kvstore-tool
 
 Synopsis
 ========
 
-| **ceph-kvstore-tool** <leveldb|rocksdb|bluestore-kv> <store path> *command* [args...]
+| **stone-kvstore-tool** <leveldb|rocksdb|bluestore-kv> <store path> *command* [args...]
 
 
 Description
 ===========
 
-:program:`ceph-kvstore-tool` is a kvstore manipulation tool. It allows users to manipulate
+:program:`stone-kvstore-tool` is a kvstore manipulation tool. It allows users to manipulate
 leveldb/rocksdb's data (like OSD's omap) offline.
 
 Commands
 ========
 
-:program:`ceph-kvstore-tool` utility uses many commands for debugging purpose
+:program:`stone-kvstore-tool` utility uses many commands for debugging purpose
 which are as follows:
 
 :command:`list [prefix]`
@@ -88,11 +88,11 @@ which are as follows:
 Availability
 ============
 
-**ceph-kvstore-tool** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**stone-kvstore-tool** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)

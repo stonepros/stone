@@ -7,7 +7,7 @@ import logging
 import time
 
 from teuthology.orchestra.run import CommandFailedError
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 
 log = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 MDS_RESTART_GRACE = 60
 
 
-class TestMDSAutoRepair(CephFSTestCase):
+class TestMDSAutoRepair(StoneFSTestCase):
     def test_backtrace_repair(self):
         """
         MDS should verify/fix backtrace on fetch dirfrag

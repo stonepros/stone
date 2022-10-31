@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -25,11 +25,11 @@
 class EpollDriver : public EventDriver {
   int epfd;
   struct epoll_event *events;
-  StoneeContext *cct;
+  StoneContext *cct;
   int nevent;
 
  public:
-  explicit EpollDriver(StoneeContext *c): epfd(-1), events(NULL), cct(c), nevent(0) {}
+  explicit EpollDriver(StoneContext *c): epfd(-1), events(NULL), cct(c), nevent(0) {}
   ~EpollDriver() override {
     if (epfd != -1)
       close(epfd);

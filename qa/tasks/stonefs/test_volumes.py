@@ -10,13 +10,13 @@ import unittest
 from hashlib import md5
 from textwrap import dedent
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
-from tasks.cephfs.fuse_mount import FuseMount
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
+from tasks.stonefs.fuse_mount import FuseMount
 from teuthology.exceptions import CommandFailedError
 
 log = logging.getLogger(__name__)
 
-class TestVolumesHelper(CephFSTestCase):
+class TestVolumesHelper(StoneFSTestCase):
     """Helper class for testing FS volume, subvolume group and subvolume operations."""
     TEST_VOLUME_PREFIX = "volume"
     TEST_SUBVOLUME_PREFIX="subvolume"
@@ -103,7 +103,7 @@ class TestVolumesHelper(CephFSTestCase):
             self.assertEqual(sval, cval)
 
             # inode timestamps
-            # do not check access as kclient will generally not update this like ceph-fuse will.
+            # do not check access as kclient will generally not update this like stone-fuse will.
             sval = int(self.mount_a.run_shell(['stat', '-c' '%Y', source_path]).stdout.getvalue().strip())
             cval = int(self.mount_a.run_shell(['stat', '-c' '%Y', sink_path]).stdout.getvalue().strip())
             self.assertEqual(sval, cval)
@@ -115,8 +115,8 @@ class TestVolumesHelper(CephFSTestCase):
         clone_info = json.loads(self._get_subvolume_info(self.volname, clone, clone_group))
 
         # verify quota is inherited from source snapshot
-        src_quota = self.mount_a.getfattr(source_path, "ceph.quota.max_bytes")
-        # FIXME: kclient fails to get this quota value: https://tracker.ceph.com/issues/48075
+        src_quota = self.mount_a.getfattr(source_path, "stone.quota.max_bytes")
+        # FIXME: kclient fails to get this quota value: https://tracker.stone.com/issues/48075
         if isinstance(self.mount_a, FuseMount):
             self.assertEqual(clone_info["bytes_quota"], "infinite" if src_quota is None else int(src_quota))
 
@@ -126,9 +126,9 @@ class TestVolumesHelper(CephFSTestCase):
         else:
             # verify pool and pool namespace are inherited from snapshot
             self.assertEqual(clone_info["data_pool"],
-                             self.mount_a.getfattr(source_path, "ceph.dir.layout.pool"))
+                             self.mount_a.getfattr(source_path, "stone.dir.layout.pool"))
             self.assertEqual(clone_info["pool_namespace"],
-                             self.mount_a.getfattr(source_path, "ceph.dir.layout.pool_namespace"))
+                             self.mount_a.getfattr(source_path, "stone.dir.layout.pool_namespace"))
 
     def _verify_clone(self, subvolume, snapshot, clone,
                       source_group=None, clone_group=None, clone_pool=None,
@@ -140,10 +140,10 @@ class TestVolumesHelper(CephFSTestCase):
 
         check = 0
         # TODO: currently snapshot rentries are not stable if snapshot source entries
-        #       are removed, https://tracker.ceph.com/issues/46747
+        #       are removed, https://tracker.stone.com/issues/46747
         while check < timo and subvol_path is None:
-            val1 = int(self.mount_a.getfattr(path1, "ceph.dir.rentries"))
-            val2 = int(self.mount_a.getfattr(path2, "ceph.dir.rentries"))
+            val1 = int(self.mount_a.getfattr(path1, "stone.dir.rentries"))
+            val2 = int(self.mount_a.getfattr(path2, "stone.dir.rentries"))
             if val1 == val2:
                 break
             check += 1
@@ -233,10 +233,10 @@ class TestVolumesHelper(CephFSTestCase):
         subvolpath = self._get_subvolume_path(self.volname, subvolume, group_name=subvolume_group)
 
         if pool is not None:
-            self.mount_a.setfattr(subvolpath, 'ceph.dir.layout.pool', pool, sudo=True)
+            self.mount_a.setfattr(subvolpath, 'stone.dir.layout.pool', pool, sudo=True)
 
         if pool_namespace is not None:
-            self.mount_a.setfattr(subvolpath, 'ceph.dir.layout.pool_namespace', pool_namespace, sudo=True)
+            self.mount_a.setfattr(subvolpath, 'stone.dir.layout.pool_namespace', pool_namespace, sudo=True)
 
     def _do_subvolume_attr_update(self, subvolume, uid, gid, mode, subvolume_group=None):
         subvolpath = self._get_subvolume_path(self.volname, subvolume, group_name=subvolume_group)
@@ -324,8 +324,8 @@ class TestVolumesHelper(CephFSTestCase):
             self.mount_a.run_shell(['mkdir', '-p', snappath], sudo=True)
 
         # add required xattrs to subvolume
-        default_pool = self.mount_a.getfattr(".", "ceph.dir.layout.pool")
-        self.mount_a.setfattr(createpath, 'ceph.dir.layout.pool', default_pool, sudo=True)
+        default_pool = self.mount_a.getfattr(".", "stone.dir.layout.pool")
+        self.mount_a.setfattr(createpath, 'stone.dir.layout.pool', default_pool, sudo=True)
 
         # create a v1 .meta file
         meta_contents = "[GLOBAL]\nversion = 1\ntype = {0}\npath = {1}\nstate = {2}\n".format(subvol_type, "/" + createpath, state)
@@ -358,7 +358,7 @@ class TestVolumesHelper(CephFSTestCase):
         guest_mount.client_id = authid
         guest_mount.client_remote.write_file(guest_mount.get_keyring_path(),
                                              keyring_txt, sudo=True)
-        # Add a guest client section to the ceph config file.
+        # Add a guest client section to the stone config file.
         self.config_set("client.{0}".format(authid), "debug client", 20)
         self.config_set("client.{0}".format(authid), "debug objecter", 20)
         self.set_conf("client.{0}".format(authid),
@@ -581,7 +581,7 @@ class TestSubvolumeGroups(TestVolumesHelper):
         self._fs_cmd("subvolumegroup", "create", self.volname, group1)
         group1_path = self._get_subvolume_group_path(self.volname, group1)
 
-        default_pool = self.mount_a.getfattr(group1_path, "ceph.dir.layout.pool")
+        default_pool = self.mount_a.getfattr(group1_path, "stone.dir.layout.pool")
         new_pool = "new_pool"
         self.assertNotEqual(default_pool, new_pool)
 
@@ -593,7 +593,7 @@ class TestSubvolumeGroups(TestVolumesHelper):
                      "--pool_layout", new_pool)
         group2_path = self._get_subvolume_group_path(self.volname, group2)
 
-        desired_pool = self.mount_a.getfattr(group2_path, "ceph.dir.layout.pool")
+        desired_pool = self.mount_a.getfattr(group2_path, "stone.dir.layout.pool")
         try:
             self.assertEqual(desired_pool, new_pool)
         except AssertionError:
@@ -971,7 +971,7 @@ class TestSubvolumes(TestVolumesHelper):
         self._fs_cmd("subvolume", "create", self.volname, subvol1, "--group_name", group)
         subvol1_path = self._get_subvolume_path(self.volname, subvol1, group_name=group)
 
-        default_pool = self.mount_a.getfattr(subvol1_path, "ceph.dir.layout.pool")
+        default_pool = self.mount_a.getfattr(subvol1_path, "stone.dir.layout.pool")
         new_pool = "new_pool"
         self.assertNotEqual(default_pool, new_pool)
 
@@ -983,7 +983,7 @@ class TestSubvolumes(TestVolumesHelper):
                      "--pool_layout", new_pool)
         subvol2_path = self._get_subvolume_path(self.volname, subvol2, group_name=group)
 
-        desired_pool = self.mount_a.getfattr(subvol2_path, "ceph.dir.layout.pool")
+        desired_pool = self.mount_a.getfattr(subvol2_path, "stone.dir.layout.pool")
         try:
             self.assertEqual(desired_pool, new_pool)
         except AssertionError:
@@ -1138,7 +1138,7 @@ class TestSubvolumes(TestVolumesHelper):
         self._fs_cmd("subvolume", "resize", self.volname, subvolname, str(nsize))
 
         # verify the quota
-        size = int(self.mount_a.getfattr(subvolpath, "ceph.quota.max_bytes"))
+        size = int(self.mount_a.getfattr(subvolpath, "stone.quota.max_bytes"))
         self.assertEqual(size, nsize)
 
         # remove subvolume
@@ -1235,7 +1235,7 @@ class TestSubvolumes(TestVolumesHelper):
 
     def test_subvolume_marked(self):
         """
-        ensure a subvolume is marked with the ceph.dir.subvolume xattr
+        ensure a subvolume is marked with the stone.dir.subvolume xattr
         """
         subvolume = self._generate_random_subvolume_name()
 
@@ -1246,7 +1246,7 @@ class TestSubvolumes(TestVolumesHelper):
         subvolpath = self._get_subvolume_path(self.volname, subvolume)
 
         # subdirectory of a subvolume cannot be moved outside the subvolume once marked with
-        # the xattr ceph.dir.subvolume, hence test by attempting to rename subvol path (incarnation)
+        # the xattr stone.dir.subvolume, hence test by attempting to rename subvol path (incarnation)
         # outside the subvolume
         dstpath = os.path.join(self.mount_a.mountpoint, 'volumes', '_nogroup', 'new_subvol_location')
         srcpath = os.path.join(self.mount_a.mountpoint, subvolpath)
@@ -1303,8 +1303,8 @@ class TestSubvolumes(TestVolumesHelper):
         self.mount_a.run_shell(['mkdir', '-p', createpath], sudo=True)
 
         # add required xattrs to subvolume
-        default_pool = self.mount_a.getfattr(".", "ceph.dir.layout.pool")
-        self.mount_a.setfattr(createpath, 'ceph.dir.layout.pool', default_pool, sudo=True)
+        default_pool = self.mount_a.getfattr(".", "stone.dir.layout.pool")
+        self.mount_a.setfattr(createpath, 'stone.dir.layout.pool', default_pool, sudo=True)
 
         mount_path = os.path.join("/", "volumes", group, subvolume)
 
@@ -1320,7 +1320,7 @@ class TestSubvolumes(TestVolumesHelper):
         self._configure_guest_auth(guest_mount, authid, key)
 
         # mount the subvolume, and write to it
-        guest_mount.mount_wait(cephfs_mntpt=mount_path)
+        guest_mount.mount_wait(stonefs_mntpt=mount_path)
         guest_mount.write_n_mb("data.bin", 1)
 
         # authorize guest authID read access to subvolume
@@ -1330,7 +1330,7 @@ class TestSubvolumes(TestVolumesHelper):
         # guest client sees the change in access level to read only after a
         # remount of the subvolume.
         guest_mount.umount_wait()
-        guest_mount.mount_wait(cephfs_mntpt=mount_path)
+        guest_mount.mount_wait(stonefs_mntpt=mount_path)
 
         # read existing content of the subvolume
         self.assertListEqual(guest_mount.ls(guest_mount.mountpoint), ["data.bin"])
@@ -1376,7 +1376,7 @@ class TestSubvolumes(TestVolumesHelper):
         self._configure_guest_auth(guest_mount, authid, key)
 
         # mount the subvolume, and write to it
-        guest_mount.mount_wait(cephfs_mntpt=mount_path)
+        guest_mount.mount_wait(stonefs_mntpt=mount_path)
         guest_mount.write_n_mb("data.bin", 1)
 
         # authorize guest authID read access to subvolume
@@ -1386,7 +1386,7 @@ class TestSubvolumes(TestVolumesHelper):
         # guest client sees the change in access level to read only after a
         # remount of the subvolume.
         guest_mount.umount_wait()
-        guest_mount.mount_wait(cephfs_mntpt=mount_path)
+        guest_mount.mount_wait(stonefs_mntpt=mount_path)
 
         # read existing content of the subvolume
         self.assertListEqual(guest_mount.ls(guest_mount.mountpoint), ["data.bin"])
@@ -1676,7 +1676,7 @@ class TestSubvolumes(TestVolumesHelper):
         out = self.fs.mon_manager.raw_cluster_cmd(
             "auth", "caps", "client.guest1",
             "mds", "allow rw path=/volumes/{0}, allow rw path={1}".format(group, subvol_path),
-            "osd", "allow rw pool=cephfs_data",
+            "osd", "allow rw pool=stonefs_data",
             "mon", "allow r",
             "mgr", "allow *"
         )
@@ -1809,7 +1809,7 @@ class TestSubvolumes(TestVolumesHelper):
 
     def test_update_old_style_auth_metadata_to_new_during_authorize(self):
         """
-        CephVolumeClient stores the subvolume data in auth metadata file with
+        StoneVolumeClient stores the subvolume data in auth metadata file with
         'volumes' key as there was no subvolume namespace. It doesn't makes sense
         with mgr/volumes. This test validates the transparent update of 'volumes'
         key to 'subvolumes' key in auth metadata file during authorize.
@@ -1884,7 +1884,7 @@ class TestSubvolumes(TestVolumesHelper):
 
     def test_update_old_style_auth_metadata_to_new_during_deauthorize(self):
         """
-        CephVolumeClient stores the subvolume data in auth metadata file with
+        StoneVolumeClient stores the subvolume data in auth metadata file with
         'volumes' key as there was no subvolume namespace. It doesn't makes sense
         with mgr/volumes. This test validates the transparent update of 'volumes'
         key to 'subvolumes' key in auth metadata file during deauthorize.
@@ -1991,7 +1991,7 @@ class TestSubvolumes(TestVolumesHelper):
             self._configure_guest_auth(guest_mounts[i], auth_id, key)
 
             # mount the subvolume, and write to it
-            guest_mounts[i].mount_wait(cephfs_mntpt=mount_path)
+            guest_mounts[i].mount_wait(stonefs_mntpt=mount_path)
             guest_mounts[i].write_n_mb("data.bin", 1)
 
         # Evict client, guest_mounts[0], using auth ID 'guest' and has mounted
@@ -2063,7 +2063,7 @@ class TestSubvolumes(TestVolumesHelper):
             self.fail("expected the 'fs subvolume resize' command to fail")
 
         # verify the quota did not change
-        size = int(self.mount_a.getfattr(subvolpath, "ceph.quota.max_bytes"))
+        size = int(self.mount_a.getfattr(subvolpath, "stone.quota.max_bytes"))
         self.assertEqual(size, osize)
 
         # remove subvolume
@@ -2096,7 +2096,7 @@ class TestSubvolumes(TestVolumesHelper):
             self.fail("expected the 'fs subvolume resize' command to fail")
 
         # verify the quota did not change
-        size = int(self.mount_a.getfattr(subvolpath, "ceph.quota.max_bytes"))
+        size = int(self.mount_a.getfattr(subvolpath, "stone.quota.max_bytes"))
         self.assertEqual(size, osize)
 
         # remove subvolume
@@ -2129,7 +2129,7 @@ class TestSubvolumes(TestVolumesHelper):
         filename = "{0}.{1}".format(TestVolumes.TEST_FILE_NAME_PREFIX, self.DEFAULT_NUMBER_OF_FILES+1)
         self.mount_a.write_n_mb(os.path.join(subvolpath, filename), file_size)
 
-        usedsize = int(self.mount_a.getfattr(subvolpath, "ceph.dir.rbytes"))
+        usedsize = int(self.mount_a.getfattr(subvolpath, "stone.dir.rbytes"))
         susedsize = int(self.mount_a.run_shell(['stat', '-c' '%s', subvolpath]).stdout.getvalue().strip())
         if isinstance(self.mount_a, FuseMount):
             # kclient dir does not have size==rbytes
@@ -2143,7 +2143,7 @@ class TestSubvolumes(TestVolumesHelper):
             self.fail("expected the 'fs subvolume resize' command to succeed")
 
         # verify the quota
-        size = int(self.mount_a.getfattr(subvolpath, "ceph.quota.max_bytes"))
+        size = int(self.mount_a.getfattr(subvolpath, "stone.quota.max_bytes"))
         self.assertEqual(size, nsize)
 
         # remove subvolume
@@ -2176,7 +2176,7 @@ class TestSubvolumes(TestVolumesHelper):
         filename = "{0}.{1}".format(TestVolumes.TEST_FILE_NAME_PREFIX, self.DEFAULT_NUMBER_OF_FILES+2)
         self.mount_a.write_n_mb(os.path.join(subvolpath, filename), file_size)
 
-        usedsize = int(self.mount_a.getfattr(subvolpath, "ceph.dir.rbytes"))
+        usedsize = int(self.mount_a.getfattr(subvolpath, "stone.dir.rbytes"))
         susedsize = int(self.mount_a.run_shell(['stat', '-c' '%s', subvolpath]).stdout.getvalue().strip())
         if isinstance(self.mount_a, FuseMount):
             # kclient dir does not have size==rbytes
@@ -2192,7 +2192,7 @@ class TestSubvolumes(TestVolumesHelper):
             self.fail("expected the 'fs subvolume resize' command to fail")
 
         # verify the quota did not change
-        size = int(self.mount_a.getfattr(subvolpath, "ceph.quota.max_bytes"))
+        size = int(self.mount_a.getfattr(subvolpath, "stone.quota.max_bytes"))
         self.assertEqual(size, osize)
 
         # remove subvolume
@@ -2268,7 +2268,7 @@ class TestSubvolumes(TestVolumesHelper):
         self._fs_cmd("subvolume", "resize", self.volname, subvolname, "inf")
 
         # verify that the quota is None
-        size = self.mount_a.getfattr(subvolpath, "ceph.quota.max_bytes")
+        size = self.mount_a.getfattr(subvolpath, "stone.quota.max_bytes")
         self.assertEqual(size, None)
 
         # remove subvolume
@@ -2295,7 +2295,7 @@ class TestSubvolumes(TestVolumesHelper):
         self._fs_cmd("subvolume", "resize", self.volname, subvolname, "inf")
 
         # verify that the quota is None
-        size = self.mount_a.getfattr(subvolpath, "ceph.quota.max_bytes")
+        size = self.mount_a.getfattr(subvolpath, "stone.quota.max_bytes")
         self.assertEqual(size, None)
 
         # create one file of 10MB and try to write
@@ -2345,7 +2345,7 @@ class TestSubvolumes(TestVolumesHelper):
         self._fs_cmd("subvolume", "resize", self.volname, subvolname, str(nsize))
 
         # verify the quota
-        size = int(self.mount_a.getfattr(subvolpath, "ceph.quota.max_bytes"))
+        size = int(self.mount_a.getfattr(subvolpath, "stone.quota.max_bytes"))
         self.assertEqual(size, nsize)
 
         # remove subvolume
@@ -3289,7 +3289,7 @@ class TestSubvolumeSnapshotClones(TestVolumesHelper):
 
         # create a pool different from current subvolume pool
         subvol_path = self._get_subvolume_path(self.volname, subvolume)
-        default_pool = self.mount_a.getfattr(subvol_path, "ceph.dir.layout.pool")
+        default_pool = self.mount_a.getfattr(subvol_path, "stone.dir.layout.pool")
         new_pool = "new_pool"
         self.assertNotEqual(default_pool, new_pool)
         self.fs.add_data_pool(new_pool)
@@ -3332,7 +3332,7 @@ class TestSubvolumeSnapshotClones(TestVolumesHelper):
         subvolpath = self._get_subvolume_path(self.volname, subvolume)
 
         # set quota on number of files
-        self.mount_a.setfattr(subvolpath, 'ceph.quota.max_files', "20", sudo=True)
+        self.mount_a.setfattr(subvolpath, 'stone.quota.max_files', "20", sudo=True)
 
         # snapshot subvolume
         self._fs_cmd("subvolume", "snapshot", "create", self.volname, subvolume, snapshot)
@@ -3350,8 +3350,8 @@ class TestSubvolumeSnapshotClones(TestVolumesHelper):
         clonepath = self._get_subvolume_path(self.volname, clone)
 
         # verify quota max_files is inherited from source snapshot
-        subvol_quota = self.mount_a.getfattr(subvolpath, "ceph.quota.max_files")
-        clone_quota = self.mount_a.getfattr(clonepath, "ceph.quota.max_files")
+        subvol_quota = self.mount_a.getfattr(subvolpath, "stone.quota.max_files")
+        clone_quota = self.mount_a.getfattr(clonepath, "stone.quota.max_files")
         self.assertEqual(subvol_quota, clone_quota)
 
         # remove snapshot
@@ -4327,7 +4327,7 @@ class TestSubvolumeSnapshotClones(TestVolumesHelper):
         self._fs_cmd("subvolume", "snapshot", "rm", self.volname, subvolume, snapshot)
 
         subvol_path = self._get_subvolume_path(self.volname, clone)
-        desired_pool = self.mount_a.getfattr(subvol_path, "ceph.dir.layout.pool")
+        desired_pool = self.mount_a.getfattr(subvol_path, "stone.dir.layout.pool")
         try:
             self.assertEqual(desired_pool, new_pool)
         except AssertionError:
@@ -4439,8 +4439,8 @@ class TestSubvolumeSnapshotClones(TestVolumesHelper):
         self.mount_a.run_shell_payload(f"mkdir -p -m 777 {createpath}", sudo=True)
 
         # add required xattrs to subvolume
-        default_pool = self.mount_a.getfattr(".", "ceph.dir.layout.pool")
-        self.mount_a.setfattr(createpath, 'ceph.dir.layout.pool', default_pool, sudo=True)
+        default_pool = self.mount_a.getfattr(".", "stone.dir.layout.pool")
+        self.mount_a.setfattr(createpath, 'stone.dir.layout.pool', default_pool, sudo=True)
 
         # do some IO
         self._do_subvolume_io(subvolume, number_of_files=64)
@@ -4566,13 +4566,13 @@ class TestSubvolumeSnapshotClones(TestVolumesHelper):
 class TestMisc(TestVolumesHelper):
     """Miscellaneous tests related to FS volume, subvolume group, and subvolume operations."""
     def test_connection_expiration(self):
-        # unmount any cephfs mounts
+        # unmount any stonefs mounts
         for i in range(0, self.CLIENTS_REQUIRED):
             self.mounts[i].umount_wait()
         sessions = self._session_list()
         self.assertLessEqual(len(sessions), 1) # maybe mgr is already mounted
 
-        # Get the mgr to definitely mount cephfs
+        # Get the mgr to definitely mount stonefs
         subvolume = self._generate_random_subvolume_name()
         self._fs_cmd("subvolume", "create", self.volname, subvolume)
         sessions = self._session_list()
@@ -4582,13 +4582,13 @@ class TestMisc(TestVolumesHelper):
         self.wait_until_evicted(sessions[0]['id'], timeout=90)
 
     def test_mgr_eviction(self):
-        # unmount any cephfs mounts
+        # unmount any stonefs mounts
         for i in range(0, self.CLIENTS_REQUIRED):
             self.mounts[i].umount_wait()
         sessions = self._session_list()
         self.assertLessEqual(len(sessions), 1) # maybe mgr is already mounted
 
-        # Get the mgr to definitely mount cephfs
+        # Get the mgr to definitely mount stonefs
         subvolume = self._generate_random_subvolume_name()
         self._fs_cmd("subvolume", "create", self.volname, subvolume)
         sessions = self._session_list()
@@ -4815,7 +4815,7 @@ class TestMisc(TestVolumesHelper):
         self._assert_meta_location_and_version(self.volname, clone2, version=2)
 
         # verify clone
-        # TODO: rentries will mismatch till this is fixed https://tracker.ceph.com/issues/46747
+        # TODO: rentries will mismatch till this is fixed https://tracker.stone.com/issues/46747
         #self._verify_clone(subvolume, 'fake', clone2, source_version=1)
 
         # snap-info
@@ -4950,8 +4950,8 @@ class TestMisc(TestVolumesHelper):
         self.mount_a.run_shell(['mkdir', '-p', createpath1], sudo=True)
 
         # add required xattrs to subvolume
-        default_pool = self.mount_a.getfattr(".", "ceph.dir.layout.pool")
-        self.mount_a.setfattr(createpath1, 'ceph.dir.layout.pool', default_pool, sudo=True)
+        default_pool = self.mount_a.getfattr(".", "stone.dir.layout.pool")
+        self.mount_a.setfattr(createpath1, 'stone.dir.layout.pool', default_pool, sudo=True)
 
         # create v2 subvolume
         self._fs_cmd("subvolume", "create", self.volname, subvol2)
@@ -5004,8 +5004,8 @@ class TestMisc(TestVolumesHelper):
         self.mount_a.run_shell(['mkdir', '-p', createpath], sudo=True)
 
         # add required xattrs to subvolume
-        default_pool = self.mount_a.getfattr(".", "ceph.dir.layout.pool")
-        self.mount_a.setfattr(createpath, 'ceph.dir.layout.pool', default_pool, sudo=True)
+        default_pool = self.mount_a.getfattr(".", "stone.dir.layout.pool")
+        self.mount_a.setfattr(createpath, 'stone.dir.layout.pool', default_pool, sudo=True)
 
         # Create unparseable binary .meta file on legacy subvol's root
         meta_contents = os.urandom(4096)
@@ -5047,8 +5047,8 @@ class TestMisc(TestVolumesHelper):
         self.mount_a.run_shell(['mkdir', '-p', createpath], sudo=True)
 
         # add required xattrs to subvolume
-        default_pool = self.mount_a.getfattr(".", "ceph.dir.layout.pool")
-        self.mount_a.setfattr(createpath, 'ceph.dir.layout.pool', default_pool, sudo=True)
+        default_pool = self.mount_a.getfattr(".", "stone.dir.layout.pool")
+        self.mount_a.setfattr(createpath, 'stone.dir.layout.pool', default_pool, sudo=True)
 
         # Create unparseable text .meta file on legacy subvol's root
         meta_contents = "unparseable config\nfile ...\nunparseable config\nfile ...\n"

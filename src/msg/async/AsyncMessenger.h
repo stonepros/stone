@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -25,7 +25,7 @@
 #include "include/unordered_map.h"
 #include "include/unordered_set.h"
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "common/Thread.h"
 
@@ -34,7 +34,7 @@
 #include "AsyncConnection.h"
 #include "Event.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 class AsyncMessenger;
 
@@ -44,7 +44,7 @@ class AsyncMessenger;
  */
 class Processor {
   AsyncMessenger *msgr;
-  ceph::NetHandler net;
+  stone::NetHandler net;
   Worker *worker;
   std::vector<ServerSocket> listen_sockets;
   EventCallbackRef listen_handler;
@@ -52,7 +52,7 @@ class Processor {
   class C_processor_accept;
 
  public:
-  Processor(AsyncMessenger *r, Worker *w, StoneeContext *c);
+  Processor(AsyncMessenger *r, Worker *w, StoneContext *c);
   ~Processor() { delete listen_handler; };
 
   void stop();
@@ -76,12 +76,12 @@ public:
   /**
    * Initialize the AsyncMessenger!
    *
-   * @param cct The StoneeContext to use
+   * @param cct The StoneContext to use
    * @param name The name to assign ourselves
    * _nonce A unique ID to use for this AsyncMessenger. It should not
    * be a value that will be repeated if the daemon restarts.
    */
-  AsyncMessenger(StoneeContext *cct, entity_name_t name, const std::string &type,
+  AsyncMessenger(StoneContext *cct, entity_name_t name, const std::string &type,
                  std::string mname, uint64_t _nonce);
 
   /**
@@ -110,7 +110,7 @@ public:
    * @{
    */
   void set_cluster_protocol(int p) override {
-    ceph_assert(!started && !did_bind);
+    stone_assert(!started && !did_bind);
     cluster_protocol = p;
   }
 
@@ -220,7 +220,7 @@ private:
   std::string ms_type;
 
   /// overall lock used for AsyncMessenger data structures
-  ceph::mutex lock = ceph::make_mutex("AsyncMessenger::lock");
+  stone::mutex lock = stone::make_mutex("AsyncMessenger::lock");
   // AsyncMessenger stuff
   /// approximately unique ID set by the Constructor for use in entity_addr_t
   uint64_t nonce;
@@ -253,7 +253,7 @@ private:
   /// counter for the global seq our connection protocol uses
   __u32 global_seq = 0;
   /// lock to protect the global_seq
-  ceph::spinlock global_seq_lock;
+  stone::spinlock global_seq_lock;
 
   /**
    * hash map of addresses to Asyncconnection
@@ -261,7 +261,7 @@ private:
    * NOTE: a Asyncconnection* with state CLOSED may still be in the map but is considered
    * invalid and can be replaced by anyone holding the msgr lock
    */
-  ceph::unordered_map<entity_addrvec_t, AsyncConnectionRef> conns;
+  stone::unordered_map<entity_addrvec_t, AsyncConnectionRef> conns;
 
   /**
    * list of connection are in the process of accepting
@@ -284,7 +284,7 @@ private:
    * deleted for AsyncConnection. "_lookup_conn" must ensure not return a
    * AsyncConnection in this set.
    */
-  ceph::mutex deleted_lock = ceph::make_mutex("AsyncMessenger::deleted_lock");
+  stone::mutex deleted_lock = stone::make_mutex("AsyncMessenger::deleted_lock");
   std::set<AsyncConnectionRef> deleted_conns;
 
   EventCallbackRef reap_handler;
@@ -292,13 +292,13 @@ private:
   /// internal cluster protocol version, if any, for talking to entities of the same type.
   int cluster_protocol = 0;
 
-  ceph::condition_variable  stop_cond;
+  stone::condition_variable  stop_cond;
   bool stopped = true;
 
   /* You must hold this->lock for the duration of use! */
   const auto& _lookup_conn(const entity_addrvec_t& k) {
     static const AsyncConnectionRef nullref;
-    ceph_assert(ceph_mutex_is_locked(lock));
+    stone_assert(stone_mutex_is_locked(lock));
     auto p = conns.find(k);
     if (p == conns.end()) {
       return nullref;
@@ -319,7 +319,7 @@ private:
   }
 
   void _init_local_connection() {
-    ceph_assert(ceph_mutex_is_locked(lock));
+    stone_assert(stone_mutex_is_locked(lock));
     local_connection->peer_addrs = *my_addrs;
     local_connection->peer_type = my_name.type();
     local_connection->set_features(STONE_FEATURES_ALL);
@@ -366,7 +366,7 @@ public:
    * @return a global sequence ID that nobody else has seen.
    */
   __u32 get_global_seq(__u32 old=0) {
-    std::lock_guard<ceph::spinlock> lg(global_seq_lock);
+    std::lock_guard<stone::spinlock> lg(global_seq_lock);
 
     if (old > global_seq)
       global_seq = old;

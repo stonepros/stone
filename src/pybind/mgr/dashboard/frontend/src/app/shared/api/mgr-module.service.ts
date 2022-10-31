@@ -12,7 +12,7 @@ export class MgrModuleService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Get the list of Ceph Mgr modules and their state (enabled/disabled).
+   * Get the list of Stone Mgr modules and their state (enabled/disabled).
    * @return {Observable<Object[]>}
    */
   list(): Observable<Object[]> {
@@ -20,7 +20,7 @@ export class MgrModuleService {
   }
 
   /**
-   * Get the Ceph Mgr module configuration.
+   * Get the Stone Mgr module configuration.
    * @param {string} module The name of the mgr module.
    * @return {Observable<Object>}
    */
@@ -29,7 +29,7 @@ export class MgrModuleService {
   }
 
   /**
-   * Update the Ceph Mgr module configuration.
+   * Update the Stone Mgr module configuration.
    * @param {string} module The name of the mgr module.
    * @param {object} config The configuration.
    * @return {Observable<Object>}
@@ -39,7 +39,7 @@ export class MgrModuleService {
   }
 
   /**
-   * Enable the Ceph Mgr module.
+   * Enable the Stone Mgr module.
    * @param {string} module The name of the mgr module.
    */
   enable(module: string) {
@@ -47,7 +47,7 @@ export class MgrModuleService {
   }
 
   /**
-   * Disable the Ceph Mgr module.
+   * Disable the Stone Mgr module.
    * @param {string} module The name of the mgr module.
    */
   disable(module: string) {
@@ -55,7 +55,7 @@ export class MgrModuleService {
   }
 
   /**
-   * Get the Ceph Mgr module options.
+   * Get the Stone Mgr module options.
    * @param {string} module The name of the mgr module.
    * @return {Observable<Object>}
    */

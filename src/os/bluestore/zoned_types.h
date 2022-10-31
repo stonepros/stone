@@ -19,8 +19,8 @@ struct zone_state_t {
   uint32_t num_dead_bytes = 0;
   uint32_t write_pointer = 0;
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &p);
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &p);
 
   uint64_t get_num_dead_bytes() const {
     return num_dead_bytes;

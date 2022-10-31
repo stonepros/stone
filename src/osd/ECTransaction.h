@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -89,7 +89,7 @@ namespace ECTransaction {
 	for (auto &&extent: i.second.buffer_updates) {
 	  using BufferUpdate = PGTransaction::ObjectOperation::BufferUpdate;
 	  if (boost::get<BufferUpdate::CloneRange>(&(extent.get_val()))) {
-	    ceph_assert(
+	    stone_assert(
 	      0 ==
 	      "CloneRange is not allowed, do_op should have returned ENOTSUPP");
 	  }
@@ -109,8 +109,8 @@ namespace ECTransaction {
 	  }
 	  if (head_start != head_finish &&
 	      head_start < orig_size) {
-	    ceph_assert(head_finish <= orig_size);
-	    ceph_assert(head_finish - head_start == sinfo.get_stripe_width());
+	    stone_assert(head_finish <= orig_size);
+	    stone_assert(head_finish - head_start == sinfo.get_stripe_width());
 	    ldpp_dout(dpp, 20) << __func__ << ": reading partial head stripe "
 			       << head_start << "~" << sinfo.get_stripe_width()
 			       << dendl;
@@ -127,8 +127,8 @@ namespace ECTransaction {
 	  if (tail_start != tail_finish &&
 	      (head_start == head_finish || tail_start != head_start) &&
 	      tail_start < orig_size) {
-	    ceph_assert(tail_finish <= orig_size);
-	    ceph_assert(tail_finish - tail_start == sinfo.get_stripe_width());
+	    stone_assert(tail_finish <= orig_size);
+	    stone_assert(tail_finish - tail_start == sinfo.get_stripe_width());
 	    ldpp_dout(dpp, 20) << __func__ << ": reading partial tail stripe "
 			       << tail_start << "~" << sinfo.get_stripe_width()
 			       << dendl;
@@ -137,7 +137,7 @@ namespace ECTransaction {
 	  }
 
 	  if (head_start != tail_finish) {
-	    ceph_assert(
+	    stone_assert(
 	      sinfo.logical_offset_is_stripe_aligned(
 		tail_finish - head_start)
 	      );
@@ -146,7 +146,7 @@ namespace ECTransaction {
 	    if (tail_finish > projected_size)
 	      projected_size = tail_finish;
 	  } else {
-	    ceph_assert(tail_finish <= projected_size);
+	    stone_assert(tail_finish <= projected_size);
 	  }
 	}
 
@@ -174,7 +174,7 @@ namespace ECTransaction {
 	 * to_read should have an entry for i.first iff it isn't empty
 	 * and if we are reading from i.first, we can't be renaming or
 	 * cloning it */
-	ceph_assert(plan.to_read.count(i.first) == 0 ||
+	stone_assert(plan.to_read.count(i.first) == 0 ||
 	       (!plan.to_read.at(i.first).empty() &&
 		!i.second.has_source()));
       });
@@ -184,7 +184,7 @@ namespace ECTransaction {
 
   void generate_transactions(
     WritePlan &plan,
-    ceph::ErasureCodeInterfaceRef &ecimpl,
+    stone::ErasureCodeInterfaceRef &ecimpl,
     pg_t pgid,
     const ECUtil::stripe_info_t &sinfo,
     const std::map<hobject_t,extent_map> &partial_extents,
@@ -194,7 +194,7 @@ namespace ECTransaction {
     std::set<hobject_t> *temp_added,
     std::set<hobject_t> *temp_removed,
     DoutPrefixProvider *dpp,
-    const ceph_release_t require_osd_release = ceph_release_t::unknown);
+    const stone_release_t require_osd_release = stone_release_t::unknown);
 };
 
 #endif

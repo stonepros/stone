@@ -1,6 +1,6 @@
 """
-API for CRUD lvm tag operations. Follows the Ceph LVM tag naming convention
-that prefixes tags with ``ceph.`` and uses ``=`` for assignment, and provides
+API for CRUD lvm tag operations. Follows the Stone LVM tag naming convention
+that prefixes tags with ``stone.`` and uses ``=`` for assignment, and provides
 set of utilities for interacting with LVM.
 """
 import logging
@@ -8,8 +8,8 @@ import os
 import uuid
 from itertools import repeat
 from math import floor
-from ceph_volume import process, util, conf
-from ceph_volume.exceptions import SizeAllocationError
+from stone_volume import process, util, conf
+from stone_volume.exceptions import SizeAllocationError
 
 logger = logging.getLogger(__name__)
 
@@ -190,13 +190,13 @@ def parse_tags(lv_tags):
 
     Input look like::
 
-       "ceph.osd_fsid=aaa-fff-bbbb,ceph.osd_id=0"
+       "stone.osd_fsid=aaa-fff-bbbb,stone.osd_id=0"
 
     For the above example, the expected return value would be::
 
         {
-            "ceph.osd_fsid": "aaa-fff-bbbb",
-            "ceph.osd_id": "0"
+            "stone.osd_fsid": "aaa-fff-bbbb",
+            "stone.osd_id": "0"
         }
     """
     if not lv_tags:
@@ -204,7 +204,7 @@ def parse_tags(lv_tags):
     tag_mapping = {}
     tags = lv_tags.split(',')
     for tag_assignment in tags:
-        if not tag_assignment.startswith('ceph.'):
+        if not tag_assignment.startswith('stone.'):
             continue
         key, value = tag_assignment.split('=', 1)
         tag_mapping[key] = value
@@ -320,14 +320,14 @@ def dmsetup_splitname(dev):
     return _splitname_parser(out)
 
 
-def is_ceph_device(lv):
+def is_stone_device(lv):
     try:
-        lv.tags['ceph.osd_id']
+        lv.tags['stone.osd_id']
     except (KeyError, AttributeError):
-        logger.warning('device is not part of ceph: %s', lv)
+        logger.warning('device is not part of stone: %s', lv)
         return False
 
-    if lv.tags['ceph.osd_id'] == 'null':
+    if lv.tags['stone.osd_id'] == 'null':
         return False
     else:
         return True
@@ -365,8 +365,8 @@ class PVolume(object):
         :param tags: A dictionary of tag names and values, like::
 
             {
-                "ceph.osd_fsid": "aaa-fff-bbbb",
-                "ceph.osd_id": "0"
+                "stone.osd_fsid": "aaa-fff-bbbb",
+                "stone.osd_id": "0"
             }
 
         At the end of all modifications, the tags are refreshed to reflect
@@ -643,7 +643,7 @@ def create_vg(devices, name=None, name_prefix=None):
 
     :param devices: A list of devices to create a VG. Optionally, a single
                     device (as a string) can be used.
-    :param name: Optionally set the name of the VG, defaults to 'ceph-{uuid}'
+    :param name: Optionally set the name of the VG, defaults to 'stone-{uuid}'
     :param name_prefix: Optionally prefix the name of the VG, which will get combined
                         with a UUID string
     """
@@ -654,7 +654,7 @@ def create_vg(devices, name=None, name_prefix=None):
     if name_prefix:
         name = "%s-%s" % (name_prefix, str(uuid.uuid4()))
     elif name is None:
-        name = "ceph-%s" % str(uuid.uuid4())
+        name = "stone-%s" % str(uuid.uuid4())
     process.run([
         'vgcreate',
         '--force',
@@ -810,8 +810,8 @@ class Volume(object):
         if not self.name:
             raise ValueError('Volume must have a non-empty name')
         self.tags = parse_tags(kw['lv_tags'])
-        self.encrypted = self.tags.get('ceph.encrypted', '0') == '1'
-        self.used_by_ceph = 'ceph.osd_id' in self.tags
+        self.encrypted = self.tags.get('stone.encrypted', '0') == '1'
+        self.used_by_stone = 'stone.osd_id' in self.tags
 
     def __str__(self):
         return '<%s>' % self.lv_api['lv_path']
@@ -824,29 +824,29 @@ class Volume(object):
         obj.update(self.lv_api)
         obj['tags'] = self.tags
         obj['name'] = self.name
-        obj['type'] = self.tags['ceph.type']
+        obj['type'] = self.tags['stone.type']
         obj['path'] = self.lv_path
         return obj
 
     def report(self):
-        if not self.used_by_ceph:
+        if not self.used_by_stone:
             return {
                 'name': self.lv_name,
-                'comment': 'not used by ceph'
+                'comment': 'not used by stone'
             }
         else:
-            type_ = self.tags['ceph.type']
+            type_ = self.tags['stone.type']
             report = {
                 'name': self.lv_name,
-                'osd_id': self.tags['ceph.osd_id'],
-                'cluster_name': self.tags.get('ceph.cluster_name', conf.cluster),
+                'osd_id': self.tags['stone.osd_id'],
+                'cluster_name': self.tags.get('stone.cluster_name', conf.cluster),
                 'type': type_,
-                'osd_fsid': self.tags['ceph.osd_fsid'],
-                'cluster_fsid': self.tags['ceph.cluster_fsid'],
-                'osdspec_affinity': self.tags.get('ceph.osdspec_affinity', ''),
+                'osd_fsid': self.tags['stone.osd_fsid'],
+                'cluster_fsid': self.tags['stone.cluster_fsid'],
+                'osdspec_affinity': self.tags.get('stone.osdspec_affinity', ''),
             }
             type_uuid = '{}_uuid'.format(type_)
-            report[type_uuid] = self.tags['ceph.{}'.format(type_uuid)]
+            report[type_uuid] = self.tags['stone.{}'.format(type_uuid)]
             return report
 
     def _format_tag_args(self, op, tags):
@@ -877,8 +877,8 @@ class Volume(object):
         :param tags: A dictionary of tag names and values, like::
 
             {
-                "ceph.osd_fsid": "aaa-fff-bbbb",
-                "ceph.osd_id": "0"
+                "stone.osd_fsid": "aaa-fff-bbbb",
+                "stone.osd_id": "0"
             }
 
         At the end of all modifications, the tags are refreshed to reflect
@@ -937,11 +937,11 @@ def create_lv(name_prefix,
 
     ``name_prefix`` is required. If ``size`` is provided its expected to be a
     byte count. Tags are an optional dictionary and is expected to
-    conform to the convention of prefixing them with "ceph." like::
+    conform to the convention of prefixing them with "stone." like::
 
-        {"ceph.block_device": "/dev/ceph/osd-1"}
+        {"stone.block_device": "/dev/stone/osd-1"}
 
-    :param name_prefix: name prefix for the LV, typically somehting like ceph-osd-block
+    :param name_prefix: name prefix for the LV, typically somehting like stone-osd-block
     :param uuid: UUID to ensure uniqueness; is combined with name_prefix to
                  form the LV name
     :param vg: optional, pass an existing VG to create LV
@@ -958,13 +958,13 @@ def create_lv(name_prefix,
     if not vg:
         if not device:
             raise RuntimeError("Must either specify vg or device, none given")
-        # check if a vgs starting with ceph already exists
-        vgs = get_device_vgs(device, 'ceph')
+        # check if a vgs starting with stone already exists
+        vgs = get_device_vgs(device, 'stone')
         if vgs:
             vg = vgs[0]
         else:
             # create on if not
-            vg = create_vg(device, name_prefix='ceph')
+            vg = create_vg(device, name_prefix='stone')
     assert(vg)
 
     if size:
@@ -998,23 +998,23 @@ def create_lv(name_prefix,
 
     if tags is None:
         tags = {
-            "ceph.osd_id": "null",
-            "ceph.type": "null",
-            "ceph.cluster_fsid": "null",
-            "ceph.osd_fsid": "null",
+            "stone.osd_id": "null",
+            "stone.type": "null",
+            "stone.cluster_fsid": "null",
+            "stone.osd_fsid": "null",
         }
     # when creating a distinct type, the caller doesn't know what the path will
     # be so this function will set it after creation using the mapping
-    # XXX add CEPH_VOLUME_LVM_DEBUG to enable -vvvv on lv operations
+    # XXX add STONE_VOLUME_LVM_DEBUG to enable -vvvv on lv operations
     type_path_tag = {
-        'journal': 'ceph.journal_device',
-        'data': 'ceph.data_device',
-        'block': 'ceph.block_device',
-        'wal': 'ceph.wal_device',
-        'db': 'ceph.db_device',
-        'lockbox': 'ceph.lockbox_device',  # XXX might not ever need this lockbox sorcery
+        'journal': 'stone.journal_device',
+        'data': 'stone.data_device',
+        'block': 'stone.block_device',
+        'wal': 'stone.wal_device',
+        'db': 'stone.db_device',
+        'lockbox': 'stone.lockbox_device',  # XXX might not ever need this lockbox sorcery
     }
-    path_tag = type_path_tag.get(tags.get('ceph.type'))
+    path_tag = type_path_tag.get(tags.get('stone.type'))
     if path_tag:
         tags.update({path_tag: lv.lv_path})
 
@@ -1023,14 +1023,14 @@ def create_lv(name_prefix,
     return lv
 
 
-def create_lvs(volume_group, parts=None, size=None, name_prefix='ceph-lv'):
+def create_lvs(volume_group, parts=None, size=None, name_prefix='stone-lv'):
     """
     Create multiple Logical Volumes from a Volume Group by calculating the
     proper extents from ``parts`` or ``size``. A custom prefix can be used
-    (defaults to ``ceph-lv``), these names are always suffixed with a uuid.
+    (defaults to ``stone-lv``), these names are always suffixed with a uuid.
 
-    LV creation in ceph-volume will require tags, this is expected to be
-    pre-computed by callers who know Ceph metadata like OSD IDs and FSIDs. It
+    LV creation in stone-volume will require tags, this is expected to be
+    pre-computed by callers who know Stone metadata like OSD IDs and FSIDs. It
     will probably not be the case when mass-creating LVs, so common/default
     tags will be set to ``"null"``.
 
@@ -1051,10 +1051,10 @@ def create_lvs(volume_group, parts=None, size=None, name_prefix='ceph-lv'):
         parts = 1
     lvs = []
     tags = {
-        "ceph.osd_id": "null",
-        "ceph.type": "null",
-        "ceph.cluster_fsid": "null",
-        "ceph.osd_fsid": "null",
+        "stone.osd_id": "null",
+        "stone.type": "null",
+        "stone.cluster_fsid": "null",
+        "stone.osd_fsid": "null",
     }
     sizing = volume_group.sizing(parts=parts, size=size)
     for part in range(0, sizing['parts']):

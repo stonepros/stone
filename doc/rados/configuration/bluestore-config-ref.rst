@@ -14,7 +14,7 @@ is managed directly by BlueStore. This *primary device* is normally identified
 by a ``block`` symlink in the data directory.
 
 The data directory is a ``tmpfs`` mount which gets populated (at boot time, or
-when ``ceph-volume`` activates it) with all the common OSD files that hold
+when ``stone-volume`` activates it) with all the common OSD files that hold
 information about the OSD, like: its identifier, which cluster it belongs to,
 and its private keyring.
 
@@ -44,11 +44,11 @@ device.
 
 A single-device (colocated) BlueStore OSD can be provisioned with::
 
-  ceph-volume lvm prepare --bluestore --data <device>
+  stone-volume lvm prepare --bluestore --data <device>
 
 To specify a WAL device and/or DB device, ::
 
-  ceph-volume lvm prepare --bluestore --data <device> --block.wal <wal-device> --block.db <db-device>
+  stone-volume lvm prepare --bluestore --data <device> --block.wal <wal-device> --block.db <db-device>
 
 .. note:: ``--data`` can be a Logical Volume using  *vg/lv* notation. Other
           devices can be existing logical volumes or GPT partitions.
@@ -66,15 +66,15 @@ the deployment strategy:
 If all devices are the same type, for example all rotational drives, and
 there are no fast devices to use for metadata, it makes sense to specifiy the
 block device only and to not separate ``block.db`` or ``block.wal``. The
-:ref:`ceph-volume-lvm` command for a single ``/dev/sda`` device looks like::
+:ref:`stone-volume-lvm` command for a single ``/dev/sda`` device looks like::
 
-    ceph-volume lvm create --bluestore --data /dev/sda
+    stone-volume lvm create --bluestore --data /dev/sda
 
 If logical volumes have already been created for each device, (a single LV
-using 100% of the device), then the :ref:`ceph-volume-lvm` call for an LV named
-``ceph-vg/block-lv`` would look like::
+using 100% of the device), then the :ref:`stone-volume-lvm` call for an LV named
+``stone-vg/block-lv`` would look like::
 
-    ceph-volume lvm create --bluestore --data ceph-vg/block-lv
+    stone-volume lvm create --bluestore --data stone-vg/block-lv
 
 .. _bluestore-mixed-device-config:
 
@@ -85,38 +85,38 @@ it is recommended to place ``block.db`` on the faster device while ``block``
 (data) lives on the slower (spinning drive).
 
 You must create these volume groups and logical volumes manually as 
-the ``ceph-volume`` tool is currently not able to do so automatically.
+the ``stone-volume`` tool is currently not able to do so automatically.
 
 For the below example, let us assume four rotational (``sda``, ``sdb``, ``sdc``, and ``sdd``)
 and one (fast) solid state drive (``sdx``). First create the volume groups::
 
-    $ vgcreate ceph-block-0 /dev/sda
-    $ vgcreate ceph-block-1 /dev/sdb
-    $ vgcreate ceph-block-2 /dev/sdc
-    $ vgcreate ceph-block-3 /dev/sdd
+    $ vgcreate stone-block-0 /dev/sda
+    $ vgcreate stone-block-1 /dev/sdb
+    $ vgcreate stone-block-2 /dev/sdc
+    $ vgcreate stone-block-3 /dev/sdd
 
 Now create the logical volumes for ``block``::
 
-    $ lvcreate -l 100%FREE -n block-0 ceph-block-0
-    $ lvcreate -l 100%FREE -n block-1 ceph-block-1
-    $ lvcreate -l 100%FREE -n block-2 ceph-block-2
-    $ lvcreate -l 100%FREE -n block-3 ceph-block-3
+    $ lvcreate -l 100%FREE -n block-0 stone-block-0
+    $ lvcreate -l 100%FREE -n block-1 stone-block-1
+    $ lvcreate -l 100%FREE -n block-2 stone-block-2
+    $ lvcreate -l 100%FREE -n block-3 stone-block-3
 
 We are creating 4 OSDs for the four slow spinning devices, so assuming a 200GB
 SSD in ``/dev/sdx`` we will create 4 logical volumes, each of 50GB::
 
-    $ vgcreate ceph-db-0 /dev/sdx
-    $ lvcreate -L 50GB -n db-0 ceph-db-0
-    $ lvcreate -L 50GB -n db-1 ceph-db-0
-    $ lvcreate -L 50GB -n db-2 ceph-db-0
-    $ lvcreate -L 50GB -n db-3 ceph-db-0
+    $ vgcreate stone-db-0 /dev/sdx
+    $ lvcreate -L 50GB -n db-0 stone-db-0
+    $ lvcreate -L 50GB -n db-1 stone-db-0
+    $ lvcreate -L 50GB -n db-2 stone-db-0
+    $ lvcreate -L 50GB -n db-3 stone-db-0
 
-Finally, create the 4 OSDs with ``ceph-volume``::
+Finally, create the 4 OSDs with ``stone-volume``::
 
-    $ ceph-volume lvm create --bluestore --data ceph-block-0/block-0 --block.db ceph-db-0/db-0
-    $ ceph-volume lvm create --bluestore --data ceph-block-1/block-1 --block.db ceph-db-0/db-1
-    $ ceph-volume lvm create --bluestore --data ceph-block-2/block-2 --block.db ceph-db-0/db-2
-    $ ceph-volume lvm create --bluestore --data ceph-block-3/block-3 --block.db ceph-db-0/db-3
+    $ stone-volume lvm create --bluestore --data stone-block-0/block-0 --block.db stone-db-0/db-0
+    $ stone-volume lvm create --bluestore --data stone-block-1/block-1 --block.db stone-db-0/db-1
+    $ stone-volume lvm create --bluestore --data stone-block-2/block-2 --block.db stone-db-0/db-2
+    $ stone-volume lvm create --bluestore --data stone-block-3/block-3 --block.db stone-db-0/db-3
 
 These operations should end up creating four OSDs, with ``block`` on the slower
 rotational drives with a 50 GB logical volume (DB) for each on the solid state
@@ -265,7 +265,7 @@ SSD is used for the primary device (set by the
 ``bluestore_cache_size_ssd`` and ``bluestore_cache_size_hdd`` config
 options).
 
-BlueStore and the rest of the Ceph OSD daemon do the best they can
+BlueStore and the rest of the Stone OSD daemon do the best they can
 to work within this memory budget.  Note that on top of the configured
 cache size, there is also memory consumed by the OSD itself, and
 some additional utilization due to memory fragmentation and other
@@ -360,7 +360,7 @@ The smaller checksum values can be used by selecting `crc32c_16` or
 The *checksum algorithm* can be set either via a per-pool
 ``csum_type`` property or the global config option.  For example, ::
 
-  ceph osd pool set <pool-name> csum_type <algorithm>
+  stone osd pool set <pool-name> csum_type <algorithm>
 
 ``bluestore_csum_type``
 
@@ -403,11 +403,11 @@ ratio*, *min blob size*, and *max blob size* can be set either via a
 per-pool property or a global config option.  Pool properties can be
 set with::
 
-  ceph osd pool set <pool-name> compression_algorithm <algorithm>
-  ceph osd pool set <pool-name> compression_mode <mode>
-  ceph osd pool set <pool-name> compression_required_ratio <ratio>
-  ceph osd pool set <pool-name> compression_min_blob_size <size>
-  ceph osd pool set <pool-name> compression_max_blob_size <size>
+  stone osd pool set <pool-name> compression_algorithm <algorithm>
+  stone osd pool set <pool-name> compression_mode <mode>
+  stone osd pool set <pool-name> compression_required_ratio <ratio>
+  stone osd pool set <pool-name> compression_min_blob_size <size>
+  stone osd pool set <pool-name> compression_max_blob_size <size>
 
 ``bluestore_compression_algorithm``
 

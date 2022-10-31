@@ -12,7 +12,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library Public License for more details.
 #
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 SOCAT_PIDS=()
 
@@ -44,8 +44,8 @@ function run() {
     export MONA_BIND=7135   # git grep '\<7135\>' ; there must be only one
     export MONB_BIND=7136   # git grep '\<7136\>' ; there must be only one
     export MONC_BIND=7137   # git grep '\<7137\>' ; there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -60,12 +60,12 @@ function TEST_mon_client_connect_fails() {
 
     # start the mon with a public-bind-addr that is different
     # from the public-addr.
-    CEPH_ARGS+="--mon-initial-members=a "
-    CEPH_ARGS+="--mon-host=${MON_IP}:${MONA_PUBLIC} "
+    STONE_ARGS+="--mon-initial-members=a "
+    STONE_ARGS+="--mon-host=${MON_IP}:${MONA_PUBLIC} "
     run_mon $dir a --mon-host=${MON_IP}:${MONA_PUBLIC} --public-bind-addr=${MON_IP}:${MONA_BIND} || return 1
 
     # now attempt to ping it that should fail.
-    timeout 3 ceph ping mon.a || return 0
+    timeout 3 stone ping mon.a || return 0
     return 1
 }
 
@@ -74,15 +74,15 @@ function TEST_mon_client_connect() {
 
     # start the mon with a public-bind-addr that is different
     # from the public-addr.
-    CEPH_ARGS+="--mon-initial-members=a "
-    CEPH_ARGS+="--mon-host=${MON_IP}:${MONA_PUBLIC} "
+    STONE_ARGS+="--mon-initial-members=a "
+    STONE_ARGS+="--mon-host=${MON_IP}:${MONA_PUBLIC} "
     run_mon $dir a --mon-host=${MON_IP}:${MONA_PUBLIC} --public-bind-addr=${MON_IP}:${MONA_BIND} || return 1
 
     # now forward the public port to the bind port.
     port_forward ${MONA_PUBLIC} ${MONA_BIND}
 
     # attempt to connect. we expect that to work
-    ceph ping mon.a || return 1
+    stone ping mon.a || return 1
 }
 
 function TEST_mon_quorum() {
@@ -90,8 +90,8 @@ function TEST_mon_quorum() {
 
     # start the mon with a public-bind-addr that is different
     # from the public-addr.
-    CEPH_ARGS+="--mon-initial-members=a,b,c "
-    CEPH_ARGS+="--mon-host=${MON_IP}:${MONA_PUBLIC},${MON_IP}:${MONB_PUBLIC},${MON_IP}:${MONC_PUBLIC} "
+    STONE_ARGS+="--mon-initial-members=a,b,c "
+    STONE_ARGS+="--mon-host=${MON_IP}:${MONA_PUBLIC},${MON_IP}:${MONB_PUBLIC},${MON_IP}:${MONC_PUBLIC} "
     run_mon $dir a --public-addr=${MON_IP}:${MONA_PUBLIC} --public-bind-addr=${MON_IP}:${MONA_BIND} || return 1
     run_mon $dir b --public-addr=${MON_IP}:${MONB_PUBLIC} --public-bind-addr=${MON_IP}:${MONB_BIND} || return 1
     run_mon $dir c --public-addr=${MON_IP}:${MONC_PUBLIC} --public-bind-addr=${MON_IP}:${MONC_BIND} || return 1
@@ -102,7 +102,7 @@ function TEST_mon_quorum() {
     port_forward ${MONC_PUBLIC} ${MONC_BIND}
 
     # expect monmap to contain 3 monitors (a, b, and c)
-    jqinput="$(ceph quorum_status --format=json 2>/dev/null)"
+    jqinput="$(stone quorum_status --format=json 2>/dev/null)"
     jq_success "$jqinput" '.monmap.mons | length == 3' || return 1
 
     # quorum should form
@@ -117,8 +117,8 @@ function TEST_put_get() {
 
     # start the mon with a public-bind-addr that is different
     # from the public-addr.
-    CEPH_ARGS+="--mon-initial-members=a,b,c "
-    CEPH_ARGS+="--mon-host=${MON_IP}:${MONA_PUBLIC},${MON_IP}:${MONB_PUBLIC},${MON_IP}:${MONC_PUBLIC} "
+    STONE_ARGS+="--mon-initial-members=a,b,c "
+    STONE_ARGS+="--mon-host=${MON_IP}:${MONA_PUBLIC},${MON_IP}:${MONB_PUBLIC},${MON_IP}:${MONC_PUBLIC} "
     run_mon $dir a --public-addr=${MON_IP}:${MONA_PUBLIC} --public-bind-addr=${MON_IP}:${MONA_BIND} || return 1
     run_mon $dir b --public-addr=${MON_IP}:${MONB_PUBLIC} --public-bind-addr=${MON_IP}:${MONB_BIND} || return 1
     run_mon $dir c --public-addr=${MON_IP}:${MONC_PUBLIC} --public-bind-addr=${MON_IP}:${MONC_BIND} || return 1

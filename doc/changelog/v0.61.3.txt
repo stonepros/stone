@@ -148,15 +148,15 @@ commit 3372235d307172b404a48e4c4d24702a96116d00
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu May 30 21:43:50 2013 -0700
 
-    mon: destroy MonitorDBStore before g_ceph_context
+    mon: destroy MonitorDBStore before g_stone_context
 
-    Put it on the heap so that we can destroy it before the g_ceph_context
+    Put it on the heap so that we can destroy it before the g_stone_context
     cct that it references.  This fixes a crash like
 
     *** Caught signal (Segmentation fault) **
     in thread 4034a80
-    ceph version 0.63-204-gcf9aa7a (cf9aa7a0037e56eada8b3c1bb59d59d0bfe7bba5)
-    1: ceph-mon() [0x59932a]
+    stone version 0.63-204-gcf9aa7a (cf9aa7a0037e56eada8b3c1bb59d59d0bfe7bba5)
+    1: stone-mon() [0x59932a]
     2: (()+0xfcb0) [0x4e41cb0]
     3: (Mutex::Lock(bool)+0x1b) [0x6235bb]
     4: (PerfCountersCollection::remove(PerfCounters*)+0x27) [0x6a0877]
@@ -164,7 +164,7 @@ Date:   Thu May 30 21:43:50 2013 -0700
     6: (LevelDBStore::~LevelDBStore()+0x9) [0x582da9]
     7: (main()+0x1386) [0x48db16]
     8: (__libc_start_main()+0xed) [0x658076d]
-    9: ceph-mon() [0x4909ad]
+    9: stone-mon() [0x4909ad]
 
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit df2d06db6f3f7e858bdadcc8cd2b0ade432df413)
@@ -422,7 +422,7 @@ commit 8b7ca687ded06fe0b67d98e81fa1dabbed440853
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Thu May 30 18:17:28 2013 +0100
 
-    mon: Monitor: backup monmap using all ceph features instead of quorum's
+    mon: Monitor: backup monmap using all stone features instead of quorum's
 
     When a monitor is freshly created and for some reason its initial sync is
     aborted, it will end up with an incorrect backup monmap.  This monmap is
@@ -616,7 +616,7 @@ Date:   Wed May 22 09:47:29 2013 -0700
 
     We need to do df on the remote host, not locally.
 
-    Simlarly, the ceph command uses the osd key, which exists remotely; run it there.
+    Simlarly, the stone command uses the osd key, which exists remotely; run it there.
 
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit d81d0ea5c442699570bd93a90bea0d97a288a1e9)
@@ -685,7 +685,7 @@ Date:   Tue May 21 14:36:11 2013 -0700
     mon: implement --extract-monmap <filename>
 
     This will make for a simpler process for
-      http://docs.ceph.com/docs/master/rados/operations/add-or-rm-mons/#removing-monitors-from-an-unhealthy-cluster
+      http://docs.stone.com/docs/master/rados/operations/add-or-rm-mons/#removing-monitors-from-an-unhealthy-cluster
 
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit c0268e27497a4d8228ef54da9d4ca12f3ac1f1bf)
@@ -774,7 +774,7 @@ commit 85fb422a084785176af3b694882964841e02195d
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon May 20 13:34:27 2013 -0700
 
-    debian: stop sysvinit on ceph.prerm
+    debian: stop sysvinit on stone.prerm
 
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit 2f193fb931ed09d921e6fa5a985ab87aa4874589)
@@ -783,7 +783,7 @@ commit eac3cd2d8334db7c70cbba433610136ff76e447f
 Author: Mike Kelly <pioto@pioto.org>
 Date:   Thu May 16 12:29:50 2013 -0400
 
-    ceph df: fix si units for 'global' stats
+    stone df: fix si units for 'global' stats
 
     si_t expects bytes, but it was being given kilobytes.
 
@@ -797,7 +797,7 @@ Date:   Thu May 16 18:40:29 2013 -0700
     udev: install disk/by-partuuid rules
 
     Wheezy's udev (175-7.2) has broken rules for the /dev/disk/by-partuuid/
-    symlinks that ceph-disk relies on.  Install parallel rules that work.  On
+    symlinks that stone-disk relies on.  Install parallel rules that work.  On
     new udev, this is harmless; old older udev, this will make life better.
 
     Fixes: #4865
@@ -811,7 +811,7 @@ Date:   Thu May 16 13:17:45 2013 -0700
 
     debian: make radosgw require matching version of librados2
 
-    ...indirectly via ceph-common.  We get bad behavior when they diverge, I
+    ...indirectly via stone-common.  We get bad behavior when they diverge, I
     think because of libcommon.la being linked both statically and dynamically.
 
     Fixes: #4997

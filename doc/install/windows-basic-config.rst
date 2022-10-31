@@ -4,7 +4,7 @@
 Windows basic configuration
 ===========================
 
-This page describes the minimum Ceph configuration required for using the
+This page describes the minimum Stone configuration required for using the
 client components on Windows.
 
 ceph.conf

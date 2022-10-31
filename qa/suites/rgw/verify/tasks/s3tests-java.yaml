@@ -2,5 +2,5 @@ tasks:
 - s3tests-java:
     client.0:
         force-branch: stone-pacific
-        force-repo: https://github.com/stone/java_s3tests.git 
+        force-repo: https://github.com/stonepros/java_s3tests.git 
 

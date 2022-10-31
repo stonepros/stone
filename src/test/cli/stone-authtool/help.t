@@ -1,6 +1,6 @@
 # TODO synchronize with man page
-  $ ceph-authtool --help
-  usage: ceph-authtool keyringfile [OPTIONS]...
+  $ stone-authtool --help
+  usage: stone-authtool keyringfile [OPTIONS]...
   where the options are:
     -l, --list                    will list all keys and capabilities present in
                                   the keyring

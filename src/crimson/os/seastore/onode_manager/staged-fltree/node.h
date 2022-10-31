@@ -227,7 +227,7 @@ class Node
 
  protected:
   virtual node_future<> test_clone_non_root(context_t, Ref<InternalNode>) const {
-    ceph_abort("impossible path");
+    stone_abort("impossible path");
   }
   virtual node_future<search_result_t> lower_bound_tracked(
       context_t, const key_hobj_t&, MatchHistory&) = 0;

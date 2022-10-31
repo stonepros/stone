@@ -30,11 +30,11 @@ struct MgrSession : public RefCountedObject {
 
 private:
   FRIEND_MAKE_REF(MgrSession);
-  explicit MgrSession(StoneeContext *cct) : RefCountedObject(cct) {}
+  explicit MgrSession(StoneContext *cct) : RefCountedObject(cct) {}
   ~MgrSession() override = default;
 };
 
-using MgrSessionRef = ceph::ref_t<MgrSession>;
+using MgrSessionRef = stone::ref_t<MgrSession>;
 
 
 #endif

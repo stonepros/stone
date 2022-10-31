@@ -11,7 +11,7 @@ import rbd
 
 from .. import mgr
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from ..services.exception import handle_rados_error, handle_rbd_error, serialize_dashboard_exception
 from ..services.rbd import rbd_call
 from ..tools import ViewCache
@@ -48,7 +48,7 @@ def RbdMirroringTask(name, metadata, wait_for):  # noqa: N802
 def get_daemons_and_pools():  # pylint: disable=R0915
     def get_daemons():
         daemons = []
-        for hostname, server in CephService.get_service_map('rbd-mirror').items():
+        for hostname, server in StoneService.get_service_map('rbd-mirror').items():
             for service in server['services']:
                 id = service['id']  # pylint: disable=W0622
                 metadata = service['metadata']
@@ -68,7 +68,7 @@ def get_daemons_and_pools():  # pylint: disable=R0915
                 daemon = {
                     'id': id,
                     'instance_id': instance_id,
-                    'version': metadata['ceph_version'],
+                    'version': metadata['stone_version'],
                     'server_hostname': hostname,
                     'service': service,
                     'server': server,
@@ -108,7 +108,7 @@ def get_daemons_and_pools():  # pylint: disable=R0915
         return health
 
     def get_pools(daemons):  # pylint: disable=R0912, R0915
-        pool_names = [pool['pool_name'] for pool in CephService.get_pool_list('rbd')
+        pool_names = [pool['pool_name'] for pool in StoneService.get_pool_list('rbd')
                       if pool.get('type', 1) == 1]
         pool_stats = {}
         rbdctx = rbd.RBD()
@@ -265,7 +265,7 @@ def _get_pool_datum(pool_name):
 
 @ViewCache()
 def _get_content_data():  # pylint: disable=R0914
-    pool_names = [pool['pool_name'] for pool in CephService.get_pool_list('rbd')
+    pool_names = [pool['pool_name'] for pool in StoneService.get_pool_list('rbd')
                   if pool.get('type', 1) == 1]
     _, data = get_daemons_and_pools()
     daemons = data.get('daemons', [])

@@ -6,11 +6,11 @@ if [ -f $MENV_ROOT/.menvroot ]; then
     . $MENV_ROOT/.menvroot
 fi
 
-[ "$MRUN_CEPH_ROOT" == "" ] && MRUN_CEPH_ROOT=$HOME/ceph
+[ "$MRUN_STONE_ROOT" == "" ] && MRUN_STONE_ROOT=$HOME/stone
 
 if [ "$MRUN_CLUSTER" == "" ]; then
-    ${MRUN_CEPH_ROOT}/build/bin/$cmd "$@"
+    ${MRUN_STONE_ROOT}/build/bin/$cmd "$@"
     exit $?
 fi
 
-${MRUN_CEPH_ROOT}/src/mrun $MRUN_CLUSTER $cmd "$@"
+${MRUN_STONE_ROOT}/src/mrun $MRUN_CLUSTER $cmd "$@"

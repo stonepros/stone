@@ -56,10 +56,10 @@ class SettingsTest(unittest.TestCase, KVStoreMockMixin):
         import cherrypy
 
         self.plugin.register_commands()['handle_command'](
-            self.mgr, Actions.DISABLE, [Features.CEPHFS])
+            self.mgr, Actions.DISABLE, [Features.STONEFS])
 
         with patch.object(self.plugin, '_get_feature_from_request',
-                          return_value=Features.CEPHFS):
+                          return_value=Features.STONEFS):
             with self.assertRaises(cherrypy.HTTPError):
                 request = Mock()
                 self.plugin.filter_request_before_handler(request)

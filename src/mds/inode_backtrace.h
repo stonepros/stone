@@ -7,7 +7,7 @@
 
 #include "mdstypes.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -25,10 +25,10 @@ struct inode_backpointer_t {
   inode_backpointer_t() {}
   inode_backpointer_t(inodeno_t i, std::string_view d, version_t v) : dirino(i), dname(d), version(v) {}
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void decode_old(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void decode_old(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<inode_backpointer_t*>& ls);
 
   inodeno_t dirino;    // containing directory ino
@@ -53,9 +53,9 @@ inline std::ostream& operator<<(std::ostream& out, const inode_backpointer_t& ib
 struct inode_backtrace_t {
   inode_backtrace_t() {}
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<inode_backtrace_t*>& ls);
 
   /**

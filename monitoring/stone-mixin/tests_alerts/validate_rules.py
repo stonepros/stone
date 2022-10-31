@@ -481,7 +481,7 @@ class RuleChecker:
         if not cmd:
             return []
 
-        rc, stdout, stderr = run_command(f"{cmd} -Pu -Tz -M ../../snmp:/usr/share/snmp/mibs -m CEPH-MIB")
+        rc, stdout, stderr = run_command(f"{cmd} -Pu -Tz -M ../../snmp:/usr/share/snmp/mibs -m STONE-MIB")
         if rc != 0:
             return []
 

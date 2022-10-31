@@ -121,8 +121,8 @@ def task(ctx, config):
 
     {{VIPPREFIXLEN}} is the virtual_subnet prefix (16 in the example.
 
-    These substitutions work for vip.echo, and (at the time of writing) cephadm.apply
-    and cephadm.shell.
+    These substitutions work for vip.echo, and (at the time of writing) stoneadm.apply
+    and stoneadm.shell.
     """
     if config is None:
         config = {}

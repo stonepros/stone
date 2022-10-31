@@ -10,7 +10,7 @@
 #include "common/AsyncOpTracker.h"
 #include "common/Cond.h"
 #include "common/Timer.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/RefCountedObj.h"
 #include "common/WorkQueue.h"
 #include "cls/journal/cls_journal_types.h"
@@ -22,7 +22,7 @@
 #include <list>
 #include <map>
 #include <string>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace journal {
 
@@ -95,7 +95,7 @@ public:
   inline SafeTimer &get_timer() {
     return *m_timer;
   }
-  inline ceph::mutex &get_timer_lock() {
+  inline stone::mutex &get_timer_lock() {
     return *m_timer_lock;
   }
 
@@ -147,7 +147,7 @@ public:
 
 private:
   FRIEND_MAKE_REF(JournalMetadata);
-  JournalMetadata(ContextWQ *work_queue, SafeTimer *timer, ceph::mutex *timer_lock,
+  JournalMetadata(ContextWQ *work_queue, SafeTimer *timer, stone::mutex *timer_lock,
                   librados::IoCtx &ioctx, const std::string &oid,
                   const std::string &client_id, const Settings &settings);
   ~JournalMetadata() override;
@@ -295,7 +295,7 @@ private:
   };
 
   librados::IoCtx m_ioctx;
-  StoneeContext *m_cct = nullptr;
+  StoneContext *m_cct = nullptr;
   std::string m_oid;
   std::string m_client_id;
   Settings m_settings;
@@ -307,9 +307,9 @@ private:
 
   ContextWQ *m_work_queue;
   SafeTimer *m_timer;
-  ceph::mutex *m_timer_lock;
+  stone::mutex *m_timer_lock;
 
-  mutable ceph::mutex m_lock = ceph::make_mutex("JournalMetadata::m_lock");
+  mutable stone::mutex m_lock = stone::make_mutex("JournalMetadata::m_lock");
 
   uint64_t m_commit_tid = 0;
   CommitTids m_pending_commit_tids;
@@ -327,7 +327,7 @@ private:
   AllocatedEntryTids m_allocated_entry_tids;
 
   size_t m_update_notifications = 0;
-  ceph::condition_variable m_update_cond;
+  stone::condition_variable m_update_cond;
 
   size_t m_ignore_watch_notifies = 0;
   size_t m_refreshes_in_progress = 0;

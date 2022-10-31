@@ -25,7 +25,7 @@ namespace rgw {
     using unique_lock = std::unique_lock<std::mutex>;
 
   public:
-    RGWLibProcess(CephContext* cct, RGWProcessEnv* pe, int num_threads,
+    RGWLibProcess(StoneContext* cct, RGWProcessEnv* pe, int num_threads,
 		  RGWFrontendConfig* _conf) :
       RGWProcess(cct, pe, num_threads, _conf), gen(0), shutdown(false) {}
 
@@ -57,7 +57,7 @@ namespace rgw {
 
     void enqueue_req(RGWLibRequest* req) {
 
-      lsubdout(g_ceph_context, rgw, 10)
+      lsubdout(g_stone_context, rgw, 10)
 	<< __func__ << " enqueue request req="
 	<< hex << req << dec << dendl;
 

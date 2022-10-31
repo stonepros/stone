@@ -13,7 +13,7 @@
 
 struct Context;
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 namespace rbd {
 namespace mirror {

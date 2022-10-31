@@ -17,7 +17,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.FileNotFoundException;
 import org.junit.*;
@@ -31,17 +31,17 @@ import static org.junit.Assert.*;
  * that the "/" in the normal mount is non-empty, and that "/" is
  * empty in the mount with the empty directory as the root.
  */
-public class CephMountCreateTest {
+public class StoneMountCreateTest {
 
   private static String conf_file;
 
   @BeforeClass
   public static void class_setup() throws Exception {
-    conf_file = System.getProperty("CEPH_CONF_FILE");
+    conf_file = System.getProperty("STONE_CONF_FILE");
   }
 
-  private CephMount setupMount(String root) throws Exception {
-    CephMount mount = new CephMount("admin");
+  private StoneMount setupMount(String root) throws Exception {
+    StoneMount mount = new StoneMount("admin");
     if (conf_file != null)
       mount.conf_read_file(conf_file);
     mount.conf_set("client_permissions", "0");
@@ -50,11 +50,11 @@ public class CephMountCreateTest {
   }
 
   @Test
-  public void test_CephMountCreate() throws Exception {
-    CephMount mount;
+  public void test_StoneMountCreate() throws Exception {
+    StoneMount mount;
     boolean found;
 
-    String dir = "libcephfs_junit_" + UUID.randomUUID();
+    String dir = "libstonefs_junit_" + UUID.randomUUID();
 
     /* root dir has more than one dir */
     mount = setupMount("/");

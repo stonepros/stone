@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -29,7 +29,7 @@
 #include "mon/health_check.h"
 #include <sstream>
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 class PGMapDigest {
 public:
@@ -54,14 +54,14 @@ public:
     int32_t acting = 0;
     int32_t up_not_acting = 0;
     int32_t primary = 0;
-    void encode(ceph::buffer::list& bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl) const {
+      using stone::encode;
       encode(acting, bl);
       encode(up_not_acting, bl);
       encode(primary, bl);
     }
-    void decode(ceph::buffer::list::const_iterator& p) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& p) {
+      using stone::decode;
       decode(acting, p);
       decode(up_not_acting, p);
       decode(primary, p);
@@ -106,57 +106,57 @@ public:
     double *inactive_ratio,
     double *unknown_pgs_ratio) const;
 
-  void print_summary(ceph::Formatter *f, std::ostream *out) const;
-  void print_oneline_summary(ceph::Formatter *f, std::ostream *out) const;
+  void print_summary(stone::Formatter *f, std::ostream *out) const;
+  void print_oneline_summary(stone::Formatter *f, std::ostream *out) const;
 
-  void recovery_summary(ceph::Formatter *f, std::list<std::string> *psl,
+  void recovery_summary(stone::Formatter *f, std::list<std::string> *psl,
                         const pool_stat_t& pool_sum) const;
-  void overall_recovery_summary(ceph::Formatter *f, std::list<std::string> *psl) const;
-  void pool_recovery_summary(ceph::Formatter *f, std::list<std::string> *psl,
+  void overall_recovery_summary(stone::Formatter *f, std::list<std::string> *psl) const;
+  void pool_recovery_summary(stone::Formatter *f, std::list<std::string> *psl,
                              uint64_t poolid) const;
-  void recovery_rate_summary(ceph::Formatter *f, std::ostream *out,
+  void recovery_rate_summary(stone::Formatter *f, std::ostream *out,
                              const pool_stat_t& delta_sum,
                              utime_t delta_stamp) const;
-  void overall_recovery_rate_summary(ceph::Formatter *f, std::ostream *out) const;
-  void pool_recovery_rate_summary(ceph::Formatter *f, std::ostream *out,
+  void overall_recovery_rate_summary(stone::Formatter *f, std::ostream *out) const;
+  void pool_recovery_rate_summary(stone::Formatter *f, std::ostream *out,
                                   uint64_t poolid) const;
   /**
    * Obtain a formatted/plain output for client I/O, source from stats for a
    * given @p delta_sum pool over a given @p delta_stamp period of time.
    */
-  void client_io_rate_summary(ceph::Formatter *f, std::ostream *out,
+  void client_io_rate_summary(stone::Formatter *f, std::ostream *out,
                               const pool_stat_t& delta_sum,
                               utime_t delta_stamp) const;
   /**
    * Obtain a formatted/plain output for the overall client I/O, which is
    * calculated resorting to @p pg_sum_delta and @p stamp_delta.
    */
-  void overall_client_io_rate_summary(ceph::Formatter *f, std::ostream *out) const;
+  void overall_client_io_rate_summary(stone::Formatter *f, std::ostream *out) const;
   /**
    * Obtain a formatted/plain output for client I/O over a given pool
    * with id @p pool_id.  We will then obtain pool-specific data
    * from @p per_pool_sum_delta.
    */
-  void pool_client_io_rate_summary(ceph::Formatter *f, std::ostream *out,
+  void pool_client_io_rate_summary(stone::Formatter *f, std::ostream *out,
                                    uint64_t poolid) const;
   /**
    * Obtain a formatted/plain output for cache tier IO, source from stats for a
    * given @p delta_sum pool over a given @p delta_stamp period of time.
    */
-  void cache_io_rate_summary(ceph::Formatter *f, std::ostream *out,
+  void cache_io_rate_summary(stone::Formatter *f, std::ostream *out,
                              const pool_stat_t& delta_sum,
                              utime_t delta_stamp) const;
   /**
    * Obtain a formatted/plain output for the overall cache tier IO, which is
    * calculated resorting to @p pg_sum_delta and @p stamp_delta.
    */
-  void overall_cache_io_rate_summary(ceph::Formatter *f, std::ostream *out) const;
+  void overall_cache_io_rate_summary(stone::Formatter *f, std::ostream *out) const;
   /**
    * Obtain a formatted/plain output for cache tier IO over a given pool
    * with id @p pool_id.  We will then obtain pool-specific data
    * from @p per_pool_sum_delta.
    */
-  void pool_cache_io_rate_summary(ceph::Formatter *f, std::ostream *out,
+  void pool_cache_io_rate_summary(stone::Formatter *f, std::ostream *out,
                                   uint64_t poolid) const;
 
   /**
@@ -167,12 +167,12 @@ public:
 
 
   /**
-   * Dump pool usage and io ops/bytes, used by "ceph df" command
+   * Dump pool usage and io ops/bytes, used by "stone df" command
    */
   virtual void dump_pool_stats_full(const OSDMap &osd_map, std::stringstream *ss,
-				    ceph::Formatter *f, bool verbose) const;
-  void dump_cluster_stats(std::stringstream *ss, ceph::Formatter *f, bool verbose) const;
-  static void dump_object_stat_sum(TextTable &tbl, ceph::Formatter *f,
+				    stone::Formatter *f, bool verbose) const;
+  void dump_cluster_stats(std::stringstream *ss, stone::Formatter *f, bool verbose) const;
+  static void dump_object_stat_sum(TextTable &tbl, stone::Formatter *f,
 				   const pool_stat_t &pool_stat,
 				   uint64_t avail,
 				   float raw_used_rate,
@@ -196,7 +196,7 @@ public:
       return p->second.primary;
   }
 
-  ceph_statfs get_statfs(OSDMap &osdmap,
+  stone_statfs get_statfs(OSDMap &osdmap,
                          boost::optional<int64_t> data_pool) const;
 
   int64_t get_rule_avail(int ruleno) const {
@@ -222,9 +222,9 @@ public:
     return 0;
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<PGMapDigest*>& ls);
 };
 WRITE_CLASS_ENCODER(PGMapDigest::pg_count);
@@ -294,7 +294,7 @@ public:
       osd_stat_rm.insert(osd);
       osd_stat_updates.erase(osd);
     }
-    void dump(ceph::Formatter *f) const;
+    void dump(stone::Formatter *f) const;
     static void generate_test_instances(std::list<Incremental*>& o);
 
     Incremental() : version(0), osdmap_epoch(0), pg_scan(0) {}
@@ -310,7 +310,7 @@ public:
   utime_t stamp;
 
   void update_pool_deltas(
-    CephContext *cct,
+    StoneContext *cct,
     const utime_t ts,
     const mempool::pgmap::unordered_map<int32_t, pool_stat_t>& pg_pool_sum_old);
   void clear_delta();
@@ -334,7 +334,7 @@ public:
 
  private:
   void update_delta(
-    CephContext *cct,
+    StoneContext *cct,
     const utime_t ts,
     const pool_stat_t& old_pool_sum,
     utime_t *last_ts,
@@ -343,7 +343,7 @@ public:
     utime_t *result_ts_delta,
     mempool::pgmap::list<std::pair<pool_stat_t,utime_t> > *delta_avg_list);
 
-  void update_one_pool_delta(CephContext *cct,
+  void update_one_pool_delta(StoneContext *cct,
                              const utime_t ts,
                              const int64_t pool,
                              const pool_stat_t& old_pool_sum);
@@ -418,7 +418,7 @@ public:
   }
 
 
-  void apply_incremental(CephContext *cct, const Incremental& inc);
+  void apply_incremental(StoneContext *cct, const Incremental& inc);
   void calc_stats();
   void stat_pg_add(const pg_t &pgid, const pg_stat_t &s,
 		   bool sameosds=false);
@@ -429,36 +429,36 @@ public:
   void stat_osd_add(int osd, const osd_stat_t &s);
   void stat_osd_sub(int osd, const osd_stat_t &s);
   
-  void encode(ceph::buffer::list &bl, uint64_t features=-1) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void encode(stone::buffer::list &bl, uint64_t features=-1) const;
+  void decode(stone::buffer::list::const_iterator &bl);
 
   /// encode subset of our data to a PGMapDigest
   void encode_digest(const OSDMap& osdmap,
-		     ceph::buffer::list& bl, uint64_t features);
+		     stone::buffer::list& bl, uint64_t features);
 
   int64_t get_rule_avail(const OSDMap& osdmap, int ruleno) const;
   void get_rules_avail(const OSDMap& osdmap,
 		       std::map<int,int64_t> *avail_map) const;
-  void dump(ceph::Formatter *f, bool with_net = true) const;
-  void dump_basic(ceph::Formatter *f) const;
-  void dump_pg_stats(ceph::Formatter *f, bool brief) const;
-  void dump_pg_progress(ceph::Formatter *f) const;
-  void dump_pool_stats(ceph::Formatter *f) const;
-  void dump_osd_stats(ceph::Formatter *f, bool with_net = true) const;
-  void dump_osd_ping_times(ceph::Formatter *f) const;
-  void dump_delta(ceph::Formatter *f) const;
-  void dump_filtered_pg_stats(ceph::Formatter *f, std::set<pg_t>& pgs) const;
+  void dump(stone::Formatter *f, bool with_net = true) const;
+  void dump_basic(stone::Formatter *f) const;
+  void dump_pg_stats(stone::Formatter *f, bool brief) const;
+  void dump_pg_progress(stone::Formatter *f) const;
+  void dump_pool_stats(stone::Formatter *f) const;
+  void dump_osd_stats(stone::Formatter *f, bool with_net = true) const;
+  void dump_osd_ping_times(stone::Formatter *f) const;
+  void dump_delta(stone::Formatter *f) const;
+  void dump_filtered_pg_stats(stone::Formatter *f, std::set<pg_t>& pgs) const;
   void dump_pool_stats_full(const OSDMap &osd_map, std::stringstream *ss,
-			    ceph::Formatter *f, bool verbose) const override {
+			    stone::Formatter *f, bool verbose) const override {
     get_rules_avail(osd_map, &avail_space_by_rule);
     PGMapDigest::dump_pool_stats_full(osd_map, ss, f, verbose);
   }
 
   /*
   * Dump client io rate, recovery io rate, cache io rate and recovery information.
-  * this function is used by "ceph osd pool stats" command
+  * this function is used by "stone osd pool stats" command
   */
-  void dump_pool_stats_and_io_rate(int64_t poolid, const OSDMap &osd_map, ceph::Formatter *f,
+  void dump_pool_stats_and_io_rate(int64_t poolid, const OSDMap &osd_map, stone::Formatter *f,
 				   std::stringstream *ss) const;
 
   void dump_pg_stats_plain(
@@ -469,10 +469,10 @@ public:
     int types, const utime_t cutoff,
     mempool::pgmap::unordered_map<pg_t, pg_stat_t>& stuck_pgs) const;
   bool get_stuck_counts(const utime_t cutoff, std::map<std::string, int>& note) const;
-  void dump_stuck(ceph::Formatter *f, int types, utime_t cutoff) const;
+  void dump_stuck(stone::Formatter *f, int types, utime_t cutoff) const;
   void dump_stuck_plain(std::ostream& ss, int types, utime_t cutoff) const;
   int dump_stuck_pg_stats(std::stringstream &ds,
-			  ceph::Formatter *f,
+			  stone::Formatter *f,
 			  int threshold,
 			  std::vector<std::string>& args) const;
   void dump(std::ostream& ss) const;
@@ -484,10 +484,10 @@ public:
   void dump_osd_sum_stats(std::ostream& ss) const;
   void dump_filtered_pg_stats(std::ostream& ss, std::set<pg_t>& pgs) const;
 
-  void dump_osd_perf_stats(ceph::Formatter *f) const;
+  void dump_osd_perf_stats(stone::Formatter *f) const;
   void print_osd_perf_stats(std::ostream *ss) const;
 
-  void dump_osd_blocked_by_stats(ceph::Formatter *f) const;
+  void dump_osd_blocked_by_stats(stone::Formatter *f) const;
   void print_osd_blocked_by_stats(std::ostream *ss) const;
 
   void get_filtered_pg_stats(uint64_t state, int64_t poolid, int64_t osdid,
@@ -495,10 +495,10 @@ public:
 
   std::set<std::string> osd_parentage(const OSDMap& osdmap, int id) const;
   void get_health_checks(
-    CephContext *cct,
+    StoneContext *cct,
     const OSDMap& osdmap,
     health_check_map_t *checks) const;
-  void print_summary(ceph::Formatter *f, std::ostream *out) const;
+  void print_summary(stone::Formatter *f, std::ostream *out) const;
 
   static void generate_test_instances(std::list<PGMap*>& o);
 };
@@ -514,15 +514,15 @@ int process_pg_map_command(
   const cmdmap_t& cmdmap,
   const PGMap& pg_map,
   const OSDMap& osdmap,
-  ceph::Formatter *f,
+  stone::Formatter *f,
   std::stringstream *ss,
-  ceph::buffer::list *odata);
+  stone::buffer::list *odata);
 
 class PGMapUpdater
 {
 public:
   static void check_osd_map(
-    CephContext *cct,
+    StoneContext *cct,
     const OSDMap &osdmap,
     const PGMap& pg_map,
     PGMap::Incremental *pending_inc);
@@ -552,7 +552,7 @@ namespace reweight {
 		     mempool::osdmap::map<int32_t, uint32_t>* new_weights,
 		     std::stringstream *ss,
 		     std::string *out_str,
-		     ceph::Formatter *f);
+		     stone::Formatter *f);
 }
 
 #endif

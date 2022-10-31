@@ -11,8 +11,8 @@
 #include "common/RefCountedObj.h"
 #include "common/strtol.h"
 #include "include/compat.h"
-#include "common/ceph_time.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_time.h"
+#include "common/stone_mutex.h"
 
 
 // Forward declaration
@@ -57,8 +57,8 @@ private:
   std::map<int, const RequestObj> completion_objs;
 
   int next = 0;
-  ceph::mutex lock = ceph::make_mutex("BucketIndexAioManager::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("BucketIndexAioManager::lock");
+  stone::condition_variable cond;
   /*
    * Callback implementation for AIO request.
    */
@@ -359,7 +359,7 @@ void cls_rgw_bucket_complete_op(librados::ObjectWriteOperation& o, RGWModifyOp o
 void cls_rgw_remove_obj(librados::ObjectWriteOperation& o, std::list<std::string>& keep_attr_prefixes);
 void cls_rgw_obj_store_pg_ver(librados::ObjectWriteOperation& o, const std::string& attr);
 void cls_rgw_obj_check_attrs_prefix(librados::ObjectOperation& o, const std::string& prefix, bool fail_if_exist);
-void cls_rgw_obj_check_mtime(librados::ObjectOperation& o, const ceph::real_time& mtime, bool high_precision_time, RGWCheckMTimeType type);
+void cls_rgw_obj_check_mtime(librados::ObjectOperation& o, const stone::real_time& mtime, bool high_precision_time, RGWCheckMTimeType type);
 
 int cls_rgw_bi_get(librados::IoCtx& io_ctx, const std::string oid,
                    BIIndexType index_type, cls_rgw_obj_key& key,
@@ -372,9 +372,9 @@ int cls_rgw_bi_list(librados::IoCtx& io_ctx, const std::string& oid,
 
 
 void cls_rgw_bucket_link_olh(librados::ObjectWriteOperation& op,
-                            const cls_rgw_obj_key& key, ceph::buffer::list& olh_tag,
+                            const cls_rgw_obj_key& key, stone::buffer::list& olh_tag,
                             bool delete_marker, const std::string& op_tag, rgw_bucket_dir_entry_meta *meta,
-                            uint64_t olh_epoch, ceph::real_time unmod_since, bool high_precision_time, bool log_op, rgw_zone_set& zones_trace);
+                            uint64_t olh_epoch, stone::real_time unmod_since, bool high_precision_time, bool log_op, rgw_zone_set& zones_trace);
 void cls_rgw_bucket_unlink_instance(librados::ObjectWriteOperation& op,
                                    const cls_rgw_obj_key& key, const std::string& op_tag,
                                    const std::string& olh_tag, uint64_t olh_epoch, bool log_op, rgw_zone_set& zones_trace);
@@ -386,9 +386,9 @@ void cls_rgw_clear_olh(librados::ObjectWriteOperation& op, const cls_rgw_obj_key
 // rgw_rados_operate() should be called after the overloads w/o calls to io_ctx.operate()
 #ifndef CLS_CLIENT_HIDE_IOCTX
 int cls_rgw_bucket_link_olh(librados::IoCtx& io_ctx, const std::string& oid,
-                            const cls_rgw_obj_key& key, ceph::buffer::list& olh_tag,
+                            const cls_rgw_obj_key& key, stone::buffer::list& olh_tag,
                             bool delete_marker, const std::string& op_tag, rgw_bucket_dir_entry_meta *meta,
-                            uint64_t olh_epoch, ceph::real_time unmod_since, bool high_precision_time, bool log_op, rgw_zone_set& zones_trace);
+                            uint64_t olh_epoch, stone::real_time unmod_since, bool high_precision_time, bool log_op, rgw_zone_set& zones_trace);
 int cls_rgw_bucket_unlink_instance(librados::IoCtx& io_ctx, const std::string& oid,
                                    const cls_rgw_obj_key& key, const std::string& op_tag,
                                    const std::string& olh_tag, uint64_t olh_epoch, bool log_op, rgw_zone_set& zones_trace);
@@ -564,9 +564,9 @@ public:
 
 int cls_rgw_get_dir_header_async(librados::IoCtx& io_ctx, std::string& oid, RGWGetDirHeader_CB *ctx);
 
-void cls_rgw_encode_suggestion(char op, rgw_bucket_dir_entry& dirent, ceph::buffer::list& updates);
+void cls_rgw_encode_suggestion(char op, rgw_bucket_dir_entry& dirent, stone::buffer::list& updates);
 
-void cls_rgw_suggest_changes(librados::ObjectWriteOperation& o, ceph::buffer::list& updates);
+void cls_rgw_suggest_changes(librados::ObjectWriteOperation& o, stone::buffer::list& updates);
 
 /* usage logging */
 // these overloads which call io_ctx.operate() should not be called in the rgw.

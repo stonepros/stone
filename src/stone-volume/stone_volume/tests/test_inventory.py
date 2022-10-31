@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from ceph_volume.util.device import Devices
-from ceph_volume.util.lsmdisk import LSMDisk
-import ceph_volume.util.lsmdisk as lsmdisk
+from stone_volume.util.device import Devices
+from stone_volume.util.lsmdisk import LSMDisk
+import stone_volume.util.lsmdisk as lsmdisk
 
 
 @pytest.fixture

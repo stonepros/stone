@@ -3,15 +3,15 @@ SHEC erasure code plugin
 ========================
 
 The *shec* plugin encapsulates the `multiple SHEC
-<http://tracker.ceph.com/projects/ceph/wiki/Shingled_Erasure_Code_(SHEC)>`_
-library. It allows ceph to recover data more efficiently than Reed Solomon codes.
+<http://tracker.stone.com/projects/stone/wiki/Shingled_Erasure_Code_(SHEC)>`_
+library. It allows stone to recover data more efficiently than Reed Solomon codes.
 
 Create an SHEC profile
 ======================
 
 To create a new *shec* erasure code profile::
 
-        ceph osd erasure-code-profile set {name} \
+        stone osd erasure-code-profile set {name} \
              plugin=shec \
              [k={data-chunks}] \
              [m={coding-chunks}] \
@@ -91,7 +91,7 @@ Where:
 
 :Type: String
 :Required: No.
-:Default: /usr/lib/ceph/erasure-code
+:Default: /usr/lib/stone/erasure-code
 
 ``--force``
 
@@ -135,8 +135,8 @@ Erasure code profile examples
 
 ::
 
-        $ ceph osd erasure-code-profile set SHECprofile \
+        $ stone osd erasure-code-profile set SHECprofile \
              plugin=shec \
              k=8 m=4 c=3 \
              crush-failure-domain=host
-        $ ceph osd pool create shecpool erasure SHECprofile
+        $ stone osd pool create shecpool erasure SHECprofile

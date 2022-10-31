@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *           (C) 2019 SUSE LLC
@@ -15,8 +15,8 @@
 #ifndef RGW_DMCLOCK_SCHEDULER_H
 #define RGW_DMCLOCK_SCHEDULER_H
 
-#include "common/ceph_time.h"
-#include "common/ceph_context.h"
+#include "common/stone_time.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "common/async/yield_context.h"
 #include "rgw_dmclock.h"

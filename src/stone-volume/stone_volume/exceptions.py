@@ -3,13 +3,13 @@ import os
 
 class ConfigurationError(Exception):
 
-    def __init__(self, cluster_name='ceph', path='/etc/ceph', abspath=None):
+    def __init__(self, cluster_name='stone', path='/etc/stone', abspath=None):
         self.cluster_name = cluster_name
         self.path = path
         self.abspath = abspath or "%s.conf" % os.path.join(self.path, self.cluster_name)
 
     def __str__(self):
-        return 'Unable to load expected Ceph config at: %s' % self.abspath
+        return 'Unable to load expected Stone config at: %s' % self.abspath
 
 
 class ConfigurationSectionError(Exception):

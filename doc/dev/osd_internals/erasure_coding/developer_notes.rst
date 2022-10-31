@@ -6,7 +6,7 @@ Introduction
 ------------
 
 Each chapter of this document explains an aspect of the implementation
-of the erasure code within Ceph. It is mostly based on examples being
+of the erasure code within Stone. It is mostly based on examples being
 explained to demonstrate how things work. 
 
 Reading and writing encoded chunks from and to OSDs
@@ -156,7 +156,7 @@ is also influenced by the packet sizes used when calling the encoding
 functions ( for Cauchy or Liberation for instance ): smaller packets
 means more calls and more overhead.
 
-Although Reed-Solomon is provided as a default, Ceph uses it via an
+Although Reed-Solomon is provided as a default, Stone uses it via an
 `abstract API <https://github.com/ceph/ceph/blob/v0.78/src/erasure-code/ErasureCodeInterface.h>`_ designed to
 allow each pool to choose the plugin that implements it using
 key=value pairs stored in an `erasure code profile`_. 

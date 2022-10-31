@@ -81,7 +81,7 @@ public:
   virtual void dump(Formatter *f) const = 0;
 
   void encode_with_header(bufferlist& bl, uint64_t features) {
-    using ceph::encode;
+    using stone::encode;
     encode(EVENT_NEW_ENCODING, bl);
     ENCODE_START(1, 1, bl)
     encode(_type, bl);
@@ -101,7 +101,7 @@ public:
   /*** recovery ***/
   /* replay() - replay given event.  this is idempotent.
    */
-  virtual void replay(MDSRank *m) { ceph_abort(); }
+  virtual void replay(MDSRank *m) { stone_abort(); }
 
   /**
    * If the subclass embeds a MetaBlob, return it here so that

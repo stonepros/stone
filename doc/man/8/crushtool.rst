@@ -20,7 +20,7 @@ Description
 and test CRUSH map files.
 
 CRUSH is a pseudo-random data distribution algorithm that efficiently
-maps input values (which, in the context of Ceph, correspond to Placement
+maps input values (which, in the context of Stone, correspond to Placement
 Groups) across a heterogeneous, hierarchically structured device map.
 The algorithm was originally described in detail in the following paper
 (although it has evolved some since then)::
@@ -50,7 +50,7 @@ The tool has four modes of operation.
    thought of as simulated Placement Groups. See below for a more
    detailed explanation.
 
-Unlike other Ceph tools, **crushtool** does not accept generic options
+Unlike other Stone tools, **crushtool** does not accept generic options
 such as **--debug-crush** from the command line. They can, however, be
 provided via the CEPH_ARGS environment variable. For instance, to
 silence all output from the CRUSH subsystem::
@@ -71,7 +71,7 @@ on stderr.
 documented by the **--help-output** option.
 
 Note: Each Placement Group (PG) has an integer ID which can be obtained
-from ``ceph pg dump`` (for example PG 2.2f means pool id 2, PG id 32).
+from ``stone pg dump`` (for example PG 2.2f means pool id 2, PG id 32).
 The pool and PG IDs are combined by a function to get a value which is
 given to CRUSH to map it to OSDs. crushtool does not know about PGs or
 pools; it only runs simulations by mapping values in the range
@@ -219,8 +219,8 @@ Example
 =======
 
 Suppose we have two rows with two racks each and 20 nodes per rack. Suppose
-each node contains 4 storage devices for Ceph OSD Daemons. This configuration
-allows us to deploy 320 Ceph OSD Daemons. Lets assume a 42U rack with 2U nodes,
+each node contains 4 storage devices for Stone OSD Daemons. This configuration
+allows us to deploy 320 Stone OSD Daemons. Lets assume a 42U rack with 2U nodes,
 leaving an extra 2U for a rack switch.
 
 To reflect our hierarchy of devices, nodes, racks and rows, we would execute
@@ -247,7 +247,7 @@ the following::
 
 CRUSH rules are created so the generated crushmap can be
 tested. They are the same rules as the ones created by default when
-creating a new Ceph cluster. They can be further edited with::
+creating a new Stone cluster. They can be further edited with::
 
        # decompile
        crushtool -d crushmap -o map.txt
@@ -264,26 +264,26 @@ Reclassify
 The *reclassify* function allows users to transition from older maps that
 maintain parallel hierarchies for OSDs of different types to a modern CRUSH
 map that makes use of the *device class* feature.  For more information,
-see https://docs.ceph.com/en/latest/rados/operations/crush-map-edits/#migrating-from-a-legacy-ssd-rule-to-device-classes.
+see https://docs.stone.com/en/latest/rados/operations/crush-map-edits/#migrating-from-a-legacy-ssd-rule-to-device-classes.
 
 Example output from --test
 ==========================
 
-See https://github.com/ceph/ceph/blob/master/src/test/cli/crushtool/set-choose.t
+See https://github.com/stone/stone/blob/master/src/test/cli/crushtool/set-choose.t
 for sample ``crushtool --test`` commands and output produced thereby.
 
 Availability
 ============
 
-**crushtool** is part of Ceph, a massively scalable, open-source, distributed storage system. Please
-refer to the Ceph documentation at http://ceph.com/docs for more
+**crushtool** is part of Stone, a massively scalable, open-source, distributed storage system. Please
+refer to the Stone documentation at http://stone.com/docs for more
 information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8),
+:doc:`stone <stone>`\(8),
 :doc:`osdmaptool <osdmaptool>`\(8),
 
 Authors

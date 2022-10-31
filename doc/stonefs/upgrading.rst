@@ -17,7 +17,7 @@ The proper sequence for upgrading the MDS cluster is:
     ceph fs set <fs_name> allow_standby_replay false
 
 In Pacific, the standby-replay daemons are stopped for you after running this
-command. Older versions of Ceph require you to stop these daemons manually.
+command. Older versions of Stone require you to stop these daemons manually.
 
 ::
 
@@ -59,13 +59,13 @@ Upgrading pre-Firefly file systems past Jewel
 .. tip::
 
     This advice only applies to users with file systems
-    created using versions of Ceph older than *Firefly* (0.80).
+    created using versions of Stone older than *Firefly* (0.80).
     Users creating new file systems may disregard this advice.
 
-Pre-firefly versions of Ceph used a now-deprecated format
-for storing CephFS directory objects, called TMAPs.  Support
+Pre-firefly versions of Stone used a now-deprecated format
+for storing StoneFS directory objects, called TMAPs.  Support
 for reading these in RADOS will be removed after the Jewel
-release of Ceph, so for upgrading CephFS users it is important
+release of Stone, so for upgrading StoneFS users it is important
 to ensure that any old directory objects have been converted.
 
 After installing Jewel on all your MDS and OSD servers, and restarting
@@ -82,7 +82,7 @@ pool.  It is safe to continue using your file system as normal while
 it executes.  If the command aborts for any reason, it is safe
 to simply run it again.
 
-If you are upgrading a pre-Firefly CephFS file system to a newer Ceph version
+If you are upgrading a pre-Firefly StoneFS file system to a newer Stone version
 than Jewel, you must first upgrade to Jewel and run the ``tmap_upgrade``
 command before completing your upgrade to the latest version.
 

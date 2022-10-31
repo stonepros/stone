@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import { PgCategoryService } from '~/app/ceph/shared/pg-category.service';
+import { PgCategoryService } from '~/app/stone/shared/pg-category.service';
 import { HealthService } from '~/app/shared/api/health.service';
 import { OsdService } from '~/app/shared/api/osd.service';
 import { CssHelper } from '~/app/shared/classes/css-helper';

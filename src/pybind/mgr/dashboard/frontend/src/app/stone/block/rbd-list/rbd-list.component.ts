@@ -464,7 +464,7 @@ export class RbdListComponent extends ListWithDetails implements OnInit {
     const first = selection.first();
 
     if (first?.name?.match(/[@/]/)) {
-      return $localize`This RBD image has an invalid name and can't be managed by ceph.`;
+      return $localize`This RBD image has an invalid name and can't be managed by stone.`;
     }
 
     return !selection.first() || !selection.hasSingleSelection;

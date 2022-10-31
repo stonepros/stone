@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc.
  *
@@ -36,7 +36,7 @@ class RGWRadosUser : public RGWUser {
     int list_buckets(const DoutPrefixProvider *dpp, const std::string& marker, const std::string& end_marker,
 		     uint64_t max, bool need_stats, RGWBucketList& buckets,
 		     optional_yield y) override;
-    RGWBucket* create_bucket(rgw_bucket& bucket, ceph::real_time creation_time);
+    RGWBucket* create_bucket(rgw_bucket& bucket, stone::real_time creation_time);
 
     /* Placeholders */
     virtual int load_by_id(const DoutPrefixProvider *dpp, optional_yield y);
@@ -100,7 +100,7 @@ class RGWRadosObject : public RGWObject {
     int read(off_t offset, off_t length, std::iostream& stream) { return length; }
     int write(off_t offset, off_t length, std::iostream& stream) { return length; }
     virtual int delete_object(const DoutPrefixProvider *dpp, RGWObjectCtx* obj_ctx, ACLOwner obj_owner,
-			      ACLOwner bucket_owner, ceph::real_time unmod_since,
+			      ACLOwner bucket_owner, stone::real_time unmod_since,
 			      bool high_precision_time, uint64_t epoch,
 			      std::string& version_id,
 			      optional_yield y,
@@ -110,13 +110,13 @@ class RGWRadosObject : public RGWObject {
                rgw::sal::RGWObject* dest_object, rgw::sal::RGWBucket* dest_bucket,
                rgw::sal::RGWBucket* src_bucket,
                const rgw_placement_rule& dest_placement,
-               ceph::real_time *src_mtime, ceph::real_time *mtime,
-               const ceph::real_time *mod_ptr, const ceph::real_time *unmod_ptr,
+               stone::real_time *src_mtime, stone::real_time *mtime,
+               const stone::real_time *mod_ptr, const stone::real_time *unmod_ptr,
                bool high_precision_time,
                const char *if_match, const char *if_nomatch,
                AttrsMod attrs_mod, bool copy_if_newer, RGWAttrs& attrs,
                RGWObjCategory category, uint64_t olh_epoch,
-	       boost::optional<ceph::real_time> delete_at,
+	       boost::optional<stone::real_time> delete_at,
                string *version_id, string *tag, string *etag,
                void (*progress_cb)(off_t, void *), void *progress_data,
                const DoutPrefixProvider *dpp, optional_yield y) override;
@@ -246,12 +246,12 @@ class RGWRadosBucket : public RGWBucket {
     virtual int link(const DoutPrefixProvider *dpp, RGWUser* new_user, optional_yield y) override;
     virtual int unlink(RGWUser* new_user, optional_yield y) override;
     virtual int chown(RGWUser* new_user, RGWUser* old_user, optional_yield y, const DoutPrefixProvider *dpp) override;
-    virtual int put_instance_info(const DoutPrefixProvider *dpp, bool exclusive, ceph::real_time mtime) override;
+    virtual int put_instance_info(const DoutPrefixProvider *dpp, bool exclusive, stone::real_time mtime) override;
     virtual bool is_owner(RGWUser* user) override;
     virtual int check_empty(const DoutPrefixProvider *dpp, optional_yield y) override;
     virtual int check_quota(RGWQuotaInfo& user_quota, RGWQuotaInfo& bucket_quota, uint64_t obj_size, optional_yield y, bool check_size_only = false) override;
     virtual int set_instance_attrs(const DoutPrefixProvider *dpp, RGWAttrs& attrs, optional_yield y) override;
-    virtual int try_refresh_info(const DoutPrefixProvider *dpp, ceph::real_time *pmtime) override;
+    virtual int try_refresh_info(const DoutPrefixProvider *dpp, stone::real_time *pmtime) override;
     virtual int read_usage(const DoutPrefixProvider *dpp, uint64_t start_epoch, uint64_t end_epoch, uint32_t max_entries,
 			   bool *is_truncated, RGWUsageIter& usage_iter,
 			   map<rgw_user_bucket, rgw_usage_log_entry>& usage) override;
@@ -325,7 +325,7 @@ class RGWRadosStore : public RGWStore {
 
     void finalize(void) override;
 
-    virtual CephContext *ctx(void) { return rados->ctx(); }
+    virtual StoneContext *ctx(void) { return rados->ctx(); }
 
 
     int get_obj_head_ioctx(const DoutPrefixProvider *dpp, const RGWBucketInfo& bucket_info, const rgw_obj& obj,
@@ -390,18 +390,18 @@ public:
 class RGWStoreManager {
 public:
   RGWStoreManager() {}
-  static rgw::sal::RGWRadosStore *get_storage(const DoutPrefixProvider *dpp, CephContext *cct, bool use_gc_thread, bool use_lc_thread, bool quota_threads,
+  static rgw::sal::RGWRadosStore *get_storage(const DoutPrefixProvider *dpp, StoneContext *cct, bool use_gc_thread, bool use_lc_thread, bool quota_threads,
 			       bool run_sync_thread, bool run_reshard_thread, bool use_cache = true, bool use_gc = true) {
     rgw::sal::RGWRadosStore *store = init_storage_provider(dpp, cct, use_gc_thread, use_lc_thread,
 	quota_threads, run_sync_thread, run_reshard_thread, use_cache, use_gc);
     return store;
   }
-  static rgw::sal::RGWRadosStore *get_raw_storage(const DoutPrefixProvider *dpp, CephContext *cct) {
+  static rgw::sal::RGWRadosStore *get_raw_storage(const DoutPrefixProvider *dpp, StoneContext *cct) {
     rgw::sal::RGWRadosStore *rados = init_raw_storage_provider(dpp, cct);
     return rados;
   }
-  static rgw::sal::RGWRadosStore *init_storage_provider(const DoutPrefixProvider *dpp, CephContext *cct, bool use_gc_thread, bool use_lc_thread, bool quota_threads, bool run_sync_thread, bool run_reshard_thread, bool use_metadata_cache, bool use_gc);
-  static rgw::sal::RGWRadosStore *init_raw_storage_provider(const DoutPrefixProvider *dpp, CephContext *cct);
+  static rgw::sal::RGWRadosStore *init_storage_provider(const DoutPrefixProvider *dpp, StoneContext *cct, bool use_gc_thread, bool use_lc_thread, bool quota_threads, bool run_sync_thread, bool run_reshard_thread, bool use_metadata_cache, bool use_gc);
+  static rgw::sal::RGWRadosStore *init_raw_storage_provider(const DoutPrefixProvider *dpp, StoneContext *cct);
   static void close_storage(rgw::sal::RGWRadosStore *store);
 
 };

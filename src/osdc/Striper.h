@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -21,12 +21,12 @@
 #include "osdc/StriperTypes.h"
 
 
-//namespace ceph {
+//namespace stone {
 
   class Striper {
   public:
     static void file_to_extents(
-        StoneeContext *cct, const file_layout_t *layout, uint64_t offset,
+        StoneContext *cct, const file_layout_t *layout, uint64_t offset,
         uint64_t len, uint64_t trunc_size, uint64_t buffer_offset,
         striper::LightweightObjectExtents* object_extents);
 
@@ -34,21 +34,21 @@
      * std::map (ino, layout, offset, len) to a (list of) ObjectExtents (byte
      * ranges in objects on (primary) osds)
      */
-    static void file_to_extents(StoneeContext *cct, const char *object_format,
+    static void file_to_extents(StoneContext *cct, const char *object_format,
 				const file_layout_t *layout,
 				uint64_t offset, uint64_t len,
 				uint64_t trunc_size,
 				std::map<object_t, std::vector<ObjectExtent> >& extents,
 				uint64_t buffer_offset=0);
 
-    static void file_to_extents(StoneeContext *cct, const char *object_format,
+    static void file_to_extents(StoneContext *cct, const char *object_format,
 				const file_layout_t *layout,
 				uint64_t offset, uint64_t len,
 				uint64_t trunc_size,
 				std::vector<ObjectExtent>& extents,
 				uint64_t buffer_offset=0);
 
-    static void file_to_extents(StoneeContext *cct, inodeno_t ino,
+    static void file_to_extents(StoneContext *cct, inodeno_t ino,
 				const file_layout_t *layout,
 				uint64_t offset, uint64_t len,
 				uint64_t trunc_size,
@@ -63,33 +63,33 @@
     /**
      * reverse std::map an object extent to file extents
      */
-    static void extent_to_file(StoneeContext *cct, file_layout_t *layout,
+    static void extent_to_file(StoneContext *cct, file_layout_t *layout,
 			       uint64_t objectno, uint64_t off, uint64_t len,
 			       std::vector<std::pair<uint64_t, uint64_t> >& extents);
 
     static uint64_t object_truncate_size(
-      StoneeContext *cct, const file_layout_t *layout,
+      StoneContext *cct, const file_layout_t *layout,
       uint64_t objectno, uint64_t trunc_size);
 
     static uint64_t get_num_objects(const file_layout_t& layout,
 				    uint64_t size);
 
-    static uint64_t get_file_offset(StoneeContext *cct,
+    static uint64_t get_file_offset(StoneContext *cct,
             const file_layout_t *layout, uint64_t objectno, uint64_t off);
     /*
      * helper to assemble a striped result
      */
     class StripedReadResult {
       // offset -> (data, intended length)
-      std::map<uint64_t, std::pair<ceph::buffer::list, uint64_t> > partial;
+      std::map<uint64_t, std::pair<stone::buffer::list, uint64_t> > partial;
       uint64_t total_intended_len = 0; //sum of partial.second.second
 
     public:
       void add_partial_result(
-	StoneeContext *cct, ceph::buffer::list& bl,
+	StoneContext *cct, stone::buffer::list& bl,
 	const std::vector<std::pair<uint64_t,uint64_t> >& buffer_extents);
       void add_partial_result(
-	  StoneeContext *cct, ceph::buffer::list&& bl,
+	  StoneContext *cct, stone::buffer::list&& bl,
 	  const striper::LightweightBufferExtents& buffer_extents);
 
       /**
@@ -102,27 +102,27 @@
        * @param buffer_extents output buffer extents the data maps to
        */
       void add_partial_sparse_result(
-	StoneeContext *cct, ceph::buffer::list& bl,
+	StoneContext *cct, stone::buffer::list& bl,
 	const std::map<uint64_t, uint64_t>& bl_map, uint64_t bl_off,
 	const std::vector<std::pair<uint64_t,uint64_t> >& buffer_extents);
       void add_partial_sparse_result(
-	  StoneeContext *cct, ceph::buffer::list&& bl,
+	  StoneContext *cct, stone::buffer::list&& bl,
 	  const std::vector<std::pair<uint64_t, uint64_t>>& bl_map,
           uint64_t bl_off,
           const striper::LightweightBufferExtents& buffer_extents);
 
-      void assemble_result(StoneeContext *cct, ceph::buffer::list& bl,
+      void assemble_result(StoneContext *cct, stone::buffer::list& bl,
                            bool zero_tail);
 
       /**
        * @buffer copy read data into buffer
        * @len the length of buffer
        */
-      void assemble_result(StoneeContext *cct, char *buffer, size_t len);
+      void assemble_result(StoneContext *cct, char *buffer, size_t len);
 
-      uint64_t assemble_result(StoneeContext *cct,
+      uint64_t assemble_result(StoneContext *cct,
                                std::map<uint64_t, uint64_t> *extent_map,
-                               ceph::buffer::list *bl);
+                               stone::buffer::list *bl);
     };
 
   };

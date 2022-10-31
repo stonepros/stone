@@ -4,12 +4,12 @@ Running Unit Tests
 How to run s3-tests locally
 ---------------------------
 
-RGW code can be tested by building Ceph locally from source, starting a vstart
+RGW code can be tested by building Stone locally from source, starting a vstart
 cluster, and running the "s3-tests" suite against it.
 
 The following instructions should work on jewel and above.
 
-Step 1 - build Ceph
+Step 1 - build Stone
 ^^^^^^^^^^^^^^^^^^^
 
 Refer to :doc:`/install/build-ceph`.
@@ -20,7 +20,7 @@ Step 2 - vstart
 ^^^^^^^^^^^^^^^
 
 When the build completes, and still in the top-level directory of the git
-clone where you built Ceph, do the following, for cmake builds::
+clone where you built Stone, do the following, for cmake builds::
 
     cd build/
     RGW=1 ../src/vstart.sh -n
@@ -45,11 +45,11 @@ To run the s3tests suite do the following::
 
 Running test using vstart_runner.py
 -----------------------------------
-CephFS and Ceph Manager code is be tested using `vstart_runner.py`_.
+StoneFS and Stone Manager code is be tested using `vstart_runner.py`_.
 
 Running your first test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-The Python tests in Ceph repository can be executed on your local machine
+The Python tests in Stone repository can be executed on your local machine
 using `vstart_runner.py`_. To do that, you'd need `teuthology`_ installed::
 
     $ virtualenv --python=python3 venv
@@ -59,7 +59,7 @@ using `vstart_runner.py`_. To do that, you'd need `teuthology`_ installed::
     $ deactivate
 
 The above steps installs teuthology in a virtual environment. Before running
-a test locally, build Ceph successfully from the source (refer
+a test locally, build Stone successfully from the source (refer
 :doc:`/install/build-ceph`) and do::
 
     $ cd build
@@ -87,12 +87,12 @@ it would execute a single test.
 vstart_runner.py can take the following options -
 
 --clear-old-log             deletes old log file before running the test
---create                    create Ceph cluster before running a test
+--create                    create Stone cluster before running a test
 --create-cluster-only       creates the cluster and quits; tests can be issued
                             later
 --interactive               drops a Python shell when a test fails
 --log-ps-output             logs ps output; might be useful while debugging
---teardown                  tears Ceph cluster down after test(s) has finished
+--teardown                  tears Stone cluster down after test(s) has finished
                             runnng
 --kclient                   use the kernel cephfs client instead of FUSE
 --brxnet=<net/mask>         specify a new net/mask for the mount clients' network
@@ -124,12 +124,12 @@ vstart_runner.py primarily does three things -
     cluster that exists within the local machine. This is done using the class
     ``LocalRemote``. Class ``LocalRemoteProcess`` can manage the process that
     executes the commands from ``LocalRemote``, class ``LocalDaemon`` provides
-    an interface to handle Ceph daemons and class ``LocalFuseMount`` can
+    an interface to handle Stone daemons and class ``LocalFuseMount`` can
     create and handle FUSE mounts.
 
-* provides an interface to operate Ceph cluster
-    ``LocalCephManager`` provides methods to run Ceph cluster commands with
-    and without admin socket and ``LocalCephCluster`` provides methods to set
+* provides an interface to operate Stone cluster
+    ``LocalStoneManager`` provides methods to run Stone cluster commands with
+    and without admin socket and ``LocalStoneCluster`` provides methods to set
     or clear ``ceph.conf``.
 
 .. _test_reconnect_timeout: https://github.com/ceph/ceph/blob/master/qa/tasks/cephfs/test_client_recovery.py#L133

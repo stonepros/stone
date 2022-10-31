@@ -24,12 +24,12 @@ namespace rgw::putobj {
 class ETagVerifier : public rgw::putobj::Pipe
 {
 protected:
-  CephContext* cct;
+  StoneContext* cct;
   MD5 hash;
   string calculated_etag;
 
 public:
-  ETagVerifier(CephContext* cct_, rgw::putobj::DataProcessor *next)
+  ETagVerifier(StoneContext* cct_, rgw::putobj::DataProcessor *next)
     : Pipe(next), cct(cct_) {
       // Allow use of MD5 digest in FIPS mode for non-cryptographic purposes
       hash.SetFlags(EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
@@ -43,7 +43,7 @@ public:
 class ETagVerifier_Atomic : public ETagVerifier
 {
 public:
-  ETagVerifier_Atomic(CephContext* cct_, rgw::putobj::DataProcessor *next)
+  ETagVerifier_Atomic(StoneContext* cct_, rgw::putobj::DataProcessor *next)
     : ETagVerifier(cct_, next) {}
 
   int process(bufferlist&& data, uint64_t logical_offset) override;
@@ -60,7 +60,7 @@ class ETagVerifier_MPU : public ETagVerifier
   void process_end_of_MPU_part();
 
 public:
-  ETagVerifier_MPU(CephContext* cct,
+  ETagVerifier_MPU(StoneContext* cct,
                              std::vector<uint64_t> part_ofs,
                              rgw::putobj::DataProcessor *next)
     : ETagVerifier(cct, next),
@@ -79,10 +79,10 @@ constexpr auto max_etag_verifier_size = std::max(
     sizeof(ETagVerifier_Atomic),
     sizeof(ETagVerifier_MPU)
   );
-using etag_verifier_ptr = ceph::static_ptr<ETagVerifier, max_etag_verifier_size>;
+using etag_verifier_ptr = stone::static_ptr<ETagVerifier, max_etag_verifier_size>;
 
 int create_etag_verifier(const DoutPrefixProvider *dpp, 
-                         CephContext* cct, DataProcessor* next,
+                         StoneContext* cct, DataProcessor* next,
                          const bufferlist& manifest_bl,
                          const std::optional<RGWCompressionInfo>& compression,
                          etag_verifier_ptr& verifier);

@@ -4,10 +4,10 @@
 #include <list>
 
 #include "include/encoding.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/Formatter.h"
 
-// wrapper for ceph::real_time that implements the dencoder interface
+// wrapper for stone::real_time that implements the dencoder interface
 template <typename Clock>
 class time_point_wrapper {
   using time_point = typename Clock::time_point;
@@ -17,11 +17,11 @@ class time_point_wrapper {
   explicit time_point_wrapper(const time_point& t) : t(t) {}
 
   void encode(bufferlist& bl) const {
-    using ceph::encode;
+    using stone::encode;
     encode(t, bl);
   }
   void decode(bufferlist::const_iterator &p) {
-    using ceph::decode;
+    using stone::decode;
     decode(t, p);
   }
   void dump(Formatter* f) {
@@ -34,25 +34,25 @@ class time_point_wrapper {
   }
 };
 
-using real_time_wrapper = time_point_wrapper<ceph::real_clock>;
+using real_time_wrapper = time_point_wrapper<stone::real_clock>;
 WRITE_CLASS_ENCODER(real_time_wrapper)
 
-using coarse_real_time_wrapper = time_point_wrapper<ceph::coarse_real_clock>;
+using coarse_real_time_wrapper = time_point_wrapper<stone::coarse_real_clock>;
 WRITE_CLASS_ENCODER(coarse_real_time_wrapper)
 
-// wrapper for ceph::timespan that implements the dencoder interface
+// wrapper for stone::timespan that implements the dencoder interface
 class timespan_wrapper {
-  ceph::timespan d;
+  stone::timespan d;
  public:
   timespan_wrapper() = default;
-  explicit timespan_wrapper(const ceph::timespan& d) : d(d) {}
+  explicit timespan_wrapper(const stone::timespan& d) : d(d) {}
 
   void encode(bufferlist& bl) const {
-    using ceph::encode;
+    using stone::encode;
     encode(d, bl);
   }
   void decode(bufferlist::const_iterator &p) {
-    using ceph::decode;
+    using stone::decode;
     decode(d, p);
   }
   void dump(Formatter* f) {

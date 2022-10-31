@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -26,7 +26,7 @@ private:
   dirfrag_t get_base_dirfrag() const { return base_dirfrag; }
   int get_bits() const { return bits; }
 
-  ceph::buffer::list basebl;
+  stone::buffer::list basebl;
 
 protected:
   MMDSFragmentNotifyAck() : MMDSOp{MSG_MDS_FRAGMENTNOTIFYACK} {}
@@ -44,19 +44,19 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(base_dirfrag, payload);
     encode(bits, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(base_dirfrag, p);
     decode(bits, p);
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

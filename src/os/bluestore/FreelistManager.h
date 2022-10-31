@@ -14,12 +14,12 @@
 
 class FreelistManager {
 public:
-  CephContext* cct;
-  FreelistManager(CephContext* cct) : cct(cct) {}
+  StoneContext* cct;
+  FreelistManager(StoneContext* cct) : cct(cct) {}
   virtual ~FreelistManager() {}
 
   static FreelistManager *create(
-    CephContext* cct,
+    StoneContext* cct,
     std::string type,
     std::string prefix);
 

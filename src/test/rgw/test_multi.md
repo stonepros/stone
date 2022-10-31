@@ -2,13 +2,13 @@
 This framework allows you to write and run tests against a **local** multi-cluster environment. The framework is using the `mstart.sh` script in order to setup the environment according to a configuration file, and then uses the [nose](https://nose.readthedocs.io/en/latest/) test framework to actually run the tests.
 Tests are written in python2.7, but can invoke shell scripts, binaries etc.
 ## Running Tests
-Entry point for all tests is `/path/to/ceph/src/test/rgw/test_multi.py`. And the actual tests are located inside the `/path/to/ceph/src/test/rgw/rgw_multi` subdirectory.
+Entry point for all tests is `/path/to/stone/src/test/rgw/test_multi.py`. And the actual tests are located inside the `/path/to/stone/src/test/rgw/rgw_multi` subdirectory.
 So, to run all tests use:
 ```
-$ cd /path/to/ceph/src/test/rgw/
+$ cd /path/to/stone/src/test/rgw/
 $ nosetests test_multi.py
 ```
-This will assume a configuration file called `/path/to/ceph/src/test/rgw/test_multi.conf` exists.
+This will assume a configuration file called `/path/to/stone/src/test/rgw/test_multi.conf` exists.
 To use a different configuration file, set the `RGW_MULTI_TEST_CONF` environment variable to point to that file.
 Since we use the same entry point file for all tests, running specific tests is possible using the following format:
 ```
@@ -54,6 +54,6 @@ This section holds the following parameters:
 ### PubSub
 *TODO*
 ## Writing Tests
-New tests should be added into the `/path/to/ceph/src/test/rgw/rgw_multi` subdirectory.
-- Base classes are in: `/path/to/ceph/src/test/rgw/rgw_multi/multisite.py`
-- `/path/to/ceph/src/test/rgw/rgw_multi/tests.py` holds the majority of the tests, but also many utility and infrastructure functions that could be used in other tests files 
+New tests should be added into the `/path/to/stone/src/test/rgw/rgw_multi` subdirectory.
+- Base classes are in: `/path/to/stone/src/test/rgw/rgw_multi/multisite.py`
+- `/path/to/stone/src/test/rgw/rgw_multi/tests.py` holds the majority of the tests, but also many utility and infrastructure functions that could be used in other tests files 

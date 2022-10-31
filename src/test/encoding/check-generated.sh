@@ -2,7 +2,7 @@
 set -e
 
 source $(dirname $0)/../detect-build-env-vars.sh
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 dir=$1
 
@@ -13,23 +13,23 @@ tmp4=`mktemp /tmp/typ-XXXXXXXXX`
 
 failed=0
 numtests=0
-echo "checking ceph-dencoder generated test instances..."
+echo "checking stone-dencoder generated test instances..."
 echo "numgen type"
 while read type; do
-    num=`ceph-dencoder type $type count_tests`
+    num=`stone-dencoder type $type count_tests`
     echo "$num $type"
     for n in `seq 1 1 $num 2>/dev/null`; do
 
 	pids=""
-	run_in_background pids save_stdout "$tmp1" ceph-dencoder type "$type" select_test "$n" dump_json
-	run_in_background pids save_stdout "$tmp2" ceph-dencoder type "$type" select_test "$n" encode decode dump_json
-	run_in_background pids save_stdout "$tmp3" ceph-dencoder type "$type" select_test "$n" copy dump_json
-	run_in_background pids save_stdout "$tmp4" ceph-dencoder type "$type" select_test "$n" copy_ctor dump_json
+	run_in_background pids save_stdout "$tmp1" stone-dencoder type "$type" select_test "$n" dump_json
+	run_in_background pids save_stdout "$tmp2" stone-dencoder type "$type" select_test "$n" encode decode dump_json
+	run_in_background pids save_stdout "$tmp3" stone-dencoder type "$type" select_test "$n" copy dump_json
+	run_in_background pids save_stdout "$tmp4" stone-dencoder type "$type" select_test "$n" copy_ctor dump_json
 	wait_background pids
 
 	if [ $? -ne 0 ]; then
 	    echo "**** $type test $n encode+decode check failed ****"
-	    echo "   ceph-dencoder type $type select_test $n encode decode"
+	    echo "   stone-dencoder type $type select_test $n encode decode"
 	    failed=$(($failed + 3))
 	    continue
 	fi
@@ -38,7 +38,7 @@ while read type; do
 	# the sorted json output.  this is a weaker test, but is better
 	# than nothing.
 	deterministic=0
-	if ceph-dencoder type "$type" is_deterministic; then
+	if stone-dencoder type "$type" is_deterministic; then
 	    deterministic=1
 	fi
 
@@ -52,37 +52,37 @@ while read type; do
 
 	if ! cmp $tmp1 $tmp2; then
 	    echo "**** $type test $n dump_json check failed ****"
-	    echo "   ceph-dencoder type $type select_test $n dump_json > $tmp1"
-	    echo "   ceph-dencoder type $type select_test $n encode decode dump_json > $tmp2"
+	    echo "   stone-dencoder type $type select_test $n dump_json > $tmp1"
+	    echo "   stone-dencoder type $type select_test $n encode decode dump_json > $tmp2"
 	    diff $tmp1 $tmp2
 	    failed=$(($failed + 1))
 	fi
 
 	if ! cmp $tmp1 $tmp3; then
 	    echo "**** $type test $n copy dump_json check failed ****"
-	    echo "   ceph-dencoder type $type select_test $n dump_json > $tmp1"
-	    echo "   ceph-dencoder type $type select_test $n copy dump_json > $tmp2"
+	    echo "   stone-dencoder type $type select_test $n dump_json > $tmp1"
+	    echo "   stone-dencoder type $type select_test $n copy dump_json > $tmp2"
 	    diff $tmp1 $tmp2
 	    failed=$(($failed + 1))
 	fi
 
 	if ! cmp $tmp1 $tmp4; then
 	    echo "**** $type test $n copy_ctor dump_json check failed ****"
-	    echo "   ceph-dencoder type $type select_test $n dump_json > $tmp1"
-	    echo "   ceph-dencoder type $type select_test $n copy_ctor dump_json > $tmp2"
+	    echo "   stone-dencoder type $type select_test $n dump_json > $tmp1"
+	    echo "   stone-dencoder type $type select_test $n copy_ctor dump_json > $tmp2"
 	    diff $tmp1 $tmp2
 	    failed=$(($failed + 1))
 	fi
 
 	if [ $deterministic -ne 0 ]; then
-	    run_in_background pids ceph-dencoder type "$type" select_test $n encode export "$tmp1"
-	    run_in_background pids ceph-dencoder type "$type" select_test $n encode decode encode export "$tmp2"
+	    run_in_background pids stone-dencoder type "$type" select_test $n encode export "$tmp1"
+	    run_in_background pids stone-dencoder type "$type" select_test $n encode decode encode export "$tmp2"
 	    wait_background pids
 
 	    if ! cmp $tmp1 $tmp2; then
 		echo "**** $type test $n binary reencode check failed ****"
-		echo "   ceph-dencoder type $type select_test $n encode export $tmp1"
-		echo "   ceph-dencoder type $type select_test $n encode decode encode export $tmp2"
+		echo "   stone-dencoder type $type select_test $n encode export $tmp1"
+		echo "   stone-dencoder type $type select_test $n encode decode encode export $tmp2"
 		echo "   cmp $tmp1 $tmp2"
 		failed=$(($failed + 1))
 	    fi
@@ -90,7 +90,7 @@ while read type; do
 
 	numtests=$(($numtests + 3))
     done
-done < <(ceph-dencoder list_types)
+done < <(stone-dencoder list_types)
 
 rm -f $tmp1 $tmp2 $tmp3 $tmp4
 

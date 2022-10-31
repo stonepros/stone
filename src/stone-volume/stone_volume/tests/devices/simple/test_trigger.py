@@ -1,6 +1,6 @@
 import pytest
-from ceph_volume import exceptions
-from ceph_volume.devices.simple import trigger
+from stone_volume import exceptions
+from stone_volume.devices.simple import trigger
 
 
 class TestParseOSDid(object):

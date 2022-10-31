@@ -9,14 +9,14 @@
 // What and why
 // ============
 //
-// For general code making use of mutexes, use these ceph:: types.
-// The key requirement is that you make use of the ceph::make_mutex()
+// For general code making use of mutexes, use these stone:: types.
+// The key requirement is that you make use of the stone::make_mutex()
 // and make_recursive_mutex() factory methods, which take a string
 // naming the mutex for the purposes of the lockdep debug variant.
 
 #if defined(WITH_SEASTAR) && !defined(WITH_ALIEN)
 
-namespace ceph {
+namespace stone {
   // an empty class satisfying the mutex concept
   struct dummy_mutex {
     void lock() {}
@@ -54,14 +54,14 @@ namespace ceph {
     return {};
   }
 
-  #define ceph_mutex_is_locked(m) true
-  #define ceph_mutex_is_locked_by_me(m) true
+  #define stone_mutex_is_locked(m) true
+  #define stone_mutex_is_locked_by_me(m) true
 }
 
 #else  // defined (WITH_SEASTAR) && !defined(WITH_ALIEN)
 //
 // For legacy Mutex users that passed recursive=true, use
-// ceph::make_recursive_mutex.  For legacy Mutex users that passed
+// stone::make_recursive_mutex.  For legacy Mutex users that passed
 // lockdep=false, use std::mutex directly.
 
 #ifdef STONE_DEBUG_MUTEX
@@ -74,11 +74,11 @@ namespace ceph {
 #include "common/mutex_debug.h"
 #include "common/shared_mutex_debug.h"
 
-namespace ceph {
-  typedef ceph::mutex_debug mutex;
-  typedef ceph::mutex_recursive_debug recursive_mutex;
-  typedef ceph::condition_variable_debug condition_variable;
-  typedef ceph::shared_mutex_debug shared_mutex;
+namespace stone {
+  typedef stone::mutex_debug mutex;
+  typedef stone::mutex_recursive_debug recursive_mutex;
+  typedef stone::condition_variable_debug condition_variable;
+  typedef stone::shared_mutex_debug shared_mutex;
 
   // pass arguments to mutex_debug ctor
   template <typename ...Args>
@@ -99,12 +99,12 @@ namespace ceph {
   }
 
   // debug methods
-  #define ceph_mutex_is_locked(m) ((m).is_locked())
-  #define ceph_mutex_is_not_locked(m) (!(m).is_locked())
-  #define ceph_mutex_is_rlocked(m) ((m).is_rlocked())
-  #define ceph_mutex_is_wlocked(m) ((m).is_wlocked())
-  #define ceph_mutex_is_locked_by_me(m) ((m).is_locked_by_me())
-  #define ceph_mutex_is_not_locked_by_me(m) (!(m).is_locked_by_me())
+  #define stone_mutex_is_locked(m) ((m).is_locked())
+  #define stone_mutex_is_not_locked(m) (!(m).is_locked())
+  #define stone_mutex_is_rlocked(m) ((m).is_rlocked())
+  #define stone_mutex_is_wlocked(m) ((m).is_wlocked())
+  #define stone_mutex_is_locked_by_me(m) ((m).is_locked_by_me())
+  #define stone_mutex_is_not_locked_by_me(m) (!(m).is_locked_by_me())
 }
 
 #else
@@ -118,7 +118,7 @@ namespace ceph {
 #include <shared_mutex>
 
 
-namespace ceph {
+namespace stone {
 
   typedef std::mutex mutex;
   typedef std::recursive_mutex recursive_mutex;
@@ -142,12 +142,12 @@ namespace ceph {
   // debug methods.  Note that these can blindly return true
   // because any code that does anything other than assert these
   // are true is broken.
-  #define ceph_mutex_is_locked(m) true
-  #define ceph_mutex_is_not_locked(m) true
-  #define ceph_mutex_is_rlocked(m) true
-  #define ceph_mutex_is_wlocked(m) true
-  #define ceph_mutex_is_locked_by_me(m) true
-  #define ceph_mutex_is_not_locked_by_me(m) true
+  #define stone_mutex_is_locked(m) true
+  #define stone_mutex_is_not_locked(m) true
+  #define stone_mutex_is_rlocked(m) true
+  #define stone_mutex_is_wlocked(m) true
+  #define stone_mutex_is_locked_by_me(m) true
+  #define stone_mutex_is_not_locked_by_me(m) true
 
 }
 
@@ -155,11 +155,11 @@ namespace ceph {
 
 #endif	// WITH_SEASTAR
 
-namespace ceph {
+namespace stone {
 
 template <class LockT,
           class LockFactoryT>
-ceph::containers::tiny_vector<LockT> make_lock_container(
+stone::containers::tiny_vector<LockT> make_lock_container(
   const std::size_t num_instances,
   LockFactoryT&& lock_factory)
 {
@@ -170,5 +170,5 @@ ceph::containers::tiny_vector<LockT> make_lock_container(
     }
   };
 }
-} // namespace ceph
+} // namespace stone
 

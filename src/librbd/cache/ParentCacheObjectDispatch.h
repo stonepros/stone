@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_CACHE_PARENT_CACHER_OBJECT_DISPATCH_H
 
 #include "librbd/io/ObjectDispatchInterface.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/cache/TypeTraits.h"
 #include "tools/immutable_object_cache/CacheClient.h"
 #include "tools/immutable_object_cache/Types.h"
@@ -60,7 +60,7 @@ public:
   }
 
   bool write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
       IOContext io_context, int op_flags, int write_flags,
       std::optional<uint64_t> assert_version,
       const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
@@ -71,7 +71,7 @@ public:
 
   bool write_same(
       uint64_t object_no, uint64_t object_off, uint64_t object_len,
-      io::LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+      io::LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
       IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
       uint64_t* journal_tid, io::DispatchResult* dispatch_result,
@@ -80,8 +80,8 @@ public:
   }
 
   bool compare_and_write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-      ceph::bufferlist&& write_data, IOContext io_context, int op_flags,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+      stone::bufferlist&& write_data, IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, uint64_t* mismatch_offset,
       int* object_dispatch_flags, uint64_t* journal_tid,
       io::DispatchResult* dispatch_result, Context** on_finish,
@@ -134,9 +134,9 @@ public:
 
 private:
 
-  int read_object(std::string file_path, ceph::bufferlist* read_data,
+  int read_object(std::string file_path, stone::bufferlist* read_data,
                   uint64_t offset, uint64_t length, Context *on_finish);
-  void handle_read_cache(ceph::immutable_obj_cache::ObjectCacheRequest* ack,
+  void handle_read_cache(stone::immutable_obj_cache::ObjectCacheRequest* ack,
                          uint64_t object_no, io::ReadExtents* extents,
                          IOContext io_context,
                          const ZTracer::Trace &parent_trace,
@@ -148,7 +148,7 @@ private:
   ImageCtxT* m_image_ctx;
   plugin::Api<ImageCtxT>& m_plugin_api;
 
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   CacheClient *m_cache_client = nullptr;
   bool m_connecting = false;
 };

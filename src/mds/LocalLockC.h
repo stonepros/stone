@@ -37,7 +37,7 @@ public:
     return !is_xlocked();
   }
   void get_wrlock(client_t client) {
-    ceph_assert(can_wrlock());
+    stone_assert(can_wrlock());
     SimpleLock::get_wrlock();
     last_wrlock_client = client;
   }

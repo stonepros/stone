@@ -47,7 +47,7 @@ public:
                           Context *on_finish)
     : Request(image_ctx, STONE_NOSNAP, on_finish),
       m_snap_id(snap_id), m_ret_val(0) {
-    ceph_assert(snap_id != STONE_NOSNAP);
+    stone_assert(snap_id != STONE_NOSNAP);
   }
 
   void send() override;

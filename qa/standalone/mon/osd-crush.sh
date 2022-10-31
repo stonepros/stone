@@ -15,16 +15,16 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library Public License for more details.
 #
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7104" # git grep '\<7104\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7104" # git grep '\<7104\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
     local funcs=${@:-$(set | ${SED} -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -39,20 +39,20 @@ function TEST_crush_rule_create_simple() {
 
     run_mon $dir a || return 1
 
-    ceph --format xml osd crush rule dump replicated_rule | \
+    stone --format xml osd crush rule dump replicated_rule | \
         egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' | \
         grep '<op>choose_firstn</op><num>0</num><type>osd</type>' || return 1
     local ruleset=ruleset0
     local root=host1
-    ceph osd crush add-bucket $root host
+    stone osd crush add-bucket $root host
     local failure_domain=osd
-    ceph osd crush rule create-simple $ruleset $root $failure_domain || return 1
-    ceph osd crush rule create-simple $ruleset $root $failure_domain 2>&1 | \
+    stone osd crush rule create-simple $ruleset $root $failure_domain || return 1
+    stone osd crush rule create-simple $ruleset $root $failure_domain 2>&1 | \
         grep "$ruleset already exists" || return 1
-    ceph --format xml osd crush rule dump $ruleset | \
+    stone --format xml osd crush rule dump $ruleset | \
         egrep '<op>take</op><item>[^<]+</item><item_name>'$root'</item_name>' | \
         grep '<op>choose_firstn</op><num>0</num><type>'$failure_domain'</type>' || return 1
-    ceph osd crush rule rm $ruleset || return 1
+    stone osd crush rule rm $ruleset || return 1
 }
 
 function TEST_crush_rule_dump() {
@@ -61,13 +61,13 @@ function TEST_crush_rule_dump() {
     run_mon $dir a || return 1
 
     local ruleset=ruleset1
-    ceph osd crush rule create-erasure $ruleset || return 1
-    test $(ceph --format json osd crush rule dump $ruleset | \
+    stone osd crush rule create-erasure $ruleset || return 1
+    test $(stone --format json osd crush rule dump $ruleset | \
            jq ".rule_name == \"$ruleset\"") == true || return 1
-    test $(ceph --format json osd crush rule dump | \
+    test $(stone --format json osd crush rule dump | \
            jq "map(select(.rule_name == \"$ruleset\")) | length == 1") == true || return 1
-    ! ceph osd crush rule dump non_existent_ruleset || return 1
-    ceph osd crush rule rm $ruleset || return 1
+    ! stone osd crush rule dump non_existent_ruleset || return 1
+    stone osd crush rule rm $ruleset || return 1
 }
 
 function TEST_crush_rule_rm() {
@@ -75,10 +75,10 @@ function TEST_crush_rule_rm() {
 
     run_mon $dir a || return 1
 
-    ceph osd crush rule create-erasure $ruleset default || return 1
-    ceph osd crush rule ls | grep $ruleset || return 1
-    ceph osd crush rule rm $ruleset || return 1
-    ! ceph osd crush rule ls | grep $ruleset || return 1
+    stone osd crush rule create-erasure $ruleset default || return 1
+    stone osd crush rule ls | grep $ruleset || return 1
+    stone osd crush rule rm $ruleset || return 1
+    ! stone osd crush rule ls | grep $ruleset || return 1
 }
 
 function TEST_crush_rule_create_erasure() {
@@ -92,47 +92,47 @@ function TEST_crush_rule_create_erasure() {
     #
     # create a new ruleset with the default profile, implicitly
     #
-    ceph osd crush rule create-erasure $ruleset || return 1
-    ceph osd crush rule create-erasure $ruleset 2>&1 | \
+    stone osd crush rule create-erasure $ruleset || return 1
+    stone osd crush rule create-erasure $ruleset 2>&1 | \
         grep "$ruleset already exists" || return 1
-    ceph --format xml osd crush rule dump $ruleset | \
+    stone --format xml osd crush rule dump $ruleset | \
         egrep '<op>take</op><item>[^<]+</item><item_name>default</item_name>' | \
         grep '<op>chooseleaf_indep</op><num>0</num><type>host</type>' || return 1
-    ceph osd crush rule rm $ruleset || return 1
-    ! ceph osd crush rule ls | grep $ruleset || return 1
+    stone osd crush rule rm $ruleset || return 1
+    ! stone osd crush rule ls | grep $ruleset || return 1
     #
     # create a new ruleset with the default profile, explicitly
     #
-    ceph osd crush rule create-erasure $ruleset default || return 1
-    ceph osd crush rule ls | grep $ruleset || return 1
-    ceph osd crush rule rm $ruleset || return 1
-    ! ceph osd crush rule ls | grep $ruleset || return 1
+    stone osd crush rule create-erasure $ruleset default || return 1
+    stone osd crush rule ls | grep $ruleset || return 1
+    stone osd crush rule rm $ruleset || return 1
+    ! stone osd crush rule ls | grep $ruleset || return 1
     #
     # create a new ruleset and the default profile, implicitly
     #
-    ceph osd erasure-code-profile rm default || return 1
-    ! ceph osd erasure-code-profile ls | grep default || return 1
-    ceph osd crush rule create-erasure $ruleset || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
+    stone osd erasure-code-profile rm default || return 1
+    ! stone osd erasure-code-profile ls | grep default || return 1
+    stone osd crush rule create-erasure $ruleset || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.a) log flush || return 1
     grep 'profile set default' $dir/mon.a.log || return 1
-    ceph osd erasure-code-profile ls | grep default || return 1
-    ceph osd crush rule rm $ruleset || return 1
-    ! ceph osd crush rule ls | grep $ruleset || return 1
+    stone osd erasure-code-profile ls | grep default || return 1
+    stone osd crush rule rm $ruleset || return 1
+    ! stone osd crush rule ls | grep $ruleset || return 1
 }
 
 function check_ruleset_id_match_rule_id() {
     local rule_name=$1
-    rule_id=`ceph osd crush rule dump $rule_name | grep "\"rule_id\":" | awk -F ":|," '{print int($2)}'`
-    ruleset_id=`ceph osd crush rule dump $rule_name | grep "\"ruleset\":"| awk -F ":|," '{print int($2)}'`
+    rule_id=`stone osd crush rule dump $rule_name | grep "\"rule_id\":" | awk -F ":|," '{print int($2)}'`
+    ruleset_id=`stone osd crush rule dump $rule_name | grep "\"ruleset\":"| awk -F ":|," '{print int($2)}'`
     test $ruleset_id = $rule_id || return 1
 }
 
 function generate_manipulated_rules() {
     local dir=$1
-    ceph osd crush add-bucket $root host
-    ceph osd crush rule create-simple test_rule1 $root osd firstn || return 1
-    ceph osd crush rule create-simple test_rule2 $root osd firstn || return 1
-    ceph osd getcrushmap -o $dir/original_map
+    stone osd crush add-bucket $root host
+    stone osd crush rule create-simple test_rule1 $root osd firstn || return 1
+    stone osd crush rule create-simple test_rule2 $root osd firstn || return 1
+    stone osd getcrushmap -o $dir/original_map
     crushtool -d $dir/original_map -o $dir/decoded_original_map
     #manipulate the rulesets , to make the rule_id != ruleset_id
     ${SED} -i 's/ruleset 0/ruleset 3/' $dir/decoded_original_map
@@ -140,9 +140,9 @@ function generate_manipulated_rules() {
     ${SED} -i 's/ruleset 1/ruleset 2/' $dir/decoded_original_map
 
     crushtool -c $dir/decoded_original_map -o $dir/new_map
-    ceph osd setcrushmap -i $dir/new_map
+    stone osd setcrushmap -i $dir/new_map
 
-    ceph osd crush rule dump
+    stone osd crush rule dump
 }
 
 function TEST_crush_ruleset_match_rule_when_creating() {
@@ -154,9 +154,9 @@ function TEST_crush_ruleset_match_rule_when_creating() {
 
     generate_manipulated_rules $dir
 
-    ceph osd crush rule create-simple special_rule_simple $root osd firstn || return 1
+    stone osd crush rule create-simple special_rule_simple $root osd firstn || return 1
 
-    ceph osd crush rule dump
+    stone osd crush rule dump
     #show special_rule_simple has same rule_id and ruleset_id
     check_ruleset_id_match_rule_id special_rule_simple || return 1
 }
@@ -168,10 +168,10 @@ function TEST_add_ruleset_failed() {
 
     local root=host1
 
-    ceph osd crush add-bucket $root host
-    ceph osd crush rule create-simple test_rule1 $root osd firstn || return 1
-    ceph osd crush rule create-simple test_rule2 $root osd firstn || return 1
-    ceph osd getcrushmap > $dir/crushmap || return 1
+    stone osd crush add-bucket $root host
+    stone osd crush rule create-simple test_rule1 $root osd firstn || return 1
+    stone osd crush rule create-simple test_rule2 $root osd firstn || return 1
+    stone osd getcrushmap > $dir/crushmap || return 1
     crushtool --decompile $dir/crushmap > $dir/crushmap.txt || return 1
     for i in $(seq 3 255)
         do
@@ -188,8 +188,8 @@ rule test_rule$i {
 EOF
     done >> $dir/crushmap.txt
     crushtool --compile $dir/crushmap.txt -o $dir/crushmap || return 1
-    ceph osd setcrushmap -i $dir/crushmap  || return 1
-    ceph osd crush rule create-simple test_rule_nospace $root osd firstn 2>&1 | grep "Error ENOSPC" || return 1
+    stone osd setcrushmap -i $dir/crushmap  || return 1
+    stone osd crush rule create-simple test_rule_nospace $root osd firstn 2>&1 | grep "Error ENOSPC" || return 1
 
 }
 
@@ -198,24 +198,24 @@ function TEST_crush_rename_bucket() {
 
     run_mon $dir a || return 1
 
-    ceph osd crush add-bucket host1 host
-    ceph osd tree
-    ! ceph osd tree | grep host2 || return 1
-    ceph osd crush rename-bucket host1 host2 || return 1
-    ceph osd tree
-    ceph osd tree | grep host2 || return 1
-    ceph osd crush rename-bucket host1 host2 || return 1 # idempotency
-    ceph osd crush rename-bucket nonexistent something 2>&1 | grep "Error ENOENT" || return 1
+    stone osd crush add-bucket host1 host
+    stone osd tree
+    ! stone osd tree | grep host2 || return 1
+    stone osd crush rename-bucket host1 host2 || return 1
+    stone osd tree
+    stone osd tree | grep host2 || return 1
+    stone osd crush rename-bucket host1 host2 || return 1 # idempotency
+    stone osd crush rename-bucket nonexistent something 2>&1 | grep "Error ENOENT" || return 1
 }
 
 function TEST_crush_ls_node() {
     local dir=$1
     run_mon $dir a || return 1
-    ceph osd crush add-bucket default1 root
-    ceph osd crush add-bucket host1 host
-    ceph osd crush move host1 root=default1
-    ceph osd crush ls default1 | grep host1 || return 1
-    ceph osd crush ls default2 2>&1 | grep "Error ENOENT" || return 1
+    stone osd crush add-bucket default1 root
+    stone osd crush add-bucket host1 host
+    stone osd crush move host1 root=default1
+    stone osd crush ls default1 | grep host1 || return 1
+    stone osd crush ls default2 2>&1 | grep "Error ENOENT" || return 1
 }
 
 function TEST_crush_reject_empty() {
@@ -229,7 +229,7 @@ function TEST_crush_reject_empty() {
     :> $empty_map.txt
     crushtool -c $empty_map.txt -o $empty_map.map || return 1
     expect_failure $dir "Error EINVAL" \
-        ceph osd setcrushmap -i $empty_map.map || return 1
+        stone osd setcrushmap -i $empty_map.map || return 1
 }
 
 main osd-crush "$@"

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -21,7 +21,7 @@
 
 #include "rgw_sal.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 #define RGW_ORPHAN_INDEX_OID "orphan.index"
 #define RGW_ORPHAN_INDEX_PREFIX "orphan.scan"
@@ -176,7 +176,7 @@ class RGWOrphanSearch {
 
 #define RGW_ORPHANSEARCH_HASH_PRIME 7877
   int orphan_shard(const string& str) {
-    return ceph_str_hash_linux(str.c_str(), str.size()) % RGW_ORPHANSEARCH_HASH_PRIME % search_info.num_shards;
+    return stone_str_hash_linux(str.c_str(), str.size()) % RGW_ORPHANSEARCH_HASH_PRIME % search_info.num_shards;
   }
 
   int handle_stat_result(const DoutPrefixProvider *dpp, map<int, list<string> >& oids, RGWRados::Object::Stat::Result& result);

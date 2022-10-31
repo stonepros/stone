@@ -63,7 +63,7 @@ Merge: bd5d6f1 d4e67ff
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue May 20 10:19:00 2014 -0700
 
-    Merge pull request #1826 from ceph/wip-8162-dumpling
+    Merge pull request #1826 from stone/wip-8162-dumpling
     
     Wip 8162 dumpling
     
@@ -92,7 +92,7 @@ Merge: fced056 8d991fa
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon May 19 13:45:50 2014 -0700
 
-    Merge pull request #1827 from ceph/wip-6565-dumpling
+    Merge pull request #1827 from stone/wip-6565-dumpling
     
     Wip 6565 dumpling
     

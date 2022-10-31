@@ -16,7 +16,7 @@ class TelemetryTest(DashboardTestCase):
             '/api/settings',
             {
                 'mgr/telemetry/channel_ident': True,
-                'mgr/telemetry/organization': 'ceph-qa',
+                'mgr/telemetry/organization': 'stone-qa',
             }
         )
 

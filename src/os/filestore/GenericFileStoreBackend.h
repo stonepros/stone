@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -64,12 +64,12 @@ private:
   int _crc_load_or_init(int fd, SloppyCRCMap *cm);
   int _crc_save(int fd, SloppyCRCMap *cm);
 public:
-  int _crc_update_write(int fd, loff_t off, size_t len, const ceph::buffer::list& bl) override;
+  int _crc_update_write(int fd, loff_t off, size_t len, const stone::buffer::list& bl) override;
   int _crc_update_truncate(int fd, loff_t off) override;
   int _crc_update_zero(int fd, loff_t off, size_t len) override;
   int _crc_update_clone_range(int srcfd, int destfd,
 				      loff_t srcoff, size_t len, loff_t dstoff) override;
-  int _crc_verify_read(int fd, loff_t off, size_t len, const ceph::buffer::list& bl,
+  int _crc_verify_read(int fd, loff_t off, size_t len, const stone::buffer::list& bl,
 		       std::ostream *out) override;
 };
 #endif

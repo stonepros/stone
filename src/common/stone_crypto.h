@@ -20,7 +20,7 @@
 #include <openssl/ossl_typ.h>
 #include <openssl/hmac.h>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 extern "C" {
   const EVP_MD *EVP_md5(void);
@@ -190,7 +190,7 @@ namespace TOPNSPC::crypto {
   using ssl::HMACSHA1;
 
 template<class Digest>
-auto digest(const ceph::buffer::list& bl)
+auto digest(const stone::buffer::list& bl)
 {
   unsigned char fingerprint[Digest::digest_size];
   Digest gen;

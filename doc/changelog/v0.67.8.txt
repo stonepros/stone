@@ -9,7 +9,7 @@ Merge: 5a6b351 fb0944e
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Apr 30 15:15:48 2014 -0700
 
-    Merge pull request #1743 from ceph/wip-mon-backports.dumpling
+    Merge pull request #1743 from stone/wip-mon-backports.dumpling
     
     mon: OSDMonitor: HEALTH_WARN on 'mon osd down out interval == 0'
     
@@ -62,7 +62,7 @@ Date:   Fri Apr 25 16:00:24 2014 -0700
 
     Merge pull request #1700 from xanpeng/patch-1
     
-    Fix error in mkcephfs.rst
+    Fix error in mkstonefs.rst
     
     Signed-off-by: Xan Peng <xanpeng@gmail.com>
     Reviewed-by: Sage Weil <sage@inktank.com>
@@ -71,7 +71,7 @@ commit 476b929ecc5b7351a5be3024817b900976a90a3e
 Author: xanpeng <xanpeng@gmail.com>
 Date:   Mon Apr 21 11:30:42 2014 +0800
 
-    Update mkcephfs.rst
+    Update mkstonefs.rst
     
     There should be no blank between mount options.
 
@@ -81,7 +81,7 @@ Date:   Tue Apr 1 17:27:01 2014 -0700
 
     auth: add rwlock to AuthClientHandler to prevent races
     
-    For cephx, build_authorizer reads a bunch of state (especially the
+    For stonex, build_authorizer reads a bunch of state (especially the
     current session_key) which can be updated by the MonClient. With no
     locks held, Pipe::connect() calls SimpleMessenger::get_authorizer()
     which ends up calling RadosClient::get_authorizer() and then
@@ -89,14 +89,14 @@ Date:   Tue Apr 1 17:27:01 2014 -0700
     crashes like:
     
     Program terminated with signal 11, Segmentation fault.
-    0x00007fa0d2ddb7cb in ceph::buffer::ptr::release (this=0x7f987a5e3070) at common/buffer.cc:370
+    0x00007fa0d2ddb7cb in stone::buffer::ptr::release (this=0x7f987a5e3070) at common/buffer.cc:370
     370 common/buffer.cc: No such file or directory.
     in common/buffer.cc
     (gdb) bt
-    0x00007fa0d2ddb7cb in ceph::buffer::ptr::release (this=0x7f987a5e3070) at common/buffer.cc:370
+    0x00007fa0d2ddb7cb in stone::buffer::ptr::release (this=0x7f987a5e3070) at common/buffer.cc:370
     0x00007fa0d2ddec00 in ~ptr (this=0x7f989c03b830) at ./include/buffer.h:171
-    ceph::buffer::list::rebuild (this=0x7f989c03b830) at common/buffer.cc:817
-    0x00007fa0d2ddecb9 in ceph::buffer::list::c_str (this=0x7f989c03b830) at common/buffer.cc:1045
+    stone::buffer::list::rebuild (this=0x7f989c03b830) at common/buffer.cc:817
+    0x00007fa0d2ddecb9 in stone::buffer::list::c_str (this=0x7f989c03b830) at common/buffer.cc:1045
     0x00007fa0d2ea4dc2 in Pipe::connect (this=0x7fa0c4307340) at msg/Pipe.cc:907
     0x00007fa0d2ea7d73 in Pipe::writer (this=0x7fa0c4307340) at msg/Pipe.cc:1518
     0x00007fa0d2eb44dd in Pipe::Writer::entry (this=<value optimized out>) at msg/Pipe.h:59
@@ -109,10 +109,10 @@ Date:   Tue Apr 1 17:27:01 2014 -0700
     *** ======= Backtrace: =========
     /lib/x86_64-linux-gnu/libc.so.6(+0x80a46)[0x7ff3dea1fa46]
     /usr/lib/librados.so.2(+0x29eb03)[0x7ff3e3d43b03]
-    /usr/lib/librados.so.2(_ZNK9CryptoKey7encryptEP11CephContextRKN4ceph6buffer4listERS4_RSs+0x71)[0x7ff3e3d42661]
-    /usr/lib/librados.so.2(_Z21encode_encrypt_enc_blIN4ceph6buffer4listEEvP11CephContextRKT_RK9CryptoKeyRS2_RSs+0xfe)[0x7ff3e3d417de]
-    /usr/lib/librados.so.2(_Z14encode_encryptIN4ceph6buffer4listEEiP11CephContextRKT_RK9CryptoKeyRS2_RSs+0xa2)[0x7ff3e3d41912]
-    /usr/lib/librados.so.2(_ZN19CephxSessionHandler12sign_messageEP7Message+0x242)[0x7ff3e3d40de2]
+    /usr/lib/librados.so.2(_ZNK9CryptoKey7encryptEP11StoneContextRKN4stone6buffer4listERS4_RSs+0x71)[0x7ff3e3d42661]
+    /usr/lib/librados.so.2(_Z21encode_encrypt_enc_blIN4stone6buffer4listEEvP11StoneContextRKT_RK9CryptoKeyRS2_RSs+0xfe)[0x7ff3e3d417de]
+    /usr/lib/librados.so.2(_Z14encode_encryptIN4stone6buffer4listEEiP11StoneContextRKT_RK9CryptoKeyRS2_RSs+0xa2)[0x7ff3e3d41912]
+    /usr/lib/librados.so.2(_ZN19StonexSessionHandler12sign_messageEP7Message+0x242)[0x7ff3e3d40de2]
     /usr/lib/librados.so.2(_ZN4Pipe6writerEv+0x92b)[0x7ff3e3e61b2b]
     /usr/lib/librados.so.2(_ZN4Pipe6Writer5entryEv+0xd)[0x7ff3e3e6c7fd]
     /lib/x86_64-linux-gnu/libpthread.so.0(+0x7f8e)[0x7ff3ded6ff8e]
@@ -124,7 +124,7 @@ Date:   Tue Apr 1 17:27:01 2014 -0700
     Authorizer, e.g. for verify_authorizer() and it would serialize
     independent connection attempts.
     
-    This mainly matters for cephx, but none and unknown can have the
+    This mainly matters for stonex, but none and unknown can have the
     global_id reset as well.
     
     Partially-fixes: #6480
@@ -152,10 +152,10 @@ Date:   Tue Apr 1 11:37:29 2014 -0700
     /lib/x86_64-linux-gnu/libc.so.6(+0x80a46)[0x7f452f1f3a46]
     /usr/lib/x86_64-linux-gnu/libnss3.so(PK11_FreeSymKey+0xa8)[0x7f452e72ff98]
     /usr/lib/librados.so.2(+0x2a18cd)[0x7f453451a8cd]
-    /usr/lib/librados.so.2(_ZNK9CryptoKey7encryptEP11CephContextRKN4ceph6buffer4listERS4_RSs+0x71)[0x7f4534519421]
-    /usr/lib/librados.so.2(_Z21encode_encrypt_enc_blIN4ceph6buffer4listEEvP11CephContextRKT_RK9CryptoKeyRS2_RSs+0xfe)[0x7f453451859e]
-    /usr/lib/librados.so.2(_Z14encode_encryptIN4ceph6buffer4listEEiP11CephContextRKT_RK9CryptoKeyRS2_RSs+0xa2)[0x7f45345186d2]
-    /usr/lib/librados.so.2(_ZN19CephxSessionHandler23check_message_signatureEP7Message+0x246)[0x7f4534516866]
+    /usr/lib/librados.so.2(_ZNK9CryptoKey7encryptEP11StoneContextRKN4stone6buffer4listERS4_RSs+0x71)[0x7f4534519421]
+    /usr/lib/librados.so.2(_Z21encode_encrypt_enc_blIN4stone6buffer4listEEvP11StoneContextRKT_RK9CryptoKeyRS2_RSs+0xfe)[0x7f453451859e]
+    /usr/lib/librados.so.2(_Z14encode_encryptIN4stone6buffer4listEEiP11StoneContextRKT_RK9CryptoKeyRS2_RSs+0xa2)[0x7f45345186d2]
+    /usr/lib/librados.so.2(_ZN19StonexSessionHandler23check_message_signatureEP7Message+0x246)[0x7f4534516866]
     /usr/lib/librados.so.2(_ZN4Pipe12read_messageEPP7Message+0xdcc)[0x7f453462ecbc]
     /usr/lib/librados.so.2(_ZN4Pipe6readerEv+0xa5c)[0x7f453464059c]
     /usr/lib/librados.so.2(_ZN4Pipe6Reader5entryEv+0xd)[0x7f4534643ecd]
@@ -194,7 +194,7 @@ Date:   Tue Oct 1 09:28:29 2013 -0700
     that the cache remains responsive.
     
     I'm not sure this warrants a tunable (which we would need to add for both
-    libcephfs and librbd).
+    libstonefs and librbd).
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit cce990efc8f2a58c8d0fa11c234ddf2242b1b856)
@@ -476,7 +476,7 @@ commit 040abd75ad45bbcc05b24c9dddbd2026dd35e659
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Mar 29 14:23:21 2014 -0700
 
-    qa/workunits/fs/misc/layout_vxattrs: ceph.file.layout is not listed
+    qa/workunits/fs/misc/layout_vxattrs: stone.file.layout is not listed
     
     As of 08a3d6bd428c5e78dd4a10e6ee97540f66f9729c.  A similar change was made
     in the kernel.
@@ -489,7 +489,7 @@ Merge: fef70cb 84cb345
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 28 18:01:08 2014 -0700
 
-    Merge pull request #1519 from ceph/wip-6951-dumpling
+    Merge pull request #1519 from stone/wip-6951-dumpling
     
     rgw: reset objv tracker on bucket recreation
 
@@ -498,7 +498,7 @@ Merge: 9bfbce3 f443ff3
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 28 17:02:39 2014 -0700
 
-    Merge pull request #1559 from ceph/wip-7881-dumpling
+    Merge pull request #1559 from stone/wip-7881-dumpling
     
     Wip 7881 dumpling
     
@@ -537,7 +537,7 @@ Date:   Thu Mar 27 21:09:13 2014 -0700
     
     Conflicts:
     
-    	src/include/ceph_features.h
+    	src/include/stone_features.h
 
 commit a2f0974f8b3567c0385494a0b2c828ade6ca8e1c
 Author: Greg Farnum <greg@inktank.com>
@@ -613,7 +613,7 @@ Merge: 466cd53 41d5e9a
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Mar 26 17:18:24 2014 -0700
 
-    Merge pull request #1539 from ceph/wip-6910-dumpling
+    Merge pull request #1539 from stone/wip-6910-dumpling
     
     PG: don't query unfound on empty pgs
 
@@ -640,7 +640,7 @@ Merge: 2ef0d6a c188949
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 21 14:53:23 2014 -0700
 
-    Merge pull request #1313 from ceph/dumpling-osd-subscribe
+    Merge pull request #1313 from stone/dumpling-osd-subscribe
     
     Dumpling backport: clean up osd subscriptions
 
@@ -649,7 +649,7 @@ Merge: 77e46d0 bdd96c6
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Mar 21 14:52:20 2014 -0700
 
-    Merge pull request #1485 from ceph/wip-7212.dumpling
+    Merge pull request #1485 from stone/wip-7212.dumpling
     
     backport 7212 fixes to dumpling
 
@@ -702,7 +702,7 @@ Date:   Sat Feb 15 08:59:51 2014 -0800
        because a and b don't see its address in the monmap
     
     See logs:
-      ubuntu@teuthology:/var/lib/teuthworker/archive/sage-2014-02-14_13:50:04-ceph-deploy-wip-7212-sage-b-testing-basic-plana/83194
+      ubuntu@teuthology:/var/lib/teuthworker/archive/sage-2014-02-14_13:50:04-stone-deploy-wip-7212-sage-b-testing-basic-plana/83194
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit a4bcb1f8129a4ece97bd3419abf1ff45d260ad8e)
@@ -745,7 +745,7 @@ commit 21ed54201bd4b0f02c07f6f96a63a5720057f011
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Mon Mar 17 14:37:09 2014 +0000
 
-    ceph.in: do not allow using 'tell' with interactive mode
+    stone.in: do not allow using 'tell' with interactive mode
     
     This avoids a lot of hassle when dealing with to whom tell each command
     on interactive mode, and even more so if multiple targets are specified.
@@ -776,7 +776,7 @@ commit 6c3d4fbeb9cc50eca6eba12cfe7fed64b34eec3d
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Mar 13 14:49:30 2014 -0700
 
-    ceph_test_rados: wait for commit, not ack
+    stone_test_rados: wait for commit, not ack
     
     First, this is what we wanted in the first place
     
@@ -819,7 +819,7 @@ Merge: 6700dd0 cd7986c
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Mar 11 21:33:40 2014 -0700
 
-    Merge pull request #1411 from ceph/wip-7076-dumpling
+    Merge pull request #1411 from stone/wip-7076-dumpling
     
     dumpling backport of watchers check for rbd_remove()
 
@@ -856,7 +856,7 @@ Date:   Wed Jan 29 16:12:01 2014 +0200
     required atomicity isn't there), but it's a big improvement over the
     status quo.
     
-    Fixes: http://tracker.ceph.com/issues/7076
+    Fixes: http://tracker.stone.com/issues/7076
     
     Reviewed-by: Josh Durgin <josh.durgin@inktank.com>
     Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
@@ -888,7 +888,7 @@ Date:   Sat Feb 15 11:43:13 2014 +0100
     modified to call ping() on when it finds existing file. It unlinks the
     file only if the ping fails.
     
-    http://tracker.ceph.com/issues/7188 fixes: #7188
+    http://tracker.stone.com/issues/7188 fixes: #7188
     
     Backport: emperor, dumpling
     Reviewed-by: Sage Weil <sage@inktank.com>
@@ -900,7 +900,7 @@ Merge: d3e13a7 5133dd6
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Mar 5 14:19:31 2014 -0800
 
-    Merge pull request #1366 from ceph/wip-6820.dumpling
+    Merge pull request #1366 from stone/wip-6820.dumpling
     
     mon: OSDMonitor: don't crash if formatter is invalid during osd crush dump
 
@@ -909,7 +909,7 @@ Merge: c218c99 9c626e0
 Author: Josh Durgin <josh.durgin@inktank.com>
 Date:   Wed Mar 5 12:45:57 2014 -0800
 
-    Merge pull request #1377 from ceph/wip-7584
+    Merge pull request #1377 from stone/wip-7584
     
     qa/workunit/rados/test-upgrade-firely.sh
     
@@ -931,7 +931,7 @@ Merge: 0eabbf1 24711cd
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Tue Mar 4 07:28:44 2014 -0800
 
-    Merge pull request #1357 from ceph/wip-dumpling-removewq
+    Merge pull request #1357 from stone/wip-dumpling-removewq
     
     OSD: ping tphandle during pg removal
     
@@ -973,7 +973,7 @@ Merge: fe8915a 9d5d931
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Tue Feb 25 15:47:05 2014 -0800
 
-    Merge pull request #1316 from ceph/dumpling-6922
+    Merge pull request #1316 from stone/dumpling-6922
     
     Dumpling: Prevent extreme PG split multipliers
     
@@ -984,7 +984,7 @@ Merge: 87822cc 5667566
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Tue Feb 25 15:45:45 2014 -0800
 
-    Merge pull request #1315 from ceph/dumpling-hashpspool
+    Merge pull request #1315 from stone/dumpling-hashpspool
     
     mon: OSDMonitor: allow (un)setting 'hashpspool' flag via 'osd pool set'
     
@@ -995,7 +995,7 @@ Merge: 0ae3352 37fbcb9
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Tue Feb 25 15:44:39 2014 -0800
 
-    Merge pull request #1314 from ceph/dumpling-osd-pgstatsack
+    Merge pull request #1314 from stone/dumpling-osd-pgstatsack
     
     Dumpling osd pgstatsack
     
@@ -1016,7 +1016,7 @@ Date:   Thu Oct 10 17:43:48 2013 -0700
     	src/mon/MonCommands.h
     	src/mon/OSDMonitor.cc
     
-    mon: ceph hashpspool false clears the flag
+    mon: stone hashpspool false clears the flag
     instead of toggling it.
     Signed-off-by: Loic Dachary <loic@dachary.org>
     Reviewed-by: Christophe Courtaut <christophe.courtaut@gmail.com>

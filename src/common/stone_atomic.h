@@ -8,7 +8,7 @@
 // What and why
 // ============
 //
-// ceph::atomic – thin wrapper to differentiate behavior of atomics.
+// stone::atomic – thin wrapper to differentiate behavior of atomics.
 //
 // Not all users of the common truly need costly atomic operations to
 // synchronize data between CPUs and threads. Some, like crimson-osd,
@@ -21,7 +21,7 @@
 
 #include <type_traits>
 
-namespace ceph {
+namespace stone {
   template <class T>
   class dummy_atomic {
     T value;
@@ -74,12 +74,12 @@ namespace ceph {
   };
 
   template <class T> using atomic = dummy_atomic<T>;
-} // namespace ceph
+} // namespace stone
 
 #else  // WITH_SEASTAR
 
-namespace ceph {
+namespace stone {
   template <class T> using atomic = ::std::atomic<T>;
-} // namespace ceph
+} // namespace stone
 
 #endif	// WITH_SEASTAR

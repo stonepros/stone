@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,10 +19,10 @@
 #include <map>
 #include <queue>
 #include <boost/intrusive_ptr.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/common_fwd.h"
 #include "common/Throttle.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Thread.h"
 #include "common/PrioritizedQueue.h"
 
@@ -41,37 +41,37 @@ class DispatchQueue {
   class QueueItem {
     int type;
     ConnectionRef con;
-    ceph::ref_t<Message> m;
+    stone::ref_t<Message> m;
   public:
-    explicit QueueItem(const ceph::ref_t<Message>& m) : type(-1), con(0), m(m) {}
+    explicit QueueItem(const stone::ref_t<Message>& m) : type(-1), con(0), m(m) {}
     QueueItem(int type, Connection *con) : type(type), con(con), m(0) {}
     bool is_code() const {
       return type != -1;
     }
     int get_code () const {
-      ceph_assert(is_code());
+      stone_assert(is_code());
       return type;
     }
-    const ceph::ref_t<Message>& get_message() {
-      ceph_assert(!is_code());
+    const stone::ref_t<Message>& get_message() {
+      stone_assert(!is_code());
       return m;
     }
     Connection *get_connection() {
-      ceph_assert(is_code());
+      stone_assert(is_code());
       return con.get();
     }
   };
 
-  StoneeContext *cct;
+  StoneContext *cct;
   Messenger *msgr;
-  mutable ceph::mutex lock;
-  ceph::condition_variable cond;
+  mutable stone::mutex lock;
+  stone::condition_variable cond;
 
   PrioritizedQueue<QueueItem, uint64_t> mqueue;
 
-  std::set<std::pair<double, ceph::ref_t<Message>>> marrival;
-  std::map<ceph::ref_t<Message>, decltype(marrival)::iterator> marrival_map;
-  void add_arrival(const ceph::ref_t<Message>& m) {
+  std::set<std::pair<double, stone::ref_t<Message>>> marrival;
+  std::map<stone::ref_t<Message>, decltype(marrival)::iterator> marrival_map;
+  void add_arrival(const stone::ref_t<Message>& m) {
     marrival_map.insert(
       make_pair(
 	m,
@@ -79,9 +79,9 @@ class DispatchQueue {
 	)
       );
   }
-  void remove_arrival(const ceph::ref_t<Message>& m) {
+  void remove_arrival(const stone::ref_t<Message>& m) {
     auto it = marrival_map.find(m);
-    ceph_assert(it != marrival_map.end());
+    stone_assert(it != marrival_map.end());
     marrival.erase(it->second);
     marrival_map.erase(it);
   }
@@ -103,10 +103,10 @@ class DispatchQueue {
     }
   } dispatch_thread;
 
-  ceph::mutex local_delivery_lock;
-  ceph::condition_variable local_delivery_cond;
+  stone::mutex local_delivery_lock;
+  stone::condition_variable local_delivery_cond;
   bool stop_local_delivery;
-  std::queue<std::pair<ceph::ref_t<Message>, int>> local_messages;
+  std::queue<std::pair<stone::ref_t<Message>, int>> local_messages;
   class LocalDeliveryThread : public Thread {
     DispatchQueue *dq;
   public:
@@ -117,8 +117,8 @@ class DispatchQueue {
     }
   } local_delivery_thread;
 
-  uint64_t pre_dispatch(const ceph::ref_t<Message>& m);
-  void post_dispatch(const ceph::ref_t<Message>& m, uint64_t msize);
+  uint64_t pre_dispatch(const stone::ref_t<Message>& m);
+  void post_dispatch(const stone::ref_t<Message>& m, uint64_t msize);
 
  public:
 
@@ -126,9 +126,9 @@ class DispatchQueue {
   Throttle dispatch_throttler;
 
   bool stop;
-  void local_delivery(const ceph::ref_t<Message>& m, int priority);
+  void local_delivery(const stone::ref_t<Message>& m, int priority);
   void local_delivery(Message* m, int priority) {
-    return local_delivery(ceph::ref_t<Message>(m, false), priority); /* consume ref */
+    return local_delivery(stone::ref_t<Message>(m, false), priority); /* consume ref */
   }
   void run_local_delivery();
 
@@ -197,15 +197,15 @@ class DispatchQueue {
     cond.notify_all();
   }
 
-  bool can_fast_dispatch(const ceph::cref_t<Message> &m) const;
-  void fast_dispatch(const ceph::ref_t<Message>& m);
+  bool can_fast_dispatch(const stone::cref_t<Message> &m) const;
+  void fast_dispatch(const stone::ref_t<Message>& m);
   void fast_dispatch(Message* m) {
-    return fast_dispatch(ceph::ref_t<Message>(m, false)); /* consume ref */
+    return fast_dispatch(stone::ref_t<Message>(m, false)); /* consume ref */
   }
-  void fast_preprocess(const ceph::ref_t<Message>& m);
-  void enqueue(const ceph::ref_t<Message>& m, int priority, uint64_t id);
+  void fast_preprocess(const stone::ref_t<Message>& m);
+  void enqueue(const stone::ref_t<Message>& m, int priority, uint64_t id);
   void enqueue(Message* m, int priority, uint64_t id) {
-    return enqueue(ceph::ref_t<Message>(m, false), priority, id); /* consume ref */
+    return enqueue(stone::ref_t<Message>(m, false), priority, id); /* consume ref */
   }
   void discard_queue(uint64_t id);
   void discard_local();
@@ -218,14 +218,14 @@ class DispatchQueue {
   void shutdown();
   bool is_started() const {return dispatch_thread.is_started();}
 
-  DispatchQueue(StoneeContext *cct, Messenger *msgr, std::string &name)
+  DispatchQueue(StoneContext *cct, Messenger *msgr, std::string &name)
     : cct(cct), msgr(msgr),
-      lock(ceph::make_mutex("Messenger::DispatchQueue::lock" + name)),
+      lock(stone::make_mutex("Messenger::DispatchQueue::lock" + name)),
       mqueue(cct->_conf->ms_pq_max_tokens_per_priority,
 	     cct->_conf->ms_pq_min_cost),
       next_id(1),
       dispatch_thread(this),
-      local_delivery_lock(ceph::make_mutex("Messenger::DispatchQueue::local_delivery_lock" + name)),
+      local_delivery_lock(stone::make_mutex("Messenger::DispatchQueue::local_delivery_lock" + name)),
       stop_local_delivery(false),
       local_delivery_thread(this),
       dispatch_throttler(cct, std::string("msgr_dispatch_throttler-") + name,
@@ -233,9 +233,9 @@ class DispatchQueue {
       stop(false)
     {}
   ~DispatchQueue() {
-    ceph_assert(mqueue.empty());
-    ceph_assert(marrival.empty());
-    ceph_assert(local_messages.empty());
+    stone_assert(mqueue.empty());
+    stone_assert(marrival.empty());
+    stone_assert(local_messages.empty());
   }
 };
 

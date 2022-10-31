@@ -1,13 +1,13 @@
 import logging
 import random
 import time
-from tasks.cephfs.fuse_mount import FuseMount
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.fuse_mount import FuseMount
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 from teuthology.orchestra.run import CommandFailedError
 
 log = logging.getLogger(__name__)
 
-class TestExports(CephFSTestCase):
+class TestExports(StoneFSTestCase):
     MDSS_REQUIRED = 2
     CLIENTS_REQUIRED = 2
 
@@ -15,7 +15,7 @@ class TestExports(CephFSTestCase):
         """
         Test session creation race.
 
-        See: https://tracker.ceph.com/issues/24072#change-113056
+        See: https://tracker.stone.com/issues/24072#change-113056
         """
 
         self.fs.set_max_mds(2)
@@ -25,7 +25,7 @@ class TestExports(CephFSTestCase):
 
         # Create a directory that is pre-exported to rank 1
         self.mount_a.run_shell(["mkdir", "-p", "a/aa"])
-        self.mount_a.setfattr("a", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("a", "stone.dir.pin", "1")
         self._wait_subtrees([('/a', 1)], status=status, rank=1)
 
         # Now set the mds config to allow the race
@@ -33,7 +33,7 @@ class TestExports(CephFSTestCase):
 
         # Now create another directory and try to export it
         self.mount_b.run_shell(["mkdir", "-p", "b/bb"])
-        self.mount_b.setfattr("b", "ceph.dir.pin", "1")
+        self.mount_b.setfattr("b", "stone.dir.pin", "1")
 
         time.sleep(5)
 
@@ -48,12 +48,12 @@ class TestExports(CephFSTestCase):
         new_rank1 = self.fs.get_rank(rank=1)
         self.assertEqual(rank1['gid'], new_rank1['gid'])
 
-class TestExportPin(CephFSTestCase):
+class TestExportPin(StoneFSTestCase):
     MDSS_REQUIRED = 3
     CLIENTS_REQUIRED = 1
 
     def setUp(self):
-        CephFSTestCase.setUp(self)
+        StoneFSTestCase.setUp(self)
 
         self.fs.set_max_mds(3)
         self.status = self.fs.wait_for_daemons()
@@ -61,26 +61,26 @@ class TestExportPin(CephFSTestCase):
         self.mount_a.run_shell_payload("mkdir -p 1/2/3/4")
 
     def test_noop(self):
-        self.mount_a.setfattr("1", "ceph.dir.pin", "-1")
+        self.mount_a.setfattr("1", "stone.dir.pin", "-1")
         time.sleep(30) # for something to not happen
         self._wait_subtrees([], status=self.status)
 
     def test_negative(self):
-        self.mount_a.setfattr("1", "ceph.dir.pin", "-2341")
+        self.mount_a.setfattr("1", "stone.dir.pin", "-2341")
         time.sleep(30) # for something to not happen
         self._wait_subtrees([], status=self.status)
 
     def test_empty_pin(self):
-        self.mount_a.setfattr("1/2/3/4", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("1/2/3/4", "stone.dir.pin", "1")
         time.sleep(30) # for something to not happen
         self._wait_subtrees([], status=self.status)
 
     def test_trivial(self):
-        self.mount_a.setfattr("1", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("1", "stone.dir.pin", "1")
         self._wait_subtrees([('/1', 1)], status=self.status, rank=1)
 
     def test_export_targets(self):
-        self.mount_a.setfattr("1", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("1", "stone.dir.pin", "1")
         self._wait_subtrees([('/1', 1)], status=self.status, rank=1)
         self.status = self.fs.status()
         r0 = self.status.get_rank(self.fs.id, 0)
@@ -88,66 +88,66 @@ class TestExportPin(CephFSTestCase):
 
     def test_redundant(self):
         # redundant pin /1/2 to rank 1
-        self.mount_a.setfattr("1", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("1", "stone.dir.pin", "1")
         self._wait_subtrees([('/1', 1)], status=self.status, rank=1)
-        self.mount_a.setfattr("1/2", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("1/2", "stone.dir.pin", "1")
         self._wait_subtrees([('/1', 1), ('/1/2', 1)], status=self.status, rank=1)
 
     def test_reassignment(self):
-        self.mount_a.setfattr("1/2", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("1/2", "stone.dir.pin", "1")
         self._wait_subtrees([('/1/2', 1)], status=self.status, rank=1)
-        self.mount_a.setfattr("1/2", "ceph.dir.pin", "0")
+        self.mount_a.setfattr("1/2", "stone.dir.pin", "0")
         self._wait_subtrees([('/1/2', 0)], status=self.status, rank=0)
 
     def test_phantom_rank(self):
-        self.mount_a.setfattr("1", "ceph.dir.pin", "0")
-        self.mount_a.setfattr("1/2", "ceph.dir.pin", "10")
+        self.mount_a.setfattr("1", "stone.dir.pin", "0")
+        self.mount_a.setfattr("1/2", "stone.dir.pin", "10")
         time.sleep(30) # wait for nothing weird to happen
         self._wait_subtrees([('/1', 0)], status=self.status)
 
     def test_nested(self):
-        self.mount_a.setfattr("1", "ceph.dir.pin", "1")
-        self.mount_a.setfattr("1/2", "ceph.dir.pin", "0")
-        self.mount_a.setfattr("1/2/3", "ceph.dir.pin", "2")
+        self.mount_a.setfattr("1", "stone.dir.pin", "1")
+        self.mount_a.setfattr("1/2", "stone.dir.pin", "0")
+        self.mount_a.setfattr("1/2/3", "stone.dir.pin", "2")
         self._wait_subtrees([('/1', 1), ('/1/2', 0), ('/1/2/3', 2)], status=self.status, rank=2)
 
     def test_nested_unset(self):
-        self.mount_a.setfattr("1", "ceph.dir.pin", "1")
-        self.mount_a.setfattr("1/2", "ceph.dir.pin", "2")
+        self.mount_a.setfattr("1", "stone.dir.pin", "1")
+        self.mount_a.setfattr("1/2", "stone.dir.pin", "2")
         self._wait_subtrees([('/1', 1), ('/1/2', 2)], status=self.status, rank=1)
-        self.mount_a.setfattr("1/2", "ceph.dir.pin", "-1")
+        self.mount_a.setfattr("1/2", "stone.dir.pin", "-1")
         self._wait_subtrees([('/1', 1)], status=self.status, rank=1)
 
     def test_rename(self):
-        self.mount_a.setfattr("1", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("1", "stone.dir.pin", "1")
         self.mount_a.run_shell_payload("mkdir -p 9/8/7")
-        self.mount_a.setfattr("9/8", "ceph.dir.pin", "0")
+        self.mount_a.setfattr("9/8", "stone.dir.pin", "0")
         self._wait_subtrees([('/1', 1), ("/9/8", 0)], status=self.status, rank=0)
         self.mount_a.run_shell_payload("mv 9/8 1/2")
         self._wait_subtrees([('/1', 1), ("/1/2/8", 0)], status=self.status, rank=0)
 
     def test_getfattr(self):
         # pin /1 to rank 0
-        self.mount_a.setfattr("1", "ceph.dir.pin", "1")
-        self.mount_a.setfattr("1/2", "ceph.dir.pin", "0")
+        self.mount_a.setfattr("1", "stone.dir.pin", "1")
+        self.mount_a.setfattr("1/2", "stone.dir.pin", "0")
         self._wait_subtrees([('/1', 1), ('/1/2', 0)], status=self.status, rank=1)
 
         if not isinstance(self.mount_a, FuseMount):
             p = self.mount_a.client_remote.sh('uname -r', wait=True)
-            dir_pin = self.mount_a.getfattr("1", "ceph.dir.pin")
-            log.debug("mount.getfattr('1','ceph.dir.pin'): %s " % dir_pin)
+            dir_pin = self.mount_a.getfattr("1", "stone.dir.pin")
+            log.debug("mount.getfattr('1','stone.dir.pin'): %s " % dir_pin)
             if str(p) < "5" and not(dir_pin):
-                self.skipTest("Kernel does not support getting the extended attribute ceph.dir.pin")
-        self.assertEqual(self.mount_a.getfattr("1", "ceph.dir.pin"), '1')
-        self.assertEqual(self.mount_a.getfattr("1/2", "ceph.dir.pin"), '0')
+                self.skipTest("Kernel does not support getting the extended attribute stone.dir.pin")
+        self.assertEqual(self.mount_a.getfattr("1", "stone.dir.pin"), '1')
+        self.assertEqual(self.mount_a.getfattr("1/2", "stone.dir.pin"), '0')
 
     def test_export_pin_cache_drop(self):
         """
         That the export pin does not prevent empty (nothing in cache) subtree merging.
         """
 
-        self.mount_a.setfattr("1", "ceph.dir.pin", "0")
-        self.mount_a.setfattr("1/2", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("1", "stone.dir.pin", "0")
+        self.mount_a.setfattr("1/2", "stone.dir.pin", "1")
         self._wait_subtrees([('/1', 0), ('/1/2', 1)], status=self.status)
         self.mount_a.umount_wait() # release all caps
         def _drop():
@@ -155,12 +155,12 @@ class TestExportPin(CephFSTestCase):
         # drop cache multiple times to clear replica pins
         self._wait_subtrees([], status=self.status, action=_drop)
 
-class TestEphemeralPins(CephFSTestCase):
+class TestEphemeralPins(StoneFSTestCase):
     MDSS_REQUIRED = 3
     CLIENTS_REQUIRED = 1
 
     def setUp(self):
-        CephFSTestCase.setUp(self)
+        StoneFSTestCase.setUp(self)
 
         self.config_set('mds', 'mds_export_ephemeral_random', True)
         self.config_set('mds', 'mds_export_ephemeral_distributed', True)
@@ -183,9 +183,9 @@ rm -rf .inode_number_thrash
         return self.mount_a.run_shell_payload(f"""
 set -ex
 mkdir -p {path}
-{f"setfattr -n ceph.dir.pin -v {export} {path}" if export >= 0 else ""}
-{f"setfattr -n ceph.dir.pin.distributed -v 1 {path}" if distributed else ""}
-{f"setfattr -n ceph.dir.pin.random -v {random} {path}" if random > 0.0 else ""}
+{f"setfattr -n stone.dir.pin -v {export} {path}" if export >= 0 else ""}
+{f"setfattr -n stone.dir.pin.distributed -v 1 {path}" if distributed else ""}
+{f"setfattr -n stone.dir.pin.random -v {random} {path}" if random > 0.0 else ""}
 for ((i = 0; i < {count}; i++)); do
     mkdir -p "{path}/$i"
     echo file > "{path}/$i/file"
@@ -211,7 +211,7 @@ done
 
         self._setup_tree(distributed=True)
         subtrees = self._wait_distributed_subtrees(3 * 2, status=self.status, rank="all")
-        self.mount_a.setfattr("tree", "ceph.dir.pin", "0")
+        self.mount_a.setfattr("tree", "stone.dir.pin", "0")
         time.sleep(15)
         subtrees = self._get_subtrees(status=self.status, rank=0)
         for s in subtrees:
@@ -228,7 +228,7 @@ done
 
         self._setup_tree(distributed=True)
         self._wait_distributed_subtrees(3 * 2, status=self.status, rank="all")
-        self.mount_a.setfattr("tree", "ceph.dir.pin.distributed", "0")
+        self.mount_a.setfattr("tree", "stone.dir.pin.distributed", "0")
         time.sleep(15)
         subtrees = self._get_subtrees(status=self.status, rank=0)
         for s in subtrees:
@@ -244,7 +244,7 @@ done
 
         self._setup_tree()
         self.config_set('mds', 'mds_export_ephemeral_distributed', False)
-        self.mount_a.setfattr("tree", "ceph.dir.pin.distributed", "1")
+        self.mount_a.setfattr("tree", "stone.dir.pin.distributed", "1")
         time.sleep(15)
         subtrees = self._get_subtrees(status=self.status, rank=0)
         for s in subtrees:
@@ -273,9 +273,9 @@ done
         test = []
         for i in range(count):
             path = f"tree/{i}"
-            self.mount_a.setfattr(path, "ceph.dir.pin", "1")
+            self.mount_a.setfattr(path, "stone.dir.pin", "1")
             test.append(("/"+path, 1))
-        self.mount_a.setfattr("tree", "ceph.dir.pin.distributed", "1")
+        self.mount_a.setfattr("tree", "stone.dir.pin.distributed", "1")
         time.sleep(15) # for something to not happen...
         self._wait_subtrees(test, timeout=60, status=self.status, rank="all", path="/tree/")
 
@@ -289,7 +289,7 @@ done
         test = []
         for i in range(10):
             path = f"tree/{i}"
-            self.mount_a.setfattr(path, "ceph.dir.pin", "1")
+            self.mount_a.setfattr(path, "stone.dir.pin", "1")
             test.append(("/"+path, 1))
         self._wait_subtrees(test, timeout=60, status=self.status, rank="all", path="/tree/")
 
@@ -407,7 +407,7 @@ done
         self._setup_tree(count=0, random=1.0)
         self._setup_tree(path="tree/pin", count=count)
         self._wait_random_subtrees(count+1, status=self.status, rank="all")
-        self.mount_a.setfattr("tree/pin", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("tree/pin", "stone.dir.pin", "1")
         self._wait_subtrees([("/tree/pin", 1)], status=self.status, rank=1, path="/tree/pin")
 
     def test_ephemeral_randomness(self):

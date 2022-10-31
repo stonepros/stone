@@ -22,13 +22,13 @@ static constexpr size_t BLOCK_SIZE = 512;
 
 static inline std::pair<class StatusIndicator,
                         boost::optional<class HeaderView>>
-interpret_block(const StatusIndicator& status, ceph::bufferlist& bl);
+interpret_block(const StatusIndicator& status, stone::bufferlist& bl);
 
 
 class StatusIndicator {
   friend std::pair<class StatusIndicator,
                    boost::optional<class HeaderView>>
-  interpret_block(const StatusIndicator& status, ceph::bufferlist& bl);
+  interpret_block(const StatusIndicator& status, stone::bufferlist& bl);
 
   bool is_empty;
   bool is_eof;
@@ -138,7 +138,7 @@ public:
 
 static inline std::pair<StatusIndicator,
                         boost::optional<HeaderView>>
-interpret_block(const StatusIndicator& status, ceph::bufferlist& bl) {
+interpret_block(const StatusIndicator& status, stone::bufferlist& bl) {
   static constexpr std::array<char, BLOCK_SIZE> zero_block = {0, };
   const char (&block)[BLOCK_SIZE] = \
     reinterpret_cast<const char (&)[BLOCK_SIZE]>(*bl.c_str());

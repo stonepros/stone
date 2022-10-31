@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Inktank, Inc.
  *
@@ -45,23 +45,23 @@ public:
   }
 
   void service_encode() {
-    using ceph::encode;
+    using stone::encode;
     encode(epoch, payload);
     encode(round, payload);
   }
 
-  void service_decode(ceph::buffer::list::const_iterator &p) {
-    using ceph::decode;
+  void service_decode(stone::buffer::list::const_iterator &p) {
+    using stone::decode;
     decode(epoch, p);
     decode(round, p);
   }
 
   void encode_payload(uint64_t features) override {
-    ceph_abort_msg("MMonQuorumService message must always be a base class");
+    stone_abort_msg("MMonQuorumService message must always be a base class");
   }
 
   void decode_payload() override {
-    ceph_abort_msg("MMonQuorumService message must always be a base class");
+    stone_abort_msg("MMonQuorumService message must always be a base class");
   }
 
   std::string_view get_type_name() const override { return "quorum_service"; }

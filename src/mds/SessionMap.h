@@ -71,8 +71,8 @@ public:
 
   */
 
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
 
   enum {
     STATE_CLOSED = 0,
@@ -98,7 +98,7 @@ public:
     set_connection(std::move(con));
   }
   ~Session() override {
-    ceph_assert(!item_session_list.is_on_list());
+    stone_assert(!item_session_list.is_on_list());
     preopen_out_queue.clear();
   }
 
@@ -114,17 +114,17 @@ public:
     }
   }
 
-  void dump(ceph::Formatter *f, bool cap_dump=false) const;
+  void dump(stone::Formatter *f, bool cap_dump=false) const;
   void push_pv(version_t pv)
   {
-    ceph_assert(projected.empty() || projected.back() != pv);
+    stone_assert(projected.empty() || projected.back() != pv);
     projected.push_back(pv);
   }
 
   void pop_pv(version_t v)
   {
-    ceph_assert(!projected.empty());
-    ceph_assert(projected.front() == v);
+    stone_assert(!projected.empty());
+    stone_assert(projected.front() == v);
     projected.pop_front();
   }
 
@@ -139,7 +139,7 @@ public:
 
   void set_reconnecting(bool s) { reconnecting = s; }
 
-  void decode(ceph::buffer::list::const_iterator &p);
+  void decode(stone::buffer::list::const_iterator &p);
   template<typename T>
   void set_client_metadata(T&& meta)
   {
@@ -181,7 +181,7 @@ public:
       } else if (free_prealloc_inos.contains(ino)) {
 	free_prealloc_inos.erase(ino);
       } else {
-	ceph_assert(0);
+	stone_assert(0);
       }
     } else if (!free_prealloc_inos.empty()) {
       ino = free_prealloc_inos.range_start();
@@ -237,13 +237,13 @@ public:
     ++importing_count;
   }
   void dec_importing() {
-    ceph_assert(importing_count > 0);
+    stone_assert(importing_count > 0);
     --importing_count;
   }
   bool is_importing() const { return importing_count > 0; }
 
   void set_load_avg_decay_rate(double rate) {
-    ceph_assert(is_open() || is_stale());
+    stone_assert(is_open() || is_stale());
     load_avg = DecayCounter(rate);
   }
   uint64_t get_load_avg() const {
@@ -306,11 +306,11 @@ public:
     return !waitfor_flush.empty();
   }
 
-  void add_completed_request(ceph_tid_t t, inodeno_t created) {
+  void add_completed_request(stone_tid_t t, inodeno_t created) {
     info.completed_requests[t] = created;
     completed_requests_dirty = true;
   }
-  bool trim_completed_requests(ceph_tid_t mintid) {
+  bool trim_completed_requests(stone_tid_t mintid) {
     // trim
     bool erased_any = false;
     while (!info.completed_requests.empty() && 
@@ -324,7 +324,7 @@ public:
     }
     return erased_any;
   }
-  bool have_completed_request(ceph_tid_t tid, inodeno_t *pcreated) const {
+  bool have_completed_request(stone_tid_t tid, inodeno_t *pcreated) const {
     auto p = info.completed_requests.find(tid);
     if (p == info.completed_requests.end())
       return false;
@@ -333,10 +333,10 @@ public:
     return true;
   }
 
-  void add_completed_flush(ceph_tid_t tid) {
+  void add_completed_flush(stone_tid_t tid) {
     info.completed_flushes.insert(tid);
   }
-  bool trim_completed_flushes(ceph_tid_t mintid) {
+  bool trim_completed_flushes(stone_tid_t mintid) {
     bool erased_any = false;
     while (!info.completed_flushes.empty() &&
 	(mintid == 0 || *info.completed_flushes.begin() < mintid)) {
@@ -348,7 +348,7 @@ public:
     }
     return erased_any;
   }
-  bool have_completed_flush(ceph_tid_t tid) const {
+  bool have_completed_flush(stone_tid_t tid) const {
     return info.completed_flushes.count(tid);
   }
 
@@ -416,7 +416,7 @@ public:
 
   xlist<Session*>::item item_session_list;
 
-  std::list<ceph::ref_t<Message>> preopen_out_queue;  ///< messages for client, queued before they connect
+  std::list<stone::ref_t<Message>> preopen_out_queue;  ///< messages for client, queued before they connect
 
   /* This is mutable to allow get_request_count to be const. elist does not
    * support const iterators yet.
@@ -538,11 +538,11 @@ public:
 
   version_t get_version() const {return version;}
 
-  virtual void encode_header(ceph::buffer::list *header_bl);
-  virtual void decode_header(ceph::buffer::list &header_bl);
-  virtual void decode_values(std::map<std::string, ceph::buffer::list> &session_vals);
-  virtual void decode_legacy(ceph::buffer::list::const_iterator& blp);
-  void dump(ceph::Formatter *f) const;
+  virtual void encode_header(stone::buffer::list *header_bl);
+  virtual void decode_header(stone::buffer::list &header_bl);
+  virtual void decode_values(std::map<std::string, stone::buffer::list> &session_vals);
+  virtual void decode_legacy(stone::buffer::list::const_iterator& blp);
+  void dump(stone::Formatter *f) const;
 
   void set_rank(mds_rank_t r)
   {
@@ -578,7 +578,7 @@ public:
 
 protected:
   version_t version = 0;
-  ceph::unordered_map<entity_name_t, Session*> session_map;
+  stone::unordered_map<entity_name_t, Session*> session_map;
   PerfCounters *logger =nullptr;
 
   // total request load avg
@@ -597,7 +597,7 @@ public:
       delete p.second;
 
     if (logger) {
-      g_ceph_context->get_perfcounters_collection()->remove(logger);
+      g_stone_context->get_perfcounters_collection()->remove(logger);
     }
 
     delete logger;
@@ -634,7 +634,7 @@ public:
   }
 
   // sessions
-  void decode_legacy(ceph::buffer::list::const_iterator& blp) override;
+  void decode_legacy(stone::buffer::list::const_iterator& blp) override;
   bool empty() const { return session_map.empty(); }
   const auto& get_sessions() const {
     return session_map;
@@ -664,7 +664,7 @@ public:
 	    session_map_entry-> second : nullptr);
   }
   const Session* get_session(entity_name_t w) const {
-    ceph::unordered_map<entity_name_t, Session*>::const_iterator p = session_map.find(w);
+    stone::unordered_map<entity_name_t, Session*>::const_iterator p = session_map.find(w);
     if (p == session_map.end()) {
       return NULL;
     } else {
@@ -703,7 +703,7 @@ public:
 
   // helpers
   entity_inst_t& get_inst(entity_name_t w) {
-    ceph_assert(session_map.count(w));
+    stone_assert(session_map.count(w));
     return session_map[w]->info.inst;
   }
   version_t get_push_seq(client_t client) {
@@ -713,9 +713,9 @@ public:
     Session *session = get_session(rid.name);
     return session && session->have_completed_request(rid.tid, NULL);
   }
-  void trim_completed_requests(entity_name_t c, ceph_tid_t tid) {
+  void trim_completed_requests(entity_name_t c, stone_tid_t tid) {
     Session *session = get_session(c);
-    ceph_assert(session);
+    stone_assert(session);
     session->trim_completed_requests(tid);
   }
 
@@ -730,12 +730,12 @@ public:
       int header_r,
       int values_r,
       bool first,
-      ceph::buffer::list &header_bl,
-      std::map<std::string, ceph::buffer::list> &session_vals,
+      stone::buffer::list &header_bl,
+      std::map<std::string, stone::buffer::list> &session_vals,
       bool more_session_vals);
 
   void load_legacy();
-  void _load_legacy_finish(int r, ceph::buffer::list &bl);
+  void _load_legacy_finish(int r, stone::buffer::list &bl);
 
   void save(MDSContext *onsave, version_t needv=0);
   void _save_finish(version_t v);

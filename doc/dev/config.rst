@@ -18,7 +18,7 @@ How can the configuration be set? Well, there are several sources:
 The Configuration File
 ======================
 
-Most configuration settings originate in the Ceph configuration file.
+Most configuration settings originate in the Stone configuration file.
 
 How do we find the configuration file? Well, in order, we check:
  - the default locations
@@ -54,7 +54,7 @@ A few additional special metavariables are also defined:
 Reading configuration values
 ====================================================
 
-There are two ways for Ceph code to get configuration values. One way is to
+There are two ways for Stone code to get configuration values. One way is to
 read it directly from a variable named "g_conf," or equivalently,
 "g_ceph_ctx->_conf." The other is to register an observer that will be called
 every time the relevant configuration values changes. This observer will be

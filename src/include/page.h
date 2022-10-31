@@ -1,7 +1,7 @@
 #ifndef STONE_PAGE_H
 #define STONE_PAGE_H
 
-namespace ceph {
+namespace stone {
   // these are in common/page.cc
   extern unsigned _page_size;
   extern unsigned long _page_mask;
@@ -11,8 +11,8 @@ namespace ceph {
 #endif
 
 
-#define STONE_PAGE_SIZE ceph::_page_size
-#define STONE_PAGE_MASK ceph::_page_mask
-#define STONE_PAGE_SHIFT ceph::_page_shift
+#define STONE_PAGE_SIZE stone::_page_size
+#define STONE_PAGE_MASK stone::_page_mask
+#define STONE_PAGE_SHIFT stone::_page_shift
 
 

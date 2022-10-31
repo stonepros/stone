@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_WATCHER_H
 
 #include "common/AsyncOpTracker.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/RWLock.h"
 #include "include/rados/librados.hpp"
 #include "librbd/watcher/Notifier.h"
@@ -75,7 +75,7 @@ protected:
   asio::ContextWQ *m_work_queue;
   std::string m_oid;
   StoneContext *m_cct;
-  mutable ceph::shared_mutex m_watch_lock;
+  mutable stone::shared_mutex m_watch_lock;
   uint64_t m_watch_handle;
   watcher::Notifier m_notifier;
 
@@ -84,10 +84,10 @@ protected:
 
   AsyncOpTracker m_async_op_tracker;
 
-  bool is_registered(const ceph::shared_mutex&) const {
+  bool is_registered(const stone::shared_mutex&) const {
     return (m_watch_state == WATCH_STATE_IDLE && m_watch_handle != 0);
   }
-  bool is_unregistered(const ceph::shared_mutex&) const {
+  bool is_unregistered(const stone::shared_mutex&) const {
     return (m_watch_state == WATCH_STATE_IDLE && m_watch_handle == 0);
   }
 

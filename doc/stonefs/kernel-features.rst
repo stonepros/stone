@@ -3,13 +3,13 @@ Supported Features of the Kernel Driver
 ========================================
 The kernel driver is developed separately from the core ceph code, and as
 such it sometimes differs from the FUSE driver in feature implementation.
-The following details the implementation status of various CephFS features
+The following details the implementation status of various StoneFS features
 in the kernel driver.
 
 Inline data
 -----------
 Inline data was introduced by the Firefly release. This feature is being
-deprecated in mainline CephFS, and may be removed from a future kernel
+deprecated in mainline StoneFS, and may be removed from a future kernel
 release.
 
 Linux kernel clients >= 3.19 can read inline data and convert existing
@@ -26,7 +26,7 @@ quota. At present, no Linux kernel client support the old format quota.
 
 See `Quotas`_ for more information.
 
-Multiple file systems within a Ceph cluster
+Multiple file systems within a Stone cluster
 -------------------------------------------
 The feature was introduced by the Jewel release. Linux kernel clients >= 4.7
 can support it.

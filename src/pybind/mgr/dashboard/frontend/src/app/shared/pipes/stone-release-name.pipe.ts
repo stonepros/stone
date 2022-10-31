@@ -1,13 +1,13 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'cephReleaseName'
+  name: 'stoneReleaseName'
 })
-export class CephReleaseNamePipe implements PipeTransform {
+export class StoneReleaseNamePipe implements PipeTransform {
   transform(value: any): any {
-    // Expect "ceph version 13.1.0-419-g251e2515b5
+    // Expect "stone version 13.1.0-419-g251e2515b5
     //         (251e2515b563856349498c6caf34e7a282f62937) nautilus (dev)"
-    const result = /ceph version\s+[^ ]+\s+\(.+\)\s+(.+)\s+\((.+)\)/.exec(value);
+    const result = /stone version\s+[^ ]+\s+\(.+\)\s+(.+)\s+\((.+)\)/.exec(value);
     if (result) {
       if (result[2] === 'dev') {
         // Assume this is actually master

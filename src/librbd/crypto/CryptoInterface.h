@@ -15,8 +15,8 @@ namespace crypto {
 class CryptoInterface : public RefCountedObject {
 
 public:
-  virtual int encrypt(ceph::bufferlist* data, uint64_t image_offset) = 0;
-  virtual int decrypt(ceph::bufferlist* data, uint64_t image_offset) = 0;
+  virtual int encrypt(stone::bufferlist* data, uint64_t image_offset) = 0;
+  virtual int decrypt(stone::bufferlist* data, uint64_t image_offset) = 0;
   virtual uint64_t get_block_size() const = 0;
   virtual uint64_t get_data_offset() const = 0;
   virtual const unsigned char* get_key() const = 0;
@@ -70,10 +70,10 @@ public:
       extent.extent_map.emplace_back(extent.offset, extent.bl.length());
     }
 
-    ceph::bufferlist result_bl;
+    stone::bufferlist result_bl;
     io::Extents result_extent_map;
 
-    ceph::bufferlist curr_block_bl;
+    stone::bufferlist curr_block_bl;
     auto curr_offset = extent.offset;
     auto curr_block_start_offset = curr_offset;
     auto curr_block_end_offset = curr_offset;

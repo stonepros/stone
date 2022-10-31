@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7302" # git grep '\<7105\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7302" # git grep '\<7105\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -25,7 +25,7 @@ function check_lec_equals_pools() {
 
   local pool_id=$1
 
-  report=$(ceph report)
+  report=$(stone report)
   lec=$(echo $report | \
     jq '.osdmap_clean_epochs.min_last_epoch_clean')
 
@@ -52,7 +52,7 @@ function check_lec_lower_than_pool() {
   local pool_id=$1
   [[ -z "$pool_id" ]] && ( echo "expected pool_id as parameter" ; exit 1 )
 
-  report=$(ceph report)
+  report=$(stone report)
   lec=$(echo $report | \
     jq '.osdmap_clean_epochs.min_last_epoch_clean')
 
@@ -72,7 +72,7 @@ function check_floor_pool_greater_than_pool() {
   [[ -z "$pool_a" ]] && ( echo "expected id as first parameter" ; exit 1 )
   [[ -z "$pool_b" ]] && ( echo "expected id as second parameter" ; exit 1 )
 
-  report=$(ceph report)
+  report=$(stone report)
 
   floor_a=($(echo $report | \
     jq \
@@ -92,7 +92,7 @@ function check_lec_honours_osd() {
 
   local osd=$1
 
-  report=$(ceph report)
+  report=$(stone report)
   lec=$(echo $report | \
     jq '.osdmap_clean_epochs.min_last_epoch_clean')
 
@@ -116,7 +116,7 @@ function check_lec_honours_osd() {
 }
 
 function validate_fc() {
-  report=$(ceph report)
+  report=$(stone report)
   lec=$(echo $report | \
     jq '.osdmap_clean_epochs.min_last_epoch_clean')
   osdm_fc=$(echo $report | \
@@ -127,7 +127,7 @@ function validate_fc() {
 }
 
 function get_fc_lc_diff() {
-  report=$(ceph report)
+  report=$(stone report)
   osdm_fc=$(echo $report | \
     jq '.osdmap_first_committed')
   osdm_lc=$(echo $report | \
@@ -141,7 +141,7 @@ function get_pool_id() {
   local pn=$1
   [[ -z "$pn" ]] && ( echo "expected pool name as argument" ; exit 1 )
 
-  report=$(ceph report)
+  report=$(stone report)
   pool_id=$(echo $report | \
     jq ".osdmap.pools[] | select(.pool_name == \"$pn\") | .pool")
 
@@ -181,8 +181,8 @@ function TEST_mon_last_clean_epoch() {
 
   sleep 5
 
-  ceph tell 'osd.*' injectargs '--osd-beacon-report-interval 10' || exit 1
-  ceph tell 'mon.*' injectargs \
+  stone tell 'osd.*' injectargs '--osd-beacon-report-interval 10' || exit 1
+  stone tell 'mon.*' injectargs \
     '--mon-min-osdmap-epochs 2 --paxos-service-trim-min 1' || exit 1
 
   create_pool foo 32
@@ -197,8 +197,8 @@ function TEST_mon_last_clean_epoch() {
   # no real clue why we are getting these warnings, but let's make them go
   # away so we can be happy.
 
-  ceph osd set-full-ratio 0.97
-  ceph osd set-backfillfull-ratio 0.97
+  stone osd set-full-ratio 0.97
+  stone osd set-backfillfull-ratio 0.97
 
   wait_for_health_ok || exit 1
 
@@ -210,8 +210,8 @@ function TEST_mon_last_clean_epoch() {
 
   pre_map_diff=$post_map_diff
 
-  ceph osd pool set foo size 3
-  ceph osd pool set bar size 3
+  stone osd pool set foo size 3
+  stone osd pool set bar size 3
 
   wait_for_health_ok || exit 1
 
@@ -226,14 +226,14 @@ function TEST_mon_last_clean_epoch() {
   # - all pools have floor equal to lec
 
   while kill $osd_pid ; do sleep 1 ; done
-  ceph osd out 2
+  stone osd out 2
   sleep 5 # seriously, just to make sure things settle; we may not need this.
 
   # generate some maps
   for ((i=0; i <= 10; ++i)); do
-    ceph osd set noup
+    stone osd set noup
     sleep 1
-    ceph osd unset noup
+    stone osd unset noup
     sleep 1
   done
 
@@ -250,7 +250,7 @@ function TEST_mon_last_clean_epoch() {
   # - lec equals pool 'foo' floor
   # - pool 'bar' floor greater than pool 'foo'
 
-  ceph osd pool set bar size 2
+  stone osd pool set bar size 2
 
   diff_ver=$(get_fc_lc_diff)
   [[ $diff_ver -gt 2 ]] || exit 1
@@ -270,7 +270,7 @@ function TEST_mon_last_clean_epoch() {
 
   pre_map_diff=$(get_fc_lc_diff)
 
-  ceph osd pool set foo size 2 || exit 1
+  stone osd pool set foo size 2 || exit 1
   wait_for_clean || exit 1
 
   check_lec_equals_pools || exit 1

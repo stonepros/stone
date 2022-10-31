@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -43,7 +43,7 @@ public:
     : MOSDFastDispatchOp{MSG_OSD_PG_PUSH_REPLY, HEAD_VERSION, COMPAT_VERSION}
     {}
 
-  void compute_cost(StoneeContext *cct) {
+  void compute_cost(StoneContext *cct) {
     cost = 0;
     for (auto i = replies.begin(); i != replies.end(); ++i) {
       cost += i->cost(cct);
@@ -55,7 +55,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(pgid.pgid, p);
     decode(map_epoch, p);
@@ -71,7 +71,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(pgid.pgid, payload);
     encode(map_epoch, payload);
     encode(replies, payload);

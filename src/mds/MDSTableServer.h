@@ -33,7 +33,7 @@ public:
   virtual void _get_reply_buffer(version_t tid, bufferlist *pbl) const = 0;
   virtual void _commit(version_t tid, cref_t<MMDSTableRequest> req) = 0;
   virtual void _rollback(version_t tid) = 0;
-  virtual void _server_update(bufferlist& bl) { ceph_abort(); }
+  virtual void _server_update(bufferlist& bl) { stone_abort(); }
   virtual bool _notify_prep(version_t tid) { return false; };
 
   void _note_prepare(mds_rank_t mds, uint64_t reqid, bool replay=false) {

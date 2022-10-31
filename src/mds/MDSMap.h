@@ -24,18 +24,18 @@
 #include <errno.h>
 
 #include "include/types.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "include/health.h"
 #include "include/CompatSet.h"
 #include "include/common_fwd.h"
 
 #include "common/Clock.h"
 #include "common/Formatter.h"
-#include "common/ceph_releases.h"
+#include "common/stone_releases.h"
 #include "common/config.h"
 
 #include "mds/mdstypes.h"
-#include "mds/cephfs_features.h"
+#include "mds/stonefs_features.h"
 
 static inline const auto MDS_FEATURE_INCOMPAT_BASE = CompatSet::Feature(1, "base v0.20");
 static inline const auto MDS_FEATURE_INCOMPAT_CLIENTRANGES = CompatSet::Feature(2, "client writeable ranges");
@@ -48,7 +48,7 @@ static inline const auto MDS_FEATURE_INCOMPAT_NOANCHOR = CompatSet::Feature(8, "
 static inline const auto MDS_FEATURE_INCOMPAT_FILE_LAYOUT_V2 = CompatSet::Feature(9, "file layout v2");
 static inline const auto MDS_FEATURE_INCOMPAT_SNAPREALM_V2 = CompatSet::Feature(10, "snaprealm v2");
 
-#define MDS_FS_NAME_DEFAULT "cephfs"
+#define MDS_FS_NAME_DEFAULT "stonefs"
 
 class health_check_map_t;
 
@@ -56,9 +56,9 @@ class MDSMap {
 public:
   /* These states are the union of the set of possible states of an MDS daemon,
    * and the set of possible states of an MDS rank. See
-   * doc/cephfs/mds-states.rst for state descriptions,
-   * doc/cephfs/mds-state-diagram.svg for a visual state diagram, and
-   * doc/cephfs/mds-state-diagram.dot to update mds-state-diagram.svg.
+   * doc/stonefs/mds-states.rst for state descriptions,
+   * doc/stonefs/mds-state-diagram.svg for a visual state diagram, and
+   * doc/stonefs/mds-state-diagram.dot to update mds-state-diagram.svg.
    */
   typedef enum {
     // States of an MDS daemon not currently holding a rank
@@ -130,12 +130,12 @@ public:
       return addrs;
     }
 
-    void encode(ceph::buffer::list& bl, uint64_t features) const {
+    void encode(stone::buffer::list& bl, uint64_t features) const {
       if ((features & STONE_FEATURE_MDSENC) == 0 ) encode_unversioned(bl);
       else encode_versioned(bl, features);
     }
-    void decode(ceph::buffer::list::const_iterator& p);
-    void dump(ceph::Formatter *f) const;
+    void decode(stone::buffer::list::const_iterator& p);
+    void dump(stone::Formatter *f) const;
     void dump(std::ostream&) const;
 
     // The long form name for use in cluster log messages`
@@ -157,8 +157,8 @@ public:
     uint64_t flags = 0;
     CompatSet compat;
   private:
-    void encode_versioned(ceph::buffer::list& bl, uint64_t features) const;
-    void encode_unversioned(ceph::buffer::list& bl) const;
+    void encode_versioned(stone::buffer::list& bl, uint64_t features) const;
+    void encode_unversioned(stone::buffer::list& bl) const;
   };
 
   friend class MDSMonitor;
@@ -197,7 +197,7 @@ public:
   uint64_t get_max_filesize() const { return max_file_size; }
   void set_max_filesize(uint64_t m) { max_file_size = m; }
 
-  void set_min_compat_client(ceph_release_t version);
+  void set_min_compat_client(stone_release_t version);
 
   void add_required_client_feature(size_t bit) {
     required_client_features.insert(bit);
@@ -261,7 +261,7 @@ public:
   mds_rank_t get_old_max_mds() const { return old_max_mds; }
 
   mds_rank_t get_standby_count_wanted(mds_rank_t standby_daemon_count) const {
-    ceph_assert(standby_daemon_count >= 0);
+    stone_assert(standby_daemon_count >= 0);
     std::set<mds_rank_t> s;
     get_standby_replay_mds_set(s);
     mds_rank_t standbys_avail = (mds_rank_t)s.size()+standby_daemon_count;
@@ -296,7 +296,7 @@ public:
     return mds_info.at(gid);
   }
   const mds_info_t& get_mds_info(mds_rank_t m) const {
-    ceph_assert(up.count(m) && mds_info.count(up.at(m)));
+    stone_assert(up.count(m) && mds_info.count(up.at(m)));
     return mds_info.at(up.at(m));
   }
   mds_gid_t find_mds_gid_by_name(std::string_view s) const;
@@ -363,7 +363,7 @@ public:
    */
   void get_down_mds_set(std::set<mds_rank_t> *s) const
   {
-    ceph_assert(s != NULL);
+    stone_assert(s != NULL);
     s->insert(failed.begin(), failed.end());
     s->insert(damaged.begin(), damaged.end());
   }
@@ -566,18 +566,18 @@ public:
       return mds_info_entry->second.inc;
     return -1;
   }
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void decode(const ceph::buffer::list& bl) {
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void decode(const stone::buffer::list& bl) {
     auto p = bl.cbegin();
     decode(p);
   }
   void sanitize(const std::function<bool(int64_t pool)>& pool_exists);
 
   void print(std::ostream& out) const;
-  void print_summary(ceph::Formatter *f, std::ostream *out) const;
+  void print_summary(stone::Formatter *f, std::ostream *out) const;
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<MDSMap*>& ls);
 
   static bool state_transition_valid(DaemonState prev, DaemonState next);

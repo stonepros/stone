@@ -1,6 +1,6 @@
 import os
 import pytest
-from ceph_volume import main
+from stone_volume import main
 
 
 class TestVolume(object):
@@ -15,44 +15,44 @@ class TestVolume(object):
         with pytest.raises(SystemExit):
             main.Volume(argv=[])
         stdout, stderr = capsys.readouterr()
-        assert 'See "ceph-volume --help" for full list' in stdout
+        assert 'See "stone-volume --help" for full list' in stdout
 
     def test_environ_vars_show_up(self, capsys):
-        os.environ['CEPH_CONF'] = '/opt/ceph.conf'
+        os.environ['STONE_CONF'] = '/opt/stone.conf'
         with pytest.raises(SystemExit):
             main.Volume(argv=[])
         stdout, stderr = capsys.readouterr()
-        assert 'CEPH_CONF' in stdout
-        assert '/opt/ceph.conf' in stdout
+        assert 'STONE_CONF' in stdout
+        assert '/opt/stone.conf' in stdout
 
     def test_flags_are_parsed_with_help(self, capsys):
         with pytest.raises(SystemExit):
-            main.Volume(argv=['ceph-volume', '--help'])
+            main.Volume(argv=['stone-volume', '--help'])
         stdout, stderr = capsys.readouterr()
         assert '--cluster' in stdout
         assert '--log-path' in stdout
 
-    def test_log_ignoring_missing_ceph_conf(self, caplog):
+    def test_log_ignoring_missing_stone_conf(self, caplog):
         with pytest.raises(SystemExit) as error:
-            main.Volume(argv=['ceph-volume', '--cluster', 'barnacle', 'lvm', '--help'])
+            main.Volume(argv=['stone-volume', '--cluster', 'barnacle', 'lvm', '--help'])
         # make sure we aren't causing an actual error
         assert error.value.code == 0
         log = caplog.records[-1]
-        assert log.message == 'ignoring inability to load ceph.conf'
+        assert log.message == 'ignoring inability to load stone.conf'
         assert log.levelname == 'ERROR'
 
     def test_logs_current_command(self, caplog):
         with pytest.raises(SystemExit) as error:
-            main.Volume(argv=['ceph-volume', '--cluster', 'barnacle', 'lvm', '--help'])
+            main.Volume(argv=['stone-volume', '--cluster', 'barnacle', 'lvm', '--help'])
         # make sure we aren't causing an actual error
         assert error.value.code == 0
         log = caplog.records[-2]
-        assert log.message == 'Running command: ceph-volume --cluster barnacle lvm --help'
+        assert log.message == 'Running command: stone-volume --cluster barnacle lvm --help'
         assert log.levelname == 'INFO'
 
     def test_logs_set_level_error(self, caplog):
         with pytest.raises(SystemExit) as error:
-            main.Volume(argv=['ceph-volume', '--log-level', 'error', '--cluster', 'barnacle', 'lvm', '--help'])
+            main.Volume(argv=['stone-volume', '--log-level', 'error', '--cluster', 'barnacle', 'lvm', '--help'])
         # make sure we aren't causing an actual error
         assert error.value.code == 0
         assert caplog.records
@@ -62,7 +62,7 @@ class TestVolume(object):
 
     def test_logs_incorrect_log_level(self, capsys):
         with pytest.raises(SystemExit) as error:
-            main.Volume(argv=['ceph-volume', '--log-level', 'foo', '--cluster', 'barnacle', 'lvm', '--help'])
+            main.Volume(argv=['stone-volume', '--log-level', 'foo', '--cluster', 'barnacle', 'lvm', '--help'])
         # make sure this is an error
         assert error.value.code != 0
         stdout, stderr = capsys.readouterr()

@@ -3,7 +3,7 @@ import os
 if 'UNITTEST' in os.environ:
     import tests
 
-import cephfs
+import stonefs
 import contextlib
 import datetime
 import errno
@@ -22,7 +22,7 @@ else:
 
 from typing import Tuple, Any, Callable, Optional, Dict, TYPE_CHECKING, TypeVar, List, Iterable, Generator, Generic, Iterator
 
-from ceph.deployment.utils import wrap_ipv6
+from stone.deployment.utils import wrap_ipv6
 
 T = TypeVar('T')
 
@@ -51,7 +51,7 @@ UNDERLINE_SEQ = "\033[4m"
 logger = logging.getLogger(__name__)
 
 
-class CephfsConnectionException(Exception):
+class StonefsConnectionException(Exception):
     def __init__(self, error_code: int, error_message: str):
         self.errno = error_code
         self.error_str = error_message
@@ -95,10 +95,10 @@ def lock_timeout_log(lock: Lock, timeout: int = 5) -> Iterator[None]:
             warned = True
 
 
-class CephfsConnectionPool(object):
+class StonefsConnectionPool(object):
     class Connection(object):
         def __init__(self, mgr: Module_T, fs_name: str):
-            self.fs: Optional["cephfs.LibCephFS"] = None
+            self.fs: Optional["stonefs.LibStoneFS"] = None
             self.mgr = mgr
             self.fs_name = fs_name
             self.ops_in_progress = 0
@@ -110,10 +110,10 @@ class CephfsConnectionPool(object):
             for fs in fs_map['filesystems']:
                 if fs['mdsmap']['fs_name'] == self.fs_name:
                     return fs['id']
-            raise CephfsConnectionException(
+            raise StonefsConnectionException(
                 -errno.ENOENT, "FS '{0}' not found".format(self.fs_name))
 
-        def get_fs_handle(self) -> "cephfs.LibCephFS":
+        def get_fs_handle(self) -> "stonefs.LibStoneFS":
             self.last_used = time.time()
             self.ops_in_progress += 1
             return self.fs
@@ -148,27 +148,27 @@ class CephfsConnectionPool(object):
 
         def connect(self) -> None:
             assert self.ops_in_progress == 0
-            logger.debug("Connecting to cephfs '{0}'".format(self.fs_name))
-            self.fs = cephfs.LibCephFS(rados_inst=self.mgr.rados)
-            logger.debug("Setting user ID and group ID of CephFS mount as root...")
+            logger.debug("Connecting to stonefs '{0}'".format(self.fs_name))
+            self.fs = stonefs.LibStoneFS(rados_inst=self.mgr.rados)
+            logger.debug("Setting user ID and group ID of StoneFS mount as root...")
             self.fs.conf_set("client_mount_uid", "0")
             self.fs.conf_set("client_mount_gid", "0")
             self.fs.conf_set("client_check_pool_perm", "false")
-            logger.debug("CephFS initializing...")
+            logger.debug("StoneFS initializing...")
             self.fs.init()
-            logger.debug("CephFS mounting...")
+            logger.debug("StoneFS mounting...")
             self.fs.mount(filesystem_name=self.fs_name.encode('utf-8'))
-            logger.debug("Connection to cephfs '{0}' complete".format(self.fs_name))
-            self.mgr._ceph_register_client(self.fs.get_addrs())
+            logger.debug("Connection to stonefs '{0}' complete".format(self.fs_name))
+            self.mgr._stone_register_client(self.fs.get_addrs())
 
         def disconnect(self) -> None:
             try:
                 assert self.fs
                 assert self.ops_in_progress == 0
-                logger.info("disconnecting from cephfs '{0}'".format(self.fs_name))
+                logger.info("disconnecting from stonefs '{0}'".format(self.fs_name))
                 addrs = self.fs.get_addrs()
                 self.fs.shutdown()
-                self.mgr._ceph_unregister_client(addrs)
+                self.mgr._stone_unregister_client(addrs)
                 self.fs = None
             except Exception as e:
                 logger.debug("disconnect: ({0})".format(e))
@@ -177,9 +177,9 @@ class CephfsConnectionPool(object):
         def abort(self) -> None:
             assert self.fs
             assert self.ops_in_progress == 0
-            logger.info("aborting connection from cephfs '{0}'".format(self.fs_name))
+            logger.info("aborting connection from stonefs '{0}'".format(self.fs_name))
             self.fs.abort_conn()
-            logger.info("abort done from cephfs '{0}'".format(self.fs_name))
+            logger.info("abort done from stonefs '{0}'".format(self.fs_name))
             self.fs = None
 
     # TODO: make this configurable
@@ -189,10 +189,10 @@ class CephfsConnectionPool(object):
 
     def __init__(self, mgr: Module_T):
         self.mgr = mgr
-        self.connections: Dict[str, List[CephfsConnectionPool.Connection]] = {}
+        self.connections: Dict[str, List[StonefsConnectionPool.Connection]] = {}
         self.lock = Lock()
         self.cond = Condition(self.lock)
-        self.timer_task = RTimer(CephfsConnectionPool.TIMER_TASK_RUN_INTERVAL,
+        self.timer_task = RTimer(StonefsConnectionPool.TIMER_TASK_RUN_INTERVAL,
                                  self.cleanup_connections)
         self.timer_task.start()
 
@@ -203,13 +203,13 @@ class CephfsConnectionPool(object):
             for fs_name, connections in self.connections.items():
                 logger.debug(f'fs_name ({fs_name}) connections ({connections})')
                 for connection in connections:
-                    if connection.is_connection_idle(CephfsConnectionPool.CONNECTION_IDLE_INTERVAL):
+                    if connection.is_connection_idle(StonefsConnectionPool.CONNECTION_IDLE_INTERVAL):
                         idle_conns.append((fs_name, connection))
             logger.info(f'cleaning up connections: {idle_conns}')
             for idle_conn in idle_conns:
                 self._del_connection(idle_conn[0], idle_conn[1])
 
-    def get_fs_handle(self, fs_name: str) -> "cephfs.LibCephFS":
+    def get_fs_handle(self, fs_name: str) -> "stonefs.LibStoneFS":
         with self.lock:
             try:
                 min_shared = 0
@@ -228,7 +228,7 @@ class CephfsConnectionPool(object):
                         else:
                             # filesystem id changed beneath us (or the filesystem does not exist).
                             # this is possible if the filesystem got removed (and recreated with
-                            # same name) via "ceph fs rm/new" mon command.
+                            # same name) via "stone fs rm/new" mon command.
                             logger.warning(f'[get] filesystem id changed for volume ({fs_name}), disconnecting ({connection})')
                             # note -- this will mutate @connections too
                             self._del_connection(fs_name, connection)
@@ -238,9 +238,9 @@ class CephfsConnectionPool(object):
                             shared_connection = connection
                 # when we end up here, there are no "free" connections. so either spin up a new
                 # one or share it.
-                if len(connections) < CephfsConnectionPool.MAX_CONCURRENT_CONNECTIONS:
+                if len(connections) < StonefsConnectionPool.MAX_CONCURRENT_CONNECTIONS:
                     logger.debug('[get] spawning new connection since no connection is unused and we still have room for more')
-                    connection = CephfsConnectionPool.Connection(self.mgr, fs_name)
+                    connection = StonefsConnectionPool.Connection(self.mgr, fs_name)
                     connection.connect()
                     self.connections[fs_name].append(connection)
                     return connection.get_fs_handle()
@@ -248,14 +248,14 @@ class CephfsConnectionPool(object):
                     assert shared_connection is not None
                     logger.debug(f'[get] using shared connection ({shared_connection})')
                     return shared_connection.get_fs_handle()
-            except cephfs.Error as e:
+            except stonefs.Error as e:
                 # try to provide a better error string if possible
                 if e.args[0] == errno.ENOENT:
-                    raise CephfsConnectionException(
+                    raise StonefsConnectionException(
                         -errno.ENOENT, "FS '{0}' not found".format(fs_name))
-                raise CephfsConnectionException(-e.args[0], e.args[1])
+                raise StonefsConnectionException(-e.args[0], e.args[1])
 
-    def put_fs_handle(self, fs_name: str, fs_handle: cephfs.LibCephFS) -> None:
+    def put_fs_handle(self, fs_name: str, fs_handle: stonefs.LibStoneFS) -> None:
         with self.lock:
             connections = self.connections.get(fs_name, [])
             for connection in connections:
@@ -286,11 +286,11 @@ class CephfsConnectionPool(object):
             assert len(self.connections) == 0
 
 
-class CephfsClient(Generic[Module_T]):
+class StonefsClient(Generic[Module_T]):
     def __init__(self, mgr: Module_T):
         self.mgr = mgr
         self.stopping = Event()
-        self.connection_pool = CephfsConnectionPool(self.mgr)
+        self.connection_pool = StonefsConnectionPool(self.mgr)
 
     def is_stopping(self) -> bool:
         return self.stopping.is_set()
@@ -299,10 +299,10 @@ class CephfsClient(Generic[Module_T]):
         logger.info("shutting down")
         # first, note that we're shutting down
         self.stopping.set()
-        # second, delete all libcephfs handles from connection pool
+        # second, delete all libstonefs handles from connection pool
         self.connection_pool.del_all_connections()
 
-    def get_fs(self, fs_name: str) -> Optional["cephfs.LibCephFS"]:
+    def get_fs(self, fs_name: str) -> Optional["stonefs.LibStoneFS"]:
         fs_map = self.mgr.get('fs_map')
         for fs in fs_map['filesystems']:
             if fs['mdsmap']['fs_name'] == fs_name:
@@ -332,17 +332,17 @@ class CephfsClient(Generic[Module_T]):
 
 
 @contextlib.contextmanager
-def open_filesystem(fsc: CephfsClient, fs_name: str) -> Generator["cephfs.LibCephFS", None, None]:
+def open_filesystem(fsc: StonefsClient, fs_name: str) -> Generator["stonefs.LibStoneFS", None, None]:
     """
     Open a volume with shared access.
     This API is to be used as a context manager.
 
-    :param fsc: cephfs client instance
+    :param fsc: stonefs client instance
     :param fs_name: fs name
-    :return: yields a fs handle (ceph filesystem handle)
+    :return: yields a fs handle (stone filesystem handle)
     """
     if fsc.is_stopping():
-        raise CephfsConnectionException(-errno.ESHUTDOWN,
+        raise StonefsConnectionException(-errno.ESHUTDOWN,
                                         "shutdown in progress")
 
     fs_handle = fsc.connection_pool.get_fs_handle(fs_name)
@@ -487,7 +487,7 @@ class ServerConfigException(Exception):
     pass
 
 
-def create_self_signed_cert(organisation: str = 'Ceph',
+def create_self_signed_cert(organisation: str = 'Stone',
                             common_name: str = 'mgr',
                             dname: Optional[Dict[str, str]] = None) -> Tuple[str, str]:
     """Returns self-signed PEM certificates valid for 10 years.
@@ -496,7 +496,7 @@ def create_self_signed_cert(organisation: str = 'Ceph',
     creation by supporting all valid RDNs via a dictionary. However, if dname
     is not provided the default O and CN settings will be applied.
 
-    :param organisation: String representing the Organisation(O) RDN (default='Ceph')
+    :param organisation: String representing the Organisation(O) RDN (default='Stone')
     :param common_name: String representing the Common Name(CN) RDN (default='mgr')
     :param dname: Optional dictionary containing RDNs to use for crt/key generation 
 

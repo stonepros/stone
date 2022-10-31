@@ -4,7 +4,7 @@ import logging
 import threading
 import traceback
 from collections import deque
-from mgr_util import lock_timeout_log, CephfsClient
+from mgr_util import lock_timeout_log, StonefsClient
 
 from .exception import NotImplementedException
 
@@ -119,8 +119,8 @@ class AsyncJobs(threading.Thread):
         self.cancel_cv = threading.Condition(self.lock)
         self.nr_concurrent_jobs = nr_concurrent_jobs
         self.name_pfx = name_pfx
-        # each async job group uses its own libcephfs connection (pool)
-        self.fs_client = CephfsClient(self.vc.mgr)
+        # each async job group uses its own libstonefs connection (pool)
+        self.fs_client = StonefsClient(self.vc.mgr)
 
         self.threads = []
         for i in range(self.nr_concurrent_jobs):

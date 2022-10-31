@@ -5,7 +5,7 @@
 #define STONE_RBD_MIRROR_MIRROR_STATUS_UPDATER_H
 
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "cls/rbd/cls_rbd_types.h"
 #include <list>
 #include <map>
@@ -76,7 +76,7 @@ private:
 
   Context* m_timer_task = nullptr;
 
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
 
   bool m_initialized = false;
 
@@ -105,7 +105,7 @@ private:
   void schedule_timer_task();
   void handle_timer_task(int r);
 
-  void queue_update_task(std::unique_lock<ceph::mutex>&& locker);
+  void queue_update_task(std::unique_lock<stone::mutex>&& locker);
   void update_task(int r);
   void handle_update_task(int r);
 

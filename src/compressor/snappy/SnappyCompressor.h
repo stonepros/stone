@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Haomai Wang <haomaiwang@gmail.com>
  *
@@ -22,11 +22,11 @@
 #include "include/buffer.h"
 
 class STONE_BUFFER_API BufferlistSource : public snappy::Source {
-  ceph::bufferlist::const_iterator pb;
+  stone::bufferlist::const_iterator pb;
   size_t remaining;
 
  public:
-  explicit BufferlistSource(ceph::bufferlist::const_iterator _pb, size_t _input_len)
+  explicit BufferlistSource(stone::bufferlist::const_iterator _pb, size_t _input_len)
     : pb(_pb),
       remaining(_input_len) {
     remaining = std::min(remaining, (size_t)pb.get_remaining());
@@ -45,19 +45,19 @@ class STONE_BUFFER_API BufferlistSource : public snappy::Source {
     return data;
   }
   void Skip(size_t n) override {
-    ceph_assert(n <= remaining);
+    stone_assert(n <= remaining);
     pb += n;
     remaining -= n;
   }
 
-  ceph::bufferlist::const_iterator get_pos() const {
+  stone::bufferlist::const_iterator get_pos() const {
     return pb;
   }
 };
 
 class SnappyCompressor : public Compressor {
  public:
-  SnappyCompressor(StoneeContext* cct) : Compressor(COMP_ALG_SNAPPY, "snappy") {
+  SnappyCompressor(StoneContext* cct) : Compressor(COMP_ALG_SNAPPY, "snappy") {
 #ifdef HAVE_QATZIP
     if (cct->_conf->qat_compressor_enabled && qat_accel.init("snappy"))
       qat_enabled = true;
@@ -66,13 +66,13 @@ class SnappyCompressor : public Compressor {
 #endif
   }
 
-  int compress(const ceph::bufferlist &src, ceph::bufferlist &dst, boost::optional<int32_t> &compressor_message) override {
+  int compress(const stone::bufferlist &src, stone::bufferlist &dst, boost::optional<int32_t> &compressor_message) override {
 #ifdef HAVE_QATZIP
     if (qat_enabled)
       return qat_accel.compress(src, dst, compressor_message);
 #endif
-    BufferlistSource source(const_cast<ceph::bufferlist&>(src).begin(), src.length());
-    ceph::bufferptr ptr = ceph::buffer::create_small_page_aligned(
+    BufferlistSource source(const_cast<stone::bufferlist&>(src).begin(), src.length());
+    stone::bufferptr ptr = stone::buffer::create_small_page_aligned(
       snappy::MaxCompressedLength(src.length()));
     snappy::UncheckedByteArraySink sink(ptr.c_str());
     snappy::Compress(&source, &sink);
@@ -80,7 +80,7 @@ class SnappyCompressor : public Compressor {
     return 0;
   }
 
-  int decompress(const ceph::bufferlist &src, ceph::bufferlist &dst, boost::optional<int32_t> compressor_message) override {
+  int decompress(const stone::bufferlist &src, stone::bufferlist &dst, boost::optional<int32_t> compressor_message) override {
 #ifdef HAVE_QATZIP
     if (qat_enabled)
       return qat_accel.decompress(src, dst, compressor_message);
@@ -89,9 +89,9 @@ class SnappyCompressor : public Compressor {
     return decompress(i, src.length(), dst, compressor_message);
   }
 
-  int decompress(ceph::bufferlist::const_iterator &p,
+  int decompress(stone::bufferlist::const_iterator &p,
 		 size_t compressed_len,
-		 ceph::bufferlist &dst,
+		 stone::bufferlist &dst,
 		 boost::optional<int32_t> compressor_message) override {
 #ifdef HAVE_QATZIP
     if (qat_enabled)
@@ -103,7 +103,7 @@ class SnappyCompressor : public Compressor {
       return -1;
     }
     BufferlistSource source_2(p, compressed_len);
-    ceph::bufferptr ptr(res_len);
+    stone::bufferptr ptr(res_len);
     if (snappy::RawUncompress(&source_2, ptr.c_str())) {
       p = source_2.get_pos();
       dst.append(ptr);

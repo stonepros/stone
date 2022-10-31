@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -21,13 +21,13 @@
 #include "erasure-code/ErasureCodePlugin.h"
 #include "ErasureCodeIsaTableCache.h"
 
-class ErasureCodePluginIsa : public ceph::ErasureCodePlugin {
+class ErasureCodePluginIsa : public stone::ErasureCodePlugin {
 public:
   ErasureCodeIsaTableCache tcache;
 
   int factory(const std::string &directory,
-	      ceph::ErasureCodeProfile &profile,
-	      ceph::ErasureCodeInterfaceRef *erasure_code,
+	      stone::ErasureCodeProfile &profile,
+	      stone::ErasureCodeInterfaceRef *erasure_code,
 	      std::ostream *ss) override;
 };
 

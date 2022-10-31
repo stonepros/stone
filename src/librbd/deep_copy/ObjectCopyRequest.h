@@ -143,7 +143,7 @@ private:
   void send_write_object();
   void handle_write_object(int r);
 
-  Context *start_lock_op(ceph::shared_mutex &owner_lock, int* r);
+  Context *start_lock_op(stone::shared_mutex &owner_lock, int* r);
 
   void compute_read_ops();
   void merge_write_ops();

@@ -1,8 +1,8 @@
-  $ ceph-conf --help
-  Ceph configuration query tool
+  $ stone-conf --help
+  Stone configuration query tool
   
   USAGE
-  ceph-conf <flags> <action>
+  stone-conf <flags> <action>
   
   ACTIONS
     -L|--list-all-sections          List all sections
@@ -18,7 +18,7 @@
                                     can be opened in the resulted comma
                                     delimited search list.
     -D|--dump-all                   dump all variables.
-    --show-config-value <key>       Print the corresponding ceph.conf value
+    --show-config-value <key>       Print the corresponding stone.conf value
                                     that matches the specified key. Also searches
                                     global defaults.
   
@@ -33,10 +33,10 @@
   If there is no action given, the action will default to --lookup.
   
   EXAMPLES
-  [$] ceph-conf --name mon.0 -c /etc/ceph/ceph.conf 'mon addr' (re)
+  [$] stone-conf --name mon.0 -c /etc/stone/stone.conf 'mon addr' (re)
   Find out what the value of 'mon addr' is for monitor 0.
   
-  [$] ceph-conf -l mon (re)
+  [$] stone-conf -l mon (re)
   List sections beginning with 'mon'.
   
   RETURN CODE

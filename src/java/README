@@ -1,4 +1,4 @@
-libcephfs Java wrappers
+libstonefs Java wrappers
 =======================
 
 - native/: C++
@@ -10,7 +10,7 @@ libcephfs Java wrappers
 Building
 --------
 
-Autotools handles the build using the configure flag --enable-cephfs-java
+Autotools handles the build using the configure flag --enable-stonefs-java
 
 Testing
 -------
@@ -34,16 +34,16 @@ Ant is used to run the unit test (apt-get install ant). For example:
   $ cd src/
   $ ./vstart -d -n --localhost
   $ cd java
-  $ CEPHFS_CONF=../ceph.conf CLASSPATH=/usr/share/java/junit4.jar ant test
+  $ STONEFS_CONF=../stone.conf CLASSPATH=/usr/share/java/junit4.jar ant test
 
 1. The tests depend on the compiled wrappers. If the wrappers are installed as
 part of a package (e.g. Debian package) then this should 'just work'. Ant will
-also look in the current directory for 'libcephfs.jar' and 'libcephfs-test.jar';
+also look in the current directory for 'libstonefs.jar' and 'libstonefs-test.jar';
 and in ../build/lib for the
-JNI library.  If all else fails, set the environment variables CEPHFS_JAR, and
-CEPHFS_JNI_LIB accordingly.
+JNI library.  If all else fails, set the environment variables STONEFS_JAR, and
+STONEFS_JNI_LIB accordingly.
 
-2. Set CEPHFS_CONF environment variable to point to a ceph.conf. This can be
+2. Set STONEFS_CONF environment variable to point to a stone.conf. This can be
 omitted if the desired configuration file can be found in a default location.
 
 Documentation

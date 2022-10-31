@@ -33,7 +33,7 @@ namespace rados {
         std::string id;
         std::string seed;
         SeedType seed_type{OTP_SEED_UNKNOWN};
-        ceph::buffer::list seed_bin; /* parsed seed, built automatically by otp_set_op,
+        stone::buffer::list seed_bin; /* parsed seed, built automatically by otp_set_op,
                               * not being json encoded/decoded on purpose
                               */
         int32_t time_ofs{0};
@@ -42,7 +42,7 @@ namespace rados {
 
         otp_info_t() {}
 
-        void encode(ceph::buffer::list &bl) const {
+        void encode(stone::buffer::list &bl) const {
           ENCODE_START(1, 1, bl);
           encode((uint8_t)type, bl);
           /* if we ever implement anything other than TOTP
@@ -56,7 +56,7 @@ namespace rados {
           encode(window, bl);
           ENCODE_FINISH(bl);
         }
-        void decode(ceph::buffer::list::const_iterator &bl) {
+        void decode(stone::buffer::list::const_iterator &bl) {
           DECODE_START(1, bl);
           uint8_t t;
           decode(t, bl);
@@ -72,7 +72,7 @@ namespace rados {
           decode(window, bl);
           DECODE_FINISH(bl);
         }
-        void dump(ceph::Formatter *f) const;
+        void dump(stone::Formatter *f) const;
         void decode_json(JSONObj *obj);
       };
       WRITE_CLASS_ENCODER(rados::cls::otp::otp_info_t)
@@ -85,17 +85,17 @@ namespace rados {
 
       struct otp_check_t {
         std::string token;
-        ceph::real_time timestamp;
+        stone::real_time timestamp;
         OTPCheckResult result{OTP_CHECK_UNKNOWN};
 
-        void encode(ceph::buffer::list &bl) const {
+        void encode(stone::buffer::list &bl) const {
           ENCODE_START(1, 1, bl);
           encode(token, bl);
           encode(timestamp, bl);
           encode((char)result, bl);
           ENCODE_FINISH(bl);
         }
-        void decode(ceph::buffer::list::const_iterator &bl) {
+        void decode(stone::buffer::list::const_iterator &bl) {
           DECODE_START(1, bl);
           decode(token, bl);
           decode(timestamp, bl);
@@ -112,12 +112,12 @@ namespace rados {
 
         otp_repo_t() {}
 
-        void encode(ceph::buffer::list &bl) const {
+        void encode(stone::buffer::list &bl) const {
           ENCODE_START(1, 1, bl);
           encode(entries, bl);
           ENCODE_FINISH(bl);
         }
-        void decode(ceph::buffer::list::const_iterator &bl) {
+        void decode(stone::buffer::list::const_iterator &bl) {
           DECODE_START(1, bl);
           decode(entries, bl);
           DECODE_FINISH(bl);

@@ -9,14 +9,14 @@
 
 #include "crimson/common/exception.h"
 #include "crimson/common/log.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace crimson::common {
 
 class Gated {
  public:
   static seastar::logger& gated_logger() {
-    return crimson::get_logger(ceph_subsys_osd);
+    return crimson::get_logger(stone_subsys_osd);
   }
   template <typename Func, typename T>
   inline void dispatch_in_background(const char* what, T& who, Func&& func) {

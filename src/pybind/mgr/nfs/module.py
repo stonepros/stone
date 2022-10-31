@@ -24,8 +24,8 @@ class Module(orchestrator.OrchestratorClientMixin, MgrModule):
             self.nfs = NFSCluster(self)
             self.inited = True
 
-    @CLICommand('nfs export create cephfs', perm='rw')
-    def _cmd_nfs_export_create_cephfs(
+    @CLICommand('nfs export create stonefs', perm='rw')
+    def _cmd_nfs_export_create_stonefs(
             self,
             cluster_id: str,
             pseudo_path: str,
@@ -35,8 +35,8 @@ class Module(orchestrator.OrchestratorClientMixin, MgrModule):
             client_addr: Optional[List[str]] = None,
             squash: str = 'none',
     ) -> Tuple[int, str, str]:
-        """Create a CephFS export"""
-        return self.export_mgr.create_export(fsal_type='cephfs', fs_name=fsname,
+        """Create a StoneFS export"""
+        return self.export_mgr.create_export(fsal_type='stonefs', fs_name=fsname,
                                              cluster_id=cluster_id, pseudo_path=pseudo_path,
                                              read_only=readonly, path=path,
                                              squash=squash, addr=client_addr)
@@ -61,12 +61,12 @@ class Module(orchestrator.OrchestratorClientMixin, MgrModule):
 
     @CLICommand('nfs export rm', perm='rw')
     def _cmd_nfs_export_rm(self, cluster_id: str, pseudo_path: str) -> Tuple[int, str, str]:
-        """Remove a cephfs export"""
+        """Remove a stonefs export"""
         return self.export_mgr.delete_export(cluster_id=cluster_id, pseudo_path=pseudo_path)
 
     @CLICommand('nfs export delete', perm='rw')
     def _cmd_nfs_export_delete(self, cluster_id: str, pseudo_path: str) -> Tuple[int, str, str]:
-        """Delete a cephfs export (DEPRECATED)"""
+        """Delete a stonefs export (DEPRECATED)"""
         return self.export_mgr.delete_export(cluster_id=cluster_id, pseudo_path=pseudo_path)
 
     @CLICommand('nfs export ls', perm='r')

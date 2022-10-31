@@ -40,11 +40,11 @@ Erasure-code profile examples
 
 An example configuration that can be used to observe reduced bandwidth usage::
 
-        $ ceph osd erasure-code-profile set CLAYprofile \
+        $ stone osd erasure-code-profile set CLAYprofile \
              plugin=clay \
              k=4 m=2 d=5 \
              crush-failure-domain=host
-        $ ceph osd pool create claypool erasure CLAYprofile
+        $ stone osd pool create claypool erasure CLAYprofile
 
 
 Creating a clay profile
@@ -52,7 +52,7 @@ Creating a clay profile
 
 To create a new clay code profile::
 
-        ceph osd erasure-code-profile set {name} \
+        stone osd erasure-code-profile set {name} \
              plugin=clay \
              k={data-chunks} \
              m={coding-chunks} \
@@ -156,7 +156,7 @@ Where:
 
 :Type: String
 :Required: No.
-:Default: /usr/lib/ceph/erasure-code
+:Default: /usr/lib/stone/erasure-code
 
 ``--force``
 

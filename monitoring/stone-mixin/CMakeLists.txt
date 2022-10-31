@@ -1,15 +1,15 @@
 if(WITH_GRAFANA)
-  set(CEPH_GRAFANA_DASHBOARDS_DIR "${CMAKE_INSTALL_SYSCONFDIR}/grafana/dashboards/ceph-dashboard"
+  set(STONE_GRAFANA_DASHBOARDS_DIR "${CMAKE_INSTALL_SYSCONFDIR}/grafana/dashboards/stone-dashboard"
     CACHE PATH "Location for grafana dashboards")
-  file(GLOB CEPH_GRAFANA_DASHBOARDS "dashboards_out/*.json")
+  file(GLOB STONE_GRAFANA_DASHBOARDS "dashboards_out/*.json")
   install(FILES
-    ${CEPH_GRAFANA_DASHBOARDS}
-    DESTINATION ${CEPH_GRAFANA_DASHBOARDS_DIR})
+    ${STONE_GRAFANA_DASHBOARDS}
+    DESTINATION ${STONE_GRAFANA_DASHBOARDS_DIR})
   if(WITH_TESTS)
-    set(CEPH_BUILD_VIRTUALENV $ENV{TMPDIR})
-    if(NOT CEPH_BUILD_VIRTUALENV)
-      include(AddCephTest)
-      set(CEPH_BUILD_VIRTUALENV ${CMAKE_BINARY_DIR})
+    set(STONE_BUILD_VIRTUALENV $ENV{TMPDIR})
+    if(NOT STONE_BUILD_VIRTUALENV)
+      include(AddStoneTest)
+      set(STONE_BUILD_VIRTUALENV ${CMAKE_BINARY_DIR})
 
       add_test(NAME jsonnet-build
           COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/jsonnet-build.sh ${CMAKE_CURRENT_BINARY_DIR})
@@ -55,8 +55,8 @@ if(WITH_GRAFANA)
         RESULT_VARIABLE rc
         OUTPUT_QUIET)
       if(NOT rc)
-        add_ceph_test(run-promtool-unittests
-          ${PROMTOOL_EXECUTABLE} test rules ${CMAKE_SOURCE_DIR}/monitoring/ceph-mixin/tests_alerts/test_alerts.yml)
+        add_stone_test(run-promtool-unittests
+          ${PROMTOOL_EXECUTABLE} test rules ${CMAKE_SOURCE_DIR}/monitoring/stone-mixin/tests_alerts/test_alerts.yml)
       elseif(NOT promtool_executable_checked)
         message(WARNING "'${PROMTOOL_EXECUTABLE} test rules' does not work, "
           "please use a newer prometheus")

@@ -7,7 +7,7 @@ release series. We recommend that all users upgrade to this release.
 Notable Changes
 ---------------
 
-* Ceph now packages python bindings for python3.6 instead of
+* Stone now packages python bindings for python3.6 instead of
   python3.4, because EPEL7 recently switched from python3.4 to
   python3.6 as the native python3. see the `announcement <https://lists.fedoraproject.org/archives/list/epel-announce@lists.fedoraproject.org/message/EGUMKAIMPK2UD5VSHXM53BH2MBDGDWMO/>_`
   for more details on the background of this change.
@@ -32,7 +32,7 @@ Notable Changes
   Community Data License Agreement - Sharing - Version 1.0, which you can
   read at https://cdla.io/sharing-1-0/
 
-  The telemetry module reports information about CephFS file systems,
+  The telemetry module reports information about StoneFS file systems,
   including:
 
     - how many MDS daemons (in total and per file system)
@@ -444,7 +444,7 @@ Notable Changes
   cleanup.
 
 * `cephfs-journal-tool` makes rank argument (--rank) mandatory. Rank is
-  of format `filesystem:rank`, where `filesystem` is the CephFS filesystem
+  of format `filesystem:rank`, where `filesystem` is the StoneFS filesystem
   and `rank` is the MDS rank on which the operation is to be executed. To
   operate on all ranks, use `all` or `*` as the rank specifier. Note that,
   operations that dump journal information to file will now dump to per-rank
@@ -464,7 +464,7 @@ Changelog
 * build/ops: run-make-check.sh ccache tweaks (`issue#24826 <http://tracker.ceph.com/issues/24826>`_, `issue#24817 <http://tracker.ceph.com/issues/24817>`_, `issue#24777 <http://tracker.ceph.com/issues/24777>`_, `pr#23902 <https://github.com/ceph/ceph/pull/23902>`_, Nathan Cutler, Erwan Velu)
 * ceph-bluestore-tool: fix set label functionality for specific keys (`pr#25187 <https://github.com/ceph/ceph/pull/25187>`_, Igor Fedotov)
 * ceph-create-keys: fix octal notation for Python 3 without losing compatibility with Python 2 (`issue#37643 <http://tracker.ceph.com/issues/37643>`_, `pr#25532 <https://github.com/ceph/ceph/pull/25532>`_, James Page)
-* cephfs: ceph-volume-client: allow setting mode of CephFS volumes (`pr#25407 <https://github.com/ceph/ceph/pull/25407>`_, Tom Barron)
+* cephfs: ceph-volume-client: allow setting mode of StoneFS volumes (`pr#25407 <https://github.com/ceph/ceph/pull/25407>`_, Tom Barron)
 * cephfs-journal-tool: make --rank argument mandatory (`pr#24728 <https://github.com/ceph/ceph/pull/24728>`_, Venky Shankar)
 * cephfs: mgr/status: fix fs status subcommand did not show standby-replay MDS' perf info (`issue#36575 <http://tracker.ceph.com/issues/36575>`_, `issue#36399 <http://tracker.ceph.com/issues/36399>`_, `pr#25032 <https://github.com/ceph/ceph/pull/25032>`_, Zhi Zhang)
 * cephfs: race of updating wanted caps (`issue#37635 <http://tracker.ceph.com/issues/37635>`_, `issue#37464 <http://tracker.ceph.com/issues/37464>`_, `pr#25762 <https://github.com/ceph/ceph/pull/25762>`_, "Yan, Zheng")
@@ -1077,7 +1077,7 @@ v12.2.6 Luminous
 
 This is the sixth bugfix release of Luminous v12.2.x long term stable release
 series. This release contains a range of bug fixes across all components of
-Ceph and a few security fixes.
+Stone and a few security fixes.
 
 Notable Changes
 ---------------
@@ -1244,7 +1244,7 @@ v12.2.5 Luminous
 
 This is the fifth bugfix release of Luminous v12.2.x long term stable
 release series. This release contains a range of bug fixes across all
-components of Ceph. We recommend all the users of 12.2.x series to
+components of Stone. We recommend all the users of 12.2.x series to
 update.
 
 Notable Changes
@@ -1260,7 +1260,7 @@ Notable Changes
   The MGR "restful" module provides similar functionality via a "pass through"
   method. See http://docs.ceph.com/docs/luminous/mgr/restful for details.
 
-* CephFS
+* StoneFS
 
   Upgrading an MDS cluster to 12.2.3+ will result in all active MDS
   exiting due to feature incompatibilities once an upgraded MDS comes
@@ -1458,14 +1458,14 @@ v12.2.3 Luminous
 
 This is the third bugfix release of Luminous v12.2.x long term stable release
 series. It contains a range of bug fixes and a few features across Bluestore,
-CephFS, RBD & RGW. We recommend all the users of 12.2.x series update.
+StoneFS, RBD & RGW. We recommend all the users of 12.2.x series update.
 
 Notable Changes
 ---------------
 
-- *CephFS*:
+- *StoneFS*:
 
-  * The CephFS client now checks for older kernels' inability to reliably clear
+  * The StoneFS client now checks for older kernels' inability to reliably clear
     dentries from the kernel dentry cache. The new option
     client_die_on_failed_dentry_invalidate (default: true) may be turned off to
     allow the client to proceed (dangerous!).
@@ -1528,7 +1528,7 @@ Other Notable Changes
 * doc: crush_ruleset is invalid command in luminous (`issue#20559 <http://tracker.ceph.com/issues/20559>`_, `pr#19446 <https://github.com/ceph/ceph/pull/19446>`_, Nathan Cutler)
 * doc: doc/rbd: tweaks for the LIO iSCSI gateway (`issue#21763 <http://tracker.ceph.com/issues/21763>`_, `pr#20213 <https://github.com/ceph/ceph/pull/20213>`_, Ashish Singh, Mike Christie, Jason Dillaman)
 * doc: man page for mount.fuse.ceph (`issue#21539 <http://tracker.ceph.com/issues/21539>`_, `issue#22595 <http://tracker.ceph.com/issues/22595>`_, `pr#19449 <https://github.com/ceph/ceph/pull/19449>`_, Jos Collin)
-* doc: misc fixes for CephFS best practices (`issue#22630 <http://tracker.ceph.com/issues/22630>`_, `pr#19858 <https://github.com/ceph/ceph/pull/19858>`_, Jos Collin)
+* doc: misc fixes for StoneFS best practices (`issue#22630 <http://tracker.ceph.com/issues/22630>`_, `pr#19858 <https://github.com/ceph/ceph/pull/19858>`_, Jos Collin)
 * doc: remove region from "INSTALL CEPH OBJECT GATEWAY" (`issue#21610 <http://tracker.ceph.com/issues/21610>`_, `pr#18865 <https://github.com/ceph/ceph/pull/18865>`_, Orit Wasserman)
 * doc: update Blacklisting and OSD epoch barrier (`issue#22542 <http://tracker.ceph.com/issues/22542>`_, `pr#19741 <https://github.com/ceph/ceph/pull/19741>`_, Jos Collin)
 * librbd: cannot clone all image-metas if we have more than 64 key/value pairs (`issue#21814 <http://tracker.ceph.com/issues/21814>`_, `pr#19503 <https://github.com/ceph/ceph/pull/19503>`_, PCzhangPC)
@@ -1694,7 +1694,7 @@ v12.2.2 Luminous
 
 This is the second bugfix release of Luminous v12.2.x long term stable release
 series. It contains a range of bug fixes and a few features across Bluestore,
-CephFS, RBD & RGW. We recommend all the users of 12.2.x series update.
+StoneFS, RBD & RGW. We recommend all the users of 12.2.x series update.
 
 For more detailed information, see :download:`the complete changelog <../changelog/v12.2.2.txt>`.
 
@@ -1829,7 +1829,7 @@ v12.2.1 Luminous
 
 This is the first bugfix release of Luminous v12.2.x long term stable
 release series. It contains a range of bug fixes and a few features
-across CephFS, RBD & RGW. We recommend all the users of 12.2.x series
+across StoneFS, RBD & RGW. We recommend all the users of 12.2.x series
 update.
 
 For more detailed information, see :download:`the complete changelog <../changelog/v12.2.1.txt>`.
@@ -1941,7 +1941,7 @@ Major Changes from Kraken
 
 - *General*:
 
-  * Ceph now has a simple, `built-in web-based dashboard
+  * Stone now has a simple, `built-in web-based dashboard
     <../mgr/dashboard>`_ for monitoring cluster status.
 
 - *RADOS*:
@@ -1957,36 +1957,36 @@ Major Changes from Kraken
       :doc:`/rados/configuration/bluestore-config-ref`.
     - BlueStore supports `full data and metadata checksums
       <../rados/configuration/bluestore-config-ref/#checksums>`_ of all
-      data stored by Ceph.
+      data stored by Stone.
     - BlueStore supports `inline compression
       <../rados/configuration/bluestore-config-ref/#inline-compression>`_ using
-      zlib, snappy, or LZ4. (Ceph also supports zstd for `RGW compression
+      zlib, snappy, or LZ4. (Stone also supports zstd for `RGW compression
       <../man/8/radosgw-admin/#options>`_ but zstd is not recommended for
       BlueStore for performance reasons.)
 
   * *Erasure coded* pools now have `full support for overwrites
     <../rados/operations/erasure-code/#erasure-coding-with-overwrites>`_,
-    allowing them to be used with RBD and CephFS.
+    allowing them to be used with RBD and StoneFS.
 
   * *ceph-mgr*:
 
     - There is a new daemon, *ceph-mgr*, which is a required part of
-      any Ceph deployment.  Although IO can continue when *ceph-mgr*
+      any Stone deployment.  Although IO can continue when *ceph-mgr*
       is down, metrics will not refresh and some metrics-related calls
       (e.g., ``ceph df``) may block.  We recommend deploying several
       instances of *ceph-mgr* for reliability.  See the notes on
       `Upgrading`_ below.
     - The *ceph-mgr* daemon includes a `REST-based management API
       <../mgr/restful>`_. The API is still experimental and somewhat
-      limited but will form the basis for API-based management of Ceph
+      limited but will form the basis for API-based management of Stone
       going forward.
     - *ceph-mgr* also includes a `Prometheus exporter
-      <../mgr/prometheus>`_ plugin, which can provide Ceph
+      <../mgr/prometheus>`_ plugin, which can provide Stone
       perfcounters to Prometheus.
     - ceph-mgr now has a `Zabbix <../mgr/zabbix>`_ plugin. Using
       zabbix_sender it sends trapper events to a Zabbix server
-      containing high-level information of the Ceph cluster. This
-      makes it easy to monitor a Ceph cluster's status and send out
+      containing high-level information of the Stone cluster. This
+      makes it easy to monitor a Stone cluster's status and send out
       notifications in case of a malfunction.
 
   * The overall *scalability* of the cluster has improved. We have
@@ -2013,9 +2013,9 @@ Major Changes from Kraken
   * You can query the supported features and (apparent) releases of
     all connected daemons and clients with `ceph features
     <../man/8/ceph#features>`_.
-  * You can configure the oldest Ceph client version you wish to allow to
+  * You can configure the oldest Stone client version you wish to allow to
     connect to the cluster via ``ceph osd set-require-min-compat-client`` and
-    Ceph will prevent you from enabling features that will break compatibility
+    Stone will prevent you from enabling features that will break compatibility
     with those clients.
   * Several `sleep` settings, include ``osd_recovery_sleep``,
     ``osd_snap_trim_sleep``, and ``osd_scrub_sleep`` have been
@@ -2023,7 +2023,7 @@ Major Changes from Kraken
     to work around issues throttling background work.)
   * Pools are now expected to be associated with the application using them.
     Upon completing the upgrade to Luminous, the cluster will attempt to associate
-    existing pools to known applications (i.e. CephFS, RBD, and RGW). In-use pools
+    existing pools to known applications (i.e. StoneFS, RBD, and RGW). In-use pools
     that are not associated to an application will generate a health warning. Any
     unassociated pools can be manually associated using the new
     ``ceph osd pool application enable`` command. For more details see
@@ -2067,7 +2067,7 @@ Major Changes from Kraken
   * RBD mirroring's rbd-mirror daemon is now highly available. We
     recommend deploying several instances of rbd-mirror for
     reliability.
-  * RBD mirroring's rbd-mirror daemon should utilize unique Ceph user
+  * RBD mirroring's rbd-mirror daemon should utilize unique Stone user
     IDs per instance to support the new mirroring dashboard.
   * The default 'rbd' pool is no longer created automatically during
     cluster creation. Additionally, the name of the default pool used
@@ -2092,12 +2092,12 @@ Major Changes from Kraken
     For more details see :doc:`/rados/operations/user-management`
     in the documentation.
 
-- *CephFS*:
+- *StoneFS*:
 
   * *Multiple active MDS daemons* is now considered stable.  The number
-    of active MDS servers may be adjusted up or down on an active CephFS file
+    of active MDS servers may be adjusted up or down on an active StoneFS file
     system.
-  * CephFS *directory fragmentation* is now stable and enabled by
+  * StoneFS *directory fragmentation* is now stable and enabled by
     default on new filesystems.  To enable it on existing filesystems
     use "ceph fs set <fs_name> allow_dirfrags".  Large or very busy
     directories are sharded and (potentially) distributed across
@@ -2105,9 +2105,9 @@ Major Changes from Kraken
   * Directory subtrees can be explicitly pinned to specific MDS daemons in
     cases where the automatic load balancing is not desired or effective.
   * Client keys can now be created using the new ``ceph fs authorize`` command
-    to create keys with access to the given CephFS file system and all of its
+    to create keys with access to the given StoneFS file system and all of its
     data pools.
-  * When running 'df' on a CephFS filesystem comprising exactly one data pool,
+  * When running 'df' on a StoneFS filesystem comprising exactly one data pool,
     the result now reflects the file storage space used and available in that
     data pool (fuse client only).
 
@@ -2123,12 +2123,12 @@ Major Changes from Kraken
     - Ubuntu 16.04 Xenial (x86_64 and aarch64)
     - Ubuntu 14.04 Trusty (x86_64)
 
-  * A first release of Ceph for FreeBSD is available which contains a full set
+  * A first release of Stone for FreeBSD is available which contains a full set
     of features, other than Bluestore. It will run everything needed to build a
     storage cluster. For clients, all access methods are available, albeit
-    CephFS is only accessible through a Fuse implementation. RBD images can be
+    StoneFS is only accessible through a Fuse implementation. RBD images can be
     mounted on FreeBSD systems through rbd-ggate
-    Ceph versions are released through the regular FreeBSD ports and packages
+    Stone versions are released through the regular FreeBSD ports and packages
     system. The most current version is available as: net/ceph-devel. Once
     Luminous goes into official release, this version will be available as
     net/ceph. Future development releases will be available via net/ceph-devel
@@ -2233,7 +2233,7 @@ Major Changes from Kraken
       these exist yet).
     - ``ceph tell <daemon> help`` will now return a usage summary.
     - ``ceph fs authorize`` creates a new client key with caps automatically
-      set to access the given CephFS file system.
+      set to access the given StoneFS file system.
     - The ``ceph health`` structured output (JSON or XML) no longer contains
       'timechecks' section describing the time sync status.  This
       information is now available via the 'ceph time-sync-status'
@@ -2307,7 +2307,7 @@ Major Changes from Jewel
     configurable maximum.
   * The rbd Python API now supports asynchronous IO operations.
 
-- *CephFS*:
+- *StoneFS*:
 
   * libcephfs function definitions have been changed to enable proper
     uid/gid control.  The library version has been increased to reflect the
@@ -2404,7 +2404,7 @@ Upgrade from Jewel or Kraken
         "ceph version 10.2.6 (...)": 3,
      }
 
-#. Upgrade all CephFS daemons by upgrading packages and restarting
+#. Upgrade all StoneFS daemons by upgrading packages and restarting
    daemons on all hosts::
 
      # systemctl restart ceph-mds.target
@@ -2600,7 +2600,7 @@ Upgrade compatibility notes, Kraken to Luminous
   This may seem a bit strange, but is less strange than having a
   deleted-but-snapshotted object not appear at all and be completely
   hidden from librados's ability to enumerate objects.  Future
-  versions of Ceph will likely include an alternative object
+  versions of Stone will likely include an alternative object
   enumeration interface that makes it more natural and efficient to
   enumerate all objects along with their snapshot and clone metadata.
 
@@ -2662,7 +2662,7 @@ Upgrade compatibility notes, Kraken to Luminous
   not target all devices in the cluster.
 
 * Added new configuration "public bind addr" to support dynamic
-  environments like Kubernetes. When set the Ceph MON daemon could
+  environments like Kubernetes. When set the Stone MON daemon could
   bind locally to an IP address and advertise a different IP address
   ``public addr`` on the network.
 
@@ -2704,25 +2704,25 @@ Upgrade compatibility notes, Kraken to Luminous
     before updating the client-side librados library to Luminous.
     Object enumeration (via any API) with the latest librados version
     and pre-Hammer OSDs is no longer supported.  Note that no in-tree
-    Ceph services rely on object enumeration via the deprecated APIs, so
+    Stone services rely on object enumeration via the deprecated APIs, so
     only external librados users might be affected.
     The newest (and recommended) rados_object_list_begin (C) and
     object_list_begin (C++) API is only usable on clusters with the
     SORTBITWISE flag enabled (Jewel and later).  (Note that this flag is
     required to be set before upgrading beyond Jewel.)
 
-- *CephFS*:
+- *StoneFS*:
 
   * When configuring ceph-fuse mounts in /etc/fstab, a new syntax is
     available that uses "ceph.<arg>=<val>" in the options column, instead
     of putting configuration in the device column.  The old style syntax
-    still works.  See the documentation page "Mount CephFS in your
+    still works.  See the documentation page "Mount StoneFS in your
     file systems table" for details.
-  * CephFS clients without the 'p' flag in their authentication capability
+  * StoneFS clients without the 'p' flag in their authentication capability
     string will no longer be able to set quotas or any layout fields.  This
     flag previously only restricted modification of the pool and namespace
     fields in layouts.
-  * CephFS will generate a health warning if you have fewer standby daemons
+  * StoneFS will generate a health warning if you have fewer standby daemons
     than it thinks you wanted.  By default this will be 1 if you ever had
     a standby, and 0 if you did not.  You can customize this using
     ``ceph fs set <fs> standby_count_wanted <number>``.  Setting it
@@ -2931,7 +2931,7 @@ Other Notable Changes
 * bluestore,performance: os/bluestore: prevent lock for almost "flush" calls (`pr#12524 <https://github.com/ceph/ceph/pull/12524>`_, Haomai Wang)
 * bluestore,performance: os/bluestore: put bluefs in the middle of the shared device (`pr#14873 <https://github.com/ceph/ceph/pull/14873>`_, Sage Weil)
 * bluestore,performance: os/bluestore: refactor small write handling to reuse blob more effect… (`pr#14399 <https://github.com/ceph/ceph/pull/14399>`_, Igor Fedotov)
-* bluestore,performance: os/bluestore: remove CephContext\* from BmapEntry (`pr#13651 <https://github.com/ceph/ceph/pull/13651>`_, Radoslaw Zarzynski)
+* bluestore,performance: os/bluestore: remove StoneContext\* from BmapEntry (`pr#13651 <https://github.com/ceph/ceph/pull/13651>`_, Radoslaw Zarzynski)
 * bluestore,performance: os/bluestore: replace Blob ref_map with reference counting (`pr#12904 <https://github.com/ceph/ceph/pull/12904>`_, Igor Fedotov)
 * bluestore,performance: os/bluestore: rewrite deferred write handling (`issue#16644 <http://tracker.ceph.com/issues/16644>`_, `pr#14491 <https://github.com/ceph/ceph/pull/14491>`_, Sage Weil)
 * bluestore,performance: os/bluestore: separate kv_sync_thread into two parts (`pr#14035 <https://github.com/ceph/ceph/pull/14035>`_, Jianpeng Ma, Igor Fedotov, Sage Weil)
@@ -3208,7 +3208,7 @@ Other Notable Changes
 * cmake: add "container" to required boost components (`pr#14850 <https://github.com/ceph/ceph/pull/14850>`_, Kefu Chai)
 * cmake: Add -finstrument-functions flag to OSD code (`pr#15055 <https://github.com/ceph/ceph/pull/15055>`_, Mohamad Gebai)
 * cmake: add RGW and MDS to libcephd (`pr#12345 <https://github.com/ceph/ceph/pull/12345>`_, Bassam Tabbara)
-* cmake: Add simple recursive ctags target for Ceph source only (`pr#14334 <https://github.com/ceph/ceph/pull/14334>`_, Kefu Chai, Dan Mick)
+* cmake: Add simple recursive ctags target for Stone source only (`pr#14334 <https://github.com/ceph/ceph/pull/14334>`_, Kefu Chai, Dan Mick)
 * cmake: align cmake names of library packages (`issue#19853 <http://tracker.ceph.com/issues/19853>`_, `pr#14951 <https://github.com/ceph/ceph/pull/14951>`_, Nathan Cutler)
 * cmake: Allow tests to build without NSS (`pr#13315 <https://github.com/ceph/ceph/pull/13315>`_, Daniel Gryniewicz)
 * cmake: build boost as an external project (`pr#15376 <https://github.com/ceph/ceph/pull/15376>`_, Kefu Chai)
@@ -3854,7 +3854,7 @@ Other Notable Changes
 * doc: add some undocumented options to rbd-nbd (`pr#14134 <https://github.com/ceph/ceph/pull/14134>`_, wangzhengyong)
 * doc: add verbiage to rbdmap manpage (`issue#18262 <http://tracker.ceph.com/issues/18262>`_, `pr#12509 <https://github.com/ceph/ceph/pull/12509>`_, Nathan Cutler)
 * doc: Add Zabbix ceph-mgr plugin to PendingReleaseNotes (`pr#16412 <https://github.com/ceph/ceph/pull/16412>`_, Wido den Hollander)
-* doc: AUTHORS: update CephFS PTL (`pr#16399 <https://github.com/ceph/ceph/pull/16399>`_, Patrick Donnelly)
+* doc: AUTHORS: update StoneFS PTL (`pr#16399 <https://github.com/ceph/ceph/pull/16399>`_, Patrick Donnelly)
 * doc: AUTHORS: update tech leads (`pr#14350 <https://github.com/ceph/ceph/pull/14350>`_, Patrick Donnelly)
 * doc: AUTHORS: update with release manager, backport team (`pr#15391 <https://github.com/ceph/ceph/pull/15391>`_, Sage Weil)
 * doc: build/install-deps.sh: Add sphinx package for building docs on FreeBSD (`pr#13223 <https://github.com/ceph/ceph/pull/13223>`_, Willem Jan Withagen)
@@ -3874,9 +3874,9 @@ Other Notable Changes
 * doc: crush: API documentation fixes (`pr#13589 <https://github.com/ceph/ceph/pull/13589>`_, Loic Dachary)
 * doc: crush typo in algorithm description (`pr#13661 <https://github.com/ceph/ceph/pull/13661>`_, Loic Dachary)
 * doc: deletes duplicated word and clarifies an example (`pr#13746 <https://github.com/ceph/ceph/pull/13746>`_, Tahia Khan)
-* doc: describe CephFS max_file_size (`pr#15287 <https://github.com/ceph/ceph/pull/15287>`_, Ken Dreyer)
+* doc: describe StoneFS max_file_size (`pr#15287 <https://github.com/ceph/ceph/pull/15287>`_, Ken Dreyer)
 * doc: describe mark_events logging available via the OSD's OpTracker (`pr#15095 <https://github.com/ceph/ceph/pull/15095>`_, Greg Farnum)
-* doc: Describe mClock's use within Ceph in great detail (`pr#16707 <https://github.com/ceph/ceph/pull/16707>`_, J. Eric Ivancich)
+* doc: Describe mClock's use within Stone in great detail (`pr#16707 <https://github.com/ceph/ceph/pull/16707>`_, J. Eric Ivancich)
 * doc: dev add a note about ccache (`pr#14478 <https://github.com/ceph/ceph/pull/14478>`_, Abhishek Lekshmanan)
 * doc: dev: add notes on PR make check validation test (`pr#16079 <https://github.com/ceph/ceph/pull/16079>`_, Nathan Cutler)
 * doc: dev guide: how to run s3-tests locally against vstart (`pr#14508 <https://github.com/ceph/ceph/pull/14508>`_, Nathan Cutler, Abhishek Lekshmanan)
@@ -4048,7 +4048,7 @@ Other Notable Changes
 * doc: typo in hit_set_search_last_n (`pr#14108 <https://github.com/ceph/ceph/pull/14108>`_, Sven Seeberg)
 * doc: Update adminops.rst (`pr#13893 <https://github.com/ceph/ceph/pull/13893>`_, Chu, Hua-Rong)
 * doc: update ceph(8) man page with new sub-commands (`pr#16437 <https://github.com/ceph/ceph/pull/16437>`_, Kefu Chai)
-* doc: Update CephFS disaster recovery documentation (`pr#12370 <https://github.com/ceph/ceph/pull/12370>`_, Wido den Hollander)
+* doc: Update StoneFS disaster recovery documentation (`pr#12370 <https://github.com/ceph/ceph/pull/12370>`_, Wido den Hollander)
 * doc: Update disk thread section to reflect that scrubbing is no longe… (`pr#12621 <https://github.com/ceph/ceph/pull/12621>`_, Nick Fisk)
 * doc: update intro, quick start docs (`pr#16224 <https://github.com/ceph/ceph/pull/16224>`_, Sage Weil)
 * doc: Update keystone.rst (`pr#12717 <https://github.com/ceph/ceph/pull/12717>`_, Chu, Hua-Rong)
@@ -4855,7 +4855,7 @@ Other Notable Changes
 * rbd: use min<uint64_t>() explicitly (`issue#18938 <http://tracker.ceph.com/issues/18938>`_, `pr#14202 <https://github.com/ceph/ceph/pull/14202>`_, Kefu Chai)
 * rbd: validate pool and snap name optionals (`issue#14535 <http://tracker.ceph.com/issues/14535>`_, `pr#13836 <https://github.com/ceph/ceph/pull/13836>`_, Gaurav Kumar Garg)
 * rbd: warning, ‘devno’ may be used uninitialized in this function (`pr#14271 <https://github.com/ceph/ceph/pull/14271>`_, Jos Collin)
-* rbd: When Ceph cluster becomes full, should allow user to remove rbd … (`pr#12627 <https://github.com/ceph/ceph/pull/12627>`_, Pan Liu)
+* rbd: When Stone cluster becomes full, should allow user to remove rbd … (`pr#12627 <https://github.com/ceph/ceph/pull/12627>`_, Pan Liu)
 * rdma: msg/async: Postpone bind if network stack is not ready (`pr#14414 <https://github.com/ceph/ceph/pull/14414>`_, Amir Vadai, Haomai Wang)
 * rdma: msg/async/rdma: Add DSCP support (`pr#15484 <https://github.com/ceph/ceph/pull/15484>`_, Sarit Zubakov)
 * rdma: msg/async/rdma: add inqueue rx chunks perf counter (`pr#14782 <https://github.com/ceph/ceph/pull/14782>`_, Haomai Wang)
@@ -5223,7 +5223,7 @@ Other Notable Changes
 * rgw,tests: qa/rgw: fix assertions in radosgw_admin task (`pr#14842 <https://github.com/ceph/ceph/pull/14842>`_, Casey Bodley)
 * rgw,tests: qa/rgw: remove apache/fastcgi and radosgw-agent tests (`pr#15184 <https://github.com/ceph/ceph/pull/15184>`_, Casey Bodley)
 * rgw,tests: qa/suites/rgw/thrash: add osd thrashing tests (`pr#13445 <https://github.com/ceph/ceph/pull/13445>`_, Sage Weil)
-* rgw,tests: qa/tasks: S3A hadoop task to test s3a with Ceph (`pr#14624 <https://github.com/ceph/ceph/pull/14624>`_, Vasu Kulkarni)
+* rgw,tests: qa/tasks: S3A hadoop task to test s3a with Stone (`pr#14624 <https://github.com/ceph/ceph/pull/14624>`_, Vasu Kulkarni)
 * rgw,tests: test/rgw: add bucket acl and versioning tests to test_multi.py (`pr#12449 <https://github.com/ceph/ceph/pull/12449>`_, Casey Bodley)
 * rgw,tests: test/rgw: add test for versioned object sync (`pr#12474 <https://github.com/ceph/ceph/pull/12474>`_, Casey Bodley)
 * rgw,tests: test/rgw: fixes for test_multi_period_incremental_sync() (`pr#13067 <https://github.com/ceph/ceph/pull/13067>`_, Casey Bodley)

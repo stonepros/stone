@@ -13,7 +13,7 @@ class TestCompletion(object):
         (list(range(5)), [str((x, )) for x in range(5)]),
         ([(1, 2), (3, 4)], ["(1, 2)", "(3, 4)"]),
     ])
-    def test_async_map(self, input, expected, cephadm_module):
+    def test_async_map(self, input, expected, stoneadm_module):
         @forall_hosts
         def run_forall(*args):
             return str(args)
@@ -27,7 +27,7 @@ class TestCompletion(object):
         (list(range(5)), [str((x, )) for x in range(5)]),
         ([(1, 2), (3, 4)], ["(1, 2)", "(3, 4)"]),
     ])
-    def test_async_map_self(self, input, expected, cephadm_module):
+    def test_async_map_self(self, input, expected, stoneadm_module):
         class Run(object):
             def __init__(self):
                 self.attr = 1

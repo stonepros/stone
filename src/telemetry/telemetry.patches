@@ -90,7 +90,7 @@ index 0000000000..111355857e
 +                key=itemgetter(1),
 +                reverse=True,
 +            ):
-+            print('%d %s, cluster %s, ceph ver %s' %
++            print('%d %s, cluster %s, stone ver %s' %
 +                  (count, plural(count, 'instance', 's'),
 +                  clid_and_version[0], clid_and_version[1])
 +                 )
@@ -188,7 +188,7 @@ index 98fc9720af..6b2a1493fb 100644
 -            (cluster_id,)
 -        )
 -        for (entity_type, info) in report.get('metadata', {}).items():
--            for (version, num) in info.get('ceph_version', {}).items():
+-            for (version, num) in info.get('stone_version', {}).items():
 -                ccur.execute(
 -                    "INSERT INTO cluster_version (cluster_id, entity_type, version, num_daemons) VALUES (%s, %s, %s, %s)",
 -                    (cluster_id,
@@ -256,7 +256,7 @@ index 98fc9720af..6b2a1493fb 100644
 +        (cluster_id,)
 +    )
 +    for (entity_type, info) in report.get('metadata', {}).items():
-+        for (version, num) in info.get('ceph_version', {}).items():
++        for (version, num) in info.get('stone_version', {}).items():
 +            cur.execute(
 +                "INSERT INTO cluster_version (cluster_id, entity_type, version, num_daemons) VALUES (%s, %s, %s, %s)",
 +                (cluster_id,
@@ -293,7 +293,7 @@ index 98fc9720af..6b2a1493fb 100644
               json.dumps(crash, indent=4),
               crash.get('timestamp'),
               crash.get('entity_name'),
-              crash.get('ceph_version'),
+              crash.get('stone_version'),
 -             stack,
 +             sig,
 +             str(stack),
@@ -496,7 +496,7 @@ index 0000000000..74f1417c0a
 +             json.dumps(crash, indent=4),
 +             crash.get('timestamp'),
 +             crash.get('entity_name'),
-+             crash.get('ceph_version'),
++             crash.get('stone_version'),
 +             sig,
 +             str(stack),
 +             sig,
@@ -683,7 +683,7 @@ index 0000000000..001376a9e7
 +    
 +    cur.execute('''
 +    with cleanver as
-+      (select regexp_replace(version, 'ceph version (([0-9.]+|Dev)).*', '\\1')
++      (select regexp_replace(version, 'stone version (([0-9.]+|Dev)).*', '\\1')
 +       as ver from cluster_version)
 +    select ver, count(ver) from cleanver
 +    group by ver
@@ -697,7 +697,7 @@ index 0000000000..001376a9e7
 +        counts.append(row[1])
 +    conn.close()
 +    fig, ax = plt.subplots(
-+        subplot_kw=dict(xlabel='Ceph version', ylabel='Number of daemons')
++        subplot_kw=dict(xlabel='Stone version', ylabel='Number of daemons')
 +        )
 +    ax.bar(
 +        range(0, len(versions)),

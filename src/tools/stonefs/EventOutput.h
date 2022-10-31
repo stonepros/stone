@@ -1,7 +1,7 @@
 // -*- mode:c++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * ceph - scalable distributed file system
+ * stone - scalable distributed file system
  *
  * copyright (c) 2014 john spray <john.spray@inktank.com>
  *

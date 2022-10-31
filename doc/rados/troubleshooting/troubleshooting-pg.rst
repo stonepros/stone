@@ -20,24 +20,24 @@ pool size greater than 1 object replica.
 One Node Cluster
 ----------------
 
-Ceph no longer provides documentation for operating on a single node, because
+Stone no longer provides documentation for operating on a single node, because
 you would never deploy a system designed for distributed computing on a single
 node. Additionally, mounting client kernel modules on a single node containing a
-Ceph  daemon may cause a deadlock due to issues with the Linux kernel itself
-(unless you use VMs for the clients). You can experiment with Ceph in a 1-node
+Stone  daemon may cause a deadlock due to issues with the Linux kernel itself
+(unless you use VMs for the clients). You can experiment with Stone in a 1-node
 configuration, in spite of the limitations as described herein.
 
 If you are trying to create a cluster on a single node, you must change the
 default of the ``osd crush chooseleaf type`` setting from ``1`` (meaning
-``host`` or ``node``) to ``0`` (meaning ``osd``) in your Ceph configuration
-file before you create your monitors and OSDs. This tells Ceph that an OSD
+``host`` or ``node``) to ``0`` (meaning ``osd``) in your Stone configuration
+file before you create your monitors and OSDs. This tells Stone that an OSD
 can peer with another OSD on the same host. If you are trying to set up a
 1-node cluster and ``osd crush chooseleaf type`` is greater than ``0``,
-Ceph will try to peer the PGs of one OSD with the PGs of another OSD on
+Stone will try to peer the PGs of one OSD with the PGs of another OSD on
 another node, chassis, rack, row, or even datacenter depending on the setting.
 
 .. tip:: DO NOT mount kernel clients directly on the same node as your
-   Ceph Storage Cluster, because kernel conflicts can arise. However, you
+   Stone Storage Cluster, because kernel conflicts can arise. However, you
    can mount kernel clients within virtual machines (VMs) on a single node.
 
 If you are creating OSDs using a single disk, you must create directories
@@ -60,7 +60,7 @@ one replica), in which case the cluster should achieve an ``active + clean``
 state.
 
 .. note:: You can make the changes at runtime. If you make the changes in
-   your Ceph configuration file, you may need to restart your cluster.
+   your Stone configuration file, you may need to restart your cluster.
 
 
 Pool Size = 1
@@ -71,10 +71,10 @@ one copy of the object. OSDs rely on other OSDs to tell them which objects
 they should have. If a first OSD has a copy of an object and there is no
 second copy, then no second OSD can tell the first OSD that it should have
 that copy. For each placement group mapped to the first OSD (see
-``ceph pg dump``), you can force the first OSD to notice the placement groups
+``stone pg dump``), you can force the first OSD to notice the placement groups
 it needs by running::
 
-   	ceph osd force-create-pg <pgid>
+   	stone osd force-create-pg <pgid>
 
 
 CRUSH Map Errors
@@ -100,17 +100,17 @@ non-optimal state.  Specifically, we check for:
 * ``unclean`` - The placement group has not been ``clean`` for too long
   (i.e., it hasn't been able to completely recover from a previous failure).
 
-* ``stale`` - The placement group status has not been updated by a ``ceph-osd``,
+* ``stale`` - The placement group status has not been updated by a ``stone-osd``,
   indicating that all nodes storing this placement group may be ``down``.
 
 You can explicitly list stuck placement groups with one of::
 
-	ceph pg dump_stuck stale
-	ceph pg dump_stuck inactive
-	ceph pg dump_stuck unclean
+	stone pg dump_stuck stale
+	stone pg dump_stuck inactive
+	stone pg dump_stuck unclean
 
 For stuck ``stale`` placement groups, it is normally a matter of getting the
-right ``ceph-osd`` daemons running again.  For stuck ``inactive`` placement
+right ``stone-osd`` daemons running again.  For stuck ``inactive`` placement
 groups, it is usually a peering problem (see :ref:`failures-osd-peering`).  For
 stuck ``unclean`` placement groups, there is usually something preventing
 recovery from completing, like unfound objects (see
@@ -123,11 +123,11 @@ recovery from completing, like unfound objects (see
 Placement Group Down - Peering Failure
 ======================================
 
-In certain cases, the ``ceph-osd`` `Peering` process can run into
+In certain cases, the ``stone-osd`` `Peering` process can run into
 problems, preventing a PG from becoming active and usable.  For
-example, ``ceph health`` might report::
+example, ``stone health`` might report::
 
-	ceph health detail
+	stone health detail
 	HEALTH_ERR 7 pgs degraded; 12 pgs down; 12 pgs peering; 1 pgs recovering; 6 pgs stuck unclean; 114/3300 degraded (3.455%); 1/3 in osds are down
 	...
 	pg 0.5 is down+peering
@@ -137,7 +137,7 @@ example, ``ceph health`` might report::
 
 We can query the cluster to determine exactly why the PG is marked ``down`` with::
 
-	ceph pg 0.5 query
+	stone pg 0.5 query
 
 .. code-block:: javascript
 
@@ -165,7 +165,7 @@ We can query the cluster to determine exactly why the PG is marked ``down`` with
  }
 
 The ``recovery_state`` section tells us that peering is blocked due to
-down ``ceph-osd`` daemons, specifically ``osd.1``.  In this case, we can start that ``ceph-osd``
+down ``stone-osd`` daemons, specifically ``osd.1``.  In this case, we can start that ``stone-osd``
 and things will recover.
 
 Alternatively, if there is a catastrophic failure of ``osd.1`` (e.g., disk
@@ -176,9 +176,9 @@ best it can.
    guarantee that the other copies of the data are consistent
    and up to date.
 
-To instruct Ceph to continue anyway::
+To instruct Stone to continue anyway::
 
-	ceph osd lost 1
+	stone osd lost 1
 
 Recovery will proceed.
 
@@ -188,16 +188,16 @@ Recovery will proceed.
 Unfound Objects
 ===============
 
-Under certain combinations of failures Ceph may complain about
+Under certain combinations of failures Stone may complain about
 ``unfound`` objects::
 
-	ceph health detail
+	stone health detail
 	HEALTH_WARN 1 pgs degraded; 78/3778 unfound (2.065%)
 	pg 2.4 is active+degraded, 78 unfound
 
 This means that the storage cluster knows that some objects (or newer
 copies of existing objects) exist, but it hasn't found copies of them.
-One example of how this might come about for a PG whose data is on ceph-osds
+One example of how this might come about for a PG whose data is on stone-osds
 1 and 2:
 
 * 1 goes down
@@ -206,14 +206,14 @@ One example of how this might come about for a PG whose data is on ceph-osds
 * 1 and 2 repeer, and the objects missing on 1 are queued for recovery.
 * Before the new objects are copied, 2 goes down.
 
-Now 1 knows that these object exist, but there is no live ``ceph-osd`` who
+Now 1 knows that these object exist, but there is no live ``stone-osd`` who
 has a copy.  In this case, IO to those objects will block, and the
 cluster will hope that the failed node comes back soon; this is
 assumed to be preferable to returning an IO error to the user.
 
 First, you can identify which objects are unfound with::
 
-	ceph pg 2.4 list_unfound [starting offset, in json]
+	stone pg 2.4 list_unfound [starting offset, in json]
 
 .. code-block:: javascript
 
@@ -261,13 +261,13 @@ data.
 
 At the end of the listing (before ``more`` is false), ``might_have_unfound`` is provided
 when ``available_might_have_unfound`` is true.  This is equivalent to the output
-of ``ceph pg #.# query``.  This eliminates the need to use ``query`` directly.
+of ``stone pg #.# query``.  This eliminates the need to use ``query`` directly.
 The ``might_have_unfound`` information given behaves the same way as described below for ``query``.
 The only difference is that OSDs that have ``already probed`` status are ignored.
 
 Use of ``query``::
 
-	ceph pg 2.4 query
+	stone pg 2.4 query
 
 .. code-block:: javascript
 
@@ -290,10 +290,10 @@ Sometimes it simply takes some time for the cluster to query possible
 locations.
 
 It is possible that there are other locations where the object can
-exist that are not listed.  For example, if a ceph-osd is stopped and
+exist that are not listed.  For example, if a stone-osd is stopped and
 taken out of the cluster, the cluster fully recovers, and due to some
 future set of failures ends up with an unfound object, it won't
-consider the long-departed ceph-osd as a potential location to
+consider the long-departed stone-osd as a potential location to
 consider.  (This scenario, however, is unlikely.)
 
 If all possible locations have been queried and objects are still
@@ -302,7 +302,7 @@ possible given unusual combinations of failures that allow the cluster
 to learn about writes that were performed before the writes themselves
 are recovered.  To mark the "unfound" objects as "lost"::
 
-	ceph pg 2.5 mark_unfound_lost revert|delete
+	stone pg 2.5 mark_unfound_lost revert|delete
 
 This the final argument specifies how the cluster should deal with
 lost objects.
@@ -324,13 +324,13 @@ monitor will receive no status updates for those placement groups.  To detect
 this situation, the monitor marks any placement group whose primary OSD has
 failed as ``stale``.  For example::
 
-	ceph health
+	stone health
 	HEALTH_WARN 24 pgs stale; 3/300 in osds are down
 
 You can identify which placement groups are ``stale``, and what the last OSDs to
 store them were, with::
 
-	ceph health detail
+	stone health detail
 	HEALTH_WARN 24 pgs stale; 3/300 in osds are down
 	...
 	pg 2.5 is stuck stale+active+remapped, last acting [2,0]
@@ -340,7 +340,7 @@ store them were, with::
 	osd.12 is down since epoch 24, last address 192.168.106.220:6806/11861
 
 If we want to get placement group 2.5 back online, for example, this tells us that
-it was last managed by ``osd.0`` and ``osd.2``.  Restarting those ``ceph-osd``
+it was last managed by ``osd.0`` and ``osd.2``.  Restarting those ``stone-osd``
 daemons will allow the cluster to recover that placement group (and, presumably,
 many others).
 
@@ -362,8 +362,8 @@ Can't Write Data
 If your cluster is up, but some OSDs are down and you cannot write data,
 check to ensure that you have the minimum number of OSDs running for the
 placement group. If you don't have the minimum number of OSDs running,
-Ceph will not allow you to write data because there is no guarantee
-that Ceph can replicate your data. See ``osd pool default min size``
+Stone will not allow you to write data because there is no guarantee
+that Stone can replicate your data. See ``osd pool default min size``
 in the `Pool, PG and CRUSH Config Reference`_ for details.
 
 
@@ -374,7 +374,7 @@ If you receive an ``active + clean + inconsistent`` state, this may happen
 due to an error during scrubbing. As always, we can identify the inconsistent
 placement group(s) with::
 
-    $ ceph health detail
+    $ stone health detail
     HEALTH_ERR 1 pgs inconsistent; 2 scrub errors
     pg 0.6 is active+clean+inconsistent, acting [0,1,2]
     2 scrub errors
@@ -469,10 +469,10 @@ In this case, we can learn from the output:
 
 You can repair the inconsistent placement group by executing::
 
-	ceph pg repair {placement-group-ID}
+	stone pg repair {placement-group-ID}
 
 Which overwrites the `bad` copies with the `authoritative` ones. In most cases,
-Ceph is able to choose authoritative copies from all available replicas using
+Stone is able to choose authoritative copies from all available replicas using
 some predefined criteria. But this does not always work. For example, the stored
 data digest could be missing, and the calculated digest will be ignored when
 choosing the authoritative copies. So, please use the above command with caution.
@@ -483,7 +483,7 @@ used by that OSD.
 
 If you receive ``active + clean + inconsistent`` states periodically due to
 clock skew, you may consider configuring your `NTP`_ daemons on your
-monitor hosts to act as peers. See `The Network Time Protocol`_ and Ceph
+monitor hosts to act as peers. See `The Network Time Protocol`_ and Stone
 `Clock Settings`_ for additional details.
 
 
@@ -498,12 +498,12 @@ When CRUSH fails to find enough OSDs to map to a PG, it will show as a
 Not enough OSDs
 ---------------
 
-If the Ceph cluster only has 8 OSDs and the erasure coded pool needs
+If the Stone cluster only has 8 OSDs and the erasure coded pool needs
 9, that is what it will show. You can either create another erasure
 coded pool that requires less OSDs::
 
-     ceph osd erasure-code-profile set myprofile k=5 m=3
-     ceph osd pool create erasurepool erasure myprofile
+     stone osd erasure-code-profile set myprofile k=5 m=3
+     stone osd pool create erasurepool erasure myprofile
 
 or add a new OSDs and the PG will automatically use them.
 
@@ -517,11 +517,11 @@ same host are used in the same PG, the mapping may fail because only
 two OSDs will be found. You can check the constraint by displaying ("dumping")
 the rule::
 
-    $ ceph osd crush rule ls
+    $ stone osd crush rule ls
     [
         "replicated_rule",
         "erasurepool"]
-    $ ceph osd crush rule dump erasurepool
+    $ stone osd crush rule dump erasurepool
     { "rule_id": 1,
       "rule_name": "erasurepool",
       "ruleset": 1,
@@ -541,13 +541,13 @@ the rule::
 You can resolve the problem by creating a new pool in which PGs are allowed
 to have OSDs residing on the same host with::
 
-     ceph osd erasure-code-profile set myprofile crush-failure-domain=osd
-     ceph osd pool create erasurepool erasure myprofile
+     stone osd erasure-code-profile set myprofile crush-failure-domain=osd
+     stone osd pool create erasurepool erasure myprofile
 
 CRUSH gives up too soon
 -----------------------
 
-If the Ceph cluster has just enough OSDs to map the PG (for instance a
+If the Stone cluster has just enough OSDs to map the PG (for instance a
 cluster with a total of 9 OSDs and an erasure coded pool that requires
 9 OSDs per PG), it is possible that CRUSH gives up before finding a
 mapping. It can be resolved by:
@@ -565,9 +565,9 @@ mapping. It can be resolved by:
 
 You should first verify the problem with ``crushtool`` after
 extracting the crushmap from the cluster so your experiments do not
-modify the Ceph cluster and only work on a local files::
+modify the Stone cluster and only work on a local files::
 
-    $ ceph osd crush rule dump erasurepool
+    $ stone osd crush rule dump erasurepool
     { "rule_name": "erasurepool",
       "ruleset": 1,
       "type": 3,
@@ -581,7 +581,7 @@ modify the Ceph cluster and only work on a local files::
               "num": 0,
               "type": "host"},
             { "op": "emit"}]}
-    $ ceph osd getcrushmap > crush.map
+    $ stone osd getcrushmap > crush.map
     got crush map from osdmap epoch 13
     $ crushtool -i crush.map --test --show-bad-mappings \
        --rule 1 \
@@ -593,7 +593,7 @@ modify the Ceph cluster and only work on a local files::
 
 Where ``--num-rep`` is the number of OSDs the erasure code CRUSH
 rule needs, ``--rule`` is the value of the ``ruleset`` field
-displayed by ``ceph osd crush rule dump``.  The test will try mapping
+displayed by ``stone osd crush rule dump``.  The test will try mapping
 one million values (i.e. the range defined by ``[--min-x,--max-x]``)
 and must display at least one bad mapping. If it outputs nothing it
 means all mappings are successful and you can stop right there: the

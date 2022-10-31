@@ -9,20 +9,20 @@ from teuthology.contextutil import MaxWhileTries
 from teuthology.contextutil import safe_while
 from teuthology.orchestra import run
 from teuthology.orchestra.run import CommandFailedError
-from tasks.ceph_manager import get_valgrind_args
-from tasks.cephfs.mount import CephFSMount
+from tasks.stone_manager import get_valgrind_args
+from tasks.stonefs.mount import StoneFSMount
 
 log = logging.getLogger(__name__)
 
 # Refer mount.py for docstrings.
-class FuseMount(CephFSMount):
+class FuseMount(StoneFSMount):
     def __init__(self, ctx, client_config, test_dir, client_id,
-                 client_remote, client_keyring_path=None, cephfs_name=None,
-                 cephfs_mntpt=None, hostfs_mntpt=None, brxnet=None):
+                 client_remote, client_keyring_path=None, stonefs_name=None,
+                 stonefs_mntpt=None, hostfs_mntpt=None, brxnet=None):
         super(FuseMount, self).__init__(ctx=ctx, test_dir=test_dir,
             client_id=client_id, client_remote=client_remote,
             client_keyring_path=client_keyring_path, hostfs_mntpt=hostfs_mntpt,
-            cephfs_name=cephfs_name, cephfs_mntpt=cephfs_mntpt, brxnet=brxnet)
+            stonefs_name=stonefs_name, stonefs_mntpt=stonefs_mntpt, brxnet=brxnet)
 
         self.client_config = client_config if client_config else {}
         self.fuse_daemon = None
@@ -41,7 +41,7 @@ class FuseMount(CephFSMount):
             # TODO: don't call setupfs() from within mount(), since it's
             # absurd. The proper order should be: create FS first and then
             # call mount().
-            self.setupfs(name=self.cephfs_name)
+            self.setupfs(name=self.stonefs_name)
 
         try:
             return self._mount(mntopts, check_status)
@@ -49,7 +49,7 @@ class FuseMount(CephFSMount):
             # Catch exceptions by the mount() logic (i.e. not remote command
             # failures) and ensure the mount is not left half-up.
             # Otherwise we might leave a zombie mount point that causes
-            # anyone traversing cephtest/ to get hung up on.
+            # anyone traversing stonetest/ to get hung up on.
             log.warning("Trying to clean up after failed mount")
             self.umount_wait(force=True)
             raise
@@ -77,24 +77,24 @@ class FuseMount(CephFSMount):
         run_cmd = [
             'sudo',
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             '{tdir}/archive/coverage'.format(tdir=self.test_dir),
             'daemon-helper',
             daemon_signal,
         ]
 
         fuse_cmd = [
-            'ceph-fuse', "-f",
-            "--admin-socket", "/var/run/ceph/$cluster-$name.$pid.asok",
+            'stone-fuse', "-f",
+            "--admin-socket", "/var/run/stonepros/$cluster-$name.$pid.asok",
         ]
         if self.client_id is not None:
             fuse_cmd += ['--id', self.client_id]
         if self.client_keyring_path and self.client_id is not None:
             fuse_cmd += ['-k', self.client_keyring_path]
-        if self.cephfs_mntpt is not None:
-            fuse_cmd += ["--client_mountpoint=" + self.cephfs_mntpt]
-        if self.cephfs_name is not None:
-            fuse_cmd += ["--client_fs=" + self.cephfs_name]
+        if self.stonefs_mntpt is not None:
+            fuse_cmd += ["--client_mountpoint=" + self.stonefs_mntpt]
+        if self.stonefs_name is not None:
+            fuse_cmd += ["--client_fs=" + self.stonefs_name]
         if mntopts:
             fuse_cmd += mntopts
         fuse_cmd.append(self.hostfs_mntpt)
@@ -135,7 +135,7 @@ class FuseMount(CephFSMount):
             else:
                 return []
 
-        # Before starting ceph-fuse process, note the contents of
+        # Before starting stone-fuse process, note the contents of
         # /sys/fs/fuse/connections
         pre_mount_conns = list_connections()
         log.info("Pre-mount connections: {0}".format(pre_mount_conns))
@@ -143,7 +143,7 @@ class FuseMount(CephFSMount):
         mountcmd_stdout, mountcmd_stderr = StringIO(), StringIO()
         self.fuse_daemon = self.client_remote.run(
             args=run_cmd,
-            logger=log.getChild('ceph-fuse.{id}'.format(id=self.client_id)),
+            logger=log.getChild('stone-fuse.{id}'.format(id=self.client_id)),
             stdin=run.PIPE,
             stdout=mountcmd_stdout,
             stderr=mountcmd_stderr,
@@ -243,10 +243,10 @@ class FuseMount(CephFSMount):
 
         fstype = proc.stdout.getvalue().rstrip('\n')
         if fstype == 'fuseblk':
-            log.info('ceph-fuse is mounted on %s', self.hostfs_mntpt)
+            log.info('stone-fuse is mounted on %s', self.hostfs_mntpt)
             return True
         else:
-            log.debug('ceph-fuse not mounted, got fs type {fstype!r}'.format(
+            log.debug('stone-fuse not mounted, got fs type {fstype!r}'.format(
                 fstype=fstype))
             return False
 
@@ -312,7 +312,7 @@ class FuseMount(CephFSMount):
                 # This happens if the mount directory already unmouted
                 log.info('mount point not mounted: %s', self.mountpoint)
             else:
-                log.info('Failed to unmount ceph-fuse on {name}, aborting...'.format(name=self.client_remote.name))
+                log.info('Failed to unmount stone-fuse on {name}, aborting...'.format(name=self.client_remote.name))
 
                 self.client_remote.run(
                     args=['sudo', run.Raw('PATH=/usr/sbin:$PATH'), 'lsof',
@@ -352,7 +352,7 @@ class FuseMount(CephFSMount):
         :param force: Complete cleanly even if the MDS is offline
         """
         if not (self.is_mounted() and self.fuse_daemon):
-            log.debug('ceph-fuse client.{id} is not mounted at {remote} '
+            log.debug('stone-fuse client.{id} is not mounted at {remote} '
                       '{mnt}'.format(id=self.client_id,
                                      remote=self.client_remote,
                                      mnt=self.hostfs_mntpt))
@@ -362,7 +362,7 @@ class FuseMount(CephFSMount):
         if force:
             assert not require_clean  # mutually exclusive
 
-            # When we expect to be forcing, kill the ceph-fuse process directly.
+            # When we expect to be forcing, kill the stone-fuse process directly.
             # This should avoid hitting the more aggressive fallback killing
             # in umount() which can affect other mounts too.
             self.fuse_daemon.stdin.close()
@@ -381,7 +381,7 @@ class FuseMount(CephFSMount):
 
         except MaxWhileTries:
             log.error("process failed to terminate after unmount. This probably"
-                      " indicates a bug within ceph-fuse.")
+                      " indicates a bug within stone-fuse.")
             raise
         except CommandFailedError:
             if require_clean:
@@ -408,7 +408,7 @@ class FuseMount(CephFSMount):
         self.mounted = False
 
     def _asok_path(self):
-        return "/var/run/ceph/ceph-client.{0}.*.asok".format(self.client_id)
+        return "/var/run/stonepros/stone-client.{0}.*.asok".format(self.client_id)
 
     @property
     def _prefix(self):
@@ -459,7 +459,7 @@ print(_find_admin_socket("{client_name}"))
             while proceed():
                 try:
                     p = self.client_remote.run(args=
-                        ['sudo', self._prefix + 'ceph', '--admin-daemon', asok_path] + args,
+                        ['sudo', self._prefix + 'stone', '--admin-daemon', asok_path] + args,
                         stdout=StringIO(), stderr=StringIO(), wait=False,
                         timeout=(15*60))
                     p.wait()
@@ -472,25 +472,25 @@ print(_find_admin_socket("{client_name}"))
 
     def get_global_id(self):
         """
-        Look up the CephFS client ID for this mount
+        Look up the StoneFS client ID for this mount
         """
         return self.admin_socket(['mds_sessions'])['id']
 
     def get_global_inst(self):
         """
-        Look up the CephFS client instance for this mount
+        Look up the StoneFS client instance for this mount
         """
         return self.inst
 
     def get_global_addr(self):
         """
-        Look up the CephFS client addr for this mount
+        Look up the StoneFS client addr for this mount
         """
         return self.addr
 
     def get_client_pid(self):
         """
-        return pid of ceph-fuse process
+        return pid of stone-fuse process
         """
         status = self.admin_socket(['status'])
         return status['metadata']['pid']

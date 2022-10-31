@@ -2,7 +2,7 @@
 #define STONE_RADOS_H
 
 /*
- * Data types for the Ceph distributed object storage layer RADOS
+ * Data types for the Stone distributed object storage layer RADOS
  * (Reliable Autonomic Distributed Object Store).
  */
 
@@ -10,23 +10,23 @@
 #include <stdbool.h>
 #include "msgr.h"
 
-/* See comment in ceph_fs.h.  */
+/* See comment in stone_fs.h.  */
 #ifndef __KERNEL__
 #include "byteorder.h"
-#define __le16 ceph_le16
-#define __le32 ceph_le32
-#define __le64 ceph_le64
+#define __le16 stone_le16
+#define __le32 stone_le32
+#define __le64 stone_le64
 #endif
 
 /*
  * fs id
  */
-struct ceph_fsid {
+struct stone_fsid {
 	unsigned char fsid[16];
 };
 
-static inline int ceph_fsid_compare(const struct ceph_fsid *a,
-				    const struct ceph_fsid *b)
+static inline int stone_fsid_compare(const struct stone_fsid *a,
+				    const struct stone_fsid *b)
 {
 	return memcmp(a, b, sizeof(*a));
 }
@@ -34,12 +34,12 @@ static inline int ceph_fsid_compare(const struct ceph_fsid *a,
 /*
  * ino, object, etc.
  */
-typedef __le64 ceph_snapid_t;
+typedef __le64 stone_snapid_t;
 #define STONE_SNAPDIR ((__u64)(-1))  /* reserved for hidden .snap dir */
 #define STONE_NOSNAP  ((__u64)(-2))  /* "head", "live" revision */
 #define STONE_MAXSNAP ((__u64)(-3))  /* largest valid snapid */
 
-struct ceph_timespec {
+struct stone_timespec {
 	__le32 tv_sec;
 	__le32 tv_nsec;
 } __attribute__ ((packed));
@@ -66,7 +66,7 @@ struct ceph_timespec {
  * placement group.
  * we encode this into one __le64.
  */
-struct ceph_pg {
+struct stone_pg {
 	__le16 preferred; /* preferred primary osd */
 	__le16 ps;        /* placement seed */
 	__le32 pool;      /* object pool */
@@ -93,7 +93,7 @@ struct ceph_pg {
  *
  * ** This function is released to the public domain by the author. **
  */
-static inline int ceph_stable_mod(int x, int b, int bmask)
+static inline int stone_stable_mod(int x, int b, int bmask)
 {
 	if ((x & bmask) < b)
 		return x & bmask;
@@ -104,15 +104,15 @@ static inline int ceph_stable_mod(int x, int b, int bmask)
 /*
  * object layout - how a given object should be stored.
  */
-struct ceph_object_layout {
-	struct ceph_pg ol_pgid;   /* raw pg, with _full_ ps precision. */
+struct stone_object_layout {
+	struct stone_pg ol_pgid;   /* raw pg, with _full_ ps precision. */
 	__le32 ol_stripe_unit;    /* for per-object parity, if any */
 } __attribute__ ((packed));
 
 /*
  * compound epoch+version, used by storage layer to serialize mutations
  */
-struct ceph_eversion {
+struct stone_eversion {
 	__le32 epoch;
 	__le64 version;
 } __attribute__ ((packed));
@@ -136,7 +136,7 @@ struct ceph_eversion {
 #define STONE_OSD_NOOUT        (1<<11) /* osd can not be marked out */
 #define STONE_OSD_STOP         (1<<12) /* osd has been stopped by admin */
 
-extern const char *ceph_osd_state_name(int s);
+extern const char *stone_osd_state_name(int s);
 
 /* osd weights.  fixed point value: 0x10000 == 1.0 ("in"), 0 == "out" */
 #define STONE_OSD_IN  0x10000
@@ -173,7 +173,7 @@ extern const char *ceph_osd_state_name(int s);
 #define STONE_OSDMAP_NOSNAPTRIM       (1<<21) /* disable snap trimming */
 #define STONE_OSDMAP_PGLOG_HARDLIMIT  (1<<22) /* put a hard limit on pg log length */
 
-/* these are hidden in 'ceph status' view */
+/* these are hidden in 'stone status' view */
 #define STONE_OSDMAP_SEMIHIDDEN_FLAGS (STONE_OSDMAP_REQUIRE_JEWEL|	\
 				      STONE_OSDMAP_REQUIRE_KRAKEN |	\
 				      STONE_OSDMAP_REQUIRE_LUMINOUS |	\
@@ -186,7 +186,7 @@ extern const char *ceph_osd_state_name(int s);
 					  STONE_OSDMAP_REQUIRE_LUMINOUS)
 
 /*
- * major ceph release numbers
+ * major stone release numbers
  */
 #define STONE_RELEASE_ARGONAUT    1
 #define STONE_RELEASE_BOBTAIL     2
@@ -373,41 +373,41 @@ __STONE_FORALL_OSD_OPS(GENERATE_ENUM_ENTRY)
 #undef GENERATE_ENUM_ENTRY
 };
 
-static inline int ceph_osd_op_type_data(int op)
+static inline int stone_osd_op_type_data(int op)
 {
 	return (op & STONE_OSD_OP_TYPE) == STONE_OSD_OP_TYPE_DATA;
 }
-static inline int ceph_osd_op_type_attr(int op)
+static inline int stone_osd_op_type_attr(int op)
 {
 	return (op & STONE_OSD_OP_TYPE) == STONE_OSD_OP_TYPE_ATTR;
 }
-static inline int ceph_osd_op_type_exec(int op)
+static inline int stone_osd_op_type_exec(int op)
 {
 	return (op & STONE_OSD_OP_TYPE) == STONE_OSD_OP_TYPE_EXEC;
 }
-static inline int ceph_osd_op_type_pg(int op)
+static inline int stone_osd_op_type_pg(int op)
 {
 	return (op & STONE_OSD_OP_TYPE) == STONE_OSD_OP_TYPE_PG;
 }
 
-static inline int ceph_osd_op_mode_subop(int op)
+static inline int stone_osd_op_mode_subop(int op)
 {
 	return (op & STONE_OSD_OP_MODE) == STONE_OSD_OP_MODE_SUB;
 }
-static inline int ceph_osd_op_mode_read(int op)
+static inline int stone_osd_op_mode_read(int op)
 {
 	return (op & STONE_OSD_OP_MODE_RD) &&
 		op != STONE_OSD_OP_CALL;
 }
-static inline int ceph_osd_op_mode_modify(int op)
+static inline int stone_osd_op_mode_modify(int op)
 {
 	return op & STONE_OSD_OP_MODE_WR;
 }
-static inline int ceph_osd_op_mode_cache(int op)
+static inline int stone_osd_op_mode_cache(int op)
 {
 	return op & STONE_OSD_OP_MODE_CACHE;
 }
-static inline bool ceph_osd_op_uses_extent(int op)
+static inline bool stone_osd_op_uses_extent(int op)
 {
 	switch(op) {
 	case STONE_OSD_OP_READ:
@@ -429,7 +429,7 @@ static inline bool ceph_osd_op_uses_extent(int op)
 }
 
 /*
- * note that the following tmap stuff is also defined in the ceph librados.h
+ * note that the following tmap stuff is also defined in the stone librados.h
  * and objclass.h. Any modification here needs to be updated there
  */
 #define STONE_OSD_TMAP_HDR 'h'
@@ -438,7 +438,7 @@ static inline bool ceph_osd_op_uses_extent(int op)
 #define STONE_OSD_TMAP_RM  'r'
 #define STONE_OSD_TMAP_RMSLOPPY 'R'
 
-extern const char *ceph_osd_op_name(int op);
+extern const char *stone_osd_op_name(int op);
 
 /*
  * osd op flags
@@ -546,7 +546,7 @@ enum {
 	STONE_OSD_CHECKSUM_OP_TYPE_CRC32C   = 2
 };
 
-const char *ceph_osd_watch_op_name(int o);
+const char *stone_osd_watch_op_name(int o);
 
 enum {
 	STONE_OSD_ALLOC_HINT_FLAG_SEQUENTIAL_WRITE = 1,
@@ -561,7 +561,7 @@ enum {
 	STONE_OSD_ALLOC_HINT_FLAG_INCOMPRESSIBLE = 512,
 };
 
-const char *ceph_osd_alloc_hint_flag_name(int f);
+const char *stone_osd_alloc_hint_flag_name(int f);
 
 enum {
 	STONE_OSD_BACKOFF_OP_BLOCK = 1,
@@ -569,13 +569,13 @@ enum {
 	STONE_OSD_BACKOFF_OP_UNBLOCK = 3,
 };
 
-const char *ceph_osd_backoff_op_name(int op);
+const char *stone_osd_backoff_op_name(int op);
 
 /*
  * an individual object operation.  each may be accompanied by some data
  * payload
  */
-struct ceph_osd_op {
+struct stone_osd_op {
 	__le16 op;           /* STONE_OSD_OP_* */
 	__le32 flags;        /* STONE_OSD_OP_FLAG_* */
 	union {
@@ -631,12 +631,12 @@ struct ceph_osd_op {
 			/*
 			 * STONE_OSD_OP_FLAG_FADVISE_*: fadvise flags
 			 * for src object, flags for dest object are in
-			 * ceph_osd_op::flags.
+			 * stone_osd_op::flags.
 			 */
 			__le32 src_fadvise_flags;
 		} __attribute__ ((packed)) copy_from;
 		struct {
-			struct ceph_timespec stamp;
+			struct stone_timespec stamp;
 		} __attribute__ ((packed)) hit_set_get;
 		struct {
 			__u8 flags;
@@ -662,29 +662,29 @@ struct ceph_osd_op {
 } __attribute__ ((packed));
 
 /*
- * Check the compatibility of struct ceph_osd_op
- *  (2+4+(2*8+8+4)+4) = (sizeof(ceph_osd_op::op) +
- *                     sizeof(ceph_osd_op::flags) +
- *                     sizeof(ceph_osd_op::extent) +
- *                     sizeof(ceph_osd_op::payload_len))
+ * Check the compatibility of struct stone_osd_op
+ *  (2+4+(2*8+8+4)+4) = (sizeof(stone_osd_op::op) +
+ *                     sizeof(stone_osd_op::flags) +
+ *                     sizeof(stone_osd_op::extent) +
+ *                     sizeof(stone_osd_op::payload_len))
  */
 #ifdef __cplusplus
-static_assert(sizeof(ceph_osd_op) == (2+4+(2*8+8+4)+4),
-              "sizeof(ceph_osd_op) breaks the compatibility");
+static_assert(sizeof(stone_osd_op) == (2+4+(2*8+8+4)+4),
+              "sizeof(stone_osd_op) breaks the compatibility");
 #endif
 
-struct ceph_osd_reply_head {
+struct stone_osd_reply_head {
 	__le32 client_inc;                /* client incarnation */
 	__le32 flags;
-	struct ceph_object_layout layout;
+	struct stone_object_layout layout;
 	__le32 osdmap_epoch;
-	struct ceph_eversion reassert_version; /* for replaying uncommitted */
+	struct stone_eversion reassert_version; /* for replaying uncommitted */
 
 	__le32 result;                    /* result code */
 
 	__le32 object_len;                /* length of object name */
 	__le32 num_ops;
-	struct ceph_osd_op ops[0];  /* ops[], object */
+	struct stone_osd_op ops[0];  /* ops[], object */
 } __attribute__ ((packed));
 
 #ifndef __KERNEL__

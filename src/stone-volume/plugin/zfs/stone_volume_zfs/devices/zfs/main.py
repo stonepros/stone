@@ -2,7 +2,7 @@
 
 import argparse
 from textwrap import dedent
-from ceph_volume import terminal
+from stone_volume import terminal
 
 from . import inventory
 from . import prepare
@@ -27,7 +27,7 @@ class ZFSDEV(object):
     def main(self):
         terminal.dispatch(self.mapper, self.argv)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume zfs',
+            prog='stone-volume zfs',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self.print_help(terminal.subhelp(self.mapper)),
         )

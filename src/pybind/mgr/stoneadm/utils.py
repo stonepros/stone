@@ -7,7 +7,7 @@ from typing import Optional, Callable, TypeVar, List, NewType, TYPE_CHECKING, An
 from orchestrator import OrchestratorError
 
 if TYPE_CHECKING:
-    from cephadm import CephadmOrchestrator
+    from stoneadm import StoneadmOrchestrator
 
 T = TypeVar('T')
 logger = logging.getLogger(__name__)
@@ -15,35 +15,35 @@ logger = logging.getLogger(__name__)
 ConfEntity = NewType('ConfEntity', str)
 
 
-class CephadmNoImage(Enum):
+class StoneadmNoImage(Enum):
     token = 1
 
 
-# ceph daemon types that use the ceph container image.
+# stone daemon types that use the stone container image.
 # NOTE: order important here as these are used for upgrade order
-CEPH_TYPES = ['mgr', 'mon', 'crash', 'osd', 'mds', 'rgw', 'rbd-mirror', 'cephfs-mirror']
+STONE_TYPES = ['mgr', 'mon', 'crash', 'osd', 'mds', 'rgw', 'rbd-mirror', 'stonefs-mirror']
 GATEWAY_TYPES = ['iscsi', 'nfs']
 MONITORING_STACK_TYPES = ['node-exporter', 'prometheus', 'alertmanager', 'grafana']
 RESCHEDULE_FROM_OFFLINE_HOSTS_TYPES = ['nfs']
 
-CEPH_UPGRADE_ORDER = CEPH_TYPES + GATEWAY_TYPES + MONITORING_STACK_TYPES
+STONE_UPGRADE_ORDER = STONE_TYPES + GATEWAY_TYPES + MONITORING_STACK_TYPES
 
-# these daemon types use the ceph container image
-CEPH_IMAGE_TYPES = CEPH_TYPES + ['iscsi', 'nfs']
+# these daemon types use the stone container image
+STONE_IMAGE_TYPES = STONE_TYPES + ['iscsi', 'nfs']
 
-# Used for _run_cephadm used for check-host etc that don't require an --image parameter
-cephadmNoImage = CephadmNoImage.token
+# Used for _run_stoneadm used for check-host etc that don't require an --image parameter
+stoneadmNoImage = StoneadmNoImage.token
 
 
 class ContainerInspectInfo(NamedTuple):
     image_id: str
-    ceph_version: Optional[str]
+    stone_version: Optional[str]
     repo_digests: Optional[List[str]]
 
 
 def name_to_config_section(name: str) -> ConfEntity:
     """
-    Map from daemon names to ceph entity names (as seen in config)
+    Map from daemon names to stone entity names (as seen in config)
     """
     daemon_type = name.split('.', 1)[0]
     if daemon_type in ['rgw', 'rbd-mirror', 'nfs', 'crash', 'iscsi']:
@@ -57,7 +57,7 @@ def name_to_config_section(name: str) -> ConfEntity:
 def forall_hosts(f: Callable[..., T]) -> Callable[..., List[T]]:
     @wraps(f)
     def forall_hosts_wrapper(*args: Any) -> List[T]:
-        from cephadm.module import CephadmOrchestrator
+        from stoneadm.module import StoneadmOrchestrator
 
         # Some weired logic to make calling functions with multiple arguments work.
         if len(args) == 1:
@@ -79,13 +79,13 @@ def forall_hosts(f: Callable[..., T]) -> Callable[..., List[T]]:
                 logger.exception(f'executing {f.__name__}({args}) failed.')
                 raise
 
-        assert CephadmOrchestrator.instance is not None
-        return CephadmOrchestrator.instance._worker_pool.map(do_work, vals)
+        assert StoneadmOrchestrator.instance is not None
+        return StoneadmOrchestrator.instance._worker_pool.map(do_work, vals)
 
     return forall_hosts_wrapper
 
 
-def get_cluster_health(mgr: 'CephadmOrchestrator') -> str:
+def get_cluster_health(mgr: 'StoneadmOrchestrator') -> str:
     # check cluster health
     ret, out, err = mgr.check_mon_command({
         'prefix': 'health',
@@ -103,7 +103,7 @@ def get_cluster_health(mgr: 'CephadmOrchestrator') -> str:
 
 def is_repo_digest(image_name: str) -> bool:
     """
-    repo digest are something like "ceph/ceph@sha256:blablabla"
+    repo digest are something like "stone/stone@sha256:blablabla"
     """
     return '@' in image_name
 
@@ -121,7 +121,7 @@ def resolve_ip(hostname: str) -> str:
         raise OrchestratorError(f"Cannot resolve ip for host {hostname}: {e}")
 
 
-def ceph_release_to_major(release: str) -> int:
+def stone_release_to_major(release: str) -> int:
     return ord(release[0]) - ord('a') + 1
 
 

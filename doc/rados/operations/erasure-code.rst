@@ -4,7 +4,7 @@
  Erasure code
 =============
 
-A Ceph pool is associated to a type to sustain the loss of an OSD
+A Stone pool is associated to a type to sustain the loss of an OSD
 (i.e. a disk since most of the time there is one OSD per disk). The
 default choice when `creating a pool <../pools>`_ is *replicated*,
 meaning every object is copied on multiple disks. The `Erasure Code
@@ -18,7 +18,7 @@ The simplest erasure coded pool is equivalent to `RAID5
 <https://en.wikipedia.org/wiki/Standard_RAID_levels#RAID_5>`_ and
 requires at least three hosts::
 
-    $ ceph osd pool create ecpool erasure
+    $ stone osd pool create ecpool erasure
     pool 'ecpool' created
     $ echo ABCDEFGHI | rados --pool ecpool put NYAN -
     $ rados --pool ecpool get NYAN -
@@ -32,7 +32,7 @@ is equivalent to a replicated pool of size three but requires 2TB
 instead of 3TB to store 1TB of data. The default profile can be
 displayed with::
 
-    $ ceph osd erasure-code-profile get default
+    $ stone osd erasure-code-profile get default
     k=2
     m=2
     plugin=jerasure
@@ -49,11 +49,11 @@ the data durability. For instance, if the desired architecture must
 sustain the loss of two racks with a storage overhead of 67% overhead,
 the following profile can be defined::
 
-    $ ceph osd erasure-code-profile set myprofile \
+    $ stone osd erasure-code-profile set myprofile \
        k=3 \
        m=2 \
        crush-failure-domain=rack
-    $ ceph osd pool create ecpool erasure myprofile
+    $ stone osd pool create ecpool erasure myprofile
     $ echo ABCDEFGHI | rados --pool ecpool put NYAN -
     $ rados --pool ecpool get NYAN -
     ABCDEFGHI
@@ -120,10 +120,10 @@ By default, erasure coded pools only work with uses like RGW that
 perform full object writes and appends.
 
 Since Luminous, partial writes for an erasure coded pool may be
-enabled with a per-pool setting. This lets RBD and CephFS store their
+enabled with a per-pool setting. This lets RBD and StoneFS store their
 data in an erasure coded pool::
 
-    ceph osd pool set ec_pool allow_ec_overwrites true
+    stone osd pool set ec_pool allow_ec_overwrites true
 
 This can only be enabled on a pool residing on bluestore OSDs, since
 bluestore's checksumming is used to detect bitrot or other corruption
@@ -131,14 +131,14 @@ during deep-scrub. In addition to being unsafe, using filestore with
 ec overwrites yields low performance compared to bluestore.
 
 Erasure coded pools do not support omap, so to use them with RBD and
-CephFS you must instruct them to store their data in an ec pool, and
+StoneFS you must instruct them to store their data in an ec pool, and
 their metadata in a replicated pool. For RBD, this means using the
 erasure coded pool as the ``--data-pool`` during image creation::
 
     rbd create --size 1G --data-pool ec_pool replicated_pool/image_name
 
-For CephFS, an erasure coded pool can be set as the default data pool during
-file system creation or via `file layouts <../../../cephfs/file-layouts>`_.
+For StoneFS, an erasure coded pool can be set as the default data pool during
+file system creation or via `file layouts <../../../stonefs/file-layouts>`_.
 
 
 Erasure coded pool and cache tiering
@@ -151,9 +151,9 @@ before the erasure coded pool.
 
 For instance, if the pool *hot-storage* is made of fast storage::
 
-    $ ceph osd tier add ecpool hot-storage
-    $ ceph osd tier cache-mode hot-storage writeback
-    $ ceph osd tier set-overlay ecpool hot-storage
+    $ stone osd tier add ecpool hot-storage
+    $ stone osd tier cache-mode hot-storage writeback
+    $ stone osd tier set-overlay ecpool hot-storage
 
 will place the *hot-storage* pool as tier of *ecpool* in *writeback*
 mode so that every write and read to the *ecpool* are actually using

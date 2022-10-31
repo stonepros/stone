@@ -6,7 +6,7 @@
 
 #include <boost/variant.hpp>
 #include "include/denc.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "mgr/OSDPerfMetricTypes.h"
 #include "mgr/MDSPerfMetricTypes.h"
 
@@ -55,7 +55,7 @@ struct UnknownMetricPayload {
   UnknownMetricPayload() { }
 
   DENC(UnknownMetricPayload, v, p) {
-    ceph_abort();
+    stone_abort();
   }
 };
 
@@ -69,33 +69,33 @@ typedef boost::variant<OSDMetricPayload,
 
 class EncodeMetricPayloadVisitor : public boost::static_visitor<void> {
 public:
-  explicit EncodeMetricPayloadVisitor(ceph::buffer::list &bl) : m_bl(bl) {
+  explicit EncodeMetricPayloadVisitor(stone::buffer::list &bl) : m_bl(bl) {
   }
 
   template <typename MetricPayload>
   inline void operator()(const MetricPayload &payload) const {
-    using ceph::encode;
+    using stone::encode;
     encode(static_cast<uint32_t>(MetricPayload::METRIC_REPORT_TYPE), m_bl);
     encode(payload, m_bl);
   }
 
 private:
-  ceph::buffer::list &m_bl;
+  stone::buffer::list &m_bl;
 };
 
 class DecodeMetricPayloadVisitor : public boost::static_visitor<void> {
 public:
-  DecodeMetricPayloadVisitor(ceph::buffer::list::const_iterator &iter) : m_iter(iter) {
+  DecodeMetricPayloadVisitor(stone::buffer::list::const_iterator &iter) : m_iter(iter) {
   }
 
   template <typename MetricPayload>
   inline void operator()(MetricPayload &payload) const {
-    using ceph::decode;
+    using stone::decode;
     decode(payload, m_iter);
   }
 
 private:
-  ceph::buffer::list::const_iterator &m_iter;
+  stone::buffer::list::const_iterator &m_iter;
 };
 
 struct MetricReportMessage {
@@ -113,12 +113,12 @@ struct MetricReportMessage {
     return true;
   }
 
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
     boost::apply_visitor(EncodeMetricPayloadVisitor(bl), payload);
   }
 
-  void decode(ceph::buffer::list::const_iterator &iter) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &iter) {
+    using stone::decode;
 
     uint32_t metric_report_type;
     decode(metric_report_type, iter);
@@ -188,7 +188,7 @@ struct UnknownConfigPayload {
   UnknownConfigPayload() { }
 
   DENC(UnknownConfigPayload, v, p) {
-    ceph_abort();
+    stone_abort();
   }
 };
 
@@ -202,33 +202,33 @@ typedef boost::variant<OSDConfigPayload,
 
 class EncodeConfigPayloadVisitor : public boost::static_visitor<void> {
 public:
-  explicit EncodeConfigPayloadVisitor(ceph::buffer::list &bl) : m_bl(bl) {
+  explicit EncodeConfigPayloadVisitor(stone::buffer::list &bl) : m_bl(bl) {
   }
 
   template <typename ConfigPayload>
   inline void operator()(const ConfigPayload &payload) const {
-    using ceph::encode;
+    using stone::encode;
     encode(static_cast<uint32_t>(ConfigPayload::METRIC_CONFIG_TYPE), m_bl);
     encode(payload, m_bl);
   }
 
 private:
-  ceph::buffer::list &m_bl;
+  stone::buffer::list &m_bl;
 };
 
 class DecodeConfigPayloadVisitor : public boost::static_visitor<void> {
 public:
-  DecodeConfigPayloadVisitor(ceph::buffer::list::const_iterator &iter) : m_iter(iter) {
+  DecodeConfigPayloadVisitor(stone::buffer::list::const_iterator &iter) : m_iter(iter) {
   }
 
   template <typename ConfigPayload>
   inline void operator()(ConfigPayload &payload) const {
-    using ceph::decode;
+    using stone::decode;
     decode(payload, m_iter);
   }
 
 private:
-  ceph::buffer::list::const_iterator &m_iter;
+  stone::buffer::list::const_iterator &m_iter;
 };
 
 struct MetricConfigMessage {
@@ -246,12 +246,12 @@ struct MetricConfigMessage {
     return true;
   }
 
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
     boost::apply_visitor(EncodeConfigPayloadVisitor(bl), payload);
   }
 
-  void decode(ceph::buffer::list::const_iterator &iter) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &iter) {
+    using stone::decode;
 
     uint32_t metric_config_type;
     decode(metric_config_type, iter);

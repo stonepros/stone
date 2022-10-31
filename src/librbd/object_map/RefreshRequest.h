@@ -7,7 +7,7 @@
 #include "include/int_types.h"
 #include "include/buffer.h"
 #include "common/bit_vector.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 class Context;
 class RWLock;
@@ -22,15 +22,15 @@ template <typename ImageCtxT = ImageCtx>
 class RefreshRequest {
 public:
   static RefreshRequest *create(ImageCtxT &image_ctx,
-				ceph::shared_mutex* object_map_lock,
-                                ceph::BitVector<2> *object_map,
+				stone::shared_mutex* object_map_lock,
+                                stone::BitVector<2> *object_map,
                                 uint64_t snap_id, Context *on_finish) {
     return new RefreshRequest(image_ctx, object_map_lock, object_map, snap_id,
                               on_finish);
   }
 
-  RefreshRequest(ImageCtxT &image_ctx, ceph::shared_mutex* object_map_lock,
-                 ceph::BitVector<2> *object_map, uint64_t snap_id,
+  RefreshRequest(ImageCtxT &image_ctx, stone::shared_mutex* object_map_lock,
+                 stone::BitVector<2> *object_map, uint64_t snap_id,
                  Context *on_finish);
 
   void send();
@@ -63,13 +63,13 @@ private:
    */
 
   ImageCtxT &m_image_ctx;
-  ceph::shared_mutex* m_object_map_lock;
-  ceph::BitVector<2> *m_object_map;
+  stone::shared_mutex* m_object_map_lock;
+  stone::BitVector<2> *m_object_map;
   uint64_t m_snap_id;
   Context *m_on_finish;
 
   uint64_t m_object_count;
-  ceph::BitVector<2> m_on_disk_object_map;
+  stone::BitVector<2> m_on_disk_object_map;
   bool m_truncate_on_disk_object_map;
   bufferlist m_out_bl;
 

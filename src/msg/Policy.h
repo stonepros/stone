@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 
-namespace ceph::net {
+namespace stone::net {
 
 using peer_type_t = int;
 

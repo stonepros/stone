@@ -14,7 +14,7 @@ clusters can be converted to a state in which they can be managed by
 Limitations
 -----------
 
-* Cephadm works only with BlueStore OSDs. FileStore OSDs that are in your
+* Stoneadm works only with BlueStore OSDs. FileStore OSDs that are in your
   cluster cannot be managed with ``cephadm``.
 
 Preparation
@@ -29,10 +29,10 @@ Preparation
 
       cephadm prepare-host
 
-#. Choose a version of Ceph to use for the conversion. This procedure will work
-   with any release of Ceph that is Octopus (15.2.z) or later, inclusive.  The
-   latest stable release of Ceph is the default. You might be upgrading from an
-   earlier Ceph release at the same time that you're performing this
+#. Choose a version of Stone to use for the conversion. This procedure will work
+   with any release of Stone that is Octopus (15.2.z) or later, inclusive.  The
+   latest stable release of Stone is the default. You might be upgrading from an
+   earlier Stone release at the same time that you're performing this
    conversion; if you are upgrading from an earlier release, make sure to
    follow any upgrade-related instructions for that release.
 
@@ -190,7 +190,7 @@ Adoption process
       systemctl stop ceph-mds.target
       rm -rf /var/lib/ceph/mds/ceph-*
 
-#. Redeploy RGW daemons. Cephadm manages RGW daemons by zone. For each
+#. Redeploy RGW daemons. Stoneadm manages RGW daemons by zone. For each
    zone, deploy new RGW daemons with cephadm:
 
    .. prompt:: bash #

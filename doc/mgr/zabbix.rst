@@ -3,7 +3,7 @@ Zabbix Module
 
 The Zabbix module actively sends information to a Zabbix server like:
 
-- Ceph status
+- Stone status
 - I/O operations
 - I/O bandwidth
 - OSD status
@@ -13,7 +13,7 @@ Requirements
 ------------
 
 The module requires that the *zabbix_sender* executable is present on *all*
-machines running ceph-mgr. It can be installed on most distributions using
+machines running stone-mgr. It can be installed on most distributions using
 the package manager.
 
 Dependencies
@@ -40,7 +40,7 @@ You can enable the *zabbix* module with:
 
 ::
 
-    ceph mgr module enable zabbix
+    stone mgr module enable zabbix
 
 Configuration
 -------------
@@ -58,10 +58,10 @@ The *identifier* parameter controls the identifier/hostname to use as source
 when sending items to Zabbix. This should match the name of the *Host* in
 your Zabbix server.
 
-When the *identifier* parameter is not configured the ceph-<fsid> of the cluster
+When the *identifier* parameter is not configured the stone-<fsid> of the cluster
 will be used when sending data to Zabbix.
 
-This would for example be *ceph-c4d32a99-9e80-490f-bd3a-1d22d8a7d354*
+This would for example be *stone-c4d32a99-9e80-490f-bd3a-1d22d8a7d354*
 
 Additional configuration keys which can be configured and their default values:
 
@@ -73,30 +73,30 @@ Additional configuration keys which can be configured and their default values:
 Configuration keys
 ^^^^^^^^^^^^^^^^^^^
 
-Configuration keys can be set on any machine with the proper cephx credentials,
+Configuration keys can be set on any machine with the proper stonex credentials,
 these are usually Monitors where the *client.admin* key is present.
 
 ::
 
-    ceph zabbix config-set <key> <value>
+    stone zabbix config-set <key> <value>
 
 For example:
 
 ::
 
-    ceph zabbix config-set zabbix_host zabbix.localdomain
-    ceph zabbix config-set identifier ceph.eu-ams02.local
+    stone zabbix config-set zabbix_host zabbix.localdomain
+    stone zabbix config-set identifier stone.eu-ams02.local
 
 The current configuration of the module can also be shown:
 
 ::
 
-   ceph zabbix config-show
+   stone zabbix config-show
 
 
 Template
 ^^^^^^^^
-A `template <https://raw.githubusercontent.com/ceph/ceph/master/src/pybind/mgr/zabbix/zabbix_template.xml>`_. 
+A `template <https://raw.githubusercontent.com/stone/stone/master/src/pybind/mgr/zabbix/zabbix_template.xml>`_. 
 (XML) to be used on the Zabbix server can be found in the source directory of the module.
 
 This template contains all items and a few triggers. You can customize the triggers afterwards to fit your needs.
@@ -114,7 +114,7 @@ For example:
 
 ::
 
-    ceph zabbix config-set zabbix_host "zabbix1,zabbix2:2222,zabbix3:3333"
+    stone zabbix config-set zabbix_host "zabbix1,zabbix2:2222,zabbix3:3333"
 
 
 Manually sending data
@@ -126,7 +126,7 @@ This can be done with this command:
 
 ::
 
-    ceph zabbix send
+    stone zabbix send
 
 The module will now send its latest data to the Zabbix server.
 
@@ -135,14 +135,14 @@ manually, this can be done with this command:
 
 ::
 
-    ceph zabbix discovery
+    stone zabbix discovery
 
 
 Debugging
 ---------
 
 Should you want to debug the Zabbix module increase the logging level for
-ceph-mgr and check the logs.
+stone-mgr and check the logs.
 
 ::
 

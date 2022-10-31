@@ -58,8 +58,8 @@ class RGWMultisite(Task):
 
         tasks:
         - install:
-        - ceph: {cluster: c1}
-        - ceph: {cluster: c2}
+        - stone: {cluster: c1}
+        - stone: {cluster: c2}
         - rgw:
             c1.client.0:
             c2.client.0:

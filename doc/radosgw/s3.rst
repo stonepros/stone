@@ -1,8 +1,8 @@
 ============================
- Ceph Object Gateway S3 API
+ Stone Object Gateway S3 API
 ============================
 
-Ceph supports a RESTful API that is compatible with the basic data access model of the `Amazon S3 API`_.
+Stone supports a RESTful API that is compatible with the basic data access model of the `Amazon S3 API`_.
 
 API
 ---

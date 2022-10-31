@@ -41,7 +41,7 @@ public:
   ACLGrant_S3() {}
   ~ACLGrant_S3() override {}
 
-  void to_xml(CephContext *cct, ostream& out);
+  void to_xml(StoneContext *cct, ostream& out);
   bool xml_end(const char *el) override;
   bool xml_start(const char *el, const char **attr);
 
@@ -52,7 +52,7 @@ public:
 class RGWAccessControlList_S3 : public RGWAccessControlList, public XMLObj
 {
 public:
-  explicit RGWAccessControlList_S3(CephContext *_cct) : RGWAccessControlList(_cct) {}
+  explicit RGWAccessControlList_S3(StoneContext *_cct) : RGWAccessControlList(_cct) {}
   ~RGWAccessControlList_S3() override {}
 
   bool xml_end(const char *el) override;
@@ -77,7 +77,7 @@ class RGWEnv;
 class RGWAccessControlPolicy_S3 : public RGWAccessControlPolicy, public XMLObj
 {
 public:
-  explicit RGWAccessControlPolicy_S3(CephContext *_cct) : RGWAccessControlPolicy(_cct) {}
+  explicit RGWAccessControlPolicy_S3(StoneContext *_cct) : RGWAccessControlPolicy(_cct) {}
   ~RGWAccessControlPolicy_S3() override {}
 
   bool xml_end(const char *el) override;
@@ -106,11 +106,11 @@ public:
  */
 class RGWACLXMLParser_S3 : public RGWXMLParser
 {
-  CephContext *cct;
+  StoneContext *cct;
 
   XMLObj *alloc_obj(const char *el) override;
 public:
-  explicit RGWACLXMLParser_S3(CephContext *_cct) : cct(_cct) {}
+  explicit RGWACLXMLParser_S3(StoneContext *_cct) : cct(_cct) {}
 };
 
 #endif

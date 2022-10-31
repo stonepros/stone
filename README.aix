@@ -80,7 +80,7 @@ The following AIX packages are required for developing and compilation, they hav
 
 Download and Compile Boost 1.59 (or higher)
 
-Building Ceph
+Building Stone
 =============
 
 	export CXX="c++ -maix64"

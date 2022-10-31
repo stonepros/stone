@@ -5,9 +5,9 @@
 
 #include "include/common_fwd.h"
 #include "include/Context.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/Finisher.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include <map>
 #include <utility>
@@ -16,7 +16,7 @@
 namespace librbd {
 
 struct TaskFinisherSingleton {
-  ceph::mutex m_lock = ceph::make_mutex("librbd::TaskFinisher::m_lock");
+  stone::mutex m_lock = stone::make_mutex("librbd::TaskFinisher::m_lock");
   SafeTimer *m_safe_timer;
   Finisher *m_finisher;
 
@@ -150,7 +150,7 @@ private:
 
   StoneContext &m_cct;
 
-  ceph::mutex *m_lock;
+  stone::mutex *m_lock;
   Finisher *m_finisher;
   SafeTimer *m_safe_timer;
 

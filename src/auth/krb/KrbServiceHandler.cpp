@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2018 SUSE LLC.
  * Author: Daniel Oliveira <doliveira@suse.com>
@@ -21,7 +21,7 @@
 #include "common/config.h"
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_auth
+#define dout_subsys stone_subsys_auth
 #undef dout_prefix
 #define dout_prefix *_dout << "krb5/gssapi service: " << entity_name <<  " : "
 
@@ -49,7 +49,7 @@ int KrbServiceHandler::handle_request(
   KrbRequest krb_request; 
   KrbTokenBlob krb_token; 
 
-  using ceph::decode;
+  using stone::decode;
   decode(krb_request, indata); 
   decode(krb_token, indata);
 
@@ -95,7 +95,7 @@ int KrbServiceHandler::handle_request(
             << "KrbServiceHandler::handle_response() : "
                "[KrbServiceHandler(GSS_S_COMPLETE)] " << dendl; 
         if (!m_key_server->get_service_caps(entity_name, 
-                                            CEPH_ENTITY_TYPE_MON, 
+                                            STONE_ENTITY_TYPE_MON, 
                                             *caps)) {
           result = (-EACCES);
           ldout(cct, 0)
@@ -134,7 +134,7 @@ int KrbServiceHandler::handle_request(
     krb_response.m_response_type = 
         static_cast<int>(GSSAuthenticationRequest::GSS_TOKEN);
 
-    using ceph::encode;
+    using stone::encode;
     encode(krb_response, *buff_list);
 
     krb_token.m_token_blob.append(buffer::create_static(
@@ -207,9 +207,9 @@ int KrbServiceHandler::do_start_session(
     krb_response.m_response_type = 
         static_cast<int>(GSSAuthenticationRequest::GSS_MUTUAL);
 
-    using ceph::encode;
+    using stone::encode;
     encode(krb_response, *buff_list);
-    return (CEPH_AUTH_GSS);
+    return (STONE_AUTH_GSS);
   }
 }
 

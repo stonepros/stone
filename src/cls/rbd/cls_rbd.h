@@ -42,7 +42,7 @@ struct cls_rbd_parent {
     return !(*this == rhs);
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const {
+  void encode(stone::buffer::list& bl, uint64_t features) const {
     // NOTE: remove support for version 1 after Nautilus EOLed
     uint8_t version = 1;
     if ((features & STONE_FEATURE_SERVER_NAUTILUS) != 0ULL) {
@@ -65,7 +65,7 @@ struct cls_rbd_parent {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(2, bl);
     decode(pool_id, bl);
     if (struct_v >= 2) {
@@ -83,7 +83,7 @@ struct cls_rbd_parent {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_int("pool_id", pool_id);
     f->dump_string("pool_namespace", pool_namespace);
     f->dump_string("image_id", image_id);
@@ -134,7 +134,7 @@ struct cls_rbd_snap {
             (parent.exists()));
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const {
+  void encode(stone::buffer::list& bl, uint64_t features) const {
     // NOTE: remove support for versions < 8 after Nautilus EOLed
     uint8_t min_version = 1;
     if ((features & STONE_FEATURE_SERVER_NAUTILUS) != 0ULL) {
@@ -160,7 +160,7 @@ struct cls_rbd_snap {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(8, p);
     decode(id, p);
     decode(name, p);
@@ -193,7 +193,7 @@ struct cls_rbd_snap {
     DECODE_FINISH(p);
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_unsigned("id", id);
     f->dump_string("name", name);
     f->dump_unsigned("image_size", image_size);
@@ -213,7 +213,7 @@ struct cls_rbd_snap {
       f->dump_string("protection_status", "protected");
       break;
     default:
-      ceph_abort();
+      stone_abort();
     }
     f->dump_unsigned("child_count", child_count);
     if (parent_overlap) {

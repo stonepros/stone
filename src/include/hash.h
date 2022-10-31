@@ -19,7 +19,7 @@
 	c=c-a;  c=c-b;  c=c^(b>>15);
 
 
-//namespace ceph {
+//namespace stone {
 
 template <class _Key> struct rjhash { };
 

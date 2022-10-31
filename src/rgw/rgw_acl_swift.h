@@ -22,7 +22,7 @@ class RGWAccessControlPolicy_SWIFT : public RGWAccessControlPolicy
                  uint32_t perm);
 
 public:
-  explicit RGWAccessControlPolicy_SWIFT(CephContext* const cct)
+  explicit RGWAccessControlPolicy_SWIFT(StoneContext* const cct)
     : RGWAccessControlPolicy(cct) {
   }
   ~RGWAccessControlPolicy_SWIFT() override = default;
@@ -41,7 +41,7 @@ public:
 class RGWAccessControlPolicy_SWIFTAcct : public RGWAccessControlPolicy
 {
 public:
-  explicit RGWAccessControlPolicy_SWIFTAcct(CephContext * const cct)
+  explicit RGWAccessControlPolicy_SWIFTAcct(StoneContext * const cct)
     : RGWAccessControlPolicy(cct) {
   }
   ~RGWAccessControlPolicy_SWIFTAcct() override {}

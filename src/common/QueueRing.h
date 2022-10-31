@@ -4,7 +4,7 @@
 #ifndef QUEUE_RING_H
 #define QUEUE_RING_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 #include <list>
 #include <atomic>
@@ -13,8 +13,8 @@
 template <class T>
 class QueueRing {
   struct QueueBucket {
-    ceph::mutex lock = ceph::make_mutex("QueueRing::QueueBucket::lock");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("QueueRing::QueueBucket::lock");
+    stone::condition_variable cond;
     typename std::list<T> entries;
 
     QueueBucket() {}
@@ -36,7 +36,7 @@ class QueueRing {
       while (entries.empty()) {
         cond.wait(l);
       };
-      ceph_assert(!entries.empty());
+      stone_assert(!entries.empty());
       *entry = entries.front();
       entries.pop_front();
     };

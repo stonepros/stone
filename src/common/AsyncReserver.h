@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -28,11 +28,11 @@
  */
 template <typename T, typename F>
 class AsyncReserver {
-  StoneeContext *cct;
+  StoneContext *cct;
   F *f;
   unsigned max_allowed;
   unsigned min_priority;
-  ceph::mutex lock = ceph::make_mutex("AsyncReserver::lock");
+  stone::mutex lock = stone::make_mutex("AsyncReserver::lock");
 
   struct Reservation {
     T item;
@@ -42,7 +42,7 @@ class AsyncReserver {
     Reservation() {}
     Reservation(T i, unsigned pr, Context *g, Context *p = 0)
       : item(i), prio(pr), grant(g), preempt(p) {}
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_stream("item") << item;
       f->dump_unsigned("prio", prio);
       f->dump_bool("can_preempt", !!preempt);
@@ -59,9 +59,9 @@ class AsyncReserver {
   std::set<std::pair<unsigned,T>> preempt_by_prio;  ///< in_progress that can be preempted
 
   void preempt_one() {
-    ceph_assert(!preempt_by_prio.empty());
+    stone_assert(!preempt_by_prio.empty());
     auto q = in_progress.find(preempt_by_prio.begin()->second);
-    ceph_assert(q != in_progress.end());
+    stone_assert(q != in_progress.end());
     Reservation victim = q->second;
     rdout(10) << __func__ << " preempt " << victim << dendl;
     f->queue(victim.preempt);
@@ -72,7 +72,7 @@ class AsyncReserver {
 
   void do_queues() {
     rdout(20) << __func__ << ":\n";
-    ceph::JSONFormatter jf(true);
+    stone::JSONFormatter jf(true);
     jf.open_object_section("queue");
     _dump(&jf);
     jf.close_section();
@@ -90,7 +90,7 @@ class AsyncReserver {
       // choose highest priority queue
       auto it = queues.end();
       --it;
-      ceph_assert(!it->second.empty());
+      stone_assert(!it->second.empty());
       if (it->first < min_priority) {
 	break;
       }
@@ -120,7 +120,7 @@ class AsyncReserver {
   }
 public:
   AsyncReserver(
-    StoneeContext *cct,
+    StoneContext *cct,
     F *f,
     unsigned max_allowed,
     unsigned min_priority = 0)
@@ -173,7 +173,7 @@ public:
       queue_pointers.erase(i);
 
       // Like request_reservation() to re-queue it but with new priority
-      ceph_assert(!queue_pointers.count(item) &&
+      stone_assert(!queue_pointers.count(item) &&
 	   !in_progress.count(item));
       r.prio = newprio;
       queues[newprio].push_back(r);
@@ -193,7 +193,7 @@ public:
             // choose highest priority queue
             auto it = queues.end();
             --it;
-            ceph_assert(!it->second.empty());
+            stone_assert(!it->second.empty());
             if (it->first > newprio) {
 	      rdout(10) << __func__ << " update " << p->second
 		        << " lowered priority let do_queues() preempt it" << dendl;
@@ -213,11 +213,11 @@ public:
     return;
   }
 
-  void dump(ceph::Formatter *f) {
+  void dump(stone::Formatter *f) {
     std::lock_guard l(lock);
     _dump(f);
   }
-  void _dump(ceph::Formatter *f) {
+  void _dump(stone::Formatter *f) {
     f->dump_unsigned("max_allowed", max_allowed);
     f->dump_unsigned("min_priority", min_priority);
     f->open_array_section("queues");
@@ -256,7 +256,7 @@ public:
     std::lock_guard l(lock);
     Reservation r(item, prio, on_reserved, on_preempt);
     rdout(10) << __func__ << " queue " << r << dendl;
-    ceph_assert(!queue_pointers.count(item) &&
+    stone_assert(!queue_pointers.count(item) &&
 	   !in_progress.count(item));
     queues[prio].push_back(r);
     queue_pointers.insert(std::make_pair(item,

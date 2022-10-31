@@ -8,8 +8,8 @@ import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrModule } from 'ngx-toastr';
 import { Observable, of } from 'rxjs';
 
-import { NfsFormClientComponent } from '~/app/ceph/nfs/nfs-form-client/nfs-form-client.component';
-import { NfsFormComponent } from '~/app/ceph/nfs/nfs-form/nfs-form.component';
+import { NfsFormClientComponent } from '~/app/stone/nfs/nfs-form-client/nfs-form-client.component';
+import { NfsFormComponent } from '~/app/stone/nfs/nfs-form/nfs-form.component';
 import { Directory } from '~/app/shared/api/nfs.service';
 import { LoadingPanelComponent } from '~/app/shared/components/loading-panel/loading-panel.component';
 import { SharedModule } from '~/app/shared/shared.module';
@@ -51,8 +51,8 @@ describe('NfsFormComponent', () => {
     RgwHelper.selectDaemon();
     fixture.detectChanges();
 
-    httpTesting.expectOne('ui-api/nfs-ganesha/fsals').flush(['CEPH', 'RGW']);
-    httpTesting.expectOne('ui-api/nfs-ganesha/cephfs/filesystems').flush([{ id: 1, name: 'a' }]);
+    httpTesting.expectOne('ui-api/nfs-ganesha/fsals').flush(['STONE', 'RGW']);
+    httpTesting.expectOne('ui-api/nfs-ganesha/stonefs/filesystems').flush([{ id: 1, name: 'a' }]);
     httpTesting.expectOne('api/nfs-ganesha/cluster').flush(['mynfs']);
     httpTesting.verify();
   });
@@ -63,7 +63,7 @@ describe('NfsFormComponent', () => {
 
   it('should process all data', () => {
     expect(component.allFsals).toEqual([
-      { descr: 'CephFS', value: 'CEPH', disabled: false },
+      { descr: 'StoneFS', value: 'STONE', disabled: false },
       { descr: 'Object Gateway', value: 'RGW', disabled: false }
     ]);
     expect(component.allFsNames).toEqual([{ id: 1, name: 'a' }]);
@@ -75,7 +75,7 @@ describe('NfsFormComponent', () => {
       access_type: 'RW',
       clients: [],
       cluster_id: 'mynfs',
-      fsal: { fs_name: 'a', name: 'CEPH' },
+      fsal: { fs_name: 'a', name: 'STONE' },
       path: '/',
       protocolNfsv4: true,
       pseudo: '',
@@ -110,7 +110,7 @@ describe('NfsFormComponent', () => {
         access_type: 'RW',
         clients: [],
         cluster_id: 'cluster1',
-        fsal: { name: 'CEPH', fs_name: 1 },
+        fsal: { name: 'STONE', fs_name: 1 },
         path: '/foo',
         protocolNfsv4: true,
         pseudo: '/baz',
@@ -135,7 +135,7 @@ describe('NfsFormComponent', () => {
         clients: [],
         cluster_id: 'cluster1',
         export_id: 1,
-        fsal: { fs_name: 1, name: 'CEPH', sec_label_xattr: null },
+        fsal: { fs_name: 1, name: 'STONE', sec_label_xattr: null },
         path: '/foo',
         protocols: [4],
         pseudo: '/baz',
@@ -157,7 +157,7 @@ describe('NfsFormComponent', () => {
         cluster_id: 'cluster1',
         fsal: {
           fs_name: 1,
-          name: 'CEPH',
+          name: 'STONE',
           sec_label_xattr: null
         },
         path: '/foo',
@@ -175,7 +175,7 @@ describe('NfsFormComponent', () => {
       component['nfsService']['lsDir'] = jest.fn(
         (): Observable<Directory> => of({ paths: ['/path1'] })
       );
-      component.nfsForm.get('name').setValue('CEPH');
+      component.nfsForm.get('name').setValue('STONE');
       component.setPathValidation();
     });
 

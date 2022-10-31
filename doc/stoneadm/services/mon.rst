@@ -7,13 +7,13 @@ MON Service
 Deploying additional monitors 
 =============================
 
-A typical Ceph cluster has three or five monitor daemons that are spread
+A typical Stone cluster has three or five monitor daemons that are spread
 across different hosts.  We recommend deploying five monitors if there are
 five or more nodes in your cluster.
 
 .. _CIDR: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#CIDR_notation
 
-Ceph deploys monitor daemons automatically as the cluster grows and Ceph
+Stone deploys monitor daemons automatically as the cluster grows and Stone
 scales back monitor daemons automatically as the cluster shrinks. The
 smooth execution of this automatic growing and shrinking depends upon
 proper subnet configuration.
@@ -49,7 +49,7 @@ format (e.g., ``10.1.2.0/24``):
 
      ceph config set mon public_network 10.1.2.0/24
 
-Cephadm deploys new monitor daemons only on hosts that have IP addresses in
+Stoneadm deploys new monitor daemons only on hosts that have IP addresses in
 the designated subnet.
 
 You can also specify two public networks by using a list of networks:

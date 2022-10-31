@@ -27,13 +27,13 @@ using Exception = std::system_error;
  * interacted with. */
 class BasicClient {
 protected:
-  virtual int init_env(CephContext *cct) = 0;
+  virtual int init_env(StoneContext *cct) = 0;
 
 public:
   virtual ~BasicClient() = default;
 
-  /* Initialize the BasicClient and inject CephContext. */
-  int init(CephContext *cct);
+  /* Initialize the BasicClient and inject StoneContext. */
+  int init(StoneContext *cct);
 
   /* Return the RGWEnv describing the environment that a given request lives in.
    * The method does not throw exceptions. */
@@ -196,7 +196,7 @@ protected:
     decoratee = &new_dec;
   }
 
-  int init_env(CephContext *cct) override {
+  int init_env(StoneContext *cct) override {
     return get_decoratee().init_env(cct);
   }
 
@@ -338,7 +338,7 @@ class RGWRestfulIO : public rgw::io::AccountingFilter<rgw::io::RestfulClient*> {
 public:
   ~RGWRestfulIO() override = default;
 
-  RGWRestfulIO(CephContext *_cx, rgw::io::RestfulClient* engine)
+  RGWRestfulIO(StoneContext *_cx, rgw::io::RestfulClient* engine)
     : AccountingFilter<rgw::io::RestfulClient*>(_cx, std::move(engine)) {
   }
 
@@ -353,20 +353,20 @@ public:
 /* Type conversions to work around lack of req_state type hierarchy matching
  * (e.g.) REST backends (may be replaced w/dynamic typed req_state). */
 static inline rgw::io::RestfulClient* RESTFUL_IO(struct req_state* s) {
-  ceph_assert(dynamic_cast<rgw::io::RestfulClient*>(s->cio) != nullptr);
+  stone_assert(dynamic_cast<rgw::io::RestfulClient*>(s->cio) != nullptr);
 
   return static_cast<rgw::io::RestfulClient*>(s->cio);
 }
 
 static inline rgw::io::Accounter* ACCOUNTING_IO(struct req_state* s) {
   auto ptr = dynamic_cast<rgw::io::Accounter*>(s->cio);
-  ceph_assert(ptr != nullptr);
+  stone_assert(ptr != nullptr);
 
   return ptr;
 }
 
 static inline RGWRestfulIO* AWS_AUTHv4_IO(const req_state* const s) {
-  ceph_assert(dynamic_cast<RGWRestfulIO*>(s->cio) != nullptr);
+  stone_assert(dynamic_cast<RGWRestfulIO*>(s->cio) != nullptr);
 
   return static_cast<RGWRestfulIO*>(s->cio);
 }

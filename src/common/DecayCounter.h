@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,7 +18,7 @@
 #include "include/buffer.h"
 #include "common/Formatter.h"
 #include "common/StackStringStream.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 #include <cmath>
 #include <list>
@@ -55,15 +55,15 @@ private:
 
 class DecayCounter {
 public:
-  using time = ceph::coarse_mono_time;
-  using clock = ceph::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
 
   DecayCounter() : DecayCounter(DecayRate()) {}
   explicit DecayCounter(const DecayRate &rate) : last_decay(clock::now()), rate(rate) {}
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<DecayCounter*>& ls);
 
   /**
@@ -118,10 +118,10 @@ private:
   DecayRate rate;
 };
 
-inline void encode(const DecayCounter &c, ceph::buffer::list &bl) {
+inline void encode(const DecayCounter &c, stone::buffer::list &bl) {
   c.encode(bl);
 }
-inline void decode(DecayCounter &c, ceph::buffer::list::const_iterator &p) {
+inline void decode(DecayCounter &c, stone::buffer::list::const_iterator &p) {
   c.decode(p);
 }
 

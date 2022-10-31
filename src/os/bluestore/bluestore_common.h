@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -16,7 +16,7 @@
 #define STONE_OSD_BLUESTORE_COMMON_H
 
 #include "include/intarith.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "kv/KeyValueDB.h"
 
 template <class Bitset, class Func>
@@ -26,7 +26,7 @@ void apply_for_bitset_range(uint64_t off,
   Bitset &bitset,
   Func f) {
   auto end = round_up_to(off + len, granularity) / granularity;
-  ceph_assert(end <= bitset.size());
+  stone_assert(end <= bitset.size());
   uint64_t pos = off / granularity;
   while (pos < end) {
     f(pos, bitset);
@@ -45,12 +45,12 @@ struct Int64ArrayMergeOperator : public KeyValueDB::MergeOperator {
     const char *ldata, size_t llen,
     const char *rdata, size_t rlen,
     std::string *new_value) override {
-    ceph_assert(llen == rlen);
-    ceph_assert((rlen % 8) == 0);
+    stone_assert(llen == rlen);
+    stone_assert((rlen % 8) == 0);
     new_value->resize(rlen);
-    const ceph_le64* lv = (const ceph_le64*)ldata;
-    const ceph_le64* rv = (const ceph_le64*)rdata;
-    ceph_le64* nv = &(ceph_le64&)new_value->at(0);
+    const stone_le64* lv = (const stone_le64*)ldata;
+    const stone_le64* rv = (const stone_le64*)rdata;
+    stone_le64* nv = &(stone_le64&)new_value->at(0);
     for (size_t i = 0; i < rlen >> 3; ++i) {
       nv[i] = lv[i] + rv[i];
     }

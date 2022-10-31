@@ -21,14 +21,14 @@ protected:
   static constexpr uint64_t MAX_ROLE_SESSION_SIZE = 64;
   uint64_t MIN_DURATION_IN_SECS;
   uint64_t MAX_DURATION_IN_SECS;
-  CephContext* cct;
+  StoneContext* cct;
   uint64_t duration;
   string err_msg;
   string iamPolicy;
   string roleArn;
   string roleSessionName;
 public:
-  AssumeRoleRequestBase(CephContext* cct,
+  AssumeRoleRequestBase(StoneContext* cct,
                         const string& duration,
                         const string& iamPolicy,
                         const string& roleArn,
@@ -51,7 +51,7 @@ class AssumeRoleWithWebIdentityRequest : public AssumeRoleRequestBase {
   string sub;
   string aud;
 public:
-  AssumeRoleWithWebIdentityRequest( CephContext* cct,
+  AssumeRoleWithWebIdentityRequest( StoneContext* cct,
                       const string& duration,
                       const string& providerId,
                       const string& iamPolicy,
@@ -79,7 +79,7 @@ class AssumeRoleRequest : public AssumeRoleRequestBase {
   string serialNumber;
   string tokenCode;
 public:
-  AssumeRoleRequest(CephContext* cct,
+  AssumeRoleRequest(StoneContext* cct,
                     const string& duration,
                     const string& externalId,
                     const string& iamPolicy,
@@ -111,7 +111,7 @@ class AssumedRoleUser {
   string arn;
   string assumeRoleId;
 public:
-  int generateAssumedRoleUser( CephContext* cct,
+  int generateAssumedRoleUser( StoneContext* cct,
                                 rgw::sal::RGWRadosStore *store,
                                 const string& roleId,
                                 const rgw::ARN& roleArn,
@@ -190,7 +190,7 @@ class Credentials {
   string secretAccessKey;
   string sessionToken;
 public:
-  int generateCredentials(CephContext* cct,
+  int generateCredentials(StoneContext* cct,
                           const uint64_t& duration,
                           const boost::optional<string>& policy,
                           const boost::optional<string>& roleId,
@@ -224,7 +224,7 @@ using GetSessionTokenResponse = std::tuple<int, Credentials>;
 using AssumeRoleWithWebIdentityResponse = struct AssumeRoleWithWebIdentityResponse;
 
 class STSService {
-  CephContext* cct;
+  StoneContext* cct;
   rgw::sal::RGWRadosStore *store;
   rgw_user user_id;
   RGWRole role;
@@ -232,7 +232,7 @@ class STSService {
   int storeARN(const DoutPrefixProvider *dpp, string& arn, optional_yield y);
 public:
   STSService() = default;
-  STSService(CephContext* cct, rgw::sal::RGWRadosStore *store, rgw_user user_id,
+  STSService(StoneContext* cct, rgw::sal::RGWRadosStore *store, rgw_user user_id,
 	     rgw::auth::Identity* identity)
     : cct(cct), store(store), user_id(user_id), identity(identity) {}
   std::tuple<int, RGWRole> getRoleInfo(const DoutPrefixProvider *dpp, const string& arn, optional_yield y);

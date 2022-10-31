@@ -17,9 +17,9 @@ import threading
 import time
 import uuid
 
-from ceph_argparse import json_command
+from stone_argparse import json_command
 
-import cephfs
+import stonefs
 import rados
 
 def to_bytes(param):
@@ -35,7 +35,7 @@ def to_bytes(param):
 
 class RadosError(Exception):
     """
-    Something went wrong talking to Ceph with librados
+    Something went wrong talking to Stone with librados
     """
     pass
 
@@ -69,7 +69,7 @@ class VolumePath(object):
 
 class ClusterTimeout(Exception):
     """
-    Exception indicating that we timed out trying to talk to the Ceph cluster,
+    Exception indicating that we timed out trying to talk to the Stone cluster,
     either to the mons, or to any individual daemon that the mons indicate ought
     to be up but isn't responding to us.
     """
@@ -177,7 +177,7 @@ class RankEvicter(threading.Thread):
             if ret == 0:
                 return True
             elif ret == errno.ETIMEDOUT:
-                # Oh no, the MDS went laggy (that's how libcephfs knows to emit this error)
+                # Oh no, the MDS went laggy (that's how libstonefs knows to emit this error)
                 self._mds_map = self._volume_client.get_mds_map()
                 try:
                     self._wait_for_ready()
@@ -200,30 +200,30 @@ class EvictionError(Exception):
     pass
 
 
-class CephFSVolumeClientError(Exception):
+class StoneFSVolumeClientError(Exception):
     """
-    Something went wrong talking to Ceph using CephFSVolumeClient.
+    Something went wrong talking to Stone using StoneFSVolumeClient.
     """
     pass
 
 
-CEPHFSVOLUMECLIENT_VERSION_HISTORY = """
+STONEFSVOLUMECLIENT_VERSION_HISTORY = """
 
-    CephFSVolumeClient Version History:
+    StoneFSVolumeClient Version History:
 
     * 1 - Initial version
-    * 2 - Added get_object, put_object, delete_object methods to CephFSVolumeClient
+    * 2 - Added get_object, put_object, delete_object methods to StoneFSVolumeClient
     * 3 - Allow volumes to be created without RADOS namespace isolation
-    * 4 - Added get_object_and_version, put_object_versioned method to CephFSVolumeClient
-    * 5 - Disallow authorize API for users not created by CephFSVolumeClient
+    * 4 - Added get_object_and_version, put_object_versioned method to StoneFSVolumeClient
+    * 5 - Disallow authorize API for users not created by StoneFSVolumeClient
     * 6 - The 'volumes' key in auth-metadata-file is changed to 'subvolumes'.
 """
 
 
-class CephFSVolumeClient(object):
+class StoneFSVolumeClient(object):
     """
-    Combine libcephfs and librados interfaces to implement a
-    'Volume' concept implemented as a cephfs directory and
+    Combine libstonefs and librados interfaces to implement a
+    'Volume' concept implemented as a stonefs directory and
     client capabilities which restrict mount access to this
     directory.
 
@@ -236,7 +236,7 @@ class CephFSVolumeClient(object):
     be None.
 
     In general, functions in this class are allowed raise rados.Error
-    or cephfs.Error exceptions in unexpected situations.
+    or stonefs.Error exceptions in unexpected situations.
     """
 
     # Current version
@@ -274,7 +274,7 @@ class CephFSVolumeClient(object):
 
         self.volume_prefix = volume_prefix if volume_prefix else self.DEFAULT_VOL_PREFIX
         self.pool_ns_prefix = pool_ns_prefix if pool_ns_prefix else self.DEFAULT_NS_PREFIX
-        # For flock'ing in cephfs, I want a unique ID to distinguish me
+        # For flock'ing in stonefs, I want a unique ID to distinguish me
         # from any other manila-share services that are loading this module.
         # We could use pid, but that's unnecessary weak: generate a
         # UUID
@@ -284,7 +284,7 @@ class CephFSVolumeClient(object):
 
     def recover(self):
         # Scan all auth keys to see if they're dirty: if they are, they have
-        # state that might not have propagated to Ceph or to the related
+        # state that might not have propagated to Stone or to the related
         # volumes yet.
 
         # Important: we *always* acquire locks in the order auth->volume
@@ -296,7 +296,7 @@ class CephFSVolumeClient(object):
 
         try:
             dir_handle = self.fs.opendir(self.volume_prefix)
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             log.debug("Nothing to recover. No auth meta files.")
             return
 
@@ -320,14 +320,14 @@ class CephFSVolumeClient(object):
 
         # Key points based on ordering:
         # * Anything added in VMeta is already added in AMeta
-        # * Anything added in Ceph is already added in VMeta
-        # * Anything removed in VMeta is already removed in Ceph
+        # * Anything added in Stone is already added in VMeta
+        # * Anything removed in VMeta is already removed in Stone
         # * Anything removed in AMeta is already removed in VMeta
 
         # Deauthorization: because I only update metadata AFTER the
         # update of the next level down, I have the same ordering of
         # -> things which exist in the AMeta should also exist
-        #    in the VMeta, should also exist in Ceph, and the same
+        #    in the VMeta, should also exist in Stone, and the same
         #    recovery procedure that gets me consistent after crashes
         #    during authorization will also work during deauthorization
 
@@ -368,7 +368,7 @@ class CephFSVolumeClient(object):
                 vol_meta = self._volume_metadata_get(volume_path)
 
                 # No VMeta update indicates that there was no auth update
-                # in Ceph either. So it's safe to remove corresponding
+                # in Stone either. So it's safe to remove corresponding
                 # partial update in AMeta.
                 if not vol_meta or auth_id not in vol_meta['auths']:
                     remove_volumes.append(volume)
@@ -378,7 +378,7 @@ class CephFSVolumeClient(object):
                     'access_level': access_level,
                     'dirty': False,
                 }
-                # VMeta update looks clean. Ceph auth update must have been
+                # VMeta update looks clean. Stone auth update must have been
                 # clean.
                 if vol_meta['auths'][auth_id] == want_auth:
                     auth_meta['subvolumes'][volume]['dirty'] = False
@@ -469,7 +469,7 @@ class CephFSVolumeClient(object):
 
     def _get_path(self, volume_path):
         """
-        Determine the path within CephFS where this volume will live
+        Determine the path within StoneFS where this volume will live
         :return: absolute path (string)
         """
         return os.path.join(
@@ -487,17 +487,17 @@ class CephFSVolumeClient(object):
         )
 
     def _connect(self, premount_evict):
-        log.debug("Connecting to cephfs...")
-        self.fs = cephfs.LibCephFS(rados_inst=self.rados)
-        log.debug("CephFS initializing...")
+        log.debug("Connecting to stonefs...")
+        self.fs = stonefs.LibStoneFS(rados_inst=self.rados)
+        log.debug("StoneFS initializing...")
         self.fs.init()
         if premount_evict is not None:
             log.debug("Premount eviction of {0} starting".format(premount_evict))
             self.evict(premount_evict)
             log.debug("Premount eviction of {0} completes".format(premount_evict))
-        log.debug("CephFS mounting...")
+        log.debug("StoneFS mounting...")
         self.fs.mount(filesystem_name=to_bytes(self.fs_name))
-        log.debug("Connection to cephfs complete")
+        log.debug("Connection to stonefs complete")
 
         # Recover from partial auth updates due to a previous
         # crash.
@@ -538,10 +538,10 @@ class CephFSVolumeClient(object):
     def disconnect(self):
         log.info("disconnect")
         if self.fs:
-            log.debug("Disconnecting cephfs...")
+            log.debug("Disconnecting stonefs...")
             self.fs.shutdown()
             self.fs = None
-            log.debug("Disconnecting cephfs complete")
+            log.debug("Disconnecting stonefs complete")
 
         if self.rados and self.own_rados:
             log.debug("Disconnecting rados...")
@@ -570,7 +570,7 @@ class CephFSVolumeClient(object):
 
     def _create_volume_pool(self, pool_name):
         """
-        Idempotently create a pool for use as a CephFS data pool, with the given name
+        Idempotently create a pool for use as a StoneFS data pool, with the given name
 
         :return The ID of the created pool
         """
@@ -592,7 +592,7 @@ class CephFSVolumeClient(object):
         pool_id = self._get_pool_id(osd_map, pool_name)
 
         if pool_id is None:
-            # If the pool isn't there, that's either a ceph bug, or it's some outside influence
+            # If the pool isn't there, that's either a stone bug, or it's some outside influence
             # removing it right after we created it.
             log.error("OSD map doesn't contain expected pool '{0}':\n{1}".format(
                 pool_name, json.dumps(osd_map, indent=2)
@@ -614,7 +614,7 @@ class CephFSVolumeClient(object):
         path = self._get_group_path(group_id)
         try:
             self.fs.stat(self.volume_prefix)
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             pass
         else:
             self.fs.rmdir(path)
@@ -639,7 +639,7 @@ class CephFSVolumeClient(object):
         self.fs.mkdirs(path, mode)
 
         if size is not None:
-            self.fs.setxattr(path, 'ceph.quota.max_bytes', to_bytes(size), 0)
+            self.fs.setxattr(path, 'stone.quota.max_bytes', to_bytes(size), 0)
 
         # data_isolated means create a separate pool for this volume
         if data_isolated:
@@ -653,20 +653,20 @@ class CephFSVolumeClient(object):
                     'pool': pool_name
                 })
             time.sleep(5) # time for MDSMap to be distributed
-            self.fs.setxattr(path, 'ceph.dir.layout.pool', to_bytes(pool_name), 0)
+            self.fs.setxattr(path, 'stone.dir.layout.pool', to_bytes(pool_name), 0)
 
         # enforce security isolation, use separate namespace for this volume
         if namespace_isolated:
             namespace = "{0}{1}".format(self.pool_ns_prefix, volume_path.volume_id)
             log.info("create_volume: {0}, using rados namespace {1} to isolate data.".format(volume_path, namespace))
-            self.fs.setxattr(path, 'ceph.dir.layout.pool_namespace',
+            self.fs.setxattr(path, 'stone.dir.layout.pool_namespace',
                              to_bytes(namespace), 0)
         else:
             # If volume's namespace layout is not set, then the volume's pool
             # layout remains unset and will undesirably change with ancestor's
             # pool layout changes.
-            pool_name = self._get_ancestor_xattr(path, "ceph.dir.layout.pool")
-            self.fs.setxattr(path, 'ceph.dir.layout.pool',
+            pool_name = self._get_ancestor_xattr(path, "stone.dir.layout.pool")
+            self.fs.setxattr(path, 'stone.dir.layout.pool',
                              to_bytes(pool_name), 0)
 
         # Create a volume meta file, if it does not already exist, to store
@@ -702,7 +702,7 @@ class CephFSVolumeClient(object):
         # Move the volume's data to the trash folder
         try:
             self.fs.stat(path)
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             log.warning("Trying to delete volume '{0}' but it's already gone".format(
                 path))
         else:
@@ -712,7 +712,7 @@ class CephFSVolumeClient(object):
         vol_meta_path = self._volume_metadata_path(volume_path)
         try:
             self.fs.unlink(vol_meta_path)
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             pass
 
     def purge_volume(self, volume_path, data_isolated=False):
@@ -726,7 +726,7 @@ class CephFSVolumeClient(object):
 
         try:
             self.fs.stat(trashed_volume)
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             log.warning("Trying to purge volume '{0}' but it's already been purged".format(
                 trashed_volume))
             return
@@ -779,11 +779,11 @@ class CephFSVolumeClient(object):
         try:
             result = self.fs.getxattr(path, attr).decode()
             if result == "":
-                # Annoying!  cephfs gives us empty instead of an error when attr not found
-                raise cephfs.NoData()
+                # Annoying!  stonefs gives us empty instead of an error when attr not found
+                raise stonefs.NoData()
             else:
                 return result
-        except cephfs.NoData:
+        except stonefs.NoData:
             if path == "/":
                 raise
             else:
@@ -791,12 +791,12 @@ class CephFSVolumeClient(object):
 
     def _check_compat_version(self, compat_version):
         if self.version < compat_version:
-            msg = ("The current version of CephFSVolumeClient, version {0} "
+            msg = ("The current version of StoneFSVolumeClient, version {0} "
                    "does not support the required feature. Need version {1} "
                    "or greater".format(self.version, compat_version)
                   )
             log.error(msg)
-            raise CephFSVolumeClientError(msg)
+            raise StoneFSVolumeClientError(msg)
 
     def _metadata_get(self, path):
         """
@@ -833,7 +833,7 @@ class CephFSVolumeClient(object):
                 # does not happen.
                 try:
                     statbuf = self.fs.stat(path)
-                except cephfs.ObjectNotFound:
+                except stonefs.ObjectNotFound:
                     self.fs.close(fd)
                     continue
 
@@ -861,9 +861,9 @@ class CephFSVolumeClient(object):
         Call me with the metadata locked!
 
         Check whether a auth metadata structure can be decoded by the current
-        version of CephFSVolumeClient.
+        version of StoneFSVolumeClient.
 
-        Return auth metadata that the current version of CephFSVolumeClient
+        Return auth metadata that the current version of StoneFSVolumeClient
         can decode.
         """
         auth_metadata = self._metadata_get(self._auth_metadata_path(auth_id))
@@ -880,8 +880,8 @@ class CephFSVolumeClient(object):
         Fsync the auth metadata.
 
         Add two version attributes to the auth metadata,
-        'compat_version', the minimum CephFSVolumeClient version that can
-        decode the metadata, and 'version', the CephFSVolumeClient version
+        'compat_version', the minimum StoneFSVolumeClient version that can
+        decode the metadata, and 'version', the StoneFSVolumeClient version
         that encoded the metadata.
         """
         data['compat_version'] = 6
@@ -916,10 +916,10 @@ class CephFSVolumeClient(object):
         Call me with the metadata locked!
 
         Check whether a volume metadata structure can be decoded by the current
-        version of CephFSVolumeClient.
+        version of StoneFSVolumeClient.
 
         Return a volume_metadata structure that the current version of
-        CephFSVolumeClient can decode.
+        StoneFSVolumeClient can decode.
         """
         volume_metadata = self._metadata_get(self._volume_metadata_path(volume_path))
 
@@ -933,8 +933,8 @@ class CephFSVolumeClient(object):
         Call me with the metadata locked!
 
         Add two version attributes to the volume metadata,
-        'compat_version', the minimum CephFSVolumeClient version that can
-        decode the metadata and 'version', the CephFSVolumeClient version
+        'compat_version', the minimum StoneFSVolumeClient version that can
+        decode the metadata and 'version', the StoneFSVolumeClient version
         that encoded the metadata.
         """
         data['compat_version'] = 1
@@ -963,16 +963,16 @@ class CephFSVolumeClient(object):
 
     def authorize(self, volume_path, auth_id, readonly=False, tenant_id=None, allow_existing_id=False):
         """
-        Get-or-create a Ceph auth identity for `auth_id` and grant them access
+        Get-or-create a Stone auth identity for `auth_id` and grant them access
         to
         :param volume_path:
         :param auth_id:
         :param readonly:
         :param tenant_id: Optionally provide a stringizable object to
-                          restrict any created cephx IDs to other callers
+                          restrict any created stonex IDs to other callers
                           passing the same tenant ID.
         :allow_existing_id: Optionally authorize existing auth-ids not
-                            created by ceph_volume_client
+                            created by stone_volume_client
         :return:
         """
 
@@ -1005,9 +1005,9 @@ class CephFSVolumeClient(object):
 
             if auth_meta is None:
                 if not allow_existing_id and existing_caps is not None:
-                    msg = "auth ID: {0} exists and not created by ceph_volume_client. Not allowed to modify".format(auth_id)
+                    msg = "auth ID: {0} exists and not created by stone_volume_client. Not allowed to modify".format(auth_id)
                     log.error(msg)
-                    raise CephFSVolumeClientError(msg)
+                    raise StoneFSVolumeClientError(msg)
 
                 # non-existent auth IDs
                 sys.stderr.write("Creating meta for ID {0} with tenant {1}\n".format(
@@ -1028,7 +1028,7 @@ class CephFSVolumeClient(object):
                 if auth_meta['tenant_id'].__str__() != tenant_id.__str__():
                     msg = "auth ID: {0} is already in use".format(auth_id)
                     log.error(msg)
-                    raise CephFSVolumeClientError(msg)
+                    raise StoneFSVolumeClientError(msg)
 
                 if auth_meta['dirty']:
                     self._recover_auth_meta(auth_id, auth_meta)
@@ -1078,27 +1078,27 @@ class CephFSVolumeClient(object):
             vol_meta['auths'].update(auth)
             self._volume_metadata_set(volume_path, vol_meta)
 
-        key = self._authorize_ceph(volume_path, auth_id, readonly, existing_caps)
+        key = self._authorize_stone(volume_path, auth_id, readonly, existing_caps)
 
         vol_meta['auths'][auth_id]['dirty'] = False
         self._volume_metadata_set(volume_path, vol_meta)
 
         return key
 
-    def _authorize_ceph(self, volume_path, auth_id, readonly, existing_caps):
+    def _authorize_stone(self, volume_path, auth_id, readonly, existing_caps):
         path = self._get_path(volume_path)
-        log.debug("Authorizing Ceph id '{0}' for path '{1}'".format(
+        log.debug("Authorizing Stone id '{0}' for path '{1}'".format(
             auth_id, path
         ))
 
         # First I need to work out what the data pool is for this share:
         # read the layout
-        pool_name = self._get_ancestor_xattr(path, "ceph.dir.layout.pool")
+        pool_name = self._get_ancestor_xattr(path, "stone.dir.layout.pool")
 
         try:
-            namespace = self.fs.getxattr(path, "ceph.dir.layout.pool_"
+            namespace = self.fs.getxattr(path, "stone.dir.layout.pool_"
                                          "namespace").decode()
-        except cephfs.NoData:
+        except stonefs.NoData:
             namespace = None
 
         # Now construct auth capabilities that give the guest just enough
@@ -1260,7 +1260,7 @@ class CephFSVolumeClient(object):
             self._deauthorize(volume_path, auth_id)
 
             # Remove the auth_id from the metadata *after* removing it
-            # from ceph, so that if we crashed here, we would actually
+            # from stone, so that if we crashed here, we would actually
             # recreate the auth ID during recovery (i.e. end up with
             # a consistent state).
 
@@ -1274,11 +1274,11 @@ class CephFSVolumeClient(object):
         """
         client_entity = "client.{0}".format(auth_id)
         path = self._get_path(volume_path)
-        pool_name = self._get_ancestor_xattr(path, "ceph.dir.layout.pool")
+        pool_name = self._get_ancestor_xattr(path, "stone.dir.layout.pool")
         try:
-            namespace = self.fs.getxattr(path, "ceph.dir.layout.pool_"
+            namespace = self.fs.getxattr(path, "stone.dir.layout.pool_"
                                          "namespace").decode()
-        except cephfs.NoData:
+        except stonefs.NoData:
             namespace = None
 
         # The auth_id might have read-only or read-write mount access for the
@@ -1359,7 +1359,7 @@ class CephFSVolumeClient(object):
 
     def _rados_command(self, prefix, args=None, decode=True):
         """
-        Safer wrapper for ceph_argparse.json_command, which raises
+        Safer wrapper for stone_argparse.json_command, which raises
         Error exception instead of relying on caller to check return
         codes.
 
@@ -1368,9 +1368,9 @@ class CephFSVolumeClient(object):
         * Actual legitimate errors
         * Malformed JSON output
 
-        return: Decoded object from ceph, or None if empty string returned.
+        return: Decoded object from stone, or None if empty string returned.
                 If decode is False, return a string (the data returned by
-                ceph command)
+                stone command)
         """
         if args is None:
             args = {}
@@ -1397,11 +1397,11 @@ class CephFSVolumeClient(object):
                 return outbuf
 
     def get_used_bytes(self, volume_path):
-        return int(self.fs.getxattr(self._get_path(volume_path), "ceph.dir."
+        return int(self.fs.getxattr(self._get_path(volume_path), "stone.dir."
                                     "rbytes").decode())
 
     def set_max_bytes(self, volume_path, max_bytes):
-        self.fs.setxattr(self._get_path(volume_path), 'ceph.quota.max_bytes',
+        self.fs.setxattr(self._get_path(volume_path), 'stone.quota.max_bytes',
                          to_bytes(max_bytes if max_bytes else 0), 0)
 
     def _snapshot_path(self, dir_path, snapshot_name):
@@ -1419,7 +1419,7 @@ class CephFSVolumeClient(object):
         """
         try:
             self.fs.rmdir(self._snapshot_path(dir_path, snapshot_name))
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             log.warning("Snapshot was already gone: {0}".format(snapshot_name))
 
     def create_snapshot_volume(self, volume_path, snapshot_name, mode=0o755):
@@ -1487,7 +1487,7 @@ class CephFSVolumeClient(object):
             msg = ("Data to be written to object '{0}' exceeds "
                    "{1} bytes".format(object_name, max_size))
             log.error(msg)
-            raise CephFSVolumeClientError(msg)
+            raise StoneFSVolumeClientError(msg)
 
         try:
             with rados.WriteOpCtx() as wop:

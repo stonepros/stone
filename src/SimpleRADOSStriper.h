@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2021 Red Hat, Inc.
  *
@@ -24,19 +24,19 @@
 #include "include/uuid.h"
 #include "include/types.h"
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/perf_counters.h"
 
 class [[gnu::visibility("default")]] SimpleRADOSStriper
 {
 public:
   using aiocompletionptr = std::unique_ptr<librados::AioCompletion>;
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
 
   static inline const uint64_t object_size = 22; /* power of 2 */
   static inline const uint64_t min_growth = (1<<27); /* 128 MB */
-  static int config_logger(StoneeContext* cct, std::string_view name, std::shared_ptr<PerfCounters>* l);
+  static int config_logger(StoneContext* cct, std::string_view name, std::shared_ptr<PerfCounters>* l);
 
   SimpleRADOSStriper() = default;
   SimpleRADOSStriper(librados::IoCtx _ioctx, std::string _oid)
@@ -87,8 +87,8 @@ protected:
     size_t off;
   };
 
-  ceph::bufferlist str2bl(std::string_view sv);
-  ceph::bufferlist uint2bl(uint64_t v);
+  stone::bufferlist str2bl(std::string_view sv);
+  stone::bufferlist uint2bl(uint64_t v);
   int set_metadata(uint64_t new_size, bool update_size);
   int shrink_alloc(uint64_t a);
   int maybe_shrink_alloc();

@@ -1,14 +1,14 @@
 =================
- Welcome to Ceph
+ Welcome to Stone
 =================
 
-Ceph uniquely delivers **object, block, and file storage in one unified
+Stone uniquely delivers **object, block, and file storage in one unified
 system**.
 
 .. raw:: html
 
 	<style type="text/css">div.body h3{margin:5px 0px 0px 0px;}</style>
-	<table cellpadding="10"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><tbody valign="top"><tr><td><h3>Ceph Object Store</h3>
+	<table cellpadding="10"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><tbody valign="top"><tr><td><h3>Stone Object Store</h3>
 
 - RESTful Interface
 - S3- and Swift-compliant APIs
@@ -23,7 +23,7 @@ system**.
 
 .. raw:: html
 
-	</td><td><h3>Ceph Block Device</h3>
+	</td><td><h3>Stone Block Device</h3>
 
 
 - Thin-provisioned
@@ -40,7 +40,7 @@ system**.
 
 .. raw:: html
 
-	</td><td><h3>Ceph File System</h3>
+	</td><td><h3>Stone File System</h3>
 
 - POSIX-compliant semantics
 - Separates metadata from data
@@ -56,34 +56,34 @@ system**.
 
 	</td></tr><tr><td>
 
-See `Ceph Object Store`_ for additional details.
+See `Stone Object Store`_ for additional details.
 
 .. raw:: html
 
 	</td><td>
 
-See `Ceph Block Device`_ for additional details.
+See `Stone Block Device`_ for additional details.
 
 .. raw:: html
 
 	</td><td>
 
-See `Ceph File System`_ for additional details.
+See `Stone File System`_ for additional details.
 
 .. raw::	html
 
 	</td></tr></tbody></table>
 
-Ceph is highly reliable, easy to manage, and free. The power of Ceph
+Stone is highly reliable, easy to manage, and free. The power of Stone
 can transform your company's IT infrastructure and your ability to manage vast
-amounts of data. To try Ceph, see our `Getting Started`_ guides. To learn more
-about Ceph, see our `Architecture`_ section.
+amounts of data. To try Stone, see our `Getting Started`_ guides. To learn more
+about Stone, see our `Architecture`_ section.
 
 
 
-.. _Ceph Object Store: radosgw
-.. _Ceph Block Device: rbd
-.. _Ceph File System: cephfs
+.. _Stone Object Store: radosgw
+.. _Stone Block Device: rbd
+.. _Stone File System: stonefs
 .. _Getting Started: install
 .. _Architecture: architecture
 
@@ -93,9 +93,9 @@ about Ceph, see our `Architecture`_ section.
 
    start/intro
    install/index
-   cephadm/index
+   stoneadm/index
    rados/index
-   cephfs/index
+   stonefs/index
    rbd/index
    radosgw/index
    mgr/index
@@ -106,7 +106,7 @@ about Ceph, see our `Architecture`_ section.
    dev/internals
    governance
    foundation
-   ceph-volume/index
+   stone-volume/index
    releases/general
    releases/index
    Glossary <glossary>

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -26,16 +26,16 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Thread.h"
 
-namespace ceph::async {
+namespace stone::async {
 class io_context_pool {
   std::vector<std::thread> threadvec;
   boost::asio::io_context ioctx;
   std::optional<boost::asio::executor_work_guard<
 		  boost::asio::io_context::executor_type>> guard;
-  ceph::mutex m = make_mutex("ceph::io_context_pool::m");
+  stone::mutex m = make_mutex("stone::io_context_pool::m");
 
   void cleanup() noexcept {
     guard = std::nullopt;

@@ -1,36 +1,36 @@
 :orphan:
 
 ======================================================
- ceph-bluestore-tool -- bluestore administrative tool
+ stone-bluestore-tool -- bluestore administrative tool
 ======================================================
 
-.. program:: ceph-bluestore-tool
+.. program:: stone-bluestore-tool
 
 Synopsis
 ========
 
-| **ceph-bluestore-tool** *command*
+| **stone-bluestore-tool** *command*
   [ --dev *device* ... ]
   [ --path *osd path* ]
   [ --out-dir *dir* ]
   [ --log-file | -l *filename* ]
   [ --deep ]
-| **ceph-bluestore-tool** fsck|repair --path *osd path* [ --deep ]
-| **ceph-bluestore-tool** show-label --dev *device* ...
-| **ceph-bluestore-tool** prime-osd-dir --dev *device* --path *osd path*
-| **ceph-bluestore-tool** bluefs-export --path *osd path* --out-dir *dir*
-| **ceph-bluestore-tool** bluefs-bdev-new-wal --path *osd path* --dev-target *new-device*
-| **ceph-bluestore-tool** bluefs-bdev-new-db --path *osd path* --dev-target *new-device*
-| **ceph-bluestore-tool** bluefs-bdev-migrate --path *osd path* --dev-target *new-device* --devs-source *device1* [--devs-source *device2*]
-| **ceph-bluestore-tool** free-dump|free-score --path *osd path* [ --allocator block/bluefs-wal/bluefs-db/bluefs-slow ]
-| **ceph-bluestore-tool** reshard --path *osd path* --sharding *new sharding* [ --sharding-ctrl *control string* ]
-| **ceph-bluestore-tool** show-sharding --path *osd path*
+| **stone-bluestore-tool** fsck|repair --path *osd path* [ --deep ]
+| **stone-bluestore-tool** show-label --dev *device* ...
+| **stone-bluestore-tool** prime-osd-dir --dev *device* --path *osd path*
+| **stone-bluestore-tool** bluefs-export --path *osd path* --out-dir *dir*
+| **stone-bluestore-tool** bluefs-bdev-new-wal --path *osd path* --dev-target *new-device*
+| **stone-bluestore-tool** bluefs-bdev-new-db --path *osd path* --dev-target *new-device*
+| **stone-bluestore-tool** bluefs-bdev-migrate --path *osd path* --dev-target *new-device* --devs-source *device1* [--devs-source *device2*]
+| **stone-bluestore-tool** free-dump|free-score --path *osd path* [ --allocator block/bluefs-wal/bluefs-db/bluefs-slow ]
+| **stone-bluestore-tool** reshard --path *osd path* --sharding *new sharding* [ --sharding-ctrl *control string* ]
+| **stone-bluestore-tool** show-sharding --path *osd path*
 
 
 Description
 ===========
 
-**ceph-bluestore-tool** is a utility to perform low-level administrative
+**stone-bluestore-tool** is a utility to perform low-level administrative
 operations on a BlueStore instance.
 
 Commands
@@ -167,7 +167,7 @@ Device labels
 Every BlueStore block device has a single block label at the beginning of the
 device.  You can dump the contents of the label with::
 
-  ceph-bluestore-tool show-label --dev *device*
+  stone-bluestore-tool show-label --dev *device*
 
 The main device will have a lot of metadata, including information
 that used to be stored in small files in the OSD data directory.  The
@@ -180,7 +180,7 @@ OSD directory priming
 You can generate the content for an OSD data directory that can start up a
 BlueStore OSD with the *prime-osd-dir* command::
 
-  ceph-bluestore-tool prime-osd-dir --dev *main device* --path /var/lib/ceph/osd/ceph-*id*
+  stone-bluestore-tool prime-osd-dir --dev *main device* --path /var/lib/stone/osd/stone-*id*
 
 BlueFS log rescue
 =====================
@@ -190,10 +190,10 @@ beyond the point of making booting OSD impossible. This state is indicated by
 booting that takes very long and fails in _replay function.
 
 This can be fixed by::
-  ceph-bluestore-tool fsck --path *osd path* --bluefs_replay_recovery=true
+  stone-bluestore-tool fsck --path *osd path* --bluefs_replay_recovery=true
 
 It is advised to first check if rescue process would be successfull::
-  ceph-bluestore-tool fsck --path *osd path* \
+  stone-bluestore-tool fsck --path *osd path* \
   --bluefs_replay_recovery=true --bluefs_replay_recovery_disable_compact=true
 
 If above fsck is successful fix procedure can be applied.
@@ -201,12 +201,12 @@ If above fsck is successful fix procedure can be applied.
 Availability
 ============
 
-**ceph-bluestore-tool** is part of Ceph, a massively scalable,
-open-source, distributed storage system. Please refer to the Ceph
-documentation at http://ceph.com/docs for more information.
+**stone-bluestore-tool** is part of Stone, a massively scalable,
+open-source, distributed storage system. Please refer to the Stone
+documentation at http://stone.com/docs for more information.
 
 
 See also
 ========
 
-:doc:`ceph-osd <ceph-osd>`\(8)
+:doc:`stone-osd <stone-osd>`\(8)

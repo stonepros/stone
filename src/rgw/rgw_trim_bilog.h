@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc
  *
@@ -22,7 +22,7 @@
 
 #include "include/common_fwd.h"
 #include "include/encoding.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/dout.h"
 
 class RGWCoroutine;
@@ -60,11 +60,11 @@ struct BucketTrimConfig {
   size_t recent_size{0};
   /// maximum duration to consider a trim as 'recent' (should be some multiple
   /// of the trim interval, at least)
-  ceph::timespan recent_duration{0};
+  stone::timespan recent_duration{0};
 };
 
-/// fill out the BucketTrimConfig from the ceph context
-void configure_bucket_trim(CephContext *cct, BucketTrimConfig& config);
+/// fill out the BucketTrimConfig from the stone context
+void configure_bucket_trim(StoneContext *cct, BucketTrimConfig& config);
 
 /// Determines the buckets on which to focus trim activity, using two sources of
 /// input: the frequency of entries read from the data changes log, and a global
@@ -88,7 +88,7 @@ class BucketTrimManager : public BucketChangeObserver, public DoutPrefixProvider
   /// create a coroutine to trim buckets directly via radosgw-admin
   RGWCoroutine* create_admin_bucket_trim_cr(RGWHTTPManager *http);
 
-  CephContext *get_cct() const override;
+  StoneContext *get_cct() const override;
   unsigned get_subsys() const;
   std::ostream& gen_prefix(std::ostream& out) const;
 };

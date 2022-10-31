@@ -1,11 +1,11 @@
-# Ceph - a scalable distributed storage system
+# Stone - a scalable distributed storage system
 
-Please see http://ceph.com/ for current info.
+Please see http://stone.com/ for current info.
 
 
 ## Contributing Code
 
-Most of Ceph is dual licensed under the LGPL version 2.1 or 3.0.  Some
+Most of Stone is dual licensed under the LGPL version 2.1 or 3.0.  Some
 miscellaneous code is under BSD-style license or is public domain.
 The documentation is licensed under Creative Commons
 Attribution Share Alike 3.0 (CC-BY-SA-3.0).  There are a handful of headers
@@ -25,13 +25,13 @@ contributed under the terms of the applicable license.
 
 You can clone from github with
 
-	git clone git@github.com:ceph/ceph
+	git clone git@github.com:stone/stone
 
 or, if you are not a github user,
 
-	git clone git://github.com/ceph/ceph
+	git clone git://github.com/stone/stone
 
-Ceph contains many git submodules that need to be checked out with
+Stone contains many git submodules that need to be checked out with
 
 	git submodule update --init --recursive
 
@@ -43,12 +43,12 @@ The list of Debian or RPM packages dependencies can be installed with:
 	./install-deps.sh
 
 
-## Building Ceph
+## Building Stone
 
 Note that these instructions are meant for developers who are
 compiling the code for development and testing.  To build binaries
 suitable for installation we recommend you build deb or rpm packages,
-or refer to the `ceph.spec.in` or `debian/rules` to see which
+or refer to the `stone.spec.in` or `debian/rules` to see which
 configuration options are specified for production builds.
 
 Build instructions:
@@ -57,7 +57,7 @@ Build instructions:
 	cd build
 	make
 
-(Note: do_cmake.sh now defaults to creating a debug build of ceph that can
+(Note: do_cmake.sh now defaults to creating a debug build of stone that can
 be up to 5x slower with some workloads. Please pass 
 "-DCMAKE_BUILD_TYPE=RelWithDebInfo" to do_cmake.sh to create a non-debug
 release.)
@@ -66,7 +66,7 @@ release.)
 the `-j` option to use more threads. Something like `make -j$(nproc)` would be
 a good start.
 
-This assumes you make your build dir a subdirectory of the ceph.git
+This assumes you make your build dir a subdirectory of the stone.git
 checkout. If you put it elsewhere, just point `CEPH_GIT_DIR`to the correct
 path to the checkout. Any additional CMake args can be specified setting ARGS
 before invoking do_cmake. See [cmake options](#cmake-options)
@@ -88,13 +88,13 @@ If you run the `cmake` command by hand, there are many options you can
 set with "-D". For example the option to build the RADOS Gateway is
 defaulted to ON. To build without the RADOS Gateway:
 
-	cmake -DWITH_RADOSGW=OFF [path to top level ceph directory]
+	cmake -DWITH_RADOSGW=OFF [path to top level stone directory]
 
 Another example below is building with debugging and alternate locations 
 for a couple of external dependencies:
 
 	cmake -DLEVELDB_PREFIX="/opt/hyperleveldb" \
-	-DCMAKE_INSTALL_PREFIX=/opt/ceph -DCMAKE_C_FLAGS="-O0 -g3 -gdwarf-4" \
+	-DCMAKE_INSTALL_PREFIX=/opt/stone -DCMAKE_C_FLAGS="-O0 -g3 -gdwarf-4" \
 	..
 
 To view an exhaustive list of -D options, you can invoke `cmake` with:
@@ -122,7 +122,7 @@ source and/or build a (deb or rpm) package, run
 
 	./make-dist
 
-This will create a tarball like ceph-$version.tar.bz2 from git.
+This will create a tarball like stone-$version.tar.bz2 from git.
 (Ensure that any changes you want to include in your working directory
 are committed to git.)
 
@@ -134,7 +134,7 @@ To run a functional test cluster,
 	cd build
 	make vstart        # builds just enough to run vstart
 	../src/vstart.sh --debug --new -x --localhost --bluestore
-	./bin/ceph -s
+	./bin/stone -s
 
 Almost all of the usual commands are available in the bin/ directory.
 For example,
@@ -148,8 +148,8 @@ To shut down the test cluster,
 
 To start or stop individual daemons, the sysvinit script can be used:
 
-	./bin/init-ceph restart osd.0
-	./bin/init-ceph stop
+	./bin/init-stone restart osd.0
+	./bin/init-stone stop
 
 
 ## Running unit tests
@@ -162,13 +162,13 @@ To build and run all tests (in parallel using all processors), use `ctest`:
 
 (Note: Many targets built from src/test are not run using `ctest`.
 Targets starting with "unittest" are run in `make check` and thus can
-be run with `ctest`. Targets starting with "ceph_test" can not, and should
+be run with `ctest`. Targets starting with "stone_test" can not, and should
 be run by hand.)
 
 When failures occur, look in build/Testing/Temporary for logs.
 
 To build and run all tests and their dependencies without other
-unnecessary targets in Ceph:
+unnecessary targets in Stone:
 
 	cd build
 	make check -j$(nproc)
@@ -208,7 +208,7 @@ found in `doc_deps.deb.txt`:
 ### Building the Documentation
 
 To build the documentation, ensure that you are in the top-level
-`/ceph` directory, and execute the build script. For example:
+`/stone` directory, and execute the build script. For example:
 
 	admin/build-doc
 

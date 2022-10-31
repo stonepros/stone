@@ -18,7 +18,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import java.util.UUID;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import com.ceph.crush.Bucket;
+import com.stone.crush.Bucket;
 
 /*
  * Coverage
@@ -35,23 +35,23 @@ import com.ceph.crush.Bucket;
  *  - l[set,get,remove]xattr are not working
  */
 
-public class CephMountTest {
+public class StoneMountTest {
 
-  private static CephMount mount;
+  private static StoneMount mount;
   private static String basedir = null;
 
   @BeforeClass
   public static void setup() throws Exception {
-    mount = new CephMount("admin");
+    mount = new StoneMount("admin");
 
-    String conf_file = System.getProperty("CEPH_CONF_FILE");
+    String conf_file = System.getProperty("STONE_CONF_FILE");
     if (conf_file != null)
       mount.conf_read_file(conf_file);
     mount.conf_set("client_permissions", "0");
 
     mount.mount(null);
 
-    basedir = "/libcephfs_junit_" + UUID.randomUUID();
+    basedir = "/libstonefs_junit_" + UUID.randomUUID();
     mount.mkdir(basedir, 0777);
   }
 
@@ -78,7 +78,7 @@ public class CephMountTest {
    */
   public String getRootPoolName() throws Exception
   {
-    int fd = mount.open("/", CephMount.O_DIRECTORY, 0600);
+    int fd = mount.open("/", StoneMount.O_DIRECTORY, 0600);
     String pool = mount.get_file_pool_name(fd);
     mount.close(fd);
     return pool;
@@ -89,7 +89,7 @@ public class CephMountTest {
    * is filled with size bytes and the file descriptor is returned.
    */
   public int createFile(String path, int size) throws Exception {
-    int fd = mount.open(path, CephMount.O_RDWR|CephMount.O_CREAT, 0600);
+    int fd = mount.open(path, StoneMount.O_RDWR|StoneMount.O_CREAT, 0600);
     byte[] buf = new byte[4096];
     int left = size;
     while (left > 0) {
@@ -110,8 +110,8 @@ public class CephMountTest {
 
   @Test(expected=FileNotFoundException.class)
   public void test_mount_dne() throws Exception {
-    CephMount mount2 = new CephMount("admin");
-    String conf_file = System.getProperty("CEPH_CONF_FILE");
+    StoneMount mount2 = new StoneMount("admin");
+    String conf_file = System.getProperty("STONE_CONF_FILE");
     if (conf_file != null)
       mount2.conf_read_file(conf_file);
     mount2.mount("/wlfkjwlekfjwlejfwe");
@@ -122,7 +122,7 @@ public class CephMountTest {
    * Test loading of conf file that doesn't exist.
    *
    * FIXME:
-   * Ceph returns -ENOSYS rather than -ENOENT. Correct?
+   * Stone returns -ENOSYS rather than -ENOENT. Correct?
    */
   //@Test(expected=FileNotFoundException.class)
   @Test
@@ -198,7 +198,7 @@ public class CephMountTest {
 
   @Test
   public void test_statfs() throws Exception {
-    CephStatVFS st1 = new CephStatVFS();
+    StoneStatVFS st1 = new StoneStatVFS();
     mount.statfs("/", st1);
 
     /*
@@ -314,8 +314,8 @@ public class CephMountTest {
   /*
    * Missing
    *
-   * ceph_link
-   * ceph_unlink
+   * stone_link
+   * stone_unlink
    */
 
   /*
@@ -349,7 +349,7 @@ public class CephMountTest {
     mount.rename(path, newpath);
 
     /* verfiy the sizes are the same */
-    CephStat st = new CephStat();
+    StoneStat st = new StoneStat();
     mount.lstat(newpath, st);
     assertTrue(st.size == 1);
 
@@ -387,7 +387,7 @@ public class CephMountTest {
   public void test_mkdir() throws Exception {
     String path = makePath();
     mount.mkdir(path, 0777);
-    CephStat st = new CephStat();
+    StoneStat st = new StoneStat();
     mount.lstat(path, st);
     assertTrue(st.isDir());
     mount.rmdir(path);
@@ -398,7 +398,7 @@ public class CephMountTest {
     String path = makePath();
     mount.mkdirs(path + "/x/y", 0777);
 
-    CephStat st = new CephStat();
+    StoneStat st = new StoneStat();
     mount.lstat(path, st);
     assertTrue(st.isDir());
 
@@ -418,7 +418,7 @@ public class CephMountTest {
     /* make a new directory */
     String path = makePath();
     mount.mkdir(path, 0777);
-    CephStat st = new CephStat();
+    StoneStat st = new StoneStat();
     mount.lstat(path, st);
     assertTrue(st.isDir());
     /* remove it */
@@ -437,7 +437,7 @@ public class CephMountTest {
     String newpath = makePath();
 
     mount.symlink(oldpath, newpath);
-    CephStat stat = new CephStat();
+    StoneStat stat = new StoneStat();
     mount.lstat(newpath, stat);
     assertTrue(stat.isSymlink());
 
@@ -453,7 +453,7 @@ public class CephMountTest {
 
   @Test(expected=NullPointerException.class)
   public void test_lstat_null_path() throws Exception {
-    mount.lstat(null, new CephStat());
+    mount.lstat(null, new StoneStat());
   }
 
   @Test(expected=NullPointerException.class)
@@ -463,7 +463,7 @@ public class CephMountTest {
 
   @Test(expected=FileNotFoundException.class)
   public void test_lstat_null_dne() throws Exception {
-    mount.lstat("/path/does/not/exist", new CephStat());
+    mount.lstat("/path/does/not/exist", new StoneStat());
   }
 
   /*
@@ -481,19 +481,19 @@ public class CephMountTest {
     mount.close(fd);
 
     /* test some basic info about the new file */
-    CephStat orig_st = new CephStat();
+    StoneStat orig_st = new StoneStat();
     mount.lstat(path, orig_st);
     assertTrue(orig_st.size == size);
     assertTrue(orig_st.blksize > 0);
     assertTrue(orig_st.blocks > 0);
 
     /* now try stat */
-    CephStat stat_st = new CephStat();
+    StoneStat stat_st = new StoneStat();
     mount.stat(path, stat_st);
 
     /* now try fstat */
-    CephStat other_st = new CephStat();
-    fd = mount.open(path, CephMount.O_RDWR, 0);
+    StoneStat other_st = new StoneStat();
+    fd = mount.open(path, StoneMount.O_RDWR, 0);
     mount.fstat(fd, other_st);
     mount.close(fd);
 
@@ -522,7 +522,7 @@ public class CephMountTest {
 
   @Test(expected=NullPointerException.class)
   public void test_stat_null_path() throws Exception {
-    mount.stat(null, new CephStat());
+    mount.stat(null, new StoneStat());
   }
 
   @Test(expected=NullPointerException.class)
@@ -532,17 +532,17 @@ public class CephMountTest {
 
   @Test(expected=FileNotFoundException.class)
   public void test_stat_null_dne() throws Exception {
-    mount.stat("/path/does/not/exist", new CephStat());
+    mount.stat("/path/does/not/exist", new StoneStat());
   }
 
-  @Test(expected=CephNotDirectoryException.class)
+  @Test(expected=StoneNotDirectoryException.class)
   public void test_enotdir() throws Exception {
     String path = makePath();
     int fd = createFile(path, 1);
     mount.close(fd);
 
     try {
-      CephStat stat = new CephStat();
+      StoneStat stat = new StoneStat();
       mount.lstat(path + "/blah", stat);
     } finally {
       mount.unlink(path);
@@ -555,7 +555,7 @@ public class CephMountTest {
 
   @Test(expected=NullPointerException.class)
   public void test_setattr_null_path() throws Exception {
-    mount.setattr(null, new CephStat(), 0);
+    mount.setattr(null, new StoneStat(), 0);
   }
 
   @Test(expected=NullPointerException.class)
@@ -565,7 +565,7 @@ public class CephMountTest {
 
   @Test(expected=FileNotFoundException.class)
   public void test_setattr_dne() throws Exception {
-    mount.setattr("/path/does/not/exist", new CephStat(), 0);
+    mount.setattr("/path/does/not/exist", new StoneStat(), 0);
   }
 
   @Test
@@ -575,14 +575,14 @@ public class CephMountTest {
     int fd = createFile(path, 1);
     mount.close(fd);
 
-    CephStat st1 = new CephStat();
+    StoneStat st1 = new StoneStat();
     mount.lstat(path, st1);
 
     st1.uid += 1;
     st1.gid += 1;
     mount.setattr(path, st1, mount.SETATTR_UID|mount.SETATTR_GID);
 
-    CephStat st2 = new CephStat();
+    StoneStat st2 = new StoneStat();
     mount.lstat(path, st2);
 
     assertTrue(st2.uid == st1.uid);
@@ -613,7 +613,7 @@ public class CephMountTest {
     int fd = createFile(path, 1);
     mount.close(fd);
 
-    CephStat st = new CephStat();
+    StoneStat st = new StoneStat();
     mount.lstat(path, st);
 
     /* flip a bit */
@@ -624,7 +624,7 @@ public class CephMountTest {
       mode += 1;
 
     mount.chmod(path, mode);
-    CephStat st2 = new CephStat();
+    StoneStat st2 = new StoneStat();
     mount.lstat(path, st2);
     assertTrue(st2.mode == mode);
 
@@ -641,7 +641,7 @@ public class CephMountTest {
     String path = makePath();
     int fd = createFile(path, 1);
 
-    CephStat st = new CephStat();
+    StoneStat st = new StoneStat();
     mount.lstat(path, st);
 
     /* flip a bit */
@@ -654,7 +654,7 @@ public class CephMountTest {
     mount.fchmod(fd, mode);
     mount.close(fd);
 
-    CephStat st2 = new CephStat();
+    StoneStat st2 = new StoneStat();
     mount.lstat(path, st2);
     assertTrue(st2.mode == mode);
 
@@ -684,7 +684,7 @@ public class CephMountTest {
     mount.close(fd);
 
     // check file size
-    CephStat st = new CephStat();
+    StoneStat st = new StoneStat();
     mount.lstat(path, st);
     assertTrue(st.size == orig_size);
 
@@ -695,7 +695,7 @@ public class CephMountTest {
     assertTrue(st.size == crop_size);
 
     // check after re-open
-    fd = mount.open(path, CephMount.O_RDWR, 0);
+    fd = mount.open(path, StoneMount.O_RDWR, 0);
     mount.fstat(fd, st);
     assertTrue(st.size == crop_size);
     mount.close(fd);
@@ -706,7 +706,7 @@ public class CephMountTest {
   @Test
   public void test_open_layout() throws Exception {
     String path = makePath();
-    int fd = mount.open(path, CephMount.O_WRONLY|CephMount.O_CREAT, 0,
+    int fd = mount.open(path, StoneMount.O_WRONLY|StoneMount.O_CREAT, 0,
         (1<<20), 1, (1<<20), null);
     mount.close(fd);
     mount.unlink(path);
@@ -734,8 +734,8 @@ public class CephMountTest {
     mount.close(fd);
 
     /* open and check size */
-    fd = mount.open(path, CephMount.O_RDWR, 0);
-    long end = mount.lseek(fd, 0, CephMount.SEEK_END);
+    fd = mount.open(path, StoneMount.O_RDWR, 0);
+    long end = mount.lseek(fd, 0, StoneMount.SEEK_END);
     mount.close(fd);
 
     mount.unlink(path);
@@ -769,7 +769,7 @@ public class CephMountTest {
     int fd = createFile(path, orig_size);
 
     // check file size
-    CephStat st = new CephStat();
+    StoneStat st = new StoneStat();
     mount.fstat(fd, st);
     assertTrue(st.size == orig_size);
 
@@ -785,7 +785,7 @@ public class CephMountTest {
     mount.close(fd);
 
     // check after re-open
-    fd = mount.open(path, CephMount.O_RDWR, 0);
+    fd = mount.open(path, StoneMount.O_RDWR, 0);
     mount.fstat(fd, st);
     assertTrue(st.size == crop_size);
     mount.close(fd);
@@ -815,23 +815,23 @@ public class CephMountTest {
   public void test_flock() throws Exception {
     String path = makePath();
     int fd = createFile(path, 123);
-    mount.flock(fd, CephMount.LOCK_SH | CephMount.LOCK_NB, 42);
-    mount.flock(fd, CephMount.LOCK_SH | CephMount.LOCK_NB, 43);
-    mount.flock(fd, CephMount.LOCK_UN, 42);
-    mount.flock(fd, CephMount.LOCK_UN, 43);
-    mount.flock(fd, CephMount.LOCK_EX | CephMount.LOCK_NB, 42);
+    mount.flock(fd, StoneMount.LOCK_SH | StoneMount.LOCK_NB, 42);
+    mount.flock(fd, StoneMount.LOCK_SH | StoneMount.LOCK_NB, 43);
+    mount.flock(fd, StoneMount.LOCK_UN, 42);
+    mount.flock(fd, StoneMount.LOCK_UN, 43);
+    mount.flock(fd, StoneMount.LOCK_EX | StoneMount.LOCK_NB, 42);
     try {
-      mount.flock(fd, CephMount.LOCK_SH | CephMount.LOCK_NB, 43);
+      mount.flock(fd, StoneMount.LOCK_SH | StoneMount.LOCK_NB, 43);
       assertTrue(false);
     } catch(IOException io) {}
     try {
-      mount.flock(fd, CephMount.LOCK_EX | CephMount.LOCK_NB, 43);
+      mount.flock(fd, StoneMount.LOCK_EX | StoneMount.LOCK_NB, 43);
       assertTrue(false);
     } catch(IOException io) {}
-    mount.flock(fd, CephMount.LOCK_SH, 42);  // downgrade
-    mount.flock(fd, CephMount.LOCK_SH, 43);
-    mount.flock(fd, CephMount.LOCK_UN, 42);
-    mount.flock(fd, CephMount.LOCK_UN, 43);
+    mount.flock(fd, StoneMount.LOCK_SH, 42);  // downgrade
+    mount.flock(fd, StoneMount.LOCK_SH, 43);
+    mount.flock(fd, StoneMount.LOCK_UN, 42);
+    mount.flock(fd, StoneMount.LOCK_UN, 43);
     mount.close(fd);
     mount.unlink(path);
   }
@@ -958,7 +958,7 @@ public class CephMountTest {
     try {
       mount.get_pool_id("asdlfkjlsejflkjef");
       assertTrue(false);
-    } catch (CephPoolException e) {}
+    } catch (StonePoolException e) {}
   }
 
   @Test
@@ -967,7 +967,7 @@ public class CephMountTest {
     try {
       mount.get_pool_replication(-1);
       assertTrue(false);
-    } catch (CephPoolException e) {}
+    } catch (StonePoolException e) {}
 
     /* test valid pool id */
     String data_pool_name = getRootPoolName();
@@ -998,10 +998,10 @@ public class CephMountTest {
   public void test_get_file_extent() throws Exception {
     int stripe_unit = 1<<18;
     String path = makePath();
-    int fd = mount.open(path, CephMount.O_WRONLY|CephMount.O_CREAT, 0,
+    int fd = mount.open(path, StoneMount.O_WRONLY|StoneMount.O_CREAT, 0,
         stripe_unit, 2, stripe_unit*2, null);
 
-    CephFileExtent e = mount.get_file_extent(fd, 0);
+    StoneFileExtent e = mount.get_file_extent(fd, 0);
     assertTrue(e.getOSDs().length > 0);
 
     assertTrue(e.getOffset() == 0);

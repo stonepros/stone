@@ -10,9 +10,9 @@ from typing import Optional, Dict, Any, List, Union, Callable, Iterable, Type, T
 
 import yaml
 
-from ceph.deployment.hostspec import HostSpec, SpecValidationError, assert_valid_host
-from ceph.deployment.utils import unwrap_ipv6, valid_addr
-from ceph.utils import is_hex
+from stone.deployment.hostspec import HostSpec, SpecValidationError, assert_valid_host
+from stone.deployment.utils import unwrap_ipv6, valid_addr
+from stone.utils import is_hex
 
 ServiceSpecT = TypeVar('ServiceSpecT', bound='ServiceSpec')
 FuncT = TypeVar('FuncT', bound=Callable)
@@ -58,7 +58,7 @@ class HostPlacementSpec(NamedTuple):
         # type: (str, bool) -> HostPlacementSpec
         """
         Split host into host, network, and (optional) daemon name parts.  The network
-        part can be an IP, CIDR, or ceph addrvec like '[v2:1.2.3.4:3300,v1:1.2.3.4:6789]'.
+        part can be an IP, CIDR, or stone addrvec like '[v2:1.2.3.4:3300,v1:1.2.3.4:6789]'.
         e.g.,
           "myhost"
           "myhost=name"
@@ -423,7 +423,7 @@ _service_spec_from_json_validate = True
 @contextmanager
 def service_spec_allow_invalid_from_json() -> Iterator[None]:
     """
-    I know this is evil, but unfortunately `ceph orch ls`
+    I know this is evil, but unfortunately `stone orch ls`
     may return invalid OSD specs for OSDs not associated to
     and specs. If you have a better idea, please!
     """
@@ -445,7 +445,7 @@ class ServiceSpec(object):
     """
     KNOWN_SERVICE_TYPES = 'alertmanager crash grafana iscsi mds mgr mon nfs ' \
                           'node-exporter osd prometheus rbd-mirror rgw ' \
-                          'container cephadm-exporter ingress cephfs-mirror snmp-gateway'.split()
+                          'container stoneadm-exporter ingress stonefs-mirror snmp-gateway'.split()
     REQUIRES_SERVICE_ID = 'iscsi mds nfs rgw container ingress '.split()
     MANAGED_CONFIG_OPTIONS = [
         'mds_join_fs',
@@ -453,7 +453,7 @@ class ServiceSpec(object):
 
     @classmethod
     def _cls(cls: Type[ServiceSpecT], service_type: str) -> Type[ServiceSpecT]:
-        from ceph.deployment.drive_group import DriveGroupSpec
+        from stone.deployment.drive_group import DriveGroupSpec
 
         ret = {
             'rgw': RGWSpec,
@@ -504,7 +504,7 @@ class ServiceSpec(object):
         self.placement = PlacementSpec() if placement is None else placement  # type: PlacementSpec
 
         assert service_type in ServiceSpec.KNOWN_SERVICE_TYPES, service_type
-        #: The type of the service. Needs to be either a Ceph
+        #: The type of the service. Needs to be either a Stone
         #: service (``mon``, ``crash``, ``mds``, ``mgr``, ``osd`` or
         #: ``rbd-mirror``), a gateway (``nfs`` or ``rgw``), part of the
         #: monitoring stack (``alertmanager``, ``grafana``, ``node-exporter`` or
@@ -521,15 +521,15 @@ class ServiceSpec(object):
         #: If set to ``true``, the orchestrator will not deploy nor remove
         #: any daemon associated with this service. Placement and all other properties
         #: will be ignored. This is useful, if you do not want this service to be
-        #: managed temporarily. For cephadm, See :ref:`cephadm-spec-unmanaged`
+        #: managed temporarily. For stoneadm, See :ref:`stoneadm-spec-unmanaged`
         self.unmanaged = unmanaged
         self.preview_only = preview_only
 
         #: A list of network identities instructing the daemons to only bind
         #: on the particular networks in that list. In case the cluster is distributed
         #: across multiple networks, you can add multiple networks. See
-        #: :ref:`cephadm-monitoring-networks-ports`,
-        #: :ref:`cephadm-rgw-networks` and :ref:`cephadm-mgr-networks`.
+        #: :ref:`stoneadm-monitoring-networks-ports`,
+        #: :ref:`stoneadm-rgw-networks` and :ref:`stoneadm-mgr-networks`.
         self.networks: List[str] = networks or []
 
         self.config: Optional[Dict[str, str]] = None
@@ -568,7 +568,7 @@ class ServiceSpec(object):
               pool: mypool
               namespace: myns
 
-        In https://tracker.ceph.com/issues/45321 we decided that we'd like to
+        In https://tracker.stone.com/issues/45321 we decided that we'd like to
         prefer the new style as it is more readable and provides a better
         understanding of what fields are special for a give service type.
 
@@ -697,7 +697,7 @@ class ServiceSpec(object):
             for k, v in self.config.items():
                 if k in self.MANAGED_CONFIG_OPTIONS:
                     raise SpecValidationError(
-                        f'Cannot set config option {k} in spec: it is managed by cephadm'
+                        f'Cannot set config option {k} in spec: it is managed by stoneadm'
                     )
         for network in self.networks or []:
             try:
@@ -762,7 +762,7 @@ yaml.add_representer(NFSServiceSpec, ServiceSpec.yaml_representer)
 
 class RGWSpec(ServiceSpec):
     """
-    Settings to configure a (multisite) Ceph RGW
+    Settings to configure a (multisite) Stone RGW
 
     .. code-block:: yaml
 
@@ -878,7 +878,7 @@ class IscsiServiceSpec(ServiceSpec):
                                                config=config, networks=networks,
                                                extra_container_args=extra_container_args)
 
-        #: RADOS pool where ceph-iscsi config data is stored.
+        #: RADOS pool where stone-iscsi config data is stored.
         self.pool = pool
         #: list of trusted IP addresses
         self.trusted_ip_list = trusted_ip_list
@@ -1037,10 +1037,10 @@ class CustomContainerSpec(ServiceSpec):
 
     def config_json(self) -> Dict[str, Any]:
         """
-        Helper function to get the value of the `--config-json` cephadm
+        Helper function to get the value of the `--config-json` stoneadm
         command line option. It will contain all specification properties
         that haven't a `None` value. Such properties will get default
-        values in cephadm.
+        values in stoneadm.
         :return: Returns a dictionary containing all specification
             properties.
         """

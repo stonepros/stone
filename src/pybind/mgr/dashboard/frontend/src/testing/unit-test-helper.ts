@@ -9,9 +9,9 @@ import _ from 'lodash';
 import { configureTestSuite } from 'ng-bullet';
 import { of } from 'rxjs';
 
-import { InventoryDevice } from '~/app/ceph/cluster/inventory/inventory-devices/inventory-device.model';
-import { Pool } from '~/app/ceph/pool/pool';
-import { RgwDaemon } from '~/app/ceph/rgw/models/rgw-daemon';
+import { InventoryDevice } from '~/app/stone/cluster/inventory/inventory-devices/inventory-device.model';
+import { Pool } from '~/app/stone/pool/pool';
+import { RgwDaemon } from '~/app/stone/rgw/models/rgw-daemon';
 import { OrchestratorService } from '~/app/shared/api/orchestrator.service';
 import { RgwDaemonService } from '~/app/shared/api/rgw-daemon.service';
 import { TableActionsComponent } from '~/app/shared/datatable/table-actions/table-actions.component';

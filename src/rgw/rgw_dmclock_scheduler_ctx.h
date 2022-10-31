@@ -5,7 +5,7 @@
 #define RGW_DMCLOCK_SCHEDULER_CTX_H
 
 #include "common/perf_counters.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "rgw_dmclock.h"
 
@@ -28,7 +28,7 @@ namespace queue_counters {
         l_last,
   };
 
-  PerfCountersRef build(CephContext *cct, const std::string& name);
+  PerfCountersRef build(StoneContext *cct, const std::string& name);
 
 } // namespace queue_counters
 
@@ -40,7 +40,7 @@ namespace throttle_counters {
         l_last
   };
 
-  PerfCountersRef build(CephContext *cct, const std::string& name);
+  PerfCountersRef build(StoneContext *cct, const std::string& name);
 } // namespace throttle
 
 namespace rgw::dmclock {
@@ -51,7 +51,7 @@ static constexpr auto counter_size = static_cast<size_t>(client_id::count) + 1;
 class ClientCounters {
   std::array<PerfCountersRef, counter_size> clients;
  public:
-  ClientCounters(CephContext *cct);
+  ClientCounters(StoneContext *cct);
 
   PerfCounters* operator()(client_id client) const {
     return clients[static_cast<size_t>(client)].get();
@@ -61,7 +61,7 @@ class ClientCounters {
 class ThrottleCounters {
   PerfCountersRef counters;
 public:
-  ThrottleCounters(CephContext* const cct,const std::string& name):
+  ThrottleCounters(StoneContext* const cct,const std::string& name):
     counters(throttle_counters::build(cct, name)) {}
 
   PerfCounters* operator()() const {
@@ -89,7 +89,7 @@ class ClientConfig : public md_config_obs_t {
   void update(const ConfigProxy &conf);
 
 public:
-  ClientConfig(CephContext *cct);
+  ClientConfig(StoneContext *cct);
 
   ClientInfo* operator()(client_id client);
 
@@ -100,7 +100,7 @@ public:
 
 class SchedulerCtx {
 public:
-  SchedulerCtx(CephContext* const cct) : sched_t(get_scheduler_t(cct))
+  SchedulerCtx(StoneContext* const cct) : sched_t(get_scheduler_t(cct))
   {
     if(sched_t == scheduler_t::dmclock) {
       dmc_client_config = std::make_shared<ClientConfig>(cct);

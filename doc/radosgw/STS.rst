@@ -1,18 +1,18 @@
 ===========
-STS in Ceph
+STS in Stone
 ===========
 
 Secure Token Service is a web service in AWS that returns a set of temporary security credentials for authenticating federated users.
 The link to official AWS documentation can be found here: https://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html.
 
-Ceph Object Gateway implements a subset of STS APIs that provide temporary credentials for identity and access management.
-These temporary credentials can be used to make subsequent S3 calls which will be authenticated by the STS engine in Ceph Object Gateway.
+Stone Object Gateway implements a subset of STS APIs that provide temporary credentials for identity and access management.
+These temporary credentials can be used to make subsequent S3 calls which will be authenticated by the STS engine in Stone Object Gateway.
 Permissions of the temporary credentials can be further restricted via an IAM policy passed as a parameter to the STS APIs.
 
 STS REST APIs
 =============
 
-The following STS REST APIs have been implemented in Ceph Object Gateway:
+The following STS REST APIs have been implemented in Stone Object Gateway:
 
 1. AssumeRole: Returns a set of temporary credentials that can be used for 
 cross-account access. The temporary credentials will have permissions that are
@@ -85,7 +85,7 @@ The following configurable options have to be added for STS integration::
   rgw s3 auth use sts = true
 
 Note: By default, STS and S3 APIs co-exist in the same namespace, and both S3
-and STS APIs can be accessed via the same endpoint in Ceph Object Gateway.
+and STS APIs can be accessed via the same endpoint in Stone Object Gateway.
 
 Examples
 ========

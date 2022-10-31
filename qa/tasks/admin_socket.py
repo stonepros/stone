@@ -25,7 +25,7 @@ def task(ctx, config):
     To run the same test on all clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rados:
         - admin_socket:
             all:
@@ -35,7 +35,7 @@ def task(ctx, config):
     To restrict it to certain clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rados: [client.1]
         - admin_socket:
             client.1:
@@ -46,7 +46,7 @@ def task(ctx, config):
     a list::
 
         tasks:
-        - ceph:
+        - stone:
         - rados: [client.0]
         - admin_socket:
             client.0:
@@ -56,7 +56,7 @@ def task(ctx, config):
                 test: http://example.com/test_help_version
                 args: [version]
 
-    Note that there must be a ceph client with an admin socket running
+    Note that there must be a stone client with an admin socket running
     before this task is run. The tests are parallelized at the client
     level. Tests for a single client are run serially.
 
@@ -91,15 +91,15 @@ def _socket_command(ctx, remote, socket_path, command, args):
             out = remote.sh([
                 'sudo',
                 'adjust-ulimits',
-                'ceph-coverage',
+                'stone-coverage',
                 '{tdir}/archive/coverage'.format(tdir=testdir),
-                'ceph',
+                'stone',
                 '--admin-daemon', socket_path,
                 ] + command.split(' ') + args)
         except CommandFailedError:
             assert max_tries > 0
             max_tries -= 1
-            log.info('ceph cli returned an error, command not registered yet?')
+            log.info('stone cli returned an error, command not registered yet?')
             log.info('sleeping and retrying ...')
             time.sleep(1)
             continue
@@ -120,7 +120,7 @@ def _run_tests(ctx, client, tests):
     testdir = teuthology.get_testdir(ctx)
     log.debug('Running admin socket tests on %s', client)
     (remote,) = ctx.cluster.only(client).remotes.keys()
-    socket_path = '/var/run/ceph/ceph-{name}.asok'.format(name=client)
+    socket_path = '/var/run/stonepros/stone-{name}.asok'.format(name=client)
     overrides = ctx.config.get('overrides', {}).get('admin_socket', {})
 
     try:
@@ -148,11 +148,11 @@ def _run_tests(ctx, client, tests):
 
             test_path = None
             if 'test' in config:
-                # hack: the git_url is always ceph-ci or ceph
-                git_url = teuth_config.get_ceph_git_url()
-                repo_name = 'ceph.git'
-                if git_url.count('ceph-ci'):
-                    repo_name = 'ceph-ci.git'
+                # hack: the git_url is always stone-ci or stone
+                git_url = teuth_config.get_stone_git_url()
+                repo_name = 'stone.git'
+                if git_url.count('stone-ci'):
+                    repo_name = 'stone-ci.git'
                 url = config['test'].format(
                     branch=config.get('branch', 'master'),
                     repo=repo_name,

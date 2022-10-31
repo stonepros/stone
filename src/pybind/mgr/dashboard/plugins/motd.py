@@ -5,7 +5,7 @@ import json
 from enum import Enum
 from typing import Dict, NamedTuple, Optional
 
-from ceph.utils import datetime_now, datetime_to_str, parse_timedelta, str_to_datetime
+from stone.utils import datetime_now, datetime_to_str, parse_timedelta, str_to_datetime
 from mgr_module import CLICommand
 
 from . import PLUGIN_MANAGER as PM

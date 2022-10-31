@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -26,7 +26,7 @@
 class MAuth final : public PaxosServiceMessage {
 public:
   __u32 protocol;
-  ceph::buffer::list auth_payload;
+  stone::buffer::list auth_payload;
   epoch_t monmap_epoch;
 
   /* if protocol == 0, then auth_payload is a set<__u32> listing protocols the client supports */
@@ -43,7 +43,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(protocol, p);
@@ -54,13 +54,13 @@ public:
       monmap_epoch = 0;
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(protocol, payload);
     encode(auth_payload, payload);
     encode(monmap_epoch, payload);
   }
-  ceph::buffer::list& get_auth_payload() { return auth_payload; }
+  stone::buffer::list& get_auth_payload() { return auth_payload; }
 };
 
 #endif

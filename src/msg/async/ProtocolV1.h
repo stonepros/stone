@@ -104,9 +104,9 @@ protected:
 
   enum class WriteStatus { NOWRITE, REPLACING, CANWRITE, CLOSED };
   std::atomic<WriteStatus> can_write;
-  std::list<Message *> sent;  // the first ceph::buffer::list need to inject seq
+  std::list<Message *> sent;  // the first stone::buffer::list need to inject seq
   // priority queue for outbound msgs
-  std::map<int, std::list<std::pair<ceph::buffer::list, Message *>>> out_q;
+  std::map<int, std::list<std::pair<stone::buffer::list, Message *>>> out_q;
   bool keepalive;
   bool write_in_progress = false;
 
@@ -118,20 +118,20 @@ protected:
   std::shared_ptr<AuthSessionHandler> session_security;
 
   // Open state
-  ceph_msg_connect connect_msg;
-  ceph_msg_connect_reply connect_reply;
-  ceph::buffer::list authorizer_buf;  // auth(orizer) payload read off the wire
-  ceph::buffer::list authorizer_more;  // connect-side auth retry (we added challenge)
+  stone_msg_connect connect_msg;
+  stone_msg_connect_reply connect_reply;
+  stone::buffer::list authorizer_buf;  // auth(orizer) payload read off the wire
+  stone::buffer::list authorizer_more;  // connect-side auth retry (we added challenge)
 
   utime_t backoff;  // backoff time
   utime_t recv_stamp;
   utime_t throttle_stamp;
   unsigned msg_left;
   uint64_t cur_msg_size;
-  ceph_msg_header current_header;
-  ceph::buffer::list data_buf;
-  ceph::buffer::list::iterator data_blp;
-  ceph::buffer::list front, middle, data;
+  stone_msg_header current_header;
+  stone::buffer::list data_buf;
+  stone::buffer::list::iterator data_blp;
+  stone::buffer::list front, middle, data;
 
   bool replacing;  // when replacing process happened, we will reply connect
                    // side with RETRY tag and accept side will clear replaced
@@ -147,7 +147,7 @@ protected:
   void run_continuation(CtPtr pcontinuation);
   CtPtr read(CONTINUATION_RX_TYPE<ProtocolV1> &next, int len,
              char *buffer = nullptr);
-  CtPtr write(CONTINUATION_TX_TYPE<ProtocolV1> &next,ceph::buffer::list &bl);
+  CtPtr write(CONTINUATION_TX_TYPE<ProtocolV1> &next,stone::buffer::list &bl);
   inline CtPtr _fault() {  // helper fault method that stops continuation
     fault();
     return nullptr;
@@ -194,10 +194,10 @@ protected:
   void session_reset();
   void randomize_out_seq();
 
-  Message *_get_next_outgoing(ceph::buffer::list *bl);
+  Message *_get_next_outgoing(stone::buffer::list *bl);
 
-  void prepare_send_message(uint64_t features, Message *m, ceph::buffer::list &bl);
-  ssize_t write_message(Message *m, ceph::buffer::list &bl, bool more);
+  void prepare_send_message(uint64_t features, Message *m, stone::buffer::list &bl);
+  ssize_t write_message(Message *m, stone::buffer::list &bl, bool more);
 
   void requeue_sent();
   uint64_t discard_requeued_up_to(uint64_t out_seq, uint64_t seq);
@@ -281,12 +281,12 @@ protected:
   CtPtr wait_connect_message_auth();
   CtPtr handle_connect_message_auth(char *buffer, int r);
   CtPtr handle_connect_message_2();
-  CtPtr send_connect_message_reply(char tag, ceph_msg_connect_reply &reply,
-                                   ceph::buffer::list &authorizer_reply);
+  CtPtr send_connect_message_reply(char tag, stone_msg_connect_reply &reply,
+                                   stone::buffer::list &authorizer_reply);
   CtPtr handle_connect_message_reply_write(int r);
-  CtPtr replace(const AsyncConnectionRef& existing, ceph_msg_connect_reply &reply,
-                ceph::buffer::list &authorizer_reply);
-  CtPtr open(ceph_msg_connect_reply &reply, ceph::buffer::list &authorizer_reply);
+  CtPtr replace(const AsyncConnectionRef& existing, stone_msg_connect_reply &reply,
+                stone::buffer::list &authorizer_reply);
+  CtPtr open(stone_msg_connect_reply &reply, stone::buffer::list &authorizer_reply);
   CtPtr handle_ready_connect_message_reply_write(int r);
   CtPtr wait_seq();
   CtPtr handle_seq(char *buffer, int r);

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -19,7 +19,7 @@
 #include <Python.h>
 
 #include "common/Thread.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 #include "mgr/Gil.h"
 #include "mon/MonClient.h"
@@ -33,7 +33,7 @@ class Finisher;
  */
 class StandbyPyModuleState
 {
-  mutable ceph::mutex lock = ceph::make_mutex("StandbyPyModuleState::lock");
+  mutable stone::mutex lock = stone::make_mutex("StandbyPyModuleState::lock");
 
   MgrMap mgr_map;
   PyModuleConfig &module_config;
@@ -103,7 +103,7 @@ class StandbyPyModule : public PyModuleRunner
 class StandbyPyModules
 {
 private:
-  mutable ceph::mutex lock = ceph::make_mutex("StandbyPyModules::lock");
+  mutable stone::mutex lock = stone::make_mutex("StandbyPyModules::lock");
   std::map<std::string, std::unique_ptr<StandbyPyModule>> modules;
 
   StandbyPyModuleState state;

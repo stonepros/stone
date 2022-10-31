@@ -9,5 +9,5 @@ else
 fi
 echo "fsid $fsid"
 
-sudo ../src/cephadm/cephadm rm-cluster --force --fsid $fsid
+sudo ../src/stoneadm/stoneadm rm-cluster --force --fsid $fsid
 

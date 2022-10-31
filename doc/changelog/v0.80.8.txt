@@ -53,7 +53,7 @@ Date:   Fri Jan 9 01:32:17 2015 +0100
 
     Merge pull request #3127 from ktdreyer/firefly-no-epoch
     
-    Revert "ceph.spec.: add epoch"
+    Revert "stone.spec.: add epoch"
     
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
     Reviewed-by: Sage Weil <sage@redhat.com>
@@ -79,7 +79,7 @@ Merge: 1fdcb52 11995b3
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Fri Jan 9 01:30:59 2015 +0100
 
-    Merge pull request #3169 from ceph/wip-8797-firefly
+    Merge pull request #3169 from stone/wip-8797-firefly
     
     Wip 8797 firefly
     
@@ -106,7 +106,7 @@ Merge: 4897ba4 f55b097
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Fri Jan 9 01:28:11 2015 +0100
 
-    Merge pull request #3220 from ceph/wip-mon-backports.firefly
+    Merge pull request #3220 from stone/wip-mon-backports.firefly
     
     mon: backports for #9987 against firefly
     
@@ -120,7 +120,7 @@ Merge: efe801f f20225c
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Fri Jan 9 01:26:30 2015 +0100
 
-    Merge pull request #3258 from ceph/wip-10372-firefly
+    Merge pull request #3258 from stone/wip-10372-firefly
     
     osd: fix librados pool deletion race on firefly
     
@@ -144,7 +144,7 @@ Date:   Tue Dec 30 21:02:45 2014 +0800
 
     clear data and payload inside ops_in_flight_lock
     
-    http://tracker.ceph.com/issues/9916 Fixes: #9916
+    http://tracker.stone.com/issues/9916 Fixes: #9916
     Signed-off-by: Dong Lei <leidong@yahoo-inc.com>
 
 commit e0648e3d30de504b096c4ae3bbe7d9c17652bdb5
@@ -161,9 +161,9 @@ Merge: b1ab685 aa95a2d
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Dec 29 10:55:39 2014 -0800
 
-    Merge pull request #3268 from ceph/firefly-10415
+    Merge pull request #3268 from stone/firefly-10415
     
-    libcephfs/test.cc: close fd before umount
+    libstonefs/test.cc: close fd before umount
 
 commit 362400667aad0b5098fbe8dbec1b0bde059f84a6
 Author: Loic Dachary <ldachary@redhat.com>
@@ -180,7 +180,7 @@ commit aa95a2d20dbba2f3a775f709493c987d0d001e9c
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Tue Dec 23 10:22:00 2014 +0800
 
-    libcephfs/test.cc: close fd before umount
+    libstonefs/test.cc: close fd before umount
     
     Fixes: #10415
     Signed-off-by: Yan, Zheng <zyan@redhat.com>
@@ -212,7 +212,7 @@ commit 820dbfd9947455d07426981b7152861c3c216080
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Aug 5 15:11:18 2014 -0700
 
-    test/ceph-disk.sh: mkdir -p
+    test/stone-disk.sh: mkdir -p
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit c2f58e6694a2457200ab3d59e037ad17b9c82028)
@@ -221,7 +221,7 @@ commit 77d393024f9d867b574b8ec8e15ec48a1a291511
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Thu Sep 4 12:23:27 2014 +0200
 
-    test/ceph-disk.sh: resolve symlinks before check
+    test/stone-disk.sh: resolve symlinks before check
     
     Make sure symlinks are resolved in command_fixture()
     before compare result of which command and the current
@@ -234,10 +234,10 @@ commit ed6ec2936513d7dd6c45bccd8edf69a12c71dc7b
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Tue Jun 24 19:54:17 2014 +0200
 
-    test/ceph-disk.sh: fix for SUSE
+    test/stone-disk.sh: fix for SUSE
     
     On SUSE 'which' returns always the full path of (shell) commands and
-    not e.g. './ceph-conf' as on Debian. Add check also for full
+    not e.g. './stone-conf' as on Debian. Add check also for full
     path returned by which.
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
@@ -253,11 +253,11 @@ Date:   Fri Jun 13 14:41:39 2014 +0200
     retrieving it from the pidfile multiple times. It prevents the following
     race condition:
     
-      * try to kill ceph-mon
-      * ceph-mon is in the process of dying and removed its pidfile
-      * try to kill ceph-mon fails because the pidfile is not found
-      * another ceph-mon is spawned and fails to bind the port
-        because the previous ceph-mon is still holding it
+      * try to kill stone-mon
+      * stone-mon is in the process of dying and removed its pidfile
+      * try to kill stone-mon fails because the pidfile is not found
+      * another stone-mon is spawned and fails to bind the port
+        because the previous stone-mon is still holding it
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit a1c13c57ba20fc329d943ea57523913e11067dc7)
@@ -285,7 +285,7 @@ Date:   Tue Aug 26 21:59:39 2014 +0200
     
     By moving the tests to separate functions.
     
-    http://tracker.ceph.com/issues/9235 Fixes: #9235
+    http://tracker.stone.com/issues/9235 Fixes: #9235
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 4b8b25ecd128c34a386ad7c4cc89f323c4d384e1)
@@ -298,7 +298,7 @@ Date:   Tue Aug 26 21:59:39 2014 +0200
     
     By moving the test to a separate function.
     
-    http://tracker.ceph.com/issues/9235 Fixes: #9235
+    http://tracker.stone.com/issues/9235 Fixes: #9235
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit ee02293ad2ef050672fa8c164ba17b10e8d4ceeb)
@@ -312,7 +312,7 @@ Date:   Wed Dec 10 00:08:57 2014 +0100
     Use . instead of tab in echo to avoid variations in how escape sequences
     are interpreted by the shell.
     
-    http://tracker.ceph.com/issues/10281 Fixes: #10281
+    http://tracker.stone.com/issues/10281 Fixes: #10281
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
 
@@ -360,7 +360,7 @@ Date:   Sun Nov 23 18:50:51 2014 -0800
     
     Backport: giant, firefly
     Fixes: #9998
-    Reported-by: Pawel Sadowski <ceph@sadziu.pl>
+    Reported-by: Pawel Sadowski <stone@sadziu.pl>
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 9902383c690dca9ed5ba667800413daa8332157e)
 
@@ -383,7 +383,7 @@ Date:   Fri Nov 21 17:37:03 2014 -0800
 
     crush/CrushWrapper: fix _search_item_exists
     
-    Reported-by: Pawel Sadowski <ceph@sadziu.pl>
+    Reported-by: Pawel Sadowski <stone@sadziu.pl>
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit eeadd60714d908a3a033aeb7fd542c511e63122b)
 
@@ -392,7 +392,7 @@ Merge: dd7c8c2 ef3773a
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Dec 12 06:19:50 2014 -0800
 
-    Merge pull request #3124 from ceph/wip-10194-firefly
+    Merge pull request #3124 from stone/wip-10194-firefly
     
     rgw: optionally call FCGX_Free() on the fcgi connection
     
@@ -417,7 +417,7 @@ Date:   Wed Dec 10 13:19:16 2014 -0800
     rados.py: remove Rados.__del__(); it just causes problems
     
     Recent versions of Python contain a change to thread shutdown that
-    causes ceph to hang on exit; see http://bugs.python.org/issue21963.
+    causes stone to hang on exit; see http://bugs.python.org/issue21963.
     As it turns out, this is relatively easy to avoid by not spawning
     threads on exit, as Rados.__del__() will certainly do by calling
     shutdown(); I suspect, but haven't proven, that the problem is
@@ -437,7 +437,7 @@ commit 7faae891aefa4c21c50430fa03d9204a86d082f8
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Tue Dec 9 14:52:19 2014 -0700
 
-    Revert "ceph.spec.: add epoch"
+    Revert "stone.spec.: add epoch"
     
     If ICE ships 0.80.8, then it will be newer than what RHCEPH ships
     (0.80.7), and users won't be able to seamlessly upgrade via Yum.
@@ -475,7 +475,7 @@ Merge: d759467 a597096
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Mon Dec 8 15:02:52 2014 -0800
 
-    Merge pull request #3109 from ceph/firefly-10263
+    Merge pull request #3109 from stone/firefly-10263
     
     mds: store backtrace for straydir
     
@@ -527,18 +527,18 @@ Date:   Fri Dec 5 17:33:05 2014 -0800
 
     Merge pull request #3096 from dachary/wip-9785-dmcrypt-keys-permissions-firefly
     
-    ceph-disk: dmcrypt file permissions (firefly)
+    stone-disk: dmcrypt file permissions (firefly)
 
 commit cd3447d04cabf6745001afeef69f25a92400cd0e
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Thu Dec 4 22:21:32 2014 +0100
 
-    ceph-disk: dmcrypt file permissions
+    stone-disk: dmcrypt file permissions
     
     The directory in which key files are stored for dmcrypt must be 700 and
     the file 600.
     
-    http://tracker.ceph.com/issues/9785 Fixes: #9785
+    http://tracker.stone.com/issues/9785 Fixes: #9785
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit 58682d1776ab1fd4daddd887d921ca9cc312bf50)
@@ -559,18 +559,18 @@ Date:   Fri Nov 14 01:16:10 2014 +0100
     common: do not omit shard when ghobject NO_GEN is set
     
     Do not silence the display of shard_id when generation is NO_GEN.
-    Erasure coded objects JSON representation used by ceph_objectstore_tool
+    Erasure coded objects JSON representation used by stone_objectstore_tool
     need the shard_id to find the file containing the chunk.
     
-    Minimal testing is added to ceph_objectstore_tool.py
+    Minimal testing is added to stone_objectstore_tool.py
     
-    http://tracker.ceph.com/issues/10063 Fixes: #10063
+    http://tracker.stone.com/issues/10063 Fixes: #10063
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit dcf09aed121f566221f539106d10283a09f15cf5)
     
     Conflicts:
-    	src/test/ceph_objectstore_tool.py
+    	src/test/stone_objectstore_tool.py
 
 commit 9f3b21d1b70be591d68bfa57c3393e8f9af8e7df
 Author: Loic Dachary <ldachary@redhat.com>
@@ -580,7 +580,7 @@ Date:   Tue Dec 2 18:10:48 2014 +0100
     
     Same as sysv.
     
-    http://tracker.ceph.com/issues/10125 Fixes: #10125
+    http://tracker.stone.com/issues/10125 Fixes: #10125
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 7b621f4abf63456272dec3449aa108c89504a7a5)
@@ -593,7 +593,7 @@ Merge: e2ec37b 02d4685
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Dec 4 11:32:18 2014 -0800
 
-    Merge pull request #3078 from ceph/wip-10030-firefly
+    Merge pull request #3078 from stone/wip-10030-firefly
     
     librbd: don't close an already closed parent image upon failure
     
@@ -604,7 +604,7 @@ Merge: c4c63e8 af12194
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Dec 3 23:01:44 2014 -0800
 
-    Merge pull request #3063 from ceph/wip-10123-firefly
+    Merge pull request #3063 from stone/wip-10123-firefly
     
     librbd: protect list_children from invalid child pool IoCtxs
     
@@ -689,46 +689,46 @@ Merge: 4a148df c4e4a31
 Author: Sage Weil <sage@redhat.com>
 Date:   Sun Nov 30 10:12:04 2014 -0800
 
-    Merge pull request #3014 from dachary/wip-9665-ceph-disk-partprobe-firefly
+    Merge pull request #3014 from dachary/wip-9665-stone-disk-partprobe-firefly
     
-    ceph disk zap must call partprobe
+    stone disk zap must call partprobe
 
 commit c4e4a310f14ca3049ac90422aea95051fe0d4b15
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Fri Oct 10 10:26:31 2014 +0200
 
-    ceph-disk: use update_partition in prepare_dev and main_prepare
+    stone-disk: use update_partition in prepare_dev and main_prepare
     
     In the case of prepare_dev the partx alternative was missing and is not
     added because update_partition does it.
     
-    http://tracker.ceph.com/issues/9721 Fixes: #9721
+    http://tracker.stone.com/issues/9721 Fixes: #9721
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 23e71b1ee816c0ec8bd65891998657c46e364fbe)
     
     Conflicts:
-    	src/ceph-disk
+    	src/stone-disk
 
 commit e70a81464b906b9a304c29f474e6726762b63a7c
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Thu Oct 9 18:52:17 2014 +0200
 
-    ceph-disk: run partprobe after zap
+    stone-disk: run partprobe after zap
     
     Not running partprobe after zapping a device can lead to the following:
     
-    * ceph-disk prepare /dev/loop2
+    * stone-disk prepare /dev/loop2
     * links are created in /dev/disk/by-partuuid
-    * ceph-disk zap /dev/loop2
+    * stone-disk zap /dev/loop2
     * links are not removed from /dev/disk/by-partuuid
-    * ceph-disk prepare /dev/loop2
+    * stone-disk prepare /dev/loop2
     * some links are not created in /dev/disk/by-partuuid
     
     This is assuming there is a bug in the way udev events are handled by
     the operating system.
     
-    http://tracker.ceph.com/issues/9665 Fixes: #9665
+    http://tracker.stone.com/issues/9665 Fixes: #9665
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit fed3b06c47a5ef22cb3514c7647544120086d1e7)
@@ -737,7 +737,7 @@ commit 5a5f427bc09076ef3fb13a710dede1b47bb232e0
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Fri Oct 10 10:23:34 2014 +0200
 
-    ceph-disk: encapsulate partprobe / partx calls
+    stone-disk: encapsulate partprobe / partx calls
     
     Add the update_partition function to reduce code duplication.
     The action is made an argument although it always is -a because it will
@@ -749,7 +749,7 @@ Date:   Fri Oct 10 10:23:34 2014 +0200
     (cherry picked from commit 922a15ea6865ef915bbdec2597433da6792c1cb2)
     
     Conflicts:
-    	src/ceph-disk
+    	src/stone-disk
 
 commit 73b47dbee8858f182fd2b4fd8eb5f3c786877bf4
 Author: Loic Dachary <loic-201408@dachary.org>
@@ -759,7 +759,7 @@ Date:   Thu Nov 6 17:11:20 2014 +0100
     
     Instead it should set read_error.
     
-    http://tracker.ceph.com/issues/10018 Fixes: #10018
+    http://tracker.stone.com/issues/10018 Fixes: #10018
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 9d84d2e8309d26e39ca849a75166d2d7f2dec9ea)
@@ -779,9 +779,9 @@ Date:   Sat Sep 13 13:36:09 2014 +0200
     erasure-code: workunit to check for encoding regression
     
     Clone the archive of encoded objects and decode all archived objects, up
-    to and including the current ceph version.
+    to and including the current stone version.
     
-    http://tracker.ceph.com/issues/9420 Refs: #9420
+    http://tracker.stone.com/issues/9420 Refs: #9420
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
 
@@ -791,11 +791,11 @@ Date:   Sat Sep 13 10:16:31 2014 +0200
 
     erasure-code: store and compare encoded contents
     
-    Introduce ceph_erasure_code_non_regression to check and compare how an
+    Introduce stone_erasure_code_non_regression to check and compare how an
     erasure code plugin encodes and decodes content with a given set of
     parameters. For instance:
     
-    ./ceph_erasure_code_non_regression \
+    ./stone_erasure_code_non_regression \
           --plugin jerasure \
           --parameter technique=reed_sol_van \
           --parameter k=2 \
@@ -813,10 +813,10 @@ Date:   Sat Sep 13 10:16:31 2014 +0200
     encodes it and compares the result with the content of the chunks read
     from the files. It also attempts recover from one or two erasures.
     
-    Chunks encoded by a given version of Ceph are expected to be encoded
-    exactly in the same way by all Ceph versions going forward.
+    Chunks encoded by a given version of Stone are expected to be encoded
+    exactly in the same way by all Stone versions going forward.
     
-    http://tracker.ceph.com/issues/9420 Refs: #9420
+    http://tracker.stone.com/issues/9420 Refs: #9420
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
 
@@ -825,7 +825,7 @@ Merge: c069bce 01faf13
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Wed Nov 19 02:45:26 2014 +0100
 
-    Merge pull request #2961 from ceph/wip-10114-firefly
+    Merge pull request #2961 from stone/wip-10114-firefly
     
     Add annotation to all assembly files to turn off stack-execute bit
     
@@ -837,7 +837,7 @@ Date:   Fri Nov 14 17:59:57 2014 -0800
 
     Add annotation to all assembly files to turn off stack-execute bit
     
-    See discussion in http://tracker.ceph.com/issues/10114
+    See discussion in http://tracker.stone.com/issues/10114
     
     Building with these changes allows output from readelf like this:
     
@@ -857,7 +857,7 @@ Merge: 0d8ad6a fac1654
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Thu Nov 13 10:36:12 2014 -0800
 
-    Merge pull request #2760 from ceph/wip-9835-firefly
+    Merge pull request #2760 from stone/wip-9835-firefly
     
     osd: fix erasure hung op bug (9835)
     
@@ -944,7 +944,7 @@ Merge: d241aa7 d548431
 Author: Gregory Farnum <greg@gregs42.com>
 Date:   Fri Nov 7 14:10:18 2014 -0800
 
-    Merge pull request #2880 from ceph/wip-10025-firefly
+    Merge pull request #2880 from stone/wip-10025-firefly
     
     #10025/firefly -- tools: fix MDS journal import
     
@@ -978,7 +978,7 @@ Merge: 23cbffa 1228658
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Thu Nov 6 10:30:20 2014 -0800
 
-    Merge pull request #2737 from ceph/wip-9629-firefly
+    Merge pull request #2737 from stone/wip-9629-firefly
     
     osd: do not clone/preserve snapdir on cache-evict (firefly backport)
     
@@ -989,7 +989,7 @@ Merge: 3bba938 e296685
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Thu Nov 6 10:26:21 2014 -0800
 
-    Merge pull request #2657 from ceph/wip-9053-9301-firefly
+    Merge pull request #2657 from stone/wip-9053-9301-firefly
     
     mon: backport two paxos fixes to firefly
     
@@ -1000,7 +1000,7 @@ Merge: 3f9bf73 835f8c6
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Thu Nov 6 10:21:12 2014 -0800
 
-    Merge pull request #2656 from ceph/wip-9502-firefly
+    Merge pull request #2656 from stone/wip-9502-firefly
     
     mon: backport mon disk full check to firefly
     
@@ -1011,7 +1011,7 @@ Merge: a340e6d 3e17a08
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Thu Nov 6 10:18:27 2014 -0800
 
-    Merge pull request #2764 from ceph/wip-9851
+    Merge pull request #2764 from stone/wip-9851
     
     osd: bring FileJournal in sync with giant
     
@@ -1022,7 +1022,7 @@ Merge: b7d5f99 b9450b5
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Thu Nov 6 10:12:17 2014 -0800
 
-    Merge pull request #2776 from ceph/wip-9675.firefly
+    Merge pull request #2776 from stone/wip-9675.firefly
     
     CrushWrapper: pick a ruleset same as rule_id
     
@@ -1032,9 +1032,9 @@ commit b7d5f99c8f4d751e83dc29305649d7a465c657b1
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Sep 15 15:29:08 2014 -0700
 
-    ceph-disk: mount xfs with inode64 by default
+    stone-disk: mount xfs with inode64 by default
     
-    We did this forever ago with mkcephfs, but ceph-disk didn't.  Note that for
+    We did this forever ago with mkstonefs, but stone-disk didn't.  Note that for
     modern XFS this option is obsolete, but for older kernels it was not the
     default.
     
@@ -1089,7 +1089,7 @@ Date:   Fri Oct 31 00:49:21 2014 +0100
     
     The acting array was incorrectly including the primary and up_primary.
     
-    http://tracker.ceph.com/issues/9752 Fixes: #9752
+    http://tracker.stone.com/issues/9752 Fixes: #9752
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit c5f8d6eded52da451fdd1d807bd4700221e4c41c)
@@ -1099,7 +1099,7 @@ Merge: 6fd8879 c20a242
 Author: Yan, Zheng <ukernel@gmail.com>
 Date:   Thu Oct 30 17:01:24 2014 -0700
 
-    Merge pull request #2840 from ceph/firefly-9869
+    Merge pull request #2840 from stone/firefly-9869
     
     Backport "client: cast m->get_client_tid() to compare to 16-bit Inode::flushing_cap_tid"
 
@@ -1221,9 +1221,9 @@ Merge: 0975ec9 afe6bd8
 Author: Sage Weil <sage@redhat.com>
 Date:   Sun Oct 26 20:37:52 2014 -0700
 
-    Merge pull request #2717 from dachary/wip-9747-ceph-spec-firefly
+    Merge pull request #2717 from dachary/wip-9747-stone-spec-firefly
     
-    rpm: 95-ceph-osd-alt.rules is not needed for centos7 / rhel7 (firefly)
+    rpm: 95-stone-osd-alt.rules is not needed for centos7 / rhel7 (firefly)
 
 commit b9450b532ab7ad23ec6e2c22ed7cf55e6e1cc4c0
 Author: Xiaoxi Chen <xiaoxi.chen@intel.com>
@@ -1351,7 +1351,7 @@ Merge: cc69c16 d5bac46
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Fri Oct 17 10:47:22 2014 -0700
 
-    Merge pull request #2716 from ceph/wip-firefly-9419
+    Merge pull request #2716 from stone/wip-firefly-9419
     
     Backport fix for bug #9419
 
@@ -1369,7 +1369,7 @@ Merge: 0b4b34a 412c277
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Oct 17 08:20:53 2014 -0700
 
-    Merge pull request #2742 from ceph/firefly-unknown-locktype
+    Merge pull request #2742 from stone/firefly-unknown-locktype
     
     mds: reply -EOPNOTSUPP for unknown lock type
 
@@ -1401,7 +1401,7 @@ commit 88e6014463e86e48d78ac419226644209f83f2a0
 Author: Sage Weil <sage@redhat.com>
 Date:   Sun Sep 21 15:54:15 2014 -0700
 
-    ceph_test_rados_api_tier: add EvictSnap2 test case
+    stone_test_rados_api_tier: add EvictSnap2 test case
     
     Verify an evict doesn't create a snapdir object.  Reproduces #8629
     
@@ -1413,7 +1413,7 @@ Merge: 322958a 0a72235
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Oct 16 06:09:51 2014 -0700
 
-    Merge pull request #2734 from ceph/wip-firefly-undump
+    Merge pull request #2734 from stone/wip-firefly-undump
     
     mds: fix --undump-journal
     
@@ -1434,7 +1434,7 @@ commit 835f8c6f6121f3ebdec3a0d2d5cb1376301dc03a
 Author: Joao Eduardo Luis <joao@redhat.com>
 Date:   Tue Sep 23 14:02:55 2014 +0100
 
-    ceph-mon: check fs stats just before preforking
+    stone-mon: check fs stats just before preforking
     
     Otherwise statfs may fail if mkfs hasn't been run yet or if the monitor
     data directory does not exist.  There are checks to account for the mon
@@ -1445,13 +1445,13 @@ Date:   Tue Sep 23 14:02:55 2014 +0100
     (cherry picked from commit 7f71c11666b25e91dd612c58b4eda9ac0d4752f8)
     
     Conflicts:
-    	src/ceph_mon.cc
+    	src/stone_mon.cc
 
 commit 1ddf435464562f70f63cdb0032da3187f34ce853
 Author: Joao Eduardo Luis <joao@redhat.com>
 Date:   Thu Sep 18 16:53:43 2014 +0100
 
-    ceph_mon: check available storage space for mon data dir on start
+    stone_mon: check available storage space for mon data dir on start
     
     error out if available storage space is below 'mon data avail crit'
     
@@ -1461,7 +1461,7 @@ Date:   Thu Sep 18 16:53:43 2014 +0100
     (cherry picked from commit 2da1a2914ac7df18ce842b0aac728fffb5bed2b6)
     
     Conflicts:
-    	src/ceph_mon.cc
+    	src/stone_mon.cc
 
 commit 112317791b744d9890a65adcc13554c85e90f3af
 Author: Joao Eduardo Luis <joao@redhat.com>
@@ -1470,7 +1470,7 @@ Date:   Thu Sep 18 16:52:34 2014 +0100
     mon: DataHealthService: use get_fs_stats() instead
     
     and relieve the DataStats struct from clutter by using
-    ceph_data_stats_t instead of multiple fields.
+    stone_data_stats_t instead of multiple fields.
     
     Signed-off-by: Joao Eduardo Luis <joao@redhat.com>
     (cherry picked from commit 9996d446988768658db751a7843b13cf3d194213)
@@ -1650,11 +1650,11 @@ Date:   Tue Aug 5 16:12:22 2014 +0800
 
     mon/OSDMonitor : Use user provided ruleset for replicated pool
     
-    When creating a replicated pool, currently ceph ignore the ruleset
+    When creating a replicated pool, currently stone ignore the ruleset
     name provided by user but use a global default ruleset.
     
     This patch fix this bug, so the rulset specified by
-    ceph osd pool create replicated
+    stone osd pool create replicated
     can be properly set.
     
     Signed-off-by: Xiaoxi Chen <xiaoxi.chen@intel.com>
@@ -1677,12 +1677,12 @@ commit afe6bd89f8a1588fb67063d1a08a4be8c1ab2ce6
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Sat Oct 11 18:20:36 2014 +0200
 
-    rpm: 95-ceph-osd-alt.rules is not needed for centos7 / rhel7
+    rpm: 95-stone-osd-alt.rules is not needed for centos7 / rhel7
     
     The || instead of && had it always installed. That was fixed in EPEL
     already.
     
-    http://tracker.ceph.com/issues/9747 Fixes: #9747
+    http://tracker.stone.com/issues/9747 Fixes: #9747
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 5ff4a850a0d809b3f25988c6cceb82c35095ef84)
@@ -1706,7 +1706,7 @@ Date:   Wed Sep 24 16:02:21 2014 -0700
     
     Conflicts:
     
-    	src/include/ceph_features.h
+    	src/include/stone_features.h
     	src/osd/PG.cc
     	src/osd/PG.h
     	src/osd/ReplicatedPG.cc
@@ -1725,7 +1725,7 @@ Merge: 345714b a1ae7f4
 Author: Gregory Farnum <greg@inktank.com>
 Date:   Fri Oct 10 06:57:06 2014 -0700
 
-    Merge pull request #2691 from ceph/firefly-unused-variable
+    Merge pull request #2691 from stone/firefly-unused-variable
     
     Firefly unused variable
 
@@ -1742,7 +1742,7 @@ Merge: fd20a1d 2afb6fe
 Author: Yan, Zheng <ukernel@gmail.com>
 Date:   Fri Oct 10 09:37:53 2014 +0800
 
-    Merge pull request #2681 from ceph/firefly-locker-null
+    Merge pull request #2681 from stone/firefly-locker-null
     
     mds: Locker: fix a NULL deref in _update_cap_fields
 
@@ -1766,18 +1766,18 @@ Date:   Wed Oct 8 08:44:46 2014 +0200
 
     Merge pull request #2662 from dachary/wip-9677-ioprio-class-firefly
     
-    common: ceph_ioprio_string_to_class always returns -EINVAL
+    common: stone_ioprio_string_to_class always returns -EINVAL
 
 commit 86926c6089d63014dd770b4bb61fc7aca3998542
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Tue Oct 7 14:06:38 2014 +0200
 
-    common: ceph_ioprio_string_to_class always returns -EINVAL
+    common: stone_ioprio_string_to_class always returns -EINVAL
     
     The l string is always empty because std::transform needs a
     pre-allocated string. Replace with the in-place version. Add unit tests.
     
-    http://tracker.ceph.com/issues/9677 Fixes: #9677
+    http://tracker.stone.com/issues/9677 Fixes: #9677
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 3535b7aba3df8b54fa5117b8a9c2f52b8f0f118b)
@@ -1817,7 +1817,7 @@ Merge: 726c6a1 459dca1
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Oct 7 09:58:03 2014 -0700
 
-    Merge pull request #2632 from ceph/wip-9039-firefly
+    Merge pull request #2632 from stone/wip-9039-firefly
     
     rgw: copy object data if target bucket is in a different pool
 
@@ -1825,7 +1825,7 @@ commit 726c6a147a14c00cf12eb6c6561655475282419f
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Oct 6 15:50:51 2014 -0700
 
-    debian/control: fix python-ceph -> ceph file move to allow upgrades
+    debian/control: fix python-stone -> stone file move to allow upgrades
     
     This is a backport of 5c6c366d2abe771c581690270c2d176ebb30c571 with the
     version numbers changed, to compensate for the change in
@@ -1895,15 +1895,15 @@ Merge: 0b978fb 5a5e7e7
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Oct 3 11:58:41 2014 -0700
 
-    Merge pull request #2634 from dachary/wip-9653-ceph-disk-bootstrap-osd-firefly
+    Merge pull request #2634 from dachary/wip-9653-stone-disk-bootstrap-osd-firefly
     
-    ceph-disk: bootstrap-osd keyring ignores --statedir (firefly)
+    stone-disk: bootstrap-osd keyring ignores --statedir (firefly)
 
 commit c8a8e4763a55dec44836bc679254ee7dcc448567
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Oct 1 12:33:38 2014 -0700
 
-    ceph.spec: fix typo
+    stone.spec: fix typo
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit da9ae5c92ecb4059e0ec6be5ce03af46430e76a5)
@@ -1912,10 +1912,10 @@ commit b890c1e4706d7cfef7ed24c9df65b439b4f7ff1d
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Oct 1 06:02:02 2014 -0700
 
-    ceph.spec.: add epoch
+    stone.spec.: add epoch
     
     This is done in fedora packaging.  Do it here too so that you can move
-    between upstream packages (from ceph.com) and fedora and other derivatives
+    between upstream packages (from stone.com) and fedora and other derivatives
     will builds.
     
     Backport: firefly, dumpling
@@ -1924,13 +1924,13 @@ Date:   Wed Oct 1 06:02:02 2014 -0700
     
     Conflicts:
     
-    	ceph.spec.in
+    	stone.spec.in
 
 commit d01db8080d97bfae34dcee3d153bf10e6f5327dd
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue May 20 13:41:35 2014 -0700
 
-    ceph.spec.in: remove BuildRoot
+    stone.spec.in: remove BuildRoot
     
     Deprecated
     
@@ -1942,7 +1942,7 @@ commit 3c2b5c440863df548afc2bd8aa5440f15a44ac02
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Tue Aug 12 16:31:22 2014 -0700
 
-    ceph.spec.in: tests for rhel or centos need to not include _version
+    stone.spec.in: tests for rhel or centos need to not include _version
     
     rhel_version and centos_version are apparently the OpenSUSE Build
     names; the native macros are just "rhel" and "centos" (and contain
@@ -1955,7 +1955,7 @@ commit c82c29d6174022be45929fe9ba8a84993eef974a
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Tue Aug 12 14:46:52 2014 -0700
 
-    ceph.spec.in: Add a small comment on the empty %files section
+    stone.spec.in: Add a small comment on the empty %files section
     
     as suggested by Dan Mick.
     
@@ -1966,9 +1966,9 @@ commit a4f748aa906fc65b14f65515721bc3a815c18fb8
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Tue Aug 12 14:39:18 2014 -0700
 
-    ceph.spec.in: Obsolete all older versions.
+    stone.spec.in: Obsolete all older versions.
     
-    Now this changeset can be used on all current ceph releases that already
+    Now this changeset can be used on all current stone releases that already
     have the package split.
     
     Signed-off-by: Erik Logtenberg <erik@logtenberg.eu>
@@ -1978,7 +1978,7 @@ commit 74c7f3caec1cc7a5da89ef33de36a8b59249cfcd
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Tue Aug 12 14:09:43 2014 -0700
 
-    ceph.spec.in: No version on ceph-libs Obsoletes.
+    stone.spec.in: No version on stone-libs Obsoletes.
     
     If we are installing with the new package structure we don't ever want the
     new package to co-exist with the old one; this includes the mistakenly-
@@ -1993,10 +1993,10 @@ commit 561261b6efb7ea442686bb8fce387c4de2482067
 Author: Sandon Van Ness <sandon@inktank.com>
 Date:   Fri Aug 8 18:01:30 2014 -0700
 
-    ceph.spec.in: Obselete ceph-libcephfs (not libcephfs)
+    stone.spec.in: Obselete stone-libstonefs (not libstonefs)
     
-    I am guessing that because it was a sub-package libcephfs was mistakenly
-    used instead of ceph-libcephfs.
+    I am guessing that because it was a sub-package libstonefs was mistakenly
+    used instead of stone-libstonefs.
     
     Signed-off-by: Sandon Van Ness <sandon@inktank.com>
     (cherry picked from commit 75985024bd30ca6fbe4c61aa7f7cbe5306c9a988)
@@ -2005,7 +2005,7 @@ commit 107bfd9ee7dbf360561187b9e0946964d40b9b1c
 Author: Erik Logtenberg <erik@logtenberg.eu>
 Date:   Fri Aug 1 14:20:18 2014 +0200
 
-    ceph.spec.in: We need those nice recent changes for rhel7 in Fedora too.
+    stone.spec.in: We need those nice recent changes for rhel7 in Fedora too.
     
     Signed-off-by: Erik Logtenberg <erik@logtenberg.eu>
     (cherry picked from commit 00877ae502ac52613bcd5c5c834d72787d668dca)
@@ -2014,7 +2014,7 @@ commit 7946c5e5de8d6cd25d20beee15f3489113e51539
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Wed Aug 27 12:56:43 2014 -0700
 
-    Move fedora patch file (used by ceph.spec.in) to rpm/ subdir
+    Move fedora patch file (used by stone.spec.in) to rpm/ subdir
     
     Signed-off-by: Dan Mick <dan.mick@inktank.com>
     (cherry picked from commit 06b92cee621cbe33a6f17e8c64169db4453a5160)
@@ -2023,17 +2023,17 @@ commit cb2ae9afa611175226efb5544f7d2aa705d55ece
 Author: Erik Logtenberg <erik@logtenberg.eu>
 Date:   Fri Aug 1 00:13:50 2014 +0200
 
-    ceph.spec.in, init-ceph.in: Don't autostart ceph service on Fedora.
+    stone.spec.in, init-stone.in: Don't autostart stone service on Fedora.
     
     This patch is taken from the current Fedora package and makes the upstream
-    ceph.spec compliant with Fedora policy. The goal is to be fully compliant
+    stone.spec compliant with Fedora policy. The goal is to be fully compliant
     upstream so that we can replace current Fedora package with upstream
     package to fix many bugs in Fedora.
     
     Addition from Dan Mick <dan.mick@inktank.com>:
     Do this for RHEL and Centos as well, since they surely will benefit
     from the same policy.   Note: this requires changes to
-    autobuild-ceph and ceph-build scripts, which currently copy
+    autobuild-stone and stone-build scripts, which currently copy
     only the dist tarball to the rpmbuild/SOURCES dir.
     
     Signed-off-by: Erik Logtenberg <erik@logtenberg.eu>
@@ -2044,7 +2044,7 @@ commit 2b11376f1ee8925ab16065ebda912b11d3d7be59
 Author: Erik Logtenberg <erik@logtenberg.eu>
 Date:   Thu Jul 31 23:54:03 2014 +0200
 
-    ceph.spec.in: Add obsoletes for libcephfs
+    stone.spec.in: Add obsoletes for libstonefs
     
     This fixes a bug for Fedora:
     https://bugzilla.redhat.com/show_bug.cgi?id=1116614
@@ -2056,13 +2056,13 @@ commit eefc62e3b85f402a7e1ae31c272c8a432d979379
 Author: Erik Logtenberg <erik@logtenberg.eu>
 Date:   Thu Jul 31 23:49:56 2014 +0200
 
-    ceph.spec.in: add ceph-libs-compat
+    stone.spec.in: add stone-libs-compat
     
-    Added a ceph-libs-compat package in accordance with Fedora packaging
+    Added a stone-libs-compat package in accordance with Fedora packaging
     guidelines [1], to handle the recent package split more gracefully.
     In Fedora this is necessary because there are already other packages
-    depending on ceph-libs, that need to be adjusted to depend on the new
-    split packages instead. In the mean time, ceph-libs-compat prevents
+    depending on stone-libs, that need to be adjusted to depend on the new
+    split packages instead. In the mean time, stone-libs-compat prevents
     breakage.
     
     [1] http://fedoraproject.org/wiki/Upgrade_paths_%E2%80%94_renaming_or_splitting_packages
@@ -2072,7 +2072,7 @@ Date:   Thu Jul 31 23:49:56 2014 +0200
     
     Conflicts:
     
-    	ceph.spec.in
+    	stone.spec.in
 
 commit 0b978fb15a1307644aba3119419bb7386f98ee04
 Author: Sage Weil <sage@redhat.com>
@@ -2098,14 +2098,14 @@ commit 5a5e7e7bcedbccbe4ae8aab159af6d8615eb3887
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Fri Oct 3 14:08:57 2014 +0200
 
-    ceph-disk: bootstrap-osd keyring ignores --statedir
+    stone-disk: bootstrap-osd keyring ignores --statedir
     
     The STATEDIR variable is used to initialize the bootstrap-osd keyring
     before it gets a chance to be overriden by --statedir. Replace it with
     {statedir} so that it can be substituted after all options have been
     parsed.
     
-    http://tracker.ceph.com/issues/9653 Fixes: #9653
+    http://tracker.stone.com/issues/9653 Fixes: #9653
     
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit fa0bd06b4657e5b84e237b76033ac3d3478b6a1f)
@@ -2169,7 +2169,7 @@ Merge: 78c3ef9 ee02cfd
 Author: Yehuda Sadeh <yehuda@inktank.com>
 Date:   Thu Oct 2 15:28:40 2014 -0700
 
-    Merge pull request #2565 from ceph/wip-rgw-firefly-backports
+    Merge pull request #2565 from stone/wip-rgw-firefly-backports
     
     Wip rgw firefly backports
 
@@ -2202,7 +2202,7 @@ commit a261b4952056aab7b067453930342960bbe55089
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Sep 29 14:28:32 2014 -0700
 
-    debian: move ceph_rest_api.py into ceph
+    debian: move stone_rest_api.py into stone
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit fe3434f41cd09433975d7d0f9dbb2fae662e4a1b)
@@ -2211,7 +2211,7 @@ commit eb0f6e347969b40c0655d3165a6c4531c6b595a3
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Sep 29 14:24:01 2014 -0700
 
-    ceph.spec.in: move ceph_rest_api.py into ceph
+    stone.spec.in: move stone_rest_api.py into stone
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 8cda623e0ba34a48a70e9ea988d619b15605c4fd)
@@ -2220,10 +2220,10 @@ commit c4188e31f7bc8f3c337e637cd99c41d5ee4b6787
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Sep 29 13:44:03 2014 -0700
 
-    ceph.spec: fix python-flask dependency
+    stone.spec: fix python-flask dependency
     
-    This is needed by ceph-rest-api, which is in ceph.rpm; it's not related to
-    python-ceph (except that ceph-rest-api happens to require that too).
+    This is needed by stone-rest-api, which is in stone.rpm; it's not related to
+    python-stone (except that stone-rest-api happens to require that too).
     
     Backport: firefly
     Signed-off-by: Sage Weil <sage@redhat.com>
@@ -2233,9 +2233,9 @@ commit bf1933e5c184476a354664c42fec834e9f59067c
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Sep 29 13:40:18 2014 -0700
 
-    debian: python-flask is needed by ceph, not python-ceph
+    debian: python-flask is needed by stone, not python-stone
     
-    It's used by ceph-rest-api which is in the 'ceph' (server) package.
+    It's used by stone-rest-api which is in the 'stone' (server) package.
     
     Backport: firefly
     Signed-off-by: Sage Weil <sage@redhat.com>
@@ -2472,7 +2472,7 @@ Date:   Thu Aug 14 13:35:12 2014 -0700
 
     rgw: fix compilation
     
-    RGWRadosPutObj couldn't refer to the ceph context.
+    RGWRadosPutObj couldn't refer to the stone context.
     
     Reviewed-by: Sage Weil <sage@redhat.com>
     Signed-off-by: Yehuda Sadeh <yehuda@redhat.com>

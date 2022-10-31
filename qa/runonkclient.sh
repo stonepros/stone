@@ -2,7 +2,7 @@
 set -x
 
 mkdir -p testspace
-/bin/mount -t ceph $1 testspace
+/bin/mount -t stone $1 testspace
 
 ./runallonce.sh testspace
 

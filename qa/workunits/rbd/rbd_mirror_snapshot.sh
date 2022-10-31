@@ -487,6 +487,6 @@ wait_for_image_in_omap ${CLUSTER2} ${POOL}
 if [ -z "${RBD_MIRROR_USE_RBD_MIRROR}" ]; then
   # teuthology will trash the daemon
   testlog "TEST: no blocklists"
-  CEPH_ARGS='--id admin' ceph --cluster ${CLUSTER1} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
-  CEPH_ARGS='--id admin' ceph --cluster ${CLUSTER2} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
+  STONE_ARGS='--id admin' stone --cluster ${CLUSTER1} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
+  STONE_ARGS='--id admin' stone --cluster ${CLUSTER2} osd blocklist ls 2>&1 | grep -q "listed 0 entries"
 fi

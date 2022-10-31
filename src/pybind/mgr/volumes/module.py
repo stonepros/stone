@@ -43,63 +43,63 @@ class Module(orchestrator.OrchestratorClientMixin, MgrModule):
         },
         {
             'cmd': 'fs volume create '
-                   f'name=name,type=CephString,goodchars={goodchars} '
-                   'name=placement,type=CephString,req=false ',
-            'desc': "Create a CephFS volume",
+                   f'name=name,type=StoneString,goodchars={goodchars} '
+                   'name=placement,type=StoneString,req=false ',
+            'desc': "Create a StoneFS volume",
             'perm': 'rw'
         },
         {
             'cmd': 'fs volume rm '
-                   'name=vol_name,type=CephString '
-                   'name=yes-i-really-mean-it,type=CephString,req=false ',
+                   'name=vol_name,type=StoneString '
+                   'name=yes-i-really-mean-it,type=StoneString,req=false ',
             'desc': "Delete a FS volume by passing --yes-i-really-mean-it flag",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolumegroup ls '
-            'name=vol_name,type=CephString ',
+            'name=vol_name,type=StoneString ',
             'desc': "List subvolumegroups",
             'perm': 'r'
         },
         {
             'cmd': 'fs subvolumegroup create '
-                   'name=vol_name,type=CephString '
-                   f'name=group_name,type=CephString,goodchars={goodchars} '
-                   'name=pool_layout,type=CephString,req=false '
-                   'name=uid,type=CephInt,req=false '
-                   'name=gid,type=CephInt,req=false '
-                   'name=mode,type=CephString,req=false ',
-            'desc': "Create a CephFS subvolume group in a volume, and optionally, "
+                   'name=vol_name,type=StoneString '
+                   f'name=group_name,type=StoneString,goodchars={goodchars} '
+                   'name=pool_layout,type=StoneString,req=false '
+                   'name=uid,type=StoneInt,req=false '
+                   'name=gid,type=StoneInt,req=false '
+                   'name=mode,type=StoneString,req=false ',
+            'desc': "Create a StoneFS subvolume group in a volume, and optionally, "
                     "with a specific data pool layout, and a specific numeric mode",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolumegroup rm '
-                   'name=vol_name,type=CephString '
-                   'name=group_name,type=CephString '
-                   'name=force,type=CephBool,req=false ',
-            'desc': "Delete a CephFS subvolume group in a volume",
+                   'name=vol_name,type=StoneString '
+                   'name=group_name,type=StoneString '
+                   'name=force,type=StoneBool,req=false ',
+            'desc': "Delete a StoneFS subvolume group in a volume",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume ls '
-                   'name=vol_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
+                   'name=vol_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
             'desc': "List subvolumes",
             'perm': 'r'
         },
         {
             'cmd': 'fs subvolume create '
-                   'name=vol_name,type=CephString '
-                   f'name=sub_name,type=CephString,goodchars={goodchars} '
-                   'name=size,type=CephInt,req=false '
-                   'name=group_name,type=CephString,req=false '
-                   'name=pool_layout,type=CephString,req=false '
-                   'name=uid,type=CephInt,req=false '
-                   'name=gid,type=CephInt,req=false '
-                   'name=mode,type=CephString,req=false '
-                   'name=namespace_isolated,type=CephBool,req=false ',
-            'desc': "Create a CephFS subvolume in a volume, and optionally, "
+                   'name=vol_name,type=StoneString '
+                   f'name=sub_name,type=StoneString,goodchars={goodchars} '
+                   'name=size,type=StoneInt,req=false '
+                   'name=group_name,type=StoneString,req=false '
+                   'name=pool_layout,type=StoneString,req=false '
+                   'name=uid,type=StoneInt,req=false '
+                   'name=gid,type=StoneInt,req=false '
+                   'name=mode,type=StoneString,req=false '
+                   'name=namespace_isolated,type=StoneBool,req=false ',
+            'desc': "Create a StoneFS subvolume in a volume, and optionally, "
                     "with a specific size (in bytes), a specific data pool layout, "
                     "a specific mode, in a specific subvolume group and in separate "
                     "RADOS namespace",
@@ -107,216 +107,216 @@ class Module(orchestrator.OrchestratorClientMixin, MgrModule):
         },
         {
             'cmd': 'fs subvolume rm '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=group_name,type=CephString,req=false '
-                   'name=force,type=CephBool,req=false '
-                   'name=retain_snapshots,type=CephBool,req=false ',
-            'desc': "Delete a CephFS subvolume in a volume, and optionally, "
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false '
+                   'name=force,type=StoneBool,req=false '
+                   'name=retain_snapshots,type=StoneBool,req=false ',
+            'desc': "Delete a StoneFS subvolume in a volume, and optionally, "
                     "in a specific subvolume group, force deleting a cancelled or failed "
                     "clone, and retaining existing subvolume snapshots",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume authorize '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=auth_id,type=CephString '
-                   'name=group_name,type=CephString,req=false '
-                   'name=access_level,type=CephString,req=false '
-                   'name=tenant_id,type=CephString,req=false '
-                   'name=allow_existing_id,type=CephBool,req=false ',
-            'desc': "Allow a cephx auth ID access to a subvolume",
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=auth_id,type=StoneString '
+                   'name=group_name,type=StoneString,req=false '
+                   'name=access_level,type=StoneString,req=false '
+                   'name=tenant_id,type=StoneString,req=false '
+                   'name=allow_existing_id,type=StoneBool,req=false ',
+            'desc': "Allow a stonex auth ID access to a subvolume",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume deauthorize '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=auth_id,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
-            'desc': "Deny a cephx auth ID access to a subvolume",
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=auth_id,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
+            'desc': "Deny a stonex auth ID access to a subvolume",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume authorized_list '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
             'desc': "List auth IDs that have access to a subvolume",
             'perm': 'r'
         },
         {
             'cmd': 'fs subvolume evict '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=auth_id,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=auth_id,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
             'desc': "Evict clients based on auth IDs and subvolume mounted",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolumegroup getpath '
-                   'name=vol_name,type=CephString '
-                   'name=group_name,type=CephString ',
-            'desc': "Get the mountpath of a CephFS subvolume group in a volume",
+                   'name=vol_name,type=StoneString '
+                   'name=group_name,type=StoneString ',
+            'desc': "Get the mountpath of a StoneFS subvolume group in a volume",
             'perm': 'r'
         },
         {
             'cmd': 'fs subvolume getpath '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
-            'desc': "Get the mountpath of a CephFS subvolume in a volume, "
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
+            'desc': "Get the mountpath of a StoneFS subvolume in a volume, "
                     "and optionally, in a specific subvolume group",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume info '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
-            'desc': "Get the metadata of a CephFS subvolume in a volume, "
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
+            'desc': "Get the metadata of a StoneFS subvolume in a volume, "
                     "and optionally, in a specific subvolume group",
             'perm': 'r'
         },
         {
             'cmd': 'fs subvolumegroup pin'
-                   ' name=vol_name,type=CephString'
-                   ' name=group_name,type=CephString,req=true'
-                   ' name=pin_type,type=CephChoices,strings=export|distributed|random'
-                   ' name=pin_setting,type=CephString,req=true',
+                   ' name=vol_name,type=StoneString'
+                   ' name=group_name,type=StoneString,req=true'
+                   ' name=pin_type,type=StoneChoices,strings=export|distributed|random'
+                   ' name=pin_setting,type=StoneString,req=true',
             'desc': "Set MDS pinning policy for subvolumegroup",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolumegroup snapshot ls '
-                   'name=vol_name,type=CephString '
-                   'name=group_name,type=CephString ',
+                   'name=vol_name,type=StoneString '
+                   'name=group_name,type=StoneString ',
             'desc': "List subvolumegroup snapshots",
             'perm': 'r'
         },
         {
             'cmd': 'fs subvolumegroup snapshot create '
-                   'name=vol_name,type=CephString '
-                   'name=group_name,type=CephString '
-                   'name=snap_name,type=CephString ',
-            'desc': "Create a snapshot of a CephFS subvolume group in a volume",
+                   'name=vol_name,type=StoneString '
+                   'name=group_name,type=StoneString '
+                   'name=snap_name,type=StoneString ',
+            'desc': "Create a snapshot of a StoneFS subvolume group in a volume",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolumegroup snapshot rm '
-                   'name=vol_name,type=CephString '
-                   'name=group_name,type=CephString '
-                   'name=snap_name,type=CephString '
-                   'name=force,type=CephBool,req=false ',
-                   'desc': "Delete a snapshot of a CephFS subvolume group in a volume",
+                   'name=vol_name,type=StoneString '
+                   'name=group_name,type=StoneString '
+                   'name=snap_name,type=StoneString '
+                   'name=force,type=StoneBool,req=false ',
+                   'desc': "Delete a snapshot of a StoneFS subvolume group in a volume",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume snapshot ls '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
             'desc': "List subvolume snapshots",
             'perm': 'r'
         },
         {
             'cmd': 'fs subvolume snapshot create '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=snap_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
-            'desc': "Create a snapshot of a CephFS subvolume in a volume, "
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=snap_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
+            'desc': "Create a snapshot of a StoneFS subvolume in a volume, "
                     "and optionally, in a specific subvolume group",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume snapshot info '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=snap_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
-            'desc': "Get the metadata of a CephFS subvolume snapshot "
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=snap_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
+            'desc': "Get the metadata of a StoneFS subvolume snapshot "
                     "and optionally, in a specific subvolume group",
             'perm': 'r'
         },
         {
             'cmd': 'fs subvolume snapshot rm '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=snap_name,type=CephString '
-                   'name=group_name,type=CephString,req=false '
-                   'name=force,type=CephBool,req=false ',
-            'desc': "Delete a snapshot of a CephFS subvolume in a volume, "
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=snap_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false '
+                   'name=force,type=StoneBool,req=false ',
+            'desc': "Delete a snapshot of a StoneFS subvolume in a volume, "
                     "and optionally, in a specific subvolume group",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume resize '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=new_size,type=CephString,req=true '
-                   'name=group_name,type=CephString,req=false '
-                   'name=no_shrink,type=CephBool,req=false ',
-            'desc': "Resize a CephFS subvolume",
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=new_size,type=StoneString,req=true '
+                   'name=group_name,type=StoneString,req=false '
+                   'name=no_shrink,type=StoneBool,req=false ',
+            'desc': "Resize a StoneFS subvolume",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume pin'
-                   ' name=vol_name,type=CephString'
-                   ' name=sub_name,type=CephString'
-                   ' name=pin_type,type=CephChoices,strings=export|distributed|random'
-                   ' name=pin_setting,type=CephString,req=true'
-                   ' name=group_name,type=CephString,req=false',
+                   ' name=vol_name,type=StoneString'
+                   ' name=sub_name,type=StoneString'
+                   ' name=pin_type,type=StoneChoices,strings=export|distributed|random'
+                   ' name=pin_setting,type=StoneString,req=true'
+                   ' name=group_name,type=StoneString,req=false',
             'desc': "Set MDS pinning policy for subvolume",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume snapshot protect '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=snap_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
-            'desc': "(deprecated) Protect snapshot of a CephFS subvolume in a volume, "
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=snap_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
+            'desc': "(deprecated) Protect snapshot of a StoneFS subvolume in a volume, "
                     "and optionally, in a specific subvolume group",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume snapshot unprotect '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=snap_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
-            'desc': "(deprecated) Unprotect a snapshot of a CephFS subvolume in a volume, "
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=snap_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
+            'desc': "(deprecated) Unprotect a snapshot of a StoneFS subvolume in a volume, "
                     "and optionally, in a specific subvolume group",
             'perm': 'rw'
         },
         {
             'cmd': 'fs subvolume snapshot clone '
-                   'name=vol_name,type=CephString '
-                   'name=sub_name,type=CephString '
-                   'name=snap_name,type=CephString '
-                   'name=target_sub_name,type=CephString '
-                   'name=pool_layout,type=CephString,req=false '
-                   'name=group_name,type=CephString,req=false '
-                   'name=target_group_name,type=CephString,req=false ',
+                   'name=vol_name,type=StoneString '
+                   'name=sub_name,type=StoneString '
+                   'name=snap_name,type=StoneString '
+                   'name=target_sub_name,type=StoneString '
+                   'name=pool_layout,type=StoneString,req=false '
+                   'name=group_name,type=StoneString,req=false '
+                   'name=target_group_name,type=StoneString,req=false ',
             'desc': "Clone a snapshot to target subvolume",
             'perm': 'rw'
         },
         {
             'cmd': 'fs clone status '
-                   'name=vol_name,type=CephString '
-                   'name=clone_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
+                   'name=vol_name,type=StoneString '
+                   'name=clone_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
             'desc': "Get status on a cloned subvolume.",
             'perm': 'r'
         },
         {
             'cmd': 'fs clone cancel '
-                   'name=vol_name,type=CephString '
-                   'name=clone_name,type=CephString '
-                   'name=group_name,type=CephString,req=false ',
+                   'name=vol_name,type=StoneString '
+                   'name=clone_name,type=StoneString '
+                   'name=group_name,type=StoneString,req=false ',
             'desc': "Cancel an pending or ongoing clone operation.",
             'perm': 'r'
         },
@@ -330,7 +330,7 @@ class Module(orchestrator.OrchestratorClientMixin, MgrModule):
 
         # snapshots?
 
-        # FIXME: we're doing CephFSVolumeClient.recover on every
+        # FIXME: we're doing StoneFSVolumeClient.recover on every
         # path where we instantiate and connect a client.  Perhaps
         # keep clients alive longer, or just pass a "don't recover"
         # flag in if it's the >1st time we connected a particular

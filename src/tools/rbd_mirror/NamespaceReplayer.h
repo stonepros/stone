@@ -5,7 +5,7 @@
 #define STONE_RBD_MIRROR_NAMESPACE_REPLAYER_H
 
 #include "common/AsyncOpTracker.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/rados/librados.hpp"
 
 #include "tools/rbd_mirror/ImageDeleter.h"
@@ -277,7 +277,7 @@ private:
   journal::CacheManagerHandler *m_cache_manager_handler;
   PoolMetaCache* m_pool_meta_cache;
 
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
 
   int m_ret_val = 0;
   Context *m_on_finish = nullptr;

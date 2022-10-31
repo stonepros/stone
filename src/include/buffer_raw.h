@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc.
  *
@@ -18,12 +18,12 @@
 #include <map>
 #include <utility>
 #include <type_traits>
-#include "common/ceph_atomic.h"
+#include "common/stone_atomic.h"
 #include "include/buffer.h"
 #include "include/mempool.h"
 #include "include/spinlock.h"
 
-namespace ceph::buffer {
+namespace stone::buffer {
 inline namespace v15_2_0 {
 
   class raw {
@@ -36,13 +36,13 @@ inline namespace v15_2_0 {
     char *data;
     unsigned len;
   public:
-    ceph::atomic<unsigned> nref { 0 };
+    stone::atomic<unsigned> nref { 0 };
     int mempool;
 
     std::pair<size_t, size_t> last_crc_offset {std::numeric_limits<size_t>::max(), std::numeric_limits<size_t>::max()};
     std::pair<uint32_t, uint32_t> last_crc_val;
 
-    mutable ceph::spinlock crc_spinlock;
+    mutable stone::spinlock crc_spinlock;
 
     explicit raw(unsigned l, int mempool=mempool::mempool_buffer_anon)
       : data(nullptr), len(l), nref(0), mempool(mempool) {
@@ -93,10 +93,10 @@ public:
       return len;
     }
     virtual raw* clone_empty() = 0;
-    ceph::unique_leakable_ptr<raw> clone() {
+    stone::unique_leakable_ptr<raw> clone() {
       raw* const c = clone_empty();
       memcpy(c->data, data, len);
-      return ceph::unique_leakable_ptr<raw>(c);
+      return stone::unique_leakable_ptr<raw>(c);
     }
     bool get_crc(const std::pair<size_t, size_t> &fromto,
 		 std::pair<uint32_t, uint32_t> *crc) const {
@@ -121,6 +121,6 @@ public:
   };
 
 } // inline namespace v15_2_0
-} // namespace ceph::buffer
+} // namespace stone::buffer
 
 #endif // STONE_BUFFER_RAW_H

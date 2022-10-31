@@ -27,7 +27,7 @@ protected:
   void get_params_str(map<string, string>& extra_args, string& dest);
 
 public:
-  RGWHTTPSimpleRequest(CephContext *_cct, const string& _method, const string& _url,
+  RGWHTTPSimpleRequest(StoneContext *_cct, const string& _method, const string& _url,
                        param_vec_t *_headers, param_vec_t *_params) : RGWHTTPClient(_cct, _method, _url),
                 http_status(0), status(0),
                 send_iter(NULL),
@@ -60,7 +60,7 @@ public:
 
 class RGWRESTSimpleRequest : public RGWHTTPSimpleRequest {
 public:
-  RGWRESTSimpleRequest(CephContext *_cct, const string& _method, const string& _url,
+  RGWRESTSimpleRequest(StoneContext *_cct, const string& _method, const string& _url,
                        param_vec_t *_headers, param_vec_t *_params) : RGWHTTPSimpleRequest(_cct, _method, _url, _headers, _params) {}
 
   int execute(const DoutPrefixProvider *dpp, RGWAccessKey& key, const char *method, const char *resource, optional_yield y);
@@ -75,7 +75,7 @@ public:
 };
 
 class RGWRESTGenerateHTTPHeaders {
-  CephContext *cct;
+  StoneContext *cct;
   RGWEnv *new_env;
   req_info *new_info;
   string method;
@@ -83,7 +83,7 @@ class RGWRESTGenerateHTTPHeaders {
   string resource;
 
 public:
-  RGWRESTGenerateHTTPHeaders(CephContext *_cct, RGWEnv *_env, req_info *_info) : cct(_cct), new_env(_env), new_info(_info) {}
+  RGWRESTGenerateHTTPHeaders(StoneContext *_cct, RGWEnv *_env, req_info *_info) : cct(_cct), new_env(_env), new_info(_info) {}
   void init(const string& method, const string& url, const string& resource, const param_vec_t& params);
   void set_extra_headers(const map<string, string>& extra_headers);
   int set_obj_attrs(const DoutPrefixProvider *dpp, map<string, bufferlist>& rgw_attrs);
@@ -99,10 +99,10 @@ public:
     class ReceiveCB;
 
 private:
-  ceph::mutex lock =
-    ceph::make_mutex("RGWHTTPStreamRWRequest");
-  ceph::mutex write_lock =
-    ceph::make_mutex("RGWHTTPStreamRWRequest::write_lock");
+  stone::mutex lock =
+    stone::make_mutex("RGWHTTPStreamRWRequest");
+  stone::mutex write_lock =
+    stone::make_mutex("RGWHTTPStreamRWRequest::write_lock");
   ReceiveCB *cb{nullptr};
   RGWWriteDrainCB *write_drain_cb{nullptr};
   bufferlist outbl;
@@ -132,10 +132,10 @@ public:
       }
   };
 
-  RGWHTTPStreamRWRequest(CephContext *_cct, const string& _method, const string& _url,
+  RGWHTTPStreamRWRequest(StoneContext *_cct, const string& _method, const string& _url,
                          param_vec_t *_headers, param_vec_t *_params) : RGWHTTPSimpleRequest(_cct, _method, _url, _headers, _params) {
   }
-  RGWHTTPStreamRWRequest(CephContext *_cct, const string& _method, const string& _url, ReceiveCB *_cb,
+  RGWHTTPStreamRWRequest(StoneContext *_cct, const string& _method, const string& _url, ReceiveCB *_cb,
                          param_vec_t *_headers, param_vec_t *_params) : RGWHTTPSimpleRequest(_cct, _method, _url, _headers, _params),
 									cb(_cb) {
   }
@@ -164,7 +164,7 @@ class RGWRESTStreamRWRequest : public RGWHTTPStreamRWRequest {
 protected:
   HostStyle host_style;
 public:
-  RGWRESTStreamRWRequest(CephContext *_cct, const string& _method, const string& _url, RGWHTTPStreamRWRequest::ReceiveCB *_cb,
+  RGWRESTStreamRWRequest(StoneContext *_cct, const string& _method, const string& _url, RGWHTTPStreamRWRequest::ReceiveCB *_cb,
 		param_vec_t *_headers, param_vec_t *_params, HostStyle _host_style = PathStyle) : RGWHTTPStreamRWRequest(_cct, _method, _url, _cb, _headers, _params), host_style(_host_style) {
   }
   virtual ~RGWRESTStreamRWRequest() override {}
@@ -191,13 +191,13 @@ private:
 
 class RGWRESTStreamReadRequest : public RGWRESTStreamRWRequest {
 public:
-  RGWRESTStreamReadRequest(CephContext *_cct, const string& _url, ReceiveCB *_cb, param_vec_t *_headers,
+  RGWRESTStreamReadRequest(StoneContext *_cct, const string& _url, ReceiveCB *_cb, param_vec_t *_headers,
 		param_vec_t *_params, HostStyle _host_style = PathStyle) : RGWRESTStreamRWRequest(_cct, "GET", _url, _cb, _headers, _params, _host_style) {}
 };
 
 class RGWRESTStreamHeadRequest : public RGWRESTStreamRWRequest {
 public:
-  RGWRESTStreamHeadRequest(CephContext *_cct, const string& _url, ReceiveCB *_cb, param_vec_t *_headers,
+  RGWRESTStreamHeadRequest(StoneContext *_cct, const string& _url, ReceiveCB *_cb, param_vec_t *_headers,
 		param_vec_t *_params) : RGWRESTStreamRWRequest(_cct, "HEAD", _url, _cb, _headers, _params) {}
 };
 
@@ -207,7 +207,7 @@ class RGWRESTStreamS3PutObj : public RGWRESTStreamRWRequest {
   req_info new_info;
   RGWRESTGenerateHTTPHeaders headers_gen;
 public:
-  RGWRESTStreamS3PutObj(CephContext *_cct, const string& _method, const string& _url, param_vec_t *_headers,
+  RGWRESTStreamS3PutObj(StoneContext *_cct, const string& _method, const string& _url, param_vec_t *_headers,
 		param_vec_t *_params, HostStyle _host_style) : RGWRESTStreamRWRequest(_cct, _method, _url, nullptr, _headers, _params, _host_style),
                 out_cb(NULL), new_info(cct, &new_env), headers_gen(_cct, &new_env, &new_info) {}
   ~RGWRESTStreamS3PutObj() override;

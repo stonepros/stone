@@ -29,7 +29,7 @@ Merge: 2ca3c3e 9ab5fd9
 Author: Orit Wasserman <owasserm@redhat.com>
 Date:   Fri Feb 5 10:30:22 2016 +0100
 
-    Merge pull request #7526 from ceph/wip-14516-hammer
+    Merge pull request #7526 from stone/wip-14516-hammer
     
     hammer: rgw-admin: document orphans commands in usage
 
@@ -92,7 +92,7 @@ Date:   Thu Jul 9 16:56:07 2015 +0800
     However some private setups may have some special requirements
     on this limit. It's more convinent to have a configurable value.
     
-    Closes: http://tracker.ceph.com/issues/14569
+    Closes: http://tracker.stone.com/issues/14569
     (cherry picked from commit df97f28)
     
     Signed-off-by: Yuan Zhou <yuan.zhou@intel.com>
@@ -183,7 +183,7 @@ Date:   Sat Jan 30 21:42:29 2016 -0500
     
     config_opts: increase suicide timeout to 300 to match recovery
     
-    http://pulpito.ceph.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
+    http://pulpito.stone.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -196,7 +196,7 @@ Date:   Sat Jan 30 21:42:12 2016 -0500
     
     tests: testprofile must be removed before it is re-created
     
-    http://pulpito.ceph.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
+    http://pulpito.stone.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -207,9 +207,9 @@ Date:   Sat Jan 30 21:41:39 2016 -0500
 
     Merge pull request #6680 from SUSE/wip-13859-hammer
     
-    hammer: ceph.spec.in License line does not reflect COPYING
+    hammer: stone.spec.in License line does not reflect COPYING
     
-    http://pulpito.ceph.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
+    http://pulpito.stone.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
 
 commit 520792d51e949c451767d116e267d86fee812ada
 Merge: 4d0fafb c2c6d02
@@ -220,7 +220,7 @@ Date:   Sat Jan 30 21:41:18 2016 -0500
     
     Race condition in rados bench
     
-    http://pulpito.ceph.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
+    http://pulpito.stone.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
 
 commit 4d0fafb289fc35f44e6e74bb974c402ba147d4d4
 Merge: 211a093 6379ff1
@@ -231,7 +231,7 @@ Date:   Sat Jan 30 21:40:38 2016 -0500
     
     configure.ac: no use to add "+" before ac_ext=c
     
-    http://pulpito.ceph.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
+    http://pulpito.stone.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -244,7 +244,7 @@ Date:   Sat Jan 30 21:40:13 2016 -0500
     
     osd/PG.cc: 3837: FAILED assert(0 == "Running incompatible OSD")
     
-    http://pulpito.ceph.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
+    http://pulpito.stone.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
     
     Reviewed-by: David Zafman <dzafman@redhat.com>
 
@@ -266,9 +266,9 @@ Date:   Sat Jan 30 21:39:11 2016 -0500
 
     Merge pull request #7347 from tchaikov/wip-hammer-10093
     
-    tools: ceph-monstore-tool must do out_store.close()
+    tools: stone-monstore-tool must do out_store.close()
     
-    http://pulpito.ceph.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
+    http://pulpito.stone.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -281,7 +281,7 @@ Date:   Sat Jan 30 21:38:35 2016 -0500
     
     hammer: disable filestore_xfs_extsize by default
     
-    http://pulpito.ceph.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
+    http://pulpito.stone.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -305,7 +305,7 @@ Date:   Sat Jan 30 21:37:46 2016 -0500
     
     mon: compact full epochs also
     
-    http://pulpito.ceph.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
+    http://pulpito.stone.com/sage-2016-01-30_09:58:32-rados-wip-sage-testing-hammer---basic-mira/
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -497,7 +497,7 @@ Date:   Fri Jan 29 08:52:51 2016 -0500
 
     Merge pull request #5789 from SUSE/wip-12928-hammer
     
-    rpm: libcephfs_jni1 has no %post and %postun
+    rpm: libstonefs_jni1 has no %post and %postun
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -568,7 +568,7 @@ commit 926017187910c9e6a3fb8babf9b498cf07941819
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Wed Sep 16 18:28:52 2015 +0800
 
-    tools: ceph_monstore_tool: add inflate-pgmap command
+    tools: stone_monstore_tool: add inflate-pgmap command
     
     this command repeatly add the latest pgmap to the monstore in order
     to inflate it. the command helps with the testing of some monstore
@@ -609,7 +609,7 @@ commit 1bb899a290b77188b44a53ef7c7a40910c9248b2
 Author: Joao Eduardo Luis <joao@suse.de>
 Date:   Mon Jul 13 12:35:13 2015 +0100
 
-    tools: ceph_monstore_tool: describe behavior of rewrite command
+    tools: stone_monstore_tool: describe behavior of rewrite command
     
     Signed-off-by: Joao Eduardo Luis <joao@suse.de>
     (cherry picked from commit a881f9385feb0f5a61fa22357984d6f291c08177)
@@ -618,7 +618,7 @@ commit 9035c69481f4aa4786414ac41cbc36fb4a3ca51d
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Fri Jun 19 22:57:57 2015 +0800
 
-    tools/ceph-monstore-tools: add rewrite command
+    tools/stone-monstore-tools: add rewrite command
     
     "rewrite" command will
      - add a new osdmap version to update current osdmap held by OSDMonitor
@@ -638,10 +638,10 @@ commit 90aaed744243dfc7c620f91e19fc0bfa233f711f
 Author: huangjun <hjwsm1989@gmail.com>
 Date:   Tue Apr 21 14:04:40 2015 +0800
 
-    tools: ceph-monstore-tool must do out_store.close()
+    tools: stone-monstore-tool must do out_store.close()
     
     this change fixes the "store-copy" command.
-    Like the bug reported in http://tracker.ceph.com/issues/10093.
+    Like the bug reported in http://tracker.stone.com/issues/10093.
     
     Signed-off-by: huangjun <hjwsm1989@gmail.com>
     (cherry picked from commit d85e0f8c50fce62be012506f7ffcb1cdeb0c819c)
@@ -664,7 +664,7 @@ Merge: b6b8ee4 0325f8a
 Author: Loic Dachary <loic@dachary.org>
 Date:   Fri Jan 29 10:36:05 2016 +0700
 
-    Merge pull request #7316 from ceph/wip-deb-lttng-hammer
+    Merge pull request #7316 from stone/wip-deb-lttng-hammer
     
     deb: strip tracepoint libraries from Wheezy/Precise builds
     
@@ -726,7 +726,7 @@ Date:   Tue Jan 26 10:12:29 2016 -0500
 
     Merge pull request #7365 from liewegas/wip-tcmalloc-hammer
     
-    osd: pass tcmalloc env through to ceph-osd
+    osd: pass tcmalloc env through to stone-osd
     
     Reviewed-by: Ken Dreyer <kdreyer@redhat.com>
 
@@ -734,7 +734,7 @@ commit 9f30fe18e839f5846c90e3b5995171a0132d7f3a
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Jan 26 08:43:15 2016 -0500
 
-    upstart/ceph-osd.conf: pass TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES through
+    upstart/stone-osd.conf: pass TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES through
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit a95a3d34cccb9f9f0782a96ca05e5fe9c2b01772)
@@ -743,7 +743,7 @@ commit a58873e213d7423d89c95db4e1710dc9631e3313
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Jan 20 18:36:08 2016 -0500
 
-    init-ceph: pass TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES through
+    init-stone: pass TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES through
     
     ..when set in the sysconfig/default file.
     
@@ -756,10 +756,10 @@ commit 8d9e08c44150a4f3ad06ec1abc130b9aeaf479d9
 Author: huangjun <hjwsm1989@gmail.com>
 Date:   Tue Apr 21 14:04:40 2015 +0800
 
-    tools: ceph-monstore-tool must do out_store.close()
+    tools: stone-monstore-tool must do out_store.close()
     
     this change fixes the "store-copy" command.
-    Like the bug reported in http://tracker.ceph.com/issues/10093.
+    Like the bug reported in http://tracker.stone.com/issues/10093.
     
     Signed-off-by: huangjun <hjwsm1989@gmail.com>
     (cherry picked from commit d85e0f8c50fce62be012506f7ffcb1cdeb0c819c)
@@ -780,7 +780,7 @@ Merge: 4e67418 e4d3e9b
 Author: Jason Dillaman <dillaman@redhat.com>
 Date:   Mon Jan 18 20:46:07 2016 -0500
 
-    Merge pull request #7252 from ceph/wip-13483-hammer
+    Merge pull request #7252 from stone/wip-13483-hammer
     
     qa: remove legacy OS support from rbd/qemu-iotests
     
@@ -870,7 +870,7 @@ Date:   Thu Jan 14 09:20:10 2016 -0500
 
     Merge pull request #7180 from dachary/wip-14288-hammer
     
-    hammer: ceph osd pool stats broken in hammer
+    hammer: stone osd pool stats broken in hammer
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -903,7 +903,7 @@ Date:   Thu Jan 14 09:18:23 2016 -0500
 
     Merge pull request #6835 from SUSE/wip-13892-hammer
     
-    hammer: auth/cephx: large amounts of log are produced by osd
+    hammer: auth/stonex: large amounts of log are produced by osd
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -914,7 +914,7 @@ Date:   Thu Jan 14 09:17:53 2016 -0500
 
     Merge pull request #6834 from SUSE/wip-13930-hammer
     
-    hammer: Ceph Pools' MAX AVAIL is 0 if some OSDs' weight is 0
+    hammer: Stone Pools' MAX AVAIL is 0 if some OSDs' weight is 0
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -925,7 +925,7 @@ Date:   Thu Jan 14 09:17:25 2016 -0500
 
     Merge pull request #6832 from SUSE/wip-13936-hammer
     
-    hammer: Ceph daemon failed to start, because the service name was already used.
+    hammer: Stone daemon failed to start, because the service name was already used.
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -958,7 +958,7 @@ Date:   Thu Jan 14 08:15:02 2016 +0100
 
     Merge pull request #7176 from dachary/wip-13440-hammer
     
-    ceph-disk prepare fails if device is a symlink
+    stone-disk prepare fails if device is a symlink
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1002,7 +1002,7 @@ commit 53742bdbc587747c93413f9db38f3eeb71487872
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Jun 15 17:55:41 2015 -0700
 
-    ceph_osd: Add required feature bits related to this branch to osd_required mask
+    stone_osd: Add required feature bits related to this branch to osd_required mask
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 0b2bab460c013ea5cece10ea028d26da3485eaf5)
@@ -1132,7 +1132,7 @@ Date:   Fri Oct 9 12:57:06 2015 -0700
     Compare parted output with the dereferenced path of the device as parted
     prints that instead of the symlink we called it with.
     
-    http://tracker.ceph.com/issues/13438 Fixes: #13438
+    http://tracker.stone.com/issues/13438 Fixes: #13438
     
     Signed-off-by: Joe Julian <jjulian@io.com>
     (cherry picked from commit b3c7cb098195111b9c642e5a9b726b63717f2e0d)
@@ -1292,7 +1292,7 @@ commit 66ff0aa0130973aa2bea3a1a4ec8f4e3e6c19da8
 Author: qiankunzheng <zheng.qiankun@h3c.com>
 Date:   Thu Nov 5 07:29:49 2015 -0500
 
-    auth/cephx: large amounts of log are produced by osd
+    auth/stonex: large amounts of log are produced by osd
     if the auth of osd is deleted when the osd is running, the osd will produce large amounts of log.
     
     Fixes:#13610
@@ -1319,14 +1319,14 @@ commit 53e81aab442855b34ee6e922f181bae3bf33e292
 Author: wangchaunhong <root@A22832429.(none)>
 Date:   Tue Oct 20 18:40:23 2015 +0800
 
-    init-ceph: fix systemd-run cant't start ceph daemon sometimes
+    init-stone: fix systemd-run cant't start stone daemon sometimes
     
     Fixes: #13474
     Signed-off-by: Chuanhong Wang <wang.chuanhong@zte.com.cn>
     (cherry picked from commit 2f36909e1e08bac993e77d1781a777b386335669)
     
     Conflicts:
-    	src/init-ceph.in
+    	src/init-stone.in
                 different content of cmd variable
 
 commit c2c6d02591519dfd15ddcb397ac440322a964deb
@@ -1547,12 +1547,12 @@ commit 3f1292e117ab1cdcaef3b24ee33854f7be142795
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Thu Sep 3 20:30:50 2015 +0200
 
-    ceph.spec.in: fix License line
+    stone.spec.in: fix License line
     
     This is closer to my reading of
-    https://github.com/ceph/ceph/blob/master/COPYING than the previous version.
+    https://github.com/stone/stone/blob/master/COPYING than the previous version.
     
-    http://tracker.ceph.com/issues/12935 Fixes: #12935
+    http://tracker.stone.com/issues/12935 Fixes: #12935
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit ef7418421b3748c712019c8aedd02b8005c1e1ea)
@@ -1616,10 +1616,10 @@ commit a81bcf723c1099f2bea5daf8b01b7d9853de323a
 Author: Jason Dillaman <dillaman@redhat.com>
 Date:   Thu Oct 15 00:15:54 2015 -0400
 
-    ceph_context: remove unsafe cast for singletons
+    stone_context: remove unsafe cast for singletons
     
-    It was previously assumed that a CephContext singleton would
-    inherit from CephContext::AssociatedSingletonObject, but it was
+    It was previously assumed that a StoneContext singleton would
+    inherit from StoneContext::AssociatedSingletonObject, but it was
     not enforced.  This could result in unknown behavior when the
     singleton is destroyed due to the implied virtual destructor.
     
@@ -1716,13 +1716,13 @@ commit bb7c0f501918b75dee97052faeafb1d6db61bd0a
 Author: Jason Dillaman <dillaman@redhat.com>
 Date:   Tue Sep 29 14:30:43 2015 -0400
 
-    ceph.spec.in: add new tracepoint probe shared libraries
+    stone.spec.in: add new tracepoint probe shared libraries
     
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit f4feee2f9dcd7b94476701b66d1f0bdf6fb6e0c2)
     
      Conflicts:
-    	ceph.spec.in: trivial resolution
+    	stone.spec.in: trivial resolution
 
 commit e1da27134e4c9b4a2881aca664818598e5b2125b
 Author: Jason Dillaman <dillaman@redhat.com>
@@ -1749,7 +1749,7 @@ Date:   Thu Nov 19 19:45:25 2015 +0100
 
     Merge pull request #6580 from dachary/wip-13786-hammer
     
-    rbd-replay-* moved from ceph-test-dbg to ceph-common-dbg as well
+    rbd-replay-* moved from stone-test-dbg to stone-common-dbg as well
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1797,7 +1797,7 @@ Date:   Wed Nov 18 18:08:58 2015 +0100
     This reverts commit 39544718dc2f09bcfdc632ac72fd2a3cda87687e, reversing
     changes made to 4ad97162026e1eb6e6e948ddf3eb39f711431e45.
     
-    http://tracker.ceph.com/issues/13812 Fixes: #13812
+    http://tracker.stone.com/issues/13812 Fixes: #13812
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
 
@@ -1822,7 +1822,7 @@ Date:   Tue Nov 17 10:24:45 2015 +0100
 
     Merge pull request #6402 from SUSE/wip-13621-hammer
     
-    CephFS restriction on removing cache tiers is overly strict
+    StoneFS restriction on removing cache tiers is overly strict
     
     Reviewed-by: Greg Farnum <gfarnum@redhat.com>
 
@@ -1896,9 +1896,9 @@ commit 8378aaf3f9d5463fb61a19d601201dd63a884419
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Fri Nov 13 19:10:28 2015 +0100
 
-    build/ops: rbd-replay moved from ceph-test-dbg to ceph-common-dbg
+    build/ops: rbd-replay moved from stone-test-dbg to stone-common-dbg
     
-    http://tracker.ceph.com/issues/13785 Fixes: #13785
+    http://tracker.stone.com/issues/13785 Fixes: #13785
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit a0204dc47acc0c50223e449fd23a2fc97bfd111a)
@@ -1992,7 +1992,7 @@ commit 6a40e4f19d7b4cd45a25161303c7363e96fe799e
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Tue Sep 29 10:39:16 2015 +0200
 
-    ceph.spec.in: lttng in SLES12 only
+    stone.spec.in: lttng in SLES12 only
     
     Over in the SUSE sector, we are trying to enable the SLE_12 and openSUSE_13.2
     build targets. The lttng/babeltrace stuff is currently available only in
@@ -2002,59 +2002,59 @@ Date:   Tue Sep 29 10:39:16 2015 +0200
     (cherry picked from commit bf9ca1eb107c4462d8768faf3ff4db7972384ffd)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
                 trivial resolution
 
 commit e508a44485366557ac8a280de35584f3b5edf720
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Wed Jul 15 12:54:20 2015 +0200
 
-    ceph.spec.in: fix lttng/babeltrace conditionals
+    stone.spec.in: fix lttng/babeltrace conditionals
     
     lttng and babeltrace are build dependencies for rbd-replay-prep. Make
     sure the right package names are used. Enable for SLE12, as well as
     for openSUSE 13.1 and higher.
     
-    Move the BuildRequires out of the ceph-test subpackage and into the
+    Move the BuildRequires out of the stone-test subpackage and into the
     distro-conditional dependencies section.
     
     Make ordering of BuildRequires a little more alphabetical.
     
-    http://tracker.ceph.com/issues/12360 Fixes: #12360
+    http://tracker.stone.com/issues/12360 Fixes: #12360
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit e267128ce22d8b8cd83f6d6d82f24f496600e678)
     
     Conflicts:
-    	ceph.spec.in
-                Dropped Requires: xmlstarlet in ceph-test that had inadvertently
+    	stone.spec.in
+                Dropped Requires: xmlstarlet in stone-test that had inadvertently
                 been grabbed from d2cc2b1
 
 commit 19c9546b79f506d0b4ee005a138a77f120c629e8
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Tue Sep 8 10:41:02 2015 -0600
 
-    packaging: move rbd-replay* to ceph-common
+    packaging: move rbd-replay* to stone-common
     
-    The rbd-replay* utilities are useful for Ceph users with RBD clients.
-    Currently the rbd-replay* utilities ship in the "ceph-test" package, and
-    we intend this ceph-test package for Ceph developers and contributors,
+    The rbd-replay* utilities are useful for Stone users with RBD clients.
+    Currently the rbd-replay* utilities ship in the "stone-test" package, and
+    we intend this stone-test package for Stone developers and contributors,
     not normal users.
     
-    Move the rbd-replay* utilities to "ceph-common".
+    Move the rbd-replay* utilities to "stone-common".
     
-    http://tracker.ceph.com/issues/12994 Fixes: #12994
+    http://tracker.stone.com/issues/12994 Fixes: #12994
     
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit 96486fd6f284ca3ab67f4f94631896d41c529e85)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
                 50a33dea has not been backported to hammer
-    	debian/ceph-test.install
+    	debian/stone-test.install
                 50a33dea has not been backported to hammer
     	debian/control
-                different ceph-test Replaces: and Breaks: version
+                different stone-test Replaces: and Breaks: version
 
 commit a79acd41187e6b049432bdc314f192e3fbb560a3
 Merge: 3d61493 31b7864
@@ -2085,7 +2085,7 @@ Date:   Wed Nov 11 06:59:42 2015 +0100
 
     Merge pull request #6391 from SUSE/wip-13590-hammer
     
-    mon: should not set isvalid = true when cephx_verify_authorizer return false
+    mon: should not set isvalid = true when stonex_verify_authorizer return false
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -2170,13 +2170,13 @@ commit f972f38445bc7a6efe122a5f9fc2ba7658625e26
 Author: Boris Ranto <branto@redhat.com>
 Date:   Fri Oct 23 16:39:16 2015 +0200
 
-    ceph.spec.in: We no longer need redhat-lsb-core
+    stone.spec.in: We no longer need redhat-lsb-core
     
     Drop the redhat-lsb-core dependency as it is no longer necessary on
     fedora/rhel.
     
     The other two init scripts do not use redhat-lsb-core either. The
-    init-ceph.in conditionally requires /lib/lsb/init-functions and does not
+    init-stone.in conditionally requires /lib/lsb/init-functions and does not
     use any of the functions defined in that file (at least not directly).
     The init-radosgw file includes /etc/rc.d/init.d/functions on non-debian
     platforms instead of /lib/lsb/init-functions file so it does not require
@@ -2186,7 +2186,7 @@ Date:   Fri Oct 23 16:39:16 2015 +0200
     (cherry picked from commit 15600572265bed397fbd80bdd2b7d83a0e9bd918)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
     Merge conflict because there were other commits that introduced systemd
     & SUSE specific bits in the master which havent yet reached
     hammer. Since this commit only removed redhat-lsb-core from *el distros
@@ -2434,7 +2434,7 @@ Date:   Wed Nov 4 11:36:39 2015 +0100
 
     Merge pull request #6159 from dachary/wip-13341-hammer
     
-    ceph upstart script rbdmap.conf incorrectly processes parameters
+    stone upstart script rbdmap.conf incorrectly processes parameters
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -2511,7 +2511,7 @@ Date:   Wed Nov 4 11:10:26 2015 +0100
 
     Merge pull request #5766 from dachary/wip-12590-hammer
     
-    ceph mds add_data_pool check for EC pool is wrong
+    stone mds add_data_pool check for EC pool is wrong
     
     Reviewed-by: Greg Farnum <gfarnum@redhat.com>
 
@@ -2520,7 +2520,7 @@ Merge: 9764da5 e8d6d5a
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Nov 4 11:06:18 2015 +0100
 
-    Merge pull request #5361 from ceph/wip-11786.hammer
+    Merge pull request #5361 from stone/wip-11786.hammer
     
     mon: MonitorDBStore: get_next_key() only if prefix matches
     
@@ -2536,7 +2536,7 @@ Date:   Tue Nov 3 00:21:51 2015 +0100
     time it is called, it must create the testprofile erasure code profile
     again for the test to use.
     
-    http://tracker.ceph.com/issues/13664 Refs: #13664
+    http://tracker.stone.com/issues/13664 Refs: #13664
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit a60342942b5a42ee04d59af77a6b904ce62eefc4)
@@ -2554,7 +2554,7 @@ Date:   Mon Nov 2 20:24:51 2015 +0100
     This must be done when creating erasure coded pools with the C++
     interface, in the same way it's done with the C interface.
     
-    http://tracker.ceph.com/issues/13664 Fixes: #13664
+    http://tracker.stone.com/issues/13664 Fixes: #13664
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit 47abab9a6f182aa0abe5047c04402850379bcd6d)
@@ -2634,7 +2634,7 @@ commit 1448915e49bb6c8abc192053e6f2e8a380c4e92a
 Author: John Spray <john.spray@redhat.com>
 Date:   Mon Jun 1 13:55:22 2015 +0100
 
-    qa: update cephtool test for CephFS tier cases
+    qa: update stonetool test for StoneFS tier cases
     
     1. Creating a filesystem using a
        readonly tier on an EC pool (should be forbidden)
@@ -2648,11 +2648,11 @@ commit 14c36f0ccf103dea39b63e0e1b03082b99c42cb1
 Author: John Spray <john.spray@redhat.com>
 Date:   Mon Jun 1 13:54:25 2015 +0100
 
-    mon: forbid readonly cache tiers for CephFS
+    mon: forbid readonly cache tiers for StoneFS
     
     For EC pools, we need a tier that is not just forwarding
     writes, in order to provide the ops required
-    by CephFS.
+    by StoneFS.
     
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 11e5faf3c1d4fa28a8b41e3a92f0f684a844e5f5)
@@ -2696,7 +2696,7 @@ commit 9085c820491f25a04ec02accc5098c1ab9b57311
 Author: yangruifeng <yangruifeng.09209@h3c.com>
 Date:   Mon Oct 19 08:08:12 2015 -0400
 
-    mon: should not set isvalid = true when cephx_verify_authorizer return false
+    mon: should not set isvalid = true when stonex_verify_authorizer return false
     
     Fixes: #13525
     Signed-off-by: Ruifeng Yang <yangruifeng.09209@h3c.com>
@@ -2706,12 +2706,12 @@ commit 4875d05a3e265e80463a2a33a2c922affb0dad66
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Mon Mar 16 10:02:35 2015 -0600
 
-    ceph.spec.in: rm EOL Fedoras; add OBS RHEL5 instead
+    stone.spec.in: rm EOL Fedoras; add OBS RHEL5 instead
     
     Fedora 12 has been EOL for a long time. Remove the reference in the
     RPM .spec file.
     
-    Since RHEL 5 support for Ceph is a work in progress, we won't remove
+    Since RHEL 5 support for Stone is a work in progress, we won't remove
     this entire python_sitelib / python_sitearch conditional for now, since
     those are still needed on RHEL 5.
     
@@ -2727,22 +2727,22 @@ Date:   Thu May 7 20:13:53 2015 -0400
 
     packaging: Add rgw placeholder dirs in proper packages
     
-    Automatically create /var/lib/ceph/radosgw with the
-    ceph-radosgw package, and /var/lib/ceph/bootstrap-rgw
-    via the ceph package.
+    Automatically create /var/lib/stone/radosgw with the
+    stone-radosgw package, and /var/lib/stone/bootstrap-rgw
+    via the stone package.
     
     Signed-off-by: Travis Rhoden <trhoden@redhat.com>
     (cherry picked from commit bf93128f664ac74383806530a1f974edde8df5b6)
     
     Conflicts:
-        ceph.spec.in
+        stone.spec.in
             hammer uses %ghost
 
 commit 2387c8e0caef00e7181241e16549457d58a12192
 Author: Nathan Cutler <ncutler@suse.cz>
 Date:   Fri May 15 21:39:39 2015 +0200
 
-    ceph.spec.in: consolidate centos/rhel macros
+    stone.spec.in: consolidate centos/rhel macros
     
     0%{?rhel} || 0%{?centos} can be simplified to just 0%{?rhel}, since
     CentOS defines that macro for compatibility with RHEL.
@@ -2751,8 +2751,8 @@ Date:   Fri May 15 21:39:39 2015 +0200
     (cherry picked from commit 46404dd381e240634d224e77adc69f0ba4807045)
     
     Conflicts:
-    	ceph.spec.in
-                https://github.com/ceph/ceph/pull/4068 has not been backported
+    	stone.spec.in
+                https://github.com/stone/stone/pull/4068 has not been backported
 
 commit 7c58d312db2aa42088f419dbfa7e841d897fdad6
 Author: Nathan Cutler <ncutler@suse.com>
@@ -2760,7 +2760,7 @@ Date:   Thu Jun 25 16:55:10 2015 +0200
 
     packaging: make logrotate a hard dependency across all distros
     
-    Given ceph's reputation for voluminous logs, it makes sense for
+    Given stone's reputation for voluminous logs, it makes sense for
     logrotate to be a hard dependency for all distros.
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
@@ -2770,7 +2770,7 @@ commit 61acc4e20ca58e11b9aba1efcdca78d1d7ddd2f7
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Thu Jul 9 12:05:24 2015 +0200
 
-    ceph.spec.in: add missing -%{release}
+    stone.spec.in: add missing -%{release}
     
     We have it everywhere else and I can't think of any reason why
     it should be omitted here.
@@ -2782,7 +2782,7 @@ commit 20590d367226ea01c9d4d95de15cfd1aa354d02b
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Fri Jun 26 20:21:59 2015 +0200
 
-    ceph.spec.in: remove duplicate BuildRequires: sharutils
+    stone.spec.in: remove duplicate BuildRequires: sharutils
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit c418bd9615e6f23f3c14ae9e71003c66d31d4b78)
@@ -2791,7 +2791,7 @@ commit 6b306eba829b1ec9822b24243ee7c021aab3d738
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Mon Jun 15 12:58:00 2015 +0200
 
-    ceph.spec.in: fix python-flask dependency for SUSE
+    stone.spec.in: fix python-flask dependency for SUSE
     
     In SLE and openSUSE, the package is called python-Flask with an upper-case F.
     
@@ -2799,17 +2799,17 @@ Date:   Mon Jun 15 12:58:00 2015 +0200
     (cherry picked from commit 39c28b9faf0fb069d91ac069a4d8df7bf03fb490)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
                 add missing SUSE-specific build deps
 
 commit 7a2cbcb0a4efa365b6d92ec58d7acf4a66e9d2b1
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Thu Jun 25 18:55:39 2015 +0200
 
-    ceph.spec.in: clarify two important comments
+    stone.spec.in: clarify two important comments
     
     First, the terms "common" and "specific" are vague. Second,
-    "common" can easily be confused with the ceph-common subpackage.
+    "common" can easily be confused with the stone-common subpackage.
     
     Fix this by rephrasing to "distro-unconditional dependencies" and
     "distro-conditional dependencies", respectively.
@@ -2824,7 +2824,7 @@ commit dfe27c6ba05d49bb73854754b9d5c02cf1c7b1ef
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Wed Jun 24 16:37:58 2015 -0600
 
-    ceph.spec.in: rm reference to EOL Fedoras (< 20)
+    stone.spec.in: rm reference to EOL Fedoras (< 20)
     
     Fedora 19 is EOL, so there's no need to refer to Fedoras less than 20.
     "%{fedora}" effectively implies "Fedora 20 and above".
@@ -2834,14 +2834,14 @@ Date:   Wed Jun 24 16:37:58 2015 -0600
     (cherry picked from commit f3e4a91c458ca7b11706fe4608cb739499f5d3cc)
     
     Conflicts:
-    	ceph.spec.in
-               added xmlstarlet dependency to ceph-test package
+    	stone.spec.in
+               added xmlstarlet dependency to stone-test package
 
 commit 371b64ef4aa786db3fd29bc84ff98e63000a859b
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Wed Jun 24 16:39:30 2015 -0600
 
-    ceph.spec.in: package rbd-replay-prep on all Fedoras
+    stone.spec.in: package rbd-replay-prep on all Fedoras
     
     This reverts the change in commit
     85517d611b7bf4cb6cbffcd2c65303be0d038264. Since we BuildRequire:
@@ -2860,7 +2860,7 @@ commit 82425b33f712047442d9d29c5a4349818b44b40a
 Author: Boris Ranto <branto@redhat.com>
 Date:   Tue Jun 16 23:07:04 2015 +0200
 
-    ceph.spec.in: rbd-replay-prep is not being built on f21+
+    stone.spec.in: rbd-replay-prep is not being built on f21+
     
     Signed-off-by: Boris Ranto <branto@redhat.com>
     (cherry picked from commit 85517d611b7bf4cb6cbffcd2c65303be0d038264)
@@ -2869,11 +2869,11 @@ commit 53e2f702681dc08ddd0414b116e51de6488f42ca
 Author: Owen Synge <osynge@suse.com>
 Date:   Mon Jun 8 17:48:55 2015 +0200
 
-    ceph.spec.in:BuildRequires sharutils
+    stone.spec.in:BuildRequires sharutils
     
     The uudecode binary is used to build Java-related components, and
     uudecode is provided by the sharutils package on all supported
-    RPM platforms. When building with "--without=cephfs_java",
+    RPM platforms. When building with "--without=stonefs_java",
     sharutils is not needed.
     
     Thanks to Nathan Cutler <ncutler@suse.cz> for going into the
@@ -2882,12 +2882,12 @@ Date:   Mon Jun 8 17:48:55 2015 +0200
     On OBS without this patch we get the error message:
     
     [  170s] -----------------------------------------------------------------
-    [  170s] ----- building ceph.spec (user abuild)
+    [  170s] ----- building stone.spec (user abuild)
     [  170s] -----------------------------------------------------------------
     [  170s] -----------------------------------------------------------------
-    [  170s] + exec rpmbuild -ba --define '_srcdefattr (-,root,root)' --nosignature --define 'disturl obs://build.opensuse.org/home:osynge:ceph:wip:wip_obs_fedora/Fedora_20/c0bbbc1e62228ca956ac3d367edc4fba-master' /home/abuild/rpmbuild/SOURCES/ceph.spec
+    [  170s] + exec rpmbuild -ba --define '_srcdefattr (-,root,root)' --nosignature --define 'disturl obs://build.opensuse.org/home:osynge:stone:wip:wip_obs_fedora/Fedora_20/c0bbbc1e62228ca956ac3d367edc4fba-master' /home/abuild/rpmbuild/SOURCES/stone.spec
     [  170s] error: Failed build dependencies:
-    [  170s]    sharutils is needed by ceph-1:2+git.1435043747.c1bd02c-1.1.x86_64
+    [  170s]    sharutils is needed by stone-1:2+git.1435043747.c1bd02c-1.1.x86_64
     
     With this patch we can build fedora 22 and fedora 20 rpms fine.
     
@@ -2895,24 +2895,24 @@ Date:   Mon Jun 8 17:48:55 2015 +0200
     (cherry picked from commit 43c1784640538b813f0575c50f721ac911a30b3e)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
                 _with_systemd -> trivial resolution
 
 commit a84376c68499845de01f9e3b194b16a698125b6a
 Author: Owen Synge <osynge@suse.com>
 Date:   Wed Jun 10 12:11:50 2015 +0200
 
-    ceph.spec.in: fix:Add missing directories breaking build
+    stone.spec.in: fix:Add missing directories breaking build
     
     SUSE builds on OBS are failing with the missing dir entries:
     
-        /usr/share/ceph
-        /usr/lib/ceph
+        /usr/share/stone
+        /usr/lib/stone
     
     On suse these correspond to:
     
-        %dir %{_datarootdir}/ceph/
-        %dir %{_libexecdir}/ceph/
+        %dir %{_datarootdir}/stone/
+        %dir %{_libexecdir}/stone/
     
     Signed-off-by: Owen Synge <osynge@suse.com>
     (cherry picked from commit f1ff3e4dcb5dd7eddd2c346a05cfa78d860a5ce6)
@@ -3124,7 +3124,7 @@ commit 5c63d3c614189381cc169c64a3138c7abcb368c6
 Author: Jason Dillaman <dillaman@redhat.com>
 Date:   Thu Oct 8 13:26:42 2015 -0400
 
-    ceph-dencoder: new rbd_replay trace file types
+    stone-dencoder: new rbd_replay trace file types
     
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit c2a83d0b518497dc8bcbbdea77b88febe52a3034)
@@ -3302,7 +3302,7 @@ Date:   Fri Aug 28 00:32:38 2015 +0800
     (cherry picked from commit 5a4f6a866bb675195ad83c38fd23238d078c78ed)
     
     Conflicts:
-    	src/include/ceph_features.h
+    	src/include/stone_features.h
     		minor changes to resolve conflicts
 
 commit 7fcc61d26028eb417a0c224e8c9cd3cc95bc13d9
@@ -3322,7 +3322,7 @@ commit 26c7e968523ac09f608c4ed7c50681fbb741ca1f
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Aug 18 16:53:50 2015 +0800
 
-    mon: print use_gmt_hitset in "ceph osd pool get"
+    mon: print use_gmt_hitset in "stone osd pool get"
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit cc2bcf760f2d2f20fc4a2fa78ba52475a23e55bf)
@@ -3335,9 +3335,9 @@ commit e8e00dab1b064e77a997504f385b5d60ee8aca25
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Aug 18 00:04:23 2015 +0800
 
-    mon: add "ceph osd pool set $pool use_gmt_hitset true" cmd
+    mon: add "stone osd pool set $pool use_gmt_hitset true" cmd
     
-    allow "ceph osd pool set $pool use_gmt_hitset <true|1>" as long as
+    allow "stone osd pool set $pool use_gmt_hitset <true|1>" as long as
     the cluster supports gmt hitset.
     
     Fixes: #9732
@@ -3368,7 +3368,7 @@ Date:   Fri Jun 5 21:06:48 2015 +0800
     (cherry picked from commit 42f8c5daad16aa849a0b99871d50161673c0c370)
     
      Conflicts:
-    	src/include/ceph_features.h
+    	src/include/stone_features.h
     	src/osd/ReplicatedPG.cc
     	src/osd/osd_types.cc
     	src/osd/osd_types.h
@@ -3378,13 +3378,13 @@ commit 31b7864b4161221f6027c6cbe1e42ed598d42b6a
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Sun Sep 27 21:55:00 2015 +0200
 
-    CephxServiceHandler.cc: fix get_auth conditional
+    StonexServiceHandler.cc: fix get_auth conditional
     
     The KeyServer class has a public method get_auth() that returns a boolean
     value. This value is being checked here - fix the conditional so it triggers
     when get_auth() returns false.
     
-    http://tracker.ceph.com/issues/9756 References: #9756
+    http://tracker.stone.com/issues/9756 References: #9756
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     (cherry picked from commit 7250db62cb7ac1e9c0b1f5956d60b9d874496702)
@@ -3811,7 +3811,7 @@ commit cecd68d06d4d114b0b735155da5c2bac736714c3
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Fri Aug 28 11:36:49 2015 +0800
 
-    ceph_test_rados_api_aio: add a test for aio_sparse_read
+    stone_test_rados_api_aio: add a test for aio_sparse_read
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 076bad955d374cbb37b77e2b0429f3c85f32abc0)
@@ -3820,7 +3820,7 @@ commit 8849f9933fe0fc315da0981f9cd88ea108f686ed
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Thu Aug 27 22:57:16 2015 +0800
 
-    ceph_test_rados_api_io: add tests for sparse_read
+    stone_test_rados_api_io: add tests for sparse_read
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 4d4920610ebfcb516630ed15678979c9e9292f5a)
@@ -3833,7 +3833,7 @@ commit 64b22dcba316bf9ac5598c249e4fba47c157f588
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Wed Aug 26 15:41:13 2015 +0800
 
-    ceph_test_rados: also send sparse_read in ReadOp
+    stone_test_rados: also send sparse_read in ReadOp
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 5ae2e7a185b5f95753a09a89d7110fc38848a083)
@@ -3950,10 +3950,10 @@ commit 50c82f2095add5ad75200a62081fd2f5fea8d8d9
 Author: Owen Synge <osynge@suse.com>
 Date:   Mon Jun 1 15:57:03 2015 +0200
 
-    ceph.spec.in summary-ended-with-dot
+    stone.spec.in summary-ended-with-dot
     
     RPM spec files summary should not end with a dot.
-    This was inconsistent across the ceph rpm packages
+    This was inconsistent across the stone rpm packages
     and creates errors with rpm lint.
     
     Signed-off-by: Owen Synge <osynge@suse.com>
@@ -3963,9 +3963,9 @@ commit 94699e724b45a9a6de84a943c5b834d2f20f85ef
 Author: Owen Synge <osynge@suse.com>
 Date:   Mon Jun 1 14:58:31 2015 +0200
 
-    ceph.spec.in libcephfs_jni1 has no %post and %postun
+    stone.spec.in libstonefs_jni1 has no %post and %postun
     
-    /usr/lib64/libcephfs_jni.so.1.0.0 requires /sbin/ldconfig to be
+    /usr/lib64/libstonefs_jni.so.1.0.0 requires /sbin/ldconfig to be
     run after installing and after removing.
     
     Signed-off-by: Owen Synge <osynge@suse.com>

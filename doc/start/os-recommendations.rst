@@ -2,19 +2,19 @@
  OS Recommendations
 ====================
 
-Ceph Dependencies
+Stone Dependencies
 =================
 
-As a general rule, we recommend deploying Ceph on newer releases of Linux. 
+As a general rule, we recommend deploying Stone on newer releases of Linux. 
 We also recommend deploying on releases with long-term support.
 
 Linux Kernel
 ------------
 
-- **Ceph Kernel Client**
+- **Stone Kernel Client**
 
   If you are using the kernel client to map RBD block devices or mount
-  CephFS, the general advice is to use a "stable" or "longterm
+  StoneFS, the general advice is to use a "stable" or "longterm
   maintenance" kernel series provided by either http://kernel.org or
   your Linux distribution on any client hosts.
 
@@ -25,18 +25,18 @@ Linux Kernel
   - 4.14.z
   - 5.x
 
-  For CephFS, see the section about `Mounting CephFS using Kernel Driver`_
+  For StoneFS, see the section about `Mounting StoneFS using Kernel Driver`_
   for kernel version guidance.
 
   Older kernel client versions may not support your `CRUSH tunables`_ profile
-  or other newer features of the Ceph cluster, requiring the storage cluster
+  or other newer features of the Stone cluster, requiring the storage cluster
   to be configured with those features disabled.
 
 
 Platforms
 =========
 
-The charts below show how Ceph's requirements map onto various Linux
+The charts below show how Stone's requirements map onto various Linux
 platforms.  Generally speaking, there is very little dependence on
 specific distributions outside of the kernel and system initialization
 package (i.e., sysvinit, systemd).
@@ -51,9 +51,9 @@ package (i.e., sysvinit, systemd).
 | Octopus      | 15.2.z | 7 :sup:`B` 8 :sup:`A`  | 18.04 :sup:`C`, 20.04 :sup:`A` | 15.2              | 10              |
 +--------------+--------+------------------------+--------------------------------+-------------------+-----------------+
 
-- **A**: Ceph provides packages and has done comprehensive tests on the software in them.
-- **B**: Ceph provides packages and has done basic tests on the software in them.
-- **C**: Ceph provides packages only. No tests have been done on these releases.
+- **A**: Stone provides packages and has done comprehensive tests on the software in them.
+- **B**: Stone provides packages and has done basic tests on the software in them.
+- **C**: Stone provides packages only. No tests have been done on these releases.
 
 .. note::
    **For Centos 7 Users** 
@@ -62,4 +62,4 @@ package (i.e., sysvinit, systemd).
 
 .. _CRUSH Tunables: ../../rados/operations/crush-map#tunables
 
-.. _Mounting CephFS using Kernel Driver: ../../cephfs/mount-using-kernel-driver#which-kernel-version
+.. _Mounting StoneFS using Kernel Driver: ../../cephfs/mount-using-kernel-driver#which-kernel-version

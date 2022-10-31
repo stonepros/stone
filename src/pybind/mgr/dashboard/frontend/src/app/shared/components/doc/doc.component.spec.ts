@@ -1,7 +1,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CephReleaseNamePipe } from '~/app/shared/pipes/ceph-release-name.pipe';
+import { StoneReleaseNamePipe } from '~/app/shared/pipes/stone-release-name.pipe';
 import { configureTestBed } from '~/testing/unit-test-helper';
 import { DocComponent } from './doc.component';
 
@@ -12,7 +12,7 @@ describe('DocComponent', () => {
   configureTestBed({
     declarations: [DocComponent],
     imports: [HttpClientTestingModule],
-    providers: [CephReleaseNamePipe]
+    providers: [StoneReleaseNamePipe]
   });
 
   beforeEach(() => {

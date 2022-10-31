@@ -1,4 +1,4 @@
-# {{ cephadm_managed }}
+# {{ stoneadm_managed }}
 global:
   scrape_interval: 10s
   evaluation_interval: 10s
@@ -12,7 +12,7 @@ alerting:
         - targets: [{{ alertmgr_targets|join(', ') }}]
 {% endif %}
 scrape_configs:
-  - job_name: 'ceph'
+  - job_name: 'stone'
     honor_labels: true
     static_configs:
     - targets:

@@ -1,13 +1,13 @@
 # author: Min chen(minchen@ubuntukylin.com) 2014 2015
 
-------------- ceph rbd recover tool -------------
+------------- stone rbd recover tool -------------
 
-  ceph rbd recover tool is used for recovering ceph rbd image, when all ceph services are killed.
-it is based on ceph-0.80.x (Firefly and newer)
-  currently, ceph service(ceph-mon, ceph-osd) evently are not available caused by bugs or sth else
-, especially on large scale ceph cluster, so that the ceph cluster can not supply service 
+  stone rbd recover tool is used for recovering stone rbd image, when all stone services are killed.
+it is based on stone-0.80.x (Firefly and newer)
+  currently, stone service(stone-mon, stone-osd) evently are not available caused by bugs or sth else
+, especially on large scale stone cluster, so that the stone cluster can not supply service 
 and rbd images can not be accessed. In this case, a tool to recover rbd image is necessary.
-  ceph rbd recover tool is just used for this, it can collect all objects of an image from distributed
+  stone rbd recover tool is just used for this, it can collect all objects of an image from distributed
 osd nodes with the latest pg epoch, and splice objects by offset to a complete image. To make sure
 object data is complete, this tool does flush osd journal on each osd node before recovering.
   but, there are some limitions:
@@ -17,9 +17,9 @@ object data is complete, this tool does flush osd journal on each osd node befor
 -only support relicated pool
 
 before you run this tool, you should make sure that:
-1). all processes (ceph-osd, ceph-mon, ceph-mds) are shutdown
+1). all processes (stone-osd, stone-mon, stone-mds) are shutdown
 2). ssh daemon is running & network is ok (ssh to each node without password)
-3). ceph-kvstore-tool is installed(for ubuntu: apt-get install ceph-test)
+3). stone-kvstore-tool is installed(for ubuntu: apt-get install stone-test)
 4). osd disk is not crashed and data can be accessed on local filesystem
 
 -architecture:
@@ -45,8 +45,8 @@ admin_node will copy files: osd_job, common_h, epoch_h, metadata_h to remote osd
 -config file
 before you run this tool, make sure write config files first
 osd_host_path: osd hostnames and osd data path #user input
-  osdhost0	/var/lib/ceph/osd/ceph-0
-  osdhost1	/var/lib/ceph/osd/ceph-1
+  osdhost0	/var/lib/stone/osd/stone-0
+  osdhost1	/var/lib/stone/osd/stone-1
   ......
 mon_host: all mon node hostname #user input
   monhost0
@@ -72,7 +72,7 @@ lookup <pool_id>/<image_name>[@[<snap_name>]]	#lookup image metadata in offline 
 recover <pool_id><image_name>[@[<snap_name>]] [/path/to/store/image]	#recover image data according to image metadata
 
 -steps:
-1. stop all ceph services: ceph-mon, ceph-osd, ceph-mds
+1. stop all stone services: stone-mon, stone-osd, stone-mds
 2. setup config files: osd_host_path, mon_host, mds_host
 3. rbd-recover-tool database 	# wait a long time 
 4. rbd-recover-tool list

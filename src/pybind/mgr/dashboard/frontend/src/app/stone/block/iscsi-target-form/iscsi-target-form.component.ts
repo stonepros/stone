@@ -27,7 +27,7 @@ import { IscsiTargetIqnSettingsModalComponent } from '../iscsi-target-iqn-settin
   styleUrls: ['./iscsi-target-form.component.scss']
 })
 export class IscsiTargetFormComponent extends CdForm implements OnInit {
-  cephIscsiConfigVersion: number;
+  stoneIscsiConfigVersion: number;
   targetForm: CdFormGroup;
   modalRef: NgbModalRef;
   api_version = 0;
@@ -129,7 +129,7 @@ export class IscsiTargetFormComponent extends CdForm implements OnInit {
       this.imagesAll = _(data[1])
         .flatMap((pool) => pool.value)
         .filter((image) => {
-          // Namespaces are not supported by ceph-iscsi
+          // Namespaces are not supported by stone-iscsi
           if (image.namespace) {
             return false;
           }
@@ -159,7 +159,7 @@ export class IscsiTargetFormComponent extends CdForm implements OnInit {
       this.portalsSelections = [...portals];
 
       // iscsiService.version()
-      this.cephIscsiConfigVersion = data[4]['ceph_iscsi_config_version'];
+      this.stoneIscsiConfigVersion = data[4]['stone_iscsi_config_version'];
 
       this.createForm();
 
@@ -174,7 +174,7 @@ export class IscsiTargetFormComponent extends CdForm implements OnInit {
 
   createForm() {
     this.targetForm = new CdFormGroup({
-      target_iqn: new FormControl('iqn.2001-07.com.ceph:' + Date.now(), {
+      target_iqn: new FormControl('iqn.2001-07.com.stone:' + Date.now(), {
         validators: [Validators.required, Validators.pattern(this.IQN_REGEX)]
       }),
       target_controls: new FormControl({}),
@@ -202,8 +202,8 @@ export class IscsiTargetFormComponent extends CdForm implements OnInit {
       groups: new FormArray([]),
       acl_enabled: new FormControl(false)
     });
-    // Target level authentication was introduced in ceph-iscsi config v11
-    if (this.cephIscsiConfigVersion > 10) {
+    // Target level authentication was introduced in stone-iscsi config v11
+    if (this.stoneIscsiConfigVersion > 10) {
       const authFormGroup = new CdFormGroup({
         user: new FormControl(''),
         password: new FormControl(''),
@@ -221,8 +221,8 @@ export class IscsiTargetFormComponent extends CdForm implements OnInit {
       target_controls: res.target_controls,
       acl_enabled: res.acl_enabled
     });
-    // Target level authentication was introduced in ceph-iscsi config v11
-    if (this.cephIscsiConfigVersion > 10) {
+    // Target level authentication was introduced in stone-iscsi config v11
+    if (this.stoneIscsiConfigVersion > 10) {
       this.targetForm.patchValue({
         auth: res.auth
       });
@@ -650,8 +650,8 @@ export class IscsiTargetFormComponent extends CdForm implements OnInit {
       groups: []
     };
 
-    // Target level authentication was introduced in ceph-iscsi config v11
-    if (this.cephIscsiConfigVersion > 10) {
+    // Target level authentication was introduced in stone-iscsi config v11
+    if (this.stoneIscsiConfigVersion > 10) {
       const targetAuth: CdFormGroup = this.targetForm.get('auth') as CdFormGroup;
       if (!targetAuth.getValue('user')) {
         targetAuth.get('user').setValue('');

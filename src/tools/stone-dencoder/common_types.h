@@ -1,4 +1,4 @@
-#include "ceph_time.h"
+#include "stone_time.h"
 TYPE(real_time_wrapper)
 TYPE(coarse_real_time_wrapper)
 TYPE(timespan_wrapper)
@@ -22,7 +22,7 @@ TYPE(filepath)
 TYPE_FEATUREFUL(file_layout_t)
 
 #include "include/util.h"
-TYPE(ceph_data_stats)
+TYPE(stone_data_stats)
 
 #include "common/bit_vector.hpp"
 TYPE(BitVector<2>)

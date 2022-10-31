@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,7 +20,7 @@
 #include <list>
 #include <functional>
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -61,7 +61,7 @@ public:
   virtual T dequeue() = 0;
 
   // Formatted output of the queue
-  virtual void dump(ceph::Formatter *f) const = 0;
+  virtual void dump(stone::Formatter *f) const = 0;
 
   // Human readable brief description of queue and relevant parameters
   virtual void print(std::ostream &f) const = 0;

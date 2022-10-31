@@ -132,7 +132,7 @@ struct MgrCapGrant {
    * @return bits we allow
    */
   mgr_rwxa_t get_allowed(
-      StoneeContext *cct,
+      StoneContext *cct,
       EntityName name,
       const std::string& service,
       const std::string& module,
@@ -180,7 +180,7 @@ struct MgrCap {
    * @param op_may_exec whether the operation may exec
    * @return true if the operation is allowed, false otherwise
    */
-  bool is_capable(StoneeContext *cct,
+  bool is_capable(StoneContext *cct,
 		  EntityName name,
 		  const std::string& service,
 		  const std::string& module,
@@ -189,9 +189,9 @@ struct MgrCap {
 		  bool op_may_read, bool op_may_write, bool op_may_exec,
 		  const entity_addr_t& addr) const;
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<MgrCap*>& ls);
 };
 WRITE_CLASS_ENCODER(MgrCap)

@@ -21,11 +21,11 @@
 #include <errno.h>
 #include "common/errno.h"
 #include "common/dout.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/common_fwd.h"
 #include "common/Formatter.h"
 #include "common/Cond.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/PriorityCache.h"
 #include "common/pretty_binary.h"
 
@@ -63,7 +63,7 @@ namespace rocksdb{
   struct ColumnFamilyOptions;
 }
 
-extern rocksdb::Logger *create_rocksdb_ceph_logger();
+extern rocksdb::Logger *create_rocksdb_stone_logger();
 
 inline rocksdb::Slice make_slice(const std::optional<std::string>& bound) {
   if (bound) {
@@ -77,7 +77,7 @@ inline rocksdb::Slice make_slice(const std::optional<std::string>& bound) {
  * Uses RocksDB to implement the KeyValueDB interface
  */
 class RocksDBStore : public KeyValueDB {
-  StoneeContext *cct;
+  StoneContext *cct;
   PerfCounters *logger;
   std::string path;
   std::map<std::string,std::string> kv_options;
@@ -173,9 +173,9 @@ private:
 				   const std::string& more_options,
 				   rocksdb::ColumnFamilyOptions* cf_opt);
   // manage async compactions
-  ceph::mutex compact_queue_lock =
-    ceph::make_mutex("RocksDBStore::compact_thread_lock");
-  ceph::condition_variable compact_queue_cond;
+  stone::mutex compact_queue_lock =
+    stone::make_mutex("RocksDBStore::compact_thread_lock");
+  stone::condition_variable compact_queue_cond;
   std::list<std::pair<std::string,std::string>> compact_queue;
   bool compact_queue_stop;
   class CompactThread : public Thread {
@@ -209,7 +209,7 @@ public:
 
   int ParseOptionsFromString(const std::string& opt_str, rocksdb::Options& opt);
   static int ParseOptionsFromStringStatic(
-    StoneeContext* cct,
+    StoneContext* cct,
     const std::string& opt_str,
     rocksdb::Options &opt,
     std::function<int(const std::string&, const std::string&, rocksdb::Options&)> interp);
@@ -232,7 +232,7 @@ public:
     compact_range_async(combine_strings(prefix, start), combine_strings(prefix, end));
   }
 
-  RocksDBStore(StoneeContext *c, const std::string &path, std::map<std::string,std::string> opt, void *p) :
+  RocksDBStore(StoneContext *c, const std::string &path, std::map<std::string,std::string> opt, void *p) :
     cct(c),
     logger(NULL),
     path(path),
@@ -268,7 +268,7 @@ public:
 
   int repair(std::ostream &out) override;
   void split_stats(const std::string &s, char delim, std::vector<std::string> &elems);
-  void get_statistics(ceph::Formatter *f) override;
+  void get_statistics(stone::Formatter *f) override;
 
   PerfCounters *get_perf_counters() override
   {
@@ -293,17 +293,17 @@ public:
       rocksdb::WriteBatch& bat,
       rocksdb::ColumnFamilyHandle *cf,
       const std::string &k,
-      const ceph::bufferlist &to_set_bl);
+      const stone::bufferlist &to_set_bl);
   public:
     void set(
       const std::string &prefix,
       const std::string &k,
-      const ceph::bufferlist &bl) override;
+      const stone::bufferlist &bl) override;
     void set(
       const std::string &prefix,
       const char *k,
       size_t keylen,
-      const ceph::bufferlist &bl) override;
+      const stone::bufferlist &bl) override;
     void rmkey(
       const std::string &prefix,
       const std::string &k) override;
@@ -324,7 +324,7 @@ public:
     void merge(
       const std::string& prefix,
       const std::string& k,
-      const ceph::bufferlist &bl) override;
+      const stone::bufferlist &bl) override;
   };
 
   KeyValueDB::Transaction get_transaction() override {
@@ -336,18 +336,18 @@ public:
   int get(
     const std::string &prefix,
     const std::set<std::string> &key,
-    std::map<std::string, ceph::bufferlist> *out
+    std::map<std::string, stone::bufferlist> *out
     ) override;
   int get(
     const std::string &prefix,
     const std::string &key,
-    ceph::bufferlist *out
+    stone::bufferlist *out
     ) override;
   int get(
     const std::string &prefix,
     const char *key,
     size_t keylen,
-    ceph::bufferlist *out) override;
+    stone::bufferlist *out) override;
 
 
   class RocksDBWholeSpaceIteratorImpl :
@@ -378,8 +378,8 @@ public:
     std::string key() override;
     std::pair<std::string,std::string> raw_key() override;
     bool raw_key_is_prefixed(const std::string &prefix) override;
-    ceph::bufferlist value() override;
-    ceph::bufferptr value_as_ptr() override;
+    stone::bufferlist value() override;
+    stone::bufferptr value_as_ptr() override;
     int status() override;
     size_t key_size() override;
     size_t value_size() override;

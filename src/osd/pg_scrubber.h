@@ -282,9 +282,9 @@ class PgScrubber : public ScrubPgIF, public ScrubMachineListener {
    */
   bool reserve_local() final;
 
-  void handle_query_state(ceph::Formatter* f) final;
+  void handle_query_state(stone::Formatter* f) final;
 
-  void dump(ceph::Formatter* f) const override;
+  void dump(stone::Formatter* f) const override;
 
   // used if we are a replica
 
@@ -319,7 +319,7 @@ class PgScrubber : public ScrubPgIF, public ScrubMachineListener {
   virtual void stats_of_handled_objects(const object_stat_sum_t& delta_stats,
 					const hobject_t& soid) override
   {
-    ceph_assert(false);
+    stone_assert(false);
   }
 
   /**
@@ -591,7 +591,7 @@ class PgScrubber : public ScrubPgIF, public ScrubMachineListener {
   /// Returns epoch of current osdmap
   epoch_t get_osdmap_epoch() const { return get_osdmap()->get_epoch(); }
 
-  StoneeContext* get_pg_cct() const { return m_pg->cct; }
+  StoneContext* get_pg_cct() const { return m_pg->cct; }
 
   // collected statistics
   int m_shallow_errors{0};

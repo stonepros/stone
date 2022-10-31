@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc
  *
@@ -32,7 +32,7 @@ class SocketConnection : public Connection {
   SocketMessenger& messenger;
   std::unique_ptr<Protocol> protocol;
 
-  ceph::net::Policy<crimson::common::Throttle> policy;
+  stone::net::Policy<crimson::common::Throttle> policy;
 
   /// the seq num of the last transmitted message
   seq_num_t out_seq = 0;

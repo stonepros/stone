@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Allen Samuels <allen.samuels@sandisk.com>
  *
@@ -21,7 +21,7 @@
 #include <memory>
 #include <cxxabi.h>
 
-static std::string ceph_demangle(const char* name)
+static std::string stone_demangle(const char* name)
 {
   int status = -4; // some arbitrary value to eliminate the compiler warning
 

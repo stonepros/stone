@@ -316,7 +316,7 @@ void RGWXMLDecoder::decode_xml(const char *name, T& val, T& default_val, XMLObj 
 }
 
 template<class T>
-static void encode_xml(const char *name, const T& val, ceph::Formatter *f)
+static void encode_xml(const char *name, const T& val, stone::Formatter *f)
 {
   f->open_object_section(name);
   val.dump_xml(f);
@@ -324,27 +324,27 @@ static void encode_xml(const char *name, const T& val, ceph::Formatter *f)
 }
 
 template<class T>
-static void encode_xml(const char *name, const char *ns, const T& val, ceph::Formatter *f)
+static void encode_xml(const char *name, const char *ns, const T& val, stone::Formatter *f)
 {
   f->open_object_section_in_ns(name, ns);
   val.dump_xml(f);
   f->close_section();
 }
 
-void encode_xml(const char *name, const string& val, ceph::Formatter *f);
-void encode_xml(const char *name, const char *val, ceph::Formatter *f);
-void encode_xml(const char *name, bool val, ceph::Formatter *f);
-void encode_xml(const char *name, int val, ceph::Formatter *f);
-void encode_xml(const char *name, unsigned val, ceph::Formatter *f);
-void encode_xml(const char *name, long val, ceph::Formatter *f);
-void encode_xml(const char *name, unsigned long val, ceph::Formatter *f);
-void encode_xml(const char *name, long long val, ceph::Formatter *f);
-void encode_xml(const char *name, const utime_t& val, ceph::Formatter *f);
-void encode_xml(const char *name, const bufferlist& bl, ceph::Formatter *f);
-void encode_xml(const char *name, long long unsigned val, ceph::Formatter *f);
+void encode_xml(const char *name, const string& val, stone::Formatter *f);
+void encode_xml(const char *name, const char *val, stone::Formatter *f);
+void encode_xml(const char *name, bool val, stone::Formatter *f);
+void encode_xml(const char *name, int val, stone::Formatter *f);
+void encode_xml(const char *name, unsigned val, stone::Formatter *f);
+void encode_xml(const char *name, long val, stone::Formatter *f);
+void encode_xml(const char *name, unsigned long val, stone::Formatter *f);
+void encode_xml(const char *name, long long val, stone::Formatter *f);
+void encode_xml(const char *name, const utime_t& val, stone::Formatter *f);
+void encode_xml(const char *name, const bufferlist& bl, stone::Formatter *f);
+void encode_xml(const char *name, long long unsigned val, stone::Formatter *f);
 
 template<class T>
-static void do_encode_xml(const char *name, const std::list<T>& l, const char *entry_name, ceph::Formatter *f)
+static void do_encode_xml(const char *name, const std::list<T>& l, const char *entry_name, stone::Formatter *f)
 {
   f->open_array_section(name);
   for (typename std::list<T>::const_iterator iter = l.begin(); iter != l.end(); ++iter) {
@@ -354,7 +354,7 @@ static void do_encode_xml(const char *name, const std::list<T>& l, const char *e
 }
 
 template<class T>
-static void encode_xml(const char *name, const std::vector<T>& l, ceph::Formatter *f)
+static void encode_xml(const char *name, const std::vector<T>& l, stone::Formatter *f)
 {
   for (typename std::vector<T>::const_iterator iter = l.begin(); iter != l.end(); ++iter) {
     encode_xml(name, *iter, f);
@@ -362,7 +362,7 @@ static void encode_xml(const char *name, const std::vector<T>& l, ceph::Formatte
 }
 
 template<class T>
-static void encode_xml(const char *name, const std::optional<T>& o, ceph::Formatter *f)
+static void encode_xml(const char *name, const std::optional<T>& o, stone::Formatter *f)
 {
   if (!o) {
     return;

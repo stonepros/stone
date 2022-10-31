@@ -15,10 +15,10 @@
 #ifndef STONEFS_FEATURES_H
 #define STONEFS_FEATURES_H
 
-#include "include/cephfs/metrics/Types.h"
+#include "include/stonefs/metrics/Types.h"
 
 class feature_bitset_t;
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -29,7 +29,7 @@ namespace ceph {
 // later to mount StoneFS.
 #define STONEFS_CURRENT_RELEASE  STONE_RELEASE_PACIFIC
 
-// The first 5 bits are reserved for old ceph releases.
+// The first 5 bits are reserved for old stone releases.
 #define STONEFS_FEATURE_JEWEL		5
 #define STONEFS_FEATURE_KRAKEN		6
 #define STONEFS_FEATURE_LUMINOUS		7
@@ -81,9 +81,9 @@ namespace ceph {
 #define STONEFS_FEATURES_CLIENT_SUPPORTED STONEFS_FEATURES_ALL
 #define STONEFS_FEATURES_CLIENT_REQUIRED {}
 
-extern std::string_view cephfs_feature_name(size_t id);
-extern int cephfs_feature_from_name(std::string_view name);
-std::string cephfs_stringify_features(const feature_bitset_t& features);
-void cephfs_dump_features(ceph::Formatter *f, const feature_bitset_t& features);
+extern std::string_view stonefs_feature_name(size_t id);
+extern int stonefs_feature_from_name(std::string_view name);
+std::string stonefs_stringify_features(const feature_bitset_t& features);
+void stonefs_dump_features(stone::Formatter *f, const feature_bitset_t& features);
 
 #endif

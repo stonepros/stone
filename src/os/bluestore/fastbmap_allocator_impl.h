@@ -31,11 +31,11 @@ struct interval_t
 typedef std::vector<interval_t> interval_vector_t;
 typedef std::vector<slot_t> slot_vector_t;
 #else
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/likely.h"
 #include "os/bluestore/bluestore_types.h"
 #include "include/mempool.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 typedef bluestore_interval_t<uint64_t, uint64_t> interval_t;
 typedef PExtentVector interval_vector_t;
@@ -195,11 +195,11 @@ class AllocatorLevel01Loose : public AllocatorLevel01
 
     ++l0_dives;
 
-    ceph_assert(l0_pos0 < l0_pos1);
-    ceph_assert(length > *allocated);
-    ceph_assert(0 == (l0_pos0 % (slots_per_slotset * d0)));
-    ceph_assert(0 == (l0_pos1 % (slots_per_slotset * d0)));
-    ceph_assert(((length - *allocated) % l0_granularity) == 0);
+    stone_assert(l0_pos0 < l0_pos1);
+    stone_assert(length > *allocated);
+    stone_assert(0 == (l0_pos0 % (slots_per_slotset * d0)));
+    stone_assert(0 == (l0_pos1 % (slots_per_slotset * d0)));
+    stone_assert(((length - *allocated) % l0_granularity) == 0);
 
     uint64_t need_entries = (length - *allocated) / l0_granularity;
 
@@ -228,7 +228,7 @@ class AllocatorLevel01Loose : public AllocatorLevel01
       }
 
       auto free_pos = find_next_set_bit(slot_val, 0);
-      ceph_assert(free_pos < bits_per_slot);
+      stone_assert(free_pos < bits_per_slot);
       auto next_pos = free_pos + 1;
       while (next_pos < bits_per_slot &&
         (next_pos - free_pos) < need_entries) {
@@ -374,8 +374,8 @@ protected:
   {
     bool no_free = true;
     uint64_t d = slots_per_slotset * L0_ENTRIES_PER_SLOT;
-    ceph_assert(0 == (l0_pos % d));
-    ceph_assert(0 == (l0_pos_end % d));
+    stone_assert(0 == (l0_pos % d));
+    stone_assert(0 == (l0_pos_end % d));
 
     auto idx = l0_pos / L0_ENTRIES_PER_SLOT;
     auto idx_end = l0_pos_end / L0_ENTRIES_PER_SLOT;
@@ -389,8 +389,8 @@ protected:
   {
     bool no_free = true;
     uint64_t d = slots_per_slotset * _children_per_slot();
-    ceph_assert(0 == (l1_pos % d));
-    ceph_assert(0 == (l1_pos_end % d));
+    stone_assert(0 == (l1_pos % d));
+    stone_assert(0 == (l1_pos_end % d));
 
     auto idx = l1_pos / L1_ENTRIES_PER_SLOT;
     auto idx_end = l1_pos_end / L1_ENTRIES_PER_SLOT;
@@ -467,8 +467,8 @@ public:
 
   uint64_t debug_get_free(uint64_t l1_pos0 = 0, uint64_t l1_pos1 = 0)
   {
-    ceph_assert(0 == (l1_pos0 % L1_ENTRIES_PER_SLOT));
-    ceph_assert(0 == (l1_pos1 % L1_ENTRIES_PER_SLOT));
+    stone_assert(0 == (l1_pos0 % L1_ENTRIES_PER_SLOT));
+    stone_assert(0 == (l1_pos1 % L1_ENTRIES_PER_SLOT));
 
     auto idx0 = l1_pos0 * slots_per_slotset;
     auto idx1 = l1_pos1 * slots_per_slotset;
@@ -556,7 +556,7 @@ public:
   uint64_t claim_free_to_left(uint64_t offset) {
     std::lock_guard l(lock);
     auto allocated = l1.claim_free_to_left_l1(offset);
-    ceph_assert(available >= allocated);
+    stone_assert(available >= allocated);
     available -= allocated;
 
     uint64_t l2_pos = (offset - allocated) / l2_granularity;
@@ -569,7 +569,7 @@ public:
   uint64_t claim_free_to_right(uint64_t offset) {
     std::lock_guard l(lock);
     auto allocated = l1.claim_free_to_right_l1(offset);
-    ceph_assert(available >= allocated);
+    stone_assert(available >= allocated);
     available -= allocated;
 
     uint64_t l2_pos = (offset) / l2_granularity;
@@ -579,7 +579,7 @@ public:
     return allocated;
   }
 protected:
-  ceph::mutex lock = ceph::make_mutex("AllocatorLevel02::lock");
+  stone::mutex lock = stone::make_mutex("AllocatorLevel02::lock");
   L1 l1;
   slot_vector_t l2;
   uint64_t l2_granularity = 0; // space per entry
@@ -601,7 +601,7 @@ protected:
 
   void _init(uint64_t capacity, uint64_t _alloc_unit, bool mark_as_free = true)
   {
-    ceph_assert(isp2(_alloc_unit));
+    stone_assert(isp2(_alloc_unit));
     l1._init(capacity, _alloc_unit, mark_as_free);
 
     l2_granularity =
@@ -628,8 +628,8 @@ protected:
   void _mark_l2_allocated(int64_t l2_pos, int64_t l2_pos_end)
   {
     auto d = L1_ENTRIES_PER_SLOT;
-    ceph_assert(0 <= l2_pos_end);
-    ceph_assert((int64_t)l2.size() >= (l2_pos_end / d));
+    stone_assert(0 <= l2_pos_end);
+    stone_assert((int64_t)l2.size() >= (l2_pos_end / d));
 
     while (l2_pos < l2_pos_end) {
       l2[l2_pos / d] &= ~(slot_t(1) << (l2_pos % d));
@@ -640,8 +640,8 @@ protected:
   void _mark_l2_free(int64_t l2_pos, int64_t l2_pos_end)
   {
     auto d = L1_ENTRIES_PER_SLOT;
-    ceph_assert(0 <= l2_pos_end);
-    ceph_assert((int64_t)l2.size() >= (l2_pos_end / d));
+    stone_assert(0 <= l2_pos_end);
+    stone_assert((int64_t)l2.size() >= (l2_pos_end / d));
 
     while (l2_pos < l2_pos_end) {
         l2[l2_pos / d] |= (slot_t(1) << (l2_pos % d));
@@ -652,8 +652,8 @@ protected:
   void _mark_l2_on_l1(int64_t l2_pos, int64_t l2_pos_end)
   {
     auto d = L1_ENTRIES_PER_SLOT;
-    ceph_assert(0 <= l2_pos_end);
-    ceph_assert((int64_t)l2.size() >= (l2_pos_end / d));
+    stone_assert(0 <= l2_pos_end);
+    stone_assert((int64_t)l2.size() >= (l2_pos_end / d));
 
     auto idx = l2_pos * slots_per_slotset;
     auto idx_end = l2_pos_end * slots_per_slotset;
@@ -689,11 +689,11 @@ protected:
   {
     uint64_t prev_allocated = *allocated;
     uint64_t d = L1_ENTRIES_PER_SLOT;
-    ceph_assert(min_length <= l2_granularity);
-    ceph_assert(max_length == 0 || max_length >= min_length);
-    ceph_assert(max_length == 0 || (max_length % min_length) == 0);
-    ceph_assert(length >= min_length);
-    ceph_assert((length % min_length) == 0);
+    stone_assert(min_length <= l2_granularity);
+    stone_assert(max_length == 0 || max_length >= min_length);
+    stone_assert(max_length == 0 || (max_length % min_length) == 0);
+    stone_assert(length >= min_length);
+    stone_assert((length % min_length) == 0);
 
     uint64_t cap = 1ull << 31;
     if (max_length == 0 || max_length >= cap) {
@@ -731,10 +731,10 @@ protected:
 	  all_set = true;
 	} else {
 	  free_pos = find_next_set_bit(slot_val, 0);
-	  ceph_assert(free_pos < bits_per_slot);
+	  stone_assert(free_pos < bits_per_slot);
 	}
 	do {
-	  ceph_assert(length > *allocated);
+	  stone_assert(length > *allocated);
 	  bool empty = l1._allocate_l1(length,
 	    min_length,
 	    max_length,
@@ -763,7 +763,7 @@ protected:
 
     ++l2_allocs;
     auto allocated_here = *allocated - prev_allocated;
-    ceph_assert(available >= allocated_here);
+    stone_assert(available >= allocated_here);
     available -= allocated_here;
   }
 
@@ -806,7 +806,7 @@ protected:
 
     std::lock_guard l(lock);
     auto allocated = l1._mark_alloc_l1(o, len);
-    ceph_assert(available >= allocated);
+    stone_assert(available >= allocated);
     available -= allocated;
     _mark_l2_on_l1(l2_pos, l2_pos_end);
   }

@@ -1,6 +1,6 @@
 .. _containers:
 
-Ceph Container Images
+Stone Container Images
 =====================
 
 .. important::
@@ -19,7 +19,7 @@ Ceph Container Images
 Official Releases
 -----------------
 
-Ceph Container images are available from both Quay and Docker Hub::
+Stone Container images are available from both Quay and Docker Hub::
 
   https://quay.io/repository/ceph/ceph
   https://hub.docker.com/r/ceph
@@ -27,7 +27,7 @@ Ceph Container images are available from both Quay and Docker Hub::
 ceph/ceph
 ^^^^^^^^^
 
-- General purpose Ceph container with all necessary daemons and
+- General purpose Stone container with all necessary daemons and
   dependencies installed.
 
 +----------------------+--------------------------------------------------------------+
@@ -52,7 +52,7 @@ Legacy container images are available from Docker Hub at::
 ceph/daemon-base
 ^^^^^^^^^^^^^^^^
 
-- General purpose Ceph container with all necessary daemons and
+- General purpose Stone container with all necessary daemons and
   dependencies installed.
 - Basically the same as *ceph/ceph*, but with different tags.
 - Note that all of the *-devel* tags (and the *latest-master* tag) are based on
@@ -75,7 +75,7 @@ ceph/daemon
 ^^^^^^^^^^^
 
 - *ceph/daemon-base* plus a collection of BASH scripts that are used
-  by ceph-nano and ceph-ansible to manage a Ceph cluster.
+  by ceph-nano and ceph-ansible to manage a Stone cluster.
 
 +------------------------+---------------------------------------------------------+
 | Tag                    | Meaning                                                 |

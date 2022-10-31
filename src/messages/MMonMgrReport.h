@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Greg Farnum/Red Hat <gfarnum@redhat.com>
  *
@@ -29,7 +29,7 @@ private:
 public:
   // PGMapDigest is in data payload
   health_check_map_t health_checks;
-  ceph::buffer::list service_map_bl;  // encoded ServiceMap
+  stone::buffer::list service_map_bl;  // encoded ServiceMap
   std::map<std::string,ProgressEvent> progress_events;
   uint64_t gid = 0;
 
@@ -49,7 +49,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(health_checks, payload);
     encode(service_map_bl, payload);
@@ -64,17 +64,17 @@ public:
       // The mgr isn't able to do this at the time the encoded
       // PGMapDigest is constructed because we don't know which mon we
       // will target.  Note that this only triggers if the user
-      // upgrades ceph-mgr before ceph-mon (tsk tsk).
+      // upgrades stone-mgr before stone-mon (tsk tsk).
       PGMapDigest digest;
       auto p = data.cbegin();
       decode(digest, p);
-      ceph::buffer::list bl;
+      stone::buffer::list bl;
       encode(digest, bl, features);
       set_data(bl);
     }
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(health_checks, p);
@@ -88,7 +88,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

@@ -3,7 +3,7 @@
 DIR=`dirname $0`
 ROOT=$1
 
-[ "$ROOT" == "" ] && ROOT="$HOME/ceph"
+[ "$ROOT" == "" ] && ROOT="$HOME/stone"
 
 mkdir -p $DIR/bin
 
@@ -13,4 +13,4 @@ for f in `ls $ROOT/build/bin`; do
         ln -sf ../mdo.sh $DIR/bin/$f
 done
 
-echo "MRUN_CEPH_ROOT=$ROOT" > $DIR/.menvroot
+echo "MRUN_STONE_ROOT=$ROOT" > $DIR/.menvroot

@@ -152,7 +152,7 @@ class PgAutoscaler(MgrModule):
         for opt in self.NATIVE_OPTIONS:
             setattr(self,
                     opt,
-                    self.get_ceph_option(opt))
+                    self.get_stone_option(opt))
             self.log.debug(' native option %s = %s', opt, getattr(self, opt))
         for opt in self.MODULE_OPTIONS:
             setattr(self,
@@ -731,7 +731,7 @@ class PgAutoscaler(MgrModule):
                 if r[0] != 0:
                     # FIXME: this is a serious and unexpected thing,
                     # we should expose it as a cluster log error once
-                    # the hook for doing that from ceph-mgr modules is
+                    # the hook for doing that from stone-mgr modules is
                     # in.
                     self.log.error("pg_num adjustment on {0} to {1} failed: {2}"
                                    .format(p['pool_name'],

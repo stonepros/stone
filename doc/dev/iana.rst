@@ -6,7 +6,7 @@ Private Enterprise Number (PEN) Assignment
 
 50495
 
-Organization ``Ceph``.
+Organization ``Stone``.
 
 Port number (monitor)
 ---------------------

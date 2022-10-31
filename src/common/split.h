@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -17,7 +17,7 @@
 
 #include <string_view>
 
-namespace ceph {
+namespace stone {
 
 // a forward iterator over the parts of a split string
 class spliterator {
@@ -104,4 +104,4 @@ class split {
   const_iterator cend() const { return {}; }
 };
 
-} // namespace ceph
+} // namespace stone

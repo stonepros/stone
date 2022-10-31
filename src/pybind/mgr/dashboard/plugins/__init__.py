@@ -66,7 +66,7 @@ class DashboardPluginManager(object):
         return plugin
 
 
-PLUGIN_MANAGER = DashboardPluginManager("ceph-mgr.dashboard")
+PLUGIN_MANAGER = DashboardPluginManager("stone-mgr.dashboard")
 
 # Load all interfaces and their hooks
 from . import interfaces  # noqa pylint: disable=C0413,W0406

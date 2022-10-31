@@ -4,7 +4,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -52,7 +52,7 @@ public:
     Context_OTP(RGWSI_SysObj*_sysobj_svc) : RGWSI_MetaBackend_SObj::Context_SObj(_sysobj_svc, nullptr) {}
   };
 
-  RGWSI_MetaBackend_OTP(CephContext *cct);
+  RGWSI_MetaBackend_OTP(StoneContext *cct);
   virtual ~RGWSI_MetaBackend_OTP();
 
   RGWSI_MetaBackend::Type get_type() {
@@ -71,7 +71,7 @@ public:
   RGWSI_MetaBackend_Handler *alloc_be_handler() override;
   RGWSI_MetaBackend::Context *alloc_ctx() override;
 
-  int call_with_get_params(ceph::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)> cb) override;
+  int call_with_get_params(stone::real_time *pmtime, std::function<int(RGWSI_MetaBackend::GetParams&)> cb) override;
 
   int get_entry(RGWSI_MetaBackend::Context *ctx,
                 const string& key,

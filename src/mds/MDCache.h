@@ -132,8 +132,8 @@ class MDCache {
  public:
   typedef std::map<mds_rank_t, ref_t<MCacheExpire>> expiremap;
 
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
 
   // -- discover --
   struct discover_info_t {
@@ -147,7 +147,7 @@ class MDCache {
       basei->get(MDSCacheObject::PIN_DISCOVERBASE);
     }
 
-    ceph_tid_t tid = 0;
+    stone_tid_t tid = 0;
     mds_rank_t mds = -1;
     inodeno_t ino;
     frag_t frag;
@@ -171,7 +171,7 @@ class MDCache {
   struct find_ino_peer_info_t {
     find_ino_peer_info_t() {}
     inodeno_t ino;
-    ceph_tid_t tid = 0;
+    stone_tid_t tid = 0;
     MDSContext *fin = nullptr;
     bool path_locked = false;
     mds_rank_t hint = MDS_RANK_NONE;
@@ -228,7 +228,7 @@ class MDCache {
    * on to StrayManager (i.e. this is a stray you've just created)
    */
   void notify_stray(CDentry *dn) {
-    ceph_assert(dn->get_dir()->get_inode()->is_stray());
+    stone_assert(dn->get_dir()->get_inode()->is_stray());
     if (dn->state_test(CDentry::STATE_PURGING))
       return;
 
@@ -270,7 +270,7 @@ class MDCache {
 
   void _send_discover(discover_info_t& dis);
   discover_info_t& _create_discover(mds_rank_t mds) {
-    ceph_tid_t t = ++discover_last_tid;
+    stone_tid_t t = ++discover_last_tid;
     discover_info_t& d = discovers[t];
     d.tid = t;
     d.mds = mds;
@@ -318,7 +318,7 @@ class MDCache {
   CDir *get_subtree_root(CDir *dir);
   CDir *get_projected_subtree_root(CDir *dir);
   bool is_leaf_subtree(CDir *dir) {
-    ceph_assert(subtrees.count(dir));
+    stone_assert(subtrees.count(dir));
     return subtrees[dir].empty();
   }
   void remove_subtree(CDir *dir);
@@ -465,7 +465,7 @@ class MDCache {
   void remove_ambiguous_peer_update(metareqid_t reqid, mds_rank_t leader) {
     auto p = ambiguous_peer_updates.find(leader);
     auto q = p->second.find(reqid);
-    ceph_assert(q != p->second.end());
+    stone_assert(q != p->second.end());
     p->second.erase(q);
     if (p->second.empty())
       ambiguous_peer_updates.erase(p);
@@ -483,7 +483,7 @@ class MDCache {
     return my_ambiguous_imports.count(base);
   }
   void get_ambiguous_import_bounds(dirfrag_t base, vector<dirfrag_t>& bounds) {
-    ceph_assert(my_ambiguous_imports.count(base));
+    stone_assert(my_ambiguous_imports.count(base));
     bounds = my_ambiguous_imports[base];
   }
   void cancel_ambiguous_import(CDir *);
@@ -538,8 +538,8 @@ class MDCache {
     return NULL;
   }
   void remove_replay_cap_reconnect(inodeno_t ino, client_t client) {
-    ceph_assert(cap_imports[ino].size() == 1);
-    ceph_assert(cap_imports[ino][client].size() == 1);
+    stone_assert(cap_imports[ino].size() == 1);
+    stone_assert(cap_imports[ino][client].size() == 1);
     cap_imports.erase(ino);
   }
   void wait_replay_cap_reconnect(inodeno_t ino, MDSContext *c) {
@@ -577,7 +577,7 @@ class MDCache {
   void export_remaining_imported_caps();
 
   void do_cap_import(Session *session, CInode *in, Capability *cap,
-		     uint64_t p_cap_id, ceph_seq_t p_seq, ceph_seq_t p_mseq,
+		     uint64_t p_cap_id, stone_seq_t p_seq, stone_seq_t p_mseq,
 		     int peer, int p_flags);
   void do_delayed_cap_imports();
   void rebuild_need_snapflush(CInode *head_in, SnapRealm *realm, client_t client,
@@ -924,7 +924,7 @@ class MDCache {
   void show_subtrees(int dbl=10, bool force_print=false);
 
   CInode *hack_pick_random_inode() {
-    ceph_assert(!inode_map.empty());
+    stone_assert(!inode_map.empty());
     int n = rand() % inode_map.size();
     auto p = inode_map.begin();
     while (n--) ++p;
@@ -967,8 +967,8 @@ class MDCache {
   // -- client caps --
   uint64_t last_cap_id = 0;
 
-  map<ceph_tid_t, discover_info_t> discovers;
-  ceph_tid_t discover_last_tid = 0;
+  map<stone_tid_t, discover_info_t> discovers;
+  stone_tid_t discover_last_tid = 0;
 
   // waiters
   map<int, map<inodeno_t, MDSContext::vec > > waiting_for_base_ino;
@@ -986,8 +986,8 @@ class MDCache {
 
   bool did_shutdown_log_cap = false;
 
-  map<ceph_tid_t, find_ino_peer_info_t> find_ino_peer;
-  ceph_tid_t find_ino_peer_last_tid = 0;
+  map<stone_tid_t, find_ino_peer_info_t> find_ino_peer;
+  stone_tid_t find_ino_peer_last_tid = 0;
 
   // delayed cache expire
   map<CDir*, expiremap> delayed_expire; // subtree root -> expire msg
@@ -1128,10 +1128,10 @@ class MDCache {
   void repair_dirfrag_stats_work(MDRequestRef& mdr);
   void rdlock_dirfrags_stats_work(MDRequestRef& mdr);
 
-  ceph::unordered_map<inodeno_t,CInode*> inode_map;  // map of head inodes by ino
+  stone::unordered_map<inodeno_t,CInode*> inode_map;  // map of head inodes by ino
   map<vinodeno_t, CInode*> snap_inode_map;  // map of snap inodes by ino
   CInode *root = nullptr; // root inode
-  CInode *myin = nullptr; // .ceph/mds%d dir
+  CInode *myin = nullptr; // .stone/mds%d dir
 
   bool readonly = false;
 
@@ -1150,7 +1150,7 @@ class MDCache {
   map<CInode*,list<pair<CDir*,CDir*> > > projected_subtree_renames;  // renamed ino -> target dir
 
   // -- requests --
-  ceph::unordered_map<metareqid_t, MDRequestRef> active_requests;
+  stone::unordered_map<metareqid_t, MDRequestRef> active_requests;
 
   // -- recovery --
   set<mds_rank_t> recovery_set;
@@ -1209,7 +1209,7 @@ class MDCache {
   std::unique_ptr<MDSContext> rejoin_done;
   std::unique_ptr<MDSContext> resolve_done;
 
-  ceph_tid_t open_ino_last_tid = 0;
+  stone_tid_t open_ino_last_tid = 0;
   map<inodeno_t,open_ino_info_t> opening_inodes;
 
   StrayManager stray_manager;
@@ -1335,8 +1335,8 @@ class MDCache {
   DecayCounter trim_counter;
 
   std::thread upkeeper;
-  ceph::mutex upkeep_mutex = ceph::make_mutex("MDCache::upkeep_mutex");
-  ceph::condition_variable upkeep_cvar;
+  stone::mutex upkeep_mutex = stone::make_mutex("MDCache::upkeep_mutex");
+  stone::condition_variable upkeep_cvar;
   time upkeep_last_trim = time::min();
   time upkeep_last_release = time::min();
   std::atomic<bool> upkeep_trim_shutdown{false};

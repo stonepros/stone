@@ -21,15 +21,15 @@ struct Fh {
 
   int flags;
   bool pos_locked;           // pos is currently in use
-  std::list<ceph::condition_variable*> pos_waiters;   // waiters for pos
+  std::list<stone::condition_variable*> pos_waiters;   // waiters for pos
 
   UserPerm actor_perms; // perms I opened the file with
 
   Readahead readahead;
 
   // file lock
-  std::unique_ptr<ceph_lock_state_t> fcntl_locks;
-  std::unique_ptr<ceph_lock_state_t> flock_locks;
+  std::unique_ptr<stone_lock_state_t> fcntl_locks;
+  std::unique_ptr<stone_lock_state_t> flock_locks;
 
   bool has_any_filelocks() {
     return

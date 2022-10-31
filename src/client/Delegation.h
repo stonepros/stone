@@ -5,7 +5,7 @@
 
 #include "common/Clock.h"
 #include "common/Timer.h"
-#include "include/cephfs/ceph_ll_client.h"
+#include "include/stonefs/stone_ll_client.h"
 
 /* Commands for manipulating delegation state */
 #ifndef STONE_DELEGATION_NONE
@@ -15,7 +15,7 @@
 #endif
 
 /* Converts STONE_DELEGATION_* to cap mask */
-int ceph_deleg_caps_for_type(unsigned type);
+int stone_deleg_caps_for_type(unsigned type);
 
 /*
  * A delegation is a container for holding caps on behalf of a client that
@@ -23,13 +23,13 @@ int ceph_deleg_caps_for_type(unsigned type);
  */
 class Delegation {
 public:
-  Delegation(Fh *_fh, unsigned _type, ceph_deleg_cb_t _cb, void *_priv);
+  Delegation(Fh *_fh, unsigned _type, stone_deleg_cb_t _cb, void *_priv);
   ~Delegation();
   Fh *get_fh() { return fh; }
   unsigned get_type() { return type; }
   bool is_recalled() { return !recall_time.is_zero(); }
 
-  void reinit(unsigned _type, ceph_deleg_cb_t _recall_cb, void *_priv);
+  void reinit(unsigned _type, stone_deleg_cb_t _recall_cb, void *_priv);
   void recall(bool skip_read);
 private:
   // Filehandle against which it was acquired
@@ -42,7 +42,7 @@ private:
   unsigned			type;
 
   // callback into application to recall delegation
-  ceph_deleg_cb_t		recall_cb;
+  stone_deleg_cb_t		recall_cb;
 
   // time of first recall
   utime_t			recall_time;

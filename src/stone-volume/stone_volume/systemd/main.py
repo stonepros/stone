@@ -1,14 +1,14 @@
 """
 This file is used only by systemd units that are passing their instance suffix
 as arguments to this script so that it can parse the suffix into arguments that
-``ceph-volume <sub command>`` can consume
+``stone-volume <sub command>`` can consume
 """
 import os
 import sys
 import time
 import logging
-from ceph_volume import log, process
-from ceph_volume.exceptions import SuffixParsingError
+from stone_volume import log, process
+from stone_volume.exceptions import SuffixParsingError
 
 
 def parse_subcommand(string):
@@ -52,33 +52,33 @@ def parse_osd_uuid(string):
 
 def main(args=None):
     """
-    Main entry point for the ``ceph-volume-systemd`` executable. ``args`` are
+    Main entry point for the ``stone-volume-systemd`` executable. ``args`` are
     optional for easier testing of arguments.
 
     Expected input is similar to::
 
-        ['/path/to/ceph-volume-systemd', '<type>-<extra metadata>']
+        ['/path/to/stone-volume-systemd', '<type>-<extra metadata>']
 
     For example::
 
         [
-            '/usr/bin/ceph-volume-systemd',
+            '/usr/bin/stone-volume-systemd',
             'lvm-0-8715BEB4-15C5-49DE-BA6F-401086EC7B41'
         ]
 
     The first part of the argument is the only interesting bit, which contains
-    the metadata needed to proxy the call to ``ceph-volume`` itself.
+    the metadata needed to proxy the call to ``stone-volume`` itself.
 
-    Reusing the example, the proxy call to ``ceph-volume`` would look like::
+    Reusing the example, the proxy call to ``stone-volume`` would look like::
 
-        ceph-volume lvm trigger 0-8715BEB4-15C5-49DE-BA6F-401086EC7B41
+        stone-volume lvm trigger 0-8715BEB4-15C5-49DE-BA6F-401086EC7B41
 
     That means that ``lvm`` is used as the subcommand and it is **expected**
     that a ``trigger`` sub-commmand will be present to make sense of the extra
     piece of the string.
 
     """
-    log.setup(name='ceph-volume-systemd.log', log_path='/var/log/ceph/ceph-volume-systemd.log')
+    log.setup(name='stone-volume-systemd.log', log_path='/var/log/stone/stone-volume-systemd.log')
     logger = logging.getLogger('systemd')
 
     args = args if args is not None else sys.argv
@@ -90,10 +90,10 @@ def main(args=None):
     extra_data = parse_extra_data(suffix)
     logger.info('raw systemd input received: %s', suffix)
     logger.info('parsed sub-command: %s, extra data: %s', sub_command, extra_data)
-    command = ['ceph-volume', sub_command, 'trigger', extra_data]
+    command = ['stone-volume', sub_command, 'trigger', extra_data]
 
-    tries = int(os.environ.get('CEPH_VOLUME_SYSTEMD_TRIES', 30))
-    interval = int(os.environ.get('CEPH_VOLUME_SYSTEMD_INTERVAL', 5))
+    tries = int(os.environ.get('STONE_VOLUME_SYSTEMD_TRIES', 30))
+    interval = int(os.environ.get('STONE_VOLUME_SYSTEMD_INTERVAL', 5))
     while tries > 0:
         try:
             # don't log any output to the terminal, just rely on stderr/stdout

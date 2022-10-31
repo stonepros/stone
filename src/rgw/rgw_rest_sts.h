@@ -14,7 +14,7 @@
 namespace rgw::auth::sts {
 
 class WebTokenEngine : public rgw::auth::Engine {
-  CephContext* const cct;
+  StoneContext* const cct;
   RGWCtl* const ctl;
 
   using result_t = rgw::auth::Engine::result_t;
@@ -43,7 +43,7 @@ class WebTokenEngine : public rgw::auth::Engine {
                         const req_state* s, optional_yield y) const;
 
 public:
-  WebTokenEngine(CephContext* const cct,
+  WebTokenEngine(StoneContext* const cct,
                     RGWCtl* const ctl,
                     const rgw::auth::TokenExtractor* const extractor,
                     const rgw::auth::WebIdentityApplier::Factory* const apl_factory)
@@ -78,7 +78,7 @@ class DefaultStrategy : public rgw::auth::Strategy,
     return s->info.args.get("WebIdentityToken");
   }
 
-  aplptr_t create_apl_web_identity( CephContext* cct,
+  aplptr_t create_apl_web_identity( StoneContext* cct,
                                     const req_state* s,
                                     const string& role_session,
                                     const string& role_tenant,
@@ -89,7 +89,7 @@ class DefaultStrategy : public rgw::auth::Strategy,
   }
 
 public:
-  DefaultStrategy(CephContext* const cct,
+  DefaultStrategy(StoneContext* const cct,
                   ImplicitTenants& implicit_tenant_context,
                   RGWCtl* const ctl)
     : ctl(ctl),

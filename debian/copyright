@@ -1,7 +1,7 @@
 Format-Specification: http://anonscm.debian.org/viewvc/dep/web/deps/dep5/copyright-format.xml?revision=279&view=markup
-Name: ceph
+Name: stone
 Maintainer: Sage Weil <sage@newdream.net>
-Source: http://ceph.com/
+Source: http://stone.com/
 
 Files: *
 Copyright: (c) 2004-2010 by Sage Weil <sage@newdream.net>
@@ -28,7 +28,7 @@ Files: src/os/btrfs_ioctl.h
 Copyright: Copyright (C) 2007 Oracle.  All rights reserved.
 License: GPL2 (see COPYING-GPL2)
 
-Files: src/include/ceph_hash.cc
+Files: src/include/stone_hash.cc
 Copyright: None
 License: Public domain
 

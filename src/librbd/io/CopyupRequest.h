@@ -7,7 +7,7 @@
 #include "include/int_types.h"
 #include "include/buffer.h"
 #include "include/interval_set.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/zipkin_trace.h"
 #include "librbd/io/AsyncOperation.h"
 #include "librbd/io/Types.h"
@@ -91,14 +91,14 @@ private:
   bool m_deep_copied = false;
 
   Extents m_copyup_extent_map;
-  ceph::bufferlist m_copyup_data;
+  stone::bufferlist m_copyup_data;
 
   AsyncOperation m_async_op;
 
   std::vector<uint64_t> m_snap_ids;
   bool m_first_snap_is_clean = false;
 
-  ceph::mutex m_lock = ceph::make_mutex("CopyupRequest", false);
+  stone::mutex m_lock = stone::make_mutex("CopyupRequest", false);
   WriteRequests m_pending_requests;
   unsigned m_pending_copyups = 0;
   int m_copyup_ret_val = 0;

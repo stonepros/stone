@@ -32,7 +32,7 @@ def create_image(ctx, config):
     For example::
 
         tasks:
-        - ceph:
+        - stone:
         - rbd.create_image:
             client.0:
                 image_name: testimage
@@ -69,7 +69,7 @@ def create_image(ctx, config):
                                                                  size=size))
         args = [
                 'adjust-ulimits',
-                'ceph-coverage',
+                'stone-coverage',
                 '{tdir}/archive/coverage'.format(tdir=testdir),
                 'rbd',
                 '-p', 'rbd',
@@ -95,7 +95,7 @@ def create_image(ctx, config):
             remote.run(
                 args=[
                     'adjust-ulimits',
-                    'ceph-coverage',
+                    'stone-coverage',
                     '{tdir}/archive/coverage'.format(tdir=testdir),
                     'rbd',
                     'encryption',
@@ -120,7 +120,7 @@ def create_image(ctx, config):
             remote.run(
                 args=[
                     'adjust-ulimits',
-                    'ceph-coverage',
+                    'stone-coverage',
                     '{tdir}/archive/coverage'.format(tdir=testdir),
                     'rbd',
                     '-p', 'rbd',
@@ -137,7 +137,7 @@ def clone_image(ctx, config):
     For example::
 
         tasks:
-        - ceph:
+        - stone:
         - rbd.clone_image:
             client.0:
                 parent_name: testimage
@@ -170,7 +170,7 @@ def clone_image(ctx, config):
                     ('clone', parent_spec, name)]:
             args = [
                     'adjust-ulimits',
-                    'ceph-coverage',
+                    'stone-coverage',
                     '{tdir}/archive/coverage'.format(tdir=testdir),
                     'rbd', '-p', 'rbd'
                     ]
@@ -195,7 +195,7 @@ def clone_image(ctx, config):
                         ('snap', 'rm', parent_spec)]:
                 args = [
                         'adjust-ulimits',
-                        'ceph-coverage',
+                        'stone-coverage',
                         '{tdir}/archive/coverage'.format(tdir=testdir),
                         'rbd', '-p', 'rbd'
                         ]
@@ -210,7 +210,7 @@ def modprobe(ctx, config):
     For example::
 
         tasks:
-        - ceph:
+        - stone:
         - rbd.create_image: [client.0]
         - rbd.modprobe: [client.0]
     """
@@ -253,7 +253,7 @@ def dev_create(ctx, config):
     For example::
 
         tasks:
-        - ceph:
+        - stone:
         - rbd.create_image: [client.0]
         - rbd.modprobe: [client.0]
         - rbd.dev_create:
@@ -304,7 +304,7 @@ def dev_create(ctx, config):
             args=[
                 'sudo',
                 'adjust-ulimits',
-                'ceph-coverage',
+                'stone-coverage',
                 '{tdir}/archive/coverage'.format(tdir=testdir),
                 'rbd',
                 '--id', role.rsplit('.')[-1],
@@ -342,7 +342,7 @@ def dev_create(ctx, config):
                     'LD_LIBRARY_PATH={tdir}/binary/usr/local/lib'.format(tdir=testdir),
                     'sudo',
                     'adjust-ulimits',
-                    'ceph-coverage',
+                    'stone-coverage',
                     '{tdir}/archive/coverage'.format(tdir=testdir),
                     'rbd',
                     '-p', 'rbd',
@@ -391,7 +391,7 @@ def run_xfstests(ctx, config):
     For example::
 
         tasks:
-        - ceph:
+        - stone:
         - rbd.run_xfstests:
             client.0:
                 count: 2
@@ -484,7 +484,7 @@ def run_xfstests_one_client(ctx, role, properties):
             '/usr/bin/sudo',
             'TESTDIR={tdir}'.format(tdir=testdir),
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             '{tdir}/archive/coverage'.format(tdir=testdir),
             '/bin/bash',
             test_path,
@@ -518,7 +518,7 @@ def xfstests(ctx, config):
     For example::
 
         tasks:
-        - ceph:
+        - stone:
         # Image sizes are in MB
         - rbd.xfstests:
             client.0:
@@ -534,7 +534,7 @@ def xfstests(ctx, config):
                 exclude:
                 - generic/42
                 randomize: true
-                xfstests_url: 'https://raw.github.com/ceph/ceph-ci/wip-55555/qa'
+                xfstests_url: 'https://raw.github.com/stonepros/stone-ci/wip-55555/qa'
     """
     if config is None:
         config = { 'all': None }
@@ -586,7 +586,7 @@ def xfstests(ctx, config):
             )
 
         xfstests_branch = properties.get('xfstests_branch', 'master')
-        xfstests_url = properties.get('xfstests_url', 'https://raw.github.com/ceph/ceph/{branch}/qa'.format(branch=xfstests_branch))
+        xfstests_url = properties.get('xfstests_url', 'https://raw.github.com/stonepros/stone/{branch}/qa'.format(branch=xfstests_branch))
 
         xfstests_config[role] = dict(
             count=properties.get('count', 1),
@@ -627,13 +627,13 @@ def task(ctx, config):
     For example, you can specify which clients to run on::
 
         tasks:
-        - ceph:
+        - stone:
         - rbd: [client.0, client.1]
 
     There are a few image options::
 
         tasks:
-        - ceph:
+        - stone:
         - rbd:
             client.0: # uses defaults
             client.1:
@@ -645,14 +645,14 @@ def task(ctx, config):
     To use default options on all clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rbd:
             all:
 
     To create 20GiB images and format them with xfs on all clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rbd:
             all:
               image_size: 20480

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
   *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -27,13 +27,13 @@
 #include <vector>
 
 #include "acconfig.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
 
 #if defined(HAVE_LIBAIO) || defined(HAVE_POSIXAIO)
 #include "aio/aio.h"
 #endif
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/buffer.h"
 #include "include/interval_set.h"
 #define SPDK_PREFIX "spdk:"
@@ -68,12 +68,12 @@
 /// track in-flight io
 struct IOContext {
 private:
-  ceph::mutex lock = ceph::make_mutex("IOContext::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("IOContext::lock");
+  stone::condition_variable cond;
   int r = 0;
 
 public:
-  StoneeContext* cct;
+  StoneContext* cct;
   void *priv;
 #ifdef HAVE_SPDK
   void *nvme_task_first = nullptr;
@@ -89,7 +89,7 @@ public:
   std::atomic_int num_running = {0};
   bool allow_eio;
 
-  explicit IOContext(StoneeContext* cct, void *p, bool allow_eio = false)
+  explicit IOContext(StoneContext* cct, void *p, bool allow_eio = false)
     : cct(cct), priv(p), allow_eio(allow_eio)
     {}
 
@@ -130,10 +130,10 @@ public:
 
 class BlockDevice {
 public:
-  StoneeContext* cct;
+  StoneContext* cct;
   typedef void (*aio_callback_t)(void *handle, void *aio);
 private:
-  ceph::mutex ioc_reap_lock = ceph::make_mutex("BlockDevice::ioc_reap_lock");
+  stone::mutex ioc_reap_lock = stone::make_mutex("BlockDevice::ioc_reap_lock");
   std::vector<IOContext*> ioc_reap_queue;
   std::atomic_int ioc_reap_count = {0};
   enum class block_device_t {
@@ -154,7 +154,7 @@ private:
   static block_device_t detect_device_type(const std::string& path);
   static block_device_t device_type_from_name(const std::string& blk_dev_name);
   static BlockDevice *create_with_type(block_device_t device_type,
-    StoneeContext* cct, const std::string& path, aio_callback_t cb,
+    StoneContext* cct, const std::string& path, aio_callback_t cb,
     void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
 
 protected:
@@ -177,7 +177,7 @@ protected:
 public:
   aio_callback_t aio_callback;
   void *aio_callback_priv;
-  BlockDevice(StoneeContext* cct, aio_callback_t cb, void *cbpriv)
+  BlockDevice(StoneContext* cct, aio_callback_t cb, void *cbpriv)
   : cct(cct),
     aio_callback(cb),
     aio_callback_priv(cbpriv)
@@ -185,18 +185,18 @@ public:
   virtual ~BlockDevice() = default;
 
   static BlockDevice *create(
-    StoneeContext* cct, const std::string& path, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
+    StoneContext* cct, const std::string& path, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
   virtual bool supported_bdev_label() { return true; }
   virtual bool is_rotational() { return rotational; }
 
   // HM-SMR-specific calls
   virtual bool is_smr() const { return false; }
   virtual uint64_t get_zone_size() const {
-    ceph_assert(is_smr());
+    stone_assert(is_smr());
     return zone_size;
   }
   virtual uint64_t get_conventional_region_size() const {
-    ceph_assert(is_smr());
+    stone_assert(is_smr());
     return conventional_region_size;
   }
 
@@ -233,7 +233,7 @@ public:
   virtual int read(
     uint64_t off,
     uint64_t len,
-    ceph::buffer::list *pbl,
+    stone::buffer::list *pbl,
     IOContext *ioc,
     bool buffered) = 0;
   virtual int read_random(
@@ -243,18 +243,18 @@ public:
     bool buffered) = 0;
   virtual int write(
     uint64_t off,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     bool buffered,
     int write_hint = WRITE_LIFE_NOT_SET) = 0;
 
   virtual int aio_read(
     uint64_t off,
     uint64_t len,
-    ceph::buffer::list *pbl,
+    stone::buffer::list *pbl,
     IOContext *ioc) = 0;
   virtual int aio_write(
     uint64_t off,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     IOContext *ioc,
     bool buffered,
     int write_hint = WRITE_LIFE_NOT_SET) = 0;

@@ -34,7 +34,7 @@ struct aio_t {
   boost::container::small_vector<iovec,4> iov;
   uint64_t offset, length;
   long rval;
-  ceph::buffer::list bl;  ///< write payload (so that it remains stable for duration)
+  stone::buffer::list bl;  ///< write payload (so that it remains stable for duration)
 
   boost::intrusive::list_member_hook<> queue_item;
 
@@ -118,12 +118,12 @@ struct aio_queue_t final : public io_queue_t {
       ctx(0) {
   }
   ~aio_queue_t() final {
-    ceph_assert(ctx == 0);
+    stone_assert(ctx == 0);
   }
 
   int init(std::vector<int> &fds) final {
     (void)fds;
-    ceph_assert(ctx == 0);
+    stone_assert(ctx == 0);
 #if defined(HAVE_LIBAIO)
     int r = io_setup(max_iodepth, &ctx);
     if (r < 0) {
@@ -148,7 +148,7 @@ struct aio_queue_t final : public io_queue_t {
 #elif defined(HAVE_POSIXAIO)
       int r = close(ctx);
 #endif
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       ctx = 0;
     }
   }

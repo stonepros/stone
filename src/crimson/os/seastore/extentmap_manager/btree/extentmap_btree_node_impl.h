@@ -48,7 +48,7 @@ struct ExtMapInnerNode
     common::FixedKVNodeLayout<
       INNER_NODE_CAPACITY,
       extmap_node_meta_t, extmap_node_meta_le_t,
-      objaddr_t, ceph_le32,
+      objaddr_t, stone_le32,
       laddr_t, laddr_le_t> {
   using internal_iterator_t = const_iterator;
   template <typename... T>
@@ -88,18 +88,18 @@ struct ExtMapInnerNode
     return type;
   }
 
-  ceph::bufferlist get_delta() final {
+  stone::bufferlist get_delta() final {
     assert(!delta_buffer.empty());
-    ceph::buffer::ptr bptr(delta_buffer.get_bytes());
+    stone::buffer::ptr bptr(delta_buffer.get_bytes());
     delta_buffer.copy_out(bptr.c_str(), bptr.length());
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.push_back(bptr);
     return bl;
   }
 
-  void apply_delta(const ceph::bufferlist &_bl) final {
+  void apply_delta(const stone::bufferlist &_bl) final {
     assert(_bl.length());
-    ceph::bufferlist bl = _bl;
+    stone::bufferlist bl = _bl;
     bl.rebuild();
     delta_buffer_t buffer;
     buffer.copy_in(bl.front().c_str(), bl.front().length());
@@ -185,7 +185,7 @@ struct ExtMapLeafNode
     common::FixedKVNodeLayout<
       LEAF_NODE_CAPACITY,
       extmap_node_meta_t, extmap_node_meta_le_t,
-      objaddr_t, ceph_le32,
+      objaddr_t, stone_le32,
       lext_map_val_t, lext_map_val_le_t> {
   using internal_iterator_t = const_iterator;
   template <typename... T>
@@ -223,18 +223,18 @@ struct ExtMapLeafNode
     return type;
   }
 
-  ceph::bufferlist get_delta() final {
+  stone::bufferlist get_delta() final {
     assert(!delta_buffer.empty());
-    ceph::buffer::ptr bptr(delta_buffer.get_bytes());
+    stone::buffer::ptr bptr(delta_buffer.get_bytes());
     delta_buffer.copy_out(bptr.c_str(), bptr.length());
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.push_back(bptr);
     return bl;
   }
 
-  void apply_delta(const ceph::bufferlist &_bl) final {
+  void apply_delta(const stone::bufferlist &_bl) final {
     assert(_bl.length());
-    ceph::bufferlist bl = _bl;
+    stone::bufferlist bl = _bl;
     bl.rebuild();
     delta_buffer_t buffer;
     buffer.copy_in(bl.front().c_str(), bl.front().length());

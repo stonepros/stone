@@ -44,7 +44,7 @@ class Debug(SP, I.CanCherrypy, I.ConfiguresCherryPy,  # pylint: disable=too-many
                 'summary': 'Dashboard debug mode is enabled',
                 'detail': [
                     'Please disable debug mode in production environments using '
-                    '"ceph dashboard {} {}"'.format(self.NAME, Actions.DISABLE.value)
+                    '"stone dashboard {} {}"'.format(self.NAME, Actions.DISABLE.value)
                 ]
             }})
         else:
@@ -58,7 +58,7 @@ class Debug(SP, I.CanCherrypy, I.ConfiguresCherryPy,  # pylint: disable=too-many
     @no_type_check
     def handler(self, action: Actions):
         '''
-        Control and report debug status in Ceph-Dashboard
+        Control and report debug status in Stone-Dashboard
         '''
         ret = 0
         msg = ''

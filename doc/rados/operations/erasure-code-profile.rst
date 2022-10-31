@@ -7,7 +7,7 @@ Erasure code profiles
 Erasure code is defined by a **profile** and is used when creating an
 erasure coded pool and the associated CRUSH rule.
 
-The **default** erasure code profile (which is created when the Ceph
+The **default** erasure code profile (which is created when the Stone
 cluster is initialized) will split the data into 2 equal-sized chunks,
 and have 2 parity chunks of the same size. It will take as much space
 in the cluster as a 2-replica pool but can sustain the data loss of 2
@@ -41,7 +41,7 @@ osd erasure-code-profile set
 
 To create a new erasure code profile::
 
-	ceph osd erasure-code-profile set {name} \
+	stone osd erasure-code-profile set {name} \
              [{directory=directory}] \
              [{plugin=plugin}] \
              [{stripe_unit=stripe_unit}] \
@@ -57,7 +57,7 @@ Where:
 
 :Type: String
 :Required: No.
-:Default: /usr/lib/ceph/erasure-code
+:Default: /usr/lib/stone/erasure-code
 
 ``{plugin=plugin}``
 
@@ -106,7 +106,7 @@ osd erasure-code-profile rm
 
 To remove an erasure code profile::
 
-	ceph osd erasure-code-profile rm {name}
+	stone osd erasure-code-profile rm {name}
 
 If the profile is referenced by a pool, the deletion will fail.
 
@@ -115,12 +115,12 @@ osd erasure-code-profile get
 
 To display an erasure code profile::
 
-	ceph osd erasure-code-profile get {name}
+	stone osd erasure-code-profile get {name}
 
 osd erasure-code-profile ls
 ===========================
 
 To list the names of all erasure code profiles::
 
-	ceph osd erasure-code-profile ls
+	stone osd erasure-code-profile ls
 

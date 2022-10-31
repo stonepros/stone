@@ -8,14 +8,14 @@ from os.path import join as os_path_join
 
 from teuthology.orchestra.run import CommandFailedError, Raw
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
-from tasks.cephfs.filesystem import FileLayout, FSMissing
-from tasks.cephfs.fuse_mount import FuseMount
-from tasks.cephfs.caps_helper import CapsHelper
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
+from tasks.stonefs.filesystem import FileLayout, FSMissing
+from tasks.stonefs.fuse_mount import FuseMount
+from tasks.stonefs.caps_helper import CapsHelper
 
 log = logging.getLogger(__name__)
 
-class TestAdminCommands(CephFSTestCase):
+class TestAdminCommands(StoneFSTestCase):
     """
     Tests for administration command.
     """
@@ -48,7 +48,7 @@ class TestAdminCommands(CephFSTestCase):
 
     def test_fs_status(self):
         """
-        That `ceph fs status` command functions.
+        That `stone fs status` command functions.
         """
 
         s = self.fs.mon_manager.raw_cluster_cmd("fs", "status")
@@ -90,11 +90,11 @@ class TestAdminCommands(CephFSTestCase):
         mon_cmd = self.fs.mon_manager.raw_cluster_cmd
         mon_cmd('osd', 'pool', 'create', pool_name, '--pg_num_min',
                 str(self.fs.pg_num_min))
-        # Check whether https://tracker.ceph.com/issues/43061 is fixed
-        mon_cmd('osd', 'pool', 'application', 'enable', pool_name, 'cephfs')
+        # Check whether https://tracker.stone.com/issues/43061 is fixed
+        mon_cmd('osd', 'pool', 'application', 'enable', pool_name, 'stonefs')
         self.fs.add_data_pool(pool_name, create=False)
         self._check_pool_application_metadata_key_value(
-            pool_name, 'cephfs', 'data', self.fs.name)
+            pool_name, 'stonefs', 'data', self.fs.name)
 
     def test_add_data_pool_subdir(self):
         """
@@ -193,11 +193,11 @@ class TestAdminCommands(CephFSTestCase):
         mon_cmd = self.fs.mon_manager.raw_cluster_cmd
         for p in pool_names:
             mon_cmd('osd', 'pool', 'create', p, '--pg_num_min', str(self.fs.pg_num_min))
-            mon_cmd('osd', 'pool', 'application', 'enable', p, 'cephfs')
+            mon_cmd('osd', 'pool', 'application', 'enable', p, 'stonefs')
         mon_cmd('fs', 'new', fs_name, pool_names[0], pool_names[1])
         for i in range(2):
             self._check_pool_application_metadata_key_value(
-                pool_names[i], 'cephfs', keys[i], fs_name)
+                pool_names[i], 'stonefs', keys[i], fs_name)
 
     def test_fs_new_with_specific_id(self):
         """
@@ -212,7 +212,7 @@ class TestAdminCommands(CephFSTestCase):
         self.run_cluster_cmd(f'fs new {fs_name} {pool_names[0]} {pool_names[1]} --fscid  {fscid} --force')
         self.fs.status().get_fsmap(fscid)
         for i in range(2):
-            self._check_pool_application_metadata_key_value(pool_names[i], 'cephfs', keys[i], fs_name)
+            self._check_pool_application_metadata_key_value(pool_names[i], 'stonefs', keys[i], fs_name)
 
     def test_fs_new_with_specific_id_idempotency(self):
         """
@@ -266,7 +266,7 @@ class TestAdminCommands(CephFSTestCase):
             self.fail("expected creating file system with ID already in use to fail")
 
 
-class TestDump(CephFSTestCase):
+class TestDump(StoneFSTestCase):
     CLIENTS_REQUIRED = 0
     MDSS_REQUIRED = 1
 
@@ -336,13 +336,13 @@ class TestDump(CephFSTestCase):
         else:
             self.fail("trimming did not occur as expected")
 
-class TestRequiredClientFeatures(CephFSTestCase):
+class TestRequiredClientFeatures(StoneFSTestCase):
     CLIENTS_REQUIRED = 0
     MDSS_REQUIRED = 1
 
     def test_required_client_features(self):
         """
-        That `ceph fs required_client_features` command functions.
+        That `stone fs required_client_features` command functions.
         """
 
         def is_required(index):
@@ -376,7 +376,7 @@ class TestRequiredClientFeatures(CephFSTestCase):
 
     def test_required_client_feature_add_reserved(self):
         """
-        That `ceph fs required_client_features X add reserved` fails.
+        That `stone fs required_client_features X add reserved` fails.
         """
 
         p = self.fs.required_client_features('add', 'reserved', check_status=False, stderr=StringIO())
@@ -384,7 +384,7 @@ class TestRequiredClientFeatures(CephFSTestCase):
 
     def test_required_client_feature_rm_reserved(self):
         """
-        That `ceph fs required_client_features X rm reserved` fails.
+        That `stone fs required_client_features X rm reserved` fails.
         """
 
         p = self.fs.required_client_features('rm', 'reserved', check_status=False, stderr=StringIO())
@@ -392,7 +392,7 @@ class TestRequiredClientFeatures(CephFSTestCase):
 
     def test_required_client_feature_add_reserved_bit(self):
         """
-        That `ceph fs required_client_features X add <reserved_bit>` passes.
+        That `stone fs required_client_features X add <reserved_bit>` passes.
         """
 
         p = self.fs.required_client_features('add', '1', stderr=StringIO())
@@ -400,14 +400,14 @@ class TestRequiredClientFeatures(CephFSTestCase):
 
     def test_required_client_feature_rm_reserved_bit(self):
         """
-        That `ceph fs required_client_features X rm <reserved_bit>` passes.
+        That `stone fs required_client_features X rm <reserved_bit>` passes.
         """
 
         self.fs.required_client_features('add', '1')
         p = self.fs.required_client_features('rm', '1', stderr=StringIO())
         self.assertIn("removed feature 'reserved' from required_client_features", p.stderr.getvalue())
 
-class TestCompatCommands(CephFSTestCase):
+class TestCompatCommands(StoneFSTestCase):
     """
     """
 
@@ -524,7 +524,7 @@ class TestCompatCommands(CephFSTestCase):
         Like test_standby_incompat_reject but with a second fs.
         """
 
-        fs2 = self.mds_cluster.newfs(name="cephfs2", create=True)
+        fs2 = self.mds_cluster.newfs(name="stonefs2", create=True)
         fs2.fail()
         fs2.add_incompat(63, 'placeholder')
         fs2.set_joinable()
@@ -542,7 +542,7 @@ class TestCompatCommands(CephFSTestCase):
         mdsmap = fs2.get_mds_map()
         self.assertIn("feature_63", mdsmap['compat']['incompat'])
 
-class TestConfigCommands(CephFSTestCase):
+class TestConfigCommands(StoneFSTestCase):
     """
     Test that daemons and clients respond to the otherwise rarely-used
     runtime config modification operations.
@@ -551,7 +551,7 @@ class TestConfigCommands(CephFSTestCase):
     CLIENTS_REQUIRED = 1
     MDSS_REQUIRED = 1
 
-    def test_ceph_config_show(self):
+    def test_stone_config_show(self):
         """
         That I can successfully show MDS configuration.
         """
@@ -598,7 +598,7 @@ class TestConfigCommands(CephFSTestCase):
         self.assertEqual(out[test_key], test_val)
 
 
-class TestMirroringCommands(CephFSTestCase):
+class TestMirroringCommands(StoneFSTestCase):
     CLIENTS_REQUIRED = 1
     MDSS_REQUIRED = 1
 
@@ -747,7 +747,7 @@ class TestSubCmdFsAuthorize(CapsHelper):
                                                 keyring)
         self.mount_a.remount(client_id=self.client_id,
                              client_keyring_path=keyring_path,
-                             cephfs_mntpt='/')
+                             stonefs_mntpt='/')
 
         if filepath.find(self.mount_a.hostfs_mntpt) != -1:
             # can read, but not write as root
@@ -762,14 +762,14 @@ class TestSubCmdFsAuthorize(CapsHelper):
         """
         self.mount_a.umount_wait(require_clean=True)
         self.mds_cluster.delete_all_filesystems()
-        fs_name = "cephfs-_."
+        fs_name = "stonefs-_."
         self.fs = self.mds_cluster.newfs(name=fs_name)
         self.fs.wait_for_daemons()
         self.run_cluster_cmd(f'auth caps client.{self.mount_a.client_id} '
                              f'mon "allow r" '
                              f'osd "allow rw pool={self.fs.get_data_pool_name()}" '
                              f'mds allow')
-        self.mount_a.remount(cephfs_name=self.fs.name)
+        self.mount_a.remount(stonefs_name=self.fs.name)
         perm = 'rw'
         filepaths, filedata, mounts, keyring = self.setup_test_env(perm)
         self.run_mds_cap_tests(filepaths, filedata, mounts, perm)
@@ -784,7 +784,7 @@ class TestSubCmdFsAuthorize(CapsHelper):
         for path in paths:
             self.mount_a.remount(client_id=self.client_id,
                                  client_keyring_path=keyring_path,
-                                 cephfs_mntpt=path)
+                                 stonefs_mntpt=path)
 
 
             # actual tests...
@@ -801,7 +801,7 @@ class TestSubCmdFsAuthorize(CapsHelper):
         for path in paths:
             self.mount_a.remount(client_id=self.client_id,
                                  client_keyring_path=keyring_path,
-                                 cephfs_mntpt=path)
+                                 stonefs_mntpt=path)
 
 
             # actual tests...
@@ -826,7 +826,7 @@ class TestSubCmdFsAuthorize(CapsHelper):
 
         self.mount_a.remount(client_id=self.client_id,
                              client_keyring_path=keyring_path,
-                             cephfs_mntpt='/')
+                             stonefs_mntpt='/')
 
         return filepath, filedata, keyring
 
@@ -859,7 +859,7 @@ class TestSubCmdFsAuthorize(CapsHelper):
 
         return filepaths, filedata, mounts, keyring
 
-class TestAdminCommandIdempotency(CephFSTestCase):
+class TestAdminCommandIdempotency(StoneFSTestCase):
     """
     Tests for administration command idempotency.
     """
@@ -886,7 +886,7 @@ class TestAdminCommandIdempotency(CephFSTestCase):
         self.fs.remove_pools(data_pools)
 
 
-class TestAdminCommandDumpTree(CephFSTestCase):
+class TestAdminCommandDumpTree(StoneFSTestCase):
     """
     Tests for administration command subtrees.
     """

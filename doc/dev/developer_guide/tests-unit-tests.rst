@@ -1,10 +1,10 @@
 Testing - unit tests
 ====================
 
-The Ceph GitHub repository has two types of tests: unit tests (also called
+The Stone GitHub repository has two types of tests: unit tests (also called
 ``make check`` tests) and integration tests. Strictly speaking, the
 ``make check`` tests are not "unit tests", but rather tests that can be run
-easily on a single build machine after compiling Ceph from source, whereas
+easily on a single build machine after compiling Stone from source, whereas
 integration tests require package installation and multi-machine clusters to
 run.
 
@@ -13,7 +13,7 @@ run.
 What does "make check" mean?
 ----------------------------
 
-After compiling Ceph, the code can be run through a battery of tests. For
+After compiling Stone, the code can be run through a battery of tests. For
 historical reasons, this is often referred to as ``make check`` even though
 the actual command used to run the tests is now ``ctest``. To be included in
 this group of tests, a test must:
@@ -31,7 +31,7 @@ framework`_.
 While it is possible to run ``ctest`` directly, it can be tricky to correctly
 set up your environment for it. Fortunately, there is a script that makes it
 easy to run the unit tests on your code. This script can be run from the
-top-level directory of the Ceph source tree by invoking:
+top-level directory of the Stone source tree by invoking:
 
   .. prompt:: bash $
 
@@ -50,7 +50,7 @@ Unit tests are declared in the ``CMakeLists.txt`` file, which is found in the
 ``./src`` directory. The ``add_ceph_test`` and ``add_ceph_unittest`` CMake
 functions are used to declare unit tests.  ``add_ceph_test`` and
 ``add_ceph_unittest`` are themselves defined in
-``./cmake/modules/AddCephTest.cmake``. 
+``./cmake/modules/AddStoneTest.cmake``. 
 
 Some unit tests are scripts and other unit tests are binaries that are
 compiled during the build process.  
@@ -71,15 +71,15 @@ teuthology using the `cram task`_.
 
 Tox-based testing of Python modules
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Some of the Python modules in Ceph use `tox <https://tox.readthedocs.io/en/latest/>`_ 
+Some of the Python modules in Stone use `tox <https://tox.readthedocs.io/en/latest/>`_ 
 to run their unit tests.
 
 Most of these Python modules can be found in the directory ``./src/pybind/``.
 
 Currently (December 2020) the following modules use **tox**:
 
-* Cephadm (``./src/cephadm/tox.ini``)
-* Ceph Manager Python API (``./src/pybind/mgr``)
+* Stoneadm (``./src/cephadm/tox.ini``)
+* Stone Manager Python API (``./src/pybind/mgr``)
 
   * ``./src/pybind/mgr/tox.ini``
     
@@ -89,7 +89,7 @@ Currently (December 2020) the following modules use **tox**:
 
 * Dashboard (``./src/pybind/mgr/dashboard``)
 * Python common (``./src/python-common/tox.ini``)
-* CephFS (``./src/tools/cephfs/tox.ini``)
+* StoneFS (``./src/tools/cephfs/tox.ini``)
 * ceph-volume
 
   * ``./src/ceph-volume/tox.ini``
@@ -135,7 +135,7 @@ To run **tox**, just execute ``tox`` in the directory containing
 $env1,$env2``), then ``tox`` will run all environments. Jenkins will run
 ``tox`` by executing ``./src/script/run_tox.sh``.
 
-Here are some examples from Ceph Dashboard that show how to specify different
+Here are some examples from Stone Dashboard that show how to specify different
 environments and run options::
 
   ## Run Python 2+3 tests+lint commands:
@@ -161,7 +161,7 @@ includes ``mgr_util.py``.
 Unit test caveats
 -----------------
 
-#. Unlike the various Ceph daemons and ``ceph-fuse``, the unit tests are
+#. Unlike the various Stone daemons and ``ceph-fuse``, the unit tests are
    linked against the default memory allocator (glibc) unless they are
    explicitly linked against something else. This enables tools such as
    **valgrind** to be used in the tests.

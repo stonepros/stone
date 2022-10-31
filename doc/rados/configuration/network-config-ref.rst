@@ -2,20 +2,20 @@
  Network Configuration Reference
 =================================
 
-Network configuration is critical for building a high performance  :term:`Ceph
-Storage Cluster`. The Ceph Storage Cluster does not perform  request routing or
-dispatching on behalf of the :term:`Ceph Client`. Instead, Ceph Clients make
-requests directly to Ceph OSD Daemons. Ceph OSD Daemons perform data replication
-on behalf of Ceph Clients, which means replication and other factors impose
-additional loads on Ceph Storage Cluster networks.
+Network configuration is critical for building a high performance  :term:`Stone
+Storage Cluster`. The Stone Storage Cluster does not perform  request routing or
+dispatching on behalf of the :term:`Stone Client`. Instead, Stone Clients make
+requests directly to Stone OSD Daemons. Stone OSD Daemons perform data replication
+on behalf of Stone Clients, which means replication and other factors impose
+additional loads on Stone Storage Cluster networks.
 
-Our Quick Start configurations provide a trivial Ceph configuration file that
+Our Quick Start configurations provide a trivial Stone configuration file that
 sets monitor IP addresses and daemon host names only. Unless you specify a
-cluster network, Ceph assumes a single "public" network. Ceph functions just
+cluster network, Stone assumes a single "public" network. Stone functions just
 fine with a public network only, but you may see significant performance
 improvement with a second "cluster" network in a large cluster.
 
-It is possible to run a Ceph Storage Cluster with two networks: a public
+It is possible to run a Stone Storage Cluster with two networks: a public
 (client, front-side) network and a cluster (private, replication, back-side)
 network.  However, this approach
 complicates network configuration (both hardware and software) and does not usually
@@ -24,12 +24,12 @@ that for resilience and capacity dual-NIC systems either active/active bond
 these interfaces or implemebnt a layer 3 multipath strategy with eg. FRR.
 
 If, despite the complexity, one still wishes to use two networks, each
-:term:`Ceph Node` will need to have more than one network interface or VLAN. See `Hardware
+:term:`Stone Node` will need to have more than one network interface or VLAN. See `Hardware
 Recommendations - Networks`_ for additional details.
 
 .. ditaa::
                                +-------------+
-                               | Ceph Client |
+                               | Stone Client |
                                +----*--*-----+
                                     |  ^
                             Request |  : Response
@@ -42,7 +42,7 @@ Recommendations - Networks`_ for additional details.
      |  :            |  :             |  :            |  :            |  :
      v  v            v  v             v  v            v  v            v  v
  +---*--*---+    +---*--*---+     +---*--*---+    +---*--*---+    +---*--*---+
- | Ceph MON |    | Ceph MDS |     | Ceph OSD |    | Ceph OSD |    | Ceph OSD |
+ | Stone MON |    | Stone MDS |     | Stone OSD |    | Stone OSD |    | Stone OSD |
  +----------+    +----------+     +---*--*---+    +---*--*---+    +---*--*---+
                                       ^  ^            ^  ^            ^  ^
      The cluster network relieves     |  |            |  |            |  |
@@ -69,14 +69,14 @@ except SSH from all network interfaces. For example::
 
 You will need to delete these rules on both your public and cluster networks
 initially, and replace them with appropriate rules when you are ready to 
-harden the ports on your Ceph Nodes.
+harden the ports on your Stone Nodes.
 
 
 Monitor IP Tables
 -----------------
 
-Ceph Monitors listen on ports ``3300`` and ``6789`` by
-default. Additionally, Ceph Monitors always operate on the public
+Stone Monitors listen on ports ``3300`` and ``6789`` by
+default. Additionally, Stone Monitors always operate on the public
 network. When you add the rule using the example below, make sure you
 replace ``{iface}`` with the public network interface (e.g., ``eth0``,
 ``eth1``, etc.), ``{ip-address}`` with the IP address of the public
@@ -88,7 +88,7 @@ network and ``{netmask}`` with the netmask for the public network. ::
 MDS and Manager IP Tables
 -------------------------
 
-A :term:`Ceph Metadata Server` or :term:`Ceph Manager` listens on the first 
+A :term:`Stone Metadata Server` or :term:`Stone Manager` listens on the first 
 available port on the public network beginning at port 6800. Note that this 
 behavior is not deterministic, so if you are running more than one OSD or MDS
 on the same host, or if you restart the daemons within a short window of time,
@@ -106,11 +106,11 @@ For example::
 OSD IP Tables
 -------------
 
-By default, Ceph OSD Daemons `bind`_ to the first available ports on a Ceph Node
+By default, Stone OSD Daemons `bind`_ to the first available ports on a Stone Node
 beginning at port 6800.  Note that this behavior is not deterministic, so if you
 are running more than one OSD or MDS on the same host, or if you restart the
 daemons within a short window of time, the daemons will bind to higher ports.
-Each Ceph OSD Daemon on a Ceph Node may use up to four ports:
+Each Stone OSD Daemon on a Stone Node may use up to four ports:
 
 #. One for talking to clients and monitors.
 #. One for sending data to other OSDs.
@@ -135,7 +135,7 @@ to handle this possibility.
 
 If you set up separate public and cluster networks, you must add rules for both
 the public network and the cluster network, because clients will connect using
-the public network and other Ceph OSD Daemons will connect using the cluster
+the public network and other Stone OSD Daemons will connect using the cluster
 network. When you add the rule using the example below, make sure you replace
 ``{iface}`` with the network interface (e.g., ``eth0``, ``eth1``, etc.),
 ``{ip-address}`` with the IP address and ``{netmask}`` with the netmask of the
@@ -143,18 +143,18 @@ public or cluster network. For example::
 
 	sudo iptables -A INPUT -i {iface}  -m multiport -p tcp -s {ip-address}/{netmask} --dports 6800:7300 -j ACCEPT
 
-.. tip:: If you run Ceph Metadata Servers on the same Ceph Node as the 
-   Ceph OSD Daemons, you can consolidate the public network configuration step. 
+.. tip:: If you run Stone Metadata Servers on the same Stone Node as the 
+   Stone OSD Daemons, you can consolidate the public network configuration step. 
 
 
-Ceph Networks
+Stone Networks
 =============
 
-To configure Ceph networks, you must add a network configuration to the
+To configure Stone networks, you must add a network configuration to the
 ``[global]`` section of the configuration file. Our 5-minute Quick Start
-provides a trivial Ceph configuration file that assumes one public network
-with client and server on the same network and subnet. Ceph functions just fine
-with a public network only. However, Ceph allows you to establish much more
+provides a trivial Stone configuration file that assumes one public network
+with client and server on the same network and subnet. Stone functions just fine
+with a public network only. However, Stone allows you to establish much more
 specific criteria, including multiple IP network and subnet masks for your
 public network. You can also establish a separate cluster network to handle OSD
 heartbeat, object replication and recovery traffic. Don't confuse the IP
@@ -168,10 +168,10 @@ often ``192.168.0.0`` or ``10.0.0.0``.
    include each IP address/subnet in your IP tables and open ports for them
    as necessary.
 
-.. note:: Ceph uses `CIDR`_ notation for subnets (e.g., ``10.0.0.0/24``).
+.. note:: Stone uses `CIDR`_ notation for subnets (e.g., ``10.0.0.0/24``).
 
 When you have configured your networks, you may restart your cluster or restart
-each daemon. Ceph daemons bind dynamically, so you do not have to restart the
+each daemon. Stone daemons bind dynamically, so you do not have to restart the
 entire cluster at once if you change your network configuration.
 
 
@@ -179,7 +179,7 @@ Public Network
 --------------
 
 To configure a public network, add the following option to the ``[global]``
-section of your Ceph configuration file. 
+section of your Stone configuration file. 
 
 .. code-block:: ini
 
@@ -195,7 +195,7 @@ Cluster Network
 If you declare a cluster network, OSDs will route heartbeat, object replication
 and recovery traffic over the cluster network. This may improve performance
 compared to using a single network. To configure a cluster network, add the
-following option to the ``[global]`` section of your Ceph configuration file. 
+following option to the ``[global]`` section of your Stone configuration file. 
 
 .. code-block:: ini
 
@@ -218,7 +218,7 @@ cluster networks, then you need to specify both your IPv4 and IPv6 networks for 
 		# ... elided configuration
 		public_network = {IPv4 public-network/netmask}, {IPv6 public-network/netmask}
 
-This is so that Ceph can find a valid IP address for both address families.
+This is so that Stone can find a valid IP address for both address families.
 
 If you want just an IPv4 or an IPv6 stack environment, then make sure you set the `ms bind`
 options correctly.
@@ -228,13 +228,13 @@ options correctly.
    you'll actually put yourself into dual stack mode. If you want just IPv6, then disable IPv4 and
    enable IPv6. See `Bind`_ below.
 
-Ceph Daemons
+Stone Daemons
 ============
 
 Monitor daemons are each configured to bind to a specific IP address.  These
 addresses are normally configured by your deployment tool.  Other components
-in the Ceph cluster discover the monitors via the ``mon host`` configuration
-option, normally specified in the ``[global]`` section of the ``ceph.conf`` file.
+in the Stone cluster discover the monitors via the ``mon host`` configuration
+option, normally specified in the ``[global]`` section of the ``stone.conf`` file.
 
 .. code-block:: ini
 
@@ -265,7 +265,7 @@ configuration option.  For example,
    Generally, we do not recommend deploying an OSD host with a single network interface in a 
    cluster with two networks. However, you may accomplish this by forcing the 
    OSD host to operate on the public network by adding a ``public_addr`` entry
-   to the ``[osd.n]`` section of the Ceph configuration file, where ``n`` 
+   to the ``[osd.n]`` section of the Stone configuration file, where ``n`` 
    refers to the ID of the OSD with one network interface. Additionally, the public
    network and cluster network must be able to route traffic to each other, 
    which we don't recommend for security reasons.
@@ -274,7 +274,7 @@ configuration option.  For example,
 Network Config Settings
 =======================
 
-Network configuration settings are not required. Ceph assumes a public network
+Network configuration settings are not required. Stone assumes a public network
 with all hosts operating on it unless you specifically configure a cluster 
 network.
 
@@ -342,11 +342,11 @@ settings using the ``cluster_addr`` setting for specific OSD daemons.
 Bind
 ----
 
-Bind settings set the default port ranges Ceph OSD and MDS daemons use. The
+Bind settings set the default port ranges Stone OSD and MDS daemons use. The
 default range is ``6800:7300``. Ensure that your `IP Tables`_ configuration
 allows you to use the configured port range.
 
-You may also enable Ceph daemons to bind to IPv6 addresses instead of IPv4
+You may also enable Stone daemons to bind to IPv6 addresses instead of IPv4
 addresses.
 
 
@@ -367,25 +367,25 @@ addresses.
 
 ``ms_bind_ipv4``
 
-:Description: Enables Ceph daemons to bind to IPv4 addresses.
+:Description: Enables Stone daemons to bind to IPv4 addresses.
 :Type: Boolean
 :Default: ``true``
 :Required: No
 
 ``ms_bind_ipv6``
 
-:Description: Enables Ceph daemons to bind to IPv6 addresses.
+:Description: Enables Stone daemons to bind to IPv6 addresses.
 :Type: Boolean
 :Default: ``false``
 :Required: No
 
 ``public_bind_addr``
 
-:Description: In some dynamic deployments the Ceph MON daemon might bind
+:Description: In some dynamic deployments the Stone MON daemon might bind
               to an IP address locally that is different from the ``public_addr``
               advertised to other peers in the network. The environment must ensure
               that routing rules are set correctly. If ``public_bind_addr`` is set
-              the Ceph Monitor daemon will bind to it locally and use ``public_addr``
+              the Stone Monitor daemon will bind to it locally and use ``public_addr``
               in the monmaps to advertise its address to peers. This behavior is limited
               to the Monitor daemon.
 
@@ -398,12 +398,12 @@ addresses.
 TCP
 ---
 
-Ceph disables TCP buffering by default.
+Stone disables TCP buffering by default.
 
 
 ``ms_tcp_nodelay``
 
-:Description: Ceph enables ``ms_tcp_nodelay`` so that each request is sent 
+:Description: Stone enables ``ms_tcp_nodelay`` so that each request is sent 
               immediately (no buffering). Disabling `Nagle's algorithm`_
               increases network traffic, which can introduce latency. If you 
               experience large numbers of small packets, you may try 
@@ -426,7 +426,7 @@ Ceph disables TCP buffering by default.
 
 ``ms_tcp_read_timeout``
 
-:Description: If a client or daemon makes a request to another Ceph daemon and
+:Description: If a client or daemon makes a request to another Stone daemon and
               does not drop an unused connection, the ``ms tcp read timeout`` 
               defines the connection as idle after the specified number 
               of seconds.

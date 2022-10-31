@@ -35,7 +35,7 @@ public:
               counter_it++;
             };
 
-        ceph_assert(key_it.second.size() >= data[query][key].size());
+        stone_assert(key_it.second.size() >= data[query][key].size());
         query.update_counters(update_counter_fnc, &data[query][key]);
       }
     }
@@ -60,7 +60,7 @@ public:
     auto update_counter_fnc =
         [&op, inb, outb, &latency](const PerformanceCounterDescriptor &d,
                                    PerformanceCounter *c) {
-          ceph_assert(d.is_supported());
+          stone_assert(d.is_supported());
 
           switch(d.type) {
           case PerformanceCounterType::OPS:
@@ -106,14 +106,14 @@ public:
             }
             return;
           default:
-            ceph_abort_msg("unknown counter type");
+            stone_abort_msg("unknown counter type");
           }
         };
 
     auto get_subkey_fnc =
         [&osd, &pg_info, &op](const OSDPerfMetricSubKeyDescriptor &d,
                               OSDPerfMetricSubKey *sub_key) {
-          ceph_assert(d.is_supported());
+          stone_assert(d.is_supported());
 
           auto m = op.get_req<MOSDOp>();
           std::string match_string;
@@ -143,7 +143,7 @@ public:
             match_string = stringify(m->get_snapid());
             break;
           default:
-            ceph_abort_msg("unknown counter type");
+            stone_abort_msg("unknown counter type");
           }
 
           std::smatch match;
@@ -185,7 +185,7 @@ public:
           &report.performance_counter_descriptors);
 
       auto &descriptors = report.performance_counter_descriptors;
-      ceph_assert(descriptors.size() > 0);
+      stone_assert(descriptors.size() > 0);
 
       if (!is_limited(query_limits, counters.size())) {
         for (auto &it_counters : counters) {
@@ -212,7 +212,7 @@ public:
         // with samples from [max_count, end) using weighted
         // probability, and return [0, max_count) as the result.
 
-        ceph_assert(limit.max_count < counters.size());
+        stone_assert(limit.max_count < counters.size());
         typedef std::map<OSDPerfMetricKey, PerformanceCounters>::iterator
             Iterator;
         std::vector<Iterator> counter_iterators;
@@ -226,9 +226,9 @@ public:
         }
         for (; it_counters != counters.end(); it_counters++) {
           wsum += it_counters->second[index].first;
-          if (ceph::util::generate_random_number(0, wsum) <=
+          if (stone::util::generate_random_number(0, wsum) <=
               it_counters->second[index].first) {
-            auto i = ceph::util::generate_random_number(0, limit.max_count - 1);
+            auto i = stone::util::generate_random_number(0, limit.max_count - 1);
             counter_iterators[i] = it_counters;
           }
         }

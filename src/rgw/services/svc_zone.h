@@ -71,7 +71,7 @@ class RGWSI_Zone : public RGWServiceInstance
 
   int update_placement_map(const DoutPrefixProvider *dpp, optional_yield y);
 public:
-  RGWSI_Zone(CephContext *cct);
+  RGWSI_Zone(StoneContext *cct);
   ~RGWSI_Zone();
 
   const RGWZoneParams& get_zone_params() const;

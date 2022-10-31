@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,global-statement,protected-access
 """
-ceph dashboard module
+stone dashboard module
 """
 from __future__ import absolute_import
 
@@ -49,5 +49,5 @@ else:
     mgr = mock.Mock()
     mgr.get_frontend_path.side_effect = lambda: os.path.abspath("./frontend/dist")
 
-# DO NOT REMOVE: required for ceph-mgr to load a module
+# DO NOT REMOVE: required for stone-mgr to load a module
 from .module import Module, StandbyModule  # noqa: F401

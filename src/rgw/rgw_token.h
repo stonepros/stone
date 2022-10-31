@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat, Inc
  *
@@ -20,7 +20,7 @@
 #include <boost/algorithm/string.hpp>
 #include <sstream>
 
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/Formatter.h"
 #include "rgw/rgw_b64.h"
 

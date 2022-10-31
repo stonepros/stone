@@ -4,10 +4,10 @@ Encryption
 
 .. versionadded:: Luminous
 
-The Ceph Object Gateway supports server-side encryption of uploaded objects,
+The Stone Object Gateway supports server-side encryption of uploaded objects,
 with 3 options for the management of encryption keys. Server-side encryption
-means that the data is sent over HTTP in its unencrypted form, and the Ceph
-Object Gateway stores that data in the Ceph Storage Cluster in encrypted form.
+means that the data is sent over HTTP in its unencrypted form, and the Stone
+Object Gateway stores that data in the Stone Storage Cluster in encrypted form.
 
 .. note:: Requests for server-side encryption must be sent over a secure HTTPS
           connection to avoid sending secrets in plaintext. If a proxy is used
@@ -32,7 +32,7 @@ Key Management Service
 ======================
 
 This mode allows keys to be stored in a secure key management service and
-retrieved on demand by the Ceph Object Gateway to serve requests to encrypt
+retrieved on demand by the Stone Object Gateway to serve requests to encrypt
 or decrypt data.
 
 This is implemented in S3 according to the `Amazon SSE-KMS`_ specification.

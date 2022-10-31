@@ -20,36 +20,36 @@ class Module(MgrModule):
     COMMANDS = [
         {
             "cmd": "rbd mirror snapshot schedule add "
-                   "name=level_spec,type=CephString "
-                   "name=interval,type=CephString "
-                   "name=start_time,type=CephString,req=false ",
+                   "name=level_spec,type=StoneString "
+                   "name=interval,type=StoneString "
+                   "name=start_time,type=StoneString,req=false ",
             "desc": "Add rbd mirror snapshot schedule",
             "perm": "w"
         },
         {
             "cmd": "rbd mirror snapshot schedule remove "
-                   "name=level_spec,type=CephString "
-                   "name=interval,type=CephString,req=false "
-                   "name=start_time,type=CephString,req=false ",
+                   "name=level_spec,type=StoneString "
+                   "name=interval,type=StoneString,req=false "
+                   "name=start_time,type=StoneString,req=false ",
             "desc": "Remove rbd mirror snapshot schedule",
             "perm": "w"
         },
         {
             "cmd": "rbd mirror snapshot schedule list "
-                   "name=level_spec,type=CephString,req=false ",
+                   "name=level_spec,type=StoneString,req=false ",
             "desc": "List rbd mirror snapshot schedule",
             "perm": "r"
         },
         {
             "cmd": "rbd mirror snapshot schedule status "
-                   "name=level_spec,type=CephString,req=false ",
+                   "name=level_spec,type=StoneString,req=false ",
             "desc": "Show rbd mirror snapshot schedule status",
             "perm": "r"
         },
         {
             "cmd": "rbd perf image stats "
-                   "name=pool_spec,type=CephString,req=false "
-                   "name=sort_by,type=CephChoices,strings="
+                   "name=pool_spec,type=StoneString,req=false "
+                   "name=sort_by,type=StoneChoices,strings="
                    "write_ops|write_bytes|write_latency|"
                    "read_ops|read_bytes|read_latency,"
                    "req=false ",
@@ -58,8 +58,8 @@ class Module(MgrModule):
         },
         {
             "cmd": "rbd perf image counters "
-                   "name=pool_spec,type=CephString,req=false "
-                   "name=sort_by,type=CephChoices,strings="
+                   "name=pool_spec,type=StoneString,req=false "
+                   "name=sort_by,type=StoneChoices,strings="
                    "write_ops|write_bytes|write_latency|"
                    "read_ops|read_bytes|read_latency,"
                    "req=false ",
@@ -68,77 +68,77 @@ class Module(MgrModule):
         },
         {
             "cmd": "rbd task add flatten "
-                   "name=image_spec,type=CephString",
+                   "name=image_spec,type=StoneString",
             "desc": "Flatten a cloned image asynchronously in the background",
             "perm": "w"
         },
         {
             "cmd": "rbd task add remove "
-                   "name=image_spec,type=CephString",
+                   "name=image_spec,type=StoneString",
             "desc": "Remove an image asynchronously in the background",
             "perm": "w"
         },
         {
             "cmd": "rbd task add trash remove "
-                   "name=image_id_spec,type=CephString",
+                   "name=image_id_spec,type=StoneString",
             "desc": "Remove an image from the trash asynchronously in the background",
             "perm": "w"
         },
         {
             "cmd": "rbd task add migration execute "
-                   "name=image_spec,type=CephString",
+                   "name=image_spec,type=StoneString",
             "desc": "Execute an image migration asynchronously in the background",
             "perm": "w"
         },
         {
             "cmd": "rbd task add migration commit "
-                   "name=image_spec,type=CephString",
+                   "name=image_spec,type=StoneString",
             "desc": "Commit an executed migration asynchronously in the background",
             "perm": "w"
         },
         {
             "cmd": "rbd task add migration abort "
-                   "name=image_spec,type=CephString",
+                   "name=image_spec,type=StoneString",
             "desc": "Abort a prepared migration asynchronously in the background",
             "perm": "w"
         },
         {
             "cmd": "rbd task cancel "
-                   "name=task_id,type=CephString ",
+                   "name=task_id,type=StoneString ",
             "desc": "Cancel a pending or running asynchronous task",
             "perm": "r"
         },
         {
             "cmd": "rbd task list "
-                   "name=task_id,type=CephString,req=false ",
+                   "name=task_id,type=StoneString,req=false ",
             "desc": "List pending or running asynchronous tasks",
             "perm": "r"
         },
         {
             "cmd": "rbd trash purge schedule add "
-                   "name=level_spec,type=CephString "
-                   "name=interval,type=CephString "
-                   "name=start_time,type=CephString,req=false ",
+                   "name=level_spec,type=StoneString "
+                   "name=interval,type=StoneString "
+                   "name=start_time,type=StoneString,req=false ",
             "desc": "Add rbd trash purge schedule",
             "perm": "w"
         },
         {
             "cmd": "rbd trash purge schedule remove "
-                   "name=level_spec,type=CephString "
-                   "name=interval,type=CephString,req=false "
-                   "name=start_time,type=CephString,req=false ",
+                   "name=level_spec,type=StoneString "
+                   "name=interval,type=StoneString,req=false "
+                   "name=start_time,type=StoneString,req=false ",
             "desc": "Remove rbd trash purge schedule",
             "perm": "w"
         },
         {
             "cmd": "rbd trash purge schedule list "
-                   "name=level_spec,type=CephString,req=false ",
+                   "name=level_spec,type=StoneString,req=false ",
             "desc": "List rbd trash purge schedule",
             "perm": "r"
         },
         {
             "cmd": "rbd trash purge schedule status "
-                   "name=level_spec,type=CephString,req=false ",
+                   "name=level_spec,type=StoneString,req=false ",
             "desc": "Show rbd trash purge schedule status",
             "perm": "r"
         }

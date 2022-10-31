@@ -5,7 +5,7 @@ except ImportError: # pragma: no cover
     from io import StringIO # pragma: no cover
 from textwrap import dedent
 import pytest
-from ceph_volume import configuration, exceptions
+from stone_volume import configuration, exceptions
 
 tabbed_conf = """
 [global]
@@ -74,21 +74,21 @@ class TestConf(object):
 class TestLoad(object):
 
     def test_load_from_path(self, tmpdir):
-        conf_path = os.path.join(str(tmpdir), 'ceph.conf')
+        conf_path = os.path.join(str(tmpdir), 'stone.conf')
         with open(conf_path, 'w') as conf:
             conf.write(tabbed_conf)
         result = configuration.load(conf_path)
         assert result.get('global', 'default') == '0'
 
     def test_load_with_colon_comments(self, tmpdir):
-        conf_path = os.path.join(str(tmpdir), 'ceph.conf')
+        conf_path = os.path.join(str(tmpdir), 'stone.conf')
         with open(conf_path, 'w') as conf:
             conf.write(tabbed_conf)
         result = configuration.load(conf_path)
         assert result.get('global', 'other_c') == '1'
 
     def test_load_with_hash_comments(self, tmpdir):
-        conf_path = os.path.join(str(tmpdir), 'ceph.conf')
+        conf_path = os.path.join(str(tmpdir), 'stone.conf')
         with open(conf_path, 'w') as conf:
             conf.write(tabbed_conf)
         result = configuration.load(conf_path)
@@ -96,21 +96,21 @@ class TestLoad(object):
 
     def test_path_does_not_exist(self):
         with pytest.raises(exceptions.ConfigurationError):
-            conf = configuration.load('/path/does/not/exist/ceph.con')
+            conf = configuration.load('/path/does/not/exist/stone.con')
             conf.is_valid()
 
     def test_unable_to_read_configuration(self, tmpdir, capsys):
-        ceph_conf = os.path.join(str(tmpdir), 'ceph.conf')
-        with open(ceph_conf, 'w') as config:
+        stone_conf = os.path.join(str(tmpdir), 'stone.conf')
+        with open(stone_conf, 'w') as config:
             config.write(']broken] config\n[[')
         with pytest.raises(RuntimeError):
-            configuration.load(ceph_conf)
+            configuration.load(stone_conf)
         stdout, stderr = capsys.readouterr()
         assert 'File contains no section headers' in stderr
 
     @pytest.mark.parametrize('commented', ['colon','hash'])
     def test_coment_as_a_value(self, tmpdir, commented):
-        conf_path = os.path.join(str(tmpdir), 'ceph.conf')
+        conf_path = os.path.join(str(tmpdir), 'stone.conf')
         with open(conf_path, 'w') as conf:
             conf.write(tabbed_conf)
         result = configuration.load(conf_path)

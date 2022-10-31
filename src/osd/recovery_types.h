@@ -68,13 +68,13 @@ struct BackfillInterval {
 
   /// drop first entry, and adjust @begin accordingly
   void pop_front() {
-    ceph_assert(!objects.empty());
+    stone_assert(!objects.empty());
     objects.erase(objects.begin());
     trim();
   }
 
   /// dump
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_stream("begin") << begin;
     f->dump_stream("end") << end;
     f->open_array_section("objects");

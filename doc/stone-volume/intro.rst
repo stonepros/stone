@@ -7,7 +7,7 @@ logical volumes as OSDs, trying to maintain a similar API to ``ceph-disk`` when
 preparing, activating, and creating OSDs.
 
 It deviates from ``ceph-disk`` by not interacting or relying on the udev rules
-that come installed for Ceph. These rules allow automatic detection of
+that come installed for Stone. These rules allow automatic detection of
 previously setup devices that are in turn fed into ``ceph-disk`` to activate
 them.
 
@@ -51,7 +51,7 @@ workflow. Here is an example call to create a data partition::
     /sbin/sgdisk --largest-new=1 --change-name=1:ceph data --partition-guid=1:f0fc39fd-eeb2-49f1-b922-a11939cf8a0f --typecode=1:89c57f98-2fe5-4dc0-89c1-f3ad0ceff2be --mbrtogpt -- /dev/sdb
 
 Not only creating these was hard, but these partitions required devices to be
-exclusively owned by Ceph. For example, in some cases a special partition would
+exclusively owned by Stone. For example, in some cases a special partition would
 be created when devices were encrypted, which would contain unencrypted keys.
 This was ``ceph-disk`` domain knowledge, which would not translate to a "GPT
 partitions are simple" understanding. Here is an example of that special

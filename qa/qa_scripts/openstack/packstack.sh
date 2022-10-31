@@ -11,7 +11,7 @@ set -fv
 source ./copy_func.sh
 source ./fix_conf_file.sh
 openstack_node=${1}
-ceph_node=${2}
+stone_node=${2}
 
 copy_file execs/openstack-preinstall.sh $openstack_node . 0777 
 fix_conf_file $openstack_node kilo .

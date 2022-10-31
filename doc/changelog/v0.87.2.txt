@@ -20,7 +20,7 @@ Merge: 1fb08d3 5f4e62f
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Apr 7 16:39:28 2015 +0200
 
-    Merge pull request #4258 from ceph/wip-10643-v2
+    Merge pull request #4258 from stone/wip-10643-v2
     
     mon: MDSMonitor: additional backports for #10643
     
@@ -32,7 +32,7 @@ Merge: 90b37d9 7684ee2
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Thu Apr 2 08:55:48 2015 -0700
 
-    Merge pull request #4261 from ceph/wip-11303-giant
+    Merge pull request #4261 from stone/wip-11303-giant
     
     allow -L to disable lttng. Enable it by default
     
@@ -130,7 +130,7 @@ Date:   Mon Mar 23 20:39:26 2015 +0100
 
     Merge pull request #4127 from dzafman/wip-11176-giant
     
-    ceph-objectstore-tool: Output only unsupported features when incomatible
+    stone-objectstore-tool: Output only unsupported features when incomatible
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -304,7 +304,7 @@ Merge: d282cfd b318e2f
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Sun Mar 22 23:03:35 2015 +0100
 
-    Merge pull request #3548 from ceph/wip-10643
+    Merge pull request #3548 from stone/wip-10643
     
     mon: MDSMonitor: missing backports for giant
     
@@ -415,7 +415,7 @@ commit de4b08704172ac31b511dde50e5c11d58d811ca2
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Mar 20 16:57:40 2015 -0700
 
-    ceph-objectstore-tool: Output only unsupported features when incomatible
+    stone-objectstore-tool: Output only unsupported features when incomatible
     
     Fixes: #11176
     Backport: firefly, giant
@@ -428,7 +428,7 @@ Merge: fea29b1 61d6006
 Author: John Spray <jcspray@gmail.com>
 Date:   Thu Mar 19 22:07:58 2015 +0000
 
-    Merge pull request #3971 from ceph/giant-11053
+    Merge pull request #3971 from stone/giant-11053
     
     mds: fix assertion caused by system clock backwards
     
@@ -459,7 +459,7 @@ Date:   Thu Jan 8 13:16:17 2015 -0800
     librados: Translate operation flags from C APIs
     
     The operation flags in the public C API are a distinct enum
-    and need to be translated to Ceph OSD flags, like as happens in
+    and need to be translated to Stone OSD flags, like as happens in
     the C++ API. It seems like the C enum and the C++ enum consciously
     use the same values, so I reused the C++ translation function.
     
@@ -694,7 +694,7 @@ Date:   Thu Mar 19 00:32:39 2015 +0100
           at the desired commit although the content of the gmock directory
           is from hammer
     
-    http://tracker.ceph.com/issues/11157 Fixes: #11157
+    http://tracker.stone.com/issues/11157 Fixes: #11157
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
 
@@ -838,7 +838,7 @@ Date:   Wed Feb 11 23:36:01 2015 +0000
     
     e.g., running
     
-    ceph --name osd.0 config-key exists foo daemon-private/osd.X/foo
+    stone --name osd.0 config-key exists foo daemon-private/osd.X/foo
     
     has entity_name_t 'client.12345' and EntityName 'osd.0'.  Using
     entity_name_t during profile expansion would not allow the client access
@@ -879,7 +879,7 @@ Date:   Tue Mar 17 10:52:01 2015 -0700
 
     Merge pull request #4042 from dachary/wip-10546-giant
     
-    ceph time check start round bug in monitor.cc
+    stone time check start round bug in monitor.cc
 
 commit 9fee7ba9d7343bda29bc5113f8db5cdd9c09d71a
 Merge: ca635ce e7af52a
@@ -926,7 +926,7 @@ Date:   Tue Mar 17 10:44:53 2015 -0700
 
     Merge pull request #4030 from dachary/wip-10351-giant
     
-    mount.ceph: avoid spurious error message
+    mount.stone: avoid spurious error message
     
     Reviewed-by: John Spray <john.spray@redhat.com>
 
@@ -955,7 +955,7 @@ Date:   Tue Mar 17 10:41:56 2015 -0700
 
     Merge pull request #3998 from dzafman/wip-10677
     
-    Fix ceph command manpage to match ceph -h (giant)
+    Fix stone command manpage to match stone -h (giant)
     
     Reviewed-by: Xinxin Shu <xinxin.shu@intel.com>
 
@@ -982,7 +982,7 @@ Merge: 776c82c c5c6fcd
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Mar 17 10:35:37 2015 -0700
 
-    Merge pull request #3771 from ceph/wip-10883-giant
+    Merge pull request #3771 from stone/wip-10883-giant
     
     osd: Fix FileJournal wrap to get header out first
 
@@ -1148,13 +1148,13 @@ Date:   Wed Dec 17 16:06:55 2014 +0100
 
     crush: set_choose_tries = 100 for erasure code rulesets
     
-    It is common for people to try to map 9 OSDs out of a 9 OSDs total ceph
+    It is common for people to try to map 9 OSDs out of a 9 OSDs total stone
     cluster. The default tries (50) will frequently lead to bad mappings for
     this use case. Changing it to 100 makes no significant CPU performance
     difference, as tested manually by running crushtool on one million
     mappings.
     
-    http://tracker.ceph.com/issues/10353 Fixes: #10353
+    http://tracker.stone.com/issues/10353 Fixes: #10353
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit 2f87ac807f3cc7ac55d9677d2051645bf5396a62)
@@ -1163,7 +1163,7 @@ commit 4bd523744cefb4a5e6b0d4440b9829b0e19dc012
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Sat Jan 3 15:29:29 2015 +0800
 
-    mount.ceph: avoid spurious error message
+    mount.stone: avoid spurious error message
     
     /etc/mtab in most modern distributions is a symbol link to
     /proc/self/mounts.
@@ -1234,7 +1234,7 @@ commit 640986fdef3543c7469e43853900b63d7b2f6f36
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Mar 13 19:16:47 2015 -0700
 
-    doc: Fix ceph command manpage to match ceph -h (giant)
+    doc: Fix stone command manpage to match stone -h (giant)
     
     Fixes: #10677
     
@@ -1244,7 +1244,7 @@ commit ec4c8997a67397e3ba5f335e444586f6f1a7864c
 Author: David Zafman <dzafman@redhat.com>
 Date:   Fri Mar 13 16:50:13 2015 -0700
 
-    doc: Minor fixes to ceph command manpage
+    doc: Minor fixes to stone command manpage
     
     Fixes: #10676
     
@@ -1255,7 +1255,7 @@ commit 15e1c6fb3a0e2e191025f96df33feaf115c1411d
 Author: David Zafman <dzafman@redhat.com>
 Date:   Thu Mar 12 11:39:52 2015 -0700
 
-    doc: Fix ceph command manpage to match ceph -h (firefly)
+    doc: Fix stone command manpage to match stone -h (firefly)
     
     Improve synopsis section
     Fixes: #10676
@@ -1265,13 +1265,13 @@ Date:   Thu Mar 12 11:39:52 2015 -0700
     
     Conflicts:
     
-    	man/ceph.8 (took incoming version)
+    	man/stone.8 (took incoming version)
 
 commit 17d03e8e8b055ed50b1abb679a0dd1edf4ec3f30
 Author: Nilamdyuti Goswami <ngoswami@redhat.com>
 Date:   Thu Dec 18 17:11:22 2014 +0530
 
-    doc: Changes format style in ceph to improve readability as html.
+    doc: Changes format style in stone to improve readability as html.
     
     Signed-off-by: Nilamdyuti Goswami <ngoswami@redhat.com>
     (cherry picked from commit 8b796173063ac9af8c21364521fc5ee23d901196)
@@ -1289,7 +1289,7 @@ commit f1c9c71fd6d566687db05e1d8f15b04a9f793005
 Author: Nilamdyuti Goswami <ngoswami@redhat.com>
 Date:   Sat Dec 13 02:24:41 2014 +0530
 
-    doc: Adds man page for ceph.
+    doc: Adds man page for stone.
     
     Signed-off-by: Nilamdyuti Goswami <ngoswami@redhat.com>
     (cherry picked from commit 76da87a64ca6b3cc0ceeaf63e19a9f440d6f4161)

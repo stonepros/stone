@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Stonee - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2013 Inktank, Inc.
 *
@@ -31,7 +31,7 @@ public:
     switch (op) {
     case OP_SCRUB: return "scrub";
     case OP_RESULT: return "result";
-    default: ceph_abort_msg("unknown op type"); return NULL;
+    default: stone_abort_msg("unknown op type"); return NULL;
     }
   }
 
@@ -64,7 +64,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     uint8_t o = op;
     encode(o, payload);
     encode(version, payload);
@@ -74,7 +74,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     uint8_t o;
     decode(o, p);
@@ -86,7 +86,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif /* STONE_MMONSCRUB_H */

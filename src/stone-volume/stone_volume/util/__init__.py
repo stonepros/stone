@@ -1,6 +1,6 @@
 import logging
 from math import floor
-from ceph_volume import terminal
+from stone_volume import terminal
 
 try:
     input = raw_input  # pylint: disable=redefined-builtin

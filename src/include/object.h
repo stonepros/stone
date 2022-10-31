@@ -28,7 +28,7 @@
 
 #include "hash.h"
 #include "encoding.h"
-#include "ceph_hash.h"
+#include "stone_hash.h"
 #include "cmp.h"
 
 using namespace std;
@@ -51,12 +51,12 @@ struct object_t {
     name.clear();
   }
 
-  void encode(ceph::buffer::list &bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list &bl) const {
+    using stone::encode;
     encode(name, bl);
   }
-  void decode(ceph::buffer::list::const_iterator &bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &bl) {
+    using stone::decode;
     decode(name, bl);
   }
 };
@@ -89,7 +89,7 @@ template<> struct hash<object_t> {
   size_t operator()(const object_t& r) const {
     //static hash<string> H;
     //return H(r.name);
-    return ceph_str_hash_linux(r.name.c_str(), r.name.length());
+    return stone_str_hash_linux(r.name.c_str(), r.name.length());
   }
 };
 } // namespace std
@@ -127,12 +127,12 @@ struct snapid_t {
   operator uint64_t() const { return val; }
 };
 
-inline void encode(snapid_t i, ceph::buffer::list &bl) {
-  using ceph::encode;
+inline void encode(snapid_t i, stone::buffer::list &bl) {
+  using stone::encode;
   encode(i.val, bl);
 }
-inline void decode(snapid_t &i, ceph::buffer::list::const_iterator &p) {
-  using ceph::decode;
+inline void decode(snapid_t &i, stone::buffer::list::const_iterator &p) {
+  using stone::decode;
   decode(i.val, p);
 }
 
@@ -145,10 +145,10 @@ struct denc_traits<snapid_t> {
   static void bound_encode(const snapid_t& o, size_t& p) {
     denc(o.val, p);
   }
-  static void encode(const snapid_t &o, ceph::buffer::list::contiguous_appender& p) {
+  static void encode(const snapid_t &o, stone::buffer::list::contiguous_appender& p) {
     denc(o.val, p);
   }
-  static void decode(snapid_t& o, ceph::buffer::ptr::const_iterator &p) {
+  static void decode(snapid_t& o, stone::buffer::ptr::const_iterator &p) {
     denc(o.val, p);
   }
 };
@@ -177,13 +177,13 @@ struct sobject_t {
     o.snap = t;
   }
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(oid, bl);
     encode(snap, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     decode(oid, bl);
     decode(snap, bl);
   }

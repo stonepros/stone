@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -24,7 +24,7 @@ private:
   static constexpr int COMPAT_VERSION = 1;
 
 public:
-  ceph_mds_session_head head;
+  stone_mds_session_head head;
   static constexpr unsigned SESSION_BLOCKLISTED = (1<<0);
 
   unsigned flags = 0;
@@ -59,7 +59,7 @@ protected:
 public:
   std::string_view get_type_name() const override { return "client_session"; }
   void print(std::ostream& out) const override {
-    out << "client_session(" << ceph_session_op_name(get_op());
+    out << "client_session(" << stone_session_op_name(get_op());
     if (get_seq())
       out << " seq " << get_seq();
     if (get_op() == STONE_SESSION_RECALL_STATE)
@@ -68,7 +68,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(head, p);
     if (header.version >= 2)
@@ -83,7 +83,7 @@ public:
     }
   }
   void encode_payload(uint64_t features) override { 
-    using ceph::encode;
+    using stone::encode;
     encode(head, payload);
     if (metadata.empty() && supported_features.empty()) {
       // If we're not trying to send any metadata (always the case if
@@ -100,7 +100,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

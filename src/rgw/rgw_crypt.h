@@ -80,7 +80,7 @@ public:
 };
 
 static const size_t AES_256_KEYSIZE = 256 / 8;
-bool AES_256_ECB_encrypt(CephContext* cct,
+bool AES_256_ECB_encrypt(StoneContext* cct,
                          const uint8_t* key,
                          size_t key_size,
                          const uint8_t* data_in,
@@ -88,7 +88,7 @@ bool AES_256_ECB_encrypt(CephContext* cct,
                          size_t data_size);
 
 class RGWGetObj_BlockDecrypt : public RGWGetObj_Filter {
-  CephContext* cct;
+  StoneContext* cct;
 
   std::unique_ptr<BlockCrypt> crypt; /**< already configured stateless BlockCrypt
                                           for operations when enough data is accumulated */
@@ -103,7 +103,7 @@ class RGWGetObj_BlockDecrypt : public RGWGetObj_Filter {
 protected:
   std::vector<size_t> parts_len; /**< size of parts of multipart object, parsed from manifest */
 public:
-  RGWGetObj_BlockDecrypt(CephContext* cct,
+  RGWGetObj_BlockDecrypt(StoneContext* cct,
                          RGWGetObj_Filter* next,
                          std::unique_ptr<BlockCrypt> crypt);
   virtual ~RGWGetObj_BlockDecrypt();
@@ -121,13 +121,13 @@ public:
 
 class RGWPutObj_BlockEncrypt : public rgw::putobj::Pipe
 {
-  CephContext* cct;
+  StoneContext* cct;
   std::unique_ptr<BlockCrypt> crypt; /**< already configured stateless BlockCrypt
                                           for operations when enough data is accumulated */
   bufferlist cache; /**< stores extra data that could not (yet) be processed by BlockCrypt */
   const size_t block_size; /**< snapshot of \ref BlockCrypt.get_block_size() */
 public:
-  RGWPutObj_BlockEncrypt(CephContext* cct,
+  RGWPutObj_BlockEncrypt(StoneContext* cct,
                          rgw::putobj::DataProcessor *next,
                          std::unique_ptr<BlockCrypt> crypt);
 
@@ -136,7 +136,7 @@ public:
 
 
 int rgw_s3_prepare_encrypt(struct req_state* s,
-                           std::map<std::string, ceph::bufferlist>& attrs,
+                           std::map<std::string, stone::bufferlist>& attrs,
                            std::map<std::string,
                                     RGWPostObj_ObjStore::post_form_part,
                                     const ltstr_nocase>* parts,
@@ -145,7 +145,7 @@ int rgw_s3_prepare_encrypt(struct req_state* s,
                                     std::string>& crypt_http_responses);
 
 int rgw_s3_prepare_decrypt(struct req_state* s,
-                           std::map<std::string, ceph::bufferlist>& attrs,
+                           std::map<std::string, stone::bufferlist>& attrs,
                            std::unique_ptr<BlockCrypt>* block_crypt,
                            std::map<std::string,
                                     std::string>& crypt_http_responses);

@@ -142,7 +142,7 @@ sub compare_cksum
 }
 
 #== Main starts here===
-ceph_os_info();
+stone_os_info();
 check();
 # The following test runs multi part upload of file size 1Gb in 10 parts
 multipart_upload('1048576000', 10);

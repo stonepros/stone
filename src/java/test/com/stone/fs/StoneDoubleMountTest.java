@@ -17,7 +17,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,12 +26,12 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 
-public class CephDoubleMountTest {
+public class StoneDoubleMountTest {
 
-  @Test(expected=CephAlreadyMountedException.class)
+  @Test(expected=StoneAlreadyMountedException.class)
   public void test_double_mount() throws Exception {
-    CephMount mount = new CephMount("admin");
-    String conf_file = System.getProperty("CEPH_CONF_FILE");
+    StoneMount mount = new StoneMount("admin");
+    String conf_file = System.getProperty("STONE_CONF_FILE");
     if (conf_file != null)
       mount.conf_read_file(conf_file);
     mount.mount(null);

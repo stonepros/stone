@@ -9,8 +9,8 @@
 #include <unordered_map>
 #include "include/types.h"
 #include "include/utime.h"
-#include "include/ceph_assert.h"
-#include "common/ceph_mutex.h"
+#include "include/stone_assert.h"
+#include "common/stone_mutex.h"
 
 #include "cls/version/cls_version_types.h"
 #include "rgw_common.h"
@@ -58,7 +58,7 @@ struct ObjectCacheInfo {
   map<string, bufferlist> rm_xattrs;
   ObjectMetaInfo meta;
   obj_version version = {};
-  ceph::coarse_mono_time time_added;
+  stone::coarse_mono_time time_added;
 
   ObjectCacheInfo() = default;
 
@@ -165,13 +165,13 @@ class ObjectCache {
   unsigned long lru_size;
   unsigned long lru_counter;
   unsigned long lru_window;
-  ceph::shared_mutex lock = ceph::make_shared_mutex("ObjectCache");
-  CephContext *cct;
+  stone::shared_mutex lock = stone::make_shared_mutex("ObjectCache");
+  StoneContext *cct;
 
   vector<RGWChainedCache *> chained_cache;
 
   bool enabled;
-  ceph::timespan expiry;
+  stone::timespan expiry;
 
   void touch_lru(const DoutPrefixProvider *dpp, const string& name, ObjectCacheEntry& entry,
 		 std::list<string>::iterator& lru_iter);
@@ -194,7 +194,7 @@ public:
   void for_each(const F& f) {
     std::shared_lock l{lock};
     if (enabled) {
-      auto now  = ceph::coarse_mono_clock::now();
+      auto now  = stone::coarse_mono_clock::now();
       for (const auto& [name, entry] : cache_map) {
         if (expiry.count() && (now - entry.info.time_added) < expiry) {
           f(name, entry);
@@ -205,7 +205,7 @@ public:
 
   void put(const DoutPrefixProvider *dpp, const std::string& name, ObjectCacheInfo& bl, rgw_cache_entry_info *cache_info);
   bool remove(const DoutPrefixProvider *dpp, const std::string& name);
-  void set_ctx(CephContext *_cct) {
+  void set_ctx(StoneContext *_cct) {
     cct = _cct;
     lru_window = cct->_conf->rgw_cache_lru_size / 2;
     expiry = std::chrono::seconds(cct->_conf.get_val<uint64_t>(

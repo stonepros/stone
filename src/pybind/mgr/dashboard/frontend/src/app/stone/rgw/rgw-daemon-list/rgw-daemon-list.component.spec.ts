@@ -7,8 +7,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { of } from 'rxjs';
 
-import { PerformanceCounterModule } from '~/app/ceph/performance-counter/performance-counter.module';
-import { RgwDaemon } from '~/app/ceph/rgw/models/rgw-daemon';
+import { PerformanceCounterModule } from '~/app/stone/performance-counter/performance-counter.module';
+import { RgwDaemon } from '~/app/stone/rgw/models/rgw-daemon';
 import { RgwDaemonService } from '~/app/shared/api/rgw-daemon.service';
 import { RgwSiteService } from '~/app/shared/api/rgw-site.service';
 import { Permissions } from '~/app/shared/models/permissions';
@@ -28,8 +28,8 @@ describe('RgwDaemonListComponent', () => {
   const daemon: RgwDaemon = {
     id: '8000',
     service_map_id: '4803',
-    version: 'ceph version',
-    server_hostname: 'ceph',
+    version: 'stone version',
+    server_hostname: 'stone',
     realm_name: 'realm1',
     zonegroup_name: 'zg1-realm1',
     zone_name: 'zone1-zg1-realm1',

@@ -13,7 +13,7 @@ export class NFSPageHelper extends PageHelper {
     this.selectOption('cluster_id', 'testnfs');
     // select a storage backend
     this.selectOption('name', backend);
-    if (backend === 'CephFS') {
+    if (backend === 'StoneFS') {
       this.selectOption('fs_name', 'myfs');
 
       cy.get('#security_label').click({ force: true });

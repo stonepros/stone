@@ -9,14 +9,14 @@ from textwrap import dedent
 import time
 
 from teuthology.exceptions import CommandFailedError, ConnectionLostError
-from tasks.cephfs.filesystem import ObjectNotFound, ROOT_INO
-from tasks.cephfs.cephfs_test_case import CephFSTestCase, for_teuthology
+from tasks.stonefs.filesystem import ObjectNotFound, ROOT_INO
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase, for_teuthology
 from tasks.workunit import task as workunit
 
 log = logging.getLogger(__name__)
 
 
-class TestJournalRepair(CephFSTestCase):
+class TestJournalRepair(StoneFSTestCase):
     MDSS_REQUIRED = 2
 
     def test_inject_to_empty(self):
@@ -169,8 +169,8 @@ class TestJournalRepair(CephFSTestCase):
 
         # Create a dir on each rank
         self.mount_a.run_shell_payload("mkdir {alpha,bravo} && touch {alpha,bravo}/file")
-        self.mount_a.setfattr("alpha/", "ceph.dir.pin", "0")
-        self.mount_a.setfattr("bravo/", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("alpha/", "stone.dir.pin", "0")
+        self.mount_a.setfattr("bravo/", "stone.dir.pin", "1")
 
         # Ensure the pinning has taken effect and the /bravo dir is now
         # migrated to rank 1.
@@ -405,7 +405,7 @@ class TestJournalRepair(CephFSTestCase):
         workunit(self.ctx, {
             'clients': {
                 "client.{0}".format(self.mount_a.client_id): [
-                    "suites/cephfs_journal_tool_smoke.sh"],
+                    "suites/stonefs_journal_tool_smoke.sh"],
             },
             "timeout": "1h"
         })

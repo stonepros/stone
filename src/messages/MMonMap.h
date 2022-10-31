@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,17 +16,17 @@
 #define STONE_MMONMAP_H
 
 #include "include/encoding.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "msg/Message.h"
 #include "msg/MessageRef.h"
 #include "mon/MonMap.h"
 
 class MMonMap final : public Message {
 public:
-  ceph::buffer::list monmapbl;
+  stone::buffer::list monmapbl;
 
   MMonMap() : Message{STONE_MSG_MON_MAP} { }
-  explicit MMonMap(ceph::buffer::list &bl) : Message{STONE_MSG_MON_MAP} {
+  explicit MMonMap(stone::buffer::list &bl) : Message{STONE_MSG_MON_MAP} {
     monmapbl = std::move(bl);
   }
 private:
@@ -46,17 +46,17 @@ public:
       t.encode(monmapbl, features);
     }
 
-    using ceph::encode;
+    using stone::encode;
     encode(monmapbl, payload);
   }
   void decode_payload() override { 
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(monmapbl, p);
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

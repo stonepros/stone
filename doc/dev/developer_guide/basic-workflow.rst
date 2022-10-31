@@ -1,14 +1,14 @@
 Basic Workflow
 ==============
 
-The following chart illustrates the basic Ceph development workflow:
+The following chart illustrates the basic Stone development workflow:
 
 .. ditaa::
 
             Upstream Code                       Your Local Environment
 
            /----------\        git clone           /-------------\
-           |   Ceph   | -------------------------> | ceph/master |
+           |   Stone   | -------------------------> | ceph/master |
            \----------/                            \-------------/
                 ^                                    |
                 |                                    | git branch fix_1
@@ -30,7 +30,7 @@ The following chart illustrates the basic Ceph development workflow:
 
 This page assumes that you are a new contributor with an idea for a bugfix or
 enhancement, but do not know how to proceed. Watch the `Getting Started with
-Ceph Development <https://www.youtube.com/watch?v=t5UIehZ1oLs>`_ video for a
+Stone Development <https://www.youtube.com/watch?v=t5UIehZ1oLs>`_ video for a
 practical summary of this workflow.
 
 Updating the tracker
@@ -43,7 +43,7 @@ not necessarily require a corresponding tracker issue. However, an issue
 (ticket) should be created if one is adding new documentation chapters or
 files, or for other substantial changes.
 
-The tracker ticket serves to explain the issue (bug) to your fellow Ceph
+The tracker ticket serves to explain the issue (bug) to your fellow Stone
 developers and keep them informed as you make progress toward resolution.  To
 this end, please provide a descriptive title and write appropriate information
 and details into the description.  When composing the ticket's title, consider "If I
@@ -55,7 +55,7 @@ setting the ``Assignee`` field.  If your tracker permissions have not been
 elevated, simply add a comment with a short message like "I am working on this
 issue".
 
-Forking and Cloning the Ceph Repository
+Forking and Cloning the Stone Repository
 ---------------------------------------
 
 This section, and the ones that follow, correspond to nodes in the above chart.
@@ -71,7 +71,7 @@ A local copy of the upstream code is made by
 2. Cloning your fork to make a local working copy
 
 
-Forking The Ceph Repository
+Forking The Stone Repository
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 See the `GitHub documentation
@@ -89,7 +89,7 @@ Once you have created your fork, clone it by running:
 
    git clone https://github.com/mygithubaccount/ceph
 
-You must fork the Ceph repository before you clone it.  Without forking, you cannot 
+You must fork the Stone repository before you clone it.  Without forking, you cannot 
 open a `GitHub pull request
 <https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request>`_.
 
@@ -131,7 +131,7 @@ can be referenced as ``ceph/$BRANCH_NAME`` in local git commands.
 Resetting Local Master to Upstream Master
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Your local ``master`` branch can be reset to the upstream Ceph ``master``
+Your local ``master`` branch can be reset to the upstream Stone ``master``
 branch by running the following commands:
 
 .. prompt:: bash $
@@ -164,8 +164,8 @@ with your new work.
 Fixing the bug locally
 ----------------------
 
-In the `Ceph issue tracker <https://tracker.ceph.com>`_, change the status of
-the tracker issue to "In progress".  This communicates to other Ceph
+In the `Stone issue tracker <https://tracker.ceph.com>`_, change the status of
+the tracker issue to "In progress".  This communicates to other Stone
 contributors that you have begun working on a fix, which helps to avoid
 duplication of effort.  If you don't have permission to change that field, your
 previous comment that you are working on the issue is sufficient.
@@ -174,7 +174,7 @@ Your fix may be very simple and require only minimal testing. But that's not
 likely. It is more likely that the process of fixing your bug will be iterative
 and will involve trial and error, as well as skill. An explanation of how to
 fix bugs is beyond the scope of this document. Instead, we focus on the
-mechanics of the process in the context of the Ceph project.
+mechanics of the process in the context of the Stone project.
 
 For a detailed discussion of the tools available for validating bugfixes,
 see the chapters on testing.
@@ -198,12 +198,12 @@ Opening a GitHub pull request
 -----------------------------
 
 The next step is to open a GitHub pull request (PR). This makes your bugfix
-visible to the community of Ceph contributors.  They will review it and may
+visible to the community of Stone contributors.  They will review it and may
 perform additional testing and / or request changes.
 
 This is the point where you "go public" with your modifications.  Be prepared
 to receive suggestions and constructive criticism in the form of comments
-within the PR. Don't worry!  The Ceph project is a friendly place!
+within the PR. Don't worry!  The Stone project is a friendly place!
 
 If you are uncertain how to create and manage pull requests, you may read
 `this GitHub pull request tutorial`_.
@@ -228,7 +228,7 @@ as simple as::
 Understanding Automated PR validation
 -------------------------------------
 
-When you create or update your PR, the Ceph project's `Continuous Integration
+When you create or update your PR, the Stone project's `Continuous Integration
 (CI) <https://en.wikipedia.org/wiki/Continuous_integration>`_ infrastructure
 automatically tests it. At the time of this writing (September 2020), the
 automated CI testing included five tests: 
@@ -242,7 +242,7 @@ automated CI testing included five tests:
 Additional tests may be performed depending on which files your PR modifies.
 
 The :ref:`make check<make-check>` test builds the PR and runs it through a battery of
-tests. These tests run on servers operated by the Ceph Continuous
+tests. These tests run on servers operated by the Stone Continuous
 Integration (CI) team. When the tests complete, the result will be shown
 on GitHub in the pull request itself.
 
@@ -279,7 +279,7 @@ cause of your specific failure.
 Integration tests AKA ceph-qa-suite
 -----------------------------------
 
-Since Ceph is complex, it may be necessary to test your fix to
+Since Stone is complex, it may be necessary to test your fix to
 see how it behaves on real clusters running on physical or virtual
 hardware. Tests designed for this purpose live in the `ceph/qa
 sub-directory`_ and are run via the `teuthology framework`_.
@@ -288,7 +288,7 @@ sub-directory`_ and are run via the `teuthology framework`_.
 .. _`teuthology repository`: https://github.com/ceph/teuthology
 .. _`teuthology framework`: https://github.com/ceph/teuthology
 
-The Ceph community has access to the `Sepia lab
+The Stone community has access to the `Sepia lab
 <https://wiki.sepia.ceph.com/doku.php>`_ where :ref:`testing-integration-tests` can be
 run on physical hardware. Other developers may add tags like "needs-qa" to your
 PR. This allows PRs that need testing to be merged into a single branch and

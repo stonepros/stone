@@ -2,19 +2,19 @@
 
 .. _mgr-module-dev:
 
-ceph-mgr module developer's guide
+stone-mgr module developer's guide
 =================================
 
 .. warning::
 
-    This is developer documentation, describing Ceph internals that
-    are only relevant to people writing ceph-mgr modules.
+    This is developer documentation, describing Stone internals that
+    are only relevant to people writing stone-mgr modules.
 
 Creating a module
 -----------------
 
 In pybind/mgr/, create a python module.  Within your module, create a class
-that inherits from ``MgrModule``.  For ceph-mgr to detect your module, your
+that inherits from ``MgrModule``.  For stone-mgr to detect your module, your
 directory must contain a file called `module.py`.
 
 The most important methods to override are:
@@ -27,7 +27,7 @@ The most important methods to override are:
   exposes CLI commands.
 
 Some modules interface with external orchestrators to deploy
-Ceph services.  These also inherit from ``Orchestrator``, which adds
+Stone services.  These also inherit from ``Orchestrator``, which adds
 additional methods to the base ``MgrModule`` class.  See
 :ref:`Orchestrator modules <orchestrator-modules>` for more on
 creating these modules.
@@ -37,28 +37,28 @@ Installing a module
 
 Once your module is present in the location set by the
 ``mgr module path`` configuration setting, you can enable it
-via the ``ceph mgr module enable`` command::
+via the ``stone mgr module enable`` command::
 
-  ceph mgr module enable mymodule
+  stone mgr module enable mymodule
 
 Note that the MgrModule interface is not stable, so any modules maintained
-outside of the Ceph tree are liable to break when run against any newer
-or older versions of Ceph.
+outside of the Stone tree are liable to break when run against any newer
+or older versions of Stone.
 
 Logging
 -------
 
-Logging in Ceph manager modules is done as in any other Python program. Just
+Logging in Stone manager modules is done as in any other Python program. Just
 import the ``logging`` package and get a logger instance with the
 ``logging.getLogger`` function.
 
 Each module has a ``log_level`` option that specifies the current Python
 logging level of the module.
-To change or query the logging level of the module use the following Ceph
+To change or query the logging level of the module use the following Stone
 commands::
 
-  ceph config get mgr mgr/<module_name>/log_level
-  ceph config set mgr mgr/<module_name>/log_level <info|debug|critical|error|warning|>
+  stone config get mgr mgr/<module_name>/log_level
+  stone config set mgr mgr/<module_name>/log_level <info|debug|critical|error|warning|>
 
 The logging level used upon the module's start is determined by the current
 logging level of the mgr daemon, unless if the ``log_level`` option was
@@ -73,9 +73,9 @@ level is mapped to the module python logging level as follows:
 We can unset the module log level and fallback to the mgr daemon logging level
 by running the following command::
 
-  ceph config set mgr mgr/<module_name>/log_level ''
+  stone config set mgr mgr/<module_name>/log_level ''
 
-By default, modules' logging messages are processed by the Ceph logging layer
+By default, modules' logging messages are processed by the Stone logging layer
 where they will be recorded in the mgr daemon's log file.
 But it's also possible to send a module's logging message to it's own file.
 
@@ -86,7 +86,7 @@ log file with the following name pattern::
 
 To enable the file logging on a module use the following command::
 
-   ceph config set mgr mgr/<module_name>/log_to_file true
+   stone config set mgr mgr/<module_name>/log_to_file true
 
 When the module's file logging is enabled, module's logging messages stop
 being written to the mgr daemon's log file and are only written to the
@@ -95,8 +95,8 @@ module's log file.
 It's also possible to check the status and disable the file logging with the
 following commands::
 
-   ceph config get mgr mgr/<module_name>/log_to_file
-   ceph config set mgr mgr/<module_name>/log_to_file false
+   stone config get mgr mgr/<module_name>/log_to_file
+   stone config set mgr mgr/<module_name>/log_to_file false
 
 
 
@@ -130,14 +130,14 @@ the command. like this
        return HandleCommandResult(stdout=f'the black hole swallowed '{oid}'")
 
 The first parameter passed to ``CLICommand`` is the "name" of the command.
-Since there are lots of commands in Ceph, we tend to group related commands
+Since there are lots of commands in Stone, we tend to group related commands
 with a common prefix. In this case, "antigravity" is used for this purpose.
 As the author is probably designing a module which is also able to launch
 rockets into the deep space.
 
 The `type annotations <https://www.python.org/dev/peps/pep-0484/>`_ for the
 method parameters are mandatory here, so the usage of the command can be
-properly reported to the ``ceph`` CLI, and the manager daemon can convert
+properly reported to the ``stone`` CLI, and the manager daemon can convert
 the serialized command parameters sent by the clients to the expected type
 before passing them to the handler method. With properly implemented types,
 one can also perform some sanity checks against the parameters!
@@ -145,7 +145,7 @@ one can also perform some sanity checks against the parameters!
 The names of the parameters are part of the command interface, so please
 try to take the backward compatibility into consideration when changing
 them. But you **cannot** change name of ``inbuf`` parameter, it is used
-to pass the content of the file specified by ``ceph --in-file`` option.
+to pass the content of the file specified by ``stone --in-file`` option.
 
 The docstring of the method is used for the description of the command.
 
@@ -154,7 +154,7 @@ like::
 
   antigravity send to blackhole <oid> [<blackhole>]  Send the specified object to black hole
 
-as part of the output of ``ceph --help``.
+as part of the output of ``stone --help``.
 
 In addition to ``@CLICommand``, you could also use ``@CLIReadCommand`` or
 ``@CLIWriteCommand`` if your command only requires read permissions or
@@ -165,7 +165,7 @@ a list of dicts like this::
 
     COMMANDS = [
         {
-            "cmd": "foobar name=myarg,type=CephString",
+            "cmd": "foobar name=myarg,type=StoneString",
             "desc": "Do something awesome",
             "perm": "rw",
             # optional:
@@ -174,11 +174,11 @@ a list of dicts like this::
     ]
 
 The ``cmd`` part of each entry is parsed in the same way as internal
-Ceph mon and admin socket commands (see mon/MonCommands.h in
-the Ceph source for examples). Note that the "poll" field is optional,
-and is set to False by default; this indicates to the ``ceph`` CLI
+Stone mon and admin socket commands (see mon/MonCommands.h in
+the Stone source for examples). Note that the "poll" field is optional,
+and is set to False by default; this indicates to the ``stone`` CLI
 that it should call this command repeatedly and output results (see
-``ceph -h`` and its ``--period`` option).
+``stone -h`` and its ``--period`` option).
 
 Each command is expected to return a tuple ``(retval, stdout, stderr)``.
 ``retval`` is an integer representing a libc error code (e.g. EINVAL,
@@ -220,14 +220,14 @@ in ``MODULE_OPTIONS``, an exception will be raised.
 
 You may choose to provide setter commands in your module to perform
 high level validation.  Users can also modify configuration using
-the normal `ceph config set` command, where the configuration options
+the normal `stone config set` command, where the configuration options
 for a mgr module are named like `mgr/<module name>/<option>`.
 
 If a configuration option is different depending on which node the mgr
 is running on, then use *localized* configuration (
 ``get_localized_module_option``, ``set_localized_module_option``).
 This may be necessary for options such as what address to listen on.
-Localized options may also be set externally with ``ceph config set``,
+Localized options may also be set externally with ``stone config set``,
 where they key name is like ``mgr/<module name>/<mgr id>/<option>``
 
 If you need to load and store data (e.g. something larger, binary, or multiline),
@@ -235,7 +235,7 @@ use the KV store instead of configuration options (see next section).
 
 Hints for using config options:
 
-* Reads are fast: ceph-mgr keeps a local in-memory copy, so in many cases
+* Reads are fast: stone-mgr keeps a local in-memory copy, so in many cases
   you can just do a get_module_option every time you use a option, rather than
   copying it out into a variable.
 * Writes block until the value is persisted (i.e. round trip to the monitor),
@@ -264,10 +264,10 @@ The KV store commands work in a similar way to the configuration
 commands.  Reads are fast, operating from a local cache.  Writes block
 on persistence and do a round trip to the monitor.
 
-This data can be access from outside of ceph-mgr using the
-``ceph config-key [get|set]`` commands.  Key names follow the same
+This data can be access from outside of stone-mgr using the
+``stone config-key [get|set]`` commands.  Key names follow the same
 conventions as configuration options.  Note that any values updated
-from outside of ceph-mgr will not be seen by running modules until
+from outside of stone-mgr will not be seen by running modules until
 the next restart.  Users should be discouraged from accessing module KV
 data externally -- if it is necessary for users to populate data, modules
 should provide special commands to set the data via the module.
@@ -286,7 +286,7 @@ a particular prefix (i.e. all keys starting with a particular substring).
 Accessing cluster data
 ----------------------
 
-Modules have access to the in-memory copies of the Ceph cluster's
+Modules have access to the in-memory copies of the Stone cluster's
 state that the mgr maintains.  Accessor functions as exposed
 as members of MgrModule.
 
@@ -316,8 +316,8 @@ function. This will result in a circular locking exception.
 Exposing health checks
 ----------------------
 
-Modules can raise first class Ceph health checks, which will be reported
-in the output of ``ceph status`` and in other places that report on the
+Modules can raise first class Stone health checks, which will be reported
+in the output of ``stone status`` and in other places that report on the
 cluster's health.
 
 If you use ``set_health_checks`` to report a problem, be sure to call
@@ -378,24 +378,24 @@ simply return from this function without doing anything.
 
 .. automethod:: MgrModule.notify
 
-Accessing RADOS or CephFS
+Accessing RADOS or StoneFS
 -------------------------
 
 If you want to use the librados python API to access data stored in
-the Ceph cluster, you can access the ``rados`` attribute of your
+the Stone cluster, you can access the ``rados`` attribute of your
 ``MgrModule`` instance.  This is an instance of ``rados.Rados`` which
-has been constructed for you using the existing Ceph context (an internal
-detail of the C++ Ceph code) of the mgr daemon.
+has been constructed for you using the existing Stone context (an internal
+detail of the C++ Stone code) of the mgr daemon.
 
 Always use this specially constructed librados instance instead of
 constructing one by hand.
 
-Similarly, if you are using libcephfs to access the file system, then
-use the libcephfs ``create_with_rados`` to construct it from the
+Similarly, if you are using libstonefs to access the file system, then
+use the libstonefs ``create_with_rados`` to construct it from the
 ``MgrModule.rados`` librados instance, and thereby inherit the correct context.
 
 Remember that your module may be running while other parts of the cluster
-are down: do not assume that librados or libcephfs calls will return
+are down: do not assume that librados or libstonefs calls will return
 promptly -- consider whether to use timeouts or to block if the rest of
 the cluster is not fully available.
 
@@ -415,12 +415,12 @@ its ``serve`` method is called.  Implementations of ``StandbyModule``
 must inherit from ``mgr_module.MgrStandbyModule``.
 
 The interface of ``MgrStandbyModule`` is much restricted compared to
-``MgrModule`` -- none of the Ceph cluster state is available to
+``MgrModule`` -- none of the Stone cluster state is available to
 the module.  ``serve`` and ``shutdown`` methods are used in the same
 way as a normal module class.  The ``get_active_uri`` method enables
 the standby module to discover the address of its active peer in
 order to make redirects.  See the ``MgrStandbyModule`` definition
-in the Ceph source code for the full list of methods.
+in the Stone source code for the full list of methods.
 
 For an example of how to use this interface, look at the source code
 of the ``dashboard`` module.
@@ -454,23 +454,23 @@ Shutting down cleanly
 
 If a module implements the ``serve()`` method, it should also implement
 the ``shutdown()`` method to shutdown cleanly: misbehaving modules
-may otherwise prevent clean shutdown of ceph-mgr.
+may otherwise prevent clean shutdown of stone-mgr.
 
 Limitations
 -----------
 
 It is not possible to call back into C++ code from a module's
 ``__init__()`` method.  For example calling ``self.get_module_option()`` at
-this point will result in an assertion failure in ceph-mgr.  For modules
+this point will result in an assertion failure in stone-mgr.  For modules
 that implement the ``serve()`` method, it usually makes sense to do most
 initialization inside that method instead.
 
 Is something missing?
 ---------------------
 
-The ceph-mgr python interface is not set in stone.  If you have a need
+The stone-mgr python interface is not set in stone.  If you have a need
 that is not satisfied by the current interface, please bring it up
-on the ceph-devel mailing list.  While it is desired to avoid bloating
+on the stone-devel mailing list.  While it is desired to avoid bloating
 the interface, it is not generally very hard to expose existing data
 to the Python code when there is a good reason.
 

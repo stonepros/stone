@@ -8,7 +8,7 @@
 #include "include/buffer_fwd.h"
 #include "include/Context.h"
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include <list>
 
 namespace librbd {
@@ -50,7 +50,7 @@ private:
   StoneContext *m_cct;
   std::string m_oid;
 
-  ceph::mutex m_aio_notify_lock;
+  stone::mutex m_aio_notify_lock;
   size_t m_pending_aio_notifies = 0;
   Contexts m_aio_notify_flush_ctxs;
 

@@ -5,7 +5,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 
 import { IscsiService } from '~/app/shared/api/iscsi.service';
-import { CephShortVersionPipe } from '~/app/shared/pipes/ceph-short-version.pipe';
+import { StoneShortVersionPipe } from '~/app/shared/pipes/stone-short-version.pipe';
 import { DimlessPipe } from '~/app/shared/pipes/dimless.pipe';
 import { IscsiBackstorePipe } from '~/app/shared/pipes/iscsi-backstore.pipe';
 import { FormatterService } from '~/app/shared/services/formatter.service';
@@ -32,7 +32,7 @@ describe('IscsiComponent', () => {
     declarations: [IscsiComponent],
     schemas: [NO_ERRORS_SCHEMA],
     providers: [
-      CephShortVersionPipe,
+      StoneShortVersionPipe,
       DimlessPipe,
       FormatterService,
       IscsiBackstorePipe,

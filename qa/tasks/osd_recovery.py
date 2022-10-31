@@ -3,7 +3,7 @@ osd recovery
 """
 import logging
 import time
-from tasks import ceph_manager
+from tasks import stone_manager
 from teuthology import misc as teuthology
 
 
@@ -17,7 +17,7 @@ def rados_start(testdir, remote, cmd):
     log.info("rados %s" % ' '.join(cmd))
     pre = [
         'adjust-ulimits',
-        'ceph-coverage',
+        'stone-coverage',
         '{tdir}/archive/coverage'.format(tdir=testdir),
         'rados',
         ];
@@ -44,10 +44,10 @@ def task(ctx, config):
     log.info('num_osds is %s' % num_osds)
     assert num_osds == 3
 
-    manager = ceph_manager.CephManager(
+    manager = stone_manager.StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager'),
+        logger=log.getChild('stone_manager'),
         )
 
     while len(manager.get_osd_status()['up']) < 3:
@@ -120,10 +120,10 @@ def test_incomplete_pgs(ctx, config):
     log.info('num_osds is %s' % num_osds)
     assert num_osds == 4
 
-    manager = ceph_manager.CephManager(
+    manager = stone_manager.StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager'),
+        logger=log.getChild('stone_manager'),
         )
 
     while len(manager.get_osd_status()['up']) < 4:

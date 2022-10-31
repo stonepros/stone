@@ -8,7 +8,7 @@
 #include <mutex>
 #include <system_error>
 #include <boost/intrusive/avl_set.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/types.h"
 #include "common/async/yield_context.h"
 #include "common/dout.h"
@@ -47,7 +47,7 @@ class RGWPeriodHistory final {
 		     optional_yield y) = 0;
   };
 
-  RGWPeriodHistory(CephContext* cct, Puller* puller,
+  RGWPeriodHistory(StoneContext* cct, Puller* puller,
                    const RGWPeriod& current_period);
   ~RGWPeriodHistory();
 

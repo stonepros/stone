@@ -24,7 +24,7 @@ public:
     void format(ImageCtxT* ictx, Context* on_finish) override;
     void load(ImageCtxT* ictx, Context* on_finish) override;
 
-    ceph::ref_t<CryptoInterface> get_crypto() override {
+    stone::ref_t<CryptoInterface> get_crypto() override {
       return m_crypto;
     }
 
@@ -33,7 +33,7 @@ private:
 
     encryption_algorithm_t m_alg;
     std::string m_passphrase;
-    ceph::ref_t<CryptoInterface> m_crypto;
+    stone::ref_t<CryptoInterface> m_crypto;
 };
 
 template <typename ImageCtxT>

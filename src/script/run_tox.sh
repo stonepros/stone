@@ -17,8 +17,8 @@ $prog_name [options] ... [test_name]
 options:
 
   [-h|--help]         display this help message
-  [--source-dir dir]  root source directory of Ceph. deduced by the path of this script by default.
-  [--build-dir dir]   build directory of Ceph. "\$source_dir/build" by default.
+  [--source-dir dir]  root source directory of Stone. deduced by the path of this script by default.
+  [--build-dir dir]   build directory of Stone. "\$source_dir/build" by default.
   [--tox-path dir]    directory in which "tox.ini" is located. if "test_name" is not specified, it is the current directory by default, otherwise the script will try to find a directory with the name of specified \$test_name with a "tox.ini" under it.
   <--tox-envs envs>   tox envlist. this option is required.
   [--venv-path]       the python virtualenv path. \$build_dir/\$test_name by default.
@@ -29,9 +29,9 @@ following command will run tox with envlist of "py3,mypy" using the "tox.ini" in
 
   $prog_name --tox-envs py3,mypy
 
-following command will run tox with envlist of "py3" using "/ceph/src/python-common/tox.ini"
+following command will run tox with envlist of "py3" using "/stone/src/python-common/tox.ini"
 
-  $prog_name --tox-envs py3 --tox-path /ceph/src/python-common
+  $prog_name --tox-envs py3 --tox-path /stone/src/python-common
 EOF
 }
 
@@ -59,7 +59,7 @@ function main() {
     local tox_path
     local script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
     local build_dir=$script_dir/../../build
-    local source_dir=$(get_cmake_variable $build_dir ceph_SOURCE_DIR)
+    local source_dir=$(get_cmake_variable $build_dir stone_SOURCE_DIR)
     local tox_envs
     local options
 
@@ -122,7 +122,7 @@ function main() {
     pip install tox
 
     # tox.ini will take care of this.
-    export CEPH_BUILD_DIR=$build_dir
+    export STONE_BUILD_DIR=$build_dir
     # use the wheelhouse prepared by install-deps.sh
     export PIP_FIND_LINKS="$tox_path/wheelhouse"
     tox -c $tox_path/tox.ini -e "$tox_envs" "$@"

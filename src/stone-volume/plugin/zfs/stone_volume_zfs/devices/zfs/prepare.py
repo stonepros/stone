@@ -1,7 +1,7 @@
 import argparse
 
 from textwrap import dedent
-# from ceph_volume.util import arg_validators
+# from stone_volume.util import arg_validators
 
 class Prepare(object):
 
@@ -15,7 +15,7 @@ class Prepare(object):
 	Prepare a device
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume zfs prepare',
+            prog='stone-volume zfs prepare',
             description=sub_command_help,
         )
         if len(self.argv) == 0 or len(self.argv) > 0:

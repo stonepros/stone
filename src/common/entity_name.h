@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -21,20 +21,20 @@
 
 #include "msg/msg_types.h"
 
-/* Represents a Stonee entity name.
+/* Represents a Stone entity name.
  *
  * For example, mds.0 is the name of the first metadata server.
  * client
  */
 struct EntityName
 {
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(type, bl);
     encode(id, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     uint32_t type_;
     std::string id_;
     decode(type_, bl);
@@ -66,7 +66,7 @@ struct EntityName
   bool has_default_id() const;
 
   static std::string get_valid_types_as_str();
-  static uint32_t str_to_ceph_entity_type(std::string_view);
+  static uint32_t str_to_stone_entity_type(std::string_view);
 
   friend bool operator<(const EntityName& a, const EntityName& b);
   friend std::ostream& operator<<(std::ostream& out, const EntityName& n);

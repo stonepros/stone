@@ -12,7 +12,7 @@ expect_false()
         if "$@"; then return 1; else return 0; fi
 }
 
-COT=ceph-objectstore-tool
+COT=stone-objectstore-tool
 DATA=store_test_fuse_dir
 [ -z "$TYPE" ] && TYPE=bluestore
 MNT=store_test_fuse_mnt
@@ -24,7 +24,7 @@ test -d $MNT && fusermount -u $MNT || true
 rmdir $MNT || true
 mkdir $MNT
 
-export CEPH_ARGS=--enable_experimental_unrecoverable_data_corrupting_features=bluestore
+export STONE_ARGS=--enable_experimental_unrecoverable_data_corrupting_features=bluestore
 
 $COT --no-mon-config --op mkfs --data-path $DATA --type $TYPE
 $COT --no-mon-config --op fuse --data-path $DATA --mountpoint $MNT &

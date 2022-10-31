@@ -14,7 +14,7 @@
 #include "include/rbd/librbd.hpp"
 #include "include/rbd_types.h"
 #include "cls/rbd/cls_rbd_types.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "librbd/Types.h"
 
 namespace librbd {
@@ -114,7 +114,7 @@ namespace librbd {
   void trim_image(ImageCtx *ictx, uint64_t newsize, ProgressContext& prog_ctx);
 
   int read_header_bl(librados::IoCtx& io_ctx, const std::string& md_oid,
-		     ceph::bufferlist& header, uint64_t *ver);
+		     stone::bufferlist& header, uint64_t *ver);
   int read_header(librados::IoCtx& io_ctx, const std::string& md_oid,
 		  struct rbd_obj_header_ondisk *header, uint64_t *ver);
   int tmap_set(librados::IoCtx& io_ctx, const std::string& imgname);

@@ -62,12 +62,12 @@ stop_osd() {
                 if kill `cat $pidfile` ; then
                         poll_cmd "eval test -e $pidfile ; echo \$?" "1" 1 30
                         [ $? -eq 1 ] && return 0
-                        echo "ceph-osd process did not terminate correctly"
+                        echo "stone-osd process did not terminate correctly"
                 else
                         echo "kill `cat $pidfile` failed"
                 fi
         else
-                echo "ceph-osd process $osd_index is not running"
+                echo "stone-osd process $osd_index is not running"
         fi
         return 1
 }
@@ -75,7 +75,7 @@ stop_osd() {
 # Restart an OSD started by vstart
 restart_osd() {
         osd_index=$1
-        ./ceph-osd -i $osd_index -c ceph.conf &
+        ./stone-osd -i $osd_index -c stone.conf &
 }
 
 # Ask the user a yes/no question and get the response
@@ -117,7 +117,7 @@ write_objects() {
                 chr=`perl -e "print chr(48+$v)"`
                 head -c $obj_size /dev/zero  | tr '\0' "$chr" > $TEMPDIR/ver$v
                 for i in `seq -w 1 $num_objs`; do
-                        ./rados -c ./ceph.conf -p $pool put obj$i $TEMPDIR/ver$v || die "radostool failed"
+                        ./rados -c ./stone.conf -p $pool put obj$i $TEMPDIR/ver$v || die "radostool failed"
                 done
         done
 }
@@ -130,7 +130,7 @@ read_objects() {
 	chr=`perl -e "print chr(48+$ver)"`
 	head -c $obj_size /dev/zero  | tr '\0' "$chr" > $TEMPDIR/exemplar
         for i in `seq -w 1 $num_objs`; do
-                ./rados -c ./ceph.conf -p $pool get obj$i $TEMPDIR/out$i || die "radostool failed"
+                ./rados -c ./stone.conf -p $pool get obj$i $TEMPDIR/out$i || die "radostool failed"
 		cmp $TEMPDIR/out$i $TEMPDIR/exemplar || die "got back incorrect obj$i"
         done
 }
@@ -163,10 +163,10 @@ dump_osd_store() {
 }
 
 start_recovery() {
-        CEPH_NUM_OSD=$1
+        STONE_NUM_OSD=$1
         osd=0
-        while [ $osd -lt $CEPH_NUM_OSD ]; do
-                ./ceph -c ./ceph.conf tell osd.$osd debug kick_recovery_wq 0
+        while [ $osd -lt $STONE_NUM_OSD ]; do
+                ./stone -c ./stone.conf tell osd.$osd debug kick_recovery_wq 0
                 osd=$((osd+1))
         done
 }

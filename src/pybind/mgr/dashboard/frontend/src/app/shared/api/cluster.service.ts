@@ -13,7 +13,7 @@ export class ClusterService {
 
   getStatus(): Observable<string> {
     return this.http.get<string>(`${this.baseURL}`, {
-      headers: { Accept: 'application/vnd.ceph.api.v0.1+json' }
+      headers: { Accept: 'application/vnd.stone.api.v0.1+json' }
     });
   }
 
@@ -21,7 +21,7 @@ export class ClusterService {
     return this.http.put(
       `${this.baseURL}`,
       { status: status },
-      { headers: { Accept: 'application/vnd.ceph.api.v0.1+json' } }
+      { headers: { Accept: 'application/vnd.stone.api.v0.1+json' } }
     );
   }
 }

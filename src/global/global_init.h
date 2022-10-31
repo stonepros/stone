@@ -19,15 +19,15 @@
 #include <vector>
 #include <map>
 #include <boost/intrusive_ptr.hpp>
-#include "include/ceph_assert.h"
-#include "common/ceph_context.h"
+#include "include/stone_assert.h"
+#include "common/stone_context.h"
 #include "common/code_environment.h"
 #include "common/common_init.h"
 
 /*
  * global_init is the first initialization function that
  * daemons and utility programs need to call. It takes care of a lot of
- * initialization, including setting up g_ceph_context.
+ * initialization, including setting up g_stone_context.
  */
 boost::intrusive_ptr<StoneContext>
 global_init(

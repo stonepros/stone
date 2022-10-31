@@ -3,12 +3,12 @@ import argparse
 import logging
 import os
 from textwrap import dedent
-from ceph_volume import process, conf, decorators, terminal, __release__, configuration
-from ceph_volume.util import system, disk
-from ceph_volume.util import prepare as prepare_utils
-from ceph_volume.util import encryption as encryption_utils
-from ceph_volume.systemd import systemctl
-from ceph_volume.api import lvm as api
+from stone_volume import process, conf, decorators, terminal, __release__, configuration
+from stone_volume.util import system, disk
+from stone_volume.util import prepare as prepare_utils
+from stone_volume.util import encryption as encryption_utils
+from stone_volume.systemd import systemctl
+from stone_volume.api import lvm as api
 from .listing import direct_report
 
 
@@ -18,21 +18,21 @@ logger = logging.getLogger(__name__)
 def activate_filestore(osd_lvs, no_systemd=False):
     # find the osd
     for osd_lv in osd_lvs:
-        if osd_lv.tags.get('ceph.type') == 'data':
+        if osd_lv.tags.get('stone.type') == 'data':
             data_lv = osd_lv
             break
     else:
         raise RuntimeError('Unable to find a data LV for filestore activation')
 
-    is_encrypted = data_lv.tags.get('ceph.encrypted', '0') == '1'
-    is_vdo = data_lv.tags.get('ceph.vdo', '0')
+    is_encrypted = data_lv.tags.get('stone.encrypted', '0') == '1'
+    is_vdo = data_lv.tags.get('stone.vdo', '0')
 
-    osd_id = data_lv.tags['ceph.osd_id']
-    configuration.load_ceph_conf_path(data_lv.tags['ceph.cluster_name'])
+    osd_id = data_lv.tags['stone.osd_id']
+    configuration.load_stone_conf_path(data_lv.tags['stone.cluster_name'])
     configuration.load()
     # it may have a volume with a journal
     for osd_lv in osd_lvs:
-        if osd_lv.tags.get('ceph.type') == 'journal':
+        if osd_lv.tags.get('stone.type') == 'journal':
             osd_journal_lv = osd_lv
             break
     else:
@@ -40,15 +40,15 @@ def activate_filestore(osd_lvs, no_systemd=False):
 
     # TODO: add sensible error reporting if this is ever the case
     # blow up with a KeyError if this doesn't exist
-    osd_fsid = data_lv.tags['ceph.osd_fsid']
+    osd_fsid = data_lv.tags['stone.osd_fsid']
     if not osd_journal_lv:
         # must be a disk partition, by querying blkid by the uuid we are ensuring that the
         # device path is always correct
-        journal_uuid = data_lv.tags['ceph.journal_uuid']
+        journal_uuid = data_lv.tags['stone.journal_uuid']
         osd_journal = disk.get_device_from_partuuid(journal_uuid)
     else:
         journal_uuid = osd_journal_lv.lv_uuid
-        osd_journal = data_lv.tags['ceph.journal_device']
+        osd_journal = data_lv.tags['stone.journal_device']
 
     if not osd_journal:
         raise RuntimeError('unable to detect an lv or device journal for OSD %s' % osd_id)
@@ -56,7 +56,7 @@ def activate_filestore(osd_lvs, no_systemd=False):
     # this is done here, so that previous checks that ensure path availability
     # and correctness can still be enforced, and report if any issues are found
     if is_encrypted:
-        lockbox_secret = data_lv.tags['ceph.cephx_lockbox_secret']
+        lockbox_secret = data_lv.tags['stone.stonex_lockbox_secret']
         # this keyring writing is idempotent
         encryption_utils.write_lockbox_keyring(osd_id, osd_fsid, lockbox_secret)
         dmcrypt_secret = encryption_utils.get_dmcrypt_key(osd_id, osd_fsid)
@@ -69,7 +69,7 @@ def activate_filestore(osd_lvs, no_systemd=False):
         source = data_lv.lv_path
 
     # mount the osd
-    destination = '/var/lib/ceph/osd/%s-%s' % (conf.cluster, osd_id)
+    destination = '/var/lib/stone/osd/%s-%s' % (conf.cluster, osd_id)
     if not system.device_is_mounted(source, destination=destination):
         prepare_utils.mount_osd(source, osd_id, is_vdo=is_vdo)
 
@@ -78,14 +78,14 @@ def activate_filestore(osd_lvs, no_systemd=False):
 
     # always re-do the symlink regardless if it exists, so that the journal
     # device path that may have changed can be mapped correctly every time
-    destination = '/var/lib/ceph/osd/%s-%s/journal' % (conf.cluster, osd_id)
+    destination = '/var/lib/stone/osd/%s-%s/journal' % (conf.cluster, osd_id)
     process.run(['ln', '-snf', osd_journal, destination])
 
     # make sure that the journal has proper permissions
     system.chown(osd_journal)
 
     if no_systemd is False:
-        # enable the ceph-volume unit for this OSD
+        # enable the stone-volume unit for this OSD
         systemctl.enable_volume(osd_id, osd_fsid, 'lvm')
 
         # enable the OSD
@@ -93,7 +93,7 @@ def activate_filestore(osd_lvs, no_systemd=False):
 
         # start the OSD
         systemctl.start_osd(osd_id)
-    terminal.success("ceph-volume lvm activate successful for osd ID: %s" % osd_id)
+    terminal.success("stone-volume lvm activate successful for osd ID: %s" % osd_id)
 
 
 def get_osd_device_path(osd_lvs, device_type, dmcrypt_secret=None):
@@ -107,20 +107,20 @@ def get_osd_device_path(osd_lvs, device_type, dmcrypt_secret=None):
     """
     osd_block_lv = None
     for lv in osd_lvs:
-        if lv.tags.get('ceph.type') == 'block':
+        if lv.tags.get('stone.type') == 'block':
             osd_block_lv = lv
             break
     if osd_block_lv:
-        is_encrypted = osd_block_lv.tags.get('ceph.encrypted', '0') == '1'
+        is_encrypted = osd_block_lv.tags.get('stone.encrypted', '0') == '1'
         logger.debug('Found block device (%s) with encryption: %s', osd_block_lv.name, is_encrypted)
-        uuid_tag = 'ceph.%s_uuid' % device_type
+        uuid_tag = 'stone.%s_uuid' % device_type
         device_uuid = osd_block_lv.tags.get(uuid_tag)
         if not device_uuid:
             return None
 
     device_lv = None
     for lv in osd_lvs:
-        if lv.tags.get('ceph.type') == device_type:
+        if lv.tags.get('stone.type') == device_type:
             device_lv = lv
             break
     if device_lv:
@@ -142,26 +142,26 @@ def get_osd_device_path(osd_lvs, device_type, dmcrypt_secret=None):
 
 def activate_bluestore(osd_lvs, no_systemd=False):
     for lv in osd_lvs:
-        if lv.tags.get('ceph.type') == 'block':
+        if lv.tags.get('stone.type') == 'block':
             osd_block_lv = lv
             break
     else:
         raise RuntimeError('could not find a bluestore OSD to activate')
 
-    is_encrypted = osd_block_lv.tags.get('ceph.encrypted', '0') == '1'
+    is_encrypted = osd_block_lv.tags.get('stone.encrypted', '0') == '1'
     dmcrypt_secret = None
-    osd_id = osd_block_lv.tags['ceph.osd_id']
-    conf.cluster = osd_block_lv.tags['ceph.cluster_name']
-    osd_fsid = osd_block_lv.tags['ceph.osd_fsid']
-    configuration.load_ceph_conf_path(osd_block_lv.tags['ceph.cluster_name'])
+    osd_id = osd_block_lv.tags['stone.osd_id']
+    conf.cluster = osd_block_lv.tags['stone.cluster_name']
+    osd_fsid = osd_block_lv.tags['stone.osd_fsid']
+    configuration.load_stone_conf_path(osd_block_lv.tags['stone.cluster_name'])
     configuration.load()
 
     # mount on tmpfs the osd directory
-    osd_path = '/var/lib/ceph/osd/%s-%s' % (conf.cluster, osd_id)
+    osd_path = '/var/lib/stone/osd/%s-%s' % (conf.cluster, osd_id)
     if not system.path_is_mounted(osd_path):
         # mkdir -p and mount as tmpfs
         prepare_utils.create_osd_path(osd_id, tmpfs=True)
-    # XXX This needs to be removed once ceph-bluestore-tool can deal with
+    # XXX This needs to be removed once stone-bluestore-tool can deal with
     # symlinks that exist in the osd dir
     for link_name in ['block', 'block.db', 'block.wal']:
         link_path = os.path.join(osd_path, link_name)
@@ -170,7 +170,7 @@ def activate_bluestore(osd_lvs, no_systemd=False):
     # encryption is handled here, before priming the OSD dir
     if is_encrypted:
         osd_lv_path = '/dev/mapper/%s' % osd_block_lv.lv_uuid
-        lockbox_secret = osd_block_lv.tags['ceph.cephx_lockbox_secret']
+        lockbox_secret = osd_block_lv.tags['stone.stonex_lockbox_secret']
         encryption_utils.write_lockbox_keyring(osd_id, osd_fsid, lockbox_secret)
         dmcrypt_secret = encryption_utils.get_dmcrypt_key(osd_id, osd_fsid)
         encryption_utils.luks_open(dmcrypt_secret, osd_block_lv.lv_path, osd_block_lv.lv_uuid)
@@ -185,7 +185,7 @@ def activate_bluestore(osd_lvs, no_systemd=False):
     # even if permissions are somehow messed up
     system.chown(osd_path)
     prime_command = [
-        'ceph-bluestore-tool', '--cluster=%s' % conf.cluster,
+        'stone-bluestore-tool', '--cluster=%s' % conf.cluster,
         'prime-osd-dir', '--dev', osd_lv_path,
         '--path', osd_path]
 
@@ -212,7 +212,7 @@ def activate_bluestore(osd_lvs, no_systemd=False):
         system.chown(destination)
 
     if no_systemd is False:
-        # enable the ceph-volume unit for this OSD
+        # enable the stone-volume unit for this OSD
         systemctl.enable_volume(osd_id, osd_fsid, 'lvm')
 
         # enable the OSD
@@ -220,12 +220,12 @@ def activate_bluestore(osd_lvs, no_systemd=False):
 
         # start the OSD
         systemctl.start_osd(osd_id)
-    terminal.success("ceph-volume lvm activate successful for osd ID: %s" % osd_id)
+    terminal.success("stone-volume lvm activate successful for osd ID: %s" % osd_id)
 
 
 class Activate(object):
 
-    help = 'Discover and mount the LVM device associated with an OSD ID and start the Ceph OSD'
+    help = 'Discover and mount the LVM device associated with an OSD ID and start the Stone OSD'
 
     def __init__(self, argv):
         self.argv = argv
@@ -238,13 +238,13 @@ class Activate(object):
             # the metadata for all devices in each OSD will contain
             # the FSID which is required for activation
             for device in devices:
-                fsid = device.get('tags', {}).get('ceph.osd_fsid')
+                fsid = device.get('tags', {}).get('stone.osd_fsid')
                 if fsid:
                     osds[fsid] = osd_id
                     break
         if not osds:
             terminal.warning('Was unable to find any OSDs to activate')
-            terminal.warning('Verify OSDs are present with "ceph-volume lvm list"')
+            terminal.warning('Verify OSDs are present with "stone-volume lvm list"')
             return
         for osd_fsid, osd_id in osds.items():
             if not args.no_systemd and systemctl.osd_is_active(osd_id):
@@ -268,9 +268,9 @@ class Activate(object):
         osd_fsid = osd_fsid if osd_fsid else args.osd_fsid
 
         if osd_id and osd_fsid:
-            tags = {'ceph.osd_id': osd_id, 'ceph.osd_fsid': osd_fsid}
+            tags = {'stone.osd_id': osd_id, 'stone.osd_fsid': osd_fsid}
         elif not osd_id and osd_fsid:
-            tags = {'ceph.osd_fsid': osd_fsid}
+            tags = {'stone.osd_fsid': osd_fsid}
         elif osd_id and not osd_fsid:
             raise RuntimeError('could not activate osd.{}, please provide the '
                                'osd_fsid too'.format(osd_id))
@@ -287,7 +287,7 @@ class Activate(object):
             logger.info('auto detecting objectstore')
             # may get multiple lvs, so can't do get_the_lvs() calls here
             for lv in lvs:
-                has_journal = lv.tags.get('ceph.journal_uuid')
+                has_journal = lv.tags.get('stone.journal_uuid')
                 if has_journal:
                     logger.info('found a journal associated with the OSD, '
                                 'assuming filestore')
@@ -307,7 +307,7 @@ class Activate(object):
         Activate OSDs by discovering them with LVM and mounting them in their
         appropriate destination:
 
-            ceph-volume lvm activate {ID} {FSID}
+            stone-volume lvm activate {ID} {FSID}
 
         The lvs associated with the OSD need to have been prepared previously,
         so that all needed tags and metadata exist.
@@ -315,11 +315,11 @@ class Activate(object):
         When migrating OSDs, or a multiple-osd activation is needed, the
         ``--all`` flag can be used instead of the individual ID and FSID:
 
-            ceph-volume lvm activate --all
+            stone-volume lvm activate --all
 
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume lvm activate',
+            prog='stone-volume lvm activate',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=sub_command_help,
         )

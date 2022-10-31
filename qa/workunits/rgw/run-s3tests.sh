@@ -2,7 +2,7 @@
 set -ex
 
 # run s3-tests from current directory. assume working
-# ceph environment (radosgw-admin in path) and rgw on localhost:8000
+# stone environment (radosgw-admin in path) and rgw on localhost:8000
 # (the vstart default).
 
 branch=$1
@@ -27,9 +27,9 @@ dir=tmp.s3-tests.$$
 # clone and bootstrap
 mkdir $dir
 cd $dir
-git clone https://github.com/ceph/s3-tests
+git clone https://github.com/stonepros/s3-tests
 cd s3-tests
-git checkout ceph-$branch
+git checkout stone-$branch
 VIRTUALENV_PYTHON=/usr/bin/python3 ./bootstrap
 
 S3TEST_CONF=s3tests.conf.SAMPLE virtualenv/bin/python -m nose -a '!fails_on_rgw,!lifecycle_expiration,!fails_strict_rfc2616' -v

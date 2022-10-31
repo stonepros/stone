@@ -6,9 +6,9 @@ exceed the limits of how many caps/inodes they should hold.
 
 import logging
 from textwrap import dedent
-from tasks.ceph_test_case import TestTimeoutError
-from tasks.cephfs.cephfs_test_case import CephFSTestCase, needs_trimming
-from tasks.cephfs.fuse_mount import FuseMount
+from tasks.stone_test_case import TestTimeoutError
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase, needs_trimming
+from tasks.stonefs.fuse_mount import FuseMount
 import os
 
 
@@ -24,7 +24,7 @@ CAP_RECALL_RATIO = 0.8
 CAP_RECALL_MIN = 100
 
 
-class TestClientLimits(CephFSTestCase):
+class TestClientLimits(StoneFSTestCase):
     REQUIRE_KCLIENT_REMOTE = True
     CLIENTS_REQUIRED = 2
 

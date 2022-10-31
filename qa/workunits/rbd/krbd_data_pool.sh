@@ -101,15 +101,15 @@ function get_num_clones() {
         python3 -c 'import sys, json; print(json.load(sys.stdin)["pools"][0]["num_object_clones"])'
 }
 
-ceph osd pool create repdata 24 24
+stone osd pool create repdata 24 24
 rbd pool init repdata
-ceph osd erasure-code-profile set teuthologyprofile crush-failure-domain=osd m=1 k=2
-ceph osd pool create ecdata 24 24 erasure teuthologyprofile
+stone osd erasure-code-profile set teuthologyprofile crush-failure-domain=osd m=1 k=2
+stone osd pool create ecdata 24 24 erasure teuthologyprofile
 rbd pool init ecdata
-ceph osd pool set ecdata allow_ec_overwrites true
-ceph osd pool create rbdnonzero 24 24
+stone osd pool set ecdata allow_ec_overwrites true
+stone osd pool create rbdnonzero 24 24
 rbd pool init rbdnonzero
-ceph osd pool create clonesonly 24 24
+stone osd pool create clonesonly 24 24
 rbd pool init clonesonly
 
 for pool in rbd rbdnonzero; do

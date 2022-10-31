@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2018 SUSE LLC.
  * Author: Daniel Oliveira <doliveira@suse.com>
@@ -17,10 +17,10 @@
 
 #include "common/debug.h"
 
-#define dout_subsys ceph_subsys_auth 
+#define dout_subsys stone_subsys_auth 
 
 bool KrbAuthorizeHandler::verify_authorizer(
-  CephContext* ceph_ctx,
+  StoneContext* stone_ctx,
   const KeyStore& keys,
   const bufferlist& authorizer_data,
   size_t connection_secret_required_len,
@@ -37,12 +37,12 @@ bool KrbAuthorizeHandler::verify_authorizer(
   try {
     uint8_t value = (1);
 
-    using ceph::decode;
+    using stone::decode;
     decode(value, itr);
     decode(*entity_name, itr);
     decode(*global_id, itr);
   } catch (const buffer::error& err) {
-    ldout(ceph_ctx, 0) 
+    ldout(stone_ctx, 0) 
         << "Error: KrbAuthorizeHandler::verify_authorizer() failed!" << dendl;
     return false;
   }

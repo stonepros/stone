@@ -185,7 +185,7 @@ class FSAL(object):
     @classmethod
     def from_dict(cls, fsal_dict: Dict[str, Any]) -> 'FSAL':
         if fsal_dict.get('name') == NFS_GANESHA_SUPPORTED_FSALS[0]:
-            return CephFSFSAL.from_dict(fsal_dict)
+            return StoneFSFSAL.from_dict(fsal_dict)
         if fsal_dict.get('name') == NFS_GANESHA_SUPPORTED_FSALS[1]:
             return RGWFSAL.from_dict(fsal_dict)
         raise NFSInvalidOperation(f'Unknown FSAL {fsal_dict.get("name")}')
@@ -193,7 +193,7 @@ class FSAL(object):
     @classmethod
     def from_fsal_block(cls, fsal_block: RawBlock) -> 'FSAL':
         if fsal_block.values.get('name') == NFS_GANESHA_SUPPORTED_FSALS[0]:
-            return CephFSFSAL.from_fsal_block(fsal_block)
+            return StoneFSFSAL.from_fsal_block(fsal_block)
         if fsal_block.values.get('name') == NFS_GANESHA_SUPPORTED_FSALS[1]:
             return RGWFSAL.from_fsal_block(fsal_block)
         raise NFSInvalidOperation(f'Unknown FSAL {fsal_block.values.get("name")}')
@@ -205,22 +205,22 @@ class FSAL(object):
         raise NotImplementedError
 
 
-class CephFSFSAL(FSAL):
+class StoneFSFSAL(FSAL):
     def __init__(self,
                  name: str,
                  user_id: Optional[str] = None,
                  fs_name: Optional[str] = None,
                  sec_label_xattr: Optional[str] = None,
-                 cephx_key: Optional[str] = None) -> None:
+                 stonex_key: Optional[str] = None) -> None:
         super().__init__(name)
-        assert name == 'CEPH'
+        assert name == 'STONE'
         self.fs_name = fs_name
         self.user_id = user_id
         self.sec_label_xattr = sec_label_xattr
-        self.cephx_key = cephx_key
+        self.stonex_key = stonex_key
 
     @classmethod
-    def from_fsal_block(cls, fsal_block: RawBlock) -> 'CephFSFSAL':
+    def from_fsal_block(cls, fsal_block: RawBlock) -> 'StoneFSFSAL':
         return cls(fsal_block.values['name'],
                    fsal_block.values.get('user_id'),
                    fsal_block.values.get('filesystem'),
@@ -236,17 +236,17 @@ class CephFSFSAL(FSAL):
             result.values['filesystem'] = self.fs_name
         if self.sec_label_xattr:
             result.values['sec_label_xattr'] = self.sec_label_xattr
-        if self.cephx_key:
-            result.values['secret_access_key'] = self.cephx_key
+        if self.stonex_key:
+            result.values['secret_access_key'] = self.stonex_key
         return result
 
     @classmethod
-    def from_dict(cls, fsal_dict: Dict[str, Any]) -> 'CephFSFSAL':
+    def from_dict(cls, fsal_dict: Dict[str, Any]) -> 'StoneFSFSAL':
         return cls(fsal_dict['name'],
                    fsal_dict.get('user_id'),
                    fsal_dict.get('fs_name'),
                    fsal_dict.get('sec_label_xattr'),
-                   fsal_dict.get('cephx_key'))
+                   fsal_dict.get('stonex_key'))
 
     def to_dict(self) -> Dict[str, str]:
         r = {'name': self.name}
@@ -506,7 +506,7 @@ class Export:
                 self.validate_access_type(client.access_type)
 
         if self.fsal.name == NFS_GANESHA_SUPPORTED_FSALS[0]:
-            fs = cast(CephFSFSAL, self.fsal)
+            fs = cast(StoneFSFSAL, self.fsal)
             if not fs.fs_name or not check_fs(mgr, fs.fs_name):
                 raise FSNotFound(fs.fs_name)
         elif self.fsal.name == NFS_GANESHA_SUPPORTED_FSALS[1]:

@@ -8,13 +8,13 @@
 #include <boost/scoped_ptr.hpp>
 #include <list>
 #include <map>
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 class FileStoreTracker {
   const static uint64_t SIZE = 4 * 1024;
   ObjectStore *store;
   KeyValueDB *db;
-  ceph::mutex lock = ceph::make_mutex("Tracker Lock");
+  stone::mutex lock = stone::make_mutex("Tracker Lock");
   uint64_t restart_seq;
 
   struct OutTransaction {

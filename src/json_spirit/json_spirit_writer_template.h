@@ -17,13 +17,13 @@
 #include <iomanip>
 #include <boost/io/ios_state.hpp>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace json_spirit
 {
     inline char to_hex_char( unsigned int c )
     {
-        ceph_assert( c <= 0xF );
+        stone_assert( c <= 0xF );
 
         const char ch = static_cast< char >( c );
 
@@ -194,7 +194,7 @@ namespace json_spirit
                 case real_type:  output( value.get_real() );  break;
                 case int_type:   output_int( value );         break;
                 case null_type:  os_ << "null";               break;
-                default: ceph_assert( false );
+                default: stone_assert( false );
             }
         }
 

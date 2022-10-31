@@ -9,8 +9,8 @@
     </groups>
     <templates>
         <template>
-            <template>ceph-mgr Zabbix module</template>
-            <name>ceph-mgr Zabbix module</name>
+            <template>stone-mgr Zabbix module</template>
+            <name>stone-mgr Zabbix module</name>
             <description/>
             <groups>
                 <group>
@@ -19,7 +19,7 @@
             </groups>
             <applications>
                 <application>
-                    <name>Ceph</name>
+                    <name>Stone</name>
                 </application>
             </applications>
             <items>
@@ -29,7 +29,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_mon</key>
+                    <key>stone.num_mon</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -56,11 +56,11 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Number of Monitors configured in Ceph cluster</description>
+                    <description>Number of Monitors configured in Stone cluster</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -72,7 +72,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_osd</key>
+                    <key>stone.num_osd</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -99,11 +99,11 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Number of OSDs in Ceph cluster</description>
+                    <description>Number of OSDs in Stone cluster</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -115,7 +115,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_osd_in</key>
+                    <key>stone.num_osd_in</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -142,11 +142,11 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Total number of IN OSDs in Ceph cluster</description>
+                    <description>Total number of IN OSDs in Stone cluster</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -158,7 +158,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_osd_up</key>
+                    <key>stone.num_osd_up</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -185,11 +185,11 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Total number of UP OSDs in Ceph cluster</description>
+                    <description>Total number of UP OSDs in Stone cluster</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -201,7 +201,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg</key>
+                    <key>stone.num_pg</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -228,11 +228,11 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Total number of Placement Groups in Ceph cluster</description>
+                    <description>Total number of Placement Groups in Stone cluster</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -244,7 +244,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_temp</key>
+                    <key>stone.num_pg_temp</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -275,7 +275,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -287,7 +287,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_active</key>
+                    <key>stone.num_pg_active</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -318,7 +318,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -330,7 +330,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_clean</key>
+                    <key>stone.num_pg_clean</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -361,7 +361,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -373,7 +373,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_peering</key>
+                    <key>stone.num_pg_peering</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -404,7 +404,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -416,7 +416,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_scrubbing</key>
+                    <key>stone.num_pg_scrubbing</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -447,7 +447,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -459,7 +459,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_undersized</key>
+                    <key>stone.num_pg_undersized</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -490,7 +490,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -502,7 +502,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_backfilling</key>
+                    <key>stone.num_pg_backfilling</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -533,7 +533,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -545,7 +545,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_degraded</key>
+                    <key>stone.num_pg_degraded</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -576,7 +576,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -588,7 +588,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_inconsistent</key>
+                    <key>stone.num_pg_inconsistent</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -619,7 +619,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -631,7 +631,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_remapped</key>
+                    <key>stone.num_pg_remapped</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -662,7 +662,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -674,7 +674,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_recovering</key>
+                    <key>stone.num_pg_recovering</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -705,7 +705,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -717,7 +717,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_backfill_toofull</key>
+                    <key>stone.num_pg_backfill_toofull</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -748,7 +748,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -760,7 +760,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_backfill_wait</key>
+                    <key>stone.num_pg_backfill_wait</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -791,7 +791,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -803,7 +803,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pg_recovery_wait</key>
+                    <key>stone.num_pg_recovery_wait</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -834,7 +834,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -846,7 +846,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.num_pools</key>
+                    <key>stone.num_pools</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -873,23 +873,23 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Total number of pools in Ceph cluster</description>
+                    <description>Total number of pools in Stone cluster</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD avg fill</name>
+                    <name>Stone OSD avg fill</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_avg_fill</key>
+                    <key>stone.osd_avg_fill</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -920,19 +920,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD max PGs</name>
+                    <name>Stone OSD max PGs</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_max_pgs</key>
+                    <key>stone.osd_max_pgs</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -963,19 +963,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD min PGs</name>
+                    <name>Stone OSD min PGs</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_min_pgs</key>
+                    <key>stone.osd_min_pgs</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1006,19 +1006,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD avg PGs</name>
+                    <name>Stone OSD avg PGs</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_avg_pgs</key>
+                    <key>stone.osd_avg_pgs</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1049,19 +1049,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph backfill full ratio</name>
+                    <name>Stone backfill full ratio</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>1</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_backfillfull_ratio</key>
+                    <key>stone.osd_backfillfull_ratio</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1088,23 +1088,23 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Backfill full ratio setting of Ceph cluster as configured on OSDMap</description>
+                    <description>Backfill full ratio setting of Stone cluster as configured on OSDMap</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph full ratio</name>
+                    <name>Stone full ratio</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>1</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_full_ratio</key>
+                    <key>stone.osd_full_ratio</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1131,23 +1131,23 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Full ratio setting of Ceph cluster as configured on OSDMap</description>
+                    <description>Full ratio setting of Stone cluster as configured on OSDMap</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD Apply latency Avg</name>
+                    <name>Stone OSD Apply latency Avg</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_latency_apply_avg</key>
+                    <key>stone.osd_latency_apply_avg</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1178,19 +1178,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD Apply latency Max</name>
+                    <name>Stone OSD Apply latency Max</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_latency_apply_max</key>
+                    <key>stone.osd_latency_apply_max</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1221,19 +1221,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD Apply latency Min</name>
+                    <name>Stone OSD Apply latency Min</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_latency_apply_min</key>
+                    <key>stone.osd_latency_apply_min</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1264,19 +1264,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD Commit latency Avg</name>
+                    <name>Stone OSD Commit latency Avg</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_latency_commit_avg</key>
+                    <key>stone.osd_latency_commit_avg</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1307,19 +1307,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD Commit latency Max</name>
+                    <name>Stone OSD Commit latency Max</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_latency_commit_max</key>
+                    <key>stone.osd_latency_commit_max</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1350,19 +1350,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD Commit latency Min</name>
+                    <name>Stone OSD Commit latency Min</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_latency_commit_min</key>
+                    <key>stone.osd_latency_commit_min</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1393,19 +1393,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD max fill</name>
+                    <name>Stone OSD max fill</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_max_fill</key>
+                    <key>stone.osd_max_fill</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1436,19 +1436,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph OSD min fill</name>
+                    <name>Stone OSD min fill</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_min_fill</key>
+                    <key>stone.osd_min_fill</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1479,19 +1479,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph nearfull ratio</name>
+                    <name>Stone nearfull ratio</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>1</multiplier>
                     <snmp_oid/>
-                    <key>ceph.osd_nearfull_ratio</key>
+                    <key>stone.osd_nearfull_ratio</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1518,23 +1518,23 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Near full ratio setting of Ceph cluster as configured on OSDMap</description>
+                    <description>Near full ratio setting of Stone cluster as configured on OSDMap</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Overall Ceph status</name>
+                    <name>Overall Stone status</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.overall_status</key>
+                    <key>stone.overall_status</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>0</trends>
@@ -1561,23 +1561,23 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Overall Ceph cluster status, eg HEALTH_OK, HEALTH_WARN of HEALTH_ERR</description>
+                    <description>Overall Stone cluster status, eg HEALTH_OK, HEALTH_WARN of HEALTH_ERR</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Overal Ceph status (numeric)</name>
+                    <name>Overal Stone status (numeric)</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.overall_status_int</key>
+                    <key>stone.overall_status_int</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1604,23 +1604,23 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Overal Ceph status in numeric value. OK: 0, WARN: 1, ERR: 2</description>
+                    <description>Overal Stone status in numeric value. OK: 0, WARN: 1, ERR: 2</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph Read bandwidth</name>
+                    <name>Stone Read bandwidth</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.rd_bytes</key>
+                    <key>stone.rd_bytes</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1651,19 +1651,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph Read operations</name>
+                    <name>Stone Read operations</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.rd_ops</key>
+                    <key>stone.rd_ops</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1694,7 +1694,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -1706,7 +1706,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.total_avail_bytes</key>
+                    <key>stone.total_avail_bytes</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1733,11 +1733,11 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Total bytes available in Ceph cluster</description>
+                    <description>Total bytes available in Stone cluster</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -1749,7 +1749,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.total_bytes</key>
+                    <key>stone.total_bytes</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1776,11 +1776,11 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Total (RAW) capacity of Ceph cluster in bytes</description>
+                    <description>Total (RAW) capacity of Stone cluster in bytes</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -1792,7 +1792,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.total_objects</key>
+                    <key>stone.total_objects</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1819,11 +1819,11 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Total number of objects in Ceph cluster</description>
+                    <description>Total number of objects in Stone cluster</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -1835,7 +1835,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.total_used_bytes</key>
+                    <key>stone.total_used_bytes</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1862,23 +1862,23 @@
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <description>Total bytes used in Ceph cluster</description>
+                    <description>Total bytes used in Stone cluster</description>
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph Write bandwidth</name>
+                    <name>Stone Write bandwidth</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.wr_bytes</key>
+                    <key>stone.wr_bytes</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1909,19 +1909,19 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Ceph Write operations</name>
+                    <name>Stone Write operations</name>
                     <type>2</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>ceph.wr_ops</key>
+                    <key>stone.wr_ops</key>
                     <delay>0</delay>
                     <history>90</history>
                     <trends>365</trends>
@@ -1952,7 +1952,7 @@
                     <inventory_link>0</inventory_link>
                     <applications>
                         <application>
-                            <name>Ceph</name>
+                            <name>Stone</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -1961,11 +1961,11 @@
             </items>
             <discovery_rules>
                 <discovery_rule>
-                    <name>Ceph OSD discovery</name>
+                    <name>Stone OSD discovery</name>
                     <type>2</type>
                     <snmp_community/>
                     <snmp_oid/>
-                    <key>ceph.zabbix.osd.discovery</key>
+                    <key>stone.zabbix.osd.discovery</key>
                     <delay>0</delay>
                     <status>0</status>
                     <allowed_hosts/>
@@ -1999,7 +1999,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[osd.{#OSD},in]</key>
+                            <key>stone.[osd.{#OSD},in]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2033,7 +2033,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2043,7 +2043,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[osd.{#OSD},num_pgs]</key>
+                            <key>stone.[osd.{#OSD},num_pgs]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2077,7 +2077,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2087,7 +2087,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[osd.{#OSD},osd_fill]</key>
+                            <key>stone.[osd.{#OSD},osd_fill]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2121,7 +2121,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2131,7 +2131,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[osd.{#OSD},osd_latency_apply]</key>
+                            <key>stone.[osd.{#OSD},osd_latency_apply]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2165,7 +2165,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2175,7 +2175,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[osd.{#OSD},osd_latency_commit]</key>
+                            <key>stone.[osd.{#OSD},osd_latency_commit]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2209,7 +2209,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2219,7 +2219,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[osd.{#OSD},up]</key>
+                            <key>stone.[osd.{#OSD},up]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2253,15 +2253,15 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{ceph-mgr Zabbix module:ceph.[osd.{#OSD},up].last()}=0</expression>
-                            <name>Ceph OSD osd.{#OSD} is DOWN</name>
+                            <expression>{stone-mgr Zabbix module:stone.[osd.{#OSD},up].last()}=0</expression>
+                            <name>Stone OSD osd.{#OSD} is DOWN</name>
                             <url/>
                             <status>0</status>
                             <priority>2</priority>
@@ -2270,8 +2270,8 @@
                             <dependencies/>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>{ceph-mgr Zabbix module:ceph.[osd.{#OSD},osd_fill].last()}&gt;={ceph-mgr Zabbix module:ceph.osd_full_ratio.last()}</expression>
-                            <name>Ceph OSD osd.{#OSD} is full: {ITEM.VALUE}%</name>
+                            <expression>{stone-mgr Zabbix module:stone.[osd.{#OSD},osd_fill].last()}&gt;={stone-mgr Zabbix module:stone.osd_full_ratio.last()}</expression>
+                            <name>Stone OSD osd.{#OSD} is full: {ITEM.VALUE}%</name>
                             <url/>
                             <status>0</status>
                             <priority>4</priority>
@@ -2280,8 +2280,8 @@
                             <dependencies/>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>{ceph-mgr Zabbix module:ceph.[osd.{#OSD},osd_fill].last()}&gt;={ceph-mgr Zabbix module:ceph.osd_nearfull_ratio.last()}</expression>
-                            <name>Ceph OSD osd.{#OSD} is near full: {ITEM.VALUE}%</name>
+                            <expression>{stone-mgr Zabbix module:stone.[osd.{#OSD},osd_fill].last()}&gt;={stone-mgr Zabbix module:stone.osd_nearfull_ratio.last()}</expression>
+                            <name>Stone OSD osd.{#OSD} is near full: {ITEM.VALUE}%</name>
                             <url/>
                             <status>0</status>
                             <priority>2</priority>
@@ -2294,11 +2294,11 @@
                     <host_prototypes/>
                 </discovery_rule>
                 <discovery_rule>
-                    <name>Ceph pool discovery</name>
+                    <name>Stone pool discovery</name>
                     <type>2</type>
                     <snmp_community/>
                     <snmp_oid/>
-                    <key>ceph.zabbix.pool.discovery</key>
+                    <key>stone.zabbix.pool.discovery</key>
                     <delay>0</delay>
                     <status>0</status>
                     <allowed_hosts/>
@@ -2332,7 +2332,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[{#POOL},bytes_used]</key>
+                            <key>stone.[{#POOL},bytes_used]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2366,7 +2366,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2376,7 +2376,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[{#POOL},stored_raw]</key>
+                            <key>stone.[{#POOL},stored_raw]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2410,7 +2410,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2420,7 +2420,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[{#POOL},percent_used]</key>
+                            <key>stone.[{#POOL},percent_used]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2454,7 +2454,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2464,7 +2464,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[{#POOL},rd_bytes]</key>
+                            <key>stone.[{#POOL},rd_bytes]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2498,7 +2498,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2508,7 +2508,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[{#POOL},rd_ops]</key>
+                            <key>stone.[{#POOL},rd_ops]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2542,7 +2542,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2552,7 +2552,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[{#POOL},wr_bytes]</key>
+                            <key>stone.[{#POOL},wr_bytes]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2586,7 +2586,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2596,7 +2596,7 @@
                             <snmp_community/>
                             <multiplier>0</multiplier>
                             <snmp_oid/>
-                            <key>ceph.[{#POOL},wr_ops]</key>
+                            <key>stone.[{#POOL},wr_ops]</key>
                             <delay>0</delay>
                             <history>90</history>
                             <trends>365</trends>
@@ -2630,7 +2630,7 @@
                             <logtimefmt/>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>Ceph CRUSH [{#CRUSH_RULE}]</name>
+                                    <name>Stone CRUSH [{#CRUSH_RULE}]</name>
                                 </application_prototype>
                             </application_prototypes>
                         </item_prototype>
@@ -2644,7 +2644,7 @@
             <templates/>
             <screens>
                 <screen>
-                    <name>Ceph</name>
+                    <name>Stone</name>
                     <hsize>1</hsize>
                     <vsize>7</vsize>
                     <screen_items>
@@ -2664,8 +2664,8 @@
                             <dynamic>0</dynamic>
                             <sort_triggers>0</sort_triggers>
                             <resource>
-                                <name>Ceph storage overview</name>
-                                <host>ceph-mgr Zabbix module</host>
+                                <name>Stone storage overview</name>
+                                <host>stone-mgr Zabbix module</host>
                             </resource>
                             <max_columns>3</max_columns>
                             <application/>
@@ -2686,8 +2686,8 @@
                             <dynamic>0</dynamic>
                             <sort_triggers>0</sort_triggers>
                             <resource>
-                                <name>Ceph free space</name>
-                                <host>ceph-mgr Zabbix module</host>
+                                <name>Stone free space</name>
+                                <host>stone-mgr Zabbix module</host>
                             </resource>
                             <max_columns>3</max_columns>
                             <application/>
@@ -2708,8 +2708,8 @@
                             <dynamic>0</dynamic>
                             <sort_triggers>0</sort_triggers>
                             <resource>
-                                <name>Ceph health</name>
-                                <host>ceph-mgr Zabbix module</host>
+                                <name>Stone health</name>
+                                <host>stone-mgr Zabbix module</host>
                             </resource>
                             <max_columns>3</max_columns>
                             <application/>
@@ -2730,8 +2730,8 @@
                             <dynamic>0</dynamic>
                             <sort_triggers>0</sort_triggers>
                             <resource>
-                                <name>Ceph bandwidth</name>
-                                <host>ceph-mgr Zabbix module</host>
+                                <name>Stone bandwidth</name>
+                                <host>stone-mgr Zabbix module</host>
                             </resource>
                             <max_columns>3</max_columns>
                             <application/>
@@ -2752,8 +2752,8 @@
                             <dynamic>0</dynamic>
                             <sort_triggers>0</sort_triggers>
                             <resource>
-                                <name>Ceph I/O</name>
-                                <host>ceph-mgr Zabbix module</host>
+                                <name>Stone I/O</name>
+                                <host>stone-mgr Zabbix module</host>
                             </resource>
                             <max_columns>3</max_columns>
                             <application/>
@@ -2774,8 +2774,8 @@
                             <dynamic>0</dynamic>
                             <sort_triggers>0</sort_triggers>
                             <resource>
-                                <name>Ceph OSD utilization</name>
-                                <host>ceph-mgr Zabbix module</host>
+                                <name>Stone OSD utilization</name>
+                                <host>stone-mgr Zabbix module</host>
                             </resource>
                             <max_columns>3</max_columns>
                             <application/>
@@ -2796,8 +2796,8 @@
                             <dynamic>0</dynamic>
                             <sort_triggers>0</sort_triggers>
                             <resource>
-                                <name>Ceph OSD latency</name>
-                                <host>ceph-mgr Zabbix module</host>
+                                <name>Stone OSD latency</name>
+                                <host>stone-mgr Zabbix module</host>
                             </resource>
                             <max_columns>3</max_columns>
                             <application/>
@@ -2809,27 +2809,27 @@
     </templates>
     <triggers>
         <trigger>
-            <expression>{ceph-mgr Zabbix module:ceph.overall_status_int.last()}=2</expression>
-            <name>Ceph cluster in ERR state</name>
+            <expression>{stone-mgr Zabbix module:stone.overall_status_int.last()}=2</expression>
+            <name>Stone cluster in ERR state</name>
             <url/>
             <status>0</status>
             <priority>5</priority>
-            <description>Ceph cluster is in ERR state</description>
+            <description>Stone cluster is in ERR state</description>
             <type>0</type>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{ceph-mgr Zabbix module:ceph.overall_status_int.avg(1h)}=1</expression>
-            <name>Ceph cluster in WARN state</name>
+            <expression>{stone-mgr Zabbix module:stone.overall_status_int.avg(1h)}=1</expression>
+            <name>Stone cluster in WARN state</name>
             <url/>
             <status>0</status>
             <priority>4</priority>
-            <description>Issue a trigger if Ceph cluster is in WARN state for &gt;1h</description>
+            <description>Issue a trigger if Stone cluster is in WARN state for &gt;1h</description>
             <type>0</type>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{ceph-mgr Zabbix module:ceph.num_osd_in.abschange()}&gt;0</expression>
+            <expression>{stone-mgr Zabbix module:stone.num_osd_in.abschange()}&gt;0</expression>
             <name>Number of IN OSDs changed</name>
             <url/>
             <status>0</status>
@@ -2839,7 +2839,7 @@
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{ceph-mgr Zabbix module:ceph.num_osd_up.abschange()}&gt;0</expression>
+            <expression>{stone-mgr Zabbix module:stone.num_osd_up.abschange()}&gt;0</expression>
             <name>Number of UP OSDs changed</name>
             <url/>
             <status>0</status>
@@ -2851,7 +2851,7 @@
     </triggers>
     <graphs>
         <graph>
-            <name>Ceph bandwidth</name>
+            <name>Stone bandwidth</name>
             <width>900</width>
             <height>200</height>
             <yaxismin>0.0000</yaxismin>
@@ -2876,8 +2876,8 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.rd_bytes</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.rd_bytes</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -2888,14 +2888,14 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.wr_bytes</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.wr_bytes</key>
                     </item>
                 </graph_item>
             </graph_items>
         </graph>
         <graph>
-            <name>Ceph free space</name>
+            <name>Stone free space</name>
             <width>900</width>
             <height>200</height>
             <yaxismin>0.0000</yaxismin>
@@ -2911,8 +2911,8 @@
             <ymax_type_1>2</ymax_type_1>
             <ymin_item_1>0</ymin_item_1>
             <ymax_item_1>
-                <host>ceph-mgr Zabbix module</host>
-                <key>ceph.total_bytes</key>
+                <host>stone-mgr Zabbix module</host>
+                <key>stone.total_bytes</key>
             </ymax_item_1>
             <graph_items>
                 <graph_item>
@@ -2923,8 +2923,8 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.total_avail_bytes</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.total_avail_bytes</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -2935,14 +2935,14 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.total_used_bytes</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.total_used_bytes</key>
                     </item>
                 </graph_item>
             </graph_items>
         </graph>
         <graph>
-            <name>Ceph health</name>
+            <name>Stone health</name>
             <width>900</width>
             <height>200</height>
             <yaxismin>0.0000</yaxismin>
@@ -2967,14 +2967,14 @@
                     <calc_fnc>7</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.overall_status_int</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.overall_status_int</key>
                     </item>
                 </graph_item>
             </graph_items>
         </graph>
         <graph>
-            <name>Ceph I/O</name>
+            <name>Stone I/O</name>
             <width>900</width>
             <height>200</height>
             <yaxismin>0.0000</yaxismin>
@@ -2999,8 +2999,8 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.rd_ops</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.rd_ops</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3011,14 +3011,14 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.wr_ops</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.wr_ops</key>
                     </item>
                 </graph_item>
             </graph_items>
         </graph>
         <graph>
-            <name>Ceph OSD latency</name>
+            <name>Stone OSD latency</name>
             <width>900</width>
             <height>200</height>
             <yaxismin>0.0000</yaxismin>
@@ -3043,8 +3043,8 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_latency_apply_avg</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_latency_apply_avg</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3055,8 +3055,8 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_latency_commit_avg</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_latency_commit_avg</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3067,8 +3067,8 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_latency_apply_max</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_latency_apply_max</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3079,8 +3079,8 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_latency_commit_max</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_latency_commit_max</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3091,8 +3091,8 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_latency_apply_min</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_latency_apply_min</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3103,14 +3103,14 @@
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_latency_commit_min</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_latency_commit_min</key>
                     </item>
                 </graph_item>
             </graph_items>
         </graph>
         <graph>
-            <name>Ceph OSD utilization</name>
+            <name>Stone OSD utilization</name>
             <width>900</width>
             <height>200</height>
             <yaxismin>0.0000</yaxismin>
@@ -3135,8 +3135,8 @@
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_nearfull_ratio</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_nearfull_ratio</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3147,8 +3147,8 @@
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_full_ratio</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_full_ratio</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3159,8 +3159,8 @@
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_backfillfull_ratio</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_backfillfull_ratio</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3171,8 +3171,8 @@
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_max_fill</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_max_fill</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3183,8 +3183,8 @@
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_avg_fill</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_avg_fill</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3195,14 +3195,14 @@
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.osd_min_fill</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.osd_min_fill</key>
                     </item>
                 </graph_item>
             </graph_items>
         </graph>
         <graph>
-            <name>Ceph storage overview</name>
+            <name>Stone storage overview</name>
             <width>900</width>
             <height>200</height>
             <yaxismin>0.0000</yaxismin>
@@ -3227,8 +3227,8 @@
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.total_used_bytes</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.total_used_bytes</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -3239,8 +3239,8 @@
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>ceph-mgr Zabbix module</host>
-                        <key>ceph.total_avail_bytes</key>
+                        <host>stone-mgr Zabbix module</host>
+                        <key>stone.total_avail_bytes</key>
                     </item>
                 </graph_item>
             </graph_items>

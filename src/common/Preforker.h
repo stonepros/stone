@@ -11,7 +11,7 @@
 
 #include "common/errno.h"
 #include "common/safe_io.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/compat.h"
 #include "include/sock_compat.h"
 
@@ -36,7 +36,7 @@ public:
   {}
 
   int prefork(std::string &err) {
-    ceph_assert(!forked);
+    stone_assert(!forked);
     std::ostringstream oss;
     int r = socketpair_cloexec(AF_UNIX, SOCK_STREAM, 0, fd);
     if (r < 0) {
@@ -87,7 +87,7 @@ public:
   }
 
   int parent_wait(std::string &err_msg) {
-    ceph_assert(forked);
+    stone_assert(forked);
 
     int r = -1;
     std::ostringstream oss;
@@ -133,7 +133,7 @@ public:
   }
 
   void daemonize() {
-    ceph_assert(forked);
+    stone_assert(forked);
     static int r = -1;
     int r2 = ::write(fd[1], &r, sizeof(r));
     r += r2;  // make the compiler shut up about the unused return code from ::write(2).

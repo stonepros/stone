@@ -132,7 +132,7 @@ commit 9483a032f750572586f146c696ec6501d3df0383
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Dec 27 16:06:24 2012 -0800
 
-    init-ceph: fix status version check across machines
+    init-stone: fix status version check across machines
     
     The local state isn't propagated into the backtick shell, resulting in
     'unknown' for all remote daemons.  Avoid backticks altogether.
@@ -144,16 +144,16 @@ commit 8fef9360fe949fbf4ee6e468c36cc1c84b369b6e
 Author: Travis Rhoden <trhoden@gmail.com>
 Date:   Mon Aug 20 13:29:11 2012 -0700
 
-    init-ceph: use SSH in "service ceph status -a" to get version
+    init-stone: use SSH in "service stone status -a" to get version
     
-    When running "service ceph status -a", a version number was never
+    When running "service stone status -a", a version number was never
     returned for remote hosts, only for the local.  This was because
     the command to query the version number didn't use the do_cmd
     function, which is responsible for running the command over SSH
     when needed.
     
-    Modify the ceph init.d script to use do_cmd for querying the
-    Ceph version.
+    Modify the stone init.d script to use do_cmd for querying the
+    Stone version.
     
     Signed-off-by: Travis Rhoden <trhoden@gmail.com>
     (cherry picked from commit 60fdb6fda6233b01dae4ed8a34427d5960840b84)
@@ -228,7 +228,7 @@ commit bc4f74c7b9ec4e6bbcf4ab4ab68a82a69b8eaca5
 Author: Gary Lowell <gary.lowell@inktank.com>
 Date:   Thu Dec 20 16:49:32 2012 -0800
 
-    ceph.spec.in:  Fedora builds debuginfo by default.
+    stone.spec.in:  Fedora builds debuginfo by default.
     
     Signed-off-by: Gary Lowell <gary.lowell@inktank.com>
 
@@ -249,7 +249,7 @@ Date:   Mon Sep 24 09:55:25 2012 -0700
 
     client: Fix for #3184 cfuse segv with no keyring
     
-    Fixes bug #3184 where the ceph-fuse client segfaults if authx is
+    Fixes bug #3184 where the stone-fuse client segfaults if authx is
     enabled but no keyring file is present.  This was due to the
     client->init() return value not getting checked.
     
@@ -265,7 +265,7 @@ Date:   Tue Oct 9 21:25:54 2012 +0100
     Otherwise our keyring default location, or any other similarly formatted
     location, will be taken as the actual location for the keyring and fail.
     
-    Reported-by: tziOm (at) #ceph
+    Reported-by: tziOm (at) #stone
     Fixes: 3276
     Backport: argonaut
     
@@ -295,7 +295,7 @@ commit f60c9b6600a85b840a02e145bac77326d60fd03f
 Author: Gary Lowell <glowell@inktank.com>
 Date:   Fri Nov 9 13:28:13 2012 -0800
 
-    ceph.spec.in:  Build debuginfo subpackage.
+    stone.spec.in:  Build debuginfo subpackage.
     
     This is a partial fix for bug 3471.  Enable building of debuginfo package.
     Some distributions enable this automatically by installing additional rpm
@@ -391,7 +391,7 @@ commit e35e7e2bcb749e3ee00f1f93bc6b17bde8329414
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Oct 30 14:17:56 2012 -0700
 
-    ceph-disk-activate: avoid duplicating mounts if already activated
+    stone-disk-activate: avoid duplicating mounts if already activated
     
     If the given device is already mounted at the target location, do not
     mount --move it again and create a bunch of dup entries in the /etc/mtab
@@ -404,7 +404,7 @@ commit 0c9bbb3b4b4dbe6f0a12960785e35af9c748701a
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Oct 25 21:21:18 2012 -0700
 
-    ceph-disk-prepare: poke kernel into refreshing partition tables
+    stone-disk-prepare: poke kernel into refreshing partition tables
     
     Prod the kernel to refresh the partition table after we create one.  The
     partprobe program is packaged with parted, which we already use, so this
@@ -417,7 +417,7 @@ commit b4004806ec387915ba4e039b9bc1c563273ef08f
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Oct 25 21:20:21 2012 -0700
 
-    ceph-disk-prepare: fix journal partition creation
+    stone-disk-prepare: fix journal partition creation
     
     The end value needs to have + to indicate it is relative to wherever the
     start is.
@@ -429,7 +429,7 @@ commit efac1bb19f1ca3851c7b51d96cb4e82d8d142a45
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Oct 25 18:14:47 2012 -0700
 
-    ceph-disk-prepare: assume parted failure means no partition table
+    stone-disk-prepare: assume parted failure means no partition table
     
     If the disk has no valid label we get an error like
     
@@ -497,9 +497,9 @@ commit 83ab36655f397b7d781a611b4d82679c8484710f
 Author: Gary Lowell <glowell@inktank.com>
 Date:   Wed Nov 7 12:41:10 2012 -0800
 
-    ceph.spec.in:  Remove ceph version requirement from ceph-fuse package.
+    stone.spec.in:  Remove stone version requirement from stone-fuse package.
     
-    The ceph-fuse rpm package now only requires ceph as a pre-req, not a specific
+    The stone-fuse rpm package now only requires stone as a pre-req, not a specific
     version.
 
 commit 578b5764d5b26d190c295da88c1be5f0c77682a7
@@ -629,17 +629,17 @@ commit b0164d9902c834c95187f6b277f58a30d26cc4d3
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Fri Oct 5 10:57:42 2012 -0700
 
-    ceph-disk-prepare, debian/control: Support external journals.
+    stone-disk-prepare, debian/control: Support external journals.
     
-    Previously, ceph-disk-* would only let you use a journal that was a
+    Previously, stone-disk-* would only let you use a journal that was a
     file inside the OSD data directory. With this, you can do:
     
-      ceph-disk-prepare /dev/sdb /dev/sdb
+      stone-disk-prepare /dev/sdb /dev/sdb
     
     to put the journal as a second partition on the same disk as the OSD
     data (might save some file system overhead), or, more interestingly:
     
-      ceph-disk-prepare /dev/sdb /dev/sdc
+      stone-disk-prepare /dev/sdb /dev/sdc
     
     which makes it create a new partition on /dev/sdc to use as the
     journal. Size of the partition is decided by $osd_journal_size.
@@ -687,7 +687,7 @@ Date:   Mon Oct 8 17:14:22 2012 -0700
     let the command be reprocessed and re-proposed.
     
     Among other things, this could lead to nondeterministic results for
-    'ceph osd create <uuid>'.
+    'stone osd create <uuid>'.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
 
@@ -702,7 +702,7 @@ commit 5d84b4a22b2ff975679711719f336a312a6edff3
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Thu Aug 2 13:02:04 2012 -0700
 
-    ceph-authtool: Fix usage, it's --print-key not --print.
+    stone-authtool: Fix usage, it's --print-key not --print.
     
     Signed-off-by: Tommi Virtanen <tv@inktank.com>
 
@@ -742,7 +742,7 @@ commit 86546d7dec6cd5080162d1f3d7de2c579736dd65
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Thu Oct 4 16:03:40 2012 -0700
 
-    ceph-disk-prepare: Use the OSD uuid as the partition GUID.
+    stone-disk-prepare: Use the OSD uuid as the partition GUID.
     
     This will make locating the right data partition for a given journal
     partition a lot easier.
@@ -753,10 +753,10 @@ commit fa3aa41ead0be5a27695e3c208c5af00af90bc53
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Wed Oct 3 12:38:38 2012 -0700
 
-    debian/control, ceph-disk-prepare: Depend on xfsprogs, use xfs by default.
+    debian/control, stone-disk-prepare: Depend on xfsprogs, use xfs by default.
     
     Ext4 as a default is a bad choice, as we don't perform enough QA with
-    it. To use XFS as the default for ceph-disk-prepare, we need to depend
+    it. To use XFS as the default for stone-disk-prepare, we need to depend
     on xfsprogs.
     
     btrfs-tools is already recommended, so no change there. If you set
@@ -769,9 +769,9 @@ commit 4c3997dc8bbd3985a7b86d8c54b71fbe15af1591
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Wed Oct 3 10:13:17 2012 -0700
 
-    ceph-disk-{prepare,activate}: Default mkfs arguments and mount options.
+    stone-disk-{prepare,activate}: Default mkfs arguments and mount options.
     
-    The values for the settings were copied from teuthology task "ceph".
+    The values for the settings were copied from teuthology task "stone".
     
     Signed-off-by: Tommi Virtanen <tv@inktank.com>
 
@@ -779,16 +779,16 @@ commit a6229b901785ef0a88d1b1886b5b5ae339ac7fcb
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Wed Oct 3 08:47:20 2012 -0700
 
-    ceph-disk-prepare: Avoid triggering activate before prepare is done.
+    stone-disk-prepare: Avoid triggering activate before prepare is done.
     
     Earlier testing never saw this, but now a mount of a disk triggers a
-    udev blockdev-added event, causing ceph-disk-activate to run even
-    before ceph-disk-prepare has had a chance to write the files and
+    udev blockdev-added event, causing stone-disk-activate to run even
+    before stone-disk-prepare has had a chance to write the files and
     unmount the disk.
     
-    Avoid this by using a temporary partition type uuid ("ceph 2 be"), and
-    only setting it to the permanent ("ceph osd"). The hotplug event won't
-    match the type uuid, and thus won't trigger ceph-disk-activate.
+    Avoid this by using a temporary partition type uuid ("stone 2 be"), and
+    only setting it to the permanent ("stone osd"). The hotplug event won't
+    match the type uuid, and thus won't trigger stone-disk-activate.
     
     Signed-off-by: Tommi Virtanen <tv@inktank.com>
 
@@ -796,7 +796,7 @@ commit 03cec77e2b0b4536349880de6890ad9537da0783
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Tue Oct 2 17:06:11 2012 -0700
 
-    ceph-disk-activate: Add a comment about user_xattr being default now.
+    stone-disk-activate: Add a comment about user_xattr being default now.
     
     Signed-off-by: Tommi Virtanen <tv@inktank.com>
 
@@ -804,9 +804,9 @@ commit 4aa13c6d228b9256870e02a57496f00a75e17349
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Tue Oct 2 16:53:35 2012 -0700
 
-    ceph-disk-activate: Use mount options from ceph.conf
+    stone-disk-activate: Use mount options from stone.conf
     
-    Always uses default cluster name ("ceph") for now, see
+    Always uses default cluster name ("stone") for now, see
     http://tracker.newdream.net/issues/3253
     
     Closes: #2548
@@ -816,7 +816,7 @@ commit b684ab1d1727b23f75f232123f1da947df2e5e63
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Tue Oct 2 16:43:08 2012 -0700
 
-    ceph-disk-activate: Refactor to extract detect_fstype call.
+    stone-disk-activate: Refactor to extract detect_fstype call.
     
     This allows us to use the fstype for a config lookup.
     
@@ -826,11 +826,11 @@ commit ce5e1f8dfaa8675b0a1e9fa22ebf91be9652aa01
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Tue Oct 2 16:37:07 2012 -0700
 
-    ceph-disk-activate: Unmount on errors (if it did the mount).
+    stone-disk-activate: Unmount on errors (if it did the mount).
     
     This cleans up the error handling to not leave disks mounted
-    in /var/lib/ceph/tmp/mnt.* when something fails, e.g. when
-    the ceph command line tool can't talk to mons.
+    in /var/lib/stone/tmp/mnt.* when something fails, e.g. when
+    the stone command line tool can't talk to mons.
     
     Signed-off-by: Tommi Virtanen <tv@inktank.com>
 
@@ -838,7 +838,7 @@ commit da86e4e43676ceaf0b39635954489c297de88025
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Tue Oct 2 16:23:55 2012 -0700
 
-    ceph-disk-prepare: Allow setting mkfs arguments and mount options in ceph.conf
+    stone-disk-prepare: Allow setting mkfs arguments and mount options in stone.conf
     
     Tested with meaningless but easy-to-verify values:
     
@@ -847,7 +847,7 @@ Date:   Tue Oct 2 16:23:55 2012 -0700
       osd_fs_mkfs_arguments_xfs = -i size=512
       osd_fs_mount_options_xfs = noikeep
     
-    ceph-disk-activate does not respect the mount options yet.
+    stone-disk-activate does not respect the mount options yet.
     
     Closes: #2549
     Signed-off-by: Tommi Virtanen <tv@inktank.com>
@@ -856,16 +856,16 @@ commit cf2e3b15cea99cc100169e7a67103676d8990aee
 Author: Tommi Virtanen <tv@inktank.com>
 Date:   Tue Oct 2 16:04:15 2012 -0700
 
-    ceph-disk-prepare: Allow specifying fs type to use.
+    stone-disk-prepare: Allow specifying fs type to use.
     
-    Either use ceph.conf variable osd_fs_type or command line option
+    Either use stone.conf variable osd_fs_type or command line option
     --fs-type=
     
     Default is still ext4, as currently nothing guarantees xfsprogs
     or btrfs-tools are installed.
     
     Currently both btrfs and xfs seems to trigger a disk hotplug event at
-    mount time, thus triggering a useless and unwanted ceph-disk-activate
+    mount time, thus triggering a useless and unwanted stone-disk-activate
     run. This will be worked around in a later commit.
     
     Currently mkfs and mount options cannot be configured.

@@ -409,7 +409,7 @@ Date:   Mon Jun 30 07:05:04 2014 -0700
 
     qa/workunits/suites/fsx.sh: don't use zero range
     
-    Zero range is not supported by cephfs.
+    Zero range is not supported by stonefs.
     
     Fixes: #8542
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -420,7 +420,7 @@ Merge: 3c63601 4ca12b4
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Jun 30 19:19:24 2014 +0200
 
-    Merge pull request #2014 from ceph/wip-scrub-dumpling
+    Merge pull request #2014 from stone/wip-scrub-dumpling
     
     osd: scrub priority updates for dumpling
     
@@ -445,7 +445,7 @@ commit 15360a900c8746c28006d6f5c8b093685ddac796
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu May 8 08:52:51 2014 -0700
 
-    ceph-disk: partprobe before settle when preparing dev
+    stone-disk: partprobe before settle when preparing dev
     
     Two users have reported this fixes a problem with using --dmcrypt.
     
@@ -542,15 +542,15 @@ Date:   Tue May 20 16:50:18 2014 +0100
     Implement CrushWrapper::ruleset_exists that iterates over the existing
     rulesets to find the one matching the ruleset argument.
     
-    ceph osd pool set <pool> crush_ruleset must not use
+    stone osd pool set <pool> crush_ruleset must not use
     CrushWrapper::rule_exists, which checks for a *rule* existing, whereas
     the value being set is a *ruleset*. (cherry picked from commit
     fb504baed98d57dca8ec141bcc3fd021f99d82b0)
     
-    A test via ceph osd pool set data crush_ruleset verifies the ruleset
+    A test via stone osd pool set data crush_ruleset verifies the ruleset
     argument is accepted.
     
-    http://tracker.ceph.com/issues/8599 fixes: #8599
+    http://tracker.stone.com/issues/8599 fixes: #8599
     
     Backport: firefly, emperor, dumpling
     Signed-off-by: John Spray <john.spray@inktank.com>
@@ -576,7 +576,7 @@ commit 323492451c2d29b90c30a4e133dc8ca9780035a5
 Author: Sage Weil <sage@inktank.com>
 Date:   Sun Jun 8 20:18:49 2014 -0700
 
-    init-ceph: continue after failure doing osd data mount
+    init-stone: continue after failure doing osd data mount
     
     If we are starting many daemons and hit an error, we normally note it and
     move on.  Do the same when doing the pre-mount step.
@@ -607,7 +607,7 @@ Merge: 95a464a 7ad2fbf
 Author: Sage Weil <sage@inktank.com>
 Date:   Sun Jun 8 21:12:32 2014 -0700
 
-    Merge pull request #1931 from ceph/wip-7068-dumpling
+    Merge pull request #1931 from stone/wip-7068-dumpling
     
     Wip 7068 dumpling
     

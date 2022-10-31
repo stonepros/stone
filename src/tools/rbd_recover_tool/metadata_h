@@ -80,19 +80,19 @@ function get_image_format_by_hobject()
 # 1		__u8 comp_type;
 # 1		__u8 unused;
 # 	} __attribute__((packed)) options;
-# 8	ceph_le64 image_size;//hexdump -C s=80 n=8
-# 8	ceph_le64 snap_seq;  //hexdump -C s=88 n=8
-# 4	ceph_le32 snap_count;//hexdump -C s=96 n=4
-# 4	ceph_le32 reserved;
-# 8	ceph_le64 snap_names_len;//hexdump -C s=104 n=8
+# 8	stone_le64 image_size;//hexdump -C s=80 n=8
+# 8	stone_le64 snap_seq;  //hexdump -C s=88 n=8
+# 4	stone_le32 snap_count;//hexdump -C s=96 n=4
+# 4	stone_le32 reserved;
+# 8	stone_le64 snap_names_len;//hexdump -C s=104 n=8
 # 	struct rbd_obj_snap_ondisk snaps[0];
 # } __attribute__((packed));
 #
 # sizeof(rbd_obj_header_ondisk): 112
 #
 # struct rbd_obj_snap_ondisk {
-# 8	ceph_le64 id;    //hexdump -C s=112+i*16 n=8   , i=[0, snap_count)
-# 8	ceph_le64 image_size;//hexdump -C s=112+i*16+8 n=8, i=[0, snap_count)
+# 8	stone_le64 id;    //hexdump -C s=112+i*16 n=8   , i=[0, snap_count)
+# 8	stone_le64 image_size;//hexdump -C s=112+i*16+8 n=8, i=[0, snap_count)
 # } __attribute__((packed));
 # sizeof(rbd_obj_snap_ondisk): 16
 #
@@ -197,7 +197,7 @@ function get_image_metadata_v1()
 #			_USER_0000000000017426_USER_:order
 #			_USER_0000000000017426_USER_:size
 #			_USER_0000000000017426_USER_:snap_seq
-# key/value		ceph-kvstore-tool /storepath get _USER_0000000000017426_USER_ (object_prefix|order|size|snap_seq)
+# key/value		stone-kvstore-tool /storepath get _USER_0000000000017426_USER_ (object_prefix|order|size|snap_seq)
 
 # decode image id from image_id_hobject 
 function get_image_id()
@@ -325,7 +325,7 @@ function list_snaps_v2()
   for key in ${keys[@]}
   do
     key="snapshot_$key"
-    local arr=(`ceph-kvstore-tool $omap_path get $prefix $key|awk -F ":" '{print $2}'`);
+    local arr=(`stone-kvstore-tool $omap_path get $prefix $key|awk -F ":" '{print $2}'`);
     # get snap_name
     tmp=
     for ((i=17; i>13; i--))

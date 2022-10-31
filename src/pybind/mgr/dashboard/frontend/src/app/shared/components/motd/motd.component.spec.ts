@@ -1,7 +1,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DashboardModule } from '~/app/ceph/dashboard/dashboard.module';
+import { DashboardModule } from '~/app/stone/dashboard/dashboard.module';
 import { SharedModule } from '~/app/shared/shared.module';
 import { configureTestBed } from '~/testing/unit-test-helper';
 import { MotdComponent } from './motd.component';

@@ -2,7 +2,7 @@
 Task to handle tgt
 
 Assumptions made:
-    The ceph-extras tgt package may need to get installed.
+    The stone-extras tgt package may need to get installed.
     The open-iscsi package needs to get installed.
 """
 import logging
@@ -127,19 +127,19 @@ def task(ctx, config):
     To start on on all clients::
 
         tasks:
-        - ceph:
+        - stone:
         - tgt:
 
     To start on certain clients::
 
         tasks:
-        - ceph:
+        - stone:
         - tgt: [client.0, client.3]
 
     or
 
         tasks:
-        - ceph:
+        - stone:
         - tgt:
             client.0:
             client.3:
@@ -147,7 +147,7 @@ def task(ctx, config):
     An image blocksize size can also be specified::
         
         tasks:
-        - ceph:
+        - stone:
         - tgt:
             image_size = 20480
 

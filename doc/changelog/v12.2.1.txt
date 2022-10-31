@@ -1,5 +1,5 @@
 commit 3e7492b9ada8bdc9a5cd0feafd42fbca27f9c38e
-Author: Jenkins Build Slave User <ceph-release-team@redhat.com>
+Author: Jenkins Build Slave User <stone-release-team@redhat.com>
 Date:   Tue Sep 26 16:27:07 2017 +0000
 
     12.2.1
@@ -107,7 +107,7 @@ Date:   Mon Sep 25 22:32:17 2017 +0200
 
     Merge pull request #17821 from smithfarm/wip-21472-luminous
     
-    luminous: tests: kcephfs: ignorable MDS cache too large warning
+    luminous: tests: kstonefs: ignorable MDS cache too large warning
     
     Reviewed-by: Patrick Donnelly <pdonnell@redhat.com>
     Reviewed-by: Yan, Zheng <zyan@redhat.com>
@@ -122,7 +122,7 @@ Date:   Mon Aug 28 11:47:29 2017 -0700
     (cherry picked from commit 71f0066f6ec32be18abc0c220a49e203ac3b9786)
     
     Conflicts:
-       qa/suites/kcephfs/recovery/tasks/client-limits.yaml - fix
+       qa/suites/kstonefs/recovery/tasks/client-limits.yaml - fix
           already applied by some other commit
 
 commit b335066f81a0f990fb87b84f69c34dda037ba9cf
@@ -139,9 +139,9 @@ Merge: b6f38c4fcd d94b3ca2ae
 Author: Nathan Cutler <presnypreklad@gmail.com>
 Date:   Mon Sep 25 15:43:06 2017 +0200
 
-    Merge pull request #17922 from batrick/kcephfs-backports
+    Merge pull request #17922 from batrick/kstonefs-backports
     
-    luminous: qa: kcephfs whitelist fixes
+    luminous: qa: kstonefs whitelist fixes
     
     Reviewed-by: Yan, Zheng <zyan@redhat.com>
 
@@ -162,7 +162,7 @@ Date:   Wed Sep 20 15:44:40 2017 -0700
 
     qa: get config only on running MDS
     
-    Fixes: http://tracker.ceph.com/issues/21466
+    Fixes: http://tracker.stone.com/issues/21466
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 8a535d9c72965c79692dccc6ff418b46fb86c3eb)
@@ -173,7 +173,7 @@ Date:   Fri Sep 22 09:44:43 2017 -0700
 
     qa: whitelist cache too large in client-limits
     
-    Fixes: http://tracker.ceph.com/issues/21510
+    Fixes: http://tracker.stone.com/issues/21510
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 87039eb30a25158a192ab7099fa81fbb9ce02953)
@@ -184,7 +184,7 @@ Date:   Fri Sep 22 09:42:06 2017 -0700
 
     qa: whitelist failover log warnings
     
-    Fixes: http://tracker.ceph.com/issues/21509
+    Fixes: http://tracker.stone.com/issues/21509
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 37a7737712f36422b5f035a0e02bab25ae2da890)
@@ -195,7 +195,7 @@ Date:   Fri Sep 22 09:38:59 2017 -0700
 
     qa: ignore evicted client in client-recovery
     
-    Fixes: http://tracker.ceph.com/issues/21508
+    Fixes: http://tracker.stone.com/issues/21508
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 8ecef57bb10a83587f02ce087b657d303ae7c589)
@@ -208,7 +208,7 @@ Date:   Fri Sep 22 09:53:43 2017 -0700
     Merge PR #17878 into luminous
     
     * refs/remotes/upstream/pull/17878/head:
-            qa/cephfs: Fix error in test_filtered_df
+            qa/stonefs: Fix error in test_filtered_df
     
     Reviewed-by: Patrick Donnelly <pdonnell@redhat.com>
     Reviewed-by: Amit Kumar <amitkuma@redhat.com>
@@ -272,8 +272,8 @@ Date:   Fri Sep 22 09:53:33 2017 -0700
     Merge PR #17822 into luminous
     
     * refs/remotes/upstream/pull/17822/head:
-            qa/cephfs: kill mount if it gets evicted by mds
-            qa/cephfs: fix test_evict_client
+            qa/stonefs: kill mount if it gets evicted by mds
+            qa/stonefs: fix test_evict_client
     
     Reviewed-by: Patrick Donnelly <pdonnell@redhat.com>
     Reviewed-by: Zheng Yan <zyan@redhat.com>
@@ -309,7 +309,7 @@ Date:   Fri Sep 22 09:40:46 2017 -0700
 
     Merge pull request #17886 from smithfarm/wip-21486-luminous
     
-    luminous: tests: [kcephfs] test_client_pin times out waiting for dentry release from kernel
+    luminous: tests: [kstonefs] test_client_pin times out waiting for dentry release from kernel
     
     Reviewed-by: Amit Kumar amitkuma@redhat.com
     Reviewed-by: Yan, Zheng <ukernel@gmail.com>
@@ -321,7 +321,7 @@ Date:   Fri Sep 22 09:39:26 2017 -0700
 
     Merge pull request #17887 from smithfarm/wip-21487-luminous
     
-    luminous: cephfs: MDS rank add/remove log messages say wrong number of ranks
+    luminous: stonefs: MDS rank add/remove log messages say wrong number of ranks
     
     Reviewed-by: Amit Kumar amitkuma@redhat.com
     Reviewed-by: Yan, Zheng <ukernel@gmail.com>
@@ -354,14 +354,14 @@ commit f09786d2940ca5532f6f59464be4fdf29a4d75b3
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Sun Sep 17 16:51:04 2017 +0800
 
-    ceph: do link/rename semantic checks after srcdn is readable
+    stone: do link/rename semantic checks after srcdn is readable
     
     For hard link, source inode must not be directory. For rename,
     types of source/destination inodes must match. If srcdn is replica
     and we do these checks while it's not readble, it's possible that
     wrong source inode is used in these checks.
     
-    Fixes: http://tracker.ceph.com/issues/21383
+    Fixes: http://tracker.stone.com/issues/21383
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit 46962b253563a867707e7c5d7887abf2060cc4d7)
 
@@ -374,7 +374,7 @@ Date:   Mon Sep 18 13:16:40 2017 -0400
     Because these were generated before the actual
     change, the get_num_in values did not make sense.
     
-    Fixes: http://tracker.ceph.com/issues/21421
+    Fixes: http://tracker.stone.com/issues/21421
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 511439b515414ae93d791f54a187e44d5fdffa7b)
 
@@ -384,7 +384,7 @@ Date:   Tue Sep 19 14:38:13 2017 +0800
 
     client: set client_try_dentry_invalidate to false by default
     
-    By default, ceph-fuse uses side effect of 'dentry invalidation' to
+    By default, stone-fuse uses side effect of 'dentry invalidation' to
     trim kernel dcache if it runs on kernel < 3.18. The implemention of
     kernel function d_invalidate() changed in 3.18 kernel, the method no
     longer works for upstream kernel >= 3.18.
@@ -393,7 +393,7 @@ Date:   Tue Sep 19 14:38:13 2017 +0800
     of d_invalidate(). So checking kernel version to decide if 'dentry
     invalidation' method works is unreliable.
     
-    Fixes: http://tracker.ceph.com/issues/21423
+    Fixes: http://tracker.stone.com/issues/21423
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit 69adaabface27880dd6c8dbfdeeb06cf3f3d346a)
 
@@ -401,13 +401,13 @@ commit 105f82d5502deb3cabb87d8fdd83a98e880fd6e2
 Author: Douglas Fuller <dfuller@redhat.com>
 Date:   Tue Sep 12 13:22:09 2017 -0400
 
-    qa/tasks/cephfs: Whitelist POOL_APP_NOT_ENABLED for test_misc
+    qa/tasks/stonefs: Whitelist POOL_APP_NOT_ENABLED for test_misc
     
-    test_misc verifies that ceph fs new will not create a filesystem
+    test_misc verifies that stone fs new will not create a filesystem
     on a pool that already contains objects. As part of the test, it
     inserts a dummy object into a pool and then attempts to use it for
-    CephFS. This triggers POOL_APP_NOT_ENABLED. Setting the application
-    metadata for the pool (and having ceph fs new fail because of the
+    StoneFS. This triggers POOL_APP_NOT_ENABLED. Setting the application
+    metadata for the pool (and having stone fs new fail because of the
     existing metadata) would then exercise a different failure case.
     
     Signed-off-by: Douglas Fuller <dfuller@redhat.com>
@@ -417,11 +417,11 @@ commit 4bb1d893739e33fc35ae57ac0290606b5cf8b918
 Author: Douglas Fuller <dfuller@redhat.com>
 Date:   Wed Sep 13 14:00:20 2017 -0400
 
-    qa/cephfs: Fix error in test_filtered_df
+    qa/stonefs: Fix error in test_filtered_df
     
-    ceph df accounts for pool size, so there is no need to do it in the test.
+    stone df accounts for pool size, so there is no need to do it in the test.
     
-    Fixes: http://tracker.ceph.com/issues/21381
+    Fixes: http://tracker.stone.com/issues/21381
     Signed-off-by: Douglas Fuller <dfuller@redhat.com>
     (cherry picked from commit b059cb6290d81df07bd8ec4e1ec9ef0be24892a2)
 
@@ -445,13 +445,13 @@ Date:   Fri Aug 25 08:31:47 2017 -0400
     
     Currently we check for mountedness in the high level wrappers, but those
     checks are lockless. It's possible to have a call that races with
-    ceph_unmount(). It could pass one of the is_mounted() checks in the
+    stone_unmount(). It could pass one of the is_mounted() checks in the
     wrapper, and then block on the client_lock while the unmount is actually
     running. Eventually it picks up and runs after the unmount returns, with
     questionable results -- possibly even a crash in some cases.
     
     For now, we can explain this away with a simple admonition that
-    applications should ensure that no calls are running when ceph_unmount
+    applications should ensure that no calls are running when stone_unmount
     is called. In the future though, we may need to forcibly shut down the
     mount when certain events occur (not returning a lease or delegation in
     time, for instance).
@@ -465,8 +465,8 @@ Date:   Fri Aug 25 08:31:47 2017 -0400
     
     Note that this can't replace the ->is_mounted() checks in the lockless
     wrappers as those are needed to determine whether the client pointer in
-    the ceph_mount_info is still valid. The admonition not to allow
-    ceph_unmount to race with other calls is therefore still necessary.
+    the stone_mount_info is still valid. The admonition not to allow
+    stone_unmount to race with other calls is therefore still necessary.
     
     Signed-off-by: Jeff Layton <jlayton@redhat.com>
     (cherry picked from commit efca340596ef4da2b254ff1c64ec4c462d7b95a5)
@@ -479,7 +479,7 @@ Date:   Tue Sep 5 14:44:49 2017 -0700
     
     This prevents partial results from concatenating with the error message.
     
-    Fixes: http://tracker.ceph.com/issues/21252
+    Fixes: http://tracker.stone.com/issues/21252
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit 2b2b3d2035a700a65c3c469eedae69ad31023cf6)
@@ -488,7 +488,7 @@ commit 847cb76968bb225e4f3713cdfc0a5c38c4047e4e
 Author: Douglas Fuller <dfuller@redhat.com>
 Date:   Wed Jul 12 10:48:42 2017 -0500
 
-    qa/cephfs: Refactor alternate pool test
+    qa/stonefs: Refactor alternate pool test
     
     Remove the alternate pool recovery test from test_data_scan. Newer
     commits will place the test in its own file.
@@ -500,10 +500,10 @@ commit 3342ba0c6853fda90cf2c8c9bec9d523c9269855
 Author: Douglas Fuller <dfuller@redhat.com>
 Date:   Wed Jul 12 10:45:13 2017 -0500
 
-    qa/cephfs: test CephFS recovery pools
+    qa/stonefs: test StoneFS recovery pools
     
     Test recovering metadata in to a separate RADOS pool with
-    cephfs_data_scan and friends.
+    stonefs_data_scan and friends.
     
     Signed-off-by: Douglas Fuller <dfuller@redhat.com>
     (cherry picked from commit 6af2ae80d327e564ad17f2caeded9c8142becf29)
@@ -512,9 +512,9 @@ commit 5ac721394770de88a6218dd3f9bedbdbc9982232
 Author: Douglas Fuller <dfuller@redhat.com>
 Date:   Wed Jul 12 10:43:39 2017 -0500
 
-    qa/cephfs: support CephFS recovery pools
+    qa/stonefs: support StoneFS recovery pools
     
-    Add support for testing recovery of CephFS metadata into an alternate
+    Add support for testing recovery of StoneFS metadata into an alternate
     RADOS pool, useful as a disaster recovery mechanism that avoids
     modifying the metadata in-place.
     
@@ -525,7 +525,7 @@ commit 0f5f99c1de5484e7563b5c5c9fa481200e1d00c6
 Author: Douglas Fuller <dfuller@redhat.com>
 Date:   Wed Jul 26 13:05:59 2017 -0400
 
-    qa/cephfs: Allow deferred fs creation
+    qa/stonefs: Allow deferred fs creation
     
     Permit Filesystem objects to be created and settings modified before
     calling Filesystem.create().
@@ -537,9 +537,9 @@ commit 47e485e5ccedce3977b30503e05b743e09fc7c77
 Author: Douglas Fuller <dfuller@redhat.com>
 Date:   Wed Jul 12 10:41:11 2017 -0500
 
-    qa/ceph_test_case: support CephFS recovery pools
+    qa/stone_test_case: support StoneFS recovery pools
     
-    Add support for testing recovery of CephFS metadata into an alternate
+    Add support for testing recovery of StoneFS metadata into an alternate
     RADOS pool, useful as a disaster recovery mechanism that avoids
     modifying the metadata in-place.
     
@@ -593,7 +593,7 @@ Date:   Thu Sep 21 10:56:07 2017 +0800
     log entry. So mds should make sure there is no scatter-gather
     before capping log.
     
-    Fixes: http://tracker.ceph.com/issues/21467
+    Fixes: http://tracker.stone.com/issues/21467
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
 
 commit 0132a275aa86ca80bf1dcacd9905243257317e6c
@@ -613,7 +613,7 @@ Date:   Wed Sep 20 01:18:35 2017 -0400
 
     osd/PrimaryLogPG: request osdmap update in the right block
     
-    Fixes: http://tracker.ceph.com/issues/21428
+    Fixes: http://tracker.stone.com/issues/21428
     Signed-off-by: Josh Durgin <jdurgin@redhat.com>
     (cherry picked from commit afc6624f768ea3c6e2d155122797db5cce8836f7)
 
@@ -621,11 +621,11 @@ commit 13f0c9f534d0a9df362bb86ab546648fa046c104
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Wed Sep 13 16:34:40 2017 +0800
 
-    qa/cephfs: kill mount if it gets evicted by mds
+    qa/stonefs: kill mount if it gets evicted by mds
     
     otherwise, teardown() hange at umount
     
-    Fixes: http://tracker.ceph.com/issues/21275
+    Fixes: http://tracker.stone.com/issues/21275
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit 98d86a075242f0c4576814db15cc3f8fd8e06017)
 
@@ -633,7 +633,7 @@ commit 651280281ab1347fb7d0e3114cf87b74398dbc87
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Wed Sep 13 16:15:31 2017 +0800
 
-    qa/cephfs: fix test_evict_client
+    qa/stonefs: fix test_evict_client
     
     executing mount_a.kill() twice, then executing mount_b.kill_cleanup()
     twice do not make sense.
@@ -656,7 +656,7 @@ commit 8d18150560bbf0c41f4d62b17b642449b3610660
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Tue Sep 5 17:09:32 2017 +0800
 
-    qa: whitelist expected MDS_READ_ONLY for kcephfs test
+    qa: whitelist expected MDS_READ_ONLY for kstonefs test
     
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit 584241285f52fc420ebc4a6a6455497a3ed4d45a)
@@ -677,7 +677,7 @@ Date:   Mon Sep 18 22:31:10 2017 -0400
     Fix this by adding an OSDService mechanism for scheduling a new osdmap
     subscription request.
     
-    Fixes: http://tracker.ceph.com/issues/21428
+    Fixes: http://tracker.stone.com/issues/21428
     Signed-off-by: Josh Durgin <jdurgin@redhat.com>
     (cherry picked from commit dd33360e5a4ed06228af552edadee88e66c5aba9)
 
@@ -711,7 +711,7 @@ Date:   Fri Sep 15 16:52:28 2017 -0400
     a different primary then use primary_affinity, or pg_upmap
     (not pg_upmap_items).
     
-    Fixes: http://tracker.ceph.com/issues/21410
+    Fixes: http://tracker.stone.com/issues/21410
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 9c73305e3ad11177d58632eba6ece5d2c0e701da)
 
@@ -722,7 +722,7 @@ Date:   Fri Sep 15 22:46:27 2017 +0200
 
     Merge pull request #17724 from theanalyst/wip-21374-luminous
     
-    luminous: incorrect erasure-code space in command ceph df
+    luminous: incorrect erasure-code space in command stone df
     
     Reviewed-By: Josh Durgin <jdurgin@redhat.com>
 
@@ -744,7 +744,7 @@ Date:   Fri Sep 15 21:58:05 2017 +0200
 
     Merge pull request #17635 from smithfarm/wip-21342-luminous
     
-    luminous: ceph mgr versions shows active mgr as Unknown
+    luminous: stone mgr versions shows active mgr as Unknown
     
     Reviewed-By: Josh Durgin <jdurgin@redhat.com>
 
@@ -799,7 +799,7 @@ Date:   Fri Sep 15 21:45:04 2017 +0200
 
     Merge pull request #17623 from liewegas/wip-pr-17572-luminous
     
-    tools/ceph_objectstore_tool: fix 'dup' unable to duplicate meta PG
+    tools/stone_objectstore_tool: fix 'dup' unable to duplicate meta PG
     
     Reviewed-By: Josh Durgin <jdurgin@redhat.com>
 
@@ -900,12 +900,12 @@ Date:   Fri Sep 15 10:30:16 2017 +0800
     which enables SSE42 globally in rocksdb. and we will end up with a
     binary not portable on non-SSE42 enabled machines.
     
-    Fixes: http://tracker.ceph.com/issues/20529
+    Fixes: http://tracker.stone.com/issues/20529
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     
     Conflicts:
             this change is not cherry-picked from master. because the
-    PR targeting master (https://github.com/ceph/ceph/pull/17388) is
+    PR targeting master (https://github.com/stone/stone/pull/17388) is
     still pending on review. and the cmake changes is different if
     we want to use a recent commit of rocksdb, as it's doing differently
     in cmake to address the portability issues.
@@ -917,14 +917,14 @@ Date:   Fri Sep 15 10:23:47 2017 +0800
     rocksdb: pick up portable fixes
     
     to pick up the the fix to disable SSE42 globally, and only enable it on
-    crc32c. this change is pushed to ceph/rocksdb:luminous.
+    crc32c. this change is pushed to stone/rocksdb:luminous.
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     Conflicts:
             this change is not cherry-picked from master, as the master PR
-    (https://github.com/ceph/ceph/pull/17388) is still pending on review.
+    (https://github.com/stone/stone/pull/17388) is still pending on review.
     and the latest rocksdb's cmake was revised to address the portability
-    issues. so the fix on ceph side is different if we want to use a
+    issues. so the fix on stone side is different if we want to use a
     recent rocksdb's commit.
 
 commit 73ef8de0bf147a3ca670ab8a4b04ddaaf0ed5bfd
@@ -933,7 +933,7 @@ Date:   Wed Aug 30 09:32:18 2017 +0800
 
     rgw: fix resource leak in rgw_bucket.cc and rgw_user.cc
     
-    Fixes: http://tracker.ceph.com/issues/21214
+    Fixes: http://tracker.stone.com/issues/21214
     
     Signed-off-by: Luo Kexue <luo.kexue@zte.com.cn>
     (cherry picked from commit 1f23976adab74e25ce06941692a881521885c6ee)
@@ -986,9 +986,9 @@ commit 4c16e1b36b60028e9b6877dea7abcfe872b2e753
 Author: liuchang0812 <liuchang0812@gmail.com>
 Date:   Wed Sep 6 11:50:17 2017 +0800
 
-    mon: incorrect MAX AVAIL in "ceph df"
+    mon: incorrect MAX AVAIL in "stone df"
     
-    Fixes: http://tracker.ceph.com/issues/21243
+    Fixes: http://tracker.stone.com/issues/21243
     
     Signed-off-by: liuchang0812 <liuchang0812@gmail.com>
     (cherry picked from commit 365558571c59dd42cf0934e6c31c7b4bf2c65026)
@@ -1022,7 +1022,7 @@ Date:   Thu Sep 14 10:26:12 2017 +0200
 
     Merge pull request #17474 from smithfarm/wip-21114-luminous
     
-    luminous: cephfs: tests: FS_DEGRADED spurious health warnings in some sub-suites
+    luminous: stonefs: tests: FS_DEGRADED spurious health warnings in some sub-suites
     
     Reviewed-By: Patrick Donelly <pdonelly@redhat.com>
 
@@ -1033,7 +1033,7 @@ Date:   Thu Sep 14 10:25:51 2017 +0200
 
     Merge pull request #17471 from smithfarm/wip-21107-luminous
     
-    luminous: cephfs: client/mds has wrong check to clear S_ISGID on chown
+    luminous: stonefs: client/mds has wrong check to clear S_ISGID on chown
     
     Reviewed-By: Patrick Donelly <pdonelly@redhat.com>
 
@@ -1041,12 +1041,12 @@ commit e7e3d8977b4e46db7a370880d54094e7b7915826
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Wed Sep 13 11:27:18 2017 +0800
 
-    ceph: fix "stopping mds can't export subtree"
+    stone: fix "stopping mds can't export subtree"
     
     caused by commit
     790c34138f "Make standby-replay mds avoid initiating subtree export"
     
-    Fixes: http://tracker.ceph.com/issues/21378
+    Fixes: http://tracker.stone.com/issues/21378
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit c294051987de1ff79540060a0563fa02c8f03f91)
 
@@ -1084,7 +1084,7 @@ Date:   Mon Sep 4 11:36:00 2017 -0700
     A more complete solution to this problem is to selectively print subtrees
     relating to the operation (e.g. the subtree and its parents).
     
-    Fixes: http://tracker.ceph.com/issues/21221
+    Fixes: http://tracker.stone.com/issues/21221
     Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=1485783
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
@@ -1132,7 +1132,7 @@ Date:   Mon Sep 11 15:21:52 2017 -0700
     (i.e. unlimited). The new preferred way of specifying cache limits is by memory
     size. The default is 1GB.
     
-    Fixes: http://tracker.ceph.com/issues/20594
+    Fixes: http://tracker.stone.com/issues/20594
     Fixes: https://bugzilla.redhat.com/show_bug.cgi?id=1464976
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
@@ -1301,7 +1301,7 @@ Date:   Mon Aug 28 11:24:13 2017 +0800
     The 'dirfrag end' check can be wrong when not reading from beginning
     of dirfrag.
     
-    Fixes: http://tracker.ceph.com/issues/21070
+    Fixes: http://tracker.stone.com/issues/21070
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit 88332c0f2f0a7a99639d1de237d5bb68edddbe70)
 
@@ -1347,9 +1347,9 @@ Merge: 4102a50c0d 64fc7cf105
 Author: Alfredo Deza <alfredo@deza.pe>
 Date:   Tue Sep 12 08:01:43 2017 -0400
 
-    Merge pull request #17653 from ceph/backport-wip-bz1478598
+    Merge pull request #17653 from stone/backport-wip-bz1478598
     
-    luminous: ceph-volume allow filtering by `uuid`, do not require osd id
+    luminous: stone-volume allow filtering by `uuid`, do not require osd id
     
     Reviewed-by: Andrew Schoen <aschoen@redhat.com>
 
@@ -1382,7 +1382,7 @@ Date:   Tue Sep 12 11:06:05 2017 +0200
 
     Merge pull request #17470 from smithfarm/wip-21104-luminous
     
-    luminous: build/ops: ceph-fuse RPM should require fusermount
+    luminous: build/ops: stone-fuse RPM should require fusermount
     
     Reviewed-By: Ken Dreyer <ktdreyer@redhat.com>
     Reviewed-By: Kefu Chai <kchai@redhat.com>
@@ -1446,7 +1446,7 @@ Date:   Mon Sep 11 22:31:14 2017 +0200
 
     Merge pull request #17473 from smithfarm/wip-21112-luminous
     
-    luminous: cephfs: get_quota_root sends lookupname op for every buffered write
+    luminous: stonefs: get_quota_root sends lookupname op for every buffered write
     
     Reviewed-By: Patrick Donnelly <pdonnell@redhat.com>
 
@@ -1468,7 +1468,7 @@ Date:   Mon Sep 11 22:28:59 2017 +0200
 
     Merge pull request #17565 from theanalyst/wip-21278-luminous
     
-    luminous: the standbys are not updated via ceph tell mds.* command
+    luminous: the standbys are not updated via stone tell mds.* command
     
     Reviewed-By: Patrick Donnelly <pdonnell@redhat.com>
 
@@ -1520,7 +1520,7 @@ commit 64fc7cf105ec4cdeacb6e2af3060b914ba47abeb
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Sep 11 12:32:08 2017 -0400
 
-    ceph-volume lvm.trigger just split the osd_id once
+    stone-volume lvm.trigger just split the osd_id once
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit ecd5af88da2815603283742c661d27e2a48f9f7e)
@@ -1529,7 +1529,7 @@ commit 7cdf1772d69e85646a55202c4faac1d0aaace5c4
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Sep 11 12:30:34 2017 -0400
 
-    ceph-volume tests catch improper parsing of osd uuid
+    stone-volume tests catch improper parsing of osd uuid
     
     When the osd ID existed in the UUID in the same format (e.g. '1-') the
     parsing would break returning a bogus UUID that is impossible to find
@@ -1541,10 +1541,10 @@ commit 944e69863347bb11450874980e4f64807d9e6e87
 Author: Andrew Schoen <aschoen@redhat.com>
 Date:   Fri Sep 8 15:32:15 2017 -0500
 
-    tests: remove 'ceph-' prefix from test node hostnames
+    tests: remove 'stone-' prefix from test node hostnames
     
-    This updates our Vagrantfile to match the changes in ceph-ansible
-    introduced by https://github.com/ceph/ceph-ansible/commit/298a63c43
+    This updates our Vagrantfile to match the changes in stone-ansible
+    introduced by https://github.com/stone/stone-ansible/commit/298a63c43
     
     Signed-off-by: Andrew Schoen <aschoen@redhat.com>
     (cherry picked from commit f41d359ebaec8762ed1a7b8cfd85c23f351a5070)
@@ -1553,7 +1553,7 @@ commit f1b92868fa775ab4c210b3fd02e9a4913485db3a
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Sep 8 12:25:57 2017 -0400
 
-    ceph-volume lvm.api PVolumes should filter by all matching tags, not just one
+    stone-volume lvm.api PVolumes should filter by all matching tags, not just one
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit b8613c1d7bf56c49d1b7f1c41a37073b8739bbc3)
@@ -1562,7 +1562,7 @@ commit 54cdf1805a12fd691bd9da0441dab186446aef76
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Sep 8 12:25:31 2017 -0400
 
-    ceph-volume tests pv API should also match all pv_tags
+    stone-volume tests pv API should also match all pv_tags
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 120fd6a196045c8511c3eaafec37de43003bf450)
@@ -1571,7 +1571,7 @@ commit 6a1189d1eb74d9c3d7653f4f32c480158d260901
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Sep 8 11:47:09 2017 -0400
 
-    ceph-volume tests prove all volume tags have to match in vgs
+    stone-volume tests prove all volume tags have to match in vgs
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit fe2a7106decb586e83f5b60d6c18c454afe4883e)
@@ -1580,7 +1580,7 @@ commit f4930e0b8327e5dcd6aafaac7cd51c1933b95456
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Fri Sep 8 11:46:34 2017 -0400
 
-    ceph-volume lvm.api all vg tags should match, not just one
+    stone-volume lvm.api all vg tags should match, not just one
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 6d679855aa077e2de3f20316625d478a3697c78f)
@@ -1589,7 +1589,7 @@ commit fafc161e1f6c825930c0848c32fa06b1d5edc849
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Sep 7 17:00:22 2017 -0400
 
-    ceph-volume tests prove all tags have to match in lvs
+    stone-volume tests prove all tags have to match in lvs
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 80e401ca970066541ae7255be1caf42883048df4)
@@ -1598,7 +1598,7 @@ commit cdba58264732a648425dd1f78e75a91ea6a5198d
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Sep 7 16:59:53 2017 -0400
 
-    ceph-volume lvm.api all lv tags should match, not just one
+    stone-volume lvm.api all lv tags should match, not just one
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit dbaf30c3e4d921df2a92812383c8805a77eb8f5b)
@@ -1607,7 +1607,7 @@ commit 12d638afea087189a1d3f350dd87185b0ade6617
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Sep 7 16:56:55 2017 -0400
 
-    ceph-volume lvm.activate allow not using osd_id
+    stone-volume lvm.activate allow not using osd_id
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 99a8a719695591558da29b3d16a347d5bff8bf3d)
@@ -1616,7 +1616,7 @@ commit a50dc9647282c7b7455774502532f5281ae2aece
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Sep 7 16:54:19 2017 -0400
 
-    ceph-volume tests prove missing args.osd_id is fine
+    stone-volume tests prove missing args.osd_id is fine
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 8d1a1a885fd65073308c205949bc70b41805f92f)
@@ -1625,7 +1625,7 @@ commit 834d4c0eabf18fe1219f52a70e3bf78235f51f62
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Sep 7 16:51:43 2017 -0400
 
-    ceph-volume tests add is_root and lv fixtures to conftest
+    stone-volume tests add is_root and lv fixtures to conftest
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d18d5e139be82de36e1a60340525adbf79fdedd9)
@@ -1724,7 +1724,7 @@ Date:   Thu Sep 7 08:55:27 2017 -0400
 
     qa/workunits/rbd: relax greps to support upgrade formatting change
     
-    Fixes: http://tracker.ceph.com/issues/21181
+    Fixes: http://tracker.stone.com/issues/21181
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 273c84578b06905229a7c6eae7b1a12bbe60de95)
     
@@ -1767,7 +1767,7 @@ Date:   Thu Sep 7 09:44:36 2017 -0400
     really dropping the daemon, not when we're promoting
     it to active.
     
-    Fixes: http://tracker.ceph.com/issues/21260
+    Fixes: http://tracker.stone.com/issues/21260
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 29c6f9adf178f6611a625740f395e397cad9147b)
 
@@ -1777,9 +1777,9 @@ Date:   Thu Sep 7 09:42:29 2017 -0400
 
     qa/tasks/mgr: regression test for 21260
     
-    (aka http://tracker.ceph.com/issues/21260)
+    (aka http://tracker.stone.com/issues/21260)
     
-    Fixes: http://tracker.ceph.com/issues/21260
+    Fixes: http://tracker.stone.com/issues/21260
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 28cb4bb2e68298a8a307eb2de6121b60db43cb86)
 
@@ -1793,7 +1793,7 @@ Date:   Fri Sep 8 12:48:12 2017 +0100
     happens, we should not queue additional pgs from that pool to be
     created.
     
-    Fixes: http://tracker.ceph.com/issues/21309
+    Fixes: http://tracker.stone.com/issues/21309
     
     Signed-off-by: Joao Eduardo Luis <joao@suse.de>
     (cherry picked from commit 7a8a88032ec0bf7f1b485419a11646d7441faf2c)
@@ -1829,15 +1829,15 @@ commit 9f65be2feb0186276e2b91fc58e6573779921970
 Author: xie xingguo <xie.xingguo@zte.com.cn>
 Date:   Wed Sep 6 17:31:16 2017 +0800
 
-    tools/ceph_objectstore_tool: fix 'dup' unable to duplicate meta PG
+    tools/stone_objectstore_tool: fix 'dup' unable to duplicate meta PG
     
     Recently we plan to bring a Jewel cluster into Luminous.
     After that is done, which turns out to be a big success,
     we then try to transform all FileStore osds into BlueStore ones
-    offline but with no luck. The ceph_objectstore_tool keeps complaining:
+    offline but with no luck. The stone_objectstore_tool keeps complaining:
     --------------------------------------------------------------------
-    dup from filestore: /var/lib/ceph/osd/ceph-20.old
-          to bluestore: /var/lib/ceph/osd/ceph-20
+    dup from filestore: /var/lib/stone/osd/stone-20.old
+          to bluestore: /var/lib/stone/osd/stone-20
     fsid d444b253-337d-4d15-9d63-86ae134ec9ac
     65 collections
     1/65 meta
@@ -1848,7 +1848,7 @@ Date:   Wed Sep 6 17:31:16 2017 +0800
     pg "bits" as a file attribute on "Load" if that is not available.
     But since meta pg is never loaded (we skip it during OSD::load_pgs()),
     we actually never get the chance to do so; hence making the
-    dup method from ceph_objectstore_tool very unhappy since it always
+    dup method from stone_objectstore_tool very unhappy since it always
     expects to see such a attribute from underlying store.
     
     Fix the above problem by manually skipping loading the "bits" attribute
@@ -1918,11 +1918,11 @@ Date:   Tue Aug 29 00:19:24 2017 +0200
     As reported by Ademar de Souza Reis Jr <areis@redhat.com>:
     
     This symlink should not be necessary anymore. QEMU is properly linked to
-    ceph/librbd these days (look at the qemu-block-rbd sub-package in Fedora and
+    stone/librbd these days (look at the qemu-block-rbd sub-package in Fedora and
     the respective package in RHEL).
     
     The symlink was a hack from a time when librbd was distributed and supported by
-    ceph and the rbd driver would be enabled at runtime only when/if the symlink
+    stone and the rbd driver would be enabled at runtime only when/if the symlink
     was present.
     
     So the right fix is to actually get rid of the symlink altogether and never
@@ -2019,7 +2019,7 @@ Date:   Fri Sep 8 08:51:33 2017 -0700
 
     Merge pull request #17469 from smithfarm/wip-21103-luminous
     
-    luminous: cephfs: client: missing space in some client debug log messages
+    luminous: stonefs: client: missing space in some client debug log messages
     
     Reviewed-by: Nathan Cutler <ncutler@suse.com>
 
@@ -2041,7 +2041,7 @@ Date:   Fri Sep 8 09:28:35 2017 -0500
 
     Merge pull request #17345 from liewegas/wip-pr-17311-luminous
     
-    mon: use ceph_clock_now if message is self-generated
+    mon: use stone_clock_now if message is self-generated
     
     Reviewed-by: Kefu Chai <kchai@redhat.com>
 
@@ -2171,7 +2171,7 @@ Date:   Tue Aug 29 16:15:52 2017 -0400
     - aio completion thread blocks trying to take deferred_lock, and thus
     no further aios are drained.
     
-    Fixes: http://tracker.ceph.com/issues/21171
+    Fixes: http://tracker.stone.com/issues/21171
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 7a5ef62af194373c3a8c307b05ae6d467e49c9f0)
 
@@ -2192,7 +2192,7 @@ Date:   Mon Aug 28 13:50:46 2017 +0100
     
     Like "Health check failed: 1 filesystem is have a failed mds daemon (FS_WITH_FAILED_MDS)"
     
-    Fixes: http://tracker.ceph.com/issues/21153
+    Fixes: http://tracker.stone.com/issues/21153
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 7d21119a47212140d121df99efdb838a3f078a82)
 
@@ -2200,11 +2200,11 @@ commit 1e9983ac833e8bd74fa82c6a03ad8fbba68747ac
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Sep 5 16:33:24 2017 +0800
 
-    ceph: collect all mds in mdsids()
+    stone: collect all mds in mdsids()
     
     otherwise, only the active mds are returned.
     
-    Fixes: http://tracker.ceph.com/issues/21230
+    Fixes: http://tracker.stone.com/issues/21230
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit dd702cc94e32f533f0f2e76f9d202d1fa7c6a57f)
 
@@ -2212,7 +2212,7 @@ commit dabbe79e17269e8061aae60198008292601335f3
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Sep 5 16:05:44 2017 +0800
 
-    ceph: always populate `targets` with ids_by_service()
+    stone: always populate `targets` with ids_by_service()
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit b682e61ddc190b91da4c6cbaeba3c69d54652afb)
@@ -2221,7 +2221,7 @@ commit 428c9934fdf78d378b2c75ac43759581710472fb
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Tue Sep 5 16:00:59 2017 +0800
 
-    ceph: extract ids_by_service() so it can be reused
+    stone: extract ids_by_service() so it can be reused
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit 25639f66910aa8a188d5b4b8fff8803e169da62a)
@@ -2233,7 +2233,7 @@ Date:   Tue Sep 5 17:43:28 2017 -0400
     qa/objectstore/bluestore*: less debug output
     
     Let's see if this makes the spurious MON_DOWN failures go away?  (See
-    http://tracker.ceph.com/issues/20910)
+    http://tracker.stone.com/issues/20910)
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 444f5aa08539cde827e7d93a514367a8ba39b122)
@@ -2255,7 +2255,7 @@ Date:   Tue Sep 5 15:01:02 2017 -0400
     See 455cc6cea2e5e8bc1126b5047b6003fa583af1b5, which failed to implement
     this properly.
     
-    Fixes: http://tracker.ceph.com/issues/21250
+    Fixes: http://tracker.stone.com/issues/21250
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 6bd9db304f906e9e4a07ca5ce07ffffdbc1678f0)
 
@@ -2265,7 +2265,7 @@ Date:   Wed Sep 6 16:14:58 2017 -0400
 
     rbd: support iterating over metadata items when listing
     
-    Fixes: http://tracker.ceph.com/issues/21179
+    Fixes: http://tracker.stone.com/issues/21179
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 9c4f9856b034061aed052192b0ee09b9a9d09bc0)
 
@@ -2275,7 +2275,7 @@ Date:   Tue Sep 5 16:26:52 2017 -0400
 
     qa/suites/rbd: reduce monitor requirements for mirroring tests
     
-    Fixes: http://tracker.ceph.com/issues/21251
+    Fixes: http://tracker.stone.com/issues/21251
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 27194c30c50009eaf6391a21837f73b312fe5de6)
 
@@ -2285,7 +2285,7 @@ Date:   Tue Sep 5 16:20:26 2017 -0400
 
     qa/suites/rbd: fixed cache override
     
-    Fixes: http://tracker.ceph.com/issues/21251
+    Fixes: http://tracker.stone.com/issues/21251
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 98061bb3d7ce6309ddb04ea4d7e9d44a7ecd09c6)
 
@@ -2298,7 +2298,7 @@ Date:   Tue Sep 5 15:59:47 2017 -0400
     The teuthology machines are periodically running out of space
     due to the aggressive log settings.
     
-    Fixes: http://tracker.ceph.com/issues/21251
+    Fixes: http://tracker.stone.com/issues/21251
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 763f1877ecda680e62a2b7eff5815bb6b7dd18f2)
 
@@ -2308,7 +2308,7 @@ Date:   Tue Sep 5 10:53:47 2017 -0400
 
     cls/rbd: metadata_list not honoring max_return parameter
     
-    Fixes: http://tracker.ceph.com/issues/21247
+    Fixes: http://tracker.stone.com/issues/21247
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 0130b85732849da8bb3e96f4afb7c023c958aef9)
 
@@ -2318,7 +2318,7 @@ Date:   Sun Sep 3 12:12:15 2017 +0800
 
     rbd-nbd: fix generic option issue
     
-    Fixes: http://tracker.ceph.com/issues/20426
+    Fixes: http://tracker.stone.com/issues/20426
     Signed-off-by: Pan Liu <wanjun.lp@alibaba-inc.com>
     (cherry picked from commit 16f64a4c01068603736af476f640268d0baa338d)
 
@@ -2337,7 +2337,7 @@ Date:   Tue Sep 5 12:11:45 2017 -0400
 
     librbd: rename of non-existent image results in seg fault
     
-    Fixes: http://tracker.ceph.com/issues/21248
+    Fixes: http://tracker.stone.com/issues/21248
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 4a75ee43d3b108a9593a010160479fd62884eda8)
 
@@ -2353,7 +2353,7 @@ Date:   Wed Jul 5 16:10:38 2017 -0700
     should remain the same. The gc will then use the tail_tag (if
     exists, idtag if not) as the refcount id.
     
-    Fixes: http://tracker.ceph.com/issues/20234
+    Fixes: http://tracker.stone.com/issues/20234
     
     Signed-off-by: Yehuda Sadeh <yehuda@redhat.com>
     (cherry picked from commit f71a3e525d9a69fe537428f25930fb207a602afe)
@@ -2364,7 +2364,7 @@ Date:   Tue Sep 5 21:37:16 2017 -0400
 
     test/cls_rbd: mask newer feature bits to support upgrade tests
     
-    Fixes: http://tracker.ceph.com/issues/21217
+    Fixes: http://tracker.stone.com/issues/21217
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit aeb8f29d21625f3570e2f3e6dd26594d1a6df810)
 
@@ -2376,7 +2376,7 @@ Date:   Tue Sep 5 11:45:53 2017 +0800
     
     To make these two keys can be changed online:
     
-    ./bin/ceph tell osd.* injectargs "--bluestore_prefer_deferred_size_hdd 0"
+    ./bin/stone tell osd.* injectargs "--bluestore_prefer_deferred_size_hdd 0"
     osd.0: bluestore_prefer_deferred_size_hdd = '0' (not observed, change may require restart)
     osd.1: bluestore_prefer_deferred_size_hdd = '0' (not observed, change may require restart)
     osd.2: bluestore_prefer_deferred_size_hdd = '0' (not observed, change may require restart)
@@ -2456,7 +2456,7 @@ Date:   Thu Aug 24 16:04:54 2017 +0800
     resets the messenger sesssion when the replica reconnects. to avoid the
     out-of-order replies, the messages from that replica should be discarded.
     
-    Fixes: http://tracker.ceph.com/issues/19605
+    Fixes: http://tracker.stone.com/issues/19605
     Signed-off-by: Kefu Chai <kchai@redhat.com>
     (cherry picked from commit e3fce6be44506168a7a138aab93f6a4d6776397b)
 
@@ -2466,7 +2466,7 @@ Date:   Mon Aug 7 07:52:42 2017 -0400
 
     mon: rate limit on health check update logging
     
-    Fixes: http://tracker.ceph.com/issues/20888
+    Fixes: http://tracker.stone.com/issues/20888
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 5b903c7b428c2c7024fdfc1dffacad0b1521b750)
 
@@ -2492,7 +2492,7 @@ Date:   Thu Aug 24 17:56:13 2017 -0400
     we need to be sure that our notion of "up" is still correct and we're not
     just stuck on an old, stale OSDMap.
     
-    Fixes: http://tracker.ceph.com/issues/21121
+    Fixes: http://tracker.stone.com/issues/21121
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit fbafa659dae94faba435ca449ee5e77b51108b4b)
 
@@ -2523,7 +2523,7 @@ Date:   Thu Aug 31 11:42:37 2017 +0800
     We could develop some complicated solutions but for now let's not
     bother since the above scenario is rare.
     
-    Fixes: http://tracker.ceph.com/issues/21175
+    Fixes: http://tracker.stone.com/issues/21175
     Signed-off-by: xie xingguo <xie.xingguo@zte.com.cn>
     (cherry picked from commit 8ec4b4960f9b93ff6d85a02308ccda0bccadb599)
 
@@ -2536,7 +2536,7 @@ Date:   Fri Sep 1 10:02:34 2017 -0400
     We need to update our info about the previous interval in order to
     detect interval changes properly.
     
-    Fixes: http://tracker.ceph.com/issues/21203
+    Fixes: http://tracker.stone.com/issues/21203
     
     Signed-off-by: w11979 <wang.wenfeng@h3c.com>
     Signed-off-by: Sage Weil <sage@redhat.com>
@@ -2546,12 +2546,12 @@ commit d57399c9dab0be6905a90b743d6b87ca93700cc6
 Author: Sage Weil <sage@redhat.com>
 Date:   Thu Aug 31 14:55:46 2017 -0400
 
-    qa/tasks/ceph_manager: revive osds before doing final rerr reset
+    qa/tasks/stone_manager: revive osds before doing final rerr reset
     
     We assume below that rerrosd is up, but it may not be when we exit the
     loop.
     
-    Fixes: http://tracker.ceph.com/issues/21206
+    Fixes: http://tracker.stone.com/issues/21206
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 21027233b2a31b587e7caf95b1d85f5bcf0ae8ec)
 
@@ -2565,7 +2565,7 @@ Date:   Thu Aug 31 16:43:39 2017 -0400
     is deadlock-prone: the OSD code might block trying to submit new IO or
     while waiting for some other bluestore work to complete.
     
-    Fixes: http://tracker.ceph.com/issues/21207
+    Fixes: http://tracker.stone.com/issues/21207
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 2b6a9d1ec0778f66b6e9d9f216df21a00caeba3f)
 
@@ -2576,7 +2576,7 @@ Date:   Wed Aug 23 12:13:24 2017 +0300
     rgw-admin: require --yes-i-really-mean-it when using --inconsistent_index
     
     Signed-off-by: Orit Wasserman <owasserm@redhat.com>
-    Fixes: http://tracker.ceph.com/issues/20777
+    Fixes: http://tracker.stone.com/issues/20777
     (cherry picked from commit 1cd7ef0eb9bde5a08f8c758ce57c9e298fabad8d)
 
 commit 91dd0fe479c63e0b907ce218fa9f262fa950364f
@@ -2682,7 +2682,7 @@ Date:   Mon Aug 7 18:14:14 2017 +0800
 
     pybind: fix chart becomes bigger when refresh
     
-    Fixes: http://tracker.ceph.com/issues/20746
+    Fixes: http://tracker.stone.com/issues/20746
     Signed-off-by: Yixing Yan <yanyx@umcloud.com>
     (cherry picked from commit edf93427734ce156f5eaac7a25f4c16a92852b98)
 
@@ -2694,7 +2694,7 @@ Date:   Fri Aug 25 17:55:11 2017 -0400
     
     Found by "Supriti Singh" <Supriti.Singh@suse.com>.
     
-    Fixes http://tracker.ceph.com/issues/21141
+    Fixes http://tracker.stone.com/issues/21141
     
     Signed-off-by: Matt Benjamin <mbenjamin@redhat.com>
     (cherry picked from commit 3301596734adcbda1e8e76a742935efdeb7518fd)
@@ -2705,7 +2705,7 @@ Date:   Mon Aug 28 10:14:03 2017 -0400
 
     qa: create_cache_pool no longer runs 'pool application enable'
     
-    Fixes: http://tracker.ceph.com/issues/21155
+    Fixes: http://tracker.stone.com/issues/21155
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit 054297450484ff99f95470905cd6d8986c26e2c4)
@@ -2716,7 +2716,7 @@ Date:   Mon Aug 28 10:08:12 2017 -0400
 
     mgr: fix crash in MonCommandCompletion
     
-    Fixes: http://tracker.ceph.com/issues/21157
+    Fixes: http://tracker.stone.com/issues/21157
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 5fa61b2ed078a3cf333a3111d4f43584ce27ba9d)
 
@@ -2726,7 +2726,7 @@ Date:   Tue Aug 29 08:21:07 2017 +0800
 
     mon/OSDMonitor: make 'osd crush rule rename' idempotent
     
-    Fixes: http://tracker.ceph.com/issues/21162
+    Fixes: http://tracker.stone.com/issues/21162
     Signed-off-by: xie xingguo <xie.xingguo@zte.com.cn>
     (cherry picked from commit cd2191c3f192986e20beaab84b643dfaf49901f7)
 
@@ -2746,7 +2746,7 @@ Date:   Thu Aug 3 15:14:05 2017 +0200
     currently doesn't have any info. on tags, this requires some thought
     into for implementing without a larger performance penalty
     
-    Fixes: http://tracker.ceph.com/issues/20872
+    Fixes: http://tracker.stone.com/issues/20872
     Signed-off-by: Abhishek Lekshmanan <abhishek@suse.com>
     (cherry picked from commit 93a858392a2a3bc8c16369dd8c3f6845e99af404)
 
@@ -2775,7 +2775,7 @@ Date:   Thu Aug 10 10:57:13 2017 +0800
     target object's
     acl elements will be full_control.
     
-    Fixes: http://tracker.ceph.com/issues/20658
+    Fixes: http://tracker.stone.com/issues/20658
     
     Signed-off-by: Enming Zhang <enming.zhang@umcloud.com>
     (cherry picked from commit 6bb2ed24ad175005e7ebd187166bb8735761493c)
@@ -2790,7 +2790,7 @@ Date:   Thu Aug 10 11:10:09 2017 +0100
     this in the equivalent code in the status module, so just
     do the same thing in dashboard.
     
-    Fixes: http://tracker.ceph.com/issues/20692
+    Fixes: http://tracker.stone.com/issues/20692
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 800662c2fa3f040992987dc5c635dfbc14f0a0ea)
 
@@ -2800,7 +2800,7 @@ Date:   Mon Aug 21 17:04:45 2017 +0300
 
     rgw: Prevent overflow of stats cached values
     
-    Fixes: http://tracker.ceph.com/issues/20934
+    Fixes: http://tracker.stone.com/issues/20934
     Signed-off-by: Aleksei Gutikov <aleksey.gutikov@synesis.ru>
     (cherry picked from commit 634215eea1ddd4e4f5dc0066c4a2e745cfc20475)
 
@@ -2821,9 +2821,9 @@ commit 39b3b132f24c2e66b7d862ef5b553992dd109cf4
 Author: Yan, Zheng <zyan@redhat.com>
 Date:   Mon Aug 21 16:56:20 2017 +0800
 
-    qa: add health whitelist for kcephfs suite
+    qa: add health whitelist for kstonefs suite
     
-    Fixes: http://tracker.ceph.com/issues/20892
+    Fixes: http://tracker.stone.com/issues/20892
     Signed-off-by: "Yan, Zheng" <zyan@redhat.com>
     (cherry picked from commit b10989209f41ddb5abe16f816ffd8a3ce118fd02)
 
@@ -2842,7 +2842,7 @@ Date:   Thu Aug 10 11:33:46 2017 +0200
     Don't do the lookupname for unlinked files; use the root_ancentor's
     quota instead.
     
-    Fixes: http://tracker.ceph.com/issues/20945
+    Fixes: http://tracker.stone.com/issues/20945
     Backport: jewel, luminous
     Signed-off-by: Dan van der Ster <daniel.vanderster@cern.ch>
     (cherry picked from commit 1d617eee2e8c32f7300cb2cb8dd37b3714a4699f)
@@ -2853,17 +2853,17 @@ Date:   Wed Aug 9 21:24:49 2017 +0800
 
     mon/OSDMonitor: "osd pool application ls" support
     
-    It would be a pain if we have to call 'ceph osd dump --format=json-pretty'
+    It would be a pain if we have to call 'stone osd dump --format=json-pretty'
     to find out these each time...
     
     Demo output:
-    (1) ceph osd pool application get
+    (1) stone osd pool application get
     {
-        "cephfs_data_b": {
-            "cephfs": {}
+        "stonefs_data_b": {
+            "stonefs": {}
         },
-        "cephfs_metadata_a": {
-            "cephfs": {}
+        "stonefs_metadata_a": {
+            "stonefs": {}
         },
         "test_pool": {
             "rbd": {
@@ -2872,22 +2872,22 @@ Date:   Wed Aug 9 21:24:49 2017 +0800
         }
     }
     
-    (2) ceph osd pool application get test_pool
+    (2) stone osd pool application get test_pool
     {
         "rbd": {
             "test": "me"
         }
     }
     
-    (3) ceph osd pool application get test_pool rbd
+    (3) stone osd pool application get test_pool rbd
     {
         "test": "me"
     }
     
-    (4) ceph osd pool application get test_pool rbd test
+    (4) stone osd pool application get test_pool rbd test
     me
     
-    Fixes: http://tracker.ceph.com/issues/20976
+    Fixes: http://tracker.stone.com/issues/20976
     Signed-off-by: xie xingguo <xie.xingguo@zte.com.cn>
     (cherry picked from commit 46586b22882c0c08c099243e189f5a165063da0c)
 
@@ -2904,7 +2904,7 @@ commit d9a8b3e797252114c930117e6311f924ef0588b3
 Author: Patrick Donnelly <pdonnell@redhat.com>
 Date:   Wed Aug 16 10:48:21 2017 -0700
 
-    ceph-fuse: load supplementary groups by default
+    stone-fuse: load supplementary groups by default
     
     Partially addresses POSIX test failures in [1] due to the config setting being
     false by default.
@@ -2941,7 +2941,7 @@ commit f9eb24e74f948d85729432dbb440aa177789df85
 Author: Patrick Donnelly <pdonnell@redhat.com>
 Date:   Wed Aug 16 09:52:36 2017 -0700
 
-    cephfs: clear suid/sgid if regular file is exe
+    stonefs: clear suid/sgid if regular file is exe
     
     According to [1], the suid/sgid should be cleared if any of the executable bits
     are set.
@@ -2951,7 +2951,7 @@ Date:   Wed Aug 16 09:52:36 2017 -0700
     [1] http://pubs.opengroup.org/onlinepubs/9699919799/functions/chown.html
     [2] https://bugzilla.redhat.com/show_bug.cgi?id=1480182
     
-    Fixes: http://tracker.ceph.com/issues/21004
+    Fixes: http://tracker.stone.com/issues/21004
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
     (cherry picked from commit d306d74a60e6d2c79aa4e9a840f3fc12ee8461bc)
@@ -2963,7 +2963,7 @@ Date:   Wed Aug 16 09:48:09 2017 -0700
     client: refactor clear set uid/gid if -1
     
     libfuse already does not set FUSE_SET_ATTR_UID if the chown uid is -1. However,
-    another libcephfs client could call setattr directly with -1 as the uid/gid so we
+    another libstonefs client could call setattr directly with -1 as the uid/gid so we
     should handle that potential case.
     
     Signed-off-by: Patrick Donnelly <pdonnell@redhat.com>
@@ -2973,16 +2973,16 @@ commit 18442e15854f7973c1b478befaff42f08b549505
 Author: Ken Dreyer <kdreyer@redhat.com>
 Date:   Mon Aug 21 13:02:44 2017 -0600
 
-    rpm: ceph-fuse requires fuse package
+    rpm: stone-fuse requires fuse package
     
-    The ceph-fuse(8) man page describes using the "fusermount" tool to mount
-    CephFS. This utility is in the "fuse" package. Prior to this change, the
-    ceph-fuse RPM only depends on "fuse-libs", not "fuse".
+    The stone-fuse(8) man page describes using the "fusermount" tool to mount
+    StoneFS. This utility is in the "fuse" package. Prior to this change, the
+    stone-fuse RPM only depends on "fuse-libs", not "fuse".
     
     The Debian packaging has always depended on the full "fuse" (previously
     "fuse-utils") package, so we should make the RPM packaging do the same.
     
-    Fixes: http://tracker.ceph.com/issues/21057
+    Fixes: http://tracker.stone.com/issues/21057
     Signed-off-by: Ken Dreyer <kdreyer@redhat.com>
     (cherry picked from commit 6fba9cc3f910442d3d09b41f01f454a39bfdbc48)
 
@@ -2992,7 +2992,7 @@ Date:   Wed Aug 23 10:20:17 2017 +0800
 
     client: add blank space between function name and inode number for log
     
-    Fixes: http://tracker.ceph.com/issues/21069
+    Fixes: http://tracker.stone.com/issues/21069
     
     Signed-off-by: Zhu Shangzhong <zhu.shangzhong@zte.com.cn>
     (cherry picked from commit 0cb4d379fdd2b869bd765e1fcb424a8f8a8f6a04)
@@ -3006,7 +3006,7 @@ Date:   Fri Jun 9 14:38:28 2017 +0200
     This commit allows nvme devices which use a different label than
     standard block devices.
     
-    Fixes: http://tracker.ceph.com/issues/19200
+    Fixes: http://tracker.stone.com/issues/19200
     Signed-off-by: Boris Ranto <branto@redhat.com>
     (cherry picked from commit a8af61c8da9028adc13f7aea611d5a5fee9dbfd1)
 
@@ -3047,7 +3047,7 @@ Date:   Thu Aug 17 18:39:05 2017 -0400
 
     test/librbd: TestMirroringWatcher unit tests should ignore duplicates
     
-    Fixes: http://tracker.ceph.com/issues/21029
+    Fixes: http://tracker.stone.com/issues/21029
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 5d3d5ea5aca5807b09050fe8ad2245c4963a0f34)
 
@@ -3057,7 +3057,7 @@ Date:   Tue Aug 1 15:03:57 2017 -0400
 
     rbd: switched from legacy to new-style configuration options
     
-    Fixes: http://tracker.ceph.com/issues/20737
+    Fixes: http://tracker.stone.com/issues/20737
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 7dc82bc08cbfabd424dcd0b83ed618d28db5fe8e)
 
@@ -3136,8 +3136,8 @@ Date:   Wed Jul 26 16:26:25 2017 -0400
 
     rgw: rgwx-skip-decrypt header bypasses decryption filter on GetObj
     
-    Fixes: http://tracker.ceph.com/issues/20668
-    Fixes: http://tracker.ceph.com/issues/20671
+    Fixes: http://tracker.stone.com/issues/20668
+    Fixes: http://tracker.stone.com/issues/20671
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit adf7a333017f52682c7319420804433b7d3851a0)
@@ -3170,7 +3170,7 @@ Date:   Wed Aug 9 11:48:53 2017 +0800
     rgw: break sending data-log list infinitely
     
     radosgw send data-log list infinitely when opposite end trimmed the data-log and in quiescence.
-    Fixes: http://tracker.ceph.com/issues/20951
+    Fixes: http://tracker.stone.com/issues/20951
     
     Signed-off-by: fang yuxiang fang.yuxiang@eisoo.com
     (cherry picked from commit 40db1fdbc7b24d56b2c7b463238e6b96f2d4bbd9)
@@ -3184,13 +3184,13 @@ Date:   Fri Aug 4 20:01:32 2017 -0400
     Rearrange logic to make it easier to measure accumulation.
     Instrument the boto request/response loop to count bytes in and out.
     Accumulate byte counts in usage like structure.
-    Compare actual usage reported by ceph against local usage measured.
+    Compare actual usage reported by stone against local usage measured.
     Report and assert if there are any short-comings.
     Remove zone placement rule that was newly added at end: tests should be rerunable.
     
     Nit: the logic to wait for "delete_obj" is not quite right.
     
-    Fixes: http://tracker.ceph.com/issues/19870
+    Fixes: http://tracker.stone.com/issues/19870
     Signed-off-by: Marcus Watts <mwatts@redhat.com>
     (cherry picked from commit a45ab45f74042617ec382f3d50f4d45d883042f5)
 
@@ -3214,7 +3214,7 @@ Date:   Sun Jun 18 18:18:39 2017 -0400
     incorporated into some base class (such RestfulClient) so that it is
     possible to easily add in debug statements such as these in the future.
     
-    Fixes: http://tracker.ceph.com/issues/19870
+    Fixes: http://tracker.stone.com/issues/19870
     Signed-off-by: Marcus Watts <mwatts@redhat.com>
     (cherry picked from commit 0172aab860abe324923a392baf51f956a65b64a5)
 
@@ -3242,7 +3242,7 @@ Merge: 3e35d292bd 6979dd31ed
 Author: Josh Durgin <jdurgin@redhat.com>
 Date:   Fri Sep 1 14:37:38 2017 -0700
 
-    Merge pull request #17429 from ceph/wip-luminous-x-luminous
+    Merge pull request #17429 from stone/wip-luminous-x-luminous
     
     qa: add upgrade/luminous-x suite
     
@@ -3254,7 +3254,7 @@ Date:   Fri Sep 1 14:29:41 2017 -0700
 
     Initial check in luminous-x suite
     
-    same from master https://github.com/ceph/ceph/pull/17160
+    same from master https://github.com/stone/stone/pull/17160
     
     Signed-off-by: Yuri Weinstein <yweinste@redhat.com>
 
@@ -3263,9 +3263,9 @@ Merge: fa996769fc 55a519056c
 Author: Alfredo Deza <alfredo@deza.pe>
 Date:   Fri Sep 1 07:14:15 2017 -0400
 
-    Merge pull request #17408 from ceph/luminous-bz1485011
+    Merge pull request #17408 from stone/luminous-bz1485011
     
-    luminous: ceph-volume Persist non-lv devices for journals
+    luminous: stone-volume Persist non-lv devices for journals
     
     Reviewed-by: Andrew Schoen <aschoen@redhat.com>
 
@@ -3273,7 +3273,7 @@ commit 55a519056ce2dd2c7e155f6f8a06ee95c428ad72
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Aug 31 10:27:39 2017 -0400
 
-    ceph-volume tests add new ceph_* ansible dev variables required (centos)
+    stone-volume tests add new stone_* ansible dev variables required (centos)
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d3abfd42ef8e558a1bbb31e24d0ab3c44ee7f4c4)
@@ -3282,7 +3282,7 @@ commit 00c28d7b3fbc4cf3d04e8de76abe284ed98451aa
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Aug 30 14:46:54 2017 -0400
 
-    ceph-volume tests add new ceph_* ansible dev variables required (xenial)
+    stone-volume tests add new stone_* ansible dev variables required (xenial)
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit ebb48c58123a1cfcfc6eccdf9f6c2b3a720f1233)
@@ -3291,7 +3291,7 @@ commit 22fbc9d8d0ef3803166c7fcf627f7b41847ad7e3
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Aug 30 14:12:33 2017 -0400
 
-    ceph-volume util create a disk utility for blkid operations
+    stone-volume util create a disk utility for blkid operations
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit a19e1288e8ae044f41dff9a1770126aa540cc729)
@@ -3300,7 +3300,7 @@ commit 5ce9597d3579e5f4ee6523b59c42f6b3ef2ece82
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Aug 30 14:11:52 2017 -0400
 
-    ceph-volume lvm.prepare store the blkid uuid of a partition journal
+    stone-volume lvm.prepare store the blkid uuid of a partition journal
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 5160c5398bbf107bcc826696664c503aa52d0020)
@@ -3309,7 +3309,7 @@ commit 3e8f2cc2a57351c990836792256af899bc233b1a
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Wed Aug 30 14:05:22 2017 -0400
 
-    ceph-volume lvm.activate use the partuuid of a partition to link the journal
+    stone-volume lvm.activate use the partuuid of a partition to link the journal
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit a1080f833b35c5de30d7b577deabf0a0e82fbbf2)
@@ -3318,7 +3318,7 @@ commit a971b0e0c694da4c2cd5eda8d540f4a3965cd80c
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Aug 29 13:34:21 2017 -0400
 
-    ceph-volume tests update the ansible version for functional/tox.ini
+    stone-volume tests update the ansible version for functional/tox.ini
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 007655afa3def6788e07d2db10c7cd9cb4ab45b7)
@@ -3327,7 +3327,7 @@ commit 9b20da46761c92f3e39e44383bc0b3e3625ee26c
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Aug 29 13:25:28 2017 -0400
 
-    ceph-volume tests add pv* related unit tests
+    stone-volume tests add pv* related unit tests
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 7c22743c9aa1306242fc09ccae5dedf94e025cc4)
@@ -3336,7 +3336,7 @@ commit 459ed5ad1efe0af070e92267657ac4d6a6a15c28
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Aug 29 11:31:56 2017 -0400
 
-    ceph-volume lvm.api include lv_uuid as output fields
+    stone-volume lvm.api include lv_uuid as output fields
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit d85656da2531471e11cb90fcc74570c9c2b804e0)
@@ -3345,7 +3345,7 @@ commit 9b04a4cff09e7aaab6fde5d456854847acc4c061
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Aug 29 09:38:08 2017 -0400
 
-    ceph-volume lvm.activate always update the link to the journal
+    stone-volume lvm.activate always update the link to the journal
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 6a1de41838cb9dbbdc4a8f59eb07e4340ccb9680)
@@ -3354,7 +3354,7 @@ commit 9c1e84ab1fdaad47cb0e27453b19de8c899a9700
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Tue Aug 29 09:26:35 2017 -0400
 
-    ceph-volume lvm.activate retrieve the journal uuid if journal is a device
+    stone-volume lvm.activate retrieve the journal uuid if journal is a device
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit a368fa1ad6d6265c5094eacbe7e72f642b43559d)
@@ -3363,7 +3363,7 @@ commit 7da501a250fb551edb396dde1f19d9737a5812c7
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Aug 28 17:33:39 2017 -0400
 
-    ceph-volume exceptions create a specifc error for multiple pvs
+    stone-volume exceptions create a specifc error for multiple pvs
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 73315c49115dbb45f3bb6c9e46955b333602cec2)
@@ -3372,7 +3372,7 @@ commit 38e0caa1bbb2471808b2895604ede20d8a6615fe
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Aug 28 16:52:33 2017 -0400
 
-    ceph-volume lvm.prepare make a journal a pv, use uuids always
+    stone-volume lvm.prepare make a journal a pv, use uuids always
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 913cef2d01b91e12c16e42d268043886b62c72fa)
@@ -3381,7 +3381,7 @@ commit 237e42c4ea21a48f04bc092f9c3f9c0d407ec298
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Mon Aug 28 16:51:11 2017 -0400
 
-    ceph-volume lvm.api create the PVolumes class and helpers
+    stone-volume lvm.api create the PVolumes class and helpers
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit f2bc125d980485c7b456e0193ec9c66ea0acbe54)
@@ -3390,7 +3390,7 @@ commit 337edc3cd1145cf85dfa3745a8e0ab7c5d26cbf3
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Aug 24 19:28:12 2017 -0400
 
-    ceph-volume lvm.api create the PVolume class
+    stone-volume lvm.api create the PVolume class
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 1725a5f3589ba2faddc9ce633997e5563fc66a01)
@@ -3399,7 +3399,7 @@ commit eda292b40a2c221d98b8ddf740752cc8dd857cf9
 Author: Alfredo Deza <adeza@redhat.com>
 Date:   Thu Aug 24 16:37:48 2017 -0400
 
-    ceph-volume lvm.api add a helper to create pvs
+    stone-volume lvm.api add a helper to create pvs
     
     Signed-off-by: Alfredo Deza <adeza@redhat.com>
     (cherry picked from commit 00f3fa401871f3108558fea71f6ac03660d00ba1)
@@ -3465,7 +3465,7 @@ Date:   Wed Jul 12 17:11:25 2017 -0500
 
     doc/rbd: Replaced numbered steps with a # for dynamic numbering
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit f109031cb5c8150f042f9754f16bfa5216411eda)
@@ -3476,7 +3476,7 @@ Date:   Thu Jul 6 17:22:38 2017 -0500
 
     doc/rbd: Updated the content based on engineering feedback
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit 2a59c82b3d4bbb13bc82cf62fce1d9cb5ba7e6be)
@@ -3487,7 +3487,7 @@ Date:   Thu Jul 6 17:22:02 2017 -0500
 
     doc/rbd: Updated the content based on engineering feedback
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit 1d4f5b458d127065d92652c323c73704cf775754)
@@ -3498,7 +3498,7 @@ Date:   Thu Jul 6 17:20:40 2017 -0500
 
     doc/rbd: Updated the content based on engineering feedback
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit 441820d95890d95ea79bae55afb3ca3b1a8a36e3)
@@ -3509,7 +3509,7 @@ Date:   Thu Jul 6 17:19:01 2017 -0500
 
     doc/rbd: Updated the requirements based on engineering feedback
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit c57266bf82c554b93653489a4b355f53b4b86424)
@@ -3520,7 +3520,7 @@ Date:   Thu Jul 6 12:35:38 2017 -0500
 
     doc/rbd: Added the iSCSI gateway requirements content
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit 9335742140a2b4e8b408560c600a490b2749bd9d)
@@ -3531,7 +3531,7 @@ Date:   Thu Jul 6 12:34:49 2017 -0500
 
     doc/rbd: Added the iSCSI gateway overview content
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit d022034bb3a6e1b00cf185cae0b5fa3f4b617a38)
@@ -3542,7 +3542,7 @@ Date:   Thu Jul 6 12:34:10 2017 -0500
 
     doc/rbd: Added the iSCSI gateway 'gwtop' monitoring content
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit 7e8233429ba158c1a4cfe6e58a7ce24ffe8759c9)
@@ -3553,7 +3553,7 @@ Date:   Thu Jul 6 12:32:53 2017 -0500
 
     doc/rbd: Added the iSCSI targets, Ansible and CLI docs
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit cbf654c702e7b7a8e7023c4707c4ea38d584be3e)
@@ -3564,7 +3564,7 @@ Date:   Thu Jul 6 12:31:39 2017 -0500
 
     doc/rbd: Added the iSCSI initiators, RHEL, Windows, and ESX docs
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit f0e177fa3d8807cfa6ae17f8a0dc759a045623f9)
@@ -3575,7 +3575,7 @@ Date:   Thu Jul 6 12:28:06 2017 -0500
 
     doc/rbd: Updated the "toctree" adding the iSCSI gateway overview doc
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit 4ef8426bff9a32e00093f7c5d2b6b9620252293b)
@@ -3586,7 +3586,7 @@ Date:   Thu Jul 6 12:23:50 2017 -0500
 
     doc/rbd: Added the unmodified iSCSI initiator images for ESX and Windows 2016
     
-    Fixes: http://tracker.ceph.com/issues/20437
+    Fixes: http://tracker.stone.com/issues/20437
     
     Signed-off-by: Aron Gunn <agunn@redhat.com>
     (cherry picked from commit 2fd61f8de1587d2bfbbb7e15c952a29566b390a1)
@@ -3608,7 +3608,7 @@ Date:   Thu Aug 24 18:03:36 2017 -0400
     Check that the correct set of dups is persisted by adding a roundtrip
     through memstore to each merge_log unit test.
     
-    Fixes: http://tracker.ceph.com/issues/21026
+    Fixes: http://tracker.stone.com/issues/21026
     Signed-off-by: Josh Durgin <jdurgin@redhat.com>
     (cherry picked from commit 75af72f758aacc1260b8d828d0b8bb7786597fdf)
 
@@ -3628,15 +3628,15 @@ Merge: bcf89707d6 8f0945a0f3
 Author: Sage Weil <sage@newdream.net>
 Date:   Wed Aug 30 08:28:33 2017 -0500
 
-    Merge pull request #17359 from tchaikov/wip-luminous-ceph-release-stable
+    Merge pull request #17359 from tchaikov/wip-luminous-stone-release-stable
     
-    luminous: ceph_release: luminous is now 'stable' (12.2.x)
+    luminous: stone_release: luminous is now 'stable' (12.2.x)
 
 commit 8f0945a0f39e7da629fa94f406bc1314e1b39fc8
 Author: Kefu Chai <kchai@redhat.com>
 Date:   Wed Aug 30 12:23:42 2017 +0800
 
-    ceph_release: luminous is now 'stable' (12.2.x)
+    stone_release: luminous is now 'stable' (12.2.x)
     
     Signed-off-by: Kefu Chai <kchai@redhat.com>
 
@@ -3665,7 +3665,7 @@ commit 2c7fbc463cf5a981e5966a4a8b7d2a0d1eff3e95
 Author: huangjun <huangjun@xsky.com>
 Date:   Mon Aug 28 22:52:37 2017 +0800
 
-    mon: use ceph_clock_now if message is self-generated
+    mon: use stone_clock_now if message is self-generated
     
     Signed-off-by: huangjun <huangjun@xsky.com>
     (cherry picked from commit 56e8031dac7ee65d54e831e7e372e8771fa0f94a)
@@ -3691,7 +3691,7 @@ Date:   Tue Aug 29 21:33:58 2017 +0800
     Reviewed-by: Sage Weil <sage@redhat.com>
 
 commit 10a5e1911bf0114a7563ad634b7387fefd90caad
-Author: Jenkins Build Slave User <ceph-release-team@redhat.com>
+Author: Jenkins Build Slave User <stone-release-team@redhat.com>
 Date:   Mon Aug 28 16:30:20 2017 +0000
 
     12.2.0

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -21,7 +21,7 @@
 #include <boost/intrusive/rbtree.hpp>
 #include <boost/intrusive/avl_set.hpp>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace bi = boost::intrusive;
 
@@ -89,11 +89,11 @@ class WeightedPriorityQueue :  public OpQueue <T, K>
       }
       //Get the cost of the next item to dequeue
       unsigned get_cost() const {
-        ceph_assert(!empty());
+        stone_assert(!empty());
         return lp.begin()->cost;
       }
       T pop() {
-	ceph_assert(!lp.empty());
+	stone_assert(!lp.empty());
 	T ret = std::move(lp.begin()->item);
         lp.erase_and_dispose(lp.begin(), DelItem<ListPair>());
         return ret;
@@ -156,7 +156,7 @@ class WeightedPriorityQueue :  public OpQueue <T, K>
 	ret.first->insert(cost, std::move(item), front);
       }
       unsigned get_cost() const {
-        ceph_assert(!empty());
+        stone_assert(!empty());
         return next->get_cost();
       }
       T pop() {
@@ -188,7 +188,7 @@ class WeightedPriorityQueue :  public OpQueue <T, K>
 	}
 	return count;
       }
-      void dump(ceph::Formatter *f) const {
+      void dump(stone::Formatter *f) const {
         f->dump_int("num_keys", next->get_size());
         if (!empty()) {
           f->dump_int("first_item_cost", next->get_cost());
@@ -285,7 +285,7 @@ class WeightedPriorityQueue :  public OpQueue <T, K>
 	  }
 	  return count;
 	}
-	void dump(ceph::Formatter *f) const {
+	void dump(stone::Formatter *f) const {
 	  for (typename SubQueues::const_iterator i = queues.begin();
 	        i != queues.end(); ++i) {
 	    f->dump_int("total_priority", total_prio);
@@ -327,7 +327,7 @@ class WeightedPriorityQueue :  public OpQueue <T, K>
       normal.insert(p, cl, cost, std::move(item), true);
     }
     T dequeue() override {
-      ceph_assert(!empty());
+      stone_assert(!empty());
       if (!strict.empty()) {
 	return strict.pop(true);
       }
@@ -336,7 +336,7 @@ class WeightedPriorityQueue :  public OpQueue <T, K>
     unsigned get_size_slow() {
       return strict.get_size_slow() + normal.get_size_slow();
     }
-    void dump(ceph::Formatter *f) const override {
+    void dump(stone::Formatter *f) const override {
       f->open_array_section("high_queues");
       strict.dump(f);
       f->close_section();

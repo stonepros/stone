@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 //
-// Stonee - scalable distributed file system
+// Stone - scalable distributed file system
 //
 // Copyright (C) 2018 Red Hat, Inc.
 //
@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace ceph::containers {
+namespace stone::containers {
 
 // tiny_vector – CPU friendly, small_vector-like container for mutexes,
 // atomics and other non-movable things.
@@ -98,14 +98,14 @@ public:
   //   }
   // ```
   //
-  // For the sake of supporting the ceph::make_mutex() family of
+  // For the sake of supporting the stone::make_mutex() family of
   // factories, which relies on C++17's guaranteed copy elision,
   // the emplacer provides `data()` to retrieve the location for
   // constructing the instance with placement-new. This is handy
   // as the `emplace()` depends on perfect forwarding, and thus
   // interfere with the elision for cases like:
   // ```
-  //   emplacer.emplace(ceph::make_mutex("mtx-name"));
+  //   emplacer.emplace(stone::make_mutex("mtx-name"));
   // ```
   // See: https://stackoverflow.com/a/52498826
 
@@ -190,6 +190,6 @@ public:
   }
 };
 
-} // namespace ceph::containers
+} // namespace stone::containers
 
 #endif // STONE_COMMON_CONTAINERS_H

@@ -54,7 +54,7 @@ struct OptionMask {
     }
     return r;
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 };
 
 struct MaskedOption {
@@ -82,7 +82,7 @@ struct MaskedOption {
 
   friend std::ostream& operator<<(std::ostream& out, const MaskedOption& o);
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 };
 
 struct Section {
@@ -91,7 +91,7 @@ struct Section {
   void clear() {
     options.clear();
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   std::string get_minimal_conf() const;
 };
 
@@ -121,7 +121,7 @@ struct ConfigMap {
     by_id.clear();
     stray_options.clear();
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   std::map<std::string,std::string,std::less<>> generate_entity_map(
     const EntityName& name,
     const std::map<std::string,std::string>& crush_location,
@@ -148,6 +148,6 @@ struct ConfigChangeSet {
   // key -> (old value, new value)
   std::map<std::string,std::pair<boost::optional<std::string>,boost::optional<std::string>>> diff;
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void print(std::ostream& out) const;
 };

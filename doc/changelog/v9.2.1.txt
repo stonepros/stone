@@ -150,7 +150,7 @@ Date:   Wed Feb 10 13:00:23 2016 +0700
 
     Merge pull request #7431 from Abhishekvrshny/wip-14067-infernalis
     
-    infernalis : Ceph file system is not freeing space
+    infernalis : Stone file system is not freeing space
     
     Reviewed-by: Yan, Zheng <zyan@redhat.com>
 
@@ -194,7 +194,7 @@ Date:   Wed Feb 10 12:53:34 2016 +0700
 
     Merge pull request #6628 from Abhishekvrshny/wip-13792-infernalis
     
-    rbd-replay-* moved from ceph-test-dbg to ceph-common-dbg as well
+    rbd-replay-* moved from stone-test-dbg to stone-common-dbg as well
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -304,7 +304,7 @@ Date:   Mon Feb 8 08:48:03 2016 -0500
 
     Merge pull request #6907 from Abhishekvrshny/wip-13929-infernalis
     
-    infernalis: Ceph Pools' MAX AVAIL is 0 if some OSDs' weight is 0
+    infernalis: Stone Pools' MAX AVAIL is 0 if some OSDs' weight is 0
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -370,7 +370,7 @@ Date:   Mon Feb 8 11:18:35 2016 +0700
 
     Merge pull request #6852 from Abhishekvrshny/wip-14013-infernalis
     
-    infernalis: systemd/ceph-disk@.service assumes /bin/flock
+    infernalis: systemd/stone-disk@.service assumes /bin/flock
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -392,7 +392,7 @@ Date:   Mon Feb 8 11:14:18 2016 +0700
 
     Merge pull request #6836 from SUSE/wip-13891-infernalis
     
-    infernalis: auth/cephx: large amounts of log are produced by osd
+    infernalis: auth/stonex: large amounts of log are produced by osd
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -403,7 +403,7 @@ Date:   Mon Feb 8 11:12:47 2016 +0700
 
     Merge pull request #6833 from SUSE/wip-13935-infernalis
     
-    infernalis: Ceph daemon failed to start, because the service name was already used.
+    infernalis: Stone daemon failed to start, because the service name was already used.
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -461,7 +461,7 @@ Date:   Thu Feb 4 16:23:51 2016 -0500
 
     Merge pull request #6880 from dachary/wip-14044-infernalis
     
-    infernalis: ceph-disk list fails on /dev/cciss!c0d0
+    infernalis: stone-disk list fails on /dev/cciss!c0d0
 
 commit 7ffe6ff4e26db538335b8069ce4fd14fe4cdd76c
 Merge: a8fd5ba 8707b0b
@@ -470,7 +470,7 @@ Date:   Fri Jan 29 09:05:14 2016 -0500
 
     Merge pull request #6392 from SUSE/wip-13589-infernalis
     
-    mon: should not set isvalid = true when cephx_verify_authorizer retur…
+    mon: should not set isvalid = true when stonex_verify_authorizer retur…
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -625,11 +625,11 @@ Date:   Thu Dec 10 15:20:32 2015 +0100
 
     tests: verify it is possible to reuse an OSD id
     
-    When an OSD id is removed via ceph osd rm, it will be reused by the next
-    ceph osd create command. Verify that and OSD reusing such an id
+    When an OSD id is removed via stone osd rm, it will be reused by the next
+    stone osd create command. Verify that and OSD reusing such an id
     successfully comes up.
     
-    http://tracker.ceph.com/issues/13988 Refs: #13988
+    http://tracker.stone.com/issues/13988 Refs: #13988
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 7324615bdb829f77928fa10d4e988c6422945937)
@@ -638,9 +638,9 @@ commit 399b7c5409d9801aa7f38533dd8b7c19c726a594
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Jan 5 17:33:45 2016 +0100
 
-    ceph-disk: list accepts absolute dev names
+    stone-disk: list accepts absolute dev names
     
-    The ceph-disk list subcommand now accepts /dev/sda as well as sda.
+    The stone-disk list subcommand now accepts /dev/sda as well as sda.
     The filtering is done on the full list of devices instead of restricting
     the number of devices explored. Always obtaining the full list of
     devices makes things simpler when trying to match a dmcrypted device to
@@ -650,7 +650,7 @@ Date:   Tue Jan 5 17:33:45 2016 +0100
     (cherry picked from commit 591d581c84cfd72d7c655ac88b0911a318b96e95)
     
     Conflicts:
-    	src/ceph-disk: as part of the implementation of deactivate /
+    	src/stone-disk: as part of the implementation of deactivate /
     	destroy in master, the prototype of list_device was changed
             to take a list of paths instead of the all arguments (args).
 
@@ -658,19 +658,19 @@ commit e222d7bce218b732025ce094ed2d1bb31af0d6f6
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Jan 5 14:25:51 2016 +0100
 
-    ceph-disk: display OSD details when listing dmcrypt devices
+    stone-disk: display OSD details when listing dmcrypt devices
     
     The details about a device that mapped via dmcrypt are directly
     available. Do not try to fetch them from the device entry describing the
     devicemapper entry.
     
-    http://tracker.ceph.com/issues/14230 Fixes: #14230
+    http://tracker.stone.com/issues/14230 Fixes: #14230
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 7aab4ed6f108ddc7bc90300f1999a38f30da3a57)
     
     Conflicts:
-    	src/ceph-disk: an incorrect attempt was made to fix the same
+    	src/stone-disk: an incorrect attempt was made to fix the same
                            problem. It was not backported and does not
                            need to be. It is entirely contained in the
                            code block removed and is the reason for the
@@ -680,7 +680,7 @@ commit 87db693eb7d52ad297e8d265ffffa0d7e1125478
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Dec 9 16:52:10 2015 +0100
 
-    tests: limit ceph-disk unit tests to test dir
+    tests: limit stone-disk unit tests to test dir
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 499c80db606fe3926a8a603e03fdba6967d66003)
@@ -689,7 +689,7 @@ commit 2c0d7ef2c72b7570a1304cad927a0b612ea3d4a8
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Jan 5 17:38:59 2016 +0100
 
-    ceph-disk: factorize duplicated dmcrypt mapping
+    stone-disk: factorize duplicated dmcrypt mapping
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 35a0c94c4cd3a57cfc382c64eaa9cfb9306dd2e6)
@@ -698,24 +698,24 @@ commit 22881b1686dc040d8af01c66f59a935065bb680a
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Tue Jan 5 17:42:11 2016 +0100
 
-    ceph-disk: fix regression in cciss devices names
+    stone-disk: fix regression in cciss devices names
     
     The cciss driver has device paths such as /dev/cciss/c0d1 with a
     matching /sys/block/cciss!c0d1. The general case is that whenever a
     device name is found in /sys/block, the / is replaced by the !.
     
-    When refactoring the ceph-disk list subcommand, this conversion was
+    When refactoring the stone-disk list subcommand, this conversion was
     overlooked in a few places. All explicit concatenation of /dev with a
     device name are replaced with a call to get_dev_name which does the same
     but also converts all ! in /.
     
-    http://tracker.ceph.com/issues/13970 Fixes: #13970
+    http://tracker.stone.com/issues/13970 Fixes: #13970
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit a2fd3a535e66b3a2b694cda9c6add33383ccfa4a)
     
     Conflicts:
-    	src/ceph-disk : trivial resolution
+    	src/stone-disk : trivial resolution
 
 commit 9dc5e6cbf85681d0fb9ab249c571672456eb6556
 Merge: 64fab4f 5798d1e
@@ -724,11 +724,11 @@ Date:   Thu Jan 7 15:06:32 2016 +0100
 
     Merge pull request #7001 from dachary/wip-14145-infernalis
     
-    infernalis: ceph-disk: use blkid instead of sgdisk -i
+    infernalis: stone-disk: use blkid instead of sgdisk -i
     
     
     On CentOS 7.1 and other operating systems with a version of udev greater or equal to 214,
-    running ceph-disk prepare triggered unexpected removal and addition of partitions on
+    running stone-disk prepare triggered unexpected removal and addition of partitions on
     the disk being prepared. That created problems ranging from the OSD not being activated
     to failures because /dev/sdb1 does not exist although it should.
     
@@ -738,12 +738,12 @@ commit 5798d1e76c380182472d08ec6f62ebe0f1a9897e
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Jan 6 23:36:57 2016 +0100
 
-    tests: ceph-disk cryptsetup close must try harder
+    tests: stone-disk cryptsetup close must try harder
     
     Similar to how it's done in dmcrpyt_unmap in master (
     132e56615805cba0395898cf165b32b88600d633 ), the infernalis tests helper
     that were deprecated by the addition of the deactivate / destroy
-    ceph-disk subcommand must try cryptsetup close a few times in some
+    stone-disk subcommand must try cryptsetup close a few times in some
     contexts.
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
@@ -752,12 +752,12 @@ commit 379bbe0613e8dbe2f4d38f4f9ee23a10ed39a64d
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Sat Dec 19 00:53:03 2015 +0100
 
-    ceph-disk: protect deactivate with activate lock
+    stone-disk: protect deactivate with activate lock
     
-    When ceph-disk prepares the disk, it triggers udev events and each of
-    them ceph-disk activate. If systemctl stop ceph-osd@2 happens while
-    there still are ceph-disk activate in flight, the systemctl stop may be
-    cancelled by the systemctl enable issued by one of the pending ceph-disk
+    When stone-disk prepares the disk, it triggers udev events and each of
+    them stone-disk activate. If systemctl stop stone-osd@2 happens while
+    there still are stone-disk activate in flight, the systemctl stop may be
+    cancelled by the systemctl enable issued by one of the pending stone-disk
     activate.
     
     This only matters in a test environment where disks are destroyed
@@ -768,18 +768,18 @@ Date:   Sat Dec 19 00:53:03 2015 +0100
     
     Conflicts:
     
-            src/ceph-disk: ceph-disk deactivate does not exist in ceph-disk
+            src/stone-disk: stone-disk deactivate does not exist in stone-disk
                 on infernalis. But the same feature is implemented in
-                ceph-test-disk.py for test purposes and has the same
-                problem. The patch is adapted to ceph-test-disk.py.
+                stone-test-disk.py for test purposes and has the same
+                problem. The patch is adapted to stone-test-disk.py.
 
 commit 4da2f9494dbd72e84d381cc12125c61931a27628
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Jan 6 11:15:19 2016 +0100
 
-    ceph-disk: retry cryptsetup remove
+    stone-disk: retry cryptsetup remove
     
-    Retry a cryptsetup remove ten times. After the ceph-osd terminates, the
+    Retry a cryptsetup remove ten times. After the stone-osd terminates, the
     device is released asyncrhonously and an attempt to cryptsetup remove
     will may fail because it is considered busy. Although a few attempts are
     made before giving up, the number of attempts / the duration of the
@@ -797,7 +797,7 @@ commit 676a4b42267133a9242a81503f7dd0eaeb0afd33
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Fri Dec 18 17:03:21 2015 +0100
 
-    ceph-disk: use blkid instead of sgdisk -i
+    stone-disk: use blkid instead of sgdisk -i
     
     sgdisk -i 1 /dev/vdb opens /dev/vdb in write mode which indirectly
     triggers a BLKRRPART ioctl from udev (starting version 214 and up) when
@@ -806,7 +806,7 @@ Date:   Fri Dec 18 17:03:21 2015 +0100
     all partitions and adds them again (similar to what partprobe does
     explicitly).
     
-    The side effects of partitions disappearing while ceph-disk is running
+    The side effects of partitions disappearing while stone-disk is running
     are devastating.
     
     sgdisk is replaced by blkid which only opens the device in read mode and
@@ -834,7 +834,7 @@ Date:   Fri Dec 18 17:03:21 2015 +0100
               devices, or might need to disable it entirely. Device Mapper
               devices are excluded from this logic.
     
-    http://tracker.ceph.com/issues/14080 Fixes: #14080
+    http://tracker.stone.com/issues/14080 Fixes: #14080
     
     Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
     Signed-off-by: Loic Dachary <loic@dachary.org>
@@ -844,7 +844,7 @@ commit bb8d53636d3a433bb7752e3a291a86a8af058215
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Dec 16 15:57:03 2015 +0100
 
-    ceph-disk: dereference symlinks in destroy and zap
+    stone-disk: dereference symlinks in destroy and zap
     
     The behavior of partprobe or sgdisk may be subtly different if given a
     symbolic link to a device instead of an actual device. The debug output
@@ -857,7 +857,7 @@ Date:   Wed Dec 16 15:57:03 2015 +0100
     (cherry picked from commit fe71647bc9bd0f9ddc6d470ee7bee1e6b0983e2b)
     
     Conflicts:
-            src/ceph-disk
+            src/stone-disk
               trivial, because destroy is not implemented
               in infernalis
 
@@ -865,7 +865,7 @@ commit 74c27423f4925c7a31d6675851ffa3d2f5265ef1
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Dec 16 12:33:25 2015 +0100
 
-    ceph-disk: increase partprobe / udevadm settle timeouts
+    stone-disk: increase partprobe / udevadm settle timeouts
     
     The default of 120 seconds may be exceeded when the disk is very slow
     which can happen in cloud environments. Increase it to 600 seconds
@@ -888,7 +888,7 @@ commit 263eb579ac7179a19157004ed2de294085dc4a63
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Dec 16 12:36:47 2015 +0100
 
-    tests: ceph-disk workunit increase verbosity
+    tests: stone-disk workunit increase verbosity
     
     So that reading the teuthology log is enough in most cases to figure out
     the cause of the error.
@@ -897,7 +897,7 @@ Date:   Wed Dec 16 12:36:47 2015 +0100
     (cherry picked from commit fd7fe8c4977658f66651dad5efb0d816ae71b38b)
     
     Conflicts:
-    	qa/workunits/ceph-disk/ceph-disk-test.py:
+    	qa/workunits/stone-disk/stone-disk-test.py:
               trivial, because destroy/deactivate are not implemented
               in infernalis. The existing destroy_osd function
               has to be modified so the id returned by sh() does
@@ -907,7 +907,7 @@ commit 936dda76ce11baa9f2b7cce882b655550188a731
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Dec 16 12:30:20 2015 +0100
 
-    ceph-disk: log parted output
+    stone-disk: log parted output
     
     Should parted output fail to parse, it is useful to get the full output
     when running in verbose mode.
@@ -919,13 +919,13 @@ commit db26cc4b7fbd5b6f2a3da58fb7ac7736fc058065
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Wed Dec 16 12:29:17 2015 +0100
 
-    ceph-disk: do not discard stderr
+    stone-disk: do not discard stderr
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 5fa35ba10e10b56262757afc43929ab8ee4164f2)
     
     Conflicts:
-    	src/ceph-disk : trivial, because destroy/deactivate
+    	src/stone-disk : trivial, because destroy/deactivate
             are not implemented in infernalis
 
 commit 83bba36afbae58ebe7cea2b0fb8ff51edb475fff
@@ -1015,7 +1015,7 @@ Date:   Wed Dec 9 11:22:26 2015 +0530
 
     Merge pull request #6395 from SUSE/wip-13593-infernalis
     
-    Ceph-fuse won't start correctly when the option log_max_new in ceph.conf set to zero
+    Stone-fuse won't start correctly when the option log_max_new in stone.conf set to zero
     
     Reviewed-by: Greg Farnum <gfarnum@redhat.com>
 
@@ -1024,9 +1024,9 @@ Merge: 476af49 ebc5e4e
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Dec 9 00:06:33 2015 +0100
 
-    Merge pull request #6828 from dachary/wip-ceph-disk-augeas
+    Merge pull request #6828 from dachary/wip-stone-disk-augeas
     
-    tests: ceph-disk workunit uses configobj
+    tests: stone-disk workunit uses configobj
     
     Reviewed-by: Loic Dachary <ldachary@redhat.com>
 
@@ -1034,12 +1034,12 @@ commit ebc5e4ee46dce9ab17208cdebc31ae5cc8c7e828
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Thu Oct 22 01:48:31 2015 +0200
 
-    tests: ceph-disk workunit uses the ceph task
+    tests: stone-disk workunit uses the stone task
     
-    The ceph-disk workunit deploy keys that are not deployed by default by
-    the ceph teuthology task.
+    The stone-disk workunit deploy keys that are not deployed by default by
+    the stone teuthology task.
     
-    The OSD created by the ceph task are removed from the default
+    The OSD created by the stone task are removed from the default
     bucket (via osd rm) so they do not interfere with the tests.
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
@@ -1049,7 +1049,7 @@ commit 0afaeb243448819dfce0de2778c27015a46e195a
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Thu Oct 22 00:21:49 2015 +0200
 
-    tests: ceph-disk workunit uses configobj
+    tests: stone-disk workunit uses configobj
     
     Instead of using augtool to modify the configuration file, use
     configobj. It is also used by the install teuthology task. The .ini
@@ -1088,12 +1088,12 @@ commit 7d90c018e5cfec982f96ce6dd45b6f89218f441d
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Fri Dec 4 21:11:09 2015 +0100
 
-    build/ops: systemd ceph-disk unit must not assume /bin/flock
+    build/ops: systemd stone-disk unit must not assume /bin/flock
     
     The flock command may be installed elsewhere, depending on the
     system. Let the PATH search figure that out.
     
-    http://tracker.ceph.com/issues/13975 Fixes: #13975
+    http://tracker.stone.com/issues/13975 Fixes: #13975
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit c8f7d44c935bd097db7d131b785bdab78a7a650c)
@@ -1146,7 +1146,7 @@ Date:   Tue Dec 8 08:02:56 2015 +0100
     
     To get libunwind from the CR repositories until CentOS 7.2.1511 is released.
     
-    http://tracker.ceph.com/issues/13997 Fixes: #13997
+    http://tracker.stone.com/issues/13997 Fixes: #13997
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 247ee6084b58861da601d349bdba739b252d96de)
@@ -1177,7 +1177,7 @@ commit ac31f7f8ac168e27b5a33093832aab3bfc97f667
 Author: qiankunzheng <zheng.qiankun@h3c.com>
 Date:   Thu Nov 5 07:29:49 2015 -0500
 
-    auth/cephx: large amounts of log are produced by osd
+    auth/stonex: large amounts of log are produced by osd
     if the auth of osd is deleted when the osd is running, the osd will produce large amounts of log.
     
     Fixes:#13610
@@ -1188,7 +1188,7 @@ commit c968a40dfb0a0412d1feb7f8f085c8293b42bf4d
 Author: wangchaunhong <root@A22832429.(none)>
 Date:   Tue Oct 20 18:40:23 2015 +0800
 
-    init-ceph: fix systemd-run cant't start ceph daemon sometimes
+    init-stone: fix systemd-run cant't start stone daemon sometimes
     
     Fixes: #13474
     Signed-off-by: Chuanhong Wang <wang.chuanhong@zte.com.cn>
@@ -1204,7 +1204,7 @@ Date:   Tue Nov 3 00:21:51 2015 +0100
     time it is called, it must create the testprofile erasure code profile
     again for the test to use.
     
-    http://tracker.ceph.com/issues/13664 Refs: #13664
+    http://tracker.stone.com/issues/13664 Refs: #13664
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit a60342942b5a42ee04d59af77a6b904ce62eefc4)
@@ -1222,7 +1222,7 @@ Date:   Mon Nov 2 20:24:51 2015 +0100
     This must be done when creating erasure coded pools with the C++
     interface, in the same way it's done with the C interface.
     
-    http://tracker.ceph.com/issues/13664 Fixes: #13664
+    http://tracker.stone.com/issues/13664 Fixes: #13664
     
     Signed-off-by: Loic Dachary <ldachary@redhat.com>
     (cherry picked from commit 47abab9a6f182aa0abe5047c04402850379bcd6d)
@@ -1383,7 +1383,7 @@ Date:   Mon Nov 30 15:01:23 2015 +0100
 
     Merge pull request #6396 from SUSE/wip-13342-infernalis
     
-    ceph upstart script rbdmap.conf incorrectly processes parameters
+    stone upstart script rbdmap.conf incorrectly processes parameters
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -1535,9 +1535,9 @@ commit 58b43e656cd9278667af2b7ac4fee72f50a03caa
 Author: Loic Dachary <ldachary@redhat.com>
 Date:   Fri Nov 13 19:10:28 2015 +0100
 
-    build/ops: rbd-replay moved from ceph-test-dbg to ceph-common-dbg
+    build/ops: rbd-replay moved from stone-test-dbg to stone-common-dbg
     
-    http://tracker.ceph.com/issues/13785 Fixes: #13785
+    http://tracker.stone.com/issues/13785 Fixes: #13785
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit a0204dc47acc0c50223e449fd23a2fc97bfd111a)
@@ -1619,9 +1619,9 @@ commit 34d0b692cf1b9c0c2ea508b81d252b901fe1f52b
 Author: wenjunhuang <wenjunhuang@tencent.com>
 Date:   Sat Oct 10 14:30:56 2015 +0800
 
-    ceph-fuse.cc: While starting ceph-fuse, start the log thread first
+    stone-fuse.cc: While starting stone-fuse, start the log thread first
     
-    http://tracker.ceph.com/issues/13443 Fixes: #13443
+    http://tracker.stone.com/issues/13443 Fixes: #13443
     
     Signed-off-by: Wenjun Huang <wenjunhuang@tencent.com>
     (cherry picked from commit f2763085754462610730a23bb5652237714abc2a)
@@ -1630,7 +1630,7 @@ commit 8707b0b083e7a7732d1e3563b00d3adf3e09807b
 Author: yangruifeng <yangruifeng.09209@h3c.com>
 Date:   Mon Oct 19 08:08:12 2015 -0400
 
-    mon: should not set isvalid = true when cephx_verify_authorizer return false
+    mon: should not set isvalid = true when stonex_verify_authorizer return false
     
     Fixes: #13525
     Signed-off-by: Ruifeng Yang <yangruifeng.09209@h3c.com>

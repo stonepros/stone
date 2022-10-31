@@ -2,34 +2,34 @@
 .. _kubernetes-dev:
 
 =======================================
-Hacking on Ceph in Kubernetes with Rook
+Hacking on Stone in Kubernetes with Rook
 =======================================
 
 .. warning::
 
     This is *not* official user documentation for setting up production
-    Ceph clusters with Kubernetes.  It is aimed at developers who want
-    to hack on Ceph in Kubernetes.
+    Stone clusters with Kubernetes.  It is aimed at developers who want
+    to hack on Stone in Kubernetes.
 
-This guide is aimed at Ceph developers getting started with running
+This guide is aimed at Stone developers getting started with running
 in a Kubernetes environment. It assumes that you may be hacking on Rook,
-Ceph or both, so everything is built from source.
+Stone or both, so everything is built from source.
 
 TL;DR for hacking on MGR modules
 ================================
 
-Make your changes to the Python code base and then from Ceph's
+Make your changes to the Python code base and then from Stone's
 ``build`` directory, run::
 
     ../src/script/kubejacker/kubejacker.sh '192.168.122.1:5000'
 
 where ``'192.168.122.1:5000'`` is a local docker registry and
-Rook's ``CephCluster`` CR uses ``image: 192.168.122.1:5000/ceph/ceph:latest``.
+Rook's ``StoneCluster`` CR uses ``image: 192.168.122.1:5000/ceph/ceph:latest``.
 
 1. Build a kubernetes cluster
 =============================
 
-Before installing Ceph/Rook, make sure you've got a working kubernetes
+Before installing Stone/Rook, make sure you've got a working kubernetes
 cluster with some nodes added (i.e. ``kubectl get nodes`` shows you something).
 The rest of this guide assumes that your development workstation has network
 access to your kubernetes cluster, such that ``kubectl`` works from your
@@ -99,7 +99,7 @@ You may need to mark the registry as **insecure**.
 
 .. note::
 
-    Building Rook is **not required** to make changes to Ceph.
+    Building Rook is **not required** to make changes to Stone.
 
 Install Go if you don't already have it.
 
@@ -131,23 +131,23 @@ Run ``make`` in the root of your Rook tree to build its binaries and containers:
 
 You can use ``docker image ls`` to see the resulting built images.  The
 images you care about are the ones with tags ending "ceph-amd64" (used
-for the Rook operator and Ceph daemons) and "ceph-toolbox-amd64" (used
+for the Rook operator and Stone daemons) and "ceph-toolbox-amd64" (used
 for the "toolbox" container where the CLI is run).
 
-4. Build Ceph
+4. Build Stone
 =============
 
 .. note::
 
-    Building Ceph is **not required** to make changes to MGR modules
+    Building Stone is **not required** to make changes to MGR modules
     written in Python.
 
 
-The Rook containers and the Ceph containers are independent now. Note that
-Rook's Ceph client libraries need to communicate with the Ceph cluster,
+The Rook containers and the Stone containers are independent now. Note that
+Rook's Stone client libraries need to communicate with the Stone cluster,
 therefore a compatible major version is required.
 
-You can run a Registry docker container with access to your Ceph source
+You can run a Registry docker container with access to your Stone source
 tree using a command like:
 
 ::
@@ -155,7 +155,7 @@ tree using a command like:
     docker run -i -v /my/ceph/src:/my/ceph/src -p 192.168.122.1:5000:5000 -t --name registry registry:2
 
 
-Once you have built Ceph, you can inject the resulting binaries into
+Once you have built Stone, you can inject the resulting binaries into
 the Rook container image using the ``kubejacker.sh`` script (run from
 your build directory but from *outside* your build container).
 
@@ -163,24 +163,24 @@ your build directory but from *outside* your build container).
 =================
 
 ``kubejacker`` needs access to your docker registry. Execute the script
-to build a docker image containing your latest Ceph binaries:
+to build a docker image containing your latest Stone binaries:
 
 ::
 
     build$ ../src/script/kubejacker/kubejacker.sh "<host>:<port>"
 
 
-Now you've got your freshly built Rook and freshly built Ceph into
+Now you've got your freshly built Rook and freshly built Stone into
 a single container image, ready to run.  Next time you change something
-in Ceph, you can re-run this to update your image and restart your
+in Stone, you can re-run this to update your image and restart your
 kubernetes containers. If you change something in Rook, then re-run the Rook
-build, and the Ceph build too.
+build, and the Stone build too.
 
 5. Run a Rook cluster
 =====================
 
 Please refer to `Rook's documentation <https://rook.io/docs/rook/master/ceph-quickstart.html>`_
-for setting up a Rook operator, a Ceph cluster and the toolbox.
+for setting up a Rook operator, a Stone cluster and the toolbox.
 
 The Rook source tree includes example .yaml files in
 ``cluster/examples/kubernetes/ceph/``. Copy these into
@@ -201,7 +201,7 @@ Then, load the configuration into the kubernetes API using ``kubectl``:
     kubectl apply -f ./cluster-test.yaml
 
 Use ``kubectl -n rook-ceph get pods`` to check the operator
-pod the Ceph daemons and toolbox are is coming up.
+pod the Stone daemons and toolbox are is coming up.
 
 Once everything is up and running,
 you should be able to open a shell in the toolbox container and

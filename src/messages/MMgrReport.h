@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -39,7 +39,7 @@ public:
   uint8_t priority = PerfCountersBuilder::PRIO_USEFUL;
   enum unit_t unit;
 
-  void encode(ceph::buffer::list &bl) const
+  void encode(stone::buffer::list &bl) const
   {
     // TODO: decide whether to drop the per-type
     // encoding here, we could rely on the MgrReport
@@ -55,7 +55,7 @@ public:
     ENCODE_FINISH(bl);
   }
   
-  void decode(ceph::buffer::list::const_iterator &p)
+  void decode(stone::buffer::list::const_iterator &p)
   {
     DECODE_START(3, p);
     decode(path, p);
@@ -96,8 +96,8 @@ public:
 
   // Decode: iterate over the types we know about, sorted by idx,
   // and use the current type's type to decide how to decode
-  // the next bytes from the ceph::buffer::list.
-  ceph::buffer::list packed;
+  // the next bytes from the stone::buffer::list.
+  stone::buffer::list packed;
 
   std::string daemon_name;
   std::string service_name;  // optional; otherwise infer from entity type
@@ -109,7 +109,7 @@ public:
   std::vector<DaemonHealthMetric> daemon_health_metrics;
 
   // encode map<string,map<int32_t,string>> of current config
-  ceph::buffer::list config_bl;
+  stone::buffer::list config_bl;
 
   std::map<OSDPerfMetricQuery, OSDPerfMetricReport>  osd_perf_metric_reports;
 
@@ -117,7 +117,7 @@ public:
 
   void decode_payload() override
   {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(daemon_name, p);
     decode(declare_types, p);
@@ -146,7 +146,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(daemon_name, payload);
     encode(declare_types, payload);
     encode(packed, payload);
@@ -171,7 +171,7 @@ public:
     if (service_name.length()) {
       out << service_name;
     } else {
-      out << ceph_entity_type_name(get_source().type());
+      out << stone_entity_type_name(get_source().type());
     }
     out << "." << daemon_name
 	<< " +" << declare_types.size()
@@ -196,7 +196,7 @@ private:
   using RefCountedObject::put;
   using RefCountedObject::get;
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

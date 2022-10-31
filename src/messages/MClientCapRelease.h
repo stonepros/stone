@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -26,24 +26,24 @@ class MClientCapRelease final : public SafeMessage {
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(head, p);
-    ceph::decode_nohead(head.num, caps, p);
+    stone::decode_nohead(head.num, caps, p);
     if (header.version >= 2) {
       decode(osd_epoch_barrier, p);
     }
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     head.num = caps.size();
     encode(head, payload);
-    ceph::encode_nohead(caps, payload);
+    stone::encode_nohead(caps, payload);
     encode(osd_epoch_barrier, payload);
   }
 
-  struct ceph_mds_cap_release head;
-  std::vector<ceph_mds_cap_item> caps;
+  struct stone_mds_cap_release head;
+  std::vector<stone_mds_cap_item> caps;
 
   // The message receiver must wait for this OSD epoch
   // before actioning this cap release.
@@ -51,7 +51,7 @@ class MClientCapRelease final : public SafeMessage {
 
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 
   static constexpr int HEAD_VERSION = 2;
   static constexpr int COMPAT_VERSION = 1;

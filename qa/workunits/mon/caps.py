@@ -10,9 +10,9 @@ import os
 import io
 import re
 
-from ceph_argparse import * # noqa
+from stone_argparse import * # noqa
 
-keyring_base = '/tmp/cephtest-caps.keyring'
+keyring_base = '/tmp/stonetest-caps.keyring'
 
 class UnexpectedReturn(Exception):
   def __init__(self, cmd, ret, expected, msg):
@@ -107,8 +107,8 @@ def destroy_keyring(path):
 
   # clean up and make sure each entity is gone
   for e in entities:
-    expect('ceph auth del client.{0}'.format(e), 0)
-    expect('ceph auth get client.{0}'.format(e), errno.ENOENT)
+    expect('stone auth del client.{0}'.format(e), 0)
+    expect('stone auth get client.{0}'.format(e), errno.ENOENT)
 
   # remove keyring
   os.unlink(path)
@@ -119,18 +119,18 @@ def test_basic_auth():
   # make sure we can successfully add/del entities, change their caps
   # and import/export keyrings.
 
-  expect('ceph auth add client.basicauth', 0)
-  expect('ceph auth caps client.basicauth mon \'allow *\'', 0)
+  expect('stone auth add client.basicauth', 0)
+  expect('stone auth caps client.basicauth mon \'allow *\'', 0)
   # entity exists and caps do not match
-  expect('ceph auth add client.basicauth', errno.EINVAL)
+  expect('stone auth add client.basicauth', errno.EINVAL)
   # this command attempts to change an existing state and will fail
-  expect('ceph auth add client.basicauth mon \'allow w\'', errno.EINVAL)
-  expect('ceph auth get-or-create client.basicauth', 0)
-  expect('ceph auth get-key client.basicauth', 0)
-  expect('ceph auth get-or-create client.basicauth2', 0)
+  expect('stone auth add client.basicauth mon \'allow w\'', errno.EINVAL)
+  expect('stone auth get-or-create client.basicauth', 0)
+  expect('stone auth get-key client.basicauth', 0)
+  expect('stone auth get-or-create client.basicauth2', 0)
   # cleanup
-  expect('ceph auth del client.basicauth', 0)
-  expect('ceph auth del client.basicauth2', 0)
+  expect('stone auth del client.basicauth', 0)
+  expect('stone auth del client.basicauth2', 0)
 
   return True
 
@@ -148,7 +148,7 @@ def gen_module_keyring(module):
     for (n,p,r) in module_caps:
       c = p.format(t='mon', s=module, p=perms)
       expect_to_file(
-          'ceph auth get-or-create client.{cn}-{cp} {caps}'.format(
+          'stone auth get-or-create client.{cn}-{cp} {caps}'.format(
           cn=n,cp=perms,caps=c), 0, keyring)
 
   return keyring
@@ -298,7 +298,7 @@ def test_all():
             cname = 'client.{gb}-{kind}-{p}'.format(
                 gb=good_or_bad,kind=kind,p=perm)
             expect_to_file(
-                'ceph auth get-or-create {n} {c}'.format(
+                'stone auth get-or-create {n} {c}'.format(
                   n=cname,c=run_cap), 0, k)
       # keyring generated
       print('testing {m}/{c}'.format(m=module,c=cmd_cmd))
@@ -322,11 +322,11 @@ def test_all():
             expect_ret = errno.EACCES
 
           if 'pre' in cmd and len(cmd['pre']) > 0:
-            expect('ceph {0}'.format(cmd['pre']), 0)
-          expect('ceph -n {cn} -k {k} {c} {arg_val}'.format(
+            expect('stone {0}'.format(cmd['pre']), 0)
+          expect('stone -n {cn} -k {k} {c} {arg_val}'.format(
             cn=cname,k=k,c=cmd_cmd,arg_val=cmd_args_val), expect_ret)
           if 'post' in cmd and len(cmd['post']) > 0:
-            expect('ceph {0}'.format(cmd['post']), 0)
+            expect('stone {0}'.format(cmd['post']), 0)
       # finish testing
       destroy_keyring(k)
 
@@ -338,11 +338,11 @@ def test_misc():
 
   k = keyring_base + '.misc'
   expect_to_file(
-      'ceph auth get-or-create client.caps mon \'allow command "auth caps"' \
+      'stone auth get-or-create client.caps mon \'allow command "auth caps"' \
           ' with entity="client.caps"\'', 0, k)
-  expect('ceph -n client.caps -k {kf} quorum_status'.format(kf=k), errno.EACCES)
-  expect('ceph -n client.caps -k {kf} auth caps client.caps mon \'allow *\''.format(kf=k), 0)
-  expect('ceph -n client.caps -k {kf} quorum_status'.format(kf=k), 0)
+  expect('stone -n client.caps -k {kf} quorum_status'.format(kf=k), errno.EACCES)
+  expect('stone -n client.caps -k {kf} auth caps client.caps mon \'allow *\''.format(kf=k), 0)
+  expect('stone -n client.caps -k {kf} quorum_status'.format(kf=k), 0)
   destroy_keyring(k)
 
 def main():

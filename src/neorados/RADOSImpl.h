@@ -21,8 +21,8 @@
 #include <boost/asio.hpp>
 #include <boost/intrusive_ptr.hpp>
 
-#include "common/ceph_context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_context.h"
+#include "common/stone_mutex.h"
 
 #include "librados/RadosClient.h"
 
@@ -48,7 +48,7 @@ class RADOS : public Dispatcher
   boost::asio::io_context& ioctx;
   boost::intrusive_ptr<StoneContext> cct;
 
-  ceph::mutex lock = ceph::make_mutex("RADOS_unleashed::_::RADOSImpl");
+  stone::mutex lock = stone::make_mutex("RADOS_unleashed::_::RADOSImpl");
   int instance_id = -1;
 
   std::unique_ptr<Messenger> messenger;

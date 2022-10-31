@@ -17,7 +17,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,15 +30,15 @@ import static org.junit.Assert.*;
 
 @RunWith( Suite.class )
 @Suite.SuiteClasses( { 
-  CephDoubleMountTest.class,
-  CephMountCreateTest.class,
-  CephMountTest.class,
-  CephUnmountedTest.class,
+  StoneDoubleMountTest.class,
+  StoneMountCreateTest.class,
+  StoneMountTest.class,
+  StoneUnmountedTest.class,
 })
 
 /**
  * Every Java test class must be added to this list in order to be executed with 'ant test'
  */
-public class CephAllTests{
+public class StoneAllTests{
 
 }

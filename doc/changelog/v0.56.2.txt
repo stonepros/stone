@@ -21,10 +21,10 @@ commit 5a7c5088cc8f57f75eb594a21bf5fb6661e50978
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Tue Jan 29 15:18:53 2013 -0800
 
-    init-ceph: make ulimit -n be part of daemon command
+    init-stone: make ulimit -n be part of daemon command
 
     ulimit -n from 'max open files' was being set only on the machine
-    running /etc/init.d/ceph.  It needs to be added to the commands to
+    running /etc/init.d/stone.  It needs to be added to the commands to
     start the daemons, and run both locally and remotely.
 
     Verified by examining /proc/<pid>/limits on local and remote hosts
@@ -1029,7 +1029,7 @@ commit 5fb77bf1d1b241b4f9c1fe9e57288bbc84d8d97d
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jan 16 14:09:53 2013 -0800
 
-    ceph: adjust crush tunables via 'ceph osd crush tunables <profile>'
+    stone: adjust crush tunables via 'stone osd crush tunables <profile>'
 
     Make it easy to adjust crush tunables.  Create profiles:
 

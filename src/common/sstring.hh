@@ -695,7 +695,7 @@ public:
   }
 };
 
-#if 0 /* XXX conflicts w/Ceph types.h */
+#if 0 /* XXX conflicts w/Stone types.h */
 template <typename T>
 inline
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {

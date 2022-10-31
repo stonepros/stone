@@ -3,7 +3,7 @@ Running Integration Tests using Teuthology
 
 Getting binaries
 ----------------
-To run integration tests using teuthology, you need to have Ceph binaries
+To run integration tests using teuthology, you need to have Stone binaries
 built for your branch. Follow these steps to initiate the build process -
 
 #. Push the branch to `ceph-ci`_ repository. This triggers the process of
@@ -99,7 +99,7 @@ config printed at the very beginning of the teuthology job.
 About Suites and Filters
 ------------------------
 See `Suites Inventory`_ for a list of suites of integration tests present
-right now. Alternatively, each directory under ``qa/suites`` in Ceph
+right now. Alternatively, each directory under ``qa/suites`` in Stone
 repository is an integration test suite, so looking within that directory
 to decide an appropriate argument for ``-s`` also works.
 

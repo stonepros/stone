@@ -32,7 +32,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(name, p);
     decode(host, p);
@@ -40,7 +40,7 @@ public:
   }
 
   void encode_payload(uint64_t) override {
-    using ceph::encode;
+    using stone::encode;
     encode(name, payload);
     encode(host, payload);
     encode(device_class, payload);

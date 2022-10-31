@@ -25,9 +25,9 @@ Merge: 3e7ea33 fec55a2
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Feb 15 22:20:45 2014 -0800
 
-    Merge pull request #1243 from dachary/wip-ceph-disk-dumpling
+    Merge pull request #1243 from dachary/wip-stone-disk-dumpling
     
-    ceph-disk: unit tests (dumpling)
+    stone-disk: unit tests (dumpling)
     
     Reviewed-by: Sage Weil <sage@inktank.com>
 
@@ -50,9 +50,9 @@ commit fec55a2174b49ef68c816755c1218f9cd69033b6
 Author: Loic Dachary <loic@dachary.org>
 Date:   Sat Feb 15 18:34:04 2014 +0100
 
-    ceph-disk: unit tests
+    stone-disk: unit tests
     
-    src/test/ceph-disk.sh replaces src/test/cli/ceph-disk/data-dir.t
+    src/test/stone-disk.sh replaces src/test/cli/stone-disk/data-dir.t
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
 
@@ -60,10 +60,10 @@ commit 0679b11b4d2f7cb7bd9c1cd86854a064aaa83f8a
 Author: Loic Dachary <loic@dachary.org>
 Date:   Thu Jan 2 22:42:17 2014 +0100
 
-    ceph-disk: cannot run unit tests
+    stone-disk: cannot run unit tests
     
-    Because ceph-disk relies on hardcoded paths. The corresponding test will
-    be added back when ceph-disk can run from sources.
+    Because stone-disk relies on hardcoded paths. The corresponding test will
+    be added back when stone-disk can run from sources.
     
     Fixes: #7085
     

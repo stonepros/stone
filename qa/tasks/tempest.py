@@ -175,7 +175,7 @@ def task(ctx, config):
     Example of configuration:
 
       overrides:
-        ceph:
+        stone:
           conf:
             client:
               rgw keystone api version: 3
@@ -190,7 +190,7 @@ def task(ctx, config):
               rgw keystone admin password: ADMIN
               rgw keystone admin project: admin
       tasks:
-      # typically, the task should be preceded with install, ceph, tox,
+      # typically, the task should be preceded with install, stone, tox,
       # keystone and rgw. Tox and Keystone are specific requirements
       # of tempest.py.
       - rgw:

@@ -15,7 +15,7 @@ try:
 except ImportError:
     pass  # For typing only
 
-logger = logging.getLogger('ceph_service')
+logger = logging.getLogger('stone_service')
 
 
 class SendCommandError(rados.Error):
@@ -26,7 +26,7 @@ class SendCommandError(rados.Error):
 
 
 # pylint: disable=too-many-public-methods
-class CephService(object):
+class StoneService(object):
 
     OSD_FLAG_NO_SCRUB = 'noscrub'
     OSD_FLAG_NO_DEEP_SCRUB = 'nodeep-scrub'
@@ -240,7 +240,7 @@ class CephService(object):
             # Get a list of all OSD daemons on all hosts that are 'up'
             # because SMART data can not be retrieved from daemons that
             # are 'down' or 'destroyed'.
-            osd_tree = CephService.send_command('mon', 'osd tree')
+            osd_tree = StoneService.send_command('mon', 'osd tree')
             osd_daemons_up = [
                 node['name'] for node in osd_tree.get('nodes', {})
                 if node.get('status') == 'up'
@@ -255,7 +255,7 @@ class CephService(object):
                     if daemon not in osd_daemons_up:
                         continue
                     try:
-                        dev_smart_data = CephService.send_command(
+                        dev_smart_data = StoneService.send_command(
                             svc_type, 'smart', svc_id, devid=device['devid'])
                     except SendCommandError as error:
                         logger.warning(str(error))
@@ -263,7 +263,7 @@ class CephService(object):
                         continue
                 elif 'mon' in svc_type:
                     try:
-                        dev_smart_data = CephService.send_command(
+                        dev_smart_data = StoneService.send_command(
                             svc_type, 'device query-daemon-health-metrics', who=daemon)
                     except SendCommandError as error:
                         logger.warning(str(error))
@@ -286,14 +286,14 @@ class CephService(object):
     @staticmethod
     def get_devices_by_host(hostname):
         # type: (str) -> dict
-        return CephService.send_command('mon',
+        return StoneService.send_command('mon',
                                         'device ls-by-host',
                                         host=hostname)
 
     @staticmethod
     def get_devices_by_daemon(daemon_type, daemon_id):
         # type: (str, str) -> dict
-        return CephService.send_command('mon',
+        return StoneService.send_command('mon',
                                         'device ls-by-daemon',
                                         who='{}.{}'.format(
                                             daemon_type, daemon_id))
@@ -309,13 +309,13 @@ class CephService(object):
           on the given host. The device name is used as the key in the
           dictionary.
         """
-        devices = CephService.get_devices_by_host(hostname)
+        devices = StoneService.get_devices_by_host(hostname)
         smart_data = {}  # type: dict
         if devices:
             for device in devices:
                 if device['devid'] not in smart_data:
                     smart_data.update(
-                        CephService._get_smart_data_by_device(device))
+                        StoneService._get_smart_data_by_device(device))
         else:
             logger.debug('[SMART] could not retrieve device list from host %s', hostname)
         return smart_data
@@ -331,13 +331,13 @@ class CephService(object):
           associated with the given daemon. The device name is used as the
           key in the dictionary.
         """
-        devices = CephService.get_devices_by_daemon(daemon_type, daemon_id)
+        devices = StoneService.get_devices_by_daemon(daemon_type, daemon_id)
         smart_data = {}  # type: Dict[str, dict]
         if devices:
             for device in devices:
                 if device['devid'] not in smart_data:
                     smart_data.update(
-                        CephService._get_smart_data_by_device(device))
+                        StoneService._get_smart_data_by_device(device))
         else:
             msg = '[SMART] could not retrieve device list from daemon with type %s and ' +\
                 'with ID %s'

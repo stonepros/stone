@@ -1,11 +1,11 @@
 =========================
-Create a Ceph file system
+Create a Stone file system
 =========================
 
 Creating pools
 ==============
 
-A Ceph file system requires at least two RADOS pools, one for data and one for metadata.
+A Stone file system requires at least two RADOS pools, one for data and one for metadata.
 When configuring these pools, you might consider:
 
 - Using a higher replication level for the metadata pool, as any data loss in
@@ -15,7 +15,7 @@ When configuring these pools, you might consider:
 - The data pool used to create the file system is the "default" data pool and
   the location for storing all inode backtrace information, used for hard link
   management and disaster recovery. For this reason, all inodes created in
-  CephFS have at least one object in the default data pool. If erasure-coded
+  StoneFS have at least one object in the default data pool. If erasure-coded
   pools are planned for the file system, it is usually better to use a
   replicated pool for the default data pool to improve small-object write and
   read performance for updating backtraces. Separately, another erasure-coded
@@ -67,13 +67,13 @@ Once the file system is created and the MDS is active, you are ready to mount
 the file system.  If you have created more than one file system, you will
 choose which to use when mounting.
 
-  - `Mount CephFS`_
-  - `Mount CephFS as FUSE`_
-  - `Mount CephFS on Windows`_
+  - `Mount StoneFS`_
+  - `Mount StoneFS as FUSE`_
+  - `Mount StoneFS on Windows`_
 
-.. _Mount CephFS: ../../cephfs/mount-using-kernel-driver
-.. _Mount CephFS as FUSE: ../../cephfs/mount-using-fuse
-.. _Mount CephFS on Windows: ../../cephfs/ceph-dokan
+.. _Mount StoneFS: ../../cephfs/mount-using-kernel-driver
+.. _Mount StoneFS as FUSE: ../../cephfs/mount-using-fuse
+.. _Mount StoneFS on Windows: ../../cephfs/ceph-dokan
 
 If you have created more than one file system, and a client does not
 specify a file system when mounting, you can control which file system
@@ -85,10 +85,10 @@ Adding a Data Pool to the File System
 See :ref:`adding-data-pool-to-file-system`.
 
 
-Using Erasure Coded pools with CephFS
+Using Erasure Coded pools with StoneFS
 =====================================
 
-You may use Erasure Coded pools as CephFS data pools as long as they have overwrites enabled, which is done as follows:
+You may use Erasure Coded pools as StoneFS data pools as long as they have overwrites enabled, which is done as follows:
 
 .. code:: bash
 
@@ -96,5 +96,5 @@ You may use Erasure Coded pools as CephFS data pools as long as they have overwr
     
 Note that EC overwrites are only supported when using OSDS with the BlueStore backend.
 
-You may not use Erasure Coded pools as CephFS metadata pools, because CephFS metadata is stored using RADOS *OMAP* data structures, which EC pools cannot store.
+You may not use Erasure Coded pools as StoneFS metadata pools, because StoneFS metadata is stored using RADOS *OMAP* data structures, which EC pools cannot store.
 

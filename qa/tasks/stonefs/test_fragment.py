@@ -1,6 +1,6 @@
 from io import StringIO
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 from teuthology.orchestra import run
 
 import os
@@ -9,7 +9,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class TestFragmentation(CephFSTestCase):
+class TestFragmentation(StoneFSTestCase):
     CLIENTS_REQUIRED = 1
     MDSS_REQUIRED = 1
 
@@ -37,7 +37,7 @@ class TestFragmentation(CephFSTestCase):
         """
 
         for k, v in kwargs.items():
-            self.ceph_cluster.set_ceph_conf("mds", k, v.__str__())
+            self.stone_cluster.set_stone_conf("mds", k, v.__str__())
 
         self.mds_cluster.mds_fail_restart()
         self.fs.wait_for_daemons()
@@ -160,13 +160,13 @@ class TestFragmentation(CephFSTestCase):
             target_files = branch_factor**depth * int(split_size * 1.5)
             create_files = target_files - files_written
 
-            self.ceph_cluster.mon_manager.raw_cluster_cmd("log",
+            self.stone_cluster.mon_manager.raw_cluster_cmd("log",
                 "{0} Writing {1} files (depth={2})".format(
                     self.__class__.__name__, create_files, depth
                 ))
             self.mount_a.create_n_files("splitdir/file_{0}".format(depth),
                                         create_files)
-            self.ceph_cluster.mon_manager.raw_cluster_cmd("log",
+            self.stone_cluster.mon_manager.raw_cluster_cmd("log",
                 "{0} Done".format(self.__class__.__name__))
 
             files_written += create_files

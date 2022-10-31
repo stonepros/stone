@@ -73,14 +73,14 @@ class RgwDaemonControllerTestCase(ControllerTestCase):
         }]
         mgr.get_metadata.side_effect = [
             {
-                'ceph_version': 'ceph version master (dev)',
+                'stone_version': 'stone version master (dev)',
                 'id': 'daemon1',
                 'realm_name': 'realm1',
                 'zonegroup_name': 'zg1',
                 'zone_name': 'zone1'
             },
             {
-                'ceph_version': 'ceph version master (dev)',
+                'stone_version': 'stone version master (dev)',
                 'id': 'daemon2',
                 'realm_name': 'realm2',
                 'zonegroup_name': 'zg2',
@@ -91,7 +91,7 @@ class RgwDaemonControllerTestCase(ControllerTestCase):
         self.assertJsonBody([{
             'id': 'daemon1',
             'service_map_id': '4832',
-            'version': 'ceph version master (dev)',
+            'version': 'stone version master (dev)',
             'server_hostname': 'host1',
             'realm_name': 'realm1',
             'zonegroup_name': 'zg1',
@@ -100,7 +100,7 @@ class RgwDaemonControllerTestCase(ControllerTestCase):
             {
             'id': 'daemon2',
             'service_map_id': '5356',
-            'version': 'ceph version master (dev)',
+            'version': 'stone version master (dev)',
             'server_hostname': 'host1',
             'realm_name': 'realm2',
             'zonegroup_name': 'zg2',

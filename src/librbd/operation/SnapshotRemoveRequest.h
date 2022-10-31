@@ -86,7 +86,7 @@ private:
   bool m_trashed_snapshot = false;
   bool m_child_attached = false;
 
-  ceph::bufferlist m_out_bl;
+  stone::bufferlist m_out_bl;
 
   void trash_snap();
   void handle_trash_snap(int r);

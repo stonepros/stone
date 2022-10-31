@@ -2,17 +2,17 @@
 Configuring the iSCSI Target using the Command Line Interface
 =============================================================
 
-The Ceph iSCSI gateway is both an iSCSI target  and a Ceph client;
-think of it as a "translator" between Ceph's RBD interface
-and the iSCSI standard. The Ceph iSCSI gateway can run on a
+The Stone iSCSI gateway is both an iSCSI target  and a Stone client;
+think of it as a "translator" between Stone's RBD interface
+and the iSCSI standard. The Stone iSCSI gateway can run on a
 standalone node or be colocated with other daemons eg. on
-a Ceph Object Store Disk (OSD) node.  When co-locating, ensure
+a Stone Object Store Disk (OSD) node.  When co-locating, ensure
 that sufficient CPU and memory are available to share.
-The following steps install and configure the Ceph iSCSI gateway for basic operation.
+The following steps install and configure the Stone iSCSI gateway for basic operation.
 
 **Requirements:**
 
--  A running Ceph Luminous or later storage cluster
+-  A running Stone Luminous or later storage cluster
 
 -  Red Hat Enterprise Linux/CentOS 7.5 (or newer); Linux kernel v4.16 (or newer)
 
@@ -30,16 +30,16 @@ The following steps install and configure the Ceph iSCSI gateway for basic opera
         If previous versions of these packages exist, then they must
         be removed first before installing the newer versions.
 
-Do the following steps on the Ceph iSCSI gateway node before proceeding
+Do the following steps on the Stone iSCSI gateway node before proceeding
 to the *Installing* section:
 
-#. If the Ceph iSCSI gateway is not colocated on an OSD node, then copy
-   the Ceph configuration files, located in ``/etc/ceph/``, from a
-   running Ceph node in the storage cluster to the iSCSI Gateway node.
-   The Ceph configuration files must exist on the iSCSI gateway node
+#. If the Stone iSCSI gateway is not colocated on an OSD node, then copy
+   the Stone configuration files, located in ``/etc/ceph/``, from a
+   running Stone node in the storage cluster to the iSCSI Gateway node.
+   The Stone configuration files must exist on the iSCSI gateway node
    under ``/etc/ceph/``.
 
-#. Install and configure the `Ceph Command-line Interface`_
+#. Install and configure the `Stone Command-line Interface`_
 
 #. If needed, open TCP ports 3260 and 5000 on the firewall.
 
@@ -104,8 +104,8 @@ For rpm based instructions execute the following commands:
       ::
 
           [config]
-          # Name of the Ceph storage cluster. A suitable Ceph configuration file allowing
-          # access to the Ceph storage cluster from the gateway node is required, if not
+          # Name of the Stone storage cluster. A suitable Stone configuration file allowing
+          # access to the Stone storage cluster from the gateway node is required, if not
           # colocated on an OSD node.
           cluster_name = ceph
 
@@ -236,7 +236,7 @@ to create a iSCSI target and export a RBD image as LUN 0.
 
 The next step is to configure the iSCSI initiators.
 
-.. _`Ceph Command-line Interface`: ../../start/quick-rbd/#install-ceph
+.. _`Stone Command-line Interface`: ../../start/quick-rbd/#install-ceph
 
 .. toctree::
    :hidden:

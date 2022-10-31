@@ -1,28 +1,22 @@
-[submodule "stone-object-corpus"]
-	path = stone-object-corpus
-	url = https://github.com/stonepros/stone-object-corpus.git
 [submodule "src/civetweb"]
 	path = src/civetweb
 	url = https://github.com/stonepros/civetweb
 [submodule "src/erasure-code/jerasure/jerasure"]
 	path = src/erasure-code/jerasure/jerasure
 	url = https://github.com/stonepros/jerasure.git
-	branch = v2-ceph
+	branch = v2-stone
 [submodule "src/erasure-code/jerasure/gf-complete"]
 	path = src/erasure-code/jerasure/gf-complete
 	url = https://github.com/stonepros/gf-complete.git
-	branch = v3-ceph
+	branch = v3-stone
 [submodule "src/rocksdb"]
 	path = src/rocksdb
 	url = https://github.com/stonepros/rocksdb
 	ignore = dirty
-[submodule "stone-erasure-code-corpus"]
-	path = stone-erasure-code-corpus
-	url = https://github.com/stonepros/stone-erasure-code-corpus.git
 [submodule "src/googletest"]
 	path = src/googletest
 	url = https://github.com/stonepros/googletest
-	branch = ceph-release-1.7.x
+	branch = stone-release-1.7.x
 [submodule "src/spdk"]
 	path = src/spdk
 	url = https://github.com/stonepros/spdk.git
@@ -44,9 +38,6 @@
 [submodule "src/rapidjson"]
 	path = src/rapidjson
 	url = https://github.com/stonepros/rapidjson
-[submodule "src/dmclock"]
-	path = src/dmclock
-	url = https://github.com/stonepros/dmclock.git
 [submodule "src/seastar"]
 	path = src/seastar
 	url = https://github.com/stonepros/seastar.git
@@ -62,9 +53,6 @@
 [submodule "src/pybind/mgr/rook/rook-client-python"]
 	path = src/pybind/mgr/rook/rook-client-python
 	url = https://github.com/stonepros/rook-client-python.git
-[submodule "s3select"]
-	path = src/s3select
-	url = https://github.com/stonepros/s3select.git
 [submodule "src/jaegertracing/opentracing-cpp"]
 	path = src/jaegertracing/opentracing-cpp
 	url = https://github.com/opentracing/opentracing-cpp.git
@@ -80,4 +68,16 @@
 [submodule "src/libkmip"]
 	path = src/libkmip
 	url = https://github.com/stonepros/libkmip
-	branch = ceph-master
+	branch = stone-master
+[submodule "src/dmclock"]
+	path = src/dmclock
+	url = https://github.com/stonepros/dmclock.git
+[submodule "stone-object-corpus"]
+	path = stone-object-corpus
+	url = https://github.com/stonepros/stone-object-corpus.git
+[submodule "stone-erasure-code-corpus"]
+	path = stone-erasure-code-corpus
+	url = https://github.com/stonepros/stone-erasure-code-corpus.git
+[submodule "src/s3select"]
+	path = src/s3select
+	url = https://github.com/stonepros/s3select.git

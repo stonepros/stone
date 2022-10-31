@@ -6,7 +6,7 @@
 
 #include "include/buffer.h"
 #include "include/byteorder.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "xxHash/xxhash.h"
 
@@ -73,7 +73,7 @@ public:
 
   struct crc32c {
     typedef uint32_t init_value_t;
-    typedef ceph_le32 value_t;
+    typedef stone_le32 value_t;
 
     // we have no execution context/state.
     typedef int state_t;
@@ -86,7 +86,7 @@ public:
       state_t state,
       init_value_t init_value,
       size_t len,
-      ceph::buffer::list::const_iterator& p
+      stone::buffer::list::const_iterator& p
       ) {
       return p.crc32c(len, init_value);
     }
@@ -94,7 +94,7 @@ public:
 
   struct crc32c_16 {
     typedef uint32_t init_value_t;
-    typedef ceph_le16 value_t;
+    typedef stone_le16 value_t;
 
     // we have no execution context/state.
     typedef int state_t;
@@ -107,7 +107,7 @@ public:
       state_t state,
       init_value_t init_value,
       size_t len,
-      ceph::buffer::list::const_iterator& p
+      stone::buffer::list::const_iterator& p
       ) {
       return p.crc32c(len, init_value) & 0xffff;
     }
@@ -128,7 +128,7 @@ public:
       state_t state,
       init_value_t init_value,
       size_t len,
-      ceph::buffer::list::const_iterator& p
+      stone::buffer::list::const_iterator& p
       ) {
       return p.crc32c(len, init_value) & 0xff;
     }
@@ -136,7 +136,7 @@ public:
 
   struct xxhash32 {
     typedef uint32_t init_value_t;
-    typedef ceph_le32 value_t;
+    typedef stone_le32 value_t;
 
     typedef XXH32_state_t *state_t;
     static void init(state_t *s) {
@@ -150,7 +150,7 @@ public:
       state_t state,
       init_value_t init_value,
       size_t len,
-      ceph::buffer::list::const_iterator& p
+      stone::buffer::list::const_iterator& p
       ) {
       XXH32_reset(state, init_value);
       while (len > 0) {
@@ -165,7 +165,7 @@ public:
 
   struct xxhash64 {
     typedef uint64_t init_value_t;
-    typedef ceph_le64 value_t;
+    typedef stone_le64 value_t;
 
     typedef XXH64_state_t *state_t;
     static void init(state_t *s) {
@@ -179,7 +179,7 @@ public:
       state_t state,
       init_value_t init_value,
       size_t len,
-      ceph::buffer::list::const_iterator& p
+      stone::buffer::list::const_iterator& p
       ) {
       XXH64_reset(state, init_value);
       while (len > 0) {
@@ -197,8 +197,8 @@ public:
     size_t csum_block_size,
     size_t offset,
     size_t length,
-    const ceph::buffer::list &bl,
-    ceph::buffer::ptr* csum_data
+    const stone::buffer::list &bl,
+    stone::buffer::ptr* csum_data
     ) {
     return calculate<Alg>(-1, csum_block_size, offset, length, bl, csum_data);
   }
@@ -209,17 +209,17 @@ public:
       size_t csum_block_size,
       size_t offset,
       size_t length,
-      const ceph::buffer::list &bl,
-      ceph::buffer::ptr* csum_data) {
-    ceph_assert(length % csum_block_size == 0);
+      const stone::buffer::list &bl,
+      stone::buffer::ptr* csum_data) {
+    stone_assert(length % csum_block_size == 0);
     size_t blocks = length / csum_block_size;
-    ceph::buffer::list::const_iterator p = bl.begin();
-    ceph_assert(bl.length() >= length);
+    stone::buffer::list::const_iterator p = bl.begin();
+    stone_assert(bl.length() >= length);
 
     typename Alg::state_t state;
     Alg::init(&state);
 
-    ceph_assert(csum_data->length() >= (offset + length) / csum_block_size *
+    stone_assert(csum_data->length() >= (offset + length) / csum_block_size *
 	   sizeof(typename Alg::value_t));
 
     typename Alg::value_t *pv =
@@ -238,13 +238,13 @@ public:
     size_t csum_block_size,
     size_t offset,
     size_t length,
-    const ceph::buffer::list &bl,
-    const ceph::buffer::ptr& csum_data,
+    const stone::buffer::list &bl,
+    const stone::buffer::ptr& csum_data,
     uint64_t *bad_csum=0
     ) {
-    ceph_assert(length % csum_block_size == 0);
-    ceph::buffer::list::const_iterator p = bl.begin();
-    ceph_assert(bl.length() >= length);
+    stone_assert(length % csum_block_size == 0);
+    stone::buffer::list::const_iterator p = bl.begin();
+    stone_assert(bl.length() >= length);
 
     typename Alg::state_t state;
     Alg::init(&state);

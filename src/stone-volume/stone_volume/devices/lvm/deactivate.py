@@ -2,9 +2,9 @@ import argparse
 import logging
 import sys
 from textwrap import dedent
-from ceph_volume import conf
-from ceph_volume.util import encryption, system
-from ceph_volume.api.lvm import get_lvs_by_tag
+from stone_volume import conf
+from stone_volume.util import encryption, system
+from stone_volume.api.lvm import get_lvs_by_tag
 
 logger = logging.getLogger(__name__)
 
@@ -13,21 +13,21 @@ def deactivate_osd(osd_id=None, osd_uuid=None):
 
     lvs = []
     if osd_uuid is not None:
-        lvs = get_lvs_by_tag('ceph.osd_fsid={}'.format(osd_uuid))
-        osd_id = next(lv.tags['ceph.osd_id'] for lv in lvs)
+        lvs = get_lvs_by_tag('stone.osd_fsid={}'.format(osd_uuid))
+        osd_id = next(lv.tags['stone.osd_id'] for lv in lvs)
     else:
-        lvs = get_lvs_by_tag('ceph.osd_id={}'.format(osd_id))
+        lvs = get_lvs_by_tag('stone.osd_id={}'.format(osd_id))
 
-    data_lv = next(lv for lv in lvs if lv.tags['ceph.type'] in ['data', 'block'])
+    data_lv = next(lv for lv in lvs if lv.tags['stone.type'] in ['data', 'block'])
 
-    conf.cluster = data_lv.tags['ceph.cluster_name']
+    conf.cluster = data_lv.tags['stone.cluster_name']
     logger.debug('Found cluster name {}'.format(conf.cluster))
 
-    tmpfs_path = '/var/lib/ceph/osd/{}-{}'.format(conf.cluster, osd_id)
+    tmpfs_path = '/var/lib/stone/osd/{}-{}'.format(conf.cluster, osd_id)
     system.unmount_tmpfs(tmpfs_path)
 
     for lv in lvs:
-        if lv.tags.get('ceph.encrypted', '0') == '1':
+        if lv.tags.get('stone.encrypted', '0') == '1':
             encryption.dmcrypt_close(lv.lv_uuid)
 
 
@@ -52,11 +52,11 @@ class Deactivate(object):
         sub_command_help = dedent("""
         Deactivate unmounts and OSDs tmpfs and closes any crypt devices.
 
-            ceph-volume lvm deactivate {ID} {FSID}
+            stone-volume lvm deactivate {ID} {FSID}
 
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume lvm deactivate',
+            prog='stone-volume lvm deactivate',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=sub_command_help,
         )

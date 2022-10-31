@@ -8,7 +8,7 @@
 #include <set>
 #include <vector>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/WorkQueue.h"
 #include "mds/FSMap.h"
 #include "ClusterWatcher.h"
@@ -20,15 +20,15 @@ class Messenger;
 class MonClient;
 class ContextWQ;
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 // this wraps up ClusterWatcher and FSMirrors to implement mirroring
-// for ceph filesystems.
+// for stone filesystems.
 
 class Mirror {
 public:
-  Mirror(CephContext *cct, const std::vector<const char*> &args,
+  Mirror(StoneContext *cct, const std::vector<const char*> &args,
          MonClient *monc, Messenger *msgr);
   ~Mirror();
 
@@ -81,10 +81,10 @@ private:
     std::unique_ptr<FSMirror> fs_mirror;
   };
 
-  ceph::mutex m_lock = ceph::make_mutex("cephfs::mirror::Mirror");
-  ceph::condition_variable m_cond;
+  stone::mutex m_lock = stone::make_mutex("stonefs::mirror::Mirror");
+  stone::condition_variable m_cond;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   std::vector<const char *> m_args;
   MonClient *m_monc;
   Messenger *m_msgr;
@@ -93,7 +93,7 @@ private:
   ThreadPool *m_thread_pool = nullptr;
   ContextWQ *m_work_queue = nullptr;
   SafeTimer *m_timer = nullptr;
-  ceph::mutex *m_timer_lock = nullptr;
+  stone::mutex *m_timer_lock = nullptr;
   Context *m_timer_task = nullptr;
 
   bool m_stopping = false;
@@ -135,6 +135,6 @@ private:
 };
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_H

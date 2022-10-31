@@ -46,7 +46,7 @@ public:
   }
   pwl::C_WriteRequest<T> *create_write_request(
       T &pwl, utime_t arrived, io::Extents &&image_extents,
-      bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+      bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req) override {
     return new C_WriteRequest<T>(
         pwl, arrived, std::move(image_extents), std::move(bl),
@@ -54,7 +54,7 @@ public:
   }
   pwl::C_WriteSameRequest<T> *create_writesame_request(
       T &pwl, utime_t arrived, io::Extents &&image_extents,
-      bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+      bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req) override {
     return new C_WriteSameRequest<T>(
         pwl, arrived, std::move(image_extents), std::move(bl),
@@ -63,7 +63,7 @@ public:
   pwl::C_WriteRequest<T> *create_comp_and_write_request(
       T &pwl, utime_t arrived, io::Extents &&image_extents,
       bufferlist&& cmp_bl, bufferlist&& bl, uint64_t *mismatch_offset,
-      const int fadvise_flags, ceph::mutex &lock,
+      const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req) override {
     return new rwl::C_CompAndWriteRequest<T>(
         pwl, arrived, std::move(image_extents), std::move(cmp_bl),
@@ -94,7 +94,7 @@ public:
         dispatch_time, perfcounter, cct);
   }
   C_ReadRequest *create_read_request(StoneContext *cct, utime_t arrived,
-      PerfCounters *perfcounter, ceph::bufferlist *bl, Context *on_finish) {
+      PerfCounters *perfcounter, stone::bufferlist *bl, Context *on_finish) {
     return new C_ReadRequest(cct, arrived, perfcounter, bl, on_finish);
   }
 };

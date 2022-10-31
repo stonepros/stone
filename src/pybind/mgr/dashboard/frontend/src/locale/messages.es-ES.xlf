@@ -920,11 +920,11 @@
       </trans-unit>
       <trans-unit id="1039ea40da18a6453d9c1adc72a35aed099029d0" datatype="html">
         <source>Please add the 
-          <x id="START_BOLD_TEXT" equiv-text="<b>"/>Ceph Manager
+          <x id="START_BOLD_TEXT" equiv-text="<b>"/>Stone Manager
           <x id="CLOSE_BOLD_TEXT" equiv-text="</b> "/> IP addresses here, otherwise the iSCSI gateways can't be reached.
         </source>
         <target>Please add the 
-          <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="<b>"/>Ceph Manager
+          <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="<b>"/>Stone Manager
           <x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="</b>"/> IP addresses here, otherwise the iSCSI gateways can't be reached.
         </target>
       </trans-unit>
@@ -1021,25 +1021,25 @@
         </target>
       </trans-unit>
       <trans-unit id="a09b723a928774bff707973c99999dcf3d84a349" datatype="html">
-        <source>The telemetry module sends anonymous data about this Ceph cluster back to the Ceph developers to help understand how Ceph is used and what problems users may be experiencing.
+        <source>The telemetry module sends anonymous data about this Stone cluster back to the Stone developers to help understand how Stone is used and what problems users may be experiencing.
           <x id="LINE_BREAK" equiv-text="<br/>               "/> This data is visualized on 
-          <x id="START_LINK" equiv-text="<a href=&quot;https://telemetry-public.ceph.com/&quot;>"/>public dashboards
+          <x id="START_LINK" equiv-text="<a href=&quot;https://telemetry-public.stone.com/&quot;>"/>public dashboards
           <x id="CLOSE_LINK" equiv-text="</a>               "/> that allow the community to quickly see summary statistics on how many clusters are reporting, their total capacity and OSD count, and version distribution trends.
           <x id="LINE_BREAK" equiv-text="<br/>               "/>
           <x id="LINE_BREAK" equiv-text="<br/>               "/> The data being reported does 
           <x id="START_BOLD_TEXT" equiv-text="<b>"/>not
-          <x id="CLOSE_BOLD_TEXT" equiv-text="</b> "/> contain any sensitive data like pool names, object names, object contents, hostnames, or device serial numbers. It contains counters and statistics on how the cluster has been deployed, the version of Ceph, the distribution of the hosts and other parameters which help the project to gain a better understanding of the way Ceph is used. The data is sent secured to 
+          <x id="CLOSE_BOLD_TEXT" equiv-text="</b> "/> contain any sensitive data like pool names, object names, object contents, hostnames, or device serial numbers. It contains counters and statistics on how the cluster has been deployed, the version of Stone, the distribution of the hosts and other parameters which help the project to gain a better understanding of the way Stone is used. The data is sent secured to 
           <x id="INTERPOLATION" equiv-text="eph is used. Th"/> and 
           <x id="INTERPOLATION_1" equiv-text="a is sent secured to "/> (device report).
         </source>
-        <target>The telemetry module sends anonymous data about this Ceph cluster back to the Ceph developers to help understand how Ceph is used and what problems users may be experiencing.
+        <target>The telemetry module sends anonymous data about this Stone cluster back to the Stone developers to help understand how Stone is used and what problems users may be experiencing.
           <x id="LINE_BREAK" ctype="lb" equiv-text="<br/>"/> This data is visualized on 
-          <x id="START_LINK" ctype="x-a" equiv-text="<a href=&quot;https://telemetry-public.ceph.com/&quot;>"/>public dashboards
+          <x id="START_LINK" ctype="x-a" equiv-text="<a href=&quot;https://telemetry-public.stone.com/&quot;>"/>public dashboards
           <x id="CLOSE_LINK" ctype="x-a" equiv-text="</a>"/> that allow the community to quickly see summary statistics on how many clusters are reporting, their total capacity and OSD count, and version distribution trends.
           <x id="LINE_BREAK" ctype="lb" equiv-text="<br/>"/>
           <x id="LINE_BREAK" ctype="lb" equiv-text="<br/>"/> The data being reported does 
           <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="<b>"/>not
-          <x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="</b>"/> contain any sensitive data like pool names, object names, object contents, hostnames, or device serial numbers. It contains counters and statistics on how the cluster has been deployed, the version of Ceph, the distribution of the hosts and other parameters which help the project to gain a better understanding of the way Ceph is used. The data is sent secured to 
+          <x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="</b>"/> contain any sensitive data like pool names, object names, object contents, hostnames, or device serial numbers. It contains counters and statistics on how the cluster has been deployed, the version of Stone, the distribution of the hosts and other parameters which help the project to gain a better understanding of the way Stone is used. The data is sent secured to 
           <x id="INTERPOLATION" equiv-text="{{ sendToUrl }}"/> and 
           <x id="INTERPOLATION_1" equiv-text="{{ sendToDeviceUrl }}"/> (device report).
         </target>
@@ -1073,8 +1073,8 @@
         <target>Versión del software que se usa</target>
       </trans-unit>
       <trans-unit id="34881ae65482ffa74ccb4043fb2622e48ed146d5" datatype="html">
-        <source>Number and types of RADOS pools and CephFS file systems</source>
-        <target>Número y tipos de repositorios RADOS y sistemas de archivos CephFS</target>
+        <source>Number and types of RADOS pools and StoneFS file systems</source>
+        <target>Número y tipos de repositorios RADOS y sistemas de archivos StoneFS</target>
       </trans-unit>
       <trans-unit id="696f8f5ea7a9cf6125b9a3af160981fda363552d" datatype="html">
         <source>Names of configuration options that have been changed from their default (but not their values)</source>
@@ -1101,8 +1101,8 @@
         <target>Sistema operativo (distribución de SO, versión del núcleo)</target>
       </trans-unit>
       <trans-unit id="84facf84a73631d66e9a4e0bc1c40097b9d14742" datatype="html">
-        <source>Stack trace identifying where in the Ceph code the crash occurred</source>
-        <target>Seguimiento de pila donde se identifica en qué lugar del código de Ceph se ha producido la detención por fallo</target>
+        <source>Stack trace identifying where in the Stone code the crash occurred</source>
+        <target>Seguimiento de pila donde se identifica en qué lugar del código de Stone se ha producido la detención por fallo</target>
       </trans-unit>
       <trans-unit id="ea64d4177bd648e1a20c92669e6857762b811d8c" datatype="html">
         <source>Device</source>
@@ -1133,8 +1133,8 @@
         <target>Contacto</target>
       </trans-unit>
       <trans-unit id="632cac1e025b77b2d77fed16ad22a410ddacab9e" datatype="html">
-        <source>My first Ceph cluster</source>
-        <target>Mi primer clúster de Ceph</target>
+        <source>My first Stone cluster</source>
+        <target>Mi primer clúster de Stone</target>
       </trans-unit>
       <trans-unit id="339878da255ab55447c43afef8d9b2f9753bf5f6" datatype="html">
         <source>Advanced Settings</source>
@@ -1153,12 +1153,12 @@
         <target>Proxy</target>
       </trans-unit>
       <trans-unit id="6de03357358c7eff62aca486508bb5c2046e0669" datatype="html">
-        <source>If the cluster cannot directly connect to the configured telemetry endpoint (default telemetry.ceph.com), you can configure a HTTP/HTTPS proxy server by e.g. adding https://10.0.0.1:8080</source>
-        <target>If the cluster cannot directly connect to the configured telemetry endpoint (default telemetry.ceph.com), you can configure a HTTP/HTTPS proxy server by e.g. adding https://10.0.0.1:8080</target>
+        <source>If the cluster cannot directly connect to the configured telemetry endpoint (default telemetry.stone.com), you can configure a HTTP/HTTPS proxy server by e.g. adding https://10.0.0.1:8080</source>
+        <target>If the cluster cannot directly connect to the configured telemetry endpoint (default telemetry.stone.com), you can configure a HTTP/HTTPS proxy server by e.g. adding https://10.0.0.1:8080</target>
       </trans-unit>
       <trans-unit id="5687a733af051bfca97dbffba282e39fbb9b8c8f" datatype="html">
-        <source>You can also include a user:pass if needed e.g. https://ceph:telemetry@10.0.0.1:8080</source>
-        <target>También puede incluir un user:pass si fuera necesario, por ejemplo, https://ceph:telemetry@10.0.0.1:8080</target>
+        <source>You can also include a user:pass if needed e.g. https://stone:telemetry@10.0.0.1:8080</source>
+        <target>También puede incluir un user:pass si fuera necesario, por ejemplo, https://stone:telemetry@10.0.0.1:8080</target>
       </trans-unit>
       <trans-unit id="4e6430c68df43ea65e4145972b01186fba40f26a" datatype="html">
         <source>
@@ -1295,12 +1295,12 @@
         <target>-- Seleccione el motor de almacenamiento --</target>
       </trans-unit>
       <trans-unit id="ee3ba0ab5f0ccd597b3e44021c71e9aaad14df0a" datatype="html">
-        <source>-- No CephFS filesystem available --</source>
-        <target>-- No hay ningún sistema de archivos CephFS disponible --</target>
+        <source>-- No StoneFS filesystem available --</source>
+        <target>-- No hay ningún sistema de archivos StoneFS disponible --</target>
       </trans-unit>
       <trans-unit id="764c57812558b1ae66c5eec95d7efd2b1bf761e3" datatype="html">
-        <source>-- Select the CephFS filesystem --</source>
-        <target>-- Seleccione el sistema de archivos CephFS --</target>
+        <source>-- Select the StoneFS filesystem --</source>
+        <target>-- Seleccione el sistema de archivos StoneFS --</target>
       </trans-unit>
       <trans-unit id="957512d0321f73e9f115bce1bd823fa635170c41" datatype="html">
         <source>Security Label</source>
@@ -1311,8 +1311,8 @@
         <target>Habilitar etiqueta de seguridad</target>
       </trans-unit>
       <trans-unit id="7e808f804130c7b6ff719509cbc06ebb27393a48" datatype="html">
-        <source>CephFS Path</source>
-        <target>Ruta de CephFS</target>
+        <source>StoneFS Path</source>
+        <target>Ruta de StoneFS</target>
       </trans-unit>
       <trans-unit id="5ecc0107badb6625466aaa3f975b5c05276f432f" datatype="html">
         <source>Path need to start with a '/' and can be followed by a word</source>
@@ -1395,8 +1395,8 @@
         <target>Tipo de acceso</target>
       </trans-unit>
       <trans-unit id="734c9905951a774870497c5aaae8e3ee833b6196" datatype="html">
-        <source>CephFS</source>
-        <target>CephFS</target>
+        <source>StoneFS</source>
+        <target>StoneFS</target>
       </trans-unit>
       <trans-unit id="2190548d236ca5f7bc7ab2bca334b860c5ff2ad4" datatype="html">
         <source>Object Gateway</source>
@@ -2268,17 +2268,17 @@
         <target>You can activate the module on the Telemetry configuration page (&lt;b&gt;Dashboard Settings&lt;/b&gt; -&gt; &lt;b&gt;Telemetry configuration&lt;/b&gt;) at any time.</target>
       </trans-unit>
       <trans-unit id="e6702323d3760e3db0e2e785d567469d18beb120" datatype="html">
-        <source>The Ceph community needs your help to continue improving: please 
+        <source>The Stone community needs your help to continue improving: please 
           <x id="START_LINK" equiv-text="<a routerLink=&quot;/telemetry&quot;        class=&quot;btn activate-button alert-link activate-text&quot;>"/>Activate
           <x id="CLOSE_LINK" equiv-text="</a> "/> the 
-          <x id="START_LINK_1" equiv-text="<a href=&quot;https://docs.ceph.com/en/latest/mgr/telemetry/&quot;>"/>Telemetry
+          <x id="START_LINK_1" equiv-text="<a href=&quot;https://docs.stone.com/en/latest/mgr/telemetry/&quot;>"/>Telemetry
           <x id="CLOSE_LINK" equiv-text="</a> "/> module.
         </source>
-        <target>The Ceph community needs your help to continue improving: please 
+        <target>The Stone community needs your help to continue improving: please 
           <x id="START_LINK" ctype="x-a" equiv-text="<a routerLink=&quot;/telemetry&quot;
        class=&quot;btn activate-button alert-link activate-text&quot;>"/>Activate
           <x id="CLOSE_LINK" ctype="x-a" equiv-text="</a>"/> the 
-          <x id="START_LINK_1" equiv-text="<a href=&quot;https://docs.ceph.com/en/latest/mgr/telemetry/&quot;>"/>Telemetry
+          <x id="START_LINK_1" equiv-text="<a href=&quot;https://docs.stone.com/en/latest/mgr/telemetry/&quot;>"/>Telemetry
           <x id="CLOSE_LINK" ctype="x-a" equiv-text="</a>"/> module.
         </target>
       </trans-unit>
@@ -2801,16 +2801,16 @@
         <target>Transportar</target>
       </trans-unit>
       <trans-unit id="8440421106569981118" datatype="html">
-        <source>CephFS</source>
-        <target>CephFS</target>
+        <source>StoneFS</source>
+        <target>StoneFS</target>
       </trans-unit>
       <trans-unit id="4095248496892792741" datatype="html">
-        <source>CephFS User</source>
-        <target>Usuario de CephFS</target>
+        <source>StoneFS User</source>
+        <target>Usuario de StoneFS</target>
       </trans-unit>
       <trans-unit id="2535727951299201687" datatype="html">
-        <source>CephFS Filesystem</source>
-        <target>Sistemas de archivos CephFS</target>
+        <source>StoneFS Filesystem</source>
+        <target>Sistemas de archivos StoneFS</target>
       </trans-unit>
       <trans-unit id="2169401160512036026" datatype="html">
         <source>Security Label</source>
@@ -3592,12 +3592,12 @@
       </trans-unit>
       <trans-unit id="1718354829128482129" datatype="html">
         <source>Daemons/clients do not pull this value from the
-      monitor config database. We disallow setting this option via 'ceph config
-      set ...'. This option should be configured via ceph.conf or via the
+      monitor config database. We disallow setting this option via 'stone config
+      set ...'. This option should be configured via stone.conf or via the
       command line.</source>
         <target>Los daemons/clientes no extraen este valor de la
-      base de datos de configuración del monitor. No se recomienda definir esta opción con "ceph config
-      set ...". Esta opción se debe configurar mediante ceph.conf o a través
+      base de datos de configuración del monitor. No se recomienda definir esta opción con "stone config
+      set ...". Esta opción se debe configurar mediante stone.conf o a través
       de la línea de comandos.</target>
       </trans-unit>
       <trans-unit id="2345189734548717257" datatype="html">
@@ -3685,12 +3685,12 @@
       </trans-unit>
       <trans-unit id="6328794256834621774" datatype="html">
         <source>
-          <x id="PH" equiv-text="action"/> CephFS 
+          <x id="PH" equiv-text="action"/> StoneFS 
           <x id="PH_1" equiv-text="this.getQuotaName()"/> quota for '
           <x id="PH_2" equiv-text="path"/>'
         </source>
         <target>
-          <x id="PH" equiv-text="action"/> CephFS 
+          <x id="PH" equiv-text="action"/> StoneFS 
           <x id="PH_1" equiv-text="this.getQuotaName()"/> quota for '
           <x id="PH_2" equiv-text="path"/>'
         </target>
@@ -3781,8 +3781,8 @@
         </target>
       </trans-unit>
       <trans-unit id="753342836137587734" datatype="html">
-        <source>CephFs Snapshot</source>
-        <target>Instantánea de CephFS</target>
+        <source>StoneFs Snapshot</source>
+        <target>Instantánea de StoneFS</target>
       </trans-unit>
       <trans-unit id="2774104291801979963" datatype="html">
         <source>Deleted snapshot '
@@ -5021,8 +5021,8 @@
         <target>Este RBD tiene instantáneas clonadas. Suprima los RBD relacionados antes de suprimir este RBD.</target>
       </trans-unit>
       <trans-unit id="2900827028308925059" datatype="html">
-        <source>This RBD image has an invalid name and can't be managed by ceph.</source>
-        <target>This RBD image has an invalid name and can't be managed by ceph.</target>
+        <source>This RBD image has an invalid name and can't be managed by stone.</source>
+        <target>This RBD image has an invalid name and can't be managed by stone.</target>
       </trans-unit>
       <trans-unit id="1796389652493657142" datatype="html">
         <source>Action not possible for an RBD in status 'Removing'</source>
@@ -5637,8 +5637,8 @@
         <target>Número máximo de objetos</target>
       </trans-unit>
       <trans-unit id="16e113230b6b0d3165e076300880542bac7c8138" datatype="html">
-        <source>The chosen Ceph pool name is already in use.</source>
-        <target>El nombre del repositorio de Ceph que ha elegido ya está en uso.</target>
+        <source>The chosen Stone pool name is already in use.</source>
+        <target>El nombre del repositorio de Stone que ha elegido ya está en uso.</target>
       </trans-unit>
       <trans-unit id="c75b132bef7b29fa5171768303c4b96e34ccaf68" datatype="html">
         <source>It's not possible to create an RBD pool with '/' in the name. Please change the name or remove 'rbd' from the applications list.</source>
@@ -5895,8 +5895,8 @@
         <target>Clase de dispositivo de CRUSH</target>
       </trans-unit>
       <trans-unit id="72d80e0c07bfea1b693a33ef2245007de92a6780" datatype="html">
-        <source>Let Ceph decide</source>
-        <target>Dejar que Ceph decida</target>
+        <source>Let Stone decide</source>
+        <target>Dejar que Stone decida</target>
       </trans-unit>
       <trans-unit id="f3f657ffa19dc6ac504b83c86209709522dcf065" datatype="html">
         <source>Available OSDs: 
@@ -6071,9 +6071,9 @@
         <target>User Denied</target>
       </trans-unit>
       <trans-unit id="7645004872908092358" datatype="html">
-        <source>Sorry, the user does not exist in Ceph.
+        <source>Sorry, the user does not exist in Stone.
   You'll be logged out from the Identity Provider when you retry logging in.</source>
-        <target>Sorry, the user does not exist in Ceph.
+        <target>Sorry, the user does not exist in Stone.
   You'll be logged out from the Identity Provider when you retry logging in.</target>
       </trans-unit>
       <trans-unit id="7738182956549158907" datatype="html">
@@ -6320,9 +6320,9 @@
       </trans-unit>
       <trans-unit id="8826111293169381132" datatype="html">
         <source>The jerasure plugin is the most generic and flexible plugin,
-          it is also the default for Ceph erasure coded pools.</source>
+          it is also the default for Stone erasure coded pools.</source>
         <target>El complemento jerasure es el más genérico y flexible,
-          y también el complemento por defecto para los repositorios de código de borrado de Ceph.</target>
+          y también el complemento por defecto para los repositorios de código de borrado de Stone.</target>
       </trans-unit>
       <trans-unit id="1331133460856304156" datatype="html">
         <source>The more flexible technique is reed_sol_van : it is enough to set k
@@ -6392,9 +6392,9 @@
       </trans-unit>
       <trans-unit id="7319555444402547739" datatype="html">
         <source>The shec plugin encapsulates the multiple SHEC library.
-          It allows ceph to recover data more efficiently than Reed Solomon codes.</source>
+          It allows stone to recover data more efficiently than Reed Solomon codes.</source>
         <target>El complemento shec encapsula las distintas bibliotecas SHEC.
-          Permite a Ceph recuperar datos de forma más eficiente que los códigos de Reed Solomon.</target>
+          Permite a Stone recuperar datos de forma más eficiente que los códigos de Reed Solomon.</target>
       </trans-unit>
       <trans-unit id="7723217930035575928" datatype="html">
         <source>The number of parity chunks each of which includes each data chunk in its
@@ -6510,12 +6510,12 @@ Las técnicas admitidas son:
         <target>Nombre del clúster</target>
       </trans-unit>
       <trans-unit id="ca6deafa31bf421f85094807982aee4bcb20a3ae" datatype="html">
-        <source>CephX ID</source>
-        <target>ID de CephX</target>
+        <source>StoneX ID</source>
+        <target>ID de StoneX</target>
       </trans-unit>
       <trans-unit id="7539188a568c3d553cbde1bacaf32310c4264e24" datatype="html">
-        <source>CephX ID...</source>
-        <target>ID de CephX...</target>
+        <source>StoneX ID...</source>
+        <target>ID de StoneX...</target>
       </trans-unit>
       <trans-unit id="20861576fcfce773c918c782cd4f5adf32382921" datatype="html">
         <source>Monitor Addresses</source>
@@ -6526,8 +6526,8 @@ Las técnicas admitidas son:
         <target>Direcciones delimitadas por comas...</target>
       </trans-unit>
       <trans-unit id="e0ac55b83dc6739e62bc655cfe375b67c93e7f4a" datatype="html">
-        <source>CephX Key</source>
-        <target>Clave de CephX</target>
+        <source>StoneX Key</source>
+        <target>Clave de StoneX</target>
       </trans-unit>
       <trans-unit id="f53434bcb95bd86f1df9c8e22966f757614fc4ad" datatype="html">
         <source>Base64-encoded key...</source>
@@ -6538,16 +6538,16 @@ Las técnicas admitidas son:
         <target>El nombre del clúster no es válido.</target>
       </trans-unit>
       <trans-unit id="a1c45b594b0fba22fc64e80c793a7ffe005fdb0e" datatype="html">
-        <source>The CephX ID is not valid.</source>
-        <target>El ID de CephX no es válido.</target>
+        <source>The StoneX ID is not valid.</source>
+        <target>El ID de StoneX no es válido.</target>
       </trans-unit>
       <trans-unit id="dc016c82fd85848d5c1b2fd0e8469ee2027d9c16" datatype="html">
         <source>The monitory address is not valid.</source>
         <target>La dirección del monitor no es válida.</target>
       </trans-unit>
       <trans-unit id="4cd83164cd4f66b4abc2863f9ce6f599d789e4ca" datatype="html">
-        <source>CephX key must be base64 encoded.</source>
-        <target>La clave de CephX debe tener cifrado base64</target>
+        <source>StoneX key must be base64 encoded.</source>
+        <target>La clave de StoneX debe tener cifrado base64</target>
       </trans-unit>
       <trans-unit id="4057c56d63a7e9b140b1d01871a9229a5f30eb27" datatype="html">
         <source>Edit pool mirror mode</source>

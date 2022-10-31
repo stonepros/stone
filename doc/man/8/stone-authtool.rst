@@ -1,15 +1,15 @@
 :orphan:
 
 =================================================
- ceph-authtool -- ceph keyring manipulation tool
+ stone-authtool -- stone keyring manipulation tool
 =================================================
 
-.. program:: ceph-authtool
+.. program:: stone-authtool
 
 Synopsis
 ========
 
-| **ceph-authtool** *keyringfile*
+| **stone-authtool** *keyringfile*
   [ -l | --list ]
   [ -p | --print-key ]
   [ -C | --create-keyring ]
@@ -26,13 +26,13 @@ Synopsis
 Description
 ===========
 
-**ceph-authtool** is a utility to create, view, and modify a Ceph keyring
-file. A keyring file stores one or more Ceph authentication keys and
+**stone-authtool** is a utility to create, view, and modify a Stone keyring
+file. A keyring file stores one or more Stone authentication keys and
 possibly an associated capability specification. Each key is
 associated with an entity name, of the form
 ``{client,mon,mds,osd}.name``.
 
-**WARNING** Ceph provides authentication and protection against
+**WARNING** Stone provides authentication and protection against
 man-in-the-middle attacks once secret keys are in place.  However,
 data over the wire is not encrypted, which may include the messages
 used to configure said keys. The system is primarily intended to be
@@ -91,7 +91,7 @@ Options
 Capabilities
 ============
 
-The subsystem is the name of a Ceph subsystem: ``mon``, ``mds``, or
+The subsystem is the name of a Stone subsystem: ``mon``, ``mds``, or
 ``osd``.
 
 The capability is a string describing what the given user is allowed
@@ -152,7 +152,7 @@ The capspec determines what kind of operations the entity can perform::
     class-read  = can call class methods that are reads
     class-write = can call class methods that are writes
     * or "all"  = equivalent to rwx, plus the ability to run osd admin commands,
-                  i.e. ceph osd tell ...
+                  i.e. stone osd tell ...
 
 The match criteria restrict a grant based on the pool being accessed.
 Grants are additive if the client fulfills the match condition. For
@@ -167,7 +167,7 @@ Caps file format
 The caps file format consists of zero or more key/value pairs, one per
 line. The key and value are separated by an ``=``, and the value must
 be quoted (with ``'`` or ``"``) if it contains any whitespace. The key
-is the name of the Ceph subsystem (``osd``, ``mds``, ``mon``), and the
+is the name of the Stone subsystem (``osd``, ``mds``, ``mon``), and the
 value is the capability string (see above).
 
 
@@ -176,31 +176,31 @@ Example
 
 To create a new keyring containing a key for client.foo with a 0644 file mode::
 
-        ceph-authtool -C -n client.foo --gen-key keyring --mode 0644
+        stone-authtool -C -n client.foo --gen-key keyring --mode 0644
 
 To associate some capabilities with the key (namely, the ability to
-mount a Ceph file system)::
+mount a Stone file system)::
 
-        ceph-authtool -n client.foo --cap mds 'allow' --cap osd 'allow rw pool=data' --cap mon 'allow r' keyring
+        stone-authtool -n client.foo --cap mds 'allow' --cap osd 'allow rw pool=data' --cap mon 'allow r' keyring
 
 To display the contents of the keyring::
 
-        ceph-authtool -l keyring
+        stone-authtool -l keyring
 
-When mounting a Ceph file system, you can grab the appropriately encoded secret key with::
+When mounting a Stone file system, you can grab the appropriately encoded secret key with::
 
-        mount -t ceph serverhost:/ mountpoint -o name=foo,secret=`ceph-authtool -p -n client.foo keyring`
+        mount -t stone serverhost:/ mountpoint -o name=foo,secret=`stone-authtool -p -n client.foo keyring`
 
 
 Availability
 ============
 
-**ceph-authtool** is part of Ceph, a massively scalable, open-source, distributed storage system. Please
-refer to the Ceph documentation at http://ceph.com/docs for more
+**stone-authtool** is part of Stone, a massively scalable, open-source, distributed storage system. Please
+refer to the Stone documentation at http://stone.com/docs for more
 information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)

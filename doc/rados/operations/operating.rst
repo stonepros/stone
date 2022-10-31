@@ -5,186 +5,186 @@
 .. index:: systemd; operating a cluster
 
 
-Running Ceph with systemd
+Running Stone with systemd
 ==========================
 
 For all distributions that support systemd (CentOS 7, Fedora, Debian
-Jessie 8 and later, SUSE), ceph daemons are now managed using native
+Jessie 8 and later, SUSE), stone daemons are now managed using native
 systemd files instead of the legacy sysvinit scripts.  For example::
 
-        sudo systemctl start ceph.target       # start all daemons
-        sudo systemctl status ceph-osd@12      # check status of osd.12
+        sudo systemctl start stone.target       # start all daemons
+        sudo systemctl status stone-osd@12      # check status of osd.12
 
-To list the Ceph systemd units on a node, execute::
+To list the Stone systemd units on a node, execute::
 
-        sudo systemctl status ceph\*.service ceph\*.target
+        sudo systemctl status stone\*.service stone\*.target
 
 Starting all Daemons
 --------------------
 
-To start all daemons on a Ceph Node (irrespective of type), execute the
+To start all daemons on a Stone Node (irrespective of type), execute the
 following::
 
-	sudo systemctl start ceph.target
+	sudo systemctl start stone.target
 
 
 Stopping all Daemons
 --------------------
 
-To stop all daemons on a Ceph Node (irrespective of type), execute the
+To stop all daemons on a Stone Node (irrespective of type), execute the
 following::
 
-        sudo systemctl stop ceph\*.service ceph\*.target
+        sudo systemctl stop stone\*.service stone\*.target
 
 
 Starting all Daemons by Type
 ----------------------------
 
-To start all daemons of a particular type on a Ceph Node, execute one of the
+To start all daemons of a particular type on a Stone Node, execute one of the
 following::
 
-        sudo systemctl start ceph-osd.target
-        sudo systemctl start ceph-mon.target
-        sudo systemctl start ceph-mds.target
+        sudo systemctl start stone-osd.target
+        sudo systemctl start stone-mon.target
+        sudo systemctl start stone-mds.target
 
 
 Stopping all Daemons by Type
 ----------------------------
 
-To stop all daemons of a particular type on a Ceph Node, execute one of the
+To stop all daemons of a particular type on a Stone Node, execute one of the
 following::
 
-        sudo systemctl stop ceph-mon\*.service ceph-mon.target
-        sudo systemctl stop ceph-osd\*.service ceph-osd.target
-        sudo systemctl stop ceph-mds\*.service ceph-mds.target
+        sudo systemctl stop stone-mon\*.service stone-mon.target
+        sudo systemctl stop stone-osd\*.service stone-osd.target
+        sudo systemctl stop stone-mds\*.service stone-mds.target
 
 
 Starting a Daemon
 -----------------
 
-To start a specific daemon instance on a Ceph Node, execute one of the
+To start a specific daemon instance on a Stone Node, execute one of the
 following::
 
-	sudo systemctl start ceph-osd@{id}
-	sudo systemctl start ceph-mon@{hostname}
-	sudo systemctl start ceph-mds@{hostname}
+	sudo systemctl start stone-osd@{id}
+	sudo systemctl start stone-mon@{hostname}
+	sudo systemctl start stone-mds@{hostname}
 
 For example::
 
-	sudo systemctl start ceph-osd@1
-	sudo systemctl start ceph-mon@ceph-server
-	sudo systemctl start ceph-mds@ceph-server
+	sudo systemctl start stone-osd@1
+	sudo systemctl start stone-mon@stone-server
+	sudo systemctl start stone-mds@stone-server
 
 
 Stopping a Daemon
 -----------------
 
-To stop a specific daemon instance on a Ceph Node, execute one of the
+To stop a specific daemon instance on a Stone Node, execute one of the
 following::
 
-	sudo systemctl stop ceph-osd@{id}
-	sudo systemctl stop ceph-mon@{hostname}
-	sudo systemctl stop ceph-mds@{hostname}
+	sudo systemctl stop stone-osd@{id}
+	sudo systemctl stop stone-mon@{hostname}
+	sudo systemctl stop stone-mds@{hostname}
 
 For example::
 
-	sudo systemctl stop ceph-osd@1
-	sudo systemctl stop ceph-mon@ceph-server
-	sudo systemctl stop ceph-mds@ceph-server
+	sudo systemctl stop stone-osd@1
+	sudo systemctl stop stone-mon@stone-server
+	sudo systemctl stop stone-mds@stone-server
 
 
 .. index:: Upstart; operating a cluster
 
-Running Ceph with Upstart
+Running Stone with Upstart
 ==========================
 
 Starting all Daemons
 --------------------
 
-To start all daemons on a Ceph Node (irrespective of type), execute the
+To start all daemons on a Stone Node (irrespective of type), execute the
 following:: 
 
-	sudo start ceph-all
+	sudo start stone-all
 	
 
 Stopping all Daemons	
 --------------------
 
-To stop all daemons on a Ceph Node (irrespective of type), execute the
+To stop all daemons on a Stone Node (irrespective of type), execute the
 following:: 
 
-	sudo stop ceph-all
+	sudo stop stone-all
 	
 
 Starting all Daemons by Type
 ----------------------------
 
-To start all daemons of a particular type on a Ceph Node, execute one of the
+To start all daemons of a particular type on a Stone Node, execute one of the
 following:: 
 
-	sudo start ceph-osd-all
-	sudo start ceph-mon-all
-	sudo start ceph-mds-all
+	sudo start stone-osd-all
+	sudo start stone-mon-all
+	sudo start stone-mds-all
 
 
 Stopping all Daemons by Type
 ----------------------------
 
-To stop all daemons of a particular type on a Ceph Node, execute one of the
+To stop all daemons of a particular type on a Stone Node, execute one of the
 following::
 
-	sudo stop ceph-osd-all
-	sudo stop ceph-mon-all
-	sudo stop ceph-mds-all
+	sudo stop stone-osd-all
+	sudo stop stone-mon-all
+	sudo stop stone-mds-all
 
 
 Starting a Daemon
 -----------------
 
-To start a specific daemon instance on a Ceph Node, execute one of the
+To start a specific daemon instance on a Stone Node, execute one of the
 following:: 
 
-	sudo start ceph-osd id={id}
-	sudo start ceph-mon id={hostname}
-	sudo start ceph-mds id={hostname}
+	sudo start stone-osd id={id}
+	sudo start stone-mon id={hostname}
+	sudo start stone-mds id={hostname}
 
 For example:: 
 
-	sudo start ceph-osd id=1
-	sudo start ceph-mon id=ceph-server
-	sudo start ceph-mds id=ceph-server
+	sudo start stone-osd id=1
+	sudo start stone-mon id=stone-server
+	sudo start stone-mds id=stone-server
 
 
 Stopping a Daemon
 -----------------
 
-To stop a specific daemon instance on a Ceph Node, execute one of the
+To stop a specific daemon instance on a Stone Node, execute one of the
 following:: 
 
-	sudo stop ceph-osd id={id}
-	sudo stop ceph-mon id={hostname}
-	sudo stop ceph-mds id={hostname}
+	sudo stop stone-osd id={id}
+	sudo stop stone-mon id={hostname}
+	sudo stop stone-mds id={hostname}
 
 For example:: 
 
-	sudo stop ceph-osd id=1
-	sudo start ceph-mon id=ceph-server
-	sudo start ceph-mds id=ceph-server
+	sudo stop stone-osd id=1
+	sudo start stone-mon id=stone-server
+	sudo start stone-mds id=stone-server
 
 
 .. index:: sysvinit; operating a cluster
 
-Running Ceph with sysvinit
+Running Stone with sysvinit
 ==========================
 
-Each time you to **start**, **restart**, and  **stop** Ceph daemons (or your
+Each time you to **start**, **restart**, and  **stop** Stone daemons (or your
 entire cluster) you must specify at least one option and one command. You may
 also specify a daemon type or a daemon instance. ::
 
 	{commandline} [options] [commands] [daemons]
 
 
-The ``ceph`` options include:
+The ``stone`` options include:
 
 +-----------------+----------+-------------------------------------------------+
 | Option          | Shortcut | Description                                     |
@@ -193,7 +193,7 @@ The ``ceph`` options include:
 +-----------------+----------+-------------------------------------------------+
 | ``--valgrind``  | ``N/A``  | (Dev and QA only) Use `Valgrind`_ debugging.    |
 +-----------------+----------+-------------------------------------------------+
-| ``--allhosts``  |  ``-a``  | Execute on all nodes in ``ceph.conf.``          |
+| ``--allhosts``  |  ``-a``  | Execute on all nodes in ``stone.conf.``          |
 |                 |          | Otherwise, it only executes on ``localhost``.   |
 +-----------------+----------+-------------------------------------------------+
 | ``--restart``   | ``N/A``  | Automatically restart daemon if it core dumps.  |
@@ -203,7 +203,7 @@ The ``ceph`` options include:
 | ``--conf``      |  ``-c``  | Use an alternate configuration file.            |
 +-----------------+----------+-------------------------------------------------+
 
-The ``ceph`` commands include:
+The ``stone`` commands include:
 
 +------------------+------------------------------------------------------------+
 | Command          | Description                                                |
@@ -221,7 +221,7 @@ The ``ceph`` commands include:
 | ``cleanalllogs`` | Cleans out **everything** in the log directory.            |
 +------------------+------------------------------------------------------------+
 
-For subsystem operations, the ``ceph`` service can target specific daemon types
+For subsystem operations, the ``stone`` service can target specific daemon types
 by adding a particular daemon type for the ``[daemons]`` option. Daemon types
 include: 
 

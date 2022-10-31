@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -37,7 +37,7 @@
 #include "include/types.h"
 #include "include/utime.h"
 #include "include/CompatSet.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/histogram.h"
 #include "include/interval_set.h"
 #include "include/inline_memory.h"
@@ -52,7 +52,7 @@
 #include "compressor/Compressor.h"
 #include "osd_perf_counters.h"
 
-#define STONE_OSD_ONDISK_MAGIC "ceph osd volume v026"
+#define STONE_OSD_ONDISK_MAGIC "stone osd volume v026"
 
 #define STONE_OSD_FEATURE_INCOMPAT_BASE CompatSet::Feature(1, "initial feature set(~v.18)")
 #define STONE_OSD_FEATURE_INCOMPAT_PGINFO CompatSet::Feature(2, "pginfo object")
@@ -124,21 +124,21 @@ static std::map<int, int> max_prio_map = {
 typedef hobject_t collection_list_handle_t;
 
 /// convert a single CPEH_OSD_FLAG_* to a std::string
-const char *ceph_osd_flag_name(unsigned flag);
+const char *stone_osd_flag_name(unsigned flag);
 /// convert a single STONE_OSD_OF_FLAG_* to a std::string
-const char *ceph_osd_op_flag_name(unsigned flag);
+const char *stone_osd_op_flag_name(unsigned flag);
 
 /// convert STONE_OSD_FLAG_* op flags to a std::string
-std::string ceph_osd_flag_string(unsigned flags);
+std::string stone_osd_flag_string(unsigned flags);
 /// conver STONE_OSD_OP_FLAG_* op flags to a std::string
-std::string ceph_osd_op_flag_string(unsigned flags);
+std::string stone_osd_op_flag_string(unsigned flags);
 /// conver STONE_OSD_ALLOC_HINT_FLAG_* op flags to a std::string
-std::string ceph_osd_alloc_hint_flag_string(unsigned flags);
+std::string stone_osd_alloc_hint_flag_string(unsigned flags);
 
 typedef std::map<std::string,std::string> osd_alert_list_t;
 /// map osd id -> alert_list_t
 typedef std::map<int, osd_alert_list_t> osd_alerts_t;
-void dump(ceph::Formatter* f, const osd_alerts_t& alerts);
+void dump(stone::Formatter* f, const osd_alerts_t& alerts);
 
 
 typedef interval_set<
@@ -153,13 +153,13 @@ typedef interval_set<
  */
 struct osd_reqid_t {
   entity_name_t name; // who
-  ceph_tid_t    tid;
+  stone_tid_t    tid;
   int32_t       inc;  // incarnation
 
   osd_reqid_t()
     : tid(0), inc(0)
   {}
-  osd_reqid_t(const entity_name_t& a, int i, ceph_tid_t t)
+  osd_reqid_t(const entity_name_t& a, int i, stone_tid_t t)
     : name(a), tid(t), inc(i)
   {}
 
@@ -170,7 +170,7 @@ struct osd_reqid_t {
     denc(v.inc, p);
     DENC_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<osd_reqid_t*>& o);
 };
 WRITE_CLASS_DENC(osd_reqid_t)
@@ -188,9 +188,9 @@ struct pg_shard_t {
     return osd == -1;
   }
   std::string get_osd() const { return (osd == NO_OSD ? "NONE" : std::to_string(osd)); }
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const {
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const {
     f->dump_unsigned("osd", osd);
     if (shard != shard_id_t::NO_SHARD) {
       f->dump_unsigned("shard", shard);
@@ -294,9 +294,9 @@ struct object_locator_t {
     return pool == -1;
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<object_locator_t*>& o);
 };
 WRITE_CLASS_ENCODER(object_locator_t)
@@ -344,9 +344,9 @@ public:
       obj = redirect_object;
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<request_redirect_t*>& o);
 };
 WRITE_CLASS_ENCODER(request_redirect_t)
@@ -379,14 +379,14 @@ enum {
 // placement seed (a hash value)
 typedef uint32_t ps_t;
 
-// old (v1) pg_t encoding (wrap old struct ceph_pg)
+// old (v1) pg_t encoding (wrap old struct stone_pg)
 struct old_pg_t {
-  ceph_pg v;
-  void encode(ceph::buffer::list& bl) const {
-    ceph::encode_raw(v, bl);
+  stone_pg v;
+  void encode(stone::buffer::list& bl) const {
+    stone::encode_raw(v, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    ceph::decode_raw(v, bl);
+  void decode(stone::buffer::list::const_iterator& bl) {
+    stone::decode_raw(v, bl);
   }
 };
 WRITE_CLASS_ENCODER(old_pg_t)
@@ -400,7 +400,7 @@ struct pg_t {
   pg_t(ps_t seed, uint64_t pool) :
     m_pool(pool), m_seed(seed) {}
   // cppcheck-suppress noExplicitConstructor
-  pg_t(const ceph_pg& cpg) :
+  pg_t(const stone_pg& cpg) :
     m_pool(cpg.pool), m_seed(cpg.ps) {}
 
   // cppcheck-suppress noExplicitConstructor
@@ -410,7 +410,7 @@ struct pg_t {
 
   old_pg_t get_old_pg() const {
     old_pg_t o;
-    ceph_assert(m_pool < 0xffffffffull);
+    stone_assert(m_pool < 0xffffffffull);
     o.v.pool = m_pool;
     o.v.ps = m_seed;
     o.v.preferred = (__s16)-1;
@@ -480,29 +480,29 @@ struct pg_t {
     }
   }
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 v = 1;
     encode(v, bl);
     encode(m_pool, bl);
     encode(m_seed, bl);
     encode((int32_t)-1, bl); // was preferred
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 v;
     decode(v, bl);
     decode(m_pool, bl);
     decode(m_seed, bl);
     bl += sizeof(int32_t); // was preferred
   }
-  void decode_old(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode_old(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     old_pg_t opg;
     decode(opg, bl);
     *this = opg;
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_t*>& o);
 };
 WRITE_CLASS_ENCODER(pg_t)
@@ -609,13 +609,13 @@ struct spg_t {
     return ghobject_t::make_pgmeta(pgid.pool(), pgid.ps(), shard);
   }
 
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
     ENCODE_START(1, 1, bl);
     encode(pgid, bl);
     encode(shard, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(pgid, bl);
     decode(shard, bl);
@@ -758,8 +758,8 @@ public:
     return pgid.pool();
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
   size_t encoded_size() const;
 
   inline bool operator==(const coll_t& rhs) const {
@@ -777,7 +777,7 @@ public:
   // get a TEMP collection that corresponds to the current collection,
   // which we presume is a pg collection.
   coll_t get_temp() const {
-    ceph_assert(type == TYPE_PG);
+    stone_assert(type == TYPE_PG);
     return coll_t(TYPE_PG_TEMP, pgid, 0);
   }
 
@@ -803,7 +803,7 @@ public:
     return 0;  // whatever.
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<coll_t*>& o);
 };
 
@@ -833,7 +833,7 @@ namespace std {
   };
 } // namespace std
 
-inline std::ostream& operator<<(std::ostream& out, const ceph_object_layout &ol)
+inline std::ostream& operator<<(std::ostream& out, const stone_object_layout &ol)
 {
   out << pg_t(ol.ol_pgid);
   int su = ol.ol_stripe_unit;
@@ -858,20 +858,20 @@ public:
   eversion_t(epoch_t e, version_t v) : version(v), epoch(e), __pad(0) {}
 
   // cppcheck-suppress noExplicitConstructor
-  eversion_t(const ceph_eversion& ce) :
+  eversion_t(const stone_eversion& ce) :
     version(ce.version),
     epoch(ce.epoch),
     __pad(0) { }
 
-  explicit eversion_t(ceph::buffer::list& bl) : __pad(0) { decode(bl); }
+  explicit eversion_t(stone::buffer::list& bl) : __pad(0) { decode(bl); }
 
   static const eversion_t& max() {
     static const eversion_t max(-1,-1);
     return max;
   }
 
-  operator ceph_eversion() {
-    ceph_eversion c;
+  operator stone_eversion() {
+    stone_eversion c;
     c.epoch = epoch;
     c.version = version;
     return c;
@@ -888,25 +888,25 @@ public:
     ritoa<uint32_t, 10, 10>(epoch, key + 10);
   }
 
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
 #if defined(STONE_LITTLE_ENDIAN)
     bl.append((char *)this, sizeof(version_t) + sizeof(epoch_t));
 #else
-    using ceph::encode;
+    using stone::encode;
     encode(version, bl);
     encode(epoch, bl);
 #endif
   }
-  void decode(ceph::buffer::list::const_iterator &bl) {
+  void decode(stone::buffer::list::const_iterator &bl) {
 #if defined(STONE_LITTLE_ENDIAN)
     bl.copy(sizeof(version_t) + sizeof(epoch_t), (char *)this);
 #else
-    using ceph::decode;
+    using stone::decode;
     decode(version, bl);
     decode(epoch, bl);
 #endif
   }
-  void decode(ceph::buffer::list& bl) {
+  void decode(stone::buffer::list& bl) {
     auto p = std::cbegin(bl);
     decode(p);
   }
@@ -961,9 +961,9 @@ struct objectstore_perf_stat_t {
     os_commit_latency_ns -= o.os_commit_latency_ns;
     os_apply_latency_ns -= o.os_apply_latency_ns;
   }
-  void dump(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &bl);
   static void generate_test_instances(std::list<objectstore_perf_stat_t*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(objectstore_perf_stat_t)
@@ -1021,9 +1021,9 @@ struct pool_snap_info_t {
   utime_t stamp;
   std::string name;
 
-  void dump(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
   static void generate_test_instances(std::list<pool_snap_info_t*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(pool_snap_info_t)
@@ -1126,11 +1126,11 @@ public:
 
   bool unset(key_t key);
 
-  void dump(const std::string& name, ceph::Formatter *f) const;
+  void dump(const std::string& name, stone::Formatter *f) const;
 
-  void dump(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &bl);
 
 private:
   typedef std::map<key_t, value_t> opts_t;
@@ -1148,7 +1148,7 @@ struct pg_merge_meta_t {
   eversion_t source_version;
   eversion_t target_version;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(source_pgid, bl);
     encode(ready_epoch, bl);
@@ -1158,7 +1158,7 @@ struct pg_merge_meta_t {
     encode(target_version, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(1, p);
     decode(source_pgid, p);
     decode(ready_epoch, p);
@@ -1168,7 +1168,7 @@ struct pg_merge_meta_t {
     decode(target_version, p);
     DECODE_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_stream("source_pgid") << source_pgid;
     f->dump_unsigned("ready_epoch", ready_epoch);
     f->dump_unsigned("last_epoch_started", last_epoch_started);
@@ -1357,7 +1357,7 @@ struct pg_pool_t {
     case CACHEMODE_READPROXY:
       return true;
     default:
-      ceph_abort_msg("implement me");
+      stone_abort_msg("implement me");
     }
   }
 
@@ -1441,7 +1441,7 @@ public:
   std::map<snapid_t, pool_snap_info_t> snaps;
   /*
    * Alternatively, if we are defining non-pool snaps (e.g. via the
-   * Stonee MDS), we must track @removed_snaps (since @snaps is not
+   * Stone MDS), we must track @removed_snaps (since @snaps is not
    * used).  Snaps and removed_snaps are to be used exclusive of each
    * other!
    */
@@ -1637,7 +1637,7 @@ public:
 
   pg_pool_t() = default;
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
   const utime_t &get_create_time() const { return create_time; }
   uint64_t get_flags() const { return flags; }
@@ -1660,7 +1660,7 @@ public:
   int get_crush_rule() const { return crush_rule; }
   int get_object_hash() const { return object_hash; }
   const char *get_object_hash_name() const {
-    return ceph_str_hash_name(get_object_hash());
+    return stone_str_hash_name(get_object_hash());
   }
   epoch_t get_last_change() const { return last_change; }
   epoch_t get_last_force_op_resend() const { return last_force_op_resend; }
@@ -1703,7 +1703,7 @@ public:
     case TYPE_ERASURE:
       return false;
     default:
-      ceph_abort_msg("unhandled pool type");
+      stone_abort_msg("unhandled pool type");
     }
   }
 
@@ -1823,8 +1823,8 @@ public:
   /// choose a random hash position within a pg
   uint32_t get_random_pg_position(pg_t pgid, uint32_t seed) const;
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
 
   static void generate_test_instances(std::list<pg_pool_t*>& o);
 };
@@ -2043,7 +2043,7 @@ struct object_stat_sum_t {
   void add(const object_stat_sum_t& o);
   void sub(const object_stat_sum_t& o);
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void padding_check() {
     static_assert(
       sizeof(object_stat_sum_t) ==
@@ -2090,8 +2090,8 @@ struct object_stat_sum_t {
       ,
       "object_stat_sum_t have padding");
   }
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
   static void generate_test_instances(std::list<object_stat_sum_t*>& o);
 };
 WRITE_CLASS_ENCODER(object_stat_sum_t)
@@ -2113,9 +2113,9 @@ struct object_stat_collection_t {
     sum.calc_copies(nrep);
   }
 
-  void dump(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
   static void generate_test_instances(std::list<object_stat_collection_t*>& o);
 
   bool is_zero() const {
@@ -2293,10 +2293,10 @@ struct pg_stat_t {
   }
 
   bool is_acting_osd(int32_t osd, bool primary) const;
-  void dump(ceph::Formatter *f) const;
-  void dump_brief(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
+  void dump_brief(stone::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
   static void generate_test_instances(std::list<pg_stat_t*>& o);
 };
 WRITE_CLASS_ENCODER(pg_stat_t)
@@ -2412,7 +2412,7 @@ struct store_statfs_t
     omap_allocated -= o.omap_allocated;
     internal_metadata -= o.internal_metadata;
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   DENC(store_statfs_t, v, p) {
     DENC_START(1, 1, p);
     denc(v.total, p);
@@ -2511,10 +2511,10 @@ struct osd_stat_t {
       }
     }
   }
-  void dump(ceph::Formatter *f, bool with_net = true) const;
-  void dump_ping_time(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f, bool with_net = true) const;
+  void dump_ping_time(stone::Formatter *f) const;
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &bl);
   static void generate_test_instances(std::list<osd_stat_t*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(osd_stat_t)
@@ -2655,9 +2655,9 @@ struct pool_stat_t {
     }
   }
 
-  void dump(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &bl);
   static void generate_test_instances(std::list<pool_stat_t*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(pool_stat_t)
@@ -2688,9 +2688,9 @@ struct pg_hit_set_info_t {
   explicit pg_hit_set_info_t(bool using_gmt = true)
     : using_gmt(using_gmt) {}
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_hit_set_info_t*>& o);
 };
 WRITE_CLASS_ENCODER(pg_hit_set_info_t)
@@ -2712,9 +2712,9 @@ struct pg_hit_set_history_t {
       l.history == r.history;
   }
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_hit_set_history_t*>& o);
 };
 WRITE_CLASS_ENCODER(pg_hit_set_history_t)
@@ -2734,7 +2734,7 @@ struct pg_history_t {
 			       // (note: may be pg creation epoch for
 			       // pre-luminous clusters)
   epoch_t last_epoch_started = 0;;  // lower bound on last epoch started (anywhere, not necessarily locally)
-                                    // https://docs.ceph.com/docs/master/dev/osd_internals/last_epoch_started/
+                                    // https://docs.stone.com/docs/master/dev/osd_internals/last_epoch_started/
   epoch_t last_interval_started = 0;; // first epoch of last_epoch_started interval
   epoch_t last_epoch_clean = 0;;    // lower bound on last epoch the PG was completely clean.
   epoch_t last_interval_clean = 0;; // first epoch of last_epoch_clean interval
@@ -2759,7 +2759,7 @@ struct pg_history_t {
   utime_t last_clean_scrub_stamp;
 
   /// upper bound on how long prior interval readable (relative to encode time)
-  ceph::timespan prior_readable_until_ub = ceph::timespan::zero();
+  stone::timespan prior_readable_until_ub = stone::timespan::zero();
 
   friend bool operator==(const pg_history_t& l, const pg_history_t& r) {
     return
@@ -2862,26 +2862,26 @@ struct pg_history_t {
     return modified;
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_history_t*>& o);
 
-  ceph::signedspan refresh_prior_readable_until_ub(
-    ceph::signedspan now,  ///< now, relative to osd startup_time
-    ceph::signedspan ub) { ///< ub, relative to osd startup_time
+  stone::signedspan refresh_prior_readable_until_ub(
+    stone::signedspan now,  ///< now, relative to osd startup_time
+    stone::signedspan ub) { ///< ub, relative to osd startup_time
     if (now >= ub) {
       // prior interval(s) are unreadable; we can zero the upper bound
-      prior_readable_until_ub = ceph::signedspan::zero();
-      return ceph::signedspan::zero();
+      prior_readable_until_ub = stone::signedspan::zero();
+      return stone::signedspan::zero();
     } else {
       prior_readable_until_ub = ub - now;
       return ub;
     }
   }
-  ceph::signedspan get_prior_readable_until_ub(ceph::signedspan now) {
-    if (prior_readable_until_ub == ceph::signedspan::zero()) {
-      return ceph::signedspan::zero();
+  stone::signedspan get_prior_readable_until_ub(stone::signedspan now) {
+    if (prior_readable_until_ub == stone::signedspan::zero()) {
+      return stone::signedspan::zero();
     }
     return now + prior_readable_until_ub;
   }
@@ -2895,7 +2895,7 @@ inline std::ostream& operator<<(std::ostream& out, const pg_history_t& h) {
       << " les/c/f=" << h.last_epoch_started << "/" << h.last_epoch_clean
       << "/" << h.last_epoch_marked_full
       << " sis=" << h.same_interval_since;
-  if (h.prior_readable_until_ub != ceph::timespan::zero()) {
+  if (h.prior_readable_until_ub != stone::timespan::zero()) {
     out << " pruub=" << h.prior_readable_until_ub;
   }
   return out;
@@ -2972,9 +2972,9 @@ struct pg_info_t {
   bool has_missing() const { return last_complete != last_update; }
   bool is_incomplete() const { return !last_backfill.is_max(); }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_info_t*>& o);
 };
 WRITE_CLASS_ENCODER(pg_info_t)
@@ -3095,7 +3095,7 @@ struct pg_fast_info_t {
     return true;
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(last_update, bl);
     encode(last_complete, bl);
@@ -3120,7 +3120,7 @@ struct pg_fast_info_t {
     encode(stats.stats.sum.num_objects_dirty, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(1, p);
     decode(last_update, p);
     decode(last_complete, p);
@@ -3186,9 +3186,9 @@ public:
 	maybe_went_rw(maybe_went_rw), primary(primary), up_primary(up_primary)
       {}
 
-    void encode(ceph::buffer::list& bl) const;
-    void decode(ceph::buffer::list::const_iterator& bl);
-    void dump(ceph::Formatter *f) const;
+    void encode(stone::buffer::list& bl) const;
+    void decode(stone::buffer::list::const_iterator& bl);
+    void dump(stone::Formatter *f) const;
     static void generate_test_instances(std::list<pg_interval_t*>& o);
   };
 
@@ -3210,9 +3210,9 @@ public:
     virtual void add_interval(bool ec_pool, const pg_interval_t &interval) = 0;
     virtual std::unique_ptr<interval_rep> clone() const = 0;
     virtual std::ostream &print(std::ostream &out) const = 0;
-    virtual void encode(ceph::buffer::list &bl) const = 0;
-    virtual void decode(ceph::buffer::list::const_iterator &bl) = 0;
-    virtual void dump(ceph::Formatter *f) const = 0;
+    virtual void encode(stone::buffer::list &bl) const = 0;
+    virtual void decode(stone::buffer::list::const_iterator &bl) = 0;
+    virtual void dump(stone::Formatter *f) const = 0;
     virtual void iterate_mayberw_back_to(
       epoch_t les,
       std::function<void(epoch_t, const std::set<pg_shard_t> &)> &&f) const = 0;
@@ -3220,8 +3220,8 @@ public:
     virtual bool has_full_intervals() const { return false; }
     virtual void iterate_all_intervals(
       std::function<void(const pg_interval_t &)> &&f) const {
-      ceph_assert(!has_full_intervals());
-      ceph_abort_msg("not valid for this implementation");
+      stone_assert(!has_full_intervals());
+      stone_abort_msg("not valid for this implementation");
     }
     virtual void adjust_start_backwards(epoch_t last_epoch_clean) = 0;
 
@@ -3236,11 +3236,11 @@ private:
 
 public:
   void add_interval(bool ec_pool, const pg_interval_t &interval) {
-    ceph_assert(past_intervals);
+    stone_assert(past_intervals);
     return past_intervals->add_interval(ec_pool, interval);
   }
 
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
     ENCODE_START(1, 1, bl);
     if (past_intervals) {
       __u8 type = 2;
@@ -3252,10 +3252,10 @@ public:
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void decode(stone::buffer::list::const_iterator &bl);
 
-  void dump(ceph::Formatter *f) const {
-    ceph_assert(past_intervals);
+  void dump(stone::Formatter *f) const {
+    stone_assert(past_intervals);
     past_intervals->dump(f);
   }
   static void generate_test_instances(std::list<PastIntervals *> & o);
@@ -3371,11 +3371,11 @@ public:
   void iterate_mayberw_back_to(
     epoch_t les,
     F &&f) const {
-    ceph_assert(past_intervals);
+    stone_assert(past_intervals);
     past_intervals->iterate_mayberw_back_to(les, std::forward<F>(f));
   }
   void clear() {
-    ceph_assert(past_intervals);
+    stone_assert(past_intervals);
     past_intervals->clear();
   }
 
@@ -3384,12 +3384,12 @@ public:
    * of state contained
    */
   size_t size() const {
-    ceph_assert(past_intervals);
+    stone_assert(past_intervals);
     return past_intervals->size();
   }
 
   bool empty() const {
-    ceph_assert(past_intervals);
+    stone_assert(past_intervals);
     return past_intervals->empty();
   }
 
@@ -3405,7 +3405,7 @@ public:
   std::set<pg_shard_t> get_might_have_unfound(
     pg_shard_t pg_whoami,
     bool ec_pool) const {
-    ceph_assert(past_intervals);
+    stone_assert(past_intervals);
     auto ret = past_intervals->get_all_participants(ec_pool);
     ret.erase(pg_whoami);
     return ret;
@@ -3416,7 +3416,7 @@ public:
    */
   std::set<pg_shard_t> get_all_probe(
     bool ec_pool) const {
-    ceph_assert(past_intervals);
+    stone_assert(past_intervals);
     return past_intervals->get_all_participants(ec_pool);
   }
 
@@ -3424,12 +3424,12 @@ public:
    * past_interval set.
    */
   std::pair<epoch_t, epoch_t> get_bounds() const {
-    ceph_assert(past_intervals);
+    stone_assert(past_intervals);
     return past_intervals->get_bounds();
   }
 
   void adjust_start_backwards(epoch_t last_epoch_clean) {
-    ceph_assert(past_intervals);
+    stone_assert(past_intervals);
     past_intervals->adjust_start_backwards(last_epoch_clean);
   }
 
@@ -3642,7 +3642,7 @@ PastIntervals::PriorSet::PriorSet(
 	// fixme: how do we identify a "clean" shutdown anyway?
 	ldpp_dout(dpp, 10) << "build_prior  possibly went active+rw,"
 			   << " insufficient up; including down osds" << dendl;
-	ceph_assert(!candidate_blocked_by.empty());
+	stone_assert(!candidate_blocked_by.empty());
 	pg_down = true;
 	blocked_by.insert(
 	  candidate_blocked_by.begin(),
@@ -3678,11 +3678,11 @@ struct pg_notify_t {
       epoch_sent(epoch_sent),
       info(info), to(to), from(from),
       past_intervals(pi) {
-    ceph_assert(from == info.pgid.shard);
+    stone_assert(from == info.pgid.shard);
   }
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_notify_t*> &o);
 };
 WRITE_CLASS_ENCODER(pg_notify_t)
@@ -3730,7 +3730,7 @@ struct pg_query_t {
       history(h),
       epoch_sent(epoch_sent),
       to(to), from(from) {
-    ceph_assert(t != LOG);
+    stone_assert(t != LOG);
   }
   pg_query_t(
     int t,
@@ -3741,13 +3741,13 @@ struct pg_query_t {
     epoch_t epoch_sent)
     : type(t), since(s), history(h),
       epoch_sent(epoch_sent), to(to), from(from) {
-    ceph_assert(t == LOG);
+    stone_assert(t == LOG);
   }
   
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &bl);
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_query_t*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(pg_query_t)
@@ -3769,24 +3769,24 @@ inline std::ostream& operator<<(std::ostream& out, const pg_query_t& q) {
  */
 struct pg_lease_t {
   /// pg readable_until value; replicas must not be readable beyond this
-  ceph::signedspan readable_until = ceph::signedspan::zero();
+  stone::signedspan readable_until = stone::signedspan::zero();
 
   /// upper bound on any acting osd's readable_until
-  ceph::signedspan readable_until_ub = ceph::signedspan::zero();
+  stone::signedspan readable_until_ub = stone::signedspan::zero();
 
   /// duration of the lease (in case clock deltas aren't available)
-  ceph::signedspan interval = ceph::signedspan::zero();
+  stone::signedspan interval = stone::signedspan::zero();
 
   pg_lease_t() {}
-  pg_lease_t(ceph::signedspan ru, ceph::signedspan ruub,
-	     ceph::signedspan i)
+  pg_lease_t(stone::signedspan ru, stone::signedspan ruub,
+	     stone::signedspan i)
     : readable_until(ru),
       readable_until_ub(ruub),
       interval(i) {}
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_lease_t*>& o);
 
   friend std::ostream& operator<<(std::ostream& out, const pg_lease_t& l) {
@@ -3805,15 +3805,15 @@ WRITE_CLASS_ENCODER(pg_lease_t)
  */
 struct pg_lease_ack_t {
   /// highest upper bound non-primary has recorded (primary's clock)
-  ceph::signedspan readable_until_ub = ceph::signedspan::zero();
+  stone::signedspan readable_until_ub = stone::signedspan::zero();
 
   pg_lease_ack_t() {}
-  pg_lease_ack_t(ceph::signedspan ub)
+  pg_lease_ack_t(stone::signedspan ub)
     : readable_until_ub(ub) {}
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_lease_ack_t*>& o);
 
   friend std::ostream& operator<<(std::ostream& out, const pg_lease_ack_t& l) {
@@ -3835,7 +3835,7 @@ public:
   class Visitor {
   public:
     virtual void append(uint64_t old_offset) {}
-    virtual void setattrs(std::map<std::string, std::optional<ceph::buffer::list>> &attrs) {}
+    virtual void setattrs(std::map<std::string, std::optional<stone::buffer::list>> &attrs) {}
     virtual void rmobject(version_t old_version) {}
     /**
      * Used to support the unfound_lost_delete log event: if the stashed
@@ -3854,7 +3854,7 @@ public:
     virtual ~Visitor() {}
   };
   void visit(Visitor *visitor) const;
-  mutable ceph::buffer::list bl;
+  mutable stone::buffer::list bl;
   enum ModID {
     APPEND = 1,
     SETATTRS = 2,
@@ -3891,7 +3891,7 @@ public:
     swap(other.max_required_version, max_required_version);
   }
   void append_id(ModID id) {
-    using ceph::encode;
+    using stone::encode;
     uint8_t _id(id);
     encode(_id, bl);
   }
@@ -3903,7 +3903,7 @@ public:
     encode(old_size, bl);
     ENCODE_FINISH(bl);
   }
-  void setattrs(std::map<std::string, std::optional<ceph::buffer::list>> &old_attrs) {
+  void setattrs(std::map<std::string, std::optional<stone::buffer::list>> &old_attrs) {
     if (!can_local_rollback || rollback_info_completed)
       return;
     ENCODE_START(1, 1, bl);
@@ -3949,8 +3949,8 @@ public:
   }
   void rollback_extents(
     version_t gen, const std::vector<std::pair<uint64_t, uint64_t> > &extents) {
-    ceph_assert(can_local_rollback);
-    ceph_assert(!rollback_info_completed);
+    stone_assert(can_local_rollback);
+    stone_assert(!rollback_info_completed);
     if (max_required_version < 2)
       max_required_version = 2;
     ENCODE_START(2, 2, bl);
@@ -3985,9 +3985,9 @@ public:
     if (bl.length() > 0)
       bl.rebuild();
   }
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ObjectModDesc*>& o);
 };
 WRITE_CLASS_ENCODER(ObjectModDesc)
@@ -4030,9 +4030,9 @@ public:
   bool object_is_exist() const;
   bool is_clean_region(uint64_t offset, uint64_t len) const;
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ObjectCleanRegions*>& o);
 };
 WRITE_CLASS_ENCODER(ObjectCleanRegions)
@@ -4040,33 +4040,33 @@ std::ostream& operator<<(std::ostream& out, const ObjectCleanRegions& ocr);
 
 
 struct OSDOp {
-  ceph_osd_op op;
+  stone_osd_op op;
   sobject_t soid;
 
-  ceph::buffer::list indata, outdata;
+  stone::buffer::list indata, outdata;
   errorcode32_t rval = 0;
 
   OSDOp() {
     // FIPS zeroization audit 20191115: this memset clean for security
-    memset(&op, 0, sizeof(ceph_osd_op));
+    memset(&op, 0, sizeof(stone_osd_op));
   }
 
   OSDOp(const int op_code) {
     // FIPS zeroization audit 20191115: this memset clean for security
-    memset(&op, 0, sizeof(ceph_osd_op));
+    memset(&op, 0, sizeof(stone_osd_op));
     op.op = op_code;
   }
 
   /**
-   * split a ceph::buffer::list into constituent indata members of a vector of OSDOps
+   * split a stone::buffer::list into constituent indata members of a vector of OSDOps
    *
    * @param ops [out] vector of OSDOps
    * @param in  [in] combined data buffer
    */
   template<typename V>
   static void split_osd_op_vector_in_data(V& ops,
-					  ceph::buffer::list& in) {
-    ceph::buffer::list::iterator datap = in.begin();
+					  stone::buffer::list& in) {
+    stone::buffer::list::iterator datap = in.begin();
     for (unsigned i = 0; i < ops.size(); i++) {
       if (ops[i].op.payload_len) {
 	datap.copy(ops[i].op.payload_len, ops[i].indata);
@@ -4075,7 +4075,7 @@ struct OSDOp {
   }
 
   /**
-   * merge indata members of a vector of OSDOp into a single ceph::buffer::list
+   * merge indata members of a vector of OSDOp into a single stone::buffer::list
    *
    * Notably this also encodes certain other OSDOp data into the data
    * buffer, including the sobject_t soid.
@@ -4084,7 +4084,7 @@ struct OSDOp {
    * @param out [out] combined data buffer
    */
   template<typename V>
-  static void merge_osd_op_vector_in_data(V& ops, ceph::buffer::list& out) {
+  static void merge_osd_op_vector_in_data(V& ops, stone::buffer::list& out) {
     for (unsigned i = 0; i < ops.size(); i++) {
       if (ops[i].indata.length()) {
 	ops[i].op.payload_len = ops[i].indata.length();
@@ -4094,20 +4094,20 @@ struct OSDOp {
   }
 
   /**
-   * split a ceph::buffer::list into constituent outdata members of a vector of OSDOps
+   * split a stone::buffer::list into constituent outdata members of a vector of OSDOps
    *
    * @param ops [out] vector of OSDOps
    * @param in  [in] combined data buffer
    */
-  static void split_osd_op_vector_out_data(std::vector<OSDOp>& ops, ceph::buffer::list& in);
+  static void split_osd_op_vector_out_data(std::vector<OSDOp>& ops, stone::buffer::list& in);
 
   /**
-   * merge outdata members of a vector of OSDOps into a single ceph::buffer::list
+   * merge outdata members of a vector of OSDOps into a single stone::buffer::list
    *
    * @param ops [in] vector of OSDOps
    * @param out [out] combined data buffer
    */
-  static void merge_osd_op_vector_out_data(std::vector<OSDOp>& ops, ceph::buffer::list& out);
+  static void merge_osd_op_vector_out_data(std::vector<OSDOp>& ops, stone::buffer::list& out);
 
   /**
    * Clear data as much as possible, leave minimal data for historical op dump
@@ -4119,20 +4119,20 @@ struct OSDOp {
     for (unsigned i = 0; i < ops.size(); i++) {
       OSDOp& op = ops[i];
       op.outdata.clear();
-      if (ceph_osd_op_type_attr(op.op.op) &&
+      if (stone_osd_op_type_attr(op.op.op) &&
 	  op.op.xattr.name_len &&
 	  op.indata.length() >= op.op.xattr.name_len) {
-	ceph::buffer::list bl;
-	bl.push_back(ceph::buffer::ptr_node::create(op.op.xattr.name_len));
+	stone::buffer::list bl;
+	bl.push_back(stone::buffer::ptr_node::create(op.op.xattr.name_len));
 	bl.begin().copy_in(op.op.xattr.name_len, op.indata);
 	op.indata = std::move(bl);
-      } else if (ceph_osd_op_type_exec(op.op.op) &&
+      } else if (stone_osd_op_type_exec(op.op.op) &&
 		 op.op.cls.class_len &&
 		 op.indata.length() >
 	         (op.op.cls.class_len + op.op.cls.method_len)) {
 	__u8 len = op.op.cls.class_len + op.op.cls.method_len;
-	ceph::buffer::list bl;
-	bl.push_back(ceph::buffer::ptr_node::create(len));
+	stone::buffer::list bl;
+	bl.push_back(stone::buffer::ptr_node::create(len));
 	bl.begin().copy_in(len, op.indata);
 	op.indata = std::move(bl);
       } else {
@@ -4145,18 +4145,18 @@ std::ostream& operator<<(std::ostream& out, const OSDOp& op);
 
 struct pg_log_op_return_item_t {
   int32_t rval;
-  ceph::buffer::list bl;
-  void encode(ceph::buffer::list& p) const {
-    using ceph::encode;
+  stone::buffer::list bl;
+  void encode(stone::buffer::list& p) const {
+    using stone::encode;
     encode(rval, p);
     encode(bl, p);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& p) {
+    using stone::decode;
     decode(rval, p);
     decode(bl, p);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_int("rval", rval);
     f->dump_unsigned("bl_length", bl.length());
   }
@@ -4222,7 +4222,7 @@ struct pg_log_entry_t {
 
   // describes state for a locally-rollbackable entry
   ObjectModDesc mod_desc;
-  ceph::buffer::list snaps;   // only for clone entries
+  stone::buffer::list snaps;   // only for clone entries
   hobject_t  soid;
   osd_reqid_t reqid;  // caller+tid to uniquely identify request
   mempool::osd_pglog::vector<std::pair<osd_reqid_t, version_t> > extra_reqids;
@@ -4310,12 +4310,12 @@ struct pg_log_entry_t {
   }
 
   std::string get_key_name() const;
-  void encode_with_checksum(ceph::buffer::list& bl) const;
-  void decode_with_checksum(ceph::buffer::list::const_iterator& p);
+  void encode_with_checksum(stone::buffer::list& bl) const;
+  void decode_with_checksum(stone::buffer::list::const_iterator& p);
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_log_entry_t*>& o);
 
 };
@@ -4347,9 +4347,9 @@ struct pg_log_dup_t {
   {}
 
   std::string get_key_name() const;
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_log_dup_t*>& o);
 
   bool operator==(const pg_log_dup_t &rhs) const {
@@ -4472,7 +4472,7 @@ public:
     }
 
   mempool::osd_pglog::list<pg_log_entry_t> rewind_from_head(eversion_t newhead) {
-    ceph_assert(newhead >= tail);
+    stone_assert(newhead >= tail);
 
     mempool::osd_pglog::list<pg_log_entry_t>::iterator p = log.end();
     mempool::osd_pglog::list<pg_log_entry_t> divergent;
@@ -4497,7 +4497,7 @@ public:
 	divergent.splice(divergent.begin(), log, p, log.end());
 	break;
       }
-      ceph_assert(p->version > newhead);
+      stone_assert(p->version > newhead);
     }
     head = newhead;
 
@@ -4556,7 +4556,7 @@ public:
    * @param other pg_log_t to copy from
    * @param from copy entries after this version
    */
-  void copy_after(StoneeContext* cct, const pg_log_t &other, eversion_t from);
+  void copy_after(StoneContext* cct, const pg_log_t &other, eversion_t from);
 
   /**
    * copy up to N entries
@@ -4564,13 +4564,13 @@ public:
    * @param other source log
    * @param max max number of entries to copy
    */
-  void copy_up_to(StoneeContext* cct, const pg_log_t &other, int max);
+  void copy_up_to(StoneContext* cct, const pg_log_t &other, int max);
 
   std::ostream& print(std::ostream& out) const;
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl, int64_t pool = -1);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl, int64_t pool = -1);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_log_t*>& o);
 };
 WRITE_CLASS_ENCODER(pg_log_t)
@@ -4605,8 +4605,8 @@ struct pg_missing_item {
       clean_regions.mark_fully_dirty();
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl, uint64_t features) const {
+    using stone::encode;
     if (HAVE_FEATURE(features, SERVER_OCTOPUS)) {
       // encoding a zeroed eversion_t to differentiate between OSD_RECOVERY_DELETES、
       // SERVER_OCTOPUS and legacy unversioned encoding - a need value of 0'0 is not
@@ -4624,8 +4624,8 @@ struct pg_missing_item {
       encode(static_cast<uint8_t>(flags), bl);
     }
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     eversion_t e, l;
     decode(e, bl);
     decode(l, bl);
@@ -4664,7 +4664,7 @@ struct pg_missing_item {
     }
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_stream("need") << need;
     f->dump_stream("have") << have;
     f->dump_stream("flags") << flag_str();
@@ -4802,7 +4802,7 @@ public:
       return eversion_t();
     }
     auto it = missing.find(rmissing.begin()->second);
-    ceph_assert(it != missing.end());
+    stone_assert(it != missing.end());
     return it->second.need;
   }
 
@@ -4844,7 +4844,7 @@ public:
         missing_it->second.clean_regions.merge(e.clean_regions);
     } else {
       // not missing, we must have prior_version (if any)
-      ceph_assert(!is_missing_divergent_item);
+      stone_assert(!is_missing_divergent_item);
       missing[e.soid] = item(e.version, e.prior_version, e.is_delete());
       if (e.is_lost_revert())
         missing[e.soid].clean_regions.mark_fully_dirty();
@@ -4914,8 +4914,8 @@ public:
 
   void got(const hobject_t& oid, eversion_t v) {
     std::map<hobject_t, item>::iterator p = missing.find(oid);
-    ceph_assert(p != missing.end());
-    ceph_assert(p->second.need <= v || p->second.is_delete());
+    stone_assert(p != missing.end());
+    stone_assert(p->second.need <= v || p->second.is_delete());
     got(p);
   }
 
@@ -4951,13 +4951,13 @@ public:
     rmissing.clear();
   }
 
-  void encode(ceph::buffer::list &bl, uint64_t features) const {
+  void encode(stone::buffer::list &bl, uint64_t features) const {
     ENCODE_START(5, 2, bl)
     encode(missing, bl, features);
     encode(may_include_deletes, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator &bl, int64_t pool = -1) {
+  void decode(stone::buffer::list::const_iterator &bl, int64_t pool = -1) {
     for (auto const &i: missing)
       tracker.changed(i.first);
     DECODE_START_LEGACY_COMPAT_LEN(5, 2, 2, bl);
@@ -4994,7 +4994,7 @@ public:
     for (auto const &i: missing)
       tracker.changed(i.first);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->open_array_section("missing");
     for (std::map<hobject_t,item>::const_iterator p =
 	   missing.begin(); p != missing.end(); ++p) {
@@ -5085,13 +5085,13 @@ public:
 };
 template <bool TrackChanges>
 void encode(
-  const pg_missing_set<TrackChanges> &c, ceph::buffer::list &bl, uint64_t features=0) {
+  const pg_missing_set<TrackChanges> &c, stone::buffer::list &bl, uint64_t features=0) {
   ENCODE_DUMP_PRE();
   c.encode(bl, features);
   ENCODE_DUMP_POST(cl);
 }
 template <bool TrackChanges>
-void decode(pg_missing_set<TrackChanges> &c, ceph::buffer::list::const_iterator &p) {
+void decode(pg_missing_set<TrackChanges> &c, stone::buffer::list::const_iterator &p) {
   c.decode(p);
 }
 template <bool TrackChanges>
@@ -5120,7 +5120,7 @@ struct pg_nls_response_template {
   collection_list_handle_t handle;
   std::vector<T> entries;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(handle, bl);
     __u32 n = (__u32)entries.size();
@@ -5132,7 +5132,7 @@ struct pg_nls_response_template {
     }
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(handle, bl);
     __u32 n;
@@ -5147,7 +5147,7 @@ struct pg_nls_response_template {
     }
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_stream("handle") << handle;
     f->open_array_section("entries");
     for (auto p = entries.begin(); p != entries.end(); ++p) {
@@ -5191,22 +5191,22 @@ struct pg_ls_response_t {
   collection_list_handle_t handle; 
   std::list<std::pair<object_t, std::string> > entries;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 v = 1;
     encode(v, bl);
     encode(handle, bl);
     encode(entries, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 v;
     decode(v, bl);
-    ceph_assert(v == 1);
+    stone_assert(v == 1);
     decode(handle, bl);
     decode(entries, bl);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_stream("handle") << handle;
     f->open_array_section("entries");
     for (std::list<std::pair<object_t, std::string> >::const_iterator p = entries.begin(); p != entries.end(); ++p) {
@@ -5253,9 +5253,9 @@ struct object_copy_cursor_t {
   }
 
   static void generate_test_instances(std::list<object_copy_cursor_t*>& o);
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
 };
 WRITE_CLASS_ENCODER(object_copy_cursor_t)
 
@@ -5283,10 +5283,10 @@ struct object_copy_data_t {
   utime_t mtime;
   uint32_t data_digest, omap_digest;
   uint32_t flags;
-  std::map<std::string, ceph::buffer::list> attrs;
-  ceph::buffer::list data;
-  ceph::buffer::list omap_header;
-  ceph::buffer::list omap_data;
+  std::map<std::string, stone::buffer::list> attrs;
+  stone::buffer::list data;
+  stone::buffer::list omap_header;
+  stone::buffer::list omap_data;
 
   /// which snaps we are defined for (if a snap and not the head)
   std::vector<snapid_t> snaps;
@@ -5310,9 +5310,9 @@ public:
     truncate_size(0) {}
 
   static void generate_test_instances(std::list<object_copy_data_t*>& o);
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
 };
 WRITE_CLASS_ENCODER_FEATURES(object_copy_data_t)
 
@@ -5329,9 +5329,9 @@ struct pg_create_t {
   pg_create_t(unsigned c, pg_t p, int s)
     : created(c), parent(p), split_bits(s) {}
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<pg_create_t*>& o);
 };
 WRITE_CLASS_ENCODER(pg_create_t)
@@ -5403,9 +5403,9 @@ public:
   epoch_t purged_snaps_last = 0;
   utime_t last_purged_snaps_scrub;
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<OSDSuperblock*>& o);
 };
 WRITE_CLASS_ENCODER(OSDSuperblock)
@@ -5443,7 +5443,7 @@ struct SnapSet {
   std::map<snapid_t, std::vector<snapid_t>> clone_snaps; // descending
 
   SnapSet() : seq(0) {}
-  explicit SnapSet(ceph::buffer::list& bl) {
+  explicit SnapSet(stone::buffer::list& bl) {
     auto p = std::cbegin(bl);
     decode(p);
   }
@@ -5454,9 +5454,9 @@ struct SnapSet {
   /// get space accounted to clone
   uint64_t get_clone_bytes(snapid_t clone) const;
     
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<SnapSet*>& o);  
 
   SnapContext get_ssc_as_of(snapid_t as_of) const {
@@ -5495,9 +5495,9 @@ struct watch_info_t {
   watch_info_t() : cookie(0), timeout_seconds(0) { }
   watch_info_t(uint64_t c, uint32_t t, const entity_addr_t& a) : cookie(c), timeout_seconds(t), addr(a) {}
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<watch_info_t*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(watch_info_t)
@@ -5516,7 +5516,7 @@ struct notify_info_t {
   uint64_t cookie;
   uint64_t notify_id;
   uint32_t timeout;
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
 };
 
 static inline std::ostream& operator<<(std::ostream& out, const notify_info_t& n) {
@@ -5634,9 +5634,9 @@ struct chunk_info_t {
   bool has_fingerprint() const {
     return test_flag(FLAG_HAS_FINGERPRINT);
   }
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   friend std::ostream& operator<<(std::ostream& out, const chunk_info_t& ci);
   bool operator==(const chunk_info_t& cit) const;
   bool operator!=(const chunk_info_t& cit) const {
@@ -5736,9 +5736,9 @@ struct object_manifest_t {
   ) const;
 
   static void generate_test_instances(std::list<object_manifest_t*>& o);
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   friend std::ostream& operator<<(std::ostream& out, const object_info_t& oi);
 };
 WRITE_CLASS_ENCODER(object_manifest_t)
@@ -5879,13 +5879,13 @@ struct object_info_t {
     clear_omap_digest();
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void decode(const ceph::buffer::list& bl) {
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void decode(const stone::buffer::list& bl) {
     auto p = std::cbegin(bl);
     decode(p);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<object_info_t*>& o);
 
   explicit object_info_t()
@@ -5905,7 +5905,7 @@ struct object_info_t {
       alloc_hint_flags(0)
   {}
 
-  explicit object_info_t(ceph::buffer::list& bl) {
+  explicit object_info_t(stone::buffer::list& bl) {
     decode(bl);
   }
 };
@@ -5929,10 +5929,10 @@ struct ObjectRecoveryInfo {
   ObjectRecoveryInfo() : size(0), object_exist(true) { }
 
   static void generate_test_instances(std::list<ObjectRecoveryInfo*>& o);
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &bl, int64_t pool = -1);
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &bl, int64_t pool = -1);
   std::ostream &print(std::ostream &out) const;
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 };
 WRITE_CLASS_ENCODER_FEATURES(ObjectRecoveryInfo)
 std::ostream& operator<<(std::ostream& out, const ObjectRecoveryInfo &inf);
@@ -5958,10 +5958,10 @@ struct ObjectRecoveryProgress {
   }
 
   static void generate_test_instances(std::list<ObjectRecoveryProgress*>& o);
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
   std::ostream &print(std::ostream &out) const;
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 };
 WRITE_CLASS_ENCODER(ObjectRecoveryProgress)
 std::ostream& operator<<(std::ostream& out, const ObjectRecoveryProgress &prog);
@@ -5970,12 +5970,12 @@ struct PushReplyOp {
   hobject_t soid;
 
   static void generate_test_instances(std::list<PushReplyOp*>& o);
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
   std::ostream &print(std::ostream &out) const;
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
-  uint64_t cost(StoneeContext *cct) const;
+  uint64_t cost(StoneContext *cct) const;
 };
 WRITE_CLASS_ENCODER(PushReplyOp)
 std::ostream& operator<<(std::ostream& out, const PushReplyOp &op);
@@ -5987,12 +5987,12 @@ struct PullOp {
   ObjectRecoveryProgress recovery_progress;
 
   static void generate_test_instances(std::list<PullOp*>& o);
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &bl);
   std::ostream &print(std::ostream &out) const;
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
-  uint64_t cost(StoneeContext *cct) const;
+  uint64_t cost(StoneContext *cct) const;
 };
 WRITE_CLASS_ENCODER_FEATURES(PullOp)
 std::ostream& operator<<(std::ostream& out, const PullOp &op);
@@ -6000,23 +6000,23 @@ std::ostream& operator<<(std::ostream& out, const PullOp &op);
 struct PushOp {
   hobject_t soid;
   eversion_t version;
-  ceph::buffer::list data;
+  stone::buffer::list data;
   interval_set<uint64_t> data_included;
-  ceph::buffer::list omap_header;
-  std::map<std::string, ceph::buffer::list> omap_entries;
-  std::map<std::string, ceph::buffer::list> attrset;
+  stone::buffer::list omap_header;
+  std::map<std::string, stone::buffer::list> omap_entries;
+  std::map<std::string, stone::buffer::list> attrset;
 
   ObjectRecoveryInfo recovery_info;
   ObjectRecoveryProgress before_progress;
   ObjectRecoveryProgress after_progress;
 
   static void generate_test_instances(std::list<PushOp*>& o);
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &bl);
   std::ostream &print(std::ostream &out) const;
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
-  uint64_t cost(StoneeContext *cct) const;
+  uint64_t cost(StoneContext *cct) const;
 };
 WRITE_CLASS_ENCODER_FEATURES(PushOp)
 std::ostream& operator<<(std::ostream& out, const PushOp &op);
@@ -6029,7 +6029,7 @@ enum class scrub_type_t : bool { not_repair = false, do_repair = true };
  */
 struct ScrubMap {
   struct object {
-    std::map<std::string, ceph::buffer::ptr> attrs;
+    std::map<std::string, stone::buffer::ptr> attrs;
     uint64_t size;
     __u32 omap_digest;         ///< omap crc32c
     __u32 digest;              ///< data crc32c
@@ -6053,9 +6053,9 @@ struct ScrubMap {
       read_error(false), stat_error(false), ec_hash_mismatch(false),
       ec_size_mismatch(false), large_omap_object_found(false) {}
 
-    void encode(ceph::buffer::list& bl) const;
-    void decode(ceph::buffer::list::const_iterator& bl);
-    void dump(ceph::Formatter *f) const;
+    void encode(stone::buffer::list& bl) const;
+    void decode(stone::buffer::list::const_iterator& bl);
+    void dump(stone::Formatter *f) const;
     static void generate_test_instances(std::list<object*>& o);
   };
   WRITE_CLASS_ENCODER(object)
@@ -6080,9 +6080,9 @@ struct ScrubMap {
     swap(incr_since, r.incr_since);
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl, int64_t pool=-1);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl, int64_t pool=-1);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ScrubMap*>& o);
 };
 WRITE_CLASS_ENCODER(ScrubMap::object)
@@ -6095,7 +6095,7 @@ struct ScrubMapBuilder {
   int64_t data_pos = 0;
   std::string omap_pos;
   int ret = 0;
-  ceph::buffer::hash data_hash, omap_hash;  ///< accumulatinng hash value
+  stone::buffer::hash data_hash, omap_hash;  ///< accumulatinng hash value
   uint64_t omap_keys = 0;
   uint64_t omap_bytes = 0;
 
@@ -6154,7 +6154,7 @@ struct watch_item_t {
     : name(name), cookie(cookie), timeout_seconds(timeout),
     addr(addr) { }
 
-  void encode(ceph::buffer::list &bl, uint64_t features) const {
+  void encode(stone::buffer::list &bl, uint64_t features) const {
     ENCODE_START(2, 1, bl);
     encode(name, bl);
     encode(cookie, bl);
@@ -6162,7 +6162,7 @@ struct watch_item_t {
     encode(addr, bl, features);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator &bl) {
+  void decode(stone::buffer::list::const_iterator &bl) {
     DECODE_START(2, bl);
     decode(name, bl);
     decode(cookie, bl);
@@ -6172,7 +6172,7 @@ struct watch_item_t {
     }
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_stream("watcher") << name;
     f->dump_int("cookie", cookie);
     f->dump_int("timeout", timeout_seconds);
@@ -6211,17 +6211,17 @@ struct obj_watch_item_t {
 struct obj_list_watch_response_t {
   std::list<watch_item_t> entries;
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const {
+  void encode(stone::buffer::list& bl, uint64_t features) const {
     ENCODE_START(1, 1, bl);
     encode(entries, bl, features);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(entries, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->open_array_section("entries");
     for (std::list<watch_item_t>::const_iterator p = entries.begin(); p != entries.end(); ++p) {
       f->open_object_section("watch");
@@ -6252,7 +6252,7 @@ struct clone_info {
 
   clone_info() : cloneid(STONE_NOSNAP), size(0) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(cloneid, bl);
     encode(snaps, bl);
@@ -6260,7 +6260,7 @@ struct clone_info {
     encode(size, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(cloneid, bl);
     decode(snaps, bl);
@@ -6268,7 +6268,7 @@ struct clone_info {
     decode(size, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     if (cloneid == STONE_NOSNAP)
       f->dump_string("cloneid", "HEAD");
     else
@@ -6314,13 +6314,13 @@ struct obj_list_snap_response_t {
   std::vector<clone_info> clones;   // ascending
   snapid_t seq;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 1, bl);
     encode(clones, bl);
     encode(seq, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(2, bl);
     decode(clones, bl);
     if (struct_v >= 2)
@@ -6329,7 +6329,7 @@ struct obj_list_snap_response_t {
       seq = STONE_NOSNAP;
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->open_array_section("clones");
     for (std::vector<clone_info>::const_iterator p = clones.begin(); p != clones.end(); ++p) {
       f->open_object_section("clone");
@@ -6421,21 +6421,21 @@ struct pool_pg_num_history_t {
     }
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(epoch, bl);
     encode(pg_nums, bl);
     encode(deleted_pools, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(1, p);
     decode(epoch, p);
     decode(pg_nums, p);
     decode(deleted_pools, p);
     DECODE_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_unsigned("epoch", epoch);
     f->open_object_section("pools");
     for (auto& i : pg_nums) {
@@ -6490,8 +6490,8 @@ static const __u8 pg_latest_struct_v = 10;
 static const __u8 pg_compat_struct_v = 10;
 
 int prepare_info_keymap(
-  StoneeContext* cct,
-  std::map<std::string,ceph::buffer::list> *km,
+  StoneContext* cct,
+  std::map<std::string,stone::buffer::list> *km,
   std::string *key_to_remove,
   epoch_t epoch,
   pg_info_t &info,
@@ -6503,15 +6503,15 @@ int prepare_info_keymap(
   PerfCounters *logger = nullptr,
   DoutPrefixProvider *dpp = nullptr);
 
-namespace ceph::os {
+namespace stone::os {
   class Transaction;
 };
 
 void create_pg_collection(
-  ceph::os::Transaction& t, spg_t pgid, int bits);
+  stone::os::Transaction& t, spg_t pgid, int bits);
 
 void init_pg_ondisk(
-  ceph::os::Transaction& t, spg_t pgid, const pg_pool_t *pool);
+  stone::os::Transaction& t, spg_t pgid, const pg_pool_t *pool);
 
 // omap specific stats
 struct omap_stat_t {
@@ -6522,21 +6522,21 @@ struct omap_stat_t {
 
 // filter for pg listings
 class PGLSFilter {
-  StoneeContext* cct;
+  StoneContext* cct;
 protected:
   std::string xattr;
 public:
   PGLSFilter();
   virtual ~PGLSFilter();
   virtual bool filter(const hobject_t &obj,
-                      const ceph::buffer::list& xattr_data) const = 0;
+                      const stone::buffer::list& xattr_data) const = 0;
 
   /**
    * Arguments passed from the RADOS client.  Implementations must
    * handle any encoding errors, and return an appropriate error code,
    * or 0 on valid input.
    */
-  virtual int init(ceph::buffer::list::const_iterator &params) = 0;
+  virtual int init(stone::buffer::list::const_iterator &params) = 0;
 
   /**
    * xattr key, or empty string.  If non-empty, this xattr will be fetched
@@ -6554,10 +6554,10 @@ public:
 class PGLSPlainFilter : public PGLSFilter {
   std::string val;
 public:
-  int init(ceph::buffer::list::const_iterator &params) override;
+  int init(stone::buffer::list::const_iterator &params) override;
   ~PGLSPlainFilter() override {}
   bool filter(const hobject_t& obj,
-              const ceph::buffer::list& xattr_data) const override;
+              const stone::buffer::list& xattr_data) const override;
 };
 
 // alias name for this structure:

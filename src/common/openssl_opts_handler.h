@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2020 Huawei Technologies Co., Ltd.
  *
@@ -15,7 +15,7 @@
 #ifndef STONE_OPENSSL_OPTS_HANDLER_H
 #define STONE_OPENSSL_OPTS_HANDLER_H
 
-namespace ceph {
+namespace stone {
   namespace crypto {
     void init_openssl_engine_once();
   }

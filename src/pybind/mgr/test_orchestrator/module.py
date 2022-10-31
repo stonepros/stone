@@ -7,15 +7,15 @@ import functools
 import itertools
 from subprocess import check_output, CalledProcessError
 
-from ceph.deployment.service_spec import ServiceSpec, NFSServiceSpec, IscsiServiceSpec
+from stone.deployment.service_spec import ServiceSpec, NFSServiceSpec, IscsiServiceSpec
 
 try:
     from typing import Callable, List, Sequence, Tuple
 except ImportError:
     pass  # type checking
 
-from ceph.deployment import inventory
-from ceph.deployment.drive_group import DriveGroupSpec
+from stone.deployment import inventory
+from stone.deployment.drive_group import DriveGroupSpec
 from mgr_module import CLICommand, HandleCommandResult
 from mgr_module import MgrModule
 
@@ -91,11 +91,11 @@ class TestOrchestrator(MgrModule, orchestrator.Orchestrator):
             return self._inventory
 
         try:
-            c_v_out = check_output(['ceph-volume', 'inventory', '--format', 'json'])
+            c_v_out = check_output(['stone-volume', 'inventory', '--format', 'json'])
         except OSError:
             cmd = """
-            . {tmpdir}/ceph-volume-virtualenv/bin/activate
-            ceph-volume inventory --format json
+            . {tmpdir}/stone-volume-virtualenv/bin/activate
+            stone-volume inventory --format json
             """
             try:
                 c_v_out = check_output(cmd.format(tmpdir=os.environ.get('TMPDIR', '/tmp')), shell=True)
@@ -109,18 +109,18 @@ class TestOrchestrator(MgrModule, orchestrator.Orchestrator):
         self.log.error('c-v failed: ' + str(c_v_out))
         raise Exception('c-v failed')
 
-    def _get_ceph_daemons(self):
+    def _get_stone_daemons(self):
         # type: () -> List[orchestrator.DaemonDescription]
-        """ Return ceph daemons on the running host."""
+        """ Return stone daemons on the running host."""
         types = ("mds", "osd", "mon", "rgw", "mgr", "nfs", "iscsi")
         out = map(str, check_output(['ps', 'aux']).splitlines())
         processes = [p for p in out if any(
-            [('ceph-{} '.format(t) in p) for t in types])]
+            [('stone-{} '.format(t) in p) for t in types])]
 
         daemons = []
         for p in processes:
             # parse daemon type
-            m = re.search('ceph-([^ ]+)', p)
+            m = re.search('stone-([^ ]+)', p)
             if m:
                 _daemon_type = m.group(1)
             else:
@@ -149,7 +149,7 @@ class TestOrchestrator(MgrModule, orchestrator.Orchestrator):
                 services = list(filter(lambda s: s.spec.service_type == service_type, services))
         else:
             # Deduce services from daemons running on localhost
-            all_daemons = self._get_ceph_daemons()
+            all_daemons = self._get_stone_daemons()
             services = []
             for daemon_type, daemons in itertools.groupby(all_daemons, key=lambda d: d.daemon_type):
                 if service_type is not None and service_type != daemon_type:
@@ -178,7 +178,7 @@ class TestOrchestrator(MgrModule, orchestrator.Orchestrator):
             daemon_types = ("mds", "osd", "mon", "rgw", "mgr", "iscsi", "crash", "nfs")
             assert daemon_type in daemon_types, daemon_type + " unsupported"
 
-        daemons = self._daemons if self._daemons else self._get_ceph_daemons()
+        daemons = self._daemons if self._daemons else self._get_stone_daemons()
 
         def _filter_func(d):
             if service_name is not None and service_name != d.service_name():
@@ -201,7 +201,7 @@ class TestOrchestrator(MgrModule, orchestrator.Orchestrator):
         # type: (DriveGroupSpec) -> str
         """ Creates OSDs from a drive group specification.
 
-        $: ceph orch osd create -i <dg.file>
+        $: stone orch osd create -i <dg.file>
 
         The drivegroup file must only contain one spec at a time.
         """

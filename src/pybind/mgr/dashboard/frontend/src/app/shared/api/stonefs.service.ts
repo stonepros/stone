@@ -5,15 +5,15 @@ import _ from 'lodash';
 import { Observable } from 'rxjs';
 
 import { cdEncode } from '../decorators/cd-encode';
-import { CephfsDir, CephfsQuotas } from '../models/cephfs-directory-models';
+import { StonefsDir, StonefsQuotas } from '../models/stonefs-directory-models';
 
 @cdEncode
 @Injectable({
   providedIn: 'root'
 })
-export class CephfsService {
-  baseURL = 'api/cephfs';
-  baseUiURL = 'ui-api/cephfs';
+export class StonefsService {
+  baseURL = 'api/stonefs';
+  baseUiURL = 'ui-api/stonefs';
 
   constructor(private http: HttpClient) {}
 
@@ -21,20 +21,20 @@ export class CephfsService {
     return this.http.get(`${this.baseURL}`);
   }
 
-  lsDir(id: number, path?: string): Observable<CephfsDir[]> {
+  lsDir(id: number, path?: string): Observable<StonefsDir[]> {
     let apiPath = `${this.baseUiURL}/${id}/ls_dir?depth=2`;
     if (path) {
       apiPath += `&path=${encodeURIComponent(path)}`;
     }
-    return this.http.get<CephfsDir[]>(apiPath);
+    return this.http.get<StonefsDir[]>(apiPath);
   }
 
-  getCephfs(id: number) {
+  getStonefs(id: number) {
     return this.http.get(`${this.baseURL}/${id}`);
   }
 
   getTabs(id: number) {
-    return this.http.get(`ui-api/cephfs/${id}/tabs`);
+    return this.http.get(`ui-api/stonefs/${id}/tabs`);
   }
 
   getClients(id: number) {
@@ -65,7 +65,7 @@ export class CephfsService {
     return this.http.delete(`${this.baseURL}/${id}/snapshot`, { params });
   }
 
-  quota(id: number, path: string, quotas: CephfsQuotas) {
+  quota(id: number, path: string, quotas: StonefsQuotas) {
     let params = new HttpParams();
     params = params.append('path', path);
     return this.http.put(`${this.baseURL}/${id}/quota`, quotas, {

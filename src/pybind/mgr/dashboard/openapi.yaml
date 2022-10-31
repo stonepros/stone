@@ -7,8 +7,8 @@ components:
       type: http
 host: example.com
 info:
-  description: This is the official Ceph REST API
-  title: Ceph REST API
+  description: This is the official Stone REST API
+  title: Stone REST API
   version: v1
 openapi: 3.0.0
 paths:
@@ -1566,7 +1566,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/stonefs/{fs_id}:
     get:
       parameters:
@@ -1593,7 +1593,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/stonefs/{fs_id}/client/{client_id}:
     delete:
       parameters:
@@ -1630,7 +1630,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/stonefs/{fs_id}/clients:
     get:
       parameters:
@@ -1657,7 +1657,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/stonefs/{fs_id}/get_root_directory:
     get:
       description: "\n        The root directory that can't be fetched using ls_dir\
@@ -1687,7 +1687,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/stonefs/{fs_id}/ls_dir:
     get:
       description: "\n        List directories of specified path.\n        :param\
@@ -1731,7 +1731,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/stonefs/{fs_id}/mds_counters:
     get:
       parameters:
@@ -1763,7 +1763,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/stonefs/{fs_id}/quota:
     get:
       description: "\n        Get the quotas of the specified path.\n        :param\
@@ -1811,9 +1811,9 @@ paths:
             trace.
       security:
       - jwt: []
-      summary: Get Cephfs Quotas of the specified path
+      summary: Get Stonefs Quotas of the specified path
       tags:
-      - Cephfs
+      - Stonefs
     put:
       description: "\n        Set the quotas of the specified path.\n        :param\
         \ fs_id: The filesystem identifier.\n        :param path: The path of the\
@@ -1862,7 +1862,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/stonefs/{fs_id}/snapshot:
     delete:
       description: "\n        Remove a snapshot.\n        :param fs_id: The filesystem\
@@ -1907,7 +1907,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
     post:
       description: "\n        Create a snapshot.\n        :param fs_id: The filesystem\
         \ identifier.\n        :param path: The path of the directory.\n        :param\
@@ -1955,7 +1955,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/stonefs/{fs_id}/tree:
     delete:
       description: "\n        Remove a directory.\n        :param fs_id: The filesystem\
@@ -1994,7 +1994,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
     post:
       description: "\n        Create a directory.\n        :param fs_id: The filesystem\
         \ identifier.\n        :param path: The path of the directory.\n        "
@@ -2037,7 +2037,7 @@ paths:
       security:
       - jwt: []
       tags:
-      - Cephfs
+      - Stonefs
   /api/cluster:
     get:
       parameters: []
@@ -3273,7 +3273,7 @@ paths:
                     description: Host address
                     type: string
                   stone_version:
-                    description: Ceph version
+                    description: Stone version
                     type: string
                   hostname:
                     description: Hostname
@@ -3452,7 +3452,7 @@ paths:
       - Host
     put:
       description: "\n        Update the specified host.\n        Note, this is only\
-        \ supported when Ceph Orchestrator is enabled.\n        :param hostname: The\
+        \ supported when Stone Orchestrator is enabled.\n        :param hostname: The\
         \ name of the host to be processed.\n        :param update_labels: To update\
         \ the labels.\n        :param labels: List of labels.\n        :param maintenance:\
         \ Enter/Exit maintenance mode.\n        :param force: Force enter maintenance\
@@ -4451,7 +4451,7 @@ paths:
   /api/mgr/module/{module_name}:
     get:
       description: "\n        Retrieve the values of the persistent configuration\
-        \ settings.\n        :param module_name: The name of the Ceph Mgr module.\n\
+        \ settings.\n        :param module_name: The name of the Stone Mgr module.\n\
         \        :type module_name: str\n        :return: The values of the module\
         \ options.\n        :rtype: dict\n        "
       parameters:
@@ -4481,7 +4481,7 @@ paths:
       - MgrModule
     put:
       description: "\n        Set the values of the persistent configuration settings.\n\
-        \        :param module_name: The name of the Ceph Mgr module.\n        :type\
+        \        :param module_name: The name of the Stone Mgr module.\n        :type\
         \ module_name: str\n        :param config: The values of the module options\
         \ to be stored.\n        :type config: dict\n        "
       parameters:
@@ -4526,8 +4526,8 @@ paths:
       - MgrModule
   /api/mgr/module/{module_name}/disable:
     post:
-      description: "\n        Disable the specified Ceph Mgr module.\n        :param\
-        \ module_name: The name of the Ceph Mgr module.\n        :type module_name:\
+      description: "\n        Disable the specified Stone Mgr module.\n        :param\
+        \ module_name: The name of the Stone Mgr module.\n        :type module_name:\
         \ str\n        "
       parameters:
       - in: path
@@ -4561,8 +4561,8 @@ paths:
       - MgrModule
   /api/mgr/module/{module_name}/enable:
     post:
-      description: "\n        Enable the specified Ceph Mgr module.\n        :param\
-        \ module_name: The name of the Ceph Mgr module.\n        :type module_name:\
+      description: "\n        Enable the specified Stone Mgr module.\n        :param\
+        \ module_name: The name of the Stone Mgr module.\n        :type module_name:\
         \ str\n        "
       parameters:
       - in: path
@@ -4596,8 +4596,8 @@ paths:
       - MgrModule
   /api/mgr/module/{module_name}/options:
     get:
-      description: "\n        Get the module options of the specified Ceph Mgr module.\n\
-        \        :param module_name: The name of the Ceph Mgr module.\n        :type\
+      description: "\n        Get the module options of the specified Stone Mgr module.\n\
+        \        :param module_name: The name of the Stone Mgr module.\n        :type\
         \ module_name: str\n        :return: The module options as list of dicts.\n\
         \        :rtype: list\n        "
       parameters:
@@ -5073,7 +5073,7 @@ paths:
                       description: FSAL configuration
                       properties:
                         fs_name:
-                          description: CephFS filesystem name
+                          description: StoneFS filesystem name
                           type: string
                         name:
                           description: name of FSAL
@@ -5176,7 +5176,7 @@ paths:
                   description: FSAL configuration
                   properties:
                     fs_name:
-                      description: CephFS filesystem name
+                      description: StoneFS filesystem name
                       type: string
                     name:
                       description: name of FSAL
@@ -5261,7 +5261,7 @@ paths:
                     description: FSAL configuration
                     properties:
                       fs_name:
-                        description: CephFS filesystem name
+                        description: StoneFS filesystem name
                         type: string
                       name:
                         description: name of FSAL
@@ -5424,7 +5424,7 @@ paths:
                     description: FSAL configuration
                     properties:
                       fs_name:
-                        description: CephFS filesystem name
+                        description: StoneFS filesystem name
                         type: string
                       name:
                         description: name of FSAL
@@ -5535,7 +5535,7 @@ paths:
                   description: FSAL configuration
                   properties:
                     fs_name:
-                      description: CephFS filesystem name
+                      description: StoneFS filesystem name
                       type: string
                     name:
                       description: name of FSAL
@@ -5619,7 +5619,7 @@ paths:
                     description: FSAL configuration
                     properties:
                       fs_name:
-                        description: CephFS filesystem name
+                        description: StoneFS filesystem name
                         type: string
                       name:
                         description: name of FSAL
@@ -7685,7 +7685,7 @@ paths:
                       description: ''
                       type: string
                     version:
-                      description: Ceph Version
+                      description: Stone Version
                       type: string
                     zone_name:
                       description: Zone
@@ -9275,7 +9275,7 @@ paths:
       - Telemetry
   /api/telemetry/report:
     get:
-      description: "\n        Get Ceph and device report data\n        :return: Ceph\
+      description: "\n        Get Stone and device report data\n        :return: Stone\
         \ and device report data\n        :rtype: dict\n        "
       parameters: []
       responses:
@@ -10328,10 +10328,10 @@ schemes:
 servers:
 - url: /
 tags:
-- description: Initiate a session with Ceph
+- description: Initiate a session with Stone
   name: Auth
-- description: Cephfs Management API
-  name: Cephfs
+- description: Stonefs Management API
+  name: Stonefs
 - description: Get Cluster Details
   name: Cluster
 - description: Manage Cluster Configurations
@@ -10420,7 +10420,7 @@ tags:
   name: Service
 - description: Settings Management API
   name: Settings
-- description: Get Ceph Summary Details
+- description: Get Stone Summary Details
   name: Summary
 - description: Task Management API
   name: Task

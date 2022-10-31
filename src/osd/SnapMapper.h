@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -28,13 +28,13 @@
 #include "os/ObjectStore.h"
 #include "osd/OSDMap.h"
 
-class OSDriver : public MapCacher::StoreDriver<std::string, ceph::buffer::list> {
+class OSDriver : public MapCacher::StoreDriver<std::string, stone::buffer::list> {
   ObjectStore *os;
   ObjectStore::CollectionHandle ch;
   ghobject_t hoid;
 
 public:
-  class OSTransaction : public MapCacher::Transaction<std::string, ceph::buffer::list> {
+  class OSTransaction : public MapCacher::Transaction<std::string, stone::buffer::list> {
     friend class OSDriver;
     coll_t cid;
     ghobject_t hoid;
@@ -46,7 +46,7 @@ public:
       : cid(cid), hoid(hoid), t(t) {}
   public:
     void set_keys(
-      const std::map<std::string, ceph::buffer::list> &to_set) override {
+      const std::map<std::string, stone::buffer::list> &to_set) override {
       t->omap_setkeys(cid, hoid, to_set);
     }
     void remove_keys(
@@ -71,10 +71,10 @@ public:
   }
   int get_keys(
     const std::set<std::string> &keys,
-    std::map<std::string, ceph::buffer::list> *out) override;
+    std::map<std::string, stone::buffer::list> *out) override;
   int get_next(
     const std::string &key,
-    std::pair<std::string, ceph::buffer::list> *next) override;
+    std::pair<std::string, stone::buffer::list> *next) override;
 };
 
 /**
@@ -101,15 +101,15 @@ public:
  */
 class SnapMapper {
 public:
-  StoneeContext* cct;
+  StoneContext* cct;
   struct object_snaps {
     hobject_t oid;
     std::set<snapid_t> snaps;
     object_snaps(hobject_t oid, const std::set<snapid_t> &snaps)
       : oid(oid), snaps(snaps) {}
     object_snaps() {}
-    void encode(ceph::buffer::list &bl) const;
-    void decode(ceph::buffer::list::const_iterator &bp);
+    void encode(stone::buffer::list &bl) const;
+    void decode(stone::buffer::list::const_iterator &bp);
   };
 
   struct Mapping {
@@ -118,13 +118,13 @@ public:
     explicit Mapping(const std::pair<snapid_t, hobject_t> &in)
       : snap(in.first), hoid(in.second) {}
     Mapping() : snap(0) {}
-    void encode(ceph::buffer::list &bl) const {
+    void encode(stone::buffer::list &bl) const {
       ENCODE_START(1, 1, bl);
       encode(snap, bl);
       encode(hoid, bl);
       ENCODE_FINISH(bl);
     }
-    void decode(ceph::buffer::list::const_iterator &bl) {
+    void decode(stone::buffer::list::const_iterator &bl) {
       DECODE_START(1, bl);
       decode(snap, bl);
       decode(hoid, bl);
@@ -139,7 +139,7 @@ public:
   static const char *PURGED_SNAP_PREFIX;
 
   struct Scrubber {
-    StoneeContext *cct;
+    StoneContext *cct;
     ObjectStore *store;
     ObjectStore::CollectionHandle ch;
     ghobject_t mapping_hoid;
@@ -160,7 +160,7 @@ public:
     std::vector<std::tuple<int64_t, snapid_t, uint32_t, shard_id_t>> stray;
 
     Scrubber(
-      StoneeContext *cct,
+      StoneContext *cct,
       ObjectStore *store,
       ObjectStore::CollectionHandle& ch,
       ghobject_t mapping_hoid,
@@ -175,21 +175,21 @@ public:
   };
 
   static int convert_legacy(
-    StoneeContext *cct,
+    StoneContext *cct,
     ObjectStore *store,
     ObjectStore::CollectionHandle& ch,
     ghobject_t hoid,
     unsigned max);
 
   static void record_purged_snaps(
-    StoneeContext *cct,
+    StoneContext *cct,
     ObjectStore *store,
     ObjectStore::CollectionHandle& ch,
     ghobject_t hoid,
     ObjectStore::Transaction *t,
     std::map<epoch_t,mempool::osdmap::map<int64_t,snap_interval_set_t>> purged_snaps);
   static void scrub_purged_snaps(
-    StoneeContext *cct,
+    StoneContext *cct,
     ObjectStore *store,
     ObjectStore::CollectionHandle& ch,
     ghobject_t mapper_hoid,
@@ -197,7 +197,7 @@ public:
 
 private:
   static int _lookup_purged_snap(
-    StoneeContext *cct,
+    StoneContext *cct,
     ObjectStore *store,
     ObjectStore::CollectionHandle& ch,
     const ghobject_t& hoid,
@@ -205,11 +205,11 @@ private:
     snapid_t *begin, snapid_t *end);
   static void make_purged_snap_key_value(
     int64_t pool, snapid_t begin,
-    snapid_t end, std::map<std::string,ceph::buffer::list> *m);
+    snapid_t end, std::map<std::string,stone::buffer::list> *m);
   static std::string make_purged_snap_key(int64_t pool, snapid_t last);
 
 
-  MapCacher::MapCacher<std::string, ceph::buffer::list> backend;
+  MapCacher::MapCacher<std::string, stone::buffer::list> backend;
 
   static std::string get_legacy_prefix(snapid_t snap);
   std::string to_legacy_raw_key(
@@ -220,13 +220,13 @@ private:
   std::string to_raw_key(
     const std::pair<snapid_t, hobject_t> &to_map);
 
-  std::pair<std::string, ceph::buffer::list> to_raw(
+  std::pair<std::string, stone::buffer::list> to_raw(
     const std::pair<snapid_t, hobject_t> &to_map);
 
   static bool is_mapping(const std::string &to_test);
 
   static std::pair<snapid_t, hobject_t> from_raw(
-    const std::pair<std::string, ceph::buffer::list> &image);
+    const std::pair<std::string, stone::buffer::list> &image);
 
   std::string to_object_key(const hobject_t &hoid);
 
@@ -235,18 +235,18 @@ private:
   void set_snaps(
     const hobject_t &oid,
     const object_snaps &out,
-    MapCacher::Transaction<std::string, ceph::buffer::list> *t);
+    MapCacher::Transaction<std::string, stone::buffer::list> *t);
 
   void clear_snaps(
     const hobject_t &oid,
-    MapCacher::Transaction<std::string, ceph::buffer::list> *t);
+    MapCacher::Transaction<std::string, stone::buffer::list> *t);
 
   // True if hoid belongs in this mapping based on mask_bits and match
   bool check(const hobject_t &hoid) const;
 
   int _remove_oid(
     const hobject_t &oid,    ///< [in] oid to remove
-    MapCacher::Transaction<std::string, ceph::buffer::list> *t ///< [out] transaction
+    MapCacher::Transaction<std::string, stone::buffer::list> *t ///< [out] transaction
     );
 
 public:
@@ -255,7 +255,7 @@ public:
       return std::string();
     char buf[20];
     int r = snprintf(buf, sizeof(buf), ".%x", (int)shard);
-    ceph_assert(r < (int)sizeof(buf));
+    stone_assert(r < (int)sizeof(buf));
     return std::string(buf, r) + '_';
   }
   uint32_t mask_bits;
@@ -265,8 +265,8 @@ public:
   const shard_id_t shard;
   const std::string shard_prefix;
   SnapMapper(
-    StoneeContext* cct,
-    MapCacher::StoreDriver<std::string, ceph::buffer::list> *driver,
+    StoneContext* cct,
+    MapCacher::StoreDriver<std::string, stone::buffer::list> *driver,
     uint32_t match,  ///< [in] pgid
     uint32_t bits,   ///< [in] current split bits
     int64_t pool,    ///< [in] pool
@@ -298,14 +298,14 @@ public:
     const hobject_t &oid,       ///< [in] oid to update
     const std::set<snapid_t> &new_snaps, ///< [in] new snap std::set
     const std::set<snapid_t> *old_snaps, ///< [in] old snaps (for debugging)
-    MapCacher::Transaction<std::string, ceph::buffer::list> *t ///< [out] transaction
+    MapCacher::Transaction<std::string, stone::buffer::list> *t ///< [out] transaction
     ); ///@ return error, 0 on success
 
   /// Add mapping for oid, must not already be mapped
   void add_oid(
     const hobject_t &oid,       ///< [in] oid to add
     const std::set<snapid_t>& new_snaps, ///< [in] snaps
-    MapCacher::Transaction<std::string, ceph::buffer::list> *t ///< [out] transaction
+    MapCacher::Transaction<std::string, stone::buffer::list> *t ///< [out] transaction
     );
 
   /// Returns first object with snap as a snap
@@ -318,7 +318,7 @@ public:
   /// Remove mapping for oid
   int remove_oid(
     const hobject_t &oid,    ///< [in] oid to remove
-    MapCacher::Transaction<std::string, ceph::buffer::list> *t ///< [out] transaction
+    MapCacher::Transaction<std::string, stone::buffer::list> *t ///< [out] transaction
     ); ///< @return error, -ENOENT if the object is not mapped
 
   /// Get snaps for oid

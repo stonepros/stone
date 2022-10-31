@@ -7,7 +7,7 @@
 
 #include "include/types.h"
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "common/Thread.h"
 #include "rgw_common.h"
@@ -20,7 +20,7 @@
 class RGWGCIOManager;
 
 class RGWGC : public DoutPrefixProvider {
-  CephContext *cct;
+  StoneContext *cct;
   RGWRados *store;
   int max_objs;
   string *obj_names;
@@ -32,13 +32,13 @@ class RGWGC : public DoutPrefixProvider {
 
   class GCWorker : public Thread {
     const DoutPrefixProvider *dpp;
-    CephContext *cct;
+    StoneContext *cct;
     RGWGC *gc;
-    ceph::mutex lock = ceph::make_mutex("GCWorker");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("GCWorker");
+    stone::condition_variable cond;
 
   public:
-    GCWorker(const DoutPrefixProvider *_dpp, CephContext *_cct, RGWGC *_gc) : dpp(_dpp), cct(_cct), gc(_gc) {}
+    GCWorker(const DoutPrefixProvider *_dpp, StoneContext *_cct, RGWGC *_gc) : dpp(_dpp), cct(_cct), gc(_gc) {}
     void *entry() override;
     void stop();
   };
@@ -62,7 +62,7 @@ public:
   int remove(int index, const std::vector<string>& tags, librados::AioCompletion **pc);
   int remove(int index, int num_entries);
 
-  void initialize(CephContext *_cct, RGWRados *_store);
+  void initialize(StoneContext *_cct, RGWRados *_store);
   void finalize();
 
   int list(int *index, string& marker, uint32_t max, bool expired_only, std::list<cls_rgw_gc_obj_info>& result, bool *truncated, bool& processing_queue);
@@ -75,7 +75,7 @@ public:
   void start_processor();
   void stop_processor();
 
-  CephContext *get_cct() const override { return store->ctx(); }
+  StoneContext *get_cct() const override { return store->ctx(); }
   unsigned get_subsys() const;
 
   std::ostream& gen_prefix(std::ostream& out) const;

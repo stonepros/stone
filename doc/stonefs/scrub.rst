@@ -1,10 +1,10 @@
 .. _mds-scrub:
 
 ======================
-Ceph File System Scrub
+Stone File System Scrub
 ======================
 
-CephFS provides the cluster admin (operator) to check consistency of a file system
+StoneFS provides the cluster admin (operator) to check consistency of a file system
 via a set of scrub commands. Scrub can be classified into two parts:
 
 #. Forward Scrub: In which the scrub operation starts at the root of the file system
@@ -19,7 +19,7 @@ scrub thereafter).
 
 .. warning::
 
-   CephFS forward scrubs are started and manipulated on rank 0. All scrub
+   StoneFS forward scrubs are started and manipulated on rank 0. All scrub
    commands must be directed at rank 0.
 
 Initiate File System Scrub

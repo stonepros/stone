@@ -3,10 +3,10 @@ Copyright (C) 2020 SUSE
 
 LGPL2.1.  See file COPYING.
 """
-import cephfs
+import stonefs
 import rados
 from contextlib import contextmanager
-from mgr_util import CephfsClient, open_filesystem, CephfsConnectionException
+from mgr_util import StonefsClient, open_filesystem, StonefsConnectionException
 from collections import OrderedDict
 from datetime import datetime, timezone
 import logging
@@ -21,7 +21,7 @@ import errno
 
 
 MAX_SNAPS_PER_PATH = 50
-SNAP_SCHEDULE_NAMESPACE = 'cephfs-snap-schedule'
+SNAP_SCHEDULE_NAMESPACE = 'stonefs-snap-schedule'
 SNAP_DB_PREFIX = 'snap_db'
 # increment this every time the db schema changes and provide upgrade code
 SNAP_DB_VERSION = '0'
@@ -130,7 +130,7 @@ class DBConnectionManager():
         log.debug(f'unlocked db connection for {self.dbinfo.fs}')
 
 
-class SnapSchedClient(CephfsClient):
+class SnapSchedClient(StonefsClient):
 
     def __init__(self, mgr):
         super(SnapSchedClient, self).__init__(mgr)
@@ -186,7 +186,7 @@ class SnapSchedClient(CephfsClient):
         # only store db is it exists, otherwise nothing to do
         metadata_pool = self.get_metadata_pool(fs)
         if not metadata_pool:
-            raise CephfsConnectionException(
+            raise StonefsConnectionException(
                 -errno.ENOENT, "Filesystem {} does not exist".format(fs))
         db_content = []
         for row in db.iterdump():
@@ -270,7 +270,7 @@ class SnapSchedClient(CephfsClient):
                     log.info(f'created scheduled snapshot of {path}')
                     log.debug(f'created scheduled snapshot {snap_name}')
                     sched.update_last(time, db)
-                except cephfs.Error:
+                except stonefs.Error:
                     self._log_exception('create_scheduled_snapshot')
                     sched.set_inactive(db)
                 except Exception:

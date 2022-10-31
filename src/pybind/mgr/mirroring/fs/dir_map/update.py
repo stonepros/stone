@@ -79,7 +79,7 @@ class UpdateInstanceRequest:
         return f'{INSTANCE_ID_PREFIX}{instance_id}'
 
     @staticmethod
-    def cephfs_mirror_object_name(instance_id):
+    def stonefs_mirror_object_name(instance_id):
         assert instance_id != ''
         return f'{MIRROR_OBJECT_PREFIX}.{instance_id}'
 
@@ -97,12 +97,12 @@ class UpdateInstanceRequest:
             return
         instance_id = self.instances_purge.pop()
         self.ioctx.aio_remove(
-            UpdateInstanceRequest.cephfs_mirror_object_name(instance_id), oncomplete=self.handle_remove)
+            UpdateInstanceRequest.stonefs_mirror_object_name(instance_id), oncomplete=self.handle_remove)
 
     def handle_remove(self, completion):
         r = completion.get_return_value()
         log.debug(f'handle_remove: r={r}')
-        # cephfs-mirror instances remove their respective instance
+        # stonefs-mirror instances remove their respective instance
         # objects upon termination. so we handle ENOENT here. note
         # that when an instance is blocklisted, it wont be able to
         # purge its instance object, so we do it on its behalf.

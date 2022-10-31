@@ -27,13 +27,13 @@ public:
 
 public:
   void encode_payload(uint64_t features) {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(map_epoch, payload);
     encode(state, payload);
   }
   void decode_payload() {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(map_epoch, p);
@@ -48,7 +48,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

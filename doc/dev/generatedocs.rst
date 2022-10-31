@@ -1,37 +1,37 @@
-Building Ceph Documentation
+Building Stone Documentation
 ===========================
 
-Ceph utilizes Python's Sphinx documentation tool. For details on
+Stone utilizes Python's Sphinx documentation tool. For details on
 the Sphinx documentation tool, refer to `The Sphinx Documentation Tool <https://www.sphinx-doc.org/en/master/>`_.
 
-To build the Ceph documentation set, you must:
+To build the Stone documentation set, you must:
 
-1. Clone the Ceph repository
+1. Clone the Stone repository
 2. Install the required tools
 3. Build the documents
 4. Demo the documents (Optional)
 
 .. highlight:: bash
 
-Clone the Ceph Repository
+Clone the Stone Repository
 -------------------------
 
-To clone the Ceph repository, you must have ``git`` installed
+To clone the Stone repository, you must have ``git`` installed
 on your local host. To install ``git``, execute::
 
 	sudo apt-get install git
 
-To clone the Ceph repository, execute::
+To clone the Stone repository, execute::
 
 	git clone git://github.com/ceph/ceph
 
-You should have a full copy of the Ceph repository.
+You should have a full copy of the Stone repository.
 
 
 Install the Required Tools
 --------------------------
 
-To build the Ceph documentation, some dependencies are required.
+To build the Stone documentation, some dependencies are required.
 To know what packages are needed, you can launch this command::
 
     cd ceph

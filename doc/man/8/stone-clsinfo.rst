@@ -1,21 +1,21 @@
 :orphan:
 
 ===============================================
- ceph-clsinfo -- show class object information
+ stone-clsinfo -- show class object information
 ===============================================
 
-.. program:: ceph-clsinfo
+.. program:: stone-clsinfo
 
 Synopsis
 ========
 
-| **ceph-clsinfo** [ *options* ] ... *filename*
+| **stone-clsinfo** [ *options* ] ... *filename*
 
 
 Description
 ===========
 
-**ceph-clsinfo** can show name, version, and architecture information
+**stone-clsinfo** can show name, version, and architecture information
 about a specific class object.
 
 
@@ -38,12 +38,12 @@ Options
 Availability
 ============
 
-**ceph-clsinfo** is part of Ceph, a massively scalable, open-source, distributed storage system. Please
-refer to the Ceph documentation at http://ceph.com/docs for more
+**stone-clsinfo** is part of Stone, a massively scalable, open-source, distributed storage system. Please
+refer to the Stone documentation at http://stone.com/docs for more
 information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)

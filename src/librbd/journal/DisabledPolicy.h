@@ -21,7 +21,7 @@ public:
     return true;
   }
   void allocate_tag_on_lock(Context *on_finish) override {
-    ceph_abort();
+    stone_abort();
   }
 };
 

@@ -1,4 +1,4 @@
-CephFS Reclaim Interface
+StoneFS Reclaim Interface
 ========================
 
 Introduction
@@ -16,7 +16,7 @@ the long wait for the old session to time out before releasing the state
 previously held.
 
 As soon as an NFS server running over cephfs goes down, it's racing
-against its MDS session timeout. If the Ceph session times out before
+against its MDS session timeout. If the Stone session times out before
 the NFS grace period is started, then conflicting state could be
 acquired by another client. This mechanism also allows us to increase
 the timeout for these clients, to ensure that the server has a long
@@ -48,7 +48,7 @@ CEPH_RECLAIM_RESET
 
 Finishing Reclaim
 -----------------
-After the Ceph client has completed all of its reclaim operations, the
+After the Stone client has completed all of its reclaim operations, the
 client should issue ceph_finish_reclaim to indicate that the reclaim is
 now complete.
 

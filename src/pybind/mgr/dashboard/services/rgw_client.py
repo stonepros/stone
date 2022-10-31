@@ -154,7 +154,7 @@ def _parse_frontend_config(config) -> Tuple[int, bool]:
     the first found option will be returned.
 
     Get more details about the configuration syntax here:
-    http://docs.ceph.com/en/latest/radosgw/frontends/
+    http://docs.stone.com/en/latest/radosgw/frontends/
     https://civetweb.github.io/civetweb/UserManual.html
 
     :param config: The configuration string to parse.
@@ -220,7 +220,7 @@ def _get_user_keys(user: str, realm: Optional[str] = None) -> Tuple[str, str]:
             rgw_create_user_cmd = [
                 'user', 'create',
                 '--uid', user,
-                '--display-name', 'Ceph Dashboard',
+                '--display-name', 'Stone Dashboard',
                 '--system',
             ] + cmd_realm_option
             _, out, err = mgr.send_rgwadmin_command(rgw_create_user_cmd)
@@ -282,7 +282,7 @@ class RgwClient(RestClient):
 
     @staticmethod
     def _handle_response_status_code(status_code: int) -> int:
-        # Do not return auth error codes (so they are not handled as ceph API user auth errors).
+        # Do not return auth error codes (so they are not handled as stone API user auth errors).
         return 404 if status_code in [401, 403] else status_code
 
     @staticmethod
@@ -619,7 +619,7 @@ class RgwClient(RestClient):
             https://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketPUTVersioningStatus.html
         :param str mfa_delete: MFA Delete state.
         :param str mfa_token_serial:
-            https://docs.ceph.com/docs/master/radosgw/mfa/
+            https://docs.stone.com/docs/master/radosgw/mfa/
         :param str mfa_token_pin: value of a TOTP token at a certain time (auth code)
         :return: None
         """

@@ -14,11 +14,11 @@ class ConfigMonitor : public PaxosService
 {
   version_t version = 0;
   ConfigMap config_map;
-  std::map<std::string,boost::optional<ceph::buffer::list>> pending;
+  std::map<std::string,boost::optional<stone::buffer::list>> pending;
   std::string pending_description;
-  std::map<std::string,boost::optional<ceph::buffer::list>> pending_cleanup;
+  std::map<std::string,boost::optional<stone::buffer::list>> pending_cleanup;
 
-  std::map<std::string,ceph::buffer::list> current;
+  std::map<std::string,stone::buffer::list> current;
 
   void encode_pending_to_kvmon();
 

@@ -16,7 +16,7 @@ Description
 ===========
 
 :program:`radosgw` is an HTTP REST gateway for the RADOS object store, a part
-of the Ceph distributed storage system. It is implemented as a FastCGI
+of the Stone distributed storage system. It is implemented as a FastCGI
 module using libfcgi, and can be used in conjunction with any FastCGI
 capable web server.
 
@@ -24,14 +24,14 @@ capable web server.
 Options
 =======
 
-.. option:: -c ceph.conf, --conf=ceph.conf
+.. option:: -c stone.conf, --conf=stone.conf
 
-   Use ``ceph.conf`` configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` to determine monitor addresses during startup.
+   Use ``stone.conf`` configuration file instead of the default
+   ``/etc/stone/stone.conf`` to determine monitor addresses during startup.
 
 .. option:: -m monaddress[:port]
 
-   Connect to specified monitor (instead of looking through ``ceph.conf``).
+   Connect to specified monitor (instead of looking through ``stone.conf``).
 
 .. option:: -i ID, --id ID
 
@@ -43,7 +43,7 @@ Options
 
 .. option:: --cluster NAME
 
-   Set the cluster name (default: ceph)
+   Set the cluster name (default: stone)
 
 .. option:: -d
 
@@ -87,21 +87,21 @@ Apache 2.4, needs to be configured for use with localhost tcp. Later versions of
 Apache like Apache 2.4.9 or later support unix domain socket and as such they
 allow for the configuration with unix domain socket instead of localhost tcp.
 
-The following steps show the configuration in Ceph's configuration file i.e,
-``/etc/ceph/ceph.conf`` and the gateway configuration file i.e,
+The following steps show the configuration in Stone's configuration file i.e,
+``/etc/stone/stone.conf`` and the gateway configuration file i.e,
 ``/etc/httpd/conf.d/rgw.conf`` (RPM-based distros) or
 ``/etc/apache2/conf-available/rgw.conf`` (Debian-based distros) with localhost
 tcp and through unix domain socket:
 
 #. For distros with Apache 2.2 and early versions of Apache 2.4 that use
    localhost TCP and do not support Unix Domain Socket, append the following
-   contents to ``/etc/ceph/ceph.conf``::
+   contents to ``/etc/stone/stone.conf``::
 
 	[client.radosgw.gateway]
 	host = {hostname}
-	keyring = /etc/ceph/ceph.client.radosgw.keyring
+	keyring = /etc/stone/stone.client.radosgw.keyring
 	rgw socket path = ""
-	log file = /var/log/ceph/client.radosgw.gateway.log
+	log file = /var/log/stone/client.radosgw.gateway.log
 	rgw frontends = fastcgi socket_port=9000 socket_host=0.0.0.0
 	rgw print continue = false
 
@@ -150,13 +150,13 @@ tcp and through unix domain socket:
 		</VirtualHost>
 
 #. For distros with Apache 2.4.9 or later that support Unix Domain Socket,
-   append the following configuration to ``/etc/ceph/ceph.conf``::
+   append the following configuration to ``/etc/stone/stone.conf``::
 
 	[client.radosgw.gateway]
 	host = {hostname}
-	keyring = /etc/ceph/ceph.client.radosgw.keyring
-	rgw socket path = /var/run/ceph/ceph.radosgw.gateway.fastcgi.sock
-	log file = /var/log/ceph/client.radosgw.gateway.log
+	keyring = /etc/stone/stone.client.radosgw.keyring
+	rgw socket path = /var/run/stone/stone.radosgw.gateway.fastcgi.sock
+	log file = /var/log/stone/client.radosgw.gateway.log
 	rgw print continue = false
 
 #. Add the following content in the gateway configuration file:
@@ -178,7 +178,7 @@ tcp and through unix domain socket:
 
 		SetEnv proxy-nokeepalive 1
 
-		ProxyPass / unix:///var/run/ceph/ceph.radosgw.gateway.fastcgi.sock|fcgi://localhost:9000/
+		ProxyPass / unix:///var/run/stone/stone.radosgw.gateway.fastcgi.sock|fcgi://localhost:9000/
 
 		</VirtualHost>
 
@@ -188,12 +188,12 @@ tcp and through unix domain socket:
 
 #. Generate a key for radosgw to use for authentication with the cluster. ::
 
-	ceph-authtool -C -n client.radosgw.gateway --gen-key /etc/ceph/keyring.radosgw.gateway
-	ceph-authtool -n client.radosgw.gateway --cap mon 'allow rw' --cap osd 'allow rwx' /etc/ceph/keyring.radosgw.gateway
+	stone-authtool -C -n client.radosgw.gateway --gen-key /etc/stone/keyring.radosgw.gateway
+	stone-authtool -n client.radosgw.gateway --cap mon 'allow rw' --cap osd 'allow rwx' /etc/stone/keyring.radosgw.gateway
 
 #. Add the key to the auth entries. ::
 
-	ceph auth add client.radosgw.gateway --in-file=keyring.radosgw.gateway
+	stone auth add client.radosgw.gateway --in-file=keyring.radosgw.gateway
 
 #. Start Apache and radosgw.
 
@@ -205,7 +205,7 @@ tcp and through unix domain socket:
    CentOS/RHEL::
 
 		sudo apachectl start
-		sudo /etc/init.d/ceph-radosgw start
+		sudo /etc/init.d/stone-radosgw start
 
 Usage Logging
 =============
@@ -241,13 +241,13 @@ synchronous flush.
 Availability
 ============
 
-:program:`radosgw` is part of Ceph, a massively scalable, open-source, distributed
-storage system. Please refer to the Ceph documentation at http://ceph.com/docs for
+:program:`radosgw` is part of Stone, a massively scalable, open-source, distributed
+storage system. Please refer to the Stone documentation at http://stone.com/docs for
 more information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)
 :doc:`radosgw-admin <radosgw-admin>`\(8)

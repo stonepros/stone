@@ -9,7 +9,7 @@ from teuthology.orchestra import run
 from teuthology import misc as teuthology
 from teuthology import contextutil
 from teuthology.exceptions import ConfigError
-from tasks.ceph_manager import get_valgrind_args
+from tasks.stone_manager import get_valgrind_args
 from tasks.util import get_remote_for_role
 from tasks.util.rgw import rgwadmin, wait_for_radosgw
 from tasks.util.rados import (create_ec_pool,
@@ -50,7 +50,7 @@ def start_rgw(ctx, config, clients):
         cmd_prefix = [
             'sudo',
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             '{tdir}/archive/coverage'.format(tdir=testdir),
             'daemon-helper',
             'term',
@@ -80,9 +80,9 @@ def start_rgw(ctx, config, clients):
             '--rgw-frontends', frontends,
             '-n', client_with_id,
             '--cluster', cluster_name,
-            '-k', '/etc/ceph/{client_with_cluster}.keyring'.format(client_with_cluster=client_with_cluster),
+            '-k', '/etc/stonepros/{client_with_cluster}.keyring'.format(client_with_cluster=client_with_cluster),
             '--log-file',
-            '/var/log/ceph/rgw.{client_with_cluster}.log'.format(client_with_cluster=client_with_cluster),
+            '/var/log/stonepros/rgw.{client_with_cluster}.log'.format(client_with_cluster=client_with_cluster),
             '--rgw_ops_log_socket_path',
             '{tdir}/rgw.opslog.{client_with_cluster}.sock'.format(tdir=testdir,
                                                      client_with_cluster=client_with_cluster),
@@ -115,7 +115,7 @@ def start_rgw(ctx, config, clients):
         barbican_role = client_config.get('use-barbican-role', None)
         pykmip_role = client_config.get('use-pykmip-role', None)
 
-        token_path = '/etc/ceph/vault-root-token'
+        token_path = '/etc/stonepros/vault-root-token'
         if barbican_role is not None:
             if not hasattr(ctx, 'barbican'):
                 raise ConfigError('rgw must run after the barbican task')
@@ -139,7 +139,7 @@ def start_rgw(ctx, config, clients):
             ctx.cluster.only(client).run(args=['cat', token_path])
             log.info("Restrict access to token file")
             ctx.cluster.only(client).run(args=['sudo', 'chmod', '600', token_path])
-            ctx.cluster.only(client).run(args=['sudo', 'chown', 'ceph', token_path])
+            ctx.cluster.only(client).run(args=['sudo', 'chown', 'stone', token_path])
 
             rgw_cmd.extend([
                 '--rgw_crypt_vault_addr', "{}:{}".format(*ctx.vault.endpoints[vault_role]),
@@ -164,7 +164,7 @@ def start_rgw(ctx, config, clients):
             rootkey = clientca.key
             rootcert = clientca.certificate
 
-            cert_path = '/etc/ceph/'
+            cert_path = '/etc/stonepros/'
             ctx.cluster.only(client).run(args=['sudo', 'cp', clientcert, cert_path])
             ctx.cluster.only(client).run(args=['sudo', 'cp', clientkey, cert_path])
             ctx.cluster.only(client).run(args=['sudo', 'cp', servercert, cert_path])
@@ -180,14 +180,14 @@ def start_rgw(ctx, config, clients):
             rootcert = cert_path + 'kmiproot.crt'
 
             ctx.cluster.only(client).run(args=['sudo', 'chmod', '600', clientcert, clientkey, servercert, serverkey, rootkey, rootcert])
-            ctx.cluster.only(client).run(args=['sudo', 'chown', 'ceph', clientcert, clientkey, servercert, serverkey, rootkey, rootcert])
+            ctx.cluster.only(client).run(args=['sudo', 'chown', 'stone', clientcert, clientkey, servercert, serverkey, rootkey, rootcert])
 
         rgw_cmd.extend([
             '--foreground',
             run.Raw('|'),
             'sudo',
             'tee',
-            '/var/log/ceph/rgw.{client_with_cluster}.stdout'.format(client_with_cluster=client_with_cluster),
+            '/var/log/stonepros/rgw.{client_with_cluster}.stdout'.format(client_with_cluster=client_with_cluster),
             run.Raw('2>&1'),
             ])
 
@@ -205,7 +205,7 @@ def start_rgw(ctx, config, clients):
         ctx.daemons.add_daemon(
             remote, 'rgw', client_with_id,
             cluster=cluster_name,
-            fsid=ctx.ceph[cluster_name].fsid,
+            fsid=ctx.stone[cluster_name].fsid,
             args=run_cmd,
             logger=log.getChild(client),
             stdin=run.PIPE,
@@ -346,19 +346,19 @@ def task(ctx, config):
     For example, to run rgw on all clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw:
 
     To only run on certain clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.0, client.3]
 
     or
 
         tasks:
-        - ceph:
+        - stone:
         - rgw:
             client.0:
             client.3:
@@ -366,7 +366,7 @@ def task(ctx, config):
     To run radosgw through valgrind:
 
         tasks:
-        - ceph:
+        - stone:
         - rgw:
             client.0:
               valgrind: [--tool=memcheck]
@@ -387,7 +387,7 @@ def task(ctx, config):
     elif isinstance(config, list):
         config = dict((name, None) for name in config)
 
-    clients = config.keys() # http://tracker.ceph.com/issues/20417
+    clients = config.keys() # http://tracker.stone.com/issues/20417
 
     overrides = ctx.config.get('overrides', {})
     teuthology.deep_merge(config, overrides.get('rgw', {}))

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -29,7 +29,7 @@ class MLog;
 
 static const std::string LOG_META_CHANNEL = "$channel";
 
-namespace ceph {
+namespace stone {
 namespace logging {
   class Graylog;
 }
@@ -53,7 +53,7 @@ private:
     std::map<std::string,std::string> log_to_graylog_host;
     std::map<std::string,std::string> log_to_graylog_port;
 
-    std::map<std::string, std::shared_ptr<ceph::logging::Graylog>> graylogs;
+    std::map<std::string, std::shared_ptr<stone::logging::Graylog>> graylogs;
     uuid_d fsid;
     std::string host;
 
@@ -109,7 +109,7 @@ private:
 			      &CLOG_CONFIG_DEFAULT_KEY) == "true");
     }
 
-    std::shared_ptr<ceph::logging::Graylog> get_graylog(const std::string &channel);
+    std::shared_ptr<stone::logging::Graylog> get_graylog(const std::string &channel);
   } channels;
 
   void update_log_channels();

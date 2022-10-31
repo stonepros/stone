@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Adam Crume <adamcrume@gmail.com>
  *
@@ -40,7 +40,7 @@ public:
     return m_id;
   }
 
-  ceph::bufferlist &bufferlist() {
+  stone::bufferlist &bufferlist() {
     return m_bl;
   }
 
@@ -54,7 +54,7 @@ private:
   friend void ::rbd_replay_pending_io_callback(librbd::completion_t cb, void *arg);
 
   const action_id_t m_id;
-  ceph::bufferlist m_bl;
+  stone::bufferlist m_bl;
   librbd::RBD::AioCompletion *m_completion;
   ActionCtx &m_worker;
 };

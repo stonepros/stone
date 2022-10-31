@@ -29,7 +29,7 @@
 #include "mds/MDSMap.h"
 
 #include "include/CompatSet.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "include/common_fwd.h"
 #include "common/Formatter.h"
 #include "mds/mdstypes.h"
@@ -55,11 +55,11 @@ struct ClusterInfo {
            fs_name == cluster_info.fs_name;
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void print(std::ostream& out) const;
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &iter);
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &iter);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const ClusterInfo &cluster_info) {
@@ -90,11 +90,11 @@ struct Peer {
     return uuid < rhs.uuid;
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void print(std::ostream& out) const;
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &iter);
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &iter);
 };
 
 typedef std::set<Peer> Peers;
@@ -150,11 +150,11 @@ struct MirrorInfo {
   bool mirrored = false;
   Peers peers;
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void print(std::ostream& out) const;
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &iter);
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &iter);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const MirrorInfo &mirror_info) {
@@ -182,10 +182,10 @@ public:
     return std::make_shared<Filesystem>(std::forward<Args>(args)...);
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& p);
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& p);
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void print(std::ostream& out) const;
 
   bool is_upgradeable() const {
@@ -289,7 +289,7 @@ public:
 
   void set_legacy_client_fscid(fs_cluster_id_t fscid)
   {
-    ceph_assert(fscid == FS_CLUSTER_ID_NONE || filesystems.count(fscid));
+    stone_assert(fscid == FS_CLUSTER_ID_NONE || filesystems.count(fscid));
     legacy_client_fscid = fscid;
   }
 
@@ -448,7 +448,7 @@ public:
     if (fscid == FS_CLUSTER_ID_NONE) {
       auto& info = standby_daemons.at(who);
       fn(info);
-      ceph_assert(info.state == MDSMap::STATE_STANDBY);
+      stone_assert(info.state == MDSMap::STATE_STANDBY);
       standby_epochs[who] = epoch;
     } else {
       auto& fs = filesystems.at(fscid);
@@ -571,20 +571,20 @@ public:
    */
   void sanity(bool pending=false) const;
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void decode(ceph::buffer::list& bl) {
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void decode(stone::buffer::list& bl) {
     auto p = bl.cbegin();
     decode(p);
   }
   void sanitize(const std::function<bool(int64_t pool)>& pool_exists);
 
   void print(std::ostream& out) const;
-  void print_summary(ceph::Formatter *f, std::ostream *out) const;
+  void print_summary(stone::Formatter *f, std::ostream *out) const;
   void print_daemon_summary(std::ostream& out) const;
   void print_fs_summary(std::ostream& out) const;
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<FSMap*>& ls);
 
 protected:

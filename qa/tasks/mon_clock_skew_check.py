@@ -3,7 +3,7 @@ Handle clock skews in monitors.
 """
 import logging
 import time
-from tasks import ceph_manager
+from tasks import stone_manager
 from teuthology import misc as teuthology
 
 log = logging.getLogger(__name__)
@@ -48,10 +48,10 @@ def task(ctx, config):
     log.info('Beginning mon_clock_skew_check...')
     first_mon = teuthology.get_first_mon(ctx, config)
     (mon,) = ctx.cluster.only(first_mon).remotes.keys()
-    manager = ceph_manager.CephManager(
+    manager = stone_manager.StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager'),
+        logger=log.getChild('stone_manager'),
         )
 
     quorum_size = len(teuthology.get_mon_names(ctx))

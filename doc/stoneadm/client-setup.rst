@@ -1,9 +1,9 @@
 =======================
-Basic Ceph Client Setup
+Basic Stone Client Setup
 =======================
 Client machines require some basic configuration to interact with
-Ceph clusters. This section describes how to configure a client machine
-so that it can interact with a Ceph cluster.
+Stone clusters. This section describes how to configure a client machine
+so that it can interact with a Stone cluster.
 
 .. note:: 
    Most client machines need to install only the `ceph-common` package
@@ -23,12 +23,12 @@ configured as a client or that is running a cluster daemon, and then run the fol
   ceph config generate-minimal-conf
 
 This command generates a minimal config file that tells the client how
-to reach the Ceph monitors. The contents of this file should usually 
+to reach the Stone monitors. The contents of this file should usually 
 be installed in ``/etc/ceph/ceph.conf``.
 
 Keyring Setup
 =============
-Most Ceph clusters run with authentication enabled. This means that
+Most Stone clusters run with authentication enabled. This means that
 the client needs keys in order to communicate with the machines in the
 cluster. To generate a keyring file with credentials for `client.fs`,
 log into an running cluster member and run the following command:

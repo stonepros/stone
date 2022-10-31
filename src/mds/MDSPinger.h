@@ -9,8 +9,8 @@
 #include "include/types.h"
 
 #include "msg/msg_types.h"
-#include "common/ceph_mutex.h"
-#include "common/ceph_time.h"
+#include "common/stone_mutex.h"
+#include "common/stone_time.h"
 #include "messages/MMDSPing.h"
 
 #include "mdstypes.h"
@@ -38,8 +38,8 @@ public:
   bool is_rank_lagging(mds_rank_t rank);
 
 private:
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
 
   // Initial Sequence Number (ISN) of the first ping message sent
   // by rank 0 to other active ranks (incuding itself).
@@ -54,7 +54,7 @@ private:
   MDSRank *mds;
   // drop this lock when calling ->send_message_mds() else mds might
   // deadlock
-  ceph::mutex lock = ceph::make_mutex("MDSPinger::lock");
+  stone::mutex lock = stone::make_mutex("MDSPinger::lock");
   std::map<mds_rank_t, PingState> ping_state_by_rank;
 };
 

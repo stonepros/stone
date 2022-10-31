@@ -3,11 +3,11 @@
 set -ex
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-: ${CEPH_ROOT:=$SCRIPTPATH/../../}
+: ${STONE_ROOT:=$SCRIPTPATH/../../}
 
 sudo docker run --rm \
-         -v "$CEPH_ROOT":/ceph \
+         -v "$STONE_ROOT":/stone \
          --name=promtool \
          --network=host \
          dnanexus/promtool:2.9.2 \
-         test rules /ceph/monitoring/prometheus/alerts/test_alerts.yml
+         test rules /stone/monitoring/prometheus/alerts/test_alerts.yml

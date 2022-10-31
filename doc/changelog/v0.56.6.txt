@@ -8,7 +8,7 @@ commit 6dbdcf5a210febb5e0dd585e0e599ac807642210
 Author: Gary Lowell <gary.lowell@inktank.com>
 Date:   Fri May 3 12:45:24 2013 -0700
 
-    ceph.spec.in:  Fix platform dependecies
+    stone.spec.in:  Fix platform dependecies
 
     Picked up an incorrect dependency merging the rbd udev rules update.
 
@@ -33,7 +33,7 @@ commit f0eb20a7b0f7c8afadc21cc063f1f289b5092bab
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri May 3 12:24:21 2013 -0700
 
-    ceph_common.sh: re-sync get_name_list with master
+    stone_common.sh: re-sync get_name_list with master
 
     We backported various items but didn't catch all the changes!  :(
 

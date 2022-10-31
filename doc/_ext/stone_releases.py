@@ -12,7 +12,7 @@ from docutils.parsers.rst import Directive
 from docutils import nodes
 from sphinx.util import logging
 
-class CephReleases(Directive):
+class StoneReleases(Directive):
     has_content = False
     required_arguments = 1
     optional_arguments = 0
@@ -30,7 +30,7 @@ class CephReleases(Directive):
                 releases = releases["releases"]
         except Exception as e:
             return [document.reporter.warning(
-                "Failed to open Ceph releases file {}: {}".format(filename, e),
+                "Failed to open Stone releases file {}: {}".format(filename, e),
                 line=self.lineno)]
 
         table = nodes.table()
@@ -103,7 +103,7 @@ class CephReleases(Directive):
 
         return [table]
 
-class CephTimeline(Directive):
+class StoneTimeline(Directive):
     has_content = False
     required_arguments = 12
     optional_arguments = 0
@@ -120,7 +120,7 @@ class CephTimeline(Directive):
                 releases = yaml.safe_load(fp)
         except Exception as e:
             return [document.reporter.warning(
-                "Failed to open Ceph releases file {}: {}".format(filename, e),
+                "Failed to open Stone releases file {}: {}".format(filename, e),
                 line=self.lineno)]
 
         display_releases = self.arguments[1:]
@@ -197,5 +197,5 @@ class CephTimeline(Directive):
         return [table]
 
 def setup(app):
-    app.add_directive('ceph_releases', CephReleases)
-    app.add_directive('ceph_timeline', CephTimeline)
+    app.add_directive('stone_releases', StoneReleases)
+    app.add_directive('stone_timeline', StoneTimeline)

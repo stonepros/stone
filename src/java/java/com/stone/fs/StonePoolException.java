@@ -17,28 +17,28 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.IOException;
 
 /**
- * Exception related to Ceph pool.
+ * Exception related to Stone pool.
  */
-public class CephPoolException extends IOException {
+public class StonePoolException extends IOException {
 
   private static final long serialVersionUID = 1L;
 
   /**
-   * Construct CephPoolException.
+   * Construct StonePoolException.
    */
-  public CephPoolException() {
+  public StonePoolException() {
     super();
   }
 
   /**
-   * Construct CephPoolException with message.
+   * Construct StonePoolException with message.
    */
-  public CephPoolException(String s) {
+  public StonePoolException(String s) {
     super(s);
   }
 }

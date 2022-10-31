@@ -4,7 +4,7 @@
 #ifndef RBD_MIRROR_IMAGE_REPLAYER_SNAPSHOT_APPLY_IMAGE_STATE_REQUEST_H
 #define RBD_MIRROR_IMAGE_REPLAYER_SNAPSHOT_APPLY_IMAGE_STATE_REQUEST_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/mirror/snapshot/Types.h"
 #include <map>
 #include <string>

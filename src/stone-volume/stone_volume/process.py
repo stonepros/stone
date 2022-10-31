@@ -2,9 +2,9 @@ from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK, read, path
 import subprocess
 from select import select
-from ceph_volume import terminal
-from ceph_volume.util import as_bytes
-from ceph_volume.util.system import which, run_host_cmd, host_rootfs
+from stone_volume import terminal
+from stone_volume.util import as_bytes
+from stone_volume.util.system import which, run_host_cmd, host_rootfs
 
 import logging
 

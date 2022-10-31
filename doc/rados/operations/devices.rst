@@ -4,7 +4,7 @@
 Device Management
 =================
 
-Ceph tracks which hardware storage devices (e.g., HDDs, SSDs) are consumed by
+Stone tracks which hardware storage devices (e.g., HDDs, SSDs) are consumed by
 which daemons, and collects health metrics about those devices in order to
 provide tools to predict and/or automatically respond to hardware failure.
 
@@ -13,17 +13,17 @@ Device tracking
 
 You can query which storage devices are in use with::
 
-  ceph device ls
+  stone device ls
 
 You can also list devices by daemon or by host::
 
-  ceph device ls-by-daemon <daemon>
-  ceph device ls-by-host <host>
+  stone device ls-by-daemon <daemon>
+  stone device ls-by-host <host>
 
 For any individual device, you can query information about its
 location and how it is being consumed with::
 
-  ceph device info <devid>
+  stone device info <devid>
 
 Identifying physical devices
 ----------------------------
@@ -36,22 +36,22 @@ failed disks easy and less error-prone.  Use the following command::
 The ``<devid>`` parameter is the device identification. You can obtain this
 information using the following command::
 
-  ceph device ls
+  stone device ls
 
 The ``[ident|fault]`` parameter is used to set the kind of light to blink.
 By default, the `identification` light is used.
 
 .. note::
-   This command needs the Cephadm or the Rook `orchestrator <https://docs.ceph.com/docs/master/mgr/orchestrator/#orchestrator-cli-module>`_ module enabled.
+   This command needs the Stoneadm or the Rook `orchestrator <https://docs.stone.com/docs/master/mgr/orchestrator/#orchestrator-cli-module>`_ module enabled.
    The orchestrator module enabled is shown by executing the following command::
 
-     ceph orch status
+     stone orch status
 
 The command behind the scene to blink the drive LEDs is `lsmcli`. If you need
 to customize this command you can configure this via a Jinja2 template::
 
-   ceph config-key set mgr/cephadm/blink_device_light_cmd "<template>"
-   ceph config-key set mgr/cephadm/<host>/blink_device_light_cmd "lsmcli local-disk-{{ ident_fault }}-led-{{'on' if on else 'off'}} --path '{{ path or dev }}'"
+   stone config-key set mgr/stoneadm/blink_device_light_cmd "<template>"
+   stone config-key set mgr/stoneadm/<host>/blink_device_light_cmd "lsmcli local-disk-{{ ident_fault }}-led-{{'on' if on else 'off'}} --path '{{ path or dev }}'"
 
 The Jinja2 template is rendered using the following arguments:
 
@@ -69,21 +69,21 @@ The Jinja2 template is rendered using the following arguments:
 Enabling monitoring
 -------------------
 
-Ceph can also monitor health metrics associated with your device.  For
+Stone can also monitor health metrics associated with your device.  For
 example, SATA hard disks implement a standard called SMART that
 provides a wide range of internal metrics about the device's usage and
 health, like the number of hours powered on, number of power cycles,
 or unrecoverable read errors.  Other device types like SAS and NVMe
 implement a similar set of metrics (via slightly different standards).
-All of these can be collected by Ceph via the ``smartctl`` tool.
+All of these can be collected by Stone via the ``smartctl`` tool.
 
 You can enable or disable health monitoring with::
 
-  ceph device monitoring on
+  stone device monitoring on
 
 or::
 
-  ceph device monitoring off
+  stone device monitoring off
 
 
 Scraping
@@ -91,59 +91,59 @@ Scraping
 
 If monitoring is enabled, metrics will automatically be scraped at regular intervals.  That interval can be configured with::
 
-  ceph config set mgr mgr/devicehealth/scrape_frequency <seconds>
+  stone config set mgr mgr/devicehealth/scrape_frequency <seconds>
 
 The default is to scrape once every 24 hours.
 
 You can manually trigger a scrape of all devices with::
 
-  ceph device scrape-health-metrics
+  stone device scrape-health-metrics
 
 A single device can be scraped with::
 
-  ceph device scrape-health-metrics <device-id>
+  stone device scrape-health-metrics <device-id>
 
 Or a single daemon's devices can be scraped with::
 
-  ceph device scrape-daemon-health-metrics <who>
+  stone device scrape-daemon-health-metrics <who>
 
 The stored health metrics for a device can be retrieved (optionally
 for a specific timestamp) with::
 
-  ceph device get-health-metrics <devid> [sample-timestamp]
+  stone device get-health-metrics <devid> [sample-timestamp]
 
 Failure prediction
 ------------------
 
-Ceph can predict life expectancy and device failures based on the
+Stone can predict life expectancy and device failures based on the
 health metrics it collects.  There are three modes:
 
 * *none*: disable device failure prediction.
-* *local*: use a pre-trained prediction model from the ceph-mgr daemon
+* *local*: use a pre-trained prediction model from the stone-mgr daemon
 
 The prediction mode can be configured with::
 
-  ceph config set global device_failure_prediction_mode <mode>
+  stone config set global device_failure_prediction_mode <mode>
 
 Prediction normally runs in the background on a periodic basis, so it
 may take some time before life expectancy values are populated.  You
 can see the life expectancy of all devices in output from::
 
-  ceph device ls
+  stone device ls
 
 You can also query the metadata for a specific device with::
 
-  ceph device info <devid>
+  stone device info <devid>
 
 You can explicitly force prediction of a device's life expectancy with::
 
-  ceph device predict-life-expectancy <devid>
+  stone device predict-life-expectancy <devid>
 
-If you are not using Ceph's internal device failure prediction but
+If you are not using Stone's internal device failure prediction but
 have some external source of information about device failures, you
-can inform Ceph of a device's life expectancy with::
+can inform Stone of a device's life expectancy with::
 
-  ceph device set-life-expectancy <devid> <from> [<to>]
+  stone device set-life-expectancy <devid> <from> [<to>]
 
 Life expectancies are expressed as a time interval so that
 uncertainty can be expressed in the form of a wide interval. The
@@ -158,7 +158,7 @@ device failure must be before we generate a health warning.
 The stored life expectancy of all devices can be checked, and any
 appropriate health alerts generated, with::
 
-  ceph device check-health
+  stone device check-health
 
 Automatic Mitigation
 --------------------

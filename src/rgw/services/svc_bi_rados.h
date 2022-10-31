@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -74,7 +74,7 @@ public:
     RGWDataChangesLog *datalog_rados{nullptr};
   } svc;
 
-  RGWSI_BucketIndex_RADOS(CephContext *cct);
+  RGWSI_BucketIndex_RADOS(StoneContext *cct);
 
   void init(RGWSI_Zone *zone_svc,
             RGWSI_RADOS *rados_svc,
@@ -91,7 +91,7 @@ public:
 
   static uint32_t bucket_shard_index(const std::string& key,
                                      int num_shards) {
-    uint32_t sid = ceph_str_hash_linux(key.c_str(), key.size());
+    uint32_t sid = stone_str_hash_linux(key.c_str(), key.size());
     uint32_t sid2 = sid ^ ((sid & 0xFF) << 24);
     return rgw_shards_mod(sid2, num_shards);
   }

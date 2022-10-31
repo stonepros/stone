@@ -4,7 +4,7 @@
 #ifndef STONE_CACHE_SOCKET_COMMON_H
 #define STONE_CACHE_SOCKET_COMMON_H
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 static const int RBDSC_REGISTER        =  0X11;
@@ -27,5 +27,5 @@ typedef GenContextURef<ObjectCacheRequest*> CacheGenContextURef;
 typedef std::function<void(CacheSession*, ObjectCacheRequest*)> ProcessMsg;
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone
 #endif  // STONE_CACHE_SOCKET_COMMON_H

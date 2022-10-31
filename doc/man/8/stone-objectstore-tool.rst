@@ -1,14 +1,14 @@
 :orphan:
 
 ==============================================================
-ceph-objectstore-tool -- modify or examine the state of an OSD
+stone-objectstore-tool -- modify or examine the state of an OSD
 ==============================================================
 
 Synopsis
 ========
 
 
-| **ceph-objectstore-tool** --data-path *path to osd* [--op *list* ]
+| **stone-objectstore-tool** --data-path *path to osd* [--op *list* ]
 
 
 
@@ -31,12 +31,12 @@ Possible object operations:
 Description
 ===========
 
-**ceph-objectstore-tool** is a tool for modifying the state of an OSD. It facilitates manipulating an object's content, removing an object, listing the omap, manipulating the omap header, manipulating the omap key, listing object attributes, and manipulating object attribute keys.
+**stone-objectstore-tool** is a tool for modifying the state of an OSD. It facilitates manipulating an object's content, removing an object, listing the omap, manipulating the omap header, manipulating the omap key, listing object attributes, and manipulating object attribute keys.
 
-**ceph-objectstore-tool** provides two main modes: (1) a mode that specifies the "--op" argument (for example, **ceph-objectstore-tool** --data-path $PATH_TO_OSD --op $SELECT_OPERATION [--pgid $PGID] [--dry-run]), and (2) a mode for positional object operations. If the second mode is used, the object can be specified by ID or by the JSON output of the --op list. 
+**stone-objectstore-tool** provides two main modes: (1) a mode that specifies the "--op" argument (for example, **stone-objectstore-tool** --data-path $PATH_TO_OSD --op $SELECT_OPERATION [--pgid $PGID] [--dry-run]), and (2) a mode for positional object operations. If the second mode is used, the object can be specified by ID or by the JSON output of the --op list. 
 
-| **ceph-objectstore-tool** --data-path *path to osd* [--pgid *$PG_ID* ][--op *command*]
-| **ceph-objectstore-tool** --data-path *path to osd* [ --op *list $OBJECT_ID*]
+| **stone-objectstore-tool** --data-path *path to osd* [--pgid *$PG_ID* ][--op *command*]
+| **stone-objectstore-tool** --data-path *path to osd* [ --op *list $OBJECT_ID*]
 
 Possible -op commands::
 
@@ -72,7 +72,7 @@ Possible -op commands::
 Installation
 ============
 
-The `ceph-osd` package provides **ceph-objectstore-tool**.
+The `stone-osd` package provides **stone-objectstore-tool**.
 
 
 Examples
@@ -80,26 +80,26 @@ Examples
 
 Modifying Objects
 -----------------
-These commands modify state of an OSD. The OSD must not be running when ceph-objectstore-tool is used.
+These commands modify state of an OSD. The OSD must not be running when stone-objectstore-tool is used.
 
 Listing Objects and Placement Groups
 ------------------------------------
 
 Make sure that the target OSD is down::
 
-   systemctl status ceph-osd@$OSD_NUMBER
+   systemctl status stone-osd@$OSD_NUMBER
 
 Identify all objects within an OSD::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --op list
+   stone-objectstore-tool --data-path $PATH_TO_OSD --op list
 
 Identify all objects within a placement group::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID --op list
+   stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID --op list
 
 Identify the placement group (PG) that an object belongs to::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --op list $OBJECT_ID
+   stone-objectstore-tool --data-path $PATH_TO_OSD --op list $OBJECT_ID
 
 
 Fixing Lost Objects   
@@ -107,23 +107,23 @@ Fixing Lost Objects
 
 Make sure the OSD is down::
 
-   systemctl status ceph-osd@OSD_NUMBER
+   systemctl status stone-osd@OSD_NUMBER
 
 Fix all lost objects::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --op fix-lost
+   stone-objectstore-tool --data-path $PATH_TO_OSD --op fix-lost
 
 Fix all the lost objects within a specified placement group::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID --op fix-lost
+   stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID --op fix-lost
 
 Fix a lost object by its identifier::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --op fix-lost $OBJECT_ID
+   stone-objectstore-tool --data-path $PATH_TO_OSD --op fix-lost $OBJECT_ID
 
 Fix legacy lost objects::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --op fix-lost
+   stone-objectstore-tool --data-path $PATH_TO_OSD --op fix-lost
 
 
 Manipulating an object's content
@@ -131,19 +131,19 @@ Manipulating an object's content
 
 1. Make sure that the target OSD is down::
    
-    systemctl status ceph-osd@$OSD_NUMBER
+    systemctl status stone-osd@$OSD_NUMBER
 
 2. Find the object by listing the objects of the OSD or placement group.
 
 3. Before setting the bytes on the object, make a backup and a working copy of the object. Here is the syntactic form of that command::
    
-    ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-bytes > $OBJECT_FILE_NAME
+    stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-bytes > $OBJECT_FILE_NAME
 
 For example::
 
-   [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' get-bytes > zone_info.default.backup
+   [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' get-bytes > zone_info.default.backup
 
-   [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' get-bytes > zone_info.default.working-copy
+   [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' get-bytes > zone_info.default.working-copy
 
 The first command creates the back-up copy, and the second command creates the working copy.
 
@@ -151,65 +151,65 @@ The first command creates the back-up copy, and the second command creates the w
 
 5. Set the bytes of the object::
      
-     ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT set-bytes < $OBJECT_FILE_NAME
+     stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT set-bytes < $OBJECT_FILE_NAME
 
 For example::
 
-   [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' set-bytes < zone_info.default.working-copy
+   [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' set-bytes < zone_info.default.working-copy
  
 
 Removing an Object
 ------------------
 
-Use **ceph-objectstore-tool** to remove objects. When an object is removed, its contents and references are removed from the placement group (PG).
+Use **stone-objectstore-tool** to remove objects. When an object is removed, its contents and references are removed from the placement group (PG).
 
 Remove an object (syntax)::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT remove
+   stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT remove
 
 Remove an object (example)::
 
-[root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' remove
+[root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' remove
 
 
 Listing the Object Map
 ----------------------
 
-Use the ceph-objectstore-tool to list the contents of the object map (OMAP). The output is a list of keys.
+Use the stone-objectstore-tool to list the contents of the object map (OMAP). The output is a list of keys.
 
 
 1. Verify the appropriate OSD is down:
 
    Syntax::
 
-    systemctl status ceph-osd@$OSD_NUMBER
+    systemctl status stone-osd@$OSD_NUMBER
 
    Example::
 
-    [root@osd ~]# systemctl status ceph-osd@1
+    [root@osd ~]# systemctl status stone-osd@1
 
 2. List the object map:
 
    Syntax::
 
-    ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT list-omap
+    stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT list-omap
 
    Example::
 
-    [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' list-omap
+    [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' list-omap
 
 
 Manipulating the Object Map Header
 ----------------------------------
-The **ceph-objectstore-tool** utility will output the object map (OMAP) header with the values associated with the object's keys.
+The **stone-objectstore-tool** utility will output the object map (OMAP) header with the values associated with the object's keys.
 
-Note: If using FileStore as the OSD backend object store, then add the `--journal-path $PATH_TO_JOURNAL` argument when getting or setting the object map header, where the `$PATH_TO_JOURNAL` variable is the absolute path to the OSD journal; for example `/var/lib/ceph/osd/ceph-0/journal`.
+Note: If using FileStore as the OSD backend object store, then add the `--journal-path $PATH_TO_JOURNAL` argument when getting or setting the object map header, where the `$PATH_TO_JOURNAL` variable is the absolute path to the OSD journal; for example `/var/lib/stone/osd/stone-0/journal`.
 
 Prerequisites
 ^^^^^^^^^^^^^
 
-    * Having root access to the Ceph OSD node.
-    * Stopping the ceph-osd daemon. 
+    * Having root access to the Stone OSD node.
+    * Stopping the stone-osd daemon. 
 
 Procedure
 ^^^^^^^^^
@@ -218,45 +218,45 @@ Procedure
 
   Syntax::
 
-    systemctl status ceph-osd@$OSD_NUMBER
+    systemctl status stone-osd@$OSD_NUMBER
 
   Example::
 
-    [root@osd ~]# systemctl status ceph-osd@1
+    [root@osd ~]# systemctl status stone-osd@1
 
   Get the object map header:
 
   Syntax::
 
-        ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-omaphdr > $OBJECT_MAP_FILE_NAME
+        stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-omaphdr > $OBJECT_MAP_FILE_NAME
 
   Example::
 
-        [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}'  get-omaphdr > zone_info.default.omaphdr.txt
+        [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}'  get-omaphdr > zone_info.default.omaphdr.txt
 
   Set the object map header:
 
   Syntax::
 
-        ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-omaphdr < $OBJECT_MAP_FILE_NAME
+        stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-omaphdr < $OBJECT_MAP_FILE_NAME
 
   Example::
 
-   [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}'  set-omaphdr < zone_info.default.omaphdr.txt
+   [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}'  set-omaphdr < zone_info.default.omaphdr.txt
 
 
 Manipulating the Object Map Key
 -------------------------------
 
-Use the **ceph-objectstore-tool** utility to change the object map (OMAP) key. You need to provide the data path, the placement group identifier (PG ID), the object, and the key in the OMAP.
+Use the **stone-objectstore-tool** utility to change the object map (OMAP) key. You need to provide the data path, the placement group identifier (PG ID), the object, and the key in the OMAP.
 Note
 
-If using FileStore as the OSD backend object store, then add the `--journal-path $PATH_TO_JOURNAL` argument when getting, setting or removing the object map key, where the `$PATH_TO_JOURNAL` variable is the absolute path to the OSD journal; for example `/var/lib/ceph/osd/ceph-0/journal`.
+If using FileStore as the OSD backend object store, then add the `--journal-path $PATH_TO_JOURNAL` argument when getting, setting or removing the object map key, where the `$PATH_TO_JOURNAL` variable is the absolute path to the OSD journal; for example `/var/lib/stone/osd/stone-0/journal`.
 
 Prerequisites
 
-    * Having root access to the Ceph OSD node.
-    * Stopping the ceph-osd daemon. 
+    * Having root access to the Stone OSD node.
+    * Stopping the stone-osd daemon. 
 
 Procedure
 
@@ -264,46 +264,46 @@ Procedure
 
     Syntax::
      
-       ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-omap $KEY > $OBJECT_MAP_FILE_NAME
+       stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-omap $KEY > $OBJECT_MAP_FILE_NAME
 
    Example::
 
-    [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}'  get-omap "" > zone_info.default.omap.txt
+    [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}'  get-omap "" > zone_info.default.omap.txt
 
    Set the object map key:
 
    Syntax::
 
-    ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT set-omap $KEY < $OBJECT_MAP_FILE_NAME
+    stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT set-omap $KEY < $OBJECT_MAP_FILE_NAME
 
    Example::
 
-    [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' set-omap "" < zone_info.default.omap.txt
+    [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' set-omap "" < zone_info.default.omap.txt
 
    Remove the object map key:
 
    Syntax::
 
-    ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT rm-omap $KEY
+    stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT rm-omap $KEY
 
    Example::
 
-    [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' rm-omap ""
+    [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' rm-omap ""
 
 
 Listing an Object's Attributes
 -------------------------------
 
-Use the **ceph-objectstore-tool** utility to list an object's attributes. The output provides you with the object's keys and values.
+Use the **stone-objectstore-tool** utility to list an object's attributes. The output provides you with the object's keys and values.
 Note
 
-If you are using FileStore as the OSD backend object store and the journal is on a different disk, you must add the `--journal-path $PATH_TO_JOURNAL` argument when listing an object's attributes, where the `$PATH_TO_JOURNAL` variable is the absolute path to the OSD journal; for example `/var/lib/ceph/osd/ceph-0/journal`.
+If you are using FileStore as the OSD backend object store and the journal is on a different disk, you must add the `--journal-path $PATH_TO_JOURNAL` argument when listing an object's attributes, where the `$PATH_TO_JOURNAL` variable is the absolute path to the OSD journal; for example `/var/lib/stone/osd/stone-0/journal`.
 
 Prerequisites
 ^^^^^^^^^^^^^
 
-    * Having root access to the Ceph OSD node.
-    * Stopping the ceph-osd daemon. 
+    * Having root access to the Stone OSD node.
+    * Stopping the stone-osd daemon. 
 
 Procedure
 ^^^^^^^^^
@@ -312,35 +312,35 @@ Procedure
 
    Syntax::
 
-    systemctl status ceph-osd@$OSD_NUMBER
+    systemctl status stone-osd@$OSD_NUMBER
 
    Example::
 
-    [root@osd ~]# systemctl status ceph-osd@1
+    [root@osd ~]# systemctl status stone-osd@1
 
    List the object's attributes:
 
    Syntax::
 
-    ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT list-attrs
+    stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT list-attrs
 
    Example::
 
-    [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' list-attrs
+    [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' list-attrs
 
 
 MANIPULATING THE OBJECT ATTRIBUTE KEY
 -------------------------------------
 
-Use the ceph-objectstore-tool utility to change an object's attributes. To manipulate the object's attributes you need the data and journal paths, the placement group identifier (PG ID), the object, and the key in the object's attribute.
+Use the stone-objectstore-tool utility to change an object's attributes. To manipulate the object's attributes you need the data and journal paths, the placement group identifier (PG ID), the object, and the key in the object's attribute.
 Note
 
-If you are using FileStore as the OSD backend object store and the journal is on a different disk, you must add the `--journal-path $PATH_TO_JOURNAL` argument when getting, setting or removing the object's attributes. Where the `$PATH_TO_JOURNAL` variable is the absolute path to the OSD journal, for example `/var/lib/ceph/osd/ceph-0/journal`.
+If you are using FileStore as the OSD backend object store and the journal is on a different disk, you must add the `--journal-path $PATH_TO_JOURNAL` argument when getting, setting or removing the object's attributes. Where the `$PATH_TO_JOURNAL` variable is the absolute path to the OSD journal, for example `/var/lib/stone/osd/stone-0/journal`.
 
 Prerequisites
 
-    * Having root access to the Ceph OSD node.  
-    * Stopping the ceph-osd daemon. 
+    * Having root access to the Stone OSD node.  
+    * Stopping the stone-osd daemon. 
 
 Procedure
 
@@ -348,41 +348,41 @@ Procedure
 
  Syntax::
 
-    systemctl status ceph-osd@$OSD_NUMBER
+    systemctl status stone-osd@$OSD_NUMBER
 
  Example::
 
-    [root@osd ~]# systemctl status ceph-osd@1
+    [root@osd ~]# systemctl status stone-osd@1
 
  Get the object's attributes:
 
  Syntax::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-attrs $KEY > $OBJECT_ATTRS_FILE_NAME
+   stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT get-attrs $KEY > $OBJECT_ATTRS_FILE_NAME
 
  Example::
 
-   [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0  --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' get-attrs "oid" > zone_info.default.attr.txt
+   [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0  --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' get-attrs "oid" > zone_info.default.attr.txt
 
  Set an object's attributes:
 
  Syntax::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT  set-attrs $KEY < $OBJECT_ATTRS_FILE_NAME
+   stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT  set-attrs $KEY < $OBJECT_ATTRS_FILE_NAME
 
  Example::
 
-   [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' set-attrs "oid" < zone_info.default.attr.txt
+   [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' set-attrs "oid" < zone_info.default.attr.txt
 
  Remove an object's attributes:
 
  Syntax::
 
-   ceph-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT rm-attrs $KEY
+   stone-objectstore-tool --data-path $PATH_TO_OSD --pgid $PG_ID $OBJECT rm-attrs $KEY
 
  Example::
 
-   [root@osd ~]# ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' rm-attrs "oid"
+   [root@osd ~]# stone-objectstore-tool --data-path /var/lib/stone/osd/stone-0 --pgid 0.1c '{"oid":"zone_info.default","key":"","snapid":-2,"hash":235010478,"max":0,"pool":11,"namespace":""}' rm-attrs "oid"
 
 
 Options
@@ -480,9 +480,9 @@ Options
 
 Error Codes
 ===========
-"Mount failed with '(11) Resource temporarily unavailable" - This might mean that you have attempted to run **ceph-objectstore-tool** on a running OSD.
+"Mount failed with '(11) Resource temporarily unavailable" - This might mean that you have attempted to run **stone-objectstore-tool** on a running OSD.
 
 Availability
 ============
 
-**ceph-objectstore-tool** is part of Ceph, a massively scalable, open-source, distributed storage system. **ceph-objectstore-tool** is provided by the package `ceph-osd`. Refer to the Ceph documentation at htpp://ceph.com/docs for more information.
+**stone-objectstore-tool** is part of Stone, a massively scalable, open-source, distributed storage system. **stone-objectstore-tool** is provided by the package `stone-osd`. Refer to the Stone documentation at htpp://stone.com/docs for more information.

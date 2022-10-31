@@ -51,14 +51,14 @@ run() {
     do_run "$@"
 }
 
-if [ -n "$CEPH_BIN" ] ; then
+if [ -n "$STONE_BIN" ] ; then
    # CMake env
-   RADOS_TOOL="$CEPH_BIN/rados"
-   CEPH_TOOL="$CEPH_BIN/ceph"
+   RADOS_TOOL="$STONE_BIN/rados"
+   STONE_TOOL="$STONE_BIN/stone"
 else
    # executables should be installed by the QA env 
    RADOS_TOOL=$(which rados)
-   CEPH_TOOL=$(which ceph)
+   STONE_TOOL=$(which stone)
 fi
 
 KEEP_TEMP_FILES=0
@@ -67,7 +67,7 @@ POOL_CP_TARGET=trs_pool.2
 POOL_EC=trs_pool_ec
 
 [ -x "$RADOS_TOOL" ] || die "couldn't find $RADOS_TOOL binary to test"
-[ -x "$CEPH_TOOL" ] || die "couldn't find $CEPH_TOOL binary to test"
+[ -x "$STONE_TOOL" ] || die "couldn't find $STONE_TOOL binary to test"
 
 while getopts  "c:hkp:" flag; do
     case $flag in
@@ -88,9 +88,9 @@ run_expect_nosignal "$RADOS_TOOL" --snapid "0" ls
 run_expect_nosignal "$RADOS_TOOL" --object-locator "asdf" ls
 run_expect_nosignal "$RADOS_TOOL" --namespace "asdf" ls
 
-run_expect_succ "$CEPH_TOOL" osd pool create "$POOL" 8
-run_expect_succ "$CEPH_TOOL" osd erasure-code-profile set myprofile k=2 m=1 stripe_unit=2K crush-failure-domain=osd --force
-run_expect_succ "$CEPH_TOOL" osd pool create "$POOL_EC" 100 100 erasure myprofile
+run_expect_succ "$STONE_TOOL" osd pool create "$POOL" 8
+run_expect_succ "$STONE_TOOL" osd erasure-code-profile set myprofile k=2 m=1 stripe_unit=2K crush-failure-domain=osd --force
+run_expect_succ "$STONE_TOOL" osd pool create "$POOL_EC" 100 100 erasure myprofile
 
 
 # expb happens to be the empty export for legacy reasons
@@ -112,11 +112,11 @@ run_expect_succ "$RADOS_TOOL" -p "$POOL" setomapheader foo2 "foo2.header"
 run_expect_succ "$RADOS_TOOL" -p "$POOL" export "$TDIR/expc"
 
 # make sure that --create works
-run "$CEPH_TOOL" osd pool rm "$POOL" "$POOL" --yes-i-really-really-mean-it
+run "$STONE_TOOL" osd pool rm "$POOL" "$POOL" --yes-i-really-really-mean-it
 run_expect_succ "$RADOS_TOOL" -p "$POOL" --create import "$TDIR/expa"
 
 # make sure that lack of --create fails
-run_expect_succ "$CEPH_TOOL" osd pool rm "$POOL" "$POOL" --yes-i-really-really-mean-it
+run_expect_succ "$STONE_TOOL" osd pool rm "$POOL" "$POOL" --yes-i-really-really-mean-it
 run_expect_fail "$RADOS_TOOL" -p "$POOL" import "$TDIR/expa"
 
 run_expect_succ "$RADOS_TOOL" -p "$POOL" --create import "$TDIR/expa"
@@ -153,10 +153,10 @@ VAL=`"$RADOS_TOOL" -p "$POOL" getxattr foo "rados.toothbrush"`
 [ "${VAL}" = "toothbrush" ] || die "Invalid attribute after second import"
 
 # test copy pool
-run "$CEPH_TOOL" osd pool rm "$POOL" "$POOL" --yes-i-really-really-mean-it
-run "$CEPH_TOOL" osd pool rm "$POOL_CP_TARGET" "$POOL_CP_TARGET" --yes-i-really-really-mean-it
-run_expect_succ "$CEPH_TOOL" osd pool create "$POOL" 8
-run_expect_succ "$CEPH_TOOL" osd pool create "$POOL_CP_TARGET" 8
+run "$STONE_TOOL" osd pool rm "$POOL" "$POOL" --yes-i-really-really-mean-it
+run "$STONE_TOOL" osd pool rm "$POOL_CP_TARGET" "$POOL_CP_TARGET" --yes-i-really-really-mean-it
+run_expect_succ "$STONE_TOOL" osd pool create "$POOL" 8
+run_expect_succ "$STONE_TOOL" osd pool create "$POOL_CP_TARGET" 8
 
 # create src files
 mkdir -p "$TDIR/dir_cp_src"
@@ -236,8 +236,8 @@ run_expect_fail "$RADOS_TOOL" ls --pool "$POOL" --snapid="$snapid"k
 run_expect_succ "$RADOS_TOOL" truncate f.1 0 --pool "$POOL"
 run_expect_fail "$RADOS_TOOL" truncate f.1 0k --pool "$POOL"
 
-run "$CEPH_TOOL" osd pool rm delete_me_mkpool_test delete_me_mkpool_test --yes-i-really-really-mean-it
-run_expect_succ "$CEPH_TOOL" osd pool create delete_me_mkpool_test 1
+run "$STONE_TOOL" osd pool rm delete_me_mkpool_test delete_me_mkpool_test --yes-i-really-really-mean-it
+run_expect_succ "$STONE_TOOL" osd pool create delete_me_mkpool_test 1
 
 run_expect_succ "$RADOS_TOOL" --pool "$POOL" bench 1 write
 run_expect_fail "$RADOS_TOOL" --pool "$POOL" bench 1k write
@@ -343,23 +343,23 @@ test_xattr() {
 }
 test_rmobj() {
     p=`uuidgen`
-    $CEPH_TOOL osd pool create $p 1
-    $CEPH_TOOL osd pool set-quota $p max_objects 1
+    $STONE_TOOL osd pool create $p 1
+    $STONE_TOOL osd pool set-quota $p max_objects 1
     V1=`mktemp fooattrXXXXXXX`
     $RADOS_TOOL put $OBJ $V1 -p $p
-    while ! $CEPH_TOOL osd dump | grep 'full_quota max_objects'
+    while ! $STONE_TOOL osd dump | grep 'full_quota max_objects'
     do
 	sleep 2
     done
     $RADOS_TOOL -p $p rm $OBJ --force-full
-    $CEPH_TOOL osd pool rm $p $p --yes-i-really-really-mean-it
+    $STONE_TOOL osd pool rm $p $p --yes-i-really-really-mean-it
     rm $V1
 }
 
 test_ls() {
     echo "Testing rados ls command"
     p=`uuidgen`
-    $CEPH_TOOL osd pool create $p 1
+    $STONE_TOOL osd pool create $p 1
     NS=10
     OBJS=20
     # Include default namespace (0) in the total
@@ -394,13 +394,13 @@ test_ls() {
         die "Created $TOTAL objects but saw $CHECK"
     fi
 
-    $CEPH_TOOL osd pool rm $p $p --yes-i-really-really-mean-it
+    $STONE_TOOL osd pool rm $p $p --yes-i-really-really-mean-it
 }
 
 test_cleanup() {
     echo "Testing rados cleanup command"
     p=`uuidgen`
-    $CEPH_TOOL osd pool create $p 1
+    $STONE_TOOL osd pool create $p 1
     NS=5
     OBJS=4
     # Include default namespace (0) in the total
@@ -456,7 +456,7 @@ test_cleanup() {
     run_expect_succ $RADOS_TOOL -p $p cleanup --prefix benchmark_data_otherhost
     set -e
 
-    $CEPH_TOOL osd pool rm $p $p --yes-i-really-really-mean-it
+    $STONE_TOOL osd pool rm $p $p --yes-i-really-really-mean-it
 }
 
 function test_append()
@@ -561,15 +561,15 @@ function test_put()
 
 function test_stat()
 {
-  bluestore=$("$CEPH_TOOL" osd metadata | grep '"osd_objectstore": "bluestore"' | cut -f1)
+  bluestore=$("$STONE_TOOL" osd metadata | grep '"osd_objectstore": "bluestore"' | cut -f1)
   # create file in local fs
   dd if=/dev/urandom of=rados_object_128k bs=64K count=2
 
   # rados df test (replicated_pool):
   $RADOS_TOOL purge $POOL --yes-i-really-really-mean-it
-  $CEPH_TOOL osd pool rm $POOL $POOL --yes-i-really-really-mean-it
-  $CEPH_TOOL osd pool create $POOL 8
-  $CEPH_TOOL osd pool set $POOL size 3
+  $STONE_TOOL osd pool rm $POOL $POOL --yes-i-really-really-mean-it
+  $STONE_TOOL osd pool create $POOL 8
+  $STONE_TOOL osd pool set $POOL size 3
 
   # put object with 1 MB gap in front
   $RADOS_TOOL -p $POOL put $OBJ ./rados_object_128k --offset=1048576
@@ -778,9 +778,9 @@ function test_stat()
 
   ############ rados df test (EC pool): ##############
   $RADOS_TOOL purge $POOL_EC --yes-i-really-really-mean-it
-  $CEPH_TOOL osd pool rm $POOL_EC $POOL_EC --yes-i-really-really-mean-it
-  $CEPH_TOOL osd erasure-code-profile set myprofile k=2 m=1 stripe_unit=2K crush-failure-domain=osd --force
-  $CEPH_TOOL osd pool create $POOL_EC 8 8 erasure
+  $STONE_TOOL osd pool rm $POOL_EC $POOL_EC --yes-i-really-really-mean-it
+  $STONE_TOOL osd erasure-code-profile set myprofile k=2 m=1 stripe_unit=2K crush-failure-domain=osd --force
+  $STONE_TOOL osd pool create $POOL_EC 8 8 erasure
 
   # put object
   $RADOS_TOOL -p $POOL_EC put $OBJ ./rados_object_128k
@@ -916,9 +916,9 @@ test_put
 test_stat
 
 # clean up environment, delete pool
-$CEPH_TOOL osd pool delete $POOL $POOL --yes-i-really-really-mean-it
-$CEPH_TOOL osd pool delete $POOL_EC $POOL_EC --yes-i-really-really-mean-it
-$CEPH_TOOL osd pool delete $POOL_CP_TARGET $POOL_CP_TARGET --yes-i-really-really-mean-it
+$STONE_TOOL osd pool delete $POOL $POOL --yes-i-really-really-mean-it
+$STONE_TOOL osd pool delete $POOL_EC $POOL_EC --yes-i-really-really-mean-it
+$STONE_TOOL osd pool delete $POOL_CP_TARGET $POOL_CP_TARGET --yes-i-really-really-mean-it
 
 echo "SUCCESS!"
 exit 0

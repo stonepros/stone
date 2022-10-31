@@ -15,7 +15,7 @@
 #ifndef STONE_ROTATINGKEYRING_H
 #define STONE_ROTATINGKEYRING_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "auth/Auth.h"
 #include "include/common_fwd.h"
 
@@ -30,14 +30,14 @@ class RotatingKeyRing : public KeyStore {
   uint32_t service_id;
   RotatingSecrets secrets;
   KeyRing *keyring;
-  mutable ceph::mutex lock;
+  mutable stone::mutex lock;
 
 public:
   RotatingKeyRing(StoneContext *cct_, uint32_t s, KeyRing *kr) :
     cct(cct_),
     service_id(s),
     keyring(kr),
-    lock{ceph::make_mutex("RotatingKeyRing::lock")}
+    lock{stone::make_mutex("RotatingKeyRing::lock")}
   {}
 
   bool need_new_secrets() const;

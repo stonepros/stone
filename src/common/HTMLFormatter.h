@@ -5,7 +5,7 @@
 
 #include "Formatter.h"
 
-namespace ceph {
+namespace stone {
   class HTMLFormatter : public XMLFormatter {
   public:
     explicit HTMLFormatter(bool pretty = false);

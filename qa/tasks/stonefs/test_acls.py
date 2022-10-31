@@ -1,23 +1,23 @@
 import logging
 
 from io import BytesIO
-from tasks.cephfs.xfstests_dev import XFSTestsDev
+from tasks.stonefs.xfstests_dev import XFSTestsDev
 
 log = logging.getLogger(__name__)
 
 class TestACLs(XFSTestsDev):
 
     def test_acls(self):
-        from tasks.cephfs.fuse_mount import FuseMount
-        from tasks.cephfs.kernel_mount import KernelMount
+        from tasks.stonefs.fuse_mount import FuseMount
+        from tasks.stonefs.kernel_mount import KernelMount
 
-        # TODO: make xfstests-dev compatible with ceph-fuse. xfstests-dev
-        # remounts CephFS before running tests using kernel, so ceph-fuse
+        # TODO: make xfstests-dev compatible with stone-fuse. xfstests-dev
+        # remounts StoneFS before running tests using kernel, so stone-fuse
         # mounts are never actually testsed.
         if isinstance(self.mount_a, FuseMount):
             log.info('client is fuse mounted')
             self.skipTest('Requires kernel client; xfstests-dev not '\
-                          'compatible with ceph-fuse ATM.')
+                          'compatible with stone-fuse ATM.')
         elif isinstance(self.mount_a, KernelMount):
             log.info('client is kernel mounted')
 

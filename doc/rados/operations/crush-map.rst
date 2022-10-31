@@ -4,9 +4,9 @@
 
 The :abbr:`CRUSH (Controlled Replication Under Scalable Hashing)` algorithm
 determines how to store and retrieve data by computing storage locations.
-CRUSH empowers Ceph clients to communicate with OSDs directly rather than
+CRUSH empowers Stone clients to communicate with OSDs directly rather than
 through a centralized server or broker. With an algorithmically determined
-method of storing and retrieving data, Ceph avoids a single point of failure, a
+method of storing and retrieving data, Stone avoids a single point of failure, a
 performance bottleneck, and a physical limit to its scalability.
 
 CRUSH uses a map of your cluster (the CRUSH map) to pseudo-randomly
@@ -57,12 +57,12 @@ Note:
    ``rack``, ``chassis`` and ``host``.
    These defined types suffice for almost all clusters, but can be customized
    by modifying the CRUSH map.
-#. Not all keys need to be specified.  For example, by default, Ceph
+#. Not all keys need to be specified.  For example, by default, Stone
    automatically sets an ``OSD``'s location to be
    ``root=default host=HOSTNAME`` (based on the output from ``hostname -s``).
 
 The CRUSH location for an OSD can be defined by adding the ``crush location``
-option in ``ceph.conf``.  Each time the OSD starts,
+option in ``stone.conf``.  Each time the OSD starts,
 it verifies it is in the correct location in the CRUSH map and, if it is not,
 it moves itself.  To disable this automatic CRUSH map management, add the
 following to your configuration file in the ``[osd]`` section::
@@ -79,7 +79,7 @@ A customized location hook can be used to generate a more complete
 CRUSH location on startup.  The CRUSH location is based on, in order
 of preference:
 
-#. A ``crush location`` option in ``ceph.conf``
+#. A ``crush location`` option in ``stone.conf``
 #. A default of ``root=default host=HOSTNAME`` where the hostname is
    derived from the ``hostname -s`` command
 
@@ -87,14 +87,14 @@ A script can be written to provide additional
 location fields (for example, ``rack`` or ``datacenter``) and the
 hook enabled via the config option::
 
- crush location hook = /path/to/customized-ceph-crush-location
+ crush location hook = /path/to/customized-stone-crush-location
 
 This hook is passed several arguments (below) and should output a single line
 to ``stdout`` with the CRUSH location description.::
 
   --cluster CLUSTER --id ID --type TYPE
 
-where the cluster name is typically ``ceph``, the ``id`` is the daemon
+where the cluster name is typically ``stone``, the ``id`` is the daemon
 identifier (e.g., the OSD number or daemon identifier), and the daemon
 type is ``osd``, ``mds``, etc.
 
@@ -186,7 +186,7 @@ weights are in units of terabytes (TB).
 You can get a simple view the of CRUSH hierarchy for your cluster,
 including weights, with::
 
-  ceph osd tree
+  stone osd tree
 
 Rules
 -----
@@ -210,11 +210,11 @@ CRUSH map.
 
 You can see what rules are defined for your cluster with::
 
-  ceph osd crush rule ls
+  stone osd crush rule ls
 
 You can view the contents of the rules with::
 
-  ceph osd crush rule dump
+  stone osd crush rule dump
 
 Device classes
 --------------
@@ -226,32 +226,32 @@ by.
 
 The device class for one or more OSDs can be explicitly set with::
 
-  ceph osd crush set-device-class <class> <osd-name> [...]
+  stone osd crush set-device-class <class> <osd-name> [...]
 
 Once a device class is set, it cannot be changed to another class
 until the old class is unset with::
 
-  ceph osd crush rm-device-class <osd-name> [...]
+  stone osd crush rm-device-class <osd-name> [...]
 
 This allows administrators to set device classes without the class
 being changed on OSD restart or by some other script.
 
 A placement rule that targets a specific device class can be created with::
 
-  ceph osd crush rule create-replicated <rule-name> <root> <failure-domain> <class>
+  stone osd crush rule create-replicated <rule-name> <root> <failure-domain> <class>
 
 A pool can then be changed to use the new rule with::
 
-  ceph osd pool set <pool-name> crush_rule <rule-name>
+  stone osd pool set <pool-name> crush_rule <rule-name>
 
 Device classes are implemented by creating a "shadow" CRUSH hierarchy
 for each device class in use that contains only devices of that class.
 CRUSH rules can then distribute data over the shadow hierarchy.
 This approach is fully backward compatible with
-old Ceph clients.  You can view the CRUSH hierarchy with shadow items
+old Stone clients.  You can view the CRUSH hierarchy with shadow items
 with::
 
-  ceph osd crush tree --show-shadow
+  stone osd crush tree --show-shadow
 
 For older clusters created before Luminous that relied on manually
 crafted CRUSH maps to maintain per-device-type hierarchies, there is a
@@ -281,7 +281,7 @@ There are two types of weight sets supported:
     different pools may be different sizes and have different load
     levels, but will be mostly treated the same by the balancer).
     However, compat weight sets have the huge advantage that they are
-    *backward compatible* with previous versions of Ceph, which means
+    *backward compatible* with previous versions of Stone, which means
     that even though weight sets were first introduced in Luminous
     v12.2.z, older clients (e.g., firefly) can still connect to the
     cluster when a compat weight set is being used to balance data.
@@ -297,7 +297,7 @@ When weight sets are in use, the weights associated with each node in
 the hierarchy is visible as a separate column (labeled either
 ``(compat)`` or the pool name) from the command::
 
-  ceph osd tree
+  stone osd tree
 
 When both *compat* and *per-pool* weight sets are in use, data
 placement for a particular pool will use its own per-pool weight set
@@ -305,7 +305,7 @@ if present.  If not, it will use the compat weight set if present.  If
 neither are present, it will use the normal CRUSH weights.
 
 Although weight sets can be set up and manipulated by hand, it is
-recommended that the ``ceph-mgr`` *balancer* module be enabled to do so
+recommended that the ``stone-mgr`` *balancer* module be enabled to do so
 automatically when running Luminous or later releases.
 
 
@@ -322,7 +322,7 @@ Add/Move an OSD
 
 To add or move an OSD in the CRUSH map of a running cluster::
 
-  ceph osd crush set {name} {weight} root={root} [{bucket-type}={bucket-name} ...]
+  stone osd crush set {name} {weight} root={root} [{bucket-type}={bucket-name} ...]
 
 Where:
 
@@ -361,7 +361,7 @@ Where:
 The following example adds ``osd.0`` to the hierarchy, or moves the
 OSD from a previous location. ::
 
-  ceph osd crush set osd.0 1.0 root=default datacenter=dc1 room=room1 row=foo rack=bar host=foo-bar-1
+  stone osd crush set osd.0 1.0 root=default datacenter=dc1 room=room1 row=foo rack=bar host=foo-bar-1
 
 
 Adjust OSD weight
@@ -374,7 +374,7 @@ Adjust OSD weight
 To adjust an OSD's CRUSH weight in the CRUSH map of a running cluster, execute
 the following::
 
-  ceph osd crush reweight {name} {weight}
+  stone osd crush reweight {name} {weight}
 
 Where:
 
@@ -400,12 +400,12 @@ Remove an OSD
 -------------
 
 .. note: OSDs are normally removed from the CRUSH as part of the
-   ``ceph osd purge`` command.  This command is rarely needed.
+   ``stone osd purge`` command.  This command is rarely needed.
 
 To remove an OSD from the CRUSH map of a running cluster, execute the
 following::
 
-  ceph osd crush remove {name}
+  stone osd crush remove {name}
 
 Where:
 
@@ -431,9 +431,9 @@ Add a Bucket
    ``default`` or other root as described below.
 
 To add a bucket in the CRUSH map of a running cluster, execute the
-``ceph osd crush add-bucket`` command::
+``stone osd crush add-bucket`` command::
 
-  ceph osd crush add-bucket {bucket-name} {bucket-type}
+  stone osd crush add-bucket {bucket-name} {bucket-type}
 
 Where:
 
@@ -455,7 +455,7 @@ Where:
 
 The following example adds the ``rack12`` bucket to the hierarchy::
 
-  ceph osd crush add-bucket rack12 rack
+  stone osd crush add-bucket rack12 rack
 
 Move a Bucket
 -------------
@@ -463,7 +463,7 @@ Move a Bucket
 To move a bucket to a different location or position in the CRUSH map
 hierarchy, execute the following::
 
-  ceph osd crush move {bucket-name} {bucket-type}={bucket-name}, [...]
+  stone osd crush move {bucket-name} {bucket-type}={bucket-name}, [...]
 
 Where:
 
@@ -486,7 +486,7 @@ Remove a Bucket
 
 To remove a bucket from the CRUSH hierarchy, execute the following::
 
-  ceph osd crush remove {bucket-name}
+  stone osd crush remove {bucket-name}
 
 .. note:: A bucket must be empty before removing it from the CRUSH hierarchy.
 
@@ -501,7 +501,7 @@ Where:
 
 The following example removes the ``rack12`` bucket from the hierarchy::
 
-  ceph osd crush remove rack12
+  stone osd crush remove rack12
 
 Creating a compat weight set
 ----------------------------
@@ -511,22 +511,22 @@ Creating a compat weight set
 
 To create a *compat* weight set::
 
-  ceph osd crush weight-set create-compat
+  stone osd crush weight-set create-compat
 
 Weights for the compat weight set can be adjusted with::
 
-  ceph osd crush weight-set reweight-compat {name} {weight}
+  stone osd crush weight-set reweight-compat {name} {weight}
 
 The compat weight set can be destroyed with::
 
-  ceph osd crush weight-set rm-compat
+  stone osd crush weight-set rm-compat
 
 Creating per-pool weight sets
 -----------------------------
 
 To create a weight set for a specific pool,::
 
-  ceph osd crush weight-set create {pool-name} {mode}
+  stone osd crush weight-set create {pool-name} {mode}
 
 .. note:: Per-pool weight sets require that all servers and daemons
           run Luminous v12.2.z or later.
@@ -555,15 +555,15 @@ Where:
 
 To adjust the weight of an item in a weight set::
 
-  ceph osd crush weight-set reweight {pool-name} {item-name} {weight [...]}
+  stone osd crush weight-set reweight {pool-name} {item-name} {weight [...]}
 
 To list existing weight sets,::
 
-  ceph osd crush weight-set ls
+  stone osd crush weight-set ls
 
 To remove a weight set,::
 
-  ceph osd crush weight-set rm {pool-name}
+  stone osd crush weight-set rm {pool-name}
 
 Creating a rule for a replicated pool
 -------------------------------------
@@ -583,14 +583,14 @@ doesn't matter what type is associated with that node (it doesn't have
 to be a ``root`` node).
 
 It is also possible to create a rule that restricts data placement to
-a specific *class* of device.  By default, Ceph OSDs automatically
+a specific *class* of device.  By default, Stone OSDs automatically
 classify themselves as either ``hdd`` or ``ssd``, depending on the
 underlying type of device being used.  These classes can also be
 customized.
 
 To create a replicated rule,::
 
-  ceph osd crush rule create-replicated {name} {root} {failure-domain-type} [{class}]
+  stone osd crush rule create-replicated {name} {root} {failure-domain-type} [{class}]
 
 Where:
 
@@ -637,11 +637,11 @@ the profile is used to create a pool.
 
 The erasure code profiles can be listed with::
 
-  ceph osd erasure-code-profile ls
+  stone osd erasure-code-profile ls
 
 An existing profile can be viewed with::
 
-  ceph osd erasure-code-profile get {profile-name}
+  stone osd erasure-code-profile get {profile-name}
 
 Normally profiles should never be modified; instead, a new profile
 should be created and used when creating a new pool or creating a new
@@ -661,11 +661,11 @@ The erasure code profile properties of interest are:
 
 Once a profile is defined, you can create a CRUSH rule with::
 
-  ceph osd crush rule create-erasure {name} {profile-name}
+  stone osd crush rule create-erasure {name} {profile-name}
 
 .. note: When creating a new pool, it is not actually necessary to
    explicitly create the rule.  If the erasure code profile alone is
-   specified and the rule argument is left off then Ceph will create
+   specified and the rule argument is left off then Stone will create
    the CRUSH rule automatically.
 
 Deleting rules
@@ -673,7 +673,7 @@ Deleting rules
 
 Rules that are not in use by pools can be deleted with::
 
-  ceph osd crush rule rm {rule-name}
+  stone osd crush rule rm {rule-name}
 
 
 .. _crush-map-tunables:
@@ -689,11 +689,11 @@ algorithm is used.
 
 In order to use newer tunables, both clients and servers must support
 the new version of CRUSH.  For this reason, we have created
-``profiles`` that are named after the Ceph version in which they were
+``profiles`` that are named after the Stone version in which they were
 introduced.  For example, the ``firefly`` tunables are first supported
 by the Firefly release, and will not work with older (e.g., Dumpling)
 clients.  Once a given set of tunables are changed from the legacy
-default behavior, the ``ceph-mon`` and ``ceph-osd`` will prevent older
+default behavior, the ``stone-mon`` and ``stone-osd`` will prevent older
 clients who do not support the new CRUSH features from connecting to
 the cluster.
 
@@ -873,7 +873,7 @@ Which client versions support CRUSH_TUNABLES5
 Warning when tunables are non-optimal
 -------------------------------------
 
-Starting with version v0.74, Ceph will issue a health warning if the
+Starting with version v0.74, Stone will issue a health warning if the
 current CRUSH tunables don't include all the optimal values from the
 ``default`` profile (see below for the meaning of the ``default`` profile).
 To make this warning go away, you have two options:
@@ -884,42 +884,42 @@ To make this warning go away, you have two options:
    where the data movement may affect performance.  You can enable optimal
    tunables with::
 
-      ceph osd crush tunables optimal
+      stone osd crush tunables optimal
 
    If things go poorly (e.g., too much load) and not very much
    progress has been made, or there is a client compatibility problem
-   (old kernel CephFS or RBD clients, or pre-Bobtail ``librados``
+   (old kernel StoneFS or RBD clients, or pre-Bobtail ``librados``
    clients), you can switch back with::
 
-      ceph osd crush tunables legacy
+      stone osd crush tunables legacy
 
 2. You can make the warning go away without making any changes to CRUSH by
-   adding the following option to your ceph.conf ``[mon]`` section::
+   adding the following option to your stone.conf ``[mon]`` section::
 
       mon warn on legacy crush tunables = false
 
    For the change to take effect, you will need to restart the monitors, or
    apply the option to running monitors with::
 
-      ceph tell mon.\* config set mon_warn_on_legacy_crush_tunables false
+      stone tell mon.\* config set mon_warn_on_legacy_crush_tunables false
 
 
 A few important points
 ----------------------
 
  * Adjusting these values will result in the shift of some PGs between
-   storage nodes.  If the Ceph cluster is already storing a lot of
+   storage nodes.  If the Stone cluster is already storing a lot of
    data, be prepared for some fraction of the data to move.
- * The ``ceph-osd`` and ``ceph-mon`` daemons will start requiring the
+ * The ``stone-osd`` and ``stone-mon`` daemons will start requiring the
    feature bits of new connections as soon as they get
    the updated map.  However, already-connected clients are
    effectively grandfathered in, and will misbehave if they do not
    support the new feature.
  * If the CRUSH tunables are set to non-legacy values and then later
-   changed back to the default values, ``ceph-osd`` daemons will not be
+   changed back to the default values, ``stone-osd`` daemons will not be
    required to support the feature.  However, the OSD peering process
    requires examining and understanding old maps.  Therefore, you
-   should not run old versions of the ``ceph-osd`` daemon
+   should not run old versions of the ``stone-osd`` daemon
    if the cluster has previously used non-legacy CRUSH values, even if
    the latest version of the map has been switched back to using the
    legacy defaults.
@@ -936,9 +936,9 @@ sets known as *profiles*.  As of the Octopus release these are:
  * ``firefly``: the values supported by the firefly release
  * ``hammer``: the values supported by the hammer release
  * ``jewel``: the values supported by the jewel release
- * ``optimal``: the best (ie optimal) values of the current version of Ceph
+ * ``optimal``: the best (ie optimal) values of the current version of Stone
  * ``default``: the default values of a new cluster installed from
-   scratch. These values, which depend on the current version of Ceph,
+   scratch. These values, which depend on the current version of Stone,
    are hardcoded and are generally a mix of optimal and legacy values.
    These values generally match the ``optimal`` profile of the previous
    LTS release, or the most recent release for which we generally expect
@@ -946,7 +946,7 @@ sets known as *profiles*.  As of the Octopus release these are:
 
 You can apply a profile to a running cluster with the command::
 
- ceph osd crush tunables {PROFILE}
+ stone osd crush tunables {PROFILE}
 
 Note that this may result in data movement, potentially quite a bit.  Study
 release notes and documentation carefully before changing the profile on a
@@ -954,13 +954,13 @@ running cluster, and consider throttling recovery/backfill parameters to
 limit the impact of a bolus of backfill.
 
 
-.. _CRUSH - Controlled, Scalable, Decentralized Placement of Replicated Data: https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf
+.. _CRUSH - Controlled, Scalable, Decentralized Placement of Replicated Data: https://stone.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf
 
 
 Primary Affinity
 ================
 
-When a Ceph Client reads or writes data, it first contacts the primary OSD in
+When a Stone Client reads or writes data, it first contacts the primary OSD in
 each affected PG's acting set. By default, the first OSD in the acting set is
 the primary.  For example, in the acting set ``[2, 3, 4]``, ``osd.2`` is
 listed first and thus is the primary (aka lead) OSD. Sometimes we know that an
@@ -984,13 +984,13 @@ inversely proportional to OSD size won't be 100% optimal, but it can readily
 achieve a 15% improvement in overall read throughput by utilizing SATA
 interface bandwidth and CPU cycles more evenly.
 
-By default, all ceph OSDs have primary affinity of ``1``, which indicates that
+By default, all stone OSDs have primary affinity of ``1``, which indicates that
 any OSD may act as a primary with equal probability.
 
-You can reduce a Ceph OSD's primary affinity so that CRUSH is less likely to choose
+You can reduce a Stone OSD's primary affinity so that CRUSH is less likely to choose
 the OSD as primary in a PG's acting set.::
 
-	ceph osd primary-affinity <osd-id> <weight>
+	stone osd primary-affinity <osd-id> <weight>
 
 You may set an OSD's primary affinity to a real number in the range
 ``[0-1]``, where ``0`` indicates that the OSD may **NOT** be used as a primary

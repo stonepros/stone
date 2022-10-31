@@ -7,20 +7,20 @@ import sys
 import logging
 
 from textwrap import dedent
-from ceph_volume import log, conf, configuration
-from ceph_volume import exceptions
-from ceph_volume import terminal
+from stone_volume import log, conf, configuration
+from stone_volume import exceptions
+from stone_volume import terminal
 
-# The ceph-volume-zfs specific code
-import ceph_volume_zfs.zfs
-from ceph_volume_zfs import devices
-# from ceph_volume_zfs.util import device
-from ceph_volume_zfs.devices import zfs
+# The stone-volume-zfs specific code
+import stone_volume_zfs.zfs
+from stone_volume_zfs import devices
+# from stone_volume_zfs.util import device
+from stone_volume_zfs.devices import zfs
 
 # the supported actions
-from ceph_volume_zfs.devices.zfs import inventory
-from ceph_volume_zfs.devices.zfs import prepare
-from ceph_volume_zfs.devices.zfs import zap
+from stone_volume_zfs.devices.zfs import inventory
+from stone_volume_zfs.devices.zfs import prepare
+from stone_volume_zfs.devices.zfs import zap
 
 
 if __name__ == '__main__':
@@ -62,7 +62,7 @@ class ZFS(object):
     def get_environ_vars(self):
         environ_vars = []
         for key, value in os.environ.items():
-            if key.startswith('CEPH_'):
+            if key.startswith('STONE_'):
                 environ_vars.append("%s=%s" % (key, value))
         if not environ_vars:
             return ''
@@ -70,12 +70,12 @@ class ZFS(object):
             environ_vars.insert(0, '\nEnviron Variables:')
             return '\n'.join(environ_vars)
 
-    def load_ceph_conf_path(self, cluster_name='ceph'):
-        abspath = '/etc/ceph/%s.conf' % cluster_name
-        conf.path = os.getenv('CEPH_CONF', abspath)
+    def load_stone_conf_path(self, cluster_name='stone'):
+        abspath = '/etc/stone/%s.conf' % cluster_name
+        conf.path = os.getenv('STONE_CONF', abspath)
         conf.cluster = cluster_name
 
-    def stat_ceph_conf(self):
+    def stat_stone_conf(self):
         try:
             configuration.load(conf.path)
             return terminal.green(conf.path)
@@ -83,7 +83,7 @@ class ZFS(object):
             return terminal.red(error)
 
     def load_log_path(self):
-        conf.log_path = os.getenv('CEPH_VOLUME_LOG_PATH', '/var/log/ceph')
+        conf.log_path = os.getenv('STONE_VOLUME_LOG_PATH', '/var/log/stone')
 
     def _get_split_args(self):
         subcommands = self.zfs_mapper.keys()
@@ -98,10 +98,10 @@ class ZFS(object):
     def main(self, argv=None):
         if argv is None:
             return
-        self.load_ceph_conf_path()
+        self.load_stone_conf_path()
         # these need to be available for the help, which gets parsed super
         # early
-        self.load_ceph_conf_path()
+        self.load_stone_conf_path()
         self.load_log_path()
         main_args, subcommand_args = self._get_split_args()
         # no flags where passed in, return the help menu instead of waiting for
@@ -110,14 +110,14 @@ class ZFS(object):
             print(self.print_help(warning=True))
             return
         parser = argparse.ArgumentParser(
-            prog='ceph-volume-zfs',
+            prog='stone-volume-zfs',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self.print_help(),
         )
         parser.add_argument(
             '--cluster',
-            default='ceph',
-            help='Cluster name (defaults to "ceph")',
+            default='stone',
+            help='Cluster name (defaults to "stone")',
         )
         parser.add_argument(
             '--log-level',
@@ -126,27 +126,27 @@ class ZFS(object):
         )
         parser.add_argument(
             '--log-path',
-            default='/var/log/ceph/',
-            help='Change the log path (defaults to /var/log/ceph)',
+            default='/var/log/stone/',
+            help='Change the log path (defaults to /var/log/stone)',
         )
         args = parser.parse_args(main_args)
         conf.log_path = args.log_path
         if os.path.isdir(conf.log_path):
-            conf.log_path = os.path.join(args.log_path, 'ceph-volume-zfs.log')
+            conf.log_path = os.path.join(args.log_path, 'stone-volume-zfs.log')
         log.setup()
         logger = logging.getLogger(__name__)
-        logger.info("Running command: ceph-volume-zfs %s %s",
+        logger.info("Running command: stone-volume-zfs %s %s",
                     " ".join(main_args), " ".join(subcommand_args))
         # set all variables from args and load everything needed according to
         # them
-        self.load_ceph_conf_path(cluster_name=args.cluster)
+        self.load_stone_conf_path(cluster_name=args.cluster)
         try:
-            conf.ceph = configuration.load(conf.path)
+            conf.stone = configuration.load(conf.path)
         except exceptions.ConfigurationError as error:
             # we warn only here, because it is possible that the configuration
             # file is not needed, or that it will be loaded by some other means
             # (like reading from zfs tags)
-            logger.exception('ignoring inability to load ceph.conf')
+            logger.exception('ignoring inability to load stone.conf')
             terminal.red(error)
         # dispatch to sub-commands
         terminal.dispatch(self.zfs_mapper, subcommand_args)

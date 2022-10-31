@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat Inc.
  *
@@ -65,7 +65,7 @@ public:
   virtual item_t dequeue() = 0;
 
   // Dump formatted representation for the queue
-  virtual void dump(ceph::Formatter &f) const = 0;
+  virtual void dump(stone::Formatter &f) const = 0;
 
   // Print human readable brief description with relevant parameters
   virtual void print(std::ostream &out) const = 0;

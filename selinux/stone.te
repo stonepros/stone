@@ -1,4 +1,4 @@
-policy_module(ceph, 1.1.1)
+policy_module(stone, 1.1.1)
 
 require {
 	type sysfs_t;
@@ -31,133 +31,133 @@ require {
 # Declarations
 #
 
-type ceph_t;
-type ceph_exec_t;
-init_daemon_domain(ceph_t, ceph_exec_t)
-ceph_exec(ceph_t)
+type stone_t;
+type stone_exec_t;
+init_daemon_domain(stone_t, stone_exec_t)
+stone_exec(stone_t)
 
-permissive ceph_t;
+permissive stone_t;
 
-type ceph_initrc_exec_t;
-init_script_file(ceph_initrc_exec_t)
+type stone_initrc_exec_t;
+init_script_file(stone_initrc_exec_t)
 
-type ceph_log_t;
-logging_log_file(ceph_log_t)
+type stone_log_t;
+logging_log_file(stone_log_t)
 
-type ceph_var_lib_t;
-files_type(ceph_var_lib_t)
+type stone_var_lib_t;
+files_type(stone_var_lib_t)
 
-type ceph_var_run_t;
-files_pid_file(ceph_var_run_t)
+type stone_var_run_t;
+files_pid_file(stone_var_run_t)
 
 ########################################
 #
-# ceph local policy
+# stone local policy
 #
 
-allow ceph_t self:process { signal_perms };
-allow ceph_t self:fifo_file rw_fifo_file_perms;
-allow ceph_t self:unix_stream_socket create_stream_socket_perms;
-allow ceph_t self:capability { setuid setgid dac_override dac_read_search };
-allow ceph_t self:capability2 block_suspend;
+allow stone_t self:process { signal_perms };
+allow stone_t self:fifo_file rw_fifo_file_perms;
+allow stone_t self:unix_stream_socket create_stream_socket_perms;
+allow stone_t self:capability { setuid setgid dac_override dac_read_search };
+allow stone_t self:capability2 block_suspend;
 
-manage_dirs_pattern(ceph_t, ceph_log_t, ceph_log_t)
-manage_files_pattern(ceph_t, ceph_log_t, ceph_log_t)
-manage_lnk_files_pattern(ceph_t, ceph_log_t, ceph_log_t)
+manage_dirs_pattern(stone_t, stone_log_t, stone_log_t)
+manage_files_pattern(stone_t, stone_log_t, stone_log_t)
+manage_lnk_files_pattern(stone_t, stone_log_t, stone_log_t)
 
-manage_dirs_pattern(ceph_t, ceph_var_lib_t, ceph_var_lib_t)
-manage_files_pattern(ceph_t, ceph_var_lib_t, ceph_var_lib_t)
-manage_lnk_files_pattern(ceph_t, ceph_var_lib_t, ceph_var_lib_t)
+manage_dirs_pattern(stone_t, stone_var_lib_t, stone_var_lib_t)
+manage_files_pattern(stone_t, stone_var_lib_t, stone_var_lib_t)
+manage_lnk_files_pattern(stone_t, stone_var_lib_t, stone_var_lib_t)
 
-manage_dirs_pattern(ceph_t, ceph_var_run_t, ceph_var_run_t)
-manage_files_pattern(ceph_t, ceph_var_run_t, ceph_var_run_t)
-manage_lnk_files_pattern(ceph_t, ceph_var_run_t, ceph_var_run_t)
+manage_dirs_pattern(stone_t, stone_var_run_t, stone_var_run_t)
+manage_files_pattern(stone_t, stone_var_run_t, stone_var_run_t)
+manage_lnk_files_pattern(stone_t, stone_var_run_t, stone_var_run_t)
 
-kernel_read_system_state(ceph_t)
-kernel_read_network_state(ceph_t)
-allow ceph_t kernel_t:system module_request;
+kernel_read_system_state(stone_t)
+kernel_read_network_state(stone_t)
+allow stone_t kernel_t:system module_request;
 
-corenet_all_recvfrom_unlabeled(ceph_t)
-corenet_all_recvfrom_netlabel(ceph_t)
-corenet_udp_sendrecv_generic_if(ceph_t)
-corenet_udp_sendrecv_generic_node(ceph_t)
-corenet_udp_bind_generic_node(ceph_t)
-corenet_tcp_bind_generic_node(ceph_t)
+corenet_all_recvfrom_unlabeled(stone_t)
+corenet_all_recvfrom_netlabel(stone_t)
+corenet_udp_sendrecv_generic_if(stone_t)
+corenet_udp_sendrecv_generic_node(stone_t)
+corenet_udp_bind_generic_node(stone_t)
+corenet_tcp_bind_generic_node(stone_t)
 
-corenet_sendrecv_cyphesis_server_packets(ceph_t)
-corenet_tcp_bind_cyphesis_port(ceph_t)
-corenet_tcp_sendrecv_cyphesis_port(ceph_t)
+corenet_sendrecv_cyphesis_server_packets(stone_t)
+corenet_tcp_bind_cyphesis_port(stone_t)
+corenet_tcp_sendrecv_cyphesis_port(stone_t)
 
-allow ceph_t commplex_main_port_t:tcp_socket name_connect;
-allow ceph_t http_cache_port_t:tcp_socket name_connect;
-allow ceph_t amqp_port_t:tcp_socket name_connect;
-allow ceph_t soundd_port_t:tcp_socket name_connect;
+allow stone_t commplex_main_port_t:tcp_socket name_connect;
+allow stone_t http_cache_port_t:tcp_socket name_connect;
+allow stone_t amqp_port_t:tcp_socket name_connect;
+allow stone_t soundd_port_t:tcp_socket name_connect;
 
-corecmd_exec_bin(ceph_t)
-corecmd_exec_shell(ceph_t)
+corecmd_exec_bin(stone_t)
+corecmd_exec_shell(stone_t)
 
-allow ceph_t rpm_exec_t:file getattr;
-allow ceph_t rpm_var_lib_t:dir { add_name write };
-allow ceph_t rpm_var_lib_t:file { create open };
+allow stone_t rpm_exec_t:file getattr;
+allow stone_t rpm_var_lib_t:dir { add_name write };
+allow stone_t rpm_var_lib_t:file { create open };
 
-dev_read_urand(ceph_t)
+dev_read_urand(stone_t)
 
-domain_read_all_domains_state(ceph_t)
+domain_read_all_domains_state(stone_t)
 
-fs_getattr_all_fs(ceph_t)
+fs_getattr_all_fs(stone_t)
 
-auth_use_nsswitch(ceph_t)
+auth_use_nsswitch(stone_t)
 
-logging_send_syslog_msg(ceph_t)
+logging_send_syslog_msg(stone_t)
 
-sysnet_dns_name_resolve(ceph_t)
+sysnet_dns_name_resolve(stone_t)
 
-udev_read_db(ceph_t)
+udev_read_db(stone_t)
 
-allow ceph_t nvme_device_t:blk_file { getattr ioctl open read write };
+allow stone_t nvme_device_t:blk_file { getattr ioctl open read write };
 
 # basis for future security review
-allow ceph_t ceph_var_run_t:sock_file { create unlink write setattr };
-allow ceph_t self:capability { sys_rawio chown };
+allow stone_t stone_var_run_t:sock_file { create unlink write setattr };
+allow stone_t self:capability { sys_rawio chown };
 
-allow ceph_t self:tcp_socket { accept listen };
-corenet_tcp_connect_cyphesis_port(ceph_t)
-corenet_tcp_connect_generic_port(ceph_t)
-files_list_tmp(ceph_t)
-files_manage_generic_tmp_files(ceph_t)
-fstools_exec(ceph_t)
-nis_use_ypbind_uncond(ceph_t)
-storage_raw_rw_fixed_disk(ceph_t)
-files_manage_generic_locks(ceph_t)
-libs_exec_ldconfig(ceph_t)
-fs_list_hugetlbfs(ceph_t)
-fs_list_tmpfs(ceph_t)
-fs_read_cgroup_files(ceph_t)
-fs_read_tmpfs_symlinks(ceph_t)
-fs_search_cgroup_dirs(ceph_t)
-ceph_read_lib_files(init_t)
+allow stone_t self:tcp_socket { accept listen };
+corenet_tcp_connect_cyphesis_port(stone_t)
+corenet_tcp_connect_generic_port(stone_t)
+files_list_tmp(stone_t)
+files_manage_generic_tmp_files(stone_t)
+fstools_exec(stone_t)
+nis_use_ypbind_uncond(stone_t)
+storage_raw_rw_fixed_disk(stone_t)
+files_manage_generic_locks(stone_t)
+libs_exec_ldconfig(stone_t)
+fs_list_hugetlbfs(stone_t)
+fs_list_tmpfs(stone_t)
+fs_read_cgroup_files(stone_t)
+fs_read_tmpfs_symlinks(stone_t)
+fs_search_cgroup_dirs(stone_t)
+stone_read_lib_files(init_t)
 
-allow ceph_t sysfs_t:dir read;
-allow ceph_t sysfs_t:file { read getattr open };
-allow ceph_t sysfs_t:lnk_file { read getattr };
+allow stone_t sysfs_t:dir read;
+allow stone_t sysfs_t:file { read getattr open };
+allow stone_t sysfs_t:lnk_file { read getattr };
 
-allow ceph_t configfs_t:dir { add_name create getattr open read remove_name rmdir search write };
-allow ceph_t configfs_t:file { getattr open read write ioctl };
-allow ceph_t configfs_t:lnk_file { create getattr read unlink };
+allow stone_t configfs_t:dir { add_name create getattr open read remove_name rmdir search write };
+allow stone_t configfs_t:file { getattr open read write ioctl };
+allow stone_t configfs_t:lnk_file { create getattr read unlink };
 
 
-allow ceph_t random_device_t:chr_file getattr;
-allow ceph_t urandom_device_t:chr_file getattr;
-allow ceph_t self:process setpgid;
-allow ceph_t self:process setsched;
-allow ceph_t var_run_t:dir { write create add_name };
-allow ceph_t var_run_t:file { read write create open getattr };
-allow ceph_t init_var_run_t:file getattr;
-allow init_t ceph_t:process2 { nnp_transition nosuid_transition };
+allow stone_t random_device_t:chr_file getattr;
+allow stone_t urandom_device_t:chr_file getattr;
+allow stone_t self:process setpgid;
+allow stone_t self:process setsched;
+allow stone_t var_run_t:dir { write create add_name };
+allow stone_t var_run_t:file { read write create open getattr };
+allow stone_t init_var_run_t:file getattr;
+allow init_t stone_t:process2 { nnp_transition nosuid_transition };
 
-allow ceph_t targetd_etc_rw_t:dir { getattr search };
+allow stone_t targetd_etc_rw_t:dir { getattr search };
 
-fsadm_manage_pid(ceph_t)
+fsadm_manage_pid(stone_t)
 
 #============= setfiles_t ==============
-allow setfiles_t ceph_var_lib_t:file write;
+allow setfiles_t stone_var_lib_t:file write;

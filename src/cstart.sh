@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-image_base="quay.io/ceph-ci/ceph"
+image_base="quay.io/stone-ci/stone"
 
 if which podman 2>&1 > /dev/null; then
     runtime="podman"
@@ -50,17 +50,17 @@ if ! $runtime image inspect $image_base:$shortid 2>/dev/null; then
     sudo ../src/script/cpatch -t $image_base:$shortid
 fi
 
-sudo ../src/cephadm/cephadm rm-cluster --force --fsid $fsid
-sudo ../src/cephadm/cephadm --image ${image_base}:${shortid} bootstrap \
+sudo ../src/stoneadm/stoneadm rm-cluster --force --fsid $fsid
+sudo ../src/stoneadm/stoneadm --image ${image_base}:${shortid} bootstrap \
      --skip-pull \
      --fsid $fsid \
      --mon-addrv "[v2:$ip:$port]" \
      --output-dir . \
      --allow-overwrite
 
-# kludge to make 'bin/ceph ...' work
-sudo chmod 755 ceph.client.admin.keyring
-echo 'keyring = ceph.client.admin.keyring' >> ceph.conf
+# kludge to make 'bin/stone ...' work
+sudo chmod 755 stone.client.admin.keyring
+echo 'keyring = stone.client.admin.keyring' >> stone.conf
 
 echo
 echo "sudo ../src/script/cpatch -t $image_base:$shortid"

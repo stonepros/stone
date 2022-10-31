@@ -6,7 +6,7 @@ import _ from 'lodash';
 import { concat, forkJoin, Observable, Subscription } from 'rxjs';
 import { last } from 'rxjs/operators';
 
-import { Pool } from '~/app/ceph/pool/pool';
+import { Pool } from '~/app/stone/pool/pool';
 import { RbdMirroringService } from '~/app/shared/api/rbd-mirroring.service';
 import { ActionLabelsI18n } from '~/app/shared/constants/app.constants';
 import { CdFormGroup } from '~/app/shared/forms/cd-form-group';

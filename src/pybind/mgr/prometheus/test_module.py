@@ -7,7 +7,7 @@ from prometheus.module import Metric, LabelValues, Number
 class MetricGroupTest(TestCase):
     def setUp(self):
         self.DISK_OCCUPATION = (
-            "ceph_daemon",
+            "stone_daemon",
             "device",
             "db_device",
             "wal_device",
@@ -28,7 +28,7 @@ class MetricGroupTest(TestCase):
         m.value = self.metric_value
         grouped_metric = m.group_by(
             ["device", "instance"],
-            {"ceph_daemon": lambda xs: "+".join(xs)},
+            {"stone_daemon": lambda xs: "+".join(xs)},
             name="disk_occupation_display",
         )
         self.assertEqual(
@@ -46,17 +46,17 @@ class MetricGroupTest(TestCase):
         self.assertEqual(
             grouped_metric.str_expfmt(),
             """
-# HELP ceph_disk_occupation_display 
-# TYPE ceph_disk_occupation_display untyped
-ceph_disk_occupation_display{ceph_daemon="osd.0",device="/dev/dm-0",instance="node1"} 1.0
-ceph_disk_occupation_display{ceph_daemon="osd.1",device="/dev/dm-0",instance="node3"} 1.0
-ceph_disk_occupation_display{ceph_daemon="osd.2",device="/dev/dm-0",instance="node2"} 1.0
-ceph_disk_occupation_display{ceph_daemon="osd.3",device="/dev/dm-1",instance="node1"} 1.0
-ceph_disk_occupation_display{ceph_daemon="osd.4",device="/dev/dm-1",instance="node3"} 1.0
-ceph_disk_occupation_display{ceph_daemon="osd.5+osd.6",device="/dev/dm-1",instance="node2"} 1.0""",  # noqa: W291
+# HELP stone_disk_occupation_display 
+# TYPE stone_disk_occupation_display untyped
+stone_disk_occupation_display{stone_daemon="osd.0",device="/dev/dm-0",instance="node1"} 1.0
+stone_disk_occupation_display{stone_daemon="osd.1",device="/dev/dm-0",instance="node3"} 1.0
+stone_disk_occupation_display{stone_daemon="osd.2",device="/dev/dm-0",instance="node2"} 1.0
+stone_disk_occupation_display{stone_daemon="osd.3",device="/dev/dm-1",instance="node1"} 1.0
+stone_disk_occupation_display{stone_daemon="osd.4",device="/dev/dm-1",instance="node3"} 1.0
+stone_disk_occupation_display{stone_daemon="osd.5+osd.6",device="/dev/dm-1",instance="node2"} 1.0""",  # noqa: W291
         )
         self.assertEqual(
-            grouped_metric.labelnames, ("ceph_daemon", "device", "instance")
+            grouped_metric.labelnames, ("stone_daemon", "device", "instance")
         )
 
     def test_metric_group_by__no_value(self):
@@ -64,7 +64,7 @@ ceph_disk_occupation_display{ceph_daemon="osd.5+osd.6",device="/dev/dm-1",instan
         grouped = m.group_by(['foo'], {'bar': lambda bars: ', '.join(bars)})
         self.assertEqual(grouped.value, {})
         self.assertEqual(grouped.str_expfmt(),
-                         '\n# HELP ceph_name desc\n# TYPE ceph_name metric_type')
+                         '\n# HELP stone_name desc\n# TYPE stone_name metric_type')
 
     def test_metric_group_by__no_labels(self):
         m = Metric("metric_type", "name", "desc", labels=None)

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013- Sage Weil <sage@inktank.com>
  *
@@ -25,43 +25,43 @@
 #include "common/RWLock.h"
 #include "os/ObjectStore.h"
 #include "PageSet.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 class MemStore : public ObjectStore {
 public:
   struct Object : public RefCountedObject {
-    ceph::mutex xattr_mutex{ceph::make_mutex("MemStore::Object::xattr_mutex")};
-    ceph::mutex omap_mutex{ceph::make_mutex("MemStore::Object::omap_mutex")};
-    std::map<std::string,ceph::buffer::ptr> xattr;
-    ceph::buffer::list omap_header;
-    std::map<std::string,ceph::buffer::list> omap;
+    stone::mutex xattr_mutex{stone::make_mutex("MemStore::Object::xattr_mutex")};
+    stone::mutex omap_mutex{stone::make_mutex("MemStore::Object::omap_mutex")};
+    std::map<std::string,stone::buffer::ptr> xattr;
+    stone::buffer::list omap_header;
+    std::map<std::string,stone::buffer::list> omap;
 
-    using Ref = ceph::ref_t<Object>;
+    using Ref = stone::ref_t<Object>;
 
     // interface for object data
     virtual size_t get_size() const = 0;
-    virtual int read(uint64_t offset, uint64_t len, ceph::buffer::list &bl) = 0;
-    virtual int write(uint64_t offset, const ceph::buffer::list &bl) = 0;
+    virtual int read(uint64_t offset, uint64_t len, stone::buffer::list &bl) = 0;
+    virtual int write(uint64_t offset, const stone::buffer::list &bl) = 0;
     virtual int clone(Object *src, uint64_t srcoff, uint64_t len,
                       uint64_t dstoff) = 0;
     virtual int truncate(uint64_t offset) = 0;
-    virtual void encode(ceph::buffer::list& bl) const = 0;
-    virtual void decode(ceph::buffer::list::const_iterator& p) = 0;
+    virtual void encode(stone::buffer::list& bl) const = 0;
+    virtual void decode(stone::buffer::list::const_iterator& p) = 0;
 
-    void encode_base(ceph::buffer::list& bl) const {
-      using ceph::encode;
+    void encode_base(stone::buffer::list& bl) const {
+      using stone::encode;
       encode(xattr, bl);
       encode(omap_header, bl);
       encode(omap, bl);
     }
-    void decode_base(ceph::buffer::list::const_iterator& p) {
-      using ceph::decode;
+    void decode_base(stone::buffer::list::const_iterator& p) {
+      using stone::decode;
       decode(xattr, p);
       decode(omap_header, p);
       decode(omap, p);
     }
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_int("data_len", get_size());
       f->dump_int("omap_header_len", omap_header.length());
 
@@ -91,18 +91,18 @@ public:
   struct PageSetObject;
   struct Collection : public CollectionImpl {
     int bits = 0;
-    CephContext *cct;
+    StoneContext *cct;
     bool use_page_set;
-    ceph::unordered_map<ghobject_t, ObjectRef> object_hash;  ///< for lookup
+    stone::unordered_map<ghobject_t, ObjectRef> object_hash;  ///< for lookup
     std::map<ghobject_t, ObjectRef> object_map;        ///< for iteration
-    std::map<std::string,ceph::buffer::ptr> xattr;
+    std::map<std::string,stone::buffer::ptr> xattr;
     /// for object_{map,hash}
-    ceph::shared_mutex lock{
-      ceph::make_shared_mutex("MemStore::Collection::lock", true, false)};
+    stone::shared_mutex lock{
+      stone::make_shared_mutex("MemStore::Collection::lock", true, false)};
 
     bool exists = true;
-    ceph::mutex sequencer_mutex{
-      ceph::make_mutex("MemStore::Collection::sequencer_mutex")};
+    stone::mutex sequencer_mutex{
+      stone::make_mutex("MemStore::Collection::sequencer_mutex")};
 
     typedef boost::intrusive_ptr<Collection> Ref;
 
@@ -129,7 +129,7 @@ public:
       return result.first->second;
     }
 
-    void encode(ceph::buffer::list& bl) const {
+    void encode(stone::buffer::list& bl) const {
       ENCODE_START(1, 1, bl);
       encode(xattr, bl);
       encode(use_page_set, bl);
@@ -141,7 +141,7 @@ public:
       }
       ENCODE_FINISH(bl);
     }
-    void decode(ceph::buffer::list::const_iterator& p) {
+    void decode(stone::buffer::list::const_iterator& p) {
       DECODE_START(1, p);
       decode(xattr, p);
       decode(use_page_set, p);
@@ -175,7 +175,7 @@ public:
 
   private:
     FRIEND_MAKE_REF(Collection);
-    explicit Collection(CephContext *cct, coll_t c)
+    explicit Collection(StoneContext *cct, coll_t c)
       : CollectionImpl(cct, c),
 	cct(cct),
 	use_page_set(cct->_conf->memstore_page_set) {}
@@ -186,10 +186,10 @@ private:
   class OmapIteratorImpl;
 
 
-  ceph::unordered_map<coll_t, CollectionRef> coll_map;
+  stone::unordered_map<coll_t, CollectionRef> coll_map;
   /// rwlock to protect coll_map
-  ceph::shared_mutex coll_lock{
-    ceph::make_shared_mutex("MemStore::coll_lock")};
+  stone::shared_mutex coll_lock{
+    stone::make_shared_mutex("MemStore::coll_lock")};
   std::map<coll_t,CollectionRef> new_coll_map;
 
   CollectionRef get_collection(const coll_t& cid);
@@ -202,11 +202,11 @@ private:
 
   int _touch(const coll_t& cid, const ghobject_t& oid);
   int _write(const coll_t& cid, const ghobject_t& oid, uint64_t offset, size_t len,
-	      const ceph::buffer::list& bl, uint32_t fadvise_flags = 0);
+	      const stone::buffer::list& bl, uint32_t fadvise_flags = 0);
   int _zero(const coll_t& cid, const ghobject_t& oid, uint64_t offset, size_t len);
   int _truncate(const coll_t& cid, const ghobject_t& oid, uint64_t size);
   int _remove(const coll_t& cid, const ghobject_t& oid);
-  int _setattrs(const coll_t& cid, const ghobject_t& oid, std::map<std::string,ceph::buffer::ptr>& aset);
+  int _setattrs(const coll_t& cid, const ghobject_t& oid, std::map<std::string,stone::buffer::ptr>& aset);
   int _rmattr(const coll_t& cid, const ghobject_t& oid, const char *name);
   int _rmattrs(const coll_t& cid, const ghobject_t& oid);
   int _clone(const coll_t& cid, const ghobject_t& oldoid, const ghobject_t& newoid);
@@ -214,11 +214,11 @@ private:
 		   const ghobject_t& newoid,
 		   uint64_t srcoff, uint64_t len, uint64_t dstoff);
   int _omap_clear(const coll_t& cid, const ghobject_t &oid);
-  int _omap_setkeys(const coll_t& cid, const ghobject_t &oid, ceph::buffer::list& aset_bl);
-  int _omap_rmkeys(const coll_t& cid, const ghobject_t &oid, ceph::buffer::list& keys_bl);
+  int _omap_setkeys(const coll_t& cid, const ghobject_t &oid, stone::buffer::list& aset_bl);
+  int _omap_rmkeys(const coll_t& cid, const ghobject_t &oid, stone::buffer::list& keys_bl);
   int _omap_rmkeyrange(const coll_t& cid, const ghobject_t &oid,
 		       const std::string& first, const std::string& last);
-  int _omap_setheader(const coll_t& cid, const ghobject_t &oid, const ceph::buffer::list &bl);
+  int _omap_setheader(const coll_t& cid, const ghobject_t &oid, const stone::buffer::list &bl);
 
   int _collection_hint_expected_num_objs(const coll_t& cid, uint32_t pg_num,
       uint64_t num_objs) const { return 0; }
@@ -233,11 +233,11 @@ private:
   int _save();
   int _load();
 
-  void dump(ceph::Formatter *f);
+  void dump(stone::Formatter *f);
   void dump_all();
 
 public:
-  MemStore(CephContext *cct, const std::string& path)
+  MemStore(StoneContext *cct, const std::string& path)
     : ObjectStore(cct, path),
       finisher(cct),
       used_bytes(0) {}
@@ -300,17 +300,17 @@ public:
     const ghobject_t& oid,
     uint64_t offset,
     size_t len,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     uint32_t op_flags = 0) override;
   using ObjectStore::fiemap;
   int fiemap(CollectionHandle& c, const ghobject_t& oid,
-	     uint64_t offset, size_t len, ceph::buffer::list& bl) override;
+	     uint64_t offset, size_t len, stone::buffer::list& bl) override;
   int fiemap(CollectionHandle& c, const ghobject_t& oid, uint64_t offset,
 	     size_t len, std::map<uint64_t, uint64_t>& destmap) override;
   int getattr(CollectionHandle &c, const ghobject_t& oid, const char *name,
-	      ceph::buffer::ptr& value) override;
+	      stone::buffer::ptr& value) override;
   int getattrs(CollectionHandle &c, const ghobject_t& oid,
-	       std::map<std::string,ceph::buffer::ptr>& aset) override;
+	       std::map<std::string,stone::buffer::ptr>& aset) override;
 
   int list_collections(std::vector<coll_t>& ls) override;
 
@@ -334,8 +334,8 @@ public:
   int omap_get(
     CollectionHandle& c,                ///< [in] Collection containing oid
     const ghobject_t &oid,   ///< [in] Object containing omap
-    ceph::buffer::list *header,      ///< [out] omap header
-    std::map<std::string, ceph::buffer::list> *out /// < [out] Key to value map
+    stone::buffer::list *header,      ///< [out] omap header
+    std::map<std::string, stone::buffer::list> *out /// < [out] Key to value map
     ) override;
 
   using ObjectStore::omap_get_header;
@@ -343,7 +343,7 @@ public:
   int omap_get_header(
     CollectionHandle& c,                ///< [in] Collection containing oid
     const ghobject_t &oid,   ///< [in] Object containing omap
-    ceph::buffer::list *header,      ///< [out] omap header
+    stone::buffer::list *header,      ///< [out] omap header
     bool allow_eio = false ///< [in] don't assert on eio
     ) override;
 
@@ -361,7 +361,7 @@ public:
     CollectionHandle& c,                    ///< [in] Collection containing oid
     const ghobject_t &oid,       ///< [in] Object containing omap
     const std::set<std::string> &keys,     ///< [in] Keys to get
-    std::map<std::string, ceph::buffer::list> *out ///< [out] Returned keys and values
+    std::map<std::string, stone::buffer::list> *out ///< [out] Returned keys and values
     ) override;
 
   using ObjectStore::omap_check_keys;

@@ -1,4 +1,4 @@
-import ceph_module  # noqa
+import stone_module  # noqa
 
 from typing import cast, Tuple, Any, Dict, Generic, Optional, Callable, List, \
     Mapping, NamedTuple, Sequence, Union, TYPE_CHECKING
@@ -23,7 +23,7 @@ import re
 import socket
 import sys
 import time
-from ceph_argparse import CephArgtype
+from stone_argparse import StoneArgtype
 from mgr_util import profile_method
 
 if sys.version_info >= (3, 8):
@@ -79,7 +79,7 @@ PG_STATES = [
     "wait",
 ]
 
-NFS_GANESHA_SUPPORTED_FSALS = ['CEPH', 'RGW']
+NFS_GANESHA_SUPPORTED_FSALS = ['STONE', 'RGW']
 NFS_POOL_NAME = '.nfs'
 
 
@@ -132,7 +132,7 @@ class HandleCommandResult(NamedTuple):
 
     Only write to stderr if there is an error, or in extraordinary circumstances
 
-    Avoid having `ceph foo bar` commands say "did foo bar" on success unless there
+    Avoid having `stone foo bar` commands say "did foo bar" on success unless there
     is critical information to include there.
 
     Everything programmatically consumable should be put on stdout
@@ -145,7 +145,7 @@ class HandleCommandResult(NamedTuple):
 class MonCommandFailed(RuntimeError): pass
 
 
-class OSDMap(ceph_module.BasePyOSDMap):
+class OSDMap(stone_module.BasePyOSDMap):
     def get_epoch(self) -> int:
         return self._get_epoch()
 
@@ -206,7 +206,7 @@ class OSDMap(ceph_module.BasePyOSDMap):
         return d['require_osd_release']
 
 
-class OSDMapIncremental(ceph_module.BasePyOSDMapIncremental):
+class OSDMapIncremental(stone_module.BasePyOSDMapIncremental):
     def get_epoch(self) -> int:
         return self._get_epoch()
 
@@ -227,7 +227,7 @@ class OSDMapIncremental(ceph_module.BasePyOSDMapIncremental):
         return self._set_crush_compat_weight_set_weights(weightmap)
 
 
-class CRUSHMap(ceph_module.BasePyCRUSH):
+class CRUSHMap(stone_module.BasePyCRUSH):
     ITEM_NONE = 0x7fffffff
     DEFAULT_CHOOSE_ARGS = '-1'
 
@@ -355,7 +355,7 @@ class CLICommand(object):
             assert arg in arg_spec, \
                 f"'{arg}' is not annotated for {f}: {full_argspec}"
             has_default = index >= first_default
-            args.append(CephArgtype.to_argdesc(arg_spec[arg],
+            args.append(StoneArgtype.to_argdesc(arg_spec[arg],
                                                dict(name=arg),
                                                has_default))
         return desc, arg_spec, first_default, ' '.join(args)
@@ -400,7 +400,7 @@ class CLICommand(object):
                     continue
             kwargs_switch, k, v = self._get_arg_value(kwargs_switch,
                                                       name, raw_v)
-            kwargs[k] = CephArgtype.cast_to(tp, v)
+            kwargs[k] = StoneArgtype.cast_to(tp, v)
         return kwargs
 
     def call(self,
@@ -503,10 +503,10 @@ class Command(dict):
 
     Usage:
     >>> Command(prefix="example",
-    ...         args="name=arg,type=CephInt",
+    ...         args="name=arg,type=StoneInt",
     ...         perm='w',
     ...         desc="Blah")
-    {'poll': False, 'cmd': 'example name=arg,type=CephInt', 'perm': 'w', 'desc': 'Blah'}
+    {'poll': False, 'cmd': 'example name=arg,type=StoneInt', 'perm': 'w', 'desc': 'Blah'}
     """
 
     def __init__(
@@ -552,7 +552,7 @@ class CPlusPlusHandler(logging.Handler):
 
     def emit(self, record: logging.LogRecord) -> None:
         if record.levelno >= self.level:
-            self._module._ceph_log(self.format(record))
+            self._module._stone_log(self.format(record))
 
 
 class ClusterLogHandler(logging.Handler):
@@ -578,7 +578,7 @@ class ClusterLogHandler(logging.Handler):
 
 class FileHandler(logging.FileHandler):
     def __init__(self, module_inst: Any):
-        path = module_inst.get_ceph_option("log_file")
+        path = module_inst.get_stone_option("log_file")
         idx = path.rfind(".log")
         if idx != -1:
             self.path = "{}.{}.log".format(path[:idx], module_inst.module_name)
@@ -601,7 +601,7 @@ class MgrModuleLoggingMixin(object):
 
         self._unconfigure_logging()
 
-        # the ceph log handler is initialized only once
+        # the stone log handler is initialized only once
         self._mgr_log_handler = CPlusPlusHandler(self)
         self._cluster_log_handler = ClusterLogHandler(self)
         self._file_log_handler = FileHandler(self)
@@ -648,11 +648,11 @@ class MgrModuleLoggingMixin(object):
                 return
 
         if not self._module_level and not module_level:
-            level = self._ceph_log_level_to_python(mgr_level)
+            level = self._stone_log_level_to_python(mgr_level)
             self.getLogger().debug("setting log level based on debug_mgr: %s (%s)",
                                    level, mgr_level)
         elif self._module_level and not module_level:
-            level = self._ceph_log_level_to_python(mgr_level)
+            level = self._stone_log_level_to_python(mgr_level)
             self.getLogger().warning("unsetting module log level, falling back to "
                                      "debug_mgr level: %s (%s)", level, mgr_level)
         elif module_level:
@@ -689,21 +689,21 @@ class MgrModuleLoggingMixin(object):
         self.log_to_cluster = False
         self._root_logger.removeHandler(self._cluster_log_handler)
 
-    def _ceph_log_level_to_python(self, log_level: str) -> str:
+    def _stone_log_level_to_python(self, log_level: str) -> str:
         if log_level:
             try:
-                ceph_log_level = int(log_level.split("/", 1)[0])
+                stone_log_level = int(log_level.split("/", 1)[0])
             except ValueError:
-                ceph_log_level = 0
+                stone_log_level = 0
         else:
-            ceph_log_level = 0
+            stone_log_level = 0
 
         log_level = "DEBUG"
-        if ceph_log_level <= 0:
+        if stone_log_level <= 0:
             log_level = "CRITICAL"
-        elif ceph_log_level <= 1:
+        elif stone_log_level <= 1:
             log_level = "WARNING"
-        elif ceph_log_level <= 4:
+        elif stone_log_level <= 4:
             log_level = "INFO"
         return log_level
 
@@ -711,7 +711,7 @@ class MgrModuleLoggingMixin(object):
         return logging.getLogger(name)
 
 
-class MgrStandbyModule(ceph_module.BaseMgrStandbyModule, MgrModuleLoggingMixin):
+class MgrStandbyModule(stone_module.BaseMgrStandbyModule, MgrModuleLoggingMixin):
     """
     Standby modules only implement a serve and shutdown method, they
     are not permitted to implement commands and they do not receive
@@ -737,7 +737,7 @@ class MgrStandbyModule(ceph_module.BaseMgrStandbyModule, MgrModuleLoggingMixin):
                     self.MODULE_OPTION_DEFAULTS[o['name']] = str(o['default'])
 
         # mock does not return a str
-        mgr_level = cast(str, self.get_ceph_option("debug_mgr"))
+        mgr_level = cast(str, self.get_stone_option("debug_mgr"))
         log_level = cast(str, self.get_module_option("log_level"))
         cluster_level = cast(str, self.get_module_option('log_to_cluster_level'))
         self._configure_logging(mgr_level, log_level, cluster_level,
@@ -783,7 +783,7 @@ class MgrStandbyModule(ceph_module.BaseMgrStandbyModule, MgrModuleLoggingMixin):
         raise NotImplementedError()
 
     def get_mgr_id(self) -> str:
-        return self._ceph_get_mgr_id()
+        return self._stone_get_mgr_id()
 
     def get_module_option(self, key: str, default: OptionValue = None) -> OptionValue:
         """
@@ -791,14 +791,14 @@ class MgrStandbyModule(ceph_module.BaseMgrStandbyModule, MgrModuleLoggingMixin):
 
         :param default: the default value of the config if it is not found
         """
-        r = self._ceph_get_module_option(key)
+        r = self._stone_get_module_option(key)
         if r is None:
             return self.MODULE_OPTION_DEFAULTS.get(key, default)
         else:
             return r
 
-    def get_ceph_option(self, key: str) -> OptionValue:
-        return self._ceph_get_option(key)
+    def get_stone_option(self, key: str) -> OptionValue:
+        return self._stone_get_option(key)
 
     def get_store(self, key: str) -> Optional[str]:
         """
@@ -807,21 +807,21 @@ class MgrStandbyModule(ceph_module.BaseMgrStandbyModule, MgrModuleLoggingMixin):
         :param key: String
         :return: Byte string or None
         """
-        return self._ceph_get_store(key)
+        return self._stone_get_store(key)
 
     def get_localized_store(self, key: str, default: Optional[str] = None) -> Optional[str]:
-        r = self._ceph_get_store(_get_localized_key(self.get_mgr_id(), key))
+        r = self._stone_get_store(_get_localized_key(self.get_mgr_id(), key))
         if r is None:
-            r = self._ceph_get_store(key)
+            r = self._stone_get_store(key)
             if r is None:
                 r = default
         return r
 
     def get_active_uri(self) -> str:
-        return self._ceph_get_active_uri()
+        return self._stone_get_active_uri()
 
     def get(self, data_name: str):
-        return self._ceph_get(data_name)
+        return self._stone_get(data_name)
 
     def get_mgr_ip(self) -> str:
         ips = self.get("mgr_ips").get('ips', [])
@@ -830,7 +830,7 @@ class MgrStandbyModule(ceph_module.BaseMgrStandbyModule, MgrModuleLoggingMixin):
         return ips[0]
 
     def get_localized_module_option(self, key: str, default: OptionValue = None) -> OptionValue:
-        r = self._ceph_get_module_option(key, self.get_mgr_id())
+        r = self._stone_get_module_option(key, self.get_mgr_id())
         if r is None:
             return self.MODULE_OPTION_DEFAULTS.get(key, default)
         else:
@@ -841,7 +841,7 @@ HealthChecksT = Mapping[str, Mapping[str, Union[int, str, Sequence[str]]]]
 # {"type": service_type, "id": service_id}
 ServiceInfoT = Dict[str, str]
 # {"hostname": hostname,
-#  "ceph_version": version,
+#  "stone_version": version,
 #  "services": [service_info, ..]}
 ServerInfoT = Dict[str, Union[str, List[ServiceInfoT]]]
 PerfCounterT = Dict[str, Any]
@@ -869,7 +869,7 @@ class API:
     expose = DecoratorFactory('expose', default=False)(True)
 
 
-class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
+class MgrModule(stone_module.BaseMgrModule, MgrModuleLoggingMixin):
     COMMANDS = []  # type: List[Any]
     MODULE_OPTIONS: List[Option] = []
     MODULE_OPTION_DEFAULTS = {}  # type: Dict[str, Any]
@@ -919,7 +919,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
                     # with default and user-supplied option values.
                     self.MODULE_OPTION_DEFAULTS[o['name']] = str(o['default'])
 
-        mgr_level = cast(str, self.get_ceph_option("debug_mgr"))
+        mgr_level = cast(str, self.get_stone_option("debug_mgr"))
         log_level = cast(str, self.get_module_option("log_level"))
         cluster_level = cast(str, self.get_module_option('log_to_cluster_level'))
         log_to_file = self.get_module_option("log_to_file")
@@ -932,7 +932,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         # for backwards compatibility
         self._logger = self.getLogger()
 
-        self._version = self._ceph_get_version()
+        self._version = self._stone_get_version()
 
         self._perf_schema_cache = None
 
@@ -977,7 +977,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param priority: The log message priority.
         :param message: The message to log.
         """
-        self._ceph_cluster_log(channel, priority.value, message)
+        self._stone_cluster_log(channel, priority.value, message)
 
     @property
     def version(self) -> str:
@@ -986,25 +986,25 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
     @property
     def release_name(self) -> str:
         """
-        Get the release name of the Ceph version, e.g. 'nautilus' or 'octopus'.
-        :return: Returns the release name of the Ceph version in lower case.
+        Get the release name of the Stone version, e.g. 'nautilus' or 'octopus'.
+        :return: Returns the release name of the Stone version in lower case.
         :rtype: str
         """
-        return self._ceph_get_release_name()
+        return self._stone_get_release_name()
 
     @API.expose
     def lookup_release_name(self, major: int) -> str:
-        return self._ceph_lookup_release_name(major)
+        return self._stone_lookup_release_name(major)
 
     def get_context(self) -> object:
         """
-        :return: a Python capsule containing a C++ CephContext pointer
+        :return: a Python capsule containing a C++ StoneContext pointer
         """
-        return self._ceph_get_context()
+        return self._stone_get_context()
 
     def notify(self, notify_type: NotifyType, notify_id: str) -> None:
         """
-        Called by the ceph-mgr service to notify the Python plugin
+        Called by the stone-mgr service to notify the Python plugin
         that new state is available.  This method is *only* called for
         notify_types that are listed in the NOTIFY_TYPES string list
         member of the module class.
@@ -1021,7 +1021,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
     def _config_notify(self) -> None:
         # check logging options for changes
-        mgr_level = cast(str, self.get_ceph_option("debug_mgr"))
+        mgr_level = cast(str, self.get_stone_option("debug_mgr"))
         module_level = cast(str, self.get_module_option("log_level"))
         cluster_level = cast(str, self.get_module_option("log_to_cluster_level"))
         assert isinstance(cluster_level, str)
@@ -1047,7 +1047,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
     def config_notify(self) -> None:
         """
-        Called by the ceph-mgr service to notify the Python plugin
+        Called by the stone-mgr service to notify the Python plugin
         that the configuration may have changed.  Modules will want to
         refresh any configuration values stored in config variables.
         """
@@ -1055,7 +1055,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
     def serve(self) -> None:
         """
-        Called by the ceph-mgr service to start any server that
+        Called by the stone-mgr service to start any server that
         is provided by this Python plugin.  The implementation
         of this function should block until ``shutdown`` is called.
 
@@ -1065,7 +1065,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
     def shutdown(self) -> None:
         """
-        Called by the ceph-mgr service to request that this
+        Called by the stone-mgr service to request that this
         module drop out of its serve() function.  You do not
         need to implement this if you do not implement serve()
 
@@ -1074,12 +1074,12 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         if self._rados:
             addrs = self._rados.get_addrs()
             self._rados.shutdown()
-            self._ceph_unregister_client(addrs)
+            self._stone_unregister_client(addrs)
 
     @API.expose
     def get(self, data_name: str) -> Any:
         """
-        Called by the plugin to fetch named cluster-wide objects from ceph-mgr.
+        Called by the plugin to fetch named cluster-wide objects from stone-mgr.
 
         :param str data_name: Valid things to fetch are osd_crush_map_text,
                 osd_map, osd_map_tree, osd_map_crush, config, mon_map, fs_map,
@@ -1091,7 +1091,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
             All these structures have their own JSON representations: experiment
             or look at the C++ ``dump()`` methods to learn about them.
         """
-        obj =  self._ceph_get(data_name)
+        obj =  self._stone_get(data_name)
         if isinstance(obj, bytes):
             obj = json.loads(obj)
 
@@ -1118,7 +1118,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
             label_name = 'instance_id'
             daemon = daemon[len('rgw.'):]
         else:
-            label_name = 'ceph_daemon'
+            label_name = 'stone_daemon'
 
         label_names = (label_name,)  # type: Tuple[str, ...]
         labels = (daemon,)  # type: Tuple[str, ...]
@@ -1211,14 +1211,14 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
     def get_server(self, hostname: str) -> ServerInfoT:
         """
         Called by the plugin to fetch metadata about a particular hostname from
-        ceph-mgr.
+        stone-mgr.
 
-        This is information that ceph-mgr has gleaned from the daemon metadata
+        This is information that stone-mgr has gleaned from the daemon metadata
         reported by daemons running on a particular server.
 
         :param hostname: a hostname
         """
-        return cast(ServerInfoT, self._ceph_get_server(hostname))
+        return cast(ServerInfoT, self._stone_get_server(hostname))
 
     @API.expose
     def get_perf_schema(self,
@@ -1234,7 +1234,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param str svc_name:
         :return: list of dicts describing the counters requested
         """
-        return self._ceph_get_perf_schema(svc_type, svc_name)
+        return self._stone_get_perf_schema(svc_type, svc_name)
 
     @API.expose
     def get_counter(self,
@@ -1253,7 +1253,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
             of two-tuples of (timestamp, value).  This may be empty if no data is
             available.
         """
-        return self._ceph_get_counter(svc_type, svc_name, path)
+        return self._stone_get_counter(svc_type, svc_name, path)
 
     @API.expose
     def get_latest_counter(self,
@@ -1273,7 +1273,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
             (timestamp, value, count) is returned.  This may be empty if no
             data is available.
         """
-        return self._ceph_get_latest_counter(svc_type, svc_name, path)
+        return self._stone_get_latest_counter(svc_type, svc_name, path)
 
     @API.expose
     def list_servers(self) -> List[ServerInfoT]:
@@ -1284,7 +1284,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :return: a list of information about all servers
         :rtype: list
         """
-        return cast(List[ServerInfoT], self._ceph_get_server(None))
+        return cast(List[ServerInfoT], self._stone_get_server(None))
 
     def get_metadata(self,
                      svc_type: str,
@@ -1293,7 +1293,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         """
         Fetch the daemon metadata for a particular service.
 
-        ceph-mgr fetches metadata asynchronously, so are windows of time during
+        stone-mgr fetches metadata asynchronously, so are windows of time during
         addition/removal of services where the metadata is not available to
         modules.  ``None`` is returned if no metadata is available.
 
@@ -1302,7 +1302,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
             calling this
         :rtype: dict, or None if no metadata found
         """
-        metadata = self._ceph_get_metadata(svc_type, svc_id)
+        metadata = self._stone_get_metadata(svc_type, svc_id)
         if metadata is None:
             return default
         return metadata
@@ -1319,7 +1319,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param svc_id: string
         :return: dict, or None if the service is not found
         """
-        return self._ceph_get_daemon_status(svc_type, svc_id)
+        return self._stone_get_daemon_status(svc_type, svc_id)
 
     def check_mon_command(self, cmd_dict: dict, inbuf: Optional[str] = None) -> HandleCommandResult:
         """
@@ -1373,7 +1373,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param str svc_type:
         :param str svc_id:
         :param str command: a JSON-serialized command.  This uses the same
-            format as the ceph command line, which is a dictionary of command
+            format as the stone command line, which is a dictionary of command
             arguments, with the extra ``prefix`` key containing the command
             name itself.  Consult MonCommands.h for available commands and
             their expected arguments.
@@ -1383,7 +1383,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
             the tag of the command.
         :param str inbuf: input buffer for sending additional data.
         """
-        self._ceph_send_command(result, svc_type, svc_id, command, tag, inbuf)
+        self._stone_send_command(result, svc_type, svc_id, command, tag, inbuf)
 
     def tool_exec(
         self,
@@ -1395,7 +1395,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
             tool = args.pop(0)
             cmd = [
                 tool,
-                '-k', str(self.get_ceph_option('keyring')),
+                '-k', str(self.get_stone_option('keyring')),
                 '-n', f'mgr.{self.get_mgr_id()}',
             ] + args
             self.log.debug('exec: ' + ' '.join(cmd))
@@ -1436,7 +1436,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         :param list: dict of health check dicts
         """
-        self._ceph_set_health_checks(checks)
+        self._stone_set_health_checks(checks)
 
     def _handle_command(self,
                         inbuf: str,
@@ -1452,16 +1452,16 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
                        cmd: Dict[str, Any]) -> Union[HandleCommandResult,
                                                      Tuple[int, str, str]]:
         """
-        Called by ceph-mgr to request the plugin to handle one
+        Called by stone-mgr to request the plugin to handle one
         of the commands that it declared in self.COMMANDS
 
         Return a status code, an output buffer, and an
         output string.  The output buffer is for data results,
         the output string is for informative text.
 
-        :param inbuf: content of any "-i <file>" supplied to ceph cli
+        :param inbuf: content of any "-i <file>" supplied to stone cli
         :type inbuf: str
-        :param cmd: from Ceph's cmdmap_t
+        :param cmd: from Stone's cmdmap_t
         :type cmd: dict
 
         :return: HandleCommandResult or a 3-tuple of (int, str, str)
@@ -1478,11 +1478,11 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         :return: str
         """
-        return self._ceph_get_mgr_id()
+        return self._stone_get_mgr_id()
 
     @API.expose
-    def get_ceph_conf_path(self) -> str:
-        return self._ceph_get_ceph_conf_path()
+    def get_stone_conf_path(self) -> str:
+        return self._stone_get_stone_conf_path()
 
     @API.expose
     def get_mgr_ip(self) -> str:
@@ -1495,12 +1495,12 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         return self._mgr_ips
 
     @API.expose
-    def get_ceph_option(self, key: str) -> OptionValue:
-        return self._ceph_get_option(key)
+    def get_stone_option(self, key: str) -> OptionValue:
+        return self._stone_get_option(key)
 
     @API.expose
-    def get_foreign_ceph_option(self, entity: str, key: str) -> OptionValue:
-        return self._ceph_get_foreign_option(entity, key)
+    def get_foreign_stone_option(self, entity: str, key: str) -> OptionValue:
+        return self._stone_get_foreign_option(entity, key)
 
     def _validate_module_option(self, key: str) -> None:
         """
@@ -1516,7 +1516,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
                            key: str,
                            default: OptionValue,
                            localized_prefix: str = "") -> OptionValue:
-        r = self._ceph_get_module_option(self.module_name, key,
+        r = self._stone_get_module_option(self.module_name, key,
                                          localized_prefix)
         if r is None:
             return self.MODULE_OPTION_DEFAULTS.get(key, default)
@@ -1545,7 +1545,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         """
         if module == self.module_name:
             self._validate_module_option(key)
-        r = self._ceph_get_module_option(module, key)
+        r = self._stone_get_module_option(module, key)
         return default if r is None else r
 
     @API.expose
@@ -1557,7 +1557,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param str key_prefix:
         :return: str
         """
-        return self._ceph_get_store_prefix(key_prefix)
+        return self._stone_get_store_prefix(key_prefix)
 
     def _set_localized(self,
                        key: str,
@@ -1567,13 +1567,13 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
     def get_localized_module_option(self, key: str, default: OptionValue = None) -> OptionValue:
         """
-        Retrieve localized configuration for this ceph-mgr instance
+        Retrieve localized configuration for this stone-mgr instance
         """
         self._validate_module_option(key)
         return self._get_module_option(key, default, self.get_mgr_id())
 
     def _set_module_option(self, key: str, val: Any) -> None:
-        return self._ceph_set_module_option(self.module_name, key,
+        return self._stone_set_module_option(self.module_name, key,
                                             None if val is None else str(val))
 
     def set_module_option(self, key: str, val: Any) -> None:
@@ -1597,13 +1597,13 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         """
         if module == self.module_name:
             self._validate_module_option(key)
-        return self._ceph_set_module_option(module, key, str(val))
+        return self._stone_set_module_option(module, key, str(val))
 
     @API.perm('w')
     @API.expose
     def set_localized_module_option(self, key: str, val: Optional[str]) -> None:
         """
-        Set localized configuration for this ceph-mgr instance
+        Set localized configuration for this stone-mgr instance
         :param str key:
         :param str val:
         :return: str
@@ -1618,14 +1618,14 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         Set a value in this module's persistent key value store.
         If val is None, remove key from store
         """
-        self._ceph_set_store(key, val)
+        self._stone_set_store(key, val)
 
     @API.expose
     def get_store(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """
         Get a value from this module's persistent key value store
         """
-        r = self._ceph_get_store(key)
+        r = self._stone_get_store(key)
         if r is None:
             return default
         else:
@@ -1633,9 +1633,9 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
     @API.expose
     def get_localized_store(self, key: str, default: Optional[str] = None) -> Optional[str]:
-        r = self._ceph_get_store(_get_localized_key(self.get_mgr_id(), key))
+        r = self._stone_get_store(_get_localized_key(self.get_mgr_id(), key))
         if r is None:
-            r = self._ceph_get_store(key)
+            r = self._stone_get_store(key)
             if r is None:
                 r = default
         return r
@@ -1665,7 +1665,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         OSDMap.
         :return: OSDMap
         """
-        return cast(OSDMap, self._ceph_get_osdmap())
+        return cast(OSDMap, self._stone_get_osdmap())
 
     @API.expose
     def get_latest(self, daemon_type: str, daemon_name: str, counter: str) -> int:
@@ -1694,7 +1694,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
                                                          "rbd-mirror", "rgw",
                                                          "tcmu-runner")) -> Dict[str, dict]:
         """
-        Return the perf counters currently known to this ceph-mgr
+        Return the perf counters currently known to this stone-mgr
         instance, filtered by priority equal to or greater than `prio_limit`.
 
         The result is a map of string to dict, associating services
@@ -1768,40 +1768,40 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         :return: a string
         """
-        return self._ceph_set_uri(uri)
+        return self._stone_set_uri(uri)
 
     @API.perm('w')
     @API.expose
     def set_device_wear_level(self, devid: str, wear_level: float) -> None:
-        return self._ceph_set_device_wear_level(devid, wear_level)
+        return self._stone_set_device_wear_level(devid, wear_level)
 
     @API.expose
     def have_mon_connection(self) -> bool:
         """
-        Check whether this ceph-mgr daemon has an open connection
+        Check whether this stone-mgr daemon has an open connection
         to a monitor.  If it doesn't, then it's likely that the
         information we have about the cluster is out of date,
         and/or the monitor cluster is down.
         """
 
-        return self._ceph_have_mon_connection()
+        return self._stone_have_mon_connection()
 
     def update_progress_event(self,
                               evid: str,
                               desc: str,
                               progress: float,
-                              add_to_ceph_s: bool) -> None:
-        return self._ceph_update_progress_event(evid, desc, progress, add_to_ceph_s)
+                              add_to_stone_s: bool) -> None:
+        return self._stone_update_progress_event(evid, desc, progress, add_to_stone_s)
 
     @API.perm('w')
     @API.expose
     def complete_progress_event(self, evid: str) -> None:
-        return self._ceph_complete_progress_event(evid)
+        return self._stone_complete_progress_event(evid)
 
     @API.perm('w')
     @API.expose
     def clear_all_progress_events(self) -> None:
-        return self._ceph_clear_all_progress_events()
+        return self._stone_clear_all_progress_events()
 
     @property
     def rados(self) -> rados.Rados:
@@ -1815,7 +1815,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         ctx_capsule = self.get_context()
         self._rados = rados.Rados(context=ctx_capsule)
         self._rados.connect()
-        self._ceph_register_client(self._rados.get_addrs())
+        self._stone_register_client(self._rados.get_addrs())
         return self._rados
 
     @staticmethod
@@ -1856,7 +1856,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :raises RuntimeError: **Any** error raised within the method is converted to a RuntimeError
         :raises ImportError: No such module
         """
-        return self._ceph_dispatch_remote(module_name, method_name,
+        return self._stone_dispatch_remote(module_name, method_name,
                                           args, kwargs)
 
     def add_osd_perf_query(self, query: Dict[str, Any]) -> Optional[int]:
@@ -1887,7 +1887,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param object query: query
         :rtype: int (query id)
         """
-        return self._ceph_add_osd_perf_query(query)
+        return self._stone_add_osd_perf_query(query)
 
     @API.perm('w')
     @API.expose
@@ -1897,7 +1897,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         :param int query_id: query ID
         """
-        return self._ceph_remove_osd_perf_query(query_id)
+        return self._stone_remove_osd_perf_query(query_id)
 
     @API.expose
     def get_osd_perf_counters(self, query_id: int) -> Optional[Dict[str, List[PerfCounterT]]]:
@@ -1906,7 +1906,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         :param int query_id: query ID
         """
-        return self._ceph_get_osd_perf_counters(query_id)
+        return self._stone_get_osd_perf_counters(query_id)
 
     def add_mds_perf_query(self, query: Dict[str, Any]) -> Optional[int]:
         """
@@ -1935,7 +1935,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         :param object query: query
         :rtype: int (query id)
         """
-        return self._ceph_add_mds_perf_query(query)
+        return self._stone_add_mds_perf_query(query)
 
     @API.perm('w')
     @API.expose
@@ -1945,7 +1945,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         :param int query_id: query ID
         """
-        return self._ceph_remove_mds_perf_query(query_id)
+        return self._stone_remove_mds_perf_query(query_id)
 
     @API.expose
     def get_mds_perf_counters(self, query_id: int) -> Optional[Dict[str, List[PerfCounterT]]]:
@@ -1954,7 +1954,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         :param int query_id: query ID
         """
-        return self._ceph_get_mds_perf_counters(query_id)
+        return self._stone_get_mds_perf_counters(query_id)
 
     def is_authorized(self, arguments: Dict[str, str]) -> bool:
         """
@@ -1965,7 +1965,7 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
 
         :param arguments: dict of key/value arguments to test
         """
-        return self._ceph_is_authorized(arguments)
+        return self._stone_is_authorized(arguments)
 
     @API.expose
     def send_rgwadmin_command(self, args: List[str],
@@ -1973,8 +1973,8 @@ class MgrModule(ceph_module.BaseMgrModule, MgrModuleLoggingMixin):
         try:
             cmd = [
                     'radosgw-admin',
-                    '-c', str(self.get_ceph_conf_path()),
-                    '-k', str(self.get_ceph_option('keyring')),
+                    '-c', str(self.get_stone_conf_path()),
+                    '-k', str(self.get_stone_option('keyring')),
                     '-n', f'mgr.{self.get_mgr_id()}',
                 ] + args
             self.log.debug('Executing %s', str(cmd))

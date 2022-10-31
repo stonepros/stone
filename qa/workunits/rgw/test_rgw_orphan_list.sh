@@ -21,7 +21,7 @@ rgw_host=$(hostname --fqdn)
 if echo "$rgw_host" | grep -q '\.' ; then
     :
 else
-    host_domain=".front.sepia.ceph.com"
+    host_domain=".front.sepia.stone.com"
     echo "WARNING: rgw hostname -- $rgw_host -- does not appear to be fully qualified; PUNTING and appending $host_domain"
     rgw_host="${rgw_host}${host_domain}"
 fi
@@ -123,7 +123,7 @@ create_users() {
     local skey='h7GhxuBLTrlhVUyxSPUKUV8r/2EI4ngqJxD7iBdBYLhwluN30JaT3Q=='
     radosgw-admin user create --uid testid \
 		  --access-key $akey --secret $skey \
-		  --display-name 'M. Tester' --email tester@ceph.com
+		  --display-name 'M. Tester' --email tester@stone.com
 
     # Create Swift user
     radosgw-admin user create --subuser=test:tester \

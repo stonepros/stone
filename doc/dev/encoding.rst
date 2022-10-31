@@ -10,7 +10,7 @@ objects representing byte strings.
 Adding a field to a structure
 -----------------------------
 
-You can see examples of this all over the Ceph code, but here's an
+You can see examples of this all over the Stone code, but here's an
 example:
 
 ::

@@ -31,13 +31,13 @@ class Event(object):
     def __init__(self, id: str,
                  message: str,
                  refs: List[str],
-                 add_to_ceph_s: bool,
+                 add_to_stone_s: bool,
                  started_at: Optional[float] = None):
         self._message = message
         self._refs = refs
         self.started_at = started_at if started_at else time.time()
         self.id = id
-        self._add_to_ceph_s = add_to_ceph_s
+        self._add_to_stone_s = add_to_stone_s
 
     def _refresh(self):
         global _module
@@ -45,7 +45,7 @@ class Event(object):
         _module.log.debug('refreshing mgr for %s (%s) at %f' % (self.id, self._message,
                                                                 self.progress))
         _module.update_progress_event(
-            self.id, self.twoline_progress(6), self.progress, self._add_to_ceph_s)
+            self.id, self.twoline_progress(6), self.progress, self._add_to_stone_s)
 
     @property
     def message(self):
@@ -58,9 +58,9 @@ class Event(object):
         return self._refs
 
     @property
-    def add_to_ceph_s(self):
+    def add_to_stone_s(self):
         # type: () -> bool
-        return self._add_to_ceph_s
+        return self._add_to_stone_s
 
     @property
     def progress(self):
@@ -142,9 +142,9 @@ class GhostEvent(Event):
     after the event is complete.
     """
 
-    def __init__(self, my_id, message, refs, add_to_ceph_s, started_at, finished_at=None,
+    def __init__(self, my_id, message, refs, add_to_stone_s, started_at, finished_at=None,
                  failed=False, failure_message=None):
-        super().__init__(my_id, message, refs, add_to_ceph_s, started_at)
+        super().__init__(my_id, message, refs, add_to_stone_s, started_at)
         self.finished_at = finished_at if finished_at else time.time()
 
         if failed:
@@ -172,7 +172,7 @@ class GhostEvent(Event):
             "refs": self._refs,
             "started_at": self.started_at,
             "finished_at": self.finished_at,
-            "add_to_ceph_s:": self.add_to_ceph_s
+            "add_to_stone_s:": self.add_to_stone_s
         }
         if self._failed:
             d["failed"] = True
@@ -185,10 +185,10 @@ class GlobalRecoveryEvent(Event):
     An event whoese completion is determined by active+clean/total_pg_num
     """
 
-    def __init__(self, message, refs, add_to_ceph_s, start_epoch, active_clean_num):
+    def __init__(self, message, refs, add_to_stone_s, start_epoch, active_clean_num):
         # type: (str, List[Any], bool, int, int) -> None
-        super().__init__(str(uuid.uuid4()), message, refs, add_to_ceph_s)
-        self._add_to_ceph_s = add_to_ceph_s
+        super().__init__(str(uuid.uuid4()), message, refs, add_to_stone_s)
+        self._add_to_stone_s = add_to_stone_s
         self._progress = 0.0
         self._start_epoch = start_epoch
         self._active_clean_num = active_clean_num
@@ -242,9 +242,9 @@ class RemoteEvent(Event):
     progress information as it emerges.
     """
 
-    def __init__(self, my_id, message, refs, add_to_ceph_s):
+    def __init__(self, my_id, message, refs, add_to_stone_s):
         # type: (str, str, List[str], bool) -> None
-        super().__init__(my_id, message, refs, add_to_ceph_s)
+        super().__init__(my_id, message, refs, add_to_stone_s)
         self._progress = 0.0
         self._failed = False
         self._refresh()
@@ -285,9 +285,9 @@ class PgRecoveryEvent(Event):
     Always call update() immediately after construction.
     """
 
-    def __init__(self, message, refs, which_pgs, which_osds, start_epoch, add_to_ceph_s):
+    def __init__(self, message, refs, which_pgs, which_osds, start_epoch, add_to_stone_s):
         # type: (str, List[Any], List[PgId], List[str], int, bool) -> None
-        super().__init__(str(uuid.uuid4()), message, refs, add_to_ceph_s)
+        super().__init__(str(uuid.uuid4()), message, refs, add_to_stone_s)
         self._pgs = which_pgs
         self._which_osds = which_osds
         self._original_pg_count = len(self._pgs)
@@ -556,7 +556,7 @@ class Module(MgrModule):
                     which_pgs=affected_pgs,
                     which_osds=[osd_id],
                     start_epoch=self.get_osdmap().get_epoch(),
-                    add_to_ceph_s=False
+                    add_to_stone_s=False
                     )
             r_ev.pg_update(self.get("pg_progress"), self.log)
             self._events[r_ev.id] = r_ev
@@ -603,7 +603,7 @@ class Module(MgrModule):
                               total_pg_num - active_clean_num)
             ev = GlobalRecoveryEvent("Global Recovery Event",
                     refs=[("global", "")],
-                    add_to_ceph_s=True,
+                    add_to_stone_s=True,
                     start_epoch=self.get_osdmap().get_epoch(),
                     active_clean_num=active_clean_num)
             ev.global_event_update_progress(self.log)
@@ -729,7 +729,7 @@ class Module(MgrModule):
         self._shutdown.set()
         self.clear_all_progress_events()
 
-    def update(self, ev_id, ev_msg, ev_progress, refs=None, add_to_ceph_s=False):
+    def update(self, ev_id, ev_msg, ev_progress, refs=None, add_to_stone_s=False):
         # type: (str, str, float, Optional[list], bool) -> None
         """
         For calling from other mgr modules
@@ -744,7 +744,7 @@ class Module(MgrModule):
             assert isinstance(ev, RemoteEvent)
         except KeyError:
             # if key doesn't exist we create an event
-            ev = RemoteEvent(ev_id, ev_msg, refs, add_to_ceph_s)
+            ev = RemoteEvent(ev_id, ev_msg, refs, add_to_stone_s)
             self._events[ev_id] = ev
             self.log.info("update: starting ev {0} ({1})".format(
                 ev_id, ev_msg))
@@ -764,7 +764,7 @@ class Module(MgrModule):
         self.complete_progress_event(ev.id)
 
         self._completed_events.append(
-            GhostEvent(ev.id, ev.message, ev.refs, ev.add_to_ceph_s, ev.started_at,
+            GhostEvent(ev.id, ev.message, ev.refs, ev.add_to_stone_s, ev.started_at,
                        failed=ev.failed, failure_message=ev.failure_message))
         assert ev.id
         del self._events[ev.id]

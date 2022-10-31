@@ -14,7 +14,7 @@ class PerfCountersControllerTest(DashboardTestCase):
         for mon in self.mons():
             self.assertIn('mon.{}'.format(mon), data)
 
-        osds = self.ceph_cluster.mon_manager.get_osd_dump()
+        osds = self.stone_cluster.mon_manager.get_osd_dump()
         for osd in osds:
             self.assertIn('osd.{}'.format(osd['osd']), data)
 
@@ -51,14 +51,14 @@ class PerfCountersControllerTest(DashboardTestCase):
             self._validate_perf(mds, 'mds', data, allow_empty=True)
 
     def test_perf_counters_osd_get(self):
-        for osd in self.ceph_cluster.mon_manager.get_osd_dump():
+        for osd in self.stone_cluster.mon_manager.get_osd_dump():
             osd = osd['osd']
             data = self._get('/api/perf_counters/osd/{}'.format(osd))
             self.assertStatus(200)
             self._validate_perf(osd, 'osd', data, allow_empty=False)
 
     def test_perf_counters_not_found(self):
-        osds = self.ceph_cluster.mon_manager.get_osd_dump()
+        osds = self.stone_cluster.mon_manager.get_osd_dump()
         unused_id = int(list(map(lambda o: o['osd'], osds)).pop()) + 1
 
         self._get('/api/perf_counters/osd/{}'.format(unused_id))

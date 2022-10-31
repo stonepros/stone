@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Mirantis, Inc.
  *
@@ -26,7 +26,7 @@ class ISALCryptoPlugin : public CryptoPlugin {
 
 public:
 
-  explicit ISALCryptoPlugin(StoneeContext* cct) : CryptoPlugin(cct)
+  explicit ISALCryptoPlugin(StoneContext* cct) : CryptoPlugin(cct)
   {}
   ~ISALCryptoPlugin()
   {}
@@ -35,8 +35,8 @@ public:
   {
     if (cryptoaccel == nullptr)
     {
-      ceph_arch_probe();
-      if (ceph_arch_intel_aesni && ceph_arch_intel_sse41) {
+      stone_arch_probe();
+      if (stone_arch_intel_aesni && stone_arch_intel_sse41) {
         cryptoaccel = CryptoAccelRef(new ISALCryptoAccel);
       }
     }

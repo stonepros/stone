@@ -22,13 +22,13 @@ describe('DocService', () => {
 
   it('should return full URL', () => {
     expect(service.urlGenerator('iscsi', 'foo')).toBe(
-      'https://docs.ceph.com/en/foo/mgr/dashboard/#enabling-iscsi-management'
+      'https://docs.stone.com/en/foo/mgr/dashboard/#enabling-iscsi-management'
     );
   });
 
   it('should return latest version URL for master', () => {
     expect(service.urlGenerator('orch', 'master')).toBe(
-      'https://docs.ceph.com/en/latest/mgr/orchestrator'
+      'https://docs.stone.com/en/latest/mgr/orchestrator'
     );
   });
 
@@ -66,7 +66,7 @@ describe('DocService', () => {
 
       nextSummary('foo');
       expect(result).toEqual(
-        'https://docs.ceph.com/en/foo/mgr/dashboard/#enabling-prometheus-alerting'
+        'https://docs.stone.com/en/foo/mgr/dashboard/#enabling-prometheus-alerting'
       );
       expect(i).toBe(1);
       expect(subscriber.closed).toBe(true);

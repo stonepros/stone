@@ -1,0 +1,24 @@
+overrides:
+  stone:
+    conf:
+      client:
+        debug ms: 1
+        debug client: 20
+        debug stonesqlite: 20
+    log-ignorelist:
+    - POOL_APP_NOT_ENABLED
+    - do not have an application enabled
+tasks:
+- exec:
+   client.0:
+   - stone osd pool create stonesqlite
+   - stone auth get-or-create client.libstonesqlite mon 'profile simple-rados-client-with-blocklist' osd 'allow rwx pool=stonesqlite' >> /etc/stonepros/stone.keyring
+- exec:
+   client.0:
+   - stone_test_libstonesqlite --id libstonesqlite --no-log-to-stderr
+- workunit:
+   clients:
+     client.0:
+     - rados/test_libstonesqlite.sh stonesqlite
+   env:
+     STONE_ARGS: --id libstonesqlite --no-log-to-stderr

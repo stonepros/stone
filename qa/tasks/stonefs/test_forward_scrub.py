@@ -15,7 +15,7 @@ from io import BytesIO
 from textwrap import dedent
 
 from teuthology.orchestra.run import CommandFailedError
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 import struct
 
@@ -25,12 +25,12 @@ log = logging.getLogger(__name__)
 ValidationError = namedtuple("ValidationError", ["exception", "backtrace"])
 
 
-class TestForwardScrub(CephFSTestCase):
+class TestForwardScrub(StoneFSTestCase):
     MDSS_REQUIRED = 1
 
     def _read_str_xattr(self, pool, obj, attr):
         """
-        Read a ceph-encoded string from a rados xattr
+        Read a stone-encoded string from a rados xattr
         """
         output = self.fs.mon_manager.do_rados(["getxattr", obj, attr], pool=pool,
                                stdout=BytesIO()).stdout.getvalue()
@@ -147,8 +147,8 @@ class TestForwardScrub(CephFSTestCase):
         # Our victim will be.... bravo.
         self.mount_a.umount_wait()
         self.fs.fail()
-        self.fs.set_ceph_conf('mds', 'mds verify scatter', False)
-        self.fs.set_ceph_conf('mds', 'mds debug scatterstat', False)
+        self.fs.set_stone_conf('mds', 'mds verify scatter', False)
+        self.fs.set_stone_conf('mds', 'mds debug scatterstat', False)
         frag_obj_id = "{0:x}.00000000".format(inos["./parent/flushed"])
         self.fs.radosm(["rmomapkey", frag_obj_id, "bravo_head"])
 
@@ -175,7 +175,7 @@ class TestForwardScrub(CephFSTestCase):
         # See that journalled-but-not-flushed file *was* tagged
         self.assertTagged(inos['./parent/unflushed/jfile'], tag, self.fs.get_data_pool_name())
 
-        # Run cephfs-data-scan targeting only orphans
+        # Run stonefs-data-scan targeting only orphans
         self.fs.fail()
         self.fs.data_scan(["scan_extents", self.fs.get_data_pool_name()])
         self.fs.data_scan([
@@ -185,8 +185,8 @@ class TestForwardScrub(CephFSTestCase):
         ])
 
         # After in-place injection stats should be kosher again
-        self.fs.set_ceph_conf('mds', 'mds verify scatter', True)
-        self.fs.set_ceph_conf('mds', 'mds debug scatterstat', True)
+        self.fs.set_stone_conf('mds', 'mds verify scatter', True)
+        self.fs.set_stone_conf('mds', 'mds debug scatterstat', True)
 
         # And we should have all the same linkage we started with,
         # and no lost+found, and no extra inodes!

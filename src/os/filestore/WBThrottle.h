@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -23,7 +23,7 @@
 #include "include/common_fwd.h"
 #include "FDCache.h"
 #include "common/Thread.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 enum {
   l_wbthrottle_first = 999090,
@@ -76,21 +76,21 @@ class WBThrottle : Thread, public md_config_obs_t {
     }
   };
 
-  CephContext *cct;
+  StoneContext *cct;
   PerfCounters *logger;
   bool stopping;
-  ceph::mutex lock = ceph::make_mutex("WBThrottle::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("WBThrottle::lock");
+  stone::condition_variable cond;
 
 
   /**
    * Flush objects in lru order
    */
   std::list<ghobject_t> lru;
-  ceph::unordered_map<ghobject_t, std::list<ghobject_t>::iterator> rev_lru;
+  stone::unordered_map<ghobject_t, std::list<ghobject_t>::iterator> rev_lru;
   void remove_object(const ghobject_t &oid) {
-    ceph_assert(ceph_mutex_is_locked(lock));
-    ceph::unordered_map<ghobject_t, std::list<ghobject_t>::iterator>::iterator iter =
+    stone_assert(stone_mutex_is_locked(lock));
+    stone::unordered_map<ghobject_t, std::list<ghobject_t>::iterator>::iterator iter =
       rev_lru.find(oid);
     if (iter == rev_lru.end())
       return;
@@ -99,23 +99,23 @@ class WBThrottle : Thread, public md_config_obs_t {
     rev_lru.erase(iter);
   }
   ghobject_t pop_object() {
-    ceph_assert(!lru.empty());
+    stone_assert(!lru.empty());
     ghobject_t oid(lru.front());
     lru.pop_front();
     rev_lru.erase(oid);
     return oid;
   }
   void insert_object(const ghobject_t &oid) {
-    ceph_assert(rev_lru.find(oid) == rev_lru.end());
+    stone_assert(rev_lru.find(oid) == rev_lru.end());
     lru.push_back(oid);
     rev_lru.insert(make_pair(oid, --lru.end()));
   }
 
-  ceph::unordered_map<ghobject_t, std::pair<PendingWB, FDRef> > pending_wbs;
+  stone::unordered_map<ghobject_t, std::pair<PendingWB, FDRef> > pending_wbs;
 
   /// get next flush to perform
   bool get_next_should_flush(
-    std::unique_lock<ceph::mutex>& locker,
+    std::unique_lock<stone::mutex>& locker,
     boost::tuple<ghobject_t, FDRef, PendingWB> *next ///< [out] next to flush
     ); ///< @return false if we are shutting down
 public:
@@ -146,7 +146,7 @@ private:
   }
 
 public:
-  explicit WBThrottle(CephContext *cct);
+  explicit WBThrottle(StoneContext *cct);
   ~WBThrottle() override;
 
   void start();

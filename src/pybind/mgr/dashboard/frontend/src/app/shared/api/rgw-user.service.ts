@@ -164,7 +164,7 @@ export class RgwUserService {
   }
 
   // Using @cdEncodeNot would be the preferred way here, but this
-  // causes an error: https://tracker.ceph.com/issues/37505
+  // causes an error: https://tracker.stone.com/issues/37505
   // Use decodeURIComponent as workaround.
   // emailExists(@cdEncodeNot email: string): Observable<boolean> {
   emailExists(email: string): Observable<boolean> {

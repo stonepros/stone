@@ -1,6 +1,6 @@
 #!/bin/sh
 # vim: set noet ts=8:
-# postinst script for ceph-mgr-diskprediction-local
+# postinst script for stone-mgr-diskprediction-local
 #
 # see: dh_installdeb(1)
 
@@ -21,7 +21,7 @@ set -e
 case "$1" in
     configure)
 	# attempt to load the plugin if the mgr is running
-	deb-systemd-invoke try-restart ceph-mgr.target
+	deb-systemd-invoke try-restart stone-mgr.target
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
 	:

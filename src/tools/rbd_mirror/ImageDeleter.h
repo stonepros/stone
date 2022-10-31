@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -17,7 +17,7 @@
 
 #include "include/utime.h"
 #include "common/AsyncOpTracker.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "tools/rbd_mirror/Types.h"
 #include "tools/rbd_mirror/image_deleter/Types.h"
@@ -88,7 +88,7 @@ public:
   }
 
 private:
-  using clock_t = ceph::real_clock;
+  using clock_t = stone::real_clock;
   struct TrashListener : public image_deleter::TrashListener {
     ImageDeleter *image_deleter;
 
@@ -96,7 +96,7 @@ private:
     }
 
     void handle_trash_image(const std::string& image_id,
-      const ceph::real_clock::time_point& deferment_end_time) override {
+      const stone::real_clock::time_point& deferment_end_time) override {
       image_deleter->handle_trash_image(image_id, deferment_end_time);
     }
   };
@@ -143,7 +143,7 @@ private:
 
   AsyncOpTracker m_async_op_tracker;
 
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   DeleteQueue m_delete_queue;
   DeleteQueue m_retry_delete_queue;
   DeleteQueue m_in_flight_delete_queue;

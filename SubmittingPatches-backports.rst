@@ -1,9 +1,9 @@
-Submitting Patches to Ceph - Backports
+Submitting Patches to Stone - Backports
 ======================================
 
 Most likely you're reading this because you intend to submit a GitHub pull
 request ("PR") targeting one of the stable branches ("nautilus", etc.) at
-https://github.com/ceph/ceph.
+https://github.com/stone/stone.
 
 Before you open that PR, please read this entire document or, at the very least,
 the following two sections: `General principles`_ and `Cherry-picking rules`_.
@@ -91,7 +91,7 @@ Tracker workflow
 ----------------
 
 Any change that is to be backported to multiple stable branches should have
-an associated tracker issue at https://tracker.ceph.com.
+an associated tracker issue at https://tracker.stone.com.
 
 For fixes already merged to master, this may have already been done - see the
 ``Fixes:`` line in the master PR. If the master PR has already been merged and
@@ -99,8 +99,8 @@ there is no associated master tracker issue, you can create a master tracker
 issue and fill in the fields as described below.
 
 This master tracker issue should be in the "Bug" or "Feature"
-trackers of the relevant subproject under the "Ceph" parent project (or
-in the "Ceph" project itself if none of the subprojects are a good fit).
+trackers of the relevant subproject under the "Stone" parent project (or
+in the "Stone" project itself if none of the subprojects are a good fit).
 The stable branches to which the master changes are to be cherry-picked should
 be listed in the "Backport" field. For example::
 
@@ -125,7 +125,7 @@ For straightforward backports, that's all that you (as the developer of the fix)
 need to do. Volunteers from the `Stable Releases and Backports team`_ will
 proceed to create Backport issues to track the necessary backports and stage the
 backports by opening GitHub PRs with the cherry-picks. If you don't want to
-wait, and provided you have sufficient permissions at https://tracker.ceph.com,
+wait, and provided you have sufficient permissions at https://tracker.stone.com,
 you can `create Backport tracker issues` and `stage backports`_ yourself. In
 that case, read on.
 
@@ -193,7 +193,7 @@ For example, if the tracker issue number is 55555::
 
     backport-create-issue --user <tracker_username> --password <tracker_password> 55555
 
-The script needs to know your https://tracker.ceph.com credentials in order to
+The script needs to know your https://tracker.stone.com credentials in order to
 authenticate to Redmine. In lieu of providing your literal username and password
 on the command line, you could also obtain a REST API key ("My account" -> "API
 access key"), put it in ``~/.redmine_key`` and run the script like so::
@@ -219,7 +219,7 @@ In the past, much time was lost, and much frustration caused, by the necessity
 of staging backports manually. Now, fortunately, there is a script available
 which automates the process and takes away most of the guesswork.
 
-The ceph-backport.sh script
+The stone-backport.sh script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Similar to the case of `creating backport tracker issues`_, staging the actual
@@ -227,24 +227,24 @@ backport PR and updating the Backport tracker issue is difficult - if not
 impossible - to get right if you're doing it manually, and quickly becomes
 tedious if you do it more than once in a long while.
 
-The ``ceph-backport.sh`` script automates the entire process of cherry-picking
+The ``stone-backport.sh`` script automates the entire process of cherry-picking
 the commits from the master PR, opening the GitHub backport PR, and
 cross-linking the GitHub backport PR with the correct Backport tracker issue.
 The script can also be used to good effect if you have already manually prepared
 the backport branch with the cherry-picks in it.
 
-The script is located at ``src/script/ceph-backport.sh`` in the ``master``
+The script is located at ``src/script/stone-backport.sh`` in the ``master``
 branch. Though there might be an older version of this script in a stable
 branch, do not use it. Only use the most recent version from the master branch.
 To do this from anywhere and from any branch use the following
 alias that will use the most recent script in ``upstream/master`` of your
-local ceph clone on every call::
+local stone clone on every call::
 
-    alias ceph-backport="bash <(git --git-dir=$pathToCephClone/.git --no-pager show upstream/master:src/script/ceph-backport.sh)"
+    alias stone-backport="bash <(git --git-dir=$pathToStoneClone/.git --no-pager show upstream/master:src/script/stone-backport.sh)"
 
-``ceph-backport.sh`` is just a bash script, so the only dependency is ``bash``
+``stone-backport.sh`` is just a bash script, so the only dependency is ``bash``
 itself, but it does need to be run in the top level of a local clone of
-``ceph/ceph.git``. A small up-front time investment is required to get the
+``stone/stone.git``. A small up-front time investment is required to get the
 script working in your environment. This is because the script needs to
 authenticate itself (i.e., as you) in order to use the GitHub and Redmine REST
 API services.
@@ -253,7 +253,7 @@ The script is self-documenting. Just run the script and proceed from there.
 
 Once the script has been set up properly, you can validate the setup like so::
 
-    ceph-backport.sh --setup
+    stone-backport.sh --setup
 
 Once you have this saying "Overall setup is OK", you have two options for
 staging the backport: either leave everything to the script, or prepare the
@@ -263,7 +263,7 @@ updating the Backport tracker issue.
 If you prefer to leave everything to the script, just provide the Backport
 tracker issue number to the script::
 
-    ceph-backport.sh 55555
+    stone-backport.sh 55555
 
 The script will start by creating the backport branch in your local git clone.
 The script always uses the following format for naming the branch::
@@ -279,7 +279,7 @@ If you prefer to create the backport branch yourself, just do that. Be sure to
 name the backport branch as described above. (It's a good idea to use this
 branch naming convention for all your backporting work.) Then, run the script::
 
-    ceph-backport.sh 55555
+    stone-backport.sh 55555
 
 The script will see that the backport branch already exists, and use it.
 
@@ -287,18 +287,18 @@ Once the script hits the first cherry-pick conflict, it will no longer provide
 any cherry-picking assistance, so in that case it's up to you to resolve the conflict(s)
 (as described in `Conflict resolution`_) and finish cherry-picking
 all of the remaining commits. Once you are satisfied that the backport is complete in
-your local branch, `ceph-backport.sh` can finish the job of creating the pull request
+your local branch, `stone-backport.sh` can finish the job of creating the pull request
 and updating the backport tracker issue. To make that happen, just re-run the script
 exactly as you did before::
 
-    ceph-backport.sh $BACKPORT_TRACKER_ID
+    stone-backport.sh $BACKPORT_TRACKER_ID
 
 The script will detect that it is running from a branch with the same name as the one it
 would normally create on the first run and continues after the cherry-picking phase.
 
 For a quick reference on CLI, that contains above information, you can run::
 
-    ceph-backport.sh --usage
+    stone-backport.sh --usage
 
 Conflict resolution
 ^^^^^^^^^^^^^^^^^^^
@@ -313,7 +313,7 @@ Once the conflicts are resolved, complete the cherry-pick ::
 Git will present a draft commit message with a "Conflicts" section.
 
 Unfortunately, in recent versions of git, the Conflicts section is commented
-out. Since the Conflicts section is mandatory for Ceph backports that do not
+out. Since the Conflicts section is mandatory for Stone backports that do not
 apply cleanly, you will need to uncomment the entire "Conflicts" section
 of the commit message before committing the cherry-pick. You can also
 include commentary on what the conflicts were and how you resolved
@@ -331,7 +331,7 @@ following that line. Here is an example::
 
     Setting blatz requires special precautions. Check batlo first.
 
-    Fixes: https://tracker.ceph.com/issues/99999
+    Fixes: https://tracker.stone.com/issues/99999
     Signed-off-by: Random J Developer <random@developer.example.com>
     (cherry picked from commit 01d73020da12f40ccd95ea1e49cfcf663f1a3a75)
 
@@ -350,8 +350,8 @@ editing. If you need to add additional information to the cherry-pick commit
 message, append that information below this line. Once again: do not modify the
 original commit message.
 
-If you use `ceph-backport.sh` for your backport creation (which is recommended),
-read up at the end of `The ceph-backport.sh script`_ on how to continue from here.
+If you use `stone-backport.sh` for your backport creation (which is recommended),
+read up at the end of `The stone-backport.sh script`_ on how to continue from here.
 
 Labelling of backport PRs
 -------------------------
@@ -362,7 +362,7 @@ if the PR is targeting "nautilus", set the Milestone tag to "nautilus".
 
 If you don't have sufficient GitHub permissions to set the Milestone, don't
 worry. Members of the `Stable Releases and Backports team`_ periodically run
-a script (``ceph-backport.sh --milestones``) which scans all PRs targetting stable
+a script (``stone-backport.sh --milestones``) which scans all PRs targetting stable
 branches and automatically adds the correct Milestone tag if it is missing.
 
 Next, check which component label was applied to the master PR corresponding to
@@ -399,13 +399,13 @@ volunteers.)
 Stable Releases and Backports team
 ----------------------------------
 
-Ceph has a `Stable Releases and Backports`_ team, staffed by volunteers,
+Stone has a `Stable Releases and Backports`_ team, staffed by volunteers,
 which is charged with maintaining the stable releases and backporting bugfixes
 from the master branch to them. (That team maintains a wiki, accessible by
 clicking the `Stable Releases and Backports`_ link, which describes various
 workflows in the backporting lifecycle.)
 
-.. _`Stable Releases and Backports`: http://tracker.ceph.com/projects/ceph-releases/wiki
+.. _`Stable Releases and Backports`: http://tracker.stone.com/projects/stone-releases/wiki
 
 Ordinarily, it is enough to fill out the "Backport" field in the bug (tracker
 issue). The volunteers from the Stable Releases and Backports team will

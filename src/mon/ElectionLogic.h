@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -141,7 +141,7 @@ class ElectionLogic {
   ElectionOwner *elector;
   ConnectionTracker *peer_tracker;
   
-  CephContext *cct;
+  StoneContext *cct;
   /**
    * Latest epoch we've seen.
    *
@@ -209,7 +209,7 @@ public:
 
   ElectionLogic(ElectionOwner *e, election_strategy es, ConnectionTracker *t,
 		double ipm,
-		CephContext *c) : elector(e), peer_tracker(t), cct(c),
+		StoneContext *c) : elector(e), peer_tracker(t), cct(c),
 				  last_election_winner(-1), last_voted_for(-1),
 				  ignore_propose_margin(ipm),
 				  stable_peer_tracker(),

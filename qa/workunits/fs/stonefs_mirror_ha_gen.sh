@@ -1,9 +1,9 @@
 #!/bin/bash -ex
 #
-# cephfs_mirror_ha_gen.sh - generate workload to synchronize
+# stonefs_mirror_ha_gen.sh - generate workload to synchronize
 #
 
-. $(dirname $0)/cephfs_mirror_helpers.sh
+. $(dirname $0)/stonefs_mirror_helpers.sh
 
 cleanup()
 {
@@ -24,14 +24,14 @@ trap cleanup EXIT
 
 configure_peer()
 {
-    ceph mgr module enable mirroring
-    ceph fs snapshot mirror enable $PRIMARY_FS
-    ceph fs snapshot mirror peer_add $PRIMARY_FS client.mirror_remote@ceph $BACKUP_FS
+    stone mgr module enable mirroring
+    stone fs snapshot mirror enable $PRIMARY_FS
+    stone fs snapshot mirror peer_add $PRIMARY_FS client.mirror_remote@stone $BACKUP_FS
 
     for i in `seq 1 $NR_DIRECTORIES`
     do
         local repo_name="${REPO_PATH_PFX}_$i"
-        ceph fs snapshot mirror add $PRIMARY_FS "$MIRROR_SUBDIR/$repo_name"
+        stone fs snapshot mirror add $PRIMARY_FS "$MIRROR_SUBDIR/$repo_name"
     done
 }
 
@@ -52,7 +52,7 @@ create_snaps()
     done
 }
 
-unset CEPH_CLI_TEST_DUP_COMMAND
+unset STONE_CLI_TEST_DUP_COMMAND
 
 echo "running generator on prmary file system..."
 

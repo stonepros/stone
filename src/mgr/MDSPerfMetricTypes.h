@@ -81,14 +81,14 @@ struct denc_traits<MDSPerfMetricKeyDescriptor> {
     }
   }
   static void encode(const MDSPerfMetricKeyDescriptor& v,
-		     ceph::buffer::list::contiguous_appender& p) {
+		     stone::buffer::list::contiguous_appender& p) {
     denc_varint(v.size(), p);
     for (auto& i : v) {
       denc(i, p);
     }
   }
   static void decode(MDSPerfMetricKeyDescriptor& v,
-                     ceph::buffer::ptr::const_iterator& p) {
+                     stone::buffer::ptr::const_iterator& p) {
     unsigned num;
     denc_varint(num, p);
     v.clear();
@@ -172,8 +172,8 @@ struct MDSPerformanceCounterDescriptor {
     DENC_FINISH(p);
   }
 
-  void pack_counter(const PerformanceCounter &c, ceph::buffer::list *bl) const;
-  void unpack_counter(ceph::buffer::list::const_iterator& bl, PerformanceCounter *c) const;
+  void pack_counter(const PerformanceCounter &c, stone::buffer::list *bl) const;
+  void unpack_counter(stone::buffer::list::const_iterator& bl, PerformanceCounter *c) const;
 };
 WRITE_CLASS_DENC(MDSPerformanceCounterDescriptor)
 
@@ -196,14 +196,14 @@ struct denc_traits<MDSPerformanceCounterDescriptors> {
     }
   }
   static void encode(const MDSPerformanceCounterDescriptors& v,
-                     ceph::buffer::list::contiguous_appender& p) {
+                     stone::buffer::list::contiguous_appender& p) {
     denc_varint(v.size(), p);
     for (auto& i : v) {
       denc(i, p);
     }
   }
   static void decode(MDSPerformanceCounterDescriptors& v,
-                     ceph::buffer::ptr::const_iterator& p) {
+                     stone::buffer::ptr::const_iterator& p) {
     unsigned num;
     denc_varint(num, p);
     v.clear();
@@ -308,7 +308,7 @@ struct MDSPerfMetricQuery {
     DENC_FINISH(p);
   }
 
-  void pack_counters(const PerformanceCounters &counters, ceph::buffer::list *bl) const;
+  void pack_counters(const PerformanceCounters &counters, stone::buffer::list *bl) const;
 };
 WRITE_CLASS_DENC(MDSPerfMetricQuery)
 
@@ -325,7 +325,7 @@ struct MDSPerfCollector : PerfCollector {
 
 struct MDSPerfMetrics {
   MDSPerformanceCounterDescriptors performance_counter_descriptors;
-  std::map<MDSPerfMetricKey, ceph::buffer::list> group_packed_performance_counters;
+  std::map<MDSPerfMetricKey, stone::buffer::list> group_packed_performance_counters;
 
   DENC(MDSPerfMetrics, v, p) {
     DENC_START(1, 1, p);

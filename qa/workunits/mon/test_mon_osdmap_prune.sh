@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. $(dirname $0)/../../standalone/ceph-helpers.sh
+. $(dirname $0)/../../standalone/stone-helpers.sh
 
 set -x
 
@@ -12,7 +12,7 @@ function wait_for_osdmap_manifest() {
   local -i loop=0
 
   for ((i=0; i < ${#delays[*]}; ++i)); do
-    has_manifest=$(ceph report | jq 'has("osdmap_manifest")')
+    has_manifest=$(stone report | jq 'has("osdmap_manifest")')
     if [[ "$has_manifest" == "$what" ]]; then
       return 0
     fi
@@ -21,7 +21,7 @@ function wait_for_osdmap_manifest() {
   done
 
   echo "osdmap_manifest never outputted on report"
-  ceph report
+  stone report
   return 1
 }
 
@@ -32,7 +32,7 @@ function wait_for_trim() {
   local -i loop=0
 
   for ((i=0; i < ${#delays[*]}; ++i)); do
-    fc=$(ceph report | jq '.osdmap_first_committed')
+    fc=$(stone report | jq '.osdmap_first_committed')
     if [[ $fc -eq $epoch ]]; then
       return 0
     fi
@@ -40,7 +40,7 @@ function wait_for_trim() {
   done
 
   echo "never trimmed up to epoch $epoch"
-  ceph report
+  stone report
   return 1
 }
 
@@ -50,7 +50,7 @@ function test_osdmap() {
   local ret=0
 
   tmp_map=$(mktemp)
-  ceph osd getmap $epoch -o $tmp_map || return 1
+  stone osd getmap $epoch -o $tmp_map || return 1
   if ! osdmaptool --print $tmp_map | grep "epoch $epoch" ; then
     echo "ERROR: failed processing osdmap epoch $epoch"
     ret=1
@@ -65,7 +65,7 @@ function generate_osdmaps() {
 
   cmds=( set unset )
   for ((i=0; i < num; ++i)); do
-    ceph osd ${cmds[$((i%2))]} noup || return 1
+    stone osd ${cmds[$((i%2))]} noup || return 1
   done
   return 0
 }
@@ -75,11 +75,11 @@ function test_mon_osdmap_prune() {
   create_pool foo 32
   wait_for_clean || return 1
 
-  ceph config set mon mon_debug_block_osdmap_trim true || return 1
+  stone config set mon mon_debug_block_osdmap_trim true || return 1
 
   generate_osdmaps 500 || return 1
 
-  report="$(ceph report)"
+  report="$(stone report)"
   fc=$(jq '.osdmap_first_committed' <<< $report)
   lc=$(jq '.osdmap_last_committed' <<< $report)
 
@@ -87,7 +87,7 @@ function test_mon_osdmap_prune() {
 
   wait_for_osdmap_manifest || return 1
 
-  manifest="$(ceph report | jq '.osdmap_manifest')"
+  manifest="$(stone report | jq '.osdmap_manifest')"
 
   first_pinned=$(jq '.first_pinned' <<< $manifest)
   last_pinned=$(jq '.last_pinned' <<< $manifest)
@@ -113,7 +113,7 @@ function test_mon_osdmap_prune() {
   #  the monitor may have pruned & pinned additional maps since we last
   #  assessed state, given it's an iterative process.
   #
-  manifest="$(ceph report | jq '.osdmap_manifest')"
+  manifest="$(stone report | jq '.osdmap_manifest')"
   first_pinned=$(jq '.first_pinned' <<< $manifest)
   last_pinned=$(jq '.last_pinned' <<< $manifest)
   pinned_maps=( $(jq '.pinned_maps[]' <<< $manifest) )
@@ -132,18 +132,18 @@ function test_mon_osdmap_prune() {
   [[ ${#pinned_maps[@]} -gt 10 ]] || return 1
 
   trim_to=${pinned_maps[1]}
-  ceph config set mon mon_osd_force_trim_to $trim_to
-  ceph config set mon mon_min_osdmap_epochs 100
-  ceph config set mon paxos_service_trim_min 1
-  ceph config set mon mon_debug_block_osdmap_trim false
+  stone config set mon mon_osd_force_trim_to $trim_to
+  stone config set mon mon_min_osdmap_epochs 100
+  stone config set mon paxos_service_trim_min 1
+  stone config set mon mon_debug_block_osdmap_trim false
 
   # generate an epoch so we get to trim maps
-  ceph osd set noup
-  ceph osd unset noup
+  stone osd set noup
+  stone osd unset noup
 
   wait_for_trim $trim_to || return 1
 
-  report="$(ceph report)"
+  report="$(stone report)"
   fc=$(jq '.osdmap_first_committed' <<< $report)
   [[ $fc -eq $trim_to ]] || return 1
 
@@ -164,15 +164,15 @@ function test_mon_osdmap_prune() {
   #
   [[ ${#pinned_maps[@]} -gt 2 ]] || return 1
   trim_to=$(( ${pinned_maps[1]} - 1))
-  ceph config set mon mon_osd_force_trim_to $trim_to
+  stone config set mon mon_osd_force_trim_to $trim_to
 
   # generate an epoch so we get to trim maps
-  ceph osd set noup
-  ceph osd unset noup
+  stone osd set noup
+  stone osd unset noup
 
   wait_for_trim $trim_to || return 1
 
-  report="$(ceph report)"
+  report="$(stone report)"
   fc=$(jq '.osdmap_first_committed' <<< $report)
   [[ $fc -eq $trim_to ]] || return 1
 
@@ -189,11 +189,11 @@ function test_mon_osdmap_prune() {
 
   # 3. trim everything
   #
-  ceph config set mon mon_osd_force_trim_to 0
+  stone config set mon mon_osd_force_trim_to 0
 
   # generate an epoch so we get to trim maps
-  ceph osd set noup
-  ceph osd unset noup
+  stone osd set noup
+  stone osd unset noup
 
   wait_for_osdmap_manifest "false" || return 1
 

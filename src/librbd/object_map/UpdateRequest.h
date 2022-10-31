@@ -23,8 +23,8 @@ template <typename ImageCtxT = librbd::ImageCtx>
 class UpdateRequest : public Request {
 public:
   static UpdateRequest *create(ImageCtx &image_ctx,
-                               ceph::shared_mutex* object_map_lock,
-                               ceph::BitVector<2> *object_map,
+                               stone::shared_mutex* object_map_lock,
+                               stone::BitVector<2> *object_map,
                                uint64_t snap_id, uint64_t start_object_no,
                                uint64_t end_object_no, uint8_t new_state,
                                const boost::optional<uint8_t> &current_state,
@@ -36,8 +36,8 @@ public:
                              on_finish);
   }
 
-  UpdateRequest(ImageCtx &image_ctx, ceph::shared_mutex* object_map_lock,
-                ceph::BitVector<2> *object_map, uint64_t snap_id,
+  UpdateRequest(ImageCtx &image_ctx, stone::shared_mutex* object_map_lock,
+                stone::BitVector<2> *object_map, uint64_t snap_id,
                 uint64_t start_object_no, uint64_t end_object_no,
                 uint8_t new_state,
                 const boost::optional<uint8_t> &current_state,
@@ -78,8 +78,8 @@ private:
    * @endverbatim
    */
 
-  ceph::shared_mutex* m_object_map_lock;
-  ceph::BitVector<2> &m_object_map;
+  stone::shared_mutex* m_object_map_lock;
+  stone::BitVector<2> &m_object_map;
   uint64_t m_start_object_no;
   uint64_t m_end_object_no;
   uint64_t m_update_start_object_no;

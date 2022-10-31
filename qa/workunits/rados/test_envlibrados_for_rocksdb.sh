@@ -4,7 +4,7 @@ set -ex
 ############################################
 #			Helper functions
 ############################################
-source $(dirname $0)/../ceph-helpers-root.sh
+source $(dirname $0)/../stone-helpers-root.sh
 
 ############################################
 #			Install required tools
@@ -61,10 +61,10 @@ if [ -e rocksdb ]; then
 	rm -fr rocksdb
 fi
 
-pushd $(dirname /home/ubuntu/cephtest/clone.client.0/qa/workunits/rados/bash.sh)/../../../
+pushd $(dirname /home/ubuntu/stonetest/clone.client.0/qa/workunits/rados/bash.sh)/../../../
 git submodule update --init src/rocksdb
 popd
-git clone $(dirname /home/ubuntu/cephtest/clone.client.0/qa/workunits/rados/bash.sh)/../../../src/rocksdb rocksdb
+git clone $(dirname /home/ubuntu/stonetest/clone.client.0/qa/workunits/rados/bash.sh)/../../../src/rocksdb rocksdb
 
 # compile code
 cd rocksdb
@@ -78,24 +78,24 @@ fi
 mkdir ${BUILD_DIR} && cd ${BUILD_DIR} && ${CMAKE} -DCMAKE_BUILD_TYPE=Debug -DWITH_TESTS=ON -DWITH_LIBRADOS=ON -DWITH_SNAPPY=ON -DWITH_GFLAGS=OFF -DFAIL_ON_WARNINGS=OFF ..
 make rocksdb_env_librados_test -j8
 
-echo "Copy ceph.conf"
-# prepare ceph.conf
-mkdir -p ../ceph/src/
-if [ -f "/etc/ceph/ceph.conf" ]; then
-    cp /etc/ceph/ceph.conf ../ceph/src/
-elif [ -f "/etc/ceph/ceph/ceph.conf" ]; then
-	cp /etc/ceph/ceph/ceph.conf ../ceph/src/
+echo "Copy stone.conf"
+# prepare stone.conf
+mkdir -p ../stonepros/src/
+if [ -f "/etc/stonepros/stone.conf" ]; then
+    cp /etc/stonepros/stone.conf ../stonepros/src/
+elif [ -f "/etc/stonepros/stone/stone.conf" ]; then
+	cp /etc/stonepros/stone/stone.conf ../stonepros/src/
 else 
-	echo "/etc/ceph/ceph/ceph.conf doesn't exist"
+	echo "/etc/stonepros/stone/stone.conf doesn't exist"
 fi
 
 echo "Run EnvLibrados test"
 # run test
-if [ -f "../ceph/src/ceph.conf" ]
+if [ -f "../stonepros/src/stone.conf" ]
 	then
-	cp env_librados_test ~/cephtest/archive
+	cp env_librados_test ~/stonetest/archive
 	./env_librados_test
 else 
-	echo "../ceph/src/ceph.conf doesn't exist"
+	echo "../stonepros/src/stone.conf doesn't exist"
 fi
 cd ${CURRENT_PATH}

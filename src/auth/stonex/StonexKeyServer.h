@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -16,8 +16,8 @@
 #define STONE_KEYSSERVER_H
 
 #include "auth/KeyRing.h"
-#include "StoneexProtocol.h"
-#include "common/ceph_mutex.h"
+#include "StonexProtocol.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
 
 struct KeyServerData {
@@ -36,17 +36,17 @@ struct KeyServerData {
       extra_secrets(extra),
       rotating_ver(0) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
      __u8 struct_v = 1;
-    using ceph::encode;
+    using stone::encode;
     encode(struct_v, bl);
     encode(version, bl);
     encode(rotating_ver, bl);
     encode(secrets, bl);
     encode(rotating_secrets, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(version, bl);
@@ -55,15 +55,15 @@ struct KeyServerData {
     decode(rotating_secrets, bl);
   }
 
-  void encode_rotating(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode_rotating(stone::buffer::list& bl) const {
+    using stone::encode;
      __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(rotating_ver, bl);
     encode(rotating_secrets, bl);
   }
-  void decode_rotating(ceph::buffer::list& rotating_bl) {
-    using ceph::decode;
+  void decode_rotating(stone::buffer::list& rotating_bl) {
+    using stone::decode;
     auto iter = rotating_bl.cbegin();
     __u8 struct_v;
     decode(struct_v, iter);
@@ -93,14 +93,14 @@ struct KeyServerData {
     secrets.erase(iter);
   }
 
-  bool get_service_secret(StoneeContext *cct, uint32_t service_id,
+  bool get_service_secret(StoneContext *cct, uint32_t service_id,
 			  CryptoKey& secret, uint64_t& secret_id,
 			  double& ttl) const;
-  bool get_service_secret(StoneeContext *cct, uint32_t service_id,
+  bool get_service_secret(StoneContext *cct, uint32_t service_id,
 			  uint64_t secret_id, CryptoKey& secret) const;
   bool get_auth(const EntityName& name, EntityAuth& auth) const;
   bool get_secret(const EntityName& name, CryptoKey& secret) const;
-  bool get_caps(StoneeContext *cct, const EntityName& name,
+  bool get_caps(StoneContext *cct, const EntityName& name,
 		const std::string& type, AuthCapsInfo& caps) const;
 
   std::map<EntityName, EntityAuth>::iterator secrets_begin()
@@ -127,12 +127,12 @@ struct KeyServerData {
 
   struct Incremental {
     IncrementalOp op;
-    ceph::buffer::list rotating_bl;  // if SET_ROTATING.  otherwise,
+    stone::buffer::list rotating_bl;  // if SET_ROTATING.  otherwise,
     EntityName name;
     EntityAuth auth;
 
-    void encode(ceph::buffer::list& bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl) const {
+      using stone::encode;
       __u8 struct_v = 1;
       encode(struct_v, bl);
      __u32 _op = (__u32)op;
@@ -144,14 +144,14 @@ struct KeyServerData {
 	encode(auth, bl);
       }
     }
-    void decode(ceph::buffer::list::const_iterator& bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& bl) {
+      using stone::decode;
       __u8 struct_v;
       decode(struct_v, bl);
       __u32 _op;
       decode(_op, bl);
       op = (IncrementalOp)_op;
-      ceph_assert(op >= AUTH_INC_NOP && op <= AUTH_INC_SET_ROTATING);
+      stone_assert(op >= AUTH_INC_NOP && op <= AUTH_INC_SET_ROTATING);
       if (op == AUTH_INC_SET_ROTATING) {
 	decode(rotating_bl, bl);
       } else {
@@ -179,7 +179,7 @@ struct KeyServerData {
       break;
 
     default:
-      ceph_abort();
+      stone_abort();
     }
   }
 
@@ -191,20 +191,20 @@ WRITE_CLASS_ENCODER(KeyServerData::Incremental)
 
 
 class KeyServer : public KeyStore {
-  StoneeContext *cct;
+  StoneContext *cct;
   KeyServerData data;
-  mutable ceph::mutex lock;
+  mutable stone::mutex lock;
 
   int _rotate_secret(uint32_t service_id, KeyServerData &pending_data);
   void _dump_rotating_secrets();
   int _build_session_auth_info(uint32_t service_id, 
 			       const AuthTicket& parent_ticket,
-			       StoneeXSessionAuthInfo& info,
+			       StoneXSessionAuthInfo& info,
 			       double ttl);
   bool _get_service_caps(const EntityName& name, uint32_t service_id,
 	AuthCapsInfo& caps) const;
 public:
-  KeyServer(StoneeContext *cct_, KeyRing *extra_secrets);
+  KeyServer(StoneContext *cct_, KeyRing *extra_secrets);
   bool generate_secret(CryptoKey& secret);
 
   bool get_secret(const EntityName& name, CryptoKey& secret) const override;
@@ -218,12 +218,12 @@ public:
   
   int build_session_auth_info(uint32_t service_id,
 			      const AuthTicket& parent_ticket,
-			      StoneeXSessionAuthInfo& info);
+			      StoneXSessionAuthInfo& info);
   int build_session_auth_info(uint32_t service_id,
 			      const AuthTicket& parent_ticket,
 			      const CryptoKey& service_secret,
 			      uint64_t secret_id,
-			      StoneeXSessionAuthInfo& info);
+			      StoneXSessionAuthInfo& info);
 
   /* get current secret for specific service type */
   bool get_service_secret(uint32_t service_id, CryptoKey& secret,
@@ -233,19 +233,19 @@ public:
 
   bool generate_secret(EntityName& name, CryptoKey& secret);
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(data, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     std::scoped_lock l{lock};
-    using ceph::decode;
+    using stone::decode;
     decode(data, bl);
   }
   bool contains(const EntityName& name) const;
-  int encode_secrets(ceph::Formatter *f, std::stringstream *ds) const;
-  void encode_formatted(std::string label, ceph::Formatter *f, ceph::buffer::list &bl);
-  void encode_plaintext(ceph::buffer::list &bl);
+  int encode_secrets(stone::Formatter *f, std::stringstream *ds) const;
+  void encode_formatted(std::string label, stone::Formatter *f, stone::buffer::list &bl);
+  void encode_plaintext(stone::buffer::list &bl);
   int list_secrets(std::stringstream& ds) const {
     return encode_secrets(NULL, &ds);
   }
@@ -298,11 +298,11 @@ public:
     }
   }
 
-  bool prepare_rotating_update(ceph::buffer::list& rotating_bl);
+  bool prepare_rotating_update(stone::buffer::list& rotating_bl);
 
-  bool get_rotating_encrypted(const EntityName& name, ceph::buffer::list& enc_bl) const;
+  bool get_rotating_encrypted(const EntityName& name, stone::buffer::list& enc_bl) const;
 
-  ceph::mutex& get_lock() const { return lock; }
+  stone::mutex& get_lock() const { return lock; }
   bool get_service_caps(const EntityName& name, uint32_t service_id,
 			AuthCapsInfo& caps) const;
 

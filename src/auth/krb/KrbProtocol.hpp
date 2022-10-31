@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2018 SUSE LLC.
  * Author: Daniel Oliveira <doliveira@suse.com>
@@ -64,7 +64,7 @@ enum class GSSKeyExchange {
   USERAUTH_GSSAPI_ERRTOK, 
   USERAUTH_GSSAPI_MIC, 
 };
-static constexpr auto CEPH_GSS_OIDTYPE(0x07);
+static constexpr auto STONE_GSS_OIDTYPE(0x07);
 
 struct AuthAuthorizer;
 
@@ -72,13 +72,13 @@ struct AuthAuthorizer;
 class KrbAuthorizer : public AuthAuthorizer {
 
   public:
-    KrbAuthorizer() : AuthAuthorizer(CEPH_AUTH_GSS) { }
+    KrbAuthorizer() : AuthAuthorizer(STONE_AUTH_GSS) { }
     ~KrbAuthorizer() = default; 
     bool build_authorizer(const EntityName& entity_name, 
                           const uint64_t guid) {
       uint8_t value = (1);
 
-      using ceph::encode;
+      using stone::encode;
       encode(value, bl, 0);
       encode(entity_name, bl, 0); 
       encode(guid, bl, 0);
@@ -89,7 +89,7 @@ class KrbAuthorizer : public AuthAuthorizer {
 		      std::string *connection_secret) override {
       return true; 
     }
-    bool add_challenge(CephContext* ceph_ctx, 
+    bool add_challenge(StoneContext* stone_ctx, 
                        const bufferlist& buff_list) override {
       return true; 
     }
@@ -99,12 +99,12 @@ class KrbRequest {
 
   public:
     void decode(bufferlist::const_iterator& buff_list) {
-      using ceph::decode;
+      using stone::decode;
       decode(m_request_type, buff_list);
     }
 
     void encode(bufferlist& buff_list) const {
-      using ceph::encode;
+      using stone::encode;
       encode(m_request_type, buff_list);
     }
 
@@ -116,12 +116,12 @@ class KrbResponse {
 
   public: 
     void decode(bufferlist::const_iterator& buff_list) {
-      using ceph::decode;
+      using stone::decode;
       decode(m_response_type, buff_list); 
     }    
 
     void encode(bufferlist& buff_list) const {
-      using ceph::encode;
+      using stone::encode;
       encode(m_response_type, buff_list); 
     }
 
@@ -135,7 +135,7 @@ class KrbTokenBlob {
     void decode(bufferlist::const_iterator& buff_list) {
       uint8_t value = (0); 
      
-      using ceph::decode; 
+      using stone::decode; 
       decode(value, buff_list);
       decode(m_token_blob, buff_list);
     }
@@ -143,7 +143,7 @@ class KrbTokenBlob {
     void encode(bufferlist& buff_list) const {
       uint8_t value = (1); 
       
-      using ceph::encode;
+      using stone::encode;
       encode(value, buff_list, 0);
       encode(m_token_blob, buff_list, 0);
     }

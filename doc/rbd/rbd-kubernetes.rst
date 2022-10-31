@@ -2,17 +2,17 @@
  Block Devices and Kubernetes
 ==============================
 
-You may use Ceph Block Device images with Kubernetes v1.13 and later through
+You may use Stone Block Device images with Kubernetes v1.13 and later through
 `ceph-csi`_, which dynamically provisions RBD images to back Kubernetes
 `volumes`_ and maps these RBD images as block devices (optionally mounting
 a file system contained within the image) on worker nodes running
-`pods`_ that reference an RBD-backed volume. Ceph stripes block device images as
-objects across the cluster, which means that large Ceph Block Device images have
+`pods`_ that reference an RBD-backed volume. Stone stripes block device images as
+objects across the cluster, which means that large Stone Block Device images have
 better performance than a standalone server!
 
-To use Ceph Block Devices with Kubernetes v1.13 and higher, you must install
+To use Stone Block Devices with Kubernetes v1.13 and higher, you must install
 and configure ``ceph-csi`` within your Kubernetes environment. The following
-diagram depicts the Kubernetes/Ceph technology stack.
+diagram depicts the Kubernetes/Stone technology stack.
 
 .. ditaa::
             +---------------------------------------------------+
@@ -36,13 +36,13 @@ diagram depicts the Kubernetes/Ceph technology stack.
 
 .. important::
    ``ceph-csi`` uses the RBD kernel modules by default which may not support all
-   Ceph `CRUSH tunables`_ or `RBD image features`_.
+   Stone `CRUSH tunables`_ or `RBD image features`_.
 
 Create a Pool
 =============
 
-By default, Ceph block devices use the ``rbd`` pool. Create a pool for
-Kubernetes volume storage. Ensure your Ceph cluster is running, then create
+By default, Stone block devices use the ``rbd`` pool. Create a pool for
+Kubernetes volume storage. Ensure your Stone cluster is running, then create
 the pool. ::
 
         $ ceph osd pool create kubernetes
@@ -59,7 +59,7 @@ to initialize the pool::
 Configure ceph-csi
 ==================
 
-Setup Ceph Client Authentication
+Setup Stone Client Authentication
 --------------------------------
 
 Create a new user for Kubernetes and `ceph-csi`. Execute the following and
@@ -73,7 +73,7 @@ Generate `ceph-csi` `ConfigMap`
 -------------------------------
 
 The `ceph-csi` requires a `ConfigMap` object stored in Kubernetes to define the
-the Ceph monitor addresses for the Ceph cluster. Collect both the Ceph cluster
+the Stone monitor addresses for the Stone cluster. Collect both the Stone cluster
 unique `fsid` and the monitor addresses::
 
         $ ceph mon dump
@@ -117,7 +117,7 @@ Once generated, store the new `ConfigMap` object in Kubernetes::
 Generate `ceph-csi` cephx `Secret`
 ----------------------------------
 
-`ceph-csi` requires the cephx credentials for communicating with the Ceph
+`ceph-csi` requires the cephx credentials for communicating with the Stone
 cluster. Generate a `csi-rbd-secret.yaml` file similar to the example below,
 using the newly created Kubernetes user id and cephx key::
 
@@ -164,7 +164,7 @@ therefore can be used as-is from the `ceph-csi` deployment YAMLs::
    The YAMLs should be updated to use a release version container for
    production workloads.
 
-Using Ceph Block Devices
+Using Stone Block Devices
 ========================
 
 Create a `StorageClass`
@@ -176,7 +176,7 @@ vs HDD-based pools) and features.
 
 For example, to create a `ceph-csi` `StorageClass` that maps to the `kubernetes`
 pool created above, the following YAML file can be used after ensuring that the
-"clusterID" property matches your Ceph cluster's `fsid`::
+"clusterID" property matches your Stone cluster's `fsid`::
 
         $ cat <<EOF > csi-rbd-sc.yaml
         ---
@@ -203,7 +203,7 @@ Create a `PersistentVolumeClaim`
 
 A `PersistentVolumeClaim` is a request for abstract storage resources by a user.
 The `PersistentVolumeClaim` would then be associated to a `Pod` resource to
-provision a `PersistentVolume`, which would be backed by a Ceph block image.
+provision a `PersistentVolume`, which would be backed by a Stone block image.
 An optional `volumeMode` can be included to select between a mounted file system
 (default) or raw block device-based volume.
 

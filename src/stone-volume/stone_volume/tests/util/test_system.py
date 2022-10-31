@@ -3,9 +3,9 @@ import pwd
 import getpass
 import pytest
 from textwrap import dedent
-from ceph_volume.util import system
+from stone_volume.util import system
 from mock.mock import patch
-from ceph_volume.tests.conftest import Factory
+from stone_volume.tests.conftest import Factory
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def mock_find_executable_on_host(monkeypatch):
         )
 
         monkeypatch.setattr(
-            'ceph_volume.util.system.subprocess.Popen',
+            'stone_volume.util.system.subprocess.Popen',
             lambda *a, **kw: return_value)
 
     return apply
@@ -34,7 +34,7 @@ class TestMkdirP(object):
     def test_existing_dir_does_not_raise_w_chown(self, monkeypatch, tmpdir):
         user = pwd.getpwnam(getpass.getuser())
         uid, gid = user[2], user[3]
-        monkeypatch.setattr(system, 'get_ceph_user_ids', lambda: (uid, gid,))
+        monkeypatch.setattr(system, 'get_stone_user_ids', lambda: (uid, gid,))
         path = str(tmpdir)
         system.mkdir_p(path)
         assert os.path.isdir(path)
@@ -42,7 +42,7 @@ class TestMkdirP(object):
     def test_new_dir_w_chown(self, monkeypatch, tmpdir):
         user = pwd.getpwnam(getpass.getuser())
         uid, gid = user[2], user[3]
-        monkeypatch.setattr(system, 'get_ceph_user_ids', lambda: (uid, gid,))
+        monkeypatch.setattr(system, 'get_stone_user_ids', lambda: (uid, gid,))
         path = os.path.join(str(tmpdir), 'new')
         system.mkdir_p(path)
         assert os.path.isdir(path)
@@ -85,9 +85,9 @@ def fake_proc(tmpdir, monkeypatch):
             /dev/sde4 /two/field/path
             nfsd /proc/fs/nfsd nfsd rw,relatime 0 0
             /dev/sde2 /boot xfs rw,seclabel,relatime,attr2,inode64,noquota 0 0
-            tmpfs /far/lib/ceph/osd/ceph-5 tmpfs rw,seclabel,relatime 0 0
-            tmpfs /far/lib/ceph/osd/ceph-7 tmpfs rw,seclabel,relatime 0 0
-            /dev/sda1 /far/lib/ceph/osd/ceph-0 xfs rw,seclabel,noatime,attr2,inode64,noquota 0 0
+            tmpfs /far/lib/stone/osd/stone-5 tmpfs rw,seclabel,relatime 0 0
+            tmpfs /far/lib/stone/osd/stone-7 tmpfs rw,seclabel,relatime 0 0
+            /dev/sda1 /far/lib/stone/osd/stone-0 xfs rw,seclabel,noatime,attr2,inode64,noquota 0 0
             tmpfs /run/user/1000 tmpfs rw,seclabel,nosuid,nodev,relatime,size=50040k,mode=700,uid=1000,gid=1000 0 0
             /dev/sdc2 /boot xfs rw,seclabel,relatime,attr2,inode64,noquota 0 0
             tmpfs /run/user/1000 tmpfs rw,seclabel,mode=700,uid=1000,gid=1000 0 0"""))
@@ -116,24 +116,24 @@ class TestDeviceIsMounted(object):
         assert system.device_is_mounted('/dev/sda1') is True
 
     def test_path_is_not_device(self, fake_proc):
-        assert system.device_is_mounted('/far/lib/ceph/osd/ceph-7') is False
+        assert system.device_is_mounted('/far/lib/stone/osd/stone-7') is False
 
     def test_is_not_mounted_at_destination(self, fake_proc):
-        assert system.device_is_mounted('/dev/sda1', destination='/far/lib/ceph/osd/test-1') is False
+        assert system.device_is_mounted('/dev/sda1', destination='/far/lib/stone/osd/test-1') is False
 
     def test_is_mounted_at_destination(self, fake_proc):
-        assert system.device_is_mounted('/dev/sda1', destination='/far/lib/ceph/osd/ceph-7') is False
+        assert system.device_is_mounted('/dev/sda1', destination='/far/lib/stone/osd/stone-7') is False
 
     def test_is_realpath_dev_mounted_at_destination(self, fake_proc, monkeypatch):
         monkeypatch.setattr(system.os.path, 'realpath', lambda x: '/dev/sda1' if 'foo' in x else x)
-        result = system.device_is_mounted('/dev/maper/foo', destination='/far/lib/ceph/osd/ceph-0')
+        result = system.device_is_mounted('/dev/maper/foo', destination='/far/lib/stone/osd/stone-0')
         assert result is True
 
     def test_is_realpath_path_mounted_at_destination(self, fake_proc, monkeypatch):
         monkeypatch.setattr(
             system.os.path, 'realpath',
-            lambda x: '/far/lib/ceph/osd/ceph-0' if 'symlink' in x else x)
-        result = system.device_is_mounted('/dev/sda1', destination='/symlink/lib/ceph/osd/ceph-0')
+            lambda x: '/far/lib/stone/osd/stone-0' if 'symlink' in x else x)
+        result = system.device_is_mounted('/dev/sda1', destination='/symlink/lib/stone/osd/stone-0')
         assert result is True
 
 
@@ -172,8 +172,8 @@ class TestGetMounts(object):
         proc_path = os.path.join(PROCDIR, 'mounts')
         with open(proc_path, 'w') as f:
             f.write(dedent("""nfsd /proc/fs/nfsd nfsd rw,relatime 0 0
-                    /dev/sda1 /far/lib/ceph/osd/ceph-0 xfs rw,attr2,inode64,noquota 0 0
-                    /dev/sda2 /far/lib/ceph/osd/ceph-1 xfs rw,attr2,inode64,noquota 0 0"""))
+                    /dev/sda1 /far/lib/stone/osd/stone-0 xfs rw,attr2,inode64,noquota 0 0
+                    /dev/sda2 /far/lib/stone/osd/stone-1 xfs rw,attr2,inode64,noquota 0 0"""))
         monkeypatch.setattr(system, 'PROCDIR', PROCDIR)
         monkeypatch.setattr(os.path, 'exists', lambda x: False if x == '/dev/sda1' else True)
         result = system.get_mounts()
@@ -229,9 +229,9 @@ class TestWhich(object):
 
     def test_executable_exists_as_file(self, monkeypatch):
         monkeypatch.setattr(system.os, 'getenv', lambda x, y: '')
-        monkeypatch.setattr(system.os.path, 'isfile', lambda x: x != 'ceph')
-        monkeypatch.setattr(system.os.path, 'exists', lambda x: x != 'ceph')
-        assert system.which('ceph') == '/usr/local/bin/ceph'
+        monkeypatch.setattr(system.os.path, 'isfile', lambda x: x != 'stone')
+        monkeypatch.setattr(system.os.path, 'exists', lambda x: x != 'stone')
+        assert system.which('stone') == '/usr/local/bin/stone'
 
     def test_warnings_when_executable_isnt_matched(self, monkeypatch, capsys):
         monkeypatch.setattr(system.os.path, 'isfile', lambda x: True)
@@ -266,14 +266,14 @@ class TestSetContext(object):
 
     def setup(self):
         try:
-            os.environ.pop('CEPH_VOLUME_SKIP_RESTORECON')
+            os.environ.pop('STONE_VOLUME_SKIP_RESTORECON')
         except KeyError:
             pass
 
     @pytest.mark.parametrize('value', ['1', 'True', 'true', 'TRUE', 'yes'])
     def test_set_context_skips(self, stub_call, fake_run, value):
         stub_call(('', '', 0))
-        os.environ['CEPH_VOLUME_SKIP_RESTORECON'] = value
+        os.environ['STONE_VOLUME_SKIP_RESTORECON'] = value
         system.set_context('/tmp/foo')
         assert fake_run.calls == []
 
@@ -281,7 +281,7 @@ class TestSetContext(object):
     def test_set_context_doesnt_skip_with_env(self, stub_call, stub_which, fake_run, value):
         stub_call(('', '', 0))
         stub_which()
-        os.environ['CEPH_VOLUME_SKIP_RESTORECON'] = value
+        os.environ['STONE_VOLUME_SKIP_RESTORECON'] = value
         system.set_context('/tmp/foo')
         assert len(fake_run.calls)
 
@@ -297,7 +297,7 @@ class TestSetContext(object):
         system.set_context('/tmp/foo')
         assert len(fake_run.calls)
 
-    @patch('ceph_volume.process.call')
+    @patch('stone_volume.process.call')
     def test_selinuxenabled_doesnt_exist(self, mocked_call, fake_run):
         mocked_call.side_effect = FileNotFoundError()
         system.set_context('/tmp/foo')

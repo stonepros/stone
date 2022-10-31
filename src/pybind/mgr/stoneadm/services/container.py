@@ -1,23 +1,23 @@
 import logging
 from typing import List, Any, Tuple, Dict, cast
 
-from ceph.deployment.service_spec import CustomContainerSpec
+from stone.deployment.service_spec import CustomContainerSpec
 
-from .cephadmservice import CephadmService, CephadmDaemonDeploySpec
+from .stoneadmservice import StoneadmService, StoneadmDaemonDeploySpec
 
 logger = logging.getLogger(__name__)
 
 
-class CustomContainerService(CephadmService):
+class CustomContainerService(StoneadmService):
     TYPE = 'container'
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) \
-            -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) \
+            -> StoneadmDaemonDeploySpec:
         assert self.TYPE == daemon_spec.daemon_type
         daemon_spec.final_config, daemon_spec.deps = self.generate_config(daemon_spec)
         return daemon_spec
 
-    def generate_config(self, daemon_spec: CephadmDaemonDeploySpec) \
+    def generate_config(self, daemon_spec: StoneadmDaemonDeploySpec) \
             -> Tuple[Dict[str, Any], List[str]]:
         assert self.TYPE == daemon_spec.daemon_type
         deps: List[str] = []

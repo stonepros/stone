@@ -1,6 +1,6 @@
 .. _cephfs-multifs:
 
-Multiple Ceph File Systems
+Multiple Stone File Systems
 ==========================
 
 
@@ -12,10 +12,10 @@ Existing clusters must set a flag to enable multiple file systems::
 
     ceph fs flag set enable_multiple true
 
-New Ceph clusters automatically set this.
+New Stone clusters automatically set this.
 
 
-Creating a new Ceph File System
+Creating a new Stone File System
 -------------------------------
 
 The new ``volumes`` plugin interface (see: :doc:`/cephfs/fs-volumes`) automates
@@ -24,7 +24,7 @@ simply a new file system. This can be done via::
 
     ceph fs volume create <fs_name>
 
-Ceph will create the new pools and automate the deployment of new MDS to
+Stone will create the new pools and automate the deployment of new MDS to
 support the new file system. The deployment technology used, e.g. cephadm, will
 also configure the MDS affinity (see: :ref:`mds-join-fs`) of new MDS daemons to
 operate the new file system.
@@ -44,7 +44,7 @@ Other Notes
 
 Multiple file systems do not share pools. This is particularly important for
 snapshots but also because no measures are in place to prevent duplicate
-inodes. The Ceph commands prevent this dangerous configuration.
+inodes. The Stone commands prevent this dangerous configuration.
 
 Each file system has its own set of MDS ranks. Consequently, each new file
 system requires more MDS daemons to operate and increases operational costs.

@@ -31,7 +31,7 @@ class RBDMirrorThrasher(Thrasher, Greenlet):
     to use when selecting a random value from a range.  The config is a dict
     containing some or all of:
 
-    cluster: [default: ceph] cluster to thrash
+    cluster: [default: stone] cluster to thrash
 
     max_thrash: [default: 1] the maximum number of active rbd-mirror daemons per
       cluster will be thrashed at any given time.
@@ -55,7 +55,7 @@ class RBDMirrorThrasher(Thrasher, Greenlet):
       values:
 
       tasks:
-      - ceph:
+      - stone:
       - rbd_mirror_thrash:
           randomize: False
           max_thrash_delay: 10
@@ -189,7 +189,7 @@ def task(ctx, config):
     assert isinstance(config, dict), \
         'rbd_mirror_thrash task only accepts a dict for configuration'
 
-    cluster = config.get('cluster', 'ceph')
+    cluster = config.get('cluster', 'stone')
     daemons = list(ctx.daemons.iter_daemons_of_role('rbd-mirror', cluster))
     assert len(daemons) > 0, \
         'rbd_mirror_thrash task requires at least 1 rbd-mirror daemon'
@@ -204,7 +204,7 @@ def task(ctx, config):
 
     thrasher = RBDMirrorThrasher(ctx, config, cluster, daemons)
     thrasher.start()
-    ctx.ceph[cluster].thrashers.append(thrasher)
+    ctx.stone[cluster].thrashers.append(thrasher)
 
     try:
         log.debug('Yielding')

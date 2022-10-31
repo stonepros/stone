@@ -3,7 +3,7 @@ Development workflows
 =====================
 
 This page explains the workflows a developer is expected to follow to
-implement the goals that are part of the Ceph release cycle. It does not
+implement the goals that are part of the Stone release cycle. It does not
 go into technical details and is designed to provide a high level view
 instead. Each chapter is about a given goal such as ``Merging bug
 fixes or features`` or ``Publishing point releases and backporting``.
@@ -12,7 +12,7 @@ A key aspect of all workflows is that none of them blocks another. For
 instance, a bug fix can be backported and merged to a stable branch
 while the next point release is being published. For that specific
 example to work, a branch should be created to avoid any
-interference. In practice it is not necessary for Ceph because:
+interference. In practice it is not necessary for Stone because:
 
 * there are few people involved
 * the frequency of backports is not too high
@@ -39,7 +39,7 @@ Release Cycle
 
 ::
 
-    Ceph              hammer                             infernalis
+    Stone              hammer                             infernalis
     Developer          CDS                                  CDS 
     Summit              |                                    |
                         |                                    |
@@ -55,7 +55,7 @@ Release Cycle
 
 
 Four times a year, the development roadmap is discussed online during
-the `Ceph Developer Summit <http://tracker.ceph.com/projects/ceph/wiki/Planning#Ceph-Developer-Summit>`_. A
+the `Stone Developer Summit <http://tracker.ceph.com/projects/ceph/wiki/Planning#Stone-Developer-Summit>`_. A
 new stable release (hammer, infernalis, jewel ...) is published at the same
 frequency.  Every other release (firefly, hammer, jewel...) is a `Long Term
 Stable (LTS) <../../releases>`_.  See `Understanding the release cycle
@@ -135,7 +135,7 @@ The ``quality engineer`` is either a developer or a member of the QE
 team. There is at least one integration test suite per project:
 
 * `rgw <https://github.com/ceph/ceph/tree/master/qa/suites/rgw>`_ suite
-* `CephFS <https://github.com/ceph/ceph/tree/master/qa/suites/fs>`_ suite
+* `StoneFS <https://github.com/ceph/ceph/tree/master/qa/suites/fs>`_ suite
 * `rados <https://github.com/ceph/ceph/tree/master/qa/suites/rados>`_ suite
 * `rbd <https://github.com/ceph/ceph/tree/master/qa/suites/rbd>`_ suite
 
@@ -192,7 +192,7 @@ is to be retired, users suffering from this bug can
 upgrade to ``firefly`` to fix it. Unless users manifest themselves and ask
 for ``dumpling`` v0.67.12, this draft release may never be published.
 
-* The ``Ceph lead`` decides a new stable release must be published
+* The ``Stone lead`` decides a new stable release must be published
 * The ``release master`` gets approval from all leads
 * The ``release master`` writes and commits the release notes
 * The ``release master`` informs the ``quality engineer`` that the
@@ -208,7 +208,7 @@ for ``dumpling`` v0.67.12, this draft release may never be published.
 
 The person responsible for each role is:
 
-* Sage Weil is the ``Ceph lead``
+* Sage Weil is the ``Stone lead``
 * Sage Weil is the ``release master`` for major stable releases
   (``firefly`` 0.80, ``hammer`` 0.94 etc.)
 * Loic Dachary is the ``release master`` for stable point releases

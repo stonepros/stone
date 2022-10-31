@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -18,7 +18,7 @@
 #include "Auth.h"
 #include "include/common_fwd.h"
 #include "include/types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 // Different classes of session crypto handling
 
 #define SESSION_CRYPTO_NONE 0
@@ -30,11 +30,11 @@ class KeyRing;
 struct AuthAuthorizeHandler {
   virtual ~AuthAuthorizeHandler() {}
   virtual bool verify_authorizer(
-    StoneeContext *cct,
+    StoneContext *cct,
     const KeyStore& keys,
-    const ceph::buffer::list& authorizer_data,
+    const stone::buffer::list& authorizer_data,
     size_t connection_secret_required_len,
-    ceph::buffer::list *authorizer_reply,
+    stone::buffer::list *authorizer_reply,
     EntityName *entity_name,
     uint64_t *global_id,
     AuthCapsInfo *caps_info,

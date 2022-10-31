@@ -114,7 +114,7 @@ class Options(object):
     PWD_POLICY_MIN_LENGTH = Setting(8, [int])
     PWD_POLICY_MIN_COMPLEXITY = Setting(10, [int])
     PWD_POLICY_EXCLUSION_LIST = Setting(','.join(['osd', 'host', 'dashboard', 'pool',
-                                                  'block', 'nfs', 'ceph', 'monitors',
+                                                  'block', 'nfs', 'stone', 'monitors',
                                                   'gateway', 'logs', 'crush', 'maps']),
                                         [str])
 
@@ -170,12 +170,12 @@ def options_command_list():
     This function generates a list of ``get`` and ``set`` commands
     for each declared configuration option in class ``Options``.
     """
-    def py2ceph(pytype):
+    def py2stone(pytype):
         if pytype == str:
-            return 'CephString'
+            return 'StoneString'
         elif pytype == int:
-            return 'CephInt'
-        return 'CephString'
+            return 'StoneInt'
+        return 'StoneString'
 
     cmd_list = []
     for cmd, opt in _OPTIONS_COMMAND_MAP.items():
@@ -188,7 +188,7 @@ def options_command_list():
         elif cmd.startswith('dashboard set'):
             cmd_entry = {
                 'cmd': '{} name=value,type={}'
-                       .format(cmd, py2ceph(opt['type'])),
+                       .format(cmd, py2stone(opt['type'])),
                 'desc': 'Set the {} option value'.format(opt['name']),
                 'perm': 'w'
             }

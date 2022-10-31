@@ -9,7 +9,7 @@
 
 #include <sstream>
 
-#include "ceph_dokan.h"
+#include "stone_dokan.h"
 
 void print_credentials(
   std::ostringstream& Stream,

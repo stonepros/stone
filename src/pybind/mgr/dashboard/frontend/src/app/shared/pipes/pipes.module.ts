@@ -5,8 +5,8 @@ import { ArrayPipe } from './array.pipe';
 import { BooleanTextPipe } from './boolean-text.pipe';
 import { BooleanPipe } from './boolean.pipe';
 import { CdDatePipe } from './cd-date.pipe';
-import { CephReleaseNamePipe } from './ceph-release-name.pipe';
-import { CephShortVersionPipe } from './ceph-short-version.pipe';
+import { StoneReleaseNamePipe } from './stone-release-name.pipe';
+import { StoneShortVersionPipe } from './stone-short-version.pipe';
 import { DimlessBinaryPerSecondPipe } from './dimless-binary-per-second.pipe';
 import { DimlessBinaryPipe } from './dimless-binary.pipe';
 import { DimlessPipe } from './dimless.pipe';
@@ -41,8 +41,8 @@ import { UpperFirstPipe } from './upper-first.pipe';
     DimlessBinaryPerSecondPipe,
     HealthColorPipe,
     DimlessPipe,
-    CephShortVersionPipe,
-    CephReleaseNamePipe,
+    StoneShortVersionPipe,
+    StoneReleaseNamePipe,
     RelativeDatePipe,
     IscsiBackstorePipe,
     JoinPipe,
@@ -72,8 +72,8 @@ import { UpperFirstPipe } from './upper-first.pipe';
     DimlessBinaryPerSecondPipe,
     HealthColorPipe,
     DimlessPipe,
-    CephShortVersionPipe,
-    CephReleaseNamePipe,
+    StoneShortVersionPipe,
+    StoneReleaseNamePipe,
     RelativeDatePipe,
     IscsiBackstorePipe,
     JoinPipe,
@@ -100,8 +100,8 @@ import { UpperFirstPipe } from './upper-first.pipe';
     BooleanPipe,
     BooleanTextPipe,
     DatePipe,
-    CephShortVersionPipe,
-    CephReleaseNamePipe,
+    StoneShortVersionPipe,
+    StoneReleaseNamePipe,
     DimlessBinaryPipe,
     DimlessBinaryPerSecondPipe,
     DimlessPipe,

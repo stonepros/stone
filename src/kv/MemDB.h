@@ -35,18 +35,18 @@ enum {
 
 class MemDB : public KeyValueDB
 {
-  typedef std::pair<std::pair<std::string, std::string>, ceph::bufferlist> ms_op_t;
+  typedef std::pair<std::pair<std::string, std::string>, stone::bufferlist> ms_op_t;
   std::mutex m_lock;
   uint64_t m_total_bytes;
   uint64_t m_allocated_bytes;
 
-  typedef std::map<std::string, ceph::bufferptr> mdb_map_t;
+  typedef std::map<std::string, stone::bufferptr> mdb_map_t;
   typedef mdb_map_t::iterator mdb_iter_t;
   bool m_using_btree;
 
   mdb_map_t m_map;
 
-  StoneeContext *m_cct;
+  StoneContext *m_cct;
   PerfCounters *logger;
   void* m_priv;
   std::string m_options;
@@ -55,16 +55,16 @@ class MemDB : public KeyValueDB
   int transaction_rollback(KeyValueDB::Transaction t);
   int _open(std::ostream &out);
   void close() override;
-  bool _get(const std::string &prefix, const std::string &k, ceph::bufferlist *out);
-  bool _get_locked(const std::string &prefix, const std::string &k, ceph::bufferlist *out);
+  bool _get(const std::string &prefix, const std::string &k, stone::bufferlist *out);
+  bool _get_locked(const std::string &prefix, const std::string &k, stone::bufferlist *out);
   std::string _get_data_fn();
-  void _encode(mdb_iter_t iter, ceph::bufferlist &bl);
+  void _encode(mdb_iter_t iter, stone::bufferlist &bl);
   void _save();
   int _load();
   uint64_t iterator_seq_no;
 
 public:
-  MemDB(StoneeContext *c, const std::string &path, void *p) :
+  MemDB(StoneContext *c, const std::string &path, void *p) :
     m_total_bytes(0), m_allocated_bytes(0), m_using_btree(false),
     m_cct(c), logger(NULL), m_priv(p), m_db_path(path), iterator_seq_no(1)
   {
@@ -94,7 +94,7 @@ public:
         get_ops() { return ops; };
 
     void set(const std::string &prefix, const std::string &key,
-	     const ceph::bufferlist &val) override;
+	     const stone::bufferlist &val) override;
     using KeyValueDB::TransactionImpl::set;
     void rmkey(const std::string &prefix, const std::string &k) override;
     using KeyValueDB::TransactionImpl::rmkey;
@@ -105,7 +105,7 @@ public:
       const std::string &end) override;
 
     void merge(const std::string &prefix, const std::string &key,
-	       const ceph::bufferlist  &value) override;
+	       const stone::bufferlist  &value) override;
     void clear() {
       ops.clear();
     }
@@ -121,7 +121,7 @@ private:
   /*
    * Transaction states.
    */
-  int _merge(const std::string &k, ceph::bufferptr &bl);
+  int _merge(const std::string &k, stone::bufferptr &bl);
   int _merge(ms_op_t &op);
   int _setkey(ms_op_t &op);
   int _rmkey(ms_op_t &op);
@@ -144,17 +144,17 @@ public:
   int submit_transaction_sync(Transaction) override;
 
   int get(const std::string &prefix, const std::set<std::string> &key,
-	  std::map<std::string, ceph::bufferlist> *out) override;
+	  std::map<std::string, stone::bufferlist> *out) override;
 
   int get(const std::string &prefix, const std::string &key,
-          ceph::bufferlist *out) override;
+          stone::bufferlist *out) override;
 
   using KeyValueDB::get;
 
   class MDBWholeSpaceIteratorImpl : public KeyValueDB::WholeSpaceIteratorImpl {
 
       mdb_iter_t m_iter;
-      std::pair<std::string, ceph::bufferlist> m_key_value;
+      std::pair<std::string, stone::bufferlist> m_key_value;
       mdb_map_t *m_map_p;
       std::mutex *m_map_lock_p;
       uint64_t *global_seq_no;
@@ -194,7 +194,7 @@ public:
     std::string key() override;
     std::pair<std::string,std::string> raw_key() override;
     bool raw_key_is_prefixed(const std::string &prefix) override;
-    ceph::bufferlist value() override;
+    stone::bufferlist value() override;
     ~MDBWholeSpaceIteratorImpl() override;
   };
 

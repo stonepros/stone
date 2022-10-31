@@ -6,7 +6,7 @@ from .helper import (DashboardTestCase, JAny, JLeaf, JList, JObj,
 
 
 class HealthTest(DashboardTestCase):
-    CEPHFS = True
+    STONEFS = True
 
     __pg_info_schema = JObj({
         'object_stats': JObj({
@@ -273,7 +273,7 @@ class HealthTest(DashboardTestCase):
         })
         self.assertSchema(data, schema)
 
-        cluster_pools = self.ceph_cluster.mon_manager.list_pools()
+        cluster_pools = self.stone_cluster.mon_manager.list_pools()
         self.assertEqual(len(cluster_pools), len(data['pools']))
         for pool in data['pools']:
             self.assertIn(pool['pool_name'], cluster_pools)
@@ -295,7 +295,7 @@ class HealthTest(DashboardTestCase):
         })
         self.assertSchema(data, schema)
 
-        cluster_pools = self.ceph_cluster.mon_manager.list_pools()
+        cluster_pools = self.stone_cluster.mon_manager.list_pools()
         self.assertEqual(len(cluster_pools), len(data['pools']))
         for pool in data['pools']:
             self.assertIn(pool['pool_name'], cluster_pools)

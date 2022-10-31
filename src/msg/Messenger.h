@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -30,11 +30,11 @@
 #include "common/Throttle.h"
 #include "include/Context.h"
 #include "include/types.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "auth/Crypto.h"
 #include "common/item_history.h"
 #include "auth/AuthRegistry.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include <errno.h>
 #include <sstream>
@@ -118,13 +118,13 @@ public:
 #endif
 
   /**
-   *  The StoneeContext this Messenger uses. Many other components initialize themselves
+   *  The StoneContext this Messenger uses. Many other components initialize themselves
    *  from this value.
    */
-  StoneeContext *cct;
+  StoneContext *cct;
   int crcflags;
 
-  using Policy = ceph::net::Policy<Throttle>;
+  using Policy = stone::net::Policy<Throttle>;
 
 public:
   // allow unauthenticated connections.  This is needed for
@@ -142,7 +142,7 @@ public:
    * Messenger users should construct full implementations directly,
    * or use the create() function.
    */
-  Messenger(StoneeContext *cct_, entity_name_t w);
+  Messenger(StoneContext *cct_, entity_name_t w);
   virtual ~Messenger() {}
 
   /**
@@ -157,7 +157,7 @@ public:
    * @param lname logical name of the messenger in this process (e.g., "client")
    * @param nonce nonce value to uniquely identify this instance on the current host
    */
-  static Messenger *create(StoneeContext *cct,
+  static Messenger *create(StoneContext *cct,
                            const std::string &type,
                            entity_name_t name,
 			   std::string lname,
@@ -178,7 +178,7 @@ public:
    * @param cct context
    * @param lname logical name of the messenger in this process (e.g., "client")
    */
-  static Messenger *create_client_messenger(StoneeContext *cct, std::string lname);
+  static Messenger *create_client_messenger(StoneContext *cct, std::string lname);
 
   /**
    * @defgroup Accessors
@@ -359,7 +359,7 @@ public:
    * @param p The cluster protocol to use. Defined externally.
    */
   void set_default_send_priority(int p) {
-    ceph_assert(!started);
+    stone_assert(!started);
     default_send_priority = p;
   }
   /**
@@ -636,16 +636,16 @@ public:
       } else {
 	blocked = true;
 	int r = pthread_sigmask(SIG_BLOCK, &pipe_mask, &existing_mask);
-	ceph_assert(r == 0);
+	stone_assert(r == 0);
       }
     }
     ~sigpipe_stopper() {
       if (blocked) {
 	struct timespec nowait{0};
 	int r = sigtimedwait(&pipe_mask, 0, &nowait);
-	ceph_assert(r == EAGAIN || r == 0);
+	stone_assert(r == EAGAIN || r == 0);
 	r = pthread_sigmask(SIG_SETMASK, &existing_mask, 0);
-	ceph_assert(r == 0);
+	stone_assert(r == 0);
       }
     }
   };
@@ -664,7 +664,7 @@ public:
    *
    * @param m The Message we are testing.
    */
-  bool ms_can_fast_dispatch(const ceph::cref_t<Message>& m) {
+  bool ms_can_fast_dispatch(const stone::cref_t<Message>& m) {
     for (const auto &dispatcher : fast_dispatchers) {
       if (dispatcher->ms_can_fast_dispatch2(m))
 	return true;
@@ -676,25 +676,25 @@ public:
    * Deliver a single Message via "fast dispatch".
    *
    * @param m The Message we are fast dispatching.
-   * If none of our Dispatchers can handle it, ceph_abort().
+   * If none of our Dispatchers can handle it, stone_abort().
    */
-  void ms_fast_dispatch(const ceph::ref_t<Message> &m) {
-    m->set_dispatch_stamp(ceph_clock_now());
+  void ms_fast_dispatch(const stone::ref_t<Message> &m) {
+    m->set_dispatch_stamp(stone_clock_now());
     for (const auto &dispatcher : fast_dispatchers) {
       if (dispatcher->ms_can_fast_dispatch2(m)) {
 	dispatcher->ms_fast_dispatch2(m);
 	return;
       }
     }
-    ceph_abort();
+    stone_abort();
   }
   void ms_fast_dispatch(Message *m) {
-    return ms_fast_dispatch(ceph::ref_t<Message>(m, false)); /* consume ref */
+    return ms_fast_dispatch(stone::ref_t<Message>(m, false)); /* consume ref */
   }
   /**
    *
    */
-  void ms_fast_preprocess(const ceph::ref_t<Message> &m) {
+  void ms_fast_preprocess(const stone::ref_t<Message> &m) {
     for (const auto &dispatcher : fast_dispatchers) {
       dispatcher->ms_fast_preprocess2(m);
     }
@@ -702,22 +702,22 @@ public:
   /**
    *  Deliver a single Message. Send it to each Dispatcher
    *  in sequence until one of them handles it.
-   *  If none of our Dispatchers can handle it, ceph_abort().
+   *  If none of our Dispatchers can handle it, stone_abort().
    *
    *  @param m The Message to deliver.
    */
-  void ms_deliver_dispatch(const ceph::ref_t<Message> &m) {
-    m->set_dispatch_stamp(ceph_clock_now());
+  void ms_deliver_dispatch(const stone::ref_t<Message> &m) {
+    m->set_dispatch_stamp(stone_clock_now());
     for (const auto &dispatcher : dispatchers) {
       if (dispatcher->ms_dispatch2(m))
 	return;
     }
     lsubdout(cct, ms, 0) << "ms_deliver_dispatch: unhandled message " << m << " " << *m << " from "
 			 << m->get_source_inst() << dendl;
-    ceph_assert(!cct->_conf->ms_die_on_unhandled_msg);
+    stone_assert(!cct->_conf->ms_die_on_unhandled_msg);
   }
   void ms_deliver_dispatch(Message *m) {
-    return ms_deliver_dispatch(ceph::ref_t<Message>(m, false)); /* consume ref */
+    return ms_deliver_dispatch(stone::ref_t<Message>(m, false)); /* consume ref */
   }
   /**
    * Notify each Dispatcher of a new Connection. Call

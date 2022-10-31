@@ -6,7 +6,7 @@
 
 #include "include/rados/librados.hpp"
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 template <typename T, void(T::*MF)(int)>
@@ -48,6 +48,6 @@ struct C_AsyncCallback : public Context {
 };
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_AIO_UTILS_H

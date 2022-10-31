@@ -94,7 +94,7 @@ public:
   uint64_t get_max();
 
   JournalThrottle(
-    CephContext *cct,
+    StoneContext *cct,
     unsigned expected_concurrency ///< [in] determines size of conds
     ) : throttle(cct, "filestore_journal", expected_concurrency) {}
 };

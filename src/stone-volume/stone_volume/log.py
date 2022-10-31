@@ -1,21 +1,21 @@
 import logging
 import os
-from ceph_volume import terminal
-from ceph_volume import conf
+from stone_volume import terminal
+from stone_volume import conf
 
 BASE_FORMAT = "[%(name)s][%(levelname)-6s] %(message)s"
 FILE_FORMAT = "[%(asctime)s]" + BASE_FORMAT
 
 
-def setup(name='ceph-volume.log', log_path=None, log_level=None):
+def setup(name='stone-volume.log', log_path=None, log_level=None):
     log_path = log_path or conf.log_path
     # if a non-root user calls help or other no-sudo-required command the
-    # logger will fail to write to /var/lib/ceph/ so this /tmp/ path is used as
+    # logger will fail to write to /var/lib/stone/ so this /tmp/ path is used as
     # a fallback
     tmp_log_file = os.path.join('/tmp/', name)
     root_logger = logging.getLogger()
-    # The default path is where all ceph log files are, and will get rotated by
-    # Ceph's logrotate rules.
+    # The default path is where all stone log files are, and will get rotated by
+    # Stone's logrotate rules.
     log_level = log_level or "DEBUG"
     log_level = getattr(logging, log_level.upper())
     root_logger.setLevel(log_level)
@@ -35,7 +35,7 @@ def setup(name='ceph-volume.log', log_path=None, log_level=None):
 
 
 def setup_console():
-    # TODO: At some point ceph-volume should stop using the custom logger
+    # TODO: At some point stone-volume should stop using the custom logger
     # interface that exists in terminal.py and use the logging module to
     # produce output for the terminal
     # Console Logger

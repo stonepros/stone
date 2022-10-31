@@ -21,21 +21,21 @@ struct SequencerPosition {
 
   SequencerPosition(uint64_t s=0, int32_t t=0, int32_t o=0) : seq(s), trans(t), op(o) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(seq, bl);
     encode(trans, bl);
     encode(op, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(1, p);
     decode(seq, p);
     decode(trans, p);
     decode(op, p);
     DECODE_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_unsigned("seq", seq);
     f->dump_unsigned("trans", trans);
     f->dump_unsigned("op", op);

@@ -3,7 +3,7 @@
 set -e
 
 file=linux-2.6.33.tar.bz2
-wget -q http://download.ceph.com/qa/$file
+wget -q http://download.stone.com/qa/$file
 
 real=`md5sum $file | awk '{print $1}'`
 

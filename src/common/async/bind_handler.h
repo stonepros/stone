@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -18,7 +18,7 @@
 #include <tuple>
 #include <boost/asio.hpp>
 
-namespace ceph::async {
+namespace stone::async {
 
 /**
  * A bound completion handler for use with boost::asio.
@@ -58,16 +58,16 @@ struct CompletionHandler {
   }
 };
 
-} // namespace ceph::async
+} // namespace stone::async
 
 namespace boost::asio {
 
 // specialize boost::asio::associated_executor<> for CompletionHandler
 template <typename Handler, typename Tuple, typename Executor>
-struct associated_executor<ceph::async::CompletionHandler<Handler, Tuple>, Executor> {
+struct associated_executor<stone::async::CompletionHandler<Handler, Tuple>, Executor> {
   using type = boost::asio::associated_executor_t<Handler, Executor>;
 
-  static type get(const ceph::async::CompletionHandler<Handler, Tuple>& handler,
+  static type get(const stone::async::CompletionHandler<Handler, Tuple>& handler,
                   const Executor& ex = Executor()) noexcept {
     return boost::asio::get_associated_executor(handler.handler, ex);
   }
@@ -75,7 +75,7 @@ struct associated_executor<ceph::async::CompletionHandler<Handler, Tuple>, Execu
 
 } // namespace boost::asio
 
-namespace ceph::async {
+namespace stone::async {
 
 /**
  * Returns a wrapped completion handler with bound arguments.
@@ -106,6 +106,6 @@ auto bind_handler(Handler&& h, Args&& ...args)
                            std::make_tuple(std::forward<Args>(args)...)};
 }
 
-} // namespace ceph::async
+} // namespace stone::async
 
 #endif // STONE_ASYNC_BIND_HANDLER_H

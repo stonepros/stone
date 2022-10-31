@@ -6,7 +6,7 @@
 
 #include <map>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/async/context_pool.h"
 #include "messages/MFSMap.h"
 #include "msg/Dispatcher.h"
@@ -14,7 +14,7 @@
 
 class MonClient;
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 class ServiceDaemon;
@@ -34,7 +34,7 @@ public:
     virtual void handle_peers_removed(const Filesystem &filesystem, const Peer &peer) = 0;
   };
 
-  ClusterWatcher(CephContext *cct, MonClient *monc, ServiceDaemon *service_daemon,
+  ClusterWatcher(StoneContext *cct, MonClient *monc, ServiceDaemon *service_daemon,
                  Listener &listener);
   ~ClusterWatcher();
 
@@ -60,7 +60,7 @@ public:
   void shutdown();
 
 private:
-  ceph::mutex m_lock = ceph::make_mutex("cephfs::mirror::cluster_watcher");
+  stone::mutex m_lock = stone::make_mutex("stonefs::mirror::cluster_watcher");
   MonClient *m_monc;
   ServiceDaemon *m_service_daemon;
   Listener &m_listener;
@@ -72,6 +72,6 @@ private:
 };
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_CLUSTER_WATCHER_H

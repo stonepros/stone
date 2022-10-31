@@ -34,7 +34,7 @@ def task(ctx, config):
 @contextlib.contextmanager
 def install(ctx, config):
     """
-    Install OpenStack DevStack and configure it to use a Ceph cluster for
+    Install OpenStack DevStack and configure it to use a Stone cluster for
     Glance and Cinder.
 
     Requires one node with a role 'devstack'
@@ -51,7 +51,7 @@ def install(ctx, config):
 
     This was created using documentation found here:
         https://github.com/openstack-dev/devstack/blob/master/README.md
-        http://docs.ceph.com/en/latest/rbd/rbd-openstack/
+        http://docs.stone.com/en/latest/rbd/rbd-openstack/
     """
     if config is None:
         config = {}
@@ -64,7 +64,7 @@ def install(ctx, config):
     devstack_branch = config.get("branch", "master")
     install_devstack(devstack_node, devstack_branch)
     try:
-        configure_devstack_and_ceph(ctx, config, devstack_node, an_osd_node)
+        configure_devstack_and_stone(ctx, config, devstack_node, an_osd_node)
         yield
     finally:
         pass
@@ -88,15 +88,15 @@ def install_devstack(devstack_node, branch="master"):
     devstack_node.run(args=args)
 
 
-def configure_devstack_and_ceph(ctx, config, devstack_node, ceph_node):
+def configure_devstack_and_stone(ctx, config, devstack_node, stone_node):
     pool_size = config.get('pool_size', '128')
-    create_pools(ceph_node, pool_size)
-    distribute_ceph_conf(devstack_node, ceph_node)
-    # This is where we would install python-ceph and ceph-common but it appears
-    # the ceph task does that for us.
-    generate_ceph_keys(ceph_node)
-    distribute_ceph_keys(devstack_node, ceph_node)
-    secret_uuid = set_libvirt_secret(devstack_node, ceph_node)
+    create_pools(stone_node, pool_size)
+    distribute_stone_conf(devstack_node, stone_node)
+    # This is where we would install python-stone and stone-common but it appears
+    # the stone task does that for us.
+    generate_stone_keys(stone_node)
+    distribute_stone_keys(devstack_node, stone_node)
+    secret_uuid = set_libvirt_secret(devstack_node, stone_node)
     update_devstack_config_files(devstack_node, secret_uuid)
     set_apache_servername(devstack_node)
     # Rebooting is the most-often-used method of restarting devstack services
@@ -105,80 +105,80 @@ def configure_devstack_and_ceph(ctx, config, devstack_node, ceph_node):
     restart_apache(devstack_node)
 
 
-def create_pools(ceph_node, pool_size):
-    log.info("Creating pools on Ceph cluster...")
+def create_pools(stone_node, pool_size):
+    log.info("Creating pools on Stone cluster...")
 
     for pool_name in ['volumes', 'images', 'backups']:
-        args = ['sudo', 'ceph', 'osd', 'pool', 'create', pool_name, pool_size]
-        ceph_node.run(args=args)
+        args = ['sudo', 'stone', 'osd', 'pool', 'create', pool_name, pool_size]
+        stone_node.run(args=args)
 
 
-def distribute_ceph_conf(devstack_node, ceph_node):
-    log.info("Copying ceph.conf to DevStack node...")
+def distribute_stone_conf(devstack_node, stone_node):
+    log.info("Copying stone.conf to DevStack node...")
 
-    ceph_conf_path = '/etc/ceph/ceph.conf'
-    ceph_conf = ceph_node.read_file(ceph_conf_path, sudo=True)
-    devstack_node.write_file(ceph_conf_path, ceph_conf, sudo=True)
+    stone_conf_path = '/etc/stonepros/stone.conf'
+    stone_conf = stone_node.read_file(stone_conf_path, sudo=True)
+    devstack_node.write_file(stone_conf_path, stone_conf, sudo=True)
 
 
-def generate_ceph_keys(ceph_node):
-    log.info("Generating Ceph keys...")
+def generate_stone_keys(stone_node):
+    log.info("Generating Stone keys...")
 
-    ceph_auth_cmds = [
-        ['sudo', 'ceph', 'auth', 'get-or-create', 'client.cinder', 'mon',
+    stone_auth_cmds = [
+        ['sudo', 'stone', 'auth', 'get-or-create', 'client.cinder', 'mon',
             'allow r', 'osd', 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rx pool=images'],  # noqa
-        ['sudo', 'ceph', 'auth', 'get-or-create', 'client.glance', 'mon',
+        ['sudo', 'stone', 'auth', 'get-or-create', 'client.glance', 'mon',
             'allow r', 'osd', 'allow class-read object_prefix rbd_children, allow rwx pool=images'],  # noqa
-        ['sudo', 'ceph', 'auth', 'get-or-create', 'client.cinder-backup', 'mon',
+        ['sudo', 'stone', 'auth', 'get-or-create', 'client.cinder-backup', 'mon',
             'allow r', 'osd', 'allow class-read object_prefix rbd_children, allow rwx pool=backups'],  # noqa
     ]
-    for cmd in ceph_auth_cmds:
-        ceph_node.run(args=cmd)
+    for cmd in stone_auth_cmds:
+        stone_node.run(args=cmd)
 
 
-def distribute_ceph_keys(devstack_node, ceph_node):
-    log.info("Copying Ceph keys to DevStack node...")
+def distribute_stone_keys(devstack_node, stone_node):
+    log.info("Copying Stone keys to DevStack node...")
 
     def copy_key(from_remote, key_name, to_remote, dest_path, owner):
         key_stringio = BytesIO()
         from_remote.run(
-            args=['sudo', 'ceph', 'auth', 'get-or-create', key_name],
+            args=['sudo', 'stone', 'auth', 'get-or-create', key_name],
             stdout=key_stringio)
         key_stringio.seek(0)
         to_remote.write_file(dest_path, key_stringio, owner=owner, sudo=True)
     keys = [
         dict(name='client.glance',
-             path='/etc/ceph/ceph.client.glance.keyring',
+             path='/etc/stonepros/stone.client.glance.keyring',
              # devstack appears to just want root:root
              #owner='glance:glance',
              ),
         dict(name='client.cinder',
-             path='/etc/ceph/ceph.client.cinder.keyring',
+             path='/etc/stonepros/stone.client.cinder.keyring',
              # devstack appears to just want root:root
              #owner='cinder:cinder',
              ),
         dict(name='client.cinder-backup',
-             path='/etc/ceph/ceph.client.cinder-backup.keyring',
+             path='/etc/stonepros/stone.client.cinder-backup.keyring',
              # devstack appears to just want root:root
              #owner='cinder:cinder',
              ),
     ]
     for key_dict in keys:
-        copy_key(ceph_node, key_dict['name'], devstack_node,
+        copy_key(stone_node, key_dict['name'], devstack_node,
                  key_dict['path'], key_dict.get('owner'))
 
 
-def set_libvirt_secret(devstack_node, ceph_node):
+def set_libvirt_secret(devstack_node, stone_node):
     log.info("Setting libvirt secret...")
 
-    cinder_key = ceph_node.sh('sudo ceph auth get-key client.cinder').strip()
+    cinder_key = stone_node.sh('sudo stone auth get-key client.cinder').strip()
     uuid = devstack_node.sh('uuidgen').strip()
 
     secret_path = '/tmp/secret.xml'
     secret_template = textwrap.dedent("""
     <secret ephemeral='no' private='no'>
         <uuid>{uuid}</uuid>
-        <usage type='ceph'>
+        <usage type='stone'>
             <name>client.cinder secret</name>
         </usage>
     </secret>""")
@@ -192,7 +192,7 @@ def set_libvirt_secret(devstack_node, ceph_node):
 
 
 def update_devstack_config_files(devstack_node, secret_uuid):
-    log.info("Updating DevStack config files to use Ceph...")
+    log.info("Updating DevStack config files to use Stone...")
 
     def backup_config(node, file_name, backup_ext='.orig.teuth'):
         node.run(args=['cp', '-f', file_name, file_name + backup_ext])
@@ -217,25 +217,25 @@ def update_devstack_config_files(devstack_node, secret_uuid):
         dict(name='/etc/cinder/cinder.conf', options=dict(
             volume_driver='cinder.volume.drivers.rbd.RBDDriver',
             rbd_pool='volumes',
-            rbd_ceph_conf='/etc/ceph/ceph.conf',
+            rbd_stone_conf='/etc/stonepros/stone.conf',
             rbd_flatten_volume_from_snapshot='false',
             rbd_max_clone_depth='5',
             glance_api_version='2',
             rbd_user='cinder',
             rbd_secret_uuid=secret_uuid,
-            backup_driver='cinder.backup.drivers.ceph',
-            backup_ceph_conf='/etc/ceph/ceph.conf',
-            backup_ceph_user='cinder-backup',
-            backup_ceph_chunk_size='134217728',
-            backup_ceph_pool='backups',
-            backup_ceph_stripe_unit='0',
-            backup_ceph_stripe_count='0',
+            backup_driver='cinder.backup.drivers.stone',
+            backup_stone_conf='/etc/stonepros/stone.conf',
+            backup_stone_user='cinder-backup',
+            backup_stone_chunk_size='134217728',
+            backup_stone_pool='backups',
+            backup_stone_stripe_unit='0',
+            backup_stone_stripe_count='0',
             restore_discard_excess_bytes='true',
             )),
         dict(name='/etc/nova/nova.conf', options=dict(
             libvirt_images_type='rbd',
             libvirt_images_rbd_pool='volumes',
-            libvirt_images_rbd_ceph_conf='/etc/ceph/ceph.conf',
+            libvirt_images_rbd_stone_conf='/etc/stonepros/stone.conf',
             rbd_user='cinder',
             rbd_secret_uuid=secret_uuid,
             libvirt_inject_password='false',
@@ -335,7 +335,7 @@ def smoke(ctx, config):
         pass
 
 
-def create_volume(devstack_node, ceph_node, vol_name, size):
+def create_volume(devstack_node, stone_node, vol_name, size):
     """
     :param size: The size of the volume, in GB
     """
@@ -350,15 +350,15 @@ def create_volume(devstack_node, ceph_node, vol_name, size):
     log.debug("Volume info: %s", str(vol_info))
 
     try:
-        rbd_output = ceph_node.sh("rbd --id cinder ls -l volumes", wait=True)
+        rbd_output = stone_node.sh("rbd --id cinder ls -l volumes", wait=True)
     except run.CommandFailedError:
         log.debug("Original rbd call failed; retrying without '--id cinder'")
-        rbd_output = ceph_node.sh("rbd ls -l volumes", wait=True)
+        rbd_output = stone_node.sh("rbd ls -l volumes", wait=True)
 
     assert vol_info['id'] in rbd_output, \
-        "Volume not found on Ceph cluster"
+        "Volume not found on Stone cluster"
     assert vol_info['size'] == size, \
-        "Volume size on Ceph cluster is different than specified"
+        "Volume size on Stone cluster is different than specified"
     return vol_info['id']
 
 

@@ -65,7 +65,7 @@ public:
   }
 
   SegmentStateTracker(size_t segments, size_t block_size)
-    : bptr(ceph::buffer::create_page_aligned(
+    : bptr(stone::buffer::create_page_aligned(
 	     get_raw_size(segments, block_size))),
       layout(bptr.length())
   {
@@ -118,7 +118,7 @@ public:
   segment_off_t get_write_capacity() const final;
   segment_off_t get_write_ptr() const final { return write_pointer; }
   close_ertr::future<> close() final;
-  write_ertr::future<> write(segment_off_t offset, ceph::bufferlist bl) final;
+  write_ertr::future<> write(segment_off_t offset, stone::bufferlist bl) final;
 
   ~BlockSegment() {}
 };
@@ -170,7 +170,7 @@ public:
   read_ertr::future<> read(
     paddr_t addr,
     size_t len,
-    ceph::bufferptr &out) final;
+    stone::bufferptr &out) final;
 
   size_t get_size() const final {
     return superblock.size;
@@ -185,7 +185,7 @@ public:
   // public so tests can bypass segment interface when simpler
   Segment::write_ertr::future<> segment_write(
     paddr_t addr,
-    ceph::bufferlist bl,
+    stone::bufferlist bl,
     bool ignore_check=false);
 
 private:

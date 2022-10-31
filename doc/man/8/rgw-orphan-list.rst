@@ -18,10 +18,10 @@ Description
 administration utility. It produces a listing of rados objects that
 are not directly or indirectly referenced through the bucket indexes
 on a pool. It places the results and intermediate files on the local
-filesystem rather than on the ceph cluster itself, and therefore will
+filesystem rather than on the stone cluster itself, and therefore will
 not itself consume additional cluster storage.
 
-In theory orphans should not exist. However because ceph evolves
+In theory orphans should not exist. However because stone evolves
 rapidly, bugs do crop up, and they may result in orphans that are left
 behind.
 
@@ -58,12 +58,12 @@ Launch the tool::
 Availability
 ============
 
-:program:`radosgw-admin` is part of Ceph, a massively scalable, open-source,
-distributed storage system.  Please refer to the Ceph documentation at
-http://ceph.com/docs for more information.
+:program:`radosgw-admin` is part of Stone, a massively scalable, open-source,
+distributed storage system.  Please refer to the Stone documentation at
+http://stone.com/docs for more information.
 
 See also
 ========
 
 :doc:`radosgw-admin <radosgw-admin>`\(8)
-:doc:`ceph-diff-sorted <ceph-diff-sorted>`\(8)
+:doc:`stone-diff-sorted <stone-diff-sorted>`\(8)

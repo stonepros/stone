@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2018 SUSE LLC.
  * Author: Daniel Oliveira <doliveira@suse.com>
@@ -18,7 +18,7 @@
 
 #include "auth/AuthServiceHandler.h"
 #include "auth/Auth.h"
-#include "auth/cephx/CephxKeyServer.h"
+#include "auth/stonex/StonexKeyServer.h"
 
 #include <gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -29,8 +29,8 @@
 class KrbServiceHandler : public AuthServiceHandler {
 
   public:
-    explicit KrbServiceHandler(CephContext* ceph_ctx, KeyServer* kserver) : 
-      AuthServiceHandler(ceph_ctx), 
+    explicit KrbServiceHandler(StoneContext* stone_ctx, KeyServer* kserver) : 
+      AuthServiceHandler(stone_ctx), 
       m_gss_buffer_out({0, nullptr}), 
       m_gss_credentials(GSS_C_NO_CREDENTIAL), 
       m_gss_sec_ctx(GSS_C_NO_CONTEXT), 
@@ -46,7 +46,7 @@ class KrbServiceHandler : public AuthServiceHandler {
 
   private:
     int do_start_session(bool is_new_global_id,
-			 ceph::buffer::list *buff_list,
+			 stone::buffer::list *buff_list,
 			 AuthCapsInfo *caps) override;
 
     gss_buffer_desc m_gss_buffer_out;

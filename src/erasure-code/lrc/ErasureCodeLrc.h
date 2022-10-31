@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Cloudwatt <libre.licensing@cloudwatt.com>
  * Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -44,19 +44,19 @@
 #define ERROR_LRC_K_MODULO		-(MAX_ERRNO + 20)
 #define ERROR_LRC_M_MODULO		-(MAX_ERRNO + 21)
 
-class ErasureCodeLrc final : public ceph::ErasureCode {
+class ErasureCodeLrc final : public stone::ErasureCode {
 public:
   static const std::string DEFAULT_KML;
 
   struct Layer {
     explicit Layer(const std::string &_chunks_map) : chunks_map(_chunks_map) { }
-    ceph::ErasureCodeInterfaceRef erasure_code;
+    stone::ErasureCodeInterfaceRef erasure_code;
     std::vector<int> data;
     std::vector<int> coding;
     std::vector<int> chunks;
     std::set<int> chunks_as_set;
     std::string chunks_map;
-    ceph::ErasureCodeProfile profile;
+    stone::ErasureCodeProfile profile;
   };
   std::vector<Layer> layers;
   std::string directory;
@@ -106,25 +106,25 @@ public:
   unsigned int get_chunk_size(unsigned int object_size) const override;
 
   int encode_chunks(const std::set<int> &want_to_encode,
-		    std::map<int, ceph::buffer::list> *encoded) override;
+		    std::map<int, stone::buffer::list> *encoded) override;
 
   int decode_chunks(const std::set<int> &want_to_read,
-		    const std::map<int, ceph::buffer::list> &chunks,
-		    std::map<int, ceph::buffer::list> *decoded) override;
+		    const std::map<int, stone::buffer::list> &chunks,
+		    std::map<int, stone::buffer::list> *decoded) override;
 
-  int init(ceph::ErasureCodeProfile &profile, std::ostream *ss) override;
+  int init(stone::ErasureCodeProfile &profile, std::ostream *ss) override;
 
-  virtual int parse(ceph::ErasureCodeProfile &profile, std::ostream *ss);
+  virtual int parse(stone::ErasureCodeProfile &profile, std::ostream *ss);
 
-  int parse_kml(ceph::ErasureCodeProfile &profile, std::ostream *ss);
+  int parse_kml(stone::ErasureCodeProfile &profile, std::ostream *ss);
 
-  int parse_rule(ceph::ErasureCodeProfile &profile, std::ostream *ss);
+  int parse_rule(stone::ErasureCodeProfile &profile, std::ostream *ss);
 
   int parse_rule_step(const std::string &description_string,
 		      json_spirit::mArray description,
 		      std::ostream *ss);
 
-  int layers_description(const ceph::ErasureCodeProfile &profile,
+  int layers_description(const stone::ErasureCodeProfile &profile,
 			 json_spirit::mArray *description,
 			 std::ostream *ss) const;
   int layers_parse(const std::string &description_string,

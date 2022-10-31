@@ -37,7 +37,7 @@ struct MockImageCtx {
                               const std::string &image_id,
                               const char *snap, librados::IoCtx& p,
                               bool read_only) {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 
@@ -200,7 +200,7 @@ struct MockImageCtx {
 
   MOCK_CONST_METHOD1(test_features, bool(uint64_t test_features));
   MOCK_CONST_METHOD2(test_features, bool(uint64_t test_features,
-                                         const ceph::shared_mutex &in_image_lock));
+                                         const stone::shared_mutex &in_image_lock));
 
   MOCK_CONST_METHOD1(test_op_features, bool(uint64_t op_features));
 
@@ -228,12 +228,12 @@ struct MockImageCtx {
   IOContext get_data_io_context();
   IOContext duplicate_data_io_context();
 
-  static void set_timer_instance(MockSafeTimer *timer, ceph::mutex *timer_lock);
-  static void get_timer_instance(StoneeContext *cct, MockSafeTimer **timer,
-                                 ceph::mutex **timer_lock);
+  static void set_timer_instance(MockSafeTimer *timer, stone::mutex *timer_lock);
+  static void get_timer_instance(StoneContext *cct, MockSafeTimer **timer,
+                                 stone::mutex **timer_lock);
 
   ImageCtx *image_ctx;
-  StoneeContext *cct;
+  StoneContext *cct;
   PerfCounters *perfcounter;
 
   cls::rbd::SnapshotNamespace snap_namespace;
@@ -264,11 +264,11 @@ struct MockImageCtx {
   librados::IoCtx md_ctx;
   librados::IoCtx data_ctx;
 
-  ceph::shared_mutex &owner_lock;
-  ceph::shared_mutex &image_lock;
-  ceph::shared_mutex &timestamp_lock;
-  ceph::mutex &async_ops_lock;
-  ceph::mutex &copyup_list_lock;
+  stone::shared_mutex &owner_lock;
+  stone::shared_mutex &image_lock;
+  stone::shared_mutex &timestamp_lock;
+  stone::mutex &async_ops_lock;
+  stone::mutex &copyup_list_lock;
 
   uint8_t order;
   uint64_t size;

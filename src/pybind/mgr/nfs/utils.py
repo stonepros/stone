@@ -34,7 +34,7 @@ def available_clusters(mgr: 'Module') -> List[str]:
     <ServiceDescription of <NFSServiceSpec for service_name=nfs.vstart>>
     return value: ['vstart']
     '''
-    # TODO check cephadm cluster list with rados pool conf objects
+    # TODO check stoneadm cluster list with rados pool conf objects
     completion = mgr.describe_service(service_type='nfs')
     orchestrator.raise_if_exception(completion)
     assert completion.result is not None

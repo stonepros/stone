@@ -4,7 +4,7 @@
 #ifndef STONE_LIBRBD_IO_AIO_COMPLETION_H
 #define STONE_LIBRBD_IO_AIO_COMPLETION_H
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "include/common_fwd.h"
 #include "include/Context.h"
 #include "include/utime.h"
@@ -142,7 +142,7 @@ struct AioCompletion {
 
   void set_request_count(uint32_t num);
   void add_request() {
-    ceph_assert(pending_count > 0);
+    stone_assert(pending_count > 0);
     get();
   }
   void complete_request(ssize_t r);
@@ -152,17 +152,17 @@ struct AioCompletion {
   ssize_t get_return_value();
 
   void get() {
-    ceph_assert(ref > 0);
+    stone_assert(ref > 0);
     ++ref;
   }
   void release() {
     bool previous_released = released.exchange(true);
-    ceph_assert(!previous_released);
+    stone_assert(!previous_released);
     put();
   }
   void put() {
     uint32_t previous_ref = ref--;
-    ceph_assert(previous_ref > 0);
+    stone_assert(previous_ref > 0);
 
     if (previous_ref == 1) {
       delete this;

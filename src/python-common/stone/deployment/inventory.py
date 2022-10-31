@@ -3,7 +3,7 @@ try:
 except ImportError:
     pass  # for type checking
 
-from ceph.utils import datetime_now, datetime_to_str, str_to_datetime
+from stone.utils import datetime_now, datetime_to_str, str_to_datetime
 import datetime
 import json
 

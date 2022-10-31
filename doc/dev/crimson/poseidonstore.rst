@@ -103,7 +103,7 @@ Also, the host can garbage collect invalid objects more effectively when their s
 Observation
 -----------
 
-Two data types in Ceph
+Two data types in Stone
 
 * Data (object data)
 
@@ -272,7 +272,7 @@ Detailed Design
 * Onode lookup
 
   * Radix tree
-    Our design is entirely based on the prefix tree. Ceph already makes use of the characteristic of OID's prefix to split or search
+    Our design is entirely based on the prefix tree. Stone already makes use of the characteristic of OID's prefix to split or search
     the OID (e.g., pool id + hash + oid). So, the prefix tree fits well to store or search the object. Our scheme is designed
     to lookup the prefix tree efficiently.
 

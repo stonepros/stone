@@ -17,16 +17,16 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7111" # git grep '\<7111\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7111" # git grep '\<7111\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -51,12 +51,12 @@ function TEST_copy_from() {
     rados -p rbd stat foo2
 
     # failure
-    ceph tell osd.\* injectargs -- --osd-debug-inject-copyfrom-error
+    stone tell osd.\* injectargs -- --osd-debug-inject-copyfrom-error
     ! rados -p rbd cp foo foo3
     ! rados -p rbd stat foo3
 
     # success again
-    ceph tell osd.\* injectargs -- --no-osd-debug-inject-copyfrom-error
+    stone tell osd.\* injectargs -- --no-osd-debug-inject-copyfrom-error
     ! rados -p rbd cp foo foo3
     rados -p rbd stat foo3
 }

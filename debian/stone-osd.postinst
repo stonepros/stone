@@ -1,5 +1,5 @@
 # vim: set noet ts=8:
-# postinst script for ceph-osd
+# postinst script for stone-osd
 #
 # see: dh_installdeb(1)
 
@@ -17,14 +17,14 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-[ -f "/etc/default/ceph" ] && . /etc/default/ceph
-[ -z "$SERVER_USER" ] && SERVER_USER=ceph
-[ -z "$SERVER_GROUP" ] && SERVER_GROUP=ceph
+[ -f "/etc/default/stone" ] && . /etc/default/stone
+[ -z "$SERVER_USER" ] && SERVER_USER=stone
+[ -z "$SERVER_GROUP" ] && SERVER_GROUP=stone
 
 case "$1" in
     configure)
 	[ -x /etc/init.d/procps ] && invoke-rc.d procps restart || :
-	[ -x /sbin/start ] && start ceph-osd-all || :
+	[ -x /sbin/start ] && start stone-osd-all || :
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
 	:

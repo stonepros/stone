@@ -46,7 +46,7 @@ describe('RoleDetailsComponent', () => {
   });
 
   it('should create scopes permissions [2/2]', () => {
-    component.scopes = ['cephfs', 'log', 'rgw'];
+    component.scopes = ['stonefs', 'log', 'rgw'];
     component.selection = {
       description: 'Test',
       name: 'test',
@@ -59,7 +59,7 @@ describe('RoleDetailsComponent', () => {
     expect(component.scopes_permissions.length).toBe(0);
     component.ngOnChanges();
     expect(component.scopes_permissions).toEqual([
-      { scope: 'cephfs', read: false, create: false, update: false, delete: false },
+      { scope: 'stonefs', read: false, create: false, update: false, delete: false },
       { scope: 'log', read: true, create: false, update: true, delete: false },
       { scope: 'rgw', read: true, create: true, update: true, delete: false }
     ]);

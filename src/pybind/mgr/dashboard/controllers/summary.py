@@ -39,7 +39,7 @@ SUMMARY_SCHEMA = {
 
 
 @APIRouter('/summary')
-@APIDoc("Get Ceph Summary Details", "Summary")
+@APIDoc("Get Stone Summary Details", "Summary")
 class Summary(BaseController):
     def _health_status(self):
         health_data = mgr.get("health")

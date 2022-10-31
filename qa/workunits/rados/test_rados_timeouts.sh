@@ -21,21 +21,21 @@ delay_osd() {
 
 # pool ops
 delay_mon omap rados lspools
-delay_mon poolopreply ceph osd pool create test 8
+delay_mon poolopreply stone osd pool create test 8
 delay_mon poolopreply rados mksnap -p test snap
-delay_mon poolopreply ceph osd pool rm test test --yes-i-really-really-mean-it
+delay_mon poolopreply stone osd pool rm test test --yes-i-really-really-mean-it
 
 # other mon ops
 delay_mon getpoolstats rados df
-delay_mon mon_command ceph df
-delay_mon omap ceph osd dump
-delay_mon omap ceph -s
+delay_mon mon_command stone df
+delay_mon omap stone osd dump
+delay_mon omap stone -s
 
 # osd ops
 delay_osd osd_op_reply rados -p data put ls /bin/ls
 delay_osd osd_op_reply rados -p data get ls - >/dev/null
 delay_osd osd_op_reply rados -p data ls
-delay_osd command_reply ceph tell osd.0 bench 1 1
+delay_osd command_reply stone tell osd.0 bench 1 1
 
 # rbd commands, using more kinds of osd ops
 rbd create -s 1 test

@@ -4,7 +4,7 @@ set -x
 
 # run on a single-node three-OSD cluster
 
-sudo killall -ABRT ceph-osd
+sudo killall -ABRT stone-osd
 sleep 5
 
 # kill caused coredumps; find them and delete them, carefully, so as
@@ -12,8 +12,8 @@ sleep 5
 # and assume test failure.  sudos are because the core files are
 # root/600
 for f in $(find $TESTDIR/archive/coredump -type f); do
-	gdb_output=$(echo "quit" | sudo gdb /usr/bin/ceph-osd $f)
-	if expr match "$gdb_output" ".*generated.*ceph-osd.*" && \
+	gdb_output=$(echo "quit" | sudo gdb /usr/bin/stone-osd $f)
+	if expr match "$gdb_output" ".*generated.*stone-osd.*" && \
 	   ( \
 
 	   	expr match "$gdb_output" ".*terminated.*signal 6.*" || \
@@ -25,15 +25,15 @@ for f in $(find $TESTDIR/archive/coredump -type f); do
 done
 
 # let daemon find crashdumps on startup
-sudo systemctl restart ceph-crash
+sudo systemctl restart stone-crash
 sleep 30
 
 # must be 3 crashdumps registered and moved to crash/posted
-[ $(ceph crash ls | wc -l) = 4 ]  || exit 1   # 4 here bc of the table header
-[ $(sudo find /var/lib/ceph/crash/posted/ -name meta | wc -l) = 3 ] || exit 1
+[ $(stone crash ls | wc -l) = 4 ]  || exit 1   # 4 here bc of the table header
+[ $(sudo find /var/lib/stonepros/crash/posted/ -name meta | wc -l) = 3 ] || exit 1
 
 # there should be a health warning
-ceph health detail | grep RECENT_CRASH || exit 1
-ceph crash archive-all
+stone health detail | grep RECENT_CRASH || exit 1
+stone crash archive-all
 sleep 30
-ceph health detail | grep -c RECENT_CRASH | grep 0     # should be gone!
+stone health detail | grep -c RECENT_CRASH | grep 0     # should be gone!

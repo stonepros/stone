@@ -13,7 +13,7 @@ export class PoolFormData {
     this.poolTypes = ['erasure', 'replicated'];
     this.applications = {
       selected: [],
-      default: ['cephfs', 'rbd', 'rgw'],
+      default: ['stonefs', 'rbd', 'rgw'],
       available: [], // Filled during runtime
       validators: [Validators.pattern('[A-Za-z0-9_]+'), Validators.maxLength(128)],
       messages: new SelectMessages({

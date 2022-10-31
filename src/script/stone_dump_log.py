@@ -14,15 +14,15 @@
 # GNU Library Public License for more details.
 #
 
-# By default ceph daemons and clients maintain a list of log_max_recent (default
+# By default stone daemons and clients maintain a list of log_max_recent (default
 # 10000) log entries at a high debug level. This script will attempt to dump out
-# that log from a ceph::log::Log* passed to the ceph-dump-log function or, if no
-# object is passed, default to the globally available 'g_ceph_context->_log'
+# that log from a stone::log::Log* passed to the stone-dump-log function or, if no
+# object is passed, default to the globally available 'g_stone_context->_log'
 # (thanks Kefu). This pointer may be obtained via the _log member of a
-# CephContext object (i.e. *cct->_log) from any thread that contains such a
-# CephContext. Normally, you will find a thread waiting in
-# ceph::logging::Log::entry and the 'this' pointer from such a frame can also be
-# passed to ceph-dump-log.
+# StoneContext object (i.e. *cct->_log) from any thread that contains such a
+# StoneContext. Normally, you will find a thread waiting in
+# stone::logging::Log::entry and the 'this' pointer from such a frame can also be
+# passed to stone-dump-log.
 
 import gdb
 from datetime import datetime
@@ -33,16 +33,16 @@ try:
 except NameError:
     pass
 
-class CephDumpLog(gdb.Command):
+class StoneDumpLog(gdb.Command):
     def __init__(self):
-        super(CephDumpLog, self).__init__(
-                'ceph-dump-log',
+        super(StoneDumpLog, self).__init__(
+                'stone-dump-log',
                 gdb.COMMAND_DATA, gdb.COMPLETE_SYMBOL, False)
 
     def invoke(self, args, from_tty):
         arg_list = gdb.string_to_argv(args)
         if len(arg_list) < 1:
-            log = gdb.parse_and_eval('g_ceph_context->_log')
+            log = gdb.parse_and_eval('g_stone_context->_log')
         else:
             log = gdb.parse_and_eval(arg_list[0])
 
@@ -89,4 +89,4 @@ class CephDumpLog(gdb.Command):
                 if entry >= end:
                     entry = buff
 
-CephDumpLog()
+StoneDumpLog()

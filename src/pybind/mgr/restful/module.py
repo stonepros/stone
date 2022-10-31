@@ -1,5 +1,5 @@
 """
-A RESTful API for Ceph
+A RESTful API for Stone
 """
 from __future__ import absolute_import
 
@@ -202,12 +202,12 @@ class Module(MgrModule):
 
     COMMANDS = [
         {
-            "cmd": "restful create-key name=key_name,type=CephString",
+            "cmd": "restful create-key name=key_name,type=StoneString",
             "desc": "Create an API key with this name",
             "perm": "rw"
         },
         {
-            "cmd": "restful delete-key name=key_name,type=CephString",
+            "cmd": "restful delete-key name=key_name,type=StoneString",
             "desc": "Delete an API key with this name",
             "perm": "rw"
         },
@@ -280,7 +280,7 @@ class Module(MgrModule):
 
         server_addr = self.get_localized_module_option('server_addr', '::')
         if server_addr is None:
-            raise CannotServe('no server_addr configured; try "ceph config-key set mgr/restful/server_addr <ip>"')
+            raise CannotServe('no server_addr configured; try "stone config-key set mgr/restful/server_addr <ip>"')
 
         server_port = int(self.get_localized_module_option('server_port', '8003'))
         self.log.info('server_addr: %s server_port: %d',
@@ -399,7 +399,7 @@ class Module(MgrModule):
         # create a self-signed cert
         cert = crypto.X509()
         cert.get_subject().O = "IT"
-        cert.get_subject().CN = "ceph-restful"
+        cert.get_subject().CN = "stone-restful"
         cert.set_serial_number(int(uuid4()))
         cert.gmtime_adj_notBefore(0)
         cert.gmtime_adj_notAfter(10*365*24*60*60)

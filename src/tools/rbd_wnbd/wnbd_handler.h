@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 SUSE LINUX GmbH
  *
@@ -16,7 +16,7 @@
 #include <wnbd.h>
 
 #include "common/admin_socket.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/Thread.h"
 
 #include "include/rbd/librbd.hpp"
@@ -38,7 +38,7 @@
 // The following will be assigned to the "Owner" field of the WNBD
 // parameters, which can be used to determine the application managing
 // a disk. We'll ignore other disks.
-#define RBD_WNBD_OWNER_NAME "ceph-rbd-wnbd"
+#define RBD_WNBD_OWNER_NAME "stone-rbd-wnbd"
 
 class WnbdHandler;
 
@@ -48,11 +48,11 @@ class WnbdAdminHook : public AdminSocketHook {
 public:
   explicit WnbdAdminHook(WnbdHandler *handler) :
         m_handler(handler) {
-    g_ceph_context->get_admin_socket()->register_command(
+    g_stone_context->get_admin_socket()->register_command(
       "wnbd stats", this, "get WNBD stats");
   }
   ~WnbdAdminHook() override {
-    g_ceph_context->get_admin_socket()->unregister_commands(this);
+    g_stone_context->get_admin_socket()->unregister_commands(this);
   }
 
   int call(std::string_view command, const cmdmap_t& cmdmap,
@@ -115,7 +115,7 @@ public:
     const char* FunctionName);
 
 private:
-  ceph::mutex shutdown_lock = ceph::make_mutex("WnbdHandler::DisconnectLocker");
+  stone::mutex shutdown_lock = stone::make_mutex("WnbdHandler::DisconnectLocker");
   bool started = false;
   bool terminated = false;
   WNBD_DISK* wnbd_disk = nullptr;

@@ -166,7 +166,7 @@ struct LBAInternalNode
     op_context_t c,
     LBANodeRef &_right,
     bool prefer_left) final {
-    ceph_assert(_right->get_type() == type);
+    stone_assert(_right->get_type() == type);
     auto &right = *_right->cast<LBAInternalNode>();
     auto replacement_left = c.cache.alloc_new_extent<LBAInternalNode>(
       c.trans, LBA_BLOCK_SIZE);
@@ -225,19 +225,19 @@ struct LBAInternalNode
 
   std::ostream &print_detail(std::ostream &out) const final;
 
-  ceph::bufferlist get_delta() final {
+  stone::bufferlist get_delta() final {
     assert(!delta_buffer.empty());
-    ceph::buffer::ptr bptr(delta_buffer.get_bytes());
+    stone::buffer::ptr bptr(delta_buffer.get_bytes());
     delta_buffer.copy_out(bptr.c_str(), bptr.length());
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.push_back(bptr);
     return bl;
   }
 
   void apply_delta_and_adjust_crc(
-    paddr_t base, const ceph::bufferlist &_bl) final {
+    paddr_t base, const stone::bufferlist &_bl) final {
     assert(_bl.length());
-    ceph::bufferlist bl = _bl;
+    stone::bufferlist bl = _bl;
     bl.rebuild();
     delta_buffer_t buffer;
     buffer.copy_in(bl.front().c_str(), bl.front().length());
@@ -323,8 +323,8 @@ constexpr size_t LEAF_NODE_CAPACITY = 145;
 struct lba_map_val_le_t {
   extent_len_le_t len = init_extent_len_le_t(0);
   paddr_le_t paddr;
-  ceph_le32 refcount = init_le32(0);
-  ceph_le32 checksum = init_le32(0);
+  stone_le32 refcount = init_le32(0);
+  stone_le32 checksum = init_le32(0);
 
   lba_map_val_le_t() = default;
   lba_map_val_le_t(const lba_map_val_le_t &) = default;
@@ -445,7 +445,7 @@ struct LBALeafNode
     op_context_t c,
     LBANodeRef &_right,
     bool prefer_left) final {
-    ceph_assert(_right->get_type() == type);
+    stone_assert(_right->get_type() == type);
     auto &right = *_right->cast<LBALeafNode>();
     auto replacement_left = c.cache.alloc_new_extent<LBALeafNode>(
       c.trans, LBA_BLOCK_SIZE);
@@ -495,19 +495,19 @@ struct LBALeafNode
     }
   }
 
-  ceph::bufferlist get_delta() final {
+  stone::bufferlist get_delta() final {
     assert(!delta_buffer.empty());
-    ceph::buffer::ptr bptr(delta_buffer.get_bytes());
+    stone::buffer::ptr bptr(delta_buffer.get_bytes());
     delta_buffer.copy_out(bptr.c_str(), bptr.length());
-    ceph::bufferlist bl;
+    stone::bufferlist bl;
     bl.push_back(bptr);
     return bl;
   }
 
   void apply_delta_and_adjust_crc(
-    paddr_t base, const ceph::bufferlist &_bl) final {
+    paddr_t base, const stone::bufferlist &_bl) final {
     assert(_bl.length());
-    ceph::bufferlist bl = _bl;
+    stone::bufferlist bl = _bl;
     bl.rebuild();
     delta_buffer_t buffer;
     buffer.copy_in(bl.front().c_str(), bl.front().length());

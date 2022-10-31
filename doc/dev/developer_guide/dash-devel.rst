@@ -1,6 +1,6 @@
 .. _dashdevel:
 
-Ceph Dashboard Developer Documentation
+Stone Dashboard Developer Documentation
 ======================================
 
 .. contents:: Table of Contents
@@ -8,10 +8,10 @@ Ceph Dashboard Developer Documentation
 Feature Design
 --------------
 
-To promote collaboration on new Ceph Dashboard features, the first step is
+To promote collaboration on new Stone Dashboard features, the first step is
 the definition of a design document. These documents then form the basis of
 implementation scope and permit wider participation in the evolution of the
-Ceph Dashboard UI.
+Stone Dashboard UI.
 
 .. toctree::
    :maxdepth: 1
@@ -23,7 +23,7 @@ Ceph Dashboard UI.
 Preliminary Steps
 -----------------
 
-The following documentation chapters expect a running Ceph cluster and at
+The following documentation chapters expect a running Stone cluster and at
 least a running ``dashboard`` manager module (with few exceptions). This
 chapter gives an introduction on how to set up such a system for development,
 without the need to set up a full-blown production environment. All options
@@ -31,7 +31,7 @@ introduced in this chapter are based on a so called ``vstart`` environment.
 
 .. note::
 
-  Every ``vstart`` environment needs Ceph `to be compiled`_ from its Github
+  Every ``vstart`` environment needs Stone `to be compiled`_ from its Github
   repository, though Docker environments simplify that step by providing a
   shell script that contains those instructions.
 
@@ -43,12 +43,12 @@ introduced in this chapter are based on a so called ``vstart`` environment.
 vstart
 ~~~~~~
 
-"vstart" is actually a shell script in the ``src/`` directory of the Ceph
-repository (``src/vstart.sh``). It is used to start a single node Ceph
+"vstart" is actually a shell script in the ``src/`` directory of the Stone
+repository (``src/vstart.sh``). It is used to start a single node Stone
 cluster on the machine where it is executed. Several required and some
-optional Ceph internal services are started automatically when it is used to
-start a Ceph cluster. vstart is the basis for the three most commonly used
-development environments in Ceph Dashboard.
+optional Stone internal services are started automatically when it is used to
+start a Stone cluster. vstart is the basis for the three most commonly used
+development environments in Stone Dashboard.
 
 You can read more about vstart in `Deploying a development cluster`_.
 Additional information for developers can also be found in the `Developer
@@ -87,15 +87,15 @@ based on vstart. Those are:
 .. note::
 
   Independently of which of these environments you will choose, you need to
-  compile Ceph in that environment. If you compiled Ceph on your host system,
+  compile Stone in that environment. If you compiled Stone on your host system,
   you would have to recompile it on Docker to be able to switch to a Docker
   based solution. The same is true vice versa. If you previously used a
-  Docker development environment and compiled Ceph there and you now want to
-  switch to your host system, you will also need to recompile Ceph (or
-  compile Ceph using another separate repository).
+  Docker development environment and compiled Stone there and you now want to
+  switch to your host system, you will also need to recompile Stone (or
+  compile Stone using another separate repository).
 
   `ceph-dev`_ is an exception to this rule as one of the options it provides
-  is `build-free`_. This is accomplished through a Ceph installation using
+  is `build-free`_. This is accomplished through a Stone installation using
   RPM system packages. You will still be able to work with a local Github
   repository like you are used to.
 
@@ -105,18 +105,18 @@ Development environment on your host system
 
 - No need to learn or have experience with Docker, jump in right away.
 
-- Limited amount of scripts to support automation (like Ceph compilation).
+- Limited amount of scripts to support automation (like Stone compilation).
 
 - No pre-configured easy-to-start services (Prometheus, Grafana, etc).
 
 - Limited amount of host operating systems supported, depending on which
-  Ceph version is supposed to be used.
+  Stone version is supposed to be used.
 
 - Dependencies need to be installed on your host.
 
 - You might find yourself in the situation where you need to upgrade your
   host operating system (for instance due to a change of the GCC version used
-  to compile Ceph).
+  to compile Stone).
 
 
 Development environments based on Docker
@@ -128,7 +128,7 @@ Development environments based on Docker
   and automate recurring tasks.
 
 - Both Docker environments come with partly pre-configured external services
-  which can be used to attach to or complement Ceph Dashboard features, like
+  which can be used to attach to or complement Stone Dashboard features, like
 
   - Prometheus
   - Grafana
@@ -169,7 +169,7 @@ During development (especially in backend development), you also want to
 check on occasions if the dashboard manager module is still running. To do so
 you can call `./bin/ceph mgr services` manually. It will list all the URLs of
 successfully enabled services. Only URLs of services which are available over
-HTTP(S) will be listed there. Ceph Dashboard is one of these services. It
+HTTP(S) will be listed there. Stone Dashboard is one of these services. It
 should look similar to the following output:
 
 .. code::
@@ -180,7 +180,7 @@ should look similar to the following output:
       "restful": "https://home:42931/"
   }
 
-By default, this environment uses a randomly chosen port for Ceph Dashboard
+By default, this environment uses a randomly chosen port for Stone Dashboard
 and you need to use this command to find out which one it has become.
 
 Docker
@@ -189,7 +189,7 @@ Docker
 Docker development environments usually ship with a lot of useful scripts.
 ``ceph-dev-docker`` for instance contains a file called `start-ceph.sh`,
 which cleans up log files, always starts a Rados Gateway service, sets some
-Ceph Dashboard configuration options and automatically runs a frontend proxy,
+Stone Dashboard configuration options and automatically runs a frontend proxy,
 all before or after starting up your vstart cluster.
 
 Instructions on how to use those environments are contained in their
@@ -206,7 +206,7 @@ Frontend Development
 
 Before you can start the dashboard from within a development environment, you
 will need to generate the frontend code and either use a compiled and running
-Ceph cluster (e.g. started by ``vstart.sh``) or the standalone development web
+Stone cluster (e.g. started by ``vstart.sh``) or the standalone development web
 server.
 
 The build process is based on `Node.js <https://nodejs.org/>`_ and requires the
@@ -219,7 +219,7 @@ Prerequisites
  * NPM 6.13.4 or higher
 
 nodeenv:
-  During Ceph's build we create a virtualenv with ``node`` and ``npm``
+  During Stone's build we create a virtualenv with ``node`` and ``npm``
   installed, which can be used as an alternative to installing node/npm in your
   system.
 
@@ -298,16 +298,16 @@ We added 2 npm scripts to help run these tools:
 - ``npm run lint``, will check frontend files against all linters
 - ``npm run fix``, will try to fix all the detected linting errors
 
-Ceph Dashboard and Bootstrap
+Stone Dashboard and Bootstrap
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Currently we are using Bootstrap on the Ceph Dashboard as a CSS framework. This means that most of our SCSS and HTML
+Currently we are using Bootstrap on the Stone Dashboard as a CSS framework. This means that most of our SCSS and HTML
 code can make use of all the utilities and other advantages Bootstrap is offering. In the past we often have used our
 own custom styles and this lead to more and more variables with a single use and double defined variables which
 sometimes are forgotten to be removed or it led to styling be inconsistent because people forgot to change a color or to
 adjust a custom SCSS class.
 
-To get the current version of Bootstrap used inside Ceph please refer to the ``package.json`` and search for:
+To get the current version of Bootstrap used inside Stone please refer to the ``package.json`` and search for:
 
 - ``bootstrap``: For the Bootstrap version used.
 - ``@ng-bootstrap``: For the version of the Angular bindings which we are using.
@@ -663,7 +663,7 @@ What are E2E/unit tests designed for?
 E2E test:
 
 It requires a fully functional system and tests the interaction of all components
-of the application (Ceph, back-end, front-end).
+of the application (Stone, back-end, front-end).
 E2E tests are designed to mimic the behavior of the user when interacting with the application
 - for example when it comes to workflows like creating/editing/deleting an item.
 Also the tests should verify that certain items are displayed as a user would see them
@@ -800,10 +800,10 @@ Example:
 Terminology and wording
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Instead of using the Ceph component names, the approach
+Instead of using the Stone component names, the approach
 suggested is to use the logical/generic names (Block over RBD, Filesystem over
-CephFS, Object over RGW). Nevertheless, as Ceph-Dashboard cannot completely hide
-the Ceph internals, some Ceph-specific names might remain visible.
+StoneFS, Object over RGW). Nevertheless, as Stone-Dashboard cannot completely hide
+the Stone internals, some Stone-specific names might remain visible.
 
 Regarding the wording for action labels and other textual elements (form titles,
 buttons, etc.), the chosen approach is to follow `these guidelines
@@ -819,7 +819,7 @@ been created, which provides translated labels for use in UI elements.
 Frontend branding
 ~~~~~~~~~~~~~~~~~
 
-Every vendor can customize the 'Ceph dashboard' to his needs. No matter if
+Every vendor can customize the 'Stone dashboard' to his needs. No matter if
 logo, HTML-Template or TypeScript, every file inside the frontend folder can be
 replaced.
 
@@ -867,13 +867,13 @@ To overwrite or extend the default CSS, you can add your own styles in
 UI Style Guide
 ~~~~~~~~~~~~~~
 
-The style guide is created to document Ceph Dashboard standards and maintain
+The style guide is created to document Stone Dashboard standards and maintain
 consistency across the project. Its an effort to make it easier for
 contributors to process designing and deciding mockups and designs for
 Dashboard.
 
-The development environment for Ceph Dashboard has live reloading enabled so
-any changes made in UI are reflected in open browser windows. Ceph Dashboard
+The development environment for Stone Dashboard has live reloading enabled so
+any changes made in UI are reflected in open browser windows. Stone Dashboard
 uses Bootstrap as the main third-party CSS library.
 
 Avoid duplication of code. Be consistent with the existing UI by reusing
@@ -885,17 +885,17 @@ You should always try to keep the same look-and-feel as the existing code.
 Colors
 ......
 
-All the colors used in Ceph Dashboard UI are listed in
+All the colors used in Stone Dashboard UI are listed in
 `frontend/src/styles/defaults/_bootstrap-defaults.scss`. If using new color
 always define color variables in the `_bootstrap-defaults.scss` and
 use the variable instead of hard coded color values so that changes to the
 color are reflected in similar UI elements.
 
-The main color for the Ceph Dashboard is `$primary`. The primary color is
+The main color for the Stone Dashboard is `$primary`. The primary color is
 used in navigation components and as the `$border-color` for input components of
 form.
 
-The secondary color is `$secondary` and is the background color for Ceph
+The secondary color is `$secondary` and is the background color for Stone
 Dashboard.
 
 Buttons
@@ -1197,13 +1197,13 @@ API tests based on Teuthology
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 How to run existing API tests:
-  To run the API tests against a real Ceph cluster, we leverage the Teuthology
+  To run the API tests against a real Stone cluster, we leverage the Teuthology
   framework. This has the advantage of catching bugs originated from changes in
-  the internal Ceph code.
+  the internal Stone code.
 
-  Our ``run-backend-api-tests.sh`` script will start a ``vstart`` Ceph cluster
+  Our ``run-backend-api-tests.sh`` script will start a ``vstart`` Stone cluster
   before running the Teuthology tests, and then it stops the cluster after the
-  tests are run. Of course this implies that you have built/compiled Ceph
+  tests are run. Of course this implies that you have built/compiled Stone
   previously.
 
   Start all dashboard tests by running::
@@ -1797,7 +1797,7 @@ can be used:
 * ``pg_summary``: regular update of PG status information
 
 
-How to write a unit test when a controller accesses a Ceph module?
+How to write a unit test when a controller accesses a Stone module?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Consider the following example that implements a controller that retrieves the
@@ -1888,7 +1888,7 @@ How to run a controller read-write operation asynchronously?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some controllers might need to execute operations that alter the state of the
-Ceph cluster. These operations might take some time to execute and to maintain
+Stone cluster. These operations might take some time to execute and to maintain
 a good user experience in the Web UI, we need to run those operations
 asynchronously and return immediately to frontend some information that the
 operations are running in the background.
@@ -2251,10 +2251,10 @@ Usage example:
 
 REST API documentation
 ~~~~~~~~~~~~~~~~~~~~~~
-Ceph-Dashboard provides two types of documentation for the **Ceph RESTful API**:
+Stone-Dashboard provides two types of documentation for the **Stone RESTful API**:
 
 * **Static documentation**: available at :ref:`mgr-ceph-api`. This comes from a versioned specification located at ``src/pybind/mgr/dashboard/openapi.yaml``.
-* **Interactive documentation**: available from a running Ceph-Dashboard instance (top-right ``?`` icon > API Docs).
+* **Interactive documentation**: available from a running Stone-Dashboard instance (top-right ``?`` icon > API Docs).
 
 If changes are made to the ``controllers/`` directory, it's very likely that
 they will result in changes to the generated OpenAPI specification. For that
@@ -2263,7 +2263,7 @@ is automatically triggered by the Pull Request CI (``make check``) and can be
 also manually invoked: ``tox -e openapi-check``.
 
 If that checker failed, it means that the current Pull Request is modifying the
-Ceph API and therefore:
+Stone API and therefore:
 
 #. The versioned OpenAPI specification should be updated explicitly: ``tox -e openapi-fix``.
 #. The team @ceph/api will be requested for reviews (this is automated via Github CODEOWNERS), in order to asses the impact of changes.
@@ -2271,7 +2271,7 @@ Ceph API and therefore:
 Additionally, Sphinx documentation can be generated from the OpenAPI
 specification with ``tox -e openapi-doc``.
 
-The Ceph RESTful OpenAPI specification is dynamically generated from the
+The Stone RESTful OpenAPI specification is dynamically generated from the
 ``Controllers`` in ``controllers/`` directory.  However, by default it is not
 very detailed, so there are two decorators that can and should be used to add
 more information:
@@ -2442,12 +2442,12 @@ Plug-ins
 
 New functionality can be provided by means of a plug-in architecture. Among the
 benefits this approach brings in, loosely coupled development is one of the most
-notable. As the Ceph Dashboard grows in feature richness, its code-base becomes
+notable. As the Stone Dashboard grows in feature richness, its code-base becomes
 more and more complex. The hook-based nature of a plug-in architecture allows to
 extend functionality in a controlled manner, and isolate the scope of the
 changes.
 
-Ceph Dashboard relies on `Pluggy <https://pluggy.readthedocs.io>`_ to provide
+Stone Dashboard relies on `Pluggy <https://pluggy.readthedocs.io>`_ to provide
 for plug-ing support. On top of pluggy, an interface-based approach has been
 implemented, with some safety checks (method override and abstract method
 checks).
@@ -2459,7 +2459,7 @@ In order to create a new plugin, the following steps are required:
 #. Create a class extending the desired interfaces. The plug-in library will
    check if all the methods of the interfaces have been properly overridden.
 #. Register the plugin in the ``PLUGIN_MANAGER`` instance.
-#. Import the plug-in from within the Ceph Dashboard ``module.py`` (currently no
+#. Import the plug-in from within the Stone Dashboard ``module.py`` (currently no
    dynamic loading is implemented).
 
 The available Mixins (helpers) are:
@@ -2472,7 +2472,7 @@ The available Interfaces are:
   the very beginning of the dashboard module, right after all imports have been
   performed.
 - ``Setupable``: requires overriding ``setup()`` hook. This method is run in the
-  Ceph Dashboard ``serve()`` method, right after CherryPy has been configured,
+  Stone Dashboard ``serve()`` method, right after CherryPy has been configured,
   but before it is started. It's a placeholder for the plug-in initialization
   logic.
 - ``HasOptions``: requires overriding ``get_options()`` hook by returning a list

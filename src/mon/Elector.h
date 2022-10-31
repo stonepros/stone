@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -62,7 +62,7 @@ class Elector : public ElectionOwner, RankProvider {
   struct elector_info_t {
     uint64_t cluster_features = 0;
     mon_feature_t mon_features;
-    ceph_release_t mon_release{0};
+    stone_release_t mon_release{0};
     std::map<std::string,std::string> metadata;
   };
 
@@ -186,7 +186,7 @@ class Elector : public ElectionOwner, RankProvider {
   void handle_nak(MonOpRequestRef op);
   /**
    * Send a ping to the specified peer.
-   * @n optional time that we will use instead of calling ceph_clock_now()
+   * @n optional time that we will use instead of calling stone_clock_now()
    */
   void send_peer_ping(int peer, const utime_t *n=NULL);
   /**

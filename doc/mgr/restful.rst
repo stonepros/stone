@@ -9,7 +9,7 @@ Enabling
 
 The *restful* module is enabled with::
 
-  ceph mgr module enable restful
+  stone mgr module enable restful
 
 You will also need to configure an SSL certificate below before the
 API endpoint is available.  By default the module will accept HTTPS
@@ -21,11 +21,11 @@ Securing
 All connections to *restful* are secured with SSL.  You can generate a
 self-signed certificate with the command::
 
-  ceph restful create-self-signed-cert
+  stone restful create-self-signed-cert
 
 Note that with a self-signed certificate most clients will need a flag
 to allow a connection and/or suppress warning messages.  For example,
-if the ``ceph-mgr`` daemon is on the same host,::
+if the ``stone-mgr`` daemon is on the same host,::
 
   curl -k https://localhost:8003/
 
@@ -34,44 +34,44 @@ organization's certificate authority should be used.  For example, a key pair
 can be generated with a command similar to::
 
   openssl req -new -nodes -x509 \
-    -subj "/O=IT/CN=ceph-mgr-restful" \
+    -subj "/O=IT/CN=stone-mgr-restful" \
     -days 3650 -keyout restful.key -out restful.crt -extensions v3_ca
 
 The ``restful.crt`` should then be signed by your organization's CA
 (certificate authority).  Once that is done, you can set it with::
 
-  ceph config-key set mgr/restful/$name/crt -i restful.crt
-  ceph config-key set mgr/restful/$name/key -i restful.key
+  stone config-key set mgr/restful/$name/crt -i restful.crt
+  stone config-key set mgr/restful/$name/key -i restful.key
 
-where ``$name`` is the name of the ``ceph-mgr`` instance (usually the
+where ``$name`` is the name of the ``stone-mgr`` instance (usually the
 hostname). If all manager instances are to share the same certificate,
 you can leave off the ``$name`` portion::
 
-  ceph config-key set mgr/restful/crt -i restful.crt
-  ceph config-key set mgr/restful/key -i restful.key
+  stone config-key set mgr/restful/crt -i restful.crt
+  stone config-key set mgr/restful/key -i restful.key
 
 
 Configuring IP and port
 -----------------------
 
 Like any other RESTful API endpoint, *restful* binds to an IP and
-port.  By default, the currently active ``ceph-mgr`` daemon will bind
+port.  By default, the currently active ``stone-mgr`` daemon will bind
 to port 8003 and any available IPv4 or IPv6 address on the host.
 
-Since each ``ceph-mgr`` hosts its own instance of *restful*, it may
+Since each ``stone-mgr`` hosts its own instance of *restful*, it may
 also be necessary to configure them separately. The IP and port
 can be changed via the configuration key facility::
 
-  ceph config set mgr mgr/restful/$name/server_addr $IP
-  ceph config set mgr mgr/restful/$name/server_port $PORT
+  stone config set mgr mgr/restful/$name/server_addr $IP
+  stone config set mgr mgr/restful/$name/server_port $PORT
 
-where ``$name`` is the ID of the ceph-mgr daemon (usually the hostname).
+where ``$name`` is the ID of the stone-mgr daemon (usually the hostname).
 
 These settings can also be configured cluster-wide and not manager
 specific.  For example,::
 
-  ceph config set mgr mgr/restful/server_addr $IP
-  ceph config set mgr mgr/restful/server_port $PORT
+  stone config set mgr mgr/restful/server_addr $IP
+  stone config set mgr mgr/restful/server_port $PORT
 
 If the port is not configured, *restful* will bind to port ``8003``.
 If the address it not configured, the *restful* will bind to ``::``,
@@ -84,21 +84,21 @@ Creating an API User
 
 To create an API user, please run the following command::
 
-  ceph restful create-key <username>
+  stone restful create-key <username>
 
 Replace ``<username>`` with the desired name of the user. For example, to create a user named
 ``api``::
 
-  $ ceph restful create-key api
+  $ stone restful create-key api
   52dffd92-a103-4a10-bfce-5b60f48f764e
 
-The UUID generated from ``ceph restful create-key api`` acts as the key for the user.
+The UUID generated from ``stone restful create-key api`` acts as the key for the user.
 
 To list all of your API keys, please run the following command::
 
-  ceph restful list-keys
+  stone restful list-keys
 
-The ``ceph restful list-keys`` command will output in JSON::
+The ``stone restful list-keys`` command will output in JSON::
 
   {
   	"api": "52dffd92-a103-4a10-bfce-5b60f48f764e"
@@ -106,7 +106,7 @@ The ``ceph restful list-keys`` command will output in JSON::
 
 You can use ``curl`` in order to test your user with the API. Here is an example::
 
-  curl -k https://api:52dffd92-a103-4a10-bfce-5b60f48f764e@<ceph-mgr>:<port>/server
+  curl -k https://api:52dffd92-a103-4a10-bfce-5b60f48f764e@<stone-mgr>:<port>/server
 
 In the case above, we are using ``GET`` to fetch information from the ``server`` endpoint.
 
@@ -114,8 +114,8 @@ Load balancer
 -------------
 
 Please note that *restful* will *only* start on the manager which
-is active at that moment. Query the Ceph cluster status to see which
-manager is active (e.g., ``ceph mgr dump``).  In order to make the
+is active at that moment. Query the Stone cluster status to see which
+manager is active (e.g., ``stone mgr dump``).  In order to make the
 API available via a consistent URL regardless of which manager
 daemon is currently active, you may want to set up a load balancer
 front-end to direct traffic to whichever manager endpoint is
@@ -131,14 +131,14 @@ For example, if you want to use the PATCH method of the ``/osd/<id>``
 endpoint to set the state ``up`` of the OSD id ``1``, you can use the
 following curl command::
 
-  echo -En '{"up": true}' | curl --request PATCH --data @- --silent --insecure --user <user> 'https://<ceph-mgr>:<port>/osd/1'
+  echo -En '{"up": true}' | curl --request PATCH --data @- --silent --insecure --user <user> 'https://<stone-mgr>:<port>/osd/1'
 
 or you can use python to do so::
 
   $ python
   >> import requests
   >> result = requests.patch(
-         'https://<ceph-mgr>:<port>/osd/1',
+         'https://<stone-mgr>:<port>/osd/1',
          json={"up": True},
          auth=("<user>", "<password>")
      )
@@ -168,21 +168,21 @@ to finish execution. You can modify this behaviour by appending
 be completed.
 
 The **POST** method of the ``/request`` method provides a passthrough
-for the ceph mon commands as defined in ``src/mon/MonCommands.h``.
+for the stone mon commands as defined in ``src/mon/MonCommands.h``.
 Let's consider the following command::
 
   COMMAND("osd ls " \
-          "name=epoch,type=CephInt,range=0,req=false", \
+          "name=epoch,type=StoneInt,range=0,req=false", \
           "show all OSD ids", "osd", "r", "cli,rest")
 
 The **prefix** is **osd ls**. The optional argument's name is **epoch**
-and it is of type ``CephInt``, i.e. ``integer``. This means that you
+and it is of type ``StoneInt``, i.e. ``integer``. This means that you
 need to do the following **POST** request to schedule the command::
 
   $ python
   >> import requests
   >> result = requests.post(
-         'https://<ceph-mgr>:<port>/request',
+         'https://<stone-mgr>:<port>/request',
          json={'prefix': 'osd ls', 'epoch': 0},
          auth=("<user>", "<password>")
      )

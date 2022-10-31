@@ -5,7 +5,7 @@
 #define STONE_RGW_OBJECT_LOCK_H
 
 #include <string>
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/iso_8601.h"
 #include "rgw_xml.h"
 
@@ -141,7 +141,7 @@ public:
 
   void decode_xml(XMLObj *obj);
   void dump_xml(Formatter *f) const;
-  ceph::real_time get_lock_until_date(const ceph::real_time& mtime) const;
+  stone::real_time get_lock_until_date(const stone::real_time& mtime) const;
 };
 WRITE_CLASS_ENCODER(RGWObjectLock)
 
@@ -149,10 +149,10 @@ class RGWObjectRetention
 {
 protected:
   string mode;
-  ceph::real_time retain_until_date;
+  stone::real_time retain_until_date;
 public:
   RGWObjectRetention() {}
-  RGWObjectRetention(string _mode, ceph::real_time _date): mode(_mode), retain_until_date(_date) {}
+  RGWObjectRetention(string _mode, stone::real_time _date): mode(_mode), retain_until_date(_date) {}
 
   void set_mode(string _mode) {
     mode = _mode;
@@ -162,11 +162,11 @@ public:
     return mode;
   }
 
-  void set_retain_until_date(ceph::real_time _retain_until_date) {
+  void set_retain_until_date(stone::real_time _retain_until_date) {
     retain_until_date = _retain_until_date;
   }
 
-  ceph::real_time get_retain_until_date() const {
+  stone::real_time get_retain_until_date() const {
     return retain_until_date;
   }
 

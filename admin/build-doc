@@ -112,7 +112,7 @@ rm -rf $JAVADIR/doc
 ant -buildfile $JAVADIR/build.xml docs
 
 # Create clean target directory
-JAVA_OUTDIR=$TOPDIR/build-doc/output/html/cephfs/api/libcephfs-java/javadoc
+JAVA_OUTDIR=$TOPDIR/build-doc/output/html/stonefs/api/libstonefs-java/javadoc
 rm -rf $JAVA_OUTDIR
 mkdir $JAVA_OUTDIR
 

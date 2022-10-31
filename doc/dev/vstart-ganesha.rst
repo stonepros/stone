@@ -1,11 +1,11 @@
 ==============================
-NFS CephFS-RGW Developer Guide
+NFS StoneFS-RGW Developer Guide
 ==============================
 
-CephFS exports are supported since Octopus and RGW exports are supported since
+StoneFS exports are supported since Octopus and RGW exports are supported since
 Quincy.
 
-Configuring NFS Ganesha to export CephFS with vstart
+Configuring NFS Ganesha to export StoneFS with vstart
 ====================================================
 
 1) Using ``cephadm``

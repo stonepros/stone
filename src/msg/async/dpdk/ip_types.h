@@ -21,7 +21,7 @@
  *
  */
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *

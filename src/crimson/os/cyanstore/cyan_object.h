@@ -16,7 +16,7 @@ struct Object : public boost::intrusive_ref_counter<
   Object,
   boost::thread_unsafe_counter>
 {
-  using bufferlist = ceph::bufferlist;
+  using bufferlist = stone::bufferlist;
 
   bufferlist data;
   // use transparent comparator for better performance, see
@@ -31,7 +31,7 @@ struct Object : public boost::intrusive_ref_counter<
 
   // interface for object data
   size_t get_size() const;
-  ceph::bufferlist read(uint64_t offset, uint64_t len);
+  stone::bufferlist read(uint64_t offset, uint64_t len);
   int write(uint64_t offset, const bufferlist &bl);
   int clone(Object *src, uint64_t srcoff, uint64_t len,
 	     uint64_t dstoff);

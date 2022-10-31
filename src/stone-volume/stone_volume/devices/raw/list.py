@@ -3,8 +3,8 @@ import argparse
 import json
 import logging
 from textwrap import dedent
-from ceph_volume import decorators, process
-from ceph_volume.util import disk
+from stone_volume import decorators, process
+from stone_volume.util import disk
 
 
 logger = logging.getLogger(__name__)
@@ -22,18 +22,18 @@ def direct_report(devices):
 
 def _get_bluestore_info(dev):
     out, err, rc = process.call([
-        'ceph-bluestore-tool', 'show-label',
+        'stone-bluestore-tool', 'show-label',
         '--dev', dev], verbose_on_failure=False)
     if rc:
-        # ceph-bluestore-tool returns an error (below) if device is not bluestore OSD
+        # stone-bluestore-tool returns an error (below) if device is not bluestore OSD
         #   > unable to read label for <device>: (2) No such file or directory
         # but it's possible the error could be for a different reason (like if the disk fails)
-        logger.debug('assuming device {} is not BlueStore; ceph-bluestore-tool failed to get info from device: {}\n{}'.format(dev, out, err))
+        logger.debug('assuming device {} is not BlueStore; stone-bluestore-tool failed to get info from device: {}\n{}'.format(dev, out, err))
         return None
     oj = json.loads(''.join(out))
     if dev not in oj:
         # should be impossible, so warn
-        logger.warning('skipping device {} because it is not reported in ceph-bluestore-tool output: {}'.format(dev, out))
+        logger.warning('skipping device {} because it is not reported in stone-bluestore-tool output: {}'.format(dev, out))
         return None
     try:
         if oj[dev]['description'] != 'main':
@@ -45,12 +45,12 @@ def _get_bluestore_info(dev):
             'type': 'bluestore',
             'osd_id': int(whoami),
             'osd_uuid': oj[dev]['osd_uuid'],
-            'ceph_fsid': oj[dev]['ceph_fsid'],
+            'stone_fsid': oj[dev]['stone_fsid'],
             'device': dev
         }
     except KeyError as e:
         # this will appear for devices that have a bluestore header but aren't valid OSDs
-        # for example, due to incomplete rollback of OSDs: https://tracker.ceph.com/issues/51869
+        # for example, due to incomplete rollback of OSDs: https://tracker.stone.com/issues/51869
         logger.error('device {} does not have all BlueStore data needed to be a valid OSD: {}\n{}'.format(dev, out, e))
         return None
 
@@ -84,7 +84,7 @@ class List(object):
             # Linux kernels built with CONFIG_ATARI_PARTITION enabled can falsely interpret
             # bluestore's on-disk format as an Atari partition table. These false Atari partitions
             # can be interpreted as real OSDs if a bluestore OSD was previously created on the false
-            # partition. See https://tracker.ceph.com/issues/52060 for more info. If a device has a
+            # partition. See https://tracker.stone.com/issues/52060 for more info. If a device has a
             # parent, it is a child. If the parent is a valid bluestore OSD, the child will only
             # exist if it is a phantom Atari partition, and the child should be ignored. If the
             # parent isn't bluestore, then the child could be a valid bluestore OSD. If we fail to
@@ -119,7 +119,7 @@ class List(object):
             print(json.dumps(report, indent=4, sort_keys=True))
         else:
             if not report:
-                raise SystemExit('No valid Ceph devices found')
+                raise SystemExit('No valid Stone devices found')
             raise RuntimeError('not implemented yet')
 
     def main(self):
@@ -130,15 +130,15 @@ class List(object):
         Full listing of all identifiable (currently, BlueStore) OSDs
         on raw devices:
 
-            ceph-volume raw list
+            stone-volume raw list
 
         List a particular device, reporting all metadata about it::
 
-            ceph-volume raw list /dev/sda1
+            stone-volume raw list /dev/sda1
 
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume raw list',
+            prog='stone-volume raw list',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=sub_command_help,
         )

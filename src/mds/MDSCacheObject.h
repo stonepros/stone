@@ -7,7 +7,7 @@
 #include "common/config.h"
 
 #include "include/Context.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/mempool.h"
 #include "include/types.h"
 #include "include/xlist.h"
@@ -28,7 +28,7 @@ class SimpleLock;
 class MDSCacheObject;
 class MDSContext;
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 
@@ -42,7 +42,7 @@ struct ClientLease {
   client_t client;
   MDSCacheObject *parent;
 
-  ceph_seq_t seq = 0;
+  stone_seq_t seq = 0;
   utime_t ttl;
   xlist<ClientLease*>::item item_session_lease; // per-session list
   xlist<ClientLease*>::item item_lease;         // global list
@@ -140,9 +140,9 @@ class MDSCacheObject {
   virtual void last_put() {}
   virtual void bad_put(int by) {
 #ifdef MDS_REF_SET
-    ceph_assert(ref_map[by] > 0);
+    stone_assert(ref_map[by] > 0);
 #endif
-    ceph_assert(ref > 0);
+    stone_assert(ref > 0);
   }
   virtual void _put() {}
   void put(int by) {
@@ -167,9 +167,9 @@ class MDSCacheObject {
   virtual void first_get() {}
   virtual void bad_get(int by) {
 #ifdef MDS_REF_SET
-    ceph_assert(by < 0 || ref_map[by] == 0);
+    stone_assert(by < 0 || ref_map[by] == 0);
 #endif
-    ceph_abort();
+    stone_abort();
   }
   void get(int by) {
     if (ref == 0)
@@ -199,8 +199,8 @@ class MDSCacheObject {
   }
 #endif
 
-  void dump_states(ceph::Formatter *f) const;
-  void dump(ceph::Formatter *f) const;
+  void dump_states(stone::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
   // auth pins
   enum {
@@ -235,11 +235,11 @@ class MDSCacheObject {
     get_replicas()[mds] = nonce;
   }
   unsigned get_replica_nonce(mds_rank_t mds) {
-    ceph_assert(get_replicas().count(mds));
+    stone_assert(get_replicas().count(mds));
     return get_replicas()[mds];
   }
   void remove_replica(mds_rank_t mds) {
-    ceph_assert(get_replicas().count(mds));
+    stone_assert(get_replicas().count(mds));
     get_replicas().erase(mds);
     if (get_replicas().empty()) {
       put(PIN_REPLICATED);
@@ -286,15 +286,15 @@ class MDSCacheObject {
   // ---------------------------------------------
   // locking
   // noop unless overloaded.
-  virtual SimpleLock* get_lock(int type) { ceph_abort(); return 0; }
-  virtual void set_object_info(MDSCacheObjectInfo &info) { ceph_abort(); }
-  virtual void encode_lock_state(int type, ceph::buffer::list& bl) { ceph_abort(); }
-  virtual void decode_lock_state(int type, const ceph::buffer::list& bl) { ceph_abort(); }
-  virtual void finish_lock_waiters(int type, uint64_t mask, int r=0) { ceph_abort(); }
-  virtual void add_lock_waiter(int type, uint64_t mask, MDSContext *c) { ceph_abort(); }
-  virtual bool is_lock_waiting(int type, uint64_t mask) { ceph_abort(); return false; }
+  virtual SimpleLock* get_lock(int type) { stone_abort(); return 0; }
+  virtual void set_object_info(MDSCacheObjectInfo &info) { stone_abort(); }
+  virtual void encode_lock_state(int type, stone::buffer::list& bl) { stone_abort(); }
+  virtual void decode_lock_state(int type, const stone::buffer::list& bl) { stone_abort(); }
+  virtual void finish_lock_waiters(int type, uint64_t mask, int r=0) { stone_abort(); }
+  virtual void add_lock_waiter(int type, uint64_t mask, MDSContext *c) { stone_abort(); }
+  virtual bool is_lock_waiting(int type, uint64_t mask) { stone_abort(); return false; }
 
-  virtual void clear_dirty_scattered(int type) { ceph_abort(); }
+  virtual void clear_dirty_scattered(int type) { stone_abort(); }
 
   // ---------------------------------------------
   // ordering

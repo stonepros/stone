@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc.
  *
@@ -20,7 +20,7 @@
  * wait mechanism for "readers" to wait the state until it matches. It
  * will let the callers determine what to do next.
  *
- * The usage, such as in libcephfs's client/Client.cc case:
+ * The usage, such as in libstonefs's client/Client.cc case:
  *
  * The Readers:
  *
@@ -80,8 +80,8 @@
 #define STONE_RWRef_Posix__H
 
 #include <string>
-#include "include/ceph_assert.h"
-#include "common/ceph_mutex.h"
+#include "include/stone_assert.h"
+#include "common/stone_mutex.h"
 
 /* The status mechanism info */
 template<typename T>
@@ -128,19 +128,19 @@ struct RWRefState {
     }
 
     bool check_current_state(T require) const {
-      ceph_assert(is_valid_state(require));
+      stone_assert(is_valid_state(require));
 
       std::scoped_lock l{lock};
       return state == require;
     }
 
     RWRefState(T init_state, const char *lockname, uint64_t _reader_cnt=0)
-      : state(init_state), lock(ceph::make_mutex(lockname)), reader_cnt(_reader_cnt) {}
+      : state(init_state), lock(stone::make_mutex(lockname)), reader_cnt(_reader_cnt) {}
     virtual ~RWRefState() {}
 
   private:
-    mutable ceph::mutex lock;
-    ceph::condition_variable cond;
+    mutable stone::mutex lock;
+    stone::condition_variable cond;
     uint64_t reader_cnt = 0;
 };
 
@@ -152,7 +152,7 @@ public:
 
   RWRef(RWRefState<T> &s, T require, bool ir=true)
     :S(s), is_reader(ir) {
-    ceph_assert(S.is_valid_state(require));
+    stone_assert(S.is_valid_state(require));
 
     std::scoped_lock l{S.lock};
     if (likely(is_reader)) { // Readers will update the reader_cnt
@@ -191,8 +191,8 @@ public:
    * Update the state, and only the writer could do the update.
    */
   void update_state(T new_state) {
-    ceph_assert(!is_reader);
-    ceph_assert(S.is_valid_state(new_state));
+    stone_assert(!is_reader);
+    stone_assert(S.is_valid_state(new_state));
 
     std::scoped_lock l{S.lock};
     S.state = new_state;
@@ -210,7 +210,7 @@ public:
    */
   void wait_readers_done() {
     // Only writers can wait
-    ceph_assert(!is_reader);
+    stone_assert(!is_reader);
 
     std::unique_lock l{S.lock};
 

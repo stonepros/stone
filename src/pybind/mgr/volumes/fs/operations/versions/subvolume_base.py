@@ -7,7 +7,7 @@ from hashlib import md5
 from typing import Dict, Union
 from pathlib import Path
 
-import cephfs
+import stonefs
 
 from ..pin_util import pin
 from .subvolume_attrs import SubvolumeTypes, SubvolumeStates
@@ -128,7 +128,7 @@ class SubvolumeBase(object):
         try:
             self.fs.stat(self.legacy_config_path)
             self.legacy_mode = True
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             pass
 
         log.debug("loading config "
@@ -143,26 +143,26 @@ class SubvolumeBase(object):
         # get subvolume attributes
         attrs = {} # type: Dict[str, Union[int, str, None]]
         stx = self.fs.statx(pathname,
-                            cephfs.CEPH_STATX_UID | cephfs.CEPH_STATX_GID | cephfs.CEPH_STATX_MODE,
-                            cephfs.AT_SYMLINK_NOFOLLOW)
+                            stonefs.STONE_STATX_UID | stonefs.STONE_STATX_GID | stonefs.STONE_STATX_MODE,
+                            stonefs.AT_SYMLINK_NOFOLLOW)
 
         attrs["uid"] = int(stx["uid"])
         attrs["gid"] = int(stx["gid"])
         attrs["mode"] = int(int(stx["mode"]) & ~stat.S_IFMT(stx["mode"]))
 
         try:
-            attrs["data_pool"] = self.fs.getxattr(pathname, 'ceph.dir.layout.pool').decode('utf-8')
-        except cephfs.NoData:
+            attrs["data_pool"] = self.fs.getxattr(pathname, 'stone.dir.layout.pool').decode('utf-8')
+        except stonefs.NoData:
             attrs["data_pool"] = None
 
         try:
-            attrs["pool_namespace"] = self.fs.getxattr(pathname, 'ceph.dir.layout.pool_namespace').decode('utf-8')
-        except cephfs.NoData:
+            attrs["pool_namespace"] = self.fs.getxattr(pathname, 'stone.dir.layout.pool_namespace').decode('utf-8')
+        except stonefs.NoData:
             attrs["pool_namespace"] = None
 
         try:
-            attrs["quota"] = int(self.fs.getxattr(pathname, 'ceph.quota.max_bytes').decode('utf-8'))
-        except cephfs.NoData:
+            attrs["quota"] = int(self.fs.getxattr(pathname, 'stone.quota.max_bytes').decode('utf-8'))
+        except stonefs.NoData:
             attrs["quota"] = None
 
         return attrs
@@ -173,21 +173,21 @@ class SubvolumeBase(object):
         quota = attrs.get("quota")
         if quota is not None:
             try:
-                self.fs.setxattr(path, 'ceph.quota.max_bytes', str(quota).encode('utf-8'), 0)
-            except cephfs.InvalidValue as e:
+                self.fs.setxattr(path, 'stone.quota.max_bytes', str(quota).encode('utf-8'), 0)
+            except stonefs.InvalidValue as e:
                 raise VolumeException(-errno.EINVAL, "invalid size specified: '{0}'".format(quota))
-            except cephfs.Error as e:
+            except stonefs.Error as e:
                 raise VolumeException(-e.args[0], e.args[1])
 
         # set pool layout
         data_pool = attrs.get("data_pool")
         if data_pool is not None:
             try:
-                self.fs.setxattr(path, 'ceph.dir.layout.pool', data_pool.encode('utf-8'), 0)
-            except cephfs.InvalidValue:
+                self.fs.setxattr(path, 'stone.dir.layout.pool', data_pool.encode('utf-8'), 0)
+            except stonefs.InvalidValue:
                 raise VolumeException(-errno.EINVAL,
                                       "invalid pool layout '{0}' -- need a valid data pool".format(data_pool))
-            except cephfs.Error as e:
+            except stonefs.Error as e:
                 raise VolumeException(-e.args[0], e.args[1])
 
         # isolate namespace
@@ -195,22 +195,22 @@ class SubvolumeBase(object):
         pool_namespace = attrs.get("pool_namespace")
         if pool_namespace is not None:
             # enforce security isolation, use separate namespace for this subvolume
-            xattr_key = 'ceph.dir.layout.pool_namespace'
+            xattr_key = 'stone.dir.layout.pool_namespace'
             xattr_val = pool_namespace
         elif not data_pool:
             # If subvolume's namespace layout is not set, then the subvolume's pool
             # layout remains unset and will undesirably change with ancestor's
             # pool layout changes.
-            xattr_key = 'ceph.dir.layout.pool'
+            xattr_key = 'stone.dir.layout.pool'
             xattr_val = None
             try:
-                self.fs.getxattr(path, 'ceph.dir.layout.pool').decode('utf-8')
-            except cephfs.NoData as e:
-                xattr_val = get_ancestor_xattr(self.fs, os.path.split(path)[0], "ceph.dir.layout.pool")
+                self.fs.getxattr(path, 'stone.dir.layout.pool').decode('utf-8')
+            except stonefs.NoData as e:
+                xattr_val = get_ancestor_xattr(self.fs, os.path.split(path)[0], "stone.dir.layout.pool")
         if xattr_key and xattr_val:
             try:
                 self.fs.setxattr(path, xattr_key, xattr_val.encode('utf-8'), 0)
-            except cephfs.Error as e:
+            except stonefs.Error as e:
                 raise VolumeException(-e.args[0], e.args[1])
 
         # set uid/gid
@@ -255,10 +255,10 @@ class SubvolumeBase(object):
             noshrink = False
 
         try:
-            maxbytes = int(self.fs.getxattr(path, 'ceph.quota.max_bytes').decode('utf-8'))
-        except cephfs.NoData:
+            maxbytes = int(self.fs.getxattr(path, 'stone.quota.max_bytes').decode('utf-8'))
+        except stonefs.NoData:
             maxbytes = 0
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
         subvolstat = self.fs.stat(path)
@@ -269,8 +269,8 @@ class SubvolumeBase(object):
 
         if not newsize == maxbytes:
             try:
-                self.fs.setxattr(path, 'ceph.quota.max_bytes', str(newsize).encode('utf-8'), 0)
-            except cephfs.Error as e:
+                self.fs.setxattr(path, 'stone.quota.max_bytes', str(newsize).encode('utf-8'), 0)
+            except stonefs.Error as e:
                 raise VolumeException(-e.args[0], "Cannot set new size for the subvolume. '{0}'".format(e.args[1]))
         return newsize, subvolstat.st_size
 
@@ -302,7 +302,7 @@ class SubvolumeBase(object):
                 self.discover()
             else:
                 raise
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             if e.args[0] == errno.ENOENT:
                 raise VolumeException(-errno.ENOENT, "subvolume '{0}' does not exist".format(self.subvolname))
             raise VolumeException(-e.args[0], "error accessing subvolume '{0}'".format(self.subvolname))
@@ -327,27 +327,27 @@ class SubvolumeBase(object):
     def create_base_dir(self, mode):
         try:
             self.fs.mkdirs(self.base_path, mode)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     def info (self):
         subvolpath = self.metadata_mgr.get_global_option(MetadataManager.GLOBAL_META_KEY_PATH)
         etype = self.subvol_type
-        st = self.fs.statx(subvolpath, cephfs.CEPH_STATX_BTIME | cephfs.CEPH_STATX_SIZE |
-                                       cephfs.CEPH_STATX_UID | cephfs.CEPH_STATX_GID |
-                                       cephfs.CEPH_STATX_MODE | cephfs.CEPH_STATX_ATIME |
-                                       cephfs.CEPH_STATX_MTIME | cephfs.CEPH_STATX_CTIME,
-                                       cephfs.AT_SYMLINK_NOFOLLOW)
+        st = self.fs.statx(subvolpath, stonefs.STONE_STATX_BTIME | stonefs.STONE_STATX_SIZE |
+                                       stonefs.STONE_STATX_UID | stonefs.STONE_STATX_GID |
+                                       stonefs.STONE_STATX_MODE | stonefs.STONE_STATX_ATIME |
+                                       stonefs.STONE_STATX_MTIME | stonefs.STONE_STATX_CTIME,
+                                       stonefs.AT_SYMLINK_NOFOLLOW)
         usedbytes = st["size"]
         try:
-            nsize = int(self.fs.getxattr(subvolpath, 'ceph.quota.max_bytes').decode('utf-8'))
-        except cephfs.NoData:
+            nsize = int(self.fs.getxattr(subvolpath, 'stone.quota.max_bytes').decode('utf-8'))
+        except stonefs.NoData:
             nsize = 0
 
         try:
-            data_pool = self.fs.getxattr(subvolpath, 'ceph.dir.layout.pool').decode('utf-8')
-            pool_namespace = self.fs.getxattr(subvolpath, 'ceph.dir.layout.pool_namespace').decode('utf-8')
-        except cephfs.Error as e:
+            data_pool = self.fs.getxattr(subvolpath, 'stone.dir.layout.pool').decode('utf-8')
+            pool_namespace = self.fs.getxattr(subvolpath, 'stone.dir.layout.pool_namespace').decode('utf-8')
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
         return {'path': subvolpath, 'type': etype.value, 'uid': int(st["uid"]), 'gid': int(st["gid"]),

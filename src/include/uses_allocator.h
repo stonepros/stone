@@ -16,7 +16,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace ceph {
+namespace stone {
 
 namespace internal {
 template <class T, class Tuple, std::size_t... Indexes>
@@ -263,4 +263,4 @@ T* uninitialized_construct_using_allocator(T* p,
 		      a, std::forward<Args>(args)...));
 }
 
-} // namespace ceph
+} // namespace stone

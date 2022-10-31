@@ -3,12 +3,12 @@
 ``list``
 ========
 This subcommand will list any devices (logical and physical) that may be
-associated with a Ceph cluster, as long as they contain enough metadata to
+associated with a Stone cluster, as long as they contain enough metadata to
 allow for that discovery.
 
 Output is grouped by the OSD ID associated with the devices, and unlike
 ``ceph-disk`` it does not provide any information for devices that aren't
-associated with Ceph.
+associated with Stone.
 
 Command line options:
 

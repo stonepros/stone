@@ -4,7 +4,7 @@ from __future__ import absolute_import
 import collections
 
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from ..tools import NotificationQueue
 from . import APIDoc, APIRouter, BaseController, Endpoint, EndpointDoc, ReadPermission
 
@@ -47,7 +47,7 @@ class Logs(BaseController):
             self.log_buffer.appendleft(log_struct)
 
     def load_buffer(self, buf, channel_name):
-        lines = CephService.send_command(
+        lines = StoneService.send_command(
             'mon', 'log last', channel=channel_name, num=LOG_BUFFER_SIZE, level='debug')
         for line in lines:
             buf.appendleft(line)

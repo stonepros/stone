@@ -177,7 +177,7 @@ class OsdTest(DashboardTestCase):
         self.assertStatus(201)
 
     def test_safe_to_destroy(self):
-        osd_dump = json.loads(self._ceph_cmd(['osd', 'dump', '-f', 'json']))
+        osd_dump = json.loads(self._stone_cmd(['osd', 'dump', '-f', 'json']))
         max_id = max(map(lambda e: e['osd'], osd_dump['osds']))
 
         def get_pg_status_equal_unknown(osd_ids):
@@ -272,7 +272,7 @@ class OsdFlagsTest(DashboardTestCase):
             'flags': JList(str)
         })))
 
-        self._ceph_cmd(['osd', 'set-group', 'noout,noin', 'osd.0', 'osd.1', 'osd.2'])
+        self._stone_cmd(['osd', 'set-group', 'noout,noin', 'osd.0', 'osd.1', 'osd.2'])
         flags_added = self._get('/api/osd/flags/individual')
         self.assertStatus(200)
         for osd in flags_added:
@@ -283,7 +283,7 @@ class OsdFlagsTest(DashboardTestCase):
                     if osd['osd'] == osd_initial['osd']:
                         self.assertGreater(len(osd['flags']), len(osd_initial['flags']))
 
-        self._ceph_cmd(['osd', 'unset-group', 'noout,noin', 'osd.0', 'osd.1', 'osd.2'])
+        self._stone_cmd(['osd', 'unset-group', 'noout,noin', 'osd.0', 'osd.1', 'osd.2'])
         flags_removed = self._get('/api/osd/flags/individual')
         self.assertStatus(200)
         for osd in flags_removed:
@@ -299,7 +299,7 @@ class OsdFlagsTest(DashboardTestCase):
         self._check_indiv_flags_resp(resp, [svc_id], ['noout'], [], ['noup', 'nodown', 'noin'])
         self._check_indiv_flags_osd([svc_id], ['noout'], ['noup', 'nodown', 'noin'])
 
-        self._ceph_cmd(['osd', 'unset-group', 'noout', 'osd.{}'.format(svc_id)])
+        self._stone_cmd(['osd', 'unset-group', 'noout', 'osd.{}'.format(svc_id)])
 
     def test_add_multiple_indiv_flags(self):
         flags_update = {'noup': None, 'nodown': None, 'noin': True, 'noout': True}
@@ -309,7 +309,7 @@ class OsdFlagsTest(DashboardTestCase):
         self._check_indiv_flags_resp(resp, [svc_id], ['noout', 'noin'], [], ['noup', 'nodown'])
         self._check_indiv_flags_osd([svc_id], ['noout', 'noin'], ['noup', 'nodown'])
 
-        self._ceph_cmd(['osd', 'unset-group', 'noout,noin', 'osd.{}'.format(svc_id)])
+        self._stone_cmd(['osd', 'unset-group', 'noout,noin', 'osd.{}'.format(svc_id)])
 
     def test_add_multiple_indiv_flags_multiple_osds(self):
         flags_update = {'noup': None, 'nodown': None, 'noin': True, 'noout': True}
@@ -319,12 +319,12 @@ class OsdFlagsTest(DashboardTestCase):
         self._check_indiv_flags_resp(resp, svc_id, ['noout', 'noin'], [], ['noup', 'nodown'])
         self._check_indiv_flags_osd([svc_id], ['noout', 'noin'], ['noup', 'nodown'])
 
-        self._ceph_cmd(['osd', 'unset-group', 'noout,noin', 'osd.0', 'osd.1', 'osd.2'])
+        self._stone_cmd(['osd', 'unset-group', 'noout,noin', 'osd.0', 'osd.1', 'osd.2'])
 
     def test_remove_indiv_flag(self):
         flags_update = {'noup': None, 'nodown': None, 'noin': None, 'noout': False}
         svc_id = 0
-        self._ceph_cmd(['osd', 'set-group', 'noout', 'osd.{}'.format(svc_id)])
+        self._stone_cmd(['osd', 'set-group', 'noout', 'osd.{}'.format(svc_id)])
 
         resp = self._put_flags(flags_update, [svc_id])
         self._check_indiv_flags_resp(resp, [svc_id], [], ['noout'], ['noup', 'nodown', 'noin'])
@@ -333,7 +333,7 @@ class OsdFlagsTest(DashboardTestCase):
     def test_remove_multiple_indiv_flags(self):
         flags_update = {'noup': None, 'nodown': None, 'noin': False, 'noout': False}
         svc_id = 0
-        self._ceph_cmd(['osd', 'set-group', 'noout,noin', 'osd.{}'.format(svc_id)])
+        self._stone_cmd(['osd', 'set-group', 'noout,noin', 'osd.{}'.format(svc_id)])
 
         resp = self._put_flags(flags_update, [svc_id])
         self._check_indiv_flags_resp(resp, [svc_id], [], ['noout', 'noin'], ['noup', 'nodown'])
@@ -342,7 +342,7 @@ class OsdFlagsTest(DashboardTestCase):
     def test_remove_multiple_indiv_flags_multiple_osds(self):
         flags_update = {'noup': None, 'nodown': None, 'noin': False, 'noout': False}
         svc_id = [0, 1, 2]
-        self._ceph_cmd(['osd', 'unset-group', 'noout,noin', 'osd.0', 'osd.1', 'osd.2'])
+        self._stone_cmd(['osd', 'unset-group', 'noout,noin', 'osd.0', 'osd.1', 'osd.2'])
 
         resp = self._put_flags(flags_update, svc_id)
         self._check_indiv_flags_resp(resp, svc_id, [], ['noout', 'noin'], ['noup', 'nodown'])
@@ -359,7 +359,7 @@ class OsdFlagsTest(DashboardTestCase):
             self.assertNotIn(flag, resp['removed'])
 
     def _check_indiv_flags_osd(self, ids, activated_flags, deactivated_flags):
-        osds = json.loads(self._ceph_cmd(['osd', 'dump', '--format=json']))['osds']
+        osds = json.loads(self._stone_cmd(['osd', 'dump', '--format=json']))['osds']
         for osd in osds:
             if osd['osd'] in ids:
                 for flag in activated_flags:

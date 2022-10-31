@@ -20,8 +20,8 @@ public:
     default_to_dispatch();
   }
 
-  MOCK_METHOD1(create_rados_client, TestRadosClient*(StoneeContext*));
-  MockTestMemRadosClient* do_create_rados_client(StoneeContext *cct) {
+  MOCK_METHOD1(create_rados_client, TestRadosClient*(StoneContext*));
+  MockTestMemRadosClient* do_create_rados_client(StoneContext *cct) {
     return new ::testing::NiceMock<MockTestMemRadosClient>(cct, this);
   }
 

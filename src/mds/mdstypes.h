@@ -23,17 +23,17 @@
 #include "include/interval_set.h"
 #include "include/compact_set.h"
 #include "include/fs_types.h"
-#include "include/ceph_fs.h"
+#include "include/stone_fs.h"
 
 #include "inode_backtrace.h"
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/pool/pool.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include <boost/serialization/strong_typedef.hpp>
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 
-#define STONE_FS_ONDISK_MAGIC "ceph fs volume v011"
+#define STONE_FS_ONDISK_MAGIC "stone fs volume v011"
 
 #define MDS_PORT_CACHE   0x200
 #define MDS_PORT_LOCKER  0x300
@@ -42,7 +42,7 @@
 #define MAX_MDS                   0x100
 #define NUM_STRAY                 10
 
-// Inode numbers 1,2 and 4 please see STONE_INO_* in include/ceph_fs.h
+// Inode numbers 1,2 and 4 please see STONE_INO_* in include/stone_fs.h
 
 #define MDS_INO_MDSDIR_OFFSET     (1*MAX_MDS)
 #define MDS_INO_STRAY_OFFSET      (6*MAX_MDS)
@@ -187,9 +187,9 @@ struct frag_info_t : public scatter_info_t {
 	nsubdirs == o.nsubdirs;
   }
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
   static void generate_test_instances(std::list<frag_info_t*>& ls);
 
@@ -248,9 +248,9 @@ struct nest_info_t : public scatter_info_t {
         rsnaps == o.rsnaps;
   }
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
   static void generate_test_instances(std::list<nest_info_t*>& ls);
 
@@ -276,13 +276,13 @@ struct vinodeno_t {
   vinodeno_t() {}
   vinodeno_t(inodeno_t i, snapid_t s) : ino(i), snapid(s) {}
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(ino, bl);
     encode(snapid, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& p) {
+    using stone::decode;
     decode(ino, p);
     decode(snapid, p);
   }
@@ -306,20 +306,20 @@ inline bool operator<(const vinodeno_t &l, const vinodeno_t &r) {
 
 struct quota_info_t
 {
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(max_bytes, bl);
     encode(max_files, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START_LEGACY_COMPAT_LEN(1, 1, 1, p);
     decode(max_bytes, p);
     decode(max_files, p);
     DECODE_FINISH(p);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<quota_info_t *>& ls);
 
   bool is_valid() const {
@@ -367,17 +367,17 @@ struct client_writeable_range_t {
     void decode_json(JSONObj *obj);
   };
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<client_writeable_range_t*>& ls);
 
   byte_range_t range;
   snapid_t follows = 0;     // aka "data+metadata flushed thru"
 };
 
-inline void decode(client_writeable_range_t::byte_range_t& range, ceph::buffer::list::const_iterator& bl) {
-  using ceph::decode;
+inline void decode(client_writeable_range_t::byte_range_t& range, stone::buffer::list::const_iterator& bl) {
+  using stone::decode;
   decode(range.first, bl);
   decode(range.last, bl);
 }
@@ -411,15 +411,15 @@ public:
   void free_data() {
     blp.reset();
   }
-  void get_data(ceph::buffer::list& ret) const {
+  void get_data(stone::buffer::list& ret) const {
     if (blp)
       ret = *blp;
     else
       ret.clear();
   }
-  void set_data(const ceph::buffer::list& bl) {
+  void set_data(const stone::buffer::list& bl) {
     if (!blp)
-      blp.reset(new ceph::buffer::list);
+      blp.reset(new stone::buffer::list);
     *blp = bl;
   }
   size_t length() const { return blp ? blp->length() : 0; }
@@ -427,18 +427,18 @@ public:
   bool operator==(const inline_data_t& o) const {
    return length() == o.length() &&
 	  (length() == 0 ||
-	   (*const_cast<ceph::buffer::list*>(blp.get()) == *const_cast<ceph::buffer::list*>(o.blp.get())));
+	   (*const_cast<stone::buffer::list*>(blp.get()) == *const_cast<stone::buffer::list*>(o.blp.get())));
   }
   bool operator!=(const inline_data_t& o) const {
     return !(*this == o);
   }
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
 
   version_t version = 1;
 
 private:
-  std::unique_ptr<ceph::buffer::list> blp;
+  std::unique_ptr<stone::buffer::list> blp;
 };
 WRITE_CLASS_ENCODER(inline_data_t)
 
@@ -470,7 +470,7 @@ struct inode_t {
 
   bool is_truncating() const { return (truncate_pending > 0); }
   void truncate(uint64_t old_size, uint64_t new_size) {
-    ceph_assert(new_size < old_size);
+    stone_assert(new_size < old_size);
     if (old_size > max_size_ever)
       max_size_ever = old_size;
     truncate_from = old_size;
@@ -542,9 +542,9 @@ struct inode_t {
     old_pools.insert(l);
   }
 
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void client_ranges_cb(client_range_map& c, JSONObj *obj);
   static void old_pools_cb(compact_set<int64_t, std::less<int64_t>, Allocator<int64_t> >& c, JSONObj *obj);
   void decode_json(JSONObj *obj);
@@ -580,7 +580,7 @@ struct inode_t {
   int32_t    nlink = 0;
 
   // file (data access)
-  ceph_dir_layout dir_layout = {};    // [dir only]
+  stone_dir_layout dir_layout = {};    // [dir only]
   file_layout_t layout;
   compact_set<int64_t, std::less<int64_t>, Allocator<int64_t>> old_pools;
   uint64_t   size = 0;        // on directory, # dentries
@@ -632,7 +632,7 @@ private:
 
 // These methods may be moved back to mdstypes.cc when we have pmr
 template<template<typename> class Allocator>
-void inode_t<Allocator>::encode(ceph::buffer::list &bl, uint64_t features) const
+void inode_t<Allocator>::encode(stone::buffer::list &bl, uint64_t features) const
 {
   ENCODE_START(17, 6, bl);
 
@@ -695,7 +695,7 @@ void inode_t<Allocator>::encode(ceph::buffer::list &bl, uint64_t features) const
 }
 
 template<template<typename> class Allocator>
-void inode_t<Allocator>::decode(ceph::buffer::list::const_iterator &p)
+void inode_t<Allocator>::decode(stone::buffer::list::const_iterator &p)
 {
   DECODE_START_LEGACY_COMPAT_LEN(17, 6, 6, p);
 
@@ -805,7 +805,7 @@ void inode_t<Allocator>::decode(ceph::buffer::list::const_iterator &p)
 }
 
 template<template<typename> class Allocator>
-void inode_t<Allocator>::dump(ceph::Formatter *f) const
+void inode_t<Allocator>::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("ino", ino);
   f->dump_unsigned("rdev", rdev);
@@ -949,7 +949,7 @@ void inode_t<Allocator>::generate_test_instances(std::list<inode_t*>& ls)
 template<template<typename> class Allocator>
 int inode_t<Allocator>::compare(const inode_t<Allocator> &other, bool *divergent) const
 {
-  ceph_assert(ino == other.ino);
+  stone_assert(ino == other.ino);
   *divergent = false;
   if (version == other.version) {
     if (rdev != other.rdev ||
@@ -987,7 +987,7 @@ int inode_t<Allocator>::compare(const inode_t<Allocator> &other, bool *divergent
     *divergent = !older_is_consistent(other);
     return 1;
   } else {
-    ceph_assert(version < other.version);
+    stone_assert(version < other.version);
     *divergent = !other.older_is_consistent(*this);
     return -1;
   }
@@ -1012,14 +1012,14 @@ bool inode_t<Allocator>::older_is_consistent(const inode_t<Allocator> &other) co
 }
 
 template<template<typename> class Allocator>
-inline void encode(const inode_t<Allocator> &c, ::ceph::buffer::list &bl, uint64_t features)
+inline void encode(const inode_t<Allocator> &c, ::stone::buffer::list &bl, uint64_t features)
 {
   ENCODE_DUMP_PRE();
   c.encode(bl, features);
   ENCODE_DUMP_POST(cl);
 }
 template<template<typename> class Allocator>
-inline void decode(inode_t<Allocator> &c, ::ceph::buffer::list::const_iterator &p)
+inline void decode(inode_t<Allocator> &c, ::stone::buffer::list::const_iterator &p)
 {
   c.decode(p);
 }
@@ -1029,13 +1029,13 @@ using alloc_string = std::basic_string<char,std::char_traits<char>,Allocator<cha
 
 template<template<typename> class Allocator>
 using xattr_map = std::map<alloc_string<Allocator>,
-			   ceph::bufferptr,
+			   stone::bufferptr,
 			   std::less<alloc_string<Allocator>>,
 			   Allocator<std::pair<const alloc_string<Allocator>,
-					       ceph::bufferptr>>>; // FIXME bufferptr not in mempool
+					       stone::bufferptr>>>; // FIXME bufferptr not in mempool
 
 template<template<typename> class Allocator>
-inline void decode_noshare(xattr_map<Allocator>& xattrs, ceph::buffer::list::const_iterator &p)
+inline void decode_noshare(xattr_map<Allocator>& xattrs, stone::buffer::list::const_iterator &p)
 {
   __u32 n;
   decode(n, p);
@@ -1054,15 +1054,15 @@ struct old_inode_t {
   inode_t<Allocator> inode;
   xattr_map<Allocator> xattrs;
 
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<old_inode_t*>& ls);
 };
 
 // These methods may be moved back to mdstypes.cc when we have pmr
 template<template<typename> class Allocator>
-void old_inode_t<Allocator>::encode(ceph::buffer::list& bl, uint64_t features) const
+void old_inode_t<Allocator>::encode(stone::buffer::list& bl, uint64_t features) const
 {
   ENCODE_START(2, 2, bl);
   encode(first, bl);
@@ -1072,7 +1072,7 @@ void old_inode_t<Allocator>::encode(ceph::buffer::list& bl, uint64_t features) c
 }
 
 template<template<typename> class Allocator>
-void old_inode_t<Allocator>::decode(ceph::buffer::list::const_iterator& bl)
+void old_inode_t<Allocator>::decode(stone::buffer::list::const_iterator& bl)
 {
   DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, bl);
   decode(first, bl);
@@ -1082,7 +1082,7 @@ void old_inode_t<Allocator>::decode(ceph::buffer::list::const_iterator& bl)
 }
 
 template<template<typename> class Allocator>
-void old_inode_t<Allocator>::dump(ceph::Formatter *f) const
+void old_inode_t<Allocator>::dump(stone::Formatter *f) const
 {
   f->dump_unsigned("first", first);
   inode.dump(f);
@@ -1103,19 +1103,19 @@ void old_inode_t<Allocator>::generate_test_instances(std::list<old_inode_t<Alloc
   std::list<inode_t<Allocator>*> ils;
   inode_t<Allocator>::generate_test_instances(ils);
   ls.back()->inode = *ils.back();
-  ls.back()->xattrs["user.foo"] = ceph::buffer::copy("asdf", 4);
-  ls.back()->xattrs["user.unprintable"] = ceph::buffer::copy("\000\001\002", 3);
+  ls.back()->xattrs["user.foo"] = stone::buffer::copy("asdf", 4);
+  ls.back()->xattrs["user.unprintable"] = stone::buffer::copy("\000\001\002", 3);
 }
 
 template<template<typename> class Allocator>
-inline void encode(const old_inode_t<Allocator> &c, ::ceph::buffer::list &bl, uint64_t features)
+inline void encode(const old_inode_t<Allocator> &c, ::stone::buffer::list &bl, uint64_t features)
 {
   ENCODE_DUMP_PRE();
   c.encode(bl, features);
   ENCODE_DUMP_POST(cl);
 }
 template<template<typename> class Allocator>
-inline void decode(old_inode_t<Allocator> &c, ::ceph::buffer::list::const_iterator &p)
+inline void decode(old_inode_t<Allocator> &c, ::stone::buffer::list::const_iterator &p)
 {
   c.decode(p);
 }
@@ -1124,9 +1124,9 @@ inline void decode(old_inode_t<Allocator> &c, ::ceph::buffer::list::const_iterat
  * like an inode, but for a dir frag 
  */
 struct fnode_t {
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
   static void generate_test_instances(std::list<fnode_t*>& ls);
 
@@ -1147,9 +1147,9 @@ WRITE_CLASS_ENCODER(fnode_t)
 
 
 struct old_rstat_t {
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<old_rstat_t*>& ls);
 
   snapid_t first;
@@ -1217,9 +1217,9 @@ public:
   bool operator!=(const feature_bitset_t& other) const {
     return _vec != other._vec;
   }
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator &p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator &p);
+  void dump(stone::Formatter *f) const;
   void print(std::ostream& out) const;
 private:
   std::vector<block_type> _vec;
@@ -1259,9 +1259,9 @@ struct metric_spec_t {
     metric_flags.clear();
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   void print(std::ostream& out) const;
 
   // set of metrics that a client is capable of forwarding
@@ -1310,9 +1310,9 @@ struct client_metadata_t {
     metric_spec.clear();
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
 
   kv_map_t kv_map;
   feature_bitset_t features;
@@ -1335,16 +1335,16 @@ struct session_info_t {
     client_metadata.clear();
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<session_info_t*>& ls);
 
   entity_inst_t inst;
-  std::map<ceph_tid_t,inodeno_t> completed_requests;
+  std::map<stone_tid_t,inodeno_t> completed_requests;
   interval_set<inodeno_t> prealloc_inos;   // preallocated, ready to use.
   client_metadata_t client_metadata;
-  std::set<ceph_tid_t> completed_flushes;
+  std::set<stone_tid_t> completed_flushes;
   EntityName auth_name;
 };
 WRITE_CLASS_ENCODER_FEATURES(session_info_t)
@@ -1359,10 +1359,10 @@ struct dentry_key_t {
 
   // encode into something that can be decoded as a string.
   // name_ (head) or name_%x (!head)
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     std::string key;
     encode(key);
-    using ceph::encode;
+    using stone::encode;
     encode(key, bl);
   }
   void encode(std::string& key) const {
@@ -1377,16 +1377,16 @@ struct dentry_key_t {
     *css << name << "_" << b;
     key = css->strv();
   }
-  static void decode_helper(ceph::buffer::list::const_iterator& bl, std::string& nm,
+  static void decode_helper(stone::buffer::list::const_iterator& bl, std::string& nm,
 			    snapid_t& sn) {
     std::string key;
-    using ceph::decode;
+    using stone::decode;
     decode(key, bl);
     decode_helper(key, nm, sn);
   }
   static void decode_helper(std::string_view key, std::string& nm, snapid_t& sn) {
     size_t i = key.find_last_of('_');
-    ceph_assert(i != std::string::npos);
+    stone_assert(i != std::string::npos);
     if (key.compare(i+1, std::string_view::npos, "head") == 0) {
       // name_head
       sn = STONE_NOSNAP;
@@ -1415,7 +1415,7 @@ inline bool operator<(const dentry_key_t& k1, const dentry_key_t& k2)
   /*
    * order by hash, name, snap
    */
-  int c = ceph_frag_value(k1.hash) - ceph_frag_value(k2.hash);
+  int c = stone_frag_value(k1.hash) - stone_frag_value(k2.hash);
   if (c)
     return c < 0;
   c = k1.name.compare(k2.name);
@@ -1431,9 +1431,9 @@ struct string_snap_t {
   string_snap_t() {}
   string_snap_t(std::string_view n, snapid_t s) : name(n), snapid(s) {}
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<string_snap_t*>& ls);
 
   std::string name;
@@ -1458,9 +1458,9 @@ inline std::ostream& operator<<(std::ostream& out, const string_snap_t &k)
  * pending mutation state in the table.
  */
 struct mds_table_pending_t {
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<mds_table_pending_t*>& ls);
 
   uint64_t reqid = 0;
@@ -1472,14 +1472,14 @@ WRITE_CLASS_ENCODER(mds_table_pending_t)
 // requests
 struct metareqid_t {
   metareqid_t() {}
-  metareqid_t(entity_name_t n, ceph_tid_t t) : name(n), tid(t) {}
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  metareqid_t(entity_name_t n, stone_tid_t t) : name(n), tid(t) {}
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(name, bl);
     encode(tid, bl);
   }
-  void decode(ceph::buffer::list::const_iterator &p) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator &p) {
+    using stone::decode;
     decode(name, p);
     decode(tid, p);
   }
@@ -1523,7 +1523,7 @@ namespace std {
 struct cap_reconnect_t {
   cap_reconnect_t() {}
   cap_reconnect_t(uint64_t cap_id, inodeno_t pino, std::string_view p, int w, int i,
-		  inodeno_t sr, snapid_t sf, ceph::buffer::list& lb) :
+		  inodeno_t sr, snapid_t sf, stone::buffer::list& lb) :
     path(p) {
     capinfo.cap_id = cap_id;
     capinfo.wanted = w;
@@ -1534,18 +1534,18 @@ struct cap_reconnect_t {
     snap_follows = sf;
     flockbl = std::move(lb);
   }
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void encode_old(ceph::buffer::list& bl) const;
-  void decode_old(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void encode_old(stone::buffer::list& bl) const;
+  void decode_old(stone::buffer::list::const_iterator& bl);
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cap_reconnect_t*>& ls);
 
   std::string path;
-  mutable ceph_mds_cap_reconnect capinfo = {};
+  mutable stone_mds_cap_reconnect capinfo = {};
   snapid_t snap_follows = 0;
-  ceph::buffer::list flockbl;
+  stone::buffer::list flockbl;
 };
 WRITE_CLASS_ENCODER(cap_reconnect_t)
 
@@ -1556,29 +1556,29 @@ struct snaprealm_reconnect_t {
     realm.seq = seq;
     realm.parent = parent;
   }
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void encode_old(ceph::buffer::list& bl) const;
-  void decode_old(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void encode_old(stone::buffer::list& bl) const;
+  void decode_old(stone::buffer::list::const_iterator& bl);
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<snaprealm_reconnect_t*>& ls);
 
-  mutable ceph_mds_snaprealm_reconnect realm = {};
+  mutable stone_mds_snaprealm_reconnect realm = {};
 };
 WRITE_CLASS_ENCODER(snaprealm_reconnect_t)
 
 // compat for pre-FLOCK feature
-struct old_ceph_mds_cap_reconnect {
-	ceph_le64 cap_id;
-	ceph_le32 wanted;
-	ceph_le32 issued;
-  ceph_le64 old_size;
-  struct ceph_timespec old_mtime, old_atime;
-	ceph_le64 snaprealm;
-	ceph_le64 pathbase;        /* base ino for our path to this ino */
+struct old_stone_mds_cap_reconnect {
+	stone_le64 cap_id;
+	stone_le32 wanted;
+	stone_le32 issued;
+  stone_le64 old_size;
+  struct stone_timespec old_mtime, old_atime;
+	stone_le64 snaprealm;
+	stone_le64 pathbase;        /* base ino for our path to this ino */
 } __attribute__ ((packed));
-WRITE_RAW_ENCODER(old_ceph_mds_cap_reconnect)
+WRITE_RAW_ENCODER(old_stone_mds_cap_reconnect)
 
 struct old_cap_reconnect_t {
   const old_cap_reconnect_t& operator=(const cap_reconnect_t& n) {
@@ -1601,19 +1601,19 @@ struct old_cap_reconnect_t {
     return n;
   }
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(path, bl);
     encode(capinfo, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     decode(path, bl);
     decode(capinfo, bl);
   }
 
   std::string path;
-  old_ceph_mds_cap_reconnect capinfo;
+  old_stone_mds_cap_reconnect capinfo;
 };
 WRITE_CLASS_ENCODER(old_cap_reconnect_t)
 
@@ -1622,13 +1622,13 @@ struct dirfrag_t {
   dirfrag_t() {}
   dirfrag_t(inodeno_t i, frag_t f) : ino(i), frag(f) { }
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(ino, bl);
     encode(frag, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     decode(ino, bl);
     decode(frag, bl);
   }
@@ -1687,18 +1687,18 @@ public:
       d.reset();
     }
   }
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<inode_load_vec_t*>& ls);
 
 private:
   std::array<DecayCounter, NUM> vec;
 };
-inline void encode(const inode_load_vec_t &c, ceph::buffer::list &bl) {
+inline void encode(const inode_load_vec_t &c, stone::buffer::list &bl) {
   c.encode(bl);
 }
-inline void decode(inode_load_vec_t & c, ceph::buffer::list::const_iterator &p) {
+inline void decode(inode_load_vec_t & c, stone::buffer::list::const_iterator &p) {
   c.decode(p);
 }
 
@@ -1720,22 +1720,22 @@ public:
       vec{DecayCounter(rate), DecayCounter(rate), DecayCounter(rate), DecayCounter(rate), DecayCounter(rate)}
   {}
 
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
     ENCODE_START(2, 2, bl);
     for (const auto &i : vec) {
       encode(i, bl);
     }
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator &p) {
+  void decode(stone::buffer::list::const_iterator &p) {
     DECODE_START_LEGACY_COMPAT_LEN(2, 2, 2, p);
     for (auto &i : vec) {
       decode(i, p);
     }
     DECODE_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const;
-  void dump(ceph::Formatter *f, const DecayRate& rate) const;
+  void dump(stone::Formatter *f) const;
+  void dump(stone::Formatter *f, const DecayRate& rate) const;
   static void generate_test_instances(std::list<dirfrag_load_vec_t*>& ls);
 
   const DecayCounter &get(int t) const {
@@ -1781,10 +1781,10 @@ private:
   std::array<DecayCounter, NUM> vec;
 };
 
-inline void encode(const dirfrag_load_vec_t &c, ceph::buffer::list &bl) {
+inline void encode(const dirfrag_load_vec_t &c, stone::buffer::list &bl) {
   c.encode(bl);
 }
-inline void decode(dirfrag_load_vec_t& c, ceph::buffer::list::const_iterator &p) {
+inline void decode(dirfrag_load_vec_t& c, stone::buffer::list::const_iterator &p) {
   c.decode(p);
 }
 
@@ -1819,15 +1819,15 @@ struct mds_load_t {
   double cpu_load_avg = 0.0;
 
   double mds_load() const;  // defiend in MDBalancer.cc
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<mds_load_t*>& ls);
 };
-inline void encode(const mds_load_t &c, ceph::buffer::list &bl) {
+inline void encode(const mds_load_t &c, stone::buffer::list &bl) {
   c.encode(bl);
 }
-inline void decode(mds_load_t &c, ceph::buffer::list::const_iterator &p) {
+inline void decode(mds_load_t &c, stone::buffer::list::const_iterator &p) {
   c.decode(p);
 }
 
@@ -1889,9 +1889,9 @@ typedef std::pair<mds_rank_t, mds_rank_t> mds_authority_t;
 
 class MDSCacheObjectInfo {
 public:
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<MDSCacheObjectInfo*>& ls);
 
   inodeno_t ino = 0;

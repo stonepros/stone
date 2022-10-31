@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 from .. import mgr
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from ..services.exception import handle_send_command_error
 from ..tools import find_object_in_list, str_to_bool
 from . import APIDoc, APIRouter, EndpointDoc, RESTController, allow_empty_body
@@ -64,7 +64,7 @@ class MgrModules(RESTController):
     def get(self, module_name):
         """
         Retrieve the values of the persistent configuration settings.
-        :param module_name: The name of the Ceph Mgr module.
+        :param module_name: The name of the Stone Mgr module.
         :type module_name: str
         :return: The values of the module options.
         :rtype: dict
@@ -81,7 +81,7 @@ class MgrModules(RESTController):
     def set(self, module_name, config):
         """
         Set the values of the persistent configuration settings.
-        :param module_name: The name of the Ceph Mgr module.
+        :param module_name: The name of the Stone Mgr module.
         :type module_name: str
         :param config: The values of the module options to be stored.
         :type config: dict
@@ -97,12 +97,12 @@ class MgrModules(RESTController):
     @allow_empty_body
     def enable(self, module_name):
         """
-        Enable the specified Ceph Mgr module.
-        :param module_name: The name of the Ceph Mgr module.
+        Enable the specified Stone Mgr module.
+        :param module_name: The name of the Stone Mgr module.
         :type module_name: str
         """
         assert self._is_module_managed(module_name)
-        CephService.send_command(
+        StoneService.send_command(
             'mon', 'mgr module enable', module=module_name)
 
     @RESTController.Resource('POST')
@@ -110,19 +110,19 @@ class MgrModules(RESTController):
     @allow_empty_body
     def disable(self, module_name):
         """
-        Disable the specified Ceph Mgr module.
-        :param module_name: The name of the Ceph Mgr module.
+        Disable the specified Stone Mgr module.
+        :param module_name: The name of the Stone Mgr module.
         :type module_name: str
         """
         assert self._is_module_managed(module_name)
-        CephService.send_command(
+        StoneService.send_command(
             'mon', 'mgr module disable', module=module_name)
 
     @RESTController.Resource('GET')
     def options(self, module_name):
         """
-        Get the module options of the specified Ceph Mgr module.
-        :param module_name: The name of the Ceph Mgr module.
+        Get the module options of the specified Stone Mgr module.
+        :param module_name: The name of the Stone Mgr module.
         :type module_name: str
         :return: The module options as list of dicts.
         :rtype: list
@@ -132,10 +132,10 @@ class MgrModules(RESTController):
 
     def _is_module_managed(self, module_name):
         """
-        Check if the specified Ceph Mgr module is managed by this service.
-        :param module_name: The name of the Ceph Mgr module.
+        Check if the specified Stone Mgr module is managed by this service.
+        :param module_name: The name of the Stone Mgr module.
         :type module_name: str
-        :return: Returns ``true`` if the Ceph Mgr module is managed by
+        :return: Returns ``true`` if the Stone Mgr module is managed by
             this service, otherwise ``false``.
         :rtype: bool
         """
@@ -150,7 +150,7 @@ class MgrModules(RESTController):
     def _get_module_config(self, module_name):
         """
         Helper function to get detailed module configuration.
-        :param module_name: The name of the Ceph Mgr module.
+        :param module_name: The name of the Stone Mgr module.
         :type module_name: str
         :return: The module information, e.g. module name, can run,
             error string and available module options.
@@ -163,7 +163,7 @@ class MgrModules(RESTController):
     def _get_module_options(self, module_name):
         """
         Helper function to get the module options.
-        :param module_name: The name of the Ceph Mgr module.
+        :param module_name: The name of the Stone Mgr module.
         :type module_name: str
         :return: The module options.
         :rtype: dict
@@ -172,7 +172,7 @@ class MgrModules(RESTController):
         return self._convert_module_options(options)
 
     def _convert_module_options(self, options):
-        # Workaround a possible bug in the Ceph Mgr implementation.
+        # Workaround a possible bug in the Stone Mgr implementation.
         # Various fields (e.g. default_value, min, max) are always
         # returned as a string.
         for option in options.values():

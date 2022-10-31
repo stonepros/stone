@@ -8,7 +8,7 @@ my $header = `cat doc/header.txt`;
 
 # strip existing header
 my $new = $old;
-if ($new =~ /^(.*)\* Ceph - scalable distributed file system/s) {
+if ($new =~ /^(.*)\* Stone - scalable distributed file system/s) {
 	my ($a,@b) = split(/\*\/\n/, $new);
 	$new = join("*/\n",@b);
 }

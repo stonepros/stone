@@ -6,13 +6,13 @@
 
 #include "include/cpp-btree/btree.h"
 #include "include/cpp-btree/btree_map.h"
-#include "include/ceph_assert.h"   // cpp-btree uses system assert, blech
+#include "include/stone_assert.h"   // cpp-btree uses system assert, blech
 #include "include/encoding.h"
 
 template<class T, class U>
-inline void encode(const btree::btree_map<T,U>& m, ceph::buffer::list& bl)
+inline void encode(const btree::btree_map<T,U>& m, stone::buffer::list& bl)
 {
-  using ceph::encode;
+  using stone::encode;
   __u32 n = (__u32)(m.size());
   encode(n, bl);
   for (typename btree::btree_map<T,U>::const_iterator p = m.begin(); p != m.end(); ++p) {
@@ -21,9 +21,9 @@ inline void encode(const btree::btree_map<T,U>& m, ceph::buffer::list& bl)
   }
 }
 template<class T, class U>
-inline void encode(const btree::btree_map<T,U>& m, ceph::buffer::list& bl, uint64_t features)
+inline void encode(const btree::btree_map<T,U>& m, stone::buffer::list& bl, uint64_t features)
 {
-  using ceph::encode;
+  using stone::encode;
   __u32 n = (__u32)(m.size());
   encode(n, bl);
   for (typename btree::btree_map<T,U>::const_iterator p = m.begin(); p != m.end(); ++p) {
@@ -32,9 +32,9 @@ inline void encode(const btree::btree_map<T,U>& m, ceph::buffer::list& bl, uint6
   }
 }
 template<class T, class U>
-inline void decode(btree::btree_map<T,U>& m, ceph::buffer::list::const_iterator& p)
+inline void decode(btree::btree_map<T,U>& m, stone::buffer::list::const_iterator& p)
 {
-  using ceph::decode;
+  using stone::decode;
   __u32 n;
   decode(n, p);
   m.clear();
@@ -45,18 +45,18 @@ inline void decode(btree::btree_map<T,U>& m, ceph::buffer::list::const_iterator&
   }
 }
 template<class T, class U>
-inline void encode_nohead(const btree::btree_map<T,U>& m, ceph::buffer::list& bl)
+inline void encode_nohead(const btree::btree_map<T,U>& m, stone::buffer::list& bl)
 {
-  using ceph::encode;
+  using stone::encode;
   for (typename btree::btree_map<T,U>::const_iterator p = m.begin(); p != m.end(); ++p) {
     encode(p->first, bl);
     encode(p->second, bl);
   }
 }
 template<class T, class U>
-inline void decode_nohead(int n, btree::btree_map<T,U>& m, ceph::buffer::list::const_iterator& p)
+inline void decode_nohead(int n, btree::btree_map<T,U>& m, stone::buffer::list::const_iterator& p)
 {
-  using ceph::decode;
+  using stone::decode;
   m.clear();
   while (n--) {
     T k;

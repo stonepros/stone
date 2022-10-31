@@ -15,7 +15,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library Public License for more details.
 #
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
@@ -26,28 +26,28 @@ function run() {
     MONB=127.0.0.1:7301
     (
         FSID=$(uuidgen)
-        export CEPH_ARGS
-        CEPH_ARGS+="--fsid=$FSID --auth-supported=none "
-        CEPH_ARGS+="--mon-initial-members=a,b --mon-host=$MONA,$MONB "
+        export STONE_ARGS
+        STONE_ARGS+="--fsid=$FSID --auth-supported=none "
+        STONE_ARGS+="--mon-initial-members=a,b --mon-host=$MONA,$MONB "
         run_mon $dir a --public-addr $MONA || return 1
         run_mon $dir b --public-addr $MONB || return 1
     )
 
-    timeout 360 ceph --mon-host-override $MONA mon stat || return 1
+    timeout 360 stone --mon-host-override $MONA mon stat || return 1
     # check that MONB is indeed a peon
-    ceph --admin-daemon $(get_asok_path mon.b) mon_status |
+    stone --admin-daemon $(get_asok_path mon.b) mon_status |
        grep '"peon"' || return 1
     # when the leader ( MONA ) is used, there is no message forwarding
-    ceph --mon-host-override $MONA osd pool create POOL1 12
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
+    stone --mon-host-override $MONA osd pool create POOL1 12
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.a) log flush || return 1
     grep 'mon_command(.*"POOL1"' $dir/mon.a.log || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.b) log flush || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.b) log flush || return 1
     grep 'mon_command(.*"POOL1"' $dir/mon.b.log && return 1
     # when the peon ( MONB ) is used, the message is forwarded to the leader
-    ceph --mon-host-override $MONB osd pool create POOL2 12
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.b) log flush || return 1
+    stone --mon-host-override $MONB osd pool create POOL2 12
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.b) log flush || return 1
     grep 'forward_request.*mon_command(.*"POOL2"' $dir/mon.b.log || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.a) log flush || return 1
     grep ' forward(mon_command(.*"POOL2"' $dir/mon.a.log || return 1
     # forwarded messages must retain features from the original connection
     features=$(sed -n -e 's|.*127.0.0.1:0.*accept features \([0-9][0-9]*\)|\1|p' < \

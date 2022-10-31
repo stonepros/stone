@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -122,7 +122,7 @@ class RGWSI_Tier_RADOS : public RGWServiceInstance
   RGWSI_Zone *zone_svc{nullptr};
 
 public:
-  RGWSI_Tier_RADOS(CephContext *cct): RGWServiceInstance(cct) {}
+  RGWSI_Tier_RADOS(StoneContext *cct): RGWServiceInstance(cct) {}
 
   void init(RGWSI_Zone *_zone_svc) {
     zone_svc = _zone_svc;

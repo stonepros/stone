@@ -58,13 +58,13 @@ setup()
     if [ -e CMakeCache.txt ]; then
 	# running under cmake build dir
 
-	CEPH_SRC=$(readlink -f $(dirname $0)/../../../src)
-	CEPH_ROOT=${PWD}
-	CEPH_BIN=${CEPH_ROOT}/bin
+	STONE_SRC=$(readlink -f $(dirname $0)/../../../src)
+	STONE_ROOT=${PWD}
+	STONE_BIN=${STONE_ROOT}/bin
 
-	export LD_LIBRARY_PATH=${CEPH_ROOT}/lib:${LD_LIBRARY_PATH}
-	export PYTHONPATH=${PYTHONPATH}:${CEPH_SRC}/pybind:${CEPH_ROOT}/lib/cython_modules/lib.3
-	PATH=${CEPH_BIN}:${PATH}
+	export LD_LIBRARY_PATH=${STONE_ROOT}/lib:${LD_LIBRARY_PATH}
+	export PYTHONPATH=${PYTHONPATH}:${STONE_SRC}/pybind:${STONE_ROOT}/lib/cython_modules/lib.3
+	PATH=${STONE_BIN}:${PATH}
     fi
 
     _sudo echo test sudo
@@ -74,7 +74,7 @@ setup()
     TEMPDIR=`mktemp -d`
     DATA=${TEMPDIR}/data
     dd if=/dev/urandom of=${DATA} bs=1M count=${SIZE}
-    ceph osd pool create ${POOL} 32
+    stone osd pool create ${POOL} 32
 
     rbd namespace create ${POOL}/${NS}
     for ns in '' ${NS}; do
@@ -94,7 +94,7 @@ cleanup()
 	_sudo rbd-ggate unmap ${DEV}
     fi
 
-    ceph osd pool delete ${POOL} ${POOL} --yes-i-really-really-mean-it
+    stone osd pool delete ${POOL} ${POOL} --yes-i-really-really-mean-it
 }
 
 expect_false()

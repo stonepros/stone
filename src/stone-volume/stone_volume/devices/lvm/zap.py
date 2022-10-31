@@ -5,12 +5,12 @@ import time
 
 from textwrap import dedent
 
-from ceph_volume import decorators, terminal, process
-from ceph_volume.api import lvm as api
-from ceph_volume.util import system, encryption, disk, arg_validators, str_to_int, merge_dict
-from ceph_volume.util.device import Device
-from ceph_volume.systemd import systemctl
-from ceph_volume.devices.lvm.common import valid_osd_id
+from stone_volume import decorators, terminal, process
+from stone_volume.api import lvm as api
+from stone_volume.util import system, encryption, disk, arg_validators, str_to_int, merge_dict
+from stone_volume.util.device import Device
+from stone_volume.systemd import systemctl
+from stone_volume.devices.lvm.common import valid_osd_id
 
 logger = logging.getLogger(__name__)
 mlogger = terminal.MultiLogger(__name__)
@@ -22,15 +22,15 @@ def wipefs(path):
 
     Environment variables supported::
 
-    * ``CEPH_VOLUME_WIPEFS_TRIES``: Defaults to 8
-    * ``CEPH_VOLUME_WIPEFS_INTERVAL``: Defaults to 5
+    * ``STONE_VOLUME_WIPEFS_TRIES``: Defaults to 8
+    * ``STONE_VOLUME_WIPEFS_INTERVAL``: Defaults to 5
 
     """
     tries = str_to_int(
-        os.environ.get('CEPH_VOLUME_WIPEFS_TRIES', 8)
+        os.environ.get('STONE_VOLUME_WIPEFS_TRIES', 8)
     )
     interval = str_to_int(
-        os.environ.get('CEPH_VOLUME_WIPEFS_INTERVAL', 5)
+        os.environ.get('STONE_VOLUME_WIPEFS_INTERVAL', 5)
     )
 
     for trying in range(tries):
@@ -79,9 +79,9 @@ def find_associated_devices(osd_id=None, osd_fsid=None):
     """
     lv_tags = {}
     if osd_id:
-        lv_tags['ceph.osd_id'] = osd_id
+        lv_tags['stone.osd_id'] = osd_id
     if osd_fsid:
-        lv_tags['ceph.osd_fsid'] = osd_fsid
+        lv_tags['stone.osd_fsid'] = osd_fsid
 
     lvs = api.get_lvs(tags=lv_tags)
     if not lvs:
@@ -102,9 +102,9 @@ def ensure_associated_lvs(lvs, lv_tags={}):
     # leaving many journals with osd.1 - usually, only a single LV will be
     # returned
 
-    journal_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'ceph.type': 'journal'}))
-    db_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'ceph.type': 'db'}))
-    wal_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'ceph.type': 'wal'}))
+    journal_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'stone.type': 'journal'}))
+    db_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'stone.type': 'db'}))
+    wal_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'stone.type': 'wal'}))
     backing_devices = [(journal_lvs, 'journal'), (db_lvs, 'db'),
                        (wal_lvs, 'wal')]
 
@@ -115,18 +115,18 @@ def ensure_associated_lvs(lvs, lv_tags={}):
         # a physical device. Do this for each type (journal,db,wal) regardless
         # if they have been processed in the previous LV, so that bad devices
         # with the same ID can be caught
-        for ceph_lvs, _type in backing_devices:
-            if ceph_lvs:
-                verified_devices.extend([l.lv_path for l in ceph_lvs])
+        for stone_lvs, _type in backing_devices:
+            if stone_lvs:
+                verified_devices.extend([l.lv_path for l in stone_lvs])
                 continue
 
             # must be a disk partition, by querying blkid by the uuid we are
             # ensuring that the device path is always correct
             try:
-                device_uuid = lv.tags['ceph.%s_uuid' % _type]
+                device_uuid = lv.tags['stone.%s_uuid' % _type]
             except KeyError:
-                # Bluestore will not have ceph.journal_uuid, and Filestore
-                # will not not have ceph.db_uuid
+                # Bluestore will not have stone.journal_uuid, and Filestore
+                # will not not have stone.db_uuid
                 continue
 
             osd_device = disk.get_device_from_partuuid(device_uuid)
@@ -150,8 +150,8 @@ class Zap(object):
         self.argv = argv
 
     def unmount_lv(self, lv):
-        if lv.tags.get('ceph.cluster_name') and lv.tags.get('ceph.osd_id'):
-            lv_path = "/var/lib/ceph/osd/{}-{}".format(lv.tags['ceph.cluster_name'], lv.tags['ceph.osd_id'])
+        if lv.tags.get('stone.cluster_name') and lv.tags.get('stone.osd_id'):
+            lv_path = "/var/lib/stone/osd/{}-{}".format(lv.tags['stone.cluster_name'], lv.tags['stone.osd_id'])
         else:
             lv_path = lv.lv_path
         dmcrypt_uuid = lv.lv_uuid
@@ -295,7 +295,7 @@ class Zap(object):
             osd_is_running = systemctl.osd_is_active(self.args.osd_id)
             if osd_is_running:
                 mlogger.error("OSD ID %s is running, stop it with:" % self.args.osd_id)
-                mlogger.error("systemctl stop ceph-osd@%s" % self.args.osd_id)
+                mlogger.error("systemctl stop stone-osd@%s" % self.args.osd_id)
                 raise SystemExit("Unable to zap devices associated with OSD ID: %s" % self.args.osd_id)
         devices = find_associated_devices(self.args.osd_id, self.args.osd_fsid)
         self.zap(devices)
@@ -307,12 +307,12 @@ class Zap(object):
 
     def main(self):
         sub_command_help = dedent("""
-        Zaps the given logical volume(s), raw device(s) or partition(s) for reuse by ceph-volume.
+        Zaps the given logical volume(s), raw device(s) or partition(s) for reuse by stone-volume.
         If given a path to a logical volume it must be in the format of vg/lv. Any
         filesystems present on the given device, vg/lv, or partition will be removed and
         all data will be purged.
 
-        If the logical volume, raw device or partition is being used for any ceph related
+        If the logical volume, raw device or partition is being used for any stone related
         mount points they will be unmounted.
 
         However, the lv or partition will be kept intact.
@@ -321,40 +321,40 @@ class Zap(object):
 
           Zapping a logical volume:
 
-              ceph-volume lvm zap {vg name/lv name}
+              stone-volume lvm zap {vg name/lv name}
 
           Zapping a partition:
 
-              ceph-volume lvm zap /dev/sdc1
+              stone-volume lvm zap /dev/sdc1
 
           Zapping many raw devices:
 
-              ceph-volume lvm zap /dev/sda /dev/sdb /db/sdc
+              stone-volume lvm zap /dev/sda /dev/sdb /db/sdc
 
           Zapping devices associated with an OSD ID:
 
-              ceph-volume lvm zap --osd-id 1
+              stone-volume lvm zap --osd-id 1
 
             Optionally include the OSD FSID
 
-              ceph-volume lvm zap --osd-id 1 --osd-fsid 55BD4219-16A7-4037-BC20-0F158EFCC83D
+              stone-volume lvm zap --osd-id 1 --osd-fsid 55BD4219-16A7-4037-BC20-0F158EFCC83D
 
         If the --destroy flag is given and you are zapping a raw device or partition
         then all vgs and lvs that exist on that raw device or partition will be destroyed.
 
-        This is especially useful if a raw device or partition was used by ceph-volume lvm create
-        or ceph-volume lvm prepare commands previously and now you want to reuse that device.
+        This is especially useful if a raw device or partition was used by stone-volume lvm create
+        or stone-volume lvm prepare commands previously and now you want to reuse that device.
 
         For example:
 
-          ceph-volume lvm zap /dev/sda --destroy
+          stone-volume lvm zap /dev/sda --destroy
 
         If the --destroy flag is given and you are zapping an lv then the lv is still
         kept intact for reuse.
 
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume lvm zap',
+            prog='stone-volume lvm zap',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=sub_command_help,
         )

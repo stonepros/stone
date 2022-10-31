@@ -350,7 +350,7 @@
     --conf/-c FILE    read configuration from the given configuration file
     --id ID           set ID portion of my name
     --name/-n TYPE.ID set name
-    --cluster NAME    set cluster name (default: ceph)
+    --cluster NAME    set cluster name (default: stone)
     --setuser USER    set uid to user or uid (and gid to user's gid)
     --setgroup GROUP  set gid to group or gid
     --version         show version and quit

@@ -1,6 +1,6 @@
 *.class
-libcephfs.jar
-libcephfs-test.jar
-native/com_ceph_fs_CephMount.h
+libstonefs.jar
+libstonefs-test.jar
+native/com_stone_fs_StoneMount.h
 TEST-*.txt
 doc

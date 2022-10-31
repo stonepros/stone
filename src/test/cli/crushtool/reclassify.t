@@ -5,18 +5,18 @@
     renumbering bucket -3 -> -7
     renumbering bucket -2 -> -8
   classify_bucket %-ssd as ssd default bucket default (root)
-  match %-ssd to ttipod001-cephosd-2-ssd basename ttipod001-cephosd-2
+  match %-ssd to ttipod001-stoneosd-2-ssd basename ttipod001-stoneosd-2
     have base -8
-  match %-ssd to ttipod001-cephosd-1-ssd basename ttipod001-cephosd-1
+  match %-ssd to ttipod001-stoneosd-1-ssd basename ttipod001-stoneosd-1
     have base -7
-  match %-ssd to ttipod001-cephosd-3-ssd basename ttipod001-cephosd-3
+  match %-ssd to ttipod001-stoneosd-3-ssd basename ttipod001-stoneosd-3
     have base -6
   classify_bucket ssd as ssd default bucket default (root)
   match ssd to ssd basename default
     have base -5
-  moving items from -24 (ttipod001-cephosd-3-ssd) to -6 (ttipod001-cephosd-3)
-  moving items from -23 (ttipod001-cephosd-1-ssd) to -7 (ttipod001-cephosd-1)
-  moving items from -22 (ttipod001-cephosd-2-ssd) to -8 (ttipod001-cephosd-2)
+  moving items from -24 (ttipod001-stoneosd-3-ssd) to -6 (ttipod001-stoneosd-3)
+  moving items from -23 (ttipod001-stoneosd-1-ssd) to -7 (ttipod001-stoneosd-1)
+  moving items from -22 (ttipod001-stoneosd-2-ssd) to -8 (ttipod001-stoneosd-2)
   moving items from -21 (ssd) to -5 (default)
   $ crushtool -i $TESTDIR/crush-classes/a --compare foo
   rule 0 had 0/10240 mismatched mappings (0)
@@ -56,7 +56,7 @@
   rule 1 had 0/10240 mismatched mappings (0)
   maps appear equivalent
 
-  $ crushtool -i $TESTDIR/crush-classes/e --reclassify --reclassify-bucket ceph-osd-ssd-% ssd default --reclassify-bucket ssd-root ssd default --reclassify-root default hdd -o foo
+  $ crushtool -i $TESTDIR/crush-classes/e --reclassify --reclassify-bucket stone-osd-ssd-% ssd default --reclassify-bucket ssd-root ssd default --reclassify-root default hdd -o foo
   classify_root default (-1) as hdd
     renumbering bucket -1 -> -55
     renumbering bucket -34 -> -56
@@ -67,35 +67,35 @@
     renumbering bucket -52 -> -61
     renumbering bucket -46 -> -62
     renumbering bucket -40 -> -63
-  classify_bucket ceph-osd-ssd-% as ssd default bucket default (root)
-  match ceph-osd-ssd-% to ceph-osd-ssd-node4 basename node4
+  classify_bucket stone-osd-ssd-% as ssd default bucket default (root)
+  match stone-osd-ssd-% to stone-osd-ssd-node4 basename node4
     have base -57
-  match ceph-osd-ssd-% to ceph-osd-ssd-node3 basename node3
+  match stone-osd-ssd-% to stone-osd-ssd-node3 basename node3
     have base -58
-  match ceph-osd-ssd-% to ceph-osd-ssd-node1 basename node1
+  match stone-osd-ssd-% to stone-osd-ssd-node1 basename node1
     have base -60
-  match ceph-osd-ssd-% to ceph-osd-ssd-node2 basename node2
+  match stone-osd-ssd-% to stone-osd-ssd-node2 basename node2
     have base -59
-  match ceph-osd-ssd-% to ceph-osd-ssd-node5 basename node5
+  match stone-osd-ssd-% to stone-osd-ssd-node5 basename node5
     have base -56
-  match ceph-osd-ssd-% to ceph-osd-ssd-node6 basename node6
+  match stone-osd-ssd-% to stone-osd-ssd-node6 basename node6
     have base -63
-  match ceph-osd-ssd-% to ceph-osd-ssd-node7 basename node7
+  match stone-osd-ssd-% to stone-osd-ssd-node7 basename node7
     have base -62
-  match ceph-osd-ssd-% to ceph-osd-ssd-node8 basename node8
+  match stone-osd-ssd-% to stone-osd-ssd-node8 basename node8
     have base -61
   classify_bucket ssd-root as ssd default bucket default (root)
   match ssd-root to ssd-root basename default
     have base -55
-  moving items from -49 (ceph-osd-ssd-node8) to -61 (node8)
-  moving items from -43 (ceph-osd-ssd-node7) to -62 (node7)
-  moving items from -37 (ceph-osd-ssd-node6) to -63 (node6)
-  moving items from -31 (ceph-osd-ssd-node5) to -56 (node5)
+  moving items from -49 (stone-osd-ssd-node8) to -61 (node8)
+  moving items from -43 (stone-osd-ssd-node7) to -62 (node7)
+  moving items from -37 (stone-osd-ssd-node6) to -63 (node6)
+  moving items from -31 (stone-osd-ssd-node5) to -56 (node5)
   moving items from -18 (ssd-root) to -55 (default)
-  moving items from -9 (ceph-osd-ssd-node2) to -59 (node2)
-  moving items from -7 (ceph-osd-ssd-node1) to -60 (node1)
-  moving items from -5 (ceph-osd-ssd-node3) to -58 (node3)
-  moving items from -3 (ceph-osd-ssd-node4) to -57 (node4)
+  moving items from -9 (stone-osd-ssd-node2) to -59 (node2)
+  moving items from -7 (stone-osd-ssd-node1) to -60 (node1)
+  moving items from -5 (stone-osd-ssd-node3) to -58 (node3)
+  moving items from -3 (stone-osd-ssd-node4) to -57 (node4)
 
 this one has weird node weights, so *lots* of mappings change...
 
@@ -117,36 +117,36 @@ this one has weird node weights, so *lots* of mappings change...
     renumbering bucket -3 -> -62
     renumbering bucket -2 -> -63
   classify_bucket %-SSD as ssd default bucket default (root)
-  match %-SSD to Ceph-Stor1-SSD basename Ceph-Stor1
+  match %-SSD to Stone-Stor1-SSD basename Stone-Stor1
     have base -63
-  match %-SSD to Ceph-Stor2-SSD basename Ceph-Stor2
+  match %-SSD to Stone-Stor2-SSD basename Stone-Stor2
     have base -62
-  match %-SSD to Ceph-Stor3-SSD basename Ceph-Stor3
+  match %-SSD to Stone-Stor3-SSD basename Stone-Stor3
     have base -61
-  match %-SSD to Ceph-Stor4-SSD basename Ceph-Stor4
+  match %-SSD to Stone-Stor4-SSD basename Stone-Stor4
     have base -60
-  match %-SSD to Ceph-Stor5-SSD basename Ceph-Stor5
+  match %-SSD to Stone-Stor5-SSD basename Stone-Stor5
     have base -59
-  match %-SSD to Ceph-Stor6-SSD basename Ceph-Stor6
+  match %-SSD to Stone-Stor6-SSD basename Stone-Stor6
     have base -58
-  match %-SSD to Ceph-Stor7-SSD basename Ceph-Stor7
+  match %-SSD to Stone-Stor7-SSD basename Stone-Stor7
     have base -57
-  match %-SSD to Ceph-Stor8-SSD basename Ceph-Stor8
+  match %-SSD to Stone-Stor8-SSD basename Stone-Stor8
     have base -56
   classify_bucket ssd as ssd default bucket default (root)
   match ssd to ssd basename default
     have base -55
   moving items from -18 (ssd) to -55 (default)
-  moving items from -17 (Ceph-Stor8-SSD) to -56 (Ceph-Stor8)
-  moving items from -16 (Ceph-Stor7-SSD) to -57 (Ceph-Stor7)
-  moving items from -15 (Ceph-Stor6-SSD) to -58 (Ceph-Stor6)
-  moving items from -14 (Ceph-Stor5-SSD) to -59 (Ceph-Stor5)
-  moving items from -13 (Ceph-Stor4-SSD) to -60 (Ceph-Stor4)
-  moving items from -12 (Ceph-Stor3-SSD) to -61 (Ceph-Stor3)
-  moving items from -11 (Ceph-Stor2-SSD) to -62 (Ceph-Stor2)
-  moving items from -10 (Ceph-Stor1-SSD) to -63 (Ceph-Stor1)
+  moving items from -17 (Stone-Stor8-SSD) to -56 (Stone-Stor8)
+  moving items from -16 (Stone-Stor7-SSD) to -57 (Stone-Stor7)
+  moving items from -15 (Stone-Stor6-SSD) to -58 (Stone-Stor6)
+  moving items from -14 (Stone-Stor5-SSD) to -59 (Stone-Stor5)
+  moving items from -13 (Stone-Stor4-SSD) to -60 (Stone-Stor4)
+  moving items from -12 (Stone-Stor3-SSD) to -61 (Stone-Stor3)
+  moving items from -11 (Stone-Stor2-SSD) to -62 (Stone-Stor2)
+  moving items from -10 (Stone-Stor1-SSD) to -63 (Stone-Stor1)
 
-wonky crush weights on Ceph-Stor1, so a small number of mappings change
+wonky crush weights on Stone-Stor1, so a small number of mappings change
 because the new map has a strictly summing hierarchy.
 
   $ crushtool -i $TESTDIR/crush-classes/c --compare foo

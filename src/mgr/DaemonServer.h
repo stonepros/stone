@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -20,7 +20,7 @@
 #include <string>
 #include <boost/variant.hpp>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/LogClient.h"
 #include "common/Timer.h"
 
@@ -118,7 +118,7 @@ struct offline_pg_report {
 
 
 /**
- * Server used in ceph-mgr to communicate with Stonee daemons like
+ * Server used in stone-mgr to communicate with Stone daemons like
  * MDSs and OSDs.
  */
 class DaemonServer : public Dispatcher, public md_config_obs_t
@@ -146,13 +146,13 @@ protected:
   std::set<ConnectionRef> daemon_connections;
 
   /// connections for osds
-  ceph::unordered_map<int,set<ConnectionRef>> osd_cons;
+  stone::unordered_map<int,set<ConnectionRef>> osd_cons;
 
   ServiceMap pending_service_map;  // uncommitted
 
   epoch_t pending_service_map_dirty = 0;
 
-  ceph::mutex lock = ceph::make_mutex("DaemonServer");
+  stone::mutex lock = stone::make_mutex("DaemonServer");
 
   static void _generate_command_map(cmdmap_t& cmdmap,
                                     map<string,string> &param_str_map);
@@ -233,7 +233,7 @@ private:
   }
 
   void handle_metric_payload(const UnknownMetricPayload &payload) {
-    ceph_abort();
+    stone_abort();
   }
 
   struct HandlePayloadVisitor : public boost::static_visitor<void> {
@@ -267,18 +267,18 @@ public:
 	       LogChannelRef auditcl);
   ~DaemonServer() override;
 
-  bool ms_dispatch2(const ceph::ref_t<Message>& m) override;
+  bool ms_dispatch2(const stone::ref_t<Message>& m) override;
   int ms_handle_authentication(Connection *con) override;
   bool ms_handle_reset(Connection *con) override;
   void ms_handle_remote_reset(Connection *con) override {}
   bool ms_handle_refused(Connection *con) override;
 
   void fetch_missing_metadata(const DaemonKey& key, const entity_addr_t& addr);
-  bool handle_open(const ceph::ref_t<MMgrOpen>& m);
-  bool handle_close(const ceph::ref_t<MMgrClose>& m);
-  bool handle_report(const ceph::ref_t<MMgrReport>& m);
-  bool handle_command(const ceph::ref_t<MCommand>& m);
-  bool handle_command(const ceph::ref_t<MMgrCommand>& m);
+  bool handle_open(const stone::ref_t<MMgrOpen>& m);
+  bool handle_close(const stone::ref_t<MMgrClose>& m);
+  bool handle_report(const stone::ref_t<MMgrReport>& m);
+  bool handle_command(const stone::ref_t<MCommand>& m);
+  bool handle_command(const stone::ref_t<MMgrCommand>& m);
   bool _handle_command(std::shared_ptr<CommandContext>& cmdctx);
   void send_report();
   void got_service_map();
@@ -306,7 +306,7 @@ public:
 
   void log_access_denied(std::shared_ptr<CommandContext>& cmdctx,
                          MgrSession* session, std::stringstream& ss);
-  void dump_pg_ready(ceph::Formatter *f);
+  void dump_pg_ready(stone::Formatter *f);
 };
 
 #endif

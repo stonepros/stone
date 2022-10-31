@@ -1,7 +1,7 @@
 
 # defaults
-[ -z "$bindir" ] && bindir=$PWD       # location of init-ceph
-[ -z "$conf" ] && conf="$basedir/ceph.conf"
+[ -z "$bindir" ] && bindir=$PWD       # location of init-stone
+[ -z "$conf" ] && conf="$basedir/stone.conf"
 [ -z "$mnt" ] && mnt="/c"
 [ -z "$monhost" ] && monhost="cosd0"
 
@@ -11,7 +11,7 @@ mydir=`hostname`_`echo $0 | sed 's/\//_/g'`
 
 client_mount()
 {
-    /bin/mount -t ceph $monhost:/ $mnt
+    /bin/mount -t stone $monhost:/ $mnt
 }
 
 client_umount()
@@ -24,24 +24,24 @@ client_umount()
     fi
 }
 
-ceph_start()
+stone_start()
 {
-    $bindir/init-ceph -c $conf start ${1}
+    $bindir/init-stone -c $conf start ${1}
 }
 
-ceph_stop()
+stone_stop()
 {
-    $bindir/init-ceph -c $conf stop ${1}
+    $bindir/init-stone -c $conf stop ${1}
 }
 
-ceph_restart()
+stone_restart()
 {
-    $bindir/init-ceph -c $conf restart ${1}
+    $bindir/init-stone -c $conf restart ${1}
 }
 
-ceph_command()
+stone_command()
 {
-    $bindir/ceph -c $conf $*
+    $bindir/stone -c $conf $*
 }
 
 client_enter_mydir()

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -64,7 +64,7 @@ enum AttrsMod {
   ATTRSMOD_MERGE   = 2
 };
 
-using RGWAttrs = std::map<std::string, ceph::buffer::list>;
+using RGWAttrs = std::map<std::string, stone::buffer::list>;
 
 class RGWStore {
   public:
@@ -110,7 +110,7 @@ class RGWStore {
 
     virtual void finalize(void)=0;
 
-    virtual CephContext *ctx(void)=0;
+    virtual StoneContext *ctx(void)=0;
     
     // get the location of where lua packages are installed
     virtual const std::string& get_luarocks_path() const = 0;
@@ -132,7 +132,7 @@ class RGWUser {
                              const std::string& marker, const std::string& end_marker,
 			     uint64_t max, bool need_stats, RGWBucketList& buckets,
 			     optional_yield y) = 0;
-    virtual RGWBucket* create_bucket(rgw_bucket& bucket, ceph::real_time creation_time) = 0;
+    virtual RGWBucket* create_bucket(rgw_bucket& bucket, stone::real_time creation_time) = 0;
     friend class RGWBucket;
     virtual std::string& get_display_name() { return info.display_name; }
 
@@ -177,7 +177,7 @@ class RGWBucket {
     RGWUser* owner = nullptr;
     RGWAttrs attrs;
     obj_version bucket_version;
-    ceph::real_time mtime;
+    stone::real_time mtime;
 
   public:
 
@@ -248,14 +248,14 @@ class RGWBucket {
     virtual int link(const DoutPrefixProvider *dpp, RGWUser* new_user, optional_yield y) = 0;
     virtual int unlink(RGWUser* new_user, optional_yield y) = 0;
     virtual int chown(RGWUser* new_user, RGWUser* old_user, optional_yield y, const DoutPrefixProvider *dpp) = 0;
-    virtual int put_instance_info(const DoutPrefixProvider *dpp, bool exclusive, ceph::real_time mtime) = 0;
+    virtual int put_instance_info(const DoutPrefixProvider *dpp, bool exclusive, stone::real_time mtime) = 0;
     virtual bool is_owner(RGWUser* user) = 0;
     virtual RGWUser* get_owner(void) { return owner; };
     virtual ACLOwner get_acl_owner(void) { return ACLOwner(info.owner); };
     virtual int check_empty(const DoutPrefixProvider *dpp, optional_yield y) = 0;
     virtual int check_quota(RGWQuotaInfo& user_quota, RGWQuotaInfo& bucket_quota, uint64_t obj_size, optional_yield y, bool check_size_only = false) = 0;
     virtual int set_instance_attrs(const DoutPrefixProvider *dpp, RGWAttrs& attrs, optional_yield y) = 0;
-    virtual int try_refresh_info(const DoutPrefixProvider *dpp, ceph::real_time *pmtime) = 0;
+    virtual int try_refresh_info(const DoutPrefixProvider *dpp, stone::real_time *pmtime) = 0;
     virtual int read_usage(const DoutPrefixProvider *dpp, uint64_t start_epoch, uint64_t end_epoch, uint32_t max_entries,
 			   bool *is_truncated, RGWUsageIter& usage_iter,
 			   map<rgw_user_bucket, rgw_usage_log_entry>& usage) = 0;
@@ -269,8 +269,8 @@ class RGWBucket {
     size_t get_size_rounded() const { return ent.size_rounded; }
     uint64_t get_count() const { return ent.count; }
     rgw_placement_rule& get_placement_rule() { return info.placement_rule; }
-    ceph::real_time& get_creation_time() { return info.creation_time; }
-    ceph::real_time& get_modification_time() { return mtime; }
+    stone::real_time& get_creation_time() { return info.creation_time; }
+    stone::real_time& get_modification_time() { return mtime; }
     obj_version& get_version() { return bucket_version; }
     void set_version(obj_version &ver) { bucket_version = ver; }
     bool versioned() { return info.versioned(); }
@@ -351,7 +351,7 @@ class RGWObject {
     std::string index_hash_source;
     uint64_t obj_size;
     RGWAttrs attrs;
-    ceph::real_time mtime;
+    stone::real_time mtime;
     bool delete_marker{false};
     bool in_extra_data{false};
 
@@ -359,14 +359,14 @@ class RGWObject {
 
     struct ReadOp {
       struct Params {
-        const ceph::real_time *mod_ptr{nullptr};
-        const ceph::real_time *unmod_ptr{nullptr};
+        const stone::real_time *mod_ptr{nullptr};
+        const stone::real_time *unmod_ptr{nullptr};
         bool high_precision_time{false};
         uint32_t mod_zone_id{0};
         uint64_t mod_pg_ver{0};
         const char *if_match{nullptr};
         const char *if_nomatch{nullptr};
-        ceph::real_time *lastmod{nullptr};
+        stone::real_time *lastmod{nullptr};
         rgw_obj *target_obj{nullptr}; // XXX dang remove?
       } params;
 
@@ -388,20 +388,20 @@ class RGWObject {
     struct WriteOp {
       struct Params {
 	bool versioning_disabled{false};
-	ceph::real_time* mtime{nullptr};
+	stone::real_time* mtime{nullptr};
 	RGWAttrs* rmattrs{nullptr};
 	const bufferlist* data{nullptr};
 	RGWObjManifest* manifest{nullptr};
 	const string* ptag{nullptr};
 	list<rgw_obj_index_key>* remove_objs{nullptr};
-	ceph::real_time set_mtime;
+	stone::real_time set_mtime;
 	ACLOwner owner;
 	RGWObjCategory category{RGWObjCategory::Main};
 	int flags{0};
 	const char* if_match{nullptr};
 	const char* if_nomatch{nullptr};
 	std::optional<uint64_t> olh_epoch;
-	ceph::real_time delete_at;
+	stone::real_time delete_at;
 	bool canceled{false};
 	const string* user_data{nullptr};
 	rgw_zone_set* zones_trace{nullptr};
@@ -450,7 +450,7 @@ class RGWObject {
     virtual int read(off_t offset, off_t length, std::iostream& stream) = 0;
     virtual int write(off_t offset, off_t length, std::iostream& stream) = 0;
     virtual int delete_object(const DoutPrefixProvider *dpp, RGWObjectCtx* obj_ctx, ACLOwner obj_owner,
-			      ACLOwner bucket_owner, ceph::real_time unmod_since,
+			      ACLOwner bucket_owner, stone::real_time unmod_since,
 			      bool high_precision_time, uint64_t epoch,
 			      std::string& version_id,
 			      optional_yield y,
@@ -460,13 +460,13 @@ class RGWObject {
                rgw::sal::RGWObject* dest_object, rgw::sal::RGWBucket* dest_bucket,
                rgw::sal::RGWBucket* src_bucket,
                const rgw_placement_rule& dest_placement,
-               ceph::real_time *src_mtime, ceph::real_time *mtime,
-               const ceph::real_time *mod_ptr, const ceph::real_time *unmod_ptr,
+               stone::real_time *src_mtime, stone::real_time *mtime,
+               const stone::real_time *mod_ptr, const stone::real_time *unmod_ptr,
                bool high_precision_time,
                const char *if_match, const char *if_nomatch,
                AttrsMod attrs_mod, bool copy_if_newer, RGWAttrs& attrs,
                RGWObjCategory category, uint64_t olh_epoch,
-	       boost::optional<ceph::real_time> delete_at,
+	       boost::optional<stone::real_time> delete_at,
                string *version_id, string *tag, string *etag,
                void (*progress_cb)(off_t, void *), void *progress_data,
                const DoutPrefixProvider *dpp, optional_yield y) = 0;
@@ -505,7 +505,7 @@ class RGWObject {
 
     RGWAttrs& get_attrs(void) { return attrs; }
     const RGWAttrs& get_attrs(void) const { return attrs; }
-    ceph::real_time get_mtime(void) const { return mtime; }
+    stone::real_time get_mtime(void) const { return mtime; }
     uint64_t get_obj_size(void) const { return obj_size; }
     RGWBucket* get_bucket(void) const { return bucket; }
     void set_bucket(RGWBucket* b) { bucket = b; }

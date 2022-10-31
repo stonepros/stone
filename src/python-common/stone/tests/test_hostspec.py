@@ -4,7 +4,7 @@ import yaml
 
 import pytest
 
-from ceph.deployment.hostspec import HostSpec, SpecValidationError
+from stone.deployment.hostspec import HostSpec, SpecValidationError
 
 
 @pytest.mark.parametrize(

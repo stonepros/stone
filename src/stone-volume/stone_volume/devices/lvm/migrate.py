@@ -3,12 +3,12 @@ import argparse
 import logging
 import os
 from textwrap import dedent
-from ceph_volume.util import system, disk, merge_dict
-from ceph_volume.util.device import Device
-from ceph_volume import decorators, terminal, process
-from ceph_volume.api import lvm as api
-from ceph_volume.systemd import systemctl
-from ceph_volume.devices.lvm.common import valid_osd_id
+from stone_volume.util import system, disk, merge_dict
+from stone_volume.util.device import Device
+from stone_volume import decorators, terminal, process
+from stone_volume.api import lvm as api
+from stone_volume.systemd import systemctl
+from stone_volume.devices.lvm.common import valid_osd_id
 
 
 logger = logging.getLogger(__name__)
@@ -21,8 +21,8 @@ def get_cluster_name(osd_id, osd_fsid):
     one.
     """
     lv_tags = {}
-    lv_tags['ceph.osd_id'] = osd_id
-    lv_tags['ceph.osd_fsid'] = osd_fsid
+    lv_tags['stone.osd_id'] = osd_id
+    lv_tags['stone.osd_fsid'] = osd_fsid
 
     lvs = api.get_lvs(tags=lv_tags)
     if not lvs:
@@ -30,10 +30,10 @@ def get_cluster_name(osd_id, osd_fsid):
             'Unable to find any LV for source OSD: id:{} fsid:{}'.format(
                 osd_id,  osd_fsid)        )
         raise SystemExit('Unexpected error, terminating')
-    return next(iter(lvs)).tags["ceph.cluster_name"]
+    return next(iter(lvs)).tags["stone.cluster_name"]
 
 def get_osd_path(osd_id, osd_fsid):
-    return '/var/lib/ceph/osd/{}-{}'.format(
+    return '/var/lib/stone/osd/{}-{}'.format(
         get_cluster_name(osd_id, osd_fsid), osd_id)
 
 def find_associated_devices(osd_id, osd_fsid):
@@ -43,8 +43,8 @@ def find_associated_devices(osd_id, osd_fsid):
     part of the OSD, and then return the set of LVs and partitions (if any).
     """
     lv_tags = {}
-    lv_tags['ceph.osd_id'] = osd_id
-    lv_tags['ceph.osd_fsid'] = osd_fsid
+    lv_tags['stone.osd_id'] = osd_id
+    lv_tags['stone.osd_fsid'] = osd_fsid
 
     lvs = api.get_lvs(tags=lv_tags)
     if not lvs:
@@ -66,9 +66,9 @@ def ensure_associated_lvs(lvs, lv_tags):
     # leaving many journals with osd.1 - usually, only a single LV will be
     # returned
 
-    block_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'ceph.type': 'block'}))
-    db_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'ceph.type': 'db'}))
-    wal_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'ceph.type': 'wal'}))
+    block_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'stone.type': 'block'}))
+    db_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'stone.type': 'db'}))
+    wal_lvs = api.get_lvs(tags=merge_dict(lv_tags, {'stone.type': 'wal'}))
     backing_devices = [(block_lvs, 'block'), (db_lvs, 'db'),
                        (wal_lvs, 'wal')]
 
@@ -79,19 +79,19 @@ def ensure_associated_lvs(lvs, lv_tags):
         # a physical device. Do this for each type (journal,db,wal) regardless
         # if they have been processed in the previous LV, so that bad devices
         # with the same ID can be caught
-        for ceph_lvs, type in backing_devices:
+        for stone_lvs, type in backing_devices:
 
-            if ceph_lvs:
-                verified_devices.extend([(l.lv_path, type) for l in ceph_lvs])
+            if stone_lvs:
+                verified_devices.extend([(l.lv_path, type) for l in stone_lvs])
                 continue
 
             # must be a disk partition, by querying blkid by the uuid we are
             # ensuring that the device path is always correct
             try:
-                device_uuid = lv.tags['ceph.{}_uuid'.format(type)]
+                device_uuid = lv.tags['stone.{}_uuid'.format(type)]
             except KeyError:
-                # Bluestore will not have ceph.journal_uuid, and Filestore
-                # will not not have ceph.db_uuid
+                # Bluestore will not have stone.journal_uuid, and Filestore
+                # will not not have stone.db_uuid
                 continue
 
             osd_device = disk.get_device_from_partuuid(device_uuid)
@@ -140,12 +140,12 @@ class VolumeTagTracker(object):
             mlogger.warning(
                 'Data device is not LVM, wouldn\'t update LVM tags')
         else:
-            tags["ceph.{}_uuid".format(create_type)] = self.target_lv.lv_uuid
-            tags["ceph.{}_device".format(create_type)] = self.target_lv.lv_path
+            tags["stone.{}_uuid".format(create_type)] = self.target_lv.lv_uuid
+            tags["stone.{}_device".format(create_type)] = self.target_lv.lv_path
             self.data_device.lv_api.set_tags(tags)
 
             tags = self.data_device.lv_api.tags.copy()
-            tags["ceph.type"] = create_type
+            tags["stone.type"] = create_type
             self.target_lv.set_tags(tags)
 
         aux_dev = None
@@ -161,8 +161,8 @@ class VolumeTagTracker(object):
                     create_type.upper()))
         else:
             tags = {}
-            tags["ceph.{}_uuid".format(create_type)] = self.target_lv.lv_uuid
-            tags["ceph.{}_device".format(create_type)] = self.target_lv.lv_path
+            tags["stone.{}_uuid".format(create_type)] = self.target_lv.lv_uuid
+            tags["stone.{}_device".format(create_type)] = self.target_lv.lv_path
             aux_dev.lv_api.set_tags(tags)
 
     def remove_lvs(self, source_devices, target_type):
@@ -174,8 +174,8 @@ class VolumeTagTracker(object):
                 continue
             remaining_devices.remove(device)
             if device.is_lv:
-                outdated_tags.append("ceph.{}_uuid".format(type))
-                outdated_tags.append("ceph.{}_device".format(type))
+                outdated_tags.append("stone.{}_uuid".format(type))
+                outdated_tags.append("stone.{}_device".format(type))
                 device.lv_api.clear_tags()
         if len(outdated_tags) > 0:
             for d in remaining_devices:
@@ -195,13 +195,13 @@ class VolumeTagTracker(object):
                 continue
             remaining_devices.remove(device)
             if device.is_lv:
-                outdated_tags.append("ceph.{}_uuid".format(type))
-                outdated_tags.append("ceph.{}_device".format(type))
+                outdated_tags.append("stone.{}_uuid".format(type))
+                outdated_tags.append("stone.{}_device".format(type))
                 device.lv_api.clear_tags()
 
         new_tags = {}
-        new_tags["ceph.{}_uuid".format(target_type)] = self.target_lv.lv_uuid
-        new_tags["ceph.{}_device".format(target_type)] = self.target_lv.lv_path
+        new_tags["stone.{}_uuid".format(target_type)] = self.target_lv.lv_uuid
+        new_tags["stone.{}_device".format(target_type)] = self.target_lv.lv_path
 
         for d in remaining_devices:
             if d and d.is_lv:
@@ -215,9 +215,9 @@ class VolumeTagTracker(object):
         else:
             tags = self.data_device.lv_api.tags.copy()
 
-        tags["ceph.type"] = target_type
-        tags["ceph.{}_uuid".format(target_type)] = self.target_lv.lv_uuid
-        tags["ceph.{}_device".format(target_type)] = self.target_lv.lv_path
+        tags["stone.type"] = target_type
+        tags["stone.{}_uuid".format(target_type)] = self.target_lv.lv_uuid
+        tags["stone.{}_device".format(target_type)] = self.target_lv.lv_path
         self.target_lv.set_tags(tags)
 
     def undo(self):
@@ -272,7 +272,7 @@ class Migrate(object):
                 'Unable to migrate to : {}'.format(self.args.target))
         return ret
 
-    # ceph-bluestore-tool uses the following replacement rules
+    # stone-bluestore-tool uses the following replacement rules
     # (in the order of precedence, stop on the first match)
     # if source list has DB volume - target device replaces it.
     # if source list has WAL volume - target device replace it.
@@ -318,7 +318,7 @@ class Migrate(object):
             # we need to update lvm tags for all the remaining volumes
             # and clear for ones which to be removed
 
-            # ceph-bluestore-tool removes source volume(s) other than block one
+            # stone-bluestore-tool removes source volume(s) other than block one
             # and attaches target one after successful migration
             tag_tracker.replace_lvs(source_devices, target_type)
 
@@ -327,7 +327,7 @@ class Migrate(object):
             mlogger.info("Migrate to new, Source: {} Target: {}".format(
                 source_args, target_path))
             stdout, stderr, exit_code = process.call([
-                'ceph-bluestore-tool',
+                'stone-bluestore-tool',
                 '--path',
                 osd_path,
                 '--dev-target',
@@ -352,7 +352,7 @@ class Migrate(object):
 
     @decorators.needs_root
     def migrate_to_existing(self, osd_id, osd_fsid, devices, target_lv):
-        target_type = target_lv.tags["ceph.type"]
+        target_type = target_lv.tags["stone.type"]
         if target_type == "wal":
             mlogger.error("Migrate to WAL is not supported")
             raise SystemExit(
@@ -361,7 +361,7 @@ class Migrate(object):
         if (target_filename == ""):
             mlogger.error(
                 "Target Logical Volume doesn't have proper volume type "
-                "(ceph.type LVM tag): {}".format(target_type))
+                "(stone.type LVM tag): {}".format(target_type))
             raise SystemExit(
                 "Unable to migrate to : {}".format(self.args.target))
 
@@ -371,14 +371,14 @@ class Migrate(object):
         tag_tracker = VolumeTagTracker(devices, target_lv)
 
         try:
-            # ceph-bluestore-tool removes source volume(s) other than
+            # stone-bluestore-tool removes source volume(s) other than
             # block and target ones after successful migration
             tag_tracker.remove_lvs(source_devices, target_type)
             source_args = self.get_source_args(osd_path, source_devices)
             mlogger.info("Migrate to existing, Source: {} Target: {}".format(
                 source_args, target_path))
             stdout, stderr, exit_code = process.call([
-                'ceph-bluestore-tool',
+                'stone-bluestore-tool',
                 '--path',
                 osd_path,
                 '--dev-target',
@@ -405,7 +405,7 @@ class Migrate(object):
             osd_is_running = systemctl.osd_is_active(self.args.osd_id)
             if osd_is_running:
                 mlogger.error('OSD is running, stop it with: '
-                    'systemctl stop ceph-osd@{}'.format(
+                    'systemctl stop stone-osd@{}'.format(
                         self.args.osd_id))
                 raise SystemExit(
                     'Unable to migrate devices associated with OSD ID: {}'
@@ -419,13 +419,13 @@ class Migrate(object):
             raise SystemExit(
                 'Unable to migrate to : {}'.format(self.args.target))
         devices = find_associated_devices(self.args.osd_id, self.args.osd_fsid)
-        if (not target_lv.used_by_ceph):
+        if (not target_lv.used_by_stone):
             self.migrate_to_new(self.args.osd_id, self.args.osd_fsid,
                 devices,
                 target_lv)
         else:
-            if (target_lv.tags['ceph.osd_id'] != self.args.osd_id or
-                    target_lv.tags['ceph.osd_fsid'] != self.args.osd_fsid):
+            if (target_lv.tags['stone.osd_id'] != self.args.osd_id or
+                    target_lv.tags['stone.osd_fsid'] != self.args.osd_fsid):
                 mlogger.error(
                     'Target Logical Volume isn\'t used by the specified OSD: '
                         '{} FSID: {}'.format(self.args.osd_id,
@@ -494,34 +494,34 @@ class Migrate(object):
 
           Moves BlueFS data from main device to LV already attached as DB:
 
-            ceph-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from data --target vgname/db
+            stone-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from data --target vgname/db
 
           Moves BlueFS data from shared main device to LV which will be attached
            as a new DB:
 
-            ceph-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from data --target vgname/new_db
+            stone-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from data --target vgname/new_db
 
           Moves BlueFS data from DB device to new LV, DB is replaced:
 
-            ceph-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from db --target vgname/new_db
+            stone-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from db --target vgname/new_db
 
           Moves BlueFS data from main and DB devices to new LV, DB is replaced:
 
-            ceph-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from data db --target vgname/new_db
+            stone-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from data db --target vgname/new_db
 
           Moves BlueFS data from main, DB and WAL devices to new LV, WAL is
            removed and DB is replaced:
 
-            ceph-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from data db wal --target vgname/new_db
+            stone-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from data db wal --target vgname/new_db
 
           Moves BlueFS data from main, DB and WAL devices to main device, WAL
            and DB are removed:
 
-            ceph-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from db wal --target vgname/data
+            stone-volume lvm migrate --osd-id 1 --osd-fsid <uuid> --from db wal --target vgname/data
 
         """)
 
-        parser = self.make_parser('ceph-volume lvm migrate', sub_command_help)
+        parser = self.make_parser('stone-volume lvm migrate', sub_command_help)
 
         if len(self.argv) == 0:
             print(sub_command_help)
@@ -580,7 +580,7 @@ class NewVolume(object):
             tag_tracker.update_tags_when_lv_create(self.create_type)
 
             stdout, stderr, exit_code = process.call([
-                'ceph-bluestore-tool',
+                'stone-bluestore-tool',
                 '--path',
                 osd_path,
                 '--dev-target',
@@ -610,7 +610,7 @@ class NewVolume(object):
             osd_is_running = systemctl.osd_is_active(self.args.osd_id)
             if osd_is_running:
                 mlogger.error('OSD ID is running, stop it with:'
-                    ' systemctl stop ceph-osd@{}'.format(self.args.osd_id))
+                    ' systemctl stop stone-osd@{}'.format(self.args.osd_id))
                 raise SystemExit(
                     'Unable to attach new volume for OSD: {}'.format(
                         self.args.osd_id))
@@ -622,9 +622,9 @@ class NewVolume(object):
                     self.args.target))
             raise SystemExit(
                 'Unable to attach new volume : {}'.format(self.args.target))
-        if target_lv.used_by_ceph:
+        if target_lv.used_by_stone:
             mlogger.error(
-                'Target Logical Volume is already used by ceph: {}'.format(
+                'Target Logical Volume is already used by stone: {}'.format(
                     self.args.target))
             raise SystemExit(
                 'Unable to attach new volume : {}'.format(self.args.target))
@@ -653,9 +653,9 @@ class NewWAL(NewVolume):
 
           Attach vgname/lvname as a WAL volume to OSD 1
 
-              ceph-volume lvm new-wal --osd-id 1 --osd-fsid 55BD4219-16A7-4037-BC20-0F158EFCC83D --target vgname/new_wal
+              stone-volume lvm new-wal --osd-id 1 --osd-fsid 55BD4219-16A7-4037-BC20-0F158EFCC83D --target vgname/new_wal
         """)
-        parser = self.make_parser('ceph-volume lvm new-wal', sub_command_help)
+        parser = self.make_parser('stone-volume lvm new-wal', sub_command_help)
 
         if len(self.argv) == 0:
             print(sub_command_help)
@@ -681,10 +681,10 @@ class NewDB(NewVolume):
 
           Attach vgname/lvname as a DB volume to OSD 1
 
-              ceph-volume lvm new-db --osd-id 1 --osd-fsid 55BD4219-16A7-4037-BC20-0F158EFCC83D --target vgname/new_db
+              stone-volume lvm new-db --osd-id 1 --osd-fsid 55BD4219-16A7-4037-BC20-0F158EFCC83D --target vgname/new_db
         """)
 
-        parser = self.make_parser('ceph-volume lvm new-db', sub_command_help)
+        parser = self.make_parser('stone-volume lvm new-db', sub_command_help)
         if len(self.argv) == 0:
             print(sub_command_help)
             return

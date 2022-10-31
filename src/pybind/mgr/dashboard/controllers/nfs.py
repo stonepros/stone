@@ -7,12 +7,12 @@ import os
 from functools import partial
 from typing import Any, Dict, List, Optional
 
-import cephfs
+import stonefs
 from mgr_module import NFS_GANESHA_SUPPORTED_FSALS
 
 from .. import mgr
 from ..security import Scope
-from ..services.cephfs import CephFS
+from ..services.stonefs import StoneFS
 from ..services.exception import DashboardException, serialize_dashboard_exception
 from . import APIDoc, APIRouter, BaseController, Endpoint, EndpointDoc, \
     ReadPermission, RESTController, Task, UIRouter
@@ -39,7 +39,7 @@ EXPORT_SCHEMA = {
     'transports': ([str], 'List of transport types'),
     'fsal': ({
         'name': (str, 'name of FSAL'),
-        'fs_name': (str, 'CephFS filesystem name', True),
+        'fs_name': (str, 'StoneFS filesystem name', True),
         'sec_label_xattr': (str, 'Name of xattr for security label', True),
         'user_id': (str, 'User id', True)
     }, 'FSAL configuration'),
@@ -62,7 +62,7 @@ CREATE_EXPORT_SCHEMA = {
     'transports': ([str], 'List of transport types'),
     'fsal': ({
         'name': (str, 'name of FSAL'),
-        'fs_name': (str, 'CephFS filesystem name', True),
+        'fs_name': (str, 'StoneFS filesystem name', True),
         'sec_label_xattr': (str, 'Name of xattr for security label', True)
     }, 'FSAL configuration'),
     'clients': ([{
@@ -274,15 +274,15 @@ class NFSGaneshaUi(BaseController):
                                          msg=error_msg)
 
         try:
-            cfs = CephFS(fs_name)
+            cfs = StoneFS(fs_name)
             paths = [root_dir]
             paths.extend([p['path'].rstrip('/')
                           for p in cfs.ls_dir(root_dir, depth)])
-        except (cephfs.ObjectNotFound, cephfs.PermissionError):
+        except (stonefs.ObjectNotFound, stonefs.PermissionError):
             paths = []
         return {'paths': paths}
 
-    @Endpoint('GET', '/cephfs/filesystems')
+    @Endpoint('GET', '/stonefs/filesystems')
     @ReadPermission
     def filesystems(self):
-        return CephFS.list_filesystems()
+        return StoneFS.list_filesystems()

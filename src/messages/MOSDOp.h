@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,7 +19,7 @@
 #include <atomic>
 
 #include "MOSDFastDispatchOp.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "common/hobject.h"
 
 /*
@@ -48,7 +48,7 @@ private:
 
   hobject_t hobj;
   spg_t pgid;
-  ceph::buffer::list::const_iterator p;
+  stone::buffer::list::const_iterator p;
   // Decoding flags. Decoding is only needed for messages caught by pipe reader.
   // Transition from true -> false without locks being held
   // Can never see final_decode_needed == false and partial_decode_needed == true
@@ -68,7 +68,7 @@ private:
 public:
   friend MOSDOpReply;
 
-  ceph_tid_t get_client_tid() { return header.tid; }
+  stone_tid_t get_client_tid() { return header.tid; }
   void set_snapid(const snapid_t& s) {
     hobj.snap = s;
   }
@@ -85,32 +85,32 @@ public:
 
   // Fields decoded in partial decoding
   pg_t get_pg() const {
-    ceph_assert(!partial_decode_needed);
+    stone_assert(!partial_decode_needed);
     return pgid.pgid;
   }
   spg_t get_spg() const override {
-    ceph_assert(!partial_decode_needed);
+    stone_assert(!partial_decode_needed);
     return pgid;
   }
   pg_t get_raw_pg() const {
-    ceph_assert(!partial_decode_needed);
+    stone_assert(!partial_decode_needed);
     return pg_t(hobj.get_hash(), pgid.pgid.pool());
   }
   epoch_t get_map_epoch() const override {
-    ceph_assert(!partial_decode_needed);
+    stone_assert(!partial_decode_needed);
     return osdmap_epoch;
   }
   int get_flags() const {
-    ceph_assert(!partial_decode_needed);
+    stone_assert(!partial_decode_needed);
     return flags;
   }
   osd_reqid_t get_reqid() const {
-    ceph_assert(!partial_decode_needed);
+    stone_assert(!partial_decode_needed);
     if (reqid.name != entity_name_t() || reqid.tid != 0) {
       return reqid;
     } else {
       if (!final_decode_needed)
-	ceph_assert(reqid.inc == (int32_t)client_inc);  // decode() should have done this
+	stone_assert(reqid.inc == (int32_t)client_inc);  // decode() should have done this
       return osd_reqid_t(get_orig_source(),
                          reqid.inc,
 			 header.tid);
@@ -119,37 +119,37 @@ public:
 
   // Fields decoded in final decoding
   int get_client_inc() const {
-    ceph_assert(!final_decode_needed);
+    stone_assert(!final_decode_needed);
     return client_inc;
   }
   utime_t get_mtime() const {
-    ceph_assert(!final_decode_needed);
+    stone_assert(!final_decode_needed);
     return mtime;
   }
   object_locator_t get_object_locator() const {
-    ceph_assert(!final_decode_needed);
+    stone_assert(!final_decode_needed);
     if (hobj.oid.name.empty())
       return object_locator_t(hobj.pool, hobj.nspace, hobj.get_hash());
     else
       return object_locator_t(hobj);
   }
   const object_t& get_oid() const {
-    ceph_assert(!final_decode_needed);
+    stone_assert(!final_decode_needed);
     return hobj.oid;
   }
   const hobject_t &get_hobj() const {
     return hobj;
   }
   snapid_t get_snapid() const {
-    ceph_assert(!final_decode_needed);
+    stone_assert(!final_decode_needed);
     return hobj.snap;
   }
   const snapid_t& get_snap_seq() const {
-    ceph_assert(!final_decode_needed);
+    stone_assert(!final_decode_needed);
     return snap_seq;
   }
   const std::vector<snapid_t> &get_snaps() const {
-    ceph_assert(!final_decode_needed);
+    stone_assert(!final_decode_needed);
     return snaps;
   }
 
@@ -197,8 +197,8 @@ private:
 
 public:
   void set_mtime(utime_t mt) { mtime = mt; }
-  void set_mtime(ceph::real_time mt) {
-    mtime = ceph::real_clock::to_timespec(mt);
+  void set_mtime(stone::real_time mt) {
+    mtime = stone::real_clock::to_timespec(mt);
   }
 
   // ops
@@ -209,12 +209,12 @@ public:
     osd_op.op.extent.length = len;
     ops.push_back(osd_op);
   }
-  void write(uint64_t off, uint64_t len, ceph::buffer::list& bl) {
+  void write(uint64_t off, uint64_t len, stone::buffer::list& bl) {
     add_simple_op(STONE_OSD_OP_WRITE, off, len);
     data = std::move(bl);
     header.data_off = off;
   }
-  void writefull(ceph::buffer::list& bl) {
+  void writefull(stone::buffer::list& bl) {
     add_simple_op(STONE_OSD_OP_WRITEFULL, 0, bl.length());
     data = std::move(bl);
     header.data_off = 0;
@@ -249,7 +249,7 @@ public:
 
   // marshalling
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     if( false == bdata_encode ) {
       OSDOp::merge_osd_op_vector_in_data(ops, data);
       bdata_encode = true;
@@ -258,24 +258,24 @@ public:
     if ((features & STONE_FEATURE_OBJECTLOCATOR) == 0) {
       // here is the old structure we are encoding to: //
 #if 0
-struct ceph_osd_request_head {
-	ceph_le32 client_inc;              /* client incarnation */
-	struct ceph_object_layout layout;  /* pgid */
-	ceph_le32 osdmap_epoch;            /* client's osdmap epoch */
+struct stone_osd_request_head {
+	stone_le32 client_inc;              /* client incarnation */
+	struct stone_object_layout layout;  /* pgid */
+	stone_le32 osdmap_epoch;            /* client's osdmap epoch */
 
-	ceph_le32 flags;
+	stone_le32 flags;
 
-	struct ceph_timespec mtime;        /* for mutations only */
-	struct ceph_eversion reassert_version; /* if we are replaying op */
+	struct stone_timespec mtime;        /* for mutations only */
+	struct stone_eversion reassert_version; /* if we are replaying op */
 
-	ceph_le32 object_len;     /* length of object name */
+	stone_le32 object_len;     /* length of object name */
 
-	ceph_le64 snapid;         /* snapid to read */
-	ceph_le64 snap_seq;       /* writer's snap context */
-	ceph_le32 num_snaps;
+	stone_le64 snapid;         /* snapid to read */
+	stone_le64 snap_seq;       /* writer's snap context */
+	stone_le32 num_snaps;
 
-	ceph_le16 num_ops;
-	struct ceph_osd_op ops[];  /* followed by ops[], obj, ticket, snaps */
+	stone_le16 num_ops;
+	struct stone_osd_op ops[];  /* followed by ops[], obj, ticket, snaps */
 } __attribute__ ((packed));
 #endif
       header.version = 1;
@@ -304,8 +304,8 @@ struct ceph_osd_request_head {
       for (unsigned i = 0; i < ops.size(); i++)
 	encode(ops[i].op, payload);
 
-      ceph::encode_nohead(hobj.oid.name, payload);
-      ceph::encode_nohead(snaps, payload);
+      stone::encode_nohead(hobj.oid.name, payload);
+      stone::encode_nohead(snaps, payload);
     } else if ((features & STONE_FEATURE_NEW_OSDOP_ENCODING) == 0) {
       header.version = 6;
       encode(client_inc, payload);
@@ -394,8 +394,8 @@ struct ceph_osd_request_head {
   }
 
   void decode_payload() override {
-    using ceph::decode;
-    ceph_assert(partial_decode_needed && final_decode_needed);
+    using stone::decode;
+    stone_assert(partial_decode_needed && final_decode_needed);
     p = std::cbegin(payload);
 
     // Always keep here the newest version of decoding order/rule
@@ -421,7 +421,7 @@ struct ceph_osd_request_head {
       decode(client_inc, p);
 
       old_pg_t opgid;
-      ceph::decode_raw(opgid, p);
+      stone::decode_raw(opgid, p);
       pgid.pgid = opgid;
 
       __u32 su;
@@ -447,11 +447,11 @@ struct ceph_osd_request_head {
       for (unsigned i = 0; i < num_ops; i++)
 	decode(ops[i].op, p);
 
-      ceph::decode_nohead(oid_len, hobj.oid.name, p);
-      ceph::decode_nohead(num_snaps, snaps, p);
+      stone::decode_nohead(oid_len, hobj.oid.name, p);
+      stone::decode_nohead(num_snaps, snaps, p);
 
       // recalculate pgid hash value
-      pgid.pgid.set_ps(ceph_str_hash(STONE_STR_HASH_RJENKINS,
+      pgid.pgid.set_ps(stone_str_hash(STONE_STR_HASH_RJENKINS,
 				     hobj.oid.name.c_str(),
 				     hobj.oid.name.length()));
       hobj.pool = pgid.pgid.pool();
@@ -480,7 +480,7 @@ struct ceph_osd_request_head {
 
       if (header.version < 3) {
 	old_pg_t opgid;
-	ceph::decode_raw(opgid, p);
+	stone::decode_raw(opgid, p);
 	pgid.pgid = opgid;
       } else {
 	decode(pgid.pgid, p);
@@ -533,11 +533,11 @@ struct ceph_osd_request_head {
   }
 
   bool finish_decode() {
-    using ceph::decode;
-    ceph_assert(!partial_decode_needed); // partial decoding required
+    using stone::decode;
+    stone_assert(!partial_decode_needed); // partial decoding required
     if (!final_decode_needed)
       return false; // Message is already final decoded
-    ceph_assert(header.version >= 7);
+    stone_assert(header.version >= 7);
 
     decode(client_inc, p);
     decode(mtime, p);
@@ -590,7 +590,7 @@ struct ceph_osd_request_head {
       } else {
 	out << " " << get_raw_pg() << " (undecoded)";
       }
-      out << " " << ceph_osd_flag_string(get_flags());
+      out << " " << stone_osd_flag_string(get_flags());
       out << " e" << osdmap_epoch;
     }
     out << ")";
@@ -598,7 +598,7 @@ struct ceph_osd_request_head {
 
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 }
 

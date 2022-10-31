@@ -1,9 +1,9 @@
 #!/bin/bash -ex
 #
-# cephfs_mirror_ha_verify.sh - verify synchronized snapshots
+# stonefs_mirror_ha_verify.sh - verify synchronized snapshots
 #
 
-. $(dirname $0)/cephfs_mirror_helpers.sh
+. $(dirname $0)/stonefs_mirror_helpers.sh
 
 echo "running verifier on secondary file system..."
 

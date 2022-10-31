@@ -5,7 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { ToastrModule } from 'ngx-toastr';
 
-import { CephModule } from '~/app/ceph/ceph.module';
+import { StoneModule } from '~/app/stone/stone.module';
 import { CoreModule } from '~/app/core/core.module';
 import { HostService } from '~/app/shared/api/host.service';
 import { OsdService } from '~/app/shared/api/osd.service';
@@ -35,7 +35,7 @@ describe('CreateClusterComponent', () => {
         ToastrModule.forRoot(),
         SharedModule,
         CoreModule,
-        CephModule
+        StoneModule
       ]
     },
     [LoadingPanelComponent]

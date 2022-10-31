@@ -26,7 +26,7 @@ public:
   inodeno_t get_ino() const { return ino; }
   int get_snap_op() const { return snap_op; }
 
-  ceph::buffer::list snap_blob;
+  stone::buffer::list snap_blob;
 
 protected:
   MMDSSnapUpdate() : MMDSOp{MSG_MDS_SNAPUPDATE} {}
@@ -43,13 +43,13 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(ino, payload);
     encode(snap_op, payload);
     encode(snap_blob, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(ino, p);
     decode(snap_op, p);
@@ -57,7 +57,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

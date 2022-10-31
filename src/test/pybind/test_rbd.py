@@ -1642,7 +1642,7 @@ class TestClone(object):
     def check_children(self, expected):
         actual = self.image.list_children()
         # dedup for cache pools until
-        # http://tracker.ceph.com/issues/8187 is fixed
+        # http://tracker.stone.com/issues/8187 is fixed
         deduped = set([(pool_name, image[1]) for image in actual])
         eq(deduped, set(expected))
 

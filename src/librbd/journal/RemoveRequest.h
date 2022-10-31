@@ -57,7 +57,7 @@ private:
   StoneContext *m_cct;
   Journaler *m_journaler;
   SafeTimer *m_timer;
-  ceph::mutex *m_timer_lock;
+  stone::mutex *m_timer_lock;
   int m_r_saved;
 
   void stat_journal();

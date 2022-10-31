@@ -285,14 +285,14 @@ public:
 
     // if this changes, update the versioning in encode for it!
     void _encode_bits(uint64_t features) const {
-      using ceph::encode;
+      using stone::encode;
       if (!dn_decoded) return;
       encode(dfull, dnbl, features);
       encode(dremote, dnbl);
       encode(dnull, dnbl);
     }
     void _decode_bits() const { 
-      using ceph::decode;
+      using stone::decode;
       if (dn_decoded) return;
       auto p = dnbl.cbegin();
       decode(dfull, p);
@@ -382,7 +382,7 @@ private:
   }
 
   void add_opened_ino(inodeno_t ino) {
-    ceph_assert(!opened_ino);
+    stone_assert(!opened_ino);
     opened_ino = ino;
   }
 
@@ -459,7 +459,7 @@ private:
     }
 
     const auto& pi = in->get_projected_inode();
-    ceph_assert(pi->version > 0);
+    stone_assert(pi->version > 0);
 
     if ((state & fullbit::STATE_DIRTY) && pi->is_backtrace_updated())
       state |= fullbit::STATE_DIRTYPARENT;
@@ -503,7 +503,7 @@ private:
       add_null_dentry(dn, dirty);
       return;
     }
-    ceph_assert(dn->get_projected_linkage()->is_primary());
+    stone_assert(dn->get_projected_linkage()->is_primary());
     add_primary_dentry(dn, 0, dirty, dirty_parent, dirty_pool);
   }
 

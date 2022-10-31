@@ -24,8 +24,8 @@ class FSMapUser {
 public:
   struct fs_info_t {
     fs_info_t() {}
-    void encode(ceph::buffer::list& bl, uint64_t features) const;
-    void decode(ceph::buffer::list::const_iterator &bl);
+    void encode(stone::buffer::list& bl, uint64_t features) const;
+    void decode(stone::buffer::list::const_iterator &bl);
     std::string name;
     fs_cluster_id_t cid = FS_CLUSTER_ID_NONE;
   };
@@ -42,11 +42,11 @@ public:
     return FS_CLUSTER_ID_NONE;
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
 
   void print(std::ostream& out) const;
-  void print_summary(ceph::Formatter *f, std::ostream *out);
+  void print_summary(stone::Formatter *f, std::ostream *out);
 
   static void generate_test_instances(std::list<FSMapUser*>& ls);
 

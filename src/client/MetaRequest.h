@@ -27,7 +27,7 @@ private:
 public:
   uint64_t tid;
   utime_t  op_stamp;
-  ceph_mds_request_head head;
+  stone_mds_request_head head;
   filepath path, path2;
   std::string alternate_name;
   bufferlist data;
@@ -50,7 +50,7 @@ public:
   int      retry_attempt;
   std::atomic<uint64_t> ref = { 1 };
   
-  ceph::cref_t<MClientReply> reply;         // the reply
+  stone::cref_t<MClientReply> reply;         // the reply
   bool kick;
   bool success;
   
@@ -65,9 +65,9 @@ public:
   xlist<MetaRequest*>::item unsafe_dir_item;
   xlist<MetaRequest*>::item unsafe_target_item;
 
-  ceph::condition_variable *caller_cond;          // who to take up
-  ceph::condition_variable *dispatch_cond;        // who to kick back
-  list<ceph::condition_variable*> waitfor_safe;
+  stone::condition_variable *caller_cond;          // who to take up
+  stone::condition_variable *dispatch_cond;        // who to kick back
+  list<stone::condition_variable*> waitfor_safe;
 
   InodeRef target;
   UserPerm perms;
@@ -99,7 +99,7 @@ public:
    */
   void abort(int rc)
   {
-    ceph_assert(rc != 0);
+    stone_assert(rc != 0);
     abort_rc = rc;
   }
 
@@ -164,8 +164,8 @@ public:
   }
 
   // normal fields
-  void set_tid(ceph_tid_t t) { tid = t; }
-  void set_oldest_client_tid(ceph_tid_t t) { head.oldest_client_tid = t; }
+  void set_tid(stone_tid_t t) { tid = t; }
+  void set_oldest_client_tid(stone_tid_t t) { head.oldest_client_tid = t; }
   void inc_num_fwd() { head.num_fwd = head.num_fwd + 1; }
   void set_retry_attempt(int a) { head.num_retry = a; }
   void set_filepath(const filepath& fp) { path = fp; }
@@ -184,7 +184,7 @@ public:
     head.flags = head.flags | STONE_MDS_FLAG_WANT_DENTRY;
   }
   int get_op() { return head.op; }
-  ceph_tid_t get_tid() { return tid; }
+  stone_tid_t get_tid() { return tid; }
   filepath& get_filepath() { return path; }
   filepath& get_filepath2() { return path2; }
 

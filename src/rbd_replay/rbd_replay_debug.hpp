@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Adam Crume <adamcrume@gmail.com>
  *
@@ -16,7 +16,7 @@
 #define _INCLUDED_RBD_REPLAY_DEBUG_H
 
 #include "common/debug.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace rbd_replay {
 
@@ -27,7 +27,7 @@ static const int THREAD_LEVEL = 10;
 
 }
 
-#define dout_subsys ceph_subsys_rbd_replay
+#define dout_subsys stone_subsys_rbd_replay
 #undef dout_prefix
 #define dout_prefix *_dout << "rbd_replay: "
 

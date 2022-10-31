@@ -34,8 +34,8 @@ class Translator(object):
             mons=[localhost],
             clients=[localhost],
             rebuild_every_test=False,
-            conf_file=os.path.join(self.build_dir, 'ceph.conf'),
-            ceph_cmd=os.path.join(self.build_dir, 'bin', 'ceph'),
+            conf_file=os.path.join(self.build_dir, 'stone.conf'),
+            stone_cmd=os.path.join(self.build_dir, 'bin', 'stone'),
             rados_cmd=os.path.join(self.build_dir, 'bin', 'rados'),
             pid_dir=os.path.join(self.build_dir, 'out')
         ))

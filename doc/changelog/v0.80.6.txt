@@ -11,7 +11,7 @@ Date:   Mon Sep 29 13:55:02 2014 -0700
 
     Merge pull request #2603 from dachary/wip-9620-test-mon-thrash-firefly
 
-    qa/workunits/cephtool/test.sh: fix thrash (ultimate)
+    qa/workunits/stonetool/test.sh: fix thrash (ultimate)
 
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -19,7 +19,7 @@ commit 76341b0b7581194273ac787df2b940221825d083
 Author: Loic Dachary <loic-201408@dachary.org>
 Date:   Mon Sep 29 13:47:06 2014 +0200
 
-    qa/workunits/cephtool/test.sh: fix thrash (ultimate)
+    qa/workunits/stonetool/test.sh: fix thrash (ultimate)
 
     Keep the osd trash test to ensure it is a valid command but make it a
     noop by giving it a zero argument (meaning thrash 0 OSD maps).
@@ -30,20 +30,20 @@ Date:   Mon Sep 29 13:47:06 2014 +0200
     side effects are random and it is unnecessarily difficult to ensure they
     are finished.
 
-    http://tracker.ceph.com/issues/9620 Fixes: #9620
+    http://tracker.stone.com/issues/9620 Fixes: #9620
 
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit beade63a17db2e6fc68d1f55332d602f8f7cb93a)
 
     Conflicts:
-	qa/workunits/cephtool/test.sh
+	qa/workunits/stonetool/test.sh
 
 commit 1fafd6bf2ef03672dfa27ec7a201a274927040b7
 Merge: ebb5995 71005c1
 Author: Josh Durgin <josh.durgin@inktank.com>
 Date:   Thu Sep 25 10:08:03 2014 -0700
 
-    Merge pull request #2576 from ceph/wip-9593
+    Merge pull request #2576 from stone/wip-9593
 
     osd/ReplicatedPG: fix objecter locking in start_flush
 
@@ -202,7 +202,7 @@ Date:   Sat Sep 20 12:41:30 2014 +0200
 
     test: check python rados aio_read with buffers containing null
 
-    http://tracker.ceph.com/issues/9547 Refs: #9547
+    http://tracker.stone.com/issues/9547 Refs: #9547
 
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 226c0c7ac6ee95ff2c1665d4e7164e2962c0346e)
@@ -335,7 +335,7 @@ Merge: 668cd13 7b25512
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Sep 12 17:31:03 2014 -0700
 
-    Merge pull request #2479 from ceph/wip-9444
+    Merge pull request #2479 from stone/wip-9444
 
     mds: fix root and mdsdir inodes' rsubdirs
 
@@ -403,7 +403,7 @@ commit bc4108443a17de47b7c582e50fb884396a287152
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Sep 8 13:45:52 2014 -0700
 
-    ceph_test_rados_api_io: add read timeout test
+    stone_test_rados_api_io: add read timeout test
 
     Verify we don't receive data after a timeout.
 
@@ -417,7 +417,7 @@ commit 19e7606545f829e5b9ea0255049d9130c51e42fd
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Sep 8 13:42:43 2014 -0700
 
-    ceph_test_rados_api_*: expose nspace
+    stone_test_rados_api_*: expose nspace
 
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 977d289055d69ab8a7baaf7ef68c013019225833)
@@ -562,10 +562,10 @@ Date:   Sat Aug 23 22:41:30 2014 +1000
 
     Fix FTBFS on alpha due to incorrect check on BLKGETSIZE
 
-    Ceph FTBFS on Alpha with:
+    Stone FTBFS on Alpha with:
 
     ~~~~
-    libtool: compile:  g++ -DHAVE_CONFIG_H -I. -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -DCEPH_LIBDIR=\"/usr/lib/alpha-linux-gnu\" -DCEPH_PKGLIBDIR=\"/usr/lib/alpha-linux-gnu/ceph\" -DGTEST_HAS_TR1_TUPLE=0 -D_FORTIFY_SOURCE=2 -I/usr/include/nss -I/usr/include/nspr -Wall -Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith -Werror=format-security -fno-strict-aliasing -fsigned-char -rdynamic -ftemplate-depth-1024 -Wnon-virtual-dtor -Wno-invalid-offsetof -Wstrict-null-sentinel -g -O2 -Wformat -Werror=format-security -c common/blkdev.cc  -fPIC -DPIC -o common/.libs/blkdev.o
+    libtool: compile:  g++ -DHAVE_CONFIG_H -I. -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -DCEPH_LIBDIR=\"/usr/lib/alpha-linux-gnu\" -DCEPH_PKGLIBDIR=\"/usr/lib/alpha-linux-gnu/stone\" -DGTEST_HAS_TR1_TUPLE=0 -D_FORTIFY_SOURCE=2 -I/usr/include/nss -I/usr/include/nspr -Wall -Wtype-limits -Wignored-qualifiers -Winit-self -Wpointer-arith -Werror=format-security -fno-strict-aliasing -fsigned-char -rdynamic -ftemplate-depth-1024 -Wnon-virtual-dtor -Wno-invalid-offsetof -Wstrict-null-sentinel -g -O2 -Wformat -Werror=format-security -c common/blkdev.cc  -fPIC -DPIC -o common/.libs/blkdev.o
     In file included from /usr/include/alpha-linux-gnu/asm/ioctls.h:4:0,
                      from /usr/include/alpha-linux-gnu/bits/ioctls.h:23,
                      from /usr/include/alpha-linux-gnu/sys/ioctl.h:26,
@@ -635,7 +635,7 @@ Date:   Fri Aug 29 18:13:08 2014 +0200
     jerasure plugin in the OSD. They must also be preloaded in the mon for
     the same reasons.
 
-    http://tracker.ceph.com/issues/9273 Fixes: #9273
+    http://tracker.stone.com/issues/9273 Fixes: #9273
 
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
 
@@ -729,7 +729,7 @@ Merge: 2f11631 9ca451a
 Author: Samuel Just <sam.just@inktank.com>
 Date:   Tue Aug 26 10:30:14 2014 -0700
 
-    Merge pull request #2203 from ceph/wip-scrub-firefly
+    Merge pull request #2203 from stone/wip-scrub-firefly
 
     backport scrub throttling to firefly
 
@@ -828,7 +828,7 @@ Date:   Mon Aug 25 17:05:04 2014 +0200
     of two. This saves a modulo but it is not used where it would make a
     difference. The implementation is changed so it is generic.
 
-    http://tracker.ceph.com/issues/9209 Fixes: #9209
+    http://tracker.stone.com/issues/9209 Fixes: #9209
 
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
     (cherry picked from commit 9449520b121fc6ce0c64948386d4ff77f46f4f5f)
@@ -990,7 +990,7 @@ Date:   Thu Aug 21 14:41:55 2014 +0200
     and should be moved to the load() method instead. This change should be
     done in a separate commit.
 
-    http://tracker.ceph.com/issues/9153 Fixes: #9153
+    http://tracker.stone.com/issues/9153 Fixes: #9153
 
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
 
@@ -1029,18 +1029,18 @@ Date:   Tue Aug 19 01:30:15 2014 +0200
 
     erasure-code: preload the jerasure plugin
 
-    Load the jerasure plugin when ceph-osd starts to avoid the following
+    Load the jerasure plugin when stone-osd starts to avoid the following
     scenario:
 
-    * ceph-osd-v1 is running but did not load jerasure
+    * stone-osd-v1 is running but did not load jerasure
 
-    * ceph-osd-v2 is installed being installed but takes time : the files
-      are installed before ceph-osd is restarted
+    * stone-osd-v2 is installed being installed but takes time : the files
+      are installed before stone-osd is restarted
 
-    * ceph-osd-v1 is required to handle an erasure coded placement group and
+    * stone-osd-v1 is required to handle an erasure coded placement group and
       loads jerasure (the v2 version which is not API compatible)
 
-    * ceph-osd-v1 calls the v2 jerasure plugin and does not reference the
+    * stone-osd-v1 calls the v2 jerasure plugin and does not reference the
       expected part of the code and crashes
 
     Although this problem shows in the context of teuthology, it is unlikely
@@ -1054,7 +1054,7 @@ Date:   Tue Aug 19 01:30:15 2014 +0200
     that load other plugins depending on the CPU features, or even plugins
     such as isa which only work on specific CPU.
 
-    http://tracker.ceph.com/issues/9153 Fixes: #9153
+    http://tracker.stone.com/issues/9153 Fixes: #9153
 
     Backport: firefly
     Signed-off-by: Loic Dachary <loic-201408@dachary.org>
@@ -1104,7 +1104,7 @@ commit 7f9fe22a1c73d5f2783c3303fb9f3a7cfcea61c5
 Author: huangjun <hjwsm1989@gmail.com>
 Date:   Tue Jun 17 13:12:58 2014 +0800
 
-      Fix EINVAL err when use "ceph tell osd.* bench"
+      Fix EINVAL err when use "stone tell osd.* bench"
 
       Signed-off-by: huangjun <hjwsm1989@gmail.com>
     (cherry picked from commit 7dc93a9651f602d9c46311524fc6b54c2f1ac595)
@@ -1113,7 +1113,7 @@ commit 14607fc045aa169f1e8fa6872b412fba8f09d645
 Author: Ma Jianpeng <jianpeng.ma@intel.com>
 Date:   Wed Jul 16 17:48:34 2014 -0700
 
-    qa/workunits/cephtool/test.sh: fix get erasure_code_profile test
+    qa/workunits/stonetool/test.sh: fix get erasure_code_profile test
 
     Manual backport of 4d6899c7560e990650959b442980a7249f0ba4c1
 
@@ -1188,7 +1188,7 @@ commit 92ab6ecf321ab68ea8fe3e8c2b310303a5726af3
 Author: Alfredo Deza <alfredo.deza@inktank.com>
 Date:   Wed Aug 13 15:50:20 2014 -0400
 
-    ceph-disk: linter cleanup
+    stone-disk: linter cleanup
 
     Signed-off-by: Alfredo Deza <alfredo.deza@inktank.com>
     (cherry picked from commit d74ed9d53fab95f27a9ad8e9f5dab7192993f6a3)
@@ -1197,7 +1197,7 @@ commit 08772fd888fb0eca4570bd6b4bb25f8122691cb4
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Aug 13 12:00:50 2014 -0700
 
-    ceph-disk: warn about falling back to sgdisk (once)
+    stone-disk: warn about falling back to sgdisk (once)
 
     This way the user knows something funny might be up if dmcrypt is in use.
 
@@ -1208,7 +1208,7 @@ commit 50166efd205f46fa325dec9636d817387e5d4d3b
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Aug 13 11:40:34 2014 -0700
 
-    ceph-disk: only fall back to sgdisk for 'list' if blkid seems old
+    stone-disk: only fall back to sgdisk for 'list' if blkid seems old
 
     If the blkid doesn't show us any ID_PART_ENTRY_* fields but we know it is
     a GPT partition, *then* fallback.  Otherwise, don't bother.
@@ -1220,7 +1220,7 @@ commit a45e815cb00f1a807691cbf687990839995f7629
 Author: Sage Weil <sage@redhat.com>
 Date:   Wed Aug 13 11:39:47 2014 -0700
 
-    ceph-disk: add get_partition_base() helper
+    stone-disk: add get_partition_base() helper
 
     Return the base devices/disk for a partition device.
 
@@ -1231,7 +1231,7 @@ commit 8c04e475efb4471c605e3c921ec8a03b67934899
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Aug 12 17:26:07 2014 -0700
 
-    ceph-disk: display information about dmcrypted data and journal volumes
+    stone-disk: display information about dmcrypted data and journal volumes
 
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit c7a1ceba441fa99a82e19ed2cd3c6782a5d77636)
@@ -1240,7 +1240,7 @@ commit b09e659226b26002b58c7697f8c600d06fe78c58
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Aug 12 17:25:42 2014 -0700
 
-    ceph-disk: move fs mount probe into a helper
+    stone-disk: move fs mount probe into a helper
 
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit f80ed26d2403ba12e80da6459fc45c22584f72de)
@@ -1249,7 +1249,7 @@ commit 6775f46e4a5862ddbf81bef11016bc036222fda9
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Aug 12 17:25:10 2014 -0700
 
-    ceph-disk: use partition type UUIDs, and blkid
+    stone-disk: use partition type UUIDs, and blkid
 
     Use blkid to give us the GPT partition type.  This lets us distinguish
     between dmcrypt and non-dmcrypt partitions.  Fake it if blkid doesn't
@@ -1264,9 +1264,9 @@ commit 1804a83400b7c3dc07650e09da5224bb999d0940
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Aug 12 13:53:16 2014 -0700
 
-    ceph-disk: fix log syntax error
+    stone-disk: fix log syntax error
 
-      File "/usr/sbin/ceph-disk", line 303, in command_check_call
+      File "/usr/sbin/stone-disk", line 303, in command_check_call
         LOG.info('Running command: %s' % ' '.join(arguments))
     TypeError: sequence item 2: expected string, NoneType found
 
@@ -1292,7 +1292,7 @@ commit 50b700fadf6ce6e0bf14b5daa2288786426d7359
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Aug 11 15:57:52 2014 -0700
 
-    ceph-disk: fix verify_no_in_use check
+    stone-disk: fix verify_no_in_use check
 
     We only need to verify that partitions aren't in use when we want to
     consume the whole device (osd data), not when we want to create an
@@ -1315,7 +1315,7 @@ commit 40649902891244242d5861ccd9538aec026cae3a
 Author: Stuart Longland <stuartl@vrt.com.au>
 Date:   Tue May 6 14:06:36 2014 -0700
 
-    ceph-disk: fix list for encrypted or corrupt volume
+    stone-disk: fix list for encrypted or corrupt volume
 
     Continue gracefully if an fs type is not detected, either because it is
     encrypted or because it is corrupted.
@@ -1336,7 +1336,7 @@ commit 1b0da81d733a36de4a9dc80263058a6cdf05c745
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Aug 15 16:41:43 2014 -0700
 
-    init-ceph: don't use bashism
+    init-stone: don't use bashism
 
            -z STRING
                   the length of STRING is zero
@@ -1552,7 +1552,7 @@ commit 87bf00a2cb93ce2dc904a42c45cc9f43023725c3
 Author: Sage Weil <sage@redhat.com>
 Date:   Sun Aug 10 12:48:29 2014 -0700
 
-    ceph_test_rados_api_tier: fix cache cleanup (ec too)
+    stone_test_rados_api_tier: fix cache cleanup (ec too)
 
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit d7fb7bf5f2059f411633751e376c2270e6040fba)
@@ -1561,7 +1561,7 @@ commit 3be0d731cbe158d837d05c907aefe16aa95977be
 Author: Sage Weil <sage@redhat.com>
 Date:   Sun Aug 10 12:15:38 2014 -0700
 
-    ceph_test_rados_api: fix cleanup of cache pool
+    stone_test_rados_api: fix cleanup of cache pool
 
     We can't simply try to delete everything in there because some items may
     be whiteouts.  Instead, flush+evict everything, then remove overlay, and
@@ -1602,7 +1602,7 @@ Merge: 7da121d cb48cd4
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Aug 12 21:15:26 2014 -0700
 
-    Merge pull request #2231 from ceph/wip-8944-firefly
+    Merge pull request #2231 from stone/wip-8944-firefly
 
     Wip 8944 firefly
 
@@ -1664,7 +1664,7 @@ commit 72c2474e05b918535047181d876678a6a077aa1d
 Author: Alfredo Deza <alfredo.deza@inktank.com>
 Date:   Fri Aug 8 10:16:20 2014 -0400
 
-    init-ceph: conditionally update  after argparsing
+    init-stone: conditionally update  after argparsing
 
     Signed-off-by: Alfredo Deza <alfredo.deza@inktank.com>
     (cherry picked from commit 44ed1885fb588aad7e4729373e06c5933178b5e5)
@@ -1673,7 +1673,7 @@ commit 8d7fb538e0163f828289d7da719692bd36a66f83
 Author: Alfredo Deza <alfredo.deza@inktank.com>
 Date:   Thu Aug 7 11:11:57 2014 -0400
 
-    make ceph-disk use the new init flag for cluster
+    make stone-disk use the new init flag for cluster
 
     Signed-off-by: Alfredo Deza <alfredo.deza@inktank.com>
     (cherry picked from commit d0ccb1cbef86b8ccd8967af892e3582ee80edd55)
@@ -1684,7 +1684,7 @@ Date:   Thu Aug 7 10:48:09 2014 -0400
 
     allow passing a --cluster flag to the init script
 
-    It will fallback to looking at /etc/ceph/$cluster.conf
+    It will fallback to looking at /etc/stone/$cluster.conf
     otherwise.
 
     Signed-off-by: Alfredo Deza <alfredo.deza@inktank.com>
@@ -1703,7 +1703,7 @@ commit 79452540826d0aed7b94d374cc61b5002e89e4a4
 Author: Alfredo Deza <alfredo.deza@inktank.com>
 Date:   Wed Aug 6 15:30:09 2014 -0400
 
-    use  name in /var/lib/ceph paths
+    use  name in /var/lib/stone paths
 
     Signed-off-by: Alfredo Deza <alfredo.deza@inktank.com>
     (cherry picked from commit 3fb25c28e8e3cc62bc541538cc11f5ed41471611)
@@ -1921,7 +1921,7 @@ Date:   Sun Aug 10 17:10:04 2014 +0200
     CrushWrapper::add_simple_ruleset does not return a ruleset, it returns
     a ruleid that must be converted into a ruleset before being returned.
 
-    http://tracker.ceph.com/issues/9044 Fixes: #9044
+    http://tracker.stone.com/issues/9044 Fixes: #9044
 
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 0029a35872d3fc15f9a0d60d095b2e111d6e98a6)
@@ -1936,7 +1936,7 @@ Date:   Sun Aug 10 17:06:33 2014 +0200
     existence, it must convert the ruleid into a ruleset before assigning it
     back to the *ruleset parameter.
 
-    http://tracker.ceph.com/issues/9044 Fixes: #9044
+    http://tracker.stone.com/issues/9044 Fixes: #9044
 
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 04a484a4d5800c9bcf9805d3e87ed0c8dee01c9a)
@@ -2013,7 +2013,7 @@ commit 978f5749f3d08bb4c96529ca2d1b10760ee2606d
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Jul 25 13:51:45 2014 -0700
 
-    ceph_test_rados_api_tier: do fewer writes in HitSetWrite
+    stone_test_rados_api_tier: do fewer writes in HitSetWrite
 
     We don't need to do quite so many writes.  It can be slow when we are
     thrashing and aren't doing anything in parallel.
@@ -2033,7 +2033,7 @@ commit cb48cd47a26d27869884af83012d6a8a684abf25
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Wed Jul 30 14:50:37 2014 -0700
 
-    qa/workunits/cephtool/test_daemon.sh: verify ceph -c works with daemon
+    qa/workunits/stonetool/test_daemon.sh: verify stone -c works with daemon
 
     Signed-off-by: Dan Mick <dan.mick@inktank.com>
     (cherry picked from commit aa9ae1f270293778aa937e7f7e4bcaee3099b9b2)
@@ -2042,7 +2042,7 @@ commit 1ac0e5436da68e441f42a1016b12481046147850
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Wed Jul 30 14:49:02 2014 -0700
 
-    qa/workunits/cephtool/test_daemon.sh: typo
+    qa/workunits/stonetool/test_daemon.sh: typo
 
     Signed-off-by: Dan Mick <dan.mick@inktank.com>
     (cherry picked from commit 22d20f39b7355966554319d5a1aa888967607569)
@@ -2051,7 +2051,7 @@ commit a144950624208d8ed2901fd7421060a706ac2016
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Wed Jul 30 14:48:28 2014 -0700
 
-    qa/workunits/cephtool/test_daemon.sh: allow local ceph command
+    qa/workunits/stonetool/test_daemon.sh: allow local stone command
 
     (cherry picked from commit 97a8d5a9fdbd3a25cc922c242ee57da58c57d0bc)
 
@@ -2059,7 +2059,7 @@ commit 76b593f6268d77e6cf5a9931f6f3524b3f574c09
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Mon Jul 28 21:28:42 2014 -0700
 
-    ceph.in: Pass global args to ceph-conf for proper lookup
+    stone.in: Pass global args to stone-conf for proper lookup
 
     Fixes: #8944
     Signed-off-by: Dan Mick <dan.mick@inktank.com>
@@ -2069,7 +2069,7 @@ commit b65cef678777c1b87d25385595bf0df96168703e
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Jul 14 08:04:16 2014 -0700
 
-    ceph_test_rados_api_tier: fix [EC] HitSet{Read,Write,Trim} tests
+    stone_test_rados_api_tier: fix [EC] HitSet{Read,Write,Trim} tests
 
     The hit_set_ fields can only be set on tier pools as of
     f131dfbaedf6f451572e7aa3a83f653912122953.
@@ -2089,7 +2089,7 @@ commit f8494c87e5276f0587c3341ddef9d7a933dfea11
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Jul 22 06:53:41 2014 -0700
 
-    ceph_test_objectstore: clean up on finish of MoveRename
+    stone_test_objectstore: clean up on finish of MoveRename
 
     Otherwise, we leave collections around, and the next test fails.
 
@@ -2204,7 +2204,7 @@ commit 5db6c12b61e00b0bc8084ead5976a912ece0fc65
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Jul 18 15:46:58 2014 -0700
 
-    ceph_test_objectstore: fix warning
+    stone_test_objectstore: fix warning
 
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit cf98805c09a38cce78ac08317899dc4152ae55a5)
@@ -2263,7 +2263,7 @@ Date:   Fri Jul 18 10:25:51 2014 -0400
     query argument.  The + => ' ' translation is not correct for
     file/directory names.
 
-    Resolves http://tracker.ceph.com/issues/8702
+    Resolves http://tracker.stone.com/issues/8702
 
     Reviewed-by: Yehuda Sadeh <yehuda@redhat.com>
     Signed-off-by: Brian Rak <dn@devicenull.org>
@@ -2421,23 +2421,23 @@ Date:   Wed May 21 07:56:43 2014 +1000
     by John David Anglin <dave.anglin@bell.net>
 
     ~~~~
-    ./include/atomic.h: In member function 'size_t ceph::atomic_t::inc()':
+    ./include/atomic.h: In member function 'size_t stone::atomic_t::inc()':
     ./include/atomic.h:42:36: error: 'AO_fetch_and_add1' was not declared in this scope
            return AO_fetch_and_add1(&val) + 1;
                                         ^
-    ./include/atomic.h: In member function 'size_t ceph::atomic_t::dec()':
+    ./include/atomic.h: In member function 'size_t stone::atomic_t::dec()':
     ./include/atomic.h:45:42: error: 'AO_fetch_and_sub1_write' was not declared in this scope
            return AO_fetch_and_sub1_write(&val) - 1;
                                               ^
-    ./include/atomic.h: In member function 'void ceph::atomic_t::add(size_t)':
+    ./include/atomic.h: In member function 'void stone::atomic_t::add(size_t)':
     ./include/atomic.h:48:36: error: 'AO_fetch_and_add' was not declared in this scope
            AO_fetch_and_add(&val, add_me);
                                         ^
-    ./include/atomic.h: In member function 'void ceph::atomic_t::sub(int)':
+    ./include/atomic.h: In member function 'void stone::atomic_t::sub(int)':
     ./include/atomic.h:52:48: error: 'AO_fetch_and_add_write' was not declared in this scope
            AO_fetch_and_add_write(&val, (AO_t)negsub);
                                                     ^
-    ./include/atomic.h: In member function 'size_t ceph::atomic_t::dec()':
+    ./include/atomic.h: In member function 'size_t stone::atomic_t::dec()':
     ./include/atomic.h:46:5: warning: control reaches end of non-void function [-Wreturn-type]
          }
          ^
@@ -2493,11 +2493,11 @@ Date:   Mon Jul 28 16:54:48 2014 +0800
 
     PGMonitor: fix bug in caculating pool avail space
 
-    Currently for pools with different rules, "ceph df" cannot report
+    Currently for pools with different rules, "stone df" cannot report
     right available space for them, respectively. For detail assisment
     of the bug ,pls refer to bug report #8943
 
-    This patch fix this bug and make ceph df works correctlly.
+    This patch fix this bug and make stone df works correctlly.
 
     Fixes Bug #8943
 
@@ -2610,7 +2610,7 @@ commit a1ddce36ebf1ce479129def364328486fbcc5c86
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Wed Jul 30 14:50:37 2014 -0700
 
-    qa/workunits/cephtool/test_daemon.sh: verify ceph -c works with daemon
+    qa/workunits/stonetool/test_daemon.sh: verify stone -c works with daemon
 
     Signed-off-by: Dan Mick <dan.mick@inktank.com>
     (cherry picked from commit aa9ae1f270293778aa937e7f7e4bcaee3099b9b2)
@@ -2619,7 +2619,7 @@ commit 50a1c08e46eaedd3d81a52f64923228bc8a81c26
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Wed Jul 30 14:49:02 2014 -0700
 
-    qa/workunits/cephtool/test_daemon.sh: typo
+    qa/workunits/stonetool/test_daemon.sh: typo
 
     Signed-off-by: Dan Mick <dan.mick@inktank.com>
     (cherry picked from commit 22d20f39b7355966554319d5a1aa888967607569)
@@ -2628,7 +2628,7 @@ commit 4cfb7dbc5c8fe1a28fb945fa12d9795943db1db5
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Wed Jul 30 14:48:28 2014 -0700
 
-    qa/workunits/cephtool/test_daemon.sh: allow local ceph command
+    qa/workunits/stonetool/test_daemon.sh: allow local stone command
 
     (cherry picked from commit 97a8d5a9fdbd3a25cc922c242ee57da58c57d0bc)
 
@@ -2636,7 +2636,7 @@ commit 120b5d5ad51fa47a2bb0a144821635f5f81b5a2e
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Mon Jul 28 21:28:42 2014 -0700
 
-    ceph.in: Pass global args to ceph-conf for proper lookup
+    stone.in: Pass global args to stone-conf for proper lookup
 
     Fixes: #8944
     Signed-off-by: Dan Mick <dan.mick@inktank.com>
@@ -2646,13 +2646,13 @@ commit e0c27cd7fde84944fd350f7df89e79d9a39ace98
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed Jul 16 17:55:36 2014 -0700
 
-    qa/workunits/cephtool/test.sh: test osd pool get erasure_code_profile
+    qa/workunits/stonetool/test.sh: test osd pool get erasure_code_profile
 
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit ce9f12d7a2202948532fed9da4d763ed03f6b8fa)
 
     Conflicts:
-	qa/workunits/cephtool/test.sh
+	qa/workunits/stonetool/test.sh
 
 commit cf22759cdf1c0a6d258e5c0a2d32268ce051c742
 Author: Ma Jianpeng <jianpeng.ma@intel.com>
@@ -2725,7 +2725,7 @@ commit f19aa8ef0a2cbad7af3135defc1fe3485d377409
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Fri Jul 11 00:40:47 2014 +0100
 
-    qa/workunits: cephtool: adjust pool name where missing as it has changed
+    qa/workunits: stonetool: adjust pool name where missing as it has changed
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 50e93c2138978f7f7c2fbafacc1611c8705a8eab)
@@ -2734,7 +2734,7 @@ commit 163440a764a6fac8f2efbee6a8aee5cbc460dfe6
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Fri Jul 11 00:41:01 2014 +0100
 
-    qa/workunits: cephtool: cleanup after pool creation
+    qa/workunits: stonetool: cleanup after pool creation
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 6cd345732b15e84de17d743e06bc4d85569b79d4)
@@ -2743,7 +2743,7 @@ commit c71c99ff21063e26ebfef431f916463f5606aae2
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Tue Jul 8 19:22:49 2014 +0100
 
-    qa/workunits: cephtool: pool needs to be a tier to be used as such
+    qa/workunits: stonetool: pool needs to be a tier to be used as such
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 704b0a33f2071eabeb8c5b000a6805ef6d498961)
@@ -2752,7 +2752,7 @@ commit ba0a9bf013e8d056a4126b6840621e5a3a8b37fc
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Tue Jul 8 19:22:01 2014 +0100
 
-    qa/workunits: cephtool: test erroneous 'tier remove'
+    qa/workunits: stonetool: test erroneous 'tier remove'
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 49db6767152092d503ccf8ead6f7cb069e152a22)
@@ -2761,7 +2761,7 @@ commit ffec081a551817288303cf3fa00c016bbffe114a
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Thu Jul 3 15:32:46 2014 +0100
 
-    qa/workunits: cephtool: test get/set on both tier and non-tier pools
+    qa/workunits: stonetool: test get/set on both tier and non-tier pools
 
     Make sure gets and sets of tiering-specific variables succeed on tier
     pools and fail on non-tier pools.
@@ -2773,7 +2773,7 @@ commit 55166c3a098d8751ed6dafb3541e45a6439c5491
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Thu Jul 3 15:24:51 2014 +0100
 
-    qa/workunits: cephtool: split get/set on tier pools from get/set tests
+    qa/workunits: stonetool: split get/set on tier pools from get/set tests
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit df5944955d96c041e65964a13b802028e9700904)
@@ -2782,7 +2782,7 @@ commit 0425eb1dbd156d03a51e91c6f3079b8a687d62f3
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Fri Jun 27 22:20:51 2014 +0100
 
-    qa/workunits: cephtool: test for 'osd pool {get,set}-quota'
+    qa/workunits: stonetool: test for 'osd pool {get,set}-quota'
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit b927c0de7d5c7a78bf3c133be52cbc1d769974bb)
@@ -2822,7 +2822,7 @@ commit 99259dff5bad93dce928c1ec07a16b34e3dac3dc
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Jun 30 16:38:10 2014 -0700
 
-    qa/workunits/cephtool/test.sh: sudo ceph daemon
+    qa/workunits/stonetool/test.sh: sudo stone daemon
 
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit bcc09f93761d46202742ca85cce498a352edd494)
@@ -2831,7 +2831,7 @@ commit 4f911d45632fd23c4124bf6b29287ece473d33b4
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Wed Jun 25 21:25:29 2014 +0100
 
-    qa/workunits: cephtool: fix 'osd bench' test
+    qa/workunits: stonetool: fix 'osd bench' test
 
     Commit 7dc93a9651f602d9c46311524fc6b54c2f1ac595 fixed an incorrect
     behavior with the OSD's 'osd bench' value hard-caps.  The test wasn't
@@ -2844,7 +2844,7 @@ commit bad2f513c5bed4602005eaedff9384012103aaee
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Wed Jun 25 01:48:24 2014 +0100
 
-    qa/workunits: cephtool: only run heap profiler test if tcmalloc enabled
+    qa/workunits: stonetool: only run heap profiler test if tcmalloc enabled
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 4b0809a13eb363a15e52a6a57372a0a31a64cef8)
@@ -2853,7 +2853,7 @@ commit 26f9860d19c38595bfced76fce864fe9ad9f3a27
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Tue Jun 24 23:16:17 2014 +0100
 
-    qa/workunits: cephtool: set +e for the tcmalloc tests
+    qa/workunits: stonetool: set +e for the tcmalloc tests
 
     Avoids failing the tests when tcmalloc is not present
 
@@ -2864,7 +2864,7 @@ commit a0720b608db208ac766df8eea53bdbba31d79492
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Tue Jun 24 22:47:31 2014 +0100
 
-    qa/workunits: cephtool: delete unnecessary function calls
+    qa/workunits: stonetool: delete unnecessary function calls
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 67255435151627314cc2fc38732d4fb5efddc3cc)
@@ -2873,7 +2873,7 @@ commit 373224729e9ab2a46afb43b1388d37ff951cc42e
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Tue Jun 24 22:46:44 2014 +0100
 
-    qa/workunits: cephtool: disable bash debug when not running tests
+    qa/workunits: stonetool: disable bash debug when not running tests
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 946bd0dad4b027326b03c13405782b99ef0f91b2)
@@ -2882,7 +2882,7 @@ commit 52d733c7202b393b3b7da48e3aa6db275946757a
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Tue Jun 24 22:39:34 2014 +0100
 
-    qa/workunits: cephtool: allow running individual tests
+    qa/workunits: stonetool: allow running individual tests
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 5d26575ef2d31d745ec4aa69ca1501cd76e5e8db)
@@ -2891,7 +2891,7 @@ commit 96e58d6d38969ba8b47b1924205eb34850a24ed6
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Tue Jun 24 20:55:27 2014 +0100
 
-    qa/workunits: cephtool: cleanup state after erasure-code-profile test
+    qa/workunits: stonetool: cleanup state after erasure-code-profile test
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit f4184086d0d647e064e34308f678ef889e13c373)
@@ -2900,7 +2900,7 @@ commit 4cd5d179375c06a25f04ef8150e2a53aabf7427e
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Wed Jun 25 01:17:58 2014 +0100
 
-    qa/workunits: cephtool: add/remove comments
+    qa/workunits: stonetool: add/remove comments
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 780424df3a107c7da57fc28d64f9e7a4bb47f8e8)
@@ -2909,7 +2909,7 @@ commit 5bcf690b1dbf5a2e4388661f9d280b5934db1c9c
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Thu Jun 26 00:55:46 2014 +0100
 
-    qa/workunits: cephtool: split into properly indented functions
+    qa/workunits: stonetool: split into properly indented functions
 
     The test was a big sequence of commands being run and it has been growing
     organically for a while, even though it has maintained a sense of
@@ -2925,13 +2925,13 @@ Date:   Thu Jun 26 00:55:46 2014 +0100
     (cherry picked from commit 3d14a96f4b2b7094d05ead1dec7547d165857e31)
 
     Conflicts:
-	qa/workunits/cephtool/test.sh
+	qa/workunits/stonetool/test.sh
 
 commit 2af751807d1b51348302734c46d506db294303fd
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Wed Jun 25 01:12:55 2014 +0100
 
-    qa/workunits: cephtool: move test line to where it's more appropriate
+    qa/workunits: stonetool: move test line to where it's more appropriate
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 04658b7b2b5f98ae81ffb3f77303745e6d46eb81)
@@ -2940,13 +2940,13 @@ commit 5bf9e3c7b59d7ce5996d4d05312b4a92f34bbcb6
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Wed Jun 25 01:11:52 2014 +0100
 
-    qa/workunits: cephtool: split into functions
+    qa/workunits: stonetool: split into functions
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit db6cc133ba4bb38b3c11eb835fd3983dc2f6b00e)
 
     Conflicts:
-	qa/workunits/cephtool/test.sh
+	qa/workunits/stonetool/test.sh
 
 commit c898c9736950437256b8c261106f2827fc160e01
 Author: Loic Dachary <loic@dachary.org>
@@ -2961,13 +2961,13 @@ commit 5b72674238db80e62cf3d5cec1d94be5c0102388
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Fri May 23 17:02:23 2014 +0100
 
-    qa/workunits/cephtool: test setting options using SI units
+    qa/workunits/stonetool: test setting options using SI units
 
     Signed-off-by: Joao Eduardo Luis <joao.luis@inktank.com>
     (cherry picked from commit 38405d3554dfb0caf2b0a2c010b95a61bdb99349)
 
     Conflicts:
-	qa/workunits/cephtool/test.sh
+	qa/workunits/stonetool/test.sh
 
 commit aacf67d13f81fcc88881091d175fee9ecb0f8954
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
@@ -3134,10 +3134,10 @@ Date:   Thu Jun 19 00:49:13 2014 +0200
 
     erasure-code: create default profile if necessary
 
-    After an upgrade to firefly, the existing Ceph clusters do not have the
+    After an upgrade to firefly, the existing Stone clusters do not have the
     default erasure code profile. Although it may be created with
 
-       ceph osd erasure-code-profile set default
+       stone osd erasure-code-profile set default
 
     it was not included in the release notes and is confusing for the
     administrator.
@@ -3147,7 +3147,7 @@ Date:   Thu Jun 19 00:49:13 2014 +0200
     not found.
 
     In order to avoid code duplication, the default erasure code profile
-    code creation that happens when a new firefly ceph cluster is created is
+    code creation that happens when a new firefly stone cluster is created is
     encapsulated in the OSDMap::get_erasure_code_profile_default method.
 
     Conversely, handling the pending change in OSDMonitor is not
@@ -3157,7 +3157,7 @@ Date:   Thu Jun 19 00:49:13 2014 +0200
     done. It is unclear if having a function would lead to smaller or more
     maintainable code.
 
-    http://tracker.ceph.com/issues/8601 Fixes: #8601
+    http://tracker.stone.com/issues/8601 Fixes: #8601
 
     Backport: firefly
     Signed-off-by: Loic Dachary <loic@dachary.org>

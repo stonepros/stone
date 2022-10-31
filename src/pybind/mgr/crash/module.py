@@ -350,7 +350,7 @@ class Module(MgrModule):
 
     COMMANDS = [
         {
-            'cmd': 'crash info name=id,type=CephString',
+            'cmd': 'crash info name=id,type=StoneString',
             'desc': 'show crash dump metadata',
             'perm': 'r',
             'handler': do_info,
@@ -374,13 +374,13 @@ class Module(MgrModule):
             'handler': do_post,
         },
         {
-            'cmd': 'crash prune name=keep,type=CephString',
+            'cmd': 'crash prune name=keep,type=StoneString',
             'desc': 'Remove crashes older than <keep> days',
             'perm': 'rw',
             'handler': do_prune,
         },
         {
-            'cmd': 'crash rm name=id,type=CephString',
+            'cmd': 'crash rm name=id,type=StoneString',
             'desc': 'Remove a saved crash <id>',
             'perm': 'rw',
             'handler': do_rm,
@@ -392,13 +392,13 @@ class Module(MgrModule):
             'handler': do_stat,
         },
         {
-            'cmd': 'crash json_report name=hours,type=CephString',
+            'cmd': 'crash json_report name=hours,type=StoneString',
             'desc': 'Crashes in the last <hours> hours',
             'perm': 'r',
             'handler': do_json_report,
         },
         {
-            'cmd': 'crash archive name=id,type=CephString',
+            'cmd': 'crash archive name=id,type=StoneString',
             'desc': 'Acknowledge a crash and silence health warning(s)',
             'perm': 'w',
             'handler': do_archive,

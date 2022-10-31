@@ -17,7 +17,7 @@
 
 #include "auth/AuthClientHandler.h"
 #include "AuthNoneProtocol.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 
 class AuthNoneClientHandler : public AuthClientHandler {
@@ -33,11 +33,11 @@ public:
   void reset() override { }
 
   void prepare_build_request() override {}
-  int build_request(ceph::buffer::list& bl) const override { return 0; }
-  int handle_response(int ret, ceph::buffer::list::const_iterator& iter,
+  int build_request(stone::buffer::list& bl) const override { return 0; }
+  int handle_response(int ret, stone::buffer::list::const_iterator& iter,
 		      CryptoKey *session_key,
 		      std::string *connection_secret) override { return 0; }
-  bool build_rotating_request(ceph::buffer::list& bl) const override { return false; }
+  bool build_rotating_request(stone::buffer::list& bl) const override { return false; }
 
   int get_protocol() const override { return STONE_AUTH_NONE; }
   

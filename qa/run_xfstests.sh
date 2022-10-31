@@ -246,7 +246,7 @@ function do_mkfs() {
 function setup() {
 	arg_count 0 $#
 
-	wget -P "${TESTDIR}" http://download.ceph.com/qa/xfstests.tar.gz
+	wget -P "${TESTDIR}" http://download.stone.com/qa/xfstests.tar.gz
 	tar zxf "${TESTDIR}/xfstests.tar.gz" -C "$(dirname "${XFSTESTS_DIR}")"
 	mkdir "${TEST_DIR}"
 	mkdir "${SCRATCH_MNT}"

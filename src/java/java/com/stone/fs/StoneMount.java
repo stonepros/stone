@@ -17,7 +17,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.IOException;
 import java.io.FileNotFoundException;
@@ -26,12 +26,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.lang.String;
 
-import com.ceph.crush.Bucket;
+import com.stone.crush.Bucket;
 
-public class CephMount {
+public class StoneMount {
 
   /*
-   * Set via JNI callback in native_ceph_create
+   * Set via JNI callback in native_stone_create
    *
    * Do not touch!
    */
@@ -99,11 +99,11 @@ public class CephMount {
   }
 
   static synchronized void loadLibrary() {
-    CephNativeLoader.getInstance().loadLibrary();
+    StoneNativeLoader.getInstance().loadLibrary();
   }
 
   /*
-   * Package-private: called from CephNativeLoader
+   * Package-private: called from StoneNativeLoader
    */
   static native void native_initialize();
 
@@ -116,7 +116,7 @@ public class CephMount {
 
   /*
    * Controls clean-up synchronization between the constructor and finalize().
-   * If native_ceph_create fails, then we want a call to finalize() to not
+   * If native_stone_create fails, then we want a call to finalize() to not
    * attempt to clean-up native context, because there is none.
    */
   private boolean initialized = false;
@@ -132,28 +132,28 @@ public class CephMount {
         unmount();
       } catch (Exception e) {}
       try {
-        native_ceph_release(instance_ptr);
+        native_stone_release(instance_ptr);
       } catch (Exception e) {}
     }
     super.finalize();
   }
 
   /**
-   * Create a new CephMount with specific client id.
+   * Create a new StoneMount with specific client id.
    *
    * @param id client id.
    */
-  public CephMount(String id) {
-    native_ceph_create(this, id);
+  public StoneMount(String id) {
+    native_stone_create(this, id);
     initialized = true;
   }
 
-  private static native int native_ceph_create(CephMount mount, String id);
+  private static native int native_stone_create(StoneMount mount, String id);
 
   /**
-   * Create a new CephMount with default client id.
+   * Create a new StoneMount with default client id.
    */
-  public CephMount() {
+  public StoneMount() {
     this(null);
   }
 
@@ -165,13 +165,13 @@ public class CephMount {
   public void mount(String root) {
     wlock.lock();
     try {
-      native_ceph_mount(instance_ptr, root);
+      native_stone_mount(instance_ptr, root);
     } finally {
       wlock.unlock();
     }
   }
 
-  private static native int native_ceph_mount(long mountp, String root);
+  private static native int native_stone_mount(long mountp, String root);
 
   /**
    * Deactivate the mount.
@@ -182,18 +182,18 @@ public class CephMount {
   public void unmount() {
     wlock.lock();
     try {
-      native_ceph_unmount(instance_ptr);
+      native_stone_unmount(instance_ptr);
     } finally {
       wlock.unlock();
     }
   }
 
-  private static native int native_ceph_unmount(long mountp);
+  private static native int native_stone_unmount(long mountp);
 
   /*
-   * Private access to low-level ceph_release.
+   * Private access to low-level stone_release.
    */
-  private static native int native_ceph_release(long mountp);
+  private static native int native_stone_release(long mountp);
 
   /**
    * Load configuration from a file.
@@ -203,13 +203,13 @@ public class CephMount {
   public void conf_read_file(String path) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_conf_read_file(instance_ptr, path);
+      native_stone_conf_read_file(instance_ptr, path);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_conf_read_file(long mountp, String path);
+  private static native int native_stone_conf_read_file(long mountp, String path);
 
   /**
    * Set the value of a configuration option.
@@ -220,13 +220,13 @@ public class CephMount {
   public void conf_set(String option, String value) {
     rlock.lock();
     try {
-      native_ceph_conf_set(instance_ptr, option, value);
+      native_stone_conf_set(instance_ptr, option, value);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_conf_set(long mountp, String option, String value);
+  private static native int native_stone_conf_set(long mountp, String option, String value);
 
   /**
    * Get the value of a configuration option.
@@ -237,46 +237,46 @@ public class CephMount {
   public String conf_get(String option) {
     rlock.lock();
     try {
-      return native_ceph_conf_get(instance_ptr, option);
+      return native_stone_conf_get(instance_ptr, option);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native String native_ceph_conf_get(long mountp, String option);
+  private static native String native_stone_conf_get(long mountp, String option);
 
   /**
    * Get file system status.
    *
    * @param path Path to file in file system.
-   * @param statvfs CephStatVFS structure to hold status.
+   * @param statvfs StoneStatVFS structure to hold status.
    */
-  public void statfs(String path, CephStatVFS statvfs) throws FileNotFoundException {
+  public void statfs(String path, StoneStatVFS statvfs) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_statfs(instance_ptr, path, statvfs);
+      native_stone_statfs(instance_ptr, path, statvfs);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_statfs(long mountp, String path, CephStatVFS statvfs);
+  private static native int native_stone_statfs(long mountp, String path, StoneStatVFS statvfs);
 
   /**
    * Get the current working directory.
    *
-   * @return The current working directory in Ceph.
+   * @return The current working directory in Stone.
    */
   public String getcwd() {
     rlock.lock();
     try {
-      return native_ceph_getcwd(instance_ptr);
+      return native_stone_getcwd(instance_ptr);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native String native_ceph_getcwd(long mountp);
+  private static native String native_stone_getcwd(long mountp);
 
   /**
    * Set the current working directory.
@@ -286,13 +286,13 @@ public class CephMount {
   public void chdir(String path) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_chdir(instance_ptr, path);
+      native_stone_chdir(instance_ptr, path);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_chdir(long mountp, String cwd);
+  private static native int native_stone_chdir(long mountp, String cwd);
 
   /**
    * List the contents of a directory.
@@ -303,13 +303,13 @@ public class CephMount {
   public String[] listdir(String dir) throws FileNotFoundException {
     rlock.lock();
     try {
-      return native_ceph_listdir(instance_ptr, dir);
+      return native_stone_listdir(instance_ptr, dir);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native String[] native_ceph_listdir(long mountp, String path);
+  private static native String[] native_stone_listdir(long mountp, String path);
 
   /**
    * Create a hard link to an existing file.
@@ -320,13 +320,13 @@ public class CephMount {
   public void link(String oldpath, String newpath) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_link(instance_ptr, oldpath, newpath);
+      native_stone_link(instance_ptr, oldpath, newpath);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_link(long mountp, String existing, String newname);
+  private static native int native_stone_link(long mountp, String existing, String newname);
 
   /**
    * Unlink/delete a name from the file system.
@@ -336,13 +336,13 @@ public class CephMount {
   public void unlink(String path) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_unlink(instance_ptr, path);
+      native_stone_unlink(instance_ptr, path);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_unlink(long mountp, String path);
+  private static native int native_stone_unlink(long mountp, String path);
 
   /**
    * Rename a file or directory.
@@ -353,13 +353,13 @@ public class CephMount {
   public void rename(String from, String to) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_rename(instance_ptr, from, to);
+      native_stone_rename(instance_ptr, from, to);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_rename(long mountp, String from, String to);
+  private static native int native_stone_rename(long mountp, String from, String to);
 
   /**
    * Create a directory.
@@ -370,13 +370,13 @@ public class CephMount {
   public void mkdir(String path, int mode) {
     rlock.lock();
     try {
-      native_ceph_mkdir(instance_ptr, path, mode);
+      native_stone_mkdir(instance_ptr, path, mode);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_mkdir(long mountp, String path, int mode);
+  private static native int native_stone_mkdir(long mountp, String path, int mode);
 
   /**
    * Create a directory and all parents.
@@ -387,13 +387,13 @@ public class CephMount {
   public void mkdirs(String path, int mode) throws IOException {
     rlock.lock();
     try {
-      native_ceph_mkdirs(instance_ptr, path, mode);
+      native_stone_mkdirs(instance_ptr, path, mode);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_mkdirs(long mountp, String path, int mode);
+  private static native int native_stone_mkdirs(long mountp, String path, int mode);
 
   /**
    * Delete a directory.
@@ -403,13 +403,13 @@ public class CephMount {
   public void rmdir(String path) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_rmdir(instance_ptr, path);
+      native_stone_rmdir(instance_ptr, path);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_rmdir(long mountp, String path);
+  private static native int native_stone_rmdir(long mountp, String path);
 
   /**
    * Read the value of a symbolic link.
@@ -417,13 +417,13 @@ public class CephMount {
   public String readlink(String path) throws FileNotFoundException {
     rlock.lock();
     try {
-      return native_ceph_readlink(instance_ptr, path);
+      return native_stone_readlink(instance_ptr, path);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native String native_ceph_readlink(long mountp, String path);
+  private static native String native_stone_readlink(long mountp, String path);
 
   /**
    * Create a symbolic link.
@@ -434,65 +434,65 @@ public class CephMount {
   public void symlink(String oldpath, String newpath) {
     rlock.lock();
     try {
-      native_ceph_symlink(instance_ptr, oldpath, newpath);
+      native_stone_symlink(instance_ptr, oldpath, newpath);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_symlink(long mountp, String existing, String newname);
+  private static native int native_stone_symlink(long mountp, String existing, String newname);
 
   /**
    * Get file status.
    *
    * @param path Path of file to stat.
-   * @param stat CephStat structure to hold file status.
+   * @param stat StoneStat structure to hold file status.
    */
-  public void stat(String path, CephStat stat) throws FileNotFoundException, CephNotDirectoryException {
+  public void stat(String path, StoneStat stat) throws FileNotFoundException, StoneNotDirectoryException {
     rlock.lock();
     try {
-      native_ceph_stat(instance_ptr, path, stat);
+      native_stone_stat(instance_ptr, path, stat);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_stat(long mountp, String path, CephStat stat);
+  private static native int native_stone_stat(long mountp, String path, StoneStat stat);
 
   /**
    * Get file status, without following symlinks.
    *
    * @param path Path of file to stat.
-   * @param stat CephStat structure to hold file status.
+   * @param stat StoneStat structure to hold file status.
    */
-  public void lstat(String path, CephStat stat) throws FileNotFoundException, CephNotDirectoryException {
+  public void lstat(String path, StoneStat stat) throws FileNotFoundException, StoneNotDirectoryException {
     rlock.lock();
     try {
-      native_ceph_lstat(instance_ptr, path, stat);
+      native_stone_lstat(instance_ptr, path, stat);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_lstat(long mountp, String path, CephStat stat);
+  private static native int native_stone_lstat(long mountp, String path, StoneStat stat);
 
   /**
    * Set file attributes.
    *
    * @param path Path to file.
-   * @param stat CephStat structure holding attributes.
+   * @param stat StoneStat structure holding attributes.
    * @param mask Mask specifying which attributes to set.
    */
-  public void setattr(String path, CephStat stat, int mask) throws FileNotFoundException {
+  public void setattr(String path, StoneStat stat, int mask) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_setattr(instance_ptr, path, stat, mask);
+      native_stone_setattr(instance_ptr, path, stat, mask);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_setattr(long mountp, String relpath, CephStat stat, int mask);
+  private static native int native_stone_setattr(long mountp, String relpath, StoneStat stat, int mask);
 
   /**
    * Change file mode.
@@ -503,13 +503,13 @@ public class CephMount {
   public void chmod(String path, int mode) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_chmod(instance_ptr, path, mode);
+      native_stone_chmod(instance_ptr, path, mode);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_chmod(long mountp, String path, int mode);
+  private static native int native_stone_chmod(long mountp, String path, int mode);
 
   /**
    * Change file mode of an open file.
@@ -520,13 +520,13 @@ public class CephMount {
   public void fchmod(int fd, int mode) {
     rlock.lock();
     try {
-      native_ceph_fchmod(instance_ptr, fd, mode);
+      native_stone_fchmod(instance_ptr, fd, mode);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_fchmod(long mountp, int fd, int mode);
+  private static native int native_stone_fchmod(long mountp, int fd, int mode);
 
   /**
    * Truncate a file to a specified length.
@@ -537,13 +537,13 @@ public class CephMount {
   public void truncate(String path, long size) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_truncate(instance_ptr, path, size);
+      native_stone_truncate(instance_ptr, path, size);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_truncate(long mountp, String path, long size);
+  private static native int native_stone_truncate(long mountp, String path, long size);
 
   /**
    * Open a file.
@@ -556,13 +556,13 @@ public class CephMount {
   public int open(String path, int flags, int mode) throws FileNotFoundException {
     rlock.lock();
     try {
-      return native_ceph_open(instance_ptr, path, flags, mode);
+      return native_stone_open(instance_ptr, path, flags, mode);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_open(long mountp, String path, int flags, int mode);
+  private static native int native_stone_open(long mountp, String path, int flags, int mode);
 
   /**
    * Open a file with a specific file layout.
@@ -580,14 +580,14 @@ public class CephMount {
       int object_size, String data_pool) throws FileNotFoundException {
     rlock.lock();
     try {
-      return native_ceph_open_layout(instance_ptr, path, flags, mode, stripe_unit,
+      return native_stone_open_layout(instance_ptr, path, flags, mode, stripe_unit,
           stripe_count, object_size, data_pool);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_open_layout(long mountp, String path,
+  private static native int native_stone_open_layout(long mountp, String path,
       int flags, int mode, int stripe_unit, int stripe_count, int object_size, String data_pool);
 
   /**
@@ -598,13 +598,13 @@ public class CephMount {
   public void close(int fd) {
     rlock.lock();
     try {
-      native_ceph_close(instance_ptr, fd);
+      native_stone_close(instance_ptr, fd);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_close(long mountp, int fd);
+  private static native int native_stone_close(long mountp, int fd);
 
   /**
    * Seek to a position in a file.
@@ -617,13 +617,13 @@ public class CephMount {
   public long lseek(int fd, long offset, int whence) {
     rlock.lock();
     try {
-      return native_ceph_lseek(instance_ptr, fd, offset, whence);
+      return native_stone_lseek(instance_ptr, fd, offset, whence);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native long native_ceph_lseek(long mountp, int fd, long offset, int whence);
+  private static native long native_stone_lseek(long mountp, int fd, long offset, int whence);
 
   /**
    * Read from a file.
@@ -637,13 +637,13 @@ public class CephMount {
   public long read(int fd, byte[] buf, long size, long offset) {
     rlock.lock();
     try {
-      return native_ceph_read(instance_ptr, fd, buf, size, offset);
+      return native_stone_read(instance_ptr, fd, buf, size, offset);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native long native_ceph_read(long mountp, int fd, byte[] buf, long size, long offset);
+  private static native long native_stone_read(long mountp, int fd, byte[] buf, long size, long offset);
 
   /**
    * Write to a file at a specific offset.
@@ -657,13 +657,13 @@ public class CephMount {
   public long write(int fd, byte[] buf, long size, long offset) {
     rlock.lock();
     try {
-      return native_ceph_write(instance_ptr, fd, buf, size, offset);
+      return native_stone_write(instance_ptr, fd, buf, size, offset);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native long native_ceph_write(long mountp, int fd, byte[] buf, long size, long offset);
+  private static native long native_stone_write(long mountp, int fd, byte[] buf, long size, long offset);
 
   /**
    * Truncate a file.
@@ -674,13 +674,13 @@ public class CephMount {
   public void ftruncate(int fd, long size) {
     rlock.lock();
     try {
-      native_ceph_ftruncate(instance_ptr, fd, size);
+      native_stone_ftruncate(instance_ptr, fd, size);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_ftruncate(long mountp, int fd, long size);
+  private static native int native_stone_ftruncate(long mountp, int fd, long size);
 
   /**
    * Synchronize a file with the file system.
@@ -691,13 +691,13 @@ public class CephMount {
   public void fsync(int fd, boolean dataonly) {
     rlock.lock();
     try {
-      native_ceph_fsync(instance_ptr, fd, dataonly);
+      native_stone_fsync(instance_ptr, fd, dataonly);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_fsync(long mountp, int fd, boolean dataonly);
+  private static native int native_stone_fsync(long mountp, int fd, boolean dataonly);
 
   /**
    * Apply or remove an advisory lock.
@@ -712,13 +712,13 @@ public class CephMount {
   public void flock(int fd, int operation, long owner) throws IOException {
     rlock.lock();
     try {
-      native_ceph_flock(instance_ptr, fd, operation, owner);
+      native_stone_flock(instance_ptr, fd, operation, owner);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_flock(long mountp, int fd, int operation, long owner);
+  private static native int native_stone_flock(long mountp, int fd, int operation, long owner);
 
   /**
    * Get file status.
@@ -726,16 +726,16 @@ public class CephMount {
    * @param fd The file descriptor.
    * @param stat The object in which to store the status.
    */
-  public void fstat(int fd, CephStat stat) {
+  public void fstat(int fd, StoneStat stat) {
     rlock.lock();
     try {
-      native_ceph_fstat(instance_ptr, fd, stat);
+      native_stone_fstat(instance_ptr, fd, stat);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_fstat(long mountp, int fd, CephStat stat);
+  private static native int native_stone_fstat(long mountp, int fd, StoneStat stat);
 
   /**
    * Synchronize the client with the file system.
@@ -743,13 +743,13 @@ public class CephMount {
   public void sync_fs() {
     rlock.lock();
     try {
-      native_ceph_sync_fs(instance_ptr);
+      native_stone_sync_fs(instance_ptr);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_sync_fs(long mountp);
+  private static native int native_stone_sync_fs(long mountp);
 
   /**
    * Get an extended attribute value.
@@ -766,13 +766,13 @@ public class CephMount {
   public long getxattr(String path, String name, byte[] buf) throws FileNotFoundException {
     rlock.lock();
     try {
-      return native_ceph_getxattr(instance_ptr, path, name, buf);
+      return native_stone_getxattr(instance_ptr, path, name, buf);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native long native_ceph_getxattr(long mountp, String path, String name, byte[] buf);
+  private static native long native_stone_getxattr(long mountp, String path, String name, byte[] buf);
 
   /**
    * Get an extended attribute value of a symbolic link.
@@ -789,13 +789,13 @@ public class CephMount {
   public long lgetxattr(String path, String name, byte[] buf) throws FileNotFoundException {
     rlock.lock();
     try {
-      return native_ceph_lgetxattr(instance_ptr, path, name, buf);
+      return native_stone_lgetxattr(instance_ptr, path, name, buf);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native long native_ceph_lgetxattr(long mountp, String path, String name, byte[] buf);
+  private static native long native_stone_lgetxattr(long mountp, String path, String name, byte[] buf);
 
   /**
    * List extended attributes.
@@ -806,13 +806,13 @@ public class CephMount {
   public String[] listxattr(String path) throws FileNotFoundException {
     rlock.lock();
     try {
-      return native_ceph_listxattr(instance_ptr, path);
+      return native_stone_listxattr(instance_ptr, path);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native String[] native_ceph_listxattr(long mountp, String path);
+  private static native String[] native_stone_listxattr(long mountp, String path);
 
   /**
    * List extended attributes of a symbolic link.
@@ -823,13 +823,13 @@ public class CephMount {
   public String[] llistxattr(String path) throws FileNotFoundException {
     rlock.lock();
     try {
-      return native_ceph_llistxattr(instance_ptr, path);
+      return native_stone_llistxattr(instance_ptr, path);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native String[] native_ceph_llistxattr(long mountp, String path);
+  private static native String[] native_stone_llistxattr(long mountp, String path);
 
   /**
    * Remove an extended attribute.
@@ -840,13 +840,13 @@ public class CephMount {
   public void removexattr(String path, String name) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_removexattr(instance_ptr, path, name);
+      native_stone_removexattr(instance_ptr, path, name);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_removexattr(long mountp, String path, String name);
+  private static native int native_stone_removexattr(long mountp, String path, String name);
 
   /**
    * Remove an extended attribute from a symbolic link.
@@ -857,13 +857,13 @@ public class CephMount {
   public void lremovexattr(String path, String name) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_lremovexattr(instance_ptr, path, name);
+      native_stone_lremovexattr(instance_ptr, path, name);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_lremovexattr(long mountp, String path, String name);
+  private static native int native_stone_lremovexattr(long mountp, String path, String name);
 
   /**
    * Set the value of an extended attribute.
@@ -877,13 +877,13 @@ public class CephMount {
   public void setxattr(String path, String name, byte[] buf, long size, int flags) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_setxattr(instance_ptr, path, name, buf, size, flags);
+      native_stone_setxattr(instance_ptr, path, name, buf, size, flags);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_setxattr(long mountp, String path, String name, byte[] buf, long size, int flags);
+  private static native int native_stone_setxattr(long mountp, String path, String name, byte[] buf, long size, int flags);
 
   /**
    * Set the value of an extended attribute on a symbolic link.
@@ -897,13 +897,13 @@ public class CephMount {
   public void lsetxattr(String path, String name, byte[] buf, long size, int flags) throws FileNotFoundException {
     rlock.lock();
     try {
-      native_ceph_lsetxattr(instance_ptr, path, name, buf, size, flags);
+      native_stone_lsetxattr(instance_ptr, path, name, buf, size, flags);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_lsetxattr(long mountp, String path, String name, byte[] buf, long size, int flags);
+  private static native int native_stone_lsetxattr(long mountp, String path, String name, byte[] buf, long size, int flags);
 
   /**
    * Get the stripe unit of a file.
@@ -914,13 +914,13 @@ public class CephMount {
   public int get_file_stripe_unit(int fd) {
     rlock.lock();
     try {
-      return native_ceph_get_file_stripe_unit(instance_ptr, fd);
+      return native_stone_get_file_stripe_unit(instance_ptr, fd);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_get_file_stripe_unit(long mountp, int fd);
+  private static native int native_stone_get_file_stripe_unit(long mountp, int fd);
 
   /**
    * Get the name of the pool a file is stored in.
@@ -931,29 +931,29 @@ public class CephMount {
   public String get_file_pool_name(int fd) {
     rlock.lock();
     try {
-      return native_ceph_get_file_pool_name(instance_ptr, fd);
+      return native_stone_get_file_pool_name(instance_ptr, fd);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native String native_ceph_get_file_pool_name(long mountp, int fd);
+  private static native String native_stone_get_file_pool_name(long mountp, int fd);
   
   /**
-   * Get the default data pool of cephfs.
+   * Get the default data pool of stonefs.
    * 
    * @return The pool name.
    */ 
   public String get_default_data_pool_name() {
     rlock.lock();
     try {
-      return native_ceph_get_default_data_pool_name(instance_ptr);
+      return native_stone_get_default_data_pool_name(instance_ptr);
     } finally {
       rlock.unlock();
     }
   }
   
-  private static native String native_ceph_get_default_data_pool_name(long mountp);
+  private static native String native_stone_get_default_data_pool_name(long mountp);
 
   /**
    * Get the replication of a file.
@@ -964,13 +964,13 @@ public class CephMount {
   public int get_file_replication(int fd) {
     rlock.lock();
     try {
-      return native_ceph_get_file_replication(instance_ptr, fd);
+      return native_stone_get_file_replication(instance_ptr, fd);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_get_file_replication(long mountp, int fd);
+  private static native int native_stone_get_file_replication(long mountp, int fd);
 
   /**
    * Favor reading from local replicas when possible.
@@ -980,13 +980,13 @@ public class CephMount {
   public void localize_reads(boolean state) {
     rlock.lock();
     try {
-      native_ceph_localize_reads(instance_ptr, state);
+      native_stone_localize_reads(instance_ptr, state);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_localize_reads(long mountp, boolean on);
+  private static native int native_stone_localize_reads(long mountp, boolean on);
 
   /**
    * Get file layout stripe unit granularity.
@@ -996,13 +996,13 @@ public class CephMount {
   public int get_stripe_unit_granularity() {
     rlock.lock();
     try {
-      return native_ceph_get_stripe_unit_granularity(instance_ptr);
+      return native_stone_get_stripe_unit_granularity(instance_ptr);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_get_stripe_unit_granularity(long mountp);
+  private static native int native_stone_get_stripe_unit_granularity(long mountp);
 
   /**
    * Get the pool id for the named pool.
@@ -1010,18 +1010,18 @@ public class CephMount {
    * @param name The pool name.
    * @return The pool id.
    */
-  public int get_pool_id(String name) throws CephPoolException {
+  public int get_pool_id(String name) throws StonePoolException {
     rlock.lock();
     try {
-      return native_ceph_get_pool_id(instance_ptr, name);
+      return native_stone_get_pool_id(instance_ptr, name);
     } catch (FileNotFoundException e) {
-      throw new CephPoolException("pool name " + name + " not found");
+      throw new StonePoolException("pool name " + name + " not found");
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_get_pool_id(long mountp, String name) throws FileNotFoundException;
+  private static native int native_stone_get_pool_id(long mountp, String name) throws FileNotFoundException;
 
   /**
    * Get the pool replication factor.
@@ -1029,36 +1029,36 @@ public class CephMount {
    * @param pool_id The pool id.
    * @return Number of replicas stored in the pool.
    */
-  public int get_pool_replication(int pool_id) throws CephPoolException {
+  public int get_pool_replication(int pool_id) throws StonePoolException {
     rlock.lock();
     try {
-      return native_ceph_get_pool_replication(instance_ptr, pool_id);
+      return native_stone_get_pool_replication(instance_ptr, pool_id);
     } catch (FileNotFoundException e) {
-      throw new CephPoolException("pool id " + pool_id + " not found");
+      throw new StonePoolException("pool id " + pool_id + " not found");
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native int native_ceph_get_pool_replication(long mountp, int pool_id) throws FileNotFoundException;
+  private static native int native_stone_get_pool_replication(long mountp, int pool_id) throws FileNotFoundException;
 
   /**
    * Get file extent containing a given offset.
    *
    * @param fd The file descriptor.
    * @param offset Offset in file.
-   * @return A CephFileExtent object.
+   * @return A StoneFileExtent object.
    */
-  public CephFileExtent get_file_extent(int fd, long offset) {
+  public StoneFileExtent get_file_extent(int fd, long offset) {
     rlock.lock();
     try {
-      return native_ceph_get_file_extent_osds(instance_ptr, fd, offset);
+      return native_stone_get_file_extent_osds(instance_ptr, fd, offset);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native CephFileExtent native_ceph_get_file_extent_osds(long mountp, int fd, long offset);
+  private static native StoneFileExtent native_stone_get_file_extent_osds(long mountp, int fd, long offset);
 
   /**
    * Get the fully qualified CRUSH location of an OSD.
@@ -1072,7 +1072,7 @@ public class CephMount {
   public Bucket[] get_osd_crush_location(int osd) {
     rlock.lock();
     try {
-      String[] parts = native_ceph_get_osd_crush_location(instance_ptr, osd);
+      String[] parts = native_stone_get_osd_crush_location(instance_ptr, osd);
       Bucket[] path = new Bucket[parts.length / 2];
       for (int i = 0; i < path.length; i++)
         path[i] = new Bucket(parts[i*2], parts[i*2+1]);
@@ -1082,7 +1082,7 @@ public class CephMount {
     }
   }
 
-  private static native String[] native_ceph_get_osd_crush_location(long mountp, int osd);
+  private static native String[] native_stone_get_osd_crush_location(long mountp, int osd);
 
   /**
    * Get the network address of an OSD.
@@ -1093,11 +1093,11 @@ public class CephMount {
   public InetAddress get_osd_address(int osd) {
     rlock.lock();
     try {
-      return native_ceph_get_osd_addr(instance_ptr, osd);
+      return native_stone_get_osd_addr(instance_ptr, osd);
     } finally {
       rlock.unlock();
     }
   }
 
-  private static native InetAddress native_ceph_get_osd_addr(long mountp, int osd);
+  private static native InetAddress native_stone_get_osd_addr(long mountp, int osd);
 }

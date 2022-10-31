@@ -376,7 +376,7 @@ describe('RbdListComponent', () => {
         snapshots: []
       }
     ];
-    const message = `This RBD image has an invalid name and can't be managed by ceph.`;
+    const message = `This RBD image has an invalid name and can't be managed by stone.`;
     const expected = {
       edit: message,
       delete: message,

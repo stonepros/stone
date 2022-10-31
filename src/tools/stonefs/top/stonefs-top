@@ -32,7 +32,7 @@ class MetricType(Enum):
     METRIC_TYPE_SIZE = 3
 
 
-FS_TOP_PROG_STR = 'cephfs-top'
+FS_TOP_PROG_STR = 'stonefs-top'
 
 # version match b/w fstop and stats emitted by mgr/stats
 FS_TOP_SUPPORTED_VER = 1
@@ -71,7 +71,7 @@ MGR_STATS_COUNTERS = list(MAIN_WINDOW_TOP_LINE_METRICS.keys())
 
 FS_TOP_VERSION_HEADER_FMT = '{prog_name} - {now}'
 FS_TOP_CLIENT_HEADER_FMT = 'Client(s): {num_clients} - {num_mounts} FUSE, '\
-    '{num_kclients} kclient, {num_libs} libcephfs'
+    '{num_kclients} kclient, {num_libs} libstonefs'
 
 CLIENT_METADATA_KEY = "client_metadata"
 CLIENT_METADATA_MOUNT_POINT_KEY = "mount_point"
@@ -170,7 +170,7 @@ class FSTop(object):
             raise FSTopException('perf stats version mismatch!')
         missing = [m for m in stats_json["global_counters"] if m.upper() not in MGR_STATS_COUNTERS]
         if missing:
-            raise FSTopException('Cannot handle unknown metrics from \'ceph fs perf stats\': '
+            raise FSTopException('Cannot handle unknown metrics from \'stone fs perf stats\': '
                                  f'{missing}')
 
     def setup_curses(self, win):
@@ -194,7 +194,7 @@ class FSTop(object):
         if ret != 0:
             raise FSTopException(f'error checking \'stats\' module: {out}')
         if 'stats' not in json.loads(buf.decode('utf-8'))['enabled_modules']:
-            raise FSTopException('\'stats\' module not enabled. Use \'ceph mgr module '
+            raise FSTopException('\'stats\' module not enabled. Use \'stone mgr module '
                                  'enable stats\' to enable')
 
     def perf_stats_query(self):
@@ -549,11 +549,11 @@ if __name__ == '__main__':
                                              f'{MIN_REFRESH_INTERVAL}')
         return value
 
-    parser = argparse.ArgumentParser(description='Ceph Filesystem top utility')
-    parser.add_argument('--cluster', nargs='?', const='ceph', default='ceph',
-                        help='Ceph cluster to connect (defualt: ceph)')
+    parser = argparse.ArgumentParser(description='Stone Filesystem top utility')
+    parser.add_argument('--cluster', nargs='?', const='stone', default='stone',
+                        help='Stone cluster to connect (defualt: stone)')
     parser.add_argument('--id', nargs='?', const='fstop', default='fstop',
-                        help='Ceph user to use to connection (default: fstop)')
+                        help='Stone user to use to connection (default: fstop)')
     parser.add_argument('--conffile', nargs='?', default=None,
                         help='Path to cluster configuration file')
     parser.add_argument('--selftest', dest='selftest', action='store_true',

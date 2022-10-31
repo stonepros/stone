@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -28,8 +28,8 @@
 
 #include "common/error_code.h"
 
-#include "include/ceph_assert.h"
-#include "common/ceph_mutex.h"
+#include "include/stone_assert.h"
+#include "common/stone_mutex.h"
 
 #define mydout(cct, v) lgeneric_subdout(cct, context, v)
 
@@ -107,7 +107,7 @@ class Context {
     return false;
   }
   void complete(boost::system::error_code ec) {
-    complete(ceph::from_error_code(ec));
+    complete(stone::from_error_code(ec));
   }
   void operator()(boost::system::error_code ec) noexcept {
     complete(ec);
@@ -193,7 +193,7 @@ GenContextURef<T> make_gen_lambda_context(F &&f) {
  * finish and destroy a list of Contexts
  */
 template<class C>
-inline void finish_contexts(StoneeContext *cct, C& finished, int result = 0)
+inline void finish_contexts(StoneContext *cct, C& finished, int result = 0)
 {
   if (finished.empty())
     return;
@@ -217,9 +217,9 @@ public:
 
 
 struct C_Lock : public Context {
-  ceph::mutex *lock;
+  stone::mutex *lock;
   Context *fin;
-  C_Lock(ceph::mutex *l, Context *c) : lock(l), fin(c) {}
+  C_Lock(stone::mutex *l, Context *c) : lock(l), fin(c) {}
   ~C_Lock() override {
     delete fin;
   }
@@ -241,10 +241,10 @@ struct C_Lock : public Context {
 template <class ContextType, class ContextInstanceType, class Container = std::list<ContextType *>>
 class C_ContextsBase : public ContextInstanceType {
 public:
-  StoneeContext *cct;
+  StoneContext *cct;
   Container contexts;
 
-  C_ContextsBase(StoneeContext *cct_)
+  C_ContextsBase(StoneContext *cct_)
     : cct(cct_)
   {
   }
@@ -304,7 +304,7 @@ typedef C_ContextsBase<Context, Context> C_Contexts;
 template <class ContextType, class ContextInstanceType>
 class C_GatherBase {
 private:
-  StoneeContext *cct;
+  StoneContext *cct;
   int result = 0;
   ContextType *onfinish;
 #ifdef DEBUG_GATHER
@@ -312,14 +312,14 @@ private:
 #endif
   int sub_created_count = 0;
   int sub_existing_count = 0;
-  mutable ceph::recursive_mutex lock =
-    ceph::make_recursive_mutex("C_GatherBase::lock"); // disable lockdep
+  mutable stone::recursive_mutex lock =
+    stone::make_recursive_mutex("C_GatherBase::lock"); // disable lockdep
   bool activated = false;
 
   void sub_finish(ContextType* sub, int r) {
     lock.lock();
 #ifdef DEBUG_GATHER
-    ceph_assert(waitfor.count(sub));
+    stone_assert(waitfor.count(sub));
     waitfor.erase(sub);
 #endif
     --sub_existing_count;
@@ -368,7 +368,7 @@ private:
   };
 
 public:
-  C_GatherBase(StoneeContext *cct_, ContextType *onfinish_)
+  C_GatherBase(StoneContext *cct_, ContextType *onfinish_)
     : cct(cct_), onfinish(onfinish_)
   {
     mydout(cct,10) << "C_GatherBase " << this << ".new" << dendl;
@@ -378,12 +378,12 @@ public:
   }
   void set_finisher(ContextType *onfinish_) {
     std::lock_guard l{lock};
-    ceph_assert(!onfinish);
+    stone_assert(!onfinish);
     onfinish = onfinish_;
   }
   void activate() {
     lock.lock();
-    ceph_assert(activated == false);
+    stone_assert(activated == false);
     activated = true;
     if (sub_existing_count != 0) {
       lock.unlock();
@@ -394,7 +394,7 @@ public:
   }
   ContextType *new_sub() {
     std::lock_guard l{lock};
-    ceph_assert(activated == false);
+    stone_assert(activated == false);
     sub_created_count++;
     sub_existing_count++;
     ContextType *s = new C_GatherSub(this);
@@ -436,7 +436,7 @@ public:
  * Example:
  *
  * C_SaferCond all_done;
- * C_GatherBuilder gb(g_ceph_context, all_done);
+ * C_GatherBuilder gb(g_stone_context, all_done);
  * j.submit_entry(1, first, 0, gb.new_sub()); // add a C_Context to C_Gather
  * j.submit_entry(2, first, 0, gb.new_sub()); // add a C_Context to C_Gather
  * gb.activate(); // consume C_Context as soon as they complete()
@@ -452,17 +452,17 @@ template <class ContextType, class GatherType>
 class C_GatherBuilderBase
 {
 public:
-  C_GatherBuilderBase(StoneeContext *cct_)
+  C_GatherBuilderBase(StoneContext *cct_)
     : cct(cct_), c_gather(NULL), finisher(NULL), activated(false)
   {
   }
-  C_GatherBuilderBase(StoneeContext *cct_, ContextType *finisher_)
+  C_GatherBuilderBase(StoneContext *cct_, ContextType *finisher_)
     : cct(cct_), c_gather(NULL), finisher(finisher_), activated(false)
   {
   }
   ~C_GatherBuilderBase() {
     if (c_gather) {
-      ceph_assert(activated); // Don't forget to activate your C_Gather!
+      stone_assert(activated); // Don't forget to activate your C_Gather!
     }
     else {
       delete finisher;
@@ -477,7 +477,7 @@ public:
   void activate() {
     if (!c_gather)
       return;
-    ceph_assert(finisher != NULL);
+    stone_assert(finisher != NULL);
     activated = true;
     c_gather->activate();
   }
@@ -493,20 +493,20 @@ public:
     return (c_gather != NULL);
   }
   int num_subs_created() {
-    ceph_assert(!activated);
+    stone_assert(!activated);
     if (c_gather == NULL)
       return 0;
     return c_gather->get_sub_created_count();
   }
   int num_subs_remaining() {
-    ceph_assert(!activated);
+    stone_assert(!activated);
     if (c_gather == NULL)
       return 0;
     return c_gather->get_sub_existing_count();
   }
 
 private:
-  StoneeContext *cct;
+  StoneContext *cct;
   GatherType *c_gather;
   ContextType *finisher;
   bool activated;
@@ -525,7 +525,7 @@ public:
 inline auto lambdafy(Context *c) {
   return [fin = std::unique_ptr<Context>(c)]
     (boost::system::error_code ec) mutable {
-	   fin.release()->complete(ceph::from_error_code(ec));
+	   fin.release()->complete(stone::from_error_code(ec));
 	 };
 }
 

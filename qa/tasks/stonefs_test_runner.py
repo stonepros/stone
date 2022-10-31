@@ -5,7 +5,7 @@ import unittest
 from unittest import suite, loader, case
 from teuthology.task import interactive
 from teuthology import misc
-from tasks.cephfs.filesystem import Filesystem, MDSCluster, CephCluster
+from tasks.stonefs.filesystem import Filesystem, MDSCluster, StoneCluster
 from tasks.mgr.mgr_test_case import MgrCluster
 
 log = logging.getLogger(__name__)
@@ -85,17 +85,17 @@ class InteractiveFailureResult(unittest.TextTestResult):
 @contextlib.contextmanager
 def task(ctx, config):
     """
-    Run the CephFS test cases.
+    Run the StoneFS test cases.
 
-    Run everything in tasks/cephfs/test_*.py:
+    Run everything in tasks/stonefs/test_*.py:
 
     ::
 
         tasks:
           - install:
-          - ceph:
-          - ceph-fuse:
-          - cephfs_test_runner:
+          - stone:
+          - stone-fuse:
+          - stonefs_test_runner:
 
     `modules` argument allows running only some specific modules:
 
@@ -103,10 +103,10 @@ def task(ctx, config):
 
         tasks:
             ...
-          - cephfs_test_runner:
+          - stonefs_test_runner:
               modules:
-                - tasks.cephfs.test_sessionmap
-                - tasks.cephfs.test_auto_repair
+                - tasks.stonefs.test_sessionmap
+                - tasks.stonefs.test_auto_repair
 
     By default, any cases that can't be run on the current cluster configuration
     will generate a failure.  When the optional `fail_on_skip` argument is set
@@ -116,12 +116,12 @@ def task(ctx, config):
     ::
         tasks:
             ...
-         - cephfs_test_runner:
+         - stonefs_test_runner:
            fail_on_skip: false
 
     """
 
-    ceph_cluster = CephCluster(ctx)
+    stone_cluster = StoneCluster(ctx)
 
     if len(list(misc.all_roles_of_type(ctx.cluster, 'mds'))):
         mds_cluster = MDSCluster(ctx)
@@ -146,7 +146,7 @@ def task(ctx, config):
         "ctx": ctx,
         "mounts": mounts,
         "fs": fs,
-        "ceph_cluster": ceph_cluster,
+        "stone_cluster": stone_cluster,
         "mds_cluster": mds_cluster,
         "mgr_cluster": mgr_cluster,
     })
@@ -162,7 +162,7 @@ def task(ctx, config):
     if config and 'modules' in config and config['modules']:
         module_suites = []
         for mod_name in config['modules']:
-            # Test names like cephfs.test_auto_repair
+            # Test names like stonefs.test_auto_repair
             module_suites.append(decorating_loader.loadTestsFromName(mod_name))
         overall_suite = suite.TestSuite(module_suites)
     else:
@@ -170,7 +170,7 @@ def task(ctx, config):
         overall_suite = decorating_loader.discover(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "cephfs/"
+                "stonefs/"
             )
         )
 

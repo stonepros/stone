@@ -9,24 +9,24 @@ Multi-Site
 A single zone configuration typically consists of one zone group containing one
 zone and one or more `ceph-radosgw` instances where you may load-balance gateway
 client requests between the instances. In a single zone configuration, typically
-multiple gateway instances point to a single Ceph storage cluster. However, Kraken
-supports several multi-site configuration options for the Ceph Object Gateway:
+multiple gateway instances point to a single Stone storage cluster. However, Kraken
+supports several multi-site configuration options for the Stone Object Gateway:
 
 - **Multi-zone:** A more advanced configuration consists of one zone group and
   multiple zones, each zone with one or more `ceph-radosgw` instances. Each zone
-  is backed by its own Ceph Storage Cluster. Multiple zones in a zone group
+  is backed by its own Stone Storage Cluster. Multiple zones in a zone group
   provides disaster recovery for the zone group should one of the zones experience
   a significant failure. In Kraken, each zone is active and may receive write
   operations. In addition to disaster recovery, multiple active zones may also
   serve as a foundation for content delivery networks.
 
-- **Multi-zone-group:** Formerly called 'regions', Ceph Object Gateway can also
+- **Multi-zone-group:** Formerly called 'regions', Stone Object Gateway can also
   support multiple zone groups, each zone group with one or more zones. Objects
   stored to zones in one zone group within the same realm as another zone
   group will share a global object namespace, ensuring unique object IDs across
   zone groups and zones.
 
-- **Multiple Realms:** In Kraken, the Ceph Object Gateway supports the notion
+- **Multiple Realms:** In Kraken, the Stone Object Gateway supports the notion
   of realms, which can be a single zone group or multiple zone groups and
   a globally unique namespace for the realm. Multiple realms provide the ability
   to support numerous configurations and namespaces.
@@ -37,13 +37,13 @@ like this:
 .. image:: ../images/zone-sync2.png
    :align: center
 
-For additional details on setting up a cluster, see `Ceph Object Gateway for
+For additional details on setting up a cluster, see `Stone Object Gateway for
 Production <https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/3/html/ceph_object_gateway_for_production/index/>`__.
 
 Functional Changes from Infernalis
 ==================================
 
-In Kraken, you can configure each Ceph Object Gateway to
+In Kraken, you can configure each Stone Object Gateway to
 work in an active-active zone configuration, allowing for writes to
 non-master zones.
 
@@ -52,23 +52,23 @@ The multi-site configuration is stored within a container called a
 multiple epochs for tracking changes to the configuration. In Kraken,
 the ``ceph-radosgw`` daemons handle the synchronization,
 eliminating the need for a separate synchronization agent. Additionally,
-the new approach to synchronization allows the Ceph Object Gateway to
+the new approach to synchronization allows the Stone Object Gateway to
 operate with an "active-active" configuration instead of
 "active-passive".
 
 Requirements and Assumptions
 ============================
 
-A multi-site configuration requires at least two Ceph storage clusters,
-preferably given a distinct cluster name. At least two Ceph object
-gateway instances, one for each Ceph storage cluster.
+A multi-site configuration requires at least two Stone storage clusters,
+preferably given a distinct cluster name. At least two Stone object
+gateway instances, one for each Stone storage cluster.
 
-This guide assumes at least two Ceph storage clusters are in geographically
+This guide assumes at least two Stone storage clusters are in geographically
 separate locations; however, the configuration can work on the same
-site. This guide also assumes two Ceph object gateway servers named
+site. This guide also assumes two Stone object gateway servers named
 ``rgw1`` and ``rgw2``.
 
-.. important:: Running a single Ceph storage cluster is NOT recommended unless you have 
+.. important:: Running a single Stone storage cluster is NOT recommended unless you have 
                low latency WAN connections.
 
 A multi-site configuration requires a master zone group and a master
@@ -79,7 +79,7 @@ In this guide, the ``rgw1`` host will serve as the master zone of the
 master zone group; and, the ``rgw2`` host will serve as the secondary zone
 of the master zone group.
 
-See `Pools`_ for instructions on creating and tuning pools for Ceph
+See `Pools`_ for instructions on creating and tuning pools for Stone
 Object Storage.
 
 See `Sync Policy Config`_ for instructions on defining fine grained bucket sync
@@ -135,7 +135,7 @@ configuration. For example:
         "epoch": 1
     }
 
-.. note:: Ceph generates a unique ID for the realm, which allows the renaming
+.. note:: Stone generates a unique ID for the realm, which allows the renaming
           of a realm if the need arises.
 
 Create a Master Zone Group
@@ -190,7 +190,7 @@ the zone group configuration. For example:
 Create a Master Zone
 --------------------
 
-.. important:: Zones must be created on a Ceph Object Gateway node that will be
+.. important:: Zones must be created on a Stone Object Gateway node that will be
                within the zone.
 
 Create a new master zone for the multi-site configuration by opening a
@@ -238,7 +238,7 @@ the default zone group first.
     # radosgw-admin zonegroup delete --rgw-zonegroup=default
     # radosgw-admin period update --commit
 
-Finally, delete the ``default`` pools in your Ceph storage cluster if
+Finally, delete the ``default`` pools in your Stone storage cluster if
 they exist.
 
 .. important:: The following step assumes a multi-site configuration using newly
@@ -293,10 +293,10 @@ After updating the master zone configuration, update the period.
 .. note:: Updating the period changes the epoch, and ensures that other zones
           will receive the updated configuration.
 
-Update the Ceph Configuration File
+Update the Stone Configuration File
 ----------------------------------
 
-Update the Ceph configuration file on master zone hosts by adding the
+Update the Stone configuration file on master zone hosts by adding the
 ``rgw_zone`` configuration option and the name of the master zone to the
 instance entry.
 
@@ -318,7 +318,7 @@ For example:
 Start the Gateway
 -----------------
 
-On the object gateway host, start and enable the Ceph Object Gateway
+On the object gateway host, start and enable the Stone Object Gateway
 service:
 
 ::
@@ -369,7 +369,7 @@ default realm.
 Create a Secondary Zone
 -----------------------
 
-.. important:: Zones must be created on a Ceph Object Gateway node that will be
+.. important:: Zones must be created on a Stone Object Gateway node that will be
                within the zone.
 
 Create a secondary zone for the multi-site configuration by opening a
@@ -412,7 +412,7 @@ Delete the default zone if needed.
 
     # radosgw-admin zone rm --rgw-zone=default
 
-Finally, delete the default pools in your Ceph storage cluster if
+Finally, delete the default pools in your Stone storage cluster if
 needed.
 
 ::
@@ -423,10 +423,10 @@ needed.
     # ceph osd pool rm default.rgw.log default.rgw.log --yes-i-really-really-mean-it
     # ceph osd pool rm default.rgw.users.uid default.rgw.users.uid --yes-i-really-really-mean-it
 
-Update the Ceph Configuration File
+Update the Stone Configuration File
 ----------------------------------
 
-Update the Ceph configuration file on the secondary zone hosts by adding
+Update the Stone configuration file on the secondary zone hosts by adding
 the ``rgw_zone`` configuration option and the name of the secondary zone
 to the instance entry.
 
@@ -460,7 +460,7 @@ After updating the master zone configuration, update the period.
 Start the Gateway
 -----------------
 
-On the object gateway host, start and enable the Ceph Object Gateway
+On the object gateway host, start and enable the Stone Object Gateway
 service:
 
 ::
@@ -571,7 +571,7 @@ disaster recovery.
 
        # radosgw-admin zone modify --rgw-zone={zone-name} --master --default
 
-   By default, Ceph Object Gateway will run in an active-active
+   By default, Stone Object Gateway will run in an active-active
    configuration. If the cluster was configured to run in an
    active-passive configuration, the secondary zone is a read-only zone.
    Remove the ``--read-only`` status to allow the zone to receive write
@@ -588,7 +588,7 @@ disaster recovery.
 
        # radosgw-admin period update --commit
 
-3. Finally, restart the Ceph Object Gateway.
+3. Finally, restart the Stone Object Gateway.
 
    ::
 
@@ -616,7 +616,7 @@ If the former master zone recovers, revert the operation.
 
        # radosgw-admin period update --commit
 
-4. Then, restart the Ceph Object Gateway in the recovered zone.
+4. Then, restart the Stone Object Gateway in the recovered zone.
 
    ::
 
@@ -635,7 +635,7 @@ If the former master zone recovers, revert the operation.
 
        # radosgw-admin period update --commit
 
-7. Finally, restart the Ceph Object Gateway in the secondary zone.
+7. Finally, restart the Stone Object Gateway in the secondary zone.
 
    ::
 
@@ -697,7 +697,7 @@ zone to a multi site system, use the following steps:
 
        # radosgw-admin period update --commit
 
-7. Finally, restart the Ceph Object Gateway.
+7. Finally, restart the Stone Object Gateway.
 
    ::
 
@@ -719,7 +719,7 @@ Realms
 
 A realm represents a globally unique namespace consisting of one or more
 zonegroups containing one or more zones, and zones containing buckets,
-which in turn contain objects. A realm enables the Ceph Object Gateway
+which in turn contain objects. A realm enables the Stone Object Gateway
 to support multiple namespaces and their configuration on the same
 hardware.
 
@@ -727,7 +727,7 @@ A realm contains the notion of periods. Each period represents the state
 of the zone group and zone configuration in time. Each time you make a
 change to a zonegroup or zone, update the period and commit it.
 
-By default, the Ceph Object Gateway does not create a realm
+By default, the Stone Object Gateway does not create a realm
 for backward compatibility with Infernalis and earlier releases.
 However, as a best practice, we recommend creating realms for new
 clusters.
@@ -874,13 +874,13 @@ rename a realm, execute the following:
 Zone Groups
 -----------
 
-The Ceph Object Gateway supports multi-site deployments and a global
+The Stone Object Gateway supports multi-site deployments and a global
 namespace by using the notion of zone groups. Formerly called a region
-in Infernalis, a zone group defines the geographic location of one or more Ceph
+in Infernalis, a zone group defines the geographic location of one or more Stone
 Object Gateway instances within one or more zones.
 
 Configuring zone groups differs from typical configuration procedures,
-because not all of the settings end up in a Ceph configuration file. You
+because not all of the settings end up in a Stone configuration file. You
 can list zone groups, get a zone group configuration, and set a zone
 group configuration.
 
@@ -986,7 +986,7 @@ Then, update the period:
 List Zone Groups
 ~~~~~~~~~~~~~~~~
 
-A Ceph cluster contains a list of zone groups. To list the zone groups,
+A Stone cluster contains a list of zone groups. To list the zone groups,
 execute:
 
 ::
@@ -1236,11 +1236,11 @@ Finally, update the period.
 Zones
 -----
 
-Ceph Object Gateway supports the notion of zones. A zone defines a
-logical group consisting of one or more Ceph Object Gateway instances.
+Stone Object Gateway supports the notion of zones. A zone defines a
+logical group consisting of one or more Stone Object Gateway instances.
 
 Configuring zones differs from typical configuration procedures, because
-not all of the settings end up in a Ceph configuration file. You can
+not all of the settings end up in a Stone configuration file. You can
 list zones, get a zone configuration and set a zone configuration.
 
 Create a Zone
@@ -1384,7 +1384,7 @@ The ``default`` zone looks like this:
 Set a Zone
 ~~~~~~~~~~
 
-Configuring a zone involves specifying a series of Ceph Object Gateway
+Configuring a zone involves specifying a series of Stone Object Gateway
 pools. For consistency, we recommend using a pool prefix that is the
 same as the zone name. See
 `Pools <http://docs.ceph.com/en/latest/rados/operations/pools/#pools>`__
@@ -1429,7 +1429,7 @@ the zone name. For example:
 
 -  ``default.rgw.control``
 
-To change the defaults, include the following settings in your Ceph
+To change the defaults, include the following settings in your Stone
 configuration file under each ``[client.radosgw.{instance-name}]``
 instance.
 

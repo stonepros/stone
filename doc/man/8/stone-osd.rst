@@ -1,22 +1,22 @@
 :orphan:
 
 ========================================
- ceph-osd -- ceph object storage daemon
+ stone-osd -- stone object storage daemon
 ========================================
 
-.. program:: ceph-osd
+.. program:: stone-osd
 
 Synopsis
 ========
 
-| **ceph-osd** -i *osdnum* [ --osd-data *datapath* ] [ --osd-journal
+| **stone-osd** -i *osdnum* [ --osd-data *datapath* ] [ --osd-journal
   *journal* ] [ --mkfs ] [ --mkjournal ] [--flush-journal] [--check-allows-journal] [--check-wants-journal] [--check-needs-journal] [ --mkkey ] [ --osdspec-affinity ]
 
 
 Description
 ===========
 
-**ceph-osd** is the object storage daemon for the Ceph distributed file
+**stone-osd** is the object storage daemon for the Stone distributed file
 system. It is responsible for storing objects on a local file system
 and providing access to them over the network.
 
@@ -32,7 +32,7 @@ Options
 .. option:: -f, --foreground
 
    Foreground: do not daemonize after startup (run in foreground). Do
-   not generate a pid file. Useful when run via :doc:`ceph-run <ceph-run>`\(8).
+   not generate a pid file. Useful when run via :doc:`stone-run <stone-run>`\(8).
 
 .. option:: -d
 
@@ -78,7 +78,7 @@ Options
 
    Generate a new secret key. This is normally used in combination
    with ``--mkfs`` as it is more convenient than generating a key by
-   hand with :doc:`ceph-authtool <ceph-authtool>`\(8).
+   hand with :doc:`stone-authtool <stone-authtool>`\(8).
 
 .. option:: --mkjournal
 
@@ -108,15 +108,15 @@ Options
    Print the journal's uuid.  The journal fsid is set to match the OSD
    fsid at --mkfs time.
 
-.. option:: -c ceph.conf, --conf=ceph.conf
+.. option:: -c stone.conf, --conf=stone.conf
 
-   Use *ceph.conf* configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` for runtime configuration options.
+   Use *stone.conf* configuration file instead of the default
+   ``/etc/stone/stone.conf`` for runtime configuration options.
 
 .. option:: -m monaddress[:port]
 
    Connect to specified monitor (instead of looking through
-   ``ceph.conf``).
+   ``stone.conf``).
 
 .. option:: --osdspec-affinity
 
@@ -126,13 +126,13 @@ Options
 Availability
 ============
 
-**ceph-osd** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**stone-osd** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8),
-:doc:`ceph-mds <ceph-mds>`\(8),
-:doc:`ceph-mon <ceph-mon>`\(8),
-:doc:`ceph-authtool <ceph-authtool>`\(8)
+:doc:`stone <stone>`\(8),
+:doc:`stone-mds <stone-mds>`\(8),
+:doc:`stone-mon <stone-mon>`\(8),
+:doc:`stone-authtool <stone-authtool>`\(8)

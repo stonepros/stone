@@ -8,7 +8,7 @@ We recommend all v0.87.x Giant users upgrade to this release.
 Notable Changes
 ---------------
 
-* ceph-objectstore-tool: only output unsupported features when incompatible (#11176 David Zafman)
+* stone-objectstore-tool: only output unsupported features when incompatible (#11176 David Zafman)
 * common: do not implicitly unlock rwlock on destruction (Federico Simoncelli)
 * common: make wait timeout on empty queue configurable (#10818 Samuel Just)
 * crush: pick ruleset id that matches and rule id (Xiaoxi Chen)
@@ -35,7 +35,7 @@ Notable Changes
 * mon: use EntityName when expanding profiles (#10844 Joao Eduardo Luis)
 * mon: verify cross-service proposal preconditions (#10643 Joao Eduardo Luis)
 * mon: wait for osdmon to be writeable when requesting proposal (#9794 Joao Eduardo Luis)
-* mount.ceph: avoid spurious error message about /etc/mtab (#10351 Yan, Zheng)
+* mount.stone: avoid spurious error message about /etc/mtab (#10351 Yan, Zheng)
 * msg/simple: allow RESETSESSION when we forget an endpoint (#10080 Greg Farnum)
 * msg/simple: discard delay queue before incoming queue (#9910 Sage Weil)
 * osd: clear_primary_state when leaving Primary (#10059 Samuel Just)
@@ -70,7 +70,7 @@ Upgrading
 ---------
 
 * Due to a change in the Linux kernel version 3.18 and the limits of the FUSE
-  interface, ceph-fuse needs be mounted as root on at least some systems. See
+  interface, stone-fuse needs be mounted as root on at least some systems. See
   issues #9997, #10277, and #10542 for details.
 
 Notable Changes
@@ -78,21 +78,21 @@ Notable Changes
 
 * build: disable stack-execute bit on assembler objects (#10114 Dan Mick)
 * build: support boost 1.57.0 (#10688 Ken Dreyer)
-* ceph-disk: fix dmcrypt file permissions (#9785 Loic Dachary)
-* ceph-disk: run partprobe after zap, behave with partx or partprobe (#9665 #9721 Loic Dachary)
-* cephfs-journal-tool: fix import for aged journals (#9977 John Spray)
-* cephfs-journal-tool: fix journal import (#10025 John Spray)
-* ceph-fuse: use remount to trim kernel dcache (#10277 Yan, Zheng)
+* stone-disk: fix dmcrypt file permissions (#9785 Loic Dachary)
+* stone-disk: run partprobe after zap, behave with partx or partprobe (#9665 #9721 Loic Dachary)
+* stonefs-journal-tool: fix import for aged journals (#9977 John Spray)
+* stonefs-journal-tool: fix journal import (#10025 John Spray)
+* stone-fuse: use remount to trim kernel dcache (#10277 Yan, Zheng)
 * common: add cctid meta variable (#6228 Adam Crume)
 * common: fix dump of shard for ghobject_t (#10063 Loic Dachary)
 * crush: fix bucket weight underflow (#9998 Pawel Sadowski)
 * erasure-code: enforce chunk size alignment (#10211 Loic Dachary)
 * erasure-code: regression test suite (#9420 Loic Dachary)
 * erasure-code: relax caucy w restrictions (#10325 Loic Dachary)
-* libcephfs,ceph-fuse: allow xattr caps on inject_release_failure (#9800 John Spray)
-* libcephfs,ceph-fuse: fix cap flush tid comparison (#9869 Greg Farnum)
-* libcephfs,ceph-fuse: new flag to indicated sorted dcache (#9178 Yan, Zheng)
-* libcephfs,ceph-fuse: prune cache before reconnecting to MDS (Yan, Zheng)
+* libstonefs,stone-fuse: allow xattr caps on inject_release_failure (#9800 John Spray)
+* libstonefs,stone-fuse: fix cap flush tid comparison (#9869 Greg Farnum)
+* libstonefs,stone-fuse: new flag to indicated sorted dcache (#9178 Yan, Zheng)
+* libstonefs,stone-fuse: prune cache before reconnecting to MDS (Yan, Zheng)
 * librados: limit number of in-flight read requests (#9854 Jason Dillaman)
 * libradospy: fix thread shutdown (#8797 Dan Mick)
 * libradosstriper: fix locking issue in truncate (#10129 Sebastien Ponce)
@@ -156,17 +156,17 @@ v0.87.x.  Highlights for Giant include:
 * *RADOS Performance*: a range of improvements have been made in the
   OSD and client-side librados code that improve the throughput on
   flash backends and improve parallelism and scaling on fast machines.
-* *CephFS*: we have fixed a raft of bugs in CephFS and built some
+* *StoneFS*: we have fixed a raft of bugs in StoneFS and built some
   basic journal recovery and diagnostic tools.  Stability and
   performance of single-MDS systems is vastly improved in Giant.
-  Although we do not yet recommend CephFS for production deployments,
+  Although we do not yet recommend StoneFS for production deployments,
   we do encourage testing for non-critical workloads so that we can
   better gauge the feature, usability, performance, and stability
   gaps.
 * *Local Recovery Codes*: the OSDs now support an erasure-coding scheme
   that stores some additional data blocks to reduce the IO required to
   recover from single OSD failures.
-* *Degraded vs misplaced*: the Ceph health reports from 'ceph -s' and
+* *Degraded vs misplaced*: the Stone health reports from 'stone -s' and
   related commands now make a distinction between data that is
   degraded (there are fewer than the desired number of copies) and
   data that is misplaced (stored in the wrong location in the
@@ -178,7 +178,7 @@ v0.87.x.  Highlights for Giant include:
   read; they must be found to be sufficiently hot before that happens.
 * *Monitor performance*: the monitors now perform writes to the local
   data store asynchronously, improving overall responsiveness.
-* *Recovery tools*: the ceph_objectstore_tool is greatly expanded to
+* *Recovery tools*: the stone_objectstore_tool is greatly expanded to
   allow manipulation of an individual OSDs data store for debugging
   and repair purposes.  This is most heavily used by our QA
   infrastructure to exercise recovery code.
@@ -234,7 +234,7 @@ Upgrading from v0.80x Firefly
   replaced by ``cluster_osd_bytes``).
 
 * The ``rd_kb`` and ``wr_kb`` fields in the JSON dumps for pool stats (accessed
-  via the ``ceph df detail -f json-pretty`` and related commands) have been
+  via the ``stone df detail -f json-pretty`` and related commands) have been
   replaced with corresponding ``*_bytes`` fields.  Similarly, the
   ``total_space``, ``total_used``, and ``total_avail`` fields are replaced with
   ``total_bytes``, ``total_used_bytes``,  and ``total_avail_bytes`` fields.
@@ -266,12 +266,12 @@ Upgrading from v0.80x Firefly
 
     leveldb_log               = ""
 
-* CephFS support for the legacy anchor table has finally been removed.
+* StoneFS support for the legacy anchor table has finally been removed.
   Users with file systems created before firefly should ensure that inodes
   with multiple hard links are modified *prior* to the upgrade to ensure that
   the backtraces are written properly.  For example::
 
-    sudo find /mnt/cephfs -type f -links +1 -exec touch \{\} \;
+    sudo find /mnt/stonefs -type f -links +1 -exec touch \{\} \;
 
 * We disallow nonsensical 'tier cache-mode' transitions.  From this point
   onward, 'writeback' can only transition to 'forward' and 'forward'
@@ -281,8 +281,8 @@ Upgrading from v0.80x Firefly
 Notable Changes since v0.86
 ---------------------------
 
-* ceph-disk: use new udev rules for centos7/rhel7 (#9747 Loic Dachary)
-* libcephfs-java: fix fstat mode (Noah Watkins)
+* stone-disk: use new udev rules for centos7/rhel7 (#9747 Loic Dachary)
+* libstonefs-java: fix fstat mode (Noah Watkins)
 * librados: fix deadlock when listing PG contents (Guang Yang)
 * librados: misc fixes to the new threading model (#9582 #9706 #9845 #9873 Sage Weil)
 * mds: fix inotable initialization (Henry C Chang)
@@ -307,32 +307,32 @@ Notable Changes since v0.80.x Firefly
 * build: fix build on alpha (Michael Cree, Dmitry Smirnov)
 * build: fix CentOS 5 (Gerben Meijer)
 * build: fix yasm check for x32 (Daniel Schepler, Sage Weil)
-* ceph-brag: add tox tests (Alfredo Deza)
-* ceph-conf: flush log on exit (Sage Weil)
-* ceph.conf: update sample (Sebastien Han)
-* ceph-dencoder: refactor build a bit to limit dependencies (Sage Weil, Dan Mick)
-* ceph-disk: add Scientific Linux support (Dan van der Ster)
-* ceph-disk: do not inadvertantly create directories (Owne Synge)
-* ceph-disk: fix dmcrypt support (Sage Weil)
-* ceph-disk: fix dmcrypt support (Stephen Taylor)
-* ceph-disk: handle corrupt volumes (Stuart Longlang)
-* ceph-disk: linter cleanup, logging improvements (Alfredo Deza)
-* ceph-disk: partprobe as needed (Eric Eastman)
-* ceph-disk: show information about dmcrypt in 'ceph-disk list' output (Sage Weil)
-* ceph-disk: use partition type UUIDs and blkid (Sage Weil)
-* ceph: fix for non-default cluster names (#8944, Dan Mick)
-* ceph-fuse, libcephfs: asok hooks for handling session resets, timeouts (Yan, Zheng)
-* ceph-fuse, libcephfs: fix crash in trim_caps (John Spray)
-* ceph-fuse, libcephfs: improve cap trimming (John Spray)
-* ceph-fuse, libcephfs: improve traceless reply handling (Sage Weil)
-* ceph-fuse, libcephfs: virtual xattrs for rstat (Yan, Zheng)
-* ceph_objectstore_tool: vastly improved and extended tool for working offline with OSD data stores (David Zafman)
-* ceph.spec: many fixes (Erik Logtenberg, Boris Ranto, Dan Mick, Sandon Van Ness)
-* ceph.spec: split out ceph-common package, other fixes (Sandon Van Ness)
-* ceph_test_librbd_fsx: fix RNG, make deterministic (Ilya Dryomov)
-* cephtool: fix help (Yilong Zhao)
-* cephtool: refactor and improve CLI tests (Joao Eduardo Luis)
-* cephtool: test cleanup (Joao Eduardo Luis)
+* stone-brag: add tox tests (Alfredo Deza)
+* stone-conf: flush log on exit (Sage Weil)
+* stone.conf: update sample (Sebastien Han)
+* stone-dencoder: refactor build a bit to limit dependencies (Sage Weil, Dan Mick)
+* stone-disk: add Scientific Linux support (Dan van der Ster)
+* stone-disk: do not inadvertantly create directories (Owne Synge)
+* stone-disk: fix dmcrypt support (Sage Weil)
+* stone-disk: fix dmcrypt support (Stephen Taylor)
+* stone-disk: handle corrupt volumes (Stuart Longlang)
+* stone-disk: linter cleanup, logging improvements (Alfredo Deza)
+* stone-disk: partprobe as needed (Eric Eastman)
+* stone-disk: show information about dmcrypt in 'stone-disk list' output (Sage Weil)
+* stone-disk: use partition type UUIDs and blkid (Sage Weil)
+* stone: fix for non-default cluster names (#8944, Dan Mick)
+* stone-fuse, libstonefs: asok hooks for handling session resets, timeouts (Yan, Zheng)
+* stone-fuse, libstonefs: fix crash in trim_caps (John Spray)
+* stone-fuse, libstonefs: improve cap trimming (John Spray)
+* stone-fuse, libstonefs: improve traceless reply handling (Sage Weil)
+* stone-fuse, libstonefs: virtual xattrs for rstat (Yan, Zheng)
+* stone_objectstore_tool: vastly improved and extended tool for working offline with OSD data stores (David Zafman)
+* stone.spec: many fixes (Erik Logtenberg, Boris Ranto, Dan Mick, Sandon Van Ness)
+* stone.spec: split out stone-common package, other fixes (Sandon Van Ness)
+* stone_test_librbd_fsx: fix RNG, make deterministic (Ilya Dryomov)
+* stonetool: fix help (Yilong Zhao)
+* stonetool: refactor and improve CLI tests (Joao Eduardo Luis)
+* stonetool: test cleanup (Joao Eduardo Luis)
 * clang build fixes (John Spray, Danny Al-Gaaf)
 * client: improved MDS session dumps (John Spray)
 * common: add config diff admin socket command (Joao Eduardo Luis)
@@ -370,12 +370,12 @@ Notable Changes since v0.80.x Firefly
 * global: write pid file even when running in foreground (Alexandre Oliva)
 * hadoop: improve tests (Huamin Chen, Greg Farnum, John Spray)
 * hadoop: update hadoop tests for Hadoop 2.0 (Haumin Chen)
-* init-ceph: continue starting other daemons on crush or mount failure (#8343, Sage Weil)
+* init-stone: continue starting other daemons on crush or mount failure (#8343, Sage Weil)
 * journaler: fix locking (Zheng, Yan)
 * keyvaluestore: fix hint crash (#8381, Haomai Wang)
 * keyvaluestore: header cache (Haomai Wang)
-* libcephfs-java: build against older JNI headers (Greg Farnum)
-* libcephfs-java: fix gcj-jdk build (Dmitry Smirnov)
+* libstonefs-java: build against older JNI headers (Greg Farnum)
+* libstonefs-java: fix gcj-jdk build (Dmitry Smirnov)
 * librados: fix crash on read op timeout (#9362 Matthias Kiefer, Sage Weil)
 * librados: fix lock leaks in error paths (#9022, Paval Rallabhandi)
 * librados: fix pool existence check (#8835, Pavan Rallabhandi)
@@ -388,7 +388,7 @@ Notable Changes since v0.80.x Firefly
 * librados, osd: return ETIMEDOUT on failed notify (Sage Weil)
 * librados: pybind: fix reads when \0 is present (#9547 Mohammad Salehe)
 * librados_striper: striping library for librados (Sebastien Ponce)
-* librbd, ceph-fuse: reduce cache flush overhead (Haomai Wang)
+* librbd, stone-fuse: reduce cache flush overhead (Haomai Wang)
 * librbd: check error code on cache invalidate (Josh Durgin)
 * librbd: enable caching by default (Sage Weil)
 * librbd: enforce cache size on read requests (Jason Dillaman)
@@ -412,7 +412,7 @@ Notable Changes since v0.80.x Firefly
 * mds: add min/max UID for snapshot creation/deletion (#9029, Wido den Hollander)
 * mds: avoid tight mon reconnect loop (#9428 Sage Weil)
 * mds: boot refactor, cleanup (John Spray)
-* mds: cephfs-journal-tool (John Spray)
+* mds: stonefs-journal-tool (John Spray)
 * mds: fix crash killing sessions (#9173 John Spray)
 * mds: fix ctime updates (#9514 Greg Farnum)
 * mds: fix journal conversion with standby-replay (John Spray)
@@ -423,7 +423,7 @@ Notable Changes since v0.80.x Firefly
 * mds: improve health reporting to monitor (John Spray)
 * mds: improve Journaler on-disk format (John Spray)
 * mds: improve journal locking (Zheng, Yan)
-* mds, libcephfs: use client timestamp for mtime/ctime (Sage Weil)
+* mds, libstonefs: use client timestamp for mtime/ctime (Sage Weil)
 * mds: make max file recoveries tunable (Sage Weil)
 * mds: misc encoding improvements (John Spray)
 * mds: misc fixes for multi-mds (Yan, Zheng)
@@ -464,7 +464,7 @@ Notable Changes since v0.80.x Firefly
 * mon: drop mon- and osd- specific leveldb options (Joao Eduardo Luis)
 * mon: ec pool profile fixes (Loic Dachary)
 * mon: fix bug when no auth keys are present (#8851, Joao Eduardo Luis)
-* mon: fix 'ceph df' output for available space (Xiaoxi Chen)
+* mon: fix 'stone df' output for available space (Xiaoxi Chen)
 * mon: fix compat version for MForward (Joao Eduardo Luis)
 * mon: fix crash on loopback messages and paxos timeouts (#9062, Sage Weil)
 * mon: fix default replication pool ruleset choice (#8373, John Spray)
@@ -484,8 +484,8 @@ Notable Changes since v0.80.x Firefly
 * mon: 'osd crush reweight-subtree ...' (Sage Weil)
 * mon, osd: relax client EC support requirements (Sage Weil)
 * mon: preload erasure plugins (#9153 Loic Dachary)
-* mon: prevent cache pools from being used directly by CephFS (#9435 John Spray)
-* mon: prevent EC pools from being used with cephfs (Joao Eduardo Luis)
+* mon: prevent cache pools from being used directly by StoneFS (#9435 John Spray)
+* mon: prevent EC pools from being used with stonefs (Joao Eduardo Luis)
 * mon: prevent implicit destruction of OSDs with 'osd setmaxosd ...' (#8865, Anand Bhat)
 * mon: prevent nonsensical cache-mode transitions (Joao Eduardo Luis)
 * mon: restore original weight when auto-marked out OSDs restart (Sage Weil)
@@ -628,7 +628,7 @@ Notable Changes since v0.80.x Firefly
 * rbd: parallelize rbd import, export (Jason Dillaman)
 * rbd: rbd-replay utility to replay captured rbd workload traces (Adam Crume)
 * rbd: use write-back (not write-through) when caching is enabled (Jason Dillaman)
-* removed mkcephfs (deprecated since dumpling)
+* removed mkstonefs (deprecated since dumpling)
 * rest-api: fix help (Ailing Zhang)
 * rgw: add civetweb as default frontent on port 7490 (#9013 Yehuda Sadeh)
 * rgw: add --min-rewrite-stripe-size for object restriper (Yehuda Sadeh)
@@ -674,7 +674,7 @@ Notable Changes since v0.80.x Firefly
 * rgw: use systemd-run from sysvinit script (JuanJose Galvez)
 * rpm: do not restart daemons on upgrade (Alfredo Deza)
 * rpm: misc packaging fixes for rhel7 (Sandon Van Ness)
-* rpm: split ceph-common from ceph (Sandon Van Ness)
+* rpm: split stone-common from stone (Sandon Van Ness)
 * systemd: initial systemd config files (Federico Simoncelli)
 * systemd: wrap started daemons in new systemd environment (Sage Weil, Dan Mick)
 * sysvinit: add support for non-default cluster names (Alfredo Deza)
@@ -725,13 +725,13 @@ Notable Changes
 * build: fix CentOS 5 (Gerben Meijer)
 * build: fix build on alpha (Michael Cree, Dmitry Smirnov)
 * build: fix yasm check for x32 (Daniel Schepler, Sage Weil)
-* ceph-disk: add Scientific Linux support (Dan van der Ster)
-* ceph-fuse, libcephfs: fix crash in trim_caps (John Spray)
-* ceph-fuse, libcephfs: improve cap trimming (John Spray)
-* ceph-fuse, libcephfs: virtual xattrs for rstat (Yan, Zheng)
-* ceph.conf: update sample (Sebastien Han)
-* ceph.spec: many fixes (Erik Logtenberg, Boris Ranto, Dan Mick, Sandon Van Ness)
-* ceph_objectstore_tool: vastly improved and extended tool for working offline with OSD data stores (David Zafman)
+* stone-disk: add Scientific Linux support (Dan van der Ster)
+* stone-fuse, libstonefs: fix crash in trim_caps (John Spray)
+* stone-fuse, libstonefs: improve cap trimming (John Spray)
+* stone-fuse, libstonefs: virtual xattrs for rstat (Yan, Zheng)
+* stone.conf: update sample (Sebastien Han)
+* stone.spec: many fixes (Erik Logtenberg, Boris Ranto, Dan Mick, Sandon Van Ness)
+* stone_objectstore_tool: vastly improved and extended tool for working offline with OSD data stores (David Zafman)
 * common: add config diff admin socket command (Joao Eduardo Luis)
 * common: add rwlock assertion checks (Yehuda Sadeh)
 * crush: clean up CrushWrapper interface (Xioaxi Chen)
@@ -784,7 +784,7 @@ Notable Changes
 * mon: fix store check on startup (Joao Eduardo Luis)
 * mon: make paxos transaction commits asynchronous (Sage Weil)
 * mon: preload erasure plugins (#9153 Loic Dachary)
-* mon: prevent cache pools from being used directly by CephFS (#9435 John Spray)
+* mon: prevent cache pools from being used directly by StoneFS (#9435 John Spray)
 * mon: use user-provided ruleset for replicated pool (Xiaoxi Chen)
 * mon: verify available disk space on startup (#9502 Joao Eduardo Luis)
 * mon: verify erasure plugin version on load (Loic Dachary)
@@ -891,12 +891,12 @@ Upgrading
 Notable Changes
 ---------------
 
-* ceph-disk: do not inadvertantly create directories (Owne Synge)
-* ceph-disk: fix dmcrypt support (Sage Weil)
-* ceph-disk: linter cleanup, logging improvements (Alfredo Deza)
-* ceph-disk: show information about dmcrypt in 'ceph-disk list' output (Sage Weil)
-* ceph-disk: use partition type UUIDs and blkid (Sage Weil)
-* ceph: fix for non-default cluster names (#8944, Dan Mick)
+* stone-disk: do not inadvertantly create directories (Owne Synge)
+* stone-disk: fix dmcrypt support (Sage Weil)
+* stone-disk: linter cleanup, logging improvements (Alfredo Deza)
+* stone-disk: show information about dmcrypt in 'stone-disk list' output (Sage Weil)
+* stone-disk: use partition type UUIDs and blkid (Sage Weil)
+* stone: fix for non-default cluster names (#8944, Dan Mick)
 * doc: document new upstream wireshark dissector (Kevin Cox)
 * doc: many install doc updates (John Wilkins)
 * librados: fix lock leaks in error paths (#9022, Paval Rallabhandi)
@@ -962,9 +962,9 @@ Notable Changes
 v0.84
 =====
 
-The next Ceph development release is here!  This release contains
+The next Stone development release is here!  This release contains
 several meaty items, including some MDS improvements for journaling,
-the ability to remove the CephFS file system (and name it), several
+the ability to remove the StoneFS file system (and name it), several
 mon cleanups with tiered pools, several OSD performance branches, a
 new "read forward" RADOS caching mode, a prototype Kinetic OSD
 backend, and various radosgw improvements (especially with the new
@@ -980,7 +980,7 @@ Upgrading
   replaced by ``cluster_osd_bytes``).
 
 * The ``rd_kb`` and ``wr_kb`` fields in the JSON dumps for pool stats (accessed
-  via the ``ceph df detail -f json-pretty`` and related commands) have been
+  via the ``stone df detail -f json-pretty`` and related commands) have been
   replaced with corresponding ``*_bytes`` fields.  Similarly, the
   ``total_space``, ``total_used``, and ``total_avail`` fields are replaced with
   ``total_bytes``, ``total_used_bytes``,  and ``total_avail_bytes`` fields.
@@ -995,11 +995,11 @@ Upgrading
 Notable Changes
 ---------------
 
-* ceph-conf: flush log on exit (Sage Weil)
-* ceph-dencoder: refactor build a bit to limit dependencies (Sage Weil, Dan Mick)
-* ceph.spec: split out ceph-common package, other fixes (Sandon Van Ness)
-* ceph_test_librbd_fsx: fix RNG, make deterministic (Ilya Dryomov)
-* cephtool: refactor and improve CLI tests (Joao Eduardo Luis)
+* stone-conf: flush log on exit (Sage Weil)
+* stone-dencoder: refactor build a bit to limit dependencies (Sage Weil, Dan Mick)
+* stone.spec: split out stone-common package, other fixes (Sandon Van Ness)
+* stone_test_librbd_fsx: fix RNG, make deterministic (Ilya Dryomov)
+* stonetool: refactor and improve CLI tests (Joao Eduardo Luis)
 * client: improved MDS session dumps (John Spray)
 * common: fix dup log messages (#9080, Sage Weil)
 * crush: include new tunables in dump (Sage Weil)
@@ -1008,7 +1008,7 @@ Notable Changes
 * fix i386 builds (Sage Weil)
 * fix struct vs class inconsistencies (Thorsten Behrens)
 * hadoop: update hadoop tests for Hadoop 2.0 (Haumin Chen)
-* librbd, ceph-fuse: reduce cache flush overhead (Haomai Wang)
+* librbd, stone-fuse: reduce cache flush overhead (Haomai Wang)
 * librbd: fix error path when opening image (#8912, Josh Durgin)
 * mds: add file system name, enabled flag (John Spray)
 * mds: boot refactor, cleanup (John Spray)
@@ -1022,7 +1022,7 @@ Notable Changes
 * misc integer size cleanups (Kevin Cox)
 * mon: add get-quota commands (Joao Eduardo Luis)
 * mon: do not create file system by default (John Spray)
-* mon: fix 'ceph df' output for available space (Xiaoxi Chen)
+* mon: fix 'stone df' output for available space (Xiaoxi Chen)
 * mon: fix bug when no auth keys are present (#8851, Joao Eduardo Luis)
 * mon: fix compat version for MForward (Joao Eduardo Luis)
 * mon: restrict some pool properties to tiered pools (Joao Eduardo Luis)
@@ -1068,7 +1068,7 @@ Notable Changes
 v0.83
 =====
 
-Another Ceph development release!  This has been a longer cycle, so
+Another Stone development release!  This has been a longer cycle, so
 there has been quite a bit of bug fixing and stabilization in this
 round.  There is also a bunch of packaging fixes for RPM distros
 (RHEL/CentOS, Fedora, and SUSE) and for systemd.  We've also added a new
@@ -1101,9 +1101,9 @@ Upgrading
 Notable Changes
 ---------------
 
-* ceph-disk: fix dmcrypt support (Stephen Taylor)
-* cephtool: fix help (Yilong Zhao)
-* cephtool: test cleanup (Joao Eduardo Luis)
+* stone-disk: fix dmcrypt support (Stephen Taylor)
+* stonetool: fix help (Yilong Zhao)
+* stonetool: test cleanup (Joao Eduardo Luis)
 * doc: librados example fixes (Kevin Dalley)
 * doc: many doc updates (John Wilkins)
 * doc: update erasure docs (Loic Dachary, Venky Shankar)
@@ -1151,7 +1151,7 @@ Notable Changes
 * rgw: handle empty extra pool name (Yehuda Sadeh)
 * rpm: do not restart daemons on upgrade (Alfredo Deza)
 * rpm: misc packaging fixes for rhel7 (Sandon Van Ness)
-* rpm: split ceph-common from ceph (Sandon Van Ness)
+* rpm: split stone-common from stone (Sandon Van Ness)
 * systemd: wrap started daemons in new systemd environment (Sage Weil, Dan Mick)
 * sysvinit: less sensitive to failures (Sage Weil)
 * upstart: increase max open files limit (Sage Weil)
@@ -1161,13 +1161,13 @@ v0.82
 
 This is the second post-firefly development release.  It includes a range
 of bug fixes and some usability improvements.  There are some MDS debugging
-and diagnostic tools, an improved 'ceph df', and some OSD backend refactoring
+and diagnostic tools, an improved 'stone df', and some OSD backend refactoring
 and cleanup.
 
 Notable Changes
 ---------------
 
-* ceph-brag: add tox tests (Alfredo Deza)
+* stone-brag: add tox tests (Alfredo Deza)
 * common: perfcounters now use atomics and go faster (Sage Weil)
 * doc: CRUSH updates (John Wilkins)
 * doc: osd primary affinity (John Wilkins)
@@ -1176,13 +1176,13 @@ Notable Changes
 * doc: switch to an unencumbered font (Ross Turk)
 * doc: update openstack docs (Josh Durgin)
 * fix hppa arch build (Dmitry Smirnov)
-* init-ceph: continue starting other daemons on crush or mount failure (#8343, Sage Weil)
+* init-stone: continue starting other daemons on crush or mount failure (#8343, Sage Weil)
 * keyvaluestore: fix hint crash (#8381, Haomai Wang)
-* libcephfs-java: build against older JNI headers (Greg Farnum)
+* libstonefs-java: build against older JNI headers (Greg Farnum)
 * librados: fix rados_pool_list bounds checks (Sage Weil)
-* mds: cephfs-journal-tool (John Spray)
+* mds: stonefs-journal-tool (John Spray)
 * mds: improve Journaler on-disk format (John Spray)
-* mds, libcephfs: use client timestamp for mtime/ctime (Sage Weil)
+* mds, libstonefs: use client timestamp for mtime/ctime (Sage Weil)
 * mds: misc encoding improvements (John Spray)
 * mds: misc fixes for multi-mds (Yan, Zheng)
 * mds: OPTracker integration, dump_ops_in_flight (Greg Farnum)
@@ -1190,7 +1190,7 @@ Notable Changes
 * mon: fix default replication pool ruleset choice (#8373, John Spray)
 * mon: fix set cache_target_full_ratio (#8440, Geoffrey Hartz)
 * mon: include per-pool 'max avail' in df output (Sage Weil)
-* mon: prevent EC pools from being used with cephfs (Joao Eduardo Luis)
+* mon: prevent EC pools from being used with stonefs (Joao Eduardo Luis)
 * mon: restore original weight when auto-marked out OSDs restart (Sage Weil)
 * mon: use msg header tid for MMonGetVersionReply (Ilya Dryomov)
 * osd: fix bogus assert during OSD shutdown (Sage Weil)
@@ -1215,12 +1215,12 @@ getting backported.
 Upgrading
 ---------
 
-* CephFS support for the legacy anchor table has finally been removed.
+* StoneFS support for the legacy anchor table has finally been removed.
   Users with file systems created before firefly should ensure that inodes
   with multiple hard links are modified *prior* to the upgrade to ensure that
   the backtraces are written properly.  For example::
 
-    sudo find /mnt/cephfs -type f -links +1 -exec touch \{\} \;
+    sudo find /mnt/stonefs -type f -links +1 -exec touch \{\} \;
 
 * Disallow nonsensical 'tier cache-mode' transitions.  From this point
   onward, 'writeback' can only transition to 'forward' and 'forward'
@@ -1232,17 +1232,17 @@ Notable Changes
 
 * bash completion improvements (Wido den Hollander)
 * brag: fixes, improvements (Loic Dachary)
-* ceph-disk: handle corrupt volumes (Stuart Longlang)
-* ceph-disk: partprobe as needed (Eric Eastman)
-* ceph-fuse, libcephfs: asok hooks for handling session resets, timeouts (Yan, Zheng)
-* ceph-fuse, libcephfs: improve traceless reply handling (Sage Weil)
+* stone-disk: handle corrupt volumes (Stuart Longlang)
+* stone-disk: partprobe as needed (Eric Eastman)
+* stone-fuse, libstonefs: asok hooks for handling session resets, timeouts (Yan, Zheng)
+* stone-fuse, libstonefs: improve traceless reply handling (Sage Weil)
 * clang build fixes (John Spray, Danny Al-Gaaf)
 * config: support G, M, K, etc. suffixes (Joao Eduardo Luis)
 * coverity cleanups (Danny Al-Gaaf)
 * doc: cache tiering (John Wilkins)
 * doc: keystone integration docs (John Wilkins)
 * doc: updated simple configuration guides (John Wilkins)
-* libcephfs-java: fix gcj-jdk build (Dmitry Smirnov)
+* libstonefs-java: fix gcj-jdk build (Dmitry Smirnov)
 * librbd: check error code on cache invalidate (Josh Durgin)
 * librbd: new libkrbd library for kernel map/unmap/showmapped (Ilya Dryomov)
 * Makefile: fix out of source builds (Stefan Eilemann)
@@ -1267,7 +1267,7 @@ Notable Changes
 * osd: use FIEMAP to inform copy_range (Haomai Wang)
 * rbd-fuse: allow exposing single image (Stephen Taylor)
 * rbd-fuse: fix unlink (Josh Durgin)
-* removed mkcephfs (deprecated since dumpling)
+* removed mkstonefs (deprecated since dumpling)
 * rgw: bucket link uses instance id (Yehuda Sadeh)
 * rgw: fix memory leak following chunk read error (Yehuda Sadeh)
 * rgw: fix URL escaping (Yehuda Sadeh)

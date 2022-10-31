@@ -16,9 +16,9 @@ my_write_objects() {
 }
 
 setup() {
-        export CEPH_NUM_OSD=$1
+        export STONE_NUM_OSD=$1
 
-        # Start ceph
+        # Start stone
         ./stop.sh
 
         # set recovery start to a really long time to ensure that we don't start recovery
@@ -47,19 +47,19 @@ osd_resurrection_1_impl() {
         # Objects should be lost.
         stop_osd 0
 
-	poll_cmd "./ceph pg debug unfound_objects_exist" TRUE 3 120
+	poll_cmd "./stone pg debug unfound_objects_exist" TRUE 3 120
         [ $? -eq 1 ] || die "Failed to see unfound objects."
         echo "Got unfound objects."
 
         (
-                ./rados -c ./ceph.conf -p $TEST_POOL get obj01 $TEMPDIR/obj01 || die "radostool failed"
+                ./rados -c ./stone.conf -p $TEST_POOL get obj01 $TEMPDIR/obj01 || die "radostool failed"
         ) &
         sleep 5
         [ -e $TEMPDIR/obj01 ] && die "unexpected error: fetched unfound object?"
 
         restart_osd 0
 
-	poll_cmd "./ceph pg debug unfound_objects_exist" FALSE 3 120
+	poll_cmd "./stone pg debug unfound_objects_exist" FALSE 3 120
         [ $? -eq 1 ] || die "Failed to recover unfound objects."
 
         wait
@@ -103,7 +103,7 @@ stray_test_impl() {
         sleep 15
         # 0:active 1:active(ver1) 2:stopped(ver2)
 
-	poll_cmd "./ceph pg debug unfound_objects_exist" TRUE 5 300
+	poll_cmd "./stone pg debug unfound_objects_exist" TRUE 5 300
         [ $? -eq 1 ] || die "Failed to see unfound objects."
 
         #
@@ -115,7 +115,7 @@ stray_test_impl() {
         restart_osd 2
         sleep 15
 
-	poll_cmd "./ceph pg debug unfound_objects_exist" FALSE 4 240
+	poll_cmd "./stone pg debug unfound_objects_exist" FALSE 4 240
         [ $? -eq 1 ] || die "Failed to discover unfound objects."
 
         echo "starting recovery..."

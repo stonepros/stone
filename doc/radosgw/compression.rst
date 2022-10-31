@@ -4,8 +4,8 @@ Compression
 
 .. versionadded:: Kraken
 
-The Ceph Object Gateway supports server-side compression of uploaded objects,
-using any of Ceph's existing compression plugins.
+The Stone Object Gateway supports server-side compression of uploaded objects,
+using any of Stone's existing compression plugins.
 
 
 Configuration

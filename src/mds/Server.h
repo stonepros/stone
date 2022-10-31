@@ -86,8 +86,8 @@ enum {
 
 class Server {
 public:
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
 
   enum class RecallFlags : uint64_t {
     NONE = 0,
@@ -99,7 +99,7 @@ public:
 
   explicit Server(MDSRank *m, MetricsHandler *metrics_handler);
   ~Server() {
-    g_ceph_context->get_perfcounters_collection()->remove(logger);
+    g_stone_context->get_perfcounters_collection()->remove(logger);
     delete logger;
     delete reconnect_done;
   }
@@ -148,7 +148,7 @@ public:
   void infer_supported_features(Session *session, client_metadata_t& client_metadata);
   void update_required_client_features();
 
-  //void process_reconnect_cap(CInode *in, int from, ceph_mds_cap_reconnect& capinfo);
+  //void process_reconnect_cap(CInode *in, int from, stone_mds_cap_reconnect& capinfo);
   void reconnect_gather_finish();
   void reconnect_tick();
   void recover_filelocks(CInode *in, bufferlist locks, int64_t client);
@@ -418,51 +418,51 @@ private:
   void mirror_info_removexattr_handler(CInode *cur, InodeStoreBase::xattr_map_ptr xattrs,
                                        const XattrOp &xattr_op);
 
-  static bool is_ceph_vxattr(std::string_view xattr_name) {
-    return xattr_name.rfind("ceph.dir.layout", 0) == 0 ||
-           xattr_name.rfind("ceph.file.layout", 0) == 0 ||
-           xattr_name.rfind("ceph.quota", 0) == 0 ||
-           xattr_name == "ceph.dir.subvolume"sv ||
-           xattr_name == "ceph.dir.pin"sv ||
-           xattr_name == "ceph.dir.pin.random"sv ||
-           xattr_name == "ceph.dir.pin.distributed"sv;
+  static bool is_stone_vxattr(std::string_view xattr_name) {
+    return xattr_name.rfind("stone.dir.layout", 0) == 0 ||
+           xattr_name.rfind("stone.file.layout", 0) == 0 ||
+           xattr_name.rfind("stone.quota", 0) == 0 ||
+           xattr_name == "stone.dir.subvolume"sv ||
+           xattr_name == "stone.dir.pin"sv ||
+           xattr_name == "stone.dir.pin.random"sv ||
+           xattr_name == "stone.dir.pin.distributed"sv;
   }
 
-  static bool is_ceph_dir_vxattr(std::string_view xattr_name) {
-    return (xattr_name == "ceph.dir.layout" ||
-	    xattr_name == "ceph.dir.layout.json" ||
-	    xattr_name == "ceph.dir.layout.object_size" ||
-	    xattr_name == "ceph.dir.layout.stripe_unit" ||
-	    xattr_name == "ceph.dir.layout.stripe_count" ||
-	    xattr_name == "ceph.dir.layout.pool" ||
-	    xattr_name == "ceph.dir.layout.pool_name" ||
-	    xattr_name == "ceph.dir.layout.pool_id" ||
-	    xattr_name == "ceph.dir.layout.pool_namespace" ||
-	    xattr_name == "ceph.dir.pin" ||
-	    xattr_name == "ceph.dir.pin.random" ||
-	    xattr_name == "ceph.dir.pin.distributed");
+  static bool is_stone_dir_vxattr(std::string_view xattr_name) {
+    return (xattr_name == "stone.dir.layout" ||
+	    xattr_name == "stone.dir.layout.json" ||
+	    xattr_name == "stone.dir.layout.object_size" ||
+	    xattr_name == "stone.dir.layout.stripe_unit" ||
+	    xattr_name == "stone.dir.layout.stripe_count" ||
+	    xattr_name == "stone.dir.layout.pool" ||
+	    xattr_name == "stone.dir.layout.pool_name" ||
+	    xattr_name == "stone.dir.layout.pool_id" ||
+	    xattr_name == "stone.dir.layout.pool_namespace" ||
+	    xattr_name == "stone.dir.pin" ||
+	    xattr_name == "stone.dir.pin.random" ||
+	    xattr_name == "stone.dir.pin.distributed");
   }
 
-  static bool is_ceph_file_vxattr(std::string_view xattr_name) {
-    return (xattr_name == "ceph.file.layout" ||
-	    xattr_name == "ceph.file.layout.json" ||
-	    xattr_name == "ceph.file.layout.object_size" ||
-	    xattr_name == "ceph.file.layout.stripe_unit" ||
-	    xattr_name == "ceph.file.layout.stripe_count" ||
-	    xattr_name == "ceph.file.layout.pool" ||
-	    xattr_name == "ceph.file.layout.pool_name" ||
-	    xattr_name == "ceph.file.layout.pool_id" ||
-	    xattr_name == "ceph.file.layout.pool_namespace");
+  static bool is_stone_file_vxattr(std::string_view xattr_name) {
+    return (xattr_name == "stone.file.layout" ||
+	    xattr_name == "stone.file.layout.json" ||
+	    xattr_name == "stone.file.layout.object_size" ||
+	    xattr_name == "stone.file.layout.stripe_unit" ||
+	    xattr_name == "stone.file.layout.stripe_count" ||
+	    xattr_name == "stone.file.layout.pool" ||
+	    xattr_name == "stone.file.layout.pool_name" ||
+	    xattr_name == "stone.file.layout.pool_id" ||
+	    xattr_name == "stone.file.layout.pool_namespace");
   }
 
-  static bool is_allowed_ceph_xattr(std::string_view xattr_name) {
-    // not a ceph xattr -- allow!
-    if (xattr_name.rfind("ceph.", 0) != 0) {
+  static bool is_allowed_stone_xattr(std::string_view xattr_name) {
+    // not a stone xattr -- allow!
+    if (xattr_name.rfind("stone.", 0) != 0) {
       return true;
     }
 
-    return xattr_name == "ceph.mirror.info" ||
-           xattr_name == "ceph.mirror.dirty_snap_id";
+    return xattr_name == "stone.mirror.info" ||
+           xattr_name == "stone.mirror.dirty_snap_id";
   }
 
   void reply_client_request(MDRequestRef& mdr, const ref_t<MClientReply> &reply);

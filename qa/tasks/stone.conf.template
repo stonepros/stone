@@ -1,7 +1,7 @@
 [global]
 	chdir = ""
-	pid file = /var/run/ceph/$cluster-$name.pid
-        auth supported = cephx
+	pid file = /var/run/stonepros/$cluster-$name.pid
+        auth supported = stonex
 
 	filestore xattr use omap = true
 
@@ -103,5 +103,5 @@
 	rgw cache enabled = true
 	rgw enable ops log = true
 	rgw enable usage log = true
-	log file = /var/log/ceph/$cluster-$name.$pid.log
-	admin socket = /var/run/ceph/$cluster-$name.$pid.asok
+	log file = /var/log/stonepros/$cluster-$name.$pid.log
+	admin socket = /var/run/stonepros/$cluster-$name.$pid.asok

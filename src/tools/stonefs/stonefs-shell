@@ -5,7 +5,7 @@ import argparse
 import os
 import os.path
 import sys
-import cephfs as libcephfs
+import stonefs as libstonefs
 import shutil
 import traceback
 import colorama
@@ -21,7 +21,7 @@ from cmd2 import __version__ as cmd2_version
 from distutils.version import LooseVersion
 
 if sys.version_info.major < 3:
-    raise RuntimeError("cephfs-shell is only compatible with python3")
+    raise RuntimeError("stonefs-shell is only compatible with python3")
 
 try:
     from cmd2 import with_argparser
@@ -56,8 +56,8 @@ except ImportError:
         return argparser_decorator
 
 
-cephfs = None   # holds CephFS Python bindings
-shell = None    # holds instance of class CephFSShell
+stonefs = None   # holds StoneFS Python bindings
+shell = None    # holds instance of class StoneFSShell
 exit_codes = {'Misc': 1,
               'KeyboardInterrupt': 2,
               errno.EPERM: 3,
@@ -84,7 +84,7 @@ exit_codes = {'Misc': 1,
 
 #########################################################################
 #
-# Following are methods are generically useful through class CephFSShell
+# Following are methods are generically useful through class StoneFSShell
 #
 #######################################################################
 
@@ -101,7 +101,7 @@ def set_exit_code_msg(errcode='Misc', msg=''):
     """
     Set exit code and print error message
     """
-    if isinstance(msg, libcephfs.Error):
+    if isinstance(msg, libstonefs.Error):
         shell.exit_code = exit_codes[msg.get_error_code()]
     else:
         shell.exit_code = exit_codes[errcode]
@@ -162,15 +162,15 @@ def ls(path, opts=''):
     # opts tries to be like /bin/ls opts
     almost_all = 'A' in opts
     try:
-        with cephfs.opendir(path) as d:
+        with stonefs.opendir(path) as d:
             while True:
-                dent = cephfs.readdir(d)
+                dent = stonefs.readdir(d)
                 if dent is None:
                     return
                 elif almost_all and dent.d_name in (b'.', b'..'):
                     continue
                 yield dent
-    except libcephfs.ObjectNotFound as e:
+    except libstonefs.ObjectNotFound as e:
         set_exit_code_msg(msg=e)
 
 
@@ -187,7 +187,7 @@ def glob(path, pattern):
 
 
 def locate_file(name, case_sensitive=True):
-    dir_list = sorted(set(dirwalk(cephfs.getcwd())))
+    dir_list = sorted(set(dirwalk(stonefs.getcwd())))
     if not case_sensitive:
         return [dname for dname in dir_list if name.lower() in dname.lower()]
     else:
@@ -199,7 +199,7 @@ def get_all_possible_paths(pattern):
     paths = []
     is_rel_path = not os.path.isabs(pattern)
     if is_rel_path:
-        dir_ = cephfs.getcwd()
+        dir_ = stonefs.getcwd()
     else:
         dir_ = b'/'
         pattern = pattern[1:]
@@ -210,7 +210,7 @@ def get_all_possible_paths(pattern):
         for path in paths:
             paths.extend(glob(path, pattern))
     if is_rel_path:
-        complete_pattern = os.path.join(cephfs.getcwd(), complete_pattern)
+        complete_pattern = os.path.join(stonefs.getcwd(), complete_pattern)
     return [path for path in paths if fnmatch.fnmatch(path, complete_pattern)]
 
 
@@ -235,7 +235,7 @@ def style_listing(path, is_dir, is_symlink, ls_long=False):
         pretty += colorama.Fore.CYAN + path
         if ls_long:
             # Add target path
-            pretty += ' -> ' + cephfs.readlink(path, size=255).decode('utf-8')
+            pretty += ' -> ' + stonefs.readlink(path, size=255).decode('utf-8')
     elif is_dir:
         pretty += colorama.Fore.BLUE + path + '/'
     pretty += colorama.Style.RESET_ALL
@@ -243,7 +243,7 @@ def style_listing(path, is_dir, is_symlink, ls_long=False):
 
 
 def print_long(path, is_dir, is_symlink, human_readable):
-    info = cephfs.stat(path, follow_symlink=(not is_symlink))
+    info = stonefs.stat(path, follow_symlink=(not is_symlink))
     pretty = style_listing(os.path.basename(path.decode('utf-8')), is_dir, is_symlink, True)
     if human_readable:
         sizefmt = '\t {:10s}'.format(humansize(info.st_size))
@@ -265,16 +265,16 @@ def word_len(word):
 def is_dir_exists(path, dir_=b''):
     path_to_stat = os.path.join(dir_, path)
     try:
-        return ((cephfs.stat(path_to_stat).st_mode & 0o0040000) != 0)
-    except libcephfs.Error:
+        return ((stonefs.stat(path_to_stat).st_mode & 0o0040000) != 0)
+    except libstonefs.Error:
         return False
 
 
 def is_file_exists(path, dir_=b''):
     try:
         # if its not a directory, then its a file
-        return ((cephfs.stat(os.path.join(dir_, path)).st_mode & 0o0040000) == 0)
-    except libcephfs.Error:
+        return ((stonefs.stat(os.path.join(dir_, path)).st_mode & 0o0040000) == 0)
+    except libstonefs.Error:
         return False
 
 
@@ -314,8 +314,8 @@ def copy_from_local(local_path, remote_path):
             return
         stdin = 1
     try:
-        fd = cephfs.open(remote_path, 'w', 0o666)
-    except libcephfs.Error as e:
+        fd = stonefs.open(remote_path, 'w', 0o666)
+    except libstonefs.Error as e:
         set_exit_code_msg(msg=e)
         return
     progress = 0
@@ -325,11 +325,11 @@ def copy_from_local(local_path, remote_path):
             break
         if convert_to_bytes:
             data = to_bytes(data)
-        wrote = cephfs.write(fd, data, progress)
+        wrote = stonefs.write(fd, data, progress)
         if wrote < 0:
             break
         progress += wrote
-    cephfs.close(fd)
+    stonefs.close(fd)
     if stdin > 0:
         file_.close()
     poutput('')
@@ -345,19 +345,19 @@ def copy_to_local(remote_path, local_path):
         if len(dir_list) > 2 and dir_list[1] == b'':
             return
         fd = open(local_path, 'wb+')
-    file_ = cephfs.open(remote_path, 'r')
-    file_size = cephfs.stat(remote_path).st_size
+    file_ = stonefs.open(remote_path, 'r')
+    file_size = stonefs.stat(remote_path).st_size
     if file_size <= 0:
         return
     progress = 0
     for chunk_start, chunk_size in get_chunks(file_size):
-        file_chunk = cephfs.read(file_, chunk_start, chunk_size)
+        file_chunk = stonefs.read(file_, chunk_start, chunk_size)
         progress += len(file_chunk)
         if fd:
             fd.write(file_chunk)
         else:
             poutput(file_chunk.decode('utf-8'))
-    cephfs.close(file_)
+    stonefs.close(file_)
     if fd:
         fd.close()
 
@@ -379,15 +379,15 @@ def dirwalk(path):
 
 ##################################################################
 #
-# Following methods are implementation for CephFS Shell commands
+# Following methods are implementation for StoneFS Shell commands
 #
 #################################################################
 
-class CephFSShell(Cmd):
+class StoneFSShell(Cmd):
 
     def __init__(self):
         super().__init__(use_ipython=False)
-        self.working_dir = cephfs.getcwd().decode('utf-8')
+        self.working_dir = stonefs.getcwd().decode('utf-8')
         self.set_prompt()
         self.interactive = False
         self.umask = '2'
@@ -396,7 +396,7 @@ class CephFSShell(Cmd):
         perror('Unrecognized command')
 
     def set_prompt(self):
-        self.prompt = ('\033[01;33mCephFS:~' + colorama.Fore.LIGHTCYAN_EX
+        self.prompt = ('\033[01;33mStoneFS:~' + colorama.Fore.LIGHTCYAN_EX
                        + self.working_dir + colorama.Style.RESET_ALL
                        + '\033[01;33m>>>\033[00m ')
 
@@ -463,7 +463,7 @@ class CephFSShell(Cmd):
             set_exit_code_msg(e.errno, f'***\n{e}')
         except KeyboardInterrupt:
             set_exit_code_msg('KeyboardInterrupt', 'Command aborted')
-        except (libcephfs.Error, Exception) as e:
+        except (libstonefs.Error, Exception) as e:
             if shell.debug:
                 traceback.print_exc(file=sys.stdout)
             set_exit_code_msg(msg=e)
@@ -479,11 +479,11 @@ class CephFSShell(Cmd):
             values = to_bytes(values)
 
             if values == b'.':
-                values = cephfs.getcwd()
+                values = stonefs.getcwd()
             else:
                 for i in values:
                     if i == b'.':
-                        values[values.index(i)] = cephfs.getcwd()
+                        values[values.index(i)] = stonefs.getcwd()
 
             setattr(namespace, self.dest, values)
 
@@ -586,11 +586,11 @@ class CephFSShell(Cmd):
             else:
                 permission = 0o777
             if args.parent:
-                cephfs.mkdirs(path, permission)
+                stonefs.mkdirs(path, permission)
             else:
                 try:
-                    cephfs.mkdir(path, permission)
-                except libcephfs.Error as e:
+                    stonefs.mkdir(path, permission)
+                except libstonefs.Error as e:
                     set_exit_code_msg(e)
 
     def complete_put(self, text, line, begidx, endidx):
@@ -601,7 +601,7 @@ class CephFSShell(Cmd):
         return self.index_based_complete(text, line, begidx, endidx, index_dict)
 
     put_parser = argparse.ArgumentParser(
-        description='Copy a file/directory to Ceph File System from Local File System.')
+        description='Copy a file/directory to Stone File System from Local File System.')
     put_parser.add_argument('local_path', type=str, action=path_to_bytes,
                             help='Path of the file in the local system')
     put_parser.add_argument('remote_path', type=str, action=path_to_bytes,
@@ -613,7 +613,7 @@ class CephFSShell(Cmd):
     @with_argparser(put_parser)
     def do_put(self, args):
         """
-        Copy a local file/directory to CephFS.
+        Copy a local file/directory to StoneFS.
         """
         root_src_dir = args.local_path
         root_dst_dir = args.remote_path
@@ -664,19 +664,19 @@ class CephFSShell(Cmd):
                 if isinstance(src_dir, str):
                     src_dir = to_bytes(src_dir)
                 dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
-                dst_dir = re.sub(rb'\/+', b'/', cephfs.getcwd()
+                dst_dir = re.sub(rb'\/+', b'/', stonefs.getcwd()
                                  + dst_dir)
                 if args.force and dst_dir != b'/' and not is_dir_exists(
                         dst_dir[:-1]) and not locate_file(dst_dir):
                     try:
-                        cephfs.mkdirs(dst_dir, 0o777)
-                    except libcephfs.Error:
+                        stonefs.mkdirs(dst_dir, 0o777)
+                    except libstonefs.Error:
                         pass
                 if (not args.force) and dst_dir != b'/' and not is_dir_exists(
                         dst_dir) and not os.path.isfile(root_src_dir):
                     try:
-                        cephfs.mkdirs(dst_dir, 0o777)
-                    except libcephfs.Error:
+                        stonefs.mkdirs(dst_dir, 0o777)
+                    except libstonefs.Error:
                         # TODO: perhaps, set retval to 1?
                         pass
 
@@ -684,8 +684,8 @@ class CephFSShell(Cmd):
                     dir_name = os.path.join(dst_dir, dir_)
                     if not is_dir_exists(dir_name):
                         try:
-                            cephfs.mkdirs(dir_name, 0o777)
-                        except libcephfs.Error:
+                            stonefs.mkdirs(dir_name, 0o777)
+                        except libstonefs.Error:
                             # TODO: perhaps, set retval to 1?
                             pass
 
@@ -694,7 +694,7 @@ class CephFSShell(Cmd):
                     dst_file = re.sub(rb'\/+', b'/', b'/' + dst_dir + b'/' + file_)
                     if (not args.force) and is_file_exists(dst_file):
                         return
-                    copy_from_local(src_file, os.path.join(cephfs.getcwd(),
+                    copy_from_local(src_file, os.path.join(stonefs.getcwd(),
                                     dst_file))
 
     def complete_get(self, text, line, begidx, endidx):
@@ -704,7 +704,7 @@ class CephFSShell(Cmd):
         return self.complete_filenames(text, line, begidx, endidx)
 
     get_parser = argparse.ArgumentParser(
-        description='Copy a file from Ceph File System from Local Directory.')
+        description='Copy a file from Stone File System from Local Directory.')
     get_parser.add_argument('remote_path', type=str, action=path_to_bytes,
                             help='Path of the file in the remote system')
     get_parser.add_argument('local_path', type=str, action=path_to_bytes,
@@ -716,7 +716,7 @@ class CephFSShell(Cmd):
     @with_argparser(get_parser)
     def do_get(self, args):
         """
-        Copy a file/directory from CephFS to given path.
+        Copy a file/directory from StoneFS to given path.
         """
         root_src_dir = args.remote_path
         root_dst_dir = args.local_path
@@ -724,7 +724,7 @@ class CephFSShell(Cmd):
         if args.local_path == b'.':
             root_dst_dir = os.getcwdb()
         if args.remote_path == b'.':
-            root_src_dir = cephfs.getcwd()
+            root_src_dir = stonefs.getcwd()
         if args.local_path == b'-':
             if args.remote_path == b'.' or args.remote_path == b'./':
                 set_exit_code_msg(errno.EINVAL, 'error: no remote file name specified')
@@ -780,7 +780,7 @@ class CephFSShell(Cmd):
         return self.complete_filenames(text, line, begidx, endidx)
 
     ls_parser = argparse.ArgumentParser(
-        description='Copy a file from Ceph File System from Local Directory.')
+        description='Copy a file from Stone File System from Local Directory.')
     ls_parser.add_argument('-l', '--long', action='store_true',
                            help='Detailed list of items in the directory.')
     ls_parser.add_argument('-r', '--reverse', action='store_true',
@@ -824,13 +824,13 @@ class CephFSShell(Cmd):
                         poutput(path.decode('utf-8'), end=':\n')
                     items = sorted(items, key=lambda item: item.d_name)
                 else:
-                    if path != b'' and path != cephfs.getcwd() and len(paths) > 1:
+                    if path != b'' and path != stonefs.getcwd() and len(paths) > 1:
                         poutput(path.decode('utf-8'), end=':\n')
                     items = sorted(ls(path), key=lambda item: item.d_name)
                 if not args.all:
                     items = [i for i in items if not i.d_name.startswith(b'.')]
                 if args.S:
-                    items = sorted(items, key=lambda item: cephfs.stat(
+                    items = sorted(items, key=lambda item: stonefs.stat(
                         path + b'/' + item.d_name, follow_symlink=(
                             not item.is_symbol_file())).st_size)
                 if args.reverse:
@@ -841,23 +841,23 @@ class CephFSShell(Cmd):
                     is_sym_lnk = item.is_symbol_file()
                     try:
                         if args.long and args.H:
-                            print_long(os.path.join(cephfs.getcwd(), path, filepath), is_dir,
+                            print_long(os.path.join(stonefs.getcwd(), path, filepath), is_dir,
                                        is_sym_lnk, True)
                         elif args.long:
-                            print_long(os.path.join(cephfs.getcwd(), path, filepath), is_dir,
+                            print_long(os.path.join(stonefs.getcwd(), path, filepath), is_dir,
                                        is_sym_lnk, False)
                         elif is_sym_lnk or is_dir:
                             values.append(style_listing(filepath.decode('utf-8'), is_dir,
                                           is_sym_lnk))
                         else:
                             values.append(filepath)
-                    except libcephfs.Error as e:
+                    except libstonefs.Error as e:
                         set_exit_code_msg(msg=e)
                 if not args.long:
                     print_list(values, shutil.get_terminal_size().columns)
                     if path != paths[-1]:
                         poutput('')
-            except libcephfs.Error as e:
+            except libstonefs.Error as e:
                 set_exit_code_msg(msg=e)
 
     def complete_rmdir(self, text, line, begidx, endidx):
@@ -906,23 +906,23 @@ class CephFSShell(Cmd):
                 is_pattern = False
 
             if args.parent:
-                path = os.path.join(cephfs.getcwd(), path.rsplit(b'/')[0])
+                path = os.path.join(stonefs.getcwd(), path.rsplit(b'/')[0])
                 files = list(sorted(set(dirwalk(path)), reverse=True))
                 if not files:
                     path = b'.'
                 for filepath in files:
                     try:
-                        cephfs.rmdir(os.path.normpath(filepath))
-                    except libcephfs.Error as e:
+                        stonefs.rmdir(os.path.normpath(filepath))
+                    except libstonefs.Error as e:
                         perror(e)
                         path = b'.'
                         break
             else:
-                path = os.path.normpath(os.path.join(cephfs.getcwd(), path))
+                path = os.path.normpath(os.path.join(stonefs.getcwd(), path))
             if not is_pattern and path != os.path.normpath(b''):
                 try:
-                    cephfs.rmdir(path)
-                except libcephfs.Error as e:
+                    stonefs.rmdir(path)
+                except libstonefs.Error as e:
                     set_exit_code_msg(msg=e)
 
     def complete_rm(self, text, line, begidx, endidx):
@@ -947,8 +947,8 @@ class CephFSShell(Cmd):
                     path) if is_file_exists(i)])
             else:
                 try:
-                    cephfs.unlink(path)
-                except libcephfs.Error as e:
+                    stonefs.unlink(path)
+                except libstonefs.Error as e:
                     # NOTE: perhaps we need a better msg here
                     set_exit_code_msg(msg=e)
 
@@ -969,7 +969,7 @@ class CephFSShell(Cmd):
         """
         Rename a file or Move a file from source path to the destination
         """
-        cephfs.rename(args.src_path, args.dest_path)
+        stonefs.rename(args.src_path, args.dest_path)
 
     def complete_cd(self, text, line, begidx, endidx):
         """
@@ -986,15 +986,15 @@ class CephFSShell(Cmd):
         """
         Change working directory
         """
-        cephfs.chdir(args.path)
-        self.working_dir = cephfs.getcwd().decode('utf-8')
+        stonefs.chdir(args.path)
+        self.working_dir = stonefs.getcwd().decode('utf-8')
         self.set_prompt()
 
     def do_cwd(self, arglist):
         """
         Get current working directory.
         """
-        poutput(cephfs.getcwd().decode('utf-8'))
+        poutput(stonefs.getcwd().decode('utf-8'))
 
     def complete_chmod(self, text, line, begidx, endidx):
         """
@@ -1015,8 +1015,8 @@ class CephFSShell(Cmd):
         for path in args.paths:
             mode = int(args.mode, base=8)
             try:
-                cephfs.chmod(path, mode)
-            except libcephfs.Error as e:
+                stonefs.chmod(path, mode)
+            except libstonefs.Error as e:
                 set_exit_code_msg(msg=e)
 
     def complete_cat(self, text, line, begidx, endidx):
@@ -1054,7 +1054,7 @@ class CephFSShell(Cmd):
             poutput(self.umask.zfill(4))
         else:
             mode = int(args.mode, 8)
-            self.umask = str(oct(cephfs.umask(mode))[2:])
+            self.umask = str(oct(stonefs.umask(mode))[2:])
 
     def complete_write(self, text, line, begidx, endidx):
         """
@@ -1156,13 +1156,13 @@ class CephFSShell(Cmd):
             arglist.file = ls(b'.')
 
         for file in arglist.file:
-            if isinstance(file, libcephfs.DirEntry):
+            if isinstance(file, libstonefs.DirEntry):
                 file = file.d_name
             if file == b'.' or file == b'..':
                 continue
             try:
-                statfs = cephfs.statfs(file)
-                stat = cephfs.stat(file)
+                statfs = stonefs.statfs(file)
+                stat = stonefs.stat(file)
                 block_size = (statfs['f_blocks'] * statfs['f_bsize']) // 1024
                 available = block_size - stat.st_size
                 use = 0
@@ -1179,7 +1179,7 @@ class CephFSShell(Cmd):
                 poutput('{:d}\t{:18d}\t{:8d}\t{:10s} {}'.format(block_size,
                         stat.st_size, available, str(int(use)) + '%',
                         file.decode('utf-8')))
-            except libcephfs.OSError as e:
+            except libstonefs.OSError as e:
                 set_exit_code_msg(e.get_error_code(), "could not statfs {}: {}".format(
                     file.decode('utf-8'), e.strerror))
 
@@ -1237,11 +1237,11 @@ class CephFSShell(Cmd):
 
             for f in files:
                 try:
-                    st = cephfs.lstat(f)
+                    st = stonefs.lstat(f)
 
                     if stat.S_ISDIR(st.st_mode):
-                        dusage = int(cephfs.getxattr(f,
-                                     'ceph.dir.rbytes').decode('utf-8'))
+                        dusage = int(stonefs.getxattr(f,
+                                     'stone.dir.rbytes').decode('utf-8'))
                     else:
                         dusage = st.st_size
 
@@ -1251,7 +1251,7 @@ class CephFSShell(Cmd):
                         f = b'.' + f
                     poutput('{:10s} {}'.format(humansize(dusage),
                             f.decode('utf-8')))
-                except libcephfs.Error as e:
+                except libstonefs.Error as e:
                     set_exit_code_msg(msg=e)
                     continue
 
@@ -1293,11 +1293,11 @@ class CephFSShell(Cmd):
             if args.max_bytes >= 0:
                 max_bytes = to_bytes(str(args.max_bytes))
                 try:
-                    cephfs.setxattr(args.path, 'ceph.quota.max_bytes',
+                    stonefs.setxattr(args.path, 'stone.quota.max_bytes',
                                     max_bytes, os.XATTR_CREATE)
                     poutput('max_bytes set to %d' % args.max_bytes)
-                except libcephfs.Error as e:
-                    cephfs.setxattr(args.path, 'ceph.quota.max_bytes',
+                except libstonefs.Error as e:
+                    stonefs.setxattr(args.path, 'stone.quota.max_bytes',
                                     max_bytes, os.XATTR_REPLACE)
                     set_exit_code_msg(e.get_error_code(), 'max_bytes reset to '
                                       f'{args.max_bytes}')
@@ -1305,11 +1305,11 @@ class CephFSShell(Cmd):
             if args.max_files >= 0:
                 max_files = to_bytes(str(args.max_files))
                 try:
-                    cephfs.setxattr(args.path, 'ceph.quota.max_files',
+                    stonefs.setxattr(args.path, 'stone.quota.max_files',
                                     max_files, os.XATTR_CREATE)
                     poutput('max_files set to %d' % args.max_files)
-                except libcephfs.Error as e:
-                    cephfs.setxattr(args.path, 'ceph.quota.max_files',
+                except libstonefs.Error as e:
+                    stonefs.setxattr(args.path, 'stone.quota.max_files',
                                     max_files, os.XATTR_REPLACE)
                     set_exit_code_msg(e.get_error_code(), 'max_files reset to '
                                       f'{args.max_files}')
@@ -1317,15 +1317,15 @@ class CephFSShell(Cmd):
             max_bytes = '0'
             max_files = '0'
             try:
-                max_bytes = cephfs.getxattr(args.path, 'ceph.quota.max_bytes')
+                max_bytes = stonefs.getxattr(args.path, 'stone.quota.max_bytes')
                 poutput('max_bytes: {}'.format(max_bytes.decode('utf-8')))
-            except libcephfs.Error as e:
+            except libstonefs.Error as e:
                 set_exit_code_msg(e.get_error_code(), 'max_bytes is not set')
 
             try:
-                max_files = cephfs.getxattr(args.path, 'ceph.quota.max_files')
+                max_files = stonefs.getxattr(args.path, 'stone.quota.max_files')
                 poutput('max_files: {}'.format(max_files.decode('utf-8')))
-            except libcephfs.Error as e:
+            except libstonefs.Error as e:
                 set_exit_code_msg(e.get_error_code(), 'max_files is not set')
 
     snap_parser = argparse.ArgumentParser(description='Snapshot Management')
@@ -1347,18 +1347,18 @@ class CephFSShell(Cmd):
         self.colors = None
 
         snapdir = '.snap'
-        conf_snapdir = cephfs.conf_get('client_snapdir')
+        conf_snapdir = stonefs.conf_get('client_snapdir')
         if conf_snapdir is not None:
             snapdir = conf_snapdir
         snapdir = to_bytes(snapdir)
         if args.op == 'create':
             try:
                 if is_dir_exists(args.dir):
-                    cephfs.mkdir(os.path.join(args.dir, snapdir, args.name), 0o755)
+                    stonefs.mkdir(os.path.join(args.dir, snapdir, args.name), 0o755)
                 else:
                     set_exit_code_msg(errno.ENOENT, "'{}': no such directory".format(
                                       args.dir.decode('utf-8')))
-            except libcephfs.Error as e:
+            except libstonefs.Error as e:
                 set_exit_code_msg(e.get_error_code(),
                                   "snapshot '{}' already exists".format(
                                   args.name.decode('utf-8')))
@@ -1371,7 +1371,7 @@ class CephFSShell(Cmd):
                 else:
                     set_exit_code_msg(errno.ENOENT, "'{}': no such snapshot".format(
                         args.name.decode('utf-8')))
-            except libcephfs.Error as e:
+            except libstonefs.Error as e:
                 set_exit_code_msg(e.get_error_code(), "error while deleting "
                                   "'{}'".format(snap_dir.decode('utf-8')))
         else:
@@ -1414,7 +1414,7 @@ class CephFSShell(Cmd):
         """
         for path in args.paths:
             try:
-                stat = cephfs.stat(path)
+                stat = stonefs.stat(path)
                 atime = stat.st_atime.isoformat(' ')
                 mtime = stat.st_mtime.isoformat(' ')
                 ctime = stat.st_mtime.isoformat(' ')
@@ -1430,7 +1430,7 @@ class CephFSShell(Cmd):
                                                 mode_notation(stat.st_mode),
                                                 stat.st_uid, stat.st_gid, atime,
                                                 mtime, ctime))
-            except libcephfs.Error as e:
+            except libstonefs.Error as e:
                 set_exit_code_msg(msg=e)
 
     setxattr_parser = argparse.ArgumentParser(
@@ -1447,12 +1447,12 @@ class CephFSShell(Cmd):
         val_bytes = to_bytes(args.value)
         name_bytes = to_bytes(args.name)
         try:
-            cephfs.setxattr(args.path, name_bytes, val_bytes, os.XATTR_CREATE)
+            stonefs.setxattr(args.path, name_bytes, val_bytes, os.XATTR_CREATE)
             poutput('{} is successfully set to {}'.format(args.name, args.value))
-        except libcephfs.ObjectExists:
-            cephfs.setxattr(args.path, name_bytes, val_bytes, os.XATTR_REPLACE)
+        except libstonefs.ObjectExists:
+            stonefs.setxattr(args.path, name_bytes, val_bytes, os.XATTR_REPLACE)
             poutput('{} is successfully reset to {}'.format(args.name, args.value))
-        except libcephfs.Error as e:
+        except libstonefs.Error as e:
             set_exit_code_msg(msg=e)
 
     getxattr_parser = argparse.ArgumentParser(
@@ -1467,9 +1467,9 @@ class CephFSShell(Cmd):
         Get extended attribute for a file
         """
         try:
-            poutput('{}'.format(cephfs.getxattr(args.path,
+            poutput('{}'.format(stonefs.getxattr(args.path,
                                 to_bytes(args.name)).decode('utf-8')))
-        except libcephfs.Error as e:
+        except libstonefs.Error as e:
             set_exit_code_msg(msg=e)
 
     listxattr_parser = argparse.ArgumentParser(
@@ -1483,33 +1483,33 @@ class CephFSShell(Cmd):
         List extended attributes for a file
         """
         try:
-            size, xattr_list = cephfs.listxattr(args.path)
+            size, xattr_list = stonefs.listxattr(args.path)
             if size > 0:
                 poutput('{}'.format(xattr_list.replace(b'\x00', b' ').decode('utf-8')))
             else:
                 poutput('No extended attribute is set')
-        except libcephfs.Error as e:
+        except libstonefs.Error as e:
             set_exit_code_msg(msg=e)
 
 
 #######################################################
 #
-# Following are methods that get cephfs-shell started.
+# Following are methods that get stonefs-shell started.
 #
 #####################################################
 
-def setup_cephfs():
+def setup_stonefs():
     """
-    Mounting a cephfs
+    Mounting a stonefs
     """
-    global cephfs
+    global stonefs
     try:
-        cephfs = libcephfs.LibCephFS(conffile='')
-        cephfs.mount()
-    except libcephfs.ObjectNotFound as e:
-        print('couldn\'t find ceph configuration not found')
+        stonefs = libstonefs.LibStoneFS(conffile='')
+        stonefs.mount()
+    except libstonefs.ObjectNotFound as e:
+        print('couldn\'t find stone configuration not found')
         sys.exit(e.get_error_code())
-    except libcephfs.Error as e:
+    except libstonefs.Error as e:
         print(e)
         sys.exit(e.get_error_code())
 
@@ -1533,7 +1533,7 @@ def str_to_bool(val):
 def read_shell_conf(shell, shell_conf_file):
     import configparser
 
-    sec = 'cephfs-shell'
+    sec = 'stonefs-shell'
     opts = []
     if LooseVersion(cmd2_version) >= LooseVersion("0.10.0"):
         for attr in shell.settables.keys():
@@ -1563,8 +1563,8 @@ def read_shell_conf(shell, shell_conf_file):
 
 
 def get_shell_conffile_path(arg_conf=''):
-    conf_filename = 'cephfs-shell.conf'
-    env_var = 'CEPHFS_SHELL_CONF'
+    conf_filename = 'stonefs-shell.conf'
+    env_var = 'STONEFS_SHELL_CONF'
 
     arg_conf = '' if not arg_conf else arg_conf
     home_dir_conf = os.path.expanduser('~/.' + conf_filename)
@@ -1581,11 +1581,11 @@ def get_shell_conffile_path(arg_conf=''):
 def manage_args():
     main_parser = argparse.ArgumentParser(description='')
     main_parser.add_argument('-c', '--config', action='store',
-                             help='Path to Ceph configuration file.',
+                             help='Path to Stone configuration file.',
                              type=str)
     main_parser.add_argument('-b', '--batch', action='store',
-                             help='Path to CephFS shell script/batch file'
-                                  'containing CephFS shell commands',
+                             help='Path to StoneFS shell script/batch file'
+                                  'containing StoneFS shell commands',
                              type=str)
     main_parser.add_argument('-t', '--test', action='store',
                              help='Test against transcript(s) in FILE',
@@ -1620,7 +1620,7 @@ def manage_sys_argv(args):
     sys.argv.append(exe)
     sys.argv.extend([i.strip() for i in ' '.join(args.commands).split(',')])
 
-    setup_cephfs()
+    setup_stonefs()
 
 
 def execute_cmd_args(args):
@@ -1640,7 +1640,7 @@ def execute_cmds_and_quit(args):
     Multiple commands might be passed separated by commas, feed onecmd()
     one command at a time.
     """
-    # do_* methods triggered by cephfs-shell commands return None when they
+    # do_* methods triggered by stonefs-shell commands return None when they
     # complete running successfully. Until 0.9.6, shell.onecmd() returned this
     # value to indicate whether the execution of the commands should stop, but
     # since 0.9.7 it returns the return value of do_* methods only if it's
@@ -1674,13 +1674,13 @@ def execute_cmds_and_quit(args):
 if __name__ == '__main__':
     args = manage_args()
 
-    shell = CephFSShell()
-    # TODO: perhaps, we should add an option to pass ceph.conf?
+    shell = StoneFSShell()
+    # TODO: perhaps, we should add an option to pass stone.conf?
     read_shell_conf(shell, get_shell_conffile_path(args.config))
     # XXX: setting shell.exit_code to zero so that in case there are no errors
-    # and exceptions, it is not set by any method or function of cephfs-shell
+    # and exceptions, it is not set by any method or function of stonefs-shell
     # and return values from shell.cmdloop() or shell.onecmd() is not an
-    # integer, we can treat it as the return value of cephfs-shell.
+    # integer, we can treat it as the return value of stonefs-shell.
     shell.exit_code = 0
 
     retval = execute_cmd_args(args)

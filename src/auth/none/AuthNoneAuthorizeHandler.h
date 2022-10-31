@@ -22,9 +22,9 @@ struct AuthNoneAuthorizeHandler : public AuthAuthorizeHandler {
   bool verify_authorizer(
     StoneContext *cct,
     const KeyStore& keys,
-    const ceph::buffer::list& authorizer_data,
+    const stone::buffer::list& authorizer_data,
     size_t connection_secret_required_len,
-    ceph::buffer::list *authorizer_reply,
+    stone::buffer::list *authorizer_reply,
     EntityName *entity_name,
     uint64_t *global_id,
     AuthCapsInfo *caps_info,

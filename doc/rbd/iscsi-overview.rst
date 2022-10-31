@@ -1,19 +1,19 @@
 .. _ceph-iscsi:
 
 ==================
-Ceph iSCSI Gateway
+Stone iSCSI Gateway
 ==================
 
 The iSCSI Gateway presents
 a Highly Available (HA) iSCSI target that exports RADOS Block Device (RBD) images
 as SCSI disks. The iSCSI protocol allows clients (initiators) to send SCSI commands
 to storage devices (targets) over a TCP/IP network, enabling clients without
-native Ceph client support to access Ceph block storage.  These include
+native Stone client support to access Stone block storage.  These include
 Microsoft Windows and even BIOS.
 
 Each iSCSI gateway exploits the Linux IO target kernel subsystem (LIO) to provide
 iSCSI protocol support. LIO utilizes userspace passthrough (TCMU) to interact
-with Ceph's librbd library and expose RBD images to iSCSI clients. With Ceph’s
+with Stone's librbd library and expose RBD images to iSCSI clients. With Stone’s
 iSCSI gateway you can provision a fully integrated block-storage
 infrastructure with all the features and benefits of a conventional Storage Area
 Network (SAN).

@@ -1,8 +1,8 @@
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 import random
 import os
 
-class TestDumpTree(CephFSTestCase):
+class TestDumpTree(StoneFSTestCase):
     def get_paths_to_ino(self):
         inos = {}
         p = self.mount_a.run_shell(["find", "./"])
@@ -14,7 +14,7 @@ class TestDumpTree(CephFSTestCase):
 
     def populate(self):
         self.mount_a.run_shell(["git", "clone",
-                                "https://github.com/ceph/ceph-qa-suite"])
+                                "https://github.com/stonepros/stone-qa-suite"])
 
     def test_basic(self):
         self.mount_a.run_shell(["mkdir", "parent"])

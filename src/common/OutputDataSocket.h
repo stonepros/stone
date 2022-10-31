@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -15,7 +15,7 @@
 #ifndef STONE_COMMON_OUTPUTDATASOCKET_H
 #define STONE_COMMON_OUTPUTDATASOCKET_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Thread.h"
 #include "include/common_fwd.h"
 #include "include/buffer.h"
@@ -24,15 +24,15 @@
 class OutputDataSocket : public Thread
 {
 public:
-  OutputDataSocket(StoneeContext *cct, uint64_t _backlog);
+  OutputDataSocket(StoneContext *cct, uint64_t _backlog);
   ~OutputDataSocket() override;
 
   bool init(const std::string &path);
   
-  void append_output(ceph::buffer::list& bl);
+  void append_output(stone::buffer::list& bl);
 
 protected:
-  virtual void init_connection(ceph::buffer::list& bl) {}
+  virtual void init_connection(stone::buffer::list& bl) {}
   void shutdown();
 
   std::string create_shutdown_pipe(int *pipe_rd, int *pipe_wr);
@@ -46,7 +46,7 @@ protected:
 
   int dump_data(int fd);
 
-  StoneeContext *m_cct;
+  StoneContext *m_cct;
   uint64_t data_max_backlog;
   std::string m_path;
   int m_sock_fd;
@@ -57,11 +57,11 @@ protected:
   uint64_t data_size;
   uint32_t skipped;
 
-  std::vector<ceph::buffer::list> data;
+  std::vector<stone::buffer::list> data;
 
-  ceph::mutex m_lock = ceph::make_mutex("OutputDataSocket::m_lock");
-  ceph::condition_variable cond;
-  ceph::buffer::list delim;
+  stone::mutex m_lock = stone::make_mutex("OutputDataSocket::m_lock");
+  stone::condition_variable cond;
+  stone::buffer::list delim;
 };
 
 #endif

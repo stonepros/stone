@@ -17,28 +17,28 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.IOException;
 
 /**
  * Component of path is not a directory.
  */
-public class CephNotDirectoryException extends IOException {
+public class StoneNotDirectoryException extends IOException {
 
   private static final long serialVersionUID = 1L;
 
   /**
-   * Construct CephNotDirectoryException.
+   * Construct StoneNotDirectoryException.
    */
-  public CephNotDirectoryException() {
+  public StoneNotDirectoryException() {
     super();
   }
 
   /**
-   * Construct CephNotDirectoryException with message.
+   * Construct StoneNotDirectoryException with message.
    */
-  public CephNotDirectoryException(String s) {
+  public StoneNotDirectoryException(String s) {
     super(s);
   }
 }

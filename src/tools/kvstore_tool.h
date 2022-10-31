@@ -55,13 +55,13 @@ public:
 	    const bool do_value_dump);
   bool exists(const std::string& prefix);
   bool exists(const std::string& prefix, const std::string& key);
-  ceph::bufferlist get(const std::string& prefix,
+  stone::bufferlist get(const std::string& prefix,
 		       const std::string& key,
 		       bool& exists);
   uint64_t get_size();
   bool set(const std::string& prefix,
 	   const std::string& key,
-	   ceph::bufferlist& val);
+	   stone::bufferlist& val);
   bool rm(const std::string& prefix, const std::string& key);
   bool rm_prefix(const std::string& prefix);
   void print_summary(const uint64_t total_keys, const uint64_t total_size,

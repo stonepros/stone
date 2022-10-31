@@ -27,9 +27,9 @@
  * generic snap descriptor.
  */
 struct SnapInfo {
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<SnapInfo*>& ls);
 
   std::string_view get_long_name() const;
@@ -58,9 +58,9 @@ std::ostream& operator<<(std::ostream& out, const SnapInfo &sn);
 struct SnapRealm;
 
 struct snaplink_t {
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<snaplink_t*>& ls);
 
   inodeno_t ino;
@@ -80,9 +80,9 @@ struct sr_t {
   void clear_subvolume() { flags &= ~SUBVOLUME; }
   bool is_subvolume() const { return flags & SUBVOLUME; }
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<sr_t*>& ls);
 
   snapid_t seq = 0;                     // basically, a version/seq # for changes to _this_ realm.

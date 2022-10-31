@@ -9,8 +9,8 @@ import threading
 
 class Module(MgrModule):
     """
-    This module is for testing the ceph-mgr python interface from within
-    a running ceph-mgr daemon.
+    This module is for testing the stone-mgr python interface from within
+    a running stone-mgr daemon.
 
     It implements a sychronous self-test command for calling the functions
     in the MgrModule interface one by one, and a background "workload"
@@ -49,7 +49,7 @@ class Module(MgrModule):
                 "perm": "rw"
             },
             {
-                "cmd": "mgr self-test background start name=workload,type=CephString",
+                "cmd": "mgr self-test background start name=workload,type=StoneString",
                 "desc": "Activate a background workload (one of {0})".format(
                     ", ".join(WORKLOADS)),
                 "perm": "rw"
@@ -60,12 +60,12 @@ class Module(MgrModule):
                 "perm": "rw"
             },
             {
-                "cmd": "mgr self-test config get name=key,type=CephString",
+                "cmd": "mgr self-test config get name=key,type=StoneString",
                 "desc": "Peek at a configuration value",
                 "perm": "rw"
             },
             {
-                "cmd": "mgr self-test config get_localized name=key,type=CephString",
+                "cmd": "mgr self-test config get_localized name=key,type=StoneString",
                 "desc": "Peek at a configuration value (localized variant)",
                 "perm": "rw"
             },
@@ -75,29 +75,29 @@ class Module(MgrModule):
                 "perm": "rw"
             },
             {
-                "cmd": "mgr self-test module name=module,type=CephString",
+                "cmd": "mgr self-test module name=module,type=StoneString",
                 "desc": "Run another module's self_test() method",
                 "perm": "rw"
             },
             {
-                "cmd": "mgr self-test health set name=checks,type=CephString",
+                "cmd": "mgr self-test health set name=checks,type=StoneString",
                 "desc": "Set a health check from a JSON-formatted description.",
                 "perm": "rw"
             },
             {
-                "cmd": "mgr self-test health clear name=checks,type=CephString,n=N,req=False",
+                "cmd": "mgr self-test health clear name=checks,type=StoneString,n=N,req=False",
                 "desc": "Clear health checks by name. If no names provided, clear all.",
                 "perm": "rw"
             },
             {
-                "cmd": "mgr self-test insights_set_now_offset name=hours,type=CephString",
+                "cmd": "mgr self-test insights_set_now_offset name=hours,type=StoneString",
                 "desc": "Set the now time for the insights module.",
                 "perm": "rw"
             },
             {
-                "cmd": "mgr self-test cluster-log name=channel,type=CephString "
-                       "name=priority,type=CephString "
-                       "name=message,type=CephString",
+                "cmd": "mgr self-test cluster-log name=channel,type=StoneString "
+                       "name=priority,type=StoneString "
+                       "name=message,type=StoneString",
                 "desc": "Create an audit log record.",
                 "perm": "rw"
             },

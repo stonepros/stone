@@ -1,11 +1,11 @@
 ================
- Ceph Internals
+ Stone Internals
 ================
 
-.. note:: If you're looking for how to use Ceph as a library from your
+.. note:: If you're looking for how to use Stone as a library from your
    own software, please see :doc:`/api/index`.
 
-You can start a development mode Ceph cluster, after compiling the source, with::
+You can start a development mode Stone cluster, after compiling the source, with::
 
 	cd build
 	OSD=3 MON=3 MGR=3 ../src/vstart.sh -n -x
@@ -14,7 +14,7 @@ You can start a development mode Ceph cluster, after compiling the source, with:
 
 .. rubric:: Mailing list
 
-The ``dev@ceph.io`` list is for discussion about the development of Ceph,
+The ``dev@ceph.io`` list is for discussion about the development of Stone,
 its interoperability with other technology, and the operations of the
 project itself.  Subscribe by sending a message to ``dev-request@ceph.io``
 with the line::
@@ -24,7 +24,7 @@ with the line::
 in the body of the message.
 
 The ceph-devel@vger.kernel.org list is for discussion
-and patch review for the Linux kernel Ceph client component.
+and patch review for the Linux kernel Stone client component.
 Subscribe by sending a message to ``majordomo@vger.kernel.org`` with the line::
 
  subscribe ceph-devel

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Intel Corporation.
  * All rights reserved.
@@ -48,7 +48,7 @@
 
 class EventTrace {
 private:
-  StoneeContext *ctx;
+  StoneContext *ctx;
   std::string file;
   std::string func;
   int line;
@@ -56,12 +56,12 @@ private:
 
   static bool tpinit;
 
-  static void init_tp(StoneeContext *_ctx);
+  static void init_tp(StoneContext *_ctx);
   static void set_message_attrs(const Message *m, std::string& oid, std::string& context, bool incl_oid);
 
 public:
 
-  EventTrace(StoneeContext *_ctx, const char *_file, const char *_func, int line);
+  EventTrace(StoneContext *_ctx, const char *_file, const char *_func, int line);
   ~EventTrace();
   void log_event_latency(const char *tag);
 

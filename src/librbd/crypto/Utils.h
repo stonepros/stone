@@ -15,12 +15,12 @@ namespace crypto {
 namespace util {
 
 template <typename ImageCtxT = librbd::ImageCtx>
-void set_crypto(ImageCtxT *image_ctx, ceph::ref_t<CryptoInterface> crypto);
+void set_crypto(ImageCtxT *image_ctx, stone::ref_t<CryptoInterface> crypto);
 
 int build_crypto(
         StoneContext* cct, const unsigned char* key, uint32_t key_length,
         uint64_t block_size, uint64_t data_offset,
-        ceph::ref_t<CryptoInterface>* result_crypto);
+        stone::ref_t<CryptoInterface>* result_crypto);
 
 } // namespace util
 } // namespace crypto

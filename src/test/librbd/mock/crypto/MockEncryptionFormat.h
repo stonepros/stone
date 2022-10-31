@@ -15,7 +15,7 @@ struct MockEncryptionFormat : EncryptionFormat<MockImageCtx> {
 
   MOCK_METHOD2(format, void(MockImageCtx* ictx, Context* on_finish));
   MOCK_METHOD2(load, void(MockImageCtx* ictx, Context* on_finish));
-  MOCK_METHOD0(get_crypto, ceph::ref_t<CryptoInterface>());
+  MOCK_METHOD0(get_crypto, stone::ref_t<CryptoInterface>());
 };
 
 } // namespace crypto
@@ -24,7 +24,7 @@ namespace api {
 namespace util {
 
 inline int create_encryption_format(
-        StoneeContext* cct, encryption_format_t format,
+        StoneContext* cct, encryption_format_t format,
         encryption_options_t opts, size_t opts_size, bool c_api,
         crypto::EncryptionFormat<MockImageCtx>** result_format) {
   if (opts == nullptr) {

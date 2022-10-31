@@ -1,5 +1,5 @@
 ========================
- Ceph Block Device APIs
+ Stone Block Device APIs
 ========================
 
 .. toctree::

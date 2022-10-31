@@ -7,7 +7,7 @@ p=$1
 echo path $p
 test ! -d $p
 mkdir $p
-strings bin/ceph-osd | grep "^$p/%s__%d.%x"
+strings bin/stone-osd | grep "^$p/%s__%d.%x"
 
 v=`git describe | cut -c 2-`
 echo version $v
@@ -24,9 +24,9 @@ export PATH=bin:$PATH
 echo 'starting some background work'
 ../qa/workunits/rados/test.sh &
 ../qa/workunits/rbd/test_librbd.sh &
-../qa/workunits/libcephfs/test.sh &
+../qa/workunits/libstonefs/test.sh &
 ../qa/workunits/rgw/run-s3tests.sh &
-ceph-syn --syn makedirs 3 3 3 &
+stone-syn --syn makedirs 3 3 3 &
 
 echo 'waiting a bit'
 
@@ -35,25 +35,25 @@ echo 'triggering some recovery'
 
 kill -9 `cat out/osd.0.pid`
 sleep 10
-ceph osd out 0
+stone osd out 0
 sleep 10
-init-ceph start osd.0
-ceph osd in 0
+init-stone start osd.0
+stone osd in 0
 
 sleep 5
 echo 'triggering mds work'
-bin/ceph mds fail 0
+bin/stone mds fail 0
 
 echo 'waiting for worker to join (and ignoring errors)'
 wait || true
 
 echo 'importing'
-../src/test/encoding/import.sh $p $v ../ceph-object-corpus/archive
+../src/test/encoding/import.sh $p $v ../stone-object-corpus/archive
 
-for d in ../ceph-object-corpus/archive/$v/objects/*
+for d in ../stone-object-corpus/archive/$v/objects/*
 do
     echo prune $d
-    ../ceph-object-corpus/bin/prune.sh $d 25
+    ../stone-object-corpus/bin/prune.sh $d 25
 done
 
 echo 'done'

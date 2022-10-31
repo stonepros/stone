@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -13,7 +13,7 @@
  */
 
 /* note: no header guard */
-OPTION(host, OPT_STR) // "" means that ceph will use short hostname
+OPTION(host, OPT_STR) // "" means that stone will use short hostname
 OPTION(public_addr, OPT_ADDR)
 OPTION(public_addrv, OPT_ADDRVEC)
 OPTION(public_bind_addr, OPT_ADDR)
@@ -22,7 +22,7 @@ OPTION(public_network, OPT_STR)
 OPTION(cluster_network, OPT_STR)
 OPTION(lockdep, OPT_BOOL)
 OPTION(lockdep_force_backtrace, OPT_BOOL) // always gather current backtrace at every lock
-OPTION(run_dir, OPT_STR)       // the "/var/run/ceph" dir, created on daemon startup
+OPTION(run_dir, OPT_STR)       // the "/var/run/stone" dir, created on daemon startup
 OPTION(admin_socket, OPT_STR) // default changed by common_preinit()
 OPTION(admin_socket_mode, OPT_STR) // permission bits to set for admin socket file, e.g., "0775", "0755"
 
@@ -165,7 +165,7 @@ OPTION(ms_async_rdma_cm, OPT_BOOL)
 OPTION(ms_async_rdma_type, OPT_STR)
 
 // when there are enough accept failures, indicating there are unrecoverable failures,
-// just do ceph_abort() . Here we make it configurable.
+// just do stone_abort() . Here we make it configurable.
 OPTION(ms_max_accept_failures, OPT_INT)
 
 OPTION(ms_dpdk_port_id, OPT_INT)
@@ -187,7 +187,7 @@ OPTION(inject_early_sigterm, OPT_BOOL)
 
 OPTION(mon_data, OPT_STR)
 OPTION(mon_initial_members, OPT_STR)    // list of initial cluster mon ids; if specified, need majority to form initial quorum and create new cluster
-OPTION(mon_compact_on_start, OPT_BOOL)  // compact leveldb on ceph-mon start
+OPTION(mon_compact_on_start, OPT_BOOL)  // compact leveldb on stone-mon start
 OPTION(mon_compact_on_bootstrap, OPT_BOOL)  // trigger leveldb compaction on bootstrap
 OPTION(mon_compact_on_trim, OPT_BOOL)       // compact (a prefix) when we trim old states
 OPTION(mon_osd_cache_size, OPT_INT)  // the size of osdmaps cache, not to rely on underlying store's cache
@@ -322,13 +322,13 @@ OPTION(auth_service_required, OPT_STR)   // required by daemons of clients
 OPTION(auth_client_required, OPT_STR)     // what clients require of daemons
 OPTION(auth_supported, OPT_STR)               // deprecated; default value for above if they are not defined.
 OPTION(max_rotating_auth_attempts, OPT_INT)
-OPTION(cephx_require_signatures, OPT_BOOL)
-OPTION(cephx_cluster_require_signatures, OPT_BOOL)
-OPTION(cephx_service_require_signatures, OPT_BOOL)
-OPTION(cephx_require_version, OPT_INT)
-OPTION(cephx_cluster_require_version, OPT_INT)
-OPTION(cephx_service_require_version, OPT_INT)
-OPTION(cephx_sign_messages, OPT_BOOL)  // Default to signing session messages if supported
+OPTION(stonex_require_signatures, OPT_BOOL)
+OPTION(stonex_cluster_require_signatures, OPT_BOOL)
+OPTION(stonex_service_require_signatures, OPT_BOOL)
+OPTION(stonex_require_version, OPT_INT)
+OPTION(stonex_cluster_require_version, OPT_INT)
+OPTION(stonex_service_require_version, OPT_INT)
+OPTION(stonex_sign_messages, OPT_BOOL)  // Default to signing session messages if supported
 OPTION(auth_mon_ticket_ttl, OPT_DOUBLE)
 OPTION(auth_service_ticket_ttl, OPT_DOUBLE)
 OPTION(auth_allow_insecure_global_id_reclaim, OPT_BOOL)
@@ -786,7 +786,7 @@ OPTION(threadpool_default_timeout, OPT_INT)
 // default wait time for an empty queue before pinging the hb timeout
 OPTION(threadpool_empty_queue_max_wait, OPT_INT)
 
-OPTION(leveldb_log_to_ceph_log, OPT_BOOL)
+OPTION(leveldb_log_to_stone_log, OPT_BOOL)
 OPTION(leveldb_write_buffer_size, OPT_U64) // leveldb write buffer size
 OPTION(leveldb_cache_size, OPT_U64) // leveldb cache size
 OPTION(leveldb_block_size, OPT_U64) // leveldb block size
@@ -797,7 +797,7 @@ OPTION(leveldb_paranoid, OPT_BOOL) // leveldb paranoid flag
 OPTION(leveldb_log, OPT_STR)  // enable leveldb log file
 OPTION(leveldb_compact_on_mount, OPT_BOOL)
 
-OPTION(rocksdb_log_to_ceph_log, OPT_BOOL)  // log to ceph log
+OPTION(rocksdb_log_to_stone_log, OPT_BOOL)  // log to stone log
 OPTION(rocksdb_cache_size, OPT_U64)  // rocksdb cache size (unless set by bluestore/etc)
 OPTION(rocksdb_cache_row_ratio, OPT_FLOAT)   // ratio of cache for row (vs block)
 OPTION(rocksdb_cache_shard_bits, OPT_INT)  // rocksdb block cache shard bits, 4 bit -> 16 shards

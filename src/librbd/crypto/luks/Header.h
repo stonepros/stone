@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_CRYPTO_LUKS_HEADER_H
 
 #include <libcryptsetup.h>
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "include/buffer.h"
 
 namespace librbd {
@@ -18,8 +18,8 @@ public:
     ~Header();
     int init();
 
-    int write(const ceph::bufferlist& bl);
-    ssize_t read(ceph::bufferlist* bl);
+    int write(const stone::bufferlist& bl);
+    ssize_t read(stone::bufferlist* bl);
 
     int format(const char* type, const char* alg, const char* key,
                size_t key_size, const char* cipher_mode, uint32_t sector_size,

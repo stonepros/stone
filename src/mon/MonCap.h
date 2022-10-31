@@ -123,7 +123,7 @@ struct MonCapGrant {
    * @param command_args command args (if any)
    * @return bits we allow
    */
-  mon_rwxa_t get_allowed(CephContext *cct,
+  mon_rwxa_t get_allowed(StoneContext *cct,
 			 EntityName name,
 			 const std::string& service,
 			 const std::string& command,
@@ -170,7 +170,7 @@ struct MonCap {
    * @param op_may_exec whether the operation may exec
    * @return true if the operation is allowed, false otherwise
    */
-  bool is_capable(CephContext *cct,
+  bool is_capable(StoneContext *cct,
 		  EntityName name,
 		  const std::string& service,
 		  const std::string& command,
@@ -178,9 +178,9 @@ struct MonCap {
 		  bool op_may_read, bool op_may_write, bool op_may_exec,
 		  const entity_addr_t& addr) const;
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<MonCap*>& ls);
 
   std::vector<string> allowed_fs_names() const {

@@ -9,7 +9,7 @@
 
 class MOSDRepOp;
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -42,7 +42,7 @@ public:
   RepRequest(OSD&, crimson::net::ConnectionRef&&, Ref<MOSDRepOp>&&);
 
   void print(std::ostream &) const final;
-  void dump_detail(ceph::Formatter* f) const final;
+  void dump_detail(stone::Formatter* f) const final;
   seastar::future<> start();
 
 private:

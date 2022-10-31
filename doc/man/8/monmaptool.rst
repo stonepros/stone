@@ -1,7 +1,7 @@
 :orphan:
 
 ==========================================================
- monmaptool -- ceph monitor cluster map manipulation tool
+ monmaptool -- stone monitor cluster map manipulation tool
 ==========================================================
 
 .. program:: monmaptool
@@ -16,8 +16,8 @@ Description
 ===========
 
 **monmaptool** is a utility to create, view, and modify a monitor
-cluster map for the Ceph distributed storage system. The monitor map
-specifies the only fixed addresses in the Ceph distributed system.
+cluster map for the Stone distributed storage system. The monitor map
+specifies the only fixed addresses in the Stone distributed system.
 All other daemons bind to arbitrary addresses and register themselves
 with the monitors.
 
@@ -25,7 +25,7 @@ When creating a map with --create, a new monitor map with a new,
 random UUID will be created. It should be followed by one or more
 monitor addresses.
 
-The default Ceph monitor port for messenger protocol v1 is 6789, and
+The default Stone monitor port for messenger protocol v1 is 6789, and
 3300 for protocol v2.
 
 Multiple actions can be performed per invocation.
@@ -48,7 +48,7 @@ Options
 .. option:: --create
 
    create a new monitor map with a new UUID (and with it, a new,
-   empty Ceph cluster).
+   empty Stone cluster).
 
 .. option:: --clobber
 
@@ -59,7 +59,7 @@ Options
 .. option:: --generate
 
    generate a new monmap based on the values on the command line or specified
-   in the ceph configuration.  This is, in order of preference,
+   in the stone configuration.  This is, in order of preference,
 
       #. ``--monmap filename`` to specify a monmap to load
       #. ``--mon-host 'host1,ip2'`` to specify a list of hosts or ip addresses
@@ -110,7 +110,7 @@ Options
 Example
 =======
 
-To create a new map with three monitors (for a fresh Ceph cluster)::
+To create a new map with three monitors (for a fresh Stone cluster)::
 
         monmaptool --create --add nodeA 192.168.0.10 --add nodeB 192.168.0.11 \
           --add nodeC 192.168.0.12 --enable-all-features --clobber monmap
@@ -128,13 +128,13 @@ To replace one monitor::
 Availability
 ============
 
-**monmaptool** is part of Ceph, a massively scalable, open-source, distributed 
-storage system. Please refer to the Ceph documentation at http://ceph.com/docs 
+**monmaptool** is part of Stone, a massively scalable, open-source, distributed 
+storage system. Please refer to the Stone documentation at http://stone.com/docs 
 for more information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8),
+:doc:`stone <stone>`\(8),
 :doc:`crushtool <crushtool>`\(8),

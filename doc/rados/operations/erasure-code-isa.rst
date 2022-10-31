@@ -11,7 +11,7 @@ Create an isa profile
 
 To create a new *isa* erasure code profile::
 
-        ceph osd erasure-code-profile set {name} \
+        stone osd erasure-code-profile set {name} \
              plugin=isa \
              technique={reed_sol_van|cauchy} \
              [k={data-chunks}] \
@@ -94,7 +94,7 @@ Where:
 
 :Type: String
 :Required: No.
-:Default: /usr/lib/ceph/erasure-code
+:Default: /usr/lib/stone/erasure-code
 
 ``--force``
 

@@ -9,8 +9,8 @@ Usage:
     python <script> <angular_app_dir> <grafana_dashboard_dir>
 
 e.g.
-    cd /ceph/src/pybind/mgr/dashboard
-    python ci/<script> frontend/src/app /ceph/monitoring/ceph-mixin/dashboards_out
+    cd /stone/src/pybind/mgr/dashboard
+    python ci/<script> frontend/src/app /stone/monitoring/stone-mixin/dashboards_out
 """
 import argparse
 import codecs

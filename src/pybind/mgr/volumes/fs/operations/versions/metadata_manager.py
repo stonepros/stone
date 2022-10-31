@@ -13,7 +13,7 @@ try:
 except ImportError:
     from io import StringIO
 
-import cephfs
+import stonefs
 
 from ...exception import MetadataMgrException
 
@@ -51,9 +51,9 @@ class MetadataManager(object):
         except UnicodeDecodeError:
             raise MetadataMgrException(-errno.EINVAL,
                     "failed to decode, erroneous metadata config '{0}'".format(self.config_path))
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             raise MetadataMgrException(-errno.ENOENT, "metadata config '{0}' not found".format(self.config_path))
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise MetadataMgrException(-e.args[0], e.args[1])
         finally:
             if fd is not None:
@@ -90,7 +90,7 @@ class MetadataManager(object):
                 wrote += self.fs.write(fd, data.encode('utf-8'), -1)
             self.fs.fsync(fd, 0)
             log.info("wrote {0} bytes to config {1}".format(wrote, self.config_path))
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise MetadataMgrException(-e.args[0], e.args[1])
         finally:
             if fd is not None:

@@ -20,7 +20,7 @@ Merge: b81a277 4733178
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Jul 8 10:06:01 2014 -0700
 
-    Merge pull request #2083 from ceph/wip-8727.firefly
+    Merge pull request #2083 from stone/wip-8727.firefly
     
     messages: MForward: fix compat version
     
@@ -50,7 +50,7 @@ commit b81a2777aea636ffe544e737cd8e17dc892ba328
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Thu Jul 3 16:11:24 2014 -0700
 
-    ceph.spec.in: add bash completion file for radosgw-admin
+    stone.spec.in: add bash completion file for radosgw-admin
     
     Signed-off-by: Sandon Van Ness <sandon@inktank.com>
     (cherry picked from commit b70096307130bcbac176704493a63c5d039d3edc)
@@ -59,7 +59,7 @@ commit 4649d7e90ffec89b452aef69cf833522bdb81f88
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Thu Jul 3 16:10:55 2014 -0700
 
-    ceph.spec.in: rhel7-related changes:
+    stone.spec.in: rhel7-related changes:
     
     udev rules: /lib -> /usr/lib
     /sbin binaries move to /usr/sbin or %{_sbindir}
@@ -68,7 +68,7 @@ Date:   Thu Jul 3 16:10:55 2014 -0700
     (cherry picked from commit 235e4c7de8f8efe491edefbdde8e5da4dfc44034)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
 
 commit 38a9566e70d3a2de80c7547fd4e84c8372639f80
 Author: Dan Mick <dan.mick@inktank.com>
@@ -77,35 +77,35 @@ Date:   Thu Jul 3 16:08:44 2014 -0700
     Fix/add missing dependencies:
     
     - rbd-fuse depends on librados2/librbd1
-    - ceph-devel depends on specific releases of libs and libcephfs_jni1
+    - stone-devel depends on specific releases of libs and libstonefs_jni1
     - librbd1 depends on librados2
-    - python-ceph does not depend on libcephfs1
+    - python-stone does not depend on libstonefs1
     
     Signed-off-by: Sandon Van Ness <sandon@inktank.com>
     (cherry picked from commit 7cf81322391b629b241da90181800ca1f138ce78)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
 
 commit 733c89dc6af89321ee58ad78b30bc6a0c4e78291
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Thu Jul 3 16:05:00 2014 -0700
 
-    ceph.spec.in: whitespace fixes
+    stone.spec.in: whitespace fixes
     
     Signed-off-by: Sandon Van Ness <sandon@inktank.com>
     (cherry picked from commit ec8af52a5ede78511423a1455a496d46d580c644)
     
     Conflicts:
-    	ceph.spec.in
+    	stone.spec.in
 
 commit 21b03bc96ab1a0877235f1e3e4a96899cba2b4fa
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Thu Jul 3 16:04:10 2014 -0700
 
-    ceph.spec.in: split out ceph-common as in Debian
+    stone.spec.in: split out stone-common as in Debian
     
-    Move files, postun scriptlet, and add dependencies on ceph-common
+    Move files, postun scriptlet, and add dependencies on stone-common
     where appropriate
     
     Signed-off-by: Sandon Van Ness <sandon@inktank.com>
@@ -116,7 +116,7 @@ Merge: 6d6039a 9e81fc1
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Jul 7 09:40:51 2014 -0700
 
-    Merge pull request #2057 from ceph/wip-8593-firefly
+    Merge pull request #2057 from stone/wip-8593-firefly
     
     mon: backport health check improvements
     
@@ -152,7 +152,7 @@ commit a49c61222f8014db533d8f505ec44d10dc5478e6
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Jun 16 12:57:36 2014 -0700
 
-    ceph_test_rados_api_tier: disable LibRadosTierECPP::HitSetWrite
+    stone_test_rados_api_tier: disable LibRadosTierECPP::HitSetWrite
     
     Disable this test until hitget-get reliably works on EC pools (currently
     it does not, and this test usually passes only because we get the in-memory
@@ -166,7 +166,7 @@ Merge: b9b498e b1a4a7c
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jul 4 21:18:32 2014 -0700
 
-    Merge pull request #2073 from ceph/wip-rgw-firefly-2
+    Merge pull request #2073 from stone/wip-rgw-firefly-2
     
     rgw: more firefly backports
     
@@ -191,7 +191,7 @@ Merge: f285266 053c261
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jul 3 07:00:52 2014 -0700
 
-    Merge pull request #2028 from ceph/wip-rgw-firefly
+    Merge pull request #2028 from stone/wip-rgw-firefly
     
     rgw: a couple backports for firefly
     
@@ -216,7 +216,7 @@ Date:   Mon Jun 30 12:55:45 2014 -0700
           <ip>0x5145B8</ip>
           <obj>/usr/bin/radosgw</obj>
           <fn>RGWObjManifest::obj_iterator::seek(unsigned long)</fn>
-          <dir>/srv/autobuild-ceph/gitbuilder.git/build/out~/ceph-0.82-354-g62027ec/src/rgw</dir>
+          <dir>/srv/autobuild-stone/gitbuilder.git/build/out~/stone-0.82-354-g62027ec/src/rgw</dir>
           <file>rgw_rados.cc</file>
           <line>562</line>
         </frame>
@@ -224,7 +224,7 @@ Date:   Mon Jun 30 12:55:45 2014 -0700
           <ip>0x5672A4</ip>
           <obj>/usr/bin/radosgw</obj>
           <fn>list_multipart_parts(RGWRados*, req_state*, std::string const&amp;, std::string&amp;, int, int, std::map&lt;unsigned int, RGWUploadPartInfo, std::less&lt;unsigned int&gt;, std::allocator&lt;std::pair&lt;unsigned int const, RGWUploadPartInfo&gt; &gt; &gt;&amp;, int*, bool*, bool)</fn>
-          <dir>/srv/autobuild-ceph/gitbuilder.git/build/out~/ceph-0.82-354-g62027ec/src/rgw</dir>
+          <dir>/srv/autobuild-stone/gitbuilder.git/build/out~/stone-0.82-354-g62027ec/src/rgw</dir>
           <file>rgw_rados.h</file>
           <line>217</line>
         </frame>
@@ -232,7 +232,7 @@ Date:   Mon Jun 30 12:55:45 2014 -0700
           <ip>0x5688EE</ip>
           <obj>/usr/bin/radosgw</obj>
           <fn>RGWListMultipart::execute()</fn>
-          <dir>/srv/autobuild-ceph/gitbuilder.git/build/out~/ceph-0.82-354-g62027ec/src/rgw</dir>
+          <dir>/srv/autobuild-stone/gitbuilder.git/build/out~/stone-0.82-354-g62027ec/src/rgw</dir>
           <file>rgw_op.cc</file>
           <line>2956</line>
         </frame>
@@ -291,9 +291,9 @@ Merge: d43e711 6a0dd1b
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Jul 1 16:16:09 2014 -0700
 
-    Merge pull request #2056 from ceph/wip-8010
+    Merge pull request #2056 from stone/wip-8010
     
-    Revert "mon: OSDMonitor: Refuse to delete CephFS pools"
+    Revert "mon: OSDMonitor: Refuse to delete StoneFS pools"
     
     Reviewed-by: Sage Weil <sage@redhat.com>
 
@@ -370,7 +370,7 @@ commit 6a0dd1be909b423f52e2c7f11531b278dc8838ae
 Author: John Spray <john.spray@redhat.com>
 Date:   Tue Jul 1 22:04:25 2014 +0100
 
-    Revert "mon: OSDMonitor: Refuse to delete CephFS pools"
+    Revert "mon: OSDMonitor: Refuse to delete StoneFS pools"
     
     This reverts commit c7d265a9b276aad5caf9b35f3ce8bc7bdd169f0f.
     
@@ -401,7 +401,7 @@ Date:   Mon Jun 30 07:05:04 2014 -0700
 
     qa/workunits/suites/fsx.sh: don't use zero range
     
-    Zero range is not supported by cephfs.
+    Zero range is not supported by stonefs.
     
     Fixes: #8542
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -427,7 +427,7 @@ Date:   Wed Jun 11 22:44:57 2014 +0200
     If a non existent profile is provided as an argument to osd pool create,
     it must exit on error and not create the profile as a side effect.
     
-    http://tracker.ceph.com/issues/8307 refs: #8307
+    http://tracker.stone.com/issues/8307 refs: #8307
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit ff2eb234e63cd281b40405cb3397da5babda943f)
@@ -442,7 +442,7 @@ Date:   Wed Jun 11 22:47:49 2014 +0200
     is called and a profile is created as a side effect, which is not
     intended.
     
-    http://tracker.ceph.com/issues/8307 refs: #8307
+    http://tracker.stone.com/issues/8307 refs: #8307
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 3c638111a4943758b6089c63a42aabbf281ac257)
@@ -456,7 +456,7 @@ Date:   Tue May 27 10:06:46 2014 +0200
     It was a noop because it was incorrectly using the variable n. Add a
     test to protect against regression.
     
-    http://tracker.ceph.com/issues/8440 Fixes: #8440
+    http://tracker.stone.com/issues/8440 Fixes: #8440
     
     Reported-by: Geoffrey Hartz <hartz.geoffrey@gmail.com>
     Signed-off-by: Loic Dachary <loic@dachary.org>
@@ -615,7 +615,7 @@ Date:   Wed Jun 25 12:42:11 2014 -0700
 
     Merge pull request #1982 from accelazh/firefly-fix-issue-8256
     
-    Make <poolname> in "ceph osd tier --help" clearer (fix issue 8256).
+    Make <poolname> in "stone osd tier --help" clearer (fix issue 8256).
     
     Reviewed-by: Loic Dachary <loic@dachary.org>
 
@@ -707,7 +707,7 @@ Date:   Wed Jun 18 17:01:54 2014 +0200
 
     erasure-code: verify that rados put enforces alignment
     
-    http://tracker.ceph.com/issues/8622 refs: #8622
+    http://tracker.stone.com/issues/8622 refs: #8622
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit b46c4056014dd6de5e3bd736f2c41f096ea708b4)
@@ -773,12 +773,12 @@ commit 3ad451ef57e2ab3fc644c94d44c2de7a17cced45
 Author: Accela Zhao <accelazh@gmail.com>
 Date:   Wed Jun 18 17:17:03 2014 +0800
 
-    Make <poolname> in "ceph osd tier --help" clearer.
+    Make <poolname> in "stone osd tier --help" clearer.
     
-    The ceph osd tier --help info on the left always says <poolname>.
+    The stone osd tier --help info on the left always says <poolname>.
     It is unclear which one to put <tierpool> on the right.
     
-    $ceph osd tier --help
+    $stone osd tier --help
     osd tier add <poolname> <poolname> {--   add the tier <tierpool> to base pool
     force-nonempty}                          <pool>
     osd tier add-cache <poolname>            add a cache <tierpool> of size <size>
@@ -792,7 +792,7 @@ Date:   Wed Jun 18 17:17:03 2014 +0800
                                                one)
     ...
     
-    Fix: http://tracker.ceph.com/issues/8256
+    Fix: http://tracker.stone.com/issues/8256
     
     Signed-off-by: Yilong Zhao <accelazh@gmail.com>
 
@@ -816,15 +816,15 @@ Date:   Tue May 20 16:50:18 2014 +0100
     Implement CrushWrapper::ruleset_exists that iterates over the existing
     rulesets to find the one matching the ruleset argument.
     
-    ceph osd pool set <pool> crush_ruleset must not use
+    stone osd pool set <pool> crush_ruleset must not use
     CrushWrapper::rule_exists, which checks for a *rule* existing, whereas
     the value being set is a *ruleset*. (cherry picked from commit
     fb504baed98d57dca8ec141bcc3fd021f99d82b0)
     
-    A test via ceph osd pool set data crush_ruleset verifies the ruleset
+    A test via stone osd pool set data crush_ruleset verifies the ruleset
     argument is accepted.
     
-    http://tracker.ceph.com/issues/8599 fixes: #8599
+    http://tracker.stone.com/issues/8599 fixes: #8599
     
     Backport: firefly, emperor, dumpling
     Signed-off-by: John Spray <john.spray@inktank.com>
@@ -834,7 +834,7 @@ commit 572241942706e2f845a147f19717bf6c487f23f4
 Author: Sage Weil <sage@inktank.com>
 Date:   Sun Jun 8 20:18:49 2014 -0700
 
-    init-ceph: continue after failure doing osd data mount
+    init-stone: continue after failure doing osd data mount
     
     If we are starting many daemons and hit an error, we normally note it and
     move on.  Do the same when doing the pre-mount step.
@@ -935,7 +935,7 @@ commit a898ee56e01f971c12c0f7bebc22e59f850f27c0
 Author: Greg Farnum <greg@inktank.com>
 Date:   Wed May 21 21:41:23 2014 -0700
 
-    cephfs-java: build against older jni headers
+    stonefs-java: build against older jni headers
     
     Older versions of the JNI interface expected non-const parameters
     to their memory move functions. It's unpleasant, but won't actually
@@ -985,14 +985,14 @@ Date:   Mon May 12 14:02:53 2014 +1000
      With gcj-jdk we still get FTBFS later:
     
      ~~~~
-        java/native/libcephfs_jni.cc:2878:55: error: invalid conversion from 'const jbyte* {aka const signed char*}' to 'jbyte* {aka signed char*}' [-fpermissive]
+        java/native/libstonefs_jni.cc:2878:55: error: invalid conversion from 'const jbyte* {aka const signed char*}' to 'jbyte* {aka signed char*}' [-fpermissive]
                      reinterpret_cast<const jbyte*>(rawAddress));
                                                                ^
-        In file included from java/native/libcephfs_jni.cc:27:0:
+        In file included from java/native/libstonefs_jni.cc:27:0:
         /usr/lib/gcc/x86_64-linux-gnu/4.8/include/jni.h:1471:8: error:   initializing argument 4 of 'void _Jv_JNIEnv::SetByteArrayRegion(jbyteArray, jsize, jsize, jbyte*)' [-fpermissive]
            void SetByteArrayRegion (jbyteArray val0, jsize val1, jsize val2, jbyte * val3)
                 ^
-        make[5] *** [java/native/libcephfs_jni_la-libcephfs_jni.lo] Error 1
+        make[5] *** [java/native/libstonefs_jni_la-libstonefs_jni.lo] Error 1
      ~~~~
     
     Signed-off-by: Dmitry Smirnov <onlyjob@member.fsf.org>
@@ -1011,7 +1011,7 @@ commit de43f6d2d813d2c7e5cf915c1b9037fe662d6afc
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu May 8 08:52:51 2014 -0700
 
-    ceph-disk: partprobe before settle when preparing dev
+    stone-disk: partprobe before settle when preparing dev
     
     Two users have reported this fixes a problem with using --dmcrypt.
     

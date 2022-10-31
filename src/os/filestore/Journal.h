@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -32,14 +32,14 @@ protected:
   uuid_d fsid;
   Finisher *finisher;
 public:
-  CephContext* cct;
+  StoneContext* cct;
   PerfCounters *logger;
 protected:
-  ceph::condition_variable *do_sync_cond;
+  stone::condition_variable *do_sync_cond;
   bool wait_on_full;
 
 public:
-  Journal(CephContext* cct, uuid_d f, Finisher *fin, ceph::condition_variable *c=0) :
+  Journal(StoneContext* cct, uuid_d f, Finisher *fin, stone::condition_variable *c=0) :
     fsid(f), finisher(fin), cct(cct), logger(NULL),
     do_sync_cond(c),
     wait_on_full(false) { }
@@ -69,7 +69,7 @@ public:
   // writes
   virtual bool is_writeable() = 0;
   virtual int make_writeable() = 0;
-  virtual void submit_entry(uint64_t seq, ceph::buffer::list& e, uint32_t orig_len,
+  virtual void submit_entry(uint64_t seq, stone::buffer::list& e, uint32_t orig_len,
 			    Context *oncommit,
 			    TrackedOpRef osd_op = TrackedOpRef()) = 0;
   virtual void commit_start(uint64_t seq) = 0;
@@ -77,13 +77,13 @@ public:
 
   /// Read next journal entry - asserts on invalid journal
   virtual bool read_entry(
-    ceph::buffer::list &bl, ///< [out] payload on successful read
+    stone::buffer::list &bl, ///< [out] payload on successful read
     uint64_t &seq   ///< [in,out] sequence number on last successful read
     ) = 0; ///< @return true on successful read, false on journal end
 
   virtual bool should_commit_now() = 0;
 
-  virtual int prepare_entry(std::vector<ObjectStore::Transaction>& tls, ceph::buffer::list* tbl) = 0;
+  virtual int prepare_entry(std::vector<ObjectStore::Transaction>& tls, stone::buffer::list* tbl) = 0;
 
   virtual off64_t get_journal_size_estimate() { return 0; }
 

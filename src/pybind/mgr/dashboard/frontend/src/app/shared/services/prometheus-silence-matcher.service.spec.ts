@@ -93,7 +93,7 @@ describe('PrometheusSilenceMatcherService', () => {
 
     it('should match no rule and no alert', () => {
       expectMultiMatch(
-        [addMatcher('alertname', 'alert0'), addMatcher('job', 'ceph')],
+        [addMatcher('alertname', 'alert0'), addMatcher('job', 'stone')],
         'Your matcher seems to match no currently defined rule or active alert.',
         false
       );

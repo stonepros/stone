@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -22,7 +22,7 @@
 #include "rgw_dmclock_scheduler_ctx.h"
 
 namespace rgw::dmclock {
-  namespace async = ceph::async;
+  namespace async = stone::async;
 
 /*
  * A dmclock request scheduling service for use with boost::asio.
@@ -33,7 +33,7 @@ namespace rgw::dmclock {
 class AsyncScheduler : public md_config_obs_t, public Scheduler {
  public:
   template <typename ...Args> // args forwarded to PullPriorityQueue ctor
-  AsyncScheduler(CephContext *cct, boost::asio::io_context& context,
+  AsyncScheduler(StoneContext *cct, boost::asio::io_context& context,
             GetClientCounters&& counters, md_config_obs_t *observer,
             Args&& ...args);
   ~AsyncScheduler();
@@ -81,12 +81,12 @@ class AsyncScheduler : public md_config_obs_t, public Scheduler {
   using Signature = void(boost::system::error_code, PhaseType);
   using Completion = async::Completion<Signature, async::AsBase<Request>>;
 
-  using Clock = ceph::coarse_real_clock;
+  using Clock = stone::coarse_real_clock;
   using Timer = boost::asio::basic_waitable_timer<Clock,
         boost::asio::wait_traits<Clock>, executor_type>;
   Timer timer; //< timer for the next scheduled request
 
-  CephContext *const cct;
+  StoneContext *const cct;
   md_config_obs_t *const observer; //< observer to update ClientInfoFunc
   GetClientCounters counters; //< provides per-client perf counters
 
@@ -103,7 +103,7 @@ class AsyncScheduler : public md_config_obs_t, public Scheduler {
 
 
 template <typename ...Args>
-AsyncScheduler::AsyncScheduler(CephContext *cct, boost::asio::io_context& context,
+AsyncScheduler::AsyncScheduler(StoneContext *cct, boost::asio::io_context& context,
                                GetClientCounters&& counters,
                                md_config_obs_t *observer, Args&& ...args)
   : queue(std::forward<Args>(args)...),
@@ -161,7 +161,7 @@ auto AsyncScheduler::async_request(const client_id& client,
 
 class SimpleThrottler : public md_config_obs_t, public dmclock::Scheduler {
 public:
-  SimpleThrottler(CephContext *cct) :
+  SimpleThrottler(StoneContext *cct) :
     max_requests(cct->_conf.get_val<int64_t>("rgw_max_concurrent_requests")),
     counters(cct, "simple-throttler")
   {

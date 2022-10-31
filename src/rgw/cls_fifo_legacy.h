@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson
@@ -43,7 +43,7 @@
 #include "rgw_tools.h"
 
 namespace rgw::cls::fifo {
-namespace cb = ceph::buffer;
+namespace cb = stone::buffer;
 namespace fifo = rados::cls::fifo;
 namespace lr = librados;
 
@@ -81,7 +81,7 @@ struct marker {
 struct list_entry {
   cb::list data;
   std::string marker;
-  ceph::real_time mtime;
+  stone::real_time mtime;
 };
 
 using part_info = fifo::part_header;
@@ -111,7 +111,7 @@ class FIFO {
   friend struct Lister;
 
   mutable lr::IoCtx ioctx;
-  CephContext* cct = static_cast<CephContext*>(ioctx.cct());
+  StoneContext* cct = static_cast<StoneContext*>(ioctx.cct());
   const std::string oid;
   std::mutex m;
   std::uint64_t next_tid = 0;

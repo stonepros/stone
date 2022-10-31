@@ -16,14 +16,14 @@ rm -f mm
 fsid=`uuidgen`
 
 rm -f keyring
-ceph-authtool --create-keyring keyring --gen-key -n client.admin
-ceph-authtool keyring --gen-key -n mon.
+stone-authtool --create-keyring keyring --gen-key -n client.admin
+stone-authtool keyring --gen-key -n mon.
 
-ceph-mon -c conf -i a --mkfs --fsid $fsid --mon-data mon.a -k keyring
+stone-mon -c conf -i a --mkfs --fsid $fsid --mon-data mon.a -k keyring
 
-ceph-mon -c conf -i a --mon-data $cwd/mon.a
+stone-mon -c conf -i a --mon-data $cwd/mon.a
 
-ceph -c conf -k keyring health
+stone -c conf -k keyring health
 
-killall ceph-mon
+killall stone-mon
 echo OK

@@ -90,7 +90,7 @@ public:
     std::int64_t min,
     std::int64_t max);
 
-  void on_peering_interval_change(ceph::os::Transaction& t) {
+  void on_peering_interval_change(stone::os::Transaction& t) {
     clean_up(t, "new peering interval");
   }
 
@@ -198,6 +198,6 @@ protected:
   void clear_temp_obj(const hobject_t &oid) {
     temp_contents.erase(oid);
   }
-  void clean_up(ceph::os::Transaction& t, std::string_view why);
+  void clean_up(stone::os::Transaction& t, std::string_view why);
   virtual seastar::future<> on_stop() = 0;
 };

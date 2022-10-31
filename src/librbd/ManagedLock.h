@@ -67,62 +67,62 @@ public:
   }
 
 protected:
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
 
   inline void set_state_uninitialized() {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
-    ceph_assert(m_state == STATE_UNLOCKED);
+    stone_assert(stone_mutex_is_locked(m_lock));
+    stone_assert(m_state == STATE_UNLOCKED);
     m_state = STATE_UNINITIALIZED;
   }
   inline void set_state_initializing() {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
-    ceph_assert(m_state == STATE_UNINITIALIZED);
+    stone_assert(stone_mutex_is_locked(m_lock));
+    stone_assert(m_state == STATE_UNINITIALIZED);
     m_state = STATE_INITIALIZING;
   }
   inline void set_state_unlocked() {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
-    ceph_assert(m_state == STATE_INITIALIZING || m_state == STATE_RELEASING);
+    stone_assert(stone_mutex_is_locked(m_lock));
+    stone_assert(m_state == STATE_INITIALIZING || m_state == STATE_RELEASING);
     m_state = STATE_UNLOCKED;
   }
   inline void set_state_waiting_for_lock() {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
-    ceph_assert(m_state == STATE_ACQUIRING);
+    stone_assert(stone_mutex_is_locked(m_lock));
+    stone_assert(m_state == STATE_ACQUIRING);
     m_state = STATE_WAITING_FOR_LOCK;
   }
   inline void set_state_post_acquiring() {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
-    ceph_assert(m_state == STATE_ACQUIRING);
+    stone_assert(stone_mutex_is_locked(m_lock));
+    stone_assert(m_state == STATE_ACQUIRING);
     m_state = STATE_POST_ACQUIRING;
   }
 
   bool is_state_shutdown() const;
   inline bool is_state_acquiring() const {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
     return m_state == STATE_ACQUIRING;
   }
   inline bool is_state_post_acquiring() const {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
     return m_state == STATE_POST_ACQUIRING;
   }
   inline bool is_state_releasing() const {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
     return m_state == STATE_RELEASING;
   }
   inline bool is_state_pre_releasing() const {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
     return m_state == STATE_PRE_RELEASING;
   }
   inline bool is_state_locked() const {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
     return m_state == STATE_LOCKED;
   }
   inline bool is_state_waiting_for_lock() const {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
     return m_state == STATE_WAITING_FOR_LOCK;
   }
 
   inline bool is_action_acquire_lock() const {
-    ceph_assert(ceph_mutex_is_locked(m_lock));
+    stone_assert(stone_mutex_is_locked(m_lock));
     return get_active_action() == ACTION_ACQUIRE_LOCK;
   }
 
@@ -228,7 +228,7 @@ private:
   ActionsContexts m_actions_contexts;
   AsyncOpTracker m_async_op_tracker;
 
-  bool is_lock_owner(ceph::mutex &lock) const;
+  bool is_lock_owner(stone::mutex &lock) const;
   bool is_transition_state() const;
 
   void append_context(Action action, Context *ctx);

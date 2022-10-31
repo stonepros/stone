@@ -213,14 +213,14 @@ ThirdPartyAccountApplier<T> add_3rdparty(RGWCtl* const ctl,
 
 template <typename T>
 class SysReqApplier : public DecoratedApplier<T> {
-  CephContext* const cct;
+  StoneContext* const cct;
   /*const*/ RGWCtl* const ctl;
   const RGWHTTPArgs& args;
   mutable boost::tribool is_system;
 
 public:
   template <typename U>
-  SysReqApplier(CephContext* const cct,
+  SysReqApplier(StoneContext* const cct,
                 /*const*/ RGWCtl* const ctl,
                 const req_state* const s,
                 U&& decoratee)
@@ -283,7 +283,7 @@ void SysReqApplier<T>::modify_request_state(const DoutPrefixProvider* dpp, req_s
 }
 
 template <typename T> static inline
-SysReqApplier<T> add_sysreq(CephContext* const cct,
+SysReqApplier<T> add_sysreq(StoneContext* const cct,
                             /* const */ RGWCtl* const ctl,
                             const req_state* const s,
                             T&& t) {

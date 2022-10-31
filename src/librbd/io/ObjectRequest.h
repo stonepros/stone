@@ -38,7 +38,7 @@ class ObjectRequest {
 public:
   static ObjectRequest* create_write(
       ImageCtxT *ictx, uint64_t object_no, uint64_t object_off,
-      ceph::bufferlist&& data, IOContext io_context, int op_flags,
+      stone::bufferlist&& data, IOContext io_context, int op_flags,
       int write_flags, std::optional<uint64_t> assert_version,
       const ZTracer::Trace &parent_trace, Context *completion);
   static ObjectRequest* create_discard(
@@ -47,11 +47,11 @@ public:
       const ZTracer::Trace &parent_trace, Context *completion);
   static ObjectRequest* create_write_same(
       ImageCtxT *ictx, uint64_t object_no, uint64_t object_off,
-      uint64_t object_len, ceph::bufferlist&& data, IOContext io_context,
+      uint64_t object_len, stone::bufferlist&& data, IOContext io_context,
       int op_flags, const ZTracer::Trace &parent_trace, Context *completion);
   static ObjectRequest* create_compare_and_write(
       ImageCtxT *ictx, uint64_t object_no, uint64_t object_off,
-      ceph::bufferlist&& cmp_data, ceph::bufferlist&& write_data,
+      stone::bufferlist&& cmp_data, stone::bufferlist&& write_data,
       IOContext io_context, uint64_t *mismatch_offset, int op_flags,
       const ZTracer::Trace &parent_trace, Context *completion);
 
@@ -260,7 +260,7 @@ class ObjectWriteRequest : public AbstractObjectWriteRequest<ImageCtxT> {
 public:
   ObjectWriteRequest(
       ImageCtxT *ictx, uint64_t object_no, uint64_t object_off,
-      ceph::bufferlist&& data, IOContext io_context, int op_flags,
+      stone::bufferlist&& data, IOContext io_context, int op_flags,
       int write_flags, std::optional<uint64_t> assert_version,
       const ZTracer::Trace &parent_trace, Context *completion)
     : AbstractObjectWriteRequest<ImageCtxT>(ictx, object_no, object_off,
@@ -283,7 +283,7 @@ protected:
   void add_write_hint(neorados::WriteOp *wr) override;
 
 private:
-  ceph::bufferlist m_write_data;
+  stone::bufferlist m_write_data;
   int m_op_flags;
   int m_write_flags;
   std::optional<uint64_t> m_assert_version;
@@ -330,7 +330,7 @@ public:
     case DISCARD_ACTION_ZERO:
       return "zero";
     }
-    ceph_abort();
+    stone_abort();
     return nullptr;
   }
 
@@ -377,7 +377,7 @@ class ObjectWriteSameRequest : public AbstractObjectWriteRequest<ImageCtxT> {
 public:
   ObjectWriteSameRequest(
       ImageCtxT *ictx, uint64_t object_no, uint64_t object_off,
-      uint64_t object_len, ceph::bufferlist&& data, IOContext io_context,
+      uint64_t object_len, stone::bufferlist&& data, IOContext io_context,
       int op_flags, const ZTracer::Trace &parent_trace, Context *completion)
     : AbstractObjectWriteRequest<ImageCtxT>(ictx, object_no, object_off,
                                             object_len, io_context, "writesame",
@@ -393,7 +393,7 @@ protected:
   void add_write_ops(neorados::WriteOp *wr) override;
 
 private:
-  ceph::bufferlist m_write_data;
+  stone::bufferlist m_write_data;
   int m_op_flags;
 };
 
@@ -402,7 +402,7 @@ class ObjectCompareAndWriteRequest : public AbstractObjectWriteRequest<ImageCtxT
 public:
   ObjectCompareAndWriteRequest(
       ImageCtxT *ictx, uint64_t object_no, uint64_t object_off,
-      ceph::bufferlist&& cmp_bl, ceph::bufferlist&& write_bl,
+      stone::bufferlist&& cmp_bl, stone::bufferlist&& write_bl,
       IOContext io_context, uint64_t *mismatch_offset, int op_flags,
       const ZTracer::Trace &parent_trace, Context *completion)
    : AbstractObjectWriteRequest<ImageCtxT>(ictx, object_no, object_off,
@@ -435,8 +435,8 @@ protected:
   }
 
 private:
-  ceph::bufferlist m_cmp_bl;
-  ceph::bufferlist m_write_bl;
+  stone::bufferlist m_cmp_bl;
+  stone::bufferlist m_write_bl;
   uint64_t *m_mismatch_offset;
   int m_op_flags;
 };

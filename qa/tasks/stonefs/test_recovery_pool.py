@@ -7,7 +7,7 @@ import traceback
 from collections import namedtuple
 
 from teuthology.orchestra.run import CommandFailedError
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 log = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class SimpleOverlayWorkload(OverlayWorkload):
         self.assert_equal(st['st_size'], self._initial_state['st_size'])
         return self._errors
 
-class TestRecoveryPool(CephFSTestCase):
+class TestRecoveryPool(StoneFSTestCase):
     MDSS_REQUIRED = 2
     CLIENTS_REQUIRED = 2
     REQUIRE_RECOVERY_FILESYSTEM = True
@@ -125,8 +125,8 @@ class TestRecoveryPool(CephFSTestCase):
 
         # After recovery, we need the MDS to not be strict about stats (in production these options
         # are off by default, but in QA we need to explicitly disable them)
-        self.fs.set_ceph_conf('mds', 'mds verify scatter', False)
-        self.fs.set_ceph_conf('mds', 'mds debug scatterstat', False)
+        self.fs.set_stone_conf('mds', 'mds verify scatter', False)
+        self.fs.set_stone_conf('mds', 'mds debug scatterstat', False)
 
         # Apply any data damage the workload wants
         workload.damage()
@@ -185,7 +185,7 @@ class TestRecoveryPool(CephFSTestCase):
 
         # Mount a client
         self.mount_a.mount_wait()
-        self.mount_b.mount_wait(cephfs_name=recovery_fs)
+        self.mount_b.mount_wait(stonefs_name=recovery_fs)
 
         # See that the files are present and correct
         errors = workload.validate()

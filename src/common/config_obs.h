@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,7 +20,7 @@
 
 #include "common/config_fwd.h"
 
-namespace ceph {
+namespace stone {
 /** @brief Base class for configuration observers.
  * Use this as a base class for your object if it has to respond to configuration changes,
  * for example by updating some values or modifying its behavior.
@@ -45,6 +45,6 @@ public:
 };
 }
 
-using md_config_obs_t = ceph::md_config_obs_impl<ConfigProxy>;
+using md_config_obs_t = stone::md_config_obs_impl<ConfigProxy>;
 
 #endif

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""Top-level package for Ceph volume on ZFS."""
+"""Top-level package for Stone volume on ZFS."""
 
 __author__ = """Willem Jan Withagen"""
 __email__ = 'wjw@digiware.nl'
 
-import ceph_volume_zfs.zfs
+import stone_volume_zfs.zfs
 
 from collections import namedtuple
 

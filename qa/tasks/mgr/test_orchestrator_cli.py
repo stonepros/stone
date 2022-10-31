@@ -70,9 +70,9 @@ class TestOrchestratorCli(MgrTestCase):
 
 
     def test_service_action(self):
-        self._orch_cmd("restart", "mds.cephfs")
-        self._orch_cmd("stop", "mds.cephfs")
-        self._orch_cmd("start", "mds.cephfs")
+        self._orch_cmd("restart", "mds.stonefs")
+        self._orch_cmd("stop", "mds.stonefs")
+        self._orch_cmd("start", "mds.stonefs")
 
     def test_service_instance_action(self):
         self._orch_cmd("daemon", "restart", "mds.a")

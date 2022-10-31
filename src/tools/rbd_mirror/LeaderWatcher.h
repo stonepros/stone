@@ -209,7 +209,7 @@ private:
   leader_watcher::Listener *m_listener;
 
   InstancesListener m_instances_listener;
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
   uint64_t m_notifier_id;
   std::string m_instance_id;
   LeaderLock *m_leader_lock;
@@ -228,8 +228,8 @@ private:
 
   librbd::watcher::NotifyResponse m_heartbeat_response;
 
-  bool is_leader(ceph::mutex &m_lock) const;
-  bool is_releasing_leader(ceph::mutex &m_lock) const;
+  bool is_leader(stone::mutex &m_lock) const;
+  bool is_releasing_leader(stone::mutex &m_lock) const;
 
   void cancel_timer_task();
   void schedule_timer_task(const std::string &name,

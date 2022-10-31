@@ -2,8 +2,8 @@ import contextlib
 import logging
 import os
 import re
-from ceph_volume import terminal, conf
-from ceph_volume import exceptions
+from stone_volume import terminal, conf
+from stone_volume import exceptions
 from sys import version_info as sys_version_info
 
 if sys_version_info.major >= 3:
@@ -23,7 +23,7 @@ class _TrimIndentFile(object):
     """
     This is used to take a file-like object and removes any
     leading tabs from each line when it's read. This is important
-    because some ceph configuration files include tabs which break
+    because some stone configuration files include tabs which break
     ConfigParser.
     """
     def __init__(self, fp):
@@ -37,9 +37,9 @@ class _TrimIndentFile(object):
         return iter(self.readline, '')
 
 
-def load_ceph_conf_path(cluster_name='ceph'):
-    abspath = '/etc/ceph/%s.conf' % cluster_name
-    conf.path = os.getenv('CEPH_CONF', abspath)
+def load_stone_conf_path(cluster_name='stone'):
+    abspath = '/etc/stone/%s.conf' % cluster_name
+    conf.path = os.getenv('STONE_CONF', abspath)
     conf.cluster = cluster_name
 
 
@@ -53,11 +53,11 @@ def load(abspath=None):
     parser = Conf()
 
     try:
-        ceph_file = open(abspath)
-        trimmed_conf = _TrimIndentFile(ceph_file)
-        with contextlib.closing(ceph_file):
+        stone_file = open(abspath)
+        trimmed_conf = _TrimIndentFile(stone_file)
+        with contextlib.closing(stone_file):
             parser.read_conf(trimmed_conf)
-            conf.ceph = parser
+            conf.stone = parser
             return parser
     except configparser.ParsingError as error:
         logger.exception('Unable to parse INI-style file: %s' % abspath)
@@ -67,7 +67,7 @@ def load(abspath=None):
 
 class Conf(conf_parentclass):
     """
-    Subclasses from ConfigParser to give a few helpers for Ceph
+    Subclasses from ConfigParser to give a few helpers for Stone
     configuration.
     """
 
@@ -191,7 +191,7 @@ class Conf(conf_parentclass):
                                 optval = re.split(r'\s+(;|#)', optval)[0]
                                 # if what is left is comment as a value, fallback to an empty string
                                 # that is: `foo = ;` would mean `foo` is '', which brings parity with
-                                # what ceph-conf tool does
+                                # what stone-conf tool does
                                 if optval in [';','#']:
                                     optval = ''
                             optval = optval.strip()

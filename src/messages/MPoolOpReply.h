@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -22,19 +22,19 @@ public:
   uuid_d fsid;
   __u32 replyCode = 0;
   epoch_t epoch = 0;
-  ceph::buffer::list response_data;
+  stone::buffer::list response_data;
 
   MPoolOpReply() : PaxosServiceMessage{STONE_MSG_POOLOP_REPLY, 0}
   {}
-  MPoolOpReply( uuid_d& f, ceph_tid_t t, int rc, int e, version_t v) :
+  MPoolOpReply( uuid_d& f, stone_tid_t t, int rc, int e, version_t v) :
     PaxosServiceMessage{STONE_MSG_POOLOP_REPLY, v},
     fsid(f),
     replyCode(rc),
     epoch(e) {
     set_tid(t);
   }
-  MPoolOpReply(uuid_d& f, ceph_tid_t t, int rc, int e, version_t v,
-	       ceph::buffer::list *blp) :
+  MPoolOpReply(uuid_d& f, stone_tid_t t, int rc, int e, version_t v,
+	       stone::buffer::list *blp) :
     PaxosServiceMessage{STONE_MSG_POOLOP_REPLY, v},
     fsid(f),
     replyCode(rc),
@@ -53,7 +53,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(fsid, payload);
     encode(replyCode, payload);
@@ -65,7 +65,7 @@ public:
       encode(false, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(fsid, p);
@@ -79,7 +79,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

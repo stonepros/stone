@@ -46,18 +46,18 @@ class DeltaRecorderT final: public DeltaRecorder {
       const position_t& insert_pos,
       const match_stage_t& insert_stage,
       const node_offset_t& insert_size) {
-    ceph::encode(op_t::INSERT, encoded);
+    stone::encode(op_t::INSERT, encoded);
     encode_key<KT>(key, encoded);
     encode_value(value, encoded);
     insert_pos.encode(encoded);
-    ceph::encode(insert_stage, encoded);
-    ceph::encode(insert_size, encoded);
+    stone::encode(insert_stage, encoded);
+    stone::encode(insert_size, encoded);
   }
 
   void encode_split(
       const StagedIterator& split_at,
       const char* p_node_start) {
-    ceph::encode(op_t::SPLIT, encoded);
+    stone::encode(op_t::SPLIT, encoded);
     split_at.encode(p_node_start, encoded);
   }
 
@@ -70,24 +70,24 @@ class DeltaRecorderT final: public DeltaRecorder {
       const match_stage_t& insert_stage,
       const node_offset_t& insert_size,
       const char* p_node_start) {
-    ceph::encode(op_t::SPLIT_INSERT, encoded);
+    stone::encode(op_t::SPLIT_INSERT, encoded);
     split_at.encode(p_node_start, encoded);
     encode_key<KT>(key, encoded);
     encode_value(value, encoded);
     insert_pos.encode(encoded);
-    ceph::encode(insert_stage, encoded);
-    ceph::encode(insert_size, encoded);
+    stone::encode(insert_stage, encoded);
+    stone::encode(insert_size, encoded);
   }
 
   void encode_update_child_addr(
       const laddr_t new_addr,
       const laddr_packed_t* p_addr,
       const char* p_node_start) {
-    ceph::encode(op_t::UPDATE_CHILD_ADDR, encoded);
-    ceph::encode(new_addr, encoded);
+    stone::encode(op_t::UPDATE_CHILD_ADDR, encoded);
+    stone::encode(new_addr, encoded);
     int node_offset = reinterpret_cast<const char*>(p_addr) - p_node_start;
     assert(node_offset > 0 && node_offset <= NODE_BLOCK_SIZE);
-    ceph::encode(static_cast<node_offset_t>(node_offset), encoded);
+    stone::encode(static_cast<node_offset_t>(node_offset), encoded);
   }
 
   static DeltaRecorderURef create() {
@@ -98,13 +98,13 @@ class DeltaRecorderT final: public DeltaRecorder {
   DeltaRecorderT() = default;
   node_type_t node_type() const override { return NODE_TYPE; }
   field_type_t field_type() const override { return FIELD_TYPE; }
-  void apply_delta(ceph::bufferlist::const_iterator& delta,
+  void apply_delta(stone::bufferlist::const_iterator& delta,
                    NodeExtentMutable& node) override {
     assert(is_empty());
     node_stage_t stage(reinterpret_cast<const FieldType*>(node.get_read()));
     op_t op;
     try {
-      ceph::decode(op, delta);
+      stone::decode(op, delta);
       switch (op) {
       case op_t::INSERT: {
         logger().debug("OTree::Extent::Replay: decoding INSERT ...");
@@ -116,9 +116,9 @@ class DeltaRecorderT final: public DeltaRecorder {
 
         auto insert_pos = position_t::decode(delta);
         match_stage_t insert_stage;
-        ceph::decode(insert_stage, delta);
+        stone::decode(insert_stage, delta);
         node_offset_t insert_size;
-        ceph::decode(insert_size, delta);
+        stone::decode(insert_size, delta);
         logger().debug("OTree::Extent::Replay: apply {}, {}, "
                        "insert_pos({}), insert_stage={}, insert_size={}B ...",
                        key, *p_value, insert_pos, insert_stage, insert_size);
@@ -144,9 +144,9 @@ class DeltaRecorderT final: public DeltaRecorder {
 
         auto insert_pos = position_t::decode(delta);
         match_stage_t insert_stage;
-        ceph::decode(insert_stage, delta);
+        stone::decode(insert_stage, delta);
         node_offset_t insert_size;
-        ceph::decode(insert_size, delta);
+        stone::decode(insert_size, delta);
         logger().debug("OTree::Extent::Replay: apply split_at={}, {}, {}, "
                        "insert_pos({}), insert_stage={}, insert_size={}B ...",
                        split_at, key, *p_value, insert_pos, insert_stage, insert_size);
@@ -157,9 +157,9 @@ class DeltaRecorderT final: public DeltaRecorder {
       case op_t::UPDATE_CHILD_ADDR: {
         logger().debug("OTree::Extent::Replay: decoding UPDATE_CHILD_ADDR ...");
         laddr_t new_addr;
-        ceph::decode(new_addr, delta);
+        stone::decode(new_addr, delta);
         node_offset_t update_offset;
-        ceph::decode(update_offset, delta);
+        stone::decode(update_offset, delta);
         auto p_addr = reinterpret_cast<laddr_packed_t*>(
             node.get_write() + update_offset);
         logger().debug("OTree::Extent::Replay: apply {:#x} to offset {:#x} ...",
@@ -170,35 +170,35 @@ class DeltaRecorderT final: public DeltaRecorder {
       default:
         logger().error("OTree::Extent::Replay: got unknown op {} when replay {:#x}",
                        op, node.get_laddr());
-        ceph_abort();
+        stone_abort();
       }
     } catch (buffer::error& e) {
       logger().error("OTree::Extent::Replay: got decode error {} when replay {:#x}",
                      e, node.get_laddr());
-      ceph_abort();
+      stone_abort();
     }
   }
 
  private:
-  static void encode_value(const value_t& value, ceph::bufferlist& encoded) {
+  static void encode_value(const value_t& value, stone::bufferlist& encoded) {
     if constexpr (std::is_same_v<value_t, laddr_packed_t>) {
       // NODE_TYPE == node_type_t::INTERNAL
-      ceph::encode(value.value, encoded);
+      stone::encode(value.value, encoded);
     } else if constexpr (std::is_same_v<value_t, onode_t>) {
       // NODE_TYPE == node_type_t::LEAF
       value.encode(encoded);
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
   }
 
-  static value_t* decode_value(ceph::bufferlist::const_iterator& delta,
+  static value_t* decode_value(stone::bufferlist::const_iterator& delta,
                                std::unique_ptr<char[]>& value_storage_heap,
                                value_t& value_storage_stack) {
     if constexpr (std::is_same_v<value_t, laddr_packed_t>) {
       // NODE_TYPE == node_type_t::INTERNAL
       laddr_t value;
-      ceph::decode(value, delta);
+      stone::decode(value, delta);
       value_storage_stack.value = value;
       return &value_storage_stack;
     } else if constexpr (std::is_same_v<value_t, onode_t>) {
@@ -207,12 +207,12 @@ class DeltaRecorderT final: public DeltaRecorder {
       value_storage_heap = onode_t::allocate(value_config);
       return reinterpret_cast<onode_t*>(value_storage_heap.get());
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
   }
 
   static seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 };
 
@@ -254,7 +254,7 @@ class NodeExtentAccessorT {
              extent->get_recorder()->is_empty());
       recorder = nullptr;
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
 #ifndef NDEBUG
     auto ref_recorder = recorder_t::create();

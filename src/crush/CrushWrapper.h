@@ -20,12 +20,12 @@ extern "C" {
 #include "builder.h"
 }
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/err.h"
 #include "include/encoding.h"
 #include "include/mempool.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -35,16 +35,16 @@ typedef mempool::osdmap::map<int64_t,std::string> name_map_t;
 
 WRITE_RAW_ENCODER(crush_rule_mask)   // it's all u8's
 
-inline void encode(const crush_rule_step &s, ceph::buffer::list &bl)
+inline void encode(const crush_rule_step &s, stone::buffer::list &bl)
 {
-  using ceph::encode;
+  using stone::encode;
   encode(s.op, bl);
   encode(s.arg1, bl);
   encode(s.arg2, bl);
 }
-inline void decode(crush_rule_step &s, ceph::buffer::list::const_iterator &p)
+inline void decode(crush_rule_step &s, stone::buffer::list::const_iterator &p)
 {
-  using ceph::decode;
+  using stone::decode;
   decode(s.op, p);
   decode(s.arg1, p);
   decode(s.arg2, p);
@@ -111,7 +111,7 @@ public:
       crush_destroy(crush);
     crush = crush_create();
     choose_args_clear();
-    ceph_assert(crush);
+    stone_assert(crush);
     have_rmaps = false;
 
     set_tunables_default();
@@ -121,7 +121,7 @@ public:
    * true if any rule has a rule id != its position in the array
    *
    * These indicate "ruleset" IDs that were created by older versions
-   * of Ceph.  They are cleaned up in renumber_rules so that eventually
+   * of Stone.  They are cleaned up in renumber_rules so that eventually
    * we can remove the code for handling them.
    */
   bool has_legacy_rule_ids() const;
@@ -129,7 +129,7 @@ public:
   /**
    * fix rules whose ruleid != ruleset
    *
-   * These rules were created in older versions of Ceph.  The concept
+   * These rules were created in older versions of Stone.  The concept
    * of a ruleset no longer exists.
    *
    * Return a map of old ID -> new ID.  Caller must update OSDMap
@@ -529,7 +529,7 @@ public:
   }
   void get_devices_by_class(const std::string &name,
 			    std::set<int> *devices) const {
-    ceph_assert(devices);
+    stone_assert(devices);
     devices->clear();
     if (!class_exists(name)) {
       return;
@@ -674,10 +674,10 @@ public:
    * @param weight optional pointer to weight of item at that location
    * @return true if item is at specified location
    */
-  bool check_item_loc(CephContext *cct, int item,
+  bool check_item_loc(StoneContext *cct, int item,
 		      const std::map<std::string,std::string>& loc,
 		      int *iweight);
-  bool check_item_loc(CephContext *cct, int item,
+  bool check_item_loc(StoneContext *cct, int item,
 		      const std::map<std::string,std::string>& loc,
 		      float *weight) {
     int iweight;
@@ -775,7 +775,7 @@ public:
    * verify upmapping results.
    * return 0 on success or a negative errno on error.
    */
-  int verify_upmap(CephContext *cct,
+  int verify_upmap(StoneContext *cct,
                    int rule_id,
                    int pool_size,
                    const std::vector<int>& up);
@@ -823,7 +823,7 @@ public:
    * @param init_weight_sets initialize weight-set weights to weight (vs 0)
    * @return 0 for success, negative on error
    */
-  int insert_item(CephContext *cct, int id, float weight, std::string name,
+  int insert_item(StoneContext *cct, int id, float weight, std::string name,
 		  const std::map<std::string,std::string>& loc,
 		  bool init_weight_sets=true);
 
@@ -838,7 +838,7 @@ public:
    * @param loc location (map of type to bucket names)
    * @return 0 for success, negative on error
    */
-  int move_bucket(CephContext *cct, int id, const std::map<std::string,std::string>& loc);
+  int move_bucket(StoneContext *cct, int id, const std::map<std::string,std::string>& loc);
 
   /**
    * swap bucket contents of two buckets without touching bucket ids
@@ -848,7 +848,7 @@ public:
    * @param dst bucket b
    * @return 0 for success, negative on error
    */
-  int swap_bucket(CephContext *cct, int src, int dst);
+  int swap_bucket(StoneContext *cct, int src, int dst);
 
   /**
    * add a link to an existing bucket in the hierarchy to the new location
@@ -862,7 +862,7 @@ public:
    * @param loc location (map of type to bucket names)
    * @return 0 for success, negative on error
    */
-  int link_bucket(CephContext *cct, int id,
+  int link_bucket(StoneContext *cct, int id,
 		  const std::map<std::string,std::string>& loc);
 
   /**
@@ -878,7 +878,7 @@ public:
    * @param loc location (map of type to bucket names)
    * @return 0 for no change, 1 for successful change, negative on error
    */
-  int update_item(CephContext *cct, int id, float weight, std::string name,
+  int update_item(StoneContext *cct, int id, float weight, std::string name,
 		  const std::map<std::string, std::string>& loc);
 
   /**
@@ -892,7 +892,7 @@ public:
    * @param init_weight_sets initialize weight-set values to weight (vs 0)
    * @return 0 for no change, 1 for successful change, negative on error
    */
-  int create_or_move_item(CephContext *cct, int item, float weight,
+  int create_or_move_item(StoneContext *cct, int item, float weight,
 			  std::string name,
 			  const std::map<std::string,std::string>& loc,
 			  bool init_weight_sets=true);
@@ -905,7 +905,7 @@ public:
    * @param unlink_only unlink but do not remove bucket (useful if multiple links or not empty)
    * @return 0 on success, negative on error
    */
-  int remove_item(CephContext *cct, int id, bool unlink_only);
+  int remove_item(StoneContext *cct, int id, bool unlink_only);
 
   /**
    * recursively remove buckets starting at item and stop removing
@@ -914,7 +914,7 @@ public:
    * @param item id to remove
    * @return 0 on success, negative on error
    */
-  int remove_root(CephContext *cct, int item);
+  int remove_root(StoneContext *cct, int item);
 
   /**
    * remove all instances of an item nested beneath a certain point from the map
@@ -926,11 +926,11 @@ public:
    * @return 0 on success, negative on error
    */
 private:
-  bool _maybe_remove_last_instance(CephContext *cct, int id, bool unlink_only);
-  int _remove_item_under(CephContext *cct, int id, int ancestor, bool unlink_only);
+  bool _maybe_remove_last_instance(StoneContext *cct, int id, bool unlink_only);
+  int _remove_item_under(StoneContext *cct, int id, int ancestor, bool unlink_only);
   bool _bucket_is_in_use(int id);
 public:
-  int remove_item_under(CephContext *cct, int id, int ancestor, bool unlink_only);
+  int remove_item_under(StoneContext *cct, int id, int ancestor, bool unlink_only);
 
   /**
    * calculate the locality/distance from a given id to a crush location map
@@ -942,7 +942,7 @@ public:
    * @param id the existing id in the map
    * @param loc a set of key=value pairs describing a location in the hierarchy
    */
-  int get_common_ancestor_distance(CephContext *cct, int id,
+  int get_common_ancestor_distance(StoneContext *cct, int id,
 				   const std::multimap<std::string,std::string>& loc) const;
 
   /**
@@ -985,9 +985,9 @@ public:
     }
     return 0;
   }
-  int adjust_item_weight(CephContext *cct, int id, int weight,
+  int adjust_item_weight(StoneContext *cct, int id, int weight,
 			 bool update_weight_sets=true);
-  int adjust_item_weightf(CephContext *cct, int id, float weight,
+  int adjust_item_weightf(StoneContext *cct, int id, float weight,
 			  bool update_weight_sets=true) {
     int r = validate_weightf(weight);
     if (r < 0) {
@@ -996,13 +996,13 @@ public:
     return adjust_item_weight(cct, id, (int)(weight * (float)0x10000),
 			      update_weight_sets);
   }
-  int adjust_item_weight_in_bucket(CephContext *cct, int id, int weight,
+  int adjust_item_weight_in_bucket(StoneContext *cct, int id, int weight,
 				   int bucket_id,
 				   bool update_weight_sets);
-  int adjust_item_weight_in_loc(CephContext *cct, int id, int weight,
+  int adjust_item_weight_in_loc(StoneContext *cct, int id, int weight,
 				const std::map<std::string,std::string>& loc,
 				bool update_weight_sets=true);
-  int adjust_item_weightf_in_loc(CephContext *cct, int id, float weight,
+  int adjust_item_weightf_in_loc(StoneContext *cct, int id, float weight,
 				 const std::map<std::string,std::string>& loc,
 				 bool update_weight_sets=true) {
     int r = validate_weightf(weight);
@@ -1012,14 +1012,14 @@ public:
     return adjust_item_weight_in_loc(cct, id, (int)(weight * (float)0x10000),
 				     loc, update_weight_sets);
   }
-  void reweight(CephContext *cct);
+  void reweight(StoneContext *cct);
   void reweight_bucket(crush_bucket *b,
 		       crush_choose_arg_map& arg_map,
 		       std::vector<uint32_t> *weightv);
 
-  int adjust_subtree_weight(CephContext *cct, int id, int weight,
+  int adjust_subtree_weight(StoneContext *cct, int id, int weight,
 			    bool update_weight_sets=true);
-  int adjust_subtree_weightf(CephContext *cct, int id, float weight,
+  int adjust_subtree_weightf(StoneContext *cct, int id, float weight,
 			     bool update_weight_sets=true) {
     int r = validate_weightf(weight);
     if (r < 0) {
@@ -1155,7 +1155,7 @@ public:
   int add_rule(int ruleno, int len, int type, int minsize, int maxsize) {
     if (!crush) return -ENOENT;
     crush_rule *n = crush_make_rule(len, ruleno, type, minsize, maxsize);
-    ceph_assert(n);
+    stone_assert(n);
     ruleno = crush_add_rule(crush, n, ruleno);
     return ruleno;
   }
@@ -1255,7 +1255,7 @@ private:
    *
    * returns the weight of the detached bucket
    **/
-  int detach_bucket(CephContext *cct, int item);
+  int detach_bucket(StoneContext *cct, int item);
 
   int get_new_bucket_id();
 
@@ -1328,11 +1328,11 @@ public:
   int bucket_add_item(crush_bucket *bucket, int item, int weight);
   int bucket_remove_item(struct crush_bucket *bucket, int item);
   int bucket_adjust_item_weight(
-    CephContext *cct, struct crush_bucket *bucket, int item, int weight,
+    StoneContext *cct, struct crush_bucket *bucket, int item, int weight,
     bool adjust_weight_sets);
 
   void finalize() {
-    ceph_assert(crush);
+    stone_assert(crush);
     crush_finalize(crush);
     if (!name_map.empty() &&
 	name_map.rbegin()->first >= crush->max_devices) {
@@ -1345,7 +1345,7 @@ public:
 
   int update_device_class(int id, const std::string& class_name,
 			  const std::string& name, std::ostream *ss);
-  int remove_device_class(CephContext *cct, int id, std::ostream *ss);
+  int remove_device_class(StoneContext *cct, int id, std::ostream *ss);
   int device_class_clone(
     int original, int device_class,
     const std::map<int32_t, std::map<int32_t, int32_t>>& old_class_bucket,
@@ -1360,12 +1360,12 @@ public:
   int get_rules_by_osd(int osd, std::set<int> *rules);
   bool _class_is_dead(int class_id);
   void cleanup_dead_classes();
-  int rebuild_roots_with_classes(CephContext *cct);
+  int rebuild_roots_with_classes(StoneContext *cct);
   /* remove unused roots generated for class devices */
-  int trim_roots_with_class(CephContext *cct);
+  int trim_roots_with_class(StoneContext *cct);
 
   int reclassify(
-    CephContext *cct,
+    StoneContext *cct,
     std::ostream& out,
     const std::map<std::string,std::string>& classify_root,
     const std::map<std::string,std::pair<std::string,std::string>>& classify_bucket
@@ -1493,7 +1493,7 @@ public:
   bool create_choose_args(int64_t id, int positions) {
     if (choose_args.count(id))
       return false;
-    ceph_assert(positions);
+    stone_assert(positions);
     auto &cmap = choose_args[id];
     cmap.args = static_cast<crush_choose_arg*>(calloc(sizeof(crush_choose_arg),
 					  crush->max_buckets));
@@ -1539,24 +1539,24 @@ public:
   }
 
   // remove choose_args for buckets that no longer exist, create them for new buckets
-  void update_choose_args(CephContext *cct);
+  void update_choose_args(StoneContext *cct);
 
   // adjust choose_args_map weight, preserving the hierarchical summation
   // property.  used by callers optimizing layouts by tweaking weights.
   int _choose_args_adjust_item_weight_in_bucket(
-    CephContext *cct,
+    StoneContext *cct,
     crush_choose_arg_map cmap,
     int bucketid,
     int id,
     const std::vector<int>& weight,
     std::ostream *ss);
   int choose_args_adjust_item_weight(
-    CephContext *cct,
+    StoneContext *cct,
     crush_choose_arg_map cmap,
     int id, const std::vector<int>& weight,
     std::ostream *ss);
   int choose_args_adjust_item_weightf(
-    CephContext *cct,
+    StoneContext *cct,
     crush_choose_arg_map cmap,
     int id, const std::vector<double>& weightf,
     std::ostream *ss) {
@@ -1597,7 +1597,7 @@ public:
   }
 
   int _choose_type_stack(
-    CephContext *cct,
+    StoneContext *cct,
     const std::vector<std::pair<int,int>>& stack,
     const std::set<int>& overfull,
     const std::vector<int>& underfull,
@@ -1610,7 +1610,7 @@ public:
     int rule) const;
 
   int try_remap_rule(
-    CephContext *cct,
+    StoneContext *cct,
     int rule,
     int maxout,
     const std::set<int>& overfull,
@@ -1620,7 +1620,7 @@ public:
     std::vector<int> *out) const;
 
   bool check_crush_rule(int ruleset, int type, int size, std::ostream& ss) {
-    ceph_assert(crush);
+    stone_assert(crush);
 
     __u32 i;
     for (i = 0; i < crush->max_rules; i++) {
@@ -1644,32 +1644,32 @@ public:
     return false;
   }
 
-  void encode(ceph::buffer::list &bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator &blp);
+  void encode(stone::buffer::list &bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator &blp);
   void decode_crush_bucket(crush_bucket** bptr,
-			   ceph::buffer::list::const_iterator &blp);
-  void dump(ceph::Formatter *f) const;
-  void dump_rules(ceph::Formatter *f) const;
-  void dump_rule(int ruleset, ceph::Formatter *f) const;
-  void dump_tunables(ceph::Formatter *f) const;
-  void dump_choose_args(ceph::Formatter *f) const;
-  void list_rules(ceph::Formatter *f) const;
+			   stone::buffer::list::const_iterator &blp);
+  void dump(stone::Formatter *f) const;
+  void dump_rules(stone::Formatter *f) const;
+  void dump_rule(int ruleset, stone::Formatter *f) const;
+  void dump_tunables(stone::Formatter *f) const;
+  void dump_choose_args(stone::Formatter *f) const;
+  void list_rules(stone::Formatter *f) const;
   void list_rules(std::ostream *ss) const;
   void dump_tree(std::ostream *out,
-                 ceph::Formatter *f,
+                 stone::Formatter *f,
 		 const CrushTreeDumper::name_map_t& ws,
                  bool show_shadow = false) const;
-  void dump_tree(std::ostream *out, ceph::Formatter *f) {
+  void dump_tree(std::ostream *out, stone::Formatter *f) {
     dump_tree(out, f, CrushTreeDumper::name_map_t());
   }
-  void dump_tree(ceph::Formatter *f,
+  void dump_tree(stone::Formatter *f,
 		 const CrushTreeDumper::name_map_t& ws) const;
   static void generate_test_instances(std::list<CrushWrapper*>& o);
 
-  int get_osd_pool_default_crush_replicated_ruleset(CephContext *cct);
+  int get_osd_pool_default_crush_replicated_ruleset(StoneContext *cct);
 
   static bool is_valid_crush_name(const std::string& s);
-  static bool is_valid_crush_loc(CephContext *cct,
+  static bool is_valid_crush_loc(StoneContext *cct,
 				 const std::map<std::string,std::string>& loc);
 };
 WRITE_CLASS_ENCODER_FEATURES(CrushWrapper)

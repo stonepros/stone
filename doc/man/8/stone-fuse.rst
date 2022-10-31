@@ -1,36 +1,36 @@
 :orphan:
 
 =========================================
- ceph-fuse -- FUSE-based client for ceph
+ stone-fuse -- FUSE-based client for stone
 =========================================
 
-.. program:: ceph-fuse
+.. program:: stone-fuse
 
 Synopsis
 ========
 
-| **ceph-fuse** [-n *client.username*] [ -m *monaddr*:*port* ] *mountpoint* [ *fuse options* ]
+| **stone-fuse** [-n *client.username*] [ -m *monaddr*:*port* ] *mountpoint* [ *fuse options* ]
 
 
 Description
 ===========
 
-**ceph-fuse** is a FUSE ("Filesystem in USErspace") client for Ceph
-distributed file system. It will mount a ceph file system specified via the -m
-option or described by ceph.conf (see below) at the specific mount point. See
-`Mount CephFS using FUSE`_ for detailed information.
+**stone-fuse** is a FUSE ("Filesystem in USErspace") client for Stone
+distributed file system. It will mount a stone file system specified via the -m
+option or described by stone.conf (see below) at the specific mount point. See
+`Mount StoneFS using FUSE`_ for detailed information.
 
 The file system can be unmounted with::
 
         fusermount -u mountpoint
 
-or by sending ``SIGINT`` to the ``ceph-fuse`` process.
+or by sending ``SIGINT`` to the ``stone-fuse`` process.
 
 
 Options
 =======
 
-Any options not recognized by ceph-fuse will be passed on to libfuse.
+Any options not recognized by stone-fuse will be passed on to libfuse.
 
 .. option:: -o opt,[opt...]
 
@@ -40,18 +40,18 @@ Any options not recognized by ceph-fuse will be passed on to libfuse.
 
    Run in foreground, send all log output to stderr and enable FUSE debugging (-o debug).
 
-.. option:: -c ceph.conf, --conf=ceph.conf
+.. option:: -c stone.conf, --conf=stone.conf
 
-   Use *ceph.conf* configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` to determine monitor addresses during startup.
+   Use *stone.conf* configuration file instead of the default
+   ``/etc/stone/stone.conf`` to determine monitor addresses during startup.
 
 .. option:: -m monaddress[:port]
 
-   Connect to specified monitor (instead of looking through ceph.conf).
+   Connect to specified monitor (instead of looking through stone.conf).
 
-.. option:: -n client.{cephx-username}
+.. option:: -n client.{stonex-username}
 
-   Pass the name of CephX user whose secret key is be to used for mounting.
+   Pass the name of StoneX user whose secret key is be to used for mounting.
 
 .. option:: -k <path-to-keyring>
 
@@ -59,7 +59,7 @@ Any options not recognized by ceph-fuse will be passed on to libfuse.
 
 .. option:: --client_mountpoint/-r root_directory
 
-   Use root_directory as the mounted root, rather than the full Ceph tree.
+   Use root_directory as the mounted root, rather than the full Stone tree.
 
 .. option:: -f
 
@@ -72,14 +72,14 @@ Any options not recognized by ceph-fuse will be passed on to libfuse.
 Availability
 ============
 
-**ceph-fuse** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**stone-fuse** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 
 See also
 ========
 
 fusermount(8),
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)
 
-.. _Mount CephFS using FUSE: ../../../cephfs/mount-using-fuse/
+.. _Mount StoneFS using FUSE: ../../../stonefs/mount-using-fuse/

@@ -14,13 +14,13 @@
 #define ACL_EA_DEFAULT "system.posix_acl_default"
 
 typedef struct {
-  ceph_le16       e_tag;
-  ceph_le16       e_perm;
-  ceph_le32       e_id;
+  stone_le16       e_tag;
+  stone_le16       e_perm;
+  stone_le32       e_id;
 } acl_ea_entry;
 
 typedef struct {
-  ceph_le32       a_version;
+  stone_le32       a_version;
   acl_ea_entry    a_entries[0];
 } acl_ea_header;
 

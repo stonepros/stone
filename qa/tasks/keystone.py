@@ -76,7 +76,7 @@ def download(ctx, config):
                 ],
             )
 
-        # hax for http://tracker.ceph.com/issues/23659
+        # hax for http://tracker.stone.com/issues/23659
         run_in_keystone_dir(ctx, client, [
                 'sed', '-i',
                 's/pysaml2<4.0.3,>=2.4.0/pysaml2>=4.5.0/',
@@ -404,7 +404,7 @@ def task(ctx, config):
     Example of configuration:
 
       - install:
-      - ceph:
+      - stone:
       - tox: [ client.0 ]
       - keystone:
           client.0:

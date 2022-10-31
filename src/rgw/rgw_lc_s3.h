@@ -91,7 +91,7 @@ public:
 class RGWLifecycleConfiguration_S3 : public RGWLifecycleConfiguration
 {
 public:
-  explicit RGWLifecycleConfiguration_S3(CephContext *_cct) : RGWLifecycleConfiguration(_cct) {}
+  explicit RGWLifecycleConfiguration_S3(StoneContext *_cct) : RGWLifecycleConfiguration(_cct) {}
   RGWLifecycleConfiguration_S3() : RGWLifecycleConfiguration(nullptr) {}
 
   void decode_xml(XMLObj *obj);

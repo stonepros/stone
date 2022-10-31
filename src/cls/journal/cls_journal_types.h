@@ -11,7 +11,7 @@
 #include <list>
 #include <string>
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 
@@ -39,9 +39,9 @@ struct ObjectPosition {
     return !(*this == rhs);
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& iter);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& iter);
+  void dump(stone::Formatter *f) const;
 
   inline bool operator<(const ObjectPosition &rhs) const {
     if (object_number != rhs.object_number) {
@@ -65,9 +65,9 @@ struct ObjectSetPosition {
   ObjectSetPosition(const ObjectPositions &_object_positions)
     : object_positions(_object_positions) {}
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& iter);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& iter);
+  void dump(stone::Formatter *f) const;
 
   inline bool operator==(const ObjectSetPosition &rhs) const {
     return (object_positions == rhs.object_positions);
@@ -83,12 +83,12 @@ enum ClientState {
 
 struct Client {
   std::string id;
-  ceph::buffer::list data;
+  stone::buffer::list data;
   ObjectSetPosition commit_position;
   ClientState state;
 
   Client() : state(CLIENT_STATE_CONNECTED) {}
-  Client(const std::string& _id, const ceph::buffer::list &_data,
+  Client(const std::string& _id, const stone::buffer::list &_data,
          const ObjectSetPosition &_commit_position = ObjectSetPosition(),
          ClientState _state = CLIENT_STATE_CONNECTED)
     : id(_id), data(_data), commit_position(_commit_position), state(_state) {}
@@ -103,9 +103,9 @@ struct Client {
     return (id < rhs.id);
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& iter);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& iter);
+  void dump(stone::Formatter *f) const;
 
   static void generate_test_instances(std::list<Client *> &o);
 };
@@ -115,10 +115,10 @@ struct Tag {
 
   uint64_t tid;
   uint64_t tag_class;
-  ceph::buffer::list data;
+  stone::buffer::list data;
 
   Tag() : tid(0), tag_class(0) {}
-  Tag(uint64_t tid, uint64_t tag_class, const ceph::buffer::list &data)
+  Tag(uint64_t tid, uint64_t tag_class, const stone::buffer::list &data)
     : tid(tid), tag_class(tag_class), data(data) {}
 
   inline bool operator==(const Tag &rhs) const {
@@ -130,9 +130,9 @@ struct Tag {
     return (tid < rhs.tid);
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& iter);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& iter);
+  void dump(stone::Formatter *f) const;
 
   static void generate_test_instances(std::list<Tag *> &o);
 };

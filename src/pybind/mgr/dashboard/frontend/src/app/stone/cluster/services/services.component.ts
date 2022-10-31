@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { delay } from 'rxjs/operators';
 
-import { CephServiceService } from '~/app/shared/api/ceph-service.service';
+import { StoneServiceService } from '~/app/shared/api/stone-service.service';
 import { OrchestratorService } from '~/app/shared/api/orchestrator.service';
 import { ListWithDetails } from '~/app/shared/classes/list-with-details.class';
 import { CriticalConfirmationModalComponent } from '~/app/shared/components/critical-confirmation-modal/critical-confirmation-modal.component';
@@ -19,7 +19,7 @@ import { FinishedTask } from '~/app/shared/models/finished-task';
 import { OrchestratorFeature } from '~/app/shared/models/orchestrator.enum';
 import { OrchestratorStatus } from '~/app/shared/models/orchestrator.interface';
 import { Permissions } from '~/app/shared/models/permissions';
-import { CephServiceSpec } from '~/app/shared/models/service.interface';
+import { StoneServiceSpec } from '~/app/shared/models/service.interface';
 import { RelativeDatePipe } from '~/app/shared/pipes/relative-date.pipe';
 import { AuthStorageService } from '~/app/shared/services/auth-storage.service';
 import { ModalService } from '~/app/shared/services/modal.service';
@@ -64,7 +64,7 @@ export class ServicesComponent extends ListWithDetails implements OnChanges, OnI
   };
 
   columns: Array<CdTableColumn> = [];
-  services: Array<CephServiceSpec> = [];
+  services: Array<StoneServiceSpec> = [];
   isLoadingServices = false;
   selection: CdTableSelection = new CdTableSelection();
 
@@ -73,7 +73,7 @@ export class ServicesComponent extends ListWithDetails implements OnChanges, OnI
     private authStorageService: AuthStorageService,
     private modalService: ModalService,
     private orchService: OrchestratorService,
-    private cephServiceService: CephServiceService,
+    private stoneServiceService: StoneServiceService,
     private relativeDatePipe: RelativeDatePipe,
     private taskWrapperService: TaskWrapperService,
     private router: Router
@@ -213,8 +213,8 @@ export class ServicesComponent extends ListWithDetails implements OnChanges, OnI
       return;
     }
     this.isLoadingServices = true;
-    this.cephServiceService.list().subscribe(
-      (services: CephServiceSpec[]) => {
+    this.stoneServiceService.list().subscribe(
+      (services: StoneServiceSpec[]) => {
         this.services = services;
         this.services = this.services.filter((col: any) => {
           return !this.hiddenServices.includes(col.service_name);
@@ -245,7 +245,7 @@ export class ServicesComponent extends ListWithDetails implements OnChanges, OnI
             task: new FinishedTask(`service/${URLVerbs.DELETE}`, {
               service_name: service.service_name
             }),
-            call: this.cephServiceService.delete(service.service_name)
+            call: this.stoneServiceService.delete(service.service_name)
           })
           .pipe(
             // Delay closing the dialog, otherwise the datatable still

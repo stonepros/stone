@@ -8,7 +8,7 @@ import os.path
 import shutil
 import tempfile
 
-from tasks import ceph_manager
+from tasks import stone_manager
 from teuthology import misc as teuthology
 
 log = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ def _nuke_mons(manager, mons, mon_id):
                 cluster=cluster,
                 mon=m))
             manager.kill_mon(m)
-            mon_data = os.path.join('/var/lib/ceph/mon/',
+            mon_data = os.path.join('/var/lib/stonepros/mon/',
                                     '{0}-{1}'.format(cluster, m))
             if m == mon_id:
                 # so we will only need to recreate the store.db for the
@@ -110,27 +110,27 @@ def _rebuild_db(ctx, manager, cluster_name, mon, mon_id, keyring_path):
 
     # recover the first_mon with re-built mon db
     # pull from recovered leveldb from client
-    mon_store_dir = os.path.join('/var/lib/ceph/mon',
+    mon_store_dir = os.path.join('/var/lib/stonepros/mon',
                                  '{0}-{1}'.format(cluster_name, mon_id))
     _push_directory(local_mstore, mon, mon_store_dir)
-    mon.run(args=['sudo', 'chown', '-R', 'ceph:ceph', mon_store_dir])
+    mon.run(args=['sudo', 'chown', '-R', 'stone:stone', mon_store_dir])
     shutil.rmtree(local_mstore)
 
     # fill up the caps in the keyring file
     mon.run(args=['sudo',
-                  'ceph-authtool', keyring_path,
+                  'stone-authtool', keyring_path,
                   '-n', 'mon.',
                   '--cap', 'mon', 'allow *'])
     mon.run(args=['sudo',
-                  'ceph-authtool', keyring_path,
+                  'stone-authtool', keyring_path,
                   '-n', 'client.admin',
                   '--cap', 'mon', 'allow *',
                   '--cap', 'osd', 'allow *',
                   '--cap', 'mds', 'allow *',
                   '--cap', 'mgr', 'allow *'])
-    mon.run(args=['sudo', '-u', 'ceph',
-                  'CEPH_ARGS=--no-mon-config',
-                  'ceph-monstore-tool', mon_store_dir,
+    mon.run(args=['sudo', '-u', 'stone',
+                  'STONE_ARGS=--no-mon-config',
+                  'stone-monstore-tool', mon_store_dir,
                   'rebuild', '--',
                   '--keyring', keyring_path,
                   '--monmap', '/tmp/monmap',
@@ -139,7 +139,7 @@ def _rebuild_db(ctx, manager, cluster_name, mon, mon_id, keyring_path):
 
 def _revive_mons(manager, mons, recovered, keyring_path):
     # revive monitors
-    # the initial monmap is in the ceph.conf, so we are good.
+    # the initial monmap is in the stone.conf, so we are good.
     n_mons = 0
     is_mon = teuthology.is_type('mon')
     for remote, roles in mons.remotes.items():
@@ -154,7 +154,7 @@ def _revive_mons(manager, mons, recovered, keyring_path):
                 remote.run(
                     args=[
                         'sudo',
-                        'ceph-mon',
+                        'stone-mon',
                         '--cluster', cluster,
                         '--mkfs',
                         '-i', m,
@@ -203,19 +203,19 @@ def task(ctx, config):
     (mon,) = ctx.cluster.only(first_mon).remotes.keys()
 
     # stash a monmap for later
-    mon.run(args=['ceph', 'mon', 'getmap', '-o', '/tmp/monmap'])
+    mon.run(args=['stone', 'mon', 'getmap', '-o', '/tmp/monmap'])
 
-    manager = ceph_manager.CephManager(
+    manager = stone_manager.StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager'))
+        logger=log.getChild('stone_manager'))
 
     mons = ctx.cluster.only(teuthology.is_type('mon'))
     # note down the first cluster_name and mon_id
     # we will recover it later on
     cluster_name, _, mon_id = teuthology.split_role(first_mon)
     _nuke_mons(manager, mons, mon_id)
-    default_keyring = '/etc/ceph/{cluster}.keyring'.format(
+    default_keyring = '/etc/stonepros/{cluster}.keyring'.format(
         cluster=cluster_name)
     keyring_path = config.get('keyring_path', default_keyring)
     _rebuild_db(ctx, manager, cluster_name, mon, mon_id, keyring_path)

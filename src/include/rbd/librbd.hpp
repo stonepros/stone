@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -96,7 +96,7 @@ namespace librbd {
     std::string uuid;
     std::string cluster_name;
     std::string client_name;
-  } mirror_peer_t CEPH_RBD_DEPRECATED;
+  } mirror_peer_t STONE_RBD_DEPRECATED;
 
   typedef struct {
     std::string uuid;
@@ -125,7 +125,7 @@ namespace librbd {
     std::string description;
     time_t last_update;
     bool up;
-  } mirror_image_status_t CEPH_RBD_DEPRECATED;
+  } mirror_image_status_t STONE_RBD_DEPRECATED;
 
   typedef struct {
     std::string mirror_uuid;
@@ -163,7 +163,7 @@ namespace librbd {
 
   typedef rbd_image_info_t image_info_t;
 
-  class CEPH_RBD_API ProgressContext
+  class STONE_RBD_API ProgressContext
   {
   public:
     virtual ~ProgressContext();
@@ -228,7 +228,7 @@ namespace librbd {
     std::string passphrase;
   } encryption_luks2_format_options_t;
 
-class CEPH_RBD_API RBD
+class STONE_RBD_API RBD
 {
 public:
   RBD();
@@ -270,7 +270,7 @@ public:
   int features_from_string(const std::string str_features, uint64_t *features);
 
   int list(IoCtx& io_ctx, std::vector<std::string>& names)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
   int list2(IoCtx& io_ctx, std::vector<image_spec_t>* images);
 
   int create(IoCtx& io_ctx, const char *name, uint64_t size, int *order);
@@ -373,25 +373,25 @@ public:
   int mirror_peer_add(IoCtx& io_ctx, std::string *uuid,
                       const std::string &cluster_name,
                       const std::string &client_name)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
   int mirror_peer_remove(IoCtx& io_ctx, const std::string &uuid)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
   int mirror_peer_list(IoCtx& io_ctx, std::vector<mirror_peer_t> *peers)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
   int mirror_peer_set_client(IoCtx& io_ctx, const std::string &uuid,
                              const std::string &client_name)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
   int mirror_peer_set_cluster(IoCtx& io_ctx, const std::string &uuid,
                               const std::string &cluster_name)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
   int mirror_peer_get_attributes(
       IoCtx& io_ctx, const std::string &uuid,
       std::map<std::string, std::string> *key_vals)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
   int mirror_peer_set_attributes(
       IoCtx& io_ctx, const std::string &uuid,
       const std::map<std::string, std::string>& key_vals)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
 
   /// mirror_image_status_list command is deprecated to
   /// mirror_image_global_status_list
@@ -399,7 +399,7 @@ public:
   int mirror_image_status_list(
       IoCtx& io_ctx, const std::string &start_id, size_t max,
       std::map<std::string, mirror_image_status_t> *images)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
 
   // RBD groups support functions
   int group_create(IoCtx& io_ctx, const char *group_name);
@@ -449,7 +449,7 @@ public:
                         const std::string &value);
   int pool_metadata_remove(IoCtx &io_ctx, const std::string &key);
   int pool_metadata_list(IoCtx &io_ctx, const std::string &start, uint64_t max,
-                         std::map<std::string, ceph::bufferlist> *pairs);
+                         std::map<std::string, stone::bufferlist> *pairs);
 
   int config_list(IoCtx& io_ctx, std::vector<config_option_t> *options);
 
@@ -459,7 +459,7 @@ private:
   const RBD& operator=(const RBD& rhs);
 };
 
-class CEPH_RBD_API ImageOptions {
+class STONE_RBD_API ImageOptions {
 public:
   ImageOptions();
   ImageOptions(rbd_image_options_t opts);
@@ -482,7 +482,7 @@ private:
   rbd_image_options_t opts;
 };
 
-class CEPH_RBD_API PoolStats {
+class STONE_RBD_API PoolStats {
 public:
   PoolStats();
   ~PoolStats();
@@ -498,7 +498,7 @@ private:
   rbd_pool_stats_t pool_stats;
 };
 
-class CEPH_RBD_API UpdateWatchCtx {
+class STONE_RBD_API UpdateWatchCtx {
 public:
   virtual ~UpdateWatchCtx() {}
   /**
@@ -507,7 +507,7 @@ public:
   virtual void handle_notify() = 0;
 };
 
-class CEPH_RBD_API QuiesceWatchCtx {
+class STONE_RBD_API QuiesceWatchCtx {
 public:
   virtual ~QuiesceWatchCtx() {}
   /**
@@ -521,7 +521,7 @@ public:
   virtual void handle_unquiesce() = 0;
 };
 
-class CEPH_RBD_API Image
+class STONE_RBD_API Image
 {
 public:
   Image();
@@ -540,10 +540,10 @@ public:
   int64_t get_data_pool_id();
   int parent_info(std::string *parent_poolname, std::string *parent_name,
 		  std::string *parent_snapname)
-      CEPH_RBD_DEPRECATED;
+      STONE_RBD_DEPRECATED;
   int parent_info2(std::string *parent_poolname, std::string *parent_name,
                    std::string *parent_id, std::string *parent_snapname)
-      CEPH_RBD_DEPRECATED;
+      STONE_RBD_DEPRECATED;
   int get_parent(linked_image_spec_t *parent_image, snap_spec_t *parent_snap);
 
   int get_migration_source_spec(std::string* source_spec);
@@ -614,13 +614,13 @@ public:
    * of this image at the currently set snapshot.
    */
   int list_children(std::set<std::pair<std::string, std::string> > *children)
-      CEPH_RBD_DEPRECATED;
+      STONE_RBD_DEPRECATED;
   /**
   * Returns a structure of poolname, imagename, imageid and trash flag
   * for each clone of this image at the currently set snapshot.
   */
   int list_children2(std::vector<librbd::child_info_t> *children)
-      CEPH_RBD_DEPRECATED;
+      STONE_RBD_DEPRECATED;
   int list_children3(std::vector<linked_image_spec_t> *images);
   int list_descendants(std::vector<linked_image_spec_t> *images);
 
@@ -635,7 +635,7 @@ public:
   /* snapshots */
   int snap_list(std::vector<snap_info_t>& snaps);
   /* DEPRECATED; use snap_exists2 */
-  bool snap_exists(const char *snapname) CEPH_RBD_DEPRECATED;
+  bool snap_exists(const char *snapname) STONE_RBD_DEPRECATED;
   int snap_exists2(const char *snapname, bool *exists);
   int snap_create(const char *snapname);
   int snap_create2(const char *snapname, uint32_t flags, ProgressContext& pctx);
@@ -666,9 +666,9 @@ public:
       size_t snap_mirror_namespace_size);
 
   /* I/O */
-  ssize_t read(uint64_t ofs, size_t len, ceph::bufferlist& bl);
+  ssize_t read(uint64_t ofs, size_t len, stone::bufferlist& bl);
   /* @param op_flags see librados.h constants beginning with LIBRADOS_OP_FLAG */
-  ssize_t read2(uint64_t ofs, size_t len, ceph::bufferlist& bl, int op_flags);
+  ssize_t read2(uint64_t ofs, size_t len, stone::bufferlist& bl, int op_flags);
   int64_t read_iterate(uint64_t ofs, size_t len,
 		       int (*cb)(uint64_t, size_t, const char *, void *), void *arg);
   int read_iterate2(uint64_t ofs, uint64_t len,
@@ -702,30 +702,30 @@ public:
                     bool include_parent, bool whole_object,
 		    int (*cb)(uint64_t, size_t, int, void *), void *arg);
 
-  ssize_t write(uint64_t ofs, size_t len, ceph::bufferlist& bl);
+  ssize_t write(uint64_t ofs, size_t len, stone::bufferlist& bl);
   /* @param op_flags see librados.h constants beginning with LIBRADOS_OP_FLAG */
-  ssize_t write2(uint64_t ofs, size_t len, ceph::bufferlist& bl, int op_flags);
+  ssize_t write2(uint64_t ofs, size_t len, stone::bufferlist& bl, int op_flags);
 
   int discard(uint64_t ofs, uint64_t len);
-  ssize_t writesame(uint64_t ofs, size_t len, ceph::bufferlist &bl, int op_flags);
+  ssize_t writesame(uint64_t ofs, size_t len, stone::bufferlist &bl, int op_flags);
   ssize_t write_zeroes(uint64_t ofs, size_t len, int zero_flags, int op_flags);
 
-  ssize_t compare_and_write(uint64_t ofs, size_t len, ceph::bufferlist &cmp_bl,
-                            ceph::bufferlist& bl, uint64_t *mismatch_off, int op_flags);
+  ssize_t compare_and_write(uint64_t ofs, size_t len, stone::bufferlist &cmp_bl,
+                            stone::bufferlist& bl, uint64_t *mismatch_off, int op_flags);
 
-  int aio_write(uint64_t off, size_t len, ceph::bufferlist& bl, RBD::AioCompletion *c);
+  int aio_write(uint64_t off, size_t len, stone::bufferlist& bl, RBD::AioCompletion *c);
   /* @param op_flags see librados.h constants beginning with LIBRADOS_OP_FLAG */
-  int aio_write2(uint64_t off, size_t len, ceph::bufferlist& bl,
+  int aio_write2(uint64_t off, size_t len, stone::bufferlist& bl,
 		  RBD::AioCompletion *c, int op_flags);
 
   int aio_discard(uint64_t off, uint64_t len, RBD::AioCompletion *c);
-  int aio_writesame(uint64_t off, size_t len, ceph::bufferlist& bl,
+  int aio_writesame(uint64_t off, size_t len, stone::bufferlist& bl,
                     RBD::AioCompletion *c, int op_flags);
   int aio_write_zeroes(uint64_t ofs, size_t len, RBD::AioCompletion *c,
                        int zero_flags, int op_flags);
 
-  int aio_compare_and_write(uint64_t off, size_t len, ceph::bufferlist& cmp_bl,
-                            ceph::bufferlist& bl, RBD::AioCompletion *c,
+  int aio_compare_and_write(uint64_t off, size_t len, stone::bufferlist& cmp_bl,
+                            stone::bufferlist& bl, RBD::AioCompletion *c,
                             uint64_t *mismatch_off, int op_flags);
 
   /**
@@ -745,9 +745,9 @@ public:
    * @param bl bufferlist to read into
    * @param c aio completion to notify when read is complete
    */
-  int aio_read(uint64_t off, size_t len, ceph::bufferlist& bl, RBD::AioCompletion *c);
+  int aio_read(uint64_t off, size_t len, stone::bufferlist& bl, RBD::AioCompletion *c);
   /* @param op_flags see librados.h constants beginning with LIBRADOS_OP_FLAG */
-  int aio_read2(uint64_t off, size_t len, ceph::bufferlist& bl,
+  int aio_read2(uint64_t off, size_t len, stone::bufferlist& bl,
 		  RBD::AioCompletion *c, int op_flags);
 
   int flush();
@@ -776,10 +776,10 @@ public:
   /**
    * Returns a pair of key/value for this image
    */
-  int metadata_list(const std::string &start, uint64_t max, std::map<std::string, ceph::bufferlist> *pairs);
+  int metadata_list(const std::string &start, uint64_t max, std::map<std::string, stone::bufferlist> *pairs);
 
   // RBD image mirroring support functions
-  int mirror_image_enable() CEPH_RBD_DEPRECATED;
+  int mirror_image_enable() STONE_RBD_DEPRECATED;
   int mirror_image_enable2(mirror_image_mode_t mode);
   int mirror_image_disable(bool force);
   int mirror_image_promote(bool force);
@@ -795,7 +795,7 @@ public:
       size_t status_size);
   int mirror_image_get_status(
       mirror_image_status_t *mirror_image_status, size_t status_size)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
   int mirror_image_get_instance_id(std::string *instance_id);
   int aio_mirror_image_promote(bool force, RBD::AioCompletion *c);
   int aio_mirror_image_demote(RBD::AioCompletion *c);
@@ -809,7 +809,7 @@ public:
   int aio_mirror_image_get_status(
       mirror_image_status_t *mirror_image_status, size_t status_size,
       RBD::AioCompletion *c)
-    CEPH_RBD_DEPRECATED;
+    STONE_RBD_DEPRECATED;
   int aio_mirror_image_create_snapshot(uint32_t flags, uint64_t *snap_id,
       RBD::AioCompletion *c);
 

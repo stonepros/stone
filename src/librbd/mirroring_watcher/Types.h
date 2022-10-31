@@ -13,7 +13,7 @@
 #include <string>
 #include <boost/variant.hpp>
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 namespace librbd {
 namespace mirroring_watcher {

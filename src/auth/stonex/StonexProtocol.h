@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -16,9 +16,9 @@
 #define STONE_STONEXPROTOCOL_H
 
 /*
-  Stonee X protocol
+  Stone X protocol
 
-  See doc/dev/cephx.rst
+  See doc/dev/stonex.rst
 
 */
 
@@ -40,93 +40,93 @@
  */
 
 // initial server -> client challenge
-struct StoneeXServerChallenge {
+struct StoneXServerChallenge {
   uint64_t server_challenge;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(server_challenge, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(server_challenge, bl);
   }
 };
-WRITE_CLASS_ENCODER(StoneeXServerChallenge)
+WRITE_CLASS_ENCODER(StoneXServerChallenge)
 
 
 // request/reply headers, for subsequent exchanges.
 
-struct StoneeXRequestHeader {
+struct StoneXRequestHeader {
   __u16 request_type;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(request_type, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     decode(request_type, bl);
   }
 };
-WRITE_CLASS_ENCODER(StoneeXRequestHeader)
+WRITE_CLASS_ENCODER(StoneXRequestHeader)
 
-struct StoneeXResponseHeader {
+struct StoneXResponseHeader {
   uint16_t request_type;
   int32_t status;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     encode(request_type, bl);
     encode(status, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     decode(request_type, bl);
     decode(status, bl);
   }
 };
-WRITE_CLASS_ENCODER(StoneeXResponseHeader)
+WRITE_CLASS_ENCODER(StoneXResponseHeader)
 
-struct StoneeXTicketBlob {
+struct StoneXTicketBlob {
   uint64_t secret_id;
-  ceph::buffer::list blob;
+  stone::buffer::list blob;
 
-  StoneeXTicketBlob() : secret_id(0) {}
+  StoneXTicketBlob() : secret_id(0) {}
 
-  void encode(ceph::buffer::list& bl) const {
-     using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+     using stone::encode;
      __u8 struct_v = 1;
      encode(struct_v, bl);
      encode(secret_id, bl);
      encode(blob, bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
-     using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+     using stone::decode;
      __u8 struct_v;
      decode(struct_v, bl);
      decode(secret_id, bl);
      decode(blob, bl);
   }
 };
-WRITE_CLASS_ENCODER(StoneeXTicketBlob)
+WRITE_CLASS_ENCODER(StoneXTicketBlob)
 
 // client -> server response to challenge
-struct StoneeXAuthenticate {
+struct StoneXAuthenticate {
   uint64_t client_challenge;
   uint64_t key;
-  StoneeXTicketBlob old_ticket;
-  uint32_t other_keys = 0;  // replaces StoneeXServiceTicketRequest
+  StoneXTicketBlob old_ticket;
+  uint32_t other_keys = 0;  // replaces StoneXServiceTicketRequest
 
   bool old_ticket_may_be_omitted;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 3;
     encode(struct_v, bl);
     encode(client_challenge, bl);
@@ -134,8 +134,8 @@ struct StoneeXAuthenticate {
     encode(old_ticket, bl);
     encode(other_keys, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(client_challenge, bl);
@@ -153,25 +153,25 @@ struct StoneeXAuthenticate {
     old_ticket_may_be_omitted = struct_v < 3;
   }
 };
-WRITE_CLASS_ENCODER(StoneeXAuthenticate)
+WRITE_CLASS_ENCODER(StoneXAuthenticate)
 
-struct StoneeXChallengeBlob {
+struct StoneXChallengeBlob {
   uint64_t server_challenge, client_challenge;
   
-  void encode(ceph::buffer::list& bl) const {
-     using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+     using stone::encode;
     encode(server_challenge, bl);
     encode(client_challenge, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     decode(server_challenge, bl);
     decode(client_challenge, bl);
   }
 };
-WRITE_CLASS_ENCODER(StoneeXChallengeBlob)
+WRITE_CLASS_ENCODER(StoneXChallengeBlob)
 
-void cephx_calc_client_server_challenge(StoneeContext *cct, 
+void stonex_calc_client_server_challenge(StoneContext *cct, 
 					CryptoKey& secret, uint64_t server_challenge, uint64_t client_challenge,
 					uint64_t *key, std::string &error);
 
@@ -179,7 +179,7 @@ void cephx_calc_client_server_challenge(StoneeContext *cct,
 /*
  * getting service tickets
  */
-struct StoneeXSessionAuthInfo {
+struct StoneXSessionAuthInfo {
   uint32_t service_id;
   uint64_t secret_id;
   AuthTicket ticket;
@@ -189,48 +189,48 @@ struct StoneeXSessionAuthInfo {
 };
 
 
-extern bool cephx_build_service_ticket_blob(StoneeContext *cct,
-					    StoneeXSessionAuthInfo& ticket_info,StoneneXTicketBlob& blob);
+extern bool stonex_build_service_ticket_blob(StoneContext *cct,
+					    StoneXSessionAuthInfo& ticket_info,StoneXTicketBlob& blob);
 
-extern void cephx_build_service_ticket_request(StoneeContext *cct, 
+extern void stonex_build_service_ticket_request(StoneContext *cct, 
 					       uint32_t keys,
-					       ceph::buffer::list& request);
+					       stone::buffer::list& request);
 
-extern bool cephx_build_service_ticket_reply(StoneeContext *cct,
+extern bool stonex_build_service_ticket_reply(StoneContext *cct,
 					     CryptoKey& principal_secret,
-					     std::vector<StoneeXSessionAuthInfo> ticket_info,
+					     std::vector<StoneXSessionAuthInfo> ticket_info,
                                              bool should_encrypt_ticket,
                                              CryptoKey& ticket_enc_key,
-					     ceph::buffer::list& reply);
+					     stone::buffer::list& reply);
 
-struct StoneeXServiceTicketRequest {
+struct StoneXServiceTicketRequest {
   uint32_t keys;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(keys, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(keys, bl);
   }
 };
-WRITE_CLASS_ENCODER(StoneeXServiceTicketRequest)
+WRITE_CLASS_ENCODER(StoneXServiceTicketRequest)
 
 
 /*
  * Authorize
  */
 
-struct StoneeXAuthorizeReply {
+struct StoneXAuthorizeReply {
   uint64_t nonce_plus_one;
   std::string connection_secret;
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     if (connection_secret.size()) {
       struct_v = 2;
@@ -242,8 +242,8 @@ struct StoneeXAuthorizeReply {
       encode(connection_secret, bl);
     }
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(nonce_plus_one, bl);
@@ -252,23 +252,23 @@ struct StoneeXAuthorizeReply {
     }
   }
 };
-WRITE_CLASS_ENCODER(StoneeXAuthorizeReply)
+WRITE_CLASS_ENCODER(StoneXAuthorizeReply)
 
 
-struct StoneeXAuthorizer : public AuthAuthorizer {
+struct StoneXAuthorizer : public AuthAuthorizer {
 private:
-  StoneeContext *cct;
+  StoneContext *cct;
 public:
   uint64_t nonce;
-  ceph::buffer::list base_bl;
+  stone::buffer::list base_bl;
 
-  explicit StoneeXAuthorizerStoneneContext *cct_)
+  explicit StoneXAuthorizer(StoneContext *cct_)
     : AuthAuthorizer(STONE_AUTH_STONEX), cct(cct_), nonce(0) {}
 
   bool build_authorizer();
-  bool verify_reply(ceph::buffer::list::const_iterator& reply,
+  bool verify_reply(stone::buffer::list::const_iterator& reply,
 		    std::string *connection_secret) override;
-  bool add_challenge(StoneeContext *cct, const ceph::buffer::list& challenge) override;
+  bool add_challenge(StoneContext *cct, const stone::buffer::list& challenge) override;
 };
 
 
@@ -276,21 +276,21 @@ public:
 /*
  * TicketHandler
  */
-struct StoneeXTicketHandler {
+struct StoneXTicketHandler {
   uint32_t service_id;
   CryptoKey session_key;
-  StoneeXTicketBlob ticket;        // opaque to us
+  StoneXTicketBlob ticket;        // opaque to us
   utime_t renew_after, expires;
   bool have_key_flag;
 
-  StoneeXTicketHandlerStoneneContext *cct_, uint32_t service_id_)
+  StoneXTicketHandler(StoneContext *cct_, uint32_t service_id_)
     : service_id(service_id_), have_key_flag(false), cct(cct_) { }
 
   // to build our ServiceTicket
   bool verify_service_ticket_reply(CryptoKey& principal_secret,
-				 ceph::buffer::list::const_iterator& indata);
+				 stone::buffer::list::const_iterator& indata);
   // to access the service
-  StoneeXAuthorizer *build_authorizer(uint64_t global_id) const;
+  StoneXAuthorizer *build_authorizer(uint64_t global_id) const;
 
   bool have_key();
   bool need_key() const;
@@ -299,30 +299,30 @@ struct StoneeXTicketHandler {
     have_key_flag = 0;
   }
 private:
-  StoneeContext *cct;
+  StoneContext *cct;
 };
 
-struct StoneeXTicketManager {
-  typedef std::map<uint32_t, StoneeXTicketHandler> tickets_map_t;
+struct StoneXTicketManager {
+  typedef std::map<uint32_t, StoneXTicketHandler> tickets_map_t;
   tickets_map_t tickets_map;
   uint64_t global_id;
 
-  explicit StoneeXTicketManagerStoneneContext *cct_) : global_id(0), cct(cct_) {}
+  explicit StoneXTicketManager(StoneContext *cct_) : global_id(0), cct(cct_) {}
 
   bool verify_service_ticket_reply(CryptoKey& principal_secret,
-				 ceph::buffer::list::const_iterator& indata);
+				 stone::buffer::list::const_iterator& indata);
 
-  StoneeXTicketHandler& get_handler(uint32_t type) {
+  StoneXTicketHandler& get_handler(uint32_t type) {
     tickets_map_t::iterator i = tickets_map.find(type);
     if (i != tickets_map.end())
       return i->second;
-    StoneeXTicketHandler newTicketHandler(cct, type);
+    StoneXTicketHandler newTicketHandler(cct, type);
     std::pair < tickets_map_t::iterator, bool > res =
 	tickets_map.insert(std::make_pair(type, newTicketHandler));
-    ceph_assert(res.second);
+    stone_assert(res.second);
     return res.first->second;
   }
-  StoneeXAuthorizer *build_authorizer(uint32_t service_id) const;
+  StoneXAuthorizer *build_authorizer(uint32_t service_id) const;
   bool have_key(uint32_t service_id);
   bool need_key(uint32_t service_id) const;
   void set_have_need_key(uint32_t service_id, uint32_t& have, uint32_t& need);
@@ -330,85 +330,85 @@ struct StoneeXTicketManager {
   void invalidate_ticket(uint32_t service_id);
 
 private:
-  StoneeContext *cct;
+  StoneContext *cct;
 };
 
 
 /* A */
-struct StoneeXServiceTicket {
+struct StoneXServiceTicket {
   CryptoKey session_key;
   utime_t validity;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(session_key, bl);
     encode(validity, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(session_key, bl);
     decode(validity, bl);
   }
 };
-WRITE_CLASS_ENCODER(StoneeXServiceTicket)
+WRITE_CLASS_ENCODER(StoneXServiceTicket)
 
 /* B */
-struct StoneeXServiceTicketInfo {
+struct StoneXServiceTicketInfo {
   AuthTicket ticket;
   CryptoKey session_key;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(ticket, bl);
     encode(session_key, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(ticket, bl);
     decode(session_key, bl);
   }
 };
-WRITE_CLASS_ENCODER(StoneeXServiceTicketInfo)
+WRITE_CLASS_ENCODER(StoneXServiceTicketInfo)
 
-struct StoneeXAuthorizeChallenge : public AuthAuthorizerChallenge {
+struct StoneXAuthorizeChallenge : public AuthAuthorizerChallenge {
   uint64_t server_challenge;
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 1;
     encode(struct_v, bl);
     encode(server_challenge, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(server_challenge, bl);
   }
 };
-WRITE_CLASS_ENCODER(StoneeXAuthorizeChallenge)
+WRITE_CLASS_ENCODER(StoneXAuthorizeChallenge)
 
-struct StoneeXAuthorize {
+struct StoneXAuthorize {
   uint64_t nonce;
   bool have_challenge = false;
   uint64_t server_challenge_plus_one = 0;
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     __u8 struct_v = 2;
     encode(struct_v, bl);
     encode(nonce, bl);
     encode(have_challenge, bl);
     encode(server_challenge_plus_one, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 struct_v;
     decode(struct_v, bl);
     decode(nonce, bl);
@@ -418,28 +418,28 @@ struct StoneeXAuthorize {
     }
   }
 };
-WRITE_CLASS_ENCODER(StoneeXAuthorize)
+WRITE_CLASS_ENCODER(StoneXAuthorize)
 
 /*
  * Decode an extract ticket
  */
-bool cephx_decode_ticket(StoneeContext *cct, KeyStore *keys,
+bool stonex_decode_ticket(StoneContext *cct, KeyStore *keys,
 			 uint32_t service_id,
-			 const StoneeXTicketBlob& ticket_blob,
-			 StoneeXServiceTicketInfo& ticket_info);
+			 const StoneXTicketBlob& ticket_blob,
+			 StoneXServiceTicketInfo& ticket_info);
 
 /*
  * Verify authorizer and generate reply authorizer
  */
-extern bool cephx_verify_authorizer(
-  StoneeContext *cct,
+extern bool stonex_verify_authorizer(
+  StoneContext *cct,
   const KeyStore& keys,
-  ceph::buffer::list::const_iterator& indata,
+  stone::buffer::list::const_iterator& indata,
   size_t connection_secret_required_len,
-  StoneeXServiceTicketInfo& ticket_info,
+  StoneXServiceTicketInfo& ticket_info,
   std::unique_ptr<AuthAuthorizerChallenge> *challenge,
   std::string *connection_secret,
-  ceph::buffer::list *reply_bl);
+  stone::buffer::list *reply_bl);
 
 
 
@@ -452,19 +452,19 @@ extern bool cephx_verify_authorizer(
 static constexpr uint64_t AUTH_ENC_MAGIC = 0xff009cad8826aa55ull;
 
 template <typename T>
-void decode_decrypt_enc_bl(StoneeContext *cct, T& t, CryptoKey key,
-			   const ceph::buffer::list& bl_enc,
+void decode_decrypt_enc_bl(StoneContext *cct, T& t, CryptoKey key,
+			   const stone::buffer::list& bl_enc,
 			   std::string &error)
 {
   uint64_t magic;
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
 
   if (key.decrypt(cct, bl_enc, bl, &error) < 0)
     return;
 
   auto iter2 = bl.cbegin();
   __u8 struct_v;
-  using ceph::decode;
+  using stone::decode;
   decode(struct_v, iter2);
   decode(magic, iter2);
   if (magic != AUTH_ENC_MAGIC) {
@@ -478,12 +478,12 @@ void decode_decrypt_enc_bl(StoneeContext *cct, T& t, CryptoKey key,
 }
 
 template <typename T>
-void encode_encrypt_enc_bl(StoneeContext *cct, const T& t, const CryptoKey& key,
-			   ceph::buffer::list& out, std::string &error)
+void encode_encrypt_enc_bl(StoneContext *cct, const T& t, const CryptoKey& key,
+			   stone::buffer::list& out, std::string &error)
 {
-  ceph::buffer::list bl;
+  stone::buffer::list bl;
   __u8 struct_v = 1;
-  using ceph::encode;
+  using stone::encode;
   encode(struct_v, bl);
   uint64_t magic = AUTH_ENC_MAGIC;
   encode(magic, bl);
@@ -493,16 +493,16 @@ void encode_encrypt_enc_bl(StoneeContext *cct, const T& t, const CryptoKey& key,
 }
 
 template <typename T>
-int decode_decrypt(StoneeContext *cct, T& t, const CryptoKey& key,
-		    ceph::buffer::list::const_iterator& iter, std::string &error)
+int decode_decrypt(StoneContext *cct, T& t, const CryptoKey& key,
+		    stone::buffer::list::const_iterator& iter, std::string &error)
 {
-  ceph::buffer::list bl_enc;
-  using ceph::decode;
+  stone::buffer::list bl_enc;
+  using stone::decode;
   try {
     decode(bl_enc, iter);
     decode_decrypt_enc_bl(cct, t, key, bl_enc, error);
   }
-  catch (ceph::buffer::error &e) {
+  catch (stone::buffer::error &e) {
     error = "error decoding block for decryption";
   }
   if (!error.empty())
@@ -511,11 +511,11 @@ int decode_decrypt(StoneeContext *cct, T& t, const CryptoKey& key,
 }
 
 template <typename T>
-int encode_encrypt(StoneeContext *cct, const T& t, const CryptoKey& key,
-		    ceph::buffer::list& out, std::string &error)
+int encode_encrypt(StoneContext *cct, const T& t, const CryptoKey& key,
+		    stone::buffer::list& out, std::string &error)
 {
-  using ceph::encode;
-  ceph::buffer::list bl_enc;
+  using stone::encode;
+  stone::buffer::list bl_enc;
   encode_encrypt_enc_bl(cct, t, key, bl_enc, error);
   if (!error.empty()){
     return STONEX_CRYPT_ERR;

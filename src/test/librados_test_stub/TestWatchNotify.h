@@ -6,7 +6,7 @@
 
 #include "include/rados/librados.hpp"
 #include "common/AsyncOpTracker.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <list>
@@ -108,8 +108,8 @@ private:
   uint64_t m_handle = 0;
   uint64_t m_notify_id = 0;
 
-  ceph::mutex m_lock =
-    ceph::make_mutex("librados::TestWatchNotify::m_lock");
+  stone::mutex m_lock =
+    stone::make_mutex("librados::TestWatchNotify::m_lock");
   AsyncOpTracker m_async_op_tracker;
 
   FileWatchers	m_file_watchers;

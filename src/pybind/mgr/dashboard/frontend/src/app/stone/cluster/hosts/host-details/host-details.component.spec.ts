@@ -5,8 +5,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { ToastrModule } from 'ngx-toastr';
 
-import { CephModule } from '~/app/ceph/ceph.module';
-import { CephSharedModule } from '~/app/ceph/shared/ceph-shared.module';
+import { StoneModule } from '~/app/stone/stone.module';
+import { StoneSharedModule } from '~/app/stone/shared/stone-shared.module';
 import { CoreModule } from '~/app/core/core.module';
 import { Permissions } from '~/app/shared/models/permissions';
 import { SharedModule } from '~/app/shared/shared.module';
@@ -22,9 +22,9 @@ describe('HostDetailsComponent', () => {
       BrowserAnimationsModule,
       HttpClientTestingModule,
       RouterTestingModule,
-      CephModule,
+      StoneModule,
       CoreModule,
-      CephSharedModule,
+      StoneSharedModule,
       SharedModule,
       ToastrModule.forRoot()
     ]

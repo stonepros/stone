@@ -8,7 +8,7 @@
 #include "include/buffer_fwd.h"
 #include "include/encoding.h"
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 namespace librbd {
 

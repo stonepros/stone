@@ -6,7 +6,7 @@ import _ from 'lodash';
 import { forkJoin, Observable, ReplaySubject } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
 
-import { Pool } from '~/app/ceph/pool/pool';
+import { Pool } from '~/app/stone/pool/pool';
 import { PoolService } from '~/app/shared/api/pool.service';
 import { RbdService } from '~/app/shared/api/rbd.service';
 import { ActionLabelsI18n } from '~/app/shared/constants/app.constants';
@@ -455,7 +455,7 @@ export class RbdFormComponent extends CdForm implements OnInit {
   }
 
   interlockCheck(key: string, checked: boolean) {
-    // Adds a compatibility layer for Ceph cluster where the feature interlock of features hasn't
+    // Adds a compatibility layer for Stone cluster where the feature interlock of features hasn't
     // been implemented yet. It disables the feature interlock for images which only have one of
     // both interlocked features (at the time of this writing: object-map and fast-diff) enabled.
     const feature = this.featuresList.find((f) => f.key === key);

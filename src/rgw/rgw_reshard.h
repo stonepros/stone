@@ -15,7 +15,7 @@
 
 #include "include/common_fwd.h"
 #include "include/rados/librados.hpp"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/async/yield_context.h"
 #include "cls/rgw/cls_rgw_types.h"
 #include "cls/lock/cls_lock_client.h"
@@ -29,7 +29,7 @@ namespace rgw { namespace sal {
 } }
 
 class RGWBucketReshardLock {
-  using Clock = ceph::coarse_mono_clock;
+  using Clock = stone::coarse_mono_clock;
 
   rgw::sal::RGWRadosStore* store;
   const std::string lock_oid;
@@ -69,7 +69,7 @@ public:
 
   friend class RGWReshard;
 
-  using Clock = ceph::coarse_mono_clock;
+  using Clock = stone::coarse_mono_clock;
 
 private:
 
@@ -194,7 +194,7 @@ public:
 
 class RGWReshard {
 public:
-    using Clock = ceph::coarse_mono_clock;
+    using Clock = stone::coarse_mono_clock;
 
 private:
     rgw::sal::RGWRadosStore *store;
@@ -209,13 +209,13 @@ private:
     void get_logshard_oid(int shard_num, string *shard);
 protected:
   class ReshardWorker : public Thread, public DoutPrefixProvider {
-    CephContext *cct;
+    StoneContext *cct;
     RGWReshard *reshard;
-    ceph::mutex lock = ceph::make_mutex("ReshardWorker");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("ReshardWorker");
+    stone::condition_variable cond;
 
   public:
-    ReshardWorker(CephContext * const _cct,
+    ReshardWorker(StoneContext * const _cct,
 		  RGWReshard * const _reshard)
       : cct(_cct),
         reshard(_reshard) {}
@@ -223,7 +223,7 @@ protected:
     void *entry() override;
     void stop();
 
-    CephContext *get_cct() const override;
+    StoneContext *get_cct() const override;
     unsigned get_subsys() const;
     std::ostream& gen_prefix(std::ostream& out) const;
   };
@@ -257,9 +257,9 @@ class RGWReshardWait {
   // std::chrono::steady_clock. use that for the async waits as well
   using Clock = std::chrono::steady_clock;
  private:
-  const ceph::timespan duration;
-  ceph::mutex mutex = ceph::make_mutex("RGWReshardWait::lock");
-  ceph::condition_variable cond;
+  const stone::timespan duration;
+  stone::mutex mutex = stone::make_mutex("RGWReshardWait::lock");
+  stone::condition_variable cond;
 
   struct Waiter : boost::intrusive::list_base_hook<> {
     using Executor = boost::asio::io_context::executor_type;
@@ -273,10 +273,10 @@ class RGWReshardWait {
   bool going_down{false};
 
 public:
-  RGWReshardWait(ceph::timespan duration = std::chrono::seconds(5))
+  RGWReshardWait(stone::timespan duration = std::chrono::seconds(5))
     : duration(duration) {}
   ~RGWReshardWait() {
-    ceph_assert(going_down);
+    stone_assert(going_down);
   }
   int wait(optional_yield y);
   // unblock any threads waiting on reshard

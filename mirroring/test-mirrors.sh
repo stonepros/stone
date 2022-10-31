@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Simple script which performs a HTTP and rsync check on
-# all Ceph mirrors over IPv4 and IPv6 to see if they are online
+# all Stone mirrors over IPv4 and IPv6 to see if they are online
 #
 # Requires IPv4, IPv6, rsync and curl
 #

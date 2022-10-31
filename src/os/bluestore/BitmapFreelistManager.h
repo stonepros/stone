@@ -9,14 +9,14 @@
 #include <string>
 #include <mutex>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/buffer.h"
 #include "kv/KeyValueDB.h"
 
 class BitmapFreelistManager : public FreelistManager {
   std::string meta_prefix, bitmap_prefix;
   std::shared_ptr<KeyValueDB::MergeOperator> merge_op;
-  ceph::mutex lock = ceph::make_mutex("BitmapFreelistManager::lock");
+  stone::mutex lock = stone::make_mutex("BitmapFreelistManager::lock");
 
   uint64_t size;            ///< size of device (bytes)
   uint64_t bytes_per_block; ///< bytes per block (bdev_block_size)
@@ -27,11 +27,11 @@ class BitmapFreelistManager : public FreelistManager {
   uint64_t block_mask;  ///< mask to convert byte offset to block offset
   uint64_t key_mask;    ///< mask to convert offset to key offset
 
-  ceph::buffer::list all_set_bl;
+  stone::buffer::list all_set_bl;
 
   KeyValueDB::Iterator enumerate_p;
   uint64_t enumerate_offset; ///< logical offset; position
-  ceph::buffer::list enumerate_bl;   ///< current key at enumerate_offset
+  stone::buffer::list enumerate_bl;   ///< current key at enumerate_offset
   int enumerate_bl_pos;      ///< bit position in enumerate_bl
 
   uint64_t _get_offset(uint64_t key_off, int bit) {
@@ -57,7 +57,7 @@ class BitmapFreelistManager : public FreelistManager {
   void _load_from_db(KeyValueDB* kvdb);
 
 public:
-  BitmapFreelistManager(CephContext* cct, std::string meta_prefix,
+  BitmapFreelistManager(StoneContext* cct, std::string meta_prefix,
 			std::string bitmap_prefix);
 
   static void setup_merge_operator(KeyValueDB *db, std::string prefix);

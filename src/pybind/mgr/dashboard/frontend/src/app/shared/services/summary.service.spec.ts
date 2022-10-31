@@ -23,7 +23,7 @@ describe('SummaryService', () => {
     rbd_pools: [],
     have_mon_connection: true,
     finished_tasks: [],
-    filesystems: [{ id: 1, name: 'cephfs_a' }]
+    filesystems: [{ id: 1, name: 'stonefs_a' }]
   };
 
   const httpClientSpy = {

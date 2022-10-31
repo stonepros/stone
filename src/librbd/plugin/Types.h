@@ -27,7 +27,7 @@ struct HookPoints {
 typedef std::list<std::unique_ptr<HookPoints>> PluginHookPoints;
 
 template <typename ImageCtxT>
-struct Interface : public ceph::Plugin {
+struct Interface : public stone::Plugin {
   Interface(StoneContext* cct) : Plugin(cct) {
   }
 

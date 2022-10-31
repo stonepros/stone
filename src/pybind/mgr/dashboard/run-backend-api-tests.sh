@@ -44,7 +44,7 @@ setup_teuthology() {
     ${TEUTHOLOGY_PYTHON_BIN:-/usr/bin/python3} -m venv venv
     source venv/bin/activate
     pip install -U pip 'setuptools>=12,<60'
-    pip install "git+https://github.com/ceph/teuthology@7039075#egg=teuthology[test]"
+    pip install "git+https://github.com/stone/teuthology@7039075#egg=teuthology[test]"
     pushd $CURR_DIR
     pip install -r requirements.txt -c constraints.txt
     popd
@@ -70,7 +70,7 @@ display_log() {
     local lines=$1
     shift
 
-    local log_files=$(find "$CEPH_OUT_DIR" -iname "${daemon}.*.log" | tr '\n' ' ')
+    local log_files=$(find "$STONE_OUT_DIR" -iname "${daemon}.*.log" | tr '\n' ' ')
     for log_file in ${log_files[@]}; do
         printf "\n\nDisplaying last ${lines} lines of: ${log_file}\n\n"
         tail -n ${lines} $log_file
@@ -82,7 +82,7 @@ display_log() {
 on_tests_error() {
     local ret=$?
     if [[ -n "$JENKINS_HOME" && -z "$ON_TESTS_ERROR_RUN" ]]; then
-        CEPH_OUT_DIR=${CEPH_OUT_DIR:-"$LOCAL_BUILD_DIR"/out}
+        STONE_OUT_DIR=${STONE_OUT_DIR:-"$LOCAL_BUILD_DIR"/out}
         display_log "mgr" 1500
         display_log "osd" 1000
         ON_TESTS_ERROR_RUN=1
@@ -139,7 +139,7 @@ run_teuthology_tests() {
 
 cleanup_teuthology() {
     cd "$LOCAL_BUILD_DIR"
-    killall ceph-mgr
+    killall stone-mgr
     sleep 10
     if [[ "$COVERAGE_ENABLED" == 'true' ]]; then
         source $TEMP_DIR/coverage-venv/bin/activate

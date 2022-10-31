@@ -1,5 +1,5 @@
 import os
-from ceph_volume import terminal
+from stone_volume import terminal
 
 char = os.environ.get('INVALID')
 terminal.stdout(char)

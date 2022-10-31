@@ -82,12 +82,12 @@ def task(ctx, config):
         blktrace:
           cluster: backup
 
-    Runs blktrace on all osds in the specified cluster (the 'ceph' cluster by
+    Runs blktrace on all osds in the specified cluster (the 'stone' cluster by
     default).
     """
     if config is None:
         config = {}
-    config['cluster'] = config.get('cluster', 'ceph')
+    config['cluster'] = config.get('cluster', 'stone')
 
     with contextutil.nested(
         lambda: setup(ctx=ctx, config=config),

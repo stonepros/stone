@@ -47,18 +47,18 @@ public:
   seastar::future<> mkfs(uuid_d new_osd_fsid) final;
   seastar::future<store_statfs_t> stat() const final;
 
-  read_errorator::future<ceph::bufferlist> read(
+  read_errorator::future<stone::bufferlist> read(
     CollectionRef c,
     const ghobject_t& oid,
     uint64_t offset,
     size_t len,
     uint32_t op_flags = 0) final;
-  read_errorator::future<ceph::bufferlist> readv(
+  read_errorator::future<stone::bufferlist> readv(
     CollectionRef c,
     const ghobject_t& oid,
     interval_set<uint64_t>& m,
     uint32_t op_flags = 0) final;
-  get_attr_errorator::future<ceph::bufferptr> get_attr(
+  get_attr_errorator::future<stone::bufferptr> get_attr(
     CollectionRef c,
     const ghobject_t& oid,
     std::string_view name) const final;
@@ -98,7 +98,7 @@ public:
 
   seastar::future<> do_transaction(
     CollectionRef ch,
-    ceph::os::Transaction&& txn) final;
+    stone::os::Transaction&& txn) final;
 
   seastar::future<OmapIteratorRef> get_omap_iterator(
     CollectionRef ch,
@@ -134,7 +134,7 @@ private:
     TransactionRef &trans,
     CollectionRef &col,
     std::vector<OnodeRef> &onodes,
-    ceph::os::Transaction::iterator &i);
+    stone::os::Transaction::iterator &i);
 
   write_ertr::future<> _remove(
     TransactionRef &trans,
@@ -145,16 +145,16 @@ private:
   write_ertr::future<> _write(
     TransactionRef &trans,
     OnodeRef &onode,
-    uint64_t offset, size_t len, const ceph::bufferlist& bl,
+    uint64_t offset, size_t len, const stone::bufferlist& bl,
     uint32_t fadvise_flags);
   write_ertr::future<> _omap_set_values(
     TransactionRef &trans,
     OnodeRef &onode,
-    std::map<std::string, ceph::bufferlist> &&aset);
+    std::map<std::string, stone::bufferlist> &&aset);
   write_ertr::future<> _omap_set_header(
     TransactionRef &trans,
     OnodeRef &onode,
-    const ceph::bufferlist &header);
+    const stone::bufferlist &header);
   write_ertr::future<> _omap_rmkeys(
     TransactionRef &trans,
     OnodeRef &onode,

@@ -6,16 +6,16 @@ with open("README.rst", "r") as fh:
 
 
 setup(
-    name='ceph',
+    name='stone',
     version='1.0.0',
     packages=find_packages(),
     author='',
-    author_email='dev@ceph.io',
-    description='Ceph common library',
+    author_email='dev@stone.io',
+    description='Stone common library',
     long_description=long_description,
     license='LGPLv2+',
-    keywords='ceph',
-    url="https://github.com/ceph/ceph",
+    keywords='stone',
+    url="https://github.com/stone/stone",
     zip_safe = False,
     install_requires=(	
         'pyyaml',	

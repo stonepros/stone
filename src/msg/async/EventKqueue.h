@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -27,7 +27,7 @@ class KqueueDriver : public EventDriver {
   int kqfd;
   pthread_t mythread;
   struct kevent *res_events;
-  StoneeContext *cct;
+  StoneContext *cct;
   int size;
 
   // Keep what we set on the kqfd
@@ -42,7 +42,7 @@ class KqueueDriver : public EventDriver {
   int test_thread_change(const char* funcname);
 
  public:
-  explicit KqueueDriver(StoneeContext *c): kqfd(-1), res_events(NULL), cct(c), 
+  explicit KqueueDriver(StoneContext *c): kqfd(-1), res_events(NULL), cct(c), 
 		size(0), sav_max(0) {}
   virtual ~KqueueDriver() {
     if (kqfd != -1)

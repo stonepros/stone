@@ -2,9 +2,9 @@ import logging
 import os
 import re
 import stat
-from ceph_volume import process
-from ceph_volume.api import lvm
-from ceph_volume.util.system import get_file_contents
+from stone_volume import process
+from stone_volume.api import lvm
+from stone_volume.util.system import get_file_contents
 
 
 logger = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ def get_part_entry_type(device):
     Parses the ``ID_PART_ENTRY_TYPE`` from the "low level" (bypasses the cache)
     output that uses the ``udev`` type of output. This output is intended to be
     used for udev rules, but it is useful in this case as it is the only
-    consistent way to retrieve the GUID used by ceph-disk to identify devices.
+    consistent way to retrieve the GUID used by stone-disk to identify devices.
     """
     out, err, rc = process.call(['blkid', '-c', '/dev/null', '-p', '-o', 'udev', device])
     for line in out:
@@ -361,9 +361,9 @@ def is_partition(dev):
     return False
 
 
-def is_ceph_rbd(dev):
+def is_stone_rbd(dev):
     """
-    Boolean to determine if a given device is a ceph RBD device, like /dev/rbd0
+    Boolean to determine if a given device is a stone RBD device, like /dev/rbd0
     """
     return dev.startswith(('/dev/rbd'))
 
@@ -771,8 +771,8 @@ def get_devices(_sys_block_path='/sys/block'):
         sysdir = os.path.join(_sys_block_path, devname)
         metadata = {}
 
-        # If the device is ceph rbd it gets excluded
-        if is_ceph_rbd(diskname):
+        # If the device is stone rbd it gets excluded
+        if is_stone_rbd(diskname):
             continue
 
         # If the mapper device is a logical volume it gets excluded

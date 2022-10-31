@@ -3,7 +3,7 @@
 
 #pragma once
 
-namespace ceph::net::test {
+namespace stone::net::test {
 
 enum class cmd_t : char {
   none = '\0',
@@ -48,7 +48,7 @@ inline std::ostream& operator<<(std::ostream& out, const cmd_t& cmd) {
    case cmd_t::suite_recv_op:
     return out << "suite_recv_op";
    default:
-    ceph_abort();
+    stone_abort();
   }
 }
 
@@ -69,8 +69,8 @@ inline std::ostream& operator<<(std::ostream& out, const policy_t& policy) {
    case policy_t::lossless_client:
     return out << "lossless_client";
    default:
-    ceph_abort();
+    stone_abort();
   }
 }
 
-} // namespace ceph::net::test
+} // namespace stone::net::test

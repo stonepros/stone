@@ -14,18 +14,18 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library Public License for more details.
 #
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7138" # git grep '\<7138\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7138" # git grep '\<7138\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
-    export -n CEPH_CLI_TEST_DUP_COMMAND
+    export -n STONE_CLI_TEST_DUP_COMMAND
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
         $func $dir || return 1
@@ -51,7 +51,7 @@ function TEST_scrub_test() {
     # Create a pool with a single pg
     create_pool $poolname 1 1
     wait_for_clean || return 1
-    poolid=$(ceph osd dump | grep "^pool.*[']${poolname}[']" | awk '{ print $2 }')
+    poolid=$(stone osd dump | grep "^pool.*[']${poolname}[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
     for i in `seq 1 $objects`
@@ -74,35 +74,35 @@ function TEST_scrub_test() {
     local pgid="${poolid}.0"
     pg_deep_scrub "$pgid" || return 1
 
-    ceph pg dump pgs | grep ^${pgid} | grep -q -- +inconsistent || return 1
-    test "$(ceph pg $pgid query | jq '.info.stats.stat_sum.num_scrub_errors')" = "2" || return 1
+    stone pg dump pgs | grep ^${pgid} | grep -q -- +inconsistent || return 1
+    test "$(stone pg $pgid query | jq '.info.stats.stat_sum.num_scrub_errors')" = "2" || return 1
 
-    ceph osd out $primary
+    stone osd out $primary
     wait_for_clean || return 1
 
     pg_deep_scrub "$pgid" || return 1
 
-    test "$(ceph pg $pgid query | jq '.info.stats.stat_sum.num_scrub_errors')" = "2" || return 1
-    test "$(ceph pg $pgid query | jq '.peer_info[0].stats.stat_sum.num_scrub_errors')" = "2" || return 1
-    ceph pg dump pgs | grep ^${pgid} | grep -q -- +inconsistent || return 1
+    test "$(stone pg $pgid query | jq '.info.stats.stat_sum.num_scrub_errors')" = "2" || return 1
+    test "$(stone pg $pgid query | jq '.peer_info[0].stats.stat_sum.num_scrub_errors')" = "2" || return 1
+    stone pg dump pgs | grep ^${pgid} | grep -q -- +inconsistent || return 1
 
-    ceph osd in $primary
+    stone osd in $primary
     wait_for_clean || return 1
 
     repair "$pgid" || return 1
     wait_for_clean || return 1
 
     # This sets up the test after we've repaired with previous primary has old value
-    test "$(ceph pg $pgid query | jq '.peer_info[0].stats.stat_sum.num_scrub_errors')" = "2" || return 1
-    ceph pg dump pgs | grep ^${pgid} | grep -vq -- +inconsistent || return 1
+    test "$(stone pg $pgid query | jq '.peer_info[0].stats.stat_sum.num_scrub_errors')" = "2" || return 1
+    stone pg dump pgs | grep ^${pgid} | grep -vq -- +inconsistent || return 1
 
-    ceph osd out $primary
+    stone osd out $primary
     wait_for_clean || return 1
 
-    test "$(ceph pg $pgid query | jq '.info.stats.stat_sum.num_scrub_errors')" = "0" || return 1
-    test "$(ceph pg $pgid query | jq '.peer_info[0].stats.stat_sum.num_scrub_errors')" = "0" || return 1
-    test "$(ceph pg $pgid query | jq '.peer_info[1].stats.stat_sum.num_scrub_errors')" = "0" || return 1
-    ceph pg dump pgs | grep ^${pgid} | grep -vq -- +inconsistent || return 1
+    test "$(stone pg $pgid query | jq '.info.stats.stat_sum.num_scrub_errors')" = "0" || return 1
+    test "$(stone pg $pgid query | jq '.peer_info[0].stats.stat_sum.num_scrub_errors')" = "0" || return 1
+    test "$(stone pg $pgid query | jq '.peer_info[1].stats.stat_sum.num_scrub_errors')" = "0" || return 1
+    stone pg dump pgs | grep ^${pgid} | grep -vq -- +inconsistent || return 1
 
     teardown $dir || return 1
 }
@@ -116,7 +116,7 @@ function check_dump_scrubs() {
     local sched_time_check="$2"
     local deadline_check="$3"
 
-    DS="$(CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${primary}) dump_scrubs)"
+    DS="$(STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${primary}) dump_scrubs)"
     # use eval to drop double-quotes
     eval SCHED_TIME=$(echo $DS | jq '.[0].sched_time')
     test $(echo $SCHED_TIME | sed $DATESED) = $(date +${DATEFORMAT} -d "now + $sched_time_check") || return 1
@@ -150,7 +150,7 @@ function TEST_interval_changes() {
     # Create a pool with a single pg
     create_pool $poolname 1 1
     wait_for_clean || return 1
-    local poolid=$(ceph osd dump | grep "^pool.*[']${poolname}[']" | awk '{ print $2 }')
+    local poolid=$(stone osd dump | grep "^pool.*[']${poolname}[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
     for i in `seq 1 $objects`
@@ -165,22 +165,22 @@ function TEST_interval_changes() {
     check_dump_scrubs $primary "1 day" "1 week" || return 1
 
     # Change global osd_scrub_min_interval to 2 days
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${primary}) config set osd_scrub_min_interval $(expr $day \* 2)
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${primary}) config set osd_scrub_min_interval $(expr $day \* 2)
     sleep $WAIT_FOR_UPDATE
     check_dump_scrubs $primary "2 days" "1 week" || return 1
 
     # Change global osd_scrub_max_interval to 2 weeks
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${primary}) config set osd_scrub_max_interval $(expr $week \* 2)
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${primary}) config set osd_scrub_max_interval $(expr $week \* 2)
     sleep $WAIT_FOR_UPDATE
     check_dump_scrubs $primary "2 days" "2 week" || return 1
 
     # Change pool osd_scrub_min_interval to 3 days
-    ceph osd pool set $poolname scrub_min_interval $(expr $day \* 3)
+    stone osd pool set $poolname scrub_min_interval $(expr $day \* 3)
     sleep $WAIT_FOR_UPDATE
     check_dump_scrubs $primary "3 days" "2 week" || return 1
 
     # Change pool osd_scrub_max_interval to 3 weeks
-    ceph osd pool set $poolname scrub_max_interval $(expr $week \* 3)
+    stone osd pool set $poolname scrub_max_interval $(expr $week \* 3)
     sleep $WAIT_FOR_UPDATE
     check_dump_scrubs $primary "3 days" "3 week" || return 1
 
@@ -228,7 +228,7 @@ function TEST_scrub_extended_sleep() {
     local pgid=$(get_pg $poolname SOMETHING)
     local primary=$(get_primary $poolname SOMETHING)
     local last_scrub=$(get_last_scrub_stamp $pgid)
-    ceph tell $pgid scrub || return 1
+    stone tell $pgid scrub || return 1
 
     # Allow scrub to start extended sleep
     PASSED="false"
@@ -248,8 +248,8 @@ function TEST_scrub_extended_sleep() {
     fi
 
     # release scrub to run after extended sleep finishes
-    ceph tell osd.$primary config set osd_scrub_begin_week_day 0
-    ceph tell osd.$primary config set osd_scrub_end_week_day 0
+    stone tell osd.$primary config set osd_scrub_begin_week_day 0
+    stone tell osd.$primary config set osd_scrub_end_week_day 0
 
     # Due to extended sleep, the scrub should not be done within 20 seconds
     # but test up to 10 seconds and make sure it happens by 25 seconds.
@@ -310,7 +310,7 @@ function _scrub_abort() {
     # Create a pool with a single pg
     create_pool $poolname 1 1
     wait_for_clean || return 1
-    poolid=$(ceph osd dump | grep "^pool.*[']${poolname}[']" | awk '{ print $2 }')
+    poolid=$(stone osd dump | grep "^pool.*[']${poolname}[']" | awk '{ print $2 }')
 
     dd if=/dev/urandom of=$TESTDATA bs=1032 count=1
     for i in `seq 1 $objects`
@@ -322,11 +322,11 @@ function _scrub_abort() {
     local primary=$(get_primary $poolname obj1)
     local pgid="${poolid}.0"
 
-    ceph tell $pgid $type || return 1
+    stone tell $pgid $type || return 1
     # deep-scrub won't start without scrub noticing
     if [ "$type" = "deep_scrub" ];
     then
-      ceph tell $pgid scrub || return 1
+      stone tell $pgid scrub || return 1
     fi
 
     # Wait for scrubbing to start
@@ -335,10 +335,10 @@ function _scrub_abort() {
     for i in $(seq 0 200)
     do
       flush_pg_stats
-      if ceph pg dump pgs | grep  ^$pgid| grep -q "scrubbing"
+      if stone pg dump pgs | grep  ^$pgid| grep -q "scrubbing"
       then
         found="yes"
-        #ceph pg dump pgs
+        #stone pg dump pgs
         break
       fi
     done
@@ -350,10 +350,10 @@ function _scrub_abort() {
       return 1
     fi
 
-    ceph osd set $stopscrub
+    stone osd set $stopscrub
     if [ "$type" = "deep_scrub" ];
     then
-      ceph osd set noscrub
+      stone osd set noscrub
     fi
 
     # Wait for scrubbing to end
@@ -361,11 +361,11 @@ function _scrub_abort() {
     for i in $(seq 0 200)
     do
       flush_pg_stats
-      if ceph pg dump pgs | grep ^$pgid | grep -q "scrubbing"
+      if stone pg dump pgs | grep ^$pgid | grep -q "scrubbing"
       then
         continue
       fi
-      #ceph pg dump pgs
+      #stone pg dump pgs
       break
     done
     set +o pipefail
@@ -379,12 +379,12 @@ function _scrub_abort() {
     fi
 
     local last_scrub=$(get_last_scrub_stamp $pgid)
-    ceph config set osd "osd_scrub_sleep" "0.1"
+    stone config set osd "osd_scrub_sleep" "0.1"
 
-    ceph osd unset $stopscrub
+    stone osd unset $stopscrub
     if [ "$type" = "deep_scrub" ];
     then
-      ceph osd unset noscrub
+      stone osd unset noscrub
     fi
     TIMEOUT=$(($objects / 2))
     wait_for_scrub $pgid "$last_scrub" || return 1
@@ -436,7 +436,7 @@ function TEST_scrub_permit_time() {
     # current time to set last_scrub_stamp, it sets the deadline
     # back by osd_max_interval which would cause the time permit checking
     # to be skipped.  Set back 1 day, the default scrub_min_interval.
-    ceph tell $pgid scrub $(( 24 * 60 * 60 )) || return 1
+    stone tell $pgid scrub $(( 24 * 60 * 60 )) || return 1
 
     # Scrub should not run
     for ((i=0; i < 30; i++)); do

@@ -45,7 +45,7 @@ describe('CdValidators', () => {
     });
 
     it('should not error on valid email address', () => {
-      expectValid('dashboard@ceph.com');
+      expectValid('dashboard@stone.com');
     });
 
     it('should error on invalid email address', () => {

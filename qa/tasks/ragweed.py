@@ -22,7 +22,7 @@ def get_ragweed_branches(config, client_conf):
     """
     figure out the ragweed branch according to the per-client settings
 
-    use force-branch is specified, and fall back to the ones deduced using ceph
+    use force-branch is specified, and fall back to the ones deduced using stone
     branch under testing
     """
     force_branch = client_conf.get('force-branch', None)
@@ -31,10 +31,10 @@ def get_ragweed_branches(config, client_conf):
     else:
         S3_BRANCHES = ['master', 'nautilus', 'mimic',
                        'luminous', 'kraken', 'jewel']
-        ceph_branch = config.get('branch')
-        suite_branch = config.get('suite_branch', ceph_branch)
+        stone_branch = config.get('branch')
+        suite_branch = config.get('suite_branch', stone_branch)
         if suite_branch in S3_BRANCHES:
-            branch = client_conf.get('branch', 'ceph-' + suite_branch)
+            branch = client_conf.get('branch', 'stone-' + suite_branch)
         else:
             branch = client_conf.get('branch', suite_branch)
         default_branch = client_conf.get('default-branch', None)
@@ -58,7 +58,7 @@ def download(ctx, config):
     testdir = teuthology.get_testdir(ctx)
     for (client, cconf) in config.items():
         ragweed_repo = ctx.config.get('ragweed_repo',
-                                      teuth_config.ceph_git_base_url + 'ragweed.git')
+                                      teuth_config.stone_git_base_url + 'ragweed.git')
         for branch in get_ragweed_branches(ctx.config, cconf):
             log.info("Using branch '%s' for ragweed", branch)
             try:
@@ -137,7 +137,7 @@ def create_users(ctx, config, run_stages):
             ctx.cluster.only(client).run(
                 args=[
                     'adjust-ulimits',
-                    'ceph-coverage',
+                    'stone-coverage',
                     '{tdir}/archive/coverage'.format(tdir=testdir),
                     'radosgw-admin',
                     '-n', client,
@@ -162,7 +162,7 @@ def create_users(ctx, config, run_stages):
                 ctx.cluster.only(client).run(
                     args=[
                         'adjust-ulimits',
-                        'ceph-coverage',
+                        'stone-coverage',
                         '{tdir}/archive/coverage'.format(tdir=testdir),
                         'radosgw-admin',
                         '-n', client,
@@ -274,21 +274,21 @@ def task(ctx, config):
     To run all tests on all clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw:
         - ragweed:
 
     To restrict testing to particular clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.0]
         - ragweed: [client.0]
 
     To run against a server on client.1 and increase the boto timeout to 10m::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.1]
         - ragweed:
             client.0:
@@ -299,7 +299,7 @@ def task(ctx, config):
     To pass extra arguments to nose (e.g. to run a certain test)::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.0]
         - ragweed:
             client.0:
@@ -350,7 +350,7 @@ def task(ctx, config):
                 'user regular'   : {},
                 'rados':
                     {
-                    'ceph_conf'  : '/etc/ceph/ceph.conf',
+                    'stone_conf'  : '/etc/stonepros/stone.conf',
                     },
                 }
             )

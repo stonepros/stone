@@ -32,7 +32,7 @@ describe('FeatureTogglesService', () => {
         rbd: true,
         mirroring: true,
         iscsi: true,
-        cephfs: true,
+        stonefs: true,
         rgw: true
       }
     ];

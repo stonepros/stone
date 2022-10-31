@@ -4,7 +4,7 @@ Inconsistent_hinfo
 import logging
 import time
 from dateutil.parser import parse
-from tasks import ceph_manager
+from tasks import stone_manager
 from tasks.util.rados import rados
 from teuthology import misc as teuthology
 
@@ -73,10 +73,10 @@ def task(ctx, config):
     first_mon = teuthology.get_first_mon(ctx, config)
     (mon,) = ctx.cluster.only(first_mon).remotes.keys()
 
-    manager = ceph_manager.CephManager(
+    manager = stone_manager.StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager'),
+        logger=log.getChild('stone_manager'),
         )
 
     profile = config.get('erasure_code_profile', {

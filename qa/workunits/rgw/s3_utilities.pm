@@ -148,15 +148,15 @@ sub os_pretty_name
 }
 
 
-# Function to get the Ceph and distro info
-sub ceph_os_info
+# Function to get the Stone and distro info
+sub stone_os_info
 {
-        my $ceph_v = get_command_output ( "ceph -v" );
-        my @ceph_arr = split(" ",$ceph_v);
-        $ceph_v = "Ceph Version:   $ceph_arr[2]";
+        my $stone_v = get_command_output ( "stone -v" );
+        my @stone_arr = split(" ",$stone_v);
+        $stone_v = "Stone Version:   $stone_arr[2]";
         my $os_distro = os_pretty_name();
         $os_distro = "Linux Flavor:$os_distro";
-        return ($ceph_v, $os_distro);
+        return ($stone_v, $os_distro);
 }
 
 # Execute the test case based on the input to the script

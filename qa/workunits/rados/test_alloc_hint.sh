@@ -27,7 +27,7 @@ function get_conf_val() {
     local option="$2"
 
     local val
-    val="$(sudo ceph daemon "${entity}" config get --format=xml "${option}")"
+    val="$(sudo stone daemon "${entity}" config get --format=xml "${option}")"
     val="$(get_xml_val "${val}" "${option}")"
 
     echo "${val}"
@@ -44,21 +44,21 @@ function setup_pgid() {
     local objname="$2"
 
     local pgid
-    pgid="$(ceph osd map "${poolname}" "${objname}" --format=xml)"
+    pgid="$(stone osd map "${poolname}" "${objname}" --format=xml)"
     pgid="$(get_xml_val "${pgid}" "pgid")"
 
     PGID="${pgid}"
 }
 
 function expect_alloc_hint_eq() {
-    export CEPH_ARGS="--osd-objectstore=filestore"
+    export STONE_ARGS="--osd-objectstore=filestore"
     local expected_extsize="$1"
 
     for (( i = 0 ; i < "${NUM_OSDS}" ; i++ )); do
         # Make sure that stuff is flushed from the journal to the store
         # by the time we get to it, as we prod the actual files and not
         # the journal.
-        sudo ceph daemon "osd.${i}" "flush_journal"
+        sudo stone daemon "osd.${i}" "flush_journal"
 
         # e.g., .../25.6_head/foo__head_7FC1F406__19
         #       .../26.bs1_head/bar__head_EFE6384B__1a_ffffffffffffffff_1
@@ -108,9 +108,9 @@ setup_osd_data
 #
 
 POOL="alloc_hint-rep"
-ceph osd pool create "${POOL}" "${NUM_PG}"
-ceph osd pool set "${POOL}" size "${NUM_OSDS}" --yes-i-really-mean-it
-ceph osd pool application enable "${POOL}" rados
+stone osd pool create "${POOL}" "${NUM_PG}"
+stone osd pool set "${POOL}" size "${NUM_OSDS}" --yes-i-really-mean-it
+stone osd pool application enable "${POOL}" rados
 
 OBJ="foo"
 setup_pgid "${POOL}" "${OBJ}"
@@ -125,13 +125,13 @@ rados -p "${POOL}" set-alloc-hint "${OBJ}" "${BIG_HINT}" "${BIG_HINT}"
 expect_alloc_hint_eq "${LOW_CAP}"
 
 # Bump the cap to HIGH_CAP
-ceph tell 'osd.*' injectargs "--filestore_max_alloc_hint_size ${HIGH_CAP}"
+stone tell 'osd.*' injectargs "--filestore_max_alloc_hint_size ${HIGH_CAP}"
 
 # Try changing to BIG_HINT (2) - expect BIG_HINT (BIG_HINT < HIGH_CAP)
 rados -p "${POOL}" set-alloc-hint "${OBJ}" "${BIG_HINT}" "${BIG_HINT}"
 expect_alloc_hint_eq "${BIG_HINT}"
 
-ceph tell 'osd.*' injectargs "--filestore_max_alloc_hint_size ${LOW_CAP}"
+stone tell 'osd.*' injectargs "--filestore_max_alloc_hint_size ${LOW_CAP}"
 
 # Populate object with some data
 rados -p "${POOL}" put "${OBJ}" /etc/passwd
@@ -147,7 +147,7 @@ setup_pgid "${POOL}" "${OBJ}"
 rados -p "${POOL}" set-alloc-hint "${OBJ}" "${SMALL_HINT}" "${SMALL_HINT}"
 expect_alloc_hint_eq "${SMALL_HINT}"
 
-ceph osd pool delete "${POOL}" "${POOL}" --yes-i-really-really-mean-it
+stone osd pool delete "${POOL}" "${POOL}" --yes-i-really-really-mean-it
 
 #
 # ECBackend tests
@@ -155,10 +155,10 @@ ceph osd pool delete "${POOL}" "${POOL}" --yes-i-really-really-mean-it
 
 PROFILE="alloc_hint-ecprofile"
 POOL="alloc_hint-ec"
-ceph osd erasure-code-profile set "${PROFILE}" k=2 m=1 crush-failure-domain=osd
-ceph osd erasure-code-profile get "${PROFILE}" # just so it's logged
-ceph osd pool create "${POOL}" "${NUM_PG}" "${NUM_PGP}" erasure "${PROFILE}"
-ceph osd pool application enable "${POOL}" rados
+stone osd erasure-code-profile set "${PROFILE}" k=2 m=1 crush-failure-domain=osd
+stone osd erasure-code-profile get "${PROFILE}" # just so it's logged
+stone osd pool create "${POOL}" "${NUM_PG}" "${NUM_PGP}" erasure "${PROFILE}"
+stone osd pool application enable "${POOL}" rados
 
 OBJ="baz"
 setup_pgid "${POOL}" "${OBJ}"
@@ -168,7 +168,7 @@ rados -p "${POOL}" create "${OBJ}"
 rados -p "${POOL}" set-alloc-hint "${OBJ}" "${SMALL_HINT}" "${SMALL_HINT}"
 expect_alloc_hint_eq "$((SMALL_HINT / EC_K))"
 
-ceph osd pool delete "${POOL}" "${POOL}" --yes-i-really-really-mean-it
+stone osd pool delete "${POOL}" "${POOL}" --yes-i-really-really-mean-it
 
 #
 # Global teardown

@@ -3,7 +3,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -26,7 +26,7 @@ struct RGWBucketEnt;
 class RGWSI_BucketIndex : public RGWServiceInstance
 {
 public:
-  RGWSI_BucketIndex(CephContext *cct) : RGWServiceInstance(cct) {}
+  RGWSI_BucketIndex(StoneContext *cct) : RGWServiceInstance(cct) {}
   virtual ~RGWSI_BucketIndex() {}
 
   virtual int init_index(const DoutPrefixProvider *dpp, RGWBucketInfo& bucket_info) = 0;

@@ -24,15 +24,15 @@ extern "C" {
 /* 2k should be enough for anyone? */
 #define MON_LIST_BUFSIZE	2048
 
-void mount_ceph_debug(const char *fmt, ...);
+void mount_stone_debug(const char *fmt, ...);
 
-struct ceph_config_info {
+struct stone_config_info {
 	char		cci_secret[SECRET_BUFSIZE];	// auth secret
 	char		cci_mons[MON_LIST_BUFSIZE];	// monitor addrs
 };
 
-void mount_ceph_get_config_info(const char *config_file, const char *name,
-				bool v2_addrs, struct ceph_config_info *cci);
+void mount_stone_get_config_info(const char *config_file, const char *name,
+				bool v2_addrs, struct stone_config_info *cci);
 
 #ifdef __cplusplus
 }

@@ -11,7 +11,7 @@
 #include <utility>
 #include <algorithm>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "msg/Message.h"
 #include "mgr/Types.h"
 #include "mgr/MetricTypes.h"
@@ -62,7 +62,7 @@ protected:
   typedef std::map<MetricQueryID, std::map<Key, PerformanceCounters>> Counters;
   typedef std::function<void(PerformanceCounter *, const PerformanceCounter &)> UpdateCallback;
 
-  mutable ceph::mutex lock = ceph::make_mutex("mgr::metric::collector::lock");
+  mutable stone::mutex lock = stone::make_mutex("mgr::metric::collector::lock");
 
   Queries queries;
   Counters counters;

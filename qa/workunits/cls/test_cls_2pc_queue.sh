@@ -1,5 +1,5 @@
 #!/bin/sh -e
 
-ceph_test_cls_2pc_queue
+stone_test_cls_2pc_queue
 
 exit 0

@@ -1,8 +1,8 @@
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 
-class TestBacktrace(CephFSTestCase):
+class TestBacktrace(StoneFSTestCase):
     def test_backtrace(self):
         """
         That the 'parent' and 'layout' xattrs on the head objects of files
@@ -45,7 +45,7 @@ class TestBacktrace(CephFSTestCase):
 
         # That an object which has switched pools gets its backtrace updated
         self.mount_a.setfattr("./parent_b/alpha",
-                              "ceph.file.layout.pool", new_pool_name)
+                              "stone.file.layout.pool", new_pool_name)
         self.fs.mds_asok(["flush", "journal"])
         backtrace_old_pool = self.fs.read_backtrace(file_ino, pool=old_data_pool_name)
         self.assertEqual(backtrace_old_pool['pool'], new_pool_id)
@@ -66,7 +66,7 @@ class TestBacktrace(CephFSTestCase):
 
         # That layout is written to new pool after change to other field in layout
         self.mount_a.setfattr("./parent_c/alpha",
-                              "ceph.file.layout.object_size", "8388608")
+                              "stone.file.layout.object_size", "8388608")
 
         self.fs.mds_asok(["flush", "journal"])
         new_pool_layout = self.fs.read_layout(file_ino, pool=new_pool_name)

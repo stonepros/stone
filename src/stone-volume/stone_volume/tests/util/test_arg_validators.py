@@ -1,8 +1,8 @@
 import argparse
 import pytest
 import os
-from ceph_volume import exceptions
-from ceph_volume.util import arg_validators
+from stone_volume import exceptions
+from stone_volume.util import arg_validators
 from mock.mock import patch, PropertyMock
 
 
@@ -28,7 +28,7 @@ class TestOSDPath(object):
         validator = arg_validators.OSDPath()
         with pytest.raises(argparse.ArgumentError) as error:
             validator(tmppath)
-        assert 'Required file (ceph_fsid) was not found in OSD' in str(error.value)
+        assert 'Required file (stone_fsid) was not found in OSD' in str(error.value)
 
 
 class TestExcludeGroupOptions(object):
@@ -89,9 +89,9 @@ class TestValidDevice(object):
         with pytest.raises(argparse.ArgumentError):
             self.validator('/device/does/not/exist')
 
-    @patch('ceph_volume.util.arg_validators.Device.has_partitions', new_callable=PropertyMock, return_value=True)
-    @patch('ceph_volume.util.arg_validators.Device.exists', new_callable=PropertyMock, return_value=True)
-    @patch('ceph_volume.api.lvm.get_single_lv', return_value=None)
+    @patch('stone_volume.util.arg_validators.Device.has_partitions', new_callable=PropertyMock, return_value=True)
+    @patch('stone_volume.util.arg_validators.Device.exists', new_callable=PropertyMock, return_value=True)
+    @patch('stone_volume.api.lvm.get_single_lv', return_value=None)
     def test_dev_has_partitions(self, m_get_single_lv, m_exists, m_has_partitions, fake_call):
         with pytest.raises(RuntimeError):
             self.validator('/dev/foo')

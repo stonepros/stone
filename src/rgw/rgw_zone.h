@@ -82,7 +82,7 @@ protected:
   std::string id;
   std::string name;
 
-  CephContext *cct{nullptr};
+  StoneContext *cct{nullptr};
   RGWSI_SysObj *sysobj_svc{nullptr};
   RGWSI_Zone *zone_svc{nullptr};
 
@@ -101,10 +101,10 @@ public:
   RGWSystemMetaObj() {}
   RGWSystemMetaObj(const std::string& _name): name(_name) {}
   RGWSystemMetaObj(const std::string& _id, const std::string& _name) : id(_id), name(_name) {}
-  RGWSystemMetaObj(CephContext *_cct, RGWSI_SysObj *_sysobj_svc) {
+  RGWSystemMetaObj(StoneContext *_cct, RGWSI_SysObj *_sysobj_svc) {
     reinit_instance(_cct, _sysobj_svc);
   }
-  RGWSystemMetaObj(const std::string& _name, CephContext *_cct, RGWSI_SysObj *_sysobj_svc): name(_name) {
+  RGWSystemMetaObj(const std::string& _name, StoneContext *_cct, RGWSI_SysObj *_sysobj_svc): name(_name) {
     reinit_instance(_cct, _sysobj_svc);
   }
 
@@ -131,8 +131,8 @@ public:
     DECODE_FINISH(bl);
   }
 
-  void reinit_instance(CephContext *_cct, RGWSI_SysObj *_sysobj_svc);
-  int init(const DoutPrefixProvider *dpp, CephContext *_cct, RGWSI_SysObj *_sysobj_svc,
+  void reinit_instance(StoneContext *_cct, RGWSI_SysObj *_sysobj_svc);
+  int init(const DoutPrefixProvider *dpp, StoneContext *_cct, RGWSI_SysObj *_sysobj_svc,
 	   optional_yield y,
 	   bool setup_obj = true, bool old_format = false);
   virtual int read_default_id(const DoutPrefixProvider *dpp, std::string& default_id, optional_yield y,
@@ -147,11 +147,11 @@ public:
   int read(const DoutPrefixProvider *dpp, optional_yield y);
   int write(const DoutPrefixProvider *dpp, bool exclusive, optional_yield y);
 
-  virtual rgw_pool get_pool(CephContext *cct) const = 0;
+  virtual rgw_pool get_pool(StoneContext *cct) const = 0;
   virtual const std::string get_default_oid(bool old_format = false) const = 0;
   virtual const std::string& get_names_oid_prefix() const = 0;
   virtual const std::string& get_info_oid_prefix(bool old_format = false) const = 0;
-  virtual const std::string& get_predefined_name(CephContext *cct) const = 0;
+  virtual const std::string& get_predefined_name(StoneContext *cct) const = 0;
 
   void dump(Formatter *f) const;
   void decode_json(JSONObj *obj);
@@ -395,14 +395,14 @@ struct RGWZoneParams : RGWSystemMetaObj {
   RGWZoneParams(const rgw_zone_id& id, const std::string& name, const std::string& _realm_id)
     : RGWSystemMetaObj(id.id, name), realm_id(_realm_id) {}
 
-  rgw_pool get_pool(CephContext *cct) const override;
+  rgw_pool get_pool(StoneContext *cct) const override;
   const std::string get_default_oid(bool old_format = false) const override;
   const std::string& get_names_oid_prefix() const override;
   const std::string& get_info_oid_prefix(bool old_format = false) const override;
-  const std::string& get_predefined_name(CephContext *cct) const override;
+  const std::string& get_predefined_name(StoneContext *cct) const override;
 
   int init(const DoutPrefixProvider *dpp, 
-           CephContext *_cct, RGWSI_SysObj *_sysobj_svc, optional_yield y,
+           StoneContext *_cct, RGWSI_SysObj *_sysobj_svc, optional_yield y,
 	   bool setup_obj = true, bool old_format = false);
   using RGWSystemMetaObj::init;
   int read_default_id(const DoutPrefixProvider *dpp, std::string& default_id, optional_yield y, bool old_format = false) override;
@@ -673,7 +673,7 @@ struct RGWDefaultZoneGroupInfo {
   }
   void dump(Formatter *f) const;
   void decode_json(JSONObj *obj);
-  //todo: implement ceph-dencoder
+  //todo: implement stone-dencoder
 };
 WRITE_CLASS_ENCODER(RGWDefaultZoneGroupInfo)
 
@@ -756,7 +756,7 @@ struct RGWZoneGroup : public RGWSystemMetaObj {
   RGWZoneGroup(): is_master(false){}
   RGWZoneGroup(const std::string &id, const std::string &name):RGWSystemMetaObj(id, name) {}
   explicit RGWZoneGroup(const std::string &_name):RGWSystemMetaObj(_name) {}
-  RGWZoneGroup(const std::string &_name, bool _is_master, CephContext *cct, RGWSI_SysObj* sysobj_svc,
+  RGWZoneGroup(const std::string &_name, bool _is_master, StoneContext *cct, RGWSI_SysObj* sysobj_svc,
 	       const std::string& _realm_id, const list<std::string>& _endpoints)
     : RGWSystemMetaObj(_name, cct , sysobj_svc), endpoints(_endpoints), is_master(_is_master),
       realm_id(_realm_id) {}
@@ -827,11 +827,11 @@ struct RGWZoneGroup : public RGWSystemMetaObj {
 	       optional_yield y);
   int remove_zone(const DoutPrefixProvider *dpp, const std::string& zone_id, optional_yield y);
   int rename_zone(const DoutPrefixProvider *dpp, const RGWZoneParams& zone_params, optional_yield y);
-  rgw_pool get_pool(CephContext *cct) const override;
+  rgw_pool get_pool(StoneContext *cct) const override;
   const std::string get_default_oid(bool old_region_format = false) const override;
   const std::string& get_info_oid_prefix(bool old_region_format = false) const override;
   const std::string& get_names_oid_prefix() const override;
-  const std::string& get_predefined_name(CephContext *cct) const override;
+  const std::string& get_predefined_name(StoneContext *cct) const override;
 
   void dump(Formatter *f) const;
   void decode_json(JSONObj *obj);
@@ -851,7 +851,7 @@ struct RGWPeriodMap
   void encode(bufferlist& bl) const;
   void decode(bufferlist::const_iterator& bl);
 
-  int update(const RGWZoneGroup& zonegroup, CephContext *cct);
+  int update(const RGWZoneGroup& zonegroup, StoneContext *cct);
 
   void dump(Formatter *f) const;
   void decode_json(JSONObj *obj);
@@ -895,7 +895,7 @@ struct RGWPeriodConfig
   int write(const DoutPrefixProvider *dpp, RGWSI_SysObj *sysobj_svc, const std::string& realm_id, optional_yield y);
 
   static std::string get_oid(const std::string& realm_id);
-  static rgw_pool get_pool(CephContext *cct);
+  static rgw_pool get_pool(StoneContext *cct);
 };
 WRITE_CLASS_ENCODER(RGWPeriodConfig)
 
@@ -928,7 +928,7 @@ struct RGWZoneGroupMap {
   RGWQuotaInfo user_quota;
 
   /* construct the map */
-  int read(const DoutPrefixProvider *dpp, CephContext *cct, RGWSI_SysObj *sysobj_svc, optional_yield y);
+  int read(const DoutPrefixProvider *dpp, StoneContext *cct, RGWSI_SysObj *sysobj_svc, optional_yield y);
 
   void encode(bufferlist& bl) const;
   void decode(bufferlist::const_iterator& bl);
@@ -951,8 +951,8 @@ class RGWRealm : public RGWSystemMetaObj
 public:
   RGWRealm() {}
   RGWRealm(const std::string& _id, const std::string& _name = "") : RGWSystemMetaObj(_id, _name) {}
-  RGWRealm(CephContext *_cct, RGWSI_SysObj *_sysobj_svc): RGWSystemMetaObj(_cct, _sysobj_svc) {}
-  RGWRealm(const std::string& _name, CephContext *_cct, RGWSI_SysObj *_sysobj_svc): RGWSystemMetaObj(_name, _cct, _sysobj_svc){}
+  RGWRealm(StoneContext *_cct, RGWSI_SysObj *_sysobj_svc): RGWSystemMetaObj(_cct, _sysobj_svc) {}
+  RGWRealm(const std::string& _name, StoneContext *_cct, RGWSI_SysObj *_sysobj_svc): RGWSystemMetaObj(_name, _cct, _sysobj_svc){}
 
   void encode(bufferlist& bl) const override {
     ENCODE_START(1, 1, bl);
@@ -972,11 +972,11 @@ public:
 
   int create(const DoutPrefixProvider *dpp, optional_yield y, bool exclusive = true) override;
   int delete_obj(const DoutPrefixProvider *dpp, optional_yield y);
-  rgw_pool get_pool(CephContext *cct) const override;
+  rgw_pool get_pool(StoneContext *cct) const override;
   const std::string get_default_oid(bool old_format = false) const override;
   const std::string& get_names_oid_prefix() const override;
   const std::string& get_info_oid_prefix(bool old_format = false) const override;
-  const std::string& get_predefined_name(CephContext *cct) const override;
+  const std::string& get_predefined_name(StoneContext *cct) const override;
 
   using RGWSystemMetaObj::read_id; // expose as public for radosgw-admin
 
@@ -1059,7 +1059,7 @@ class RGWPeriod
   std::string realm_name;
   epoch_t realm_epoch{1}; //< realm epoch when period was made current
 
-  CephContext *cct{nullptr};
+  StoneContext *cct{nullptr};
   RGWSI_SysObj *sysobj_svc{nullptr};
 
   int read_info(const DoutPrefixProvider *dpp, optional_yield y);
@@ -1096,7 +1096,7 @@ public:
   RGWPeriodConfig& get_config() { return period_config; }
   const RGWPeriodConfig& get_config() const { return period_config; }
   const std::vector<std::string>& get_sync_status() const { return sync_status; }
-  rgw_pool get_pool(CephContext *cct) const;
+  rgw_pool get_pool(StoneContext *cct) const;
   const std::string& get_latest_epoch_oid() const;
   const std::string& get_info_oid_prefix() const;
 
@@ -1157,9 +1157,9 @@ public:
   // update latest_epoch if the given epoch is higher, else return -EEXIST
   int update_latest_epoch(const DoutPrefixProvider *dpp, epoch_t epoch, optional_yield y);
 
-  int init(const DoutPrefixProvider *dpp, CephContext *_cct, RGWSI_SysObj *_sysobj_svc, const std::string &period_realm_id, optional_yield y,
+  int init(const DoutPrefixProvider *dpp, StoneContext *_cct, RGWSI_SysObj *_sysobj_svc, const std::string &period_realm_id, optional_yield y,
 	   const std::string &period_realm_name = "", bool setup_obj = true);
-  int init(const DoutPrefixProvider *dpp, CephContext *_cct, RGWSI_SysObj *_sysobj_svc, optional_yield y, bool setup_obj = true);  
+  int init(const DoutPrefixProvider *dpp, StoneContext *_cct, RGWSI_SysObj *_sysobj_svc, optional_yield y, bool setup_obj = true);  
 
   int create(const DoutPrefixProvider *dpp, optional_yield y, bool exclusive = true);
   int delete_obj(const DoutPrefixProvider *dpp, optional_yield y);

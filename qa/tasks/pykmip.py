@@ -265,10 +265,10 @@ def configure_pykmip(ctx, config):
     finally:
         pass
 
-def has_ceph_task(tasks):
+def has_stone_task(tasks):
     for task in tasks:
         for name, conf in task.items():
-            if name == 'ceph':
+            if name == 'stone':
                 return True
     return False
 
@@ -277,8 +277,8 @@ def run_pykmip(ctx, config):
     assert isinstance(config, dict)
     if hasattr(ctx, 'daemons'):
         pass
-    elif has_ceph_task(ctx.config['tasks']):
-        log.info('Delay start pykmip so ceph can do once-only daemon logic')
+    elif has_stone_task(ctx.config['tasks']):
+        log.info('Delay start pykmip so stone can do once-only daemon logic')
         try:
             yield
         finally:
@@ -373,7 +373,7 @@ def create_secrets(ctx, config):
                 .replace("{replace-with-secrets}",secrets_json) \
                 .replace("{replace-with-config-file-path}",pykmip_conf_path)
             my_output.truncate()
-            remote.run(args=[run.Raw('. cephtest/pykmip/.pykmipenv/bin/activate;' \
+            remote.run(args=[run.Raw('. stonetest/pykmip/.pykmipenv/bin/activate;' \
                 + 'python')], stdin=make_keys, stdout = my_output)
             ctx.pykmip.keys[client] = json.loads(my_output.getvalue().decode())
     try:
@@ -390,13 +390,13 @@ def task(ctx, config):
 
     tasks:
     - install:
-    - ceph:
+    - stone:
        conf:
         client:
          rgw crypt s3 kms backend: kmip
-         rgw crypt kmip ca path: /home/ubuntu/cephtest/ca/kmiproot.crt
-         rgw crypt kmip client cert: /home/ubuntu/cephtest/ca/kmip-client.crt
-         rgw crypt kmip client key: /home/ubuntu/cephtest/ca/kmip-client.key
+         rgw crypt kmip ca path: /home/ubuntu/stonetest/ca/kmiproot.crt
+         rgw crypt kmip client cert: /home/ubuntu/stonetest/ca/kmip-client.crt
+         rgw crypt kmip client key: /home/ubuntu/stonetest/ca/kmip-client.key
          rgw crypt kmip kms key template: pykmip-$keyid
     - openssl_keys:
        kmiproot:

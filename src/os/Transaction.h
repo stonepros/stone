@@ -13,8 +13,8 @@
 
 #define OPS_PER_PTR 32
 
-void decode_str_str_map_to_bl(ceph::buffer::list::const_iterator& p, ceph::buffer::list *out);
-void decode_str_set_to_bl(ceph::buffer::list::const_iterator& p, ceph::buffer::list *out);
+void decode_str_str_map_to_bl(stone::buffer::list::const_iterator& p, stone::buffer::list *out);
+void decode_str_set_to_bl(stone::buffer::list::const_iterator& p, stone::buffer::list *out);
 
 
 /*********************************
@@ -51,10 +51,10 @@ void decode_str_set_to_bl(ceph::buffer::list::const_iterator& p, ceph::buffer::l
  * At the implementation level, each mutation primitive (and its
  * associated data) can be serialized to a single buffer.  That
  * serialization, however, does not copy any data, but (using the
- * ceph::buffer::list library) will reference the original buffers.  This
+ * stone::buffer::list library) will reference the original buffers.  This
  * implies that the buffer that contains the data being submitted
  * must remain stable until the on_commit callback completes.  In
- * practice, ceph::buffer::list handles all of this for you and this
+ * practice, stone::buffer::list handles all of this for you and this
  * subtlety is only relevant if you are referencing an existing
  * buffer via buffer::raw_static.
  *
@@ -67,7 +67,7 @@ void decode_str_set_to_bl(ceph::buffer::list::const_iterator& p, ceph::buffer::l
  * variables that aid in this legacy decoding:
  *
  *   sobject_encoding detects an older/simpler version of oid
- *   present in pre-bobtail versions of ceph.  use_pool_override
+ *   present in pre-bobtail versions of stone.  use_pool_override
  *   also detects a situation where the pool of an oid can be
  *   overridden for legacy operations/buffers.  For non-legacy
  *   implementations of ObjectStore, neither of these fields are
@@ -103,7 +103,7 @@ void decode_str_set_to_bl(ceph::buffer::list::const_iterator& p, ceph::buffer::l
  * A and B.
  *
  */
-namespace ceph::os {
+namespace stone::os {
 class Transaction {
 public:
   enum {
@@ -161,28 +161,28 @@ public:
   };
 
   struct Op {
-    ceph_le32 op;
-    ceph_le32 cid;
-    ceph_le32 oid;
-    ceph_le64 off;
-    ceph_le64 len;
-    ceph_le32 dest_cid;
-    ceph_le32 dest_oid;               //OP_CLONE, OP_CLONERANGE
-    ceph_le64 dest_off;               //OP_CLONERANGE
-    ceph_le32 hint;                   //OP_COLL_HINT,OP_SETALLOCHINT
-    ceph_le64 expected_object_size;   //OP_SETALLOCHINT
-    ceph_le64 expected_write_size;    //OP_SETALLOCHINT
-    ceph_le32 split_bits;             //OP_SPLIT_COLLECTION2,OP_COLL_SET_BITS,
+    stone_le32 op;
+    stone_le32 cid;
+    stone_le32 oid;
+    stone_le64 off;
+    stone_le64 len;
+    stone_le32 dest_cid;
+    stone_le32 dest_oid;               //OP_CLONE, OP_CLONERANGE
+    stone_le64 dest_off;               //OP_CLONERANGE
+    stone_le32 hint;                   //OP_COLL_HINT,OP_SETALLOCHINT
+    stone_le64 expected_object_size;   //OP_SETALLOCHINT
+    stone_le64 expected_write_size;    //OP_SETALLOCHINT
+    stone_le32 split_bits;             //OP_SPLIT_COLLECTION2,OP_COLL_SET_BITS,
                                       //OP_MKCOLL
-    ceph_le32 split_rem;              //OP_SPLIT_COLLECTION2
+    stone_le32 split_rem;              //OP_SPLIT_COLLECTION2
   } __attribute__ ((packed)) ;
 
   struct TransactionData {
-    ceph_le64 ops;
-    ceph_le32 largest_data_len;
-    ceph_le32 largest_data_off;
-    ceph_le32 largest_data_off_in_data_bl;
-    ceph_le32 fadvise_flags;
+    stone_le64 ops;
+    stone_le32 largest_data_len;
+    stone_le32 largest_data_off;
+    stone_le32 largest_data_off_in_data_bl;
+    stone_le32 fadvise_flags;
 
     TransactionData() noexcept :
       ops(init_le64(0)),
@@ -221,10 +221,10 @@ public:
     TransactionData(const TransactionData& other) = default;
     TransactionData& operator=(const TransactionData& other) = default;
 
-    void encode(ceph::buffer::list& bl) const {
+    void encode(stone::buffer::list& bl) const {
       bl.append((char*)this, sizeof(TransactionData));
     }
-    void decode(ceph::buffer::list::const_iterator &bl) {
+    void decode(stone::buffer::list::const_iterator &bl) {
       bl.copy(sizeof(TransactionData), (char*)this);
     }
   } __attribute__ ((packed)) ;
@@ -238,8 +238,8 @@ private:
   uint32_t coll_id = 0;
   uint32_t object_id = 0;
 
-  ceph::buffer::list data_bl;
-  ceph::buffer::list op_bl;
+  stone::buffer::list data_bl;
+  stone::buffer::list op_bl;
 
   std::list<Context *> on_applied;
   std::list<Context *> on_commit;
@@ -248,10 +248,10 @@ private:
 public:
   Transaction() = default;
 
-  explicit Transaction(ceph::buffer::list::const_iterator &dp) {
+  explicit Transaction(stone::buffer::list::const_iterator &dp) {
     decode(dp);
   }
-  explicit Transaction(ceph::buffer::list &nbl) {
+  explicit Transaction(stone::buffer::list &nbl) {
     auto dp = nbl.cbegin();
     decode(dp);
   }
@@ -327,9 +327,9 @@ public:
     Context **out_on_applied,
     Context **out_on_commit,
     Context **out_on_applied_sync) {
-    ceph_assert(out_on_applied);
-    ceph_assert(out_on_commit);
-    ceph_assert(out_on_applied_sync);
+    stone_assert(out_on_applied);
+    stone_assert(out_on_commit);
+    stone_assert(out_on_applied_sync);
     std::list<Context *> on_applied, on_commit, on_applied_sync;
     for (auto& i : t) {
 	on_applied.splice(on_applied.end(), i.on_applied);
@@ -345,9 +345,9 @@ public:
     std::list<Context*> *out_on_applied,
     std::list<Context*> *out_on_commit,
     std::list<Context*> *out_on_applied_sync) {
-    ceph_assert(out_on_applied);
-    ceph_assert(out_on_commit);
-    ceph_assert(out_on_applied_sync);
+    stone_assert(out_on_applied);
+    stone_assert(out_on_commit);
+    stone_assert(out_on_applied_sync);
     for (auto& i : t) {
 	out_on_applied->splice(out_on_applied->end(), i.on_applied);
 	out_on_commit->splice(out_on_commit->end(), i.on_commit);
@@ -421,17 +421,17 @@ public:
     case OP_ZERO:
     case OP_TRUNCATE:
     case OP_SETALLOCHINT:
-      ceph_assert(op->cid < cm.size());
-      ceph_assert(op->oid < om.size());
+      stone_assert(op->cid < cm.size());
+      stone_assert(op->oid < om.size());
       op->cid = cm[op->cid];
       op->oid = om[op->oid];
       break;
 
     case OP_CLONERANGE2:
     case OP_CLONE:
-      ceph_assert(op->cid < cm.size());
-      ceph_assert(op->oid < om.size());
-      ceph_assert(op->dest_oid < om.size());
+      stone_assert(op->cid < cm.size());
+      stone_assert(op->oid < om.size());
+      stone_assert(op->dest_oid < om.size());
       op->cid = cm[op->cid];
       op->oid = om[op->oid];
       op->dest_oid = om[op->dest_oid];
@@ -444,24 +444,24 @@ public:
     case OP_COLL_SETATTRS:
     case OP_COLL_HINT:
     case OP_COLL_SET_BITS:
-      ceph_assert(op->cid < cm.size());
+      stone_assert(op->cid < cm.size());
       op->cid = cm[op->cid];
       break;
 
     case OP_COLL_ADD:
-      ceph_assert(op->cid < cm.size());
-      ceph_assert(op->oid < om.size());
-      ceph_assert(op->dest_cid < om.size());
+      stone_assert(op->cid < cm.size());
+      stone_assert(op->oid < om.size());
+      stone_assert(op->dest_cid < om.size());
       op->cid = cm[op->cid];
       op->dest_cid = cm[op->dest_cid];
       op->oid = om[op->oid];
       break;
 
     case OP_COLL_MOVE_RENAME:
-      ceph_assert(op->cid < cm.size());
-      ceph_assert(op->oid < om.size());
-      ceph_assert(op->dest_cid < cm.size());
-      ceph_assert(op->dest_oid < om.size());
+      stone_assert(op->cid < cm.size());
+      stone_assert(op->oid < om.size());
+      stone_assert(op->dest_cid < cm.size());
+      stone_assert(op->dest_oid < om.size());
       op->cid = cm[op->cid];
       op->oid = om[op->oid];
       op->dest_cid = cm[op->dest_cid];
@@ -469,38 +469,38 @@ public:
       break;
 
     case OP_TRY_RENAME:
-      ceph_assert(op->cid < cm.size());
-      ceph_assert(op->oid < om.size());
-      ceph_assert(op->dest_oid < om.size());
+      stone_assert(op->cid < cm.size());
+      stone_assert(op->oid < om.size());
+      stone_assert(op->dest_oid < om.size());
       op->cid = cm[op->cid];
       op->oid = om[op->oid];
       op->dest_oid = om[op->dest_oid];
 	break;
 
     case OP_SPLIT_COLLECTION2:
-      ceph_assert(op->cid < cm.size());
-	ceph_assert(op->dest_cid < cm.size());
+      stone_assert(op->cid < cm.size());
+	stone_assert(op->dest_cid < cm.size());
       op->cid = cm[op->cid];
       op->dest_cid = cm[op->dest_cid];
       break;
 
     case OP_MERGE_COLLECTION:
-      ceph_assert(op->cid < cm.size());
-	ceph_assert(op->dest_cid < cm.size());
+      stone_assert(op->cid < cm.size());
+	stone_assert(op->dest_cid < cm.size());
       op->cid = cm[op->cid];
       op->dest_cid = cm[op->dest_cid];
       break;
 
     default:
-      ceph_abort_msg("Unknown OP");
+      stone_abort_msg("Unknown OP");
     }
   }
   void _update_op_bl(
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     std::vector<uint32_t> &cm,
     std::vector<uint32_t> &om) {
     for (auto& bp : bl.buffers()) {
-      ceph_assert(bp.length() % sizeof(Op) == 0);
+      stone_assert(bp.length() % sizeof(Op) == 0);
 
       char* raw_p = const_cast<char*>(bp.c_str());
       char* raw_end = raw_p + bp.length();
@@ -542,10 +542,10 @@ public:
     }
 
     //the other.op_bl SHOULD NOT be changes during append operation,
-    //we use additional ceph::buffer::list to avoid this problem
-    ceph::buffer::list other_op_bl;
+    //we use additional stone::buffer::list to avoid this problem
+    stone::buffer::list other_op_bl;
     {
-      ceph::buffer::ptr other_op_bl_ptr(other.op_bl.length());
+      stone::buffer::ptr other_op_bl_ptr(other.op_bl.length());
       other.op_bl.begin().copy(other.op_bl.length(), other_op_bl_ptr.c_str());
       other_op_bl.append(std::move(other_op_bl_ptr));
     }
@@ -592,9 +592,9 @@ public:
 
   /// Retain old version for regression testing purposes
   uint64_t get_encoded_bytes_test() {
-    using ceph::encode;
+    using stone::encode;
     //layout: data_bl + op_bl + coll_index + object_index + data
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     encode(coll_index, bl);
     encode(object_index, bl);
 
@@ -652,7 +652,7 @@ public:
     uint64_t ops;
     char* op_buffer_p;
 
-    ceph::buffer::list::const_iterator data_bl_p;
+    stone::buffer::list::const_iterator data_bl_p;
 
   public:
     std::vector<coll_t> colls;
@@ -691,7 +691,7 @@ public:
       return ops > 0;
     }
     Op* decode_op() {
-      ceph_assert(ops > 0);
+      stone_assert(ops > 0);
 
       Op* op = reinterpret_cast<Op*>(op_buffer_p);
       op_buffer_p += sizeof(Op);
@@ -700,44 +700,44 @@ public:
       return op;
     }
     std::string decode_string() {
-	using ceph::decode;
+	using stone::decode;
       std::string s;
       decode(s, data_bl_p);
       return s;
     }
-    void decode_bp(ceph::buffer::ptr& bp) {
-	using ceph::decode;
+    void decode_bp(stone::buffer::ptr& bp) {
+	using stone::decode;
       decode(bp, data_bl_p);
     }
-    void decode_bl(ceph::buffer::list& bl) {
-	using ceph::decode;
+    void decode_bl(stone::buffer::list& bl) {
+	using stone::decode;
       decode(bl, data_bl_p);
     }
-    void decode_attrset(std::map<std::string,ceph::buffer::ptr>& aset) {
-	using ceph::decode;
+    void decode_attrset(std::map<std::string,stone::buffer::ptr>& aset) {
+	using stone::decode;
       decode(aset, data_bl_p);
     }
-    void decode_attrset(std::map<std::string,ceph::buffer::list>& aset) {
-	using ceph::decode;
+    void decode_attrset(std::map<std::string,stone::buffer::list>& aset) {
+	using stone::decode;
       decode(aset, data_bl_p);
     }
-    void decode_attrset_bl(ceph::buffer::list *pbl) {
+    void decode_attrset_bl(stone::buffer::list *pbl) {
 	decode_str_str_map_to_bl(data_bl_p, pbl);
     }
     void decode_keyset(std::set<std::string> &keys){
-	using ceph::decode;
+	using stone::decode;
       decode(keys, data_bl_p);
     }
-    void decode_keyset_bl(ceph::buffer::list *pbl){
+    void decode_keyset_bl(stone::buffer::list *pbl){
       decode_str_set_to_bl(data_bl_p, pbl);
     }
 
     const ghobject_t &get_oid(uint32_t oid_id) {
-      ceph_assert(oid_id < objects.size());
+      stone_assert(oid_id < objects.size());
       return objects[oid_id];
     }
     const coll_t &get_cid(uint32_t cid_id) {
-      ceph_assert(cid_id < colls.size());
+      stone_assert(cid_id < colls.size());
       return colls[cid_id];
     }
     uint32_t get_fadvise_flags() const {
@@ -839,8 +839,8 @@ public:
    * Note that a 0-length write does not affect the size of the object.
    */
   void write(const coll_t& cid, const ghobject_t& oid, uint64_t off, uint64_t len,
-	       const ceph::buffer::list& write_data, uint32_t flags = 0) {
-    using ceph::encode;
+	       const stone::buffer::list& write_data, uint32_t flags = 0) {
+    using stone::encode;
     uint32_t orig_len = data_bl.length();
     Op* _op = _get_next_op();
     _op->op = OP_WRITE;
@@ -850,7 +850,7 @@ public:
     _op->len = len;
     encode(write_data, data_bl);
 
-    ceph_assert(len == write_data.length());
+    stone_assert(len == write_data.length());
     data.fadvise_flags = data.fadvise_flags | flags;
     if (write_data.length() > data.largest_data_len) {
 	data.largest_data_len = write_data.length();
@@ -896,13 +896,13 @@ public:
     data.ops = data.ops + 1;
   }
   /// Set an xattr of an object
-  void setattr(const coll_t& cid, const ghobject_t& oid, const char* name, ceph::buffer::list& val) {
+  void setattr(const coll_t& cid, const ghobject_t& oid, const char* name, stone::buffer::list& val) {
     std::string n(name);
     setattr(cid, oid, n, val);
   }
   /// Set an xattr of an object
-  void setattr(const coll_t& cid, const ghobject_t& oid, const std::string& s, ceph::buffer::list& val) {
-    using ceph::encode;
+  void setattr(const coll_t& cid, const ghobject_t& oid, const std::string& s, stone::buffer::list& val) {
+    using stone::encode;
     Op* _op = _get_next_op();
     _op->op = OP_SETATTR;
     _op->cid = _get_coll_id(cid);
@@ -912,8 +912,8 @@ public:
     data.ops = data.ops + 1;
   }
   /// Set multiple xattrs of an object
-  void setattrs(const coll_t& cid, const ghobject_t& oid, const std::map<std::string,ceph::buffer::ptr>& attrset) {
-    using ceph::encode;
+  void setattrs(const coll_t& cid, const ghobject_t& oid, const std::map<std::string,stone::buffer::ptr>& attrset) {
+    using stone::encode;
     Op* _op = _get_next_op();
     _op->op = OP_SETATTRS;
     _op->cid = _get_coll_id(cid);
@@ -922,8 +922,8 @@ public:
     data.ops = data.ops + 1;
   }
   /// Set multiple xattrs of an object
-  void setattrs(const coll_t& cid, const ghobject_t& oid, const std::map<std::string,ceph::buffer::list>& attrset) {
-    using ceph::encode;
+  void setattrs(const coll_t& cid, const ghobject_t& oid, const std::map<std::string,stone::buffer::list>& attrset) {
+    using stone::encode;
     Op* _op = _get_next_op();
     _op->op = OP_SETATTRS;
     _op->cid = _get_coll_id(cid);
@@ -938,7 +938,7 @@ public:
   }
   /// remove an xattr from an object
   void rmattr(const coll_t& cid, const ghobject_t& oid, const std::string& s) {
-    using ceph::encode;
+    using stone::encode;
     Op* _op = _get_next_op();
     _op->op = OP_RMATTR;
     _op->cid = _get_coll_id(cid);
@@ -1017,8 +1017,8 @@ public:
    * @param hint - the hint payload, which contains the customized
    *               data along with the hint type.
    */
-  void collection_hint(const coll_t& cid, uint32_t type, const ceph::buffer::list& hint) {
-    using ceph::encode;
+  void collection_hint(const coll_t& cid, uint32_t type, const stone::buffer::list& hint) {
+    using stone::encode;
     Op* _op = _get_next_op();
     _op->op = OP_COLL_HINT;
     _op->cid = _get_coll_id(cid);
@@ -1086,9 +1086,9 @@ public:
   void omap_setkeys(
     const coll_t& cid,                           ///< [in] Collection containing oid
     const ghobject_t &oid,                ///< [in] Object to update
-    const std::map<std::string, ceph::buffer::list> &attrset ///< [in] Replacement keys and values
+    const std::map<std::string, stone::buffer::list> &attrset ///< [in] Replacement keys and values
     ) {
-    using ceph::encode;
+    using stone::encode;
     Op* _op = _get_next_op();
     _op->op = OP_OMAP_SETKEYS;
     _op->cid = _get_coll_id(cid);
@@ -1097,11 +1097,11 @@ public:
     data.ops = data.ops + 1;
   }
 
-  /// Set keys on an oid omap (ceph::buffer::list variant).
+  /// Set keys on an oid omap (stone::buffer::list variant).
   void omap_setkeys(
     const coll_t &cid,                           ///< [in] Collection containing oid
     const ghobject_t &oid,                ///< [in] Object to update
-    const ceph::buffer::list &attrset_bl          ///< [in] Replacement keys and values
+    const stone::buffer::list &attrset_bl          ///< [in] Replacement keys and values
     ) {
     Op* _op = _get_next_op();
     _op->op = OP_OMAP_SETKEYS;
@@ -1117,7 +1117,7 @@ public:
     const ghobject_t &oid,  ///< [in] Object from which to remove the omap
     const std::set<std::string> &keys ///< [in] Keys to clear
     ) {
-    using ceph::encode;
+    using stone::encode;
     Op* _op = _get_next_op();
     _op->op = OP_OMAP_RMKEYS;
     _op->cid = _get_coll_id(cid);
@@ -1136,7 +1136,7 @@ public:
     _op->op = OP_OMAP_RMKEYS;
     _op->cid = _get_coll_id(cid);
     _op->oid = _get_object_id(oid);
-    using ceph::encode;
+    using stone::encode;
     encode((uint32_t)1, data_bl);
     encode(key, data_bl);
     data.ops = data.ops + 1;
@@ -1146,7 +1146,7 @@ public:
   void omap_rmkeys(
     const coll_t &cid,             ///< [in] Collection containing oid
     const ghobject_t &oid,  ///< [in] Object from which to remove the omap
-    const ceph::buffer::list &keys_bl ///< [in] Keys to clear
+    const stone::buffer::list &keys_bl ///< [in] Keys to clear
     ) {
     Op* _op = _get_next_op();
     _op->op = OP_OMAP_RMKEYS;
@@ -1163,7 +1163,7 @@ public:
     const std::string& first,    ///< [in] first key in range
     const std::string& last      ///< [in] first key past range, range is [first,last)
     ) {
-    using ceph::encode;
+    using stone::encode;
     Op* _op = _get_next_op();
     _op->op = OP_OMAP_RMKEYRANGE;
     _op->cid = _get_coll_id(cid);
@@ -1191,9 +1191,9 @@ public:
   void omap_setheader(
     const coll_t &cid,             ///< [in] Collection containing oid
     const ghobject_t &oid,  ///< [in] Object
-    const ceph::buffer::list &bl    ///< [in] Header value
+    const stone::buffer::list &bl    ///< [in] Header value
     ) {
-    using ceph::encode;
+    using stone::encode;
     Op* _op = _get_next_op();
     _op->op = OP_OMAP_SETHEADER;
     _op->cid = _get_coll_id(cid);
@@ -1260,7 +1260,7 @@ public:
     data.ops = data.ops + 1;
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     //layout: data_bl + op_bl + coll_index + object_index + data
     ENCODE_START(9, 9, bl);
     encode(data_bl, bl);
@@ -1271,7 +1271,7 @@ public:
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator &bl) {
+  void decode(stone::buffer::list::const_iterator &bl) {
     DECODE_START(9, bl);
     DECODE_OLDEST(9);
 
@@ -1286,7 +1286,7 @@ public:
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f);
+  void dump(stone::Formatter *f);
   static void generate_test_instances(std::list<Transaction*>& o);
 };
 WRITE_CLASS_ENCODER(Transaction)

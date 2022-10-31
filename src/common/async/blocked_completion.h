@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat
  * Author: Adam C. Emerson <aemerson@redhat.com>
@@ -27,7 +27,7 @@
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_error.hpp>
 
-namespace ceph::async {
+namespace stone::async {
 
 namespace bs = boost::system;
 
@@ -240,50 +240,50 @@ private:
   bool done = false;
 };
 } // namespace detail
-} // namespace ceph::async
+} // namespace stone::async
 
 
 namespace boost::asio {
 template<typename ReturnType>
-class async_result<ceph::async::use_blocked_t, ReturnType()>
-  : public ceph::async::detail::blocked_result<void>
+class async_result<stone::async::use_blocked_t, ReturnType()>
+  : public stone::async::detail::blocked_result<void>
 {
 public:
-  explicit async_result(typename ceph::async::detail::blocked_result<void>
+  explicit async_result(typename stone::async::detail::blocked_result<void>
 			::completion_handler_type& h)
-    : ceph::async::detail::blocked_result<void>(h) {}
+    : stone::async::detail::blocked_result<void>(h) {}
 };
 
 template<typename ReturnType, typename... Args>
-class async_result<ceph::async::use_blocked_t, ReturnType(Args...)>
-  : public ceph::async::detail::blocked_result<std::decay_t<Args>...>
+class async_result<stone::async::use_blocked_t, ReturnType(Args...)>
+  : public stone::async::detail::blocked_result<std::decay_t<Args>...>
 {
 public:
   explicit async_result(
-    typename ceph::async::detail::blocked_result<std::decay_t<Args>...>::completion_handler_type& h)
-    : ceph::async::detail::blocked_result<std::decay_t<Args>...>(h) {}
+    typename stone::async::detail::blocked_result<std::decay_t<Args>...>::completion_handler_type& h)
+    : stone::async::detail::blocked_result<std::decay_t<Args>...>(h) {}
 };
 
 template<typename ReturnType>
-class async_result<ceph::async::use_blocked_t,
+class async_result<stone::async::use_blocked_t,
 		   ReturnType(boost::system::error_code)>
-  : public ceph::async::detail::blocked_result<void>
+  : public stone::async::detail::blocked_result<void>
 {
 public:
   explicit async_result(
-    typename ceph::async::detail::blocked_result<void>::completion_handler_type& h)
-    : ceph::async::detail::blocked_result<void>(h) {}
+    typename stone::async::detail::blocked_result<void>::completion_handler_type& h)
+    : stone::async::detail::blocked_result<void>(h) {}
 };
 
 template<typename ReturnType, typename... Args>
-class async_result<ceph::async::use_blocked_t,
+class async_result<stone::async::use_blocked_t,
 		   ReturnType(boost::system::error_code, Args...)>
-  : public ceph::async::detail::blocked_result<std::decay_t<Args>...>
+  : public stone::async::detail::blocked_result<std::decay_t<Args>...>
 {
 public:
   explicit async_result(
-    typename ceph::async::detail::blocked_result<std::decay_t<Args>...>::completion_handler_type& h)
-    : ceph::async::detail::blocked_result<std::decay_t<Args>...>(h) {}
+    typename stone::async::detail::blocked_result<std::decay_t<Args>...>::completion_handler_type& h)
+    : stone::async::detail::blocked_result<std::decay_t<Args>...>(h) {}
 };
 }
 

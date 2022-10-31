@@ -278,7 +278,7 @@ public:
             RGWHandler* dialect_handler) override;
 
   int get_params(optional_yield y) override;
-  int get_data(ceph::bufferlist& bl, bool& again) override;
+  int get_data(stone::bufferlist& bl, bool& again) override;
   void send_response() override;
 
   static bool is_formpost_req(req_state* const s);
@@ -302,7 +302,7 @@ public:
                    const std::string_view& max_file_size,
                    const std::string_view& max_file_count,
                    const std::string_view& expires) {
-    using ceph::crypto::HMACSHA1;
+    using stone::crypto::HMACSHA1;
     using UCHARPTR = const unsigned char*;
 
     HMACSHA1 hmac((UCHARPTR) key.data(), key.size());

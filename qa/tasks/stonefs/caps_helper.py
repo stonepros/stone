@@ -1,11 +1,11 @@
 """
 Helper methods to test that MON and MDS caps are enforced properly.
 """
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 from teuthology.orchestra.run import Raw
 
-class CapsHelper(CephFSTestCase):
+class CapsHelper(StoneFSTestCase):
 
     def run_mon_cap_tests(self, moncap, keyring):
         keyring_path = self.create_keyring_file(self.fs.admin_remote, keyring)

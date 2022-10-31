@@ -1,24 +1,24 @@
 :orphan:
 
 ===============================================
- ceph-syn -- ceph synthetic workload generator
+ stone-syn -- stone synthetic workload generator
 ===============================================
 
-.. program:: ceph-syn
+.. program:: stone-syn
 
 Synopsis
 ========
 
-| **ceph-syn** [ -m *monaddr*:*port* ] --syn *command* *...*
+| **stone-syn** [ -m *monaddr*:*port* ] --syn *command* *...*
 
 
 Description
 ===========
 
-**ceph-syn** is a simple synthetic workload generator for the Ceph
+**stone-syn** is a simple synthetic workload generator for the Stone
 distributed file system. It uses the userspace client library to
 generate simple workloads against a currently running file system. The
-file system need not be mounted via ceph-fuse(8) or the kernel client.
+file system need not be mounted via stone-fuse(8) or the kernel client.
 
 One or more ``--syn`` command arguments specify the particular
 workload, as documented below.
@@ -31,16 +31,16 @@ Options
 
    Detach from console and daemonize after startup.
 
-.. option:: -c ceph.conf, --conf=ceph.conf
+.. option:: -c stone.conf, --conf=stone.conf
 
-   Use *ceph.conf* configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` to determine monitor addresses during
+   Use *stone.conf* configuration file instead of the default
+   ``/etc/stone/stone.conf`` to determine monitor addresses during
    startup.
 
 .. option:: -m monaddress[:port]
 
    Connect to specified monitor (instead of looking through
-   ``ceph.conf``).
+   ``stone.conf``).
 
 .. option:: --num_client num
 
@@ -89,11 +89,11 @@ line. This is not a complete list.
 Availability
 ============
 
-**ceph-syn** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**stone-syn** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8),
-:doc:`ceph-fuse <ceph-fuse>`\(8)
+:doc:`stone <stone>`\(8),
+:doc:`stone-fuse <stone-fuse>`\(8)

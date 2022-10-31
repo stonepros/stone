@@ -8,7 +8,7 @@
 #include "include/rados/rados_types.hpp"
 #include "include/interval_set.h"
 
-void calc_snap_set_diff(StoneeContext *cct,
+void calc_snap_set_diff(StoneContext *cct,
 			const librados::snap_set_t& snap_set,
 			librados::snap_t start, librados::snap_t end,
 			interval_set<uint64_t> *diff, uint64_t *end_size,

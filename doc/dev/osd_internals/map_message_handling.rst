@@ -120,7 +120,7 @@ These are the same in cases where there was no triggering message.  We discard
 a peering message if the message's query_epoch if the PG in question has entered
 a new epoch (See PG::old_peering_evt, PG::queue_peering_event).  Notifies,
 infos, notifies, and logs are all handled as PG::PeeringMachine events and
-are wrapped by PG::queue_* by PG::CephPeeringEvts, which include the created
+are wrapped by PG::queue_* by PG::StonePeeringEvts, which include the created
 state machine event along with epoch_sent and query_epoch in order to
 generically check PG::old_peering_message upon insertion and removal from the
 queue.

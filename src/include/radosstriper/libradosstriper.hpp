@@ -110,12 +110,12 @@ namespace libradosstriper
     /**
      * Get the value of an extended attribute on a striped object
      */
-    int getxattr(const std::string& oid, const char *name, ceph::bufferlist& bl);
+    int getxattr(const std::string& oid, const char *name, stone::bufferlist& bl);
 
     /**
      * Set the value of an extended attribute on a striped object
      */
-    int setxattr(const std::string& oid, const char *name, ceph::bufferlist& bl);
+    int setxattr(const std::string& oid, const char *name, stone::bufferlist& bl);
 
     /**
      * Delete an extended attribute from a striped object
@@ -126,53 +126,53 @@ namespace libradosstriper
      * Start iterating over xattrs on a striped object.
      */
     int getxattrs(const std::string& oid,
-                  std::map<std::string, ceph::bufferlist>& attrset); 
+                  std::map<std::string, stone::bufferlist>& attrset); 
     
     /**
      * synchronously write to the striped object at the specified offset.
      * NOTE: this call steals the contents of @param bl.
      */
-    int write(const std::string& soid, const ceph::bufferlist& bl, size_t len, uint64_t off);
+    int write(const std::string& soid, const stone::bufferlist& bl, size_t len, uint64_t off);
 
     /**
      * synchronously fill the striped object with the specified data
      * NOTE: this call steals the contents of @param bl.
      */
-    int write_full(const std::string& soid, const ceph::bufferlist& bl);
+    int write_full(const std::string& soid, const stone::bufferlist& bl);
 
     /**
      * synchronously append data to the striped object
      * NOTE: this call steals the contents of @p bl.
      */
-    int append(const std::string& soid, const ceph::bufferlist& bl, size_t len);
+    int append(const std::string& soid, const stone::bufferlist& bl, size_t len);
 
     /**
      * asynchronously write to the striped object at the specified offset.
      * NOTE: this call steals the contents of @p bl.
      */
-    int aio_write(const std::string& soid, librados::AioCompletion *c, const ceph::bufferlist& bl, size_t len, uint64_t off);
+    int aio_write(const std::string& soid, librados::AioCompletion *c, const stone::bufferlist& bl, size_t len, uint64_t off);
 
     /**
      * asynchronously fill the striped object with the specified data
      * NOTE: this call steals the contents of @p bl.
      */
-    int aio_write_full(const std::string& soid, librados::AioCompletion *c, const ceph::bufferlist& bl);
+    int aio_write_full(const std::string& soid, librados::AioCompletion *c, const stone::bufferlist& bl);
 
     /**
      * asynchronously append data to the striped object
      * NOTE: this call steals the contents of @p bl.
      */
-    int aio_append(const std::string& soid, librados::AioCompletion *c, const ceph::bufferlist& bl, size_t len);
+    int aio_append(const std::string& soid, librados::AioCompletion *c, const stone::bufferlist& bl, size_t len);
 
     /**
      * synchronously read from the striped object at the specified offset.
      */
-    int read(const std::string& soid, ceph::bufferlist* pbl, size_t len, uint64_t off);
+    int read(const std::string& soid, stone::bufferlist* pbl, size_t len, uint64_t off);
 
     /**
      * asynchronously read from the striped object at the specified offset.
      */
-    int aio_read(const std::string& soid, librados::AioCompletion *c, ceph::bufferlist *pbl, size_t len, uint64_t off);
+    int aio_read(const std::string& soid, librados::AioCompletion *c, stone::bufferlist *pbl, size_t len, uint64_t off);
 
     /**
      * synchronously get striped object stats (size/mtime)

@@ -138,11 +138,11 @@ public:
   // process_request_cap_release to preserve ordering.
   bool should_defer_client_cap_frozen(CInode *in);
 
-  void process_request_cap_release(MDRequestRef& mdr, client_t client, const ceph_mds_request_release& r,
+  void process_request_cap_release(MDRequestRef& mdr, client_t client, const stone_mds_request_release& r,
 				   std::string_view dname);
 
   void kick_cap_releases(MDRequestRef& mdr);
-  void kick_issue_caps(CInode *in, client_t client, ceph_seq_t seq);
+  void kick_issue_caps(CInode *in, client_t client, stone_seq_t seq);
 
   void remove_client_cap(CInode *in, Capability *cap, bool kill=false);
 
@@ -221,7 +221,7 @@ protected:
   bool _do_cap_update(CInode *in, Capability *cap, int dirty, snapid_t follows, const cref_t<MClientCaps> &m,
 		      const ref_t<MClientCaps> &ack, bool *need_flush=NULL);
   void handle_client_cap_release(const cref_t<MClientCapRelease> &m);
-  void _do_cap_release(client_t client, inodeno_t ino, uint64_t cap_id, ceph_seq_t mseq, ceph_seq_t seq);
+  void _do_cap_release(client_t client, inodeno_t ino, uint64_t cap_id, stone_seq_t mseq, stone_seq_t seq);
   void caps_tick();
 
   bool local_wrlock_start(LocalLockC *lock, MDRequestRef& mut);

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,14 +19,14 @@
 
 #include <netinet/in.h>
 
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "include/types.h"
 #include "include/blobhash.h"
 #include "include/encoding.h"
 
 #define MAX_PORT_NUMBER 65535
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -52,7 +52,7 @@ public:
   // cons
   entity_name_t() : _type(0), _num(0) { }
   entity_name_t(int t, int64_t n) : _type(t), _num(n) { }
-  explicit entity_name_t(const ceph_entity_name &n) :
+  explicit entity_name_t(const stone_entity_name &n) :
     _type(n.type), _num(n.num) { }
 
   // static cons
@@ -65,7 +65,7 @@ public:
   int64_t num() const { return _num; }
   int type() const { return _type; }
   const char *type_str() const {
-    return ceph_entity_type_name(type());
+    return stone_entity_type_name(type());
   }
 
   bool is_new() const { return num() < 0; }
@@ -76,8 +76,8 @@ public:
   bool is_mon() const { return type() == TYPE_MON; }
   bool is_mgr() const { return type() == TYPE_MGR; }
 
-  operator ceph_entity_name() const {
-    ceph_entity_name n = { _type, init_le64(_num) };
+  operator stone_entity_name() const {
+    stone_entity_name n = { _type, init_le64(_num) };
     return n;
   }
 
@@ -118,7 +118,7 @@ public:
     denc(v._type, p);
     denc(v._num, p);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
   static void generate_test_instances(std::list<entity_name_t*>& o);
 };
@@ -138,7 +138,7 @@ inline std::ostream& operator<<(std::ostream& out, const entity_name_t& addr) {
   else
     return out << addr.type_str() << '.' << addr.num();
 }
-inline std::ostream& operator<<(std::ostream& out, const ceph_entity_name& addr) {
+inline std::ostream& operator<<(std::ostream& out, const stone_entity_name& addr) {
   return out << entity_name_t{addr.type, static_cast<int64_t>(addr.num)};
 }
 
@@ -153,35 +153,35 @@ namespace std {
 } // namespace std
 
 // define a wire format for sockaddr that matches Linux's.
-struct ceph_sockaddr_storage {
-  ceph_le16 ss_family;
-  __u8 __ss_padding[128 - sizeof(ceph_le16)];
+struct stone_sockaddr_storage {
+  stone_le16 ss_family;
+  __u8 __ss_padding[128 - sizeof(stone_le16)];
 
-  void encode(ceph::buffer::list& bl) const {
-    struct ceph_sockaddr_storage ss = *this;
+  void encode(stone::buffer::list& bl) const {
+    struct stone_sockaddr_storage ss = *this;
     ss.ss_family = htons(ss.ss_family);
-    ceph::encode_raw(ss, bl);
+    stone::encode_raw(ss, bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    struct ceph_sockaddr_storage ss;
-    ceph::decode_raw(ss, bl);
+  void decode(stone::buffer::list::const_iterator& bl) {
+    struct stone_sockaddr_storage ss;
+    stone::decode_raw(ss, bl);
     ss.ss_family = ntohs(ss.ss_family);
     *this = ss;
   }
 } __attribute__ ((__packed__));
-WRITE_CLASS_ENCODER(ceph_sockaddr_storage)
+WRITE_CLASS_ENCODER(stone_sockaddr_storage)
 
 /*
  * encode sockaddr.ss_family as network byte order
  */
-static inline void encode(const sockaddr_storage& a, ceph::buffer::list& bl) {
+static inline void encode(const sockaddr_storage& a, stone::buffer::list& bl) {
 #if defined(__linux__)
   struct sockaddr_storage ss = a;
   ss.ss_family = htons(ss.ss_family);
-  ceph::encode_raw(ss, bl);
+  stone::encode_raw(ss, bl);
 #elif defined(__FreeBSD__) || defined(__APPLE__)
-  ceph_sockaddr_storage ss{};
+  stone_sockaddr_storage ss{};
   auto src = (unsigned char const *)&a;
   auto dst = (unsigned char *)&ss;
   src += sizeof(a.ss_len);
@@ -193,19 +193,19 @@ static inline void encode(const sockaddr_storage& a, ceph::buffer::list& bl) {
   ::memcpy(dst, src, copy_size);
   encode(ss, bl);
 #else
-  ceph_sockaddr_storage ss;
+  stone_sockaddr_storage ss;
   ::memset(&ss, '\0', sizeof(ss));
   ::memcpy(&ss, &a, std::min(sizeof(ss), sizeof(a)));
   encode(ss, bl);
 #endif
 }
 static inline void decode(sockaddr_storage& a,
-			  ceph::buffer::list::const_iterator& bl) {
+			  stone::buffer::list::const_iterator& bl) {
 #if defined(__linux__)
-  ceph::decode_raw(a, bl);
+  stone::decode_raw(a, bl);
   a.ss_family = ntohs(a.ss_family);
 #elif defined(__FreeBSD__) || defined(__APPLE__)
-  ceph_sockaddr_storage ss{};
+  stone_sockaddr_storage ss{};
   decode(ss, bl);
   auto src = (unsigned char const *)&ss;
   auto dst = (unsigned char *)&a;
@@ -218,7 +218,7 @@ static inline void decode(sockaddr_storage& a,
 				  (unsigned char*)(&a + 1) - dst);
   ::memcpy(dst, src, copy_size);
 #else
-  ceph_sockaddr_storage ss{};
+  stone_sockaddr_storage ss{};
   decode(ss, bl);
   ::memcpy(&a, &ss, std::min(sizeof(ss), sizeof(a)));
 #endif
@@ -233,8 +233,8 @@ static inline void decode(sockaddr_storage& a,
 struct entity_addr_t {
   typedef enum {
     TYPE_NONE = 0,
-    TYPE_LEGACY = 1,  ///< legacy msgr1 protocol (ceph jewel and older)
-    TYPE_MSGR2 = 2,   ///< msgr2 protocol (new in ceph kraken)
+    TYPE_LEGACY = 1,  ///< legacy msgr1 protocol (stone jewel and older)
+    TYPE_MSGR2 = 2,   ///< msgr2 protocol (new in stone kraken)
     TYPE_ANY = 3,  ///< ambiguous
   } type_t;
   static const type_t TYPE_DEFAULT = TYPE_MSGR2;
@@ -262,7 +262,7 @@ struct entity_addr_t {
   entity_addr_t(__u32 _type, __u32 _nonce) : type(_type), nonce(_nonce) {
     memset(&u, 0, sizeof(u));
   }
-  explicit entity_addr_t(const ceph_entity_addr &o) {
+  explicit entity_addr_t(const stone_entity_addr &o) {
     type = o.type;
     nonce = o.nonce;
     memcpy(&u, &o.in_addr, sizeof(u));
@@ -361,7 +361,7 @@ struct entity_addr_t {
       u.sin6.sin6_port = htons(port);
       break;
     default:
-      ceph_abort();
+      stone_abort();
     }
   }
   int get_port() const {
@@ -374,8 +374,8 @@ struct entity_addr_t {
     return 0;
   }
 
-  operator ceph_entity_addr() const {
-    ceph_entity_addr a;
+  operator stone_entity_addr() const {
+    stone_entity_addr a;
     a.type = 0;
     a.nonce = nonce;
     a.in_addr = get_sockaddr_storage();
@@ -441,9 +441,9 @@ struct entity_addr_t {
   bool parse(const std::string_view s);
   bool parse(const char *s, const char **end = 0, int type=0);
 
-  void decode_legacy_addr_after_marker(ceph::buffer::list::const_iterator& bl)
+  void decode_legacy_addr_after_marker(stone::buffer::list::const_iterator& bl)
   {
-    using ceph::decode;
+    using stone::decode;
     __u8 marker;
     __u16 rest;
     decode(marker, bl);
@@ -463,8 +463,8 @@ struct entity_addr_t {
   // Apparently on BSD there is also an ss_len that we need to handle; this requires
   // broader study
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl, uint64_t features) const {
+    using stone::encode;
     if ((features & STONE_FEATURE_MSG_ADDR2) == 0) {
       encode((__u32)0, bl);
       encode(nonce, bl);
@@ -501,8 +501,8 @@ struct entity_addr_t {
     }
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     __u8 marker;
     decode(marker, bl);
     if (marker == 0) {
@@ -510,7 +510,7 @@ struct entity_addr_t {
       return;
     }
     if (marker != 1)
-      throw ceph::buffer::malformed_input("entity_addr_t marker != 1");
+      throw stone::buffer::malformed_input("entity_addr_t marker != 1");
     DECODE_START(1, bl);
     decode(type, bl);
     decode(nonce, bl);
@@ -522,20 +522,20 @@ struct entity_addr_t {
 #endif
       uint16_t ss_family;
       if (elen < sizeof(ss_family)) {
-	throw ceph::buffer::malformed_input("elen smaller than family len");
+	throw stone::buffer::malformed_input("elen smaller than family len");
       }
       decode(ss_family, bl);
       u.sa.sa_family = ss_family;
       elen -= sizeof(ss_family);
       if (elen > get_sockaddr_len() - sizeof(u.sa.sa_family)) {
-	throw ceph::buffer::malformed_input("elen exceeds sockaddr len");
+	throw stone::buffer::malformed_input("elen exceeds sockaddr len");
       }
       bl.copy(elen, u.sa.sa_data);
     }
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
   static void generate_test_instances(std::list<entity_addr_t*>& o);
 };
@@ -659,9 +659,9 @@ struct entity_addrvec_t {
     return r;
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<entity_addrvec_t*>& ls);
 
   bool legacy_equals(const entity_addrvec_t& o) const {
@@ -750,25 +750,25 @@ struct entity_inst_t {
   entity_inst_t() {}
   entity_inst_t(entity_name_t n, const entity_addr_t& a) : name(n), addr(a) {}
   // cppcheck-suppress noExplicitConstructor
-  entity_inst_t(const ceph_entity_inst& i) : name(i.name), addr(i.addr) { }
-  entity_inst_t(const ceph_entity_name& n, const ceph_entity_addr &a) : name(n), addr(a) {}
-  operator ceph_entity_inst() {
-    ceph_entity_inst i = {name, addr};
+  entity_inst_t(const stone_entity_inst& i) : name(i.name), addr(i.addr) { }
+  entity_inst_t(const stone_entity_name& n, const stone_entity_addr &a) : name(n), addr(a) {}
+  operator stone_entity_inst() {
+    stone_entity_inst i = {name, addr};
     return i;
   }
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl, uint64_t features) const {
+    using stone::encode;
     encode(name, bl);
     encode(addr, bl, features);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& bl) {
+    using stone::decode;
     decode(name, bl);
     decode(addr, bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<entity_inst_t*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(entity_inst_t)
@@ -806,7 +806,7 @@ inline std::ostream& operator<<(std::ostream& out, const entity_inst_t &i)
 {
   return out << i.name << " " << i.addr;
 }
-inline std::ostream& operator<<(std::ostream& out, const ceph_entity_inst &i)
+inline std::ostream& operator<<(std::ostream& out, const stone_entity_inst &i)
 {
   entity_inst_t n = i;
   return out << n;

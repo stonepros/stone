@@ -3,7 +3,7 @@ Lost_unfound
 """
 import logging
 import time
-from tasks import ceph_manager
+from tasks import stone_manager
 from tasks.util.rados import rados
 from teuthology import misc as teuthology
 from teuthology.orchestra import run
@@ -24,10 +24,10 @@ def task(ctx, config):
     first_mon = teuthology.get_first_mon(ctx, config)
     (mon,) = ctx.cluster.only(first_mon).remotes.keys()
 
-    manager = ceph_manager.CephManager(
+    manager = stone_manager.StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager'),
+        logger=log.getChild('stone_manager'),
         )
 
     while len(manager.get_osd_status()['up']) < 3:
@@ -113,7 +113,7 @@ def task(ctx, config):
             args=[
                 "/bin/sh", "-c",
                 " ".join(['adjust-ulimits',
-                          'ceph-coverage',
+                          'stone-coverage',
                           '{tdir}/archive/coverage',
                           'rados',
                           '--no-log-to-stderr',

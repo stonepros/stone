@@ -1,5 +1,5 @@
 /*
- * ceph_fs.h - Stone constants and data types to share between kernel and
+ * stone_fs.h - Stone constants and data types to share between kernel and
  * user space.
  *
  * Most types in this file are defined as little-endian, and are
@@ -24,16 +24,16 @@
  * are markers that indicate endian conversion routines must be used
  * whenever such fields are accessed, which can be verified by checker
  * tools like "sparse".  For use as user-space headers, the little-endian
- * fields instead use types ceph_le16/ceph_le32/ceph_le64, which are C++
+ * fields instead use types stone_le16/stone_le32/stone_le64, which are C++
  * classes that implement automatic endian conversion on every access.
  * To still allow for header sharing, this file uses the __le types, but
- * redefines those to the ceph_ types when compiled in user space.
+ * redefines those to the stone_ types when compiled in user space.
  */
 #ifndef __KERNEL__
 #include "byteorder.h"
-#define __le16 ceph_le16
-#define __le32 ceph_le32
-#define __le64 ceph_le64
+#define __le16 stone_le16
+#define __le32 stone_le32
+#define __le64 stone_le64
 #endif
 
 /*
@@ -49,7 +49,7 @@
 
 #define STONE_INO_ROOT             1
 /*
- * hidden .ceph dir, which is no longer created but
+ * hidden .stone dir, which is no longer created but
  * recognised in existing filesystems so that we
  * don't try to fragment it.
  */
@@ -61,9 +61,9 @@
 #define STONE_MAX_MON   31
 
 /*
- * ceph_file_layout - describe data layout for a file/inode
+ * stone_file_layout - describe data layout for a file/inode
  */
-struct ceph_file_layout {
+struct stone_file_layout {
 	/* file -> object mapping */
 	__le32 fl_stripe_unit;     /* stripe unit, in bytes.  must be multiple
 				      of page size. */
@@ -82,8 +82,8 @@ struct ceph_file_layout {
 
 #define STONE_MIN_STRIPE_UNIT 65536
 
-struct ceph_dir_layout {
-	__u8   dl_dir_hash;   /* see ceph_hash.h for ids */
+struct stone_dir_layout {
+	__u8   dl_dir_hash;   /* see stone_hash.h for ids */
 	__u8   dl_unused1;
 	__u16  dl_unused2;
 	__u32  dl_unused3;
@@ -93,7 +93,7 @@ struct ceph_dir_layout {
 #define STONE_CRYPTO_NONE 0x0
 #define STONE_CRYPTO_AES  0x1
 
-#define STONE_AES_IV "cephsageyudagreg"
+#define STONE_AES_IV "stonesageyudagre"
 
 /* security/authentication protocols */
 #define STONE_AUTH_UNKNOWN	0x0
@@ -105,7 +105,7 @@ struct ceph_dir_layout {
 #define STONE_CON_MODE_CRC     0x1
 #define STONE_CON_MODE_SECURE  0x2
 
-extern const char *ceph_con_mode_name(int con_mode);
+extern const char *stone_con_mode_name(int con_mode);
 
 /*  For options with "_", like: GSS_GSS
     which means: Mode/Protocol to validate "authentication_authorization",
@@ -188,7 +188,7 @@ enum {
 	STONE_WATCH_EVENT_DISCONNECT       = 3, /* we were disconnected */
 };
 
-const char *ceph_watch_event_name(int o);
+const char *stone_watch_event_name(int o);
 
 /* pool operations */
 enum {
@@ -201,33 +201,33 @@ enum {
   POOL_OP_DELETE_UNMANAGED_SNAP		= 0x22,
 };
 
-struct ceph_mon_request_header {
+struct stone_mon_request_header {
 	__le64 have_version;
 	__le16 session_mon;
 	__le64 session_mon_tid;
 } __attribute__ ((packed));
 
-struct ceph_mon_statfs {
-	struct ceph_mon_request_header monhdr;
-	struct ceph_fsid fsid;
+struct stone_mon_statfs {
+	struct stone_mon_request_header monhdr;
+	struct stone_fsid fsid;
 } __attribute__ ((packed));
 
-struct ceph_statfs {
+struct stone_statfs {
 	__le64 kb, kb_used, kb_avail;
 	__le64 num_objects;
 } __attribute__ ((packed));
 
-struct ceph_mon_statfs_reply {
-	struct ceph_fsid fsid;
+struct stone_mon_statfs_reply {
+	struct stone_fsid fsid;
 	__le64 version;
-	struct ceph_statfs st;
+	struct stone_statfs st;
 } __attribute__ ((packed));
 
-const char *ceph_pool_op_name(int op);
+const char *stone_pool_op_name(int op);
 
-struct ceph_mon_poolop {
-	struct ceph_mon_request_header monhdr;
-	struct ceph_fsid fsid;
+struct stone_mon_poolop {
+	struct stone_mon_request_header monhdr;
+	struct stone_fsid fsid;
 	__le32 pool;
 	__le32 op;
 	__le64 __old_auid;  // obsolete
@@ -235,44 +235,44 @@ struct ceph_mon_poolop {
 	__le32 name_len;
 } __attribute__ ((packed));
 
-struct ceph_mon_poolop_reply {
-	struct ceph_mon_request_header monhdr;
-	struct ceph_fsid fsid;
+struct stone_mon_poolop_reply {
+	struct stone_mon_request_header monhdr;
+	struct stone_fsid fsid;
 	__le32 reply_code;
 	__le32 epoch;
 	char has_data;
 	char data[0];
 } __attribute__ ((packed));
 
-struct ceph_mon_unmanaged_snap {
+struct stone_mon_unmanaged_snap {
 	__le64 snapid;
 } __attribute__ ((packed));
 
-struct ceph_osd_getmap {
-	struct ceph_mon_request_header monhdr;
-	struct ceph_fsid fsid;
+struct stone_osd_getmap {
+	struct stone_mon_request_header monhdr;
+	struct stone_fsid fsid;
 	__le32 start;
 } __attribute__ ((packed));
 
-struct ceph_mds_getmap {
-	struct ceph_mon_request_header monhdr;
-	struct ceph_fsid fsid;
+struct stone_mds_getmap {
+	struct stone_mon_request_header monhdr;
+	struct stone_fsid fsid;
 } __attribute__ ((packed));
 
-struct ceph_client_mount {
-	struct ceph_mon_request_header monhdr;
+struct stone_client_mount {
+	struct stone_mon_request_header monhdr;
 } __attribute__ ((packed));
 
 #define STONE_SUBSCRIBE_ONETIME    1  /* i want only 1 update after have */
 
-struct ceph_mon_subscribe_item {
+struct stone_mon_subscribe_item {
 	__le64 start;
 	__u8 flags;
 } __attribute__ ((packed));
 
-struct ceph_mon_subscribe_ack {
+struct stone_mon_subscribe_ack {
 	__le32 duration;         /* seconds */
-	struct ceph_fsid fsid;
+	struct stone_fsid fsid;
 } __attribute__ ((packed));
 
 /*
@@ -316,7 +316,7 @@ struct ceph_mon_subscribe_ack {
 #define STONE_MDS_STATE_STOPPING     14 /* up, but exporting metadata */
 #define STONE_MDS_STATE_DAMAGED      15 /* rank not replayable, need repair */
 
-extern const char *ceph_mds_state_name(int s);
+extern const char *stone_mds_state_name(int s);
 
 
 /*
@@ -363,12 +363,12 @@ enum {
 // flags for state reclaim
 #define STONE_RECLAIM_RESET	1
 
-extern const char *ceph_session_op_name(int op);
+extern const char *stone_session_op_name(int op);
 
-struct ceph_mds_session_head {
+struct stone_mds_session_head {
 	__le32 op;
 	__le64 seq;
-	struct ceph_timespec stamp;
+	struct stone_timespec stamp;
 	__le32 max_caps, max_leases;
 } __attribute__ ((packed));
 
@@ -425,7 +425,7 @@ enum {
 	STONE_MDS_OP_RDLOCK_FRAGSSTATS = 0x01507
 };
 
-extern const char *ceph_mds_op_name(int op);
+extern const char *stone_mds_op_name(int op);
 
 #ifndef STONE_SETATTR_MODE
 #define STONE_SETATTR_MODE	(1 << 0)
@@ -454,7 +454,7 @@ extern const char *ceph_mds_op_name(int op);
 #define STONE_O_DIRECTORY       00200000
 #define STONE_O_NOFOLLOW        00400000
 
-int ceph_flags_sys2wire(int flags);
+int stone_flags_sys2wire(int flags);
 
 /*
  * Stone setxattr request flags.
@@ -476,8 +476,8 @@ int ceph_flags_sys2wire(int flags);
 #define STONE_READDIR_HASH_ORDER		(1<<9)
 #define STONE_READDIR_OFFSET_HASH       (1<<10)
 
-/* Note that this is embedded wthin ceph_mds_request_head_legacy. */
-union ceph_mds_request_args_legacy {
+/* Note that this is embedded wthin stone_mds_request_head_legacy. */
+union stone_mds_request_args_legacy {
 	struct {
 		__le32 mask;                 /* STONE_CAP_* */
 	} __attribute__ ((packed)) getattr;
@@ -485,8 +485,8 @@ union ceph_mds_request_args_legacy {
 		__le32 mode;
 		__le32 uid;
 		__le32 gid;
-		struct ceph_timespec mtime;
-		struct ceph_timespec atime;
+		struct stone_timespec mtime;
+		struct stone_timespec atime;
 		__le64 size, old_size;       /* old_size needed by truncate */
 		__le32 mask;                 /* STONE_SETATTR_* */
 	} __attribute__ ((packed)) setattr;
@@ -519,7 +519,7 @@ union ceph_mds_request_args_legacy {
 		__le32 osdmap_epoch; 	    /* use for set file/dir layout */
 	} __attribute__ ((packed)) setxattr;
 	struct {
-		struct ceph_file_layout layout;
+		struct stone_file_layout layout;
 	} __attribute__ ((packed)) setlayout;
 	struct {
 		__u8 rule; /* currently fcntl or flock */
@@ -536,7 +536,7 @@ union ceph_mds_request_args_legacy {
 #define STONE_MDS_FLAG_WANT_DENTRY   2  /* want dentry in reply */
 #define STONE_MDS_FLAG_ASYNC         4  /* request is async */
 
-struct ceph_mds_request_head_legacy {
+struct stone_mds_request_head_legacy {
 	__le64 oldest_client_tid;
 	__le32 mdsmap_epoch;           /* on client */
 	__le32 flags;                  /* STONE_MDS_FLAG_* */
@@ -546,14 +546,14 @@ struct ceph_mds_request_head_legacy {
 	__le32 caller_uid, caller_gid;
 	__le64 ino;                    /* use this ino for openc, mkdir, mknod,
 					  etc. (if replaying) */
-	union ceph_mds_request_args_legacy args;
+	union stone_mds_request_args_legacy args;
 } __attribute__ ((packed));
 
 /*
- * Note that this is embedded wthin ceph_mds_request_head. Also, compatibility
- * with the ceph_mds_request_args_legacy must be maintained!
+ * Note that this is embedded wthin stone_mds_request_head. Also, compatibility
+ * with the stone_mds_request_args_legacy must be maintained!
  */
-union ceph_mds_request_args {
+union stone_mds_request_args {
 	struct {
 		__le32 mask;                 /* STONE_CAP_* */
 	} __attribute__ ((packed)) getattr;
@@ -561,11 +561,11 @@ union ceph_mds_request_args {
 		__le32 mode;
 		__le32 uid;
 		__le32 gid;
-		struct ceph_timespec mtime;
-		struct ceph_timespec atime;
+		struct stone_timespec mtime;
+		struct stone_timespec atime;
 		__le64 size, old_size;       /* old_size needed by truncate */
 		__le32 mask;                 /* STONE_SETATTR_* */
-		struct ceph_timespec btime;
+		struct stone_timespec btime;
 	} __attribute__ ((packed)) setattr;
 	struct {
 		__le32 frag;                 /* which dir fragment */
@@ -596,7 +596,7 @@ union ceph_mds_request_args {
 		__le32 osdmap_epoch; 	    /* use for set file/dir layout */
 	} __attribute__ ((packed)) setxattr;
 	struct {
-		struct ceph_file_layout layout;
+		struct stone_file_layout layout;
 	} __attribute__ ((packed)) setlayout;
 	struct {
 		__u8 rule; /* currently fcntl or flock */
@@ -619,9 +619,9 @@ union ceph_mds_request_args {
 
 /*
  * Note that any change to this structure must ensure that it is compatible
- * with ceph_mds_request_head_legacy.
+ * with stone_mds_request_head_legacy.
  */
-struct ceph_mds_request_head {
+struct stone_mds_request_head {
 	__le16 version;
 	__le64 oldest_client_tid;
 	__le32 mdsmap_epoch;           /* on client */
@@ -632,11 +632,11 @@ struct ceph_mds_request_head {
 	__le32 caller_uid, caller_gid;
 	__le64 ino;                    /* use this ino for openc, mkdir, mknod,
 					  etc. (if replaying) */
-	union ceph_mds_request_args args;
+	union stone_mds_request_args args;
 } __attribute__ ((packed));
 
 /* cap/lease release record */
-struct ceph_mds_request_release {
+struct stone_mds_request_release {
 	__le64 ino, cap_id;            /* ino and unique cap id */
 	__le32 caps, wanted;           /* new issued, wanted */
 	__le32 seq, issue_seq, mseq;
@@ -645,25 +645,25 @@ struct ceph_mds_request_release {
 } __attribute__ ((packed));
 
 static inline void
-copy_from_legacy_head(struct ceph_mds_request_head *head,
-			struct ceph_mds_request_head_legacy *legacy)
+copy_from_legacy_head(struct stone_mds_request_head *head,
+			struct stone_mds_request_head_legacy *legacy)
 {
-	struct ceph_mds_request_head_legacy *embedded_legacy =
-		(struct ceph_mds_request_head_legacy *)&head->oldest_client_tid;
+	struct stone_mds_request_head_legacy *embedded_legacy =
+		(struct stone_mds_request_head_legacy *)&head->oldest_client_tid;
 	*embedded_legacy = *legacy;
 }
 
 static inline void
-copy_to_legacy_head(struct ceph_mds_request_head_legacy *legacy,
-			struct ceph_mds_request_head *head)
+copy_to_legacy_head(struct stone_mds_request_head_legacy *legacy,
+			struct stone_mds_request_head *head)
 {
-	struct ceph_mds_request_head_legacy *embedded_legacy =
-		(struct ceph_mds_request_head_legacy *)&head->oldest_client_tid;
+	struct stone_mds_request_head_legacy *embedded_legacy =
+		(struct stone_mds_request_head_legacy *)&head->oldest_client_tid;
 	*legacy = *embedded_legacy;
 }
 
 /* client reply */
-struct ceph_mds_reply_head {
+struct stone_mds_reply_head {
 	__le32 op;
 	__le32 result;
 	__le32 mdsmap_epoch;
@@ -673,18 +673,18 @@ struct ceph_mds_reply_head {
 } __attribute__ ((packed));
 
 /* one for each node split */
-struct ceph_frag_tree_split {
+struct stone_frag_tree_split {
 	__le32 frag;                   /* this frag splits... */
 	__le32 by;                     /* ...by this many bits */
 } __attribute__ ((packed));
 
-struct ceph_frag_tree_head {
-	__le32 nsplits;                /* num ceph_frag_tree_split records */
-	struct ceph_frag_tree_split splits[];
+struct stone_frag_tree_head {
+	__le32 nsplits;                /* num stone_frag_tree_split records */
+	struct stone_frag_tree_split splits[];
 } __attribute__ ((packed));
 
 /* capability issue, for bundling with mds reply */
-struct ceph_mds_reply_cap {
+struct stone_mds_reply_cap {
 	__le32 caps, wanted;           /* caps issued, wanted */
 	__le64 cap_id;
 	__le32 seq, mseq;
@@ -696,7 +696,7 @@ struct ceph_mds_reply_cap {
 #define STONE_CAP_FLAG_RELEASE	(1 << 1)        /* ask client to release the cap */
 
 /* reply_lease follows dname, and reply_inode */
-struct ceph_mds_reply_lease {
+struct stone_mds_reply_lease {
 	__le16 mask;            /* lease type(s) */
 	__le32 duration_ms;     /* lease duration */
 	__le32 seq;
@@ -705,7 +705,7 @@ struct ceph_mds_reply_lease {
 #define STONE_LEASE_VALID	(1 | 2) /* old and new bit values */
 #define STONE_LEASE_PRIMARY_LINK	4	/* primary linkage */
 
-struct ceph_mds_reply_dirfrag {
+struct stone_mds_reply_dirfrag {
 	__le32 frag;            /* fragment */
 	__le32 auth;            /* auth mds, if this is a delegation point */
 	__le32 ndist;           /* number of mds' this is replicated on */
@@ -721,7 +721,7 @@ struct ceph_mds_reply_dirfrag {
 #define STONE_LOCK_EXCL     2
 #define STONE_LOCK_UNLOCK   4
 
-struct ceph_filelock {
+struct stone_filelock {
 	__le64 start;/* file offset to start lock at */
 	__le64 length; /* num bytes to lock; 0 for all following start */
 	__le64 client; /* which client holds the lock */
@@ -739,7 +739,7 @@ struct ceph_filelock {
 #define STONE_FILE_MODE_LAZY       4  /* lazy io */
 #define STONE_FILE_MODE_NUM        8  /* bc these are bit fields.. mostly */
 
-int ceph_flags_to_mode(int flags);
+int stone_flags_to_mode(int flags);
 
 /* inline data state */
 #define STONE_INLINE_NONE	((__u64)-1)
@@ -837,7 +837,7 @@ int ceph_flags_to_mode(int flags);
 				STONE_CAP_FILE_WREXTEND | STONE_CAP_FILE_LAZYIO)
 
 
-int ceph_caps_for_mode(int mode);
+int stone_caps_for_mode(int mode);
 
 enum {
 	STONE_CAP_OP_GRANT,         /* mds->client grant */
@@ -855,10 +855,10 @@ enum {
 	STONE_CAP_OP_RENEW,         /* client->mds renewal request */
 };
 
-extern const char *ceph_cap_op_name(int op);
+extern const char *stone_cap_op_name(int op);
 
 /* extra info for cap import/export */
-struct ceph_mds_cap_peer {
+struct stone_mds_cap_peer {
 	__le64 cap_id;
 	__le32 seq;
 	__le32 mseq;
@@ -869,7 +869,7 @@ struct ceph_mds_cap_peer {
 /*
  * caps message, used for capability callbacks, acks, requests, etc.
  */
-struct ceph_mds_caps_head {
+struct stone_mds_caps_head {
 	__le32 op;                  /* STONE_CAP_OP_* */
 	__le64 ino, realm;
 	__le64 cap_id;
@@ -890,27 +890,27 @@ struct ceph_mds_caps_head {
 	__le64 xattr_version;
 } __attribute__ ((packed));
 
-struct ceph_mds_caps_non_export_body {
+struct stone_mds_caps_non_export_body {
     /* all except export */
     /* filelock */
     __le64 size, max_size, truncate_size;
     __le32 truncate_seq;
-    struct ceph_timespec mtime, atime, ctime;
-    struct ceph_file_layout layout;
+    struct stone_timespec mtime, atime, ctime;
+    struct stone_file_layout layout;
     __le32 time_warp_seq;
 } __attribute__ ((packed));
 
-struct ceph_mds_caps_export_body {
+struct stone_mds_caps_export_body {
     /* export message */
-    struct ceph_mds_cap_peer peer;
+    struct stone_mds_cap_peer peer;
 } __attribute__ ((packed));
 
 /* cap release msg head */
-struct ceph_mds_cap_release {
+struct stone_mds_cap_release {
 	__le32 num;                /* number of cap_items that follow */
 } __attribute__ ((packed));
 
-struct ceph_mds_cap_item {
+struct stone_mds_cap_item {
 	__le64 ino;
 	__le64 cap_id;
 	__le32 migrate_seq, seq;
@@ -921,10 +921,10 @@ struct ceph_mds_cap_item {
 #define STONE_MDS_LEASE_RENEW            3  /* client <-> mds    */
 #define STONE_MDS_LEASE_REVOKE_ACK       4  /* client  -> mds    */
 
-extern const char *ceph_lease_op_name(int o);
+extern const char *stone_lease_op_name(int o);
 
 /* lease msg header */
-struct ceph_mds_lease {
+struct stone_mds_lease {
 	__u8 action;            /* STONE_MDS_LEASE_* */
 	__le16 mask;            /* which lease */
 	__le64 ino;
@@ -935,7 +935,7 @@ struct ceph_mds_lease {
 /* followed by a __le32+string for dname */
 
 /* client reconnect */
-struct ceph_mds_cap_reconnect {
+struct stone_mds_cap_reconnect {
 	__le64 cap_id;
 	__le32 wanted;
 	__le32 issued;
@@ -945,17 +945,17 @@ struct ceph_mds_cap_reconnect {
 } __attribute__ ((packed));
 /* followed by flock blob */
 
-struct ceph_mds_cap_reconnect_v1 {
+struct stone_mds_cap_reconnect_v1 {
 	__le64 cap_id;
 	__le32 wanted;
 	__le32 issued;
 	__le64 size;
-	struct ceph_timespec mtime, atime;
+	struct stone_timespec mtime, atime;
 	__le64 snaprealm;
 	__le64 pathbase;        /* base ino for our path to this ino */
 } __attribute__ ((packed));
 
-struct ceph_mds_snaprealm_reconnect {
+struct stone_mds_snaprealm_reconnect {
 	__le64 ino;     /* snap realm base */
 	__le64 seq;     /* snap seq for this snap realm */
 	__le64 parent;  /* parent realm */
@@ -971,10 +971,10 @@ enum {
 	STONE_SNAP_OP_SPLIT,
 };
 
-extern const char *ceph_snap_op_name(int o);
+extern const char *stone_snap_op_name(int o);
 
 /* snap msg header */
-struct ceph_mds_snap_head {
+struct stone_mds_snap_head {
 	__le32 op;                /* STONE_SNAP_OP_* */
 	__le64 split;             /* ino to split off, if any */
 	__le32 num_split_inos;    /* # inos belonging to new child realm */
@@ -986,7 +986,7 @@ struct ceph_mds_snap_head {
 /*
  * encode info about a snaprealm, as viewed by a client
  */
-struct ceph_mds_snap_realm {
+struct stone_mds_snap_realm {
 	__le64 ino;           /* ino */
 	__le64 created;       /* snap: when created */
 	__le64 parent;        /* ino: parent realm */

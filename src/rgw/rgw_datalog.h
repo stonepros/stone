@@ -26,9 +26,9 @@
 
 #include "include/rados/librados.hpp"
 
-#include "common/ceph_context.h"
-#include "common/ceph_json.h"
-#include "common/ceph_time.h"
+#include "common/stone_context.h"
+#include "common/stone_json.h"
+#include "common/stone_time.h"
 #include "common/Formatter.h"
 #include "common/lru_map.h"
 #include "common/RefCountedObj.h"
@@ -51,9 +51,9 @@ enum DataLogEntityType {
 struct rgw_data_change {
   DataLogEntityType entity_type;
   std::string key;
-  ceph::real_time timestamp;
+  stone::real_time timestamp;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     auto t = std::uint8_t(entity_type);
     encode(t, bl);
@@ -72,17 +72,17 @@ struct rgw_data_change {
      DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter* f) const;
+  void dump(stone::Formatter* f) const;
   void decode_json(JSONObj* obj);
 };
 WRITE_CLASS_ENCODER(rgw_data_change)
 
 struct rgw_data_change_log_entry {
   std::string log_id;
-  ceph::real_time log_timestamp;
+  stone::real_time log_timestamp;
   rgw_data_change entry;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(log_id, bl);
     encode(log_timestamp, bl);
@@ -90,7 +90,7 @@ struct rgw_data_change_log_entry {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
      DECODE_START(1, bl);
      decode(log_id, bl);
      decode(log_timestamp, bl);
@@ -98,16 +98,16 @@ struct rgw_data_change_log_entry {
      DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter* f) const;
+  void dump(stone::Formatter* f) const;
   void decode_json(JSONObj* obj);
 };
 WRITE_CLASS_ENCODER(rgw_data_change_log_entry)
 
 struct RGWDataChangesLogInfo {
   std::string marker;
-  ceph::real_time last_update;
+  stone::real_time last_update;
 
-  void dump(ceph::Formatter* f) const;
+  void dump(stone::Formatter* f) const;
   void decode_json(JSONObj* obj);
 };
 
@@ -166,7 +166,7 @@ public:
 
 class RGWDataChangesLog {
   friend DataLogBackends;
-  CephContext *cct;
+  StoneContext *cct;
   librados::IoCtx ioctx;
   rgw::BucketChangeObserver *observer = nullptr;
   const RGWZone* zone;
@@ -182,20 +182,20 @@ class RGWDataChangesLog {
   }
   std::string prefix;
 
-  ceph::mutex lock = ceph::make_mutex("RGWDataChangesLog::lock");
-  ceph::shared_mutex modified_lock =
-    ceph::make_shared_mutex("RGWDataChangesLog::modified_lock");
+  stone::mutex lock = stone::make_mutex("RGWDataChangesLog::lock");
+  stone::shared_mutex modified_lock =
+    stone::make_shared_mutex("RGWDataChangesLog::modified_lock");
   bc::flat_map<int, bc::flat_set<std::string>> modified_shards;
 
   std::atomic<bool> down_flag = { false };
 
   struct ChangeStatus {
     std::shared_ptr<const rgw_sync_policy_info> sync_policy;
-    ceph::real_time cur_expiration;
-    ceph::real_time cur_sent;
+    stone::real_time cur_expiration;
+    stone::real_time cur_sent;
     bool pending = false;
     RefCountedCond* cond = nullptr;
-    ceph::mutex lock = ceph::make_mutex("RGWDataChangesLog::ChangeStatus");
+    stone::mutex lock = stone::make_mutex("RGWDataChangesLog::ChangeStatus");
   };
 
   using ChangeStatusPtr = std::shared_ptr<ChangeStatus>;
@@ -206,10 +206,10 @@ class RGWDataChangesLog {
 
   void _get_change(const rgw_bucket_shard& bs, ChangeStatusPtr& status);
   void register_renew(const rgw_bucket_shard& bs);
-  void update_renewed(const rgw_bucket_shard& bs, ceph::real_time expiration);
+  void update_renewed(const rgw_bucket_shard& bs, stone::real_time expiration);
 
-  ceph::mutex renew_lock = ceph::make_mutex("ChangesRenewThread::lock");
-  ceph::condition_variable renew_cond;
+  stone::mutex renew_lock = stone::make_mutex("ChangesRenewThread::lock");
+  stone::condition_variable renew_cond;
   void renew_run();
   void renew_stop();
   std::thread renew_thread;
@@ -222,7 +222,7 @@ class RGWDataChangesLog {
 
 public:
 
-  RGWDataChangesLog(CephContext* cct);
+  RGWDataChangesLog(StoneContext* cct);
   ~RGWDataChangesLog();
 
   int start(const DoutPrefixProvider *dpp, const RGWZone* _zone, const RGWZoneParams& zoneparams,
@@ -273,7 +273,7 @@ public:
 class RGWDataChangesBE : public boost::intrusive_ref_counter<RGWDataChangesBE> {
 protected:
   librados::IoCtx& ioctx;
-  CephContext* const cct;
+  StoneContext* const cct;
   RGWDataChangesLog& datalog;
 
   std::string get_oid(int shard_id) {
@@ -281,25 +281,25 @@ protected:
   }
 public:
   using entries = std::variant<std::list<cls_log_entry>,
-			       std::vector<ceph::buffer::list>>;
+			       std::vector<stone::buffer::list>>;
 
   const uint64_t gen_id;
 
   RGWDataChangesBE(librados::IoCtx& ioctx,
 		   RGWDataChangesLog& datalog,
 		   uint64_t gen_id)
-    : ioctx(ioctx), cct(static_cast<CephContext*>(ioctx.cct())),
+    : ioctx(ioctx), cct(static_cast<StoneContext*>(ioctx.cct())),
       datalog(datalog), gen_id(gen_id) {}
   virtual ~RGWDataChangesBE() = default;
 
-  virtual void prepare(ceph::real_time now,
+  virtual void prepare(stone::real_time now,
 		       const std::string& key,
-		       ceph::buffer::list&& entry,
+		       stone::buffer::list&& entry,
 		       entries& out) = 0;
   virtual int push(const DoutPrefixProvider *dpp, int index, entries&& items) = 0;
-  virtual int push(const DoutPrefixProvider *dpp, int index, ceph::real_time now,
+  virtual int push(const DoutPrefixProvider *dpp, int index, stone::real_time now,
 		   const std::string& key,
-		   ceph::buffer::list&& bl) = 0;
+		   stone::buffer::list&& bl) = 0;
   virtual int list(const DoutPrefixProvider *dpp, int shard, int max_entries,
 		   std::vector<rgw_data_change_log_entry>& entries,
 		   std::optional<std::string_view> marker,

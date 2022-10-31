@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,17 +16,17 @@
 #define STONE_MMONSUBSCRIBE_H
 
 #include "msg/Message.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 
 /*
  * compatibility with old crap
  */
-struct ceph_mon_subscribe_item_old {
-	ceph_le64 unused;
-	ceph_le64 have;
+struct stone_mon_subscribe_item_old {
+	stone_le64 unused;
+	stone_le64 have;
 	__u8 onetime;
 } __attribute__ ((packed));
-WRITE_RAW_ENCODER(ceph_mon_subscribe_item_old)
+WRITE_RAW_ENCODER(stone_mon_subscribe_item_old)
 
 
 class MMonSubscribe final : public Message {
@@ -35,7 +35,7 @@ public:
   static constexpr int COMPAT_VERSION = 1;
 
   std::string hostname;
-  std::map<std::string, ceph_mon_subscribe_item> what;
+  std::map<std::string, stone_mon_subscribe_item> what;
 
   MMonSubscribe() : Message{STONE_MSG_MON_SUBSCRIBE, HEAD_VERSION, COMPAT_VERSION} { }
 private:
@@ -53,10 +53,10 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     if (header.version < 2) {
-      std::map<std::string, ceph_mon_subscribe_item_old> oldwhat;
+      std::map<std::string, stone_mon_subscribe_item_old> oldwhat;
       decode(oldwhat, p);
       what.clear();
       for (auto q = oldwhat.begin(); q != oldwhat.end(); q++) {
@@ -76,10 +76,10 @@ public:
     }
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     if ((features & STONE_FEATURE_SUBSCRIBE2) == 0) {
       header.version = 0;
-      std::map<std::string, ceph_mon_subscribe_item_old> oldwhat;
+      std::map<std::string, stone_mon_subscribe_item_old> oldwhat;
       for (auto q = what.begin(); q != what.end(); q++) {
 	if (q->second.start)
 	  // warning: start=1 -> have=0, which was ambiguous
@@ -97,7 +97,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

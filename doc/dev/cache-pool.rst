@@ -104,7 +104,7 @@ define the false positive probability for the bloom filter (default is 0.05)::
 
 The hit_set_count and hit_set_period define how much time each HitSet
 should cover, and how many such HitSets to store.  Binning accesses
-over time allows Ceph to independently determine whether an object was
+over time allows Stone to independently determine whether an object was
 accessed at least once and whether it was accessed more than once over
 some time period ("age" vs "temperature").
 
@@ -154,7 +154,7 @@ to force all data to be flushed back to the base tier.
 The 'readonly' mode is intended for read-only workloads that do not
 require consistency to be enforced by the storage system.  Writes will
 be forwarded to the base tier, but objects that are read will get
-promoted to the cache.  No attempt is made by Ceph to ensure that the
+promoted to the cache.  No attempt is made by Stone to ensure that the
 contents of the cache tier(s) are consistent in the presence of object
 updates.
 
@@ -165,7 +165,7 @@ The agent performs two basic functions: flushing (writing 'dirty'
 cache objects back to the base tier) and evicting (removing cold and
 clean objects from the cache).
 
-The thresholds at which Ceph will flush or evict objects is specified
+The thresholds at which Stone will flush or evict objects is specified
 relative to a 'target size' of the pool.  For example::
 
  ceph osd pool set foo-hot cache_target_dirty_ratio .4
@@ -180,7 +180,7 @@ The target size can be specified either in terms of objects or bytes::
  ceph osd pool set foo-hot target_max_bytes 1000000000000  # 1 TB
  ceph osd pool set foo-hot target_max_objects 1000000       # 1 million objects
 
-Note that if both limits are specified, Ceph will begin flushing or
+Note that if both limits are specified, Stone will begin flushing or
 evicting when either threshold is triggered.
 
 Other tunables

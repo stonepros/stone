@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 
 import _ from 'lodash';
 
-import { InventoryDevice } from '~/app/ceph/cluster/inventory/inventory-devices/inventory-device.model';
+import { InventoryDevice } from '~/app/stone/cluster/inventory/inventory-devices/inventory-device.model';
 import { OsdService } from '~/app/shared/api/osd.service';
 import { Icons } from '~/app/shared/enum/icons.enum';
 import { CdTableColumnFiltersChange } from '~/app/shared/models/cd-table-column-filters-change';

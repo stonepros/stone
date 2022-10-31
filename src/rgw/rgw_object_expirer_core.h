@@ -13,13 +13,13 @@
 #include "auth/Crypto.h"
 
 #include "common/armor.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/config.h"
-#include "common/ceph_argparse.h"
+#include "common/stone_argparse.h"
 #include "common/Formatter.h"
 #include "common/errno.h"
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "common/Thread.h"
 
@@ -38,16 +38,16 @@ class RGWBucketInfo;
 class cls_timeindex_entry;
 
 class RGWObjExpStore {
-  CephContext *cct;
+  StoneContext *cct;
   RGWSI_RADOS *rados_svc;
   RGWSI_Zone *zone_svc;
 public:
-  RGWObjExpStore(CephContext *_cct, RGWSI_RADOS *_rados_svc, RGWSI_Zone *_zone_svc) : cct(_cct),
+  RGWObjExpStore(StoneContext *_cct, RGWSI_RADOS *_rados_svc, RGWSI_Zone *_zone_svc) : cct(_cct),
                                                                                       rados_svc(_rados_svc),
                                                                                       zone_svc(_zone_svc) {}
 
   int objexp_hint_add(const DoutPrefixProvider *dpp, 
-                      const ceph::real_time& delete_at,
+                      const stone::real_time& delete_at,
                       const string& tenant_name,
                       const string& bucket_name,
                       const string& bucket_id,
@@ -55,8 +55,8 @@ public:
 
   int objexp_hint_list(const DoutPrefixProvider *dpp, 
                        const string& oid,
-                       const ceph::real_time& start_time,
-                       const ceph::real_time& end_time,
+                       const stone::real_time& start_time,
+                       const stone::real_time& end_time,
                        const int max_entries,
                        const string& marker,
                        list<cls_timeindex_entry>& entries, /* out */
@@ -65,8 +65,8 @@ public:
 
   int objexp_hint_trim(const DoutPrefixProvider *dpp, 
                        const string& oid,
-                       const ceph::real_time& start_time,
-                       const ceph::real_time& end_time,
+                       const stone::real_time& start_time,
+                       const stone::real_time& end_time,
                        const string& from_marker,
                        const string& to_marker);
 };
@@ -82,13 +82,13 @@ protected:
                        RGWBucketInfo& bucket_info);
 
   class OEWorker : public Thread, public DoutPrefixProvider {
-    CephContext *cct;
+    StoneContext *cct;
     RGWObjectExpirer *oe;
-    ceph::mutex lock = ceph::make_mutex("OEWorker");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("OEWorker");
+    stone::condition_variable cond;
 
   public:
-    OEWorker(CephContext * const cct,
+    OEWorker(StoneContext * const cct,
              RGWObjectExpirer * const oe)
       : cct(cct),
         oe(oe) {
@@ -97,7 +97,7 @@ protected:
     void *entry() override;
     void stop();
 
-    CephContext *get_cct() const override;
+    StoneContext *get_cct() const override;
     unsigned get_subsys() const;
     std::ostream& gen_prefix(std::ostream& out) const;
   };
@@ -116,7 +116,7 @@ public:
   }
 
   int hint_add(const DoutPrefixProvider *dpp, 
-               const ceph::real_time& delete_at,
+               const stone::real_time& delete_at,
                const string& tenant_name,
                const string& bucket_name,
                const string& bucket_id,

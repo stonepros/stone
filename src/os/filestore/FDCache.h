@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -38,7 +38,7 @@ public:
   public:
     const int fd;
     explicit FD(int _fd) : fd(_fd) {
-      ceph_assert(_fd >= 0);
+      stone_assert(_fd >= 0);
     }
     int operator*() const {
       return fd;
@@ -49,14 +49,14 @@ public:
   };
 
 private:
-  CephContext *cct;
+  StoneContext *cct;
   const int registry_shards;
   SharedLRU<ghobject_t, FD> *registry;
 
 public:
-  explicit FDCache(CephContext *cct) : cct(cct),
+  explicit FDCache(StoneContext *cct) : cct(cct),
   registry_shards(std::max<int64_t>(cct->_conf->filestore_fd_cache_shards, 1)) {
-    ceph_assert(cct);
+    stone_assert(cct);
     cct->_conf.add_observer(this);
     registry = new SharedLRU<ghobject_t, FD>[registry_shards];
     for (int i = 0; i < registry_shards; ++i) {

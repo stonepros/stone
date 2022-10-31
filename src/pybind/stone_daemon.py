@@ -26,7 +26,7 @@ from signal import signal, SIGWINCH
 from termios import TIOCGWINSZ
 from typing import Optional
 
-from ceph_argparse import parse_json_funcsigs, validate_command
+from stone_argparse import parse_json_funcsigs, validate_command
 
 COUNTER = 0x8
 LONG_RUNNING_AVG = 0x4
@@ -128,9 +128,9 @@ class Termsize(object):
 
 class DaemonWatcher(object):
     """
-    Given a Ceph daemon's admin socket path, poll its performance counters
+    Given a Stone daemon's admin socket path, poll its performance counters
     and output a series of output lines showing the momentary values of
-    counters of interest (those with the 'nick' property in Ceph's schema)
+    counters of interest (those with the 'nick' property in Stone's schema)
     """
     (
         BLACK,

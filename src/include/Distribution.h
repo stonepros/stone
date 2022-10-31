@@ -55,7 +55,7 @@ class Distribution {
       if (s < p[i]) return v[i];
       s -= p[i];
     }
-    ceph_abort();
+    stone_abort();
     return v[p.size() - 1];  // hmm.  :/
   }
 

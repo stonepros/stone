@@ -7,7 +7,7 @@
 #include <iosfwd>
 #include <string>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/int_types.h"
 #include "common/ref.h"
 
@@ -24,7 +24,7 @@ public:
   Future& operator=(const Future&);
   Future(Future&&);
   Future& operator=(Future&&);
-  Future(ceph::ref_t<FutureImpl> future_impl);
+  Future(stone::ref_t<FutureImpl> future_impl);
   ~Future();
 
   bool is_valid() const {
@@ -45,7 +45,7 @@ private:
     return m_future_impl;
   }
 
-  ceph::ref_t<FutureImpl> m_future_impl;
+  stone::ref_t<FutureImpl> m_future_impl;
 };
 
 std::ostream &operator<<(std::ostream &os, const Future &future);

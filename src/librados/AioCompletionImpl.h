@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
  *
@@ -15,7 +15,7 @@
 #ifndef STONE_LIBRADOS_AIOCOMPLETIONIMPL_H
 #define STONE_LIBRADOS_AIOCOMPLETIONIMPL_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/buffer.h"
 #include "include/xlist.h"
 #include "osd/osd_types.h"
@@ -23,13 +23,13 @@
 class IoCtxImpl;
 
 struct librados::AioCompletionImpl {
-  ceph::mutex lock = ceph::make_mutex("AioCompletionImpl lock", false);
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("AioCompletionImpl lock", false);
+  stone::condition_variable cond;
   int ref = 1, rval = 0;
   bool released = false;
   bool complete = false;
   version_t objver = 0;
-  ceph_tid_t tid = 0;
+  stone_tid_t tid = 0;
 
   rados_callback_t callback_complete = nullptr, callback_safe = nullptr;
   void *callback_complete_arg = nullptr, *callback_safe_arg = nullptr;
@@ -41,7 +41,7 @@ struct librados::AioCompletionImpl {
   char *out_buf = nullptr;
 
   IoCtxImpl *io = nullptr;
-  ceph_tid_t aio_write_seq = 0;
+  stone_tid_t aio_write_seq = 0;
   xlist<AioCompletionImpl*>::item aio_write_list_item;
 
   AioCompletionImpl() : aio_write_list_item(this) { }
@@ -102,13 +102,13 @@ struct librados::AioCompletionImpl {
     _get();
   }
   void _get() {
-    ceph_assert(ceph_mutex_is_locked(lock));
-    ceph_assert(ref > 0);
+    stone_assert(stone_mutex_is_locked(lock));
+    stone_assert(ref > 0);
     ++ref;
   }
   void release() {
     lock.lock();
-    ceph_assert(!released);
+    stone_assert(!released);
     released = true;
     put_unlock();
   }
@@ -117,7 +117,7 @@ struct librados::AioCompletionImpl {
     put_unlock();
   }
   void put_unlock() {
-    ceph_assert(ref > 0);
+    stone_assert(ref > 0);
     int n = --ref;
     lock.unlock();
     if (!n)

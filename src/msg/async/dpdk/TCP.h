@@ -36,8 +36,8 @@
 
 #include "include/utime.h"
 #include "common/Throttle.h"
-#include "common/ceph_time.h"
-#include "common/ceph_crypto.h"
+#include "common/stone_time.h"
+#include "common/stone_crypto.h"
 #include "msg/async/Event.h"
 #include "IPChecksum.h"
 #include "IP.h"
@@ -282,7 +282,7 @@ class tcp {
   };
 
   class tcb : public enable_lw_shared_from_this<tcb> {
-    using clock_type = ceph::coarse_real_clock;
+    using clock_type = stone::coarse_real_clock;
     static constexpr tcp_state CLOSED         = tcp_state::CLOSED;
     static constexpr tcp_state LISTEN         = tcp_state::LISTEN;
     static constexpr tcp_state SYN_SENT       = tcp_state::SYN_SENT;
@@ -346,7 +346,7 @@ class tcp {
       uint32_t partial_ack = 0;
       tcp_sequence recover;
       bool window_probe = false;
-      send(StoneeContext *c): user_queue_space(c, "DPDK::tcp::tcb::user_queue_space", 81920) {}
+      send(StoneContext *c): user_queue_space(c, "DPDK::tcp::tcb::user_queue_space", 81920) {}
     } _snd;
     struct receive {
       tcp_sequence next;
@@ -384,7 +384,7 @@ class tcp {
       uint32_t key[16];
       isn_secret () {
         for (auto& k : key) {
-          k = ceph::util::generate_random_number<uint32_t>(0, std::numeric_limits<uint32_t>::max());
+          k = stone::util::generate_random_number<uint32_t>(0, std::numeric_limits<uint32_t>::max());
         }
       }
     };
@@ -620,7 +620,7 @@ class tcp {
     friend class C_all_data_acked;
   };
 
-  StoneeContext *cct;
+  StoneContext *cct;
   // ipv4_l4<ip_protocol_num::tcp>
   inet_type& _inet;
   EventCenter *center;
@@ -740,7 +740,7 @@ class tcp {
     friend class tcp;
   };
  public:
-  explicit tcp(StoneeContext *c, inet_type& inet, EventCenter *cen);
+  explicit tcp(StoneContext *c, inet_type& inet, EventCenter *cen);
   void received(Packet p, ipaddr from, ipaddr to);
   bool forward(forward_hash& out_hash_data, Packet& p, size_t off);
   listener listen(uint16_t port, size_t queue_length = 100);
@@ -766,7 +766,7 @@ class tcp {
 };
 
 template <typename InetTraits>
-tcp<InetTraits>::tcp(StoneeContext *c, inet_type& inet, EventCenter *cen)
+tcp<InetTraits>::tcp(StoneContext *c, inet_type& inet, EventCenter *cen)
     : cct(c), _inet(inet), center(cen),
       manager(static_cast<DPDKDriver*>(cen->get_driver())->manager),
       _e(_rd()), _queue_space(cct, "DPDK::tcp::queue_space", 81920) {
@@ -1236,7 +1236,7 @@ Tub<Packet> tcp<InetTraits>::tcb::read() {
 template <typename InetTraits>
 int tcp<InetTraits>::tcb::send(Packet p) {
   // We can not send after the connection is closed
-  ceph_assert(!_snd.closed);
+  stone_assert(!_snd.closed);
 
   if (in_state(CLOSED))
     return -ECONNRESET;
@@ -1244,7 +1244,7 @@ int tcp<InetTraits>::tcb::send(Packet p) {
   auto len = p.len();
   if (!_snd.user_queue_space.get_or_fail(len)) {
     // note: caller must ensure enough queue space to send
-    ceph_abort();
+    stone_abort();
   }
   // TODO: Handle p.len() > max user_queue_space case
   _snd.queued_len += len;
@@ -1442,7 +1442,7 @@ tcp_sequence tcp<InetTraits>::tcb::get_isn() {
   hash[1] = _foreign_ip.ip;
   hash[2] = (_local_port << 16) + _foreign_port;
   hash[3] = _isn_secret.key[15];
-  ceph::crypto::MD5 md5;
+  stone::crypto::MD5 md5;
   md5.Update((const unsigned char*)_isn_secret.key, sizeof(_isn_secret.key));
   md5.Final((unsigned char*)hash);
   auto seq = hash[0];
@@ -1463,7 +1463,7 @@ Tub<typename InetTraits::l4packet> tcp<InetTraits>::tcb::get_packet() {
     return p;
   }
 
-  ceph_assert(!_packetq.empty());
+  stone_assert(!_packetq.empty());
 
   p = std::move(_packetq.front());
   _packetq.pop_front();

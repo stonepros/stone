@@ -7,7 +7,7 @@
 #include <numeric>
 
 #include "include/compat.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/types.h"
 #include "include/xlist.h"
 
@@ -137,7 +137,7 @@ struct Inode : RefCountedObject {
   int32_t    nlink = 0;
 
   // file (data access)
-  ceph_dir_layout dir_layout{};
+  stone_dir_layout dir_layout{};
   file_layout_t layout;
   uint64_t   size = 0;        // on directory, # dentries
   uint32_t   truncate_seq = 1;
@@ -178,8 +178,8 @@ struct Inode : RefCountedObject {
     int which = dir_layout.dl_dir_hash;
     if (!which)
       which = STONE_STR_HASH_LINUX;
-    ceph_assert(ceph_str_hash_valid(which));
-    return ceph_str_hash(which, dn.data(), dn.length());
+    stone_assert(stone_str_hash_valid(which));
+    return stone_str_hash(which, dn.data(), dn.length());
   }
 
   unsigned flags = 0;
@@ -206,7 +206,7 @@ struct Inode : RefCountedObject {
   int64_t cap_dirtier_gid = -1;
   unsigned dirty_caps = 0;
   unsigned flushing_caps = 0;
-  std::map<ceph_tid_t, int> flushing_cap_tids;
+  std::map<stone_tid_t, int> flushing_cap_tids;
   int shared_gen = 0;
   int cache_gen = 0;
   int snap_caps = 0;
@@ -236,12 +236,12 @@ struct Inode : RefCountedObject {
   map<frag_t,int> fragmap;  // known frag -> mds mappings
   map<frag_t, std::vector<mds_rank_t>> frag_repmap; // non-auth mds mappings
 
-  std::list<ceph::condition_variable*> waitfor_caps;
-  std::list<ceph::condition_variable*> waitfor_commit;
-  std::list<ceph::condition_variable*> waitfor_deleg;
+  std::list<stone::condition_variable*> waitfor_caps;
+  std::list<stone::condition_variable*> waitfor_commit;
+  std::list<stone::condition_variable*> waitfor_deleg;
 
   Dentry *get_first_parent() {
-    ceph_assert(!dentries.empty());
+    stone_assert(!dentries.empty());
     return *dentries.begin();
   }
 
@@ -252,19 +252,19 @@ struct Inode : RefCountedObject {
   // The ref count. 1 for each dentry, fh, inode_map,
   // cwd that links to me.
   void iget() { get(); }
-  void iput(int n=1) { ceph_assert(n >= 0); while (n--) put(); }
+  void iput(int n=1) { stone_assert(n >= 0); while (n--) put(); }
 
   void ll_get() {
     ll_ref++;
   }
   void ll_put(uint64_t n=1) {
-    ceph_assert(ll_ref >= n);
+    stone_assert(ll_ref >= n);
     ll_ref -= n;
   }
 
   // file locks
-  std::unique_ptr<ceph_lock_state_t> fcntl_locks;
-  std::unique_ptr<ceph_lock_state_t> flock_locks;
+  std::unique_ptr<stone_lock_state_t> fcntl_locks;
+  std::unique_ptr<stone_lock_state_t> flock_locks;
 
   bool has_any_filelocks() {
     return
@@ -330,7 +330,7 @@ struct Inode : RefCountedObject {
 
   void recall_deleg(bool skip_read);
   bool has_recalled_deleg();
-  int set_deleg(Fh *fh, unsigned type, ceph_deleg_cb_t cb, void *priv);
+  int set_deleg(Fh *fh, unsigned type, stone_deleg_cb_t cb, void *priv);
   void unset_deleg(Fh *fh);
 
   void mark_caps_dirty(int caps);

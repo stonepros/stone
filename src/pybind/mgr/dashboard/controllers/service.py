@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 
 import cherrypy
-from ceph.deployment.service_spec import ServiceSpec
+from stone.deployment.service_spec import ServiceSpec
 
 from ..exceptions import DashboardException
 from ..security import Scope

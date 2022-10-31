@@ -38,7 +38,7 @@ struct RGWSysObjState {
   bool has_attrs{false};
   bool exists{false};
   uint64_t size{0};
-  ceph::real_time mtime;
+  stone::real_time mtime;
   uint64_t epoch{0};
   bufferlist obj_tag;
   bool has_data{false};
@@ -74,7 +74,7 @@ struct RGWSysObjState {
 
 class RGWSysObjectCtxBase {
   std::map<rgw_raw_obj, RGWSysObjState> objs_state;
-  ceph::shared_mutex lock = ceph::make_shared_mutex("RGWSysObjectCtxBase");
+  stone::shared_mutex lock = stone::make_shared_mutex("RGWSysObjectCtxBase");
 
 public:
   RGWSysObjectCtxBase() = default;

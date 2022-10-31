@@ -10,7 +10,7 @@ wait_until_changed() {
 	name=$1
 	wait=0
 	while [ $wait -lt $timeout ]; do
-		new_value=`getfattr --only-value -n ceph.dir.$name .`
+		new_value=`getfattr --only-value -n stone.dir.$name .`
 		[ $new_value == $old_value ] || return 0
 		sleep 1
 		wait=$(($wait + 1))
@@ -29,8 +29,8 @@ check_rctime() {
 	return 1
 }
 
-# sync(3) does not make ceph-fuse flush dirty caps, because fuse kernel module
-# does not notify ceph-fuse about it. Use fsync(3) instead.
+# sync(3) does not make stone-fuse flush dirty caps, because fuse kernel module
+# does not notify stone-fuse about it. Use fsync(3) instead.
 fsync_path() {
 	cmd="import os; fd=os.open(\"$1\", os.O_RDONLY); os.fsync(fd); os.close(fd)"
 	python3 -c "$cmd"
@@ -42,21 +42,21 @@ mkdir -p rstats_testdir/d1/d2
 cd rstats_testdir
 
 # rfiles
-old_value=`getfattr --only-value -n ceph.dir.rfiles .`
+old_value=`getfattr --only-value -n stone.dir.rfiles .`
 [ $old_value == 0 ] || false
 touch d1/d2/f1
 wait_until_changed rfiles
 [ $new_value == $(($old_value + 1)) ] || false
 
 # rsubdirs
-old_value=`getfattr --only-value -n ceph.dir.rsubdirs .`
+old_value=`getfattr --only-value -n stone.dir.rsubdirs .`
 [ $old_value == 3 ] || false
 mkdir d1/d2/d3
 wait_until_changed rsubdirs
 [ $new_value == $(($old_value + 1)) ] || false
 
 # rbytes
-old_value=`getfattr --only-value -n ceph.dir.rbytes .`
+old_value=`getfattr --only-value -n stone.dir.rbytes .`
 [ $old_value == 0 ] || false
 echo hello > d1/d2/f2
 fsync_path d1/d2/f2
@@ -64,13 +64,13 @@ wait_until_changed rbytes
 [ $new_value == $(($old_value + 6)) ] || false
 
 #rctime
-old_value=`getfattr --only-value -n ceph.dir.rctime .`
+old_value=`getfattr --only-value -n stone.dir.rctime .`
 touch d1/d2/d3 # touch existing file
 fsync_path d1/d2/d3
 wait_until_changed rctime
 check_rctime
 
-old_value=`getfattr --only-value -n ceph.dir.rctime .`
+old_value=`getfattr --only-value -n stone.dir.rctime .`
 touch d1/d2/f3 # create new file
 wait_until_changed rctime
 check_rctime

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -36,9 +36,9 @@ int clock_gettime(int clk_id, struct timespec *tp);
 // MINGW uses the QueryPerformanceCounter API behind the scenes.
 #endif
 
-struct ceph_timespec;
+struct stone_timespec;
 
-namespace ceph {
+namespace stone {
 // Currently we use a 64-bit count of nanoseconds.
 
 // We could, if we wished, use a struct holding a uint64_t count
@@ -82,7 +82,7 @@ struct timeval to_timeval(Duration d) {
 
 // One potential issue is that we should accept system_clock
 // timepoints in user-facing APIs alongside (or instead of)
-// ceph::real_clock times.
+// stone::real_clock times.
 
 // High-resolution real-time clock
 class real_clock {
@@ -147,10 +147,10 @@ public:
 		      std::chrono::nanoseconds(ts.tv_nsec));
   }
 
-  static void to_ceph_timespec(const time_point& t,
-			       struct ceph_timespec& ts);
-  static struct ceph_timespec to_ceph_timespec(const time_point& t);
-  static time_point from_ceph_timespec(const struct ceph_timespec& ts);
+  static void to_stone_timespec(const time_point& t,
+			       struct stone_timespec& ts);
+  static struct stone_timespec to_stone_timespec(const time_point& t);
+  static time_point from_stone_timespec(const struct stone_timespec& ts);
 
   static void to_timeval(const time_point& t, struct timeval& tv) {
     tv.tv_sec = to_time_t(t);
@@ -234,10 +234,10 @@ public:
 		      std::chrono::nanoseconds(ts.tv_nsec));
   }
 
-  static void to_ceph_timespec(const time_point& t,
-			       struct ceph_timespec& ts);
-  static struct ceph_timespec to_ceph_timespec(const time_point& t);
-  static time_point from_ceph_timespec(const struct ceph_timespec& ts);
+  static void to_stone_timespec(const time_point& t,
+			       struct stone_timespec& ts);
+  static struct stone_timespec to_stone_timespec(const time_point& t);
+  static time_point from_stone_timespec(const struct stone_timespec& ts);
 
   static void to_timeval(const time_point& t, struct timeval& tv) {
     tv.tv_sec = to_time_t(t);
@@ -384,7 +384,7 @@ typedef coarse_real_clock::time_point coarse_real_time;
 // Monotonic times should never be serialized or communicated
 // between machines, since they are incomparable. Thus we also don't
 // make any provision for converting between
-// std::chrono::steady_clock time and ceph::mono_clock time.
+// std::chrono::steady_clock time and stone::mono_clock time.
 typedef mono_clock::time_point mono_time;
 typedef coarse_mono_clock::time_point coarse_mono_time;
 
@@ -480,7 +480,7 @@ inline timespan abs(signedspan z) {
 }
 inline timespan to_timespan(signedspan z) {
   if (z < signedspan::zero()) {
-    //ceph_assert(z >= signedspan::zero());
+    //stone_assert(z >= signedspan::zero());
     // There is a kernel bug that seems to be triggering this assert.  We've
     // seen it in:
     //   centos 8.1: 4.18.0-147.el8.x86_64
@@ -488,8 +488,8 @@ inline timespan to_timespan(signedspan z) {
     //   debian 10.1: 4.19.67-2+deb10u1
     //   ubuntu 18.04
     // see bugs:
-    //   https://tracker.ceph.com/issues/43365
-    //   https://tracker.ceph.com/issues/44078
+    //   https://tracker.stone.com/issues/43365
+    //   https://tracker.stone.com/issues/44078
     z = signedspan::zero();
   }
   return std::chrono::duration_cast<timespan>(z);
@@ -526,7 +526,7 @@ static Rep to_microseconds(T t) {
       std::micro>>(t).count();
 }
 
-} // namespace ceph
+} // namespace stone
 
 namespace std {
 template<typename Rep, typename Period>

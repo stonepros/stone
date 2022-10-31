@@ -13,20 +13,20 @@ struct cls_refcount_get_op {
 
   cls_refcount_get_op() : implicit_ref(false) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(tag, bl);
     encode(implicit_ref, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(tag, bl);
     decode(implicit_ref, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_refcount_get_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_refcount_get_op)
@@ -38,21 +38,21 @@ struct cls_refcount_put_op {
 
   cls_refcount_put_op() : implicit_ref(false) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(tag, bl);
     encode(implicit_ref, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(tag, bl);
     decode(implicit_ref, bl);
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_refcount_put_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_refcount_put_op)
@@ -62,19 +62,19 @@ struct cls_refcount_set_op {
 
   cls_refcount_set_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(refs, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(refs, bl);
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_refcount_set_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_refcount_set_op)
@@ -85,19 +85,19 @@ struct cls_refcount_read_op {
 
   cls_refcount_read_op() : implicit_ref(false) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(implicit_ref, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(implicit_ref, bl);
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_refcount_read_op*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_refcount_read_op)
@@ -107,19 +107,19 @@ struct cls_refcount_read_ret {
 
   cls_refcount_read_ret() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(refs, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(refs, bl);
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<cls_refcount_read_ret*>& ls);
 };
 WRITE_CLASS_ENCODER(cls_refcount_read_ret)
@@ -130,14 +130,14 @@ struct obj_refcount {
 
   obj_refcount() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 1, bl);
     encode(refs, bl);
     encode(retired_refs, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(2, bl);
     decode(refs, bl);
     if (struct_v >= 2) {
@@ -146,7 +146,7 @@ struct obj_refcount {
     DECODE_FINISH(bl);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<obj_refcount*>& ls);
 };
 WRITE_CLASS_ENCODER(obj_refcount)

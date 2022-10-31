@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat <contact@redhat.com>
  * Author: Adam C. Emerson
@@ -57,7 +57,7 @@
 #include "include/buffer.h"
 #include "include/rados/librados_fwd.hpp"
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 namespace neorados {
 using namespace std::literals;
@@ -231,30 +231,30 @@ public:
   void set_fadvise_dontneed();
   void set_fadvise_nocache();
 
-  void cmpext(uint64_t off, ceph::buffer::list&& cmp_bl, std::size_t* s);
+  void cmpext(uint64_t off, stone::buffer::list&& cmp_bl, std::size_t* s);
   void cmpxattr(std::string_view name, cmpxattr_op op,
-		const ceph::buffer::list& val);
+		const stone::buffer::list& val);
   void cmpxattr(std::string_view name, cmpxattr_op op, std::uint64_t val);
   void assert_version(uint64_t ver);
   void assert_exists();
   void cmp_omap(const boost::container::flat_map<
 		  std::string,
-		  std::pair<ceph::buffer::list, int>>& assertions);
+		  std::pair<stone::buffer::list, int>>& assertions);
 
   void exec(std::string_view cls, std::string_view method,
-	    const ceph::buffer::list& inbl,
-	    ceph::buffer::list* out,
+	    const stone::buffer::list& inbl,
+	    stone::buffer::list* out,
 	    boost::system::error_code* ec = nullptr);
   void exec(std::string_view cls, std::string_view method,
-	    const ceph::buffer::list& inbl,
+	    const stone::buffer::list& inbl,
 	    fu2::unique_function<void(boost::system::error_code,
-				      const ceph::buffer::list&) &&> f);
+				      const stone::buffer::list&) &&> f);
   void exec(std::string_view cls, std::string_view method,
-	    const ceph::buffer::list& inbl,
+	    const stone::buffer::list& inbl,
 	    fu2::unique_function<void(boost::system::error_code, int,
-				      const ceph::buffer::list&) &&> f);
+				      const stone::buffer::list&) &&> f);
   void exec(std::string_view cls, std::string_view method,
-	    const ceph::buffer::list& inbl,
+	    const stone::buffer::list& inbl,
 	    boost::system::error_code* ec = nullptr);
 
 
@@ -273,7 +273,7 @@ public:
 
   std::size_t size() const;
   using Signature = void(boost::system::error_code);
-  using Completion = ceph::async::Completion<Signature>;
+  using Completion = stone::async::Completion<Signature>;
 
   friend std::ostream& operator <<(std::ostream& m, const Op& o);
 protected:
@@ -297,19 +297,19 @@ public:
   ReadOp& operator =(const ReadOp&) = delete;
   ReadOp& operator =(ReadOp&&) = default;
 
-  void read(size_t off, uint64_t len, ceph::buffer::list* out,
+  void read(size_t off, uint64_t len, stone::buffer::list* out,
 	    boost::system::error_code* ec = nullptr);
-  void get_xattr(std::string_view name, ceph::buffer::list* out,
+  void get_xattr(std::string_view name, stone::buffer::list* out,
 		 boost::system::error_code* ec = nullptr);
-  void get_omap_header(ceph::buffer::list*,
+  void get_omap_header(stone::buffer::list*,
 		       boost::system::error_code* ec = nullptr);
 
   void sparse_read(uint64_t off, uint64_t len,
-		   ceph::buffer::list* out,
+		   stone::buffer::list* out,
 		   std::vector<std::pair<std::uint64_t, std::uint64_t>>* extents,
 		   boost::system::error_code* ec = nullptr);
 
-  void stat(std::uint64_t* size, ceph::real_time* mtime,
+  void stat(std::uint64_t* size, stone::real_time* mtime,
 	    boost::system::error_code* ec = nullptr);
 
   void get_omap_keys(std::optional<std::string_view> start_after,
@@ -320,21 +320,21 @@ public:
 
 
   void get_xattrs(boost::container::flat_map<std::string,
-		                             ceph::buffer::list>* kv,
+		                             stone::buffer::list>* kv,
 		     boost::system::error_code* ec = nullptr);
 
   void get_omap_vals(std::optional<std::string_view> start_after,
 		     std::optional<std::string_view> filter_prefix,
 		     uint64_t max_return,
 		     boost::container::flat_map<std::string,
-		                                ceph::buffer::list>* kv,
+		                                stone::buffer::list>* kv,
 		     bool* truncated,
 		     boost::system::error_code* ec = nullptr);
 
 
   void get_omap_vals_by_keys(const boost::container::flat_set<std::string>& keys,
 			     boost::container::flat_map<std::string,
-			                                ceph::buffer::list>* kv,
+			                                stone::buffer::list>* kv,
 			     boost::system::error_code* ec = nullptr);
 
   void list_watchers(std::vector<struct ObjWatcher>* watchers,
@@ -355,23 +355,23 @@ public:
   WriteOp& operator =(const WriteOp&) = delete;
   WriteOp& operator =(WriteOp&&) = default;
 
-  void set_mtime(ceph::real_time t);
+  void set_mtime(stone::real_time t);
   void create(bool exclusive);
-  void write(uint64_t off, ceph::buffer::list&& bl);
-  void write_full(ceph::buffer::list&& bl);
+  void write(uint64_t off, stone::buffer::list&& bl);
+  void write_full(stone::buffer::list&& bl);
   void writesame(std::uint64_t off, std::uint64_t write_len,
-		 ceph::buffer::list&& bl);
-  void append(ceph::buffer::list&& bl);
+		 stone::buffer::list&& bl);
+  void append(stone::buffer::list&& bl);
   void remove();
   void truncate(uint64_t off);
   void zero(uint64_t off, uint64_t len);
   void rmxattr(std::string_view name);
   void setxattr(std::string_view name,
-		ceph::buffer::list&& bl);
+		stone::buffer::list&& bl);
   void rollback(uint64_t snapid);
   void set_omap(const boost::container::flat_map<std::string,
-		                                 ceph::buffer::list>& map);
-  void set_omap_header(ceph::buffer::list&& bl);
+		                                 stone::buffer::list>& map);
+  void set_omap_header(stone::buffer::list&& bl);
   void clear_omap();
   void rm_omap_keys(const boost::container::flat_set<std::string>& to_rm);
   void set_alloc_hint(uint64_t expected_object_size,
@@ -476,7 +476,7 @@ public:
   }
 
   using BuildSig = void(boost::system::error_code, RADOS);
-  using BuildComp = ceph::async::Completion<BuildSig>;
+  using BuildComp = stone::async::Completion<BuildSig>;
   class Builder {
     std::optional<std::string> conf_files;
     std::optional<std::string> cluster;
@@ -525,7 +525,7 @@ public:
 
 
   template<typename CompletionToken>
-  static auto make_with_cct(CephContext* cct,
+  static auto make_with_cct(StoneContext* cct,
 			    boost::asio::io_context& ioctx,
 			    CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, BuildSig> init(token);
@@ -545,7 +545,7 @@ public:
 
   ~RADOS();
 
-  CephContext* cct();
+  StoneContext* cct();
 
   using executor_type = boost::asio::io_context::executor_type;
   executor_type get_executor() const;
@@ -553,7 +553,7 @@ public:
 
   template<typename CompletionToken>
   auto execute(const Object& o, const IOContext& ioc, ReadOp&& op,
-	       ceph::buffer::list* bl,
+	       stone::buffer::list* bl,
 	       CompletionToken&& token, uint64_t* objver = nullptr,
 	       const blkin_trace_info* trace_info = nullptr) {
     boost::asio::async_completion<CompletionToken, Op::Signature> init(token);
@@ -579,7 +579,7 @@ public:
   template<typename CompletionToken>
   auto execute(const Object& o, std::int64_t pool,
 	       ReadOp&& op,
-	       ceph::buffer::list* bl,
+	       stone::buffer::list* bl,
 	       CompletionToken&& token,
 	       std::optional<std::string_view> ns = {},
 	       std::optional<std::string_view> key = {},
@@ -610,7 +610,7 @@ public:
 
   using LookupPoolSig = void(boost::system::error_code,
 			     std::int64_t);
-  using LookupPoolComp = ceph::async::Completion<LookupPoolSig>;
+  using LookupPoolComp = stone::async::Completion<LookupPoolSig>;
   template<typename CompletionToken>
   auto lookup_pool(std::string_view name,
 		   CompletionToken&& token) {
@@ -624,7 +624,7 @@ public:
   std::optional<uint64_t> get_pool_alignment(int64_t pool_id);
 
   using LSPoolsSig = void(std::vector<std::pair<std::int64_t, std::string>>);
-  using LSPoolsComp = ceph::async::Completion<LSPoolsSig>;
+  using LSPoolsComp = stone::async::Completion<LSPoolsSig>;
   template<typename CompletionToken>
   auto list_pools(CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, LSPoolsSig> init(token);
@@ -636,7 +636,7 @@ public:
 
 
   using SimpleOpSig = void(boost::system::error_code);
-  using SimpleOpComp = ceph::async::Completion<SimpleOpSig>;
+  using SimpleOpComp = stone::async::Completion<SimpleOpSig>;
   template<typename CompletionToken>
   auto create_pool_snap(int64_t pool, std::string_view snapName,
 			CompletionToken&& token) {
@@ -648,7 +648,7 @@ public:
   }
 
   using SMSnapSig = void(boost::system::error_code, std::uint64_t);
-  using SMSnapComp = ceph::async::Completion<SMSnapSig>;
+  using SMSnapComp = stone::async::Completion<SMSnapSig>;
   template<typename CompletionToken>
   auto allocate_selfmanaged_snap(int64_t pool,
 				 CompletionToken&& token) {
@@ -714,7 +714,7 @@ public:
   using PoolStatSig = void(boost::system::error_code,
 			   boost::container::flat_map<std::string,
 			                              PoolStats>, bool);
-  using PoolStatComp = ceph::async::Completion<PoolStatSig>;
+  using PoolStatComp = stone::async::Completion<PoolStatSig>;
   template<typename CompletionToken>
   auto stat_pools(const std::vector<std::string>& pools,
 		  CompletionToken&& token) {
@@ -727,12 +727,12 @@ public:
 
   using StatFSSig = void(boost::system::error_code,
 			 FSStats);
-  using StatFSComp = ceph::async::Completion<StatFSSig>;
+  using StatFSComp = stone::async::Completion<StatFSSig>;
   template<typename CompletionToken>
   auto statfs(std::optional<int64_t> pool,
 	      CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, StatFSSig> init(token);
-    ceph_statfs(pool, StatFSComp::create(get_executor(),
+    stone_statfs(pool, StatFSComp::create(get_executor(),
 					 std::move(init.completion_handler)));
     return init.result.get();
   }
@@ -741,11 +741,11 @@ public:
 					    uint64_t notify_id,
 					    uint64_t cookie,
 					    uint64_t notifier_id,
-					    ceph::buffer::list&& bl)>;
+					    stone::buffer::list&& bl)>;
 
   using WatchSig = void(boost::system::error_code ec,
 			uint64_t cookie);
-  using WatchComp = ceph::async::Completion<WatchSig>;
+  using WatchComp = stone::async::Completion<WatchSig>;
   template<typename CompletionToken>
   auto watch(const Object& o, const IOContext& ioc,
 	     std::optional<std::chrono::seconds> timeout,
@@ -776,7 +776,7 @@ public:
 		  const IOContext& ioc,
 		  uint64_t notify_id,
 		  uint64_t cookie,
-		  ceph::buffer::list&& bl,
+		  stone::buffer::list&& bl,
 		  CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, SimpleOpSig> init(token);
     notify_ack(o, ioc, notify_id, cookie, std::move(bl),
@@ -790,7 +790,7 @@ public:
 		  std::int64_t pool,
 		  uint64_t notify_id,
 		  uint64_t cookie,
-		  ceph::buffer::list&& bl,
+		  stone::buffer::list&& bl,
 		  CompletionToken&& token,
 		  std::optional<std::string_view> ns = {},
 		  std::optional<std::string_view> key = {}) {
@@ -830,7 +830,7 @@ public:
   // let us separate out the implementation details without
   // sacrificing all the benefits of templates.
   using VoidOpSig = void();
-  using VoidOpComp = ceph::async::Completion<VoidOpSig>;
+  using VoidOpComp = stone::async::Completion<VoidOpSig>;
   template<typename CompletionToken>
   auto flush_watch(CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, VoidOpSig> init(token);
@@ -839,10 +839,10 @@ public:
     return init.result.get();
   }
 
-  using NotifySig = void(boost::system::error_code, ceph::buffer::list);
-  using NotifyComp = ceph::async::Completion<NotifySig>;
+  using NotifySig = void(boost::system::error_code, stone::buffer::list);
+  using NotifyComp = stone::async::Completion<NotifySig>;
   template<typename CompletionToken>
-  auto notify(const Object& oid, const IOContext& ioc, ceph::buffer::list&& bl,
+  auto notify(const Object& oid, const IOContext& ioc, stone::buffer::list&& bl,
 	      std::optional<std::chrono::milliseconds> timeout,
 	      CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, NotifySig> init(token);
@@ -854,7 +854,7 @@ public:
   }
 
   template<typename CompletionToken>
-  auto notify(const Object& oid, std::int64_t pool, ceph::buffer::list&& bl,
+  auto notify(const Object& oid, std::int64_t pool, stone::buffer::list&& bl,
 	      std::optional<std::chrono::milliseconds> timeout,
 	      CompletionToken&& token,
 	      std::optional<std::string_view> ns = {},
@@ -873,11 +873,11 @@ public:
   using EnumerateSig = void(boost::system::error_code,
 			    std::vector<Entry>,
 			    Cursor);
-  using EnumerateComp = ceph::async::Completion<EnumerateSig>;
+  using EnumerateComp = stone::async::Completion<EnumerateSig>;
   template<typename CompletionToken>
   auto enumerate_objects(const IOContext& ioc, const Cursor& begin,
 			 const Cursor& end, const std::uint32_t max,
-			 const ceph::buffer::list& filter,
+			 const stone::buffer::list& filter,
 			 CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, EnumerateSig> init(token);
     enumerate_objects(ioc, begin, end, max, filter,
@@ -889,7 +889,7 @@ public:
   template<typename CompletionToken>
   auto enumerate_objects(std::int64_t pool, const Cursor& begin,
 			 const Cursor& end, const std::uint32_t max,
-			 const ceph::buffer::list& filter,
+			 const stone::buffer::list& filter,
 			 CompletionToken&& token,
 			 std::optional<std::string_view> ns = {},
 			 std::optional<std::string_view> key = {}) {
@@ -902,11 +902,11 @@ public:
   }
 
   using CommandSig = void(boost::system::error_code,
-			  std::string, ceph::buffer::list);
-  using CommandComp = ceph::async::Completion<CommandSig>;
+			  std::string, stone::buffer::list);
+  using CommandComp = stone::async::Completion<CommandSig>;
   template<typename CompletionToken>
   auto osd_command(int osd, std::vector<std::string>&& cmd,
-		   ceph::buffer::list&& in, CompletionToken&& token) {
+		   stone::buffer::list&& in, CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, CommandSig> init(token);
     osd_command(osd, std::move(cmd), std::move(in),
 		CommandComp::create(get_executor(),
@@ -915,7 +915,7 @@ public:
   }
   template<typename CompletionToken>
   auto pg_command(PG pg, std::vector<std::string>&& cmd,
-		  ceph::buffer::list&& in, CompletionToken&& token) {
+		  stone::buffer::list&& in, CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, CommandSig> init(token);
     pg_command(pg, std::move(cmd), std::move(in),
 	       CommandComp::create(get_executor(),
@@ -925,8 +925,8 @@ public:
 
   template<typename CompletionToken>
   auto mon_command(std::vector<std::string> command,
-		   const ceph::buffer::list& bl,
-		   std::string* outs, ceph::buffer::list* outbl,
+		   const stone::buffer::list& bl,
+		   std::string* outs, stone::buffer::list* outbl,
 		   CompletionToken&& token) {
     boost::asio::async_completion<CompletionToken, SimpleOpSig> init(token);
     mon_command(command, bl, outs, outbl,
@@ -973,12 +973,12 @@ private:
   friend Builder;
 
   RADOS(std::unique_ptr<detail::Client> impl);
-  static void make_with_cct(CephContext* cct,
+  static void make_with_cct(StoneContext* cct,
 			    boost::asio::io_context& ioctx,
 		    std::unique_ptr<BuildComp> c);
 
   void execute(const Object& o, const IOContext& ioc, ReadOp&& op,
-	       ceph::buffer::list* bl, std::unique_ptr<Op::Completion> c,
+	       stone::buffer::list* bl, std::unique_ptr<Op::Completion> c,
 	       uint64_t* objver, const blkin_trace_info* trace_info);
 
   void execute(const Object& o, const IOContext& ioc, WriteOp&& op,
@@ -986,7 +986,7 @@ private:
 	       const blkin_trace_info* trace_info);
 
   void execute(const Object& o, std::int64_t pool, ReadOp&& op,
-	       ceph::buffer::list* bl, std::unique_ptr<Op::Completion> c,
+	       stone::buffer::list* bl, std::unique_ptr<Op::Completion> c,
 	       std::optional<std::string_view> ns,
 	       std::optional<std::string_view> key,
 	       uint64_t* objver);
@@ -1025,19 +1025,19 @@ private:
 	     WatchCB&& cb, std::unique_ptr<WatchComp> c,
 	     std::optional<std::string_view> ns,
 	     std::optional<std::string_view> key);
-  tl::expected<ceph::timespan, boost::system::error_code>
+  tl::expected<stone::timespan, boost::system::error_code>
   watch_check(uint64_t cookie);
   void notify_ack(const Object& o,
 		  const IOContext& _ioc,
 		  uint64_t notify_id,
 		  uint64_t cookie,
-		  ceph::buffer::list&& bl,
+		  stone::buffer::list&& bl,
 		  std::unique_ptr<SimpleOpComp>);
   void notify_ack(const Object& o,
 		  std::int64_t pool,
 		  uint64_t notify_id,
 		  uint64_t cookie,
-		  ceph::buffer::list&& bl,
+		  stone::buffer::list&& bl,
 		  std::unique_ptr<SimpleOpComp>,
 		  std::optional<std::string_view> ns,
 		  std::optional<std::string_view> key);
@@ -1048,11 +1048,11 @@ private:
 	       std::optional<std::string_view> ns,
 	       std::optional<std::string_view> key);
   void notify(const Object& oid, const IOContext& ioctx,
-	      ceph::buffer::list&& bl,
+	      stone::buffer::list&& bl,
 	      std::optional<std::chrono::milliseconds> timeout,
 	      std::unique_ptr<NotifyComp> c);
   void notify(const Object& oid, std::int64_t pool,
-	      ceph::buffer::list&& bl,
+	      stone::buffer::list&& bl,
 	      std::optional<std::chrono::milliseconds> timeout,
 	      std::unique_ptr<NotifyComp> c,
 	      std::optional<std::string_view> ns,
@@ -1061,13 +1061,13 @@ private:
 
   void enumerate_objects(const IOContext& ioc, const Cursor& begin,
 			 const Cursor& end, const std::uint32_t max,
-			 const ceph::buffer::list& filter,
+			 const stone::buffer::list& filter,
 			 std::vector<Entry>* ls,
 			 Cursor* cursor,
 			 std::unique_ptr<SimpleOpComp> c);
   void enumerate_objects(std::int64_t pool, const Cursor& begin,
 			 const Cursor& end, const std::uint32_t max,
-			 const ceph::buffer::list& filter,
+			 const stone::buffer::list& filter,
 			 std::vector<Entry>* ls,
 			 Cursor* cursor,
 			 std::unique_ptr<SimpleOpComp> c,
@@ -1075,22 +1075,22 @@ private:
 			 std::optional<std::string_view> key);
   void enumerate_objects(const IOContext& ioc, const Cursor& begin,
 			 const Cursor& end, const std::uint32_t max,
-			 const ceph::buffer::list& filter,
+			 const stone::buffer::list& filter,
 			 std::unique_ptr<EnumerateComp> c);
   void enumerate_objects(std::int64_t pool, const Cursor& begin,
 			 const Cursor& end, const std::uint32_t max,
-			 const ceph::buffer::list& filter,
+			 const stone::buffer::list& filter,
 			 std::unique_ptr<EnumerateComp> c,
 			 std::optional<std::string_view> ns,
 			 std::optional<std::string_view> key);
   void osd_command(int osd, std::vector<std::string>&& cmd,
-		   ceph::buffer::list&& in, std::unique_ptr<CommandComp> c);
+		   stone::buffer::list&& in, std::unique_ptr<CommandComp> c);
   void pg_command(PG pg, std::vector<std::string>&& cmd,
-		  ceph::buffer::list&& in, std::unique_ptr<CommandComp> c);
+		  stone::buffer::list&& in, std::unique_ptr<CommandComp> c);
 
   void mon_command(std::vector<std::string> command,
-		   const ceph::buffer::list& bl,
-		   std::string* outs, ceph::buffer::list* outbl,
+		   const stone::buffer::list& bl,
+		   std::string* outs, stone::buffer::list* outbl,
 		   std::unique_ptr<SimpleOpComp> c);
 
   void enable_application(std::string_view pool, std::string_view app_name,

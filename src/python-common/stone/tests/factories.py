@@ -1,4 +1,4 @@
-from ceph.deployment.inventory import Device
+from stone.deployment.inventory import Device
 
 
 class InventoryFactory(object):

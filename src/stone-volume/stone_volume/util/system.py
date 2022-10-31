@@ -6,7 +6,7 @@ import platform
 import tempfile
 import uuid
 import subprocess
-from ceph_volume import process, terminal
+from stone_volume import process, terminal
 from . import as_string
 
 # python2 has no FileNotFoundError
@@ -103,15 +103,15 @@ def which(executable, run_on_host=False):
     # hoping that the system might have the executable somewhere custom
     return executable
 
-def get_ceph_user_ids():
+def get_stone_user_ids():
     """
-    Return the id and gid of the ceph user
+    Return the id and gid of the stone user
     """
     try:
-        user = pwd.getpwnam('ceph')
+        user = pwd.getpwnam('stone')
     except KeyError:
         # is this even possible?
-        raise RuntimeError('"ceph" user is not available in the current system')
+        raise RuntimeError('"stone" user is not available in the current system')
     return user[2], user[3]
 
 
@@ -130,7 +130,7 @@ def get_file_contents(path, default=''):
 
 def mkdir_p(path, chown=True):
     """
-    A `mkdir -p` that defaults to chown the path to the ceph user
+    A `mkdir -p` that defaults to chown the path to the stone user
     """
     try:
         os.mkdir(path)
@@ -140,20 +140,20 @@ def mkdir_p(path, chown=True):
         else:
             raise
     if chown:
-        uid, gid = get_ceph_user_ids()
+        uid, gid = get_stone_user_ids()
         os.chown(path, uid, gid)
 
 
 def chown(path, recursive=True):
     """
-    ``chown`` a path to the ceph user (uid and guid fetched at runtime)
+    ``chown`` a path to the stone user (uid and guid fetched at runtime)
     """
-    uid, gid = get_ceph_user_ids()
+    uid, gid = get_stone_user_ids()
     if os.path.islink(path):
-        process.run(['chown', '-h', 'ceph:ceph', path])
+        process.run(['chown', '-h', 'stone:stone', path])
         path = os.path.realpath(path)
     if recursive:
-        process.run(['chown', '-R', 'ceph:ceph', path])
+        process.run(['chown', '-R', 'stone:stone', path])
     else:
         os.chown(path, uid, gid)
 
@@ -161,7 +161,7 @@ def chown(path, recursive=True):
 def is_binary(path):
     """
     Detect if a file path is a binary or not. Will falsely report as binary
-    when utf-16 encoded. In the ceph universe there is no such risk (yet)
+    when utf-16 encoded. In the stone universe there is no such risk (yet)
     """
     with open(path, 'rb') as fp:
         contents = fp.read(8192)
@@ -204,7 +204,7 @@ class tmp_mount(object):
         ])
         if self.encrypted:
             # avoid a circular import from the encryption module
-            from ceph_volume.util import encryption
+            from stone_volume.util import encryption
             encryption.dmcrypt_close(self.device)
 
 
@@ -345,7 +345,7 @@ def set_context(path, recursive=False):
     the ``restorecon`` executable is found anywhere in the path it will get
     called.
 
-    If the ``CEPH_VOLUME_SKIP_RESTORECON`` environment variable is set to
+    If the ``STONE_VOLUME_SKIP_RESTORECON`` environment variable is set to
     any of: "1", "true", "yes" the call will be skipped as well.
 
     Finally, if SELinux is not enabled, or not available in the system,
@@ -354,10 +354,10 @@ def set_context(path, recursive=False):
     a non-zero exit status then no further action is taken and this function
     will return.
     """
-    skip = os.environ.get('CEPH_VOLUME_SKIP_RESTORECON', '')
+    skip = os.environ.get('STONE_VOLUME_SKIP_RESTORECON', '')
     if skip.lower() in ['1', 'true', 'yes']:
         logger.info(
-            'CEPH_VOLUME_SKIP_RESTORECON environ is set, will not call restorecon'
+            'STONE_VOLUME_SKIP_RESTORECON environ is set, will not call restorecon'
         )
         return
 

@@ -85,7 +85,7 @@ describe('IscsiTargetFormComponent', () => {
   ];
 
   const VERSION = {
-    ceph_iscsi_config_version: 11
+    stone_iscsi_config_version: 11
   };
 
   const RBD_LIST: any[] = [

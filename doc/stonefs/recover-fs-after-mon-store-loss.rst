@@ -29,7 +29,7 @@ existing in-RADOS metadata and doesn't overwrite it. The flag also prevents the
 standby MDS daemons to activate the file system.
 
 The file system cluster ID, fscid, of the file system will not be preserved.
-This behaviour may not be desirable for certain applications (e.g., Ceph CSI)
+This behaviour may not be desirable for certain applications (e.g., Stone CSI)
 that expect the file system to be unchanged across recovery. To fix this, you
 can optionally set the ``fscid`` option in the above command (see
 :ref:`advanced-cephfs-admin-settings`).

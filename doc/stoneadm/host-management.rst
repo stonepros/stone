@@ -39,7 +39,7 @@ To add each new host to the cluster, perform two steps:
       ssh-copy-id -f -i /etc/ceph/ceph.pub root@host2
       ssh-copy-id -f -i /etc/ceph/ceph.pub root@host3
 
-#. Tell Ceph that the new node is part of the cluster:
+#. Tell Stone that the new node is part of the cluster:
 
    .. prompt:: bash #
 
@@ -146,7 +146,7 @@ The following host labels have a special meaning to cephadm.  All start with ``_
 * ``_no_schedule``: *Do not schedule or deploy daemons on this host*.
 
   This label prevents cephadm from deploying daemons on this host.  If it is added to
-  an existing host that already contains Ceph daemons, it will cause cephadm to move
+  an existing host that already contains Stone daemons, it will cause cephadm to move
   those daemons elsewhere (except OSDs, which are not removed automatically).
 
 * ``_no_autotune_memory``: *Do not autotune memory on this host*.
@@ -166,7 +166,7 @@ The following host labels have a special meaning to cephadm.  All start with ``_
 Maintenance Mode
 ================
 
-Place a host in and out of maintenance mode (stops all Ceph daemons on host)::
+Place a host in and out of maintenance mode (stops all Stone daemons on host)::
 
     ceph orch host maintenance enter <hostname> [--force]
     ceph orch host maintenance exit <hostname>
@@ -229,14 +229,14 @@ See also :ref:`crush_map_default_types`.
 SSH Configuration
 =================
 
-Cephadm uses SSH to connect to remote hosts.  SSH uses a key to authenticate
+Stoneadm uses SSH to connect to remote hosts.  SSH uses a key to authenticate
 with those hosts in a secure way.
 
 
 Default behavior
 ----------------
 
-Cephadm stores an SSH key in the monitor that is used to
+Stoneadm stores an SSH key in the monitor that is used to
 connect to remote hosts.  When the cluster is bootstrapped, this SSH
 key is generated automatically and no additional configuration
 is necessary.
@@ -267,7 +267,7 @@ You will then need to restart the mgr daemon to reload the configuration with::
 Configuring a different SSH user
 ----------------------------------
 
-Cephadm must be able to log into all the Ceph cluster nodes as an user
+Stoneadm must be able to log into all the Stone cluster nodes as an user
 that has enough privileges to download container images, start containers
 and execute commands without prompting for a password. If you do not want
 to use the "root" user (default option in cephadm), you must provide
@@ -283,7 +283,7 @@ authorized_keys file and non-root users must have passwordless sudo access.
 Customizing the SSH configuration
 ---------------------------------
 
-Cephadm generates an appropriate ``ssh_config`` file that is
+Stoneadm generates an appropriate ``ssh_config`` file that is
 used for connecting to remote hosts.  This configuration looks
 something like this::
 
@@ -363,7 +363,7 @@ host name:
                  127.0.1.1    ursula.example.com ursula
 
 Which means, ``man hostname`` recommends ``hostname`` to return the bare
-host name. This in turn means that Ceph will return the bare host names
+host name. This in turn means that Stone will return the bare host names
 when executing ``ceph * metadata``. This in turn means cephadm also
 requires the bare host name when adding a host to the cluster: 
 ``ceph orch host add <bare-name>``.

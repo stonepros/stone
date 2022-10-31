@@ -14,4 +14,4 @@ import { SmartListComponent } from './smart-list/smart-list.component';
   exports: [DeviceListComponent, SmartListComponent],
   declarations: [DeviceListComponent, SmartListComponent]
 })
-export class CephSharedModule {}
+export class StoneSharedModule {}

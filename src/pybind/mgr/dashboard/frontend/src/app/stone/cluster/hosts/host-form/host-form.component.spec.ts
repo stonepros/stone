@@ -83,86 +83,86 @@ describe('HostFormComponent', () => {
   });
 
   it('should expand the hostname correctly', () => {
-    component.hostForm.get('hostname').setValue('ceph-node-00.cephlab.com');
+    component.hostForm.get('hostname').setValue('stone-node-00.stonelab.com');
     fixture.detectChanges();
     component.submit();
-    expect(component.hostnameArray).toStrictEqual(['ceph-node-00.cephlab.com']);
+    expect(component.hostnameArray).toStrictEqual(['stone-node-00.stonelab.com']);
 
     component.hostnameArray = [];
 
-    component.hostForm.get('hostname').setValue('ceph-node-[00-10].cephlab.com');
+    component.hostForm.get('hostname').setValue('stone-node-[00-10].stonelab.com');
     fixture.detectChanges();
     component.submit();
     expect(component.hostnameArray).toStrictEqual([
-      'ceph-node-00.cephlab.com',
-      'ceph-node-01.cephlab.com',
-      'ceph-node-02.cephlab.com',
-      'ceph-node-03.cephlab.com',
-      'ceph-node-04.cephlab.com',
-      'ceph-node-05.cephlab.com',
-      'ceph-node-06.cephlab.com',
-      'ceph-node-07.cephlab.com',
-      'ceph-node-08.cephlab.com',
-      'ceph-node-09.cephlab.com',
-      'ceph-node-10.cephlab.com'
+      'stone-node-00.stonelab.com',
+      'stone-node-01.stonelab.com',
+      'stone-node-02.stonelab.com',
+      'stone-node-03.stonelab.com',
+      'stone-node-04.stonelab.com',
+      'stone-node-05.stonelab.com',
+      'stone-node-06.stonelab.com',
+      'stone-node-07.stonelab.com',
+      'stone-node-08.stonelab.com',
+      'stone-node-09.stonelab.com',
+      'stone-node-10.stonelab.com'
     ]);
 
     component.hostnameArray = [];
 
-    component.hostForm.get('hostname').setValue('ceph-node-00.cephlab.com,ceph-node-1.cephlab.com');
+    component.hostForm.get('hostname').setValue('stone-node-00.stonelab.com,stone-node-1.stonelab.com');
     fixture.detectChanges();
     component.submit();
     expect(component.hostnameArray).toStrictEqual([
-      'ceph-node-00.cephlab.com',
-      'ceph-node-1.cephlab.com'
-    ]);
-
-    component.hostnameArray = [];
-
-    component.hostForm
-      .get('hostname')
-      .setValue('ceph-mon-[01-05].lab.com,ceph-osd-[1-4].lab.com,ceph-rgw-[001-006].lab.com');
-    fixture.detectChanges();
-    component.submit();
-    expect(component.hostnameArray).toStrictEqual([
-      'ceph-mon-01.lab.com',
-      'ceph-mon-02.lab.com',
-      'ceph-mon-03.lab.com',
-      'ceph-mon-04.lab.com',
-      'ceph-mon-05.lab.com',
-      'ceph-osd-1.lab.com',
-      'ceph-osd-2.lab.com',
-      'ceph-osd-3.lab.com',
-      'ceph-osd-4.lab.com',
-      'ceph-rgw-001.lab.com',
-      'ceph-rgw-002.lab.com',
-      'ceph-rgw-003.lab.com',
-      'ceph-rgw-004.lab.com',
-      'ceph-rgw-005.lab.com',
-      'ceph-rgw-006.lab.com'
+      'stone-node-00.stonelab.com',
+      'stone-node-1.stonelab.com'
     ]);
 
     component.hostnameArray = [];
 
     component.hostForm
       .get('hostname')
-      .setValue('ceph-(mon-[00-04],osd-[001-005],rgw-[1-3]).lab.com');
+      .setValue('stone-mon-[01-05].lab.com,stone-osd-[1-4].lab.com,stone-rgw-[001-006].lab.com');
     fixture.detectChanges();
     component.submit();
     expect(component.hostnameArray).toStrictEqual([
-      'ceph-mon-00.lab.com',
-      'ceph-mon-01.lab.com',
-      'ceph-mon-02.lab.com',
-      'ceph-mon-03.lab.com',
-      'ceph-mon-04.lab.com',
-      'ceph-osd-001.lab.com',
-      'ceph-osd-002.lab.com',
-      'ceph-osd-003.lab.com',
-      'ceph-osd-004.lab.com',
-      'ceph-osd-005.lab.com',
-      'ceph-rgw-1.lab.com',
-      'ceph-rgw-2.lab.com',
-      'ceph-rgw-3.lab.com'
+      'stone-mon-01.lab.com',
+      'stone-mon-02.lab.com',
+      'stone-mon-03.lab.com',
+      'stone-mon-04.lab.com',
+      'stone-mon-05.lab.com',
+      'stone-osd-1.lab.com',
+      'stone-osd-2.lab.com',
+      'stone-osd-3.lab.com',
+      'stone-osd-4.lab.com',
+      'stone-rgw-001.lab.com',
+      'stone-rgw-002.lab.com',
+      'stone-rgw-003.lab.com',
+      'stone-rgw-004.lab.com',
+      'stone-rgw-005.lab.com',
+      'stone-rgw-006.lab.com'
+    ]);
+
+    component.hostnameArray = [];
+
+    component.hostForm
+      .get('hostname')
+      .setValue('stone-(mon-[00-04],osd-[001-005],rgw-[1-3]).lab.com');
+    fixture.detectChanges();
+    component.submit();
+    expect(component.hostnameArray).toStrictEqual([
+      'stone-mon-00.lab.com',
+      'stone-mon-01.lab.com',
+      'stone-mon-02.lab.com',
+      'stone-mon-03.lab.com',
+      'stone-mon-04.lab.com',
+      'stone-osd-001.lab.com',
+      'stone-osd-002.lab.com',
+      'stone-osd-003.lab.com',
+      'stone-osd-004.lab.com',
+      'stone-osd-005.lab.com',
+      'stone-rgw-1.lab.com',
+      'stone-rgw-2.lab.com',
+      'stone-rgw-3.lab.com'
     ]);
   });
 });

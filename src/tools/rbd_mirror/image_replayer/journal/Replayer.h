@@ -7,7 +7,7 @@
 #include "tools/rbd_mirror/image_replayer/Replayer.h"
 #include "include/utime.h"
 #include "common/AsyncOpTracker.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/RefCountedObj.h"
 #include "cls/journal/cls_journal_types.h"
 #include "journal/ReplayEntry.h"
@@ -186,7 +186,7 @@ private:
   StateBuilder<ImageCtxT>* m_state_builder;
   ReplayerListener* m_replayer_listener;
 
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
 
   std::string m_image_spec;
   Context* m_on_init_shutdown = nullptr;
@@ -196,7 +196,7 @@ private:
   std::string m_error_description;
   bool m_resync_requested = false;
 
-  ceph::ref_t<typename std::remove_pointer<decltype(ImageCtxT::journal)>::type>
+  stone::ref_t<typename std::remove_pointer<decltype(ImageCtxT::journal)>::type>
     m_local_journal;
   RemoteJournalerListener* m_remote_listener = nullptr;
 
@@ -240,12 +240,12 @@ private:
   void init_remote_journaler();
   void handle_init_remote_journaler(int r);
 
-  void start_external_replay(std::unique_lock<ceph::mutex>& locker);
+  void start_external_replay(std::unique_lock<stone::mutex>& locker);
   void handle_start_external_replay(int r);
 
-  bool add_local_journal_listener(std::unique_lock<ceph::mutex>& locker);
+  bool add_local_journal_listener(std::unique_lock<stone::mutex>& locker);
 
-  bool notify_init_complete(std::unique_lock<ceph::mutex>& locker);
+  bool notify_init_complete(std::unique_lock<stone::mutex>& locker);
 
   void wait_for_flush();
   void handle_wait_for_flush(int r);
@@ -278,13 +278,13 @@ private:
   void handle_replay_error(int r, const std::string &error);
 
   bool is_replay_complete() const;
-  bool is_replay_complete(const std::unique_lock<ceph::mutex>& locker) const;
+  bool is_replay_complete(const std::unique_lock<stone::mutex>& locker) const;
 
   void handle_replay_complete(int r, const std::string &error_desc);
-  void handle_replay_complete(const std::unique_lock<ceph::mutex>&,
+  void handle_replay_complete(const std::unique_lock<stone::mutex>&,
                               int r, const std::string &error_desc);
   void handle_replay_ready();
-  void handle_replay_ready(std::unique_lock<ceph::mutex>& locker);
+  void handle_replay_ready(std::unique_lock<stone::mutex>& locker);
 
   void preprocess_entry();
   void handle_delayed_preprocess_task(int r);

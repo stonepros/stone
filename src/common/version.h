@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -17,19 +17,19 @@
 
 #include <string>
 
-// Return a string describing the Stonee version
-const char *ceph_version_to_str();
+// Return a string describing the Stone version
+const char *stone_version_to_str();
 
-// Return a string with the Stonee release
-const char *ceph_release_to_str(void);
+// Return a string with the Stone release
+const char *stone_release_to_str(void);
 
 // Return a string describing the git version
 const char *git_version_to_str(void);
 
-// Return a formatted string describing the ceph and git versions
+// Return a formatted string describing the stone and git versions
 std::string const pretty_version_to_str(void);
 
 // Release type ("dev", "rc", or "stable")
-const char *ceph_release_type(void);
+const char *stone_release_type(void);
 
 #endif

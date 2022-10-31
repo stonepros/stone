@@ -1,17 +1,17 @@
-from ceph_volume.util import encryption
+from stone_volume.util import encryption
 from mock.mock import patch
 import base64
 
 class TestGetKeySize(object):
-    def test_get_size_from_conf_default(self, conf_ceph_stub):
-        conf_ceph_stub('''
+    def test_get_size_from_conf_default(self, conf_stone_stub):
+        conf_stone_stub('''
         [global]
         fsid=asdf
         ''')
         assert encryption.get_key_size_from_conf() == '512'
 
-    def test_get_size_from_conf_custom(self, conf_ceph_stub):
-        conf_ceph_stub('''
+    def test_get_size_from_conf_custom(self, conf_stone_stub):
+        conf_stone_stub('''
         [global]
         fsid=asdf
         [osd]
@@ -19,8 +19,8 @@ class TestGetKeySize(object):
         ''')
         assert encryption.get_key_size_from_conf() == '256'
 
-    def test_get_size_from_conf_custom_invalid(self, conf_ceph_stub):
-        conf_ceph_stub('''
+    def test_get_size_from_conf_custom_invalid(self, conf_stone_stub):
+        conf_stone_stub('''
         [global]
         fsid=asdf
         [osd]
@@ -69,9 +69,9 @@ class TestDmcryptKey(object):
         assert len(base64.b64decode(result)) == 128
 
 class TestLuksFormat(object):
-    @patch('ceph_volume.util.encryption.process.call')
-    def test_luks_format_command_with_default_size(self, m_call, conf_ceph_stub):
-        conf_ceph_stub('[global]\nfsid=abcd')
+    @patch('stone_volume.util.encryption.process.call')
+    def test_luks_format_command_with_default_size(self, m_call, conf_stone_stub):
+        conf_stone_stub('[global]\nfsid=abcd')
         expected = [
             'cryptsetup',
             '--batch-mode',
@@ -85,9 +85,9 @@ class TestLuksFormat(object):
         encryption.luks_format('abcd', '/dev/foo')
         assert m_call.call_args[0][0] == expected
 
-    @patch('ceph_volume.util.encryption.process.call')
-    def test_luks_format_command_with_custom_size(self, m_call, conf_ceph_stub):
-        conf_ceph_stub('[global]\nfsid=abcd\n[osd]\nosd_dmcrypt_key_size=256')
+    @patch('stone_volume.util.encryption.process.call')
+    def test_luks_format_command_with_custom_size(self, m_call, conf_stone_stub):
+        conf_stone_stub('[global]\nfsid=abcd\n[osd]\nosd_dmcrypt_key_size=256')
         expected = [
             'cryptsetup',
             '--batch-mode',
@@ -103,9 +103,9 @@ class TestLuksFormat(object):
 
 
 class TestLuksOpen(object):
-    @patch('ceph_volume.util.encryption.process.call')
-    def test_luks_open_command_with_default_size(self, m_call, conf_ceph_stub):
-        conf_ceph_stub('[global]\nfsid=abcd')
+    @patch('stone_volume.util.encryption.process.call')
+    def test_luks_open_command_with_default_size(self, m_call, conf_stone_stub):
+        conf_stone_stub('[global]\nfsid=abcd')
         expected = [
             'cryptsetup',
             '--key-size',
@@ -120,9 +120,9 @@ class TestLuksOpen(object):
         encryption.luks_open('abcd', '/dev/foo', '/dev/bar')
         assert m_call.call_args[0][0] == expected
 
-    @patch('ceph_volume.util.encryption.process.call')
-    def test_luks_open_command_with_custom_size(self, m_call, conf_ceph_stub):
-        conf_ceph_stub('[global]\nfsid=abcd\n[osd]\nosd_dmcrypt_key_size=256')
+    @patch('stone_volume.util.encryption.process.call')
+    def test_luks_open_command_with_custom_size(self, m_call, conf_stone_stub):
+        conf_stone_stub('[global]\nfsid=abcd\n[osd]\nosd_dmcrypt_key_size=256')
         expected = [
             'cryptsetup',
             '--key-size',

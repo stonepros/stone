@@ -2,7 +2,7 @@
 Pools
 =====
 
-The Ceph Object Gateway uses several pools for its various storage needs,
+The Stone Object Gateway uses several pools for its various storage needs,
 which are listed in the Zone object (see ``radosgw-admin zone get``). A
 single zone named ``default`` is created automatically with pool names
 starting with ``default.rgw.``, but a `Multisite Configuration`_ will have
@@ -16,7 +16,7 @@ exist, it will create that pool with the default values from
 ``osd pool default pg num`` and ``osd pool default pgp num``. These defaults
 are sufficient for some pools, but others (especially those listed in
 ``placement_pools`` for the bucket index and data) will require additional
-tuning. We recommend using the `Ceph Placement Group’s per Pool
+tuning. We recommend using the `Stone Placement Group’s per Pool
 Calculator <http://ceph.com/pgcalc/>`__ to calculate a suitable number of
 placement groups for these pools. See
 `Pools <http://docs.ceph.com/en/latest/rados/operations/pools/#pools>`__

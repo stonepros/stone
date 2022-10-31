@@ -67,13 +67,13 @@ public:
 class SyncPointLogOperation : public GenericLogOperation {
 private:
   StoneContext *m_cct;
-  ceph::mutex &m_lock;
+  stone::mutex &m_lock;
   std::vector<Context*> append_sync_point();
   void clear_earlier_sync_point();
   std::vector<Context*> swap_on_sync_point_persisted();
 public:
   std::shared_ptr<SyncPoint> sync_point;
-  SyncPointLogOperation(ceph::mutex &lock,
+  SyncPointLogOperation(stone::mutex &lock,
                         std::shared_ptr<SyncPoint> sync_point,
                         utime_t dispatch_time,
                         PerfCounters *perfcounter,
@@ -93,7 +93,7 @@ public:
 
 class GenericWriteLogOperation : public GenericLogOperation {
 protected:
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   StoneContext *m_cct;
 public:
   std::shared_ptr<SyncPoint> sync_point;

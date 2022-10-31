@@ -6,7 +6,7 @@
 
 #include <string>
 #include <boost/algorithm/string.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "include/types.h"
 #include "rgw_common.h"
@@ -45,12 +45,12 @@ struct RGWUID
   void encode(bufferlist& bl) const {
     string s;
     user_id.to_str(s);
-    using ceph::encode;
+    using stone::encode;
     encode(s, bl);
   }
   void decode(bufferlist::const_iterator& bl) {
     string s;
-    using ceph::decode;
+    using stone::decode;
     decode(s, bl);
     user_id.from_str(s);
   }
@@ -509,7 +509,7 @@ struct RGWUserAdminOpState {
     int sub_buf_size = RAND_SUBUSER_LEN + 1;
     char sub_buf[RAND_SUBUSER_LEN + 1];
 
-    gen_rand_alphanumeric_upper(g_ceph_context, sub_buf, sub_buf_size);
+    gen_rand_alphanumeric_upper(g_stone_context, sub_buf, sub_buf_size);
 
     rand_suffix = sub_buf;
     if (rand_suffix.empty())
@@ -906,7 +906,7 @@ public:
 
   struct GetParams {
     RGWObjVersionTracker *objv_tracker{nullptr};
-    ceph::real_time *mtime{nullptr};
+    stone::real_time *mtime{nullptr};
     rgw_cache_entry_info *cache_info{nullptr};
     map<string, bufferlist> *attrs{nullptr};
 
@@ -917,7 +917,7 @@ public:
       return *this;
     }
 
-    GetParams& set_mtime(ceph::real_time *_mtime) {
+    GetParams& set_mtime(stone::real_time *_mtime) {
       mtime = _mtime;
       return *this;
     }
@@ -936,7 +936,7 @@ public:
   struct PutParams {
     RGWUserInfo *old_info{nullptr};
     RGWObjVersionTracker *objv_tracker{nullptr};
-    ceph::real_time mtime;
+    stone::real_time mtime;
     bool exclusive{false};
     map<string, bufferlist> *attrs{nullptr};
 
@@ -952,7 +952,7 @@ public:
       return *this;
     }
 
-    PutParams& set_mtime(const ceph::real_time& _mtime) {
+    PutParams& set_mtime(const stone::real_time& _mtime) {
       mtime = _mtime;
       return *this;
     }
@@ -1008,7 +1008,7 @@ public:
   int add_bucket(const DoutPrefixProvider *dpp, 
                  const rgw_user& user,
                  const rgw_bucket& bucket,
-                 ceph::real_time creation_time,
+                 stone::real_time creation_time,
 		 optional_yield y);
   int remove_bucket(const DoutPrefixProvider *dpp, 
                     const rgw_user& user,
@@ -1033,8 +1033,8 @@ public:
   int read_stats(const DoutPrefixProvider *dpp, 
                  const rgw_user& user, RGWStorageStats *stats,
 		 optional_yield y,
-		 ceph::real_time *last_stats_sync = nullptr,     /* last time a full stats sync completed */
-		 ceph::real_time *last_stats_update = nullptr);   /* last time a stats update was done */
+		 stone::real_time *last_stats_sync = nullptr,     /* last time a full stats sync completed */
+		 stone::real_time *last_stats_update = nullptr);   /* last time a stats update was done */
   int read_stats_async(const DoutPrefixProvider *dpp, const rgw_user& user, RGWGetUserStats_CB *ctx);
 };
 

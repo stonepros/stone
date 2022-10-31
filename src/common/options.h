@@ -123,7 +123,7 @@ struct Option {
     FLAG_CLUSTER_CREATE = 0x8,  ///< option only has effect at cluster creation
     FLAG_CREATE = 0x10,         ///< option only has effect at daemon creation
     FLAG_MGR = 0x20,            ///< option is a mgr module option
-    FLAG_MINIMAL_CONF = 0x40,   ///< option should go in a minimal ceph.conf
+    FLAG_MINIMAL_CONF = 0x40,   ///< option should go in a minimal stone.conf
   };
 
   struct size_t {
@@ -165,10 +165,10 @@ struct Option {
 
   static std::string to_str(const value_t& v);
 
-  // Items like mon, osd, rgw, rbd, ceph-fuse.  This is advisory metadata
+  // Items like mon, osd, rgw, rbd, stone-fuse.  This is advisory metadata
   // for presentation layers (like web dashboards, or generated docs), so that
   // they know which options to display where.
-  // Additionally: "common" for settings that exist in any Stonee code.  Do
+  // Additionally: "common" for settings that exist in any Stone code.  Do
   // not use common for settings that are just shared some places: for those
   // places, list them.
   std::vector<const char*> services;
@@ -225,11 +225,11 @@ struct Option {
     case TYPE_MILLISECS:
       value = std::chrono::milliseconds{0}; break;
     default:
-      ceph_abort();
+      stone_abort();
     }
   }
 
-  void dump_value(const char *field_name, const value_t &v, ceph::Formatter *f) const;
+  void dump_value(const char *field_name, const value_t &v, stone::Formatter *f) const;
 
   // Validate and potentially modify incoming string value
   int pre_validate(std::string *new_value, std::string *err) const;
@@ -279,7 +279,7 @@ struct Option {
     default:
       std::cerr << "Bad type in set_value: " << name << ": "
                 << typeid(T).name() << std::endl;
-      ceph_abort();
+      stone_abort();
     }
     return *this;
   }
@@ -372,7 +372,7 @@ struct Option {
     return *this;
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void print(std::ostream *out) const;
 
   bool has_flag(flag_t f) const {
@@ -399,5 +399,5 @@ struct Option {
   }
 };
 
-extern const std::vector<Option> ceph_options;
+extern const std::vector<Option> stone_options;
 

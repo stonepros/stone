@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef CEPH_SHAREDCACHE_H
-#define CEPH_SHAREDCACHE_H
+#ifndef STONE_SHAREDCACHE_H
+#define STONE_SHAREDCACHE_H
 
 #include <map>
 #include <list>
@@ -22,14 +22,14 @@
 #else
 #include <memory>
 #endif
-#include "common/ceph_mutex.h"
-#include "common/ceph_context.h"
+#include "common/stone_mutex.h"
+#include "common/stone_context.h"
 #include "common/dout.h"
 #include "include/unordered_map.h"
 
 template <class K, class V>
 class SharedLRU {
-  CephContext *cct;
+  StoneContext *cct;
 #ifdef WITH_SEASTAR
   using VPtr = boost::local_shared_ptr<V>;
   using WeakVPtr = boost::weak_ptr<V>;
@@ -37,16 +37,16 @@ class SharedLRU {
   using VPtr = std::shared_ptr<V>;
   using WeakVPtr = std::weak_ptr<V>;
 #endif
-  ceph::mutex lock;
+  stone::mutex lock;
   size_t max_size;
-  ceph::condition_variable cond;
+  stone::condition_variable cond;
   unsigned size;
 public:
   int waiting;
 private:
   using C = std::less<K>;
   using H = std::hash<K>;
-  ceph::unordered_map<K, typename std::list<std::pair<K, VPtr> >::iterator, H> contents;
+  stone::unordered_map<K, typename std::list<std::pair<K, VPtr> >::iterator, H> contents;
   std::list<std::pair<K, VPtr> > lru;
 
   std::map<K, std::pair<WeakVPtr, V*>, C> weak_refs;
@@ -100,9 +100,9 @@ private:
   };
 
 public:
-  SharedLRU(CephContext *cct = NULL, size_t max_size = 20)
+  SharedLRU(StoneContext *cct = NULL, size_t max_size = 20)
     : cct(cct),
-      lock{ceph::make_mutex("SharedLRU::lock")},
+      lock{stone::make_mutex("SharedLRU::lock")},
       max_size(max_size),
       size(0), waiting(0) {
     contents.rehash(max_size); 
@@ -116,7 +116,7 @@ public:
       dump_weak_refs(*_dout);
       *_dout << dendl;
       if (cct->_conf.get_val<bool>("debug_asserts_on_shutdown")) {
-	ceph_assert(weak_refs.empty());
+	stone_assert(weak_refs.empty());
       }
     }
   }
@@ -126,7 +126,7 @@ public:
     return size;
   }
 
-  void set_cct(CephContext *c) {
+  void set_cct(StoneContext *c) {
     cct = c;
   }
 
@@ -267,7 +267,7 @@ public:
     if (!found || !next)
       return found;
     next->first = r.first;
-    ceph_assert(r.second);
+    stone_assert(r.second);
     next->second = *(r.second);
     return found;
   }

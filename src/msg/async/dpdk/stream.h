@@ -117,7 +117,7 @@ class subscription {
   next_fn _next;
  private:
   explicit subscription(stream<T...>* s): _stream(s) {
-    ceph_assert(!_stream->_sub);
+    stone_assert(!_stream->_sub);
     _stream->_sub = this;
   }
 

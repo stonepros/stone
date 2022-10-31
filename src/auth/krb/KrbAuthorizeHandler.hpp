@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2018 SUSE LLC.
  * Author: Daniel Oliveira <doliveira@suse.com>
@@ -20,7 +20,7 @@
 
 class KrbAuthorizeHandler : public AuthAuthorizeHandler {
   bool verify_authorizer(
-    CephContext*,
+    StoneContext*,
     const KeyStore&,
     const bufferlist&,
     size_t,

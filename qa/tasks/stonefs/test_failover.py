@@ -4,13 +4,13 @@ import logging
 import operator
 from random import randint
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 from teuthology.exceptions import CommandFailedError
-from tasks.cephfs.fuse_mount import FuseMount
+from tasks.stonefs.fuse_mount import FuseMount
 
 log = logging.getLogger(__name__)
 
-class TestClusterAffinity(CephFSTestCase):
+class TestClusterAffinity(StoneFSTestCase):
     CLIENTS_REQUIRED = 0
     MDSS_REQUIRED = 4
 
@@ -60,7 +60,7 @@ class TestClusterAffinity(CephFSTestCase):
         """
         status, target = self._verify_init()
         standbys = list(status.get_standbys())
-        self.config_set('mds.'+standbys[0]['name'], 'mds_join_fs', 'cephfs')
+        self.config_set('mds.'+standbys[0]['name'], 'mds_join_fs', 'stonefs')
         self._change_target_state(target, standbys[0]['name'], {'join_fscid': self.fs.id, 'state': 'up:active'})
         self._reach_target(target)
 
@@ -71,8 +71,8 @@ class TestClusterAffinity(CephFSTestCase):
         status, target = self._verify_init()
         standbys = list(status.get_standbys())
         names = (standbys[0]['name'], standbys[1]['name'])
-        self.config_set('mds.'+names[0], 'mds_join_fs', 'cephfs')
-        self.config_set('mds.'+names[1], 'mds_join_fs', 'cephfs')
+        self.config_set('mds.'+names[0], 'mds_join_fs', 'stonefs')
+        self.config_set('mds.'+names[1], 'mds_join_fs', 'stonefs')
         self._change_target_state(target, names[0], {'join_fscid': self.fs.id})
         self._change_target_state(target, names[1], {'join_fscid': self.fs.id})
         self._reach_target(target)
@@ -92,7 +92,7 @@ class TestClusterAffinity(CephFSTestCase):
         status, target = self._verify_init()
         standbys = list(status.get_standbys())
         active = standbys[0]['name']
-        self.config_set('mds.'+active, 'mds_join_fs', 'cephfs')
+        self.config_set('mds.'+active, 'mds_join_fs', 'stonefs')
         self._change_target_state(target, active, {'join_fscid': self.fs.id, 'state': 'up:active'})
         self._reach_target(target)
         self.config_rm('mds.'+active, 'mds_join_fs')
@@ -105,14 +105,14 @@ class TestClusterAffinity(CephFSTestCase):
         """
         # After Octopus is EOL, we can remove this setting:
         self.fs.set_allow_multifs()
-        fs2 = self.mds_cluster.newfs(name="cephfs2")
+        fs2 = self.mds_cluster.newfs(name="stonefs2")
         status, target = self._verify_init()
         active = self.fs.get_active_names(status=status)[0]
         standbys = [info['name'] for info in status.get_standbys()]
         victim = standbys.pop()
         # Set a bogus fs on the others
         for mds in standbys:
-            self.config_set('mds.'+mds, 'mds_join_fs', 'cephfs2')
+            self.config_set('mds.'+mds, 'mds_join_fs', 'stonefs2')
             self._change_target_state(target, mds, {'join_fscid': fs2.id})
         self.fs.rank_fail()
         self._change_target_state(target, victim, {'state': 'up:active'})
@@ -128,10 +128,10 @@ class TestClusterAffinity(CephFSTestCase):
         status, target = self._verify_init()
         standbys = [info['name'] for info in status.get_standbys()]
         for mds in standbys:
-            self.config_set('mds.'+mds, 'mds_join_fs', 'cephfs2')
+            self.config_set('mds.'+mds, 'mds_join_fs', 'stonefs2')
         # After Octopus is EOL, we can remove this setting:
         self.fs.set_allow_multifs()
-        fs2 = self.mds_cluster.newfs(name="cephfs2")
+        fs2 = self.mds_cluster.newfs(name="stonefs2")
         for mds in standbys:
             self._change_target_state(target, mds, {'join_fscid': fs2.id})
         self.fs.rank_fail()
@@ -148,7 +148,7 @@ class TestClusterAffinity(CephFSTestCase):
         """
         status, target = self._verify_init()
         active = self.fs.get_active_names(status=status)[0]
-        self.config_set('mds.'+active, 'mds_join_fs', 'cephfs')
+        self.config_set('mds.'+active, 'mds_join_fs', 'stonefs')
         self._change_target_state(target, active, {'join_fscid': self.fs.id})
         self._reach_target(target)
         self.fs.rank_fail()
@@ -160,17 +160,17 @@ class TestClusterAffinity(CephFSTestCase):
         """
         status, target = self._verify_init()
         standbys = [info['name'] for info in status.get_standbys()]
-        self.config_set('mds.'+standbys[0], 'mds_join_fs', 'cephfs')
+        self.config_set('mds.'+standbys[0], 'mds_join_fs', 'stonefs')
         self._change_target_state(target, standbys[0], {'join_fscid': self.fs.id, 'state': 'up:active'})
         self._reach_target(target)
         self.fs.set_allow_standby_replay(True)
         status = self.fs.status()
         standbys = [info['name'] for info in status.get_standbys()]
-        self.config_set('mds.'+standbys[0], 'mds_join_fs', 'cephfs')
+        self.config_set('mds.'+standbys[0], 'mds_join_fs', 'stonefs')
         self._change_target_state(target, standbys[0], {'join_fscid': self.fs.id, 'state': 'up:standby-replay'})
         self._reach_target(target)
 
-class TestClusterResize(CephFSTestCase):
+class TestClusterResize(StoneFSTestCase):
     CLIENTS_REQUIRED = 0
     MDSS_REQUIRED = 3
 
@@ -297,7 +297,7 @@ class TestClusterResize(CephFSTestCase):
 
         self.fs.wait_for_daemons(timeout=90)
 
-class TestFailover(CephFSTestCase):
+class TestFailover(StoneFSTestCase):
     CLIENTS_REQUIRED = 1
     MDSS_REQUIRED = 2
 
@@ -422,7 +422,7 @@ class TestFailover(CephFSTestCase):
     def test_discontinuous_mdsmap(self):
         """
         That discontinuous mdsmap does not affect failover.
-        See http://tracker.ceph.com/issues/24856.
+        See http://tracker.stone.com/issues/24856.
         """
         self.fs.set_max_mds(2)
         status = self.fs.wait_for_daemons()
@@ -465,11 +465,11 @@ class TestFailover(CephFSTestCase):
         self.fs.set_max_mds(2)
         self.fs.wait_for_daemons()
         self.fs.rank_fail(rank=0)
-        # rank 0 will get stuck in up:resolve, see https://tracker.ceph.com/issues/53194
+        # rank 0 will get stuck in up:resolve, see https://tracker.stone.com/issues/53194
         self.fs.wait_for_daemons()
 
 
-class TestStandbyReplay(CephFSTestCase):
+class TestStandbyReplay(StoneFSTestCase):
     CLIENTS_REQUIRED = 0
     MDSS_REQUIRED = 4
 
@@ -638,7 +638,7 @@ class TestStandbyReplay(CephFSTestCase):
         self.assertTrue(standby_count, len(list(status.get_standbys())))
 
 
-class TestMultiFilesystems(CephFSTestCase):
+class TestMultiFilesystems(StoneFSTestCase):
     CLIENTS_REQUIRED = 2
     MDSS_REQUIRED = 4
 
@@ -676,14 +676,14 @@ class TestMultiFilesystems(CephFSTestCase):
         fs_a, fs_b = self._setup_two()
 
         # Mount a client on fs_a
-        self.mount_a.mount_wait(cephfs_name=fs_a.name)
+        self.mount_a.mount_wait(stonefs_name=fs_a.name)
         self.mount_a.write_n_mb("pad.bin", 1)
         self.mount_a.write_n_mb("test.bin", 2)
         a_created_ino = self.mount_a.path_to_ino("test.bin")
         self.mount_a.create_files()
 
         # Mount a client on fs_b
-        self.mount_b.mount_wait(cephfs_name=fs_b.name)
+        self.mount_b.mount_wait(stonefs_name=fs_b.name)
         self.mount_b.write_n_mb("test.bin", 1)
         b_created_ino = self.mount_b.path_to_ino("test.bin")
         self.mount_b.create_files()

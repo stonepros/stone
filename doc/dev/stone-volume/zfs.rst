@@ -19,7 +19,7 @@ Currently this interface is only usable when running on FreeBSD.
 
 Tag API
 -------
-The process of identifying filesystems, volumes and pools as part of Ceph relies
+The process of identifying filesystems, volumes and pools as part of Stone relies
 on applying tags on all volumes. It follows a naming convention for the
 namespace that looks like::
 
@@ -39,7 +39,7 @@ separated by ``;``
 
 Metadata
 --------
-The following describes all the metadata from Ceph OSDs that is stored on a
+The following describes all the metadata from Stone OSDs that is stored on a
 ZFS filesystem, volume, pool:
 
 

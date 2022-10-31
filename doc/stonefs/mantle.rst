@@ -4,7 +4,7 @@ Mantle
 .. warning::
 
     Mantle is for research and development of metadata balancer algorithms,
-    not for use on production CephFS clusters.
+    not for use on production StoneFS clusters.
 
 Multiple, active MDSs can migrate directories to balance metadata load. The
 policies for when, where, and how much to migrate are hard-coded into the
@@ -52,7 +52,7 @@ metadata load:
 Mantle with `vstart.sh`
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Start Ceph and tune the logging so we can see migrations happen:
+1. Start Stone and tune the logging so we can see migrations happen:
 
 ::
 
@@ -80,7 +80,7 @@ Mantle with `vstart.sh`
     bin/ceph fs set cephfs_a balancer greedyspill.lua
 
 
-4. Mount CephFS in another window:
+4. Mount StoneFS in another window:
 
 ::
 
@@ -160,7 +160,7 @@ Implementation Details
 Most of the implementation is in MDBalancer. Metrics are passed to the balancer
 policies via the Lua stack and a list of loads is returned back to MDBalancer.
 It sits alongside the current balancer implementation and it's enabled with a
-Ceph CLI command ("ceph fs set cephfs balancer mybalancer.lua"). If the Lua policy
+Stone CLI command ("ceph fs set cephfs balancer mybalancer.lua"). If the Lua policy
 fails (for whatever reason), we fall back to the original metadata load
 balancer. The balancer is stored in the RADOS metadata pool and a string in the
 MDSMap tells the MDSs which balancer to use.
@@ -183,7 +183,7 @@ This is in contrast to cls-lua in the OSDs, which has well-defined arguments
 to add new metrics without having to change the API on the Lua side; we want
 the API to grow and shrink as we explore which metrics matter. The downside of
 this approach is that the person programming Lua balancer policies has to look
-at the Ceph source code to see which metrics are exposed. We figure that the
+at the Stone source code to see which metrics are exposed. We figure that the
 Mantle developer will be in touch with MDS internals anyways.
 
 The metrics exposed to the Lua policy are the same ones that are already stored

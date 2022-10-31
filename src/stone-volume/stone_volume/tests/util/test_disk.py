@@ -1,15 +1,15 @@
 import os
 import pytest
 from mock.mock import patch
-from ceph_volume.util import disk
+from stone_volume.util import disk
 
 
 class TestLsblkParser(object):
 
     def test_parses_whitespace_values(self):
-        output = 'NAME="sdaa5" PARTLABEL="ceph data" RM="0" SIZE="10M" RO="0" TYPE="part"'
+        output = 'NAME="sdaa5" PARTLABEL="stone data" RM="0" SIZE="10M" RO="0" TYPE="part"'
         result = disk._lsblk_parser(output)
-        assert result['PARTLABEL'] == 'ceph data'
+        assert result['PARTLABEL'] == 'stone data'
 
     def test_ignores_bogus_pairs(self):
         output = 'NAME="sdaa5" PARTLABEL RM="0" SIZE="10M" RO="0" TYPE="part" MOUNTPOINT=""'
@@ -20,17 +20,17 @@ class TestLsblkParser(object):
 class TestBlkidParser(object):
 
     def test_parses_whitespace_values(self):
-        output = '''/dev/sdb1: UUID="62416664-cbaf-40bd-9689-10bd337379c3" TYPE="xfs" PART_ENTRY_SCHEME="gpt" PART_ENTRY_NAME="ceph data" PART_ENTRY_UUID="b89c03bc-bf58-4338-a8f8-a2f484852b4f"'''  # noqa
+        output = '''/dev/sdb1: UUID="62416664-cbaf-40bd-9689-10bd337379c3" TYPE="xfs" PART_ENTRY_SCHEME="gpt" PART_ENTRY_NAME="stone data" PART_ENTRY_UUID="b89c03bc-bf58-4338-a8f8-a2f484852b4f"'''  # noqa
         result = disk._blkid_parser(output)
-        assert result['PARTLABEL'] == 'ceph data'
+        assert result['PARTLABEL'] == 'stone data'
 
     def test_ignores_unmapped(self):
-        output = '''/dev/sdb1: UUID="62416664-cbaf-40bd-9689-10bd337379c3" TYPE="xfs" PART_ENTRY_SCHEME="gpt" PART_ENTRY_NAME="ceph data" PART_ENTRY_UUID="b89c03bc-bf58-4338-a8f8-a2f484852b4f"'''  # noqa
+        output = '''/dev/sdb1: UUID="62416664-cbaf-40bd-9689-10bd337379c3" TYPE="xfs" PART_ENTRY_SCHEME="gpt" PART_ENTRY_NAME="stone data" PART_ENTRY_UUID="b89c03bc-bf58-4338-a8f8-a2f484852b4f"'''  # noqa
         result = disk._blkid_parser(output)
         assert len(result.keys()) == 4
 
     def test_translates_to_partuuid(self):
-        output = '''/dev/sdb1: UUID="62416664-cbaf-40bd-9689-10bd337379c3" TYPE="xfs" PART_ENTRY_SCHEME="gpt" PART_ENTRY_NAME="ceph data" PART_ENTRY_UUID="b89c03bc-bf58-4338-a8f8-a2f484852b4f"'''  # noqa
+        output = '''/dev/sdb1: UUID="62416664-cbaf-40bd-9689-10bd337379c3" TYPE="xfs" PART_ENTRY_SCHEME="gpt" PART_ENTRY_NAME="stone data" PART_ENTRY_UUID="b89c03bc-bf58-4338-a8f8-a2f484852b4f"'''  # noqa
         result = disk._blkid_parser(output)
         assert result['PARTUUID'] == 'b89c03bc-bf58-4338-a8f8-a2f484852b4f'
 
@@ -38,11 +38,11 @@ class TestBlkidParser(object):
 class TestBlkid(object):
 
     def test_parses_translated(self, stub_call):
-        output = '''/dev/sdb1: UUID="62416664-cbaf-40bd-9689-10bd337379c3" TYPE="xfs" PART_ENTRY_SCHEME="gpt" PART_ENTRY_NAME="ceph data" PART_ENTRY_UUID="b89c03bc-bf58-4338-a8f8-a2f484852b4f"'''  # noqa
+        output = '''/dev/sdb1: UUID="62416664-cbaf-40bd-9689-10bd337379c3" TYPE="xfs" PART_ENTRY_SCHEME="gpt" PART_ENTRY_NAME="stone data" PART_ENTRY_UUID="b89c03bc-bf58-4338-a8f8-a2f484852b4f"'''  # noqa
         stub_call((output.split(), [], 0))
         result = disk.blkid('/dev/sdb1')
         assert result['PARTUUID'] == 'b89c03bc-bf58-4338-a8f8-a2f484852b4f'
-        assert result['PARTLABEL'] == 'ceph data'
+        assert result['PARTLABEL'] == 'stone data'
         assert result['UUID'] == '62416664-cbaf-40bd-9689-10bd337379c3'
         assert result['TYPE'] == 'xfs'
 
@@ -79,10 +79,10 @@ class TestDeviceFamily(object):
 
     def test_groups_multiple_devices(self, stub_call):
         out = [
-            'NAME="sdaa5" PARLABEL="ceph lockbox"',
+            'NAME="sdaa5" PARLABEL="stone lockbox"',
             'NAME="sdaa" RO="0"',
-            'NAME="sdaa1" PARLABEL="ceph data"',
-            'NAME="sdaa2" PARLABEL="ceph journal"',
+            'NAME="sdaa1" PARLABEL="stone data"',
+            'NAME="sdaa2" PARLABEL="stone journal"',
         ]
         stub_call((out, '', 0))
         result = disk.device_family('sdaa5')
@@ -91,10 +91,10 @@ class TestDeviceFamily(object):
     def test_parses_output_correctly(self, stub_call):
         names = ['sdaa', 'sdaa5', 'sdaa1', 'sdaa2']
         out = [
-            'NAME="sdaa5" PARLABEL="ceph lockbox"',
+            'NAME="sdaa5" PARLABEL="stone lockbox"',
             'NAME="sdaa" RO="0"',
-            'NAME="sdaa1" PARLABEL="ceph data"',
-            'NAME="sdaa2" PARLABEL="ceph journal"',
+            'NAME="sdaa1" PARLABEL="stone data"',
+            'NAME="sdaa2" PARLABEL="stone journal"',
         ]
         stub_call((out, '', 0))
         result = disk.device_family('sdaa5')
@@ -220,10 +220,10 @@ class TestSizeParse(object):
 
 class TestGetBlockDevsLsblk(object):
 
-    @patch('ceph_volume.process.call')
+    @patch('stone_volume.process.call')
     def test_return_structure(self, patched_call):
         lsblk_stdout = [
-			'/dev/dm-0 /dev/mapper/ceph--8b2684eb--56ff--49e4--8f28--522e04cbd6ab-osd--data--9fc29fbf--3b5b--4066--be10--61042569b5a7 lvm',
+			'/dev/dm-0 /dev/mapper/stone--8b2684eb--56ff--49e4--8f28--522e04cbd6ab-osd--data--9fc29fbf--3b5b--4066--be10--61042569b5a7 lvm',
 			'/dev/vda  /dev/vda                                                                                                       disk',
 			'/dev/vda1 /dev/vda1                                                                                                      part',
 			'/dev/vdb  /dev/vdb                                                                                                       disk',]
@@ -232,13 +232,13 @@ class TestGetBlockDevsLsblk(object):
         assert len(disks) == len(lsblk_stdout)
         assert len(disks[0]) == 3
 
-    @patch('ceph_volume.process.call')
+    @patch('stone_volume.process.call')
     def test_empty_lsblk(self, patched_call):
         patched_call.return_value = ([], '', 0)
         disks = disk.get_block_devs_lsblk()
         assert len(disks) == 0
 
-    @patch('ceph_volume.process.call')
+    @patch('stone_volume.process.call')
     def test_raise_on_failure(self, patched_call):
         patched_call.return_value = ([], 'error', 1)
         with pytest.raises(OSError):
@@ -331,7 +331,7 @@ class TestGetDevices(object):
         result = disk.get_devices(_sys_block_path=block_path)
         assert result[sda_path]['rotational'] == '1'
 
-    def test_is_ceph_rbd(self, tmpfile, tmpdir, patched_get_block_devs_lsblk):
+    def test_is_stone_rbd(self, tmpfile, tmpdir, patched_get_block_devs_lsblk):
         rbd_path = '/dev/rbd0'
         patched_get_block_devs_lsblk.return_value = [[rbd_path, rbd_path, 'disk']]
         block_path = self.setup_path(tmpdir)

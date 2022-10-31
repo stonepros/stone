@@ -84,10 +84,10 @@ public:
 
   /// IO methods
   void read(
-      Extents&& image_extents, ceph::bufferlist *bl,
+      Extents&& image_extents, stone::bufferlist *bl,
       int fadvise_flags, Context *on_finish);
   void write(
-      Extents&& image_extents, ceph::bufferlist&& bl,
+      Extents&& image_extents, stone::bufferlist&& bl,
       int fadvise_flags,
       Context *on_finish);
   void discard(
@@ -98,11 +98,11 @@ public:
       io::FlushSource flush_source, Context *on_finish);
   void writesame(
       uint64_t offset, uint64_t length,
-      ceph::bufferlist&& bl,
+      stone::bufferlist&& bl,
       int fadvise_flags, Context *on_finish);
   void compare_and_write(
       Extents&& image_extents,
-      ceph::bufferlist&& cmp_bl, ceph::bufferlist&& bl,
+      stone::bufferlist&& cmp_bl, stone::bufferlist&& bl,
       uint64_t *mismatch_offset,int fadvise_flags,
       Context *on_finish);
 
@@ -179,7 +179,7 @@ private:
   bool m_persist_on_write_until_flush = true;
 
   pwl::WriteLogGuard m_flush_guard;
-  mutable ceph::mutex m_flush_guard_lock;
+  mutable stone::mutex m_flush_guard_lock;
 
  /* Debug counters for the places m_async_op_tracker is used */
   std::atomic<int> m_async_complete_ops = {0};
@@ -187,10 +187,10 @@ private:
   std::atomic<int> m_async_process_work = {0};
 
   /* Hold m_deferred_dispatch_lock while consuming from m_deferred_ios. */
-  mutable ceph::mutex m_deferred_dispatch_lock;
+  mutable stone::mutex m_deferred_dispatch_lock;
 
   /* Used in release/detain to make BlockGuard preserve submission order */
-  mutable ceph::mutex m_blockguard_lock;
+  mutable stone::mutex m_blockguard_lock;
 
   /* Use m_blockguard_lock for the following 3 things */
   bool m_barrier_in_progress = false;
@@ -213,7 +213,7 @@ private:
   unsigned int m_free_lanes = pwl::MAX_CONCURRENT_WRITES;
 
   SafeTimer *m_timer = nullptr; /* Used with m_timer_lock */
-  mutable ceph::mutex *m_timer_lock = nullptr; /* Used with and by m_timer */
+  mutable stone::mutex *m_timer_lock = nullptr; /* Used with and by m_timer */
   Context *m_timer_ctx = nullptr;
 
   ThreadPool m_thread_pool;
@@ -297,15 +297,15 @@ protected:
 
   /* Acquire locks in order declared here */
 
-  mutable ceph::mutex m_log_retire_lock;
+  mutable stone::mutex m_log_retire_lock;
   /* Hold a read lock on m_entry_reader_lock to add readers to log entry
    * bufs. Hold a write lock to prevent readers from being added (e.g. when
    * removing log entrys from the map). No lock required to remove readers. */
   mutable RWLock m_entry_reader_lock;
   /* Hold m_log_append_lock while appending or retiring log entries. */
-  mutable ceph::mutex m_log_append_lock;
+  mutable stone::mutex m_log_append_lock;
   /* Used for most synchronization */
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
 
   /* Use m_blockguard_lock for the following 3 things */
   pwl::WriteLogGuard::BlockOperations m_awaiting_barrier;

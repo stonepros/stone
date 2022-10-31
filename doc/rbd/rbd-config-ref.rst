@@ -40,10 +40,10 @@ Cache Settings
 
 .. sidebar:: Kernel Caching
 
-	The kernel driver for Ceph block devices can use the Linux page cache to
+	The kernel driver for Stone block devices can use the Linux page cache to
 	improve performance.
 
-The user space implementation of the Ceph block device (i.e., ``librbd``) cannot
+The user space implementation of the Stone block device (i.e., ``librbd``) cannot
 take advantage of the Linux page cache, so it includes its own in-memory
 caching, called "RBD caching." RBD caching behaves just like well-behaved hard
 disk caching.  When the OS sends a barrier or a flush request, all dirty data is

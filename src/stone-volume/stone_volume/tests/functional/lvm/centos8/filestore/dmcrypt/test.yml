@@ -3,14 +3,14 @@
   become: yes
   tasks:
 
-    - name: stop ceph-osd@2 daemon
+    - name: stop stone-osd@2 daemon
       service:
-        name: ceph-osd@2
+        name: stone-osd@2
         state: stopped
 
-    - name: stop ceph-osd@0 daemon
+    - name: stop stone-osd@0 daemon
       service:
-        name: ceph-osd@0
+        name: stone-osd@0
         state: stopped
 
 
@@ -18,20 +18,20 @@
   become: yes
   tasks:
     - name: mark osds down
-      command: "ceph --cluster {{ cluster }} osd down osd.{{ item }}"
+      command: "stone --cluster {{ cluster }} osd down osd.{{ item }}"
       with_items:
         - 0
         - 2
 
     - name: destroy osd.2
-      command: "ceph --cluster {{ cluster }} osd destroy osd.2 --yes-i-really-mean-it"
+      command: "stone --cluster {{ cluster }} osd destroy osd.2 --yes-i-really-mean-it"
       register: result
       retries: 30
       delay: 1
       until: result is succeeded
 
     - name: destroy osd.0
-      command: "ceph --cluster {{ cluster }} osd destroy osd.0 --yes-i-really-mean-it"
+      command: "stone --cluster {{ cluster }} osd destroy osd.0 --yes-i-really-mean-it"
       register: result
       retries: 30
       delay: 1
@@ -43,14 +43,14 @@
 
     # osd.2 device
     - name: zap /dev/vdd1
-      command: "ceph-volume --cluster {{ cluster }} lvm zap /dev/vdd1 --destroy"
+      command: "stone-volume --cluster {{ cluster }} lvm zap /dev/vdd1 --destroy"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1
 
     - name: zap /dev/vdd2
-      command: "ceph-volume --cluster {{ cluster }} lvm zap /dev/vdd2 --destroy"
+      command: "stone-volume --cluster {{ cluster }} lvm zap /dev/vdd2 --destroy"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1
 
     # partitions have been completely removed, so re-create them again
     - name: re-create partition /dev/vdd for lvm data usage
@@ -74,20 +74,20 @@
         label: gpt
 
     - name: redeploy osd.2 using /dev/vdd1
-      command: "ceph-volume --cluster {{ cluster }} lvm create --filestore --data /dev/vdd1 --journal /dev/vdd2 --osd-id 2"
+      command: "stone-volume --cluster {{ cluster }} lvm create --filestore --data /dev/vdd1 --journal /dev/vdd2 --osd-id 2"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1
 
     # osd.0 lv
     - name: zap test_group/data-lv1
-      command: "ceph-volume --cluster {{ cluster }} lvm zap test_group/data-lv1"
+      command: "stone-volume --cluster {{ cluster }} lvm zap test_group/data-lv1"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1
 
     - name: zap /dev/vdc1
-      command: "ceph-volume --cluster {{ cluster }} lvm zap /dev/vdc1 --destroy"
+      command: "stone-volume --cluster {{ cluster }} lvm zap /dev/vdc1 --destroy"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1
 
     - name: re-create partition /dev/vdc1
       parted:
@@ -100,21 +100,21 @@
         label: gpt
 
     - name: prepare osd.0 again using test_group/data-lv1
-      command: "ceph-volume --cluster {{ cluster }} lvm prepare --filestore --data test_group/data-lv1 --journal /dev/vdc1 --osd-id 0"
+      command: "stone-volume --cluster {{ cluster }} lvm prepare --filestore --data test_group/data-lv1 --journal /dev/vdc1 --osd-id 0"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1
 
     - name: activate all to start the previously prepared osd.0
-      command: "ceph-volume lvm activate --filestore --all"
+      command: "stone-volume lvm activate --filestore --all"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1
 
     - name: node inventory
-      command: "ceph-volume inventory"
+      command: "stone-volume inventory"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1
 
     - name: list all OSDs
-      command: "ceph-volume lvm list"
+      command: "stone-volume lvm list"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1

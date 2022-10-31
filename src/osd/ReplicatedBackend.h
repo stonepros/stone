@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -30,7 +30,7 @@ public:
     const coll_t &coll,
     ObjectStore::CollectionHandle &ch,
     ObjectStore *store,
-    StoneeContext *cct);
+    StoneContext *cct);
 
   /// @see PGBackend::open_recovery_op
   RPGHandle *_open_recovery_op() {
@@ -88,7 +88,7 @@ public:
     return new RPCReadPred(get_parent()->whoami_shard());
   }
 
-  void dump_recovery_info(ceph::Formatter *f) const override {
+  void dump_recovery_info(stone::Formatter *f) const override {
     {
       f->open_array_section("pull_from_peer");
       for (std::map<pg_shard_t, std::set<hobject_t> >::const_iterator i = pull_from_peer.begin();
@@ -102,7 +102,7 @@ public:
 	       j != i->second.end();
 	       ++j) {
 	    f->open_object_section("pull_info");
-	    ceph_assert(pulling.count(*j));
+	    stone_assert(pulling.count(*j));
 	    pulling.find(*j)->second.dump(f);
 	    f->close_section();
 	  }
@@ -147,18 +147,18 @@ public:
     uint64_t off,
     uint64_t len,
     uint32_t op_flags,
-    ceph::buffer::list *bl) override;
+    stone::buffer::list *bl) override;
 
   int objects_readv_sync(
     const hobject_t &hoid,
     std::map<uint64_t, uint64_t>&& m,
     uint32_t op_flags,
-    ceph::buffer::list *bl) override;
+    stone::buffer::list *bl) override;
 
   void objects_read_async(
     const hobject_t &hoid,
     const std::list<std::pair<boost::tuple<uint64_t, uint64_t, uint32_t>,
-	       std::pair<ceph::buffer::list*, Context*> > > &to_read,
+	       std::pair<stone::buffer::list*, Context*> > > &to_read,
                Context *on_complete,
                bool fast_read = false) override;
 
@@ -171,7 +171,7 @@ private:
     object_stat_sum_t stat;
     ObcLockManager lock_manager;
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       {
 	f->open_object_section("recovery_progress");
 	recovery_progress.dump(f);
@@ -198,7 +198,7 @@ private:
     bool cache_dont_need;
     ObcLockManager lock_manager;
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       {
 	f->open_object_section("recovery_progress");
 	recovery_progress.dump(f);
@@ -254,9 +254,9 @@ private:
 
   static void trim_pushed_data(const interval_set<uint64_t> &copy_subset,
 			       const interval_set<uint64_t> &intervals_received,
-			       ceph::buffer::list data_received,
+			       stone::buffer::list data_received,
 			       interval_set<uint64_t> *intervals_usable,
-			       ceph::buffer::list *data_usable);
+			       stone::buffer::list *data_usable);
   void _failed_pull(pg_shard_t from, const hobject_t &soid);
 
   void send_pushes(int prio, std::map<pg_shard_t, std::vector<PushOp> > &pushes);
@@ -278,10 +278,10 @@ private:
 			bool cache_dont_need,
 			interval_set<uint64_t> &data_zeros,
 			const interval_set<uint64_t> &intervals_included,
-			ceph::buffer::list data_included,
-			ceph::buffer::list omap_header,
-			const std::map<std::string, ceph::buffer::list> &attrs,
-			const std::map<std::string, ceph::buffer::list> &omap_entries,
+			stone::buffer::list data_included,
+			stone::buffer::list omap_header,
+			const std::map<std::string, stone::buffer::list> &attrs,
+			const std::map<std::string, stone::buffer::list> &omap_entries,
 			ObjectStore::Transaction *t);
   void submit_push_complete(const ObjectRecoveryInfo &recovery_info,
 			    ObjectStore::Transaction *t);
@@ -334,7 +334,7 @@ private:
    * Client IO
    */
   struct InProgressOp : public RefCountedObject {
-    ceph_tid_t tid;
+    stone_tid_t tid;
     std::set<pg_shard_t> waiting_for_commit;
     Context *on_commit;
     OpRequestRef op;
@@ -344,12 +344,12 @@ private:
     }
   private:
     FRIEND_MAKE_REF(InProgressOp);
-    InProgressOp(ceph_tid_t tid, Context *on_commit, OpRequestRef op, eversion_t v)
+    InProgressOp(stone_tid_t tid, Context *on_commit, OpRequestRef op, eversion_t v)
       :
 	tid(tid), on_commit(on_commit),
 	op(op), v(v) {}
   };
-  std::map<ceph_tid_t, ceph::ref_t<InProgressOp>> in_progress_ops;
+  std::map<stone_tid_t, stone::ref_t<InProgressOp>> in_progress_ops;
 public:
   friend class C_OSD_OnOpCommit;
 
@@ -369,7 +369,7 @@ public:
     std::vector<pg_log_entry_t>&& log_entries,
     std::optional<pg_hit_set_history_t> &hset_history,
     Context *on_all_commit,
-    ceph_tid_t tid,
+    stone_tid_t tid,
     osd_reqid_t reqid,
     OpRequestRef op
     ) override;
@@ -378,13 +378,13 @@ private:
   Message * generate_subop(
     const hobject_t &soid,
     const eversion_t &at_version,
-    ceph_tid_t tid,
+    stone_tid_t tid,
     osd_reqid_t reqid,
     eversion_t pg_trim_to,
     eversion_t min_last_complete_ondisk,
     hobject_t new_temp_oid,
     hobject_t discard_temp_oid,
-    const ceph::buffer::list &log_entries,
+    const stone::buffer::list &log_entries,
     std::optional<pg_hit_set_history_t> &hset_history,
     ObjectStore::Transaction &op_t,
     pg_shard_t peer,
@@ -392,7 +392,7 @@ private:
   void issue_op(
     const hobject_t &soid,
     const eversion_t &at_version,
-    ceph_tid_t tid,
+    stone_tid_t tid,
     osd_reqid_t reqid,
     eversion_t pg_trim_to,
     eversion_t min_last_complete_ondisk,
@@ -402,7 +402,7 @@ private:
     std::optional<pg_hit_set_history_t> &hset_history,
     InProgressOp *op,
     ObjectStore::Transaction &op_t);
-  void op_commit(const ceph::ref_t<InProgressOp>& op);
+  void op_commit(const stone::ref_t<InProgressOp>& op);
   void do_repop_reply(OpRequestRef op);
   void do_repop(OpRequestRef op);
 

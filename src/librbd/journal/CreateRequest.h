@@ -8,7 +8,7 @@
 #include "include/buffer.h"
 #include "include/rados/librados.hpp"
 #include "include/rbd/librbd.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "librbd/ImageCtx.h"
 #include "journal/Journaler.h"
@@ -73,7 +73,7 @@ private:
   bufferlist m_bl;
   Journaler *m_journaler;
   SafeTimer *m_timer;
-  ceph::mutex *m_timer_lock;
+  stone::mutex *m_timer_lock;
   int m_r_saved;
 
   int64_t m_pool_id = -1;

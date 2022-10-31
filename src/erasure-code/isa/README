@@ -24,28 +24,28 @@ Therefore the accepted parameter space has limited to maximum (21,4) and (32,3) 
 
 Run the Test suite
 ==================
-cd ceph/src
+cd stone/src
 make unittest_erasure_code_isa
 ./unittest_erasure_code_isa --gtest_filter=*.* --log-to-stderr=true --debug-ods=20
 
-Run the CEPH erasure code benchmark
+Run the STONE erasure code benchmark
 ===================================
-cd ceph/src
-make ceph_erasure_code_benchmark
+cd stone/src
+make stone_erasure_code_benchmark
 
-# consult ./ceph_erasure_code_benchmark -h for help
+# consult ./stone_erasure_code_benchmark -h for help
 
 # encode performance
-./ceph_erasure_code_benchmark -p isa -P k=8 -P m=3 -S 1048576 -i 1000
+./stone_erasure_code_benchmark -p isa -P k=8 -P m=3 -S 1048576 -i 1000
 
 # decode performance one lost
-./ceph_erasure_code_benchmark -e 1 -w decode -p isa -P k=8 -P m=3 -S 1048576 -i 1000
+./stone_erasure_code_benchmark -e 1 -w decode -p isa -P k=8 -P m=3 -S 1048576 -i 1000
 
 # decode performance two lost
-./ceph_erasure_code_benchmark -e 2 -w decode -p isa -P k=8 -P m=3 -S 1048576 -i 1000
+./stone_erasure_code_benchmark -e 2 -w decode -p isa -P k=8 -P m=3 -S 1048576 -i 1000
 
 # decode performance three lost
-./ceph_erasure_code_benchmark -e 3 -w decode -p isa -P k=8 -P m=3 -S 1048576 -i 1000
+./stone_erasure_code_benchmark -e 3 -w decode -p isa -P k=8 -P m=3 -S 1048576 -i 1000
 
 
 Developer Notes

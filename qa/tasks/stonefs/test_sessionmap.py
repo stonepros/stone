@@ -2,14 +2,14 @@ import time
 import json
 import logging
 
-from tasks.cephfs.fuse_mount import FuseMount
+from tasks.stonefs.fuse_mount import FuseMount
 from teuthology.exceptions import CommandFailedError
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 log = logging.getLogger(__name__)
 
 
-class TestSessionMap(CephFSTestCase):
+class TestSessionMap(StoneFSTestCase):
     CLIENTS_REQUIRED = 2
     MDSS_REQUIRED = 2
 
@@ -182,7 +182,7 @@ class TestSessionMap(CephFSTestCase):
         # Configure a client that is limited to /foo/bar
         self._configure_auth(self.mount_b, "badguy", "allow rw path=/foo/bar")
         # Check he can mount that dir and do IO
-        self.mount_b.mount_wait(cephfs_mntpt="/foo/bar")
+        self.mount_b.mount_wait(stonefs_mntpt="/foo/bar")
         self.mount_b.create_destroy()
         self.mount_b.umount_wait()
 
@@ -191,7 +191,7 @@ class TestSessionMap(CephFSTestCase):
         # Try to mount the client, see that it fails
         with self.assert_cluster_log("client session with non-allowable root '/baz' denied"):
             with self.assertRaises(CommandFailedError):
-                self.mount_b.mount_wait(cephfs_mntpt="/foo/bar")
+                self.mount_b.mount_wait(stonefs_mntpt="/foo/bar")
 
     def test_session_evict_blocklisted(self):
         """
@@ -205,8 +205,8 @@ class TestSessionMap(CephFSTestCase):
         status = self.fs.wait_for_daemons()
 
         self.mount_a.run_shell_payload("mkdir {d0,d1} && touch {d0,d1}/file")
-        self.mount_a.setfattr("d0", "ceph.dir.pin", "0")
-        self.mount_a.setfattr("d1", "ceph.dir.pin", "1")
+        self.mount_a.setfattr("d0", "stone.dir.pin", "0")
+        self.mount_a.setfattr("d1", "stone.dir.pin", "1")
         self._wait_subtrees([('/d0', 0), ('/d1', 1)], status=status)
 
         self.mount_a.run_shell(["touch", "d0/f0"])

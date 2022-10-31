@@ -4,7 +4,7 @@
 #include "include/rados/librados.hpp"
 #include "cls/queue/cls_queue_types.h"
 #include "cls_queue_ops.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 void cls_queue_init(librados::ObjectWriteOperation& op, const string& queue_name, uint64_t size);
 int cls_queue_get_capacity(librados::IoCtx& io_ctx, const string& oid, uint64_t& size);

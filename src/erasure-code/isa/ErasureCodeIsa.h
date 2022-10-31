@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 CERN (Switzerland)
  *
@@ -30,7 +30,7 @@
 #include "ErasureCodeIsaTableCache.h"
 // -----------------------------------------------------------------------------
 
-class ErasureCodeIsa : public ceph::ErasureCode {
+class ErasureCodeIsa : public stone::ErasureCode {
 public:
 
   enum eMatrix {
@@ -74,13 +74,13 @@ public:
   unsigned int get_chunk_size(unsigned int object_size) const override;
 
   int encode_chunks(const std::set<int> &want_to_encode,
-                    std::map<int, ceph::buffer::list> *encoded) override;
+                    std::map<int, stone::buffer::list> *encoded) override;
 
   int decode_chunks(const std::set<int> &want_to_read,
-                            const std::map<int, ceph::buffer::list> &chunks,
-                            std::map<int, ceph::buffer::list> *decoded) override;
+                            const std::map<int, stone::buffer::list> &chunks,
+                            std::map<int, stone::buffer::list> *decoded) override;
 
-  int init(ceph::ErasureCodeProfile &profile, std::ostream *ss) override;
+  int init(stone::ErasureCodeProfile &profile, std::ostream *ss) override;
 
   virtual void isa_encode(char **data,
                           char **coding,
@@ -97,7 +97,7 @@ public:
   virtual void prepare() = 0;
 
  private:
-  virtual int parse(ceph::ErasureCodeProfile &profile,
+  virtual int parse(stone::ErasureCodeProfile &profile,
                     std::ostream *ss) = 0;
 };
 
@@ -146,7 +146,7 @@ public:
   void prepare() override;
 
  private:
-  int parse(ceph::ErasureCodeProfile &profile,
+  int parse(stone::ErasureCodeProfile &profile,
             std::ostream *ss) override;
 };
 

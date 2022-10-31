@@ -2,7 +2,7 @@
 
 # version 2021-02-04
 
-# IMPORTANT: affects order produced by 'sort' and 'ceph-diff-sorted'
+# IMPORTANT: affects order produced by 'sort' and 'stone-diff-sorted'
 # relies on this ordering
 export LC_ALL=C
 
@@ -119,11 +119,11 @@ sort -u "$rgwadmin_out" >"$temp_file"
 mv -f "$temp_file" "$rgwadmin_out"
 
 echo "computing delta at $(date)"
-ceph-diff-sorted "$rados_out" "$rgwadmin_out" | grep --text "^<" | sed 's/^< *//' >"$delta_out"
+stone-diff-sorted "$rados_out" "$rgwadmin_out" | grep --text "^<" | sed 's/^< *//' >"$delta_out"
 # use PIPESTATUS to get at exit status of first process in above pipe;
 # 0 means same, 1 means different, >1 means error
 if [ "${PIPESTATUS[0]}" -gt 1 ] ;then
-    error_out "ceph-diff-sorted"
+    error_out "stone-diff-sorted"
 fi
 
 found=$(wc -l < "$delta_out")

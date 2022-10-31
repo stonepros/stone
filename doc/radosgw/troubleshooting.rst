@@ -139,7 +139,7 @@ You may receive an error that looks like this::
      [java] INFO: Unable to execute HTTP request: peer not authenticated
 
 The Java SDK for S3 requires a valid certificate from a recognized certificate
-authority, because it uses HTTPS by default. If you are just testing the Ceph
+authority, because it uses HTTPS by default. If you are just testing the Stone
 Object Storage services, you can resolve this problem in a few ways:  
 
 #. Prepend the IP address or hostname with ``http://``. For example, change this::

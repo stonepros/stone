@@ -4,7 +4,7 @@ Troubleshooting
 You might need to investigate why a cephadm command failed
 or why a certain service no longer runs properly.
 
-Cephadm deploys daemons as containers. This means that
+Stoneadm deploys daemons as containers. This means that
 troubleshooting those containerized daemons might work
 differently than you expect (and that is certainly true if
 you expect this troubleshooting to work the way that
@@ -12,7 +12,7 @@ troubleshooting does when the daemons involved aren't
 containerized). 
 
 Here are some tools and commands to help you troubleshoot
-your Ceph environment.
+your Stone environment.
 
 .. _cephadm-pause:
 
@@ -20,14 +20,14 @@ Pausing or disabling cephadm
 ----------------------------
 
 If something goes wrong and cephadm is behaving badly, you can
-pause most of the Ceph cluster's background activity by running
+pause most of the Stone cluster's background activity by running
 the following command: 
 
 .. prompt:: bash #
 
   ceph orch pause
 
-This stops all changes in the Ceph cluster, but cephadm will
+This stops all changes in the Stone cluster, but cephadm will
 still periodically check hosts to refresh its inventory of
 daemons and devices.  You can disable cephadm completely by
 running the following commands:
@@ -52,7 +52,7 @@ In order to help with the process of debugging failed daemon
 deployments, cephadm stores events per service and per daemon.
 These events often contain information relevant to
 troubleshooting
-your Ceph cluster. 
+your Stone cluster. 
 
 Listing service events
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -111,7 +111,7 @@ Checking cephadm logs
 
 To learn how to monitor the cephadm logs as they are generated, read :ref:`watching_cephadm_logs`.
 
-If your Ceph cluster has been configured to log events to files, there will exist a
+If your Stone cluster has been configured to log events to files, there will exist a
 cephadm log file called ``ceph.cephadm.log`` on all monitor hosts (see
 :ref:`cephadm-logs` for a more complete explanation of this).
 
@@ -173,7 +173,7 @@ To list all container images that are downloaded on a host:
 Manually running containers
 ---------------------------
 
-Cephadm writes small wrappers that run a containers. Refer to
+Stoneadm writes small wrappers that run a containers. Refer to
 ``/var/lib/ceph/<cluster-fsid>/<service-name>/unit.run`` for the
 container execution command.
 
@@ -244,7 +244,7 @@ For more detail on operations of this kind, see :ref:`deploy_additional_monitors
 Accessing the admin socket
 --------------------------
 
-Each Ceph daemon provides an admin socket that bypasses the
+Each Stone daemon provides an admin socket that bypasses the
 MONs (See :ref:`rados-monitoring-using-admin-socket`).
 
 To access the admin socket, first enter the daemon container on the host::
@@ -280,7 +280,7 @@ for extended daemon maintenance and running the deamon interactively.
 Restoring the MON quorum
 ------------------------
 
-In case the Ceph MONs cannot form a quorum, cephadm is not able
+In case the Stone MONs cannot form a quorum, cephadm is not able
 to manage the cluster, until the quorum is restored.
 
 In order to restore the MON quorum, remove unhealthy MONs
@@ -341,7 +341,7 @@ Deploy the daemon::
 Analyzing core dumps
 ---------------------
 
-In case a Ceph daemon crashes, cephadm supports analyzing core dumps. To enable core dumps, run
+In case a Stone daemon crashes, cephadm supports analyzing core dumps. To enable core dumps, run
 
 .. prompt:: bash #
 

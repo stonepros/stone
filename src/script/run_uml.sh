@@ -27,9 +27,9 @@
 # they can all communicate with each other.
 
 # You will want to override this by setting and exporting the
-# "CEPH_TOP" environment variable to be the directory that contains
-# the "ceph-client" source tree.
-CEPH_TOP="${CEPH_TOP:-/home/elder/ceph}"
+# "STONE_TOP" environment variable to be the directory that contains
+# the "stone-client" source tree.
+STONE_TOP="${STONE_TOP:-/home/elder/stone}"
 
 # You may want to change this too, if you want guest UML instances
 # to have a diffeerent IP address range.  The guest IP will be based
@@ -56,7 +56,7 @@ fi
 GUEST_HOSTNAME="uml-${GUEST_ID}"
 
 # This is the path to the boot disk image used by UML.
-DISK_IMAGE_A="${CEPH_TOP}/ceph-client/uml.${GUEST_ID}"
+DISK_IMAGE_A="${STONE_TOP}/stone-client/uml.${GUEST_ID}"
 if [ ! -f "${DISK_IMAGE_A}" ]; then
 	echo "root disk image not found (or not a file)" >&2
 	exit 2

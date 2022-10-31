@@ -1,14 +1,14 @@
 ================================
-CephFS Client Capabilities
+StoneFS Client Capabilities
 ================================
 
-Use Ceph authentication capabilities to restrict your file system clients
+Use Stone authentication capabilities to restrict your file system clients
 to the lowest possible level of authority needed.
 
 .. note:: Path restriction and layout modification restriction are new features
-    in the Jewel release of Ceph.
+    in the Jewel release of Stone.
 
-.. note:: Using Erasure Coded(EC) pools with CephFS is supported only with the
+.. note:: Using Erasure Coded(EC) pools with StoneFS is supported only with the
    BlueStore Backend. They cannot be used as metadata pools and overwrites must
    be enabled on the data pools.
 
@@ -160,7 +160,7 @@ file systems specified by the administrator. Other file systems will not be
 reported and commands affecting them will fail as if the file systems do
 not exist.
 
-Consider following example. The Ceph cluster has 2 FSs::
+Consider following example. The Stone cluster has 2 FSs::
 
     $ ceph fs ls
     name: cephfs, metadata pool: cephfs_metadata, data pools: [cephfs_data ]
@@ -194,7 +194,7 @@ By default, user applications may communicate with any MDS, whether or not
 they are allowed to modify data on an associated file system (see
 `Path restriction` above). Client's communication can be restricted to MDS
 daemons associated with particular file system(s) by adding MDS caps for that
-particular file system. Consider the following example where the Ceph cluster
+particular file system. Consider the following example where the Stone cluster
 has 2 FSs::
 
     $ ceph fs ls

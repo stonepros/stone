@@ -2,7 +2,7 @@ overrides:
   stone:
     conf:
       client.0:
-        admin socket: /var/run/stone/stone-$name.asok
+        admin socket: /var/run/stonepros/stone-$name.asok
 tasks:
 - radosbench:
     clients: [client.0]

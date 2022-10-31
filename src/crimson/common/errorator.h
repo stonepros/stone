@@ -8,7 +8,7 @@
 
 #include <seastar/core/future-util.hh>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace crimson {
 
@@ -192,7 +192,7 @@ struct stateful_error_t : error_t<stateful_error_t<ErrorT>> {
       } catch (const ErrorT& obj) {
         return std::invoke(std::forward<Func>(func), obj);
       }
-      ceph_abort_msg("exception type mismatch – impossible!");
+      stone_abort_msg("exception type mismatch – impossible!");
     };
   }
 
@@ -558,7 +558,7 @@ private:
             //          if (__builtin_expect(future.failed(), false)) {
             //    ea25:       48 83 bd c8 fe ff ff    cmpq   $0x2,-0x138(%rbp)
             //    ea2c:       02
-            //    ea2d:       0f 87 f0 05 00 00       ja     f023 <ceph::osd::
+            //    ea2d:       0f 87 f0 05 00 00       ja     f023 <stone::osd::
             // ...
             //    /// If get() is called in a \ref seastar::thread context,
             //    /// then it need not be available; instead, the thread will
@@ -566,7 +566,7 @@ private:
             //    [[gnu::always_inline]]
             //    std::tuple<T...> get() {
             //        if (!_state.available()) {
-            //    ea3a:       0f 85 1b 05 00 00       jne    ef5b <ceph::osd::
+            //    ea3a:       0f 85 1b 05 00 00       jne    ef5b <stone::osd::
             //    }
             // ...
             //
@@ -764,9 +764,9 @@ public:
       static_assert(contains_once_v<std::decay_t<ErrorT>>,
                     "discarding disallowed ErrorT");
       if (msg) {
-        ceph_abort_msg(msg);
+        stone_abort_msg(msg);
       } else {
-        ceph_abort();
+        stone_abort();
       }
     }
   };
@@ -1046,9 +1046,9 @@ namespace ct_error {
     template <class ErrorT>
     void operator()(ErrorT&&) {
       if (msg) {
-        ceph_abort(msg);
+        stone_abort(msg);
       } else {
-        ceph_abort();
+        stone_abort();
       }
     }
   };

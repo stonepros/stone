@@ -15,7 +15,7 @@ import _ from 'lodash';
 import { Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import { CephServiceService } from '~/app/shared/api/ceph-service.service';
+import { StoneServiceService } from '~/app/shared/api/stone-service.service';
 import { DaemonService } from '~/app/shared/api/daemon.service';
 import { HostService } from '~/app/shared/api/host.service';
 import { OrchestratorService } from '~/app/shared/api/orchestrator.service';
@@ -30,7 +30,7 @@ import { CdTableFetchDataContext } from '~/app/shared/models/cd-table-fetch-data
 import { CdTableSelection } from '~/app/shared/models/cd-table-selection';
 import { Daemon } from '~/app/shared/models/daemon.interface';
 import { Permissions } from '~/app/shared/models/permissions';
-import { CephServiceSpec } from '~/app/shared/models/service.interface';
+import { StoneServiceSpec } from '~/app/shared/models/service.interface';
 import { RelativeDatePipe } from '~/app/shared/pipes/relative-date.pipe';
 import { AuthStorageService } from '~/app/shared/services/auth-storage.service';
 import { NotificationService } from '~/app/shared/services/notification.service';
@@ -65,7 +65,7 @@ export class ServiceDaemonListComponent implements OnInit, OnChanges, AfterViewI
   icons = Icons;
 
   daemons: Daemon[] = [];
-  services: Array<CephServiceSpec> = [];
+  services: Array<StoneServiceSpec> = [];
   columns: CdTableColumn[] = [];
   serviceColumns: CdTableColumn[] = [];
   tableActions: CdTableAction[];
@@ -81,7 +81,7 @@ export class ServiceDaemonListComponent implements OnInit, OnChanges, AfterViewI
 
   constructor(
     private hostService: HostService,
-    private cephServiceService: CephServiceService,
+    private stoneServiceService: StoneServiceService,
     private orchService: OrchestratorService,
     private relativeDatePipe: RelativeDatePipe,
     public actionLabels: ActionLabelsI18n,
@@ -259,7 +259,7 @@ export class ServiceDaemonListComponent implements OnInit, OnChanges, AfterViewI
     if (this.hostname) {
       observable = this.hostService.getDaemons(this.hostname);
     } else if (this.serviceName) {
-      observable = this.cephServiceService.getDaemons(this.serviceName);
+      observable = this.stoneServiceService.getDaemons(this.serviceName);
     } else {
       this.daemons = [];
       return;
@@ -284,8 +284,8 @@ export class ServiceDaemonListComponent implements OnInit, OnChanges, AfterViewI
     });
   }
   getServices(context: CdTableFetchDataContext) {
-    this.serviceSub = this.cephServiceService.list(this.serviceName).subscribe(
-      (services: CephServiceSpec[]) => {
+    this.serviceSub = this.stoneServiceService.list(this.serviceName).subscribe(
+      (services: StoneServiceSpec[]) => {
         this.services = services;
       },
       () => {

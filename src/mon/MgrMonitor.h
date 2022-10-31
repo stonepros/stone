@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -28,7 +28,7 @@ class MgrMonitor: public PaxosService
   MgrMap pending_map;
   bool ever_had_active_mgr = false;
 
-  std::map<std::string, ceph::buffer::list> pending_metadata;
+  std::map<std::string, stone::buffer::list> pending_metadata;
   std::set<std::string> pending_metadata_rm;
 
   std::map<std::string,Option> mgr_module_options;
@@ -36,7 +36,7 @@ class MgrMonitor: public PaxosService
 
   utime_t first_seen_inactive;
 
-  std::map<uint64_t, ceph::coarse_mono_clock::time_point> last_beacon;
+  std::map<uint64_t, stone::coarse_mono_clock::time_point> last_beacon;
 
   /**
    * If a standby is available, make it active, given that
@@ -119,22 +119,22 @@ public:
 
   void tick() override;
 
-  void print_summary(ceph::Formatter *f, std::ostream *ss) const;
+  void print_summary(stone::Formatter *f, std::ostream *ss) const;
 
   const std::vector<MonCommand> &get_command_descs() const;
 
   int load_metadata(const std::string& name, std::map<std::string, std::string>& m,
 		    std::ostream *err) const;
-  int dump_metadata(const std::string& name, ceph::Formatter *f, std::ostream *err);
-  void print_nodes(ceph::Formatter *f) const;
-  void count_metadata(const std::string& field, ceph::Formatter *f);
+  int dump_metadata(const std::string& name, stone::Formatter *f, std::ostream *err);
+  void print_nodes(stone::Formatter *f) const;
+  void count_metadata(const std::string& field, stone::Formatter *f);
   void count_metadata(const std::string& field, std::map<std::string,int> *out);
   void get_versions(std::map<std::string, std::list<std::string>> &versions);
 
   // When did the mon last call into our tick() method?  Used for detecting
   // when the mon was not updating us for some period (e.g. during slow
   // election) to reset last_beacon timeouts
-  ceph::coarse_mono_clock::time_point last_tick;
+  stone::coarse_mono_clock::time_point last_tick;
 };
 
 #endif

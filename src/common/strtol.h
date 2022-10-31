@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -27,7 +27,7 @@
 #include <type_traits>
 
 
-namespace ceph {
+namespace stone {
 #if __has_include(<charconv>)
 // Wrappers around std::from_chars.
 //
@@ -130,7 +130,7 @@ auto consume(std::string_view& sv, int base = 10)
   return static_cast<T>(v);
 }
 #endif // __has_include(<charconv>)
-} // namespace ceph
+} // namespace stone
 
 bool strict_strtob(const char* str, std::string *err);
 

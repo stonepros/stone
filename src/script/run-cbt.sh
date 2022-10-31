@@ -10,9 +10,9 @@ usage:
 options:
   -a,--archive-dir    directory in which the test result is stored, default to $PWD/cbt-archive
   --build-dir         directory where CMakeCache.txt is located, default to $PWD
-  --cbt               directory of cbt if you have already a copy of it. ceph/cbt:master will be cloned from github if not specified
+  --cbt               directory of cbt if you have already a copy of it. stone/cbt:master will be cloned from github if not specified
   -h,--help           print this help message
-  --source-dir        the path to the top level of Ceph source tree, default to $PWD/..
+  --source-dir        the path to the top level of Stone source tree, default to $PWD/..
   --use-existing      do not setup/teardown a vstart cluster for testing
 
 example:
@@ -80,7 +80,7 @@ fi
 
 if test -z "$cbt_dir"; then
     cbt_dir=$PWD/cbt
-    git clone --depth 1 -b master https://github.com/ceph/cbt.git $cbt_dir
+    git clone --depth 1 -b master https://github.com/stone/cbt.git $cbt_dir
 fi
 
 # store absolute path before changing cwd
@@ -117,7 +117,7 @@ for config_file in $config_files; do
         --output $cbt_config
     python3 $cbt_dir/cbt.py \
         --archive $archive_dir \
-        --conf $build_dir/ceph.conf \
+        --conf $build_dir/stone.conf \
         $cbt_config
     rm -f $cbt_config
 done

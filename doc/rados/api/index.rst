@@ -1,15 +1,15 @@
 ===========================
- Ceph Storage Cluster APIs
+ Stone Storage Cluster APIs
 ===========================
 
-The :term:`Ceph Storage Cluster` has a messaging layer protocol that enables
-clients to interact with a :term:`Ceph Monitor` and a :term:`Ceph OSD Daemon`.
-``librados`` provides this functionality to :term:`Ceph Clients` in the form of
-a library.  All Ceph Clients either use ``librados`` or the same functionality
+The :term:`Stone Storage Cluster` has a messaging layer protocol that enables
+clients to interact with a :term:`Stone Monitor` and a :term:`Stone OSD Daemon`.
+``librados`` provides this functionality to :term:`Stone Clients` in the form of
+a library.  All Stone Clients either use ``librados`` or the same functionality
 encapsulated in ``librados`` to interact with the object store.  For example,
-``librbd`` and ``libcephfs`` leverage this functionality. You may use
-``librados`` to interact with Ceph directly (e.g., an application that talks to
-Ceph, your own interface to Ceph, etc.).
+``librbd`` and ``libstonefs`` leverage this functionality. You may use
+``librados`` to interact with Stone directly (e.g., an application that talks to
+Stone, your own interface to Stone, etc.).
 
 
 .. toctree::
@@ -19,5 +19,5 @@ Ceph, your own interface to Ceph, etc.).
    librados (C) <librados>
    librados (C++) <libradospp>
    librados (Python) <python>
-   libcephsqlite (SQLite) <libcephsqlite>
+   libstonesqlite (SQLite) <libstonesqlite>
    object class <objclass-sdk>

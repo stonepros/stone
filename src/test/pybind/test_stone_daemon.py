@@ -13,7 +13,7 @@ Foundation.  See file COPYING.
 
 from unittest import TestCase
 
-from ceph_daemon import DaemonWatcher
+from stone_daemon import DaemonWatcher
 
 try:
     from StringIO import StringIO
@@ -44,5 +44,5 @@ class TestDaemonWatcher(TestCase):
 # Local Variables:
 # compile-command: "cd ../../..;
 #  PYTHONPATH=src/pybind nosetests --stop \
-#  src/test/pybind/test_ceph_daemon.py"
+#  src/test/pybind/test_stone_daemon.py"
 # End:

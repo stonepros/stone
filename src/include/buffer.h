@@ -56,7 +56,7 @@
 
 
 #ifdef __STONE__
-# include "include/ceph_assert.h"
+# include "include/stone_assert.h"
 #else
 # include <assert.h>
 #endif
@@ -77,7 +77,7 @@ class deleter;
 
 template<typename T> class DencDumper;
 
-namespace ceph {
+namespace stone {
 
 template <class T>
 struct nop_delete {
@@ -95,8 +95,8 @@ struct nop_delete {
 //  * unique_ptr with nop deleter,
 //  * raw pointer (doesn't embed ownership enforcement - std::move).
 template <class T>
-struct unique_leakable_ptr : public std::unique_ptr<T, ceph::nop_delete<T>> {
-  using std::unique_ptr<T, ceph::nop_delete<T>>::unique_ptr;
+struct unique_leakable_ptr : public std::unique_ptr<T, stone::nop_delete<T>> {
+  using std::unique_ptr<T, stone::nop_delete<T>>::unique_ptr;
 };
 
 namespace buffer STONE_BUFFER_API {
@@ -136,28 +136,28 @@ struct error_code;
   /*
    * named constructors
    */
-  ceph::unique_leakable_ptr<raw> copy(const char *c, unsigned len);
-  ceph::unique_leakable_ptr<raw> create(unsigned len);
-  ceph::unique_leakable_ptr<raw> create(unsigned len, char c);
-  ceph::unique_leakable_ptr<raw> create_in_mempool(unsigned len, int mempool);
-  ceph::unique_leakable_ptr<raw> claim_char(unsigned len, char *buf);
-  ceph::unique_leakable_ptr<raw> create_malloc(unsigned len);
-  ceph::unique_leakable_ptr<raw> claim_malloc(unsigned len, char *buf);
-  ceph::unique_leakable_ptr<raw> create_static(unsigned len, char *buf);
-  ceph::unique_leakable_ptr<raw> create_aligned(unsigned len, unsigned align);
-  ceph::unique_leakable_ptr<raw> create_aligned_in_mempool(unsigned len, unsigned align, int mempool);
-  ceph::unique_leakable_ptr<raw> create_page_aligned(unsigned len);
-  ceph::unique_leakable_ptr<raw> create_small_page_aligned(unsigned len);
-  ceph::unique_leakable_ptr<raw> claim_buffer(unsigned len, char *buf, deleter del);
+  stone::unique_leakable_ptr<raw> copy(const char *c, unsigned len);
+  stone::unique_leakable_ptr<raw> create(unsigned len);
+  stone::unique_leakable_ptr<raw> create(unsigned len, char c);
+  stone::unique_leakable_ptr<raw> create_in_mempool(unsigned len, int mempool);
+  stone::unique_leakable_ptr<raw> claim_char(unsigned len, char *buf);
+  stone::unique_leakable_ptr<raw> create_malloc(unsigned len);
+  stone::unique_leakable_ptr<raw> claim_malloc(unsigned len, char *buf);
+  stone::unique_leakable_ptr<raw> create_static(unsigned len, char *buf);
+  stone::unique_leakable_ptr<raw> create_aligned(unsigned len, unsigned align);
+  stone::unique_leakable_ptr<raw> create_aligned_in_mempool(unsigned len, unsigned align, int mempool);
+  stone::unique_leakable_ptr<raw> create_page_aligned(unsigned len);
+  stone::unique_leakable_ptr<raw> create_small_page_aligned(unsigned len);
+  stone::unique_leakable_ptr<raw> claim_buffer(unsigned len, char *buf, deleter del);
 
 #ifdef HAVE_SEASTAR
   /// create a raw buffer to wrap seastar cpu-local memory, using foreign_ptr to
   /// make it safe to share between cpus
-  ceph::unique_leakable_ptr<buffer::raw> create_foreign(seastar::temporary_buffer<char>&& buf);
+  stone::unique_leakable_ptr<buffer::raw> create_foreign(seastar::temporary_buffer<char>&& buf);
   /// create a raw buffer to wrap seastar cpu-local memory, without the safety
   /// of foreign_ptr. the caller must otherwise guarantee that the buffer ptr is
   /// destructed on this cpu
-  ceph::unique_leakable_ptr<buffer::raw> create(seastar::temporary_buffer<char>&& buf);
+  stone::unique_leakable_ptr<buffer::raw> create(seastar::temporary_buffer<char>&& buf);
 #endif
 
   /*
@@ -231,14 +231,14 @@ struct error_code;
     using iterator = iterator_impl<false>;
 
     ptr() : _raw(nullptr), _off(0), _len(0) {}
-    ptr(ceph::unique_leakable_ptr<raw> r);
+    ptr(stone::unique_leakable_ptr<raw> r);
     // cppcheck-suppress noExplicitConstructor
     ptr(unsigned l);
     ptr(const char *d, unsigned l);
     ptr(const ptr& p);
     ptr(ptr&& p) noexcept;
     ptr(const ptr& p, unsigned o, unsigned l);
-    ptr(const ptr& p, ceph::unique_leakable_ptr<raw> r);
+    ptr(const ptr& p, stone::unique_leakable_ptr<raw> r);
     ptr& operator= (const ptr& p);
     ptr& operator= (ptr&& p) noexcept;
     ~ptr() {
@@ -249,7 +249,7 @@ struct error_code;
 
     bool have_raw() const { return _raw ? true:false; }
 
-    ceph::unique_leakable_ptr<raw> clone();
+    stone::unique_leakable_ptr<raw> clone();
     void swap(ptr& other) noexcept;
 
     iterator begin(size_t offset=0) {
@@ -310,7 +310,7 @@ struct error_code;
     // modifiers
     void set_offset(unsigned o) {
 #ifdef __STONE__
-      ceph_assert(raw_length() >= o);
+      stone_assert(raw_length() >= o);
 #else
       assert(raw_length() >= o);
 #endif
@@ -318,7 +318,7 @@ struct error_code;
     }
     void set_length(unsigned l) {
 #ifdef __STONE__
-      ceph_assert(raw_length() >= l);
+      stone_assert(raw_length() >= l);
 #else
       assert(raw_length() >= l);
 #endif
@@ -372,7 +372,7 @@ struct error_code;
     ~ptr_node() = default;
 
     static std::unique_ptr<ptr_node, disposer>
-    create(ceph::unique_leakable_ptr<raw> r) {
+    create(stone::unique_leakable_ptr<raw> r) {
       return create_hypercombined(std::move(r));
     }
     static std::unique_ptr<ptr_node, disposer>
@@ -405,7 +405,7 @@ struct error_code;
 
     static bool dispose_if_hypercombined(ptr_node* delete_this);
     static std::unique_ptr<ptr_node, disposer> create_hypercombined(
-      ceph::unique_leakable_ptr<raw> r);
+      stone::unique_leakable_ptr<raw> r);
   };
   /*
    * list - the useful bit!
@@ -414,7 +414,7 @@ struct error_code;
   class STONE_BUFFER_API list {
   public:
     // this the very low-level implementation of singly linked list
-    // ceph::buffer::list is built on. We don't use intrusive slist
+    // stone::buffer::list is built on. We don't use intrusive slist
     // of Boost (or any other 3rd party) to save extra dependencies
     // in our public headers.
     class buffers_t {
@@ -740,8 +740,8 @@ struct error_code;
     };
 
     class contiguous_appender {
-      ceph::bufferlist& bl;
-      ceph::bufferlist::reserve_t space;
+      stone::bufferlist& bl;
+      stone::bufferlist::reserve_t space;
       char* pos;
       bool deep;
 
@@ -1001,7 +1001,7 @@ struct error_code;
 	len += (*it).length();
       }
 #ifdef __STONE__
-      ceph_assert(len == _len);
+      stone_assert(len == _len);
 #else
       assert(len == _len);
 #endif // __STONE__
@@ -1054,7 +1054,7 @@ struct error_code;
       _buffers.push_back(*bp.release());
     }
     void push_back(raw* const r) = delete;
-    void push_back(ceph::unique_leakable_ptr<raw> r) {
+    void push_back(stone::unique_leakable_ptr<raw> r) {
       _buffers.push_back(*ptr_node::create(std::move(r)).release());
       _carriage = &_buffers.back();
       _len += _buffers.back().length();
@@ -1184,7 +1184,7 @@ struct error_code;
     template<typename VectorT>
     void prepare_iov(VectorT *piov) const {
 #ifdef __STONE__
-      ceph_assert(_num <= IOV_MAX);
+      stone_assert(_num <= IOV_MAX);
 #else
       assert(_num <= IOV_MAX);
 #endif
@@ -1277,7 +1277,7 @@ inline bufferhash& operator<<(bufferhash& l, const bufferlist &r) {
 
 } // namespace buffer
 
-} // namespace ceph
+} // namespace stone
 
 
 #endif

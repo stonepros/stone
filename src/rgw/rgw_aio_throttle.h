@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -17,7 +17,7 @@
 
 #include "include/rados/librados_fwd.hpp"
 #include <memory>
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/async/completion.h"
 #include "common/async/yield_context.h"
 #include "services/svc_rados.h"
@@ -47,16 +47,16 @@ class Throttle {
 
   ~Throttle() {
     // must drain before destructing
-    ceph_assert(pending.empty());
-    ceph_assert(completed.empty());
+    stone_assert(pending.empty());
+    stone_assert(completed.empty());
   }
 };
 
 // a throttle for aio operations. all public functions must be called from
 // the same thread
 class BlockingAioThrottle final : public Aio, private Throttle {
-  ceph::mutex mutex = ceph::make_mutex("AioThrottle");
-  ceph::condition_variable cond;
+  stone::mutex mutex = stone::make_mutex("AioThrottle");
+  stone::condition_variable cond;
 
   struct Pending : AioResultEntry {
     BlockingAioThrottle *parent = nullptr;
@@ -86,7 +86,7 @@ class YieldingAioThrottle final : public Aio, private Throttle {
   struct Handler;
 
   // completion callback associated with the waiter
-  using Completion = ceph::async::Completion<void(boost::system::error_code)>;
+  using Completion = stone::async::Completion<void(boost::system::error_code)>;
   std::unique_ptr<Completion> completion;
 
   template <typename CompletionToken>

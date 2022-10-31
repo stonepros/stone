@@ -22,34 +22,34 @@ fi
 
 # The output image name: this should match whatever is configured as
 # the image name in your Rook cluster CRD object.
-IMAGE=ceph/ceph
+IMAGE=stone/stone
 TAG=latest
 
-# The namespace where ceph containers are running in your
+# The namespace where stone containers are running in your
 # test cluster: used for bouncing the containers.
-NAMESPACE=rook-ceph
+NAMESPACE=rook-stone
 
 mkdir -p kubejacker
 cp $SCRIPTPATH/Dockerfile kubejacker
 
 # TODO: let user specify which daemon they're interested
 # in -- doing all bins all the time is too slow and bloaty
-#BINS="ceph-mgr ceph-mon ceph-mds ceph-osd rados radosgw-admin radosgw"
+#BINS="stone-mgr stone-mon stone-mds stone-osd rados radosgw-admin radosgw"
 #pushd bin
 #strip $BINS  #TODO: make stripping optional
 #tar czf $BUILDPATH/kubejacker/bin.tar.gz $BINS
 #popd
 
-# We need ceph-common to support the binaries
+# We need stone-common to support the binaries
 # We need librados/rbd to support mgr modules
 # that import the python bindings
-#LIBS="libceph-common.so.0 libceph-common.so librados.so.2 librados.so librados.so.2.0.0 librbd.so librbd.so.1 librbd.so.1.12.0"
+#LIBS="libstone-common.so.0 libstone-common.so librados.so.2 librados.so librados.so.2.0.0 librbd.so librbd.so.1 librbd.so.1.12.0"
 #pushd lib
 #strip $LIBS  #TODO: make stripping optional
 #tar czf $BUILDPATH/kubejacker/lib.tar.gz $LIBS
 #popd
 
-pushd ../src/python-common/ceph
+pushd ../src/python-common/stone
 tar --exclude=__pycache__ --exclude=tests -czf $BUILDPATH/kubejacker/python_common.tar.gz *
 popd
 
@@ -72,17 +72,17 @@ popd
 #popd
 
 pushd kubejacker
-docker build -t $REPO/ceph/ceph:latest .
+docker build -t $REPO/stone/stone:latest .
 popd
 
 # Push the image to the repository
 #docker tag $REPO/$IMAGE:$TAG $REPO/$IMAGE:latest
-docker push $REPO/ceph/ceph:latest
+docker push $REPO/stone/stone:latest
 #docker push $REPO/$IMAGE:$TAG
 # With a plain HTTP registry
-#podman push $REPO/ceph/ceph:latest --tls-verify=false
+#podman push $REPO/stone/stone:latest --tls-verify=false
 
 # Finally, bounce the containers to pick up the new image
-kubectl -n $NAMESPACE delete pod -l app=rook-ceph-mds
-kubectl -n $NAMESPACE delete pod -l app=rook-ceph-mgr
-kubectl -n $NAMESPACE delete pod -l app=rook-ceph-mon
+kubectl -n $NAMESPACE delete pod -l app=rook-stone-mds
+kubectl -n $NAMESPACE delete pod -l app=rook-stone-mgr
+kubectl -n $NAMESPACE delete pod -l app=rook-stone-mon

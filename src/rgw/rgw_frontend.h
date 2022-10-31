@@ -17,7 +17,7 @@
 #include "rgw_auth_registry.h"
 #include "rgw_sal_rados.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 namespace rgw::dmclock {
   class SyncScheduler;
@@ -117,7 +117,7 @@ class RGWCivetWebFrontend : public RGWFrontend {
     }
   }
 
-  CephContext* cct() const { return env.store->ctx(); }
+  StoneContext* cct() const { return env.store->ctx(); }
 public:
   RGWCivetWebFrontend(RGWProcessEnv& env,
                       RGWFrontendConfig *conf,
@@ -173,7 +173,7 @@ public:
   }
 
   int run() override {
-    ceph_assert(pprocess); /* should have initialized by init() */
+    stone_assert(pprocess); /* should have initialized by init() */
     thread = new RGWProcessControlThread(pprocess);
     thread->create("rgw_frontend");
     return 0;
@@ -203,7 +203,7 @@ public:
     : RGWProcessFrontend(pe, _conf) {}
 
   int init() override {
-    pprocess = new RGWFCGXProcess(g_ceph_context, &env,
+    pprocess = new RGWFCGXProcess(g_stone_context, &env,
 				  g_conf()->rgw_thread_pool_size, conf);
     return 0;
   }
@@ -214,13 +214,13 @@ public:
   RGWLoadGenFrontend(RGWProcessEnv& pe, RGWFrontendConfig *_conf)
     : RGWProcessFrontend(pe, _conf) {}
 
-  CephContext *get_cct() const { 
+  StoneContext *get_cct() const { 
     return env.store->ctx(); 
   }
 
   unsigned get_subsys() const
   {
-    return ceph_subsys_rgw;
+    return stone_subsys_rgw;
   }
 
   std::ostream& gen_prefix(std::ostream& out) const
@@ -231,7 +231,7 @@ public:
   int init() override {
     int num_threads;
     conf->get_val("num_threads", g_conf()->rgw_thread_pool_size, &num_threads);
-    RGWLoadGenProcess *pp = new RGWLoadGenProcess(g_ceph_context, &env,
+    RGWLoadGenProcess *pp = new RGWLoadGenProcess(g_stone_context, &env,
 						  num_threads, conf);
 
     pprocess = pp;
@@ -291,7 +291,7 @@ class RGWFrontendPauser : public RGWRealmReloader::Pauser {
     /* Initialize the registry of auth strategies which will coordinate
      * the dynamic reconfiguration. */
     auto auth_registry = \
-      rgw::auth::StrategyRegistry::create(g_ceph_context, implicit_tenants, store->getRados()->pctl);
+      rgw::auth::StrategyRegistry::create(g_stone_context, implicit_tenants, store->getRados()->pctl);
 
     for (auto frontend : frontends)
       frontend->unpause_with_new_config(store, auth_registry);

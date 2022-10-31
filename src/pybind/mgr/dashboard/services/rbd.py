@@ -9,7 +9,7 @@ import rbd
 
 from .. import mgr
 from ..tools import ViewCache
-from .ceph_service import CephService
+from .stone_service import StoneService
 
 try:
     from typing import List
@@ -125,17 +125,17 @@ class RbdConfiguration(object):
                 except rbd.ImageNotFound:
                     result = []
             else:  # pool config
-                pg_status = list(CephService.get_pool_pg_status(self._pool_name).keys())
+                pg_status = list(StoneService.get_pool_pg_status(self._pool_name).keys())
                 if len(pg_status) == 1 and 'incomplete' in pg_status[0]:
                     # If config_list would be called with ioctx if it's a bad pool,
                     # the dashboard would stop working, waiting for the response
                     # that would not happen.
                     #
-                    # This is only a workaround for https://tracker.ceph.com/issues/43771 which
+                    # This is only a workaround for https://tracker.stone.com/issues/43771 which
                     # already got rejected as not worth the effort.
                     #
                     # Are more complete workaround for the dashboard will be implemented with
-                    # https://tracker.ceph.com/issues/44224
+                    # https://tracker.stone.com/issues/44224
                     #
                     # @TODO: If #44224 is addressed remove this workaround
                     return []
@@ -277,7 +277,7 @@ class RbdService(object):
             stat['stripe_count'] = img.stripe_count()
             stat['stripe_unit'] = img.stripe_unit()
 
-            data_pool_name = CephService.get_pool_name_from_id(
+            data_pool_name = StoneService.get_pool_name_from_id(
                 img.data_pool_id())
             if data_pool_name == pool_name:
                 data_pool_name = None

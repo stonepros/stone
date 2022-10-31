@@ -4,11 +4,11 @@
 #
 # e.g.,
 #
-#  zgrep smithi01817880-936 remote/*/log/*osd* | ~/src/ceph/src/script/find_dups_in_pg_log.sh
+#  zgrep smithi01817880-936 remote/*/log/*osd* | ~/src/stone/src/script/find_dups_in_pg_log.sh
 #
 # or
 #
-#  zcat remote/*/log/*osd* | ~/src/ceph/src/script/find_dups_in_pg_log.sh
+#  zcat remote/*/log/*osd* | ~/src/stone/src/script/find_dups_in_pg_log.sh
 #
 # output will be any requests that appear in the pg log >1 time (along with
 # their count)

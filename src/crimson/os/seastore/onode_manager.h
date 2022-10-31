@@ -10,7 +10,7 @@
 #include <seastar/core/future.hh>
 
 #include "include/buffer_fwd.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/hobject.h"
 
 #include "crimson/os/seastore/onode.h"

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc
  *
@@ -29,7 +29,7 @@ struct State {
   // incremented with each new obligation
   uint32_t counter = 0;
   // highest timestamp applied by all sources
-  ceph::real_time progress_timestamp;
+  stone::real_time progress_timestamp;
 
   State(const rgw_bucket_shard& key) noexcept : key(key) {}
 };
@@ -38,11 +38,11 @@ struct Entry;
 struct EntryToKey;
 class Handle;
 
-using lru_config = ceph::common::intrusive_lru_config<
+using lru_config = stone::common::intrusive_lru_config<
     rgw_bucket_shard, Entry, EntryToKey>;
 
 // a recyclable cache entry
-struct Entry : State, ceph::common::intrusive_lru_base<lru_config> {
+struct Entry : State, stone::common::intrusive_lru_base<lru_config> {
   using State::State;
 };
 
@@ -58,7 +58,7 @@ using thread_unsafe_ref_counter = boost::intrusive_ref_counter<
 
 // a state cache for entries within a single datalog shard
 class Cache : public thread_unsafe_ref_counter<Cache> {
-  ceph::common::intrusive_lru<lru_config> cache;
+  stone::common::intrusive_lru<lru_config> cache;
  protected:
   // protected ctor to enforce the use of factory function create()
   explicit Cache(size_t target_size) {

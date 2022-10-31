@@ -5,13 +5,13 @@ try:
 except ImportError:
     pass
 
-from ceph.deployment.drive_selection.selector import DriveSelection
+from stone.deployment.drive_selection.selector import DriveSelection
 
 logger = logging.getLogger(__name__)
 
 
 # TODO refactor this to a DriveSelection method
-class to_ceph_volume(object):
+class to_stone_volume(object):
 
     def __init__(self,
                  selection,  # type: DriveSelection
@@ -26,7 +26,7 @@ class to_ceph_volume(object):
 
     def run(self):
         # type: () -> Optional[str]
-        """ Generate ceph-volume commands based on the DriveGroup filters """
+        """ Generate stone-volume commands based on the DriveGroup filters """
         data_devices = [x.path for x in self.selection.data_devices()]
         db_devices = [x.path for x in self.selection.db_devices()]
         wal_devices = [x.path for x in self.selection.wal_devices()]

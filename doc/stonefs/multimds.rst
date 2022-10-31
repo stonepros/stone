@@ -5,7 +5,7 @@ Configuring multiple active MDS daemons
 
 *Also known as: multi-mds, active-active MDS*
 
-Each CephFS file system is configured for a single active MDS daemon
+Each StoneFS file system is configured for a single active MDS daemon
 by default.  To scale metadata performance for large scale systems, you
 may enable multiple active MDS daemons, which will share the metadata
 workload with one another.
@@ -28,7 +28,7 @@ are those with many clients, perhaps working on many separate directories.
 Increasing the MDS active cluster size
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each CephFS file system has a *max_mds* setting, which controls how many ranks
+Each StoneFS file system has a *max_mds* setting, which controls how many ranks
 will be created.  The actual number of ranks in the file system will only be
 increased if a spare daemon is available to take on the new rank. For example,
 if there is only one MDS daemon running, and max_mds is set to two, no second
@@ -144,7 +144,7 @@ Setting subtree partitioning policies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is also possible to setup **automatic** static partitioning of subtrees via
-a set of **policies**. In CephFS, this automatic static partitioning is
+a set of **policies**. In StoneFS, this automatic static partitioning is
 referred to as **ephemeral pinning**. Any directory (inode) which is
 ephemerally pinned will be automatically assigned to a particular rank
 according to a consistent hash of its inode number. The set of all

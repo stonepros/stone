@@ -24,7 +24,7 @@
 
 struct hobject_t;
 
-namespace ceph::os {
+namespace stone::os {
   class Transaction;
 }
 
@@ -52,7 +52,7 @@ public:
 					   crimson::osd::ShardServices& shard_services,
 					   const ec_profile_t& ec_profile);
   using attrs_t =
-    std::map<std::string, ceph::bufferptr, std::less<>>;
+    std::map<std::string, stone::bufferptr, std::less<>>;
   using read_errorator = ll_read_errorator::extend<
     crimson::ct_error::object_corrupted>;
   read_errorator::future<> read(
@@ -83,46 +83,46 @@ public:
   seastar::future<> create(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans);
+    stone::os::Transaction& trans);
   seastar::future<> remove(
     ObjectState& os,
-    ceph::os::Transaction& txn);
+    stone::os::Transaction& txn);
   seastar::future<> write(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans,
+    stone::os::Transaction& trans,
     osd_op_params_t& osd_op_params);
   seastar::future<> write_same(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans,
+    stone::os::Transaction& trans,
     osd_op_params_t& osd_op_params);
   seastar::future<> writefull(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans,
+    stone::os::Transaction& trans,
     osd_op_params_t& osd_op_params);
   using append_errorator = crimson::errorator<
     crimson::ct_error::invarg>;
   append_errorator::future<> append(
     ObjectState& os,
     OSDOp& osd_op,
-    ceph::os::Transaction& trans,
+    stone::os::Transaction& trans,
     osd_op_params_t& osd_op_params);
   write_ertr::future<> truncate(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans,
+    stone::os::Transaction& trans,
     osd_op_params_t& osd_op_params);
   write_ertr::future<> zero(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans,
+    stone::os::Transaction& trans,
     osd_op_params_t& osd_op_params);
   seastar::future<crimson::osd::acked_peers_t> mutate_object(
     std::set<pg_shard_t> pg_shards,
     crimson::osd::ObjectContextRef &&obc,
-    ceph::os::Transaction&& txn,
+    stone::os::Transaction&& txn,
     const osd_op_params_t& osd_op_p,
     epoch_t min_epoch,
     epoch_t map_epoch,
@@ -133,12 +133,12 @@ public:
   seastar::future<> setxattr(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans);
+    stone::os::Transaction& trans);
   using get_attr_errorator = crimson::os::FuturizedStore::get_attr_errorator;
   get_attr_errorator::future<> getxattr(
     const ObjectState& os,
     OSDOp& osd_op) const;
-  get_attr_errorator::future<ceph::bufferptr> getxattr(
+  get_attr_errorator::future<stone::bufferptr> getxattr(
     const hobject_t& soid,
     std::string_view key) const;
   get_attr_errorator::future<> get_xattrs(
@@ -148,7 +148,7 @@ public:
   rm_xattr_ertr::future<> rm_xattr(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans);
+    stone::os::Transaction& trans);
   seastar::future<struct stat> stat(
     CollectionRef c,
     const ghobject_t& oid) const;
@@ -171,9 +171,9 @@ public:
   seastar::future<> omap_set_vals(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans,
+    stone::os::Transaction& trans,
     osd_op_params_t& osd_op_params);
-  ll_read_errorator::future<ceph::bufferlist> omap_get_header(
+  ll_read_errorator::future<stone::bufferlist> omap_get_header(
     const crimson::os::CollectionRef& c,
     const ghobject_t& oid) const;
   ll_read_errorator::future<> omap_get_header(
@@ -182,16 +182,16 @@ public:
   seastar::future<> omap_set_header(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans);
+    stone::os::Transaction& trans);
   seastar::future<> omap_remove_range(
     ObjectState& os,
     const OSDOp& osd_op,
-    ceph::os::Transaction& trans);
+    stone::os::Transaction& trans);
   using omap_clear_ertr = crimson::errorator<crimson::ct_error::enoent>;
   omap_clear_ertr::future<> omap_clear(
     ObjectState& os,
     OSDOp& osd_op,
-    ceph::os::Transaction& trans,
+    stone::os::Transaction& trans,
     osd_op_params_t& osd_op_params);
 
   virtual void got_rep_op_reply(const MOSDRepOpReply&) {}
@@ -217,17 +217,17 @@ public:
     const hobject_t &oid);
 
 private:
-  virtual ll_read_errorator::future<ceph::bufferlist> _read(
+  virtual ll_read_errorator::future<stone::bufferlist> _read(
     const hobject_t& hoid,
     size_t offset,
     size_t length,
     uint32_t flags) = 0;
 
-  bool maybe_create_new_object(ObjectState& os, ceph::os::Transaction& txn);
+  bool maybe_create_new_object(ObjectState& os, stone::os::Transaction& txn);
   virtual seastar::future<crimson::osd::acked_peers_t>
   _submit_transaction(std::set<pg_shard_t>&& pg_shards,
 		      const hobject_t& hoid,
-		      ceph::os::Transaction&& txn,
+		      stone::os::Transaction&& txn,
 		      const osd_op_params_t& osd_op_p,
 		      epoch_t min_epoch, epoch_t max_epoch,
 		      std::vector<pg_log_entry_t>&& log_entries) = 0;

@@ -140,7 +140,7 @@ const struct sm_t sm_filelock = {
 	.careful = (STONE_CAP_GSHARED | 
 		    STONE_CAP_GEXCL | 
 		    STONE_CAP_GCACHE |
-		    CEPH_CAP_GBUFFER),
+		    STONE_CAP_GBUFFER),
 	.can_remote_xlock = 0,
 };
 

@@ -269,7 +269,7 @@ public:
     for (iterator i = get_iterator(in); !i.end(); ++i) {
       bl.append(*i);
     }
-    ceph_assert(bl.length() < big_max_len);
+    stone_assert(bl.length() < big_max_len);
     return bl;
   }
 };
@@ -359,12 +359,12 @@ public:
       }
 
       uint64_t next(uint64_t pos) {
-	ceph_assert(!covers(pos));
+	stone_assert(!covers(pos));
 	return ranges.starts_after(pos) ? ranges.start_after(pos) : size;
       }
 
       uint64_t valid_till(uint64_t pos) {
-	ceph_assert(covers(pos));
+	stone_assert(covers(pos));
 	return ranges.contains(pos) ?
 	  ranges.end_after(pos) :
 	  std::numeric_limits<uint64_t>::max();
@@ -395,7 +395,7 @@ public:
 
     void adjust_stack();
     iterator &operator++() {
-      ceph_assert(cur_valid_till >= pos);
+      stone_assert(cur_valid_till >= pos);
       ++pos;
       if (pos >= cur_valid_till) {
 	adjust_stack();
@@ -418,19 +418,19 @@ public:
     // advance @c pos to given position
     void seek(uint64_t _pos) {
       if (_pos < pos) {
-	ceph_abort();
+	stone_abort();
       }
       while (pos < _pos) {
-	ceph_assert(cur_valid_till >= pos);
+	stone_assert(cur_valid_till >= pos);
 	uint64_t next = std::min(_pos - pos, cur_valid_till - pos);
 	pos += next;
 
 	if (pos >= cur_valid_till) {
-	  ceph_assert(pos == cur_valid_till);
+	  stone_assert(pos == cur_valid_till);
 	  adjust_stack();
 	}
       }
-      ceph_assert(pos == _pos);
+      stone_assert(pos == _pos);
     }
 
     // grab the bytes in the range of [pos, pos+s), and advance @c pos
@@ -439,7 +439,7 @@ public:
     bufferlist gen_bl_advance(uint64_t s) {
       bufferlist ret;
       while (s > 0) {
-	ceph_assert(cur_valid_till >= pos);
+	stone_assert(cur_valid_till >= pos);
 	uint64_t next = std::min(s, cur_valid_till - pos);
 	if (current != layers.end() && pos < size) {
 	  ret.append(current->iter.gen_bl_advance(next));
@@ -448,11 +448,11 @@ public:
 	}
 
 	pos += next;
-	ceph_assert(next <= s);
+	stone_assert(next <= s);
 	s -= next;
 
 	if (pos >= cur_valid_till) {
-	  ceph_assert(cur_valid_till == pos);
+	  stone_assert(cur_valid_till == pos);
 	  adjust_stack();
 	}
       }
@@ -467,7 +467,7 @@ public:
     bool check_bl_advance(bufferlist &bl, uint64_t *error_at = nullptr) {
       uint64_t off = 0;
       while (off < bl.length()) {
-	ceph_assert(cur_valid_till >= pos);
+	stone_assert(cur_valid_till >= pos);
 	uint64_t next = std::min(bl.length() - off, cur_valid_till - pos);
 
 	bufferlist to_check;
@@ -491,14 +491,14 @@ public:
 
 	pos += next;
 	off += next;
-	ceph_assert(off <= bl.length());
+	stone_assert(off <= bl.length());
 
 	if (pos >= cur_valid_till) {
-	  ceph_assert(cur_valid_till == pos);
+	  stone_assert(cur_valid_till == pos);
 	  adjust_stack();
 	}
       }
-      ceph_assert(off == bl.length());
+      stone_assert(off == bl.length());
       return true;
     }
   };

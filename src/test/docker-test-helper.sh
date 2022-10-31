@@ -18,7 +18,7 @@ function get_image_name() {
     local os_type=$1
     local os_version=$2
 
-    echo ceph-$os_type-$os_version-$USER
+    echo stone-$os_type-$os_version-$USER
 }
 
 function setup_container() {
@@ -157,7 +157,7 @@ function remove_all() {
 
 function usage() {
     cat <<EOF
-Run commands within Ceph sources, in a container. Use podman if available,
+Run commands within Stone sources, in a container. Use podman if available,
 docker if not.
 $0 [options] command args ...
 
@@ -178,7 +178,7 @@ $0 [options] command args ...
 
    [--opts options]       run the container with 'options'
 
-docker-test.sh must be run from a Ceph clone and it will run the
+docker-test.sh must be run from a Stone clone and it will run the
 command in a container, using a copy of the clone so that long running
 commands such as make check are not disturbed while development
 continues. Here is a sample use case including an interactive session
@@ -189,7 +189,7 @@ and running a unit test:
    $ test/docker-test.sh --os-type centos --os-version 7 --shell
    HEAD is now at 1caee81 autotools: add --enable-docker
    bash-4.2$ pwd
-   /srv/ceph/ceph-centos-7
+   /srv/stone/stone-centos-7
    bash-4.2$ cat /etc/redhat-release 
    CentOS Linux release 7.6.1810 (Core) 
    bash-4.2$ 

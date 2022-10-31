@@ -8,14 +8,14 @@
 #include <map>
 #include <string>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
 
 namespace TOPNSPC::crush {
 
 class CrushLocation {
 public:
-  explicit CrushLocation(CephContext *c) : cct(c) {
+  explicit CrushLocation(StoneContext *c) : cct(c) {
     init_on_startup();
   }
 
@@ -27,9 +27,9 @@ public:
 
 private:
   int _parse(const std::string& s);
-  CephContext *cct;
+  StoneContext *cct;
   std::multimap<std::string,std::string> loc;
-  mutable ceph::mutex lock = ceph::make_mutex("CrushLocation");
+  mutable stone::mutex lock = stone::make_mutex("CrushLocation");
 };
 
 std::ostream& operator<<(std::ostream& os, const CrushLocation& loc);

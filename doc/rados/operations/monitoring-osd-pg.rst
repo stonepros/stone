@@ -3,8 +3,8 @@
 =========================
 
 High availability and high reliability require a fault-tolerant approach to
-managing hardware and software issues. Ceph has no single point-of-failure, and
-can service requests for data in a "degraded" mode. Ceph's `data placement`_
+managing hardware and software issues. Stone has no single point-of-failure, and
+can service requests for data in a "degraded" mode. Stone's `data placement`_
 introduces a layer of indirection to ensure that data doesn't bind directly to
 particular OSD addresses. This means that tracking down system faults requires
 finding the `placement group`_ and the underlying OSDs at root of the problem.
@@ -14,7 +14,7 @@ finding the `placement group`_ and the underlying OSDs at root of the problem.
    When you run into a fault, don't panic. Just follow the steps for monitoring
    your OSDs and placement groups. Then, begin troubleshooting.
 
-Ceph is generally self-repairing. However, when problems persist, monitoring
+Stone is generally self-repairing. However, when problems persist, monitoring
 OSDs and placement groups will help you identify the problem.
 
 
@@ -25,7 +25,7 @@ An OSD's status is either in the cluster (``in``) or out of the cluster
 (``out``); and, it is either up and running (``up``), or it is down and not
 running (``down``). If an OSD is ``up``, it may be either ``in`` the cluster
 (you can read and write data) or it is ``out`` of the cluster.  If it was
-``in`` the cluster and recently moved ``out`` of the cluster, Ceph will migrate
+``in`` the cluster and recently moved ``out`` of the cluster, Stone will migrate
 placement groups to other OSDs. If an OSD is ``out`` of the cluster, CRUSH will
 not assign placement groups to the OSD. If an OSD is ``down``, it should also be
 ``out``.
@@ -50,7 +50,7 @@ not assign placement groups to the OSD. If an OSD is ``down``, it should also be
            |                |        |                |
            +----------------+        +----------------+
 
-If you execute a command such as ``ceph health``, ``ceph -s`` or ``ceph -w``,
+If you execute a command such as ``stone health``, ``stone -s`` or ``stone -w``,
 you may notice that the cluster does not always echo back ``HEALTH OK``. Don't
 panic. With respect to OSDs, you should expect that the cluster will **NOT**
 echo   ``HEALTH OK`` in a few expected circumstances:
@@ -66,7 +66,7 @@ An important aspect of monitoring OSDs is to ensure that when the cluster
 is up and running that all OSDs that are ``in`` the cluster are ``up`` and
 running, too. To see if all OSDs are running, execute:: 
 
-	ceph osd stat
+	stone osd stat
 
 The result should tell you the total number of OSDs (x),
 how many are ``up`` (y), how many are ``in`` (z) and the map epoch (eNNNN). ::
@@ -74,10 +74,10 @@ how many are ``up`` (y), how many are ``in`` (z) and the map epoch (eNNNN). ::
 	x osds: y up, z in; epoch: eNNNN
 
 If the number of OSDs that are ``in`` the cluster is more than the number of
-OSDs that are ``up``, execute the following command to identify the ``ceph-osd``
+OSDs that are ``up``, execute the following command to identify the ``stone-osd``
 daemons that are not running:: 
 
-	ceph osd tree
+	stone osd tree
 
 :: 
 
@@ -93,7 +93,7 @@ daemons that are not running::
 
 If an OSD is ``down``, start it:: 
 
-	sudo systemctl start ceph-osd@1
+	sudo systemctl start stone-osd@1
 
 See `OSD Not Running`_ for problems associated with OSDs that stopped, or won't
 restart.
@@ -111,7 +111,7 @@ pseudo-random placement that will take into account failure domains you set in
 your `CRUSH map`_, so you will rarely see placement groups assigned to nearest
 neighbor OSDs in a large cluster.
 
-Ceph processes a client request using the **Acting Set**, which is the set of
+Stone processes a client request using the **Acting Set**, which is the set of
 OSDs that will actually handle the requests since they have a full and working
 version of a placement group shard. The set of OSDs that should contain a shard
 of a particular placement group as the **Up Set**, i.e. where data is
@@ -129,18 +129,18 @@ arise, don't panic. Common examples include:
   and another OSD has temporarily assumed its duties.
 
 In most cases, the Up Set and the Acting Set are identical. When they are not,
-it may indicate that Ceph is migrating the PG (it's remapped), an OSD is
-recovering, or that there is a problem (i.e., Ceph usually echoes a "HEALTH
+it may indicate that Stone is migrating the PG (it's remapped), an OSD is
+recovering, or that there is a problem (i.e., Stone usually echoes a "HEALTH
 WARN" state with a "stuck stale" message in such scenarios).
 
 To retrieve a list of placement groups, execute:: 
 
-	ceph pg dump
+	stone pg dump
 	
 To view which OSDs are within the Acting Set or the Up Set for a given placement
 group, execute:: 
 
-	ceph pg map {pg-num}
+	stone pg map {pg-num}
 
 The result should tell you the osdmap epoch (eNNN), the placement group number
 ({pg-num}),  the OSDs in the Up Set (up[]), and the OSDs in the acting set
@@ -157,7 +157,7 @@ Peering
 =======
 
 Before you can write data to a placement group, it must be in an ``active``
-state, and it  **should** be in a ``clean`` state. For Ceph to determine the
+state, and it  **should** be in a ``clean`` state. For Stone to determine the
 current state of a placement group, the primary OSD of the placement group
 (i.e., the first OSD in the acting set), peers with the secondary and tertiary
 OSDs to establish agreement on the current state of the placement group
@@ -190,7 +190,7 @@ Failure`_.
 Monitoring Placement Group States
 =================================
 
-If you execute a command such as ``ceph health``, ``ceph -s`` or ``ceph -w``,
+If you execute a command such as ``stone health``, ``stone -s`` or ``stone -w``,
 you may notice that the cluster does not always echo back ``HEALTH OK``. After
 you check to see if the OSDs are running, you should also check placement group
 states. You should expect that the cluster will **NOT** echo ``HEALTH OK`` in a
@@ -201,17 +201,17 @@ number of placement group peering-related circumstances:
 #. You have just added an OSD to or removed an OSD from the cluster.
 #. You have just modified your CRUSH map and your placement groups are migrating.
 #. There is inconsistent data in different replicas of a placement group.
-#. Ceph is scrubbing a placement group's replicas.
-#. Ceph doesn't have enough storage capacity to complete backfilling operations.
+#. Stone is scrubbing a placement group's replicas.
+#. Stone doesn't have enough storage capacity to complete backfilling operations.
 
-If one of the foregoing circumstances causes Ceph to echo ``HEALTH WARN``, don't
+If one of the foregoing circumstances causes Stone to echo ``HEALTH WARN``, don't
 panic. In many cases, the cluster will recover on its own. In some cases, you
 may need to take action. An important aspect of monitoring placement groups is
 to ensure that when the cluster is up and running that all placement groups are
 ``active``, and preferably in the ``clean`` state. To see the status of all
 placement groups, execute:: 
 
-	ceph pg stat
+	stone pg stat
 
 The result should tell you the total number of placement groups (x), how many
 placement groups are in a particular state such as ``active+clean`` (y) and the
@@ -219,9 +219,9 @@ amount of data stored (z). ::
 
 	x pgs: y active+clean; z bytes data, aa MB used, bb GB / cc GB avail
 
-.. note:: It is common for Ceph to report multiple states for placement groups.
+.. note:: It is common for Stone to report multiple states for placement groups.
 
-In addition to the placement group states, Ceph will also echo back the amount of
+In addition to the placement group states, Stone will also echo back the amount of
 storage capacity used (aa), the amount of storage capacity remaining (bb), and the total
 storage capacity for the placement group. These numbers can be important in a
 few cases: 
@@ -235,7 +235,7 @@ few cases:
 
    Placement group IDs consist of the pool number (not pool name) followed 
    by a period (.) and the placement group ID--a hexadecimal number. You
-   can view pool numbers and their names from the output of ``ceph osd 
+   can view pool numbers and their names from the output of ``stone osd 
    lspools``. For example, the first pool created corresponds to
    pool number ``1``. A fully qualified placement group ID has the
    following form::
@@ -249,17 +249,17 @@ few cases:
 
 To retrieve a list of placement groups, execute the following:: 
 
-	ceph pg dump
+	stone pg dump
 	
 You can also format the output in JSON format and save it to a file:: 
 
-	ceph pg dump -o {filename} --format=json
+	stone pg dump -o {filename} --format=json
 
 To query a particular placement group, execute the following:: 
 
-	ceph pg {poolnum}.{pg-id} query
+	stone pg {poolnum}.{pg-id} query
 	
-Ceph will output the query in JSON format.
+Stone will output the query in JSON format.
 
 The following subsections describe the common pg states in detail.
 
@@ -267,10 +267,10 @@ Creating
 --------
 
 When you create a pool, it will create the number of placement groups you
-specified.  Ceph will echo ``creating`` when it is creating one or more
+specified.  Stone will echo ``creating`` when it is creating one or more
 placement groups. Once they are created, the OSDs that are part of a placement
 group's Acting Set will peer. Once peering is complete, the placement group
-status should be ``active+clean``, which means a Ceph client can begin writing
+status should be ``active+clean``, which means a Stone client can begin writing
 to the placement group.
 
 .. ditaa::
@@ -282,22 +282,22 @@ to the placement group.
 Peering
 -------
 
-When Ceph is Peering a placement group, Ceph is bringing the OSDs that
+When Stone is Peering a placement group, Stone is bringing the OSDs that
 store the replicas of the placement group into **agreement about the state**
-of the objects and metadata in the placement group. When Ceph completes peering,
+of the objects and metadata in the placement group. When Stone completes peering,
 this means that the OSDs that store the placement group agree about the current
 state of the placement group. However, completion of the peering process does
 **NOT** mean that each replica has the latest contents.
 
 .. topic:: Authoritative History
 
-   Ceph will **NOT** acknowledge a write operation to a client, until 
+   Stone will **NOT** acknowledge a write operation to a client, until 
    all OSDs of the acting set persist the write operation. This practice 
    ensures that at least one member of the acting set will have a record 
    of every acknowledged write operation since the last successful 
    peering operation.
    
-   With an accurate record of each acknowledged write operation, Ceph can 
+   With an accurate record of each acknowledged write operation, Stone can 
    construct and disseminate a new authoritative history of the placement 
    group--a complete, and fully ordered set of operations that, if performed, 
    would bring an OSD’s copy of a placement group up to date.
@@ -306,7 +306,7 @@ state of the placement group. However, completion of the peering process does
 Active
 ------
 
-Once Ceph completes the peering process, a placement group may become
+Once Stone completes the peering process, a placement group may become
 ``active``. The ``active`` state means that the data in the placement group is
 generally  available in the primary placement group and the replicas for read
 and write operations. 
@@ -317,7 +317,7 @@ Clean
 
 When a placement group is in the ``clean`` state, the primary OSD and the
 replica OSDs have successfully peered and there are no stray replicas for the
-placement group. Ceph replicated all objects in the placement group the correct 
+placement group. Stone replicated all objects in the placement group the correct 
 number of times.
 
 
@@ -328,22 +328,22 @@ When a client writes an object to the primary OSD, the primary OSD is
 responsible for writing the replicas to the replica OSDs. After the primary OSD
 writes the object to storage, the placement group will remain in a ``degraded``
 state until the primary OSD has received an acknowledgement from the replica
-OSDs that Ceph created the replica objects successfully. 
+OSDs that Stone created the replica objects successfully. 
 
 The reason a placement group can be ``active+degraded`` is that an OSD may be
 ``active`` even though it doesn't hold all of the objects yet. If an OSD goes
-``down``, Ceph marks each placement group assigned to the OSD as ``degraded``.
+``down``, Stone marks each placement group assigned to the OSD as ``degraded``.
 The OSDs must peer again when the OSD comes back online. However, a client can
 still write a new object to a ``degraded`` placement group if it is ``active``.
 
-If an OSD is ``down`` and the ``degraded`` condition persists, Ceph may mark the
+If an OSD is ``down`` and the ``degraded`` condition persists, Stone may mark the
 ``down`` OSD as ``out`` of the cluster and remap the data from the ``down`` OSD
 to another OSD. The time between being marked ``down`` and being marked ``out``
 is controlled by ``mon osd down out interval``, which is set to ``600`` seconds
 by default.
 
-A placement group can also be ``degraded``, because Ceph cannot find one or more
-objects that Ceph thinks should be in the placement group. While you cannot
+A placement group can also be ``degraded``, because Stone cannot find one or more
+objects that Stone thinks should be in the placement group. While you cannot
 read or write to unfound objects, you can still access all of the other objects
 in the ``degraded`` placement group.
 
@@ -351,7 +351,7 @@ in the ``degraded`` placement group.
 Recovering
 ----------
 
-Ceph was designed for fault-tolerance at a scale where hardware and software
+Stone was designed for fault-tolerance at a scale where hardware and software
 problems are ongoing. When an OSD goes ``down``, its contents may fall behind
 the current state of other replicas in the placement groups. When the OSD is
 back ``up``, the contents of the placement groups must be updated to reflect the
@@ -364,7 +364,7 @@ cabinet may fail, which can cause the OSDs of a number of host machines to fall
 behind the current state  of the cluster. Each one of the OSDs must recover once
 the fault is resolved.
 
-Ceph provides a number of settings to balance the resource contention between
+Stone provides a number of settings to balance the resource contention between
 new service requests and the need to recover data objects and restore the
 placement groups to the current state. The ``osd recovery delay start`` setting
 allows an OSD to restart, re-peer and even process some replay requests before
@@ -398,12 +398,12 @@ are moved around, space may become available.  The ``backfill_toofull`` is
 similar to ``backfill_wait`` in that as soon as conditions change
 backfill can proceed.
 
-Ceph provides a number of settings to manage the load spike associated with
+Stone provides a number of settings to manage the load spike associated with
 reassigning placement groups to an OSD (especially a new OSD). By default,
 ``osd_max_backfills`` sets the maximum number of concurrent backfills to and from
 an OSD to 1. The ``backfill full ratio`` enables an OSD to refuse a
 backfill request if the OSD is approaching its full ratio (90%, by default) and
-change with ``ceph osd set-backfillfull-ratio`` command.
+change with ``stone osd set-backfillfull-ratio`` command.
 If an OSD refuses a backfill request, the ``osd backfill retry interval``
 enables an OSD to retry the request (after 30 seconds, by default). OSDs can
 also set ``osd backfill scan min`` and ``osd backfill scan max`` to manage scan
@@ -423,8 +423,8 @@ migration completes, the mapping uses the primary OSD of the new acting set.
 Stale
 -----
 
-While Ceph uses heartbeats to ensure that hosts and daemons are running, the
-``ceph-osd`` daemons may also get into a ``stuck`` state where they are not
+While Stone uses heartbeats to ensure that hosts and daemons are running, the
+``stone-osd`` daemons may also get into a ``stuck`` state where they are not
 reporting statistics in a timely manner (e.g., a temporary network fault). By
 default, OSD daemons report their placement group, up through, boot and failure
 statistics every half second (i.e., ``0.5``),  which is more frequent than the
@@ -443,7 +443,7 @@ Identifying Troubled PGs
 ========================
 
 As previously noted, a placement group is not necessarily problematic just 
-because its state is not ``active+clean``. Generally, Ceph's ability to self
+because its state is not ``active+clean``. Generally, Stone's ability to self
 repair may not be working when placement groups get stuck. The stuck states
 include:
 
@@ -457,7 +457,7 @@ include:
 
 To identify stuck placement groups, execute the following:: 
 
-	ceph pg dump_stuck [unclean|inactive|stale|undersized|degraded]
+	stone pg dump_stuck [unclean|inactive|stale|undersized|degraded]
 
 See `Placement Group Subsystem`_ for additional details. To troubleshoot
 stuck placement groups, see `Troubleshooting PG Errors`_.
@@ -466,17 +466,17 @@ stuck placement groups, see `Troubleshooting PG Errors`_.
 Finding an Object Location
 ==========================
 
-To store object data in the Ceph Object Store, a Ceph client must: 
+To store object data in the Stone Object Store, a Stone client must: 
 
 #. Set an object name
 #. Specify a `pool`_
 
-The Ceph client retrieves the latest cluster map and the CRUSH algorithm
+The Stone client retrieves the latest cluster map and the CRUSH algorithm
 calculates how to map the object to a `placement group`_, and then calculates
 how to assign the placement group to an OSD dynamically. To find the object
 location, all you need is the object name and the pool name. For example:: 
 
-	ceph osd map {poolname} {object-name} [namespace]
+	stone osd map {poolname} {object-name} [namespace]
 
 .. topic:: Exercise: Locate an Object
 
@@ -487,16 +487,16 @@ location, all you need is the object name and the pool name. For example::
 		rados put {object-name} {file-path} --pool=data   	
 		rados put test-object-1 testfile.txt --pool=data
    
-	To verify that the Ceph Object Store stored the object, execute the following::
+	To verify that the Stone Object Store stored the object, execute the following::
    
 		rados -p data ls
    
 	Now, identify the object location::	
 
-		ceph osd map {pool-name} {object-name}
-		ceph osd map data test-object-1
+		stone osd map {pool-name} {object-name}
+		stone osd map data test-object-1
    
-	Ceph should output the object's location. For example:: 
+	Stone should output the object's location. For example:: 
    
 		osdmap e537 pool 'data' (1) object 'test-object-1' -> pg 1.d1743484 (1.4) -> up ([0,1], p0) acting ([0,1], p0)
    
@@ -507,7 +507,7 @@ location, all you need is the object name and the pool name. For example::
    
 
 As the cluster evolves, the object location may change dynamically. One benefit
-of Ceph's dynamic rebalancing is that Ceph relieves you from having to perform
+of Stone's dynamic rebalancing is that Stone relieves you from having to perform
 the migration manually. See the  `Architecture`_ section for details.
 
 .. _data placement: ../data-placement

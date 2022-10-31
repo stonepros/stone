@@ -2,12 +2,12 @@
 
 failed=false
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-: ${CEPH_ROOT:=$SCRIPTPATH/../../../../}
+: ${STONE_ROOT:=$SCRIPTPATH/../../../../}
 
-cd $CEPH_ROOT/src/pybind/mgr/dashboard/frontend
+cd $STONE_ROOT/src/pybind/mgr/dashboard/frontend
 [ -z "$BUILD_DIR" ] && BUILD_DIR=build
 if [ `uname` != "FreeBSD" ]; then
-  .  $CEPH_ROOT/${BUILD_DIR}/src/pybind/mgr/dashboard/node-env/bin/activate
+  .  $STONE_ROOT/${BUILD_DIR}/src/pybind/mgr/dashboard/node-env/bin/activate
 fi
 
 # Build
@@ -35,7 +35,7 @@ else
   # Excluding the node_modules/ folder errors from the lint error
   if [[ -n "$i18n_lint" &&  $i18n_lint != *"node_modules/"* ]]; then
     echo -e "\nThe following source translations in 'messages.xlf' need to be \
-  fixed, please check the I18N suggestions on https://docs.ceph.com/en/latest/dev/developer_guide/dash-devel/#i18n:\n"
+  fixed, please check the I18N suggestions on https://docs.stone.com/en/latest/dev/developer_guide/dash-devel/#i18n:\n"
     echo "${i18n_lint}"
     failed=true
   fi

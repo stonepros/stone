@@ -37,10 +37,10 @@ for opt in $*; do
     fi
 done
 
-# prefix for radosgw instances in ceph.conf
+# prefix for radosgw instances in stone.conf
 PREFIX='client.radosgw.'
 
-# user to run radosgw as (if not specified in ceph.conf)
+# user to run radosgw as (if not specified in stone.conf)
 DEFAULT_USER='root'
 
 RADOSGW=`which radosgw`
@@ -50,11 +50,11 @@ if [ ! -x "$RADOSGW" ]; then
 fi
 
 # list daemons, old-style and new-style
-# NOTE: no support for cluster names that aren't "ceph"
-dlist=`ceph-conf --list-sections $PREFIX`
-if [ -d "/var/lib/ceph/radosgw" ]; then
-    for d in `ls /var/lib/ceph/radosgw | grep ^ceph-`; do
-	if [ -e "/var/lib/ceph/radosgw/$d/sysvinit" ]; then
+# NOTE: no support for cluster names that aren't "stone"
+dlist=`stone-conf --list-sections $PREFIX`
+if [ -d "/var/lib/stone/radosgw" ]; then
+    for d in `ls /var/lib/stone/radosgw | grep ^stone-`; do
+	if [ -e "/var/lib/stone/radosgw/$d/sysvinit" ]; then
 	    id=`echo $d | cut -c 6-`
 	    dlist="client.$id $dlist"
 	fi
@@ -65,28 +65,28 @@ case "$1" in
     start)
         for name in $dlist
         do
-            auto_start=`ceph-conf -n $name 'auto start'`
+            auto_start=`stone-conf -n $name 'auto start'`
             if [ "$auto_start" = "no" ] || [ "$auto_start" = "false" ] || [ "$auto_start" = "0" ]; then
                 continue
             fi
 
 	    shortname=`echo $name | cut -c 8-`
-	    if [ ! -e "/var/lib/ceph/radosgw/ceph-$shortname/sysvinit" ]; then
+	    if [ ! -e "/var/lib/stone/radosgw/stone-$shortname/sysvinit" ]; then
                 # mapped to this host?
-		host=`ceph-conf -n $name host`
+		host=`stone-conf -n $name host`
 		hostname=`hostname -s`
 		if [ "$host" != "$hostname" ]; then
-                    [ $VERBOSE -eq 1 ] && echo "hostname $hostname could not be found in ceph.conf:[$name], not starting."
+                    [ $VERBOSE -eq 1 ] && echo "hostname $hostname could not be found in stone.conf:[$name], not starting."
                     continue
 		fi
 	    fi
 
-            user=`ceph-conf -n $name user`
+            user=`stone-conf -n $name user`
             if [ -z "$user" ]; then
                 user="$DEFAULT_USER"
             fi
 
-            log_file=`ceph-conf -n $name --show-config-value log_file`
+            log_file=`stone-conf -n $name --show-config-value log_file`
             if [ -n "$log_file" ]; then
                 if [ ! -e "$log_file" ]; then
                     touch "$log_file"
@@ -96,10 +96,10 @@ case "$1" in
 
             echo "Starting $name..."
             if [ $DEBIAN -eq 1 ]; then
-                start-stop-daemon --start -u $user -x $RADOSGW -p /var/run/ceph/client-$name.pid -- -n $name
+                start-stop-daemon --start -u $user -x $RADOSGW -p /var/run/stone/client-$name.pid -- -n $name
             else
                 ulimit -n 32768
-                core_limit=`ceph-conf -n $name 'core file limit'`
+                core_limit=`stone-conf -n $name 'core file limit'`
                 if [ -z $core_limit ]; then
                     DAEMON_COREFILE_LIMIT=$core_limit
                 fi
@@ -123,7 +123,7 @@ case "$1" in
         timeout=0
         for name in $dlist
         do
-          t=`ceph-conf -n $name --show-config-value rgw_exit_timeout_secs`
+          t=`stone-conf -n $name --show-config-value rgw_exit_timeout_secs`
           if [ $t -gt $timeout ]; then timeout=$t; fi
         done
 

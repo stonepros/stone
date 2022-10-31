@@ -1,25 +1,25 @@
 :orphan:
 
 =========================================
- ceph-run -- restart daemon on core dump
+ stone-run -- restart daemon on core dump
 =========================================
 
-.. program:: ceph-run
+.. program:: stone-run
 
 Synopsis
 ========
 
-| **ceph-run** *command* ...
+| **stone-run** *command* ...
 
 
 Description
 ===========
 
-**ceph-run** is a simple wrapper that will restart a daemon if it exits
+**stone-run** is a simple wrapper that will restart a daemon if it exits
 with a signal indicating it crashed and possibly core dumped (that is,
 signals 3, 4, 5, 6, 8, or 11).
 
-The command should run the daemon in the foreground. For Ceph daemons,
+The command should run the daemon in the foreground. For Stone daemons,
 that means the ``-f`` option.
 
 
@@ -32,14 +32,14 @@ None
 Availability
 ============
 
-**ceph-run** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**stone-run** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8),
-:doc:`ceph-mon <ceph-mon>`\(8),
-:doc:`ceph-mds <ceph-mds>`\(8),
-:doc:`ceph-osd <ceph-osd>`\(8)
+:doc:`stone <stone>`\(8),
+:doc:`stone-mon <stone-mon>`\(8),
+:doc:`stone-mds <stone-mds>`\(8),
+:doc:`stone-osd <stone-osd>`\(8)

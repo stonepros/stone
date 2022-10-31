@@ -1,7 +1,7 @@
 import pytest
 import logging
-from ceph_volume.tests.conftest import Factory
-from ceph_volume import process
+from stone_volume.tests.conftest import Factory
+from stone_volume import process
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def mock_call(monkeypatch):
         )
 
         monkeypatch.setattr(
-            'ceph_volume.process.subprocess.Popen',
+            'stone_volume.process.subprocess.Popen',
             lambda *a, **kw: return_value)
 
     return apply

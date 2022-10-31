@@ -2,7 +2,7 @@
 Host Maintenance
 ================
 
-All hosts that support Ceph daemons need to support maintenance activity, whether the host
+All hosts that support Stone daemons need to support maintenance activity, whether the host
 is physical or virtual. This means that management workflows should provide
 a simple and consistent way to support this operational requirement. This document defines
 the maintenance strategy that could be implemented in cephadm and mgr/cephadm.
@@ -83,7 +83,7 @@ Implementing this capability will require changes to the following;
 
 * mgr/cephadm
 
-  * add methods to CephadmOrchestrator for enter/exit and check
+  * add methods to StoneadmOrchestrator for enter/exit and check
   * data gathering would be skipped for hosts in a maintenance state
 
 * mgr/orchestrator

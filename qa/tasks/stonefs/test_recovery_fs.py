@@ -1,11 +1,11 @@
 import logging
 from os.path import join as os_path_join
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 log = logging.getLogger(__name__)
 
-class TestFSRecovery(CephFSTestCase):
+class TestFSRecovery(StoneFSTestCase):
     """
     Tests for recovering FS after loss of FSMap
     """

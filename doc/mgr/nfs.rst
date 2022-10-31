@@ -1,25 +1,25 @@
 .. _mgr-nfs:
 
 =============================
-CephFS & RGW Exports over NFS
+StoneFS & RGW Exports over NFS
 =============================
 
-CephFS namespaces and RGW buckets can be exported over NFS protocol
+StoneFS namespaces and RGW buckets can be exported over NFS protocol
 using the `NFS-Ganesha NFS server`_.
 
 The ``nfs`` manager module provides a general interface for managing
-NFS exports of either CephFS directories or RGW buckets.  Exports can
-be managed either via the CLI ``ceph nfs export ...`` commands
+NFS exports of either StoneFS directories or RGW buckets.  Exports can
+be managed either via the CLI ``stone nfs export ...`` commands
 or via the dashboard.
 
 The deployment of the nfs-ganesha daemons can also be managed
-automatically if either the :ref:`cephadm` or :ref:`mgr-rook`
-orchestrators are enabled.  If neither are in use (e.g., Ceph is
+automatically if either the :ref:`stoneadm` or :ref:`mgr-rook`
+orchestrators are enabled.  If neither are in use (e.g., Stone is
 deployed via an external orchestrator like Ansible or Puppet), the
 nfs-ganesha daemons must be manually deployed; for more information,
 see :ref:`nfs-ganesha-config`.
 
-.. note:: Starting with Ceph Pacific, the ``nfs`` mgr module must be enabled.
+.. note:: Starting with Stone Pacific, the ``nfs`` mgr module must be enabled.
 
 NFS Cluster management
 ======================
@@ -29,16 +29,16 @@ Create NFS Ganesha Cluster
 
 .. code:: bash
 
-    $ ceph nfs cluster create <cluster_id> [<placement>] [--port <port>] [--ingress --virtual-ip <ip>]
+    $ stone nfs cluster create <cluster_id> [<placement>] [--port <port>] [--ingress --virtual-ip <ip>]
 
 This creates a common recovery pool for all NFS Ganesha daemons, new user based on
 ``cluster_id``, and a common NFS Ganesha config RADOS object.
 
-.. note:: Since this command also brings up NFS Ganesha daemons using a ceph-mgr
-   orchestrator module (see :doc:`/mgr/orchestrator`) such as cephadm or rook, at
+.. note:: Since this command also brings up NFS Ganesha daemons using a stone-mgr
+   orchestrator module (see :doc:`/mgr/orchestrator`) such as stoneadm or rook, at
    least one such module must be enabled for it to work.
 
-   Currently, NFS Ganesha daemon deployed by cephadm listens on the standard
+   Currently, NFS Ganesha daemon deployed by stoneadm listens on the standard
    port. So only one daemon will be deployed on a host.
 
 ``<cluster_id>`` is an arbitrary string by which this NFS Ganesha cluster will be
@@ -68,7 +68,7 @@ service.
 .. note:: The ingress implementation is not yet complete.  Enabling
 	  ingress will deploy multiple ganesha instances and balance
 	  load across them, but a host failure will not immediately
-	  cause cephadm to deploy a replacement daemon before the NFS
+	  cause stoneadm to deploy a replacement daemon before the NFS
 	  grace period expires.  This high-availability functionality
 	  is expected to be completed by the Quincy release (March
 	  2022).
@@ -89,17 +89,17 @@ also explicitly control where daemons are placed; see
 When a cluster is created with ``--ingress``, an *ingress* service is
 additionally deployed to provide load balancing and high-availability
 for the NFS servers.  A virtual IP is used to provide a known, stable
-NFS endpoint that all clients can use to mount.  Ceph will take care
+NFS endpoint that all clients can use to mount.  Stone will take care
 of the details of NFS redirecting traffic on the virtual IP to the
 appropriate backend NFS servers, and redeploying NFS servers when they
 fail.
 
-Enabling ingress via the ``ceph nfs cluster create`` command deploys a
+Enabling ingress via the ``stone nfs cluster create`` command deploys a
 simple ingress configuration with the most common configuration
 options.  Ingress can also be added to an existing NFS service (e.g.,
 one created without the ``--ingress`` flag), and the basic NFS service can
 also be modified after the fact to include non-default options, by modifying
-the services directly.  For more information, see :ref:`cephadm-ha-nfs`.
+the services directly.  For more information, see :ref:`stoneadm-ha-nfs`.
 
 Show NFS Cluster IP(s)
 ----------------------
@@ -109,14 +109,14 @@ daemons, and the virtual IP (if any) for the ingress service,
 
 .. code:: bash
 
-    $ ceph nfs cluster info [<cluster_id>]
+    $ stone nfs cluster info [<cluster_id>]
 
 .. note:: This will not work with the rook backend. Instead, expose the port with
    the kubectl patch command and fetch the port details with kubectl get services
    command::
 
-    $ kubectl patch service -n rook-ceph -p '{"spec":{"type": "NodePort"}}' rook-ceph-nfs-<cluster-name>-<node-id>
-    $ kubectl get services -n rook-ceph rook-ceph-nfs-<cluster-name>-<node-id>
+    $ kubectl patch service -n rook-stone -p '{"spec":{"type": "NodePort"}}' rook-stone-nfs-<cluster-name>-<node-id>
+    $ kubectl get services -n rook-stone rook-stone-nfs-<cluster-name>-<node-id>
 
 
 Delete NFS Ganesha Cluster
@@ -124,7 +124,7 @@ Delete NFS Ganesha Cluster
 
 .. code:: bash
 
-    $ ceph nfs cluster rm <cluster_id>
+    $ stone nfs cluster rm <cluster_id>
 
 This deletes the deployed cluster.
 
@@ -138,18 +138,18 @@ to modify the ``nfs.foo`` service,
 
 .. code:: bash
 
-    $ ceph orch ls --service-name nfs.foo --export > nfs.foo.yaml
+    $ stone orch ls --service-name nfs.foo --export > nfs.foo.yaml
     $ vi nfs.foo.yaml
-    $ ceph orch apply -i nfs.foo.yaml
+    $ stone orch apply -i nfs.foo.yaml
 
-For more information about the NFS service spec, see :ref:`deploy-cephadm-nfs-ganesha`.
+For more information about the NFS service spec, see :ref:`deploy-stoneadm-nfs-ganesha`.
 
 List NFS Ganesha Clusters
 -------------------------
 
 .. code:: bash
 
-    $ ceph nfs cluster ls
+    $ stone nfs cluster ls
 
 This lists deployed clusters.
 
@@ -160,7 +160,7 @@ Set Customized NFS Ganesha Configuration
 
 .. code:: bash
 
-    $ ceph nfs cluster config set <cluster_id> -i <config_file>
+    $ stone nfs cluster config set <cluster_id> -i <config_file>
 
 With this the nfs cluster will use the specified config and it will have
 precedence over default config blocks.
@@ -179,13 +179,13 @@ Example use cases include:
 #. Adding custom export block.
 
    The following sample block creates a single export. This export will not be
-   managed by `ceph nfs export` interface::
+   managed by `stone nfs export` interface::
 
     EXPORT {
       Export_Id = 100;
       Transports = TCP;
       Path = /;
-      Pseudo = /ceph/;
+      Pseudo = /stone/;
       Protocols = 4;
       Access_Type = RW;
       Attr_Expiration_Time = 0;
@@ -199,17 +199,17 @@ Example use cases include:
     }
 
 .. note:: User specified in FSAL block should have proper caps for NFS-Ganesha
-   daemons to access ceph cluster. User can be created in following way using
+   daemons to access stone cluster. User can be created in following way using
    `auth get-or-create`::
 
-         # ceph auth get-or-create client.<user_id> mon 'allow r' osd 'allow rw pool=.nfs namespace=<nfs_cluster_name>, allow rw tag cephfs data=<fs_name>' mds 'allow rw path=<export_path>'
+         # stone auth get-or-create client.<user_id> mon 'allow r' osd 'allow rw pool=.nfs namespace=<nfs_cluster_name>, allow rw tag stonefs data=<fs_name>' mds 'allow rw path=<export_path>'
 
 View Customized NFS Ganesha Configuration
 -----------------------------------------
 
 .. code:: bash
 
-    $ ceph nfs cluster config get <cluster_id>
+    $ stone nfs cluster config get <cluster_id>
 
 This will output the user defined configuration (if any).
 
@@ -218,7 +218,7 @@ Reset NFS Ganesha Configuration
 
 .. code:: bash
 
-    $ ceph nfs cluster config reset <cluster_id>
+    $ stone nfs cluster config reset <cluster_id>
 
 This removes the user defined configuration.
 
@@ -234,12 +234,12 @@ Export Management
    create exports differently. Management of dashboard created exports is not
    supported.
 
-Create CephFS Export
+Create StoneFS Export
 --------------------
 
 .. code:: bash
 
-    $ ceph nfs export create cephfs --cluster-id <cluster_id> --pseudo-path <pseudo_path> --fsname <fsname> [--readonly] [--path=/path/in/cephfs] [--client_addr <value>...] [--squash <value>]
+    $ stone nfs export create stonefs --cluster-id <cluster_id> --pseudo-path <pseudo_path> --fsname <fsname> [--readonly] [--path=/path/in/stonefs] [--client_addr <value>...] [--squash <value>]
 
 This creates export RADOS objects containing the export block, where
 
@@ -250,12 +250,12 @@ This creates export RADOS objects containing the export block, where
 ``<fsname>`` is the name of the FS volume used by the NFS Ganesha cluster
 that will serve this export.
 
-``<path>`` is the path within cephfs. Valid path should be given and default
+``<path>`` is the path within stonefs. Valid path should be given and default
 path is '/'. It need not be unique. Subvolume path can be fetched using:
 
 .. code::
 
-   $ ceph fs subvolume getpath <vol_name> <subvol_name> [--group_name <subvol_group_name>]
+   $ stone fs subvolume getpath <vol_name> <subvol_name> [--group_name <subvol_group_name>]
 
 ``<client_addr>`` is the list of client address for which these export
 permissions will be applicable. By default all clients can access the export
@@ -285,13 +285,13 @@ To export a *bucket*:
 
 .. code::
 
-   $ ceph nfs export create rgw --cluster-id <cluster_id> --pseudo-path <pseudo_path> --bucket <bucket_name> [--user-id <user-id>] [--readonly] [--client_addr <value>...] [--squash <value>]
+   $ stone nfs export create rgw --cluster-id <cluster_id> --pseudo-path <pseudo_path> --bucket <bucket_name> [--user-id <user-id>] [--readonly] [--client_addr <value>...] [--squash <value>]
 
 For example, to export *mybucket* via NFS cluster *mynfs* at the pseudo-path */bucketdata* to any host in the ``192.168.10.0/24`` network
 
 .. code::
 
-   $ ceph nfs export create rgw --cluster-id mynfs --pseudo-path /bucketdata --bucket mybucket --client_addr 192.168.10.0/24
+   $ stone nfs export create rgw --cluster-id mynfs --pseudo-path /bucketdata --bucket mybucket --client_addr 192.168.10.0/24
 
 .. note:: Export creation is supported only for NFS Ganesha clusters deployed using nfs interface.
 
@@ -305,7 +305,7 @@ For example, to export *mybucket* via NFS cluster *mynfs* at the pseudo-path */b
 operations to the bucket.  If it is not specified, the user who owns the bucket will be
 used.
 
-.. note:: Currently, if multi-site RGW is enabled, Ceph can only export RGW buckets in the default realm.
+.. note:: Currently, if multi-site RGW is enabled, Stone can only export RGW buckets in the default realm.
 
 ``<client_addr>`` is the list of client address for which these export
 permissions will be applicable. By default all clients can access the export
@@ -323,13 +323,13 @@ To export an RGW *user*:
 
 .. code::
 
-   $ ceph nfs export create rgw --cluster-id <cluster_id> --pseudo-path <pseudo_path> --user-id <user-id> [--readonly] [--client_addr <value>...] [--squash <value>]
+   $ stone nfs export create rgw --cluster-id <cluster_id> --pseudo-path <pseudo_path> --user-id <user-id> [--readonly] [--client_addr <value>...] [--squash <value>]
 
 For example, to export *myuser* via NFS cluster *mynfs* at the pseudo-path */myuser* to any host in the ``192.168.10.0/24`` network
 
 .. code::
 
-   $ ceph nfs export create rgw --cluster-id mynfs --pseudo-path /bucketdata --user-id myuser --client_addr 192.168.10.0/24
+   $ stone nfs export create rgw --cluster-id mynfs --pseudo-path /bucketdata --user-id myuser --client_addr 192.168.10.0/24
 
 
 Delete Export
@@ -337,7 +337,7 @@ Delete Export
 
 .. code:: bash
 
-    $ ceph nfs export rm <cluster_id> <pseudo_path>
+    $ stone nfs export rm <cluster_id> <pseudo_path>
 
 This deletes an export in an NFS Ganesha cluster, where:
 
@@ -350,7 +350,7 @@ List Exports
 
 .. code:: bash
 
-    $ ceph nfs export ls <cluster_id> [--detailed]
+    $ stone nfs export ls <cluster_id> [--detailed]
 
 It lists exports for a cluster, where:
 
@@ -363,7 +363,7 @@ Get Export
 
 .. code:: bash
 
-    $ ceph nfs export info <cluster_id> <pseudo_path>
+    $ stone nfs export info <cluster_id> <pseudo_path>
 
 This displays export block for a cluster based on pseudo root name,
 where:
@@ -380,24 +380,24 @@ An existing export can be dumped in JSON format with:
 
 .. prompt:: bash #
 
-    ceph nfs export info *<cluster_id>* *<pseudo_path>*
+    stone nfs export info *<cluster_id>* *<pseudo_path>*
 
 An export can be created or modified by importing a JSON description in the
 same format:
 
 .. prompt:: bash #
 
-    ceph nfs export apply *<cluster_id>* -i <json_file>
+    stone nfs export apply *<cluster_id>* -i <json_file>
 
 For example,::
 
-   $ ceph nfs export info mynfs /cephfs > update_cephfs_export.json
-   $ cat update_cephfs_export.json
+   $ stone nfs export info mynfs /stonefs > update_stonefs_export.json
+   $ cat update_stonefs_export.json
    {
      "export_id": 1,
      "path": "/",
      "cluster_id": "mynfs",
-     "pseudo": "/cephfs",
+     "pseudo": "/stonefs",
      "access_type": "RW",
      "squash": "no_root_squash",
      "security_label": true,
@@ -428,13 +428,13 @@ previous state of the export where possible.
 
 ::
 
-   $ ceph nfs export apply mynfs -i update_cephfs_export.json
-   $ cat update_cephfs_export.json
+   $ stone nfs export apply mynfs -i update_stonefs_export.json
+   $ cat update_stonefs_export.json
    {
      "export_id": 1,
      "path": "/",
      "cluster_id": "mynfs",
-     "pseudo": "/cephfs_testing",
+     "pseudo": "/stonefs_testing",
      "access_type": "RO",
      "squash": "no_root_squash",
      "security_label": true,
@@ -456,8 +456,8 @@ previous state of the export where possible.
 An export can also be created or updated by injecting a Ganesha NFS EXPORT config
 fragment.  For example,::
 
-   $ ceph nfs export apply mynfs -i update_cephfs_export.conf
-   $ cat update_cephfs_export.conf
+   $ stone nfs export apply mynfs -i update_stonefs_export.conf
+   $ cat update_stonefs_export.conf
    EXPORT {
        FSAL {
            name = "CEPH";
@@ -505,24 +505,24 @@ Troubleshooting
 
 Checking NFS-Ganesha logs with
 
-1) ``cephadm``: The NFS daemons can be listed with:
+1) ``stoneadm``: The NFS daemons can be listed with:
 
    .. code:: bash
 
-	    $ ceph orch ps --daemon-type nfs
+	    $ stone orch ps --daemon-type nfs
 
    You can via the logs for a specific daemon (e.g., ``nfs.mynfs.0.0.myhost.xkfzal``) on
    the relevant host with:
 
    .. code:: bash
 
-      # cephadm logs --fsid <fsid> --name nfs.mynfs.0.0.myhost.xkfzal
+      # stoneadm logs --fsid <fsid> --name nfs.mynfs.0.0.myhost.xkfzal
 
 2) ``rook``:
 
    .. code:: bash
 
-      $ kubectl logs -n rook-ceph rook-ceph-nfs-<cluster_id>-<node_id> nfs-ganesha
+      $ kubectl logs -n rook-stone rook-stone-nfs-<cluster_id>-<node_id> nfs-ganesha
 
 The NFS log level can be adjusted using `nfs cluster config set` command (see :ref:`nfs-cluster-set`).
 
@@ -534,7 +534,7 @@ Manual Ganesha deployment
 =========================
 
 It may be possible to deploy and manage the NFS ganesha daemons without
-orchestration frameworks such as cephadm or rook.
+orchestration frameworks such as stoneadm or rook.
 
 .. note:: Manual configuration is not tested or fully documented; your
           mileage may vary. If you make this work, please help us by
@@ -543,29 +543,29 @@ orchestration frameworks such as cephadm or rook.
 Limitations
 ------------
 
-If no orchestrator module is enabled for the Ceph Manager the NFS cluster
-management commands, such as those starting with ``ceph nfs cluster``, will not
+If no orchestrator module is enabled for the Stone Manager the NFS cluster
+management commands, such as those starting with ``stone nfs cluster``, will not
 function. However, commands that manage NFS exports, like those prefixed with
-``ceph nfs export`` are expected to work as long as the necessary RADOS objects
+``stone nfs export`` are expected to work as long as the necessary RADOS objects
 have already been created. The exact RADOS objects required are not documented
 at this time as support for this feature is incomplete. A curious reader can
 find some details about the object by reading the source code for the
-``mgr/nfs`` module (found in the ceph source tree under
+``mgr/nfs`` module (found in the stone source tree under
 ``src/pybind/mgr/nfs``).
 
 
 Requirements
 ------------
 
-The following packages are required to enable CephFS and RGW exports with nfs-ganesha:
+The following packages are required to enable StoneFS and RGW exports with nfs-ganesha:
 
--  ``nfs-ganesha``, ``nfs-ganesha-ceph``, ``nfs-ganesha-rados-grace`` and
+-  ``nfs-ganesha``, ``nfs-ganesha-stone``, ``nfs-ganesha-rados-grace`` and
    ``nfs-ganesha-rados-urls`` packages (version 3.3 and above)
 
 Ganesha Configuration Hierarchy
 -------------------------------
 
-Cephadm and rook start each nfs-ganesha daemon with a minimal
+Stoneadm and rook start each nfs-ganesha daemon with a minimal
 `bootstrap` configuration file that pulls from a shared `common`
 configuration stored in the ``.nfs`` RADOS pool and watches the common
 config for changes.  Each export is written to a separate RADOS object

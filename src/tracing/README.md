@@ -3,7 +3,7 @@ Installation
 
 The LTTng libraries that ship with Ubuntu 12.04 have been very buggy, and the
 generated header files using `lttng-gen-tp` have needed to be fixed just to
-compile in the Ceph tree. The packages available in Ubuntu 14.04 seem to work
+compile in the Stone tree. The packages available in Ubuntu 14.04 seem to work
 alright, and for older versions please install LTTng from the LTTng PPA.
 
     https://launchpad.net/~lttng/+archive/ppa
@@ -28,17 +28,17 @@ and modify the CMake file `src/tracing/CMakeLists.txt` accordingly.
 
 Function Instrumentation
 ========================
-Ceph supports instrumentation using GCC's `-finstrument-functions` flag.
+Stone supports instrumentation using GCC's `-finstrument-functions` flag.
 Supported CMake flags are:
 
 *   `-DWITH_OSD_INSTRUMENT_FUNCTIONS=ON`: instrument OSD code
 
 Note that this instrumentation adds an extra function call on each function entry
-and exit of Ceph code. This option is currently only supported with GCC. Using it
+and exit of Stone code. This option is currently only supported with GCC. Using it
 with Clang has no effect.
 
 The only function tracing implementation at the moment is done using LTTng UST.
-In order to use it, Ceph needs to be configured with LTTng using `-DWITH_LTTNG=ON`.
+In order to use it, Stone needs to be configured with LTTng using `-DWITH_LTTNG=ON`.
 [TraceCompass](http://www.tracecompass.org) can be used to generate flame
 charts/graphs and other metrics.
 

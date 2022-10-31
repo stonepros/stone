@@ -9,8 +9,8 @@ from gevent.greenlet import Greenlet
 from gevent.event import Event
 from teuthology import misc as teuthology
 
-from tasks import ceph_manager
-from tasks.cephfs.filesystem import MDSCluster, Filesystem
+from tasks import stone_manager
+from tasks.stonefs.filesystem import MDSCluster, Filesystem
 from tasks.thrasher import Thrasher
 
 log = logging.getLogger(__name__)
@@ -109,8 +109,8 @@ def task(ctx, config):
         'fwd_scrub task requires at least 1 metadata server'
 
     (first,) = ctx.cluster.only(f'mds.{mdslist[0]}').remotes.keys()
-    manager = ceph_manager.CephManager(
-        first, ctx=ctx, logger=log.getChild('ceph_manager'),
+    manager = stone_manager.StoneManager(
+        first, ctx=ctx, logger=log.getChild('stone_manager'),
     )
 
     # make sure everyone is in active, standby, or standby-replay
@@ -134,19 +134,19 @@ def task(ctx, config):
     assert manager.is_clean()
 
     if 'cluster' not in config:
-        config['cluster'] = 'ceph'
+        config['cluster'] = 'stone'
 
     for fs in status.get_filesystems():
         fwd_scrubber = ForwardScrubber(Filesystem(ctx, fscid=fs['id']),
                                        config['scrub_timeout'],
                                        config['sleep_between_iterations'])
         fwd_scrubber.start()
-        ctx.ceph[config['cluster']].thrashers.append(fwd_scrubber)
+        ctx.stone[config['cluster']].thrashers.append(fwd_scrubber)
 
     try:
         log.debug('Yielding')
         yield
     finally:
         log.info('joining ForwardScrubbers')
-        stop_all_fwd_scrubbers(ctx.ceph[config['cluster']].thrashers)
+        stop_all_fwd_scrubbers(ctx.stone[config['cluster']].thrashers)
         log.info('done joining')

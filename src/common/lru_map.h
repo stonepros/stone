@@ -1,7 +1,7 @@
 #ifndef STONE_LRU_MAP_H
 #define STONE_LRU_MAP_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 template <class K, class V>
 class lru_map {
@@ -13,7 +13,7 @@ class lru_map {
   std::map<K, entry> entries;
   std::list<K> entries_lru;
 
-  ceph::mutex lock = ceph::make_mutex("lru_map::lock");
+  stone::mutex lock = stone::make_mutex("lru_map::lock");
 
   size_t max;
 
@@ -102,7 +102,7 @@ void lru_map<K, V>::_add(const K& key, V& value)
   while (entries.size() > max) {
     typename std::list<K>::reverse_iterator riter = entries_lru.rbegin();
     iter = entries.find(*riter);
-    // ceph_assert(iter != entries.end());
+    // stone_assert(iter != entries.end());
     entries.erase(iter);
     entries_lru.pop_back();
   }

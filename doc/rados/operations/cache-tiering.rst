@@ -2,25 +2,25 @@
  Cache Tiering
 ===============
 
-A cache tier provides Ceph Clients with better I/O performance for a subset of
+A cache tier provides Stone Clients with better I/O performance for a subset of
 the data stored in a backing storage tier. Cache tiering involves creating a
 pool of relatively fast/expensive storage devices (e.g., solid state drives)
 configured to act as a cache tier, and a backing pool of either erasure-coded
 or relatively slower/cheaper devices configured to act as an economical storage
-tier. The Ceph objecter handles where to place the objects and the tiering
+tier. The Stone objecter handles where to place the objects and the tiering
 agent determines when to flush objects from the cache to the backing storage
 tier. So the cache tier and the backing storage tier are completely transparent 
-to Ceph clients.
+to Stone clients.
 
 
 .. ditaa::
            +-------------+
-           | Ceph Client |
+           | Stone Client |
            +------+------+
                   ^
      Tiering is   |  
     Transparent   |              Faster I/O
-        to Ceph   |           +---------------+
+        to Stone   |           +---------------+
      Client Ops   |           |               |   
                   |    +----->+   Cache Tier  |
                   |    |      |               |
@@ -45,14 +45,14 @@ and the backing storage tier automatically. However, admins have the ability to
 configure how this migration takes place by setting the ``cache-mode``. There are
 two main scenarios:
 
-- **writeback** mode: When admins configure tiers with ``writeback`` mode, Ceph
+- **writeback** mode: When admins configure tiers with ``writeback`` mode, Stone
   clients write data to the cache tier and receive an ACK from the cache tier.
   In time, the data written to the cache tier migrates to the storage tier
   and gets flushed from the cache tier. Conceptually, the cache tier is 
-  overlaid "in front" of the backing storage tier. When a Ceph client needs 
+  overlaid "in front" of the backing storage tier. When a Stone client needs 
   data that resides in the storage tier, the cache tiering agent migrates the
-  data to the cache tier on read, then it is sent to the Ceph client. 
-  Thereafter, the Ceph client can perform I/O using the cache tier, until the 
+  data to the cache tier on read, then it is sent to the Stone client. 
+  Thereafter, the Stone client can perform I/O using the cache tier, until the 
   data becomes inactive. This is ideal for mutable data (e.g., photo/video 
   editing, transactional data, etc.).
 
@@ -69,7 +69,7 @@ Other cache modes are:
   operations are forwarded to the base tier. This mode is intended for
   read-only workloads that do not require consistency to be enforced by the
   storage system. (**Warning**: when objects are updated in the base tier,
-  Ceph makes **no** attempt to sync these updates to the corresponding objects
+  Stone makes **no** attempt to sync these updates to the corresponding objects
   in the cache. Since this mode is considered experimental, a
   ``--yes-i-really-mean-it`` option must be passed in order to enable it.)
 
@@ -104,7 +104,7 @@ extreme caution before using this feature.
   API is not meant to be coherent in the presence of the case.  If
   your application is using librados directly and relies on object
   enumeration, cache tiering will probably not work as expected.
-  (This is not a problem for RGW, RBD, or CephFS.)
+  (This is not a problem for RGW, RBD, or StoneFS.)
 
 * *Complexity*: Enabling cache tiering means that a lot of additional
   machinery and complexity within the RADOS cluster is being used.
@@ -158,13 +158,13 @@ Setting Up a Backing Storage Pool
 Setting up a backing storage pool typically involves one of two scenarios: 
 
 - **Standard Storage**: In this scenario, the pool stores multiple copies
-  of an object in the Ceph Storage Cluster.
+  of an object in the Stone Storage Cluster.
 
 - **Erasure Coding:** In this scenario, the pool uses erasure coding to 
   store data much more efficiently with a small performance tradeoff.
 
 In the standard storage scenario, you can setup a CRUSH rule to establish 
-the failure domain (e.g., osd, host, chassis, rack, row, etc.). Ceph OSD 
+the failure domain (e.g., osd, host, chassis, rack, row, etc.). Stone OSD 
 Daemons perform optimally when all storage drives in the rule are of the 
 same size, speed (both RPMs and throughput) and type. See `CRUSH Maps`_ 
 for details on creating a rule. Once you have created a rule, create 
@@ -201,30 +201,30 @@ Creating a Cache Tier
 Setting up a cache tier involves associating a backing storage pool with
 a cache pool ::
 
-	ceph osd tier add {storagepool} {cachepool}
+	stone osd tier add {storagepool} {cachepool}
 
 For example ::
 
-	ceph osd tier add cold-storage hot-storage
+	stone osd tier add cold-storage hot-storage
 
 To set the cache mode, execute the following::
 
-	ceph osd tier cache-mode {cachepool} {cache-mode}
+	stone osd tier cache-mode {cachepool} {cache-mode}
 
 For example:: 
 
-	ceph osd tier cache-mode hot-storage writeback
+	stone osd tier cache-mode hot-storage writeback
 
 The cache tiers overlay the backing storage tier, so they require one
 additional step: you must direct all client traffic from the storage pool to 
 the cache pool. To direct client traffic directly to the cache pool, execute 
 the following:: 
 
-	ceph osd tier set-overlay {storagepool} {cachepool}
+	stone osd tier set-overlay {storagepool} {cachepool}
 
 For example:: 
 
-	ceph osd tier set-overlay cold-storage hot-storage
+	stone osd tier set-overlay cold-storage hot-storage
 
 
 Configuring a Cache Tier
@@ -233,7 +233,7 @@ Configuring a Cache Tier
 Cache tiers have several configuration options. You may set
 cache tier configuration options with the following usage:: 
 
-	ceph osd pool set {cachepool} {key} {value}
+	stone osd pool set {cachepool} {key} {value}
 
 See `Pools - Set Pool Values`_ for details.
 
@@ -241,25 +241,25 @@ See `Pools - Set Pool Values`_ for details.
 Target Size and Type
 --------------------
 
-Ceph's production cache tiers use a `Bloom Filter`_ for the ``hit_set_type``::
+Stone's production cache tiers use a `Bloom Filter`_ for the ``hit_set_type``::
 
-	ceph osd pool set {cachepool} hit_set_type bloom
+	stone osd pool set {cachepool} hit_set_type bloom
 
 For example::
 
-	ceph osd pool set hot-storage hit_set_type bloom
+	stone osd pool set hot-storage hit_set_type bloom
 
 The ``hit_set_count`` and ``hit_set_period`` define how many such HitSets to
 store, and how much time each HitSet should cover. ::
 
-	ceph osd pool set {cachepool} hit_set_count 12
-	ceph osd pool set {cachepool} hit_set_period 14400
-	ceph osd pool set {cachepool} target_max_bytes 1000000000000
+	stone osd pool set {cachepool} hit_set_count 12
+	stone osd pool set {cachepool} hit_set_period 14400
+	stone osd pool set {cachepool} target_max_bytes 1000000000000
 
 .. note:: A larger ``hit_set_count`` results in more RAM consumed by
-          the ``ceph-osd`` process.
+          the ``stone-osd`` process.
 
-Binning accesses over time allows Ceph to determine whether a Ceph client
+Binning accesses over time allows Stone to determine whether a Stone client
 accessed an object at least once, or more than once over a time period 
 ("age" vs "temperature").
 
@@ -275,12 +275,12 @@ found in any of the most recent ``min_read_recency_for_promote`` HitSets.
 A similar parameter can be set for the write operation, which is
 ``min_write_recency_for_promote``. ::
 
-	ceph osd pool set {cachepool} min_read_recency_for_promote 2
-	ceph osd pool set {cachepool} min_write_recency_for_promote 2
+	stone osd pool set {cachepool} min_read_recency_for_promote 2
+	stone osd pool set {cachepool} min_write_recency_for_promote 2
 
 .. note:: The longer the period and the higher the
    ``min_read_recency_for_promote`` and
-   ``min_write_recency_for_promote``values, the more RAM the ``ceph-osd``
+   ``min_write_recency_for_promote``values, the more RAM the ``stone-osd``
    daemon consumes. In particular, when the agent is active to flush
    or evict cache objects, all ``hit_set_count`` HitSets are loaded
    into RAM.
@@ -305,22 +305,22 @@ The cache tiering agent can flush or evict objects based upon the total number
 of bytes or the total number of objects. To specify a maximum number of bytes,
 execute the following::
 
-	ceph osd pool set {cachepool} target_max_bytes {#bytes}
+	stone osd pool set {cachepool} target_max_bytes {#bytes}
 
 For example, to flush or evict at 1 TB, execute the following::
 
-	ceph osd pool set hot-storage target_max_bytes 1099511627776
+	stone osd pool set hot-storage target_max_bytes 1099511627776
 
 
 To specify the maximum number of objects, execute the following::
 
-	ceph osd pool set {cachepool} target_max_objects {#objects}
+	stone osd pool set {cachepool} target_max_objects {#objects}
 
 For example, to flush or evict at 1M objects, execute the following::
 
-	ceph osd pool set hot-storage target_max_objects 1000000
+	stone osd pool set hot-storage target_max_objects 1000000
 
-.. note:: Ceph is not able to determine the size of a cache pool automatically, so
+.. note:: Stone is not able to determine the size of a cache pool automatically, so
    the configuration on the absolute size is required here, otherwise the
    flush/evict will not work. If you specify both limits, the cache tiering
    agent will begin flushing or evicting when either threshold is triggered.
@@ -337,34 +337,34 @@ cache pool(specified by ``target_max_bytes`` / ``target_max_objects`` in
 modified (or dirty) objects, the cache tiering agent will flush them to the
 storage pool. To set the ``cache_target_dirty_ratio``, execute the following::
 
-	ceph osd pool set {cachepool} cache_target_dirty_ratio {0.0..1.0}
+	stone osd pool set {cachepool} cache_target_dirty_ratio {0.0..1.0}
 
 For example, setting the value to ``0.4`` will begin flushing modified
 (dirty) objects when they reach 40% of the cache pool's capacity:: 
 
-	ceph osd pool set hot-storage cache_target_dirty_ratio 0.4
+	stone osd pool set hot-storage cache_target_dirty_ratio 0.4
 
 When the dirty objects reaches a certain percentage of its capacity, flush dirty
 objects with a higher speed. To set the ``cache_target_dirty_high_ratio``::
 
-	ceph osd pool set {cachepool} cache_target_dirty_high_ratio {0.0..1.0}
+	stone osd pool set {cachepool} cache_target_dirty_high_ratio {0.0..1.0}
 
 For example, setting the value to ``0.6`` will begin aggressively flush dirty objects
 when they reach 60% of the cache pool's capacity. obviously, we'd better set the value
 between dirty_ratio and full_ratio::
 
-	ceph osd pool set hot-storage cache_target_dirty_high_ratio 0.6
+	stone osd pool set hot-storage cache_target_dirty_high_ratio 0.6
 
 When the cache pool reaches a certain percentage of its capacity, the cache
 tiering agent will evict objects to maintain free capacity. To set the 
 ``cache_target_full_ratio``, execute the following:: 
 
-	ceph osd pool set {cachepool} cache_target_full_ratio {0.0..1.0}
+	stone osd pool set {cachepool} cache_target_full_ratio {0.0..1.0}
 
 For example, setting the value to ``0.8`` will begin flushing unmodified
 (clean) objects when they reach 80% of the cache pool's capacity:: 
 
-	ceph osd pool set hot-storage cache_target_full_ratio 0.8
+	stone osd pool set hot-storage cache_target_full_ratio 0.8
 
 
 Cache Age
@@ -373,21 +373,21 @@ Cache Age
 You can specify the minimum age of an object before the cache tiering agent 
 flushes a recently modified (or dirty) object to the backing storage pool::
 
-	ceph osd pool set {cachepool} cache_min_flush_age {#seconds}
+	stone osd pool set {cachepool} cache_min_flush_age {#seconds}
 
 For example, to flush modified (or dirty) objects after 10 minutes, execute 
 the following:: 
 
-	ceph osd pool set hot-storage cache_min_flush_age 600
+	stone osd pool set hot-storage cache_min_flush_age 600
 
 You can specify the minimum age of an object before it will be evicted from
 the cache tier::
 
-	ceph osd pool {cache-tier} cache_min_evict_age {#seconds}
+	stone osd pool {cache-tier} cache_min_evict_age {#seconds}
 
 For example, to evict objects after 30 minutes, execute the following:: 
 
-	ceph osd pool set hot-storage cache_min_evict_age 1800
+	stone osd pool set hot-storage cache_min_evict_age 1800
 
 
 Removing a Cache Tier
@@ -405,19 +405,19 @@ and remove it without losing any recent changes to objects in the cache.
 
 #. Change the cache-mode to ``none`` to disable it. :: 
 
-	ceph osd tier cache-mode {cachepool} none
+	stone osd tier cache-mode {cachepool} none
 
    For example:: 
 
-	ceph osd tier cache-mode hot-storage none
+	stone osd tier cache-mode hot-storage none
 
 #. Remove the cache pool from the backing pool. ::
 
-	ceph osd tier remove {storagepool} {cachepool}
+	stone osd tier remove {storagepool} {cachepool}
 
    For example::
 
-	ceph osd tier remove cold-storage hot-storage
+	stone osd tier remove cold-storage hot-storage
 
 
 
@@ -432,11 +432,11 @@ disable and remove it.
 #. Change the cache mode to ``proxy`` so that new and modified objects will 
    flush to the backing storage pool. ::
 
-	ceph osd tier cache-mode {cachepool} proxy
+	stone osd tier cache-mode {cachepool} proxy
 
    For example:: 
 
-	ceph osd tier cache-mode hot-storage proxy
+	stone osd tier cache-mode hot-storage proxy
 
 
 #. Ensure that the cache pool has been flushed. This may take a few minutes::
@@ -451,20 +451,20 @@ disable and remove it.
 
 #. Remove the overlay so that clients will not direct traffic to the cache. ::
 
-	ceph osd tier remove-overlay {storagetier}
+	stone osd tier remove-overlay {storagetier}
 
    For example::
 
-	ceph osd tier remove-overlay cold-storage
+	stone osd tier remove-overlay cold-storage
 
 
 #. Finally, remove the cache tier pool from the backing storage pool. ::
 
-	ceph osd tier remove {storagepool} {cachepool} 
+	stone osd tier remove {storagepool} {cachepool} 
 
    For example::
 
-	ceph osd tier remove cold-storage hot-storage
+	stone osd tier remove cold-storage hot-storage
 
 
 .. _Create a Pool: ../pools#create-a-pool

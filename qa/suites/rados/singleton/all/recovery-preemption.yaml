@@ -57,4 +57,4 @@ tasks:
 - stone.healthy:
 - exec:
     osd.0:
-      - egrep '(defer backfill|defer recovery)' /var/log/stone/stone-osd.*.log
+      - egrep '(defer backfill|defer recovery)' /var/log/stonepros/stone-osd.*.log

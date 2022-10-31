@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 // A vector that leverages pre-allocated stack-based array to achieve better
 // performance for array with small amount of items.
@@ -35,7 +35,7 @@
 //     operations.
 //
 // Naming style of public methods almost follows that of the STL's.
-namespace ceph {
+namespace stone {
 
 template <class T, size_t kSize = 8>
 class autovector {
@@ -99,7 +99,7 @@ class autovector {
     }
 
     difference_type operator-(const self_type& other) const {
-      ceph_assert(vect_ == other.vect_);
+      stone_assert(vect_ == other.vect_);
       return index_ - other.index_;
     }
 
@@ -119,51 +119,51 @@ class autovector {
 
     // -- Reference
     reference operator*() {
-      ceph_assert(vect_->size() >= index_);
+      stone_assert(vect_->size() >= index_);
       return (*vect_)[index_];
     }
 
     const_reference operator*() const {
-      ceph_assert(vect_->size() >= index_);
+      stone_assert(vect_->size() >= index_);
       return (*vect_)[index_];
     }
 
     pointer operator->() {
-      ceph_assert(vect_->size() >= index_);
+      stone_assert(vect_->size() >= index_);
       return &(*vect_)[index_];
     }
 
     const_pointer operator->() const {
-      ceph_assert(vect_->size() >= index_);
+      stone_assert(vect_->size() >= index_);
       return &(*vect_)[index_];
     }
 
 
     // -- Logical Operators
     bool operator==(const self_type& other) const {
-      ceph_assert(vect_ == other.vect_);
+      stone_assert(vect_ == other.vect_);
       return index_ == other.index_;
     }
 
     bool operator!=(const self_type& other) const { return !(*this == other); }
 
     bool operator>(const self_type& other) const {
-      ceph_assert(vect_ == other.vect_);
+      stone_assert(vect_ == other.vect_);
       return index_ > other.index_;
     }
 
     bool operator<(const self_type& other) const {
-      ceph_assert(vect_ == other.vect_);
+      stone_assert(vect_ == other.vect_);
       return index_ < other.index_;
     }
 
     bool operator>=(const self_type& other) const {
-      ceph_assert(vect_ == other.vect_);
+      stone_assert(vect_ == other.vect_);
       return index_ >= other.index_;
     }
 
     bool operator<=(const self_type& other) const {
-      ceph_assert(vect_ == other.vect_);
+      stone_assert(vect_ == other.vect_);
       return index_ <= other.index_;
     }
 
@@ -211,42 +211,42 @@ class autovector {
   bool empty() const { return size() == 0; }
 
   const_reference operator[](size_type n) const {
-    ceph_assert(n < size());
+    stone_assert(n < size());
     return n < kSize ? values_[n] : vect_[n - kSize];
   }
 
   reference operator[](size_type n) {
-    ceph_assert(n < size());
+    stone_assert(n < size());
     return n < kSize ? values_[n] : vect_[n - kSize];
   }
 
   const_reference at(size_type n) const {
-    ceph_assert(n < size());
+    stone_assert(n < size());
     return (*this)[n];
   }
 
   reference at(size_type n) {
-    ceph_assert(n < size());
+    stone_assert(n < size());
     return (*this)[n];
   }
 
   reference front() {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     return *begin();
   }
 
   const_reference front() const {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     return *begin();
   }
 
   reference back() {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     return *(end() - 1);
   }
 
   const_reference back() const {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     return *(end() - 1);
   }
 
@@ -273,7 +273,7 @@ class autovector {
   }
 
   void pop_back() {
-    ceph_assert(!empty());
+    stone_assert(!empty());
     if (!vect_.empty()) {
       vect_.pop_back();
     } else {
@@ -332,5 +332,5 @@ autovector<T, kSize>& autovector<T, kSize>::assign(const autovector& other) {
 
   return *this;
 }
-}  // namespace ceph 
+}  // namespace stone 
 #endif // STONE_AUTOVECTOR_H

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -23,8 +23,8 @@
 #include "common/config.h"
 #include "common/debug.h"
 #include "common/ref.h"
-#include "common/ceph_mutex.h"
-#include "include/ceph_assert.h" // Because intusive_ptr clobbers our assert...
+#include "common/stone_mutex.h"
+#include "include/stone_assert.h" // Because intusive_ptr clobbers our assert...
 #include "include/buffer.h"
 #include "include/types.h"
 #include "common/item_history.h"
@@ -41,7 +41,7 @@ class Interceptor;
 #endif
 
 struct Connection : public RefCountedObjectSafe {
-  mutable ceph::mutex lock = ceph::make_mutex("Connection::lock");
+  mutable stone::mutex lock = stone::make_mutex("Connection::lock");
   Messenger *msgr;
   RefCountedPtr priv;
   int peer_type = -1;
@@ -56,7 +56,7 @@ public:
   bool failed = false; // true if we are a lossy connection that has failed.
 
   int rx_buffers_version = 0;
-  std::map<ceph_tid_t,std::pair<ceph::buffer::list, int>> rx_buffers;
+  std::map<stone_tid_t,std::pair<stone::buffer::list, int>> rx_buffers;
 
   // authentication state
   // FIXME make these private after ms_handle_authorizer is removed
@@ -207,7 +207,7 @@ public:
     return STONE_CON_MODE_CRC;
   }
 
-  void post_rx_buffer(ceph_tid_t tid, ceph::buffer::list& bl) {
+  void post_rx_buffer(stone_tid_t tid, stone::buffer::list& bl) {
 #if 0
     std::lock_guard l{lock};
     ++rx_buffers_version;
@@ -215,7 +215,7 @@ public:
 #endif
   }
 
-  void revoke_rx_buffer(ceph_tid_t tid) {
+  void revoke_rx_buffer(stone_tid_t tid) {
 #if 0
     std::lock_guard l{lock};
     rx_buffers.erase(tid);
@@ -241,7 +241,7 @@ public:
   bool is_blackhole() const;
 
 protected:
-  Connection(StoneeContext *cct, Messenger *m)
+  Connection(StoneContext *cct, Messenger *m)
     : RefCountedObjectSafe(cct),
       msgr(m)
   {}
@@ -251,6 +251,6 @@ protected:
   }
 };
 
-using ConnectionRef = ceph::ref_t<Connection>;
+using ConnectionRef = stone::ref_t<Connection>;
 
 #endif /* STONE_CONNECTION_H */

@@ -1,7 +1,7 @@
 /**
  * Fields returned by the back-end.
  */
-export interface CephDevice {
+export interface StoneDevice {
   devid: string;
   location: { host: string; dev: string }[];
   daemons: string[];
@@ -12,9 +12,9 @@ export interface CephDevice {
 
 /**
  * Fields added by the front-end. Fields may be empty if no expectancy is provided for the
- * CephDevice interface.
+ * StoneDevice interface.
  */
-export interface CdDevice extends CephDevice {
+export interface CdDevice extends StoneDevice {
   life_expectancy_weeks?: {
     max: number;
     min: number;

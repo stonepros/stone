@@ -29,25 +29,25 @@ run() {
     do_run "$@"
 }
 
-if [ -n "$CEPH_BIN" ] ; then
+if [ -n "$STONE_BIN" ] ; then
    # CMake env
-   RADOS_TOOL="$CEPH_BIN/rados"
-   CEPH_TOOL="$CEPH_BIN/ceph"
-   DEDUP_TOOL="$CEPH_BIN/ceph-dedup-tool"
+   RADOS_TOOL="$STONE_BIN/rados"
+   STONE_TOOL="$STONE_BIN/stone"
+   DEDUP_TOOL="$STONE_BIN/stone-dedup-tool"
 else
    # executables should be installed by the QA env 
    RADOS_TOOL=$(which rados)
-   CEPH_TOOL=$(which ceph)
-   DEDUP_TOOL=$(which ceph-dedup-tool)
+   STONE_TOOL=$(which stone)
+   DEDUP_TOOL=$(which stone-dedup-tool)
 fi
 
 POOL=dedup_pool
 OBJ=test_rados_obj
 
 [ -x "$RADOS_TOOL" ] || die "couldn't find $RADOS_TOOL binary to test"
-[ -x "$CEPH_TOOL" ] || die "couldn't find $CEPH_TOOL binary to test"
+[ -x "$STONE_TOOL" ] || die "couldn't find $STONE_TOOL binary to test"
 
-run_expect_succ "$CEPH_TOOL" osd pool create "$POOL" 8
+run_expect_succ "$STONE_TOOL" osd pool create "$POOL" 8
 
 function test_dedup_ratio_fixed()
 {
@@ -100,7 +100,7 @@ function test_dedup_ratio_fixed()
 
 test_dedup_ratio_fixed
 
-$CEPH_TOOL osd pool delete $POOL $POOL --yes-i-really-really-mean-it
+$STONE_TOOL osd pool delete $POOL $POOL --yes-i-really-really-mean-it
 
 echo "SUCCESS!"
 exit 0

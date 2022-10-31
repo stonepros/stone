@@ -11,42 +11,42 @@
 #include "common/likely.h"
 #include "common/subsys_types.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-namespace ceph {
+namespace stone {
 namespace logging {
 
 class SubsystemMap {
   // Access to the current gathering levels must be *FAST* as they are
   // read over and over from all places in the code (via should_gather()
   // by i.e. dout).
-  std::array<uint8_t, ceph_subsys_get_num()> m_gather_levels;
+  std::array<uint8_t, stone_subsys_get_num()> m_gather_levels;
 
   // The rest. Should be as small as possible to not unnecessarily
   // enlarge md_config_t and spread it other elements across cache
   // lines. Access can be slow.
-  std::vector<ceph_subsys_item_t> m_subsys;
+  std::vector<stone_subsys_item_t> m_subsys;
 
   friend class Log;
 
 public:
   SubsystemMap() {
-    constexpr auto s = ceph_subsys_get_as_array();
+    constexpr auto s = stone_subsys_get_as_array();
     m_subsys.reserve(s.size());
 
     std::size_t i = 0;
-    for (const ceph_subsys_item_t& item : s) {
+    for (const stone_subsys_item_t& item : s) {
       m_subsys.emplace_back(item);
       m_gather_levels[i++] = std::max(item.log_level, item.gather_level);
     }
   }
 
   constexpr static std::size_t get_num() {
-    return ceph_subsys_get_num();
+    return stone_subsys_get_num();
   }
 
   constexpr static std::size_t get_max_subsys_len() {
-    return ceph_subsys_max_name_length();
+    return stone_subsys_max_name_length();
   }
 
   int get_log_level(unsigned subsys) const {
@@ -65,7 +65,7 @@ public:
   constexpr const char* get_name(unsigned subsys) const {
     if (subsys >= get_num())
       subsys = 0;
-    return ceph_subsys_get_as_array()[subsys].name;
+    return stone_subsys_get_as_array()[subsys].name;
   }
 
   template <unsigned SubV, int LvlV>
@@ -82,17 +82,17 @@ public:
       // we expect that setting level different than the default
       // is rather unusual.
       return expect(LvlV <= static_cast<int>(m_gather_levels[SubV]),
-		    LvlV <= ceph_subsys_get_max_default_level(SubV));
+		    LvlV <= stone_subsys_get_max_default_level(SubV));
     }
   }
   bool should_gather(const unsigned sub, int level) const {
-    ceph_assert(sub < m_subsys.size());
+    stone_assert(sub < m_subsys.size());
     return level <= static_cast<int>(m_gather_levels[sub]);
   }
 
   void set_log_level(unsigned subsys, uint8_t log)
   {
-    ceph_assert(subsys < m_subsys.size());
+    stone_assert(subsys < m_subsys.size());
     m_subsys[subsys].log_level = log;
     m_gather_levels[subsys] = \
       std::max(log, m_subsys[subsys].gather_level);
@@ -100,7 +100,7 @@ public:
 
   void set_gather_level(unsigned subsys, uint8_t gather)
   {
-    ceph_assert(subsys < m_subsys.size());
+    stone_assert(subsys < m_subsys.size());
     m_subsys[subsys].gather_level = gather;
     m_gather_levels[subsys] = \
       std::max(m_subsys[subsys].log_level, gather);

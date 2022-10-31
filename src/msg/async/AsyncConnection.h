@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 UnitedStack <haomai@unitedstack.com>
  *
@@ -27,7 +27,7 @@
 #include <optional>
 
 #include "auth/AuthSessionHandler.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "common/perf_counters.h"
 #include "include/buffer.h"
 #include "msg/Connection.h"
@@ -56,7 +56,7 @@ class AsyncConnection : public Connection {
   ssize_t read_until(unsigned needed, char *p);
   ssize_t read_bulk(char *buf, unsigned len);
 
-  ssize_t write(ceph::buffer::list &bl, std::function<void(ssize_t)> callback,
+  ssize_t write(stone::buffer::list &bl, std::function<void(ssize_t)> callback,
                 bool more=false);
   ssize_t _try_send(bool more=false);
 
@@ -90,8 +90,8 @@ class AsyncConnection : public Connection {
       : msgr(omsgr), center(c), dispatch_queue(q), conn_id(cid),
         stop_dispatch(false) { }
     ~DelayedDelivery() override {
-      ceph_assert(register_time_events.empty());
-      ceph_assert(delay_queue.empty());
+      stone_assert(register_time_events.empty());
+      stone_assert(delay_queue.empty());
     }
     void set_center(EventCenter *c) { center = c; }
     void do_request(uint64_t id) override;
@@ -107,7 +107,7 @@ class AsyncConnection : public Connection {
 
 private:
   FRIEND_MAKE_REF(AsyncConnection);
-  AsyncConnection(StoneeContext *cct, AsyncMessenger *m, DispatchQueue *q,
+  AsyncConnection(StoneContext *cct, AsyncMessenger *m, DispatchQueue *q,
 		  Worker *w, bool is_msgr2, bool local);
   ~AsyncConnection() override;
   bool unregistered = false;
@@ -182,7 +182,7 @@ private:
   DispatchQueue *dispatch_queue;
 
   // lockfree, only used in own thread
-  ceph::buffer::list outgoing_bl;
+  stone::buffer::list outgoing_bl;
   bool open_write = false;
 
   std::mutex write_lock;
@@ -198,9 +198,9 @@ private:
   uint32_t recv_start;
   uint32_t recv_end;
   std::set<uint64_t> register_time_events; // need to delete it if stop
-  ceph::coarse_mono_clock::time_point last_connect_started;
-  ceph::coarse_mono_clock::time_point last_active;
-  ceph::mono_clock::time_point recv_start_time;
+  stone::coarse_mono_clock::time_point last_connect_started;
+  stone::coarse_mono_clock::time_point last_active;
+  stone::mono_clock::time_point recv_start_time;
   uint64_t last_tick_id = 0;
   const uint64_t connect_timeout_us;
   const uint64_t inactive_timeout_us;
@@ -246,6 +246,6 @@ private:
   friend class ProtocolV2;
 }; /* AsyncConnection */
 
-using AsyncConnectionRef = ceph::ref_t<AsyncConnection>;
+using AsyncConnectionRef = stone::ref_t<AsyncConnection>;
 
 #endif

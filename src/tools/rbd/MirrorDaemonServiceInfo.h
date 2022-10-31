@@ -33,7 +33,7 @@ struct MirrorService {
   std::string instance_id;
   bool leader = false;
   std::string client_id;
-  std::string ceph_version;
+  std::string stone_version;
   std::string hostname;
   std::list<std::string> callouts;
 

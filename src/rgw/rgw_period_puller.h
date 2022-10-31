@@ -11,7 +11,7 @@
 class RGWPeriod;
 
 class RGWPeriodPuller : public RGWPeriodHistory::Puller {
-  CephContext *cct;
+  StoneContext *cct;
 
   struct {
     RGWSI_Zone *zone;

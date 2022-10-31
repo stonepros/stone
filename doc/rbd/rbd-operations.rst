@@ -1,5 +1,5 @@
 ==============================
- Ceph Block Device Operations
+ Stone Block Device Operations
 ==============================
 
 .. toctree::

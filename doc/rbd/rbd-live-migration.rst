@@ -2,7 +2,7 @@
  Image Live-Migration
 ======================
 
-.. index:: Ceph Block Device; live-migration
+.. index:: Stone Block Device; live-migration
 
 RBD images can be live-migrated between different pools within the same cluster;
 between different image formats and layouts; or from external data sources.
@@ -10,7 +10,7 @@ When started, the source will be deep-copied to the destination image, pulling
 all snapshot history while preserving the sparse allocation of data where
 possible.
 
-By default, when live-migrating RBD images within the same Ceph cluster, the
+By default, when live-migrating RBD images within the same Stone cluster, the
 source image will be marked read-only and all clients will instead redirect
 IOs to the new target image. In addition, this mode can optionally preserve the
 link to the source image's parent to preserve sparseness, or it can flatten the
@@ -28,8 +28,8 @@ import-only mode of operation. This helps to ensure that the client using the
 image is updated to point to the new target image.
 
 .. note::
-   Image live-migration requires the Ceph Nautilus release or later. Support for
-   external data sources requires the Ceph Pacific release of later. The
+   Image live-migration requires the Stone Nautilus release or later. Support for
+   external data sources requires the Stone Pacific release of later. The
    ``krbd`` kernel module does not support live-migration at this time.
 
 
@@ -73,7 +73,7 @@ The live-migration process is comprised of three steps:
 Prepare Migration
 =================
 
-The default live-migration process for images within the same Ceph cluster is
+The default live-migration process for images within the same Stone cluster is
 initiated by running the `rbd migration prepare` command, providing the source
 and target images::
 
@@ -151,7 +151,7 @@ Formats
 ~~~~~~~
 
 The ``native`` format can be used to describe a native RBD image within a
-Ceph cluster as the source image. Its ``source-spec`` JSON is encoded
+Stone cluster as the source image. Its ``source-spec`` JSON is encoded
 as follows::
 
         {
@@ -166,7 +166,7 @@ as follows::
         }
 
 Note that the ``native`` format does not include the ``stream`` object since
-it utilizes native Ceph operations. For example, to import from the image
+it utilizes native Stone operations. For example, to import from the image
 ``rbd/ns1/image1@snap1``, the ``source-spec`` could be encoded as::
 
         {

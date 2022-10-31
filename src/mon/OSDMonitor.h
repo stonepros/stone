@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -167,26 +167,26 @@ struct osdmap_manifest_t {
     return *p;
   }
 
-  void encode(ceph::buffer::list& bl) const
+  void encode(stone::buffer::list& bl) const
   {
     ENCODE_START(1, 1, bl);
     encode(pinned, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl)
+  void decode(stone::buffer::list::const_iterator& bl)
   {
     DECODE_START(1, bl);
     decode(pinned, bl);
     DECODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list& bl) {
+  void decode(stone::buffer::list& bl) {
     auto p = bl.cbegin();
     decode(p);
   }
 
-  void dump(ceph::Formatter *f) {
+  void dump(stone::Formatter *f) {
     f->dump_unsigned("first_pinned", get_first_pinned());
     f->dump_unsigned("last_pinned", get_last_pinned());
     f->open_array_section("pinned_maps");
@@ -200,7 +200,7 @@ WRITE_CLASS_ENCODER(osdmap_manifest_t);
 
 class OSDMonitor : public PaxosService,
                    public md_config_obs_t {
-  CephContext *cct;
+  StoneContext *cct;
 
 public:
   OSDMap osdmap;
@@ -211,7 +211,7 @@ public:
     const std::set<std::string> &changed) override;
   // [leader]
   OSDMap::Incremental pending_inc;
-  std::map<int, ceph::buffer::list> pending_metadata;
+  std::map<int, stone::buffer::list> pending_metadata;
   std::set<int>             pending_metadata_rm;
   std::map<int, failure_info_t> failure_info;
   std::map<int,utime_t>    down_pending_out;  // osd down -> out
@@ -219,13 +219,13 @@ public:
   std::map<int64_t,std::set<snapid_t>> pending_pseudo_purged_snaps;
   std::shared_ptr<PriorityCache::PriCache> rocksdb_binned_kv_cache = nullptr;
   std::shared_ptr<PriorityCache::Manager> pcm = nullptr;
-  ceph::mutex balancer_lock = ceph::make_mutex("OSDMonitor::balancer_lock");
+  stone::mutex balancer_lock = stone::make_mutex("OSDMonitor::balancer_lock");
 
   std::map<int,double> osd_weight;
 
   using osdmap_key_t = std::pair<version_t, uint64_t>;
   using osdmap_cache_t = SimpleLRU<osdmap_key_t,
-                                   ceph::buffer::list,
+                                   stone::buffer::list,
                                    std::less<osdmap_key_t>,
                                    boost::hash<osdmap_key_t>>;
   osdmap_cache_t inc_osd_cache;
@@ -251,15 +251,15 @@ public:
   };
 
   struct CleanUpmapJob : public ParallelPGMapper::Job {
-    CephContext *cct;
+    StoneContext *cct;
     const OSDMap& osdmap;
     OSDMap::Incremental& pending_inc;
     // lock to protect pending_inc form changing
     // when checking is done
-    ceph::mutex pending_inc_lock =
-      ceph::make_mutex("CleanUpmapJob::pending_inc_lock");
+    stone::mutex pending_inc_lock =
+      stone::make_mutex("CleanUpmapJob::pending_inc_lock");
 
-    CleanUpmapJob(CephContext *cct, const OSDMap& om, OSDMap::Incremental& pi)
+    CleanUpmapJob(StoneContext *cct, const OSDMap& om, OSDMap::Incremental& pi)
       : ParallelPGMapper::Job(&om),
         cct(cct),
         osdmap(om),
@@ -362,8 +362,8 @@ private:
   void check_osdmap_subs();
   void share_map_with_random_osd();
 
-  ceph::mutex prime_pg_temp_lock =
-    ceph::make_mutex("OSDMonitor::prime_pg_temp_lock");
+  stone::mutex prime_pg_temp_lock =
+    stone::make_mutex("OSDMonitor::prime_pg_temp_lock");
   struct PrimeTempJob : public ParallelPGMapper::Job {
     OSDMonitor *osdmon;
     PrimeTempJob(const OSDMap& om, OSDMonitor *m)
@@ -417,7 +417,7 @@ public:
 			MonOpRequestRef req = MonOpRequestRef());
 
 private:
-  void print_utilization(std::ostream &out, ceph::Formatter *f, bool tree) const;
+  void print_utilization(std::ostream &out, stone::Formatter *f, bool tree) const;
 
   bool check_source(MonOpRequestRef op, uuid_d fsid);
  
@@ -480,7 +480,7 @@ private:
   void check_legacy_ec_plugin(const std::string& plugin, 
 			      const std::string& profile) const;
   int normalize_profile(const std::string& profilename, 
-			ceph::ErasureCodeProfile &profile,
+			stone::ErasureCodeProfile &profile,
 			bool force,
 			std::ostream *ss);
   int crush_rule_create_erasure(const std::string &name,
@@ -491,7 +491,7 @@ private:
 		     int *crush_rule,
 		     std::ostream *ss);
   int get_erasure_code(const std::string &erasure_code_profile,
-		       ceph::ErasureCodeInterfaceRef *erasure_code,
+		       stone::ErasureCodeInterfaceRef *erasure_code,
 		       std::ostream *ss) const;
   int prepare_pool_crush_rule(const unsigned pool_type,
 			      const std::string &erasure_code_profile,
@@ -543,7 +543,7 @@ private:
   std::string make_purged_snap_epoch_key(epoch_t epoch);
   std::string make_purged_snap_key(int64_t pool, snapid_t snap);
   std::string make_purged_snap_key_value(int64_t pool, snapid_t snap, snapid_t num,
-				    epoch_t epoch, ceph::buffer::list *v);
+				    epoch_t epoch, stone::buffer::list *v);
 
   bool try_prune_purged_snaps();
   int lookup_purged_snap(int64_t pool, snapid_t snap,
@@ -559,7 +559,7 @@ private:
   bool prepare_unset_flag(MonOpRequestRef op, int flag);
 
   void _pool_op_reply(MonOpRequestRef op,
-                      int ret, epoch_t epoch, ceph::buffer::list *blp=NULL);
+                      int ret, epoch_t epoch, stone::buffer::list *blp=NULL);
 
   struct C_Booted : public C_MonOp {
     OSDMonitor *cmon;
@@ -574,7 +574,7 @@ private:
       else if (r == -EAGAIN)
         cmon->dispatch(op);
       else
-	ceph_abort_msg("bad C_Booted return value");
+	stone_abort_msg("bad C_Booted return value");
     }
   };
 
@@ -591,15 +591,15 @@ private:
       else if (r == -EAGAIN)
 	osdmon->dispatch(op);
       else
-	ceph_abort_msg("bad C_ReplyMap return value");
+	stone_abort_msg("bad C_ReplyMap return value");
     }    
   };
   struct C_PoolOp : public C_MonOp {
     OSDMonitor *osdmon;
     int replyCode;
     int epoch;
-    ceph::buffer::list reply_data;
-    C_PoolOp(OSDMonitor * osd, MonOpRequestRef op_, int rc, int e, ceph::buffer::list *rd=NULL) :
+    stone::buffer::list reply_data;
+    C_PoolOp(OSDMonitor * osd, MonOpRequestRef op_, int rc, int e, stone::buffer::list *rd=NULL) :
       C_MonOp(op_), osdmon(osd), replyCode(rc), epoch(e) {
       if (rd)
 	reply_data = *rd;
@@ -612,7 +612,7 @@ private:
       else if (r == -EAGAIN)
 	osdmon->dispatch(op);
       else
-	ceph_abort_msg("bad C_PoolOp return value");
+	stone_abort_msg("bad C_PoolOp return value");
     }
   };
 
@@ -623,10 +623,10 @@ private:
 
   int load_metadata(int osd, std::map<std::string, std::string>& m,
 		    std::ostream *err);
-  void count_metadata(const std::string& field, ceph::Formatter *f);
+  void count_metadata(const std::string& field, stone::Formatter *f);
 
-  void reencode_incremental_map(ceph::buffer::list& bl, uint64_t features);
-  void reencode_full_map(ceph::buffer::list& bl, uint64_t features);
+  void reencode_incremental_map(stone::buffer::list& bl, uint64_t features);
+  void reencode_full_map(stone::buffer::list& bl, uint64_t features);
 public:
   void count_metadata(const std::string& field, std::map<std::string,int> *out);
   void get_versions(std::map<std::string, std::list<std::string>> &versions);
@@ -672,7 +672,7 @@ protected:
   void set_default_laggy_params(int target_osd);
 
 public:
-  OSDMonitor(CephContext *cct, Monitor &mn, Paxos &p, const std::string& service_name);
+  OSDMonitor(StoneContext *cct, Monitor &mn, Paxos &p, const std::string& service_name);
 
   void tick() override;  // check state, take actions
 
@@ -715,7 +715,7 @@ public:
       const cmdmap_t& cmdmap,
       const std::map<std::string,std::string>& secrets,
       std::stringstream &ss,
-      ceph::Formatter *f);
+      stone::Formatter *f);
 
   int prepare_command_pool_set(const cmdmap_t& cmdmap,
                                std::stringstream& ss);
@@ -742,20 +742,20 @@ public:
     send_incremental(op, start);
   }
 
-  int get_version(version_t ver, ceph::buffer::list& bl) override;
-  int get_version(version_t ver, uint64_t feature, ceph::buffer::list& bl);
+  int get_version(version_t ver, stone::buffer::list& bl) override;
+  int get_version(version_t ver, uint64_t feature, stone::buffer::list& bl);
 
-  int get_version_full(version_t ver, uint64_t feature, ceph::buffer::list& bl);
-  int get_version_full(version_t ver, ceph::buffer::list& bl) override;
+  int get_version_full(version_t ver, uint64_t feature, stone::buffer::list& bl);
+  int get_version_full(version_t ver, stone::buffer::list& bl) override;
   int get_inc(version_t ver, OSDMap::Incremental& inc);
-  int get_full_from_pinned_map(version_t ver, ceph::buffer::list& bl);
+  int get_full_from_pinned_map(version_t ver, stone::buffer::list& bl);
 
   epoch_t blocklist(const entity_addrvec_t& av, utime_t until);
   epoch_t blocklist(entity_addr_t a, utime_t until);
 
-  void dump_info(ceph::Formatter *f);
-  int dump_osd_metadata(int osd, ceph::Formatter *f, std::ostream *err);
-  void print_nodes(ceph::Formatter *f);
+  void dump_info(stone::Formatter *f);
+  int dump_osd_metadata(int osd, stone::Formatter *f, std::ostream *err);
+  void print_nodes(stone::Formatter *f);
 
   void check_osdmap_sub(Subscription *sub);
   void check_pg_creates_sub(Subscription *sub);

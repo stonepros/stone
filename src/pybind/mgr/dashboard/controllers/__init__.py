@@ -4,7 +4,7 @@ from ._base_controller import BaseController
 from ._docs import APIDoc, EndpointDoc
 from ._endpoint import Endpoint, Proxy
 from ._helpers import ENDPOINT_MAP, allow_empty_body, \
-    generate_controller_routes, json_error_page, validate_ceph_type
+    generate_controller_routes, json_error_page, validate_stone_type
 from ._permissions import CreatePermission, DeletePermission, ReadPermission, UpdatePermission
 from ._rest_controller import RESTController
 from ._router import Router
@@ -27,7 +27,7 @@ __all__ = [
     'ENDPOINT_MAP',
     'generate_controller_routes',
     'json_error_page',
-    'validate_ceph_type',
+    'validate_stone_type',
     'CreatePermission',
     'ReadPermission',
     'UpdatePermission',

@@ -34,7 +34,7 @@ changes to the file by other clients) until ``lazyio_synchronize()`` is called.
 
 - ``lazyio_synchronize(int fd, loff_t offset, size_t count)`` - Ensures that the
   client is, in a subsequent read call, able to read the updated file with all 
-  the propagated writes of the other clients. In CephFS this is facilitated by
+  the propagated writes of the other clients. In StoneFS this is facilitated by
   invalidating the file caches pertaining to the inode and hence forces the
   client to refetch/recache the data from the updated file. Also if the write cache
   of the calling client is dirty (not propagated), lazyio_synchronize() flushes it as well.

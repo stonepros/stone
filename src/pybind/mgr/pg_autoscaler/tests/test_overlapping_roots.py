@@ -199,7 +199,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 1,
             },
             113: {
-                "pool_name": "cephfs.teuthology.meta",
+                "pool_name": "stonefs.teuthology.meta",
                 "pg_num_target": 64,
                 "size": 3,
                 "crush_rule": 4,
@@ -211,7 +211,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 512,
             },
             114: {
-                "pool_name": "cephfs.teuthology.data",
+                "pool_name": "stonefs.teuthology.data",
                 "pg_num_target": 256,
                 "size": 3,
                 "crush_rule": 0,
@@ -223,7 +223,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 256,
             },
             117: {
-                "pool_name": "cephfs.scratch.meta",
+                "pool_name": "stonefs.scratch.meta",
                 "pg_num_target": 32,
                 "size": 3,
                 "crush_rule": 4,
@@ -235,7 +235,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 64,
             },
             118: {
-                "pool_name": "cephfs.scratch.data",
+                "pool_name": "stonefs.scratch.data",
                 "pg_num_target": 32,
                 "size": 3,
                 "crush_rule": 0,
@@ -244,7 +244,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 128,
             },
             119: {
-                "pool_name": "cephfs.teuthology.data-ec",
+                "pool_name": "stonefs.teuthology.data-ec",
                 "pg_num_target": 1024,
                 "size": 6,
                 "crush_rule": 1,
@@ -255,7 +255,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 1024,
             },
             121: {
-                "pool_name": "cephsqlite",
+                "pool_name": "stonesqlite",
                 "pg_num_target": 32,
                 "size": 3,
                 "crush_rule": 4,
@@ -410,7 +410,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 1,
             },
             113: {
-                "pool_name": "cephfs.teuthology.meta",
+                "pool_name": "stonefs.teuthology.meta",
                 "pg_num_target": 64,
                 "size": 3,
                 "crush_rule": 4,
@@ -422,7 +422,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 512,
             },
             114: {
-                "pool_name": "cephfs.teuthology.data",
+                "pool_name": "stonefs.teuthology.data",
                 "pg_num_target": 256,
                 "size": 3,
                 "crush_rule": 0,
@@ -434,7 +434,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 256,
             },
             117: {
-                "pool_name": "cephfs.scratch.meta",
+                "pool_name": "stonefs.scratch.meta",
                 "pg_num_target": 32,
                 "size": 3,
                 "crush_rule": 4,
@@ -446,7 +446,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 64,
             },
             118: {
-                "pool_name": "cephfs.scratch.data",
+                "pool_name": "stonefs.scratch.data",
                 "pg_num_target": 32,
                 "size": 3,
                 "crush_rule": 0,
@@ -455,7 +455,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 128,
             },
             119: {
-                "pool_name": "cephfs.teuthology.data-ec",
+                "pool_name": "stonefs.teuthology.data-ec",
                 "pg_num_target": 1024,
                 "size": 6,
                 "crush_rule": 1,
@@ -466,7 +466,7 @@ class TestPgAutoscaler(object):
                 "expected_final_pg_target": 1024,
             },
             121: {
-                "pool_name": "cephsqlite",
+                "pool_name": "stonesqlite",
                 "pg_num_target": 32,
                 "size": 3,
                 "crush_rule": 4,

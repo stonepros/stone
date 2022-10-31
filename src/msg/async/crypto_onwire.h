@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -22,7 +22,7 @@
 #include "auth/Auth.h"
 #include "include/buffer.h"
 
-namespace ceph::math {
+namespace stone::math {
 
 // TODO
 template <typename T>
@@ -35,9 +35,9 @@ class always_aligned_t {
   }
 };
 
-} // namespace ceph::math
+} // namespace stone::math
 
-namespace ceph::crypto::onwire {
+namespace stone::crypto::onwire {
 
 struct MsgAuthError : public std::runtime_error {
   MsgAuthError()
@@ -81,11 +81,11 @@ struct TxHandler {
   // bufferlist. The method MUST NOT be called after _final() if there
   // was no call to _reset().
   virtual void authenticated_encrypt_update(
-    const ceph::bufferlist& plaintext) = 0;
+    const stone::bufferlist& plaintext) = 0;
 
   // Generates authentication signature and returns bufferlist crafted
   // basing on plaintext from preceding call to _update().
-  virtual ceph::bufferlist authenticated_encrypt_final() = 0;
+  virtual stone::bufferlist authenticated_encrypt_final() = 0;
 };
 
 class RxHandler {
@@ -103,12 +103,12 @@ public:
   virtual void reset_rx_handler() = 0;
 
   // Perform decryption ciphertext must be ALWAYS aligned to 16 bytes.
-  virtual void authenticated_decrypt_update(ceph::bufferlist& bl) = 0;
+  virtual void authenticated_decrypt_update(stone::bufferlist& bl) = 0;
 
   // Perform decryption of last cipertext's portion and verify signature
   // for overall decryption sequence.
   // Throws on integrity/authenticity checks
-  virtual void authenticated_decrypt_update_final(ceph::bufferlist& bl) = 0;
+  virtual void authenticated_decrypt_update_final(stone::bufferlist& bl) = 0;
 };
 
 struct rxtx_t {
@@ -119,12 +119,12 @@ struct rxtx_t {
   std::unique_ptr<TxHandler> tx;
 
   static rxtx_t create_handler_pair(
-    StoneeContext* ctx,
+    StoneContext* ctx,
     const class AuthConnectionMeta& auth_meta,
     bool new_nonce_format,
     bool crossed);
 };
 
-} // namespace ceph::crypto::onwire
+} // namespace stone::crypto::onwire
 
 #endif // STONE_CRYPTO_ONWIRE_H

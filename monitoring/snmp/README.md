@@ -23,13 +23,13 @@ parameters) is very similar to Prometheus, AlertManager and even node-exporter.
 
 &nbsp;
 ## SNMP OIDs
-The main components of the Ceph MIB is can be broken down into discrete areas
+The main components of the Stone MIB is can be broken down into discrete areas
 
 
 ```
 internet private enterprise   ceph   ceph    Notifications   Prometheus  Notification
                                org  cluster   (alerts)         source      Category
-1.3.6.1   .4     .1          .50495   .1        .2               .1         .2  (Ceph Health)
+1.3.6.1   .4     .1          .50495   .1        .2               .1         .2  (Stone Health)
                                                                             .3  (MON)
                                                                             .4  (OSD)
                                                                             .5  (MDS)

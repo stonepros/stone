@@ -1,6 +1,6 @@
 import argparse
 from textwrap import dedent
-from ceph_volume import terminal
+from stone_volume import terminal
 from . import list
 from . import prepare
 from . import activate
@@ -31,7 +31,7 @@ class Raw(object):
     def main(self):
         terminal.dispatch(self.mapper, self.argv)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume raw',
+            prog='stone-volume raw',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self.print_help(terminal.subhelp(self.mapper)),
         )

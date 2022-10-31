@@ -8,7 +8,7 @@
 #include "include/buffer.h"
 #include "include/interval_set.h"
 #include "include/int_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/RefCountedObj.h"
 #include "common/RWLock.h"
 #include <boost/shared_ptr.hpp>
@@ -42,8 +42,8 @@ public:
     interval_set<uint64_t> snap_overlap;
 
     bool exists;
-    ceph::shared_mutex lock =
-      ceph::make_shared_mutex("TestMemCluster::File::lock");
+    stone::shared_mutex lock =
+      stone::make_shared_mutex("TestMemCluster::File::lock");
   };
   typedef boost::shared_ptr<File> SharedFile;
 
@@ -59,8 +59,8 @@ public:
     SnapSeqs snap_seqs;
     uint64_t snap_id = 1;
 
-    ceph::shared_mutex file_lock =
-      ceph::make_shared_mutex("TestMemCluster::Pool::file_lock");
+    stone::shared_mutex file_lock =
+      stone::make_shared_mutex("TestMemCluster::Pool::file_lock");
     Files files;
     FileOMaps file_omaps;
     FileTMaps file_tmaps;
@@ -71,7 +71,7 @@ public:
   TestMemCluster();
   ~TestMemCluster() override;
 
-  TestRadosClient *create_rados_client(StoneeContext *cct) override;
+  TestRadosClient *create_rados_client(StoneContext *cct) override;
 
   int register_object_handler(int64_t pool_id, const ObjectLocator& locator,
                               ObjectHandler* object_handler) override;
@@ -102,8 +102,8 @@ private:
   typedef std::map<std::string, Pool*>		Pools;
   typedef std::set<uint32_t> Blocklist;
 
-  mutable ceph::mutex m_lock =
-    ceph::make_mutex("TestMemCluster::m_lock");
+  mutable stone::mutex m_lock =
+    stone::make_mutex("TestMemCluster::m_lock");
 
   Pools	m_pools;
   int64_t m_pool_id = 0;
@@ -113,10 +113,10 @@ private:
 
   Blocklist m_blocklist;
 
-  ceph::condition_variable m_transaction_cond;
+  stone::condition_variable m_transaction_cond;
   std::set<ObjectLocator> m_transactions;
 
-  Pool *get_pool(const ceph::mutex& lock, int64_t pool_id);
+  Pool *get_pool(const stone::mutex& lock, int64_t pool_id);
 
 };
 

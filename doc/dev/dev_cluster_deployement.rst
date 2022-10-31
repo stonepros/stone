@@ -2,7 +2,7 @@
  Deploying a development cluster
 =================================
 
-In order to develop on ceph, a Ceph utility,
+In order to develop on ceph, a Stone utility,
 *vstart.sh*, allows you to deploy fake local cluster for development purpose.
 
 Usage

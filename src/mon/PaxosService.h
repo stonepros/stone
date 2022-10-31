@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -117,7 +117,7 @@ public:
       else if (r == -ECANCELED)
         return;
       else
-	ceph_abort_msg("bad C_RetryMessage return value");
+	stone_abort_msg("bad C_RetryMessage return value");
     }
   };
 
@@ -242,7 +242,7 @@ public:
    * request on hold, for instance.
    */
   void request_proposal() {
-    ceph_assert(is_writeable());
+    stone_assert(is_writeable());
 
     propose_pending();
   }
@@ -254,8 +254,8 @@ public:
    * set a flag stating we're waiting on a cross-proposal to be finished.
    */
   void request_proposal(PaxosService *other) {
-    ceph_assert(other != NULL);
-    ceph_assert(other->is_writeable());
+    stone_assert(other != NULL);
+    stone_assert(other->is_writeable());
 
     other->request_proposal();
   }
@@ -321,7 +321,7 @@ public:
   virtual void create_pending() = 0;
 
   /**
-   * Encode the pending state into a ceph::buffer::list for ratification and
+   * Encode the pending state into a stone::buffer::list for ratification and
    * transmission as the next state.
    *
    * @invariant This function is only called on a Leader.
@@ -438,8 +438,8 @@ public:
 
   void encode_health(const health_check_map_t& next,
 		     MonitorDBStore::TransactionRef t) {
-    using ceph::encode;
-    ceph::buffer::list bl;
+    using stone::encode;
+    stone::buffer::list bl;
     encode(next, bl);
     t->put("health", service_name, bl);
     mon.log_health(next, health_checks, t);
@@ -751,10 +751,10 @@ public:
    *
    * @param t A transaction to which we will add this put operation
    * @param ver The version to which we will add the value
-   * @param bl A ceph::buffer::list containing the version's value
+   * @param bl A stone::buffer::list containing the version's value
    */
   void put_version(MonitorDBStore::TransactionRef t, version_t ver,
-		   ceph::buffer::list& bl) {
+		   stone::buffer::list& bl) {
     t->put(get_service_name(), ver, bl);
   }
   /**
@@ -763,10 +763,10 @@ public:
    *
    * @param t The transaction to which we will add this put operation
    * @param ver A version number
-   * @param bl A ceph::buffer::list containing the version's value
+   * @param bl A stone::buffer::list containing the version's value
    */
   void put_version_full(MonitorDBStore::TransactionRef t,
-			version_t ver, ceph::buffer::list& bl) {
+			version_t ver, stone::buffer::list& bl) {
     std::string key = mon.store->combine_strings(full_prefix_name, ver);
     t->put(get_service_name(), key, bl);
   }
@@ -786,10 +786,10 @@ public:
    *
    * @param t A transaction to which we will add this put operation
    * @param key The key to which we will add the value
-   * @param bl A ceph::buffer::list containing the value
+   * @param bl A stone::buffer::list containing the value
    */
   void put_value(MonitorDBStore::TransactionRef t,
-		 const std::string& key, ceph::buffer::list& bl) {
+		 const std::string& key, stone::buffer::list& bl) {
     t->put(get_service_name(), key, bl);
   }
 
@@ -845,20 +845,20 @@ public:
    * Get the contents of a given version @p ver
    *
    * @param ver The version being obtained
-   * @param bl The ceph::buffer::list to be populated
+   * @param bl The stone::buffer::list to be populated
    * @return 0 on success; <0 otherwise
    */
-  virtual int get_version(version_t ver, ceph::buffer::list& bl) {
+  virtual int get_version(version_t ver, stone::buffer::list& bl) {
     return mon.store->get(get_service_name(), ver, bl);
   }
   /**
    * Get the contents of a given full version of this service.
    *
    * @param ver A version number
-   * @param bl The ceph::buffer::list to be populated
+   * @param bl The stone::buffer::list to be populated
    * @returns 0 on success; <0 otherwise
    */
-  virtual int get_version_full(version_t ver, ceph::buffer::list& bl) {
+  virtual int get_version_full(version_t ver, stone::buffer::list& bl) {
     std::string key = mon.store->combine_strings(full_prefix_name, ver);
     return mon.store->get(get_service_name(), key, bl);
   }
@@ -876,9 +876,9 @@ public:
    * Get a value from a given key.
    *
    * @param[in] key The key
-   * @param[out] bl The ceph::buffer::list to be populated with the value
+   * @param[out] bl The stone::buffer::list to be populated with the value
    */
-  int get_value(const std::string& key, ceph::buffer::list& bl) {
+  int get_value(const std::string& key, stone::buffer::list& bl) {
     return mon.store->get(get_service_name(), key, bl);
   }
   /**

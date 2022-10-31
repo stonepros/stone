@@ -14,8 +14,8 @@ Metadata damage can result either from data loss in the underlying RADOS
 layer (e.g. multiple disk failures that lose all copies of a PG), or from
 software bugs.
 
-CephFS includes some tools that may be able to recover a damaged file system,
-but to use them safely requires a solid understanding of CephFS internals.
+StoneFS includes some tools that may be able to recover a damaged file system,
+but to use them safely requires a solid understanding of StoneFS internals.
 The documentation for these potentially dangerous operations is on a
 separate page: :ref:`disaster-recovery-experts`.
 
@@ -55,7 +55,7 @@ to know which files under /home/bob might have been damaged:
 The output will be a list of paths to potentially damaged files, one
 per line.
 
-Note that this command acts as a normal CephFS client to find all the
+Note that this command acts as a normal StoneFS client to find all the
 files in the file system and read their layouts, so the MDS must be
 up and running.
 

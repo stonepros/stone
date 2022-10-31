@@ -5,11 +5,11 @@ from setuptools import setup
 __version__ = '0.0.1'
 
 setup(
-    name='cephfs-top',
+    name='stonefs-top',
     version=__version__,
-    description='top(1) like utility for Ceph Filesystem',
-    keywords='cephfs, top',
-    scripts=['cephfs-top'],
+    description='top(1) like utility for Stone Filesystem',
+    keywords='stonefs, top',
+    scripts=['stonefs-top'],
     install_requires=[
         'rados',
     ],

@@ -117,12 +117,12 @@ SSO_COMMANDS = [
     },
     {
         'cmd': 'dashboard sso setup saml2 '
-               'name=ceph_dashboard_base_url,type=CephString '
-               'name=idp_metadata,type=CephString '
-               'name=idp_username_attribute,type=CephString,req=false '
-               'name=idp_entity_id,type=CephString,req=false '
-               'name=sp_x_509_cert,type=CephFilepath,req=false '
-               'name=sp_private_key,type=CephFilepath,req=false',
+               'name=stone_dashboard_base_url,type=StoneString '
+               'name=idp_metadata,type=StoneString '
+               'name=idp_username_attribute,type=StoneString,req=false '
+               'name=idp_entity_id,type=StoneString,req=false '
+               'name=sp_x_509_cert,type=StoneFilepath,req=false '
+               'name=sp_private_key,type=StoneFilepath,req=false',
         'desc': 'Setup SAML2 Single Sign-On',
         'perm': 'w'
     }
@@ -157,7 +157,7 @@ def handle_sso_command(cmd):
             Saml2Settings(mgr.SSO_DB.saml2.onelogin_settings)
         except Saml2Error:
             return -errno.EPERM, '', 'Single Sign-On is not configured: ' \
-                'use `ceph dashboard sso setup saml2`'
+                'use `stone dashboard sso setup saml2`'
         mgr.SSO_DB.protocol = 'saml2'
         mgr.SSO_DB.save()
         return 0, 'SSO is "enabled" with "SAML2" protocol.', ''
@@ -172,7 +172,7 @@ def handle_sso_command(cmd):
         return 0, json.dumps(mgr.SSO_DB.saml2.to_dict()), ''
 
     if cmd['prefix'] == 'dashboard sso setup saml2':
-        ceph_dashboard_base_url = cmd['ceph_dashboard_base_url']
+        stone_dashboard_base_url = cmd['stone_dashboard_base_url']
         idp_metadata = cmd['idp_metadata']
         idp_username_attribute = _get_optional_attr(cmd, 'idp_username_attribute', 'uid')
         idp_entity_id = _get_optional_attr(cmd, 'idp_entity_id', None)
@@ -212,14 +212,14 @@ def handle_sso_command(cmd):
         url_prefix = prepare_url_prefix(mgr.get_module_option('url_prefix', default=''))
         settings = {
             'sp': {
-                'entityId': '{}{}/auth/saml2/metadata'.format(ceph_dashboard_base_url, url_prefix),
+                'entityId': '{}{}/auth/saml2/metadata'.format(stone_dashboard_base_url, url_prefix),
                 'assertionConsumerService': {
-                    'url': '{}{}/auth/saml2'.format(ceph_dashboard_base_url, url_prefix),
+                    'url': '{}{}/auth/saml2'.format(stone_dashboard_base_url, url_prefix),
                     'binding': "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
                 },
                 'attributeConsumingService': {
-                    'serviceName': "Ceph Dashboard",
-                    "serviceDescription": "Ceph Dashboard Service",
+                    'serviceName': "Stone Dashboard",
+                    "serviceDescription": "Stone Dashboard Service",
                     "requestedAttributes": [
                         {
                             "name": idp_username_attribute,
@@ -228,7 +228,7 @@ def handle_sso_command(cmd):
                     ]
                 },
                 'singleLogoutService': {
-                    'url': '{}{}/auth/saml2/logout'.format(ceph_dashboard_base_url, url_prefix),
+                    'url': '{}{}/auth/saml2/logout'.format(stone_dashboard_base_url, url_prefix),
                     'binding': 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
                 },
                 "x509cert": sp_x_509_cert,

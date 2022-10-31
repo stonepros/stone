@@ -13,11 +13,11 @@ or `Monitor Bootstrap`_.
 Adding Monitors
 ===============
 
-Ceph monitors are lightweight processes that are the single source of truth
+Stone monitors are lightweight processes that are the single source of truth
 for the cluster map. You can run a cluster with 1 monitor but we recommend at least 3 
-for a production cluster. Ceph monitors use a variation of the
+for a production cluster. Stone monitors use a variation of the
 `Paxos`_ algorithm to establish consensus about maps and other critical
-information across the cluster. Due to the nature of Paxos, Ceph requires
+information across the cluster. Due to the nature of Paxos, Stone requires
 a majority of monitors to be active to establish a quorum (thus establishing
 consensus).
 
@@ -28,12 +28,12 @@ failures can be tolerated and still maintain a quorum; with three monitors,
 one failure can be tolerated; in a four monitor deployment, one failure can
 be tolerated; with five monitors, two failures can be tolerated.  This avoids
 the dreaded *split brain* phenomenon, and is why an odd number is best.
-In short, Ceph needs a majority of
+In short, Stone needs a majority of
 monitors to be active (and able to communicate with each other), but that
 majority can be achieved using a single monitor, or 2 out of 2 monitors,
 2 out of 3, 3 out of 4, etc.
 
-For small or non-critical deployments of multi-node Ceph clusters, it is
+For small or non-critical deployments of multi-node Stone clusters, it is
 advisable to deploy three monitors, and to increase the number of monitors
 to five for larger clusters or to survive a double failure.  There is rarely
 justification for seven or more.
@@ -68,7 +68,7 @@ and ensure that it has network connectivity.
 Install the Required Software
 -----------------------------
 
-For manually deployed clusters, you must install Ceph packages
+For manually deployed clusters, you must install Stone packages
 manually. See `Installing Packages`_ for details.
 You should configure SSH to a user with password-less authentication
 and root permissions.
@@ -81,10 +81,10 @@ and root permissions.
 Adding a Monitor (Manual)
 -------------------------
 
-This procedure creates a ``ceph-mon`` data directory, retrieves the monitor map
-and monitor keyring, and adds a ``ceph-mon`` daemon to your cluster.  If
+This procedure creates a ``stone-mon`` data directory, retrieves the monitor map
+and monitor keyring, and adds a ``stone-mon`` daemon to your cluster.  If
 this results in only two monitor daemons, you may add more monitors by
-repeating this procedure until you have a sufficient number of ``ceph-mon`` 
+repeating this procedure until you have a sufficient number of ``stone-mon`` 
 daemons to achieve a quorum.
 
 At this point you should define your monitor's id.  Traditionally, monitors 
@@ -98,7 +98,7 @@ on ``mon.a``).
    new monitor. :: 
 
 	ssh {new-mon-host}
-	sudo mkdir /var/lib/ceph/mon/ceph-{mon-id}
+	sudo mkdir /var/lib/stone/mon/stone-{mon-id}
 
 #. Create a temporary directory ``{tmp}`` to keep the files needed during 
    this process. This directory should be different from the monitor's default 
@@ -111,20 +111,20 @@ on ``mon.a``).
    the retrieved keyring, and ``{key-filename}`` is the name of the file 
    containing the retrieved monitor key. :: 
 
-	ceph auth get mon. -o {tmp}/{key-filename}
+	stone auth get mon. -o {tmp}/{key-filename}
 
 #. Retrieve the monitor map, where ``{tmp}`` is the path to 
    the retrieved monitor map, and ``{map-filename}`` is the name of the file 
    containing the retrieved monitor map. :: 
 
-	ceph mon getmap -o {tmp}/{map-filename}
+	stone mon getmap -o {tmp}/{map-filename}
 
 #. Prepare the monitor's data directory created in the first step. You must 
    specify the path to the monitor map so that you can retrieve the 
    information about a quorum of monitors and their ``fsid``. You must also 
    specify a path to the monitor keyring:: 
 
-	sudo ceph-mon -i {mon-id} --mkfs --monmap {tmp}/{map-filename} --keyring {tmp}/{key-filename}
+	sudo stone-mon -i {mon-id} --mkfs --monmap {tmp}/{map-filename} --keyring {tmp}/{key-filename}
 	
 
 #. Start the new monitor and it will automatically join the cluster.
@@ -132,14 +132,14 @@ on ``mon.a``).
    ``--public-addr {ip}`` or ``--public-network {network}`` argument.
    For example::
 
-	ceph-mon -i {mon-id} --public-addr {ip:port}
+	stone-mon -i {mon-id} --public-addr {ip:port}
 
 .. _removing-monitors:
 
 Removing Monitors
 =================
 
-When you remove monitors from a cluster, consider that Ceph monitors use 
+When you remove monitors from a cluster, consider that Stone monitors use 
 Paxos to establish consensus about the master cluster map. You must have 
 a sufficient number of monitors to establish a quorum for consensus about 
 the cluster map.
@@ -149,35 +149,35 @@ the cluster map.
 Removing a Monitor (Manual)
 ---------------------------
 
-This procedure removes a ``ceph-mon`` daemon from your cluster.   If this
+This procedure removes a ``stone-mon`` daemon from your cluster.   If this
 procedure results in only two monitor daemons, you may add or remove another
-monitor until you have a number of ``ceph-mon`` daemons that can achieve a 
+monitor until you have a number of ``stone-mon`` daemons that can achieve a 
 quorum.
 
 #. Stop the monitor. ::
 
-	service ceph -a stop mon.{mon-id}
+	service stone -a stop mon.{mon-id}
 	
 #. Remove the monitor from the cluster. ::
 
-	ceph mon remove {mon-id}
+	stone mon remove {mon-id}
 	
-#. Remove the monitor entry from ``ceph.conf``. 
+#. Remove the monitor entry from ``stone.conf``. 
 
 .. _rados-mon-remove-from-unhealthy: 
 
 Removing Monitors from an Unhealthy Cluster
 -------------------------------------------
 
-This procedure removes a ``ceph-mon`` daemon from an unhealthy
+This procedure removes a ``stone-mon`` daemon from an unhealthy
 cluster, for example a cluster where the monitors cannot form a
 quorum.
 
 
-#. Stop all ``ceph-mon`` daemons on all monitor hosts. ::
+#. Stop all ``stone-mon`` daemons on all monitor hosts. ::
 
 	ssh {mon-host}
-	systemctl stop ceph-mon.target
+	systemctl stop stone-mon.target
 	# and repeat for all mons
 
 #. Identify a surviving monitor and log in to that host. :: 
@@ -186,9 +186,9 @@ quorum.
 
 #. Extract a copy of the monmap file.  ::
 
-        ceph-mon -i {mon-id} --extract-monmap {map-path}
+        stone-mon -i {mon-id} --extract-monmap {map-path}
         # in most cases, that's
-        ceph-mon -i `hostname` --extract-monmap /tmp/monmap
+        stone-mon -i `hostname` --extract-monmap /tmp/monmap
 
 #. Remove the non-surviving or problematic monitors.  For example, if
    you have three monitors, ``mon.a``, ``mon.b``, and ``mon.c``, where
@@ -203,16 +203,16 @@ quorum.
    surviving monitor(s).  For example, to inject a map into monitor
    ``mon.a``, follow the example below::
 
-	ceph-mon -i {mon-id} --inject-monmap {map-path}
+	stone-mon -i {mon-id} --inject-monmap {map-path}
 	# for example,
-	ceph-mon -i a --inject-monmap /tmp/monmap
+	stone-mon -i a --inject-monmap /tmp/monmap
 
 #. Start only the surviving monitors.
 
-#. Verify the monitors form a quorum (``ceph -s``).
+#. Verify the monitors form a quorum (``stone -s``).
 
 #. You may wish to archive the removed monitors' data directory in
-   ``/var/lib/ceph/mon`` in a safe location, or delete it if you are
+   ``/var/lib/stone/mon`` in a safe location, or delete it if you are
    confident the remaining monitors are healthy and are sufficiently
    redundant.
 
@@ -223,17 +223,17 @@ Changing a Monitor's IP Address
 
 .. important:: Existing monitors are not supposed to change their IP addresses.
 
-Monitors are critical components of a Ceph cluster, and they need to maintain a
+Monitors are critical components of a Stone cluster, and they need to maintain a
 quorum for the whole system to work properly. To establish a quorum, the
-monitors need to discover each other. Ceph has strict requirements for
+monitors need to discover each other. Stone has strict requirements for
 discovering monitors.
 
-Ceph clients and other Ceph daemons use ``ceph.conf`` to discover monitors.
-However, monitors discover each other using the monitor map, not ``ceph.conf``.
+Stone clients and other Stone daemons use ``stone.conf`` to discover monitors.
+However, monitors discover each other using the monitor map, not ``stone.conf``.
 For example,  if you refer to `Adding a Monitor (Manual)`_ you will see that you
 need to obtain the current monmap for the cluster when creating a new monitor,
-as it is one of the required arguments of ``ceph-mon -i {mon-id} --mkfs``. The
-following sections explain the consistency requirements for Ceph monitors, and a
+as it is one of the required arguments of ``stone-mon -i {mon-id} --mkfs``. The
+following sections explain the consistency requirements for Stone monitors, and a
 few safe ways to change a monitor's IP address.
 
 
@@ -241,10 +241,10 @@ Consistency Requirements
 ------------------------
 
 A monitor always refers to the local copy of the monmap  when discovering other
-monitors in the cluster.  Using the monmap instead of ``ceph.conf`` avoids
-errors that could  break the cluster (e.g., typos in ``ceph.conf`` when
+monitors in the cluster.  Using the monmap instead of ``stone.conf`` avoids
+errors that could  break the cluster (e.g., typos in ``stone.conf`` when
 specifying a monitor address or port). Since monitors use monmaps for discovery
-and they share monmaps with clients and other Ceph daemons, the monmap provides
+and they share monmaps with clients and other Stone daemons, the monmap provides
 monitors with a strict guarantee that their consensus is valid.
 
 Strict consistency also applies to updates to the monmap. As with any other
@@ -256,10 +256,10 @@ incremental so that monitors have the latest agreed upon version, and a set of
 previous versions, allowing a monitor that has an older version of the monmap to
 catch up with the current state of the cluster.
 
-If monitors discovered each other through the Ceph configuration file instead of
-through the monmap, it would introduce additional risks because the Ceph
+If monitors discovered each other through the Stone configuration file instead of
+through the monmap, it would introduce additional risks because the Stone
 configuration files are not updated and distributed automatically. Monitors
-might inadvertently use an older ``ceph.conf`` file, fail to recognize a
+might inadvertently use an older ``stone.conf`` file, fail to recognize a
 monitor, fall out of a quorum, or develop a situation where `Paxos`_ is not able
 to determine the current state of the system accurately. Consequently,  making
 changes to an existing monitor's IP address must be done with  great care.
@@ -268,12 +268,12 @@ changes to an existing monitor's IP address must be done with  great care.
 Changing a Monitor's IP address (The Right Way)
 -----------------------------------------------
 
-Changing a monitor's IP address in ``ceph.conf`` only is not sufficient to
+Changing a monitor's IP address in ``stone.conf`` only is not sufficient to
 ensure that other monitors in the cluster will receive the update.  To change a
 monitor's IP address, you must add a new monitor with the IP  address you want
 to use (as described in `Adding a Monitor (Manual)`_),  ensure that the new
 monitor successfully joins the  quorum; then, remove the monitor that uses the
-old IP address. Then, update the ``ceph.conf`` file to ensure that clients and
+old IP address. Then, update the ``stone.conf`` file to ensure that clients and
 other daemons know the IP address of the new monitor.
 
 For example, lets assume there are three monitors in place, such as :: 
@@ -318,7 +318,7 @@ networks  are unable to communicate.  Use the following procedure:
    the retrieved monitor map, and ``{filename}`` is the name of the file 
    containing the retrieved monitor map. :: 
 
-	ceph mon getmap -o {tmp}/{filename}
+	stone mon getmap -o {tmp}/{filename}
 
 #. The following example demonstrates the contents of the monmap. ::
 
@@ -372,7 +372,7 @@ monitors, and inject the modified monmap into each new monitor.
 
 #. Inject the monmap. ::
 
-	ceph-mon -i {mon-id} --inject-monmap {tmp}/{filename}
+	stone-mon -i {mon-id} --inject-monmap {tmp}/{filename}
 
 #. Restart the monitors.
 

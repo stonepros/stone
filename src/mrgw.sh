@@ -12,7 +12,7 @@ elif [ -e "$script_root"/../${BUILD_DIR}/CMakeCache.txt ]; then
     cd "$script_root"/../${BUILD_DIR}
     script_root=$PWD
 fi
-#ceph_bin=$script_root/bin
+#stone_bin=$script_root/bin
 vstart_path=$(dirname "$0")
 
 [ "$#" -lt 3 ] && echo "usage: $0 <name> <port> <ssl-port> [params...]" && exit 1
@@ -45,7 +45,7 @@ logfile=$run_root/out/radosgw.${port}.log
 
 "$vstart_path"/mstop.sh "$name" radosgw "$port"
 
-"$vstart_path"/mrun "$name" ceph -c "$run_root"/ceph.conf \
+"$vstart_path"/mrun "$name" stone -c "$run_root"/stone.conf \
 	-k "$run_root"/keyring auth get-or-create client.rgw."$port" mon \
 	'allow rw' osd 'allow rwx' mgr 'allow rw' >> "$run_root"/keyring
 

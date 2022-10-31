@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-# This is a test for https://tracker.ceph.com/issues/40481.
+# This is a test for https://tracker.stone.com/issues/40481.
 #
 # An osdmap with 60000 slots encodes to ~16M, of which the ignored portion
 # is ~13M.  However in-memory osdmap is larger than ~3M: in-memory osd_addr
 # array for 60000 OSDs is ~8M because of sockaddr_storage.
 #
-# Set mon_max_osd = 60000 in ceph.conf.
+# Set mon_max_osd = 60000 in stone.conf.
 
 set -ex
 
@@ -20,11 +20,11 @@ function run_test() {
     # initially tiny, grow via incrementals
     dev=$(sudo rbd map img)
     for max in 8 60 600 6000 60000; do
-        ceph osd setmaxosd $max
+        stone osd setmaxosd $max
         expect_false sudo rbd map wait_for/latest_osdmap
         xfs_io -c 'pwrite -w 0 12M' $DEV
     done
-    ceph osd getcrushmap -o /dev/stdout | ceph osd setcrushmap -i /dev/stdin
+    stone osd getcrushmap -o /dev/stdout | stone osd setcrushmap -i /dev/stdin
     expect_false sudo rbd map wait_for/latest_osdmap
     xfs_io -c 'pwrite -w 0 12M' $DEV
     sudo rbd unmap $dev
@@ -32,11 +32,11 @@ function run_test() {
     # initially huge, shrink via incrementals
     dev=$(sudo rbd map img)
     for max in 60000 6000 600 60 8; do
-        ceph osd setmaxosd $max
+        stone osd setmaxosd $max
         expect_false sudo rbd map wait_for/latest_osdmap
         xfs_io -c 'pwrite -w 0 12M' $DEV
     done
-    ceph osd getcrushmap -o /dev/stdout | ceph osd setcrushmap -i /dev/stdin
+    stone osd getcrushmap -o /dev/stdout | stone osd setcrushmap -i /dev/stdin
     expect_false sudo rbd map wait_for/latest_osdmap
     xfs_io -c 'pwrite -w 0 12M' $DEV
     sudo rbd unmap $dev
@@ -45,7 +45,7 @@ function run_test() {
 rbd create --size 12M img
 run_test
 # repeat with primary affinity (adds an extra array)
-ceph osd primary-affinity osd.0 0.5
+stone osd primary-affinity osd.0 0.5
 run_test
 
 echo OK

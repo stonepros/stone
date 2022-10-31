@@ -2039,8 +2039,8 @@ xset.list
 xtscal.control
 xtscal.list"
 
-mount /mnt/ceph-fuse
-: cd /mnt/ceph-fuse
+mount /mnt/stone-fuse
+: cd /mnt/stone-fuse
 
 mkdir test-1774
 cd test-1774
@@ -2049,8 +2049,8 @@ for f in $list; do
 done
 
 cd
-umount /mnt/ceph-fuse
-mount /mnt/ceph-fuse
+umount /mnt/stone-fuse
+mount /mnt/stone-fuse
 cd -
 
 # this worked before the 1774 fix
@@ -2058,11 +2058,11 @@ diff <(ls) <(echo "$list")
 
 # but this failed, because we cached the dirlist wrong
 # update-modules.postinst used to be the missing file,
-# the last one in the first dirent set passed to ceph-fuse
+# the last one in the first dirent set passed to stone-fuse
 diff <(ls) <(echo "$list")
 
 cd ..
 rm -rf test-1774
 
 cd
-umount /mnt/ceph-fuse
+umount /mnt/stone-fuse

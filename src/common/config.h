@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -36,12 +36,12 @@ enum {
   CONF_FINAL
 };
 
-extern const char *ceph_conf_level_name(int level);
+extern const char *stone_conf_level_name(int level);
 
-/** This class represents the current Stonee configuration.
+/** This class represents the current Stone configuration.
  *
- * For Stonee daemons, this is the daemon configuration.  Log levels, caching
- * settings, btrfs settings, and so forth can all be found here.  For libcephfs
+ * For Stone daemons, this is the daemon configuration.  Log levels, caching
+ * settings, btrfs settings, and so forth can all be found here.  For libstonefs
  * and librados users, this is the configuration associated with their context.
  *
  * For information about how this class is loaded from a configuration file,
@@ -49,7 +49,7 @@ extern const char *ceph_conf_level_name(int level);
  *
  * ACCESS
  *
- * There are 3 ways to read the ceph context-- the old way and two new ways.
+ * There are 3 ways to read the stone context-- the old way and two new ways.
  * In the old way, code would simply read the public variables of the
  * configuration, without taking a lock. In the new way #1, code registers a
  * configuration observer which receives callbacks when a value changes. These
@@ -82,7 +82,7 @@ public:
   typedef std::function<bool(
       const std::string &k, const std::string &v)> config_callback;
 
-  /// true if we are a daemon (as per StoneeContext::code_env)
+  /// true if we are a daemon (as per StoneContext::code_env)
   const bool is_daemon;
 
   /*
@@ -103,13 +103,13 @@ public:
   mutable std::vector<std::string> may_reexpand_meta;
 
   /// encoded, cached copy of of values + ignored_mon_values
-  ceph::bufferlist values_bl;
+  stone::bufferlist values_bl;
 
   /// version for values_bl; increments each time there is a change
   uint64_t values_bl_version = 0;
 
   /// encoded copy of defaults (map<string,string>)
-  ceph::bufferlist defaults_bl;
+  stone::bufferlist defaults_bl;
 
   // Create a new md_config_t structure.
   explicit md_config_t(ConfigValues& values,
@@ -151,13 +151,13 @@ public:
 		       const std::string_view key, const std::string &val);
 
   /// Set a values from mon
-  int set_mon_vals(StoneeContext *cct,
+  int set_mon_vals(StoneContext *cct,
 		   ConfigValues& values,
 		   const ConfigTracker& tracker,
 		   const std::map<std::string,std::string, std::less<>>& kv,
 		   config_callback config_cb);
 
-  // Called by the Stonee daemons to make configuration changes at runtime
+  // Called by the Stone daemons to make configuration changes at runtime
   int injectargs(ConfigValues& values,
 		 const ConfigTracker& tracker,
 		 const std::string &s,
@@ -185,11 +185,11 @@ public:
   /// get encoded map<string,map<int32_t,string>> of entire config
   void get_config_bl(const ConfigValues& values,
 		     uint64_t have_version,
-		     ceph::buffer::list *bl,
+		     stone::buffer::list *bl,
 		     uint64_t *got_version);
 
   /// get encoded map<string,string> of compiled-in defaults
-  void get_defaults_bl(const ConfigValues& values, ceph::buffer::list *bl);
+  void get_defaults_bl(const ConfigValues& values, stone::buffer::list *bl);
 
   /// Get the default value of a configuration option
   std::optional<std::string> get_val_default(std::string_view key);
@@ -225,18 +225,18 @@ public:
   /// dump all config values to a stream
   void show_config(const ConfigValues& values, std::ostream& out) const;
   /// dump all config values to a formatter
-  void show_config(const ConfigValues& values, ceph::Formatter *f) const;
+  void show_config(const ConfigValues& values, stone::Formatter *f) const;
 
   /// dump all config settings to a formatter
-  void config_options(ceph::Formatter *f) const;
+  void config_options(stone::Formatter *f) const;
 
   /// dump config diff from default, conf, mon, etc.
   void diff(const ConfigValues& values,
-	    ceph::Formatter *f,
+	    stone::Formatter *f,
 	    std::string name = {}) const;
 
   /// print/log warnings/errors from parsing the config
-  void complain_about_parse_error(StoneeContext *cct);
+  void complain_about_parse_error(StoneContext *cct);
 
 private:
   // we use this to avoid variable expansion loops
@@ -268,7 +268,7 @@ private:
   void _refresh(ConfigValues& values, const Option& opt);
 
   void _show_config(const ConfigValues& values,
-		    std::ostream *out, ceph::Formatter *f) const;
+		    std::ostream *out, stone::Formatter *f) const;
 
   int _get_val_from_conf_file(const std::vector<std::string> &sections,
 			      const std::string_view key, std::string &out) const;
@@ -367,7 +367,7 @@ inline std::ostream& operator<<(std::ostream& o, const boost::blank& ) {
       return o << "INVALID_CONFIG_VALUE";
 }
 
-int ceph_resolve_file_search(const std::string& filename_list,
+int stone_resolve_file_search(const std::string& filename_list,
 			     std::string& result);
 
 #endif

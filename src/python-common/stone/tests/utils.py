@@ -1,4 +1,4 @@
-from ceph.deployment.inventory import Devices, Device
+from stone.deployment.inventory import Devices, Device
 
 try:
     from typing import Any, List

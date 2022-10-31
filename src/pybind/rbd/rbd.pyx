@@ -1493,7 +1493,7 @@ class RBD(object):
 
             * ``mon_host`` (str) - monitor addresses
 
-            * ``key`` (str) - CephX key
+            * ``key`` (str) - StoneX key
         """
         uuid = cstr(uuid, 'uuid')
         cdef:

@@ -26,8 +26,8 @@ namespace util {
 void apply_op_flags(uint32_t op_flags, uint32_t flags, neorados::Op* op);
 
 bool assemble_write_same_extent(const LightweightObjectExtent &object_extent,
-                                const ceph::bufferlist& data,
-                                ceph::bufferlist *ws_data,
+                                const stone::bufferlist& data,
+                                stone::bufferlist *ws_data,
                                 bool force_write);
 
 template <typename ImageCtxT = librbd::ImageCtx>
@@ -46,7 +46,7 @@ inline uint64_t get_extents_length(const Extents &extents) {
   return total_bytes;
 }
 
-void unsparsify(StoneContext* cct, ceph::bufferlist* bl,
+void unsparsify(StoneContext* cct, stone::bufferlist* bl,
                 const Extents& extent_map, uint64_t bl_off,
                 uint64_t out_bl_len);
 

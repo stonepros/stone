@@ -1,5 +1,5 @@
 """
-ceph_objectstore_tool - Simple test of ceph-objectstore-tool utility
+stone_objectstore_tool - Simple test of stone-objectstore-tool utility
 """
 from io import BytesIO
 
@@ -10,7 +10,7 @@ import os
 import sys
 import tempfile
 import time
-from tasks import ceph_manager
+from tasks import stone_manager
 from tasks.util.rados import (rados, create_replicated_pool, create_ec_pool)
 from teuthology import misc as teuthology
 from teuthology.orchestra import run
@@ -23,10 +23,10 @@ from teuthology.exceptions import CommandFailedError
 
 log = logging.getLogger(__name__)
 
-# Should get cluster name "ceph" from somewhere
+# Should get cluster name "stone" from somewhere
 # and normal path from osd_data and osd_journal in conf
-FSPATH = "/var/lib/ceph/osd/ceph-{id}"
-JPATH = "/var/lib/ceph/osd/ceph-{id}/journal"
+FSPATH = "/var/lib/stonepros/osd/stone-{id}"
+JPATH = "/var/lib/stonepros/osd/stone-{id}/journal"
 
 
 def cod_setup_local_data(log, ctx, NUM_OBJECTS, DATADIR,
@@ -145,11 +145,11 @@ def get_lines(filename):
 @contextlib.contextmanager
 def task(ctx, config):
     """
-    Run ceph_objectstore_tool test
+    Run stone_objectstore_tool test
 
     The config should be as follows::
 
-        ceph_objectstore_tool:
+        stone_objectstore_tool:
           objects: 20 # <number of objects>
           pgnum: 12
     """
@@ -157,9 +157,9 @@ def task(ctx, config):
     if config is None:
         config = {}
     assert isinstance(config, dict), \
-        'ceph_objectstore_tool task only accepts a dict for configuration'
+        'stone_objectstore_tool task only accepts a dict for configuration'
 
-    log.info('Beginning ceph_objectstore_tool...')
+    log.info('Beginning stone_objectstore_tool...')
 
     log.debug(config)
     log.debug(ctx)
@@ -176,7 +176,7 @@ def task(ctx, config):
     log.info(osds)
     log.info(osds.remotes)
 
-    manager = ctx.managers['ceph']
+    manager = ctx.managers['stone']
     while (len(manager.get_osd_status()['up']) !=
            len(manager.get_osd_status()['raw'])):
         time.sleep(10)
@@ -212,16 +212,16 @@ def task(ctx, config):
     try:
         yield
     finally:
-        log.info('Ending ceph_objectstore_tool')
+        log.info('Ending stone_objectstore_tool')
 
 
 def test_objectstore(ctx, config, cli_remote, REP_POOL, REP_NAME, ec=False):
-    manager = ctx.managers['ceph']
+    manager = ctx.managers['stone']
 
     osds = ctx.cluster.only(teuthology.is_type('osd'))
 
     TEUTHDIR = teuthology.get_testdir(ctx)
-    DATADIR = os.path.join(TEUTHDIR, "ceph.data")
+    DATADIR = os.path.join(TEUTHDIR, "stone.data")
     DATALINECOUNT = 10000
     ERRORS = 0
     NUM_OBJECTS = config.get('objects', 10)
@@ -253,10 +253,10 @@ def test_objectstore(ctx, config, cli_remote, REP_POOL, REP_NAME, ec=False):
     for stats in manager.get_pg_stats():
         if stats["pgid"].find(str(REPID) + ".") != 0:
             continue
-        if pool_dump["type"] == ceph_manager.PoolType.REPLICATED:
+        if pool_dump["type"] == stone_manager.PoolType.REPLICATED:
             for osd in stats["acting"]:
                 pgs.setdefault(osd, []).append(stats["pgid"])
-        elif pool_dump["type"] == ceph_manager.PoolType.ERASURE_CODED:
+        elif pool_dump["type"] == stone_manager.PoolType.ERASURE_CODED:
             shard = 0
             for osd in stats["acting"]:
                 pgs.setdefault(osd, []).append("{pgid}s{shard}".
@@ -279,7 +279,7 @@ def test_objectstore(ctx, config, cli_remote, REP_POOL, REP_NAME, ec=False):
 
     # Test --op list and generate json for all objects
     log.info("Test --op list by generating json for all objects")
-    prefix = ("sudo ceph-objectstore-tool "
+    prefix = ("sudo stone-objectstore-tool "
               "--data-path {fpath} "
               "--journal-path {jpath} ").format(fpath=FSPATH, jpath=JPATH)
     for remote in osds.remotes.keys():
@@ -313,7 +313,7 @@ def test_objectstore(ctx, config, cli_remote, REP_POOL, REP_NAME, ec=False):
     log.info(pgswithobjects)
     log.info(objsinpg)
 
-    if pool_dump["type"] == ceph_manager.PoolType.REPLICATED:
+    if pool_dump["type"] == stone_manager.PoolType.REPLICATED:
         # Test get-bytes
         log.info("Test get-bytes and set-bytes")
         for basename in db.keys():

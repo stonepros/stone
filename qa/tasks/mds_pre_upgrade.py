@@ -4,7 +4,7 @@ Prepare MDS cluster for upgrade.
 
 import logging
 
-from tasks.cephfs.filesystem import Filesystem
+from tasks.stonefs.filesystem import Filesystem
 
 log = logging.getLogger(__name__)
 

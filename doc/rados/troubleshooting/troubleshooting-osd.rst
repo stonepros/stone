@@ -3,7 +3,7 @@
 ======================
 
 Before troubleshooting your OSDs, first check your monitors and network. If
-you execute ``ceph health`` or ``ceph -s`` on the command line and Ceph shows
+you execute ``stone health`` or ``stone -s`` on the command line and Stone shows
 ``HEALTH_OK``, it means that the monitors have a quorum.
 If you don't have a monitor quorum or if there are errors with the monitor
 status, `address the monitor issues first <../troubleshooting-mon>`_.
@@ -17,19 +17,19 @@ Obtaining Data About OSDs
 
 A good first step in troubleshooting your OSDs is to obtain topology information in
 addition to the information you collected while `monitoring your OSDs`_
-(e.g., ``ceph osd tree``).
+(e.g., ``stone osd tree``).
 
 
-Ceph Logs
+Stone Logs
 ---------
 
-If you haven't changed the default path, you can find Ceph log files at
-``/var/log/ceph``::
+If you haven't changed the default path, you can find Stone log files at
+``/var/log/stone``::
 
-	ls /var/log/ceph
+	ls /var/log/stone
 
 If you don't see enough log detail you can change your logging level.  See
-`Logging and Debugging`_ for details to ensure that Ceph performs adequately
+`Logging and Debugging`_ for details to ensure that Stone performs adequately
 under high logging volume.
 
 
@@ -37,18 +37,18 @@ Admin Socket
 ------------
 
 Use the admin socket tool to retrieve runtime information. For details, list
-the sockets for your Ceph daemons::
+the sockets for your Stone daemons::
 
-	ls /var/run/ceph
+	ls /var/run/stone
 
 Then, execute the following, replacing ``{daemon-name}`` with an actual
 daemon (e.g., ``osd.0``)::
 
-  ceph daemon osd.0 help
+  stone daemon osd.0 help
 
-Alternatively, you can specify a ``{socket-file}`` (e.g., something in ``/var/run/ceph``)::
+Alternatively, you can specify a ``{socket-file}`` (e.g., something in ``/var/run/stone``)::
 
-  ceph daemon {socket-file} help
+  stone daemon {socket-file} help
 
 The admin socket, among other things, allows you to:
 
@@ -91,23 +91,23 @@ or resolve a problem that affects a failure domain (e.g., a rack). If you do not
 want CRUSH to automatically rebalance the cluster as you stop OSDs for
 maintenance, set the cluster to ``noout`` first::
 
-	ceph osd set noout
+	stone osd set noout
 
 On Luminous or newer releases it is safer to set the flag only on affected OSDs.
 You can do this individually ::
 
-	ceph osd add-noout osd.0
-	ceph osd rm-noout  osd.0
+	stone osd add-noout osd.0
+	stone osd rm-noout  osd.0
 
 Or an entire CRUSH bucket at a time.  Say you're going to take down
-``prod-ceph-data1701`` to add RAM ::
+``prod-stone-data1701`` to add RAM ::
 
-	ceph osd set-group noout prod-ceph-data1701
+	stone osd set-group noout prod-stone-data1701
 
-Once the flag is set you can stop the OSDs and any other colocated Ceph
+Once the flag is set you can stop the OSDs and any other colocated Stone
 services within the failure domain that requires maintenance work. ::
 
-	systemctl stop ceph\*.service ceph\*.target
+	systemctl stop stone\*.service stone\*.target
 
 .. note:: Placement groups within the OSDs you stop will become ``degraded``
    while you are addressing issues with within the failure domain.
@@ -116,14 +116,14 @@ Once you have completed your maintenance, restart the OSDs and any other
 daemons.  If you rebooted the host as part of the maintenance, these should
 come back on their own without intervention. ::
 
-	sudo systemctl start ceph.target
+	sudo systemctl start stone.target
 
 Finally, you must unset the cluster-wide``noout`` flag::
 
-	ceph osd unset noout
-	ceph osd unset-group noout prod-ceph-data1701
+	stone osd unset noout
+	stone osd unset-group noout prod-stone-data1701
 
-Note that most Linux distributions that Ceph supports today employ ``systemd``
+Note that most Linux distributions that Stone supports today employ ``systemd``
 for service management.  For other or older operating systems you may need
 to issue equivalent ``service`` or ``start``/``stop`` commands.
 
@@ -132,7 +132,7 @@ to issue equivalent ``service`` or ``start``/``stop`` commands.
 OSD Not Running
 ===============
 
-Under normal circumstances, simply restarting the ``ceph-osd`` daemon will
+Under normal circumstances, simply restarting the ``stone-osd`` daemon will
 allow it to rejoin the cluster and recover.
 
 An OSD Won't Start
@@ -166,7 +166,7 @@ If you start your cluster and an OSD won't start, check the following:
 	kernel.pid_max = 4194303
 
 - **Check ``nf_conntrack``:** This connection tracking and limiting system
-  is the bane of many production Ceph clusters, and can be insidious in that
+  is the bane of many production Stone clusters, and can be insidious in that
   everything is fine at first. As cluster topology and client workload
   grow, mysterious and intermittent connection failures and performance
   glitches manifest, becoming worse over time and at certain times of day.
@@ -184,46 +184,46 @@ If you start your cluster and an OSD won't start, check the following:
   resources.
 
 - **Kernel Version:** Identify the kernel version and distribution you
-  are using. Ceph uses some third party tools by default, which may be
+  are using. Stone uses some third party tools by default, which may be
   buggy or may conflict with certain distributions and/or kernel
   versions (e.g., Google ``gperftools`` and ``TCMalloc``). Check the
-  `OS recommendations`_ and the release notes for each Ceph version
+  `OS recommendations`_ and the release notes for each Stone version
   to ensure you have addressed any issues related to your kernel.
 
 - **Segment Fault:** If there is a segment fault, increase log levels
   and start the problematic daemon(s) again. If segment faults recur,
-  search the Ceph bug tracker `https://tracker.ceph/com/projects/ceph <https://tracker.ceph.com/projects/ceph/>`_
-  and the ``dev`` and ``ceph-users`` mailing list archives `https://ceph.io/resources <https://ceph.io/resources>`_.
+  search the Stone bug tracker `https://tracker.stone/com/projects/stone <https://tracker.stone.com/projects/stone/>`_
+  and the ``dev`` and ``stone-users`` mailing list archives `https://stone.io/resources <https://stone.io/resources>`_.
   If this is truly a new and unique
-  failure, post to the ``dev`` email list and provide the specific Ceph
-  release being run, ``ceph.conf`` (with secrets XXX'd out),
+  failure, post to the ``dev`` email list and provide the specific Stone
+  release being run, ``stone.conf`` (with secrets XXX'd out),
   your monitor status output and excerpts from your log file(s).
 
 An OSD Failed
 -------------
 
-When a ``ceph-osd`` process dies, surviving ``ceph-osd`` daemons will report
+When a ``stone-osd`` process dies, surviving ``stone-osd`` daemons will report
 to the mons that it appears down, which will in turn surface the new status
-via the ``ceph health`` command::
+via the ``stone health`` command::
 
-	ceph health
+	stone health
 	HEALTH_WARN 1/3 in osds are down
 
 Specifically, you will get a warning whenever there are OSDs marked ``in``
 and ``down``.  You can identify which  are ``down`` with::
 
-	ceph health detail
+	stone health detail
 	HEALTH_WARN 1/3 in osds are down
 	osd.0 is down since epoch 23, last address 192.168.106.220:6800/11080
 
 or ::
 
-	ceph osd tree down
+	stone osd tree down
 
 If there is a drive
-failure or other fault preventing ``ceph-osd`` from functioning or
+failure or other fault preventing ``stone-osd`` from functioning or
 restarting, an error message should be present in its log file under
-``/var/log/ceph``.
+``/var/log/stone``.
 
 If the daemon stopped because of a heartbeat failure or ``suicide timeout``,
 the underlying drive or filesystem may be unresponsive. Check ``dmesg``
@@ -233,7 +233,7 @@ easy to mistake old errors for new.
 
 If the problem is a software error (failed assertion or other
 unexpected error), search the archives and tracker as above, and
-report it to the `ceph-devel`_ email list if there's no clear fix or
+report it to the `stone-devel`_ email list if there's no clear fix or
 existing bug.
 
 .. _no-free-drive-space:
@@ -241,7 +241,7 @@ existing bug.
 No Free Drive Space
 -------------------
 
-Ceph prevents you from writing to a full OSD so that you don't lose data.
+Stone prevents you from writing to a full OSD so that you don't lose data.
 In an operational cluster, you should receive a warning when your cluster's OSDs
 and pools approach the full ratio. The ``mon osd full ratio`` defaults to
 ``0.95``, or 95% of capacity before it stops clients from writing data.
@@ -250,50 +250,50 @@ capacity above which backfills will not start. The
 OSD nearfull ratio defaults to ``0.85``, or 85% of capacity
 when it generates a health warning.
 
-Note that individual OSDs within a cluster will vary in how much data Ceph
+Note that individual OSDs within a cluster will vary in how much data Stone
 allocates to them.  This utilization can be displayed for each OSD with ::
 
-	ceph osd df
+	stone osd df
 
 Overall cluster / pool fullness can be checked with ::
 
-	ceph df 
+	stone df 
 
 Pay close attention to the **most full** OSDs, not the percentage of raw space
-used as reported by ``ceph df``.  It only takes one outlier OSD filling up to
+used as reported by ``stone df``.  It only takes one outlier OSD filling up to
 fail writes to its pool.  The space available to each pool as reported by
-``ceph df`` considers the ratio settings relative to the *most full* OSD that
+``stone df`` considers the ratio settings relative to the *most full* OSD that
 is part of a given pool.  The distribution can be flattened by progressively
 moving data from overfull or to underfull OSDs using the ``reweight-by-utilization``
-command.  With Ceph releases beginning with later revisions of Luminous one can also
-exploit the ``ceph-mgr`` ``balancer`` module to perform this task automatically
+command.  With Stone releases beginning with later revisions of Luminous one can also
+exploit the ``stone-mgr`` ``balancer`` module to perform this task automatically
 and rather effectively.
 
 The ratios can be adjusted:
 
 ::
 
-    ceph osd set-nearfull-ratio <float[0.0-1.0]>
-    ceph osd set-full-ratio <float[0.0-1.0]>
-    ceph osd set-backfillfull-ratio <float[0.0-1.0]>
+    stone osd set-nearfull-ratio <float[0.0-1.0]>
+    stone osd set-full-ratio <float[0.0-1.0]>
+    stone osd set-backfillfull-ratio <float[0.0-1.0]>
 
 Full cluster issues can arise when an OSD fails either as a test or organically
 within small and/or very full or unbalanced cluster. When an OSD or node
 holds an outsize percentage of the cluster's data, the ``nearfull`` and ``full``
 ratios may be exceeded as a result of component failures or even natural growth.
-If you are testing how Ceph reacts to OSD failures on a small
+If you are testing how Stone reacts to OSD failures on a small
 cluster, you should leave ample free disk space and consider temporarily
 lowering the OSD ``full ratio``, OSD ``backfillfull ratio`` and
 OSD ``nearfull ratio``
 
-Full ``ceph-osds`` will be reported by ``ceph health``::
+Full ``stone-osds`` will be reported by ``stone health``::
 
-	ceph health
+	stone health
 	HEALTH_WARN 1 nearfull osd(s)
 
 Or::
 
-	ceph health detail
+	stone health detail
 	HEALTH_ERR 1 full osd(s); 1 backfillfull osd(s); 1 nearfull osd(s)
 	osd.3 is full at 97%
 	osd.4 is backfill full at 91%
@@ -321,24 +321,24 @@ have eliminated other troubleshooting possibilities before delving into OSD
 performance issues. For example, ensure that your network(s) is working properly
 and your OSDs are running. Check to see if OSDs are throttling recovery traffic.
 
-.. tip:: Newer versions of Ceph provide better recovery handling by preventing
+.. tip:: Newer versions of Stone provide better recovery handling by preventing
    recovering OSDs from using up system resources so that ``up`` and ``in``
    OSDs are not available or are otherwise slow.
 
 Networking Issues
 -----------------
 
-Ceph is a distributed storage system, so it relies upon networks for OSD peering
+Stone is a distributed storage system, so it relies upon networks for OSD peering
 and replication, recovery from faults, and periodic heartbeats. Networking
 issues can cause OSD latency and flapping OSDs. See `Flapping OSDs`_ for
 details.
 
-Ensure that Ceph processes and Ceph-dependent processes are connected and/or
+Ensure that Stone processes and Stone-dependent processes are connected and/or
 listening. ::
 
-	netstat -a | grep ceph
-	netstat -l | grep ceph
-	sudo netstat -p | grep ceph
+	netstat -a | grep stone
+	netstat -l | grep stone
+	sudo netstat -p | grep stone
 
 Check network statistics. ::
 
@@ -349,10 +349,10 @@ Drive Configuration
 
 A SAS or SATA storage drive should only house one OSD; NVMe drives readily
 handle two or more. Read and write throughput can bottleneck if other processes
-share the drive, including journals / metadata, operating systems, Ceph monitors,
-`syslog` logs, other OSDs, and non-Ceph processes.
+share the drive, including journals / metadata, operating systems, Stone monitors,
+`syslog` logs, other OSDs, and non-Stone processes.
 
-Ceph acknowledges writes *after* journaling, so fast SSDs are an
+Stone acknowledges writes *after* journaling, so fast SSDs are an
 attractive option to accelerate the response time--particularly when
 using the ``XFS`` or ``ext4`` file systems for legacy Filestore OSDs.
 By contrast, the ``Btrfs``
@@ -389,10 +389,10 @@ Co-resident Processes
 ---------------------
 
 Spinning up co-resident processes (convergence) such as a cloud-based solution, virtual
-machines and other applications that write data to Ceph while operating on the
+machines and other applications that write data to Stone while operating on the
 same hardware as OSDs can introduce significant OSD latency. Generally, we
-recommend optimizing hosts for use with Ceph and using other hosts for other
-processes. The practice of separating Ceph operations from other applications
+recommend optimizing hosts for use with Stone and using other hosts for other
+processes. The practice of separating Stone operations from other applications
 may help improve performance and may streamline troubleshooting and maintenance.
 
 Logging Levels
@@ -401,12 +401,12 @@ Logging Levels
 If you turned logging levels up to track an issue and then forgot to turn
 logging levels back down, the OSD may be putting a lot of logs onto the disk. If
 you intend to keep logging levels high, you may consider mounting a drive to the
-default path for logging (i.e., ``/var/log/ceph/$cluster-$name.log``).
+default path for logging (i.e., ``/var/log/stone/$cluster-$name.log``).
 
 Recovery Throttling
 -------------------
 
-Depending upon your configuration, Ceph may reduce recovery rates to maintain
+Depending upon your configuration, Stone may reduce recovery rates to maintain
 performance or it may increase recovery rates to the point that recovery
 impacts OSD performance. Check to see if the OSD is recovering.
 
@@ -414,7 +414,7 @@ Kernel Version
 --------------
 
 Check the kernel version you are running. Older kernels may not receive
-new backports that Ceph depends upon for better performance.
+new backports that Stone depends upon for better performance.
 
 Kernel Issues with SyncFS
 -------------------------
@@ -443,7 +443,7 @@ Insufficient RAM
 ----------------
 
 We recommend a *minimum* of 4GB of RAM per OSD daemon and suggest rounding up
-from 6-8GB.  You may notice that during normal operations, ``ceph-osd``
+from 6-8GB.  You may notice that during normal operations, ``stone-osd``
 processes only use a fraction of that amount.
 Unused RAM makes it tempting to use the excess RAM for co-resident
 applications or to skimp on each node's memory capacity.  However,
@@ -454,39 +454,39 @@ and the daemons may even crash or be killed by the Linux ``OOM Killer``.
 Blocked Requests or Slow Requests
 ---------------------------------
 
-If a ``ceph-osd`` daemon is slow to respond to a request, messages will be logged
+If a ``stone-osd`` daemon is slow to respond to a request, messages will be logged
 noting ops that are taking too long.  The warning threshold
 defaults to 30 seconds and is configurable via the ``osd op complaint time``
 setting.  When this happens, the cluster log will receive messages.
 
-Legacy versions of Ceph complain about ``old requests``::
+Legacy versions of Stone complain about ``old requests``::
 
 	osd.0 192.168.106.220:6800/18813 312 : [WRN] old request osd_op(client.5099.0:790 fatty_26485_object789 [write 0~4096] 2.5e54f643) v4 received at 2012-03-06 15:42:56.054801 currently waiting for sub ops
 
-New versions of Ceph complain about ``slow requests``::
+New versions of Stone complain about ``slow requests``::
 
 	{date} {osd.num} [WRN] 1 slow requests, 1 included below; oldest blocked for > 30.005692 secs
-	{date} {osd.num}  [WRN] slow request 30.005692 seconds old, received at {date-time}: osd_op(client.4240.0:8 benchmark_data_ceph-1_39426_object7 [write 0~4194304] 0.69848840) v4 currently waiting for subops from [610]
+	{date} {osd.num}  [WRN] slow request 30.005692 seconds old, received at {date-time}: osd_op(client.4240.0:8 benchmark_data_stone-1_39426_object7 [write 0~4194304] 0.69848840) v4 currently waiting for subops from [610]
 
 Possible causes include:
 
 - A failing drive (check ``dmesg`` output)
 - A bug in the kernel file system (check ``dmesg`` output)
 - An overloaded cluster (check system load, iostat, etc.)
-- A bug in the ``ceph-osd`` daemon.
+- A bug in the ``stone-osd`` daemon.
 
 Possible solutions:
 
-- Remove VMs from Ceph hosts
+- Remove VMs from Stone hosts
 - Upgrade kernel
-- Upgrade Ceph
+- Upgrade Stone
 - Restart OSDs
 - Replace failed or failing components
 
 Debugging Slow Requests
 -----------------------
 
-If you run ``ceph daemon osd.<id> dump_historic_ops`` or ``ceph daemon osd.<id> dump_ops_in_flight``,
+If you run ``stone daemon osd.<id> dump_historic_ops`` or ``stone daemon osd.<id> dump_ops_in_flight``,
 you will see a set of operations and a list of events each operation went
 through. These are briefly described below.
 
@@ -573,18 +573,18 @@ If something does cause OSDs to 'flap' (repeatedly getting marked ``down`` and
 then ``up`` again), you can force the monitors to halt the flapping by
 temporarily freezing their states::
 
-	ceph osd set noup      # prevent OSDs from getting marked up
-	ceph osd set nodown    # prevent OSDs from getting marked down
+	stone osd set noup      # prevent OSDs from getting marked up
+	stone osd set nodown    # prevent OSDs from getting marked down
 
 These flags are recorded in the osdmap::
 
-	ceph osd dump | grep flags
+	stone osd dump | grep flags
 	flags no-up,no-down
 
 You can clear the flags with::
 
-	ceph osd unset noup
-	ceph osd unset nodown
+	stone osd unset noup
+	stone osd unset nodown
 
 Two other flags are supported, ``noin`` and ``noout``, which prevent
 booting OSDs from being marked ``in`` (allocated data) or protect OSDs
@@ -601,20 +601,20 @@ from eventually being marked ``out`` (regardless of what the current value for
    careful adjustments to the ``mon_osd_down_out_subtree_limit``,
    ``mon_osd_reporter_subtree_level``, and ``mon_osd_min_down_reporters``.
    Derivation of optimal settings depends on cluster size, topology, and the
-   Ceph  release in use. Their interactions are subtle and beyond the scope of
+   Stone  release in use. Their interactions are subtle and beyond the scope of
    this document.
 
 
 .. _iostat: https://en.wikipedia.org/wiki/Iostat
-.. _Ceph Logging and Debugging: ../../configuration/ceph-conf#ceph-logging-and-debugging
+.. _Stone Logging and Debugging: ../../configuration/stone-conf#stone-logging-and-debugging
 .. _Logging and Debugging: ../log-and-debug
 .. _Debugging and Logging: ../debug
 .. _Monitor/OSD Interaction: ../../configuration/mon-osd-interaction
 .. _Monitor Config Reference: ../../configuration/mon-config-ref
 .. _monitoring your OSDs: ../../operations/monitoring-osd-pg
-.. _subscribe to the ceph-devel email list: mailto:majordomo@vger.kernel.org?body=subscribe+ceph-devel
-.. _unsubscribe from the ceph-devel email list: mailto:majordomo@vger.kernel.org?body=unsubscribe+ceph-devel
-.. _subscribe to the ceph-users email list: mailto:ceph-users-join@lists.ceph.com
-.. _unsubscribe from the ceph-users email list: mailto:ceph-users-leave@lists.ceph.com
+.. _subscribe to the stone-devel email list: mailto:majordomo@vger.kernel.org?body=subscribe+stone-devel
+.. _unsubscribe from the stone-devel email list: mailto:majordomo@vger.kernel.org?body=unsubscribe+stone-devel
+.. _subscribe to the stone-users email list: mailto:stone-users-join@lists.stone.com
+.. _unsubscribe from the stone-users email list: mailto:stone-users-leave@lists.stone.com
 .. _OS recommendations: ../../../start/os-recommendations
-.. _ceph-devel: ceph-devel@vger.kernel.org
+.. _stone-devel: stone-devel@vger.kernel.org

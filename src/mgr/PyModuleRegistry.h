@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 John Spray <john.spray@redhat.com>
  *
@@ -40,7 +40,7 @@ class MgrSession;
 class PyModuleRegistry
 {
 private:
-  mutable ceph::mutex lock = ceph::make_mutex("PyModuleRegistry::lock");
+  mutable stone::mutex lock = stone::make_mutex("PyModuleRegistry::lock");
   LogChannelRef clog;
 
   std::map<std::string, PyModuleRef> modules;
@@ -70,7 +70,7 @@ public:
     const std::string prefix,
     bool incremental,
     const map<std::string, boost::optional<bufferlist>, std::less<>>& data) {
-    ceph_assert(active_modules);
+    stone_assert(active_modules);
     active_modules->update_kv_data(prefix, incremental, data);
   }
 
@@ -198,7 +198,7 @@ public:
 
   std::map<std::string, std::string> get_services() const
   {
-    ceph_assert(active_modules);
+    stone_assert(active_modules);
     return active_modules->get_services();
   }
 

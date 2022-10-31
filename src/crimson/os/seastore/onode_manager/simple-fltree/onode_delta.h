@@ -34,8 +34,8 @@ struct delta_t {
   ghobject_t oid;
   crimson::os::seastore::laddr_t addr = 0;
   OnodeRef onode;
-  ceph::bufferptr keys;
-  ceph::bufferptr cells;
+  stone::bufferptr keys;
+  stone::bufferptr cells;
 
   delta_t() = default;
   delta_t(op_t op)
@@ -51,10 +51,10 @@ struct delta_t {
   static delta_t update_key(unsigned slot, const ghobject_t& oid);
   static delta_t shift_left(unsigned n);
   static delta_t trim_right(unsigned n);
-  static delta_t insert_front(ceph::buffer::ptr keys,
-                              ceph::buffer::ptr cells);
-  static delta_t insert_back(ceph::buffer::ptr keys,
-                             ceph::buffer::ptr cells);
+  static delta_t insert_front(stone::buffer::ptr keys,
+                              stone::buffer::ptr cells);
+  static delta_t insert_back(stone::buffer::ptr keys,
+                             stone::buffer::ptr cells);
   static delta_t remove_from(unsigned slot);
 
   // shortcuts
@@ -65,6 +65,6 @@ struct delta_t {
     return insert_child(slot, oid, addr);
   }
 
-  void encode(ceph::bufferlist& bl);
-  void decode(ceph::bufferlist::const_iterator& p);
+  void encode(stone::bufferlist& bl);
+  void decode(stone::bufferlist::const_iterator& p);
 };

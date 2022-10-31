@@ -18,7 +18,7 @@ endif
 LOCALTAG=ceph-grafana:$(CONTAINER_VERSION)-$(ARCH)
 TAG=ceph/ceph-grafana:$(CONTAINER_VERSION)-$(ARCH)
 
-# Build a grafana instance - preconfigured for use within Ceph's dashboard UI
+# Build a grafana instance - preconfigured for use within Stone's dashboard UI
 
 build :
 	echo "Creating base container"
@@ -37,7 +37,7 @@ build :
 	@/bin/echo -e "\
 apiVersion: 1 \\n\
 providers: \\n\
-- name: 'Ceph Dashboard' \\n\
+- name: 'Stone Dashboard' \\n\
   torgId: 1 \\n\
   folder: 'ceph-dashboard' \\n\
   type: file \\n\
@@ -67,8 +67,8 @@ providers: \\n\
 
 	# finalize
 	sudo buildah config --label maintainer="Paul Cuzner <pcuzner@redhat.com>" $(CONTAINER)
-	sudo buildah config --label description="Ceph Grafana Container" $(CONTAINER)
-	sudo buildah config --label summary="Grafana Container configured for Ceph mgr/dashboard integration" $(CONTAINER)
+	sudo buildah config --label description="Stone Grafana Container" $(CONTAINER)
+	sudo buildah config --label summary="Grafana Container configured for Stone mgr/dashboard integration" $(CONTAINER)
 	sudo buildah commit --format docker --squash $(CONTAINER) $(LOCALTAG)
 
 push:

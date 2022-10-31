@@ -5,20 +5,20 @@
 # dashboard from the local machine. This assumes that the dashboard is being
 # exposed via a nodePort service
 CURR_DIR=`pwd`
-K8S_NAMESPACE='rook-ceph'
+K8S_NAMESPACE='rook-stone'
 
-HOST=$(kubectl get pods -n $K8S_NAMESPACE -l "app=rook-ceph-mgr" -o json | jq .items[0].spec.nodeName | sed s/\"//g)
+HOST=$(kubectl get pods -n $K8S_NAMESPACE -l "app=rook-stone-mgr" -o json | jq .items[0].spec.nodeName | sed s/\"//g)
 if [ "$HOST" = "minikube" ]; then
 	HOST=$(minikube ip)
 fi
-PORT=$(kubectl get service -n $K8S_NAMESPACE rook-ceph-mgr-dashboard -o yaml | grep nodePort: | awk '{print $2}')
+PORT=$(kubectl get service -n $K8S_NAMESPACE rook-stone-mgr-dashboard -o yaml | grep nodePort: | awk '{print $2}')
 API_URL="https://${HOST}:${PORT}"
 
 #
 # Rook automagically sets up an "admin" account with a random PW and stuffs
 # that into a k8s secret. This fetches it.
 #
-PASSWD=$(kubectl -n $K8S_NAMESPACE get secret rook-ceph-dashboard-password -o yaml | grep "password:" | awk '{print $2}' | base64 --decode)
+PASSWD=$(kubectl -n $K8S_NAMESPACE get secret rook-stone-dashboard-password -o yaml | grep "password:" | awk '{print $2}' | base64 --decode)
 
 if [ "$API_URL" = "null" ]; then
 	echo "Couldn't retrieve API URL, exiting..." >&2

@@ -1,5 +1,5 @@
 import pytest
-from ceph_volume import util
+from stone_volume import util
 
 
 class TestAsBytes(object):

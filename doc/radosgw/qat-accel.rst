@@ -47,12 +47,12 @@ Implementation
 ==============
 1. QAT based Encryption for RGW 
 
-`OpenSSL support for RGW encryption`_ has been merged into Ceph, and Intel also
+`OpenSSL support for RGW encryption`_ has been merged into Stone, and Intel also
 provides one `QAT Engine`_ for OpenSSL. So, theoretically speaking, QAT based
-encryption in Ceph can be directly supported through OpenSSl+QAT Engine.
+encryption in Stone can be directly supported through OpenSSl+QAT Engine.
 
 But the QAT Engine for OpenSSL currently supports chained operations only, and
-so Ceph will not be able to utilize QAT hardware feature for crypto operations
+so Stone will not be able to utilize QAT hardware feature for crypto operations
 based on OpenSSL crypto plugin. As a result, one QAT plugin based on native
 QAT API is added into crypto framework.
 
@@ -71,7 +71,7 @@ Configuration
 =============
 1. QAT based Encryption for RGW 
 
-Edit the Ceph configuration file to make use of QAT based crypto plugin::
+Edit the Stone configuration file to make use of QAT based crypto plugin::
 
     plugin crypto accelerator = crypto_qat
 
@@ -81,7 +81,7 @@ One CMake option have to be used to trigger QAT based compression::
 
     -DWITH_QATZIP=ON
 
-Edit the Ceph configuration file to enable QAT support for compression::
+Edit the Stone configuration file to enable QAT support for compression::
 
     qat compressor enabled=true
 

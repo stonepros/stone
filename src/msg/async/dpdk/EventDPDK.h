@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -21,12 +21,12 @@
 #include "UserspaceEvent.h"
 
 class DPDKDriver : public EventDriver {
-  StoneeContext *cct;
+  StoneContext *cct;
 
  public:
   UserspaceEventManager manager;
 
-  explicit DPDKDriver(StoneeContext *c): cct(c), manager(c) {}
+  explicit DPDKDriver(StoneContext *c): cct(c), manager(c) {}
   virtual ~DPDKDriver() { }
 
   int init(EventCenter *c, int nevent) override;

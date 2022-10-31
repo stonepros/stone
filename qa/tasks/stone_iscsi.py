@@ -1,5 +1,5 @@
 """
-Run ceph-iscsi cluster setup
+Run stone-iscsi cluster setup
 """
 import logging
 import contextlib
@@ -14,7 +14,7 @@ class IscsiSetup(object):
     def __init__(self, ctx, config):
         self.ctx = ctx
         self.config = config
-        self.target_iqn = "iqn.2003-01.com.redhat.iscsi-gw:ceph-gw"
+        self.target_iqn = "iqn.2003-01.com.redhat.iscsi-gw:stone-gw"
         self.client_iqn = "iqn.1994-05.com.redhat:client"
         self.trusted_ip_list = []
         self.background_procs = []
@@ -44,13 +44,13 @@ class IscsiSetup(object):
         ips = ','.join(self.trusted_ip_list)
         conf = dedent(f'''\
 [config]
-cluster_name = ceph
+cluster_name = stone
 pool = rbd
 api_secure = false
 api_port = 5000
 trusted_ip_list = {ips}
 ''')
-        path = "/etc/ceph/iscsi-gateway.cfg"
+        path = "/etc/stonepros/iscsi-gateway.cfg"
         (remote,) = (self.ctx.cluster.only(role).remotes.keys())
         remote.sudo_write_file(path, conf)
 
@@ -119,17 +119,17 @@ devices {
 @contextlib.contextmanager
 def task(ctx, config):
     """
-    Run ceph iscsi setup.
+    Run stone iscsi setup.
 
     Specify the list of gateways to run ::
 
       tasks:
-        ceph_iscsi:
+        stone_iscsi:
           gateways: [a_gateway.0, c_gateway.1]
           clients: [b_client.0]
 
     """
-    log.info('Setting ceph iscsi cluster...')
+    log.info('Setting stone iscsi cluster...')
     iscsi = IscsiSetup(ctx, config)
     iscsi.setup_gateways()
     iscsi.setup_clients()
@@ -137,5 +137,5 @@ def task(ctx, config):
     try:
         yield
     finally:
-        log.info('Ending ceph iscsi daemons')
+        log.info('Ending stone iscsi daemons')
         iscsi.kill_backgrounds()

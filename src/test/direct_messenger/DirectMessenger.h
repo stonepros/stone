@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -44,7 +44,7 @@ class DirectMessenger : public SimplePolicyMessenger {
   Semaphore sem;
 
  public:
-  DirectMessenger(StoneeContext *cct, entity_name_t name,
+  DirectMessenger(StoneContext *cct, entity_name_t name,
                   string mname, uint64_t nonce,
                   DispatchStrategy *dispatchers);
   ~DirectMessenger();

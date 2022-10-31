@@ -127,7 +127,7 @@ public:
   }
 
   ~CDentry() override {
-    ceph_assert(batch_ops.empty());
+    stone_assert(batch_ops.empty());
   }
 
   std::string_view pin_name(int p) const override {
@@ -261,7 +261,7 @@ public:
   // -- exporting
   // note: this assumes the dentry already exists.  
   // i.e., the name is already extracted... so we just need the other state.
-  void encode_export(ceph::buffer::list& bl) {
+  void encode_export(stone::buffer::list& bl) {
     ENCODE_START(1, 1, bl);
     encode(first, bl);
     encode(state, bl);
@@ -284,7 +284,7 @@ public:
   void abort_export() {
     put(PIN_TEMPEXPORTING);
   }
-  void decode_import(ceph::buffer::list::const_iterator& blp, LogSegment *ls) {
+  void decode_import(stone::buffer::list::const_iterator& blp, LogSegment *ls) {
     DECODE_START(1, blp);
     decode(first, blp);
     __u32 nstate;
@@ -307,12 +307,12 @@ public:
 
   // -- locking --
   SimpleLock* get_lock(int type) override {
-    ceph_assert(type == STONE_LOCK_DN);
+    stone_assert(type == STONE_LOCK_DN);
     return &lock;
   }
   void set_object_info(MDSCacheObjectInfo &info) override;
-  void encode_lock_state(int type, ceph::buffer::list& bl) override;
-  void decode_lock_state(int type, const ceph::buffer::list& bl) override;
+  void encode_lock_state(int type, stone::buffer::list& bl) override;
+  void decode_lock_state(int type, const stone::buffer::list& bl) override;
 
   // ---------------------------------------------
   // replicas (on clients)
@@ -344,14 +344,14 @@ public:
 
   std::ostream& print_db_line_prefix(std::ostream& out) override;
   void print(std::ostream& out) override;
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
   static void encode_remote(inodeno_t& ino, unsigned char d_type,
                             std::string_view alternate_name,
                             bufferlist &bl);
   static void decode_remote(char icode, inodeno_t& ino, unsigned char& d_type,
                             mempool::mds_co::string& alternate_name,
-                            ceph::buffer::list::const_iterator& bl);
+                            stone::buffer::list::const_iterator& bl);
 
   __u32 hash;
   snapid_t first, last;

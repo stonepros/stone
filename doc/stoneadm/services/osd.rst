@@ -110,17 +110,17 @@ conditions are met:
 * The device must not have any LVM state.
 * The device must not be mounted.
 * The device must not contain a file system.
-* The device must not contain a Ceph BlueStore OSD.
+* The device must not contain a Stone BlueStore OSD.
 * The device must be larger than 5 GB.
 
-Ceph will not provision an OSD on a device that is not available.
+Stone will not provision an OSD on a device that is not available.
 
 Creating New OSDs
 -----------------
 
 There are a few ways to create new OSDs:
 
-* Tell Ceph to consume any available and unused storage device:
+* Tell Stone to consume any available and unused storage device:
 
   .. prompt:: bash #
 
@@ -375,14 +375,14 @@ Automatically tuning OSD memory
 
 OSD daemons will adjust their memory consumption based on the
 ``osd_memory_target`` config option (several gigabytes, by
-default).  If Ceph is deployed on dedicated nodes that are not sharing
+default).  If Stone is deployed on dedicated nodes that are not sharing
 memory with other services, cephadm can automatically adjust the per-OSD
 memory consumption based on the total amount of RAM and the number of deployed
 OSDs.
 
-.. warning:: Cephadm sets ``osd_memory_target_autotune`` to ``true`` by default which is unsuitable for hyperconverged infrastructures.
+.. warning:: Stoneadm sets ``osd_memory_target_autotune`` to ``true`` by default which is unsuitable for hyperconverged infrastructures.
 
-Cephadm will start with a fraction
+Stoneadm will start with a fraction
 (``mgr/cephadm/autotune_memory_target_ratio``, which defaults to
 ``.7``) of the total RAM in the system, subtract off any memory
 consumed by non-autotuned daemons (non-OSDs, for OSDs for which
@@ -419,7 +419,7 @@ Advanced OSD Service Specifications
 
 :ref:`orchestrator-cli-service-spec`\s of type ``osd`` are a way to describe a
 cluster layout, using the properties of disks. Service specifications give the
-user an abstract way to tell Ceph which disks should turn into OSDs with which
+user an abstract way to tell Stone which disks should turn into OSDs with which
 configurations, without knowing the specifics of device names and paths.
 
 Service specifications make it possible to define a yaml or json file that can

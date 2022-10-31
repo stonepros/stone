@@ -37,10 +37,10 @@ Options
 
 Any options not recognized by rbd-fuse will be passed on to libfuse.
 
-.. option:: -c ceph.conf
+.. option:: -c stone.conf
 
-   Use *ceph.conf* configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` to determine monitor addresses during startup.
+   Use *stone.conf* configuration file instead of the default
+   ``/etc/stone/stone.conf`` to determine monitor addresses during startup.
 
 .. option:: -p pool
 
@@ -50,8 +50,8 @@ Any options not recognized by rbd-fuse will be passed on to libfuse.
 Availability
 ============
 
-**rbd-fuse** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**rbd-fuse** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 
 See also

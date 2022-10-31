@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 
 import { Observable, throwError } from 'rxjs';
 
-import { NfsFSAbstractionLayer } from '~/app/ceph/nfs/models/nfs.fsal';
+import { NfsFSAbstractionLayer } from '~/app/stone/nfs/models/nfs.fsal';
 import { ApiClient } from '~/app/shared/api/api-client';
 
 export interface Directory {
@@ -34,8 +34,8 @@ export class NfsService extends ApiClient {
 
   nfsFsal: NfsFSAbstractionLayer[] = [
     {
-      value: 'CEPH',
-      descr: $localize`CephFS`,
+      value: 'STONE',
+      descr: $localize`StoneFS`,
       disabled: false
     },
     {
@@ -98,6 +98,6 @@ export class NfsService extends ApiClient {
   }
 
   filesystems() {
-    return this.http.get(`${this.uiApiPath}/cephfs/filesystems`);
+    return this.http.get(`${this.uiApiPath}/stonefs/filesystems`);
   }
 }

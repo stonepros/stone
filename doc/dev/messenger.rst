@@ -2,7 +2,7 @@
  Messenger notes
 ============================
 
-Messenger is the Ceph network layer implementation. Currently Ceph supports
+Messenger is the Stone network layer implementation. Currently Stone supports
 one messenger type: "async".
 
 ceph_perf_msgr

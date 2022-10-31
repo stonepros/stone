@@ -5,42 +5,42 @@ import uuid
 from typing import TYPE_CHECKING, Optional, Dict, List, Tuple, Any
 
 import orchestrator
-from cephadm.registry import Registry
-from cephadm.serve import CephadmServe
-from cephadm.services.cephadmservice import CephadmDaemonDeploySpec
-from cephadm.utils import ceph_release_to_major, name_to_config_section, CEPH_UPGRADE_ORDER, MONITORING_STACK_TYPES
+from stoneadm.registry import Registry
+from stoneadm.serve import StoneadmServe
+from stoneadm.services.stoneadmservice import StoneadmDaemonDeploySpec
+from stoneadm.utils import stone_release_to_major, name_to_config_section, STONE_UPGRADE_ORDER, MONITORING_STACK_TYPES
 from orchestrator import OrchestratorError, DaemonDescription, DaemonDescriptionStatus, daemon_type_to_service
 
 if TYPE_CHECKING:
-    from .module import CephadmOrchestrator
+    from .module import StoneadmOrchestrator
 
 
 logger = logging.getLogger(__name__)
 
-# from ceph_fs.h
-CEPH_MDSMAP_ALLOW_STANDBY_REPLAY = (1 << 5)
+# from stone_fs.h
+STONE_MDSMAP_ALLOW_STANDBY_REPLAY = (1 << 5)
 
 
 def normalize_image_digest(digest: str, default_registry: str) -> str:
     """
     Normal case:
-    >>> normalize_image_digest('ceph/ceph', 'docker.io')
-    'docker.io/ceph/ceph'
+    >>> normalize_image_digest('stone/stone', 'docker.io')
+    'docker.io/stone/stone'
 
     No change:
-    >>> normalize_image_digest('quay.ceph.io/ceph/ceph', 'docker.io')
-    'quay.ceph.io/ceph/ceph'
+    >>> normalize_image_digest('quay.stone.io/stone/stone', 'docker.io')
+    'quay.stone.io/stone/stone'
 
     >>> normalize_image_digest('docker.io/ubuntu', 'docker.io')
     'docker.io/ubuntu'
 
-    >>> normalize_image_digest('localhost/ceph', 'docker.io')
-    'localhost/ceph'
+    >>> normalize_image_digest('localhost/stone', 'docker.io')
+    'localhost/stone'
     """
     known_shortnames = [
-        'ceph/ceph',
-        'ceph/daemon',
-        'ceph/daemon-base',
+        'stone/stone',
+        'stone/daemon',
+        'stone/daemon-base',
     ]
     for image in known_shortnames:
         if digest.startswith(image):
@@ -60,7 +60,7 @@ class UpgradeState:
                  fs_original_max_mds: Optional[Dict[str, int]] = None,
                  fs_original_allow_standby_replay: Optional[Dict[str, bool]] = None
                  ):
-        self._target_name: str = target_name  # Use CephadmUpgrade.target_image instead.
+        self._target_name: str = target_name  # Use StoneadmUpgrade.target_image instead.
         self.progress_id: str = progress_id
         self.target_id: Optional[str] = target_id
         self.target_digests: Optional[List[str]] = target_digests
@@ -94,7 +94,7 @@ class UpgradeState:
             return None
 
 
-class CephadmUpgrade:
+class StoneadmUpgrade:
     UPGRADE_ERRORS = [
         'UPGRADE_NO_STANDBY_MGR',
         'UPGRADE_FAILED_PULL',
@@ -103,7 +103,7 @@ class CephadmUpgrade:
         'UPGRADE_EXCEPTION'
     ]
 
-    def __init__(self, mgr: "CephadmOrchestrator"):
+    def __init__(self, mgr: "StoneadmOrchestrator"):
         self.mgr = mgr
 
         t = self.mgr.get_store('upgrade_state')
@@ -145,7 +145,7 @@ class CephadmUpgrade:
         if not self.upgrade_state or not self.upgrade_state.target_digests:
             return '', []
 
-        daemons = [d for d in self.mgr.cache.get_daemons() if d.daemon_type in CEPH_UPGRADE_ORDER]
+        daemons = [d for d in self.mgr.cache.get_daemons() if d.daemon_type in STONE_UPGRADE_ORDER]
 
         if any(not d.container_image_digests for d in daemons if d.daemon_type == 'mgr'):
             return '', []
@@ -168,18 +168,18 @@ class CephadmUpgrade:
         except ValueError:
             return 'version must be in the form X.Y.Z (e.g., 15.2.3)'
         if int(major) < 15 or (int(major) == 15 and int(minor) < 2):
-            return 'cephadm only supports octopus (15.2.0) or later'
+            return 'stoneadm only supports octopus (15.2.0) or later'
 
         # to far a jump?
-        current_version = self.mgr.version.split('ceph version ')[1]
+        current_version = self.mgr.version.split('stone version ')[1]
         (current_major, current_minor, _) = current_version.split('-')[0].split('.', 2)
         if int(current_major) < int(major) - 2:
-            return f'ceph can only upgrade 1 or 2 major versions at a time; {current_version} -> {version} is too big a jump'
+            return f'stone can only upgrade 1 or 2 major versions at a time; {current_version} -> {version} is too big a jump'
         if int(current_major) > int(major):
-            return f'ceph cannot downgrade major versions (from {current_version} to {version})'
+            return f'stone cannot downgrade major versions (from {current_version} to {version})'
         if int(current_major) == int(major):
             if int(current_minor) > int(minor):
-                return f'ceph cannot downgrade to a {"rc" if minor == "1" else "dev"} release'
+                return f'stone cannot downgrade to a {"rc" if minor == "1" else "dev"} release'
 
         # check mon min
         monmap = self.mgr.get("mon_map")
@@ -190,7 +190,7 @@ class CephadmUpgrade:
         # check osd min
         osdmap = self.mgr.get("osd_map")
         osd_min_name = osdmap.get("require_osd_release", "argonaut")
-        osd_min = ceph_release_to_major(osd_min_name)
+        osd_min = stone_release_to_major(osd_min_name)
         if osd_min < int(major) - 2:
             return f'require_osd_release ({osd_min_name} or {osd_min}) < target {major} - 2; first complete an upgrade to an earlier release'
 
@@ -336,7 +336,7 @@ class CephadmUpgrade:
 
             # setting force flag to retain old functionality.
             # note that known is an output argument for ok_to_stop()
-            r = self.mgr.cephadm_services[daemon_type_to_service(s.daemon_type)].ok_to_stop([
+            r = self.mgr.stoneadm_services[daemon_type_to_service(s.daemon_type)].ok_to_stop([
                 s.daemon_id], known=known, force=True)
 
             if not r.retval:
@@ -381,7 +381,7 @@ class CephadmUpgrade:
                             self.upgrade_state.target_version or self.target_image
                         ),
                         ev_progress=progress,
-                        add_to_ceph_s=True)
+                        add_to_stone_s=True)
 
     def _save_upgrade_state(self) -> None:
         if not self.upgrade_state:
@@ -421,7 +421,7 @@ class CephadmUpgrade:
             fs_name = mdsmap["fs_name"]
 
             # disable allow_standby_replay?
-            if mdsmap['flags'] & CEPH_MDSMAP_ALLOW_STANDBY_REPLAY:
+            if mdsmap['flags'] & STONE_MDSMAP_ALLOW_STANDBY_REPLAY:
                 self.mgr.log.info('Upgrade: Disabling standby-replay for filesystem %s' % (
                     fs_name
                 ))
@@ -537,7 +537,7 @@ class CephadmUpgrade:
             logger.info('Upgrade: First pull of %s' % target_image)
             self.upgrade_info_str = 'Doing first pull of %s image' % (target_image)
             try:
-                target_id, target_version, target_digests = CephadmServe(self.mgr)._get_container_image_info(
+                target_id, target_version, target_digests = StoneadmServe(self.mgr)._get_container_image_info(
                     target_image)
             except OrchestratorError as e:
                 self._fail_upgrade('UPGRADE_FAILED_PULL', {
@@ -552,11 +552,11 @@ class CephadmUpgrade:
                     'severity': 'warning',
                     'summary': 'Upgrade: failed to pull target image',
                     'count': 1,
-                    'detail': ['unable to extract ceph version from container'],
+                    'detail': ['unable to extract stone version from container'],
                 })
                 return
             self.upgrade_state.target_id = target_id
-            # extract the version portion of 'ceph version {version} ({sha1})'
+            # extract the version portion of 'stone version {version} ({sha1})'
             self.upgrade_state.target_version = target_version.split(' ')[2]
             self.upgrade_state.target_digests = target_digests
             self._save_upgrade_state()
@@ -565,7 +565,7 @@ class CephadmUpgrade:
 
         if target_digests is None:
             target_digests = []
-        if target_version.startswith('ceph version '):
+        if target_version.startswith('stone version '):
             # tolerate/fix upgrade state from older version
             self.upgrade_state.target_version = target_version.split(' ')[2]
             target_version = self.upgrade_state.target_version
@@ -602,9 +602,9 @@ class CephadmUpgrade:
             'who': 'mon',
         })
 
-        daemons = [d for d in self.mgr.cache.get_daemons() if d.daemon_type in CEPH_UPGRADE_ORDER]
+        daemons = [d for d in self.mgr.cache.get_daemons() if d.daemon_type in STONE_UPGRADE_ORDER]
         done = 0
-        for daemon_type in CEPH_UPGRADE_ORDER:
+        for daemon_type in STONE_UPGRADE_ORDER:
             logger.debug('Upgrade: Checking %s daemons' % daemon_type)
 
             need_upgrade_self = False
@@ -709,7 +709,7 @@ class CephadmUpgrade:
                 self._update_upgrade_progress(done / len(daemons))
 
                 # make sure host has latest container image
-                out, errs, code = CephadmServe(self.mgr)._run_cephadm(
+                out, errs, code = StoneadmServe(self.mgr)._run_stoneadm(
                     d.hostname, '', 'inspect-image', [],
                     image=target_image, no_fsid=True, error_ok=True)
                 if code or not any(d in target_digests for d in json.loads(''.join(out)).get('repo_digests', [])):
@@ -717,7 +717,7 @@ class CephadmUpgrade:
                                                                d.hostname))
                     self.upgrade_info_str = 'Pulling %s image on host %s' % (
                         target_image, d.hostname)
-                    out, errs, code = CephadmServe(self.mgr)._run_cephadm(
+                    out, errs, code = StoneadmServe(self.mgr)._run_stoneadm(
                         d.hostname, '', 'pull', [],
                         image=target_image, no_fsid=True, error_ok=True)
                     if code:
@@ -750,7 +750,7 @@ class CephadmUpgrade:
                                 (d.daemon_type, d.daemon_id))
                 action = 'Upgrading' if not d_entry[1] else 'Redeploying'
                 try:
-                    daemon_spec = CephadmDaemonDeploySpec.from_daemon_description(d)
+                    daemon_spec = StoneadmDaemonDeploySpec.from_daemon_description(d)
                     self.mgr._daemon_action(
                         daemon_spec,
                         'redeploy',
@@ -797,7 +797,7 @@ class CephadmUpgrade:
                     del self.mgr.health_checks['UPGRADE_NO_STANDBY_MGR']
                     self.mgr.set_health_checks(self.mgr.health_checks)
 
-            # make sure 'ceph versions' agrees
+            # make sure 'stone versions' agrees
             ret, out_ver, err = self.mgr.check_mon_command({
                 'prefix': 'versions',
             })
@@ -835,7 +835,7 @@ class CephadmUpgrade:
             if daemon_type == 'osd':
                 osdmap = self.mgr.get("osd_map")
                 osd_min_name = osdmap.get("require_osd_release", "argonaut")
-                osd_min = ceph_release_to_major(osd_min_name)
+                osd_min = stone_release_to_major(osd_min_name)
                 if osd_min < int(target_major):
                     logger.info(
                         f'Upgrade: Setting require_osd_release to {target_major} {target_major_name}')
@@ -887,7 +887,7 @@ class CephadmUpgrade:
         logger.info('Upgrade: Finalizing container_image settings')
         self.mgr.set_container_image('global', target_image)
 
-        for daemon_type in CEPH_UPGRADE_ORDER:
+        for daemon_type in STONE_UPGRADE_ORDER:
             ret, image, err = self.mgr.check_mon_command({
                 'prefix': 'config rm',
                 'name': 'container_image',

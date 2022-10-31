@@ -38,7 +38,7 @@ single_node=/var/rbd_tool/single_node
 
 # osd node vars
 osd_env= #single_node/$cluster$id/osd_env
-osd_data= #/var/lib/ceph/osd/$cluster-$id
+osd_data= #/var/lib/stone/osd/$cluster-$id
 omap_path= #$osd_data/current/omap
 image_list_v1= #single_node/$cluster-$id/image_list_v1
 image_list_v2= #single_node/$cluster-$id/image_list_v2
@@ -65,10 +65,10 @@ function gen_md5()
 }
 
 # on each osd node
-# check ceph environment: ssh, ceph-kvstore-tool, osd_data_path 
-function check_ceph_env()
+# check stone environment: ssh, stone-kvstore-tool, osd_data_path 
+function check_stone_env()
 {
-  local func="check_ceph_env"
+  local func="check_stone_env"
   if [ $# -lt 2 ];then
     echo "$func: parameters: <node> <data_path>" 
     exit
@@ -86,11 +86,11 @@ function check_ceph_env()
     exit
   fi
 
-  cmd=ceph-kvstore-tool
+  cmd=stone-kvstore-tool
   trap 'echo [$node]: $cmd failed; exit' INT HUP
   ssh -o ConnectTimeout=1 $node "$cmd &>/dev/null;" </dev/null 
   res=$?
-  # ceph-kvstore-tool will return 1 with no parameters input
+  # stone-kvstore-tool will return 1 with no parameters input
   if [ $res -ne 1 ];then
     echo "[$node]: $cmd not installed"
     exit
@@ -202,8 +202,8 @@ function init_env_admin()
     fi
     echo "$node $hostname_alias" >>$osd_host_mapping
     echo $node >> $osd_host
-    # check ceph env on remote osd
-    check_ceph_env $node $data_path
+    # check stone env on remote osd
+    check_stone_env $node $data_path
   done < $osd_host_path
 
   if [ $lines = 0 ];then
@@ -246,7 +246,7 @@ function admin_parse_osd()
 # for osd node
 function get_omap_list()
 {
-  ceph-kvstore-tool $omap_path list > $omap_list
+  stone-kvstore-tool $omap_path list > $omap_list
 }
 
 function convert_underline()
@@ -284,11 +284,11 @@ function check_osd_process()
   if [ "$1"x = ""x ];then
     exit
   fi
-  local cmds="ps aux|grep ceph-osd|grep -v grep"
+  local cmds="ps aux|grep stone-osd|grep -v grep"
   local ret=/tmp/ret.$$$$
   ssh $ssh_option $host $cmds |tee $ret
   if [ -s $ret ];then
-    echo "$func: [$host] ceph-osd process is not killed"
+    echo "$func: [$host] stone-osd process is not killed"
     exit
   fi
   rm -f $ret 
@@ -329,13 +329,13 @@ function get_header_seq()
   local key=$2;
   local res=/tmp/header_seq.$$$$
 
-  ceph-kvstore-tool $omap_path get $prefix $key 2>/dev/null 1>$res
+  stone-kvstore-tool $omap_path get $prefix $key 2>/dev/null 1>$res
   if [ $? != 0 ]; then
     #echo "$func: <$prefix , $key> not exists" ;
     exit;
   fi
 
-  # ceph-kvstore-tool get result like this:
+  # stone-kvstore-tool get result like this:
   # 02 01 7e 00 00 00 12 44 00 00 00 00 00 00 00 00
   # get header seq bytes: 
   # 12 44 00 00 00 00 00 00 
@@ -385,7 +385,7 @@ function get_header_kv()
   local types=$3
   local res=/tmp/kv.$$$$
 
-  ceph-kvstore-tool $omap_path get $prefix $key 2>/dev/null 1>$res
+  stone-kvstore-tool $omap_path get $prefix $key 2>/dev/null 1>$res
   if [ $? != 0 ];then
     #echo "$func: <$prefix , $key> not exists" 
     exit

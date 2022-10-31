@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -15,7 +15,7 @@
 #ifndef PRIORITY_QUEUE_H
 #define PRIORITY_QUEUE_H
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "common/Formatter.h"
 #include "common/OpQueue.h"
@@ -101,13 +101,13 @@ class PrioritizedQueue : public OpQueue <T, K> {
       size++;
     }
     std::pair<unsigned, T> &front() const {
-      ceph_assert(!(q.empty()));
-      ceph_assert(cur != q.end());
+      stone_assert(!(q.empty()));
+      stone_assert(cur != q.end());
       return cur->second.front();
     }
     T pop_front() {
-      ceph_assert(!(q.empty()));
-      ceph_assert(cur != q.end());
+      stone_assert(!(q.empty()));
+      stone_assert(cur != q.end());
       T ret = std::move(cur->second.front().second);
       cur->second.pop_front();
       if (cur->second.empty()) {
@@ -122,7 +122,7 @@ class PrioritizedQueue : public OpQueue <T, K> {
       return ret;
     }
     unsigned length() const {
-      ceph_assert(size >= 0);
+      stone_assert(size >= 0);
       return (unsigned)size;
     }
     bool empty() const {
@@ -151,7 +151,7 @@ class PrioritizedQueue : public OpQueue <T, K> {
       }
     }
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_int("tokens", tokens);
       f->dump_int("max_tokens", max_tokens);
       f->dump_int("size", size);
@@ -178,10 +178,10 @@ class PrioritizedQueue : public OpQueue <T, K> {
   }
 
   void remove_queue(unsigned priority) {
-    ceph_assert(queue.count(priority));
+    stone_assert(queue.count(priority));
     queue.erase(priority);
     total_priority -= priority;
-    ceph_assert(total_priority >= 0);
+    stone_assert(total_priority >= 0);
   }
 
   void distribute_tokens(unsigned cost) {
@@ -207,13 +207,13 @@ public:
     for (typename SubQueues::const_iterator i = queue.begin();
 	 i != queue.end();
 	 ++i) {
-      ceph_assert(i->second.length());
+      stone_assert(i->second.length());
       total += i->second.length();
     }
     for (typename SubQueues::const_iterator i = high_queue.begin();
 	 i != high_queue.end();
 	 ++i) {
-      ceph_assert(i->second.length());
+      stone_assert(i->second.length());
       total += i->second.length();
     }
     return total;
@@ -269,13 +269,13 @@ public:
   }
 
   bool empty() const final {
-    ceph_assert(total_priority >= 0);
-    ceph_assert((total_priority == 0) || !(queue.empty()));
+    stone_assert(total_priority >= 0);
+    stone_assert((total_priority == 0) || !(queue.empty()));
     return queue.empty() && high_queue.empty();
   }
 
   T dequeue() final {
-    ceph_assert(!empty());
+    stone_assert(!empty());
 
     if (!(high_queue.empty())) {
       T ret = std::move(high_queue.rbegin()->second.front().second);
@@ -292,7 +292,7 @@ public:
     for (typename SubQueues::iterator i = queue.begin();
 	 i != queue.end();
 	 ++i) {
-      ceph_assert(!(i->second.empty()));
+      stone_assert(!(i->second.empty()));
       if (i->second.front().first < i->second.num_tokens()) {
 	unsigned cost = i->second.front().first;
 	i->second.take_tokens(cost);
@@ -318,7 +318,7 @@ public:
     return ret;
   }
 
-  void dump(ceph::Formatter *f) const final {
+  void dump(stone::Formatter *f) const final {
     f->dump_int("total_priority", total_priority);
     f->dump_int("max_tokens_per_subqueue", max_tokens_per_subqueue);
     f->dump_int("min_cost", min_cost);

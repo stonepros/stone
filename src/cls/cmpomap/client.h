@@ -30,7 +30,7 @@ static constexpr uint32_t max_keys = 1000;
 /// a stored value is reported as -EIO
 [[nodiscard]] int cmp_vals(librados::ObjectReadOperation& op,
                            Mode mode, Op comparison, ComparisonMap values,
-                           std::optional<ceph::bufferlist> default_value);
+                           std::optional<stone::bufferlist> default_value);
 
 /// process each of the omap value comparisons according to the same rules as
 /// cmpxattr(). any key/value pairs that compare successfully are overwritten
@@ -40,7 +40,7 @@ static constexpr uint32_t max_keys = 1000;
 /// unsuccessful comparison and is not reported as an error
 [[nodiscard]] int cmp_set_vals(librados::ObjectWriteOperation& writeop,
                                Mode mode, Op comparison, ComparisonMap values,
-                               std::optional<ceph::bufferlist> default_value);
+                               std::optional<stone::bufferlist> default_value);
 
 /// process each of the omap value comparisons according to the same rules as
 /// cmpxattr(). any key/value pairs that compare successfully are removed. for
@@ -53,14 +53,14 @@ static constexpr uint32_t max_keys = 1000;
 
 
 // bufferlist factories for comparison values
-inline ceph::bufferlist string_buffer(std::string_view value) {
-  ceph::bufferlist bl;
+inline stone::bufferlist string_buffer(std::string_view value) {
+  stone::bufferlist bl;
   bl.append(value);
   return bl;
 }
-inline ceph::bufferlist u64_buffer(uint64_t value) {
-  ceph::bufferlist bl;
-  using ceph::encode;
+inline stone::bufferlist u64_buffer(uint64_t value) {
+  stone::bufferlist bl;
+  using stone::encode;
   encode(value, bl);
   return bl;
 }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,7 +18,7 @@
 
 #include <memory>
 #include "include/buffer_fwd.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/common_fwd.h"
 #include "msg/MessageRef.h"
 
@@ -29,7 +29,7 @@ class KeyStore;
 
 class Dispatcher {
 public:
-  explicit Dispatcher(StoneeContext *cct_)
+  explicit Dispatcher(StoneContext *cct_)
     : cct(cct_)
   {
   }
@@ -76,7 +76,7 @@ public:
    *
    * @param m The Message to fast dispatch.
    */
-  virtual void ms_fast_dispatch(Message *m) { ceph_abort(); }
+  virtual void ms_fast_dispatch(Message *m) { stone_abort(); }
 
   /* ms_fast_dispatch2 because otherwise the child must define both */
   virtual void ms_fast_dispatch2(const MessageRef &m) {
@@ -114,7 +114,7 @@ public:
    * are given a single reference count on it.
    */
   virtual bool ms_dispatch(Message *m) {
-    ceph_abort();
+    stone_abort();
   }
 
   /* ms_dispatch2 because otherwise the child must define both */
@@ -219,7 +219,7 @@ public:
    */
 
 protected:
-  StoneeContext *cct;
+  StoneContext *cct;
 private:
   explicit Dispatcher(const Dispatcher &rhs);
   Dispatcher& operator=(const Dispatcher &rhs);

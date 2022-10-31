@@ -1,8 +1,8 @@
 #!/bin/sh
 
-CCONF="$BINDIR/ceph-conf"
+CCONF="$BINDIR/stone-conf"
 
-default_conf=$ETCDIR"/ceph.conf"
+default_conf=$ETCDIR"/stone.conf"
 conf=$default_conf
 
 hostname=`hostname -s`
@@ -10,7 +10,7 @@ hostname=`hostname -s`
 verify_conf() {
     # fetch conf?
     if [ -x "$ETCDIR/fetch_config" ] && [ "$conf" = "$default_conf" ]; then
-	conf="/tmp/fetched.ceph.conf.$$"
+	conf="/tmp/fetched.stone.conf.$$"
 	echo "[$ETCDIR/fetch_config $conf]"
 	if $ETCDIR/fetch_config $conf && [ -e $conf ]; then true ; else
 	    echo "$0: failed to fetch config with '$ETCDIR/fetch_config $conf'"
@@ -18,13 +18,13 @@ verify_conf() {
 	fi
 	# yay!
     else
-        # make sure ceph.conf exists
+        # make sure stone.conf exists
 	if [ ! -e $conf ]; then
 	    if [ "$conf" = "$default_conf" ]; then
-		echo "$0: ceph conf $conf not found; system is not configured."
+		echo "$0: stone conf $conf not found; system is not configured."
 		exit 0
 	    fi
-	    echo "$0: ceph conf $conf not found!"
+	    echo "$0: stone conf $conf not found!"
 	    usage_exit
 	fi
     fi
@@ -51,12 +51,12 @@ check_host() {
     #echo host for $name is $host, i am $hostname
 
     cluster=$1
-    if [ -e "/var/lib/ceph/$type/$cluster-$id/upstart" ]; then
+    if [ -e "/var/lib/stone/$type/$cluster-$id/upstart" ]; then
 	return 1
     fi
 
     # sysvinit managed instance in standard location?
-    if [ -e "/var/lib/ceph/$type/$cluster-$id/sysvinit" ]; then
+    if [ -e "/var/lib/stone/$type/$cluster-$id/sysvinit" ]; then
 	host="$hostname"
 	echo "=== $type.$id === "
 	return 0
@@ -158,10 +158,10 @@ do_root_cmd_okfail() {
 
 get_local_daemon_list() {
     type=$1
-    if [ -d "/var/lib/ceph/$type" ]; then
-	for p in `find -L /var/lib/ceph/$type -mindepth 1 -maxdepth 1 -type d`; do
+    if [ -d "/var/lib/stone/$type" ]; then
+	for p in `find -L /var/lib/stone/$type -mindepth 1 -maxdepth 1 -type d`; do
 	    i=`basename $p` 
-	    if [ -e "/var/lib/ceph/$type/$i/sysvinit" ]; then
+	    if [ -e "/var/lib/stone/$type/$i/sysvinit" ]; then
 		id=`echo $i | sed 's/[^-]*-//'`
 		local="$local $type.$id"
 	    fi
@@ -210,7 +210,7 @@ get_name_list() {
 		;;
 	    *)
 		if ! echo " " $allconf $local " " | egrep -q "( $type$id | $type.$id )"; then
-		    echo "$0: $type.$id not found ($conf defines" $allconf", /var/lib/ceph defines" $local")"
+		    echo "$0: $type.$id not found ($conf defines" $allconf", /var/lib/stone defines" $local")"
 		    exit 1
 		fi
 		what="$what $f"

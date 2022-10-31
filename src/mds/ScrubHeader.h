@@ -20,9 +20,9 @@
 #include <string>
 #include <string_view>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-namespace ceph {
+namespace stone {
 class Formatter;
 };
 
@@ -58,7 +58,7 @@ public:
 
   void inc_num_pending() { ++num_pending; }
   void dec_num_pending() {
-    ceph_assert(num_pending > 0);
+    stone_assert(num_pending > 0);
     --num_pending;
   }
   unsigned get_num_pending() const { return num_pending; }

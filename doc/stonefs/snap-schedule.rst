@@ -1,7 +1,7 @@
 ==========================
 Snapshot Scheduling Module
 ==========================
-This module implements scheduled snapshots for CephFS.
+This module implements scheduled snapshots for StoneFS.
 It provides a user interface to add, query and remove snapshots schedules and
 retention policies, as well as a scheduler that takes the snapshots and prunes
 existing snapshots accordingly.

@@ -5,12 +5,12 @@
 from typing import NamedTuple, List, Dict, Optional
 import pytest
 
-from ceph.deployment.hostspec import HostSpec
-from ceph.deployment.service_spec import ServiceSpec, PlacementSpec, IngressSpec
-from ceph.deployment.hostspec import SpecValidationError
+from stone.deployment.hostspec import HostSpec
+from stone.deployment.service_spec import ServiceSpec, PlacementSpec, IngressSpec
+from stone.deployment.hostspec import SpecValidationError
 
-from cephadm.module import HostAssignment
-from cephadm.schedule import DaemonPlacement
+from stoneadm.module import HostAssignment
+from stoneadm.schedule import DaemonPlacement
 from orchestrator import DaemonDescription, OrchestratorValidationError, OrchestratorError
 
 
@@ -629,7 +629,7 @@ class NodeAssignmentTest(NamedTuple):
              'rgw:host2(*:81)', 'rgw:host3(*:81)'],
             ['rgw.c']
         ),
-        # cephadm.py teuth case
+        # stoneadm.py teuth case
         NodeAssignmentTest(
             'mgr',
             PlacementSpec(count=3, hosts=['host1=y', 'host2=x']),

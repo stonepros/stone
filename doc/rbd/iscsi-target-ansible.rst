@@ -2,14 +2,14 @@
 Configuring the iSCSI Target using Ansible
 ==========================================
 
-The Ceph iSCSI gateway is the iSCSI target node and also a Ceph client
-node. The Ceph iSCSI gateway can be provisioned on dedicated node
-or be colocated on a Ceph Object Store Disk (OSD) node. The following steps will
-install and configure the Ceph iSCSI gateway for basic operation.
+The Stone iSCSI gateway is the iSCSI target node and also a Stone client
+node. The Stone iSCSI gateway can be provisioned on dedicated node
+or be colocated on a Stone Object Store Disk (OSD) node. The following steps will
+install and configure the Stone iSCSI gateway for basic operation.
 
 **Requirements:**
 
--  A running Ceph Luminous (12.2.x) cluster or newer
+-  A running Stone Luminous (12.2.x) cluster or newer
 
 -  Red Hat Enterprise Linux/CentOS 7.5 (or newer); Linux kernel v4.16 (or newer)
 
@@ -168,7 +168,7 @@ perform:
 *lio* :
 
 In this mode the LIO configuration is purged on all iSCSI gateways that
-are defined. Disks that were created are left untouched within the Ceph
+are defined. Disks that were created are left untouched within the Stone
 storage cluster.
 
 *all* :
@@ -184,7 +184,7 @@ correct mode is chosen, this operation will delete data.
 
 .. warning::
   A purge operation will fail, if RBD images have snapshots or clones
-  and are exported through the Ceph iSCSI gateway.
+  and are exported through the Stone iSCSI gateway.
 
 ::
 

@@ -6,9 +6,9 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ToastrModule } from 'ngx-toastr';
 import { of } from 'rxjs';
 
-import { CephModule } from '~/app/ceph/ceph.module';
+import { StoneModule } from '~/app/stone/stone.module';
 import { CoreModule } from '~/app/core/core.module';
-import { CephServiceService } from '~/app/shared/api/ceph-service.service';
+import { StoneServiceService } from '~/app/shared/api/stone-service.service';
 import { OrchestratorService } from '~/app/shared/api/orchestrator.service';
 import { CdTableFetchDataContext } from '~/app/shared/models/cd-table-fetch-data-context';
 import { Permissions } from '~/app/shared/models/permissions';
@@ -51,7 +51,7 @@ describe('ServicesComponent', () => {
   configureTestBed({
     imports: [
       BrowserAnimationsModule,
-      CephModule,
+      StoneModule,
       CoreModule,
       SharedModule,
       HttpClientTestingModule,
@@ -65,9 +65,9 @@ describe('ServicesComponent', () => {
     fixture = TestBed.createComponent(ServicesComponent);
     component = fixture.componentInstance;
     const orchService = TestBed.inject(OrchestratorService);
-    const cephServiceService = TestBed.inject(CephServiceService);
+    const stoneServiceService = TestBed.inject(StoneServiceService);
     spyOn(orchService, 'status').and.returnValue(of({ available: true }));
-    spyOn(cephServiceService, 'list').and.returnValue(of(services));
+    spyOn(stoneServiceService, 'list').and.returnValue(of(services));
     fixture.detectChanges();
   });
 

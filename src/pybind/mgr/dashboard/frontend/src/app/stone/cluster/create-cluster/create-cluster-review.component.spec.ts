@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import _ from 'lodash';
 import { ToastrModule } from 'ngx-toastr';
 
-import { CephModule } from '~/app/ceph/ceph.module';
+import { StoneModule } from '~/app/stone/stone.module';
 import { CoreModule } from '~/app/core/core.module';
 import { SharedModule } from '~/app/shared/shared.module';
 import { configureTestBed } from '~/testing/unit-test-helper';
@@ -15,7 +15,7 @@ describe('CreateClusterReviewComponent', () => {
   let fixture: ComponentFixture<CreateClusterReviewComponent>;
 
   configureTestBed({
-    imports: [HttpClientTestingModule, SharedModule, ToastrModule.forRoot(), CephModule, CoreModule]
+    imports: [HttpClientTestingModule, SharedModule, ToastrModule.forRoot(), StoneModule, CoreModule]
   });
 
   beforeEach(() => {

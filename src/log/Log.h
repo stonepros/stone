@@ -18,7 +18,7 @@
 
 #include "log/Entry.h"
 
-namespace ceph {
+namespace stone {
 namespace logging {
 
 class Graylog;

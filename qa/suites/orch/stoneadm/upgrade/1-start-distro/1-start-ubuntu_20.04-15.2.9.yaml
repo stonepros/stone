@@ -3,9 +3,9 @@ os_version: "20.04"
 
 tasks:
 - stoneadm:
-    image: docker.io/stone/stone:v15.2.9
+    image: docker.io/stonepros/stone:v15.2.9
     stoneadm_branch: v15.2.9
-    stoneadm_git_url: https://github.com/stone/stone
+    stoneadm_git_url: https://github.com/stonepros/stone
     # avoid --cap-add=PTRACE + --privileged for older stoneadm versions
     allow_ptrace: false
     # deploy additional mons the "old" (octopus) way

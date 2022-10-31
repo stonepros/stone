@@ -3,13 +3,13 @@
 #
 # multi-dump.sh
 #
-# Dumps interesting information about the Ceph cluster at a series of epochs.
+# Dumps interesting information about the Stone cluster at a series of epochs.
 #
 
 ### Functions
 usage() {
         cat <<EOF
-multi-dump.sh: dumps out ceph maps
+multi-dump.sh: dumps out stone maps
 
 -D                         Enable diff-mode
 -e <start-epoch>           What epoch to end with.
@@ -31,8 +31,8 @@ die() {
 
 dump_osdmap() {
         for v in `seq $START_EPOCH $END_EPOCH`; do
-                ./ceph osd getmap $v -o $TEMPDIR/$v >> $TEMPDIR/cephtool-out \
-                        || die "cephtool failed to dump epoch $v"
+                ./stone osd getmap $v -o $TEMPDIR/$v >> $TEMPDIR/stonetool-out \
+                        || die "stonetool failed to dump epoch $v"
         done
         if [ $DIFFMODE -eq 1 ]; then
                 for v in `seq $START_EPOCH $END_EPOCH`; do

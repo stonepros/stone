@@ -6,7 +6,7 @@ from cherrypy import NotFound
 
 from .. import mgr
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from . import APIDoc, APIRouter, Endpoint, EndpointDoc, ReadPermission, RESTController, UIRouter
 
 LIST_SCHEMA = {
@@ -42,10 +42,10 @@ class CrushRule(RESTController):
             'type': failure_domain,
             'class': device_class
         }
-        CephService.send_command('mon', 'osd crush rule create-replicated', **rule)
+        StoneService.send_command('mon', 'osd crush rule create-replicated', **rule)
 
     def delete(self, name):
-        CephService.send_command('mon', 'osd crush rule rm', name=name)
+        StoneService.send_command('mon', 'osd crush rule rm', name=name)
 
 
 @UIRouter('/crush_rule', Scope.POOL)

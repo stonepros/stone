@@ -6,9 +6,9 @@ import textwrap
 import pytest
 import yaml
 
-from ceph.deployment.service_spec import ServiceSpec
-from ceph.deployment import inventory
-from ceph.utils import datetime_now
+from stone.deployment.service_spec import ServiceSpec
+from stone.deployment import inventory
+from stone.utils import datetime_now
 from mgr_module import HandleCommandResult
 
 from test_orchestrator import TestOrchestrator as _TestOrchestrator
@@ -101,7 +101,7 @@ placement:
   host_pattern: '*'
 status:
   container_image_id: 74803e884bea289d2d2d3ebdf6d37cd560499e955595695b1390a89800f4e37a
-  container_image_name: docker.io/ceph/daemon-base:latest-master-devel
+  container_image_name: docker.io/stone/daemon-base:latest-master-devel
   created: '2020-06-10T10:37:31.051288Z'
   last_refresh: '2020-06-10T10:57:40.715637Z'
   running: 1
@@ -141,7 +141,7 @@ def test_handle_command():
     m = OrchestratorCli('orchestrator', 0, 0)
     r = m._handle_command(None, cmd)
     assert r == HandleCommandResult(
-        retval=-2, stdout='', stderr='No orchestrator configured (try `ceph orch set backend`)')
+        retval=-2, stdout='', stderr='No orchestrator configured (try `stone orch set backend`)')
 
 
 r = OrchResult([ServiceDescription(spec=ServiceSpec(service_type='osd'), running=123)])

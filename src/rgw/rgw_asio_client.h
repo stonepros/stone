@@ -7,7 +7,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "rgw_client_io.h"
 
@@ -37,7 +37,7 @@ class ClientIO : public io::RestfulClient,
            const endpoint_type& remote_endpoint);
   ~ClientIO() override;
 
-  int init_env(CephContext *cct) override;
+  int init_env(StoneContext *cct) override;
   size_t complete_request() override;
   void flush() override;
   size_t send_status(int status, const char *status_name) override;

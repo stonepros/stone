@@ -3,7 +3,7 @@
 // vim: ts=8 sw=2 smarttab
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -43,7 +43,7 @@ struct rgw_sync_group_pipe_map {
                                                       used in the case of bucket sync policy, not at the
                                                       zonegroup level */
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
   template <typename CB1, typename CB2>
   void try_add_to_pipe_map(const rgw_zone_id& source_zone,
@@ -70,7 +70,7 @@ struct rgw_sync_group_pipe_map {
                                                                                 std::optional<rgw_bucket> b) const;
 
   template <typename CB>
-  void init(CephContext *cct,
+  void init(StoneContext *cct,
             const rgw_zone_id& _zone,
             std::optional<rgw_bucket> _bucket,
             const rgw_sync_policy_group& group,
@@ -230,12 +230,12 @@ public:
       return handlers.end();
     }
 
-    void dump(ceph::Formatter *f) const;
+    void dump(stone::Formatter *f) const;
   };
 
 private:
 
-  CephContext *cct;
+  StoneContext *cct;
 
   rgw_zone_id zone_id;
   std::optional<rgw_bucket> bucket;
@@ -261,7 +261,7 @@ private:
 
 public:
 
-  RGWBucketSyncFlowManager(CephContext *_cct,
+  RGWBucketSyncFlowManager(StoneContext *_cct,
                            const rgw_zone_id& _zone_id,
                            std::optional<rgw_bucket> _bucket,
                            const RGWBucketSyncFlowManager *_parent);

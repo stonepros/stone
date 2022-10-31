@@ -20,7 +20,7 @@ function restore_ccache_conf() {
 }
 
 function clean_up_after_myself() {
-    rm -fr ${CEPH_BUILD_VIRTUALENV:-/tmp}/*virtualenv*
+    rm -fr ${STONE_BUILD_VIRTUALENV:-/tmp}/*virtualenv*
     restore_ccache_conf
 }
 
@@ -37,9 +37,9 @@ function get_processors() {
     fi
 }
 
-function detect_ceph_dev_pkgs() {
+function detect_stone_dev_pkgs() {
     local cmake_opts
-    local boost_root=/opt/ceph
+    local boost_root=/opt/stone
     if test -f $boost_root/include/boost/config.hpp; then
         cmake_opts+=" -DWITH_SYSTEM_BOOST=ON -DBOOST_ROOT=$boost_root"
     else
@@ -121,7 +121,7 @@ EOM
 }
 
 function configure() {
-    local cmake_build_opts=$(detect_ceph_dev_pkgs)
+    local cmake_build_opts=$(detect_stone_dev_pkgs)
     in_jenkins && echo "CI_DEBUG: Running do_cmake.sh"
     $DRY_RUN ./do_cmake.sh $cmake_build_opts $@ || return 1
 }

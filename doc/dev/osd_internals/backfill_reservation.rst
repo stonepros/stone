@@ -11,7 +11,7 @@ The ``osd_max_backfills`` tunable limits the number of outgoing or
 incoming backfills that are active on a given OSD. Note that this limit is
 applied separately to incoming and to outgoing backfill operations.
 Thus there can be as many as ``osd_max_backfills * 2`` backfill operations
-in flight on each OSD.  This subtlety is often missed, and Ceph
+in flight on each OSD.  This subtlety is often missed, and Stone
 operators can be puzzled as to why more ops are observed than expected.
 
 Each ``OSDService`` now has two AsyncReserver instances: one for backfills going

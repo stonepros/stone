@@ -20,7 +20,7 @@
 
 #include "common/Formatter.h"
 #include "common/lru_map.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 #include "rgw_formats.h"
 
@@ -43,7 +43,7 @@ namespace rgw { namespace sal {
 } }
 
 extern int rgw_bucket_parse_bucket_instance(const string& bucket_instance, string *bucket_name, string *bucket_id, int *shard_id);
-extern int rgw_bucket_parse_bucket_key(CephContext *cct, const string& key,
+extern int rgw_bucket_parse_bucket_key(StoneContext *cct, const string& key,
                                        rgw_bucket* bucket, int *shard_id);
 
 extern std::string rgw_make_bucket_entry_name(const std::string& tenant_name,
@@ -57,7 +57,7 @@ extern void rgw_parse_url_bucket(const string& bucket,
 // conforms to the type declaration of RGWRados::check_filter_t.
 extern bool rgw_bucket_object_check_filter(const string& oid);
 
-void init_default_bucket_layout(CephContext *cct, rgw::BucketLayout& layout,
+void init_default_bucket_layout(StoneContext *cct, rgw::BucketLayout& layout,
 				const RGWZone& zone,
 				std::optional<uint32_t> shards,
 				std::optional<rgw::BucketIndexType> type);
@@ -138,11 +138,11 @@ public:
   RGWUserBuckets& operator=(const RGWUserBuckets&) = default;
 
   void encode(bufferlist& bl) const {
-    using ceph::encode;
+    using stone::encode;
     encode(buckets, bl);
   }
   void decode(bufferlist::const_iterator& bl) {
-    using ceph::decode;
+    using stone::decode;
     decode(buckets, bl);
   }
   /**
@@ -435,7 +435,7 @@ struct rgw_ep_info {
 
 class RGWBucketCtl
 {
-  CephContext *cct;
+  StoneContext *cct;
 
   struct Svc {
     RGWSI_Zone *zone{nullptr};
@@ -484,7 +484,7 @@ public:
         return *this;
       }
 
-      GetParams& set_mtime(ceph::real_time *_mtime) {
+      GetParams& set_mtime(stone::real_time *_mtime) {
         mtime = _mtime;
         return *this;
       }
@@ -512,7 +512,7 @@ public:
 
     struct PutParams {
       RGWObjVersionTracker *objv_tracker{nullptr};
-      ceph::real_time mtime;
+      stone::real_time mtime;
       bool exclusive{false};
       map<string, bufferlist> *attrs{nullptr};
 
@@ -523,7 +523,7 @@ public:
         return *this;
       }
 
-      PutParams& set_mtime(const ceph::real_time& _mtime) {
+      PutParams& set_mtime(const stone::real_time& _mtime) {
         mtime = _mtime;
         return *this;
       }
@@ -562,7 +562,7 @@ public:
 
       GetParams() {}
 
-      GetParams& set_mtime(ceph::real_time *_mtime) {
+      GetParams& set_mtime(stone::real_time *_mtime) {
         mtime = _mtime;
         return *this;
       }
@@ -596,7 +596,7 @@ public:
     struct PutParams {
       std::optional<RGWBucketInfo *> orig_info; /* nullopt: orig_info was not fetched,
                                                    nullptr: orig_info was not found (new bucket instance */
-      ceph::real_time mtime;
+      stone::real_time mtime;
       bool exclusive{false};
       map<string, bufferlist> *attrs{nullptr};
       RGWObjVersionTracker *objv_tracker{nullptr};
@@ -608,7 +608,7 @@ public:
         return *this;
       }
 
-      PutParams& set_mtime(const ceph::real_time& _mtime) {
+      PutParams& set_mtime(const stone::real_time& _mtime) {
         mtime = _mtime;
         return *this;
       }
@@ -697,7 +697,7 @@ public:
   /* user/bucket */
   int link_bucket(const rgw_user& user_id,
                   const rgw_bucket& bucket,
-                  ceph::real_time creation_time,
+                  stone::real_time creation_time,
 		  optional_yield y,
                   const DoutPrefixProvider *dpp,
                   bool update_entrypoint = true,
@@ -771,7 +771,7 @@ private:
   int do_link_bucket(RGWSI_Bucket_EP_Ctx& ctx,
                      const rgw_user& user,
                      const rgw_bucket& bucket,
-                     ceph::real_time creation_time,
+                     stone::real_time creation_time,
                      bool update_entrypoint,
                      rgw_ep_info *pinfo,
 		     optional_yield y,
@@ -786,7 +786,7 @@ private:
 
 };
 
-bool rgw_find_bucket_by_id(const DoutPrefixProvider *dpp, CephContext *cct, RGWMetadataManager *mgr, const string& marker,
+bool rgw_find_bucket_by_id(const DoutPrefixProvider *dpp, StoneContext *cct, RGWMetadataManager *mgr, const string& marker,
                            const string& bucket_id, rgw_bucket* bucket_out);
 
 #endif

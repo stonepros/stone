@@ -1,8 +1,8 @@
 ===============================
- Ceph Object Gateway Swift API
+ Stone Object Gateway Swift API
 ===============================
 
-Ceph supports a RESTful API that is compatible with the basic data access model of the `Swift API`_.
+Stone supports a RESTful API that is compatible with the basic data access model of the `Swift API`_.
 
 API
 ---

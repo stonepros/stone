@@ -674,8 +674,8 @@ struct node_t {
   // old: |////|.....|   |.....|/|........|
   // new: |.....|        |.....||........|
   void shift_left(unsigned from, unsigned to);
-  void insert_front(const ceph::bufferptr& keys_buf, const ceph::bufferptr& cells_buf);
-  void insert_back(const ceph::bufferptr& keys_buf, const ceph::bufferptr& cells_buf);
+  void insert_front(const stone::bufferptr& keys_buf, const stone::bufferptr& cells_buf);
+  void insert_back(const stone::bufferptr& keys_buf, const stone::bufferptr& cells_buf);
   // one or more elements are inserted, so we need to shift the elements right
   // actually there are only two use cases:
   // - bytes != 0: for inserting bytes before from
@@ -732,8 +732,8 @@ public:
   {}
   void move_from(unsigned src_first, unsigned dst_first, unsigned n)
   {
-    ceph::bufferptr keys_buf{n * sizeof(to_t::key_prefix_t)};
-    ceph::bufferptr cells_buf;
+    stone::bufferptr keys_buf{n * sizeof(to_t::key_prefix_t)};
+    stone::bufferptr cells_buf;
     auto dst_keys = reinterpret_cast<typename to_t::key_prefix_t*>(keys_buf.c_str());
     if constexpr (to_t::item_in_key) {
       for (unsigned i = 0; i < n; i++) {
@@ -752,7 +752,7 @@ public:
       // copy cells in bulk, yay!
       auto src_end = src.keys[src_first + n - 1].offset;
       uint16_t total_cell_size = src_end - src_offset;
-      cells_buf = ceph::bufferptr{total_cell_size};
+      cells_buf = stone::bufferptr{total_cell_size};
       cells_buf.copy_in(0, total_cell_size, src.from_end(src_end));
     }
     if (dst_first == dst.count) {
@@ -798,8 +798,8 @@ public:
   {}
   void move_from(unsigned src_first, unsigned dst_first, unsigned n)
   {
-    ceph::bufferptr keys_buf{n * sizeof(to_t::key_prefix_t)};
-    ceph::bufferptr cells_buf;
+    stone::bufferptr keys_buf{n * sizeof(to_t::key_prefix_t)};
+    stone::bufferptr cells_buf;
     auto dst_keys = reinterpret_cast<typename to_t::key_prefix_t*>(keys_buf.c_str());
     uint16_t in_node_offset = dst_first > 0 ? dst.keys[dst_first - 1].offset : 0;
     static_assert(!std::is_same_v<typename to_t::key_suffix_t, empty_key_suffix>);
@@ -856,7 +856,7 @@ public:
     return std::move(dst_delta);
   }
 private:
-  char* from_end(ceph::bufferptr& ptr, uint16_t offset) {
+  char* from_end(stone::bufferptr& ptr, uint16_t offset) {
     return ptr.end_c_str() - static_cast<int>(offset);
   }
 private:
@@ -879,8 +879,8 @@ public:
 
   void move_from(unsigned src_first, unsigned dst_first, unsigned n)
   {
-    ceph::bufferptr keys_buf{static_cast<unsigned>(n * sizeof(typename child_t::key_prefix_t))};
-    ceph::bufferptr cells_buf;
+    stone::bufferptr keys_buf{static_cast<unsigned>(n * sizeof(typename child_t::key_prefix_t))};
+    stone::bufferptr cells_buf;
     auto dst_keys = reinterpret_cast<typename child_t::key_prefix_t*>(keys_buf.c_str());
 
     // copy keys
@@ -897,7 +897,7 @@ public:
       // copy cells in bulk, yay!
       auto src_end = src.keys[src_first + n - 1].offset;
       uint16_t total_cell_size = src_end - src_offset;
-      cells_buf = ceph::bufferptr{total_cell_size};
+      cells_buf = stone::bufferptr{total_cell_size};
       cells_buf.copy_in(0,  total_cell_size, src.from_end(src_end));
     }
     if (dst_first == dst.count) {
@@ -925,7 +925,7 @@ public:
     return std::move(dst_delta);
   }
 private:
-  char* from_end(ceph::bufferptr& ptr, uint16_t offset) {
+  char* from_end(stone::bufferptr& ptr, uint16_t offset) {
     return ptr.end_c_str() - static_cast<int>(offset);
   }
 private:

@@ -29,7 +29,7 @@ class Module(MgrModule):
             },
             {
                 'name': 'database',
-                'default': 'ceph'
+                'default': 'stone'
             },
             {
                 'name': 'username',
@@ -68,8 +68,8 @@ class Module(MgrModule):
 
     COMMANDS = [
         {
-            "cmd": "influx config-set name=key,type=CephString "
-                   "name=value,type=CephString",
+            "cmd": "influx config-set name=key,type=StoneString "
+                   "name=value,type=StoneString",
             "desc": "Set a configuration value",
             "perm": "rw"
         },
@@ -192,7 +192,7 @@ class Module(MgrModule):
         for df_type in df_types:
             for pool in df['pools']:
                 point = {
-                    "measurement": "ceph_pool_stats",
+                    "measurement": "stone_pool_stats",
                     "tags": {
                         "pool_name": pool['name'],
                         "pool_id": pool['id'],
@@ -218,9 +218,9 @@ class Module(MgrModule):
 
             for stat in stats:
                 yield {
-                    "measurement": "ceph_pg_summary_osd",
+                    "measurement": "stone_pg_summary_osd",
                     "tags": {
-                        "ceph_daemon": "osd." + str(osd_id),
+                        "stone_daemon": "osd." + str(osd_id),
                         "type_instance": stat,
                         "host": metadata['hostname']
                     },
@@ -235,7 +235,7 @@ class Module(MgrModule):
         for pool_id, stats in pool_sum.items():
             for stat in stats:
                 yield {
-                    "measurement": "ceph_pg_summary_pool",
+                    "measurement": "stone_pg_summary_pool",
                     "tags": {
                         "pool_name" : pool_info[pool_id],
                         "pool_id" : pool_id,
@@ -263,9 +263,9 @@ class Module(MgrModule):
                 value = counter_info['value']
 
                 yield {
-                    "measurement": "ceph_daemon_stats",
+                    "measurement": "stone_daemon_stats",
                     "tags": {
-                        "ceph_daemon": daemon,
+                        "stone_daemon": daemon,
                         "type_instance": path,
                         "host": hostname,
                         "fsid": self.get_fsid()
@@ -354,7 +354,7 @@ class Module(MgrModule):
     def send_to_influx(self):
         if not self.config['hostname']:
             self.log.error("No Influx server configured, please set one using: "
-                           "ceph influx config-set hostname <hostname>")
+                           "stone influx config-set hostname <hostname>")
 
             self.set_health_checks({
                 'MGR_INFLUX_NO_SERVER': {

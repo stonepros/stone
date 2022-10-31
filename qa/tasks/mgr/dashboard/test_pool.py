@@ -175,7 +175,7 @@ class PoolTest(DashboardTestCase):
         data = self._get("/api/pool")
         self.assertStatus(200)
 
-        cluster_pools = self.ceph_cluster.mon_manager.list_pools()
+        cluster_pools = self.stone_cluster.mon_manager.list_pools()
         self.assertEqual(len(cluster_pools), len(data))
         self.assertSchemaBody(JList(self.pool_schema))
         for pool in data:
@@ -187,7 +187,7 @@ class PoolTest(DashboardTestCase):
         data = self._get("/api/pool?attrs=type,flags")
         self.assertStatus(200)
 
-        cluster_pools = self.ceph_cluster.mon_manager.list_pools()
+        cluster_pools = self.stone_cluster.mon_manager.list_pools()
         self.assertEqual(len(cluster_pools), len(data))
         for pool in data:
             self.assertIn('pool_name', pool)
@@ -202,7 +202,7 @@ class PoolTest(DashboardTestCase):
         data = self._get("/api/pool?stats=true")
         self.assertStatus(200)
 
-        cluster_pools = self.ceph_cluster.mon_manager.list_pools()
+        cluster_pools = self.stone_cluster.mon_manager.list_pools()
         self.assertEqual(len(cluster_pools), len(data))
         self.assertSchemaBody(JList(self.pool_schema))
         for pool in data:
@@ -216,7 +216,7 @@ class PoolTest(DashboardTestCase):
             self.assertIn(pool['pool_name'], cluster_pools)
 
     def test_pool_get(self):
-        cluster_pools = self.ceph_cluster.mon_manager.list_pools()
+        cluster_pools = self.stone_cluster.mon_manager.list_pools()
         pool = self._get("/api/pool/{}?stats=true&attrs=type,flags,stats"
                          .format(cluster_pools[0]))
         self.assertEqual(pool['pool_name'], cluster_pools[0])
@@ -236,8 +236,8 @@ class PoolTest(DashboardTestCase):
         })
 
     def test_pool_create_with_ecp_and_rule(self):
-        self._ceph_cmd(['osd', 'crush', 'rule', 'create-erasure', 'ecrule'])
-        self._ceph_cmd(
+        self._stone_cmd(['osd', 'crush', 'rule', 'create-erasure', 'ecrule'])
+        self._stone_cmd(
             ['osd', 'erasure-code-profile', 'set', 'ecprofile', 'crush-failure-domain=osd'])
         self.__yield_pool(None, {
             'pool': 'dashboard_pool2',
@@ -247,7 +247,7 @@ class PoolTest(DashboardTestCase):
             'erasure_code_profile': 'ecprofile',
             'crush_rule': 'ecrule',
         })
-        self._ceph_cmd(['osd', 'erasure-code-profile', 'rm', 'ecprofile'])
+        self._stone_cmd(['osd', 'erasure-code-profile', 'rm', 'ecprofile'])
 
     def test_pool_create_with_compression(self):
         pool = {

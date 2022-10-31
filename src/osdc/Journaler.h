@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -211,7 +211,7 @@ public:
 
 private:
   // me
-  StoneeContext *cct;
+  StoneContext *cct;
   std::mutex lock;
   const std::string name;
   typedef std::lock_guard<std::mutex> lock_guard;
@@ -239,7 +239,7 @@ private:
    */
   void _do_delayed_flush()
   {
-    ceph_assert(delay_flush_event != NULL);
+    stone_assert(delay_flush_event != NULL);
     lock_guard l(lock);
     delay_flush_event = NULL;
     _do_flush();
@@ -262,7 +262,7 @@ private:
   void _trim();
 
   // header
-  ceph::real_time last_wrote_head;
+  stone::real_time last_wrote_head;
   void _finish_write_head(int r, Header &wrote, C_OnFinisher *oncommit);
   class C_WriteHead;
   friend class C_WriteHead;
@@ -319,7 +319,7 @@ private:
 
   void _flush(C_OnFinisher *onsafe);
   void _do_flush(unsigned amount=0);
-  void _finish_flush(int r, uint64_t start, ceph::real_time stamp);
+  void _finish_flush(int r, uint64_t start, stone::real_time stamp);
   class C_Flush;
   friend class C_Flush;
 
@@ -368,7 +368,7 @@ private:
 
   // only init_headers when following or first reading off-disk
   void init_headers(Header& h) {
-    ceph_assert(readonly ||
+    stone_assert(readonly ||
 	   state == STATE_READHEAD ||
 	   state == STATE_REREADHEAD);
     last_written = last_committed = h;
@@ -425,7 +425,7 @@ public:
    */
   void reset() {
     lock_guard l(lock);
-    ceph_assert(state == STATE_ACTIVE);
+    stone_assert(state == STATE_ACTIVE);
 
     readonly = true;
     delay_flush_event = NULL;
@@ -441,7 +441,7 @@ public:
     requested_pos = 0;
     received_pos = 0;
     fetch_len = 0;
-    ceph_assert(!on_readable);
+    stone_assert(!on_readable);
     expire_pos = 0;
     trimming_pos = 0;
     trimmed_pos = 0;
@@ -474,7 +474,7 @@ public:
   void set_read_pos(uint64_t p) {
     lock_guard l(lock);
     // we can't cope w/ in-progress read right now.
-    ceph_assert(requested_pos == received_pos);
+    stone_assert(requested_pos == received_pos);
     read_pos = requested_pos = received_pos = p;
     read_buf.clear();
   }
@@ -499,7 +499,7 @@ public:
   void trim_tail() {
     lock_guard l(lock);
 
-    ceph_assert(!readonly);
+    stone_assert(!readonly);
     _issue_prezero();
   }
 

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Haomai Wang <haomaiwang@gmail.com>
  *
@@ -26,7 +26,7 @@
 
 class LZ4Compressor : public Compressor {
  public:
-  LZ4Compressor(StoneeContext* cct) : Compressor(COMP_ALG_LZ4, "lz4") {
+  LZ4Compressor(StoneContext* cct) : Compressor(COMP_ALG_LZ4, "lz4") {
 #ifdef HAVE_QATZIP
     if (cct->_conf->qat_compressor_enabled && qat_accel.init("lz4"))
       qat_enabled = true;
@@ -35,7 +35,7 @@ class LZ4Compressor : public Compressor {
 #endif
   }
 
-  int compress(const ceph::buffer::list &src, ceph::buffer::list &dst, boost::optional<int32_t> &compressor_message) override {
+  int compress(const stone::buffer::list &src, stone::buffer::list &dst, boost::optional<int32_t> &compressor_message) override {
     // older versions of liblz4 introduce bit errors when compressing
     // fragmented buffers.  this was fixed in lz4 commit
     // af127334670a5e7b710bbd6adb71aa7c3ef0cd72, which first
@@ -43,7 +43,7 @@ class LZ4Compressor : public Compressor {
     //
     // workaround: rebuild if not contiguous.
     if (!src.is_contiguous()) {
-      ceph::buffer::list new_src = src;
+      stone::buffer::list new_src = src;
       new_src.rebuild();
       return compress(new_src, dst, compressor_message);
     }
@@ -52,12 +52,12 @@ class LZ4Compressor : public Compressor {
     if (qat_enabled)
       return qat_accel.compress(src, dst, compressor_message);
 #endif
-    ceph::buffer::ptr outptr = ceph::buffer::create_small_page_aligned(
+    stone::buffer::ptr outptr = stone::buffer::create_small_page_aligned(
       LZ4_compressBound(src.length()));
     LZ4_stream_t lz4_stream;
     LZ4_resetStream(&lz4_stream);
 
-    using ceph::encode;
+    using stone::encode;
 
     auto p = src.begin();
     size_t left = src.length();
@@ -77,13 +77,13 @@ class LZ4Compressor : public Compressor {
       encode(origin_len, dst);
       encode((uint32_t)compressed_len, dst);
     }
-    ceph_assert(p.end());
+    stone_assert(p.end());
 
     dst.append(outptr, 0, pos);
     return 0;
   }
 
-  int decompress(const ceph::buffer::list &src, ceph::buffer::list &dst, boost::optional<int32_t> compressor_message) override {
+  int decompress(const stone::buffer::list &src, stone::buffer::list &dst, boost::optional<int32_t> compressor_message) override {
 #ifdef HAVE_QATZIP
     if (qat_enabled)
       return qat_accel.decompress(src, dst, compressor_message);
@@ -92,15 +92,15 @@ class LZ4Compressor : public Compressor {
     return decompress(i, src.length(), dst, compressor_message);
   }
 
-  int decompress(ceph::buffer::list::const_iterator &p,
+  int decompress(stone::buffer::list::const_iterator &p,
 		 size_t compressed_len,
-		 ceph::buffer::list &dst,
+		 stone::buffer::list &dst,
 		 boost::optional<int32_t> compressor_message) override {
 #ifdef HAVE_QATZIP
     if (qat_enabled)
       return qat_accel.decompress(p, compressed_len, dst, compressor_message);
 #endif
-    using ceph::decode;
+    using stone::decode;
     uint32_t count;
     std::vector<std::pair<uint32_t, uint32_t> > compressed_pairs;
     decode(count, p);
@@ -113,13 +113,13 @@ class LZ4Compressor : public Compressor {
     }
     compressed_len -= (sizeof(uint32_t) + sizeof(uint32_t) * count * 2);
 
-    ceph::buffer::ptr dstptr(total_origin);
+    stone::buffer::ptr dstptr(total_origin);
     LZ4_streamDecode_t lz4_stream_decode;
     LZ4_setStreamDecode(&lz4_stream_decode, nullptr, 0);
 
-    ceph::buffer::ptr cur_ptr = p.get_current_ptr();
-    ceph::buffer::ptr *ptr = &cur_ptr;
-    Tub<ceph::buffer::ptr> data_holder;
+    stone::buffer::ptr cur_ptr = p.get_current_ptr();
+    stone::buffer::ptr *ptr = &cur_ptr;
+    Tub<stone::buffer::ptr> data_holder;
     if (compressed_len != cur_ptr.length()) {
       data_holder.construct(compressed_len);
       p.copy_deep(compressed_len, *data_holder);

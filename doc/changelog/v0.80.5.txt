@@ -76,7 +76,7 @@ Date:   Tue Jul 22 00:25:37 2014 +0100
 
     mon: AuthMonitor: always encode full regardless of keyserver having keys
     
-    On clusters without cephx, assuming an admin never added a key to the
+    On clusters without stonex, assuming an admin never added a key to the
     cluster, the monitors have empty key servers.  A previous patch had the
     AuthMonitor not encoding an empty keyserver as a full version.
     
@@ -113,7 +113,7 @@ Merge: 442c3fd c390ec4
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Jul 21 13:10:28 2014 -0700
 
-    Merge pull request #2122 from ceph/wip-dencoder-firefly
+    Merge pull request #2122 from stone/wip-dencoder-firefly
     
     fix linking deps, cpeh-dencoder, etc., firefly backport
 
@@ -193,7 +193,7 @@ commit c390ec4fa919e0a17e646e595b30cfa878c3454f
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Jul 18 22:44:51 2014 -0700
 
-    ceph-dencoder: don't link librgw.la (and rados, etc.)
+    stone-dencoder: don't link librgw.la (and rados, etc.)
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 34671108ce0b7597dba4f619732ecdb8933cda6e)
@@ -204,7 +204,7 @@ Date:   Fri Jul 18 22:27:25 2014 -0700
 
     rgw: move a bunch of stuff into rgw_dencoder
     
-    This will help out ceph-dencoder ...
+    This will help out stone-dencoder ...
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit b1a641f307942cbf43036f75ef67fb30441dfe95)
@@ -228,7 +228,7 @@ commit 7be91e8c5d935f7094033842bde1da2486905c70
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Jul 18 20:55:39 2014 -0700
 
-    Revert "ceph.spec: move ceph-dencoder to ceph from ceph-common"
+    Revert "stone.spec: move stone-dencoder to stone from stone-common"
     
     This reverts commit 95f5a448b52db545a2b9bbad47fdb287254f93ea.
     (cherry picked from commit 58cc894b3252a848ebc2169bcc4980a0ae6cc375)
@@ -237,7 +237,7 @@ commit 04ad08a18a773e104a826b2a77ab0b2ffaac1e5f
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Jul 18 20:55:35 2014 -0700
 
-    Revert "debian: move ceph-dencoder to ceph from ceph-common"
+    Revert "debian: move stone-dencoder to stone from stone-common"
     
     This reverts commit b37e3bde3bd31287b11c069062280258666df7c5.
     (cherry picked from commit f181f78b7473260a717bc8ab4fc4d73a80e3b5ba)
@@ -259,7 +259,7 @@ commit c1073e430eafeb1f213f80636a3a24966b292698
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Jul 14 17:02:05 2014 -0700
 
-    ceph.spec: move ceph-dencoder to ceph from ceph-common
+    stone.spec: move stone-dencoder to stone from stone-common
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 95f5a448b52db545a2b9bbad47fdb287254f93ea)
@@ -268,7 +268,7 @@ commit f4e9e0ef2eab3174584f1695122b114549feff57
 Author: Sage Weil <sage@redhat.com>
 Date:   Mon Jul 14 14:16:43 2014 -0700
 
-    debian: move ceph-dencoder to ceph from ceph-common
+    debian: move stone-dencoder to stone from stone-common
     
     It links against the world currently (notably leveldb).  Not nice for the
     client-side lib.
@@ -322,7 +322,7 @@ commit 361c1f8554ce1fedfd0020cd306c41b0ba25f53e
 Author: Alfredo Deza <alfredo.deza@inktank.com>
 Date:   Wed Jul 16 16:12:12 2014 -0400
 
-    remove ceph restarts on upgrades for RPMs
+    remove stone restarts on upgrades for RPMs
     
     Signed-off-by: Alfredo Deza <alfredo.deza@inktank.com>
     (cherry picked from commit e3a5756f58ef5d07badf18ab08a26f47f7d232cb)
@@ -340,7 +340,7 @@ commit 67b5193f73a2c9ec9e503ad3431473998217375d
 Author: Sage Weil <sage@redhat.com>
 Date:   Tue Jul 15 18:11:41 2014 -0700
 
-    init-ceph: wrap daemon startup with systemd-run when running under systemd
+    init-stone: wrap daemon startup with systemd-run when running under systemd
     
     We want to make sure the daemon runs in its own systemd environment.  Check
     for systemd as pid 1 and, when present, use systemd-run -r <cmd> to do

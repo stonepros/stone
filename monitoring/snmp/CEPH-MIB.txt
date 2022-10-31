@@ -18,15 +18,15 @@ ceph MODULE-IDENTITY
     LAST-UPDATED
         "202111010000Z" -- Nov 01, 2021
     ORGANIZATION
-        "The Ceph Project
+        "The Stone Project
          https://ceph.io"
     CONTACT-INFO
         "Email: <dev@ceph.io>
 
         Send comments to: <dev@ceph.io>"
     DESCRIPTION
-        "The MIB module for Ceph. In it's current form it only
-        supports Notifications, since Ceph itself doesn't provide
+        "The MIB module for Stone. In it's current form it only
+        supports Notifications, since Stone itself doesn't provide
         any SNMP agent functionality.
 
         Notifications are provided through a Prometheus/Alertmanager
@@ -72,7 +72,7 @@ promPGs           OBJECT IDENTIFIER ::= { prometheus 7 }
 promNode          OBJECT IDENTIFIER ::= { prometheus 8 }
 promPool          OBJECT IDENTIFIER ::= { prometheus 9 }
 promRados         OBJECT IDENTIFIER ::= { prometheus 10 }
-promCephadm       OBJECT IDENTIFIER ::= { prometheus 11 }
+promStoneadm       OBJECT IDENTIFIER ::= { prometheus 11 }
 promPrometheus    OBJECT IDENTIFIER ::= { prometheus 12 }
 
 promGenericNotification NOTIFICATION-TYPE
@@ -87,12 +87,12 @@ promGenericDaemonCrash NOTIFICATION-TYPE
 
 promHealthStatusError NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Ceph in health_error state for too long."
+    DESCRIPTION "Stone in health_error state for too long."
 ::= { promHealthStatus 1 }
 
 promHealthStatusWarning NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Ceph in health_warn for too long."
+    DESCRIPTION "Stone in health_warn for too long."
 ::= { promHealthStatus 2 }
 
 promMonLowQuorum NOTIFICATION-TYPE
@@ -142,42 +142,42 @@ promOsdHighPredictedFailures NOTIFICATION-TYPE
 
 promOsdHostDown NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Ceph OSD host is down."
+    DESCRIPTION "Stone OSD host is down."
 ::= { promOsd 8 }
 
 promMdsDamaged NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Cephfs filesystem is damaged."
+    DESCRIPTION "Stonefs filesystem is damaged."
 ::= { promMds 1 }
 
 promMdsReadOnly NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Cephfs filesystem marked as READ-ONLY"
+    DESCRIPTION "Stonefs filesystem marked as READ-ONLY"
 ::= { promMds 2 }
 
 promMdsOffline NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Cephfs filesystem is unavailable/offline."
+    DESCRIPTION "Stonefs filesystem is unavailable/offline."
 ::= { promMds 3 }
 
 promMdsDegraded NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Cephfs filesystem is in a degraded state."
+    DESCRIPTION "Stonefs filesystem is in a degraded state."
 ::= { promMds 4 }
 
 promMdsNoStandby NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Cephfs MDS daemon failure, no standby available"
+    DESCRIPTION "Stonefs MDS daemon failure, no standby available"
 ::= { promMds 5 }
 
 promMgrModuleCrash NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Ceph mgr module has crashed recently"
+    DESCRIPTION "Stone mgr module has crashed recently"
 ::= { promMgr 1 }
 
 promMgrPrometheusInactive NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Ceph mgr prometheus module not responding"
+    DESCRIPTION "Stone mgr prometheus module not responding"
 ::= { promMgr 2 }
 
 promPGsInactive NOTIFICATION-TYPE
@@ -245,15 +245,15 @@ promRadosUnfound NOTIFICATION-TYPE
     DESCRIPTION "A RADOS object can not be found, even though all OSDs are online."
 ::= { promRados 1 }
 
-promCephadmDaemonDown NOTIFICATION-TYPE
+promStoneadmDaemonDown NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Cephadm has determined that a daemon is down."
-::= { promCephadm 1 }
+    DESCRIPTION "Stoneadm has determined that a daemon is down."
+::= { promStoneadm 1 }
 
-promCephadmUpgradeFailure NOTIFICATION-TYPE
+promStoneadmUpgradeFailure NOTIFICATION-TYPE
     STATUS      current
-    DESCRIPTION "Cephadm attempted to upgrade the cluster and encountered a problem."
-::= { promCephadm 2 }
+    DESCRIPTION "Stoneadm attempted to upgrade the cluster and encountered a problem."
+::= { promStoneadm 2 }
 
 promPrometheusJobMissing NOTIFICATION-TYPE
     STATUS      current
@@ -310,14 +310,14 @@ cephNotificationGroup NOTIFICATION-GROUP
         promPoolFull,
         promPoolFilling,
         promRadosUnfound,
-        promCephadmDaemonDown,
-        promCephadmUpgradeFailure,
+        promStoneadmDaemonDown,
+        promStoneadmUpgradeFailure,
         promPrometheusJobMissing
     }
     STATUS current
     DESCRIPTION
         "A collection of notifications triggered by the Prometheus
-        rules to convey Ceph cluster state"
+        rules to convey Stone cluster state"
     ::= { cephAlertGroups 2 }
 
 -- ---------------------------------------------------------- --
@@ -327,7 +327,7 @@ cephNotificationGroup NOTIFICATION-GROUP
 cephCompliance MODULE-COMPLIANCE
     STATUS current
     DESCRIPTION
-        "The Compliance statement for the Ceph MIB"
+        "The Compliance statement for the Stone MIB"
     MODULE
         MANDATORY-GROUPS {
             cephNotificationGroup

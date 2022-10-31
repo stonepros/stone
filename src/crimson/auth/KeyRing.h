@@ -8,7 +8,7 @@
 class KeyRing;
 
 namespace crimson::auth {
-  // see KeyRing::from_ceph_context
+  // see KeyRing::from_stone_context
   seastar::future<KeyRing*> load_from_keyring(KeyRing* keyring);
   seastar::future<KeyRing*> load_from_keyfile(KeyRing* keyring);
   seastar::future<KeyRing*> load_from_key(KeyRing* keyring);

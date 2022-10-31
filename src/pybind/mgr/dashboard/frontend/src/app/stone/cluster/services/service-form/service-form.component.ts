@@ -7,7 +7,7 @@ import _ from 'lodash';
 import { merge, Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
-import { CephServiceService } from '~/app/shared/api/ceph-service.service';
+import { StoneServiceService } from '~/app/shared/api/stone-service.service';
 import { HostService } from '~/app/shared/api/host.service';
 import { PoolService } from '~/app/shared/api/pool.service';
 import { SelectMessages } from '~/app/shared/components/select/select-messages.model';
@@ -18,7 +18,7 @@ import { CdFormBuilder } from '~/app/shared/forms/cd-form-builder';
 import { CdFormGroup } from '~/app/shared/forms/cd-form-group';
 import { CdValidators } from '~/app/shared/forms/cd-validators';
 import { FinishedTask } from '~/app/shared/models/finished-task';
-import { CephServiceSpec } from '~/app/shared/models/service.interface';
+import { StoneServiceSpec } from '~/app/shared/models/service.interface';
 import { TaskWrapperService } from '~/app/shared/services/task-wrapper.service';
 
 @Component({
@@ -50,12 +50,12 @@ export class ServiceFormComponent extends CdForm implements OnInit {
   labelClick = new Subject<string>();
   labelFocus = new Subject<string>();
   pools: Array<object>;
-  services: Array<CephServiceSpec> = [];
+  services: Array<StoneServiceSpec> = [];
   pageURL: string;
 
   constructor(
     public actionLabels: ActionLabelsI18n,
-    private cephServiceService: CephServiceService,
+    private stoneServiceService: StoneServiceService,
     private formBuilder: CdFormBuilder,
     private hostService: HostService,
     private poolService: PoolService,
@@ -310,7 +310,7 @@ export class ServiceFormComponent extends CdForm implements OnInit {
         this.serviceType = params.type;
       });
     }
-    this.cephServiceService.getKnownTypes().subscribe((resp: Array<string>) => {
+    this.stoneServiceService.getKnownTypes().subscribe((resp: Array<string>) => {
       // Remove service types:
       // osd       - This is deployed a different way.
       // container - This should only be used in the CLI.
@@ -334,14 +334,14 @@ export class ServiceFormComponent extends CdForm implements OnInit {
     this.poolService.getList().subscribe((resp: Array<object>) => {
       this.pools = resp;
     });
-    this.cephServiceService.list().subscribe((services: CephServiceSpec[]) => {
+    this.stoneServiceService.list().subscribe((services: StoneServiceSpec[]) => {
       this.services = services.filter((service: any) => service.service_type === 'rgw');
     });
 
     if (this.editing) {
       this.action = this.actionLabels.EDIT;
       this.disableForEditing(this.serviceType);
-      this.cephServiceService.list(this.serviceName).subscribe((response: CephServiceSpec[]) => {
+      this.stoneServiceService.list(this.serviceName).subscribe((response: StoneServiceSpec[]) => {
         const formKeys = ['service_type', 'service_id', 'unmanaged'];
         formKeys.forEach((keys) => {
           this.serviceForm.get(keys).setValue(response[0][keys]);
@@ -593,7 +593,7 @@ export class ServiceFormComponent extends CdForm implements OnInit {
         task: new FinishedTask(taskUrl, {
           service_name: serviceName
         }),
-        call: this.cephServiceService.create(serviceSpec)
+        call: this.stoneServiceService.create(serviceSpec)
       })
       .subscribe({
         error() {

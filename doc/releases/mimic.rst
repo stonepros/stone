@@ -1,7 +1,7 @@
 v13.2.10 Mimic
 ==============
 
-This is the tenth bugfix release of Ceph Mimic, this release fixes a RGW
+This is the tenth bugfix release of Stone Mimic, this release fixes a RGW
 vulnerability affecting mimic, and we recommend that all mimic users upgrade.
 
 Notable Changes
@@ -13,7 +13,7 @@ Notable Changes
 v13.2.9 Mimic
 =============
 
-This is the ninth and very likely the last stable release in the Ceph Mimic
+This is the ninth and very likely the last stable release in the Stone Mimic
 stable release series. This release fixes bugs across all components and also
 contains a RGW security fix. We recommend all mimic users to upgrade to this
 version.
@@ -156,7 +156,7 @@ Changelog
 v13.2.8 Mimic
 =============
 
-This is the eighth release in the Ceph Mimic stable release series. Its sole
+This is the eighth release in the Stone Mimic stable release series. Its sole
 purpose is to fix a regression that found its way into the previous release.
 
 Notable Changes
@@ -267,7 +267,7 @@ Changelog
 * build/ops: rpm: always build ceph-test package (`pr#30188 <https://github.com/ceph/ceph/pull/30188>`_, Nathan Cutler)
 * ceph-volume: PVolumes.filter shouldn't purge itself (`pr#30806 <https://github.com/ceph/ceph/pull/30806>`_, Rishabh Dave)
 * ceph-volume: VolumeGroups.filter shouldn't purge itself (`pr#30808 <https://github.com/ceph/ceph/pull/30808>`_, Rishabh Dave)
-* ceph-volume: add Ceph's device id to inventory (`pr#31211 <https://github.com/ceph/ceph/pull/31211>`_, Sebastian Wagner)
+* ceph-volume: add Stone's device id to inventory (`pr#31211 <https://github.com/ceph/ceph/pull/31211>`_, Sebastian Wagner)
 * ceph-volume: api/lvm: check if list of LVs is empty (`pr#31229 <https://github.com/ceph/ceph/pull/31229>`_, Rishabh Dave)
 * ceph-volume: assume msgrV1 for all branches containing mimic (`pr#31615 <https://github.com/ceph/ceph/pull/31615>`_, Jan Fajerski)
 * ceph-volume: batch functional idempotency test fails since message is now on stderr (`pr#29688 <https://github.com/ceph/ceph/pull/29688>`_, Jan Fajerski)
@@ -554,7 +554,7 @@ stable release series. We recommend all Mimic users upgrade.
 
 Notable Changes
 ---------------
-* Ceph v13.2.6 now packages python bindings for python3.6 instead of
+* Stone v13.2.6 now packages python bindings for python3.6 instead of
   python3.4, because EPEL7 recently switched from python3.4 to
   python3.6 as the native python3. See the `announcement <https://lists.fedoraproject.org/archives/list/epel-announce@lists.fedoraproject.org/message/EGUMKAIMPK2UD5VSHXM53BH2MBDGDWMO/>_`
   for more details on the background of this change.
@@ -706,7 +706,7 @@ Changelog
 * cephfs: MDCache::finish_snaprealm_reconnect() create and drop MClientSnap message (`issue#38285 <http://tracker.ceph.com/issues/38285>`_, `pr#26472 <https://github.com/ceph/ceph/pull/26472>`_, "Yan, Zheng")
 * cephfs: mgr/status: fix fs status subcommand did not show standby-replay MDS' perf info (`issue#36399 <http://tracker.ceph.com/issues/36399>`_, `pr#25031 <https://github.com/ceph/ceph/pull/25031>`_, Zhi Zhang)
 * ceph-objectstore-tool: Dump hashinfo (`issue#37597 <http://tracker.ceph.com/issues/37597>`_, `pr#25721 <https://github.com/ceph/ceph/pull/25721>`_, David Zafman)
-* ceph-volume-client: allow setting mode of CephFS volumes (`issue#36651 <http://tracker.ceph.com/issues/36651>`_, `pr#25413 <https://github.com/ceph/ceph/pull/25413>`_, Tom Barron)
+* ceph-volume-client: allow setting mode of StoneFS volumes (`issue#36651 <http://tracker.ceph.com/issues/36651>`_, `pr#25413 <https://github.com/ceph/ceph/pull/25413>`_, Tom Barron)
 * ceph-volume: enable device discards (`issue#36532 <http://tracker.ceph.com/issues/36532>`_, `pr#25749 <https://github.com/ceph/ceph/pull/25749>`_, Jonas Jelten)
 * ceph-volume: fix JSON output in `inventory` (`issue#37390 <http://tracker.ceph.com/issues/37390>`_, `pr#25923 <https://github.com/ceph/ceph/pull/25923>`_, Sebastian Wagner)
 * ceph-volume: Fix TypeError: join() takes exactly one argument (2 given) (`issue#37595 <http://tracker.ceph.com/issues/37595>`_, `pr#25771 <https://github.com/ceph/ceph/pull/25771>`_, Sebastian Wagner)
@@ -731,7 +731,7 @@ Changelog
 * deep fsck fails on inspecting very large onodes (`issue#38065 <http://tracker.ceph.com/issues/38065>`_, `pr#26291 <https://github.com/ceph/ceph/pull/26291>`_, Igor Fedotov)
 * doc: pin the version for "breathe" to 4.1.11 (`issue#38229 <http://tracker.ceph.com/issues/38229>`_, `pr#26333 <https://github.com/ceph/ceph/pull/26333>`_, Alfredo Deza)
 * doc: rados/configuration: refresh osdmap section (`issue#38051 <http://tracker.ceph.com/issues/38051>`_, `pr#26373 <https://github.com/ceph/ceph/pull/26373>`_, Ilya Dryomov)
-* doc: updated Ceph documentation links (`issue#37793 <http://tracker.ceph.com/issues/37793>`_, `pr#26180 <https://github.com/ceph/ceph/pull/26180>`_, James McClune)
+* doc: updated Stone documentation links (`issue#37793 <http://tracker.ceph.com/issues/37793>`_, `pr#26180 <https://github.com/ceph/ceph/pull/26180>`_, James McClune)
 * doc/user-management: Remove obsolete reset caps command (`issue#37663 <http://tracker.ceph.com/issues/37663>`_, `pr#25607 <https://github.com/ceph/ceph/pull/25607>`_, Brad Hubbard)
 * journal: max journal order is incorrectly set at 64 (`issue#37541 <http://tracker.ceph.com/issues/37541>`_, `pr#25957 <https://github.com/ceph/ceph/pull/25957>`_, Mykola Golub)
 * librbd: fix missing unblock_writes if shrink is not allowed (`issue#36778 <http://tracker.ceph.com/issues/36778>`_, `pr#25252 <https://github.com/ceph/ceph/pull/25252>`_, runsisi)
@@ -839,7 +839,7 @@ v13.2.3 Mimic
 =============
 
 This is the third bugfix release of the Mimic v13.2.x long term stable release
-series. This release contains many fixes across all components of Ceph.
+series. This release contains many fixes across all components of Stone.
 We recommend that all users upgrade.
 
 * The default memory utilization for the mons has been increased
@@ -850,8 +850,8 @@ We recommend that all users upgrade.
   additional 500 MB to 1 GB of RAM for large clusters, and much less
   for small clusters.
 
-* Ceph v13.2.2 includes a wrong backport, which may cause mds to go into
-  'damaged' state when upgrading Ceph cluster from previous version.
+* Stone v13.2.2 includes a wrong backport, which may cause mds to go into
+  'damaged' state when upgrading Stone cluster from previous version.
   The bug is fixed in v13.2.3. If you are already running v13.2.2,
   upgrading to v13.2.3 does not require special action.
 
@@ -873,7 +873,7 @@ We recommend that all users upgrade.
 Changelog
 ---------
 
-* build/ops: Can't compile Ceph on Fedora 29 as it doesn't recognize python\*3\*-tox as an install Tox (`issue#18163 <http://tracker.ceph.com/issues/18163>`_, `issue#37301 <http://tracker.ceph.com/issues/37301>`_, `issue#37422 <http://tracker.ceph.com/issues/37422>`_, `pr#25294 <https://github.com/ceph/ceph/pull/25294>`_, Nathan Cutler, Brad Hubbard)
+* build/ops: Can't compile Stone on Fedora 29 as it doesn't recognize python\*3\*-tox as an install Tox (`issue#18163 <http://tracker.ceph.com/issues/18163>`_, `issue#37301 <http://tracker.ceph.com/issues/37301>`_, `issue#37422 <http://tracker.ceph.com/issues/37422>`_, `pr#25294 <https://github.com/ceph/ceph/pull/25294>`_, Nathan Cutler, Brad Hubbard)
 * build/ops: debian: correct ceph-common relationship with older radosgw package (`pr#25115 <https://github.com/ceph/ceph/pull/25115>`_, Matthew Vernon)
 * ceph-bluestore-tool: fix set label functionality for specific keys (`pr#24352 <https://github.com/ceph/ceph/pull/24352>`_, Igor Fedotov)
 * ceph fs add_data_pool applies pool application metadata incorrectly (`issue#36203 <http://tracker.ceph.com/issues/36203>`_, `issue#36028 <http://tracker.ceph.com/issues/36028>`_, `pr#24470 <https://github.com/ceph/ceph/pull/24470>`_, John Spray)
@@ -1049,7 +1049,7 @@ v13.2.2 Mimic
 =============
 
 This is the second bugfix release of the Mimic v13.2.x long term stable release
-series. This release contains many fixes across all components of Ceph.
+series. This release contains many fixes across all components of Stone.
 We recommend that all users upgrade.
 
 * This version contains an upgrade bug, http://tracker.ceph.com/issues/36686,
@@ -1079,7 +1079,7 @@ Changelog
 * ceph-volume batch command (`pr#23777 <https://github.com/ceph/ceph/pull/23777>`_, Alfredo Deza)
 * ceph-volume: batch tests for mixed-type of devices (`issue#35535 <http://tracker.ceph.com/issues/35535>`_, `issue#27210 <http://tracker.ceph.com/issues/27210>`_, `pr#23966 <https://github.com/ceph/ceph/pull/23966>`_, Alfredo Deza)
 * ceph_volume_client: allow atomic update of RADOS objects (`issue#24173 <http://tracker.ceph.com/issues/24173>`_, `issue#24863 <http://tracker.ceph.com/issues/24863>`_, `pr#23878 <https://github.com/ceph/ceph/pull/23878>`_, Rishabh Dave)
-* CephVolumeClient: delay required after adding data pool to MDSMap (`issue#25206 <http://tracker.ceph.com/issues/25206>`_, `pr#23725 <https://github.com/ceph/ceph/pull/23725>`_, Patrick Donnelly)
+* StoneVolumeClient: delay required after adding data pool to MDSMap (`issue#25206 <http://tracker.ceph.com/issues/25206>`_, `pr#23725 <https://github.com/ceph/ceph/pull/23725>`_, Patrick Donnelly)
 * ceph-volume: do not use stdin in luminous (`issue#25173 <http://tracker.ceph.com/issues/25173>`_, `pr#23368 <https://github.com/ceph/ceph/pull/23368>`_, Alfredo Deza)
 * ceph-volume: earlier detection for --journal and --filestore flag requirements (`issue#24794 <http://tracker.ceph.com/issues/24794>`_, `pr#24205 <https://github.com/ceph/ceph/pull/24205>`_, Alfredo Deza)
 * ceph-volume enable the ceph-osd during lvm activation (`issue#24152 <http://tracker.ceph.com/issues/24152>`_, `pr#23393 <https://github.com/ceph/ceph/pull/23393>`_, Dan van der Ster, Alfredo Deza)
@@ -1198,7 +1198,7 @@ v13.2.1 Mimic
 =============
 
 This is the first bugfix release of the Mimic v13.2.x long term stable release
-series. This release contains many fixes across all components of Ceph,
+series. This release contains many fixes across all components of Stone,
 including a few security fixes. We recommend that all users upgrade.
 
 Notable Changes
@@ -1225,7 +1225,7 @@ Changelog
 * build/ops: include: fix build with older clang (OSX target) (`pr#23049 <https://github.com/ceph/ceph/pull/23049>`_, Christopher Blum)
 * build/ops: include: fix build with older clang (`pr#23034 <https://github.com/ceph/ceph/pull/23034>`_, Kefu Chai)
 * build/ops,rbd: build/ops: order rbdmap.service before remote-fs-pre.target (`issue#24713 <http://tracker.ceph.com/issues/24713>`_, `issue#24734 <http://tracker.ceph.com/issues/24734>`_, `pr#22843 <https://github.com/ceph/ceph/pull/22843>`_, Ilya Dryomov)
-* cephfs: cephfs: allow prohibiting user snapshots in CephFS (`issue#24705 <http://tracker.ceph.com/issues/24705>`_, `issue#24284 <http://tracker.ceph.com/issues/24284>`_, `pr#22812 <https://github.com/ceph/ceph/pull/22812>`_, "Yan, Zheng")
+* cephfs: cephfs: allow prohibiting user snapshots in StoneFS (`issue#24705 <http://tracker.ceph.com/issues/24705>`_, `issue#24284 <http://tracker.ceph.com/issues/24284>`_, `pr#22812 <https://github.com/ceph/ceph/pull/22812>`_, "Yan, Zheng")
 * cephfs: cephfs-journal-tool: Fix purging when importing an zero-length journal (`issue#24861 <http://tracker.ceph.com/issues/24861>`_, `pr#22981 <https://github.com/ceph/ceph/pull/22981>`_, yupeng chen, zhongyan gu)
 * cephfs: client: fix bug #24491 _ll_drop_pins may access invalid iterator (`issue#24534 <http://tracker.ceph.com/issues/24534>`_, `pr#22791 <https://github.com/ceph/ceph/pull/22791>`_, Liu Yangkuan)
 * cephfs: client: update inode fields according to issued caps (`issue#24539 <http://tracker.ceph.com/issues/24539>`_, `issue#24269 <http://tracker.ceph.com/issues/24269>`_, `pr#22819 <https://github.com/ceph/ceph/pull/22819>`_, "Yan, Zheng")
@@ -1363,9 +1363,9 @@ Major Changes from Luminous
 
 - *Dashboard*:
 
-  * The (read-only) Ceph manager dashboard introduced in Ceph Luminous has been
+  * The (read-only) Stone manager dashboard introduced in Stone Luminous has been
     replaced with a new implementation inspired by and derived from the
-    `openATTIC <https://openattic.org>`_ Ceph management tool, providing a
+    `openATTIC <https://openattic.org>`_ Stone management tool, providing a
     drop-in replacement offering a :ref:`number of additional management
     features <mgr-dashboard>`.
 
@@ -1387,7 +1387,7 @@ Major Changes from Luminous
   * The Beast frontend is no longer experimental, and is considered
     stable and ready for use.
 
-- *CephFS*:
+- *StoneFS*:
 
   * Snapshots are now stable when combined with multiple MDS daemons.
 
@@ -1452,7 +1452,7 @@ Instructions
      # ceph pg dump pgs_brief | cut -d " " -f 1 | xargs -n1 ceph pg scrub
 
    You should take into consideration that this forced scrub may
-   possibly have a negative impact on your Ceph clients' performance.
+   possibly have a negative impact on your Stone clients' performance.
 
 #. Make sure your cluster is stable and healthy (no down or
    recovering OSDs).  (Optional, but recommended.)
@@ -1509,7 +1509,7 @@ Instructions
         "ceph version 13.2.0 (...) mimic (stable)": 22,
      }
 
-#. Upgrade all CephFS MDS daemons.  For each CephFS file system,
+#. Upgrade all StoneFS MDS daemons.  For each StoneFS file system,
 
    #. Reduce the number of ranks to 1.  (Make note of the original
       number of MDS daemons first if you plan to restore it later.)::
@@ -1660,7 +1660,7 @@ These changes occurred between the Luminous and Mimic releases.
     and instructs the cluster to proceed with an empty PG in its place, without
     making any further efforts to find the missing data.
 
-  *CephFS*:
+  *StoneFS*:
 
   - Upgrading an MDS cluster to 12.2.3+ will result in all active MDS
     exiting due to feature incompatibilities once an upgraded MDS comes online
@@ -1672,7 +1672,7 @@ These changes occurred between the Luminous and Mimic releases.
     leaving the one active MDS, stop all standbys, upgrade the single active
     MDS, then upgrade/start standbys. Finally, restore the previous max_mds.
 
-    !! NOTE: see release notes on snapshots in CephFS if you have ever enabled
+    !! NOTE: see release notes on snapshots in StoneFS if you have ever enabled
     snapshots on your file system.
 
     See also: https://tracker.ceph.com/issues/23172
@@ -1691,7 +1691,7 @@ These changes occurred between the Luminous and Mimic releases.
     + ``mds remove_data_pool`` -> ``fs rm_data_pool``
     + ``mds rm_data_pool`` -> ``fs rm_data_pool``
 
-  - New CephFS file system attributes session_timeout and
+  - New StoneFS file system attributes session_timeout and
     session_autoclose are configurable via ``ceph fs set``. The MDS
     config options `mds_session_timeout`, `mds_session_autoclose`, and
     `mds_max_file_size` are now obsolete.
@@ -1708,7 +1708,7 @@ These changes occurred between the Luminous and Mimic releases.
     `max_mds`. Accordingly, ``ceph mds deactivate`` has been deprecated as it
     is now redundant.
 
-  - Taking a CephFS cluster down is now done by setting the down flag which
+  - Taking a StoneFS cluster down is now done by setting the down flag which
     deactivates all MDS. For example: `ceph fs set cephfs down true`.
 
   - Preventing standbys from joining as new actives (formerly the now
@@ -1716,7 +1716,7 @@ These changes occurred between the Luminous and Mimic releases.
     setting the joinable flag.  This is useful mostly for testing so that a
     file system may be quickly brought down and deleted.
 
-  - New CephFS file system attributes session_timeout and session_autoclose
+  - New StoneFS file system attributes session_timeout and session_autoclose
     are configurable via `ceph fs set`. The MDS config options
     mds_session_timeout, mds_session_autoclose, and mds_max_file_size are now
     obsolete.
@@ -1726,7 +1726,7 @@ These changes occurred between the Luminous and Mimic releases.
     significantly reducing the time of loading inodes for open files. MDS
     creates the table automatically if it does not exist.
 
-  - CephFS snapshot is now stable and enabled by default on new filesystems.
+  - StoneFS snapshot is now stable and enabled by default on new filesystems.
     To enable snapshot on existing filesystems, use the command::
 
       ceph fs set <fs_name> allow_new_snaps
@@ -1759,7 +1759,7 @@ These changes occurred between the Luminous and Mimic releases.
     you. Please report any poor behavior post-upgrade.
 
   - NFS-Ganesha is an NFS userspace server that can export shares from multiple
-    file systems, including CephFS. Support for this CephFS client has improved
+    file systems, including StoneFS. Support for this StoneFS client has improved
     significantly in Mimic. In particular, delegations are now supported through
     the libcephfs library so that Ganesha may issue delegations to its NFS clients
     allowing for safe write buffering and coherent read caching. Documentation
@@ -1803,7 +1803,7 @@ These changes occurred between the Luminous and Mimic releases.
 
 * *MGR*
 
-  - The (read-only) Ceph manager dashboard introduced in Ceph Luminous has been
+  - The (read-only) Stone manager dashboard introduced in Stone Luminous has been
     replaced with a new implementation, providing a drop-in replacement offering
     a number of additional management features. To access the new dashboard, you
     first need to define a username and password and create an SSL certificate.
@@ -1836,9 +1836,9 @@ These changes occurred between the Luminous and Mimic releases.
     already been dropped from those supported distros where Python 3 is
     standard and Python 2 is optional (currently only SUSE).
 
-  - Ceph codebase has now moved to the C++-17 standard.
+  - Stone codebase has now moved to the C++-17 standard.
 
-  - The Ceph LZ4 compression plugin is now enabled by default, and introduces a
+  - The Stone LZ4 compression plugin is now enabled by default, and introduces a
     new build dependency.
 
 
@@ -2036,8 +2036,8 @@ Detailed Changelog
 * build/ops: Fix ppc64 support for ceph (`pr#16753 <https://github.com/ceph/ceph/pull/16753>`_, Boris Ranto)
 * build/ops: Fix two dpdk assert happened in dpdk library (`pr#18409 <https://github.com/ceph/ceph/pull/18409>`_, chunmei)
 * build/ops: FreeBSD: add new required packages to be installed (`pr#21349 <https://github.com/ceph/ceph/pull/21349>`_, Willem Jan Withagen)
-* build/ops: githubmap: add some known Ceph reviewers (`pr#17507 <https://github.com/ceph/ceph/pull/17507>`_, Patrick Donnelly)
-* build/ops: .githubmap: Add wjwithagen as a known Ceph reviewer (`pr#17518 <https://github.com/ceph/ceph/pull/17518>`_, Willem Jan Withagen)
+* build/ops: githubmap: add some known Stone reviewers (`pr#17507 <https://github.com/ceph/ceph/pull/17507>`_, Patrick Donnelly)
+* build/ops: .githubmap: Add wjwithagen as a known Stone reviewer (`pr#17518 <https://github.com/ceph/ceph/pull/17518>`_, Willem Jan Withagen)
 * build/ops: .githubmap: Update (`pr#18230 <https://github.com/ceph/ceph/pull/18230>`_, Sage Weil)
 * build/ops: .gitignore: allow debian .patch files (`pr#17577 <https://github.com/ceph/ceph/pull/17577>`_, Ken Dreyer)
 * build/ops: include: compat.h, fix the return result of pthread_set_name() (`pr#20474 <https://github.com/ceph/ceph/pull/20474>`_, Willem Jan Withagen)
@@ -2075,7 +2075,7 @@ Detailed Changelog
 * build/ops: rocksdb: do not use aligned_alloc (`issue#23653 <http://tracker.ceph.com/issues/23653>`_, `pr#21632 <https://github.com/ceph/ceph/pull/21632>`_, Kefu Chai)
 * build/ops: rpm: adjust ceph-{osdomap,kvstore,monstore}-tool feature move (`issue#22558 <http://tracker.ceph.com/issues/22558>`_, `pr#19777 <https://github.com/ceph/ceph/pull/19777>`_, Kefu Chai)
 * build/ops: rpm: build-depends on "cunit-devel" for suse (`pr#18997 <https://github.com/ceph/ceph/pull/18997>`_, Kefu Chai)
-* build/ops: rpm: conditionalize Python 2 availability to enable Ceph build on Python 3-only system (`pr#20018 <https://github.com/ceph/ceph/pull/20018>`_, Nathan Cutler)
+* build/ops: rpm: conditionalize Python 2 availability to enable Stone build on Python 3-only system (`pr#20018 <https://github.com/ceph/ceph/pull/20018>`_, Nathan Cutler)
 * build/ops: rpm,debian: Ensure all ceph-disk runtime dependencies are declared for ceph-base (`issue#23657 <http://tracker.ceph.com/issues/23657>`_, `pr#21356 <https://github.com/ceph/ceph/pull/21356>`_, Nathan Cutler)
 * build/ops: rpm,deb: package ceph-kvstore-tool man page (`pr#17387 <https://github.com/ceph/ceph/pull/17387>`_, Sage Weil)
 * build/ops: rpm: drop legacy librbd.so.1 symlink in /usr/lib64/qemu (`pr#17324 <https://github.com/ceph/ceph/pull/17324>`_, Nathan Cutler)
@@ -2248,7 +2248,7 @@ Detailed Changelog
 * cmake: WITH_SPDK=ON by default (`pr#18944 <https://github.com/ceph/ceph/pull/18944>`_, Liu-Chunmei, Kefu Chai, wanjun.lp, Ziye Yang)
 * common: adding line break at end of some cli results (`issue#21019 <http://tracker.ceph.com/issues/21019>`_, `pr#16687 <https://github.com/ceph/ceph/pull/16687>`_, songweibin)
 * common: add line break for "ceph daemon TYPE.ID version" (`pr#17146 <https://github.com/ceph/ceph/pull/17146>`_, Zhu Shangzhong)
-* common: Add metadata with only Ceph version number and release (`pr#21095 <https://github.com/ceph/ceph/pull/21095>`_, Wido den Hollander)
+* common: Add metadata with only Stone version number and release (`pr#21095 <https://github.com/ceph/ceph/pull/21095>`_, Wido den Hollander)
 * common: Add min/max of ms_async_op_threads (`pr#19942 <https://github.com/ceph/ceph/pull/19942>`_, Shinobu Kinjo)
 * common: Add noreturn attribute to silence uninitialized warning (`pr#19348 <https://github.com/ceph/ceph/pull/19348>`_, Adam C. Emerson)
 * common: auth: add err reason for log info in load function (`pr#17256 <https://github.com/ceph/ceph/pull/17256>`_, Luo Kexue)
@@ -2857,7 +2857,7 @@ Detailed Changelog
 * doc: Fixes a spelling error and a broken hyperlink (`pr#20442 <https://github.com/ceph/ceph/pull/20442>`_, Jordan Hus)
 * doc: Fixes rbd snapshot flatten example (`issue#17723 <http://tracker.ceph.com/issues/17723>`_, `pr#17436 <https://github.com/ceph/ceph/pull/17436>`_, Ashish Singh)
 * doc: fixes syntax in osd-config-ref (`issue#21733 <http://tracker.ceph.com/issues/21733>`_, `pr#18188 <https://github.com/ceph/ceph/pull/18188>`_, Joshua Schmid)
-* doc: Fixes the name of the CephFS snapshot directory (`pr#18710 <https://github.com/ceph/ceph/pull/18710>`_, Jordan Rodgers)
+* doc: Fixes the name of the StoneFS snapshot directory (`pr#18710 <https://github.com/ceph/ceph/pull/18710>`_, Jordan Rodgers)
 * doc: fix hyper link to radosgw/config-ref (`pr#17986 <https://github.com/ceph/ceph/pull/17986>`_, Kefu Chai)
 * doc: fix librbdpy example (`pr#20019 <https://github.com/ceph/ceph/pull/20019>`_, Yuan Zhou)
 * doc: fix order of options in osd new (`issue#21023 <http://tracker.ceph.com/issues/21023>`_, `pr#17326 <https://github.com/ceph/ceph/pull/17326>`_, Neha Ojha)
@@ -3271,13 +3271,13 @@ Detailed Changelog
 * mgr: mgr/smart: fix python3 module loading (`pr#21047 <https://github.com/ceph/ceph/pull/21047>`_, Ricardo Dias)
 * mgr: mgr/status: fix ceph fs status returns error (`issue#21752 <http://tracker.ceph.com/issues/21752>`_, `pr#18233 <https://github.com/ceph/ceph/pull/18233>`_, Yanhu Cao)
 * mgr: mgr/status: format byte quantities in base 2 multiples (`issue#21189 <http://tracker.ceph.com/issues/21189>`_, `pr#17380 <https://github.com/ceph/ceph/pull/17380>`_, John Spray)
-* mgr: mgr/telemetry: Add Ceph Telemetry module to send reports back to project (`pr#21970 <https://github.com/ceph/ceph/pull/21970>`_, Wido den Hollander)
+* mgr: mgr/telemetry: Add Stone Telemetry module to send reports back to project (`pr#21970 <https://github.com/ceph/ceph/pull/21970>`_, Wido den Hollander)
 * mgr: mgr/zabbix: fix div by zero (`issue#21518 <http://tracker.ceph.com/issues/21518>`_, `pr#17931 <https://github.com/ceph/ceph/pull/17931>`_, John Spray)
 * mgr: mgr/zabbix: ignore osd with 0 kb capacity (`issue#21904 <http://tracker.ceph.com/issues/21904>`_, `pr#18809 <https://github.com/ceph/ceph/pull/18809>`_, Ilja Slepnev)
 * mgr: mgr/zabbix: Implement health checks (`pr#20198 <https://github.com/ceph/ceph/pull/20198>`_, Wido den Hollander)
 * mgr: mgr/zabbix: Send max, min and avg PGs of OSDs to Zabbix (`pr#21043 <https://github.com/ceph/ceph/pull/21043>`_, Wido den Hollander)
 * mgr: mgr/Zabbix: Various fixes to Zabbix module (`pr#19452 <https://github.com/ceph/ceph/pull/19452>`_, Wido den Hollander)
-* mgr: mimic: mgr/telegraf: Telegraf module for Ceph Mgr (`pr#22013 <https://github.com/ceph/ceph/pull/22013>`_, Wido den Hollander)
+* mgr: mimic: mgr/telegraf: Telegraf module for Stone Mgr (`pr#22013 <https://github.com/ceph/ceph/pull/22013>`_, Wido den Hollander)
 * mgr: Modify mgr-influx module database check to not require admin privileges (`pr#18102 <https://github.com/ceph/ceph/pull/18102>`_, Benjeman Meekhof)
 * mgr: mon,mgr: improve 'mgr module disable' cmd (`pr#21188 <https://github.com/ceph/ceph/pull/21188>`_, Gu Zhongyan)
 * mgr: mon, mgr: move "osd pool stats" command to mgr and mgr python module (`pr#19985 <https://github.com/ceph/ceph/pull/19985>`_, Chang Liu)

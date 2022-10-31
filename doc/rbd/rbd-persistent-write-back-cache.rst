@@ -2,7 +2,7 @@
  RBD Persistent Write-back Cache
 ================================
 
-.. index:: Ceph Block Device; Persistent Write-back Cache
+.. index:: Stone Block Device; Persistent Write-back Cache
 
 Persistent Write-back Cache
 ===========================
@@ -41,7 +41,7 @@ persistent-on-flush mode after the first flush request is received.
 Enable Persistent Write-back Cache
 ========================================
 
-To enable the persistent write-back cache, the following Ceph settings
+To enable the persistent write-back cache, the following Stone settings
 need to be enabled.::
 
         rbd persistent cache mode = {cache-mode}

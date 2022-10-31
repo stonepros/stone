@@ -1,6 +1,6 @@
 .. _cephfs-administration:
 
-CephFS Administrative commands
+StoneFS Administrative commands
 ==============================
 
 File Systems
@@ -9,7 +9,7 @@ File Systems
 .. note:: The names of the file systems, metadata pools, and data pools can
           only have characters in the set [a-zA-Z0-9\_-.].
 
-These commands operate on the CephFS file systems in your Ceph cluster.
+These commands operate on the StoneFS file systems in your Stone cluster.
 Note that by default only one file system is permitted: to enable
 creation of multiple file systems use ``ceph fs flag set enable_multiple true``.
 
@@ -42,7 +42,7 @@ standby MDS daemons.
 
     fs rm <file system name> [--yes-i-really-mean-it]
 
-Destroy a CephFS file system. This wipes information about the state of the
+Destroy a StoneFS file system. This wipes information about the state of the
 file system from the FSMap. The metadata pool and data pools are untouched and
 must be destroyed separately.
 
@@ -84,9 +84,9 @@ Settings
 
     fs set <fs name> max_file_size <size in bytes>
 
-CephFS has a configurable maximum file size, and it's 1TB by default.
+StoneFS has a configurable maximum file size, and it's 1TB by default.
 You may wish to set this limit higher if you expect to store large files
-in CephFS. It is a 64-bit field.
+in StoneFS. It is a 64-bit field.
 
 Setting ``max_file_size`` to 0 does not disable the limit. It would
 simply limit clients to only creating empty files.
@@ -95,7 +95,7 @@ simply limit clients to only creating empty files.
 Maximum file sizes and performance
 ----------------------------------
 
-CephFS enforces the maximum file size limit at the point of appending to
+StoneFS enforces the maximum file size limit at the point of appending to
 files or setting their size. It does not affect how anything is stored.
 
 When users create a file of an enormous size (without necessarily
@@ -112,7 +112,7 @@ to enumerate the objects during operations like stats or deletes.
 Taking the cluster down
 -----------------------
 
-Taking a CephFS cluster down is done by setting the down flag:
+Taking a StoneFS cluster down is done by setting the down flag:
  
 :: 
  
@@ -220,7 +220,7 @@ Required Client Features
 ------------------------
 
 It is sometimes desirable to set features that clients must support to talk to
-CephFS. Clients without those features may disrupt other clients or behave in
+StoneFS. Clients without those features may disrupt other clients or behave in
 surprising ways. Or, you may want to require newer features to prevent older
 and possibly buggy clients from connecting.
 
@@ -231,7 +231,7 @@ Commands to manipulate required client features of a file system:
     fs required_client_features <fs name> add reply_encoding
     fs required_client_features <fs name> rm reply_encoding
 
-To list all CephFS features
+To list all StoneFS features
 
 ::
 
@@ -239,10 +239,10 @@ To list all CephFS features
 
 Clients that are missing newly added features will be evicted automatically.
 
-Here are the current CephFS features and first release they came out:
+Here are the current StoneFS features and first release they came out:
 
 +------------------+--------------+-----------------+
-| Feature          | Ceph release | Upstream Kernel |
+| Feature          | Stone release | Upstream Kernel |
 +==================+==============+=================+
 | jewel            | jewel        | 4.5             |
 +------------------+--------------+-----------------+
@@ -267,7 +267,7 @@ Here are the current CephFS features and first release they came out:
 | alternate_name   | pacific      | PLANNED         |
 +------------------+--------------+-----------------+
 
-CephFS Feature Descriptions
+StoneFS Feature Descriptions
 
 
 ::
@@ -332,9 +332,9 @@ Global settings
 
     fs flag set <flag name> <flag val> [<confirmation string>]
 
-Sets a global CephFS flag (i.e. not specific to a particular file system).
+Sets a global StoneFS flag (i.e. not specific to a particular file system).
 Currently, the only flag setting is 'enable_multiple' which allows having
-multiple CephFS file systems.
+multiple StoneFS file systems.
 
 Some flags require you to confirm your intentions with "--yes-i-really-mean-it"
 or a similar string they will prompt you with. Consider these actions carefully

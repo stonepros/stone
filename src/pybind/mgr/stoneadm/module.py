@@ -21,14 +21,14 @@ import multiprocessing.pool
 import subprocess
 from prettytable import PrettyTable
 
-from ceph.deployment import inventory
-from ceph.deployment.drive_group import DriveGroupSpec
-from ceph.deployment.service_spec import \
+from stone.deployment import inventory
+from stone.deployment.drive_group import DriveGroupSpec
+from stone.deployment.service_spec import \
     ServiceSpec, PlacementSpec, \
     HostPlacementSpec, IngressSpec
-from ceph.utils import str_to_datetime, datetime_to_str, datetime_now
-from cephadm.serve import CephadmServe
-from cephadm.services.cephadmservice import CephadmDaemonDeploySpec
+from stone.utils import str_to_datetime, datetime_to_str, datetime_now
+from stoneadm.serve import StoneadmServe
+from stoneadm.services.stoneadmservice import StoneadmDaemonDeploySpec
 
 from mgr_module import MgrModule, HandleCommandResult, Option, NotifyType
 from mgr_util import create_self_signed_cert
@@ -45,8 +45,8 @@ from orchestrator._interface import daemon_type_to_service
 from . import remotes
 from . import utils
 from .migrations import Migrations
-from .services.cephadmservice import MonService, MgrService, MdsService, RgwService, \
-    RbdMirrorService, CrashService, CephadmService, CephfsMirrorService
+from .services.stoneadmservice import MonService, MgrService, MdsService, RgwService, \
+    RbdMirrorService, CrashService, StoneadmService, StonefsMirrorService
 from .services.ingress import IngressService
 from .services.container import CustomContainerService
 from .services.iscsi import IscsiService
@@ -54,14 +54,14 @@ from .services.nfs import NFSService
 from .services.osd import OSDRemovalQueue, OSDService, OSD, NotFoundError
 from .services.monitoring import GrafanaService, AlertmanagerService, PrometheusService, \
     NodeExporterService, SNMPGatewayService
-from .services.exporter import CephadmExporter, CephadmExporterConfig
+from .services.exporter import StoneadmExporter, StoneadmExporterConfig
 from .schedule import HostAssignment
 from .inventory import Inventory, SpecStore, HostCache, EventStore, ClientKeyringStore, ClientKeyringSpec
-from .upgrade import CephadmUpgrade
+from .upgrade import StoneadmUpgrade
 from .template import TemplateMgr
-from .utils import CEPH_IMAGE_TYPES, RESCHEDULE_FROM_OFFLINE_HOSTS_TYPES, forall_hosts, \
-    cephadmNoImage
-from .configchecks import CephadmConfigChecks
+from .utils import STONE_IMAGE_TYPES, RESCHEDULE_FROM_OFFLINE_HOSTS_TYPES, forall_hosts, \
+    stoneadmNoImage
+from .configchecks import StoneadmConfigChecks
 from .offline_watcher import OfflineHostWatcher
 
 try:
@@ -93,11 +93,11 @@ Host *
 """
 
 # Default container images -----------------------------------------------------
-DEFAULT_IMAGE = 'quay.io/ceph/ceph'
+DEFAULT_IMAGE = 'quay.io/stone/stone'
 DEFAULT_PROMETHEUS_IMAGE = 'quay.io/prometheus/prometheus:v2.33.4'
 DEFAULT_NODE_EXPORTER_IMAGE = 'quay.io/prometheus/node-exporter:v1.3.1'
 DEFAULT_ALERT_MANAGER_IMAGE = 'quay.io/prometheus/alertmanager:v0.23.0'
-DEFAULT_GRAFANA_IMAGE = 'quay.io/ceph/ceph-grafana:8.3.5'
+DEFAULT_GRAFANA_IMAGE = 'quay.io/stone/stone-grafana:8.3.5'
 DEFAULT_HAPROXY_IMAGE = 'docker.io/library/haproxy:2.3'
 DEFAULT_KEEPALIVED_IMAGE = 'docker.io/arcts/keepalived'
 DEFAULT_SNMP_GATEWAY_IMAGE = 'docker.io/maxwo/snmp-notifier:v1.2.1'
@@ -134,7 +134,7 @@ def host_exists(hostname_position: int = 1) -> Callable:
     return inner
 
 
-class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
+class StoneadmOrchestrator(orchestrator.Orchestrator, MgrModule,
                           metaclass=CLICommandMeta):
 
     _STORE_HOST_PREFIX = "host"
@@ -182,9 +182,9 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         Option(
             'mode',
             type='str',
-            enum_allowed=['root', 'cephadm-package'],
+            enum_allowed=['root', 'stoneadm-package'],
             default='root',
-            desc='mode for remote execution of cephadm',
+            desc='mode for remote execution of stoneadm',
         ),
         Option(
             'container_image_base',
@@ -232,14 +232,14 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             type='bool',
             default=True,
             desc='raise a health warning if daemons are detected on a host '
-            'that is not managed by cephadm',
+            'that is not managed by stoneadm',
         ),
         Option(
             'warn_on_stray_daemons',
             type='bool',
             default=True,
             desc='raise a health warning if daemons are detected '
-            'that are not managed by cephadm',
+            'that are not managed by stoneadm',
         ),
         Option(
             'warn_on_failed_host_check',
@@ -251,13 +251,13 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             'log_to_cluster',
             type='bool',
             default=True,
-            desc='log to the "cephadm" cluster log channel"',
+            desc='log to the "stoneadm" cluster log channel"',
         ),
         Option(
             'allow_ptrace',
             type='bool',
             default=False,
-            desc='allow SYS_PTRACE capability on ceph containers',
+            desc='allow SYS_PTRACE capability on stone containers',
             long_desc='The SYS_PTRACE capability is needed to attach to a '
             'process with gdb or strace.  Enabling this options '
             'can allow debugging daemons that encounter problems '
@@ -272,7 +272,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         Option(
             'prometheus_alerts_path',
             type='str',
-            default='/etc/prometheus/ceph/ceph_default_alerts.yml',
+            default='/etc/prometheus/stone/stone_default_alerts.yml',
             desc='location of alerts to include in prometheus deployments',
         ),
         Option(
@@ -289,16 +289,16 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             desc='manage configs like API endpoints in Dashboard.'
         ),
         Option(
-            'manage_etc_ceph_ceph_conf',
+            'manage_etc_stone_stone_conf',
             type='bool',
             default=False,
-            desc='Manage and own /etc/ceph/ceph.conf on the hosts.',
+            desc='Manage and own /etc/stone/stone.conf on the hosts.',
         ),
         Option(
-            'manage_etc_ceph_ceph_conf_hosts',
+            'manage_etc_stone_stone_conf_hosts',
             type='str',
             default='*',
-            desc='PlacementSpec describing on which hosts to manage /etc/ceph/ceph.conf',
+            desc='PlacementSpec describing on which hosts to manage /etc/stone/stone.conf',
         ),
         # not used anymore
         Option(
@@ -336,7 +336,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             'config_checks_enabled',
             type='bool',
             default=False,
-            desc='Enable or disable the cephadm configuration analysis',
+            desc='Enable or disable the stoneadm configuration analysis',
         ),
         Option(
             'default_registry',
@@ -372,7 +372,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
     ]
 
     def __init__(self, *args: Any, **kwargs: Any):
-        super(CephadmOrchestrator, self).__init__(*args, **kwargs)
+        super(StoneadmOrchestrator, self).__init__(*args, **kwargs)
         self._cluster_fsid: str = self.get('mon_map')['fsid']
         self.last_monmap: Optional[datetime.datetime] = None
 
@@ -410,8 +410,8 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             self.prometheus_alerts_path = ''
             self.migration_current: Optional[int] = None
             self.config_dashboard = True
-            self.manage_etc_ceph_ceph_conf = True
-            self.manage_etc_ceph_ceph_conf_hosts = '*'
+            self.manage_etc_stone_stone_conf = True
+            self.manage_etc_stone_stone_conf_hosts = '*'
             self.registry_url: Optional[str] = None
             self.registry_username: Optional[str] = None
             self.registry_password: Optional[str] = None
@@ -430,24 +430,24 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         self.notify(NotifyType.mon_map, None)
         self.config_notify()
 
-        path = self.get_ceph_option('cephadm_path')
+        path = self.get_stone_option('stoneadm_path')
         try:
             assert isinstance(path, str)
             with open(path, 'r') as f:
-                self._cephadm = f.read()
+                self._stoneadm = f.read()
         except (IOError, TypeError) as e:
-            raise RuntimeError("unable to read cephadm at '%s': %s" % (
+            raise RuntimeError("unable to read stoneadm at '%s': %s" % (
                 path, str(e)))
 
-        self.cephadm_binary_path = self._get_cephadm_binary_path()
+        self.stoneadm_binary_path = self._get_stoneadm_binary_path()
 
         self._worker_pool = multiprocessing.pool.ThreadPool(10)
 
         self._reconfig_ssh()
 
-        CephadmOrchestrator.instance = self
+        StoneadmOrchestrator.instance = self
 
-        self.upgrade = CephadmUpgrade(self)
+        self.upgrade = StoneadmUpgrade(self)
 
         self.health_checks: Dict[str, dict] = {}
 
@@ -479,27 +479,27 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
 
         self.migration = Migrations(self)
 
-        _service_clses: Sequence[Type[CephadmService]] = [
+        _service_clses: Sequence[Type[StoneadmService]] = [
             OSDService, NFSService, MonService, MgrService, MdsService,
             RgwService, RbdMirrorService, GrafanaService, AlertmanagerService,
             PrometheusService, NodeExporterService, CrashService, IscsiService,
-            IngressService, CustomContainerService, CephadmExporter, CephfsMirrorService,
+            IngressService, CustomContainerService, StoneadmExporter, StonefsMirrorService,
             SNMPGatewayService,
         ]
 
         # https://github.com/python/mypy/issues/8993
-        self.cephadm_services: Dict[str, CephadmService] = {
+        self.stoneadm_services: Dict[str, StoneadmService] = {
             cls.TYPE: cls(self) for cls in _service_clses}  # type: ignore
 
-        self.mgr_service: MgrService = cast(MgrService, self.cephadm_services['mgr'])
-        self.osd_service: OSDService = cast(OSDService, self.cephadm_services['osd'])
+        self.mgr_service: MgrService = cast(MgrService, self.stoneadm_services['mgr'])
+        self.osd_service: OSDService = cast(OSDService, self.stoneadm_services['osd'])
 
         self.template = TemplateMgr(self)
 
         self.requires_post_actions: Set[str] = set()
         self.need_connect_dashboard_rgw = False
 
-        self.config_checker = CephadmConfigChecks(self)
+        self.config_checker = StoneadmConfigChecks(self)
 
         self.offline_watcher = OfflineHostWatcher(self)
         self.offline_watcher.start()
@@ -512,15 +512,15 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         self.run = False
         self.event.set()
 
-    def _get_cephadm_service(self, service_type: str) -> CephadmService:
+    def _get_stoneadm_service(self, service_type: str) -> StoneadmService:
         assert service_type in ServiceSpec.KNOWN_SERVICE_TYPES
-        return self.cephadm_services[service_type]
+        return self.stoneadm_services[service_type]
 
-    def _get_cephadm_binary_path(self) -> str:
+    def _get_stoneadm_binary_path(self) -> str:
         import hashlib
         m = hashlib.sha256()
-        m.update(self._cephadm.encode())
-        return f'/var/lib/ceph/{self._cluster_fsid}/cephadm.{m.hexdigest()}'
+        m.update(self._stoneadm.encode())
+        return f'/var/lib/stone/{self._cluster_fsid}/stoneadm.{m.hexdigest()}'
 
     def _kick_serve_loop(self) -> None:
         self.log.debug('_kick_serve_loop')
@@ -528,12 +528,12 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
 
     def serve(self) -> None:
         """
-        The main loop of cephadm.
+        The main loop of stoneadm.
 
         A command handler will typically change the declarative state
-        of cephadm. This loop will then attempt to apply this new state.
+        of stoneadm. This loop will then attempt to apply this new state.
         """
-        serve = CephadmServe(self)
+        serve = StoneadmServe(self)
         serve.serve()
 
     def set_container_image(self, entity: str, image: str) -> None:
@@ -559,7 +559,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         for opt in self.NATIVE_OPTIONS:
             setattr(self,
                     opt,  # type: ignore
-                    self.get_ceph_option(opt))
+                    self.get_stone_option(opt))
             self.log.debug(' native option %s = %s', opt, getattr(self, opt))  # type: ignore
 
         self.event.set()
@@ -571,7 +571,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             self.last_monmap = str_to_datetime(monmap['modified'])
             if self.last_monmap and self.last_monmap > datetime_now():
                 self.last_monmap = None  # just in case clocks are skewed
-            if getattr(self, 'manage_etc_ceph_ceph_conf', False):
+            if getattr(self, 'manage_etc_stone_stone_conf', False):
                 # getattr, due to notify() being called before config_notify()
                 self._kick_serve_loop()
         if notify_type == NotifyType.pg_summary:
@@ -606,7 +606,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             self.paused = False
             self.set_store('pause', None)
         # unconditionally wake loop so that 'orch resume' can be used to kick
-        # cephadm
+        # stoneadm
         self._kick_serve_loop()
 
     def get_unique_name(
@@ -625,7 +625,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         suffix = daemon_type not in [
             'mon', 'crash',
             'prometheus', 'node-exporter', 'grafana', 'alertmanager',
-            'container', 'cephadm-exporter', 'snmp-gateway'
+            'container', 'stoneadm-exporter', 'snmp-gateway'
         ]
         if forcename:
             if len([d for d in existing if d.daemon_id == forcename]):
@@ -664,7 +664,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         if ssh_config is not None or ssh_config_fname is None:
             if not ssh_config:
                 ssh_config = DEFAULT_SSH_CONFIG
-            f = tempfile.NamedTemporaryFile(prefix='cephadm-conf-')
+            f = tempfile.NamedTemporaryFile(prefix='stoneadm-conf-')
             os.fchmod(f.fileno(), 0o600)
             f.write(ssh_config.encode('utf-8'))
             f.flush()  # make visible to other processes
@@ -681,7 +681,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         self.ssh_pub = ssh_pub
         self.ssh_key = ssh_key
         if ssh_key and ssh_pub:
-            tkey = tempfile.NamedTemporaryFile(prefix='cephadm-identity-')
+            tkey = tempfile.NamedTemporaryFile(prefix='stoneadm-identity-')
             tkey.write(ssh_key.encode('utf-8'))
             os.fchmod(tkey.fileno(), 0o600)
             tkey.flush()  # make visible to other processes
@@ -698,8 +698,8 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
 
         if self.mode == 'root':
             self.ssh_user = self.get_store('ssh_user', default='root')
-        elif self.mode == 'cephadm-package':
-            self.ssh_user = 'cephadm'
+        elif self.mode == 'stoneadm-package':
+            self.ssh_user = 'stoneadm'
 
         self._reset_cons()
 
@@ -753,13 +753,13 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
 
     def available(self) -> Tuple[bool, str, Dict[str, Any]]:
         """
-        The cephadm orchestrator is always available.
+        The stoneadm orchestrator is always available.
         """
         ok, err = self.can_run()
         if not ok:
             return ok, err, {}
         if not self.ssh_key or not self.ssh_pub:
-            return False, 'SSH keys not set. Use `ceph cephadm set-priv-key` and `ceph cephadm set-pub-key` or `ceph cephadm generate-key`', {}
+            return False, 'SSH keys not set. Use `stone stoneadm set-priv-key` and `stone stoneadm set-pub-key` or `stone stoneadm generate-key`', {}
 
         # mypy is unable to determine type for _processes since it's private
         worker_count: int = self._worker_pool._processes  # type: ignore
@@ -776,7 +776,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         if self.cache.get_hosts():
             # Can't check anything without hosts
             host = self.cache.get_hosts()[0]
-            r = CephadmServe(self)._check_host(host)
+            r = StoneadmServe(self)._check_host(host)
             if r is not None:
                 # connection failed reset user
                 self.set_store(what, old)
@@ -785,7 +785,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         self.log.info(f'Set ssh {what}')
 
     @orchestrator._cli_write_command(
-        prefix='cephadm set-ssh-config')
+        prefix='stoneadm set-ssh-config')
     def _set_ssh_config(self, inbuf: Optional[str] = None) -> Tuple[int, str, str]:
         """
         Set the ssh_config file (use -i <ssh_config>)
@@ -799,7 +799,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         self._validate_and_set_ssh_val('ssh_config', inbuf, old)
         return 0, "", ""
 
-    @orchestrator._cli_write_command('cephadm clear-ssh-config')
+    @orchestrator._cli_write_command('stoneadm clear-ssh-config')
     def _clear_ssh_config(self) -> Tuple[int, str, str]:
         """
         Clear the ssh_config file
@@ -811,10 +811,10 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         self._reconfig_ssh()
         return 0, "", ""
 
-    @orchestrator._cli_read_command('cephadm get-ssh-config')
+    @orchestrator._cli_read_command('stoneadm get-ssh-config')
     def _get_ssh_config(self) -> HandleCommandResult:
         """
-        Returns the ssh config as used by cephadm
+        Returns the ssh config as used by stoneadm
         """
         if self.ssh_config_file:
             self.validate_ssh_config_fname(self.ssh_config_file)
@@ -825,7 +825,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             return HandleCommandResult(stdout=ssh_config)
         return HandleCommandResult(stdout=DEFAULT_SSH_CONFIG)
 
-    @orchestrator._cli_write_command('cephadm generate-key')
+    @orchestrator._cli_write_command('stoneadm generate-key')
     def _generate_key(self) -> Tuple[int, str, str]:
         """
         Generate a cluster SSH key (if not present)
@@ -837,7 +837,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             try:
                 subprocess.check_call([
                     '/usr/bin/ssh-keygen',
-                    '-C', 'ceph-%s' % self._cluster_fsid,
+                    '-C', 'stone-%s' % self._cluster_fsid,
                     '-N', '',
                     '-f', path
                 ])
@@ -855,7 +855,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         return 0, '', ''
 
     @orchestrator._cli_write_command(
-        'cephadm set-priv-key')
+        'stoneadm set-priv-key')
     def _set_priv_key(self, inbuf: Optional[str] = None) -> Tuple[int, str, str]:
         """Set cluster SSH private key (use -i <private_key>)"""
         if inbuf is None or len(inbuf) == 0:
@@ -868,7 +868,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         return 0, "", ""
 
     @orchestrator._cli_write_command(
-        'cephadm set-pub-key')
+        'stoneadm set-pub-key')
     def _set_pub_key(self, inbuf: Optional[str] = None) -> Tuple[int, str, str]:
         """Set cluster SSH public key (use -i <public_key>)"""
         if inbuf is None or len(inbuf) == 0:
@@ -880,7 +880,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         return 0, "", ""
 
     @orchestrator._cli_write_command(
-        'cephadm clear-key')
+        'stoneadm clear-key')
     def _clear_key(self) -> Tuple[int, str, str]:
         """Clear cluster SSH key"""
         self.set_store('ssh_identity_key', None)
@@ -890,7 +890,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         return 0, '', ''
 
     @orchestrator._cli_read_command(
-        'cephadm get-pub-key')
+        'stoneadm get-pub-key')
     def _get_pub_key(self) -> Tuple[int, str, str]:
         """Show SSH public key for connecting to cluster hosts"""
         if self.ssh_pub:
@@ -899,7 +899,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             return -errno.ENOENT, '', 'No cluster SSH key defined'
 
     @orchestrator._cli_read_command(
-        'cephadm get-user')
+        'stoneadm get-user')
     def _get_user(self) -> Tuple[int, str, str]:
         """
         Show user for SSHing to cluster hosts
@@ -910,7 +910,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             return 0, self.ssh_user, ''
 
     @orchestrator._cli_read_command(
-        'cephadm set-user')
+        'stoneadm set-user')
     def set_ssh_user(self, user: str) -> Tuple[int, str, str]:
         """
         Set user for SSHing to cluster hosts, passwordless sudo will be needed for non-root users
@@ -931,7 +931,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         return 0, msg, ''
 
     @orchestrator._cli_read_command(
-        'cephadm registry-login')
+        'stoneadm registry-login')
     def registry_login(self, url: Optional[str] = None, username: Optional[str] = None, password: Optional[str] = None, inbuf: Optional[str] = None) -> Tuple[int, str, str]:
         """
         Set custom registry login info by providing url, username and password or json file with login info (-i <file>)
@@ -961,7 +961,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             break
         if not host:
             raise OrchestratorError('no hosts defined')
-        r = CephadmServe(self)._registry_login(host, registry_json)
+        r = StoneadmServe(self)._registry_login(host, registry_json)
         if r is not None:
             return 1, '', r
         # if logins succeeded, store info
@@ -971,11 +971,11 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         self.cache.distribute_new_registry_login_info()
         return 0, "registry login scheduled", ''
 
-    @orchestrator._cli_read_command('cephadm check-host')
+    @orchestrator._cli_read_command('stoneadm check-host')
     def check_host(self, host: str, addr: Optional[str] = None) -> Tuple[int, str, str]:
         """Check whether we can access and manage a remote host"""
         try:
-            out, err, code = CephadmServe(self)._run_cephadm(host, cephadmNoImage, 'check-host',
+            out, err, code = StoneadmServe(self)._run_stoneadm(host, stoneadmNoImage, 'check-host',
                                                              ['--expect-hostname', host],
                                                              addr=addr,
                                                              error_ok=True, no_fsid=True)
@@ -984,20 +984,20 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         except OrchestratorError:
             self.log.exception(f"check-host failed for '{host}'")
             return 1, '', ('check-host failed:\n'
-                           + f"Host '{host}' not found. Use 'ceph orch host ls' to see all managed hosts.")
+                           + f"Host '{host}' not found. Use 'stone orch host ls' to see all managed hosts.")
         # if we have an outstanding health alert for this host, give the
         # serve thread a kick
-        if 'CEPHADM_HOST_CHECK_FAILED' in self.health_checks:
-            for item in self.health_checks['CEPHADM_HOST_CHECK_FAILED']['detail']:
+        if 'STONEADM_HOST_CHECK_FAILED' in self.health_checks:
+            for item in self.health_checks['STONEADM_HOST_CHECK_FAILED']['detail']:
                 if item.startswith('host %s ' % host):
                     self.event.set()
         return 0, '%s (%s) ok' % (host, addr), '\n'.join(err)
 
     @orchestrator._cli_read_command(
-        'cephadm prepare-host')
+        'stoneadm prepare-host')
     def _prepare_host(self, host: str, addr: Optional[str] = None) -> Tuple[int, str, str]:
-        """Prepare a remote host for use with cephadm"""
-        out, err, code = CephadmServe(self)._run_cephadm(host, cephadmNoImage, 'prepare-host',
+        """Prepare a remote host for use with stoneadm"""
+        out, err, code = StoneadmServe(self)._run_stoneadm(host, stoneadmNoImage, 'prepare-host',
                                                          ['--expect-hostname', host],
                                                          addr=addr,
                                                          error_ok=True, no_fsid=True)
@@ -1005,19 +1005,19 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             return 1, '', ('prepare-host failed:\n' + '\n'.join(err))
         # if we have an outstanding health alert for this host, give the
         # serve thread a kick
-        if 'CEPHADM_HOST_CHECK_FAILED' in self.health_checks:
-            for item in self.health_checks['CEPHADM_HOST_CHECK_FAILED']['detail']:
+        if 'STONEADM_HOST_CHECK_FAILED' in self.health_checks:
+            for item in self.health_checks['STONEADM_HOST_CHECK_FAILED']['detail']:
                 if item.startswith('host %s ' % host):
                     self.event.set()
         return 0, '%s (%s) ok' % (host, addr), '\n'.join(err)
 
     @orchestrator._cli_write_command(
-        prefix='cephadm set-extra-ceph-conf')
-    def _set_extra_ceph_conf(self, inbuf: Optional[str] = None) -> HandleCommandResult:
+        prefix='stoneadm set-extra-stone-conf')
+    def _set_extra_stone_conf(self, inbuf: Optional[str] = None) -> HandleCommandResult:
         """
-        Text that is appended to all daemon's ceph.conf.
+        Text that is appended to all daemon's stone.conf.
         Mainly a workaround, till `config generate-minimal-conf` generates
-        a complete ceph.conf.
+        a complete stone.conf.
 
         Warning: this is a dangerous operation.
         """
@@ -1026,21 +1026,21 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             cp = ConfigParser()
             cp.read_string(inbuf, source='<infile>')
 
-        self.set_store("extra_ceph_conf", json.dumps({
+        self.set_store("extra_stone_conf", json.dumps({
             'conf': inbuf,
             'last_modified': datetime_to_str(datetime_now())
         }))
-        self.log.info('Set extra_ceph_conf')
+        self.log.info('Set extra_stone_conf')
         self._kick_serve_loop()
         return HandleCommandResult()
 
     @orchestrator._cli_read_command(
-        'cephadm get-extra-ceph-conf')
-    def _get_extra_ceph_conf(self) -> HandleCommandResult:
+        'stoneadm get-extra-stone-conf')
+    def _get_extra_stone_conf(self) -> HandleCommandResult:
         """
-        Get extra ceph conf that is appended
+        Get extra stone conf that is appended
         """
-        return HandleCommandResult(stdout=self.extra_ceph_conf().conf)
+        return HandleCommandResult(stdout=self.extra_stone_conf().conf)
 
     def _set_exporter_config(self, config: Dict[str, str]) -> None:
         self.set_store('exporter_config', json.dumps(config))
@@ -1058,14 +1058,14 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         return self.get_store(kv_option)
 
     @orchestrator._cli_write_command(
-        prefix='cephadm generate-exporter-config')
-    @service_inactive('cephadm-exporter')
+        prefix='stoneadm generate-exporter-config')
+    @service_inactive('stoneadm-exporter')
     def _generate_exporter_config(self) -> Tuple[int, str, str]:
         """
-        Generate default SSL crt/key and token for cephadm exporter daemons
+        Generate default SSL crt/key and token for stoneadm exporter daemons
         """
         self._set_exporter_defaults()
-        self.log.info('Default settings created for cephadm exporter(s)')
+        self.log.info('Default settings created for stoneadm exporter(s)')
         return 0, "", ""
 
     def _set_exporter_defaults(self) -> None:
@@ -1075,25 +1075,25 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             "crt": crt,
             "key": key,
             "token": token,
-            "port": CephadmExporterConfig.DEFAULT_PORT
+            "port": StoneadmExporterConfig.DEFAULT_PORT
         })
         self._set_exporter_option('enabled', 'true')
 
     def _generate_exporter_ssl(self) -> Tuple[str, str]:
-        return create_self_signed_cert(dname={"O": "Ceph", "OU": "cephadm-exporter"})
+        return create_self_signed_cert(dname={"O": "Stone", "OU": "stoneadm-exporter"})
 
     def _generate_exporter_token(self) -> str:
         return secrets.token_hex(32)
 
     @orchestrator._cli_write_command(
-        prefix='cephadm clear-exporter-config')
-    @service_inactive('cephadm-exporter')
+        prefix='stoneadm clear-exporter-config')
+    @service_inactive('stoneadm-exporter')
     def _clear_exporter_config(self) -> Tuple[int, str, str]:
         """
-        Clear the SSL configuration used by cephadm exporter daemons
+        Clear the SSL configuration used by stoneadm exporter daemons
         """
         self._clear_exporter_config_settings()
-        self.log.info('Cleared cephadm exporter configuration')
+        self.log.info('Cleared stoneadm exporter configuration')
         return 0, "", ""
 
     def _clear_exporter_config_settings(self) -> None:
@@ -1101,16 +1101,16 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         self._set_exporter_option('enabled', None)
 
     @orchestrator._cli_write_command(
-        prefix='cephadm set-exporter-config')
-    @service_inactive('cephadm-exporter')
+        prefix='stoneadm set-exporter-config')
+    @service_inactive('stoneadm-exporter')
     def _store_exporter_config(self, inbuf: Optional[str] = None) -> Tuple[int, str, str]:
         """
-        Set custom cephadm-exporter configuration from a json file (-i <file>). JSON must contain crt, key, token and port
+        Set custom stoneadm-exporter configuration from a json file (-i <file>). JSON must contain crt, key, token and port
         """
         if not inbuf:
             return 1, "", "JSON configuration has not been provided (-i <filename>)"
 
-        cfg = CephadmExporterConfig(self)
+        cfg = StoneadmExporterConfig(self)
         rc, reason = cfg.load_from_json(inbuf)
         if rc:
             return 1, "", reason
@@ -1129,15 +1129,15 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         return 0, "", ""
 
     @orchestrator._cli_read_command(
-        'cephadm get-exporter-config')
+        'stoneadm get-exporter-config')
     def _show_exporter_config(self) -> Tuple[int, str, str]:
         """
-        Show the current cephadm-exporter configuraion (JSON)'
+        Show the current stoneadm-exporter configuraion (JSON)'
         """
         cfg = self._get_exporter_config()
         return 0, json.dumps(cfg, indent=2), ""
 
-    @orchestrator._cli_read_command('cephadm config-check ls')
+    @orchestrator._cli_read_command('stoneadm config-check ls')
     def _config_checks_list(self, format: Format = Format.plain) -> HandleCommandResult:
         """List the available configuration checks and their current state"""
 
@@ -1177,13 +1177,13 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
 
         return HandleCommandResult(stdout=table.get_string())
 
-    @orchestrator._cli_read_command('cephadm config-check status')
+    @orchestrator._cli_read_command('stoneadm config-check status')
     def _config_check_status(self) -> HandleCommandResult:
         """Show whether the configuration checker feature is enabled/disabled"""
         status = self.get_module_option('config_checks_enabled')
         return HandleCommandResult(stdout="Enabled" if status else "Disabled")
 
-    @orchestrator._cli_write_command('cephadm config-check enable')
+    @orchestrator._cli_write_command('stoneadm config-check enable')
     def _config_check_enable(self, check_name: str) -> HandleCommandResult:
         """Enable a specific configuration check"""
         if not self._config_check_valid(check_name):
@@ -1197,7 +1197,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
 
         return HandleCommandResult(stdout="ok")
 
-    @orchestrator._cli_write_command('cephadm config-check disable')
+    @orchestrator._cli_write_command('stoneadm config-check disable')
     def _config_check_disable(self, check_name: str) -> HandleCommandResult:
         """Disable a specific configuration check"""
         if not self._config_check_valid(check_name):
@@ -1235,30 +1235,30 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
         self.set_store('config_checks', json.dumps(checks))
         return 0, ""
 
-    class ExtraCephConf(NamedTuple):
+    class ExtraStoneConf(NamedTuple):
         conf: str
         last_modified: Optional[datetime.datetime]
 
-    def extra_ceph_conf(self) -> 'CephadmOrchestrator.ExtraCephConf':
-        data = self.get_store('extra_ceph_conf')
+    def extra_stone_conf(self) -> 'StoneadmOrchestrator.ExtraStoneConf':
+        data = self.get_store('extra_stone_conf')
         if not data:
-            return CephadmOrchestrator.ExtraCephConf('', None)
+            return StoneadmOrchestrator.ExtraStoneConf('', None)
         try:
             j = json.loads(data)
         except ValueError:
-            msg = 'Unable to load extra_ceph_conf: Cannot decode JSON'
+            msg = 'Unable to load extra_stone_conf: Cannot decode JSON'
             self.log.exception('%s: \'%s\'', msg, data)
-            return CephadmOrchestrator.ExtraCephConf('', None)
-        return CephadmOrchestrator.ExtraCephConf(j['conf'], str_to_datetime(j['last_modified']))
+            return StoneadmOrchestrator.ExtraStoneConf('', None)
+        return StoneadmOrchestrator.ExtraStoneConf(j['conf'], str_to_datetime(j['last_modified']))
 
-    def extra_ceph_conf_is_newer(self, dt: datetime.datetime) -> bool:
-        conf = self.extra_ceph_conf()
+    def extra_stone_conf_is_newer(self, dt: datetime.datetime) -> bool:
+        conf = self.extra_stone_conf()
         if not conf.last_modified:
             return False
         return conf.last_modified > dt
 
     @orchestrator._cli_write_command(
-        'cephadm osd activate'
+        'stoneadm osd activate'
     )
     def _osd_activate(self, host: List[str]) -> HandleCommandResult:
         """
@@ -1274,7 +1274,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
     @orchestrator._cli_read_command('orch client-keyring ls')
     def _client_keyring_ls(self, format: Format = Format.plain) -> HandleCommandResult:
         """
-        List client keyrings under cephadm management
+        List client keyrings under stoneadm management
         """
         if format != Format.plain:
             output = to_format(self.keys.keys.values(), format, many=True, cls=ClientKeyringSpec)
@@ -1304,7 +1304,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             mode: Optional[str] = None,
     ) -> HandleCommandResult:
         """
-        Add or update client keyring under cephadm management
+        Add or update client keyring under stoneadm management
         """
         if not entity.startswith('client.'):
             raise OrchestratorError('entity must start with client.')
@@ -1335,7 +1335,7 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             entity: str,
     ) -> HandleCommandResult:
         """
-        Remove client keyring from cephadm management
+        Remove client keyring from stoneadm management
         """
         self.keys.rm(entity)
         self._kick_serve_loop()
@@ -1389,9 +1389,9 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
     def _get_container_image(self, daemon_name: str) -> Optional[str]:
         daemon_type = daemon_name.split('.', 1)[0]  # type: ignore
         image: Optional[str] = None
-        if daemon_type in CEPH_IMAGE_TYPES:
+        if daemon_type in STONE_IMAGE_TYPES:
             # get container image
-            image = str(self.get_foreign_ceph_option(
+            image = str(self.get_foreign_stone_option(
                 utils.name_to_config_section(daemon_name),
                 'container_image'
             )).strip()
@@ -1468,23 +1468,23 @@ class CephadmOrchestrator(orchestrator.Orchestrator, MgrModule,
             msg = str(e) + f'''
 You may need to supply an address for {addr}
 
-Please make sure that the host is reachable and accepts connections using the cephadm SSH key
-To add the cephadm SSH key to the host:
-> ceph cephadm get-pub-key > ~/ceph.pub
-> ssh-copy-id -f -i ~/ceph.pub {self.ssh_user}@{addr}
+Please make sure that the host is reachable and accepts connections using the stoneadm SSH key
+To add the stoneadm SSH key to the host:
+> stone stoneadm get-pub-key > ~/stone.pub
+> ssh-copy-id -f -i ~/stone.pub {self.ssh_user}@{addr}
 
 To check that the host is reachable open a new shell with the --no-hosts flag:
-> cephadm shell --no-hosts
+> stoneadm shell --no-hosts
 
 Then run the following:
-> ceph cephadm get-ssh-config > ssh_config
-> ceph config-key get mgr/cephadm/ssh_identity_key > ~/cephadm_private_key
-> chmod 0600 ~/cephadm_private_key
-> ssh -F ssh_config -i ~/cephadm_private_key {self.ssh_user}@{addr}'''
+> stone stoneadm get-ssh-config > ssh_config
+> stone config-key get mgr/stoneadm/ssh_identity_key > ~/stoneadm_private_key
+> chmod 0600 ~/stoneadm_private_key
+> ssh -F ssh_config -i ~/stoneadm_private_key {self.ssh_user}@{addr}'''
             raise OrchestratorError(msg)
 
-        out, err, code = CephadmServe(self)._run_cephadm(
-            host, cephadmNoImage, 'check-host',
+        out, err, code = StoneadmServe(self)._run_stoneadm(
+            host, stoneadmNoImage, 'check-host',
             ['--expect-hostname', host],
             addr=addr,
             error_ok=True, no_fsid=True)
@@ -1574,7 +1574,7 @@ Then run the following:
 
                 raise OrchestratorValidationError("Not allowed to remove %s from cluster. "
                                                   "The following daemons are running in the host:"
-                                                  "\n%s\nPlease run 'ceph orch host drain %s' to remove daemons from host" % (
+                                                  "\n%s\nPlease run 'stone orch host drain %s' to remove daemons from host" % (
                                                       host, daemons_table, host))
 
         # check, if there we're removing the last _admin host
@@ -1600,8 +1600,8 @@ Then run the following:
                 self.log.info(f"removing: {d.name()}")
 
                 if d.daemon_type != 'osd':
-                    self.cephadm_services[str(d.daemon_type)].pre_remove(d)
-                    self.cephadm_services[str(d.daemon_type)].post_remove(d, is_failed_deploy=False)
+                    self.stoneadm_services[str(d.daemon_type)].pre_remove(d)
+                    self.stoneadm_services[str(d.daemon_type)].post_remove(d, is_failed_deploy=False)
                 else:
                     cmd_args = {
                         'prefix': 'osd purge-actual',
@@ -1673,7 +1673,7 @@ Then run the following:
             if len(admin_hosts) == 1 and admin_hosts[0] == host:
                 raise OrchestratorValidationError(f"Host {host} is the last host with the '_admin'"
                                                   " label.\nRemoving the _admin label from this host could cause the removal"
-                                                  " of the last cluster config/keyring managed by cephadm.\n"
+                                                  " of the last cluster config/keyring managed by stoneadm.\n"
                                                   "It is recommended to add the _admin label to another host"
                                                   " before completing this operation.\nIf you're certain this is"
                                                   " what you want rerun this command with --force.")
@@ -1697,7 +1697,7 @@ Then run the following:
         error_notifications: List[str] = []
         okay: bool = True
         for daemon_type, daemon_ids in daemon_map.items():
-            r = self.cephadm_services[daemon_type_to_service(
+            r = self.stoneadm_services[daemon_type_to_service(
                 daemon_type)].ok_to_stop(daemon_ids, force=force)
             if r.retval:
                 okay = False
@@ -1745,8 +1745,8 @@ Then run the following:
     def enter_host_maintenance(self, hostname: str, force: bool = False) -> str:
         """ Attempt to place a cluster host in maintenance
 
-        Placing a host into maintenance disables the cluster's ceph target in systemd
-        and stops all ceph daemons. If the host is an osd host we apply the noout flag
+        Placing a host into maintenance disables the cluster's stone target in systemd
+        and stops all stone daemons. If the host is an osd host we apply the noout flag
         for the host subtree in crush to prevent data movement during a host maintenance
         window.
 
@@ -1777,7 +1777,7 @@ Then run the following:
                     msg + '\nNote: Warnings can be bypassed with the --force flag', errno=rc)
 
             # call the host-maintenance function
-            _out, _err, _code = CephadmServe(self)._run_cephadm(hostname, cephadmNoImage, "host-maintenance",
+            _out, _err, _code = StoneadmServe(self)._run_stoneadm(hostname, stoneadmNoImage, "host-maintenance",
                                                                 ["enter"],
                                                                 error_ok=True)
             returned_msg = _err[0].split('\n')[-1]
@@ -1808,7 +1808,7 @@ Then run the following:
         self.inventory.save()
 
         self._set_maintenance_healthcheck()
-        return f'Daemons for Ceph cluster {self._cluster_fsid} stopped on host {hostname}. Host {hostname} moved to maintenance mode'
+        return f'Daemons for Stone cluster {self._cluster_fsid} stopped on host {hostname}. Host {hostname} moved to maintenance mode'
 
     @handle_orch_error
     @host_exists()
@@ -1828,7 +1828,7 @@ Then run the following:
         if tgt_host['status'] != "maintenance":
             raise OrchestratorError(f"Host {hostname} is not in maintenance mode")
 
-        outs, errs, _code = CephadmServe(self)._run_cephadm(hostname, cephadmNoImage, 'host-maintenance',
+        outs, errs, _code = StoneadmServe(self)._run_stoneadm(hostname, stoneadmNoImage, 'host-maintenance',
                                                             ['exit'],
                                                             error_ok=True)
         returned_msg = errs[0].split('\n')[-1]
@@ -1859,13 +1859,13 @@ Then run the following:
 
         self._set_maintenance_healthcheck()
 
-        return f"Ceph cluster {self._cluster_fsid} on {hostname} has exited maintenance mode"
+        return f"Stone cluster {self._cluster_fsid} on {hostname} has exited maintenance mode"
 
-    def get_minimal_ceph_conf(self) -> str:
+    def get_minimal_stone_conf(self) -> str:
         _, config, _ = self.check_mon_command({
             "prefix": "config generate-minimal-conf",
         })
-        extra = self.extra_ceph_conf().conf
+        extra = self.extra_stone_conf().conf
         if extra:
             config += '\n\n' + extra.strip() + '\n'
         return config
@@ -1986,7 +1986,7 @@ Then run the following:
                 if service_name is not None and service_name != dd.service_name():
                     continue
                 if not dd.memory_request and dd.daemon_type in ['osd', 'mon']:
-                    dd.memory_request = cast(Optional[int], self.get_foreign_ceph_option(
+                    dd.memory_request = cast(Optional[int], self.get_foreign_stone_option(
                         dd.name(),
                         f"{dd.daemon_type}_memory_target"
                     ))
@@ -1998,7 +1998,7 @@ Then run the following:
         dds: List[DaemonDescription] = self.cache.get_daemons_by_service(service_name)
         if not dds:
             raise OrchestratorError(f'No daemons exist under service name "{service_name}".'
-                                    + ' View currently running services using "ceph orch ls"')
+                                    + ' View currently running services using "stone orch ls"')
         if action == 'stop' and service_name.split('.')[0].lower() in ['mgr', 'mon', 'osd']:
             return [f'Stopping entire {service_name} service is prohibited.']
         self.log.info('%s service %s' % (action.capitalize(), service_name))
@@ -2008,7 +2008,7 @@ Then run the following:
         ]
 
     def _daemon_action(self,
-                       daemon_spec: CephadmDaemonDeploySpec,
+                       daemon_spec: StoneadmDaemonDeploySpec,
                        action: str,
                        image: Optional[str] = None) -> str:
         self._daemon_action_set_image(action, image, daemon_spec.daemon_type,
@@ -2021,9 +2021,9 @@ Then run the following:
 
         if action == 'redeploy' or action == 'reconfig':
             if daemon_spec.daemon_type != 'osd':
-                daemon_spec = self.cephadm_services[daemon_type_to_service(
+                daemon_spec = self.stoneadm_services[daemon_type_to_service(
                     daemon_spec.daemon_type)].prepare_create(daemon_spec)
-            return CephadmServe(self)._create_daemon(daemon_spec, reconfig=(action == 'reconfig'))
+            return StoneadmServe(self)._create_daemon(daemon_spec, reconfig=(action == 'reconfig'))
 
         actions = {
             'start': ['reset-failed', 'start'],
@@ -2033,11 +2033,11 @@ Then run the following:
         name = daemon_spec.name()
         for a in actions[action]:
             try:
-                out, err, code = CephadmServe(self)._run_cephadm(
+                out, err, code = StoneadmServe(self)._run_stoneadm(
                     daemon_spec.host, name, 'unit',
                     ['--name', name, a])
             except Exception:
-                self.log.exception(f'`{daemon_spec.host}: cephadm unit {name} {a}` failed')
+                self.log.exception(f'`{daemon_spec.host}: stoneadm unit {name} {a}` failed')
         self.cache.invalidate_host_daemons(daemon_spec.host)
         msg = "{} {} from host '{}'".format(action, name, daemon_spec.host)
         self.events.for_daemon(name, 'INFO', msg)
@@ -2048,10 +2048,10 @@ Then run the following:
             if action != 'redeploy':
                 raise OrchestratorError(
                     f'Cannot execute {action} with new image. `action` needs to be `redeploy`')
-            if daemon_type not in CEPH_IMAGE_TYPES:
+            if daemon_type not in STONE_IMAGE_TYPES:
                 raise OrchestratorError(
                     f'Cannot redeploy {daemon_type}.{daemon_id} with a new image: Supported '
-                    f'types are: {", ".join(CEPH_IMAGE_TYPES)}')
+                    f'types are: {", ".join(STONE_IMAGE_TYPES)}')
 
             self.check_mon_command({
                 'prefix': 'config set',
@@ -2120,7 +2120,7 @@ Then run the following:
                 return f'Unable to remove {service_name} service.\n' \
                        f'Note, you might want to mark the {service_name} service as "unmanaged"'
         else:
-            return f"Invalid service '{service_name}'. Use 'ceph orch ls' to list available services.\n"
+            return f"Invalid service '{service_name}'. Use 'stone orch ls' to list available services.\n"
 
         # Report list of affected OSDs?
         if not force and service_name.startswith('osd.'):
@@ -2179,7 +2179,7 @@ Then run the following:
     def zap_device(self, host: str, path: str) -> str:
         """Zap a device on a managed host.
 
-        Use ceph-volume zap to return a device to an unused/free state
+        Use stone-volume zap to return a device to an unused/free state
 
         Args:
             host (str): hostname of the cluster host
@@ -2189,7 +2189,7 @@ Then run the following:
             OrchestratorError: host is not a cluster host
             OrchestratorError: host is in maintenance and therefore unavailable
             OrchestratorError: device path not found on the host
-            OrchestratorError: device is known to a different ceph cluster
+            OrchestratorError: device is known to a different stone cluster
             OrchestratorError: device holds active osd
             OrchestratorError: device cache hasn't been populated yet..
 
@@ -2225,7 +2225,7 @@ Then run the following:
                             lv_fsid = lv.get('cluster_fsid')
                             if lv_fsid != self._cluster_fsid:
                                 raise OrchestratorError(
-                                    f"device {path} has lv's from a different Ceph cluster ({lv_fsid})")
+                                    f"device {path} has lv's from a different Stone cluster ({lv_fsid})")
                             osd_id_list.append(lv.get('osd_id', ''))
                 path_found = True
                 break
@@ -2245,10 +2245,10 @@ Then run the following:
                 raise OrchestratorError(
                     f"Unable to zap: device '{path}' on {host} has {len(active_osds)} active "
                     f"OSD{'s' if len(active_osds) > 1 else ''}"
-                    f" ({', '.join(active_osds)}). Use 'ceph orch osd rm' first.")
+                    f" ({', '.join(active_osds)}). Use 'stone orch osd rm' first.")
 
-        out, err, code = CephadmServe(self)._run_cephadm(
-            host, 'osd', 'ceph-volume',
+        out, err, code = StoneadmServe(self)._run_stoneadm(
+            host, 'osd', 'stone-volume',
             ['--', 'lvm', 'zap', '--destroy', path],
             error_ok=True)
 
@@ -2269,8 +2269,8 @@ Then run the following:
 
         If you must, you can customize this via::
 
-          ceph config-key set mgr/cephadm/blink_device_light_cmd '<my jinja2 template>'
-          ceph config-key set mgr/cephadm/<host>/blink_device_light_cmd '<my jinja2 template>'
+          stone config-key set mgr/stoneadm/blink_device_light_cmd '<my jinja2 template>'
+          stone config-key set mgr/stoneadm/<host>/blink_device_light_cmd '<my jinja2 template>'
 
         See templates/blink_device_light_cmd.j2
         """
@@ -2286,7 +2286,7 @@ Then run the following:
                                             host=host)
             cmd_args = shlex.split(cmd_line)
 
-            out, err, code = CephadmServe(self)._run_cephadm(
+            out, err, code = StoneadmServe(self)._run_stoneadm(
                 host, 'osd', 'shell', ['--'] + cmd_args,
                 error_ok=True)
             if code:
@@ -2362,7 +2362,7 @@ Then run the following:
         hosts: List[HostSpec] = self.inventory.all_specs()
         filtered_hosts: List[str] = drive_group.placement.filter_matching_hostspecs(hosts)
         if not filtered_hosts:
-            return "Invalid 'host:device' spec: host not found in cluster. Please check 'ceph orch host ls' for available hosts"
+            return "Invalid 'host:device' spec: host not found in cluster. Please check 'stone orch host ls' for available hosts"
         return self.osd_service.create_from_spec(drive_group)
 
     def _preview_osdspecs(self,
@@ -2400,7 +2400,7 @@ Then run the following:
                           daemon_id: str) -> List[str]:
         deps = []
         if daemon_type == 'haproxy':
-            # because cephadm creates new daemon instances whenever
+            # because stoneadm creates new daemon instances whenever
             # port or ip changes, identifying daemons by name is
             # sufficient to detect changes.
             if not spec:
@@ -2410,7 +2410,7 @@ Then run the following:
             daemons = self.cache.get_daemons_by_service(ingress_spec.backend_service)
             deps = [d.name() for d in daemons]
         elif daemon_type == 'keepalived':
-            # because cephadm creates new daemon instances whenever
+            # because stoneadm creates new daemon instances whenever
             # port or ip changes, identifying daemons by name is
             # sufficient to detect changes.
             if not spec:
@@ -2434,7 +2434,7 @@ Then run the following:
 
     @forall_hosts
     def _remove_daemons(self, name: str, host: str) -> str:
-        return CephadmServe(self)._remove_daemon(name, host)
+        return StoneadmServe(self)._remove_daemon(name, host)
 
     def _check_pool_exists(self, pool: str, service_name: str) -> None:
         logger.info(f'Checking pool "{pool}" exists for service {service_name}')
@@ -2451,7 +2451,7 @@ Then run the following:
         """
         if spec.service_name() not in self.spec_store:
             raise OrchestratorError('Unable to add a Daemon without Service.\n'
-                                    'Please use `ceph orch apply ...` to create a Service.\n'
+                                    'Please use `stone orch apply ...` to create a Service.\n'
                                     'Note, you might want to create the service with "unmanaged=true"')
 
         self.log.debug('_add_daemon %s spec %s' % (daemon_type, spec.placement))
@@ -2475,17 +2475,17 @@ Then run the following:
         did_config = False
         service_type = daemon_type_to_service(daemon_type)
 
-        args = []  # type: List[CephadmDaemonDeploySpec]
+        args = []  # type: List[StoneadmDaemonDeploySpec]
         for host, network, name in hosts:
             daemon_id = self.get_unique_name(daemon_type, host, daemons,
                                              prefix=spec.service_id,
                                              forcename=name)
 
             if not did_config:
-                self.cephadm_services[service_type].config(spec)
+                self.stoneadm_services[service_type].config(spec)
                 did_config = True
 
-            daemon_spec = self.cephadm_services[service_type].make_daemon_spec(
+            daemon_spec = self.stoneadm_services[service_type].make_daemon_spec(
                 host, daemon_id, network, spec,
                 # NOTE: this does not consider port conflicts!
                 ports=spec.get_port_start())
@@ -2503,8 +2503,8 @@ Then run the following:
 
         @ forall_hosts
         def create_func_map(*args: Any) -> str:
-            daemon_spec = self.cephadm_services[daemon_type].prepare_create(*args)
-            return CephadmServe(self)._create_daemon(daemon_spec)
+            daemon_spec = self.stoneadm_services[daemon_type].prepare_create(*args)
+            return StoneadmServe(self)._create_daemon(daemon_spec)
 
         return create_func_map(args)
 
@@ -2555,7 +2555,7 @@ Then run the following:
                     'service_type': spec.service_type,
                     'data': self._preview_osdspecs(osdspecs=[cast(DriveGroupSpec, spec)])}
 
-        svc = self.cephadm_services[spec.service_type]
+        svc = self.stoneadm_services[spec.service_type]
         ha = HostAssignment(
             spec=spec,
             hosts=self._schedulable_hosts(),
@@ -2598,7 +2598,7 @@ Then run the following:
                 'ingress': PlacementSpec(count=2),
                 'iscsi': PlacementSpec(count=1),
                 'rbd-mirror': PlacementSpec(count=2),
-                'cephfs-mirror': PlacementSpec(count=1),
+                'stonefs-mirror': PlacementSpec(count=1),
                 'nfs': PlacementSpec(count=1),
                 'grafana': PlacementSpec(count=1),
                 'alertmanager': PlacementSpec(count=1),
@@ -2606,7 +2606,7 @@ Then run the following:
                 'node-exporter': PlacementSpec(host_pattern='*'),
                 'crash': PlacementSpec(host_pattern='*'),
                 'container': PlacementSpec(count=1),
-                'cephadm-exporter': PlacementSpec(host_pattern='*'),
+                'stoneadm-exporter': PlacementSpec(host_pattern='*'),
                 'snmp-gateway': PlacementSpec(count=1),
             }
             spec.placement = defaults[spec.service_type]
@@ -2627,11 +2627,11 @@ Then run the following:
             elif spec.service_type != 'osd':
                 if spec.placement.count > (max_count * host_count):
                     raise OrchestratorError((f'The maximum number of {spec.service_type} daemons allowed with {host_count} hosts is {host_count*max_count} ({host_count}x{max_count}).'
-                                             + ' This limit can be adjusted by changing the mgr/cephadm/max_count_per_host config option'))
+                                             + ' This limit can be adjusted by changing the mgr/stoneadm/max_count_per_host config option'))
 
         if spec.placement.count_per_host is not None and spec.placement.count_per_host > max_count and spec.service_type != 'osd':
             raise OrchestratorError((f'The maximum count_per_host allowed is {max_count}.'
-                                     + ' This limit can be adjusted by changing the mgr/cephadm/max_count_per_host config option'))
+                                     + ' This limit can be adjusted by changing the mgr/stoneadm/max_count_per_host config option'))
 
         HostAssignment(
             spec=spec,
@@ -2639,7 +2639,7 @@ Then run the following:
             unreachable_hosts=self._unreachable_hosts(),
             networks=self.cache.networks,
             daemons=self.cache.get_daemons_by_service(spec.service_name()),
-            allow_colo=self.cephadm_services[spec.service_type].allow_colo(),
+            allow_colo=self.stoneadm_services[spec.service_type].allow_colo(),
         ).validate()
 
         self.log.info('Saving service %s spec with placement %s' % (
@@ -2725,7 +2725,7 @@ Then run the following:
         return self._apply(spec)
 
     @handle_orch_error
-    def apply_cephadm_exporter(self, spec: ServiceSpec) -> str:
+    def apply_stoneadm_exporter(self, spec: ServiceSpec) -> str:
         return self._apply(spec)
 
     @handle_orch_error
@@ -2740,14 +2740,14 @@ Then run the following:
         else:
             raise OrchestratorError('must specify either image or version')
 
-        image_info = CephadmServe(self)._get_container_image_info(target_name)
+        image_info = StoneadmServe(self)._get_container_image_info(target_name)
 
-        ceph_image_version = image_info.ceph_version
-        if not ceph_image_version:
-            return f'Unable to extract ceph version from {target_name}.'
-        if ceph_image_version.startswith('ceph version '):
-            ceph_image_version = ceph_image_version.split(' ')[2]
-        version_error = self.upgrade._check_target_version(ceph_image_version)
+        stone_image_version = image_info.stone_version
+        if not stone_image_version:
+            return f'Unable to extract stone version from {target_name}.'
+        if stone_image_version.startswith('stone version '):
+            stone_image_version = stone_image_version.split(' ')[2]
+        version_error = self.upgrade._check_target_version(stone_image_version)
         if version_error:
             return f'Incompatible upgrade: {version_error}'
 
@@ -2755,23 +2755,23 @@ Then run the following:
         r: dict = {
             'target_name': target_name,
             'target_id': image_info.image_id,
-            'target_version': image_info.ceph_version,
+            'target_version': image_info.stone_version,
             'needs_update': dict(),
             'up_to_date': list(),
-            'non_ceph_image_daemons': list()
+            'non_stone_image_daemons': list()
         }
         for host, dm in self.cache.daemons.items():
             for name, dd in dm.items():
                 if image_info.image_id == dd.container_image_id:
                     r['up_to_date'].append(dd.name())
-                elif dd.daemon_type in CEPH_IMAGE_TYPES:
+                elif dd.daemon_type in STONE_IMAGE_TYPES:
                     r['needs_update'][dd.name()] = {
                         'current_name': dd.container_image_name,
                         'current_id': dd.container_image_id,
                         'current_version': dd.version,
                     }
                 else:
-                    r['non_ceph_image_daemons'].append(dd.name())
+                    r['non_stone_image_daemons'].append(dd.name())
         if self.use_repo_digest and image_info.repo_digests:
             # FIXME: we assume the first digest is the best one to use
             r['target_digest'] = image_info.repo_digests[0]
@@ -2880,7 +2880,7 @@ Then run the following:
             if len(admin_hosts) == 1 and admin_hosts[0] == hostname:
                 raise OrchestratorValidationError(f"Host {hostname} is the last host with the '_admin'"
                                                   " label.\nDraining this host could cause the removal"
-                                                  " of the last cluster config/keyring managed by cephadm.\n"
+                                                  " of the last cluster config/keyring managed by stoneadm.\n"
                                                   "It is recommended to add the _admin label to another host"
                                                   " before completing this operation.\nIf you're certain this is"
                                                   " what you want rerun this command with --force.")

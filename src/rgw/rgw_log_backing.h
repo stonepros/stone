@@ -41,7 +41,7 @@ enum class log_type {
   fifo = 1
 };
 
-inline void encode(const log_type& type, ceph::buffer::list& bl) {
+inline void encode(const log_type& type, stone::buffer::list& bl) {
   auto t = static_cast<uint8_t>(type);
   encode(t, bl);
 }
@@ -96,9 +96,9 @@ bs::error_code log_remove(librados::IoCtx& ioctx,
 struct logback_generation {
   uint64_t gen_id = 0;
   log_type type;
-  std::optional<ceph::real_time> pruned;
+  std::optional<stone::real_time> pruned;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(gen_id, bl);
     encode(type, bl);
@@ -249,7 +249,7 @@ cursorgen(std::string_view cursor_) {
     return { 0, cursor };
   }
   cursor.remove_prefix(1);
-  auto gen_id = ceph::consume<uint64_t>(cursor);
+  auto gen_id = stone::consume<uint64_t>(cursor);
   if (!gen_id || cursor[0] != '@') {
     return { 0, cursor_ };
   }
@@ -303,7 +303,7 @@ public:
   }
 
   int push(const DoutPrefixProvider *dpp, 
-           const ceph::buffer::list& bl,
+           const stone::buffer::list& bl,
 	   optional_yield y) {
     auto r = lazy_init(dpp, y);
     if (r < 0) return r;
@@ -311,7 +311,7 @@ public:
   }
 
   int push(const DoutPrefixProvider *dpp, 
-           ceph::buffer::list& bl,
+           stone::buffer::list& bl,
 	   librados::AioCompletion* c,
 	   optional_yield y) {
     auto r = lazy_init(dpp, y);
@@ -321,7 +321,7 @@ public:
   }
 
   int push(const DoutPrefixProvider *dpp, 
-           const std::vector<ceph::buffer::list>& data_bufs,
+           const std::vector<stone::buffer::list>& data_bufs,
 	   optional_yield y) {
     auto r = lazy_init(dpp, y);
     if (r < 0) return r;
@@ -329,7 +329,7 @@ public:
   }
 
   int push(const DoutPrefixProvider *dpp, 
-            const std::vector<ceph::buffer::list>& data_bufs,
+            const std::vector<stone::buffer::list>& data_bufs,
 	    librados::AioCompletion* c,
 	    optional_yield y) {
     auto r = lazy_init(dpp, y);

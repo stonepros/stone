@@ -7,7 +7,7 @@
 #include "librbd/io/ImageDispatchInterface.h"
 #include "include/int_types.h"
 #include "include/buffer.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/zipkin_trace.h"
 #include "librbd/io/ReadResult.h"
 #include "librbd/io/Types.h"
@@ -108,7 +108,7 @@ private:
   typedef std::unordered_set<uint64_t> Tids;
 
   ImageCtxT* m_image_ctx;
-  mutable ceph::shared_mutex m_lock;
+  mutable stone::shared_mutex m_lock;
 
   bool m_require_lock_on_read = false;
   bool m_require_lock_on_write = false;

@@ -54,7 +54,7 @@ class Worker(multiprocessing.Process):
 
 def main():
     parser = argparse.ArgumentParser(description="""
-Benchmark updates to ceph users' capabilities. Run one update at a time in each thread.
+Benchmark updates to stone users' capabilities. Run one update at a time in each thread.
 """)
     parser.add_argument(
         '-n', '--num-namespaces',

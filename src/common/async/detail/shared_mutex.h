@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -23,11 +23,11 @@
 #include <boost/intrusive_ptr.hpp>
 #include <boost/intrusive/list.hpp>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "common/async/completion.h"
 
-namespace ceph::async::detail {
+namespace stone::async::detail {
 
 struct LockRequest : public boost::intrusive::list_base_hook<> {
   virtual ~LockRequest() {}
@@ -113,9 +113,9 @@ class AsyncRequest : public LockRequest {
 
 inline SharedMutexImpl::~SharedMutexImpl()
 {
-  ceph_assert(state == Unlocked);
-  ceph_assert(shared_queue.empty());
-  ceph_assert(exclusive_queue.empty());
+  stone_assert(state == Unlocked);
+  stone_assert(shared_queue.empty());
+  stone_assert(exclusive_queue.empty());
 }
 
 template <typename Mutex, typename CompletionToken>
@@ -188,7 +188,7 @@ void SharedMutexImpl::unlock()
   RequestList granted;
   {
     std::lock_guard lock{mutex};
-    ceph_assert(state == Exclusive);
+    stone_assert(state == Exclusive);
 
     if (!exclusive_queue.empty()) {
       // grant next exclusive lock
@@ -277,7 +277,7 @@ inline bool SharedMutexImpl::try_lock_shared()
 inline void SharedMutexImpl::unlock_shared()
 {
   std::lock_guard lock{mutex};
-  ceph_assert(state != Unlocked && state <= MaxShared);
+  stone_assert(state != Unlocked && state <= MaxShared);
 
   if (state == 1 && !exclusive_queue.empty()) {
     // grant next exclusive lock
@@ -323,4 +323,4 @@ void SharedMutexImpl::complete(RequestList&& requests,
   }
 }
 
-} // namespace ceph::async::detail
+} // namespace stone::async::detail

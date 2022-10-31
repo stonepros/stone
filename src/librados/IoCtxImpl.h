@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
  *
@@ -18,7 +18,7 @@
 #include <atomic>
 
 #include "common/Cond.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/snap_types.h"
 #include "common/zipkin_trace.h"
 #include "include/types.h"
@@ -42,12 +42,12 @@ struct librados::IoCtxImpl {
   object_locator_t oloc;
   int extra_op_flags = 0;
 
-  ceph::mutex aio_write_list_lock =
-    ceph::make_mutex("librados::IoCtxImpl::aio_write_list_lock");
-  ceph_tid_t aio_write_seq = 0;
-  ceph::condition_variable aio_write_cond;
+  stone::mutex aio_write_list_lock =
+    stone::make_mutex("librados::IoCtxImpl::aio_write_list_lock");
+  stone_tid_t aio_write_seq = 0;
+  stone::condition_variable aio_write_cond;
   xlist<AioCompletionImpl*> aio_write_list;
-  map<ceph_tid_t, std::list<AioCompletionImpl*> > aio_write_waiters;
+  map<stone_tid_t, std::list<AioCompletionImpl*> > aio_write_waiters;
 
   Objecter *objecter = nullptr;
 
@@ -154,7 +154,7 @@ struct librados::IoCtxImpl {
   int getxattrs(const object_t& oid, map<string, bufferlist>& attrset);
   int rmxattr(const object_t& oid, const char *name);
 
-  int operate(const object_t& oid, ::ObjectOperation *o, ceph::real_time *pmtime, int flags=0);
+  int operate(const object_t& oid, ::ObjectOperation *o, stone::real_time *pmtime, int flags=0);
   int operate_read(const object_t& oid, ::ObjectOperation *o, bufferlist *pbl, int flags=0);
   int aio_operate(const object_t& oid, ::ObjectOperation *o,
 		  AioCompletionImpl *c, const SnapContext& snap_context,
@@ -165,7 +165,7 @@ struct librados::IoCtxImpl {
   struct C_aio_stat_Ack : public Context {
     librados::AioCompletionImpl *c;
     time_t *pmtime;
-    ceph::real_time mtime;
+    stone::real_time mtime;
     C_aio_stat_Ack(AioCompletionImpl *_c, time_t *pm);
     void finish(int r) override;
   };
@@ -173,7 +173,7 @@ struct librados::IoCtxImpl {
   struct C_aio_stat2_Ack : public Context {
     librados::AioCompletionImpl *c;
     struct timespec *pts;
-    ceph::real_time mtime;
+    stone::real_time mtime;
     C_aio_stat2_Ack(AioCompletionImpl *_c, struct timespec *pts);
     void finish(int r) override;
   };

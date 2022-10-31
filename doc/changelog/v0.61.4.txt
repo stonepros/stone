@@ -14,8 +14,8 @@ Date:   Wed May 22 14:29:37 2013 -0700
     ==14803== Use of uninitialised value of size 8
     ==14803==    at 0x12E7614: sctp_crc32c_sb8_64_bit (sctp_crc32.c:567)
     ==14803==    by 0x12E76F8: update_crc32 (sctp_crc32.c:609)
-    ==14803==    by 0x12E7720: ceph_crc32c_le (sctp_crc32.c:733)
-    ==14803==    by 0x105085F: ceph::buffer::list::crc32c(unsigned int) (buffer.h:427)
+    ==14803==    by 0x12E7720: stone_crc32c_le (sctp_crc32.c:733)
+    ==14803==    by 0x105085F: stone::buffer::list::crc32c(unsigned int) (buffer.h:427)
     ==14803==    by 0x115D7B2: Message::calc_front_crc() (Message.h:441)
     ==14803==    by 0x1159BB0: Message::encode(unsigned long, bool) (Message.cc:170)
     ==14803==    by 0x1323934: Pipe::writer() (Pipe.cc:1524)
@@ -159,7 +159,7 @@ commit 41e1416c3585507db75f10ed69f65a5a80370827
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Jun 18 14:51:08 2013 -0700
 
-    ceph.spec: create /var/run on package install
+    stone.spec: create /var/run on package install
     
     The %ghost %dir ... line will make this get cleaned up but won't install
     it.
@@ -173,10 +173,10 @@ commit 2df3619169d2e83617fc3005b68de395e982b39a
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jun 7 17:03:41 2013 -0700
 
-    global: create /var/run/ceph on daemon startup
+    global: create /var/run/stone on daemon startup
     
     This handles cases where the daemon is started without the benefit of
-    sysvinit or upstart (as with teuthology or ceph-fuse).
+    sysvinit or upstart (as with teuthology or stone-fuse).
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit 654299108bfb11e7dce45f54946d1505f71d2de8)
@@ -227,7 +227,7 @@ commit aa8834831dbfcdebb96841686e3707e552c349f6
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Jun 17 15:43:40 2013 -0700
 
-    ceph-disk: add some notes on wth we are up to
+    stone-disk: add some notes on wth we are up to
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit 8c6b24e9039079e897108f28d6af58cbc703a15a)
@@ -236,7 +236,7 @@ commit 261964adc5a7efe7c0efac2d527bc10a95498e45
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jun 14 16:29:10 2013 -0700
 
-    ceph-disk: clear TERM to avoid libreadline hijinx
+    stone-disk: clear TERM to avoid libreadline hijinx
     
     The weird output from libreadline users is related to the TERM variable.
     
@@ -247,7 +247,7 @@ commit e36fb3267cdbe0ec5bb01f8a012485de1bbf1652
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Jun 17 09:49:46 2013 -0700
 
-    ceph-disk-udev: set up by-partuuid, -typeuuid symlinks on ancient udev
+    stone-disk-udev: set up by-partuuid, -typeuuid symlinks on ancient udev
     
     Make the ancient-udev/blkid workaround script for RHEL/CentOS create the
     symlinks for us too.
@@ -259,7 +259,7 @@ commit c3936ebb159b419115bfdc5dc7a23f5807cff9fa
 Author: Sage Weil <sage@inktank.com>
 Date:   Sat Jun 15 20:06:33 2013 -0700
 
-    ceph-disk: do not stop activate-all on first failure
+    stone-disk: do not stop activate-all on first failure
     
     Keep going even if we hit one activation error.  This avoids failing to
     start some disks when only one of them won't start (e.g., because it
@@ -272,7 +272,7 @@ commit 3cb783c31541cebe928b97cf27eb326bb4b54f9b
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jun 14 16:30:24 2013 -0700
 
-    ceph.spec: include partuuid rules in package
+    stone.spec: include partuuid rules in package
     
     Commit f3234c147e083f2904178994bc85de3d082e2836 missed this.
     
@@ -283,11 +283,11 @@ commit 2d771b57082545e139086f3c5c9f79ba47101a14
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jun 14 15:01:14 2013 -0700
 
-    ceph.spec: install/uninstall init script
+    stone.spec: install/uninstall init script
     
     This was commented out almost years ago in commit 9baf5ef4 but it is not
     clear to me that it was correct to do so.  In any case, we are not
-    installing the rc.d links for ceph, which means it does not start up after
+    installing the rc.d links for stone, which means it does not start up after
     a reboot.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -297,9 +297,9 @@ commit dfe421e44cfa13178950258509a0cf71e308daa1
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jun 14 13:39:03 2013 -0700
 
-    sysvinit, upstart: ceph-disk activate-all on start
+    sysvinit, upstart: stone-disk activate-all on start
     
-    On 'service ceph start' or 'service ceph start osd' or start ceph-osd-all
+    On 'service stone start' or 'service stone start osd' or start stone-osd-all
     we should activate any osd GPT partitions.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
@@ -309,9 +309,9 @@ commit ef47cf9c9dd7f4a1f549c14f984cd052fc95bb64
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jun 14 13:34:40 2013 -0700
 
-    ceph-disk: add 'activate-all'
+    stone-disk: add 'activate-all'
     
-    Scan /dev/disk/by-parttypeuuid for ceph OSDs and activate them all.  This
+    Scan /dev/disk/by-parttypeuuid for stone OSDs and activate them all.  This
     is useful when the event didn't trigger on the initial udev event for
     some reason.
     
@@ -431,7 +431,7 @@ Date:   Mon May 27 12:41:53 2013 +0200
 
     Remove mon socket in post-stop
     
-    If ceph-mon segfault, socket file isn't removed.
+    If stone-mon segfault, socket file isn't removed.
     
     By adding a remove in post-stop, upstart clean run directory properly.
     
@@ -452,7 +452,7 @@ commit 0b9b8368aec049bfdd4cf72b481f3a4aa8cb031e
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Wed Jun 12 22:22:42 2013 -0700
 
-    ceph-disk: extra dash in error message
+    stone-disk: extra dash in error message
     
     Signed-off-by: Dan Mick <dan.mick@inktank.com>
     (cherry picked from commit f86b4e7a4831c684033363ddd335d2f3fb9a189a)
@@ -461,7 +461,7 @@ commit ecddd1e0062ae58e8cc75e125cc683fc04b8befe
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Fri May 24 12:41:11 2013 +0200
 
-    ceph-disk: cast output of _check_output()
+    stone-disk: cast output of _check_output()
     
     Cast output of _check_output() to str() to be able to use
     str.split().
@@ -473,7 +473,7 @@ commit 43855e3788cc90900f1b3424c4e4e2c28e8f351e
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Fri May 24 12:46:15 2013 +0200
 
-    ceph-disk: remove unnecessary semicolons
+    stone-disk: remove unnecessary semicolons
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 9785478a2aae7bf5234fbfe443603ba22b5a50d2)
@@ -482,7 +482,7 @@ commit 53927f94f3dcf7c57b73b66159d924557d92506e
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Fri May 24 12:33:16 2013 +0200
 
-    ceph-disk: fix undefined variable
+    stone-disk: fix undefined variable
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit 9429ff90a06368fc98d146e065a7b9d1b68e9822)
@@ -491,7 +491,7 @@ commit f1beeb267d6e19754a9f2f483b5849a6b900f3ce
 Author: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
 Date:   Fri May 24 12:29:07 2013 +0200
 
-    ceph-disk: add missing spaces around operator
+    stone-disk: add missing spaces around operator
     
     Signed-off-by: Danny Al-Gaaf <danny.al-gaaf@bisect.de>
     (cherry picked from commit c127745cc021c8b244d721fa940319158ef9e9d4)
@@ -500,7 +500,7 @@ commit fe23ae0042629f493792eadb88a30514c29fc1a0
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jun 13 22:02:03 2013 -0700
 
-    udev: drop useless --mount argument to ceph-disk
+    udev: drop useless --mount argument to stone-disk
     
     It doesn't mean anything anymore; drop it.
     
@@ -511,9 +511,9 @@ commit d99e0a8908d4feccc0a73952ee31586c83174589
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jun 13 22:01:34 2013 -0700
 
-    ceph-disk-udev: activate-journal
+    stone-disk-udev: activate-journal
     
-    Trigger 'ceph-disk activate-journal' from the alt udev rules.
+    Trigger 'stone-disk activate-journal' from the alt udev rules.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit b139152039bfc0d190f855910d44347c9e79b22a)
@@ -522,7 +522,7 @@ commit dfbd20104e01ce22c7e501f748b2bf13382ee7f6
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jun 13 21:56:23 2013 -0700
 
-    ceph-disk: do not use mount --move (or --bind)
+    stone-disk: do not use mount --move (or --bind)
     
     The kernel does not let you mount --move when the parent mount is
     shared (see, e.g., https://bugzilla.redhat.com/show_bug.cgi?id=917008
@@ -530,7 +530,7 @@ Date:   Thu Jun 13 21:56:23 2013 -0700
     since that (on RHEL at least) screws up /etc/mtab so that the final
     result looks like
     
-     /var/lib/ceph/tmp/mnt.HNHoXU /var/lib/ceph/osd/ceph-0 none rw,bind 0 0
+     /var/lib/stone/tmp/mnt.HNHoXU /var/lib/stone/osd/stone-0 none rw,bind 0 0
     
     Instead, mount the original dev in the final location and then umount
     from the old location.
@@ -542,7 +542,7 @@ commit 98a990d796e71c62fa64c13230a18a4a40aedcdf
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jun 13 21:22:53 2013 -0700
 
-    ceph.spec: include by-partuuid udev workaround rules
+    stone.spec: include by-partuuid udev workaround rules
     
     These are need for old or buggy udev.  Having them for new and unbroken
     udev is harmless.
@@ -554,7 +554,7 @@ commit 1504e23f177fff00a794c0db76db8a8c72bc8eb7
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jun 14 12:10:49 2013 -0700
 
-    ceph-disk: work around buggy rhel/centos parted
+    stone-disk: work around buggy rhel/centos parted
     
     parted on RHEL/Centos prefixes the *machine readable output* with
     
@@ -571,12 +571,12 @@ commit 0b9482bd631aada9e2ca730b6cddd51d7954fb11
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jun 13 15:54:58 2013 -0700
 
-    ceph-disk: implement 'activate-journal'
+    stone-disk: implement 'activate-journal'
     
     Activate an osd via its journal device.  udev populates its symlinks and
     triggers events in an order that is not related to whether the device is
     an osd data partition or a journal.  That means that triggering
-    'ceph-disk activate' can happen before the journal (or journal symlink)
+    'stone-disk activate' can happen before the journal (or journal symlink)
     is present and then fail.
     
     Similarly, it may be that they are on different disks that are hotplugged
@@ -594,7 +594,7 @@ commit 062b9296c98a03f4f291615dce010aebc55aaa32
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Jun 11 18:35:01 2013 -0700
 
-    ceph-disk: call partprobe outside of the prepare lock; drop udevadm settle
+    stone-disk: call partprobe outside of the prepare lock; drop udevadm settle
     
     After we change the final partition type, sgdisk may or may not trigger a
     udev event, depending on how well udev is behaving (it varies between
@@ -616,7 +616,7 @@ commit 9f9dc8b85a81529deb6865ec5f1cebb45f04ddc4
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jun 13 11:03:37 2013 -0700
 
-    ceph-disk: add 'zap' command
+    stone-disk: add 'zap' command
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit 10ba60cd088c15d4b4ea0b86ad681aa57f1051b6)
@@ -625,7 +625,7 @@ commit 4fab29c1c5e4dec79f089e9803adf0e855e5ec4f
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue May 21 12:52:03 2013 -0700
 
-    ceph-disk: fix stat errors with new suppress code
+    stone-disk: fix stat errors with new suppress code
     
     Broken by 225fefe5e7c997b365f481b6c4f66312ea28ed61.
     
@@ -636,7 +636,7 @@ commit 01ba391b079a494272a071b76f8dee89b5f5c44d
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon May 13 12:35:32 2013 -0700
 
-    ceph-disk: add '[un]suppress-activate <dev>' command
+    stone-disk: add '[un]suppress-activate <dev>' command
     
     It is often useful to prepare but not activate a device, for example when
     preparing a bunch of spare disks.  This marks a device as 'do not
@@ -650,13 +650,13 @@ commit 41a15a63349abc5f3e1c0b8de8fcc543e2567035
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Jun 14 11:21:25 2013 -0700
 
-    upstart: start ceph-all on runlevel [2345]
+    upstart: start stone-all on runlevel [2345]
     
     Starting when only one network interface has started breaks machines with
     multiple nics in very problematic ways.
     
     There may be an earlier trigger that we can use for cases where other
-    services on the local machine depend on ceph, but for now this is better
+    services on the local machine depend on stone, but for now this is better
     than the existing behavior.
     
     See #5248
@@ -709,14 +709,14 @@ commit 48f8d6e3ffe9fc5bb71b362e3059ffb2da69926b
 Author: Sage Weil <sage@inktank.com>
 Date:   Sun Jun 2 21:21:51 2013 -0700
 
-    ceph-fuse: create finisher threads after fork()
+    stone-fuse: create finisher threads after fork()
     
     The ObjectCacher and MonClient classes both instantiate Finisher
     threads.  We need to make sure they are created *after* the fork(2)
     or else the process will fail to join() them on shutdown, and the
     threads will not exist while fuse is doing useful work.
     
-    Put CephFuse on the heap and move all this initalization into the child
+    Put StoneFuse on the heap and move all this initalization into the child
     block, and make sure errors are passed back to the parent.
     
     Fix-proposed-by: Alexandre Marangone <alexandre.maragone@inktank.com>

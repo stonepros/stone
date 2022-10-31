@@ -28,7 +28,7 @@ public:
     DENC_FINISH(p);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluefs_extent_t*>&);
 };
 WRITE_CLASS_DENC(bluefs_extent_t)
@@ -67,11 +67,11 @@ struct bluefs_fnode_t {
   void bound_encode(size_t& p) const {
     _denc_friend(*this, p);
   }
-  void encode(ceph::buffer::list::contiguous_appender& p) const {
+  void encode(stone::buffer::list::contiguous_appender& p) const {
     DENC_DUMP_PRE(bluefs_fnode_t);
     _denc_friend(*this, p);
   }
-  void decode(ceph::buffer::ptr::const_iterator& p) {
+  void decode(stone::buffer::ptr::const_iterator& p) {
     _denc_friend(*this, p);
     recalc_allocated();
   }
@@ -124,7 +124,7 @@ struct bluefs_fnode_t {
   mempool::bluefs::vector<bluefs_extent_t>::iterator seek(
     uint64_t off, uint64_t *x_off);
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluefs_fnode_t*>& ls);
 
 };
@@ -147,9 +147,9 @@ struct bluefs_layout_t {
            dedicated_wal == other.dedicated_wal;
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
 };
 WRITE_CLASS_ENCODER(bluefs_layout_t)
 
@@ -171,9 +171,9 @@ struct bluefs_super_t {
     return ~((uint64_t)block_size - 1);
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluefs_super_t*>& ls);
 };
 WRITE_CLASS_ENCODER(bluefs_super_t)
@@ -199,7 +199,7 @@ struct bluefs_transaction_t {
 
   uuid_d uuid;          ///< fs uuid
   uint64_t seq;         ///< sequence number
-  ceph::buffer::list op_bl;     ///< encoded transaction ops
+  stone::buffer::list op_bl;     ///< encoded transaction ops
 
   bluefs_transaction_t() : seq(0) {}
 
@@ -211,50 +211,50 @@ struct bluefs_transaction_t {
   }
 
   void op_init() {
-    using ceph::encode;
+    using stone::encode;
     encode((__u8)OP_INIT, op_bl);
   }
   void op_dir_create(std::string_view dir) {
-    using ceph::encode;
+    using stone::encode;
     encode((__u8)OP_DIR_CREATE, op_bl);
     encode(dir, op_bl);
   }
   void op_dir_remove(std::string_view dir) {
-    using ceph::encode;
+    using stone::encode;
     encode((__u8)OP_DIR_REMOVE, op_bl);
     encode(dir, op_bl);
   }
   void op_dir_link(std::string_view dir, std::string_view file, uint64_t ino) {
-    using ceph::encode;
+    using stone::encode;
     encode((__u8)OP_DIR_LINK, op_bl);
     encode(dir, op_bl);
     encode(file, op_bl);
     encode(ino, op_bl);
   }
   void op_dir_unlink(std::string_view dir, std::string_view file) {
-    using ceph::encode;
+    using stone::encode;
     encode((__u8)OP_DIR_UNLINK, op_bl);
     encode(dir, op_bl);
     encode(file, op_bl);
   }
   void op_file_update(const bluefs_fnode_t& file) {
-    using ceph::encode;
+    using stone::encode;
     encode((__u8)OP_FILE_UPDATE, op_bl);
     encode(file, op_bl);
   }
   void op_file_remove(uint64_t ino) {
-    using ceph::encode;
+    using stone::encode;
     encode((__u8)OP_FILE_REMOVE, op_bl);
     encode(ino, op_bl);
   }
   void op_jump(uint64_t next_seq, uint64_t offset) {
-    using ceph::encode;
+    using stone::encode;
     encode((__u8)OP_JUMP, op_bl);
     encode(next_seq, op_bl);
     encode(offset, op_bl);
   }
   void op_jump_seq(uint64_t next_seq) {
-    using ceph::encode;
+    using stone::encode;
     encode((__u8)OP_JUMP_SEQ, op_bl);
     encode(next_seq, op_bl);
   }
@@ -262,9 +262,9 @@ struct bluefs_transaction_t {
     op_bl.claim_append(from.op_bl);
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluefs_transaction_t*>& ls);
 };
 WRITE_CLASS_ENCODER(bluefs_transaction_t)

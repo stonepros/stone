@@ -1,5 +1,5 @@
 # Building the ceph-grafana container image
-From Nautilus onwards, grafana is embedded into the mgr/dashboard UI and uses two discrete grafana plugins to provide visualisations within the UI. To better support disconnected installs, and provide a more tested configuration you may use the Makefile, in this directory, to (re)generate the grafana containers based on each Ceph release.
+From Nautilus onwards, grafana is embedded into the mgr/dashboard UI and uses two discrete grafana plugins to provide visualisations within the UI. To better support disconnected installs, and provide a more tested configuration you may use the Makefile, in this directory, to (re)generate the grafana containers based on each Stone release.
 
 The versions of grafana, and the plugins are defined in the script so testing can be done against a known configuration.  
 

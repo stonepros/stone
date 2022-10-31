@@ -47,7 +47,7 @@ public:
 };
 
 using rx_buffer_t =
-  std::unique_ptr<ceph::buffer::ptr_node, ceph::buffer::ptr_node::disposer>;
+  std::unique_ptr<stone::buffer::ptr_node, stone::buffer::ptr_node::disposer>;
 
 template <class C>
 class CtRxNode : public Ct<C> {
@@ -105,7 +105,7 @@ public:
 protected:
   AsyncConnection *connection;
   AsyncMessenger *messenger;
-  StoneeContext *cct;
+  StoneContext *cct;
 public:
   std::shared_ptr<AuthConnectionMeta> auth_meta;
 

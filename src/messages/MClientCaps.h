@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -17,7 +17,7 @@
 
 #include "msg/Message.h"
 #include "mds/mdstypes.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 
 class MClientCaps final : public SafeMessage {
 private:
@@ -30,7 +30,7 @@ private:
   static constexpr unsigned FLAG_NO_CAPSNAP		= (1<<1); // unused
   static constexpr unsigned FLAG_PENDING_CAPSNAP	= (1<<2);
 
-  struct ceph_mds_caps_head head;
+  struct stone_mds_caps_head head;
 
   uint64_t size = 0;
   uint64_t max_size = 0;
@@ -42,17 +42,17 @@ private:
   int64_t nfiles = -1;		// files in dir
   int64_t nsubdirs = -1;	// subdirs in dir
 
-  struct ceph_mds_cap_peer peer;
+  struct stone_mds_cap_peer peer;
 
-  ceph::buffer::list snapbl;
-  ceph::buffer::list xattrbl;
-  ceph::buffer::list flockbl;
+  stone::buffer::list snapbl;
+  stone::buffer::list xattrbl;
+  stone::buffer::list flockbl;
   version_t  inline_version = 0;
-  ceph::buffer::list inline_data;
+  stone::buffer::list inline_data;
 
   // Receivers may not use their new caps until they have this OSD map
   epoch_t osd_epoch_barrier = 0;
-  ceph_tid_t oldest_flush_tid = 0;
+  stone_tid_t oldest_flush_tid = 0;
   uint32_t caller_uid = 0;
   uint32_t caller_gid = 0;
 
@@ -62,9 +62,9 @@ private:
   int      get_caps() const { return head.caps; }
   int      get_wanted() const { return head.wanted; }
   int      get_dirty() const { return head.dirty; }
-  ceph_seq_t get_seq() const { return head.seq; }
-  ceph_seq_t get_issue_seq() const { return head.issue_seq; }
-  ceph_seq_t get_mseq() const { return head.migrate_seq; }
+  stone_seq_t get_seq() const { return head.seq; }
+  stone_seq_t get_issue_seq() const { return head.issue_seq; }
+  stone_seq_t get_mseq() const { return head.migrate_seq; }
 
   inodeno_t get_ino() const { return inodeno_t(head.ino); }
   inodeno_t get_realm() const { return inodeno_t(head.realm); }
@@ -114,7 +114,7 @@ private:
   void set_ctime(const utime_t &t) { ctime = t; }
   void set_atime(const utime_t &t) { atime = t; }
 
-  void set_cap_peer(uint64_t id, ceph_seq_t seq, ceph_seq_t mseq, int mds, int flags) {
+  void set_cap_peer(uint64_t id, stone_seq_t seq, stone_seq_t mseq, int mds, int flags) {
     peer.cap_id = id;
     peer.seq = seq;
     peer.mseq = mseq;
@@ -122,8 +122,8 @@ private:
     peer.flags = flags;
   }
 
-  void set_oldest_flush_tid(ceph_tid_t tid) { oldest_flush_tid = tid; }
-  ceph_tid_t get_oldest_flush_tid() const { return oldest_flush_tid; }
+  void set_oldest_flush_tid(stone_tid_t tid) { oldest_flush_tid = tid; }
+  stone_tid_t get_oldest_flush_tid() const { return oldest_flush_tid; }
 
   void clear_dirty() { head.dirty = 0; }
 
@@ -175,7 +175,7 @@ private:
 public:
   std::string_view get_type_name() const override { return "Cfcap";}
   void print(std::ostream& out) const override {
-    out << "client_caps(" << ceph_cap_op_name(head.op)
+    out << "client_caps(" << stone_cap_op_name(head.op)
 	<< " ino " << inodeno_t(head.ino)
 	<< " " << head.cap_id
 	<< " seq " << head.seq;
@@ -202,17 +202,17 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(head, p);
     if (head.op == STONE_CAP_OP_EXPORT) {
-      ceph_mds_caps_export_body body;
+      stone_mds_caps_export_body body;
       decode(body, p);
       peer = body.peer;
-      p += (sizeof(ceph_mds_caps_non_export_body) -
-	    sizeof(ceph_mds_caps_export_body));
+      p += (sizeof(stone_mds_caps_non_export_body) -
+	    sizeof(stone_mds_caps_export_body));
     } else {
-      ceph_mds_caps_non_export_body body;
+      stone_mds_caps_non_export_body body;
       decode(body, p);
       size = body.size;
       max_size = body.max_size;
@@ -224,9 +224,9 @@ public:
       layout.from_legacy(body.layout);
       time_warp_seq = body.time_warp_seq;
     }
-    ceph::decode_nohead(head.snap_trace_len, snapbl, p);
+    stone::decode_nohead(head.snap_trace_len, snapbl, p);
 
-    ceph_assert(middle.length() == head.xattr_len);
+    stone_assert(middle.length() == head.xattr_len);
     if (head.xattr_len)
       xattrbl = middle;
 
@@ -272,22 +272,22 @@ public:
     }
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     header.version = HEAD_VERSION;
     head.snap_trace_len = snapbl.length();
     head.xattr_len = xattrbl.length();
 
     encode(head, payload);
-    static_assert(sizeof(ceph_mds_caps_non_export_body) >
-		  sizeof(ceph_mds_caps_export_body));
+    static_assert(sizeof(stone_mds_caps_non_export_body) >
+		  sizeof(stone_mds_caps_export_body));
     if (head.op == STONE_CAP_OP_EXPORT) {
-      ceph_mds_caps_export_body body;
+      stone_mds_caps_export_body body;
       body.peer = peer;
       encode(body, payload);
-      payload.append_zero(sizeof(ceph_mds_caps_non_export_body) -
-			  sizeof(ceph_mds_caps_export_body));
+      payload.append_zero(sizeof(stone_mds_caps_non_export_body) -
+			  sizeof(stone_mds_caps_export_body));
     } else {
-      ceph_mds_caps_non_export_body body;
+      stone_mds_caps_non_export_body body;
       body.size = size;
       body.max_size = max_size;
       body.truncate_size = truncate_size;
@@ -299,7 +299,7 @@ public:
       body.time_warp_seq = time_warp_seq;
       encode(body, payload);
     }
-    ceph::encode_nohead(snapbl, payload);
+    stone::encode_nohead(snapbl, payload);
 
     middle = xattrbl;
 
@@ -324,7 +324,7 @@ public:
       encode(inline_data, payload);
     } else {
       encode(inline_version, payload);
-      encode(ceph::buffer::list(), payload);
+      encode(stone::buffer::list(), payload);
     }
 
     encode(osd_epoch_barrier, payload);
@@ -341,7 +341,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

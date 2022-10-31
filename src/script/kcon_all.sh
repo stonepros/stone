@@ -5,6 +5,6 @@ p() {
 }
 
 echo 9 > /proc/sysrq-trigger
-p 'module ceph +p'
-p 'module libceph +p'
+p 'module stone +p'
+p 'module libstone +p'
 p 'module rbd +p'

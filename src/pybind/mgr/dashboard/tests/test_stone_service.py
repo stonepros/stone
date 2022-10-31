@@ -9,10 +9,10 @@ from unittest import mock
 
 import pytest
 
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 
 
-class CephServiceTest(unittest.TestCase):
+class StoneServiceTest(unittest.TestCase):
     pools = [{
         'pool_name': 'good_pool',
         'pool': 1,
@@ -24,7 +24,7 @@ class CephServiceTest(unittest.TestCase):
 
     def setUp(self):
         #  Mock get_pool_list
-        self.list_patch = mock.patch('dashboard.services.ceph_service.CephService.get_pool_list')
+        self.list_patch = mock.patch('dashboard.services.stone_service.StoneService.get_pool_list')
         self.list = self.list_patch.start()
         self.list.return_value = self.pools
         #  Mock mgr.get
@@ -36,7 +36,7 @@ class CephServiceTest(unittest.TestCase):
                 '2': {'creating+incomplete': 16},
             }
         }
-        self.service = CephService()
+        self.service = StoneService()
 
     def tearDown(self):
         self.list_patch.stop()
@@ -75,9 +75,9 @@ def mock_smart_data(data):
     def _get_smart_data(d):
         return {d['devid']: data[d['devid']]}
 
-    with mock.patch.object(CephService, '_get_smart_data_by_device', side_effect=_get_smart_data), \
-            mock.patch.object(CephService, 'get_devices_by_host', return_value=devices), \
-            mock.patch.object(CephService, 'get_devices_by_daemon', return_value=devices):
+    with mock.patch.object(StoneService, '_get_smart_data_by_device', side_effect=_get_smart_data), \
+            mock.patch.object(StoneService, 'get_devices_by_host', return_value=devices), \
+            mock.patch.object(StoneService, 'get_devices_by_daemon', return_value=devices):
         yield
 
 
@@ -95,21 +95,21 @@ def test_get_smart_data(caplog, by, args, log):
         'bbb': {'device': {'name': '/dev/sdb'}},
     }
     with mock_smart_data(expected_data):
-        smart_data = getattr(CephService, 'get_smart_data_by_{}'.format(by))(*args)
-        getattr(CephService, 'get_devices_by_{}'.format(by)).assert_called_with(*args)
-        CephService._get_smart_data_by_device.assert_called()
+        smart_data = getattr(StoneService, 'get_smart_data_by_{}'.format(by))(*args)
+        getattr(StoneService, 'get_devices_by_{}'.format(by)).assert_called_with(*args)
+        StoneService._get_smart_data_by_device.assert_called()
         assert smart_data == expected_data
 
     with caplog.at_level(logging.DEBUG):
         with mock_smart_data([]):
-            smart_data = getattr(CephService, 'get_smart_data_by_{}'.format(by))(*args)
-            getattr(CephService, 'get_devices_by_{}'.format(by)).assert_called_with(*args)
-            CephService._get_smart_data_by_device.assert_not_called()
+            smart_data = getattr(StoneService, 'get_smart_data_by_{}'.format(by))(*args)
+            getattr(StoneService, 'get_devices_by_{}'.format(by)).assert_called_with(*args)
+            StoneService._get_smart_data_by_device.assert_not_called()
             assert smart_data == {}
             assert log in caplog.text
 
 
-@mock.patch.object(CephService, 'send_command')
+@mock.patch.object(StoneService, 'send_command')
 def test_get_smart_data_by_device(send_command):
     # pylint: disable=protected-access
     device_id = 'Hitachi_HUA72201_JPW9K0N20D22SE'
@@ -124,7 +124,7 @@ def test_get_smart_data_by_device(send_command):
 
     # Daemons associated: 1 osd down, 2 osd up.
     send_command.side_effect = side_effect
-    smart_data = CephService._get_smart_data_by_device(
+    smart_data = StoneService._get_smart_data_by_device(
         {'devid': device_id, 'daemons': ['osd.1', 'osd.2', 'osd.3']})
     assert smart_data == health_metrics_payload
     send_command.assert_has_calls([mock.call('mon', 'osd tree'),
@@ -133,14 +133,14 @@ def test_get_smart_data_by_device(send_command):
     # Daemons associated: 1 osd down.
     send_command.reset_mock()
     send_command.side_effect = [osd_tree_payload]
-    smart_data = CephService._get_smart_data_by_device({'devid': device_id, 'daemons': ['osd.1']})
+    smart_data = StoneService._get_smart_data_by_device({'devid': device_id, 'daemons': ['osd.1']})
     assert smart_data == {}
     send_command.assert_has_calls([mock.call('mon', 'osd tree')])
 
     # Daemons associated: 1 osd down, 1 mon.
     send_command.reset_mock()
     send_command.side_effect = side_effect
-    smart_data = CephService._get_smart_data_by_device(
+    smart_data = StoneService._get_smart_data_by_device(
         {'devid': device_id, 'daemons': ['osd.1', 'mon.1']})
     assert smart_data == health_metrics_payload
     send_command.assert_has_calls([mock.call('mon', 'osd tree'),
@@ -150,7 +150,7 @@ def test_get_smart_data_by_device(send_command):
     # Daemons associated: 1 mon.
     send_command.reset_mock()
     send_command.side_effect = side_effect
-    smart_data = CephService._get_smart_data_by_device({'devid': device_id, 'daemons': ['mon.1']})
+    smart_data = StoneService._get_smart_data_by_device({'devid': device_id, 'daemons': ['mon.1']})
     assert smart_data == health_metrics_payload
     send_command.assert_has_calls([mock.call('mon', 'osd tree'),
                                    mock.call('mon', 'device query-daemon-health-metrics',
@@ -159,12 +159,12 @@ def test_get_smart_data_by_device(send_command):
     # Daemons associated: 1 other (non-osd, non-mon).
     send_command.reset_mock()
     send_command.side_effect = [osd_tree_payload]
-    smart_data = CephService._get_smart_data_by_device({'devid': device_id, 'daemons': ['rgw.1']})
+    smart_data = StoneService._get_smart_data_by_device({'devid': device_id, 'daemons': ['rgw.1']})
     assert smart_data == {}
     send_command.assert_has_calls([mock.call('mon', 'osd tree')])
 
     # Daemons associated: no daemons.
     send_command.reset_mock()
-    smart_data = CephService._get_smart_data_by_device({'devid': device_id, 'daemons': []})
+    smart_data = StoneService._get_smart_data_by_device({'devid': device_id, 'daemons': []})
     assert smart_data == {}
     send_command.assert_has_calls([])

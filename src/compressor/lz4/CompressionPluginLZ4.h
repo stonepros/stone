@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 XSKY Inc.
  *
@@ -16,16 +16,16 @@
 #define STONE_COMPRESSION_PLUGIN_LZ4_H
 
 // -----------------------------------------------------------------------------
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "compressor/CompressionPlugin.h"
 #include "LZ4Compressor.h"
 // -----------------------------------------------------------------------------
 
-class CompressionPluginLZ4 : public ceph::CompressionPlugin {
+class CompressionPluginLZ4 : public stone::CompressionPlugin {
 
 public:
 
-  explicit CompressionPluginLZ4(StoneeContext* cct) : CompressionPlugin(cct)
+  explicit CompressionPluginLZ4(StoneContext* cct) : CompressionPlugin(cct)
   {}
 
   int factory(CompressorRef *cs, std::ostream *ss) override {

@@ -10,7 +10,7 @@
 #include <list>
 #include <map>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/Context.h"
 #include "common/ThrottleInterface.h"
 #include "common/Timer.h"
@@ -26,7 +26,7 @@
  * back, so @p get_current() drops below the limit after fulfills the requests.
  */
 class Throttle final : public ThrottleInterface {
-  StoneeContext *cct;
+  StoneContext *cct;
   const std::string name;
   PerfCountersRef logger;
   std::atomic<int64_t> count = { 0 }, max = { 0 };
@@ -35,7 +35,7 @@ class Throttle final : public ThrottleInterface {
   const bool use_perf;
 
 public:
-  Throttle(StoneeContext *cct, const std::string& n, int64_t m = 0, bool _use_perf = true);
+  Throttle(StoneContext *cct, const std::string& n, int64_t m = 0, bool _use_perf = true);
   ~Throttle() override;
 
 private:
@@ -150,7 +150,7 @@ public:
  * delay = e + (r - h)((m - e)/(1 - h))
  */
 class BackoffThrottle {
-  StoneeContext *cct;
+  StoneContext *cct;
   const std::string name;
   PerfCountersRef logger;
 
@@ -195,7 +195,7 @@ class BackoffThrottle {
   uint64_t max = 0;
   uint64_t current = 0;
 
-  ceph::timespan _get_delay(uint64_t c) const;
+  stone::timespan _get_delay(uint64_t c) const;
 
 public:
   /**
@@ -214,8 +214,8 @@ public:
     uint64_t throttle_max,
     std::ostream *errstream);
 
-  ceph::timespan get(uint64_t c = 1);
-  ceph::timespan wait() {
+  stone::timespan get(uint64_t c = 1);
+  stone::timespan wait() {
     return get(0);
   }
   uint64_t put(uint64_t c = 1);
@@ -223,7 +223,7 @@ public:
   uint64_t get_current();
   uint64_t get_max();
 
-  BackoffThrottle(StoneeContext *cct, const std::string& n,
+  BackoffThrottle(StoneContext *cct, const std::string& n,
     unsigned expected_concurrency, ///< [in] determines size of conds
     bool _use_perf = true);
   ~BackoffThrottle();
@@ -331,7 +331,7 @@ private:
 
 class TokenBucketThrottle {
   struct Bucket {
-    StoneeContext *cct;
+    StoneContext *cct;
     const std::string name;
 
     uint64_t remain;
@@ -339,7 +339,7 @@ class TokenBucketThrottle {
     uint64_t capacity;
     uint64_t available;
 
-    Bucket(StoneeContext *cct, const std::string &name, uint64_t m)
+    Bucket(StoneContext *cct, const std::string &name, uint64_t m)
       : cct(cct), name(name), remain(m), max(m), capacity(m), available(m) {}
 
     uint64_t get(uint64_t c);
@@ -355,16 +355,16 @@ class TokenBucketThrottle {
       : tokens_requested(_tokens_requested), ctx(_ctx) {}
   };
 
-  StoneeContext *m_cct;
+  StoneContext *m_cct;
   const std::string m_name;
   Bucket m_throttle;
   uint64_t m_burst = 0;
   uint64_t m_avg = 0;
   SafeTimer *m_timer;
-  ceph::mutex *m_timer_lock;
+  stone::mutex *m_timer_lock;
   Context *m_token_ctx = nullptr;
   std::list<Blocker> m_blockers;
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
 
   // minimum of the filling period.
   uint64_t m_tick_min = 50;
@@ -406,9 +406,9 @@ class TokenBucketThrottle {
   double m_schedule_tick = 1.0;
 
 public:
-  TokenBucketThrottle(StoneeContext *cct, const std::string &name,
+  TokenBucketThrottle(StoneContext *cct, const std::string &name,
                       uint64_t burst, uint64_t avg,
-                      SafeTimer *timer, ceph::mutex *timer_lock);
+                      SafeTimer *timer, stone::mutex *timer_lock);
 
   ~TokenBucketThrottle();
 

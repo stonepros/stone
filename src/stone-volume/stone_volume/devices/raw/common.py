@@ -1,5 +1,5 @@
 import argparse
-from ceph_volume.util import arg_validators
+from stone_volume.util import arg_validators
 
 def create_parser(prog, description):
     """

@@ -10,11 +10,11 @@ import threading
 import uuid
 from typing import Dict, Any
 
-import cephfs
+import stonefs
 import rados
 
-from mgr_util import RTimer, CephfsClient, open_filesystem,\
-    CephfsConnectionException
+from mgr_util import RTimer, StonefsClient, open_filesystem,\
+    StonefsConnectionException
 from mgr_module import NotifyType
 from .blocklist import blocklist
 from .notify import Notifier, InstanceWatcher
@@ -29,7 +29,7 @@ from .dir_map.state_transition import ActionType
 
 log = logging.getLogger(__name__)
 
-CEPHFS_IMAGE_POLICY_UPDATE_THROTTLE_INTERVAL = 1
+STONEFS_IMAGE_POLICY_UPDATE_THROTTLE_INTERVAL = 1
 
 class FSPolicy:
     class InstanceListener(InstanceWatcher.Listener):
@@ -54,7 +54,7 @@ class FSPolicy:
         self.instance_listener = FSPolicy.InstanceListener(self)
         self.instance_watcher = None
         self.stopping = threading.Event()
-        self.timer_task = RTimer(CEPHFS_IMAGE_POLICY_UPDATE_THROTTLE_INTERVAL,
+        self.timer_task = RTimer(STONEFS_IMAGE_POLICY_UPDATE_THROTTLE_INTERVAL,
                                  self.process_updates)
         self.timer_task.start()
 
@@ -278,7 +278,7 @@ class FSPolicy:
             return 0, json.dumps(res, indent=4, sort_keys=True), ''
 
 class FSSnapshotMirror:
-    PEER_CONFIG_KEY_PREFIX = "cephfs/mirror/peer"
+    PEER_CONFIG_KEY_PREFIX = "stonefs/mirror/peer"
 
     def __init__(self, mgr):
         self.mgr = mgr
@@ -287,7 +287,7 @@ class FSSnapshotMirror:
         self.fs_map = self.mgr.get('fs_map')
         self.lock = threading.Lock()
         self.refresh_pool_policy()
-        self.local_fs = CephfsClient(mgr)
+        self.local_fs = StonefsClient(mgr)
 
     def notify(self, notify_type: NotifyType):
         log.debug(f'got notify type {notify_type}')
@@ -380,24 +380,24 @@ class FSSnapshotMirror:
     @staticmethod
     def get_mirror_info(fs):
         try:
-            val = fs.getxattr('/', 'ceph.mirror.info')
+            val = fs.getxattr('/', 'stone.mirror.info')
             match = re.search(r'^cluster_id=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}) fs_id=(\d+)$',
                               val.decode('utf-8'))
             if match and len(match.groups()) == 2:
                 return {'cluster_id': match.group(1),
                         'fs_id': int(match.group(2))
                         }
-            raise MirrorException(-errno.EINVAL, 'invalid ceph.mirror.info value format')
-        except cephfs.Error as e:
-            raise MirrorException(-e.errno, 'error fetching ceph.mirror.info xattr')
+            raise MirrorException(-errno.EINVAL, 'invalid stone.mirror.info value format')
+        except stonefs.Error as e:
+            raise MirrorException(-e.errno, 'error fetching stone.mirror.info xattr')
 
     @staticmethod
     def set_mirror_info(local_cluster_id, local_fsid, remote_fs):
         log.info(f'setting {local_cluster_id}::{local_fsid} on remote')
         try:
-            remote_fs.setxattr('/', 'ceph.mirror.info',
+            remote_fs.setxattr('/', 'stone.mirror.info',
                                f'cluster_id={local_cluster_id} fs_id={local_fsid}'.encode('utf-8'), os.XATTR_CREATE)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             if e.errno == errno.EEXIST:
                 try:
                     mi = FSSnapshotMirror.get_mirror_info(remote_fs)
@@ -435,8 +435,8 @@ class FSSnapshotMirror:
                                                           rem['cluster_name'],
                                                           rem['fs_name'], 'remote', conf_dct=remote_conf)
         try:
-            remote_fs.removexattr('/', 'ceph.mirror.info')
-        except cephfs.Error as e:
+            remote_fs.removexattr('/', 'stone.mirror.info')
+        except stonefs.Error as e:
             if not e.errno == errno.ENOENT:
                 log.error('error removing mirror info')
                 raise Exception(-e.errno)
@@ -755,7 +755,7 @@ class FSSnapshotMirror:
             with self.lock:
                 daemons = []
                 sm = self.mgr.get('service_map')
-                daemon_entry = sm['services'].get('cephfs-mirror', None)
+                daemon_entry = sm['services'].get('stonefs-mirror', None)
                 log.debug(f'daemon_entry: {daemon_entry}')
                 if daemon_entry is not None:
                     for daemon_key in daemon_entry.get('daemons', []):
@@ -767,9 +767,9 @@ class FSSnapshotMirror:
                             'daemon_id'   : daemon_id,
                             'filesystems' : []
                         } # type: Dict[str, Any]
-                        daemon_status = self.mgr.get_daemon_status('cephfs-mirror', daemon_key)
+                        daemon_status = self.mgr.get_daemon_status('stonefs-mirror', daemon_key)
                         if not daemon_status:
-                            log.debug(f'daemon status not yet availble for cephfs-mirror daemon: {daemon_key}')
+                            log.debug(f'daemon status not yet availble for stonefs-mirror daemon: {daemon_key}')
                             continue
                         status = json.loads(daemon_status['status_json'])
                         for fs_id, fs_desc in status.items():

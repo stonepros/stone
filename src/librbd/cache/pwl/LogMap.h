@@ -70,7 +70,7 @@ private:
                                               LogMapEntryCompare>;
 
   StoneContext *m_cct;
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   BlockExtentToLogMapEntries m_block_to_log_entry_map;
 };
 

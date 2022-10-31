@@ -9,9 +9,9 @@
 #include <boost/variant.hpp>
 
 #include "msg/Dispatcher.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
-#include "include/cephfs/metrics/Types.h"
+#include "include/stonefs/metrics/Types.h"
 
 #include "messages/MMDSPing.h"
 #include "messages/MClientMetrics.h"
@@ -69,7 +69,7 @@ private:
   MDSRank *mds;
   // drop this lock when calling ->send_message_mds() else mds might
   // deadlock
-  ceph::mutex lock = ceph::make_mutex("MetricsHandler::lock");
+  stone::mutex lock = stone::make_mutex("MetricsHandler::lock");
 
   // ISN sent by rank0 pinger is 1
   version_t next_seq = 0;

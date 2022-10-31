@@ -24,7 +24,7 @@
 #include "common/Timer.h"
 #include "common/fair_mutex.h"
 #include "common/TrackedOp.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 #include "include/common_fwd.h"
 
@@ -95,11 +95,11 @@ enum {
   l_mds_scrub_dirfrag_rstats,
   l_mds_scrub_file_inodes,
   l_mdss_handle_inode_file_caps,
-  l_mdss_ceph_cap_op_revoke,
-  l_mdss_ceph_cap_op_grant,
-  l_mdss_ceph_cap_op_trunc,
-  l_mdss_ceph_cap_op_flushsnap_ack,
-  l_mdss_ceph_cap_op_flush_ack,
+  l_mdss_stone_cap_op_revoke,
+  l_mdss_stone_cap_op_grant,
+  l_mdss_stone_cap_op_trunc,
+  l_mdss_stone_cap_op_flushsnap_ack,
+  l_mdss_stone_cap_op_flush_ack,
   l_mdss_handle_client_caps,
   l_mdss_handle_client_caps_dirty,
   l_mdss_handle_client_cap_release,
@@ -127,7 +127,7 @@ enum {
   l_mdm_last,
 };
 
-namespace ceph {
+namespace stone {
   struct heartbeat_handle_d;
 }
 
@@ -167,9 +167,9 @@ class MDSRank {
     MDSRank(
         mds_rank_t whoami_,
 	std::string fs_name_,
-        ceph::fair_mutex &mds_lock_,
+        stone::fair_mutex &mds_lock_,
         LogChannelRef &clog_,
-        CommonSafeTimer<ceph::fair_mutex> &timer_,
+        CommonSafeTimer<stone::fair_mutex> &timer_,
         Beacon &beacon_,
         std::unique_ptr<MDSMap> & mdsmap_,
         Messenger *msgr,
@@ -310,7 +310,7 @@ class MDSRank {
       waiting_for_active_peer[who].push_back(c);
     }
     void wait_for_cluster_recovered(MDSContext *c) {
-      ceph_assert(cluster_degraded);
+      stone_assert(cluster_degraded);
       waiting_for_active_peer[MDS_RANK_NONE].push_back(c);
     }
 
@@ -318,7 +318,7 @@ class MDSRank {
       waiting_for_any_client_connection.push_back(c);
     }
     void kick_waiters_for_any_client_connection(void) {
-      finish_contexts(g_ceph_context, waiting_for_any_client_connection);
+      finish_contexts(g_stone_context, waiting_for_any_client_connection);
     }
     void wait_for_active(MDSContext *c) {
       waiting_for_active.push_back(c);
@@ -349,7 +349,7 @@ class MDSRank {
     epoch_t get_osd_epoch_barrier() const {return osd_epoch_barrier;}
     epoch_t get_osd_epoch() const;
 
-    ceph_tid_t issue_tid() { return ++last_tid; }
+    stone_tid_t issue_tid() { return ++last_tid; }
 
     MDSMap *get_mds_map() { return mdsmap.get(); }
 
@@ -374,7 +374,7 @@ class MDSRank {
     // Reference to global MDS::mds_lock, so that users of MDSRank don't
     // carry around references to the outer MDS, and we can substitute
     // a separate lock here in future potentially.
-    ceph::fair_mutex &mds_lock;
+    stone::fair_mutex &mds_lock;
 
     // Reference to global cluster log client, just to avoid initialising
     // a separate one here.
@@ -383,7 +383,7 @@ class MDSRank {
     // Reference to global timer utility, because MDSRank and MDSDaemon
     // currently both use the same mds_lock, so it makes sense for them
     // to share a timer.
-    CommonSafeTimer<ceph::fair_mutex> &timer;
+    CommonSafeTimer<stone::fair_mutex> &timer;
 
     std::unique_ptr<MDSMap> &mdsmap; /* MDSDaemon::mdsmap */
 
@@ -576,12 +576,12 @@ class MDSRank {
     // Dispatch, retry, queues
     int dispatch_depth = 0;
 
-    ceph::heartbeat_handle_d *hb = nullptr;  // Heartbeat for threads using mds_lock
+    stone::heartbeat_handle_d *hb = nullptr;  // Heartbeat for threads using mds_lock
     double heartbeat_grace;
 
     map<mds_rank_t, version_t> peer_mdsmap_epoch;
 
-    ceph_tid_t last_tid = 0;    // for mds-initiated requests (e.g. stray rename)
+    stone_tid_t last_tid = 0;    // for mds-initiated requests (e.g. stray rename)
 
     MDSContext::vec waiting_for_active, waiting_for_replay, waiting_for_rejoin,
 				waiting_for_reconnect, waiting_for_resolve;
@@ -618,7 +618,7 @@ private:
     // with this we can get rid of the mds_lock in many places too.
     int64_t metadata_pool = -1;
 
-    // "task" string that gets displayed in ceph status
+    // "task" string that gets displayed in stone status
     inline static const std::string SCRUB_STATUS_KEY = "scrub status";
 
     void get_task_status(std::map<std::string, std::string> *status);
@@ -671,9 +671,9 @@ public:
   MDSRankDispatcher(
       mds_rank_t whoami_,
       std::string fs_name,
-      ceph::fair_mutex &mds_lock_,
+      stone::fair_mutex &mds_lock_,
       LogChannelRef &clog_,
-      CommonSafeTimer<ceph::fair_mutex> &timer_,
+      CommonSafeTimer<stone::fair_mutex> &timer_,
       Beacon &beacon_,
       std::unique_ptr<MDSMap> &mdsmap_,
       Messenger *msgr,

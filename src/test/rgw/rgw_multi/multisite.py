@@ -6,7 +6,7 @@ import json
 from .conn import get_gateway_connection, get_gateway_secure_connection
 
 class Cluster:
-    """ interface to run commands against a distinct ceph cluster """
+    """ interface to run commands against a distinct stone cluster """
     __metaclass__ = ABCMeta
 
     @abstractmethod

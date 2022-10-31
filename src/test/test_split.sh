@@ -16,16 +16,16 @@ my_write_objects() {
 }
 
 setup() {
-        export CEPH_NUM_OSD=$1
+        export STONE_NUM_OSD=$1
 
-        # Start ceph
+        # Start stone
         ./stop.sh
 
         ./vstart.sh -d -n
 }
 
 get_pgp_num() {
-        ./ceph -c ./ceph.conf osd pool get $TEST_POOL pgp_num > $TEMPDIR/pgp_num
+        ./stone -c ./stone.conf osd pool get $TEST_POOL pgp_num > $TEMPDIR/pgp_num
         [ $? -eq 0 ] || die "failed to get pgp_num"
         PGP_NUM=`grep PGP_NUM $TEMPDIR/pgp_num | sed 's/.*PGP_NUM:\([ 0123456789]*\).*$/\1/'`
 }
@@ -40,7 +40,7 @@ split1_impl() {
         # Double the number of PGs
         PGP_NUM=$((PGP_NUM*2))
         echo "doubling PGP_NUM to $PGP_NUM..."
-        ./ceph -c ./ceph.conf osd pool set $TEST_POOL pgp_num $PGP_NUM
+        ./stone -c ./stone.conf osd pool set $TEST_POOL pgp_num $PGP_NUM
 
         sleep 30
 
@@ -56,7 +56,7 @@ split1() {
 many_pools() {
         setup 3
         for i in `seq 1 3000`; do
-                ./ceph -c ./ceph.conf osd pool create "pool${i}" 8 || die "pool create failed"
+                ./stone -c ./stone.conf osd pool create "pool${i}" 8 || die "pool create failed"
         done
         my_write_objects 1 10
 }

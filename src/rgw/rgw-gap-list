@@ -5,7 +5,7 @@
 # NOTE: This script based based on rgw-orphan-list but doing the
 # reverse calculation.
 
-# NOTE: The awk included in this script replaces the 'ceph-diff-sorted'
+# NOTE: The awk included in this script replaces the 'stone-diff-sorted'
 # utility but duplicates its functionality.  This was done to minimize
 # the number of times the massive data set must be iterated to complete
 # the task.
@@ -34,7 +34,7 @@ incremental_grep_awk="/tmp/ig-${$}.awk"
 # field separator -- contains ascii 0xFE, designed to be a character
 # that won't appear in normal output, can only be a single character
 # due to use in in the sort command
-fs="þ"
+fs="ï¿½"
 
 log_out() {
   echo $(date +%F\ %T) $1

@@ -3,7 +3,7 @@
 #include <boost/asio/basic_waitable_timer.hpp>
 #include <boost/intrusive_ptr.hpp>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 namespace rgw {
 

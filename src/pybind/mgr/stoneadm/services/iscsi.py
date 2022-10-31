@@ -6,16 +6,16 @@ from typing import List, cast, Optional
 from ipaddress import ip_address, IPv6Address
 
 from mgr_module import HandleCommandResult
-from ceph.deployment.service_spec import IscsiServiceSpec
+from stone.deployment.service_spec import IscsiServiceSpec
 
 from orchestrator import DaemonDescription, DaemonDescriptionStatus
-from .cephadmservice import CephadmDaemonDeploySpec, CephService
+from .stoneadmservice import StoneadmDaemonDeploySpec, StoneService
 from .. import utils
 
 logger = logging.getLogger(__name__)
 
 
-class IscsiService(CephService):
+class IscsiService(StoneService):
     TYPE = 'iscsi'
 
     def config(self, spec: IscsiServiceSpec) -> None:  # type: ignore
@@ -23,7 +23,7 @@ class IscsiService(CephService):
         assert spec.pool
         self.mgr._check_pool_exists(spec.pool, spec.service_name())
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         assert self.TYPE == daemon_spec.daemon_type
 
         spec = cast(IscsiServiceSpec, self.mgr.spec_store[daemon_spec.service_name].spec)
@@ -164,7 +164,7 @@ class IscsiService(CephService):
         if not ret:
             logger.info(f'{daemon.hostname} removed from iscsi gateways dashboard config')
 
-        # needed to know if we have ssl stuff for iscsi in ceph config
+        # needed to know if we have ssl stuff for iscsi in stone config
         iscsi_config_dict = {}
         ret, iscsi_config, err = self.mgr.mon_command({
             'prefix': 'config-key dump',
@@ -173,14 +173,14 @@ class IscsiService(CephService):
         if iscsi_config:
             iscsi_config_dict = json.loads(iscsi_config)
 
-        # remove iscsi cert and key from ceph config
+        # remove iscsi cert and key from stone config
         for iscsi_key, value in iscsi_config_dict.items():
             if f'iscsi/client.{daemon.name()}/' in iscsi_key:
                 ret, out, err = self.mgr.mon_command({
                     'prefix': 'config-key rm',
                     'key': iscsi_key,
                 })
-                logger.info(f'{iscsi_key} removed from ceph config')
+                logger.info(f'{iscsi_key} removed from stone config')
 
     def purge(self, service_name: str) -> None:
         """Removes configuration
@@ -190,7 +190,7 @@ class IscsiService(CephService):
             # remove service configuration from the pool
             try:
                 subprocess.run(['rados',
-                                '-k', str(self.mgr.get_ceph_option('keyring')),
+                                '-k', str(self.mgr.get_stone_option('keyring')),
                                 '-n', f'mgr.{self.mgr.get_mgr_id()}',
                                 '-p', cast(str, spec.pool),
                                 'rm',

@@ -1,10 +1,10 @@
 from textwrap import dedent
 from teuthology.exceptions import CommandFailedError
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 import os
 
 
-class TestPoolPerm(CephFSTestCase):
+class TestPoolPerm(StoneFSTestCase):
     def test_pool_perm(self):
         self.mount_a.run_shell(["touch", "test_file"])
 
@@ -78,10 +78,10 @@ class TestPoolPerm(CephFSTestCase):
         self.mount_a.mount_wait()
 
         with self.assertRaises(CommandFailedError):
-            self.mount_a.setfattr("layoutfile", "ceph.file.layout.pool",
+            self.mount_a.setfattr("layoutfile", "stone.file.layout.pool",
                                   new_pool_name)
         with self.assertRaises(CommandFailedError):
-            self.mount_a.setfattr("layoutdir", "ceph.dir.layout.pool",
+            self.mount_a.setfattr("layoutdir", "stone.dir.layout.pool",
                                   new_pool_name)
         self.mount_a.umount_wait()
 
@@ -94,9 +94,9 @@ class TestPoolPerm(CephFSTestCase):
                 self.fs.get_data_pool_names()[1],
             ))
         self.mount_a.mount_wait()
-        self.mount_a.setfattr("layoutfile", "ceph.file.layout.pool",
+        self.mount_a.setfattr("layoutfile", "stone.file.layout.pool",
                               new_pool_name)
-        self.mount_a.setfattr("layoutdir", "ceph.dir.layout.pool",
+        self.mount_a.setfattr("layoutdir", "stone.dir.layout.pool",
                               new_pool_name)
         self.mount_a.umount_wait()
 

@@ -2,15 +2,15 @@
 import os
 from collections import defaultdict
 
-import cephfs
+import stonefs
 import cherrypy
 
 from .. import mgr
 from ..exceptions import DashboardException
 from ..security import Scope
-from ..services.ceph_service import CephService
-from ..services.cephfs import CephFS as CephFS_
-from ..services.exception import handle_cephfs_error
+from ..services.stone_service import StoneService
+from ..services.stonefs import StoneFS as StoneFS_
+from ..services.exception import handle_stonefs_error
 from ..tools import ViewCache
 from . import APIDoc, APIRouter, EndpointDoc, RESTController, UIRouter, allow_empty_body
 
@@ -20,15 +20,15 @@ GET_QUOTAS_SCHEMA = {
 }
 
 
-@APIRouter('/cephfs', Scope.CEPHFS)
-@APIDoc("Cephfs Management API", "Cephfs")
-class CephFS(RESTController):
+@APIRouter('/stonefs', Scope.STONEFS)
+@APIDoc("Stonefs Management API", "Stonefs")
+class StoneFS(RESTController):
     def __init__(self):  # pragma: no cover
         super().__init__()
 
-        # Stateful instances of CephFSClients, hold cached results.  Key to
+        # Stateful instances of StoneFSClients, hold cached results.  Key to
         # dict is FSCID
-        self.cephfs_clients = {}
+        self.stonefs_clients = {}
 
     def list(self):
         fsmap = mgr.get("fs_map")
@@ -97,18 +97,18 @@ class CephFS(RESTController):
         try:
             return int(fs_id)
         except ValueError:
-            raise DashboardException(code='invalid_cephfs_id',
-                                     msg="Invalid cephfs ID {}".format(fs_id),
-                                     component='cephfs')
+            raise DashboardException(code='invalid_stonefs_id',
+                                     msg="Invalid stonefs ID {}".format(fs_id),
+                                     component='stonefs')
 
     @staticmethod
     def client_id_to_int(client_id):
         try:
             return int(client_id)
         except ValueError:
-            raise DashboardException(code='invalid_cephfs_client_id',
-                                     msg="Invalid cephfs client ID {}".format(client_id),
-                                     component='cephfs')
+            raise DashboardException(code='invalid_stonefs_client_id',
+                                     msg="Invalid stonefs client ID {}".format(client_id),
+                                     component='stonefs')
 
     def _get_mds_names(self, filesystem_id=None):
         names = []
@@ -129,7 +129,7 @@ class CephFS(RESTController):
         metadata = mgr.get_metadata('mds', metadata_key)
         if metadata is None:
             return
-        mds_versions[metadata.get('ceph_version', 'unknown')].append(metadata_key)
+        mds_versions[metadata.get('stone_version', 'unknown')].append(metadata_key)
 
     # pylint: disable=too-many-statements,too-many-branches
     def fs_status(self, fs_id):
@@ -144,7 +144,7 @@ class CephFS(RESTController):
 
         if filesystem is None:
             raise cherrypy.HTTPError(404,
-                                     "CephFS id {0} not found".format(fs_id))
+                                     "StoneFS id {0} not found".format(fs_id))
 
         rank_table = []
 
@@ -181,7 +181,7 @@ class CephFS(RESTController):
                 # ops for an active daemon, replay progress, reconnect
                 # progress
                 if state == "active":
-                    activity = CephService.get_rate("mds",
+                    activity = StoneService.get_rate("mds",
                                                     info['name'],
                                                     "mds_server.handle_client_request")
                 else:
@@ -226,7 +226,7 @@ class CephFS(RESTController):
             dirs = mgr.get_latest("mds", daemon_info['name'], "mds_mem.dir")
             caps = mgr.get_latest("mds", daemon_info['name'], "mds_mem.cap")
 
-            activity = CephService.get_rate(
+            activity = StoneService.get_rate(
                 "mds", daemon_info['name'], "mds_log.replay")
 
             rank_table.append(
@@ -268,7 +268,7 @@ class CephFS(RESTController):
             })
 
         return {
-            "cephfs": {
+            "stonefs": {
                 "id": fs_id,
                 "name": mdsmap['fs_name'],
                 "client_count": client_count,
@@ -280,28 +280,28 @@ class CephFS(RESTController):
         }
 
     def _clients(self, fs_id):
-        cephfs_clients = self.cephfs_clients.get(fs_id, None)
-        if cephfs_clients is None:
-            cephfs_clients = CephFSClients(mgr, fs_id)
-            self.cephfs_clients[fs_id] = cephfs_clients
+        stonefs_clients = self.stonefs_clients.get(fs_id, None)
+        if stonefs_clients is None:
+            stonefs_clients = StoneFSClients(mgr, fs_id)
+            self.stonefs_clients[fs_id] = stonefs_clients
 
         try:
-            status, clients = cephfs_clients.get()
+            status, clients = stonefs_clients.get()
         except AttributeError:
             raise cherrypy.HTTPError(404,
-                                     "No cephfs with id {0}".format(fs_id))
+                                     "No stonefs with id {0}".format(fs_id))
 
         if clients is None:
             raise cherrypy.HTTPError(404,
-                                     "No cephfs with id {0}".format(fs_id))
+                                     "No stonefs with id {0}".format(fs_id))
 
         # Decorate the metadata with some fields that will be
         # indepdendent of whether it's a kernel or userspace
         # client, so that the javascript doesn't have to grok that.
         for client in clients:
-            if "ceph_version" in client['client_metadata']:  # pragma: no cover - no complexity
+            if "stone_version" in client['client_metadata']:  # pragma: no cover - no complexity
                 client['type'] = "userspace"
-                client['version'] = client['client_metadata']['ceph_version']
+                client['version'] = client['client_metadata']['stone_version']
                 client['hostname'] = client['client_metadata']['hostname']
                 client['root'] = client['client_metadata']['root']
             elif "kernel_version" in client['client_metadata']:  # pragma: no cover - no complexity
@@ -323,22 +323,22 @@ class CephFS(RESTController):
         clients = self._clients(fs_id)
         if not [c for c in clients['data'] if c['id'] == client_id]:
             raise cherrypy.HTTPError(404,
-                                     "Client {0} does not exist in cephfs {1}".format(client_id,
+                                     "Client {0} does not exist in stonefs {1}".format(client_id,
                                                                                       fs_id))
-        CephService.send_command('mds', 'client evict',
+        StoneService.send_command('mds', 'client evict',
                                  srv_spec='{0}:0'.format(fs_id), id=client_id)
 
     @staticmethod
-    def _cephfs_instance(fs_id):
+    def _stonefs_instance(fs_id):
         """
         :param fs_id: The filesystem identifier.
         :type fs_id: int | str
-        :return: A instance of the CephFS class.
+        :return: A instance of the StoneFS class.
         """
-        fs_name = CephFS_.fs_name_from_id(fs_id)
+        fs_name = StoneFS_.fs_name_from_id(fs_id)
         if fs_name is None:
-            raise cherrypy.HTTPError(404, "CephFS id {} not found".format(fs_id))
-        return CephFS_(fs_name)
+            raise cherrypy.HTTPError(404, "StoneFS id {} not found".format(fs_id))
+        return StoneFS_(fs_name)
 
     @RESTController.Resource('GET')
     def get_root_directory(self, fs_id):
@@ -349,22 +349,22 @@ class CephFS(RESTController):
         :rtype: dict
         """
         try:
-            return self._get_root_directory(self._cephfs_instance(fs_id))
-        except (cephfs.PermissionError, cephfs.ObjectNotFound):  # pragma: no cover
+            return self._get_root_directory(self._stonefs_instance(fs_id))
+        except (stonefs.PermissionError, stonefs.ObjectNotFound):  # pragma: no cover
             return None
 
     def _get_root_directory(self, cfs):
         """
         The root directory that can't be fetched using ls_dir (api).
         It's used in ls_dir (ui-api) and in get_root_directory (api).
-        :param cfs: CephFS service instance
-        :type cfs: CephFS
+        :param cfs: StoneFS service instance
+        :type cfs: StoneFS
         :return: The root directory
         :rtype: dict
         """
         return cfs.get_directory(os.sep.encode())
 
-    @handle_cephfs_error()
+    @handle_stonefs_error()
     @RESTController.Resource('GET')
     def ls_dir(self, fs_id, path=None, depth=1):
         """
@@ -380,9 +380,9 @@ class CephFS(RESTController):
         """
         path = self._set_ls_dir_path(path)
         try:
-            cfs = self._cephfs_instance(fs_id)
+            cfs = self._stonefs_instance(fs_id)
             paths = cfs.ls_dir(path, depth)
-        except (cephfs.PermissionError, cephfs.ObjectNotFound):  # pragma: no cover
+        except (stonefs.PermissionError, stonefs.ObjectNotFound):  # pragma: no cover
             paths = []
         return paths
 
@@ -409,7 +409,7 @@ class CephFS(RESTController):
         :param fs_id: The filesystem identifier.
         :param path: The path of the directory.
         """
-        cfs = self._cephfs_instance(fs_id)
+        cfs = self._stonefs_instance(fs_id)
         cfs.mk_dirs(path)
 
     @RESTController.Resource('DELETE', path='/tree')
@@ -419,7 +419,7 @@ class CephFS(RESTController):
         :param fs_id: The filesystem identifier.
         :param path: The path of the directory.
         """
-        cfs = self._cephfs_instance(fs_id)
+        cfs = self._stonefs_instance(fs_id)
         cfs.rm_dir(path)
 
     @RESTController.Resource('PUT', path='/quota')
@@ -432,11 +432,11 @@ class CephFS(RESTController):
         :param max_bytes: The byte limit.
         :param max_files: The file limit.
         """
-        cfs = self._cephfs_instance(fs_id)
+        cfs = self._stonefs_instance(fs_id)
         return cfs.set_quotas(path, max_bytes, max_files)
 
     @RESTController.Resource('GET', path='/quota')
-    @EndpointDoc("Get Cephfs Quotas of the specified path",
+    @EndpointDoc("Get Stonefs Quotas of the specified path",
                  parameters={
                      'fs_id': (str, 'File System Identifier'),
                      'path': (str, 'File System Path'),
@@ -451,7 +451,7 @@ class CephFS(RESTController):
         and 'max_files'.
         :rtype: dict
         """
-        cfs = self._cephfs_instance(fs_id)
+        cfs = self._stonefs_instance(fs_id)
         return cfs.get_quotas(path)
 
     @RESTController.Resource('POST', path='/snapshot')
@@ -466,7 +466,7 @@ class CephFS(RESTController):
         :return: The name of the snapshot.
         :rtype: str
         """
-        cfs = self._cephfs_instance(fs_id)
+        cfs = self._stonefs_instance(fs_id)
         return cfs.mk_snapshot(path, name)
 
     @RESTController.Resource('DELETE', path='/snapshot')
@@ -477,23 +477,23 @@ class CephFS(RESTController):
         :param path: The path of the directory.
         :param name: The name of the snapshot.
         """
-        cfs = self._cephfs_instance(fs_id)
+        cfs = self._stonefs_instance(fs_id)
         cfs.rm_snapshot(path, name)
 
 
-class CephFSClients(object):
+class StoneFSClients(object):
     def __init__(self, module_inst, fscid):
         self._module = module_inst
         self.fscid = fscid
 
     @ViewCache()
     def get(self):
-        return CephService.send_command('mds', 'session ls', srv_spec='{0}:0'.format(self.fscid))
+        return StoneService.send_command('mds', 'session ls', srv_spec='{0}:0'.format(self.fscid))
 
 
-@UIRouter('/cephfs', Scope.CEPHFS)
-@APIDoc("Dashboard UI helper function; not part of the public API", "CephFSUi")
-class CephFsUi(CephFS):
+@UIRouter('/stonefs', Scope.STONEFS)
+@APIDoc("Dashboard UI helper function; not part of the public API", "StoneFSUi")
+class StoneFsUi(StoneFS):
     RESOURCE_ID = 'fs_id'
 
     @RESTController.Resource('GET')
@@ -503,11 +503,11 @@ class CephFsUi(CephFS):
 
         # Needed for detail tab
         fs_status = self.fs_status(fs_id)
-        for pool in fs_status['cephfs']['pools']:
+        for pool in fs_status['stonefs']['pools']:
             pool['size'] = pool['used'] + pool['avail']
-        data['pools'] = fs_status['cephfs']['pools']
-        data['ranks'] = fs_status['cephfs']['ranks']
-        data['name'] = fs_status['cephfs']['name']
+        data['pools'] = fs_status['stonefs']['pools']
+        data['ranks'] = fs_status['stonefs']['ranks']
+        data['name'] = fs_status['stonefs']['name']
         data['standbys'] = ', '.join([x['name'] for x in fs_status['standbys']])
         counters = self._mds_counters(fs_id)
         for k, v in counters.items():
@@ -519,7 +519,7 @@ class CephFsUi(CephFS):
 
         return data
 
-    @handle_cephfs_error()
+    @handle_stonefs_error()
     @RESTController.Resource('GET')
     def ls_dir(self, fs_id, path=None, depth=1):
         """
@@ -538,10 +538,10 @@ class CephFsUi(CephFS):
         """
         path = self._set_ls_dir_path(path)
         try:
-            cfs = self._cephfs_instance(fs_id)
+            cfs = self._stonefs_instance(fs_id)
             paths = cfs.ls_dir(path, depth)
             if path == os.sep:
                 paths = [self._get_root_directory(cfs)] + paths
-        except (cephfs.PermissionError, cephfs.ObjectNotFound):  # pragma: no cover
+        except (stonefs.PermissionError, stonefs.ObjectNotFound):  # pragma: no cover
             paths = []
         return paths

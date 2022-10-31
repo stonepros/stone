@@ -15,7 +15,7 @@
 #include <mutex>
 
 #include "rocksdb/cache.h"
-#include "include/ceph_hash.h"
+#include "include/stone_hash.h"
 #include "common/PriorityCache.h"
 //#include "hash.h"
 
@@ -116,7 +116,7 @@ class ShardedCache : public rocksdb::Cache, public PriorityCache::PriCache {
 
  private:
   static inline uint32_t HashSlice(const rocksdb::Slice& s) {
-     return ceph_str_hash(STONE_STR_HASH_RJENKINS, s.data(), s.size());
+     return stone_str_hash(STONE_STR_HASH_RJENKINS, s.data(), s.size());
 //    return Hash(s.data(), s.size(), 0);
   }
 

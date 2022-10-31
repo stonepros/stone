@@ -18,12 +18,12 @@ template <typename ImageCtxT = librbd::ImageCtx>
 class CryptoObjectDispatch : public io::ObjectDispatchInterface {
 public:
   static CryptoObjectDispatch* create(
-          ImageCtxT* image_ctx, ceph::ref_t<CryptoInterface> crypto) {
+          ImageCtxT* image_ctx, stone::ref_t<CryptoInterface> crypto) {
     return new CryptoObjectDispatch(image_ctx, crypto);
   }
 
   CryptoObjectDispatch(ImageCtxT* image_ctx,
-                       ceph::ref_t<CryptoInterface> crypto);
+                       stone::ref_t<CryptoInterface> crypto);
 
   io::ObjectDispatchLayer get_dispatch_layer() const override {
     return io::OBJECT_DISPATCH_LAYER_CRYPTO;
@@ -46,7 +46,7 @@ public:
       Context** on_finish, Context* on_dispatched) override;
 
   bool write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
       IOContext io_context, int op_flags, int write_flags,
       std::optional<uint64_t> assert_version,
       const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
@@ -55,15 +55,15 @@ public:
 
   bool write_same(
       uint64_t object_no, uint64_t object_off, uint64_t object_len,
-      io::LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+      io::LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
       IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
       uint64_t* journal_tid, io::DispatchResult* dispatch_result,
       Context** on_finish, Context* on_dispatched) override;
 
   bool compare_and_write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-      ceph::bufferlist&& write_data, IOContext io_context, int op_flags,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+      stone::bufferlist&& write_data, IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, uint64_t* mismatch_offset,
       int* object_dispatch_flags, uint64_t* journal_tid,
       io::DispatchResult* dispatch_result, Context** on_finish,
@@ -103,7 +103,7 @@ public:
 
 private:
   ImageCtxT* m_image_ctx;
-  ceph::ref_t<CryptoInterface> m_crypto;
+  stone::ref_t<CryptoInterface> m_crypto;
 
 };
 

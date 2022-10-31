@@ -14,17 +14,17 @@ namespace cache {
 struct MockImageCache {
   typedef std::vector<std::pair<uint64_t,uint64_t> > Extents;
 
-  MOCK_METHOD4(aio_read_mock, void(const Extents &, ceph::bufferlist*, int,
+  MOCK_METHOD4(aio_read_mock, void(const Extents &, stone::bufferlist*, int,
                                    Context *));
-  void aio_read(Extents&& image_extents, ceph::bufferlist* bl,
+  void aio_read(Extents&& image_extents, stone::bufferlist* bl,
                 int fadvise_flags, Context *on_finish) {
     aio_read_mock(image_extents, bl, fadvise_flags, on_finish);
   }
 
 
-  MOCK_METHOD4(aio_write_mock, void(const Extents &, const ceph::bufferlist &,
+  MOCK_METHOD4(aio_write_mock, void(const Extents &, const stone::bufferlist &,
                                     int, Context *));
-  void aio_write(Extents&& image_extents, ceph::bufferlist&& bl,
+  void aio_write(Extents&& image_extents, stone::bufferlist&& bl,
                  int fadvise_flags, Context *on_finish) {
     aio_write_mock(image_extents, bl, fadvise_flags, on_finish);
   }
@@ -32,20 +32,20 @@ struct MockImageCache {
   MOCK_METHOD4(aio_discard, void(uint64_t, uint64_t, uint32_t, Context *));
   MOCK_METHOD1(aio_flush, void(Context *));
   MOCK_METHOD2(aio_flush, void(librbd::io::FlushSource, Context *));
-  MOCK_METHOD5(aio_writesame_mock, void(uint64_t, uint64_t, ceph::bufferlist& bl,
+  MOCK_METHOD5(aio_writesame_mock, void(uint64_t, uint64_t, stone::bufferlist& bl,
                                         int, Context *));
-  void aio_writesame(uint64_t off, uint64_t len, ceph::bufferlist&& bl,
+  void aio_writesame(uint64_t off, uint64_t len, stone::bufferlist&& bl,
                      int fadvise_flags, Context *on_finish) {
     aio_writesame_mock(off, len, bl, fadvise_flags, on_finish);
   }
 
   MOCK_METHOD6(aio_compare_and_write_mock, void(const Extents &,
-                                                const ceph::bufferlist &,
-                                                const ceph::bufferlist &,
+                                                const stone::bufferlist &,
+                                                const stone::bufferlist &,
                                                 uint64_t *, int, Context *));
 
-  void aio_compare_and_write(Extents&& image_extents, ceph::bufferlist&& cmp_bl,
-                             ceph::bufferlist&& bl, uint64_t *mismatch_offset,
+  void aio_compare_and_write(Extents&& image_extents, stone::bufferlist&& cmp_bl,
+                             stone::bufferlist&& bl, uint64_t *mismatch_offset,
                              int fadvise_flags, Context *on_finish) {
     aio_compare_and_write_mock(image_extents, cmp_bl, bl, mismatch_offset,
                                fadvise_flags, on_finish);

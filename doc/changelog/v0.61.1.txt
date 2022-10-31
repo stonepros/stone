@@ -63,9 +63,9 @@ commit 82b9299512537b8d921caa044107472adacbdabe
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed May 8 14:54:33 2013 -0700
 
-    ceph-create-keys: gracefully handle no data from admin socket
+    stone-create-keys: gracefully handle no data from admin socket
     
-    Old ceph-mon (prior to 393c9372f82ef37fc6497dd46fc453507a463d42) would
+    Old stone-mon (prior to 393c9372f82ef37fc6497dd46fc453507a463d42) would
     return an empty string and success if the command was not registered yet.
     Gracefully handle that case by retrying.
     
@@ -80,7 +80,7 @@ commit ee3da880fbc0488467c30b1d0b635e3c50e23cc3
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed May 8 14:35:54 2013 -0700
 
-    init-ceph: fix osd_data location when checking df utilization
+    init-stone: fix osd_data location when checking df utilization
     
     Do not assume default osd data location.
     
@@ -129,7 +129,7 @@ commit 30ffca77df006a244044604074779af538721f14
 Author: Sage Weil <sage@inktank.com>
 Date:   Wed May 8 11:05:29 2013 -0700
 
-    ceph: return error code when failing to get result from admin socket
+    stone: return error code when failing to get result from admin socket
     
     Make sure we return a non-zero result code when we fail to read something
     from the admin socket.

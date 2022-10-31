@@ -6,7 +6,7 @@ tasks:
 - stoneadm:
     image: quay.stone.io/stone-ci/stone:octopus
     stoneadm_branch: octopus
-    stoneadm_git_url: https://github.com/stone/stone
+    stoneadm_git_url: https://github.com/stonepros/stone
     conf:
       osd:
         #set config option for which cls modules are allowed to be loaded / used

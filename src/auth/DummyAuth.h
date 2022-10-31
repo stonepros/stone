@@ -26,7 +26,7 @@ public:
     AuthConnectionMeta *auth_meta,
     const bufferlist& bl,
     bufferlist *reply) override {
-    ceph_abort();
+    stone_abort();
   }
 
   int handle_auth_done(
@@ -47,7 +47,7 @@ public:
     int result,
     const std::vector<uint32_t>& allowed_methods,
     const std::vector<uint32_t>& allowed_modes) override {
-    ceph_abort();
+    stone_abort();
   }
 
   // server

@@ -19,7 +19,7 @@
             "  admin_password = admin",
             "  allow_embedding = true"
 	],
-	"provisioning/datasources/ceph-dashboard.yml": [
+	"provisioning/datasources/stone-dashboard.yml": [
             "deleteDatasources:",
             "  - name: 'Dashboard'",
             "    orgId: 1",

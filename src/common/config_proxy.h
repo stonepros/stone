@@ -6,50 +6,50 @@
 #include "common/config.h"
 #include "common/config_obs.h"
 #include "common/config_obs_mgr.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 // @c ConfigProxy is a facade of multiple config related classes. it exposes
 // the legacy settings with arrow operator, and the new-style config with its
 // member methods.
-namespace ceph::common {
+namespace stone::common {
 class ConfigProxy {
   /**
    * The current values of all settings described by the schema
    */
   ConfigValues values;
-  using md_config_obs_t = ceph::md_config_obs_impl<ConfigProxy>;
+  using md_config_obs_t = stone::md_config_obs_impl<ConfigProxy>;
   ObserverMgr<md_config_obs_t> obs_mgr;
   md_config_t config;
   /** A lock that protects the md_config_t internals. It is
    * recursive, for simplicity.
    * It is best if this lock comes first in the lock hierarchy. We will
    * hold this lock when calling configuration observers.  */
-  mutable ceph::recursive_mutex lock =
-    ceph::make_recursive_mutex("ConfigProxy::lock");
+  mutable stone::recursive_mutex lock =
+    stone::make_recursive_mutex("ConfigProxy::lock");
 
   class CallGate {
   private:
     uint32_t call_count = 0;
-    ceph::mutex lock;
-    ceph::condition_variable cond;
+    stone::mutex lock;
+    stone::condition_variable cond;
   public:
     CallGate()
-      : lock(ceph::make_mutex("call::gate::lock")) {
+      : lock(stone::make_mutex("call::gate::lock")) {
     }
 
     void enter() {
-      std::lock_guard<ceph::mutex> locker(lock);
+      std::lock_guard<stone::mutex> locker(lock);
       ++call_count;
     }
     void leave() {
-      std::lock_guard<ceph::mutex> locker(lock);
-      ceph_assert(call_count > 0);
+      std::lock_guard<stone::mutex> locker(lock);
+      stone_assert(call_count > 0);
       if (--call_count == 0) {
         cond.notify_all();
       }
     }
     void close() {
-      std::unique_lock<ceph::mutex> locker(lock);
+      std::unique_lock<stone::mutex> locker(lock);
       while (call_count != 0) {
         cond.wait(locker);
       }
@@ -58,17 +58,17 @@ class ConfigProxy {
 
   void call_gate_enter(md_config_obs_t *obs) {
     auto p = obs_call_gate.find(obs);
-    ceph_assert(p != obs_call_gate.end());
+    stone_assert(p != obs_call_gate.end());
     p->second->enter();
   }
   void call_gate_leave(md_config_obs_t *obs) {
     auto p = obs_call_gate.find(obs);
-    ceph_assert(p != obs_call_gate.end());
+    stone_assert(p != obs_call_gate.end());
     p->second->leave();
   }
   void call_gate_close(md_config_obs_t *obs) {
     auto p = obs_call_gate.find(obs);
-    ceph_assert(p != obs_call_gate.end());
+    stone_assert(p != obs_call_gate.end());
     p->second->close();
   }
 
@@ -77,7 +77,7 @@ class ConfigProxy {
 
   std::map<md_config_obs_t*, CallGateRef> obs_call_gate;
 
-  void call_observers(std::unique_lock<ceph::recursive_mutex>& locker,
+  void call_observers(std::unique_lock<stone::recursive_mutex>& locker,
                       rev_obs_map_t& rev_obs) {
     // observers are notified outside of lock
     locker.unlock();
@@ -93,7 +93,7 @@ class ConfigProxy {
 
   void map_observer_changes(md_config_obs_t *obs, const std::string &key,
                             rev_obs_map_t *rev_obs) {
-    ceph_assert(ceph_mutex_is_locked(lock));
+    stone_assert(stone_mutex_is_locked(lock));
 
     auto [it, new_entry] = rev_obs->emplace(obs, std::set<std::string>{});
     it->second.emplace(key);
@@ -149,7 +149,7 @@ public:
 				       std::forward<Callback>(cb),
 				       std::forward<Args>(args)...);
   }
-  void config_options(ceph::Formatter *f) const {
+  void config_options(stone::Formatter *f) const {
     config.config_options(f);
   }
   const decltype(md_config_t::schema)& get_schema() const {
@@ -166,7 +166,7 @@ public:
   const Option *find_option(const std::string& name) const {
     return config.find_option(name);
   }
-  void diff(ceph::Formatter *f, const std::string& name = {}) const {
+  void diff(stone::Formatter *f, const std::string& name = {}) const {
     std::lock_guard l{lock};
     return config.diff(values, f, name);
   }
@@ -234,11 +234,11 @@ public:
     std::lock_guard l{lock};
     config.show_config(values, out);
   }
-  void show_config(ceph::Formatter *f) {
+  void show_config(stone::Formatter *f) {
     std::lock_guard l{lock};
     config.show_config(values, f);
   }
-  void config_options(ceph::Formatter *f) {
+  void config_options(stone::Formatter *f) {
     std::lock_guard l{lock};
     config.config_options(f);
   }
@@ -281,7 +281,7 @@ public:
     std::lock_guard l{lock};
     config.set_val_or_die(values, obs_mgr, key, val);
   }
-  int set_mon_vals(StoneeContext *cct,
+  int set_mon_vals(StoneContext *cct,
 		   const std::map<std::string,std::string,std::less<>>& kv,
 		   md_config_t::config_callback config_cb) {
     std::unique_lock locker(lock);
@@ -324,7 +324,7 @@ public:
   std::string get_parse_error() {
     return config.parse_error;
   }
-  void complain_about_parse_error(StoneeContext *cct) {
+  void complain_about_parse_error(StoneContext *cct) {
     return config.complain_about_parse_error(cct);
   }
   void do_argv_commands() const {
@@ -332,12 +332,12 @@ public:
     config.do_argv_commands(values);
   }
   void get_config_bl(uint64_t have_version,
-		     ceph::buffer::list *bl,
+		     stone::buffer::list *bl,
 		     uint64_t *got_version) {
     std::lock_guard l{lock};
     config.get_config_bl(values, have_version, bl, got_version);
   }
-  void get_defaults_bl(ceph::buffer::list *bl) {
+  void get_defaults_bl(stone::buffer::list *bl) {
     std::lock_guard l{lock};
     config.get_defaults_bl(values, bl);
   }

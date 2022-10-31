@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -29,7 +29,7 @@ public:
   boost::optional<int64_t> data_pool;
 
   MStatfs() : PaxosServiceMessage{STONE_MSG_STATFS, 0, HEAD_VERSION, COMPAT_VERSION} {}
-  MStatfs(const uuid_d& f, ceph_tid_t t, boost::optional<int64_t> _data_pool,
+  MStatfs(const uuid_d& f, stone_tid_t t, boost::optional<int64_t> _data_pool,
 	  version_t v)
     : PaxosServiceMessage{STONE_MSG_STATFS, v, HEAD_VERSION, COMPAT_VERSION},
       fsid(f), data_pool(_data_pool) {
@@ -47,13 +47,13 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(fsid, payload);
     encode(data_pool, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(fsid, p);
@@ -65,7 +65,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

@@ -9,7 +9,7 @@ uuid=`uuidgen`
 cat > secret.xml <<EOF
 <secret ephemeral='no' private='no'>
   <uuid>${uuid}</uuid>
-  <usage type='ceph'>
+  <usage type='stone'>
     <name>client.cinder secret</name>
   </usage>
 </secret>

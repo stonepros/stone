@@ -17,15 +17,15 @@ struct onode_t {
   bool operator==(const onode_t& o) const { return size == o.size && id == o.id; }
   bool operator!=(const onode_t& o) const { return !(*this == o); }
 
-  void encode(ceph::bufferlist& encoded) const {
-    ceph::encode(size, encoded);
-    ceph::encode(id, encoded);
+  void encode(stone::bufferlist& encoded) const {
+    stone::encode(size, encoded);
+    stone::encode(id, encoded);
   }
-  static onode_t decode(ceph::bufferlist::const_iterator& delta) {
+  static onode_t decode(stone::bufferlist::const_iterator& delta) {
     uint16_t size;
-    ceph::decode(size, delta);
+    stone::decode(size, delta);
     uint16_t id;
-    ceph::decode(id, delta);
+    stone::decode(id, delta);
     onode_t ret{size, id};
     return ret;
   }
@@ -33,10 +33,10 @@ struct onode_t {
     auto p_target = (const char*)&onode + onode.size - sizeof(uint32_t);
     uint32_t target;
     std::memcpy(&target, p_target, sizeof(uint32_t));
-    ceph_assert(target == onode.size * 137);
+    stone_assert(target == onode.size * 137);
   }
   static std::unique_ptr<char[]> allocate(const onode_t& config) {
-    ceph_assert(config.size >= sizeof(onode_t) + sizeof(uint32_t));
+    stone_assert(config.size >= sizeof(onode_t) + sizeof(uint32_t));
 
     auto ret = std::make_unique<char[]>(config.size);
     char* p_mem = ret.get();

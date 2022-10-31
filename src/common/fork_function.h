@@ -15,7 +15,7 @@
 #endif
 #include <sys/types.h>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/errno.h"
 
 #ifndef _WIN32
@@ -35,7 +35,7 @@ static inline int fork_function(
     // just wait
     int status;
     while (waitpid(forker_pid, &status, 0) == -1) {
-      ceph_assert(errno == EINTR);
+      stone_assert(errno == EINTR);
     }
     if (WIFSIGNALED(status)) {
       errstr << ": got signal: " << WTERMSIG(status) << "\n";

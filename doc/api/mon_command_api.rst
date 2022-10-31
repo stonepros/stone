@@ -1,3 +1,3 @@
-.. ceph-mgr-commands:: src/pybind/mgr
+.. stone-mgr-commands:: src/pybind/mgr
    :python_path: src/pybind
-.. ceph-mon-commands:: src/mon/MonCommands.h src/mgr/MgrCommands.h
+.. stone-mon-commands:: src/mon/MonCommands.h src/mgr/MgrCommands.h

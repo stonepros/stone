@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -22,7 +22,7 @@
 #include "include/utime.h"
 #include "common/Formatter.h"
 #include "common/bit_str.h"
-#include "common/ceph_releases.h"
+#include "common/stone_releases.h"
 
 // use as paxos_service index
 enum {
@@ -39,7 +39,7 @@ enum {
   PAXOS_NUM
 };
 
-#define STONE_MON_ONDISK_MAGIC "ceph mon volume v012"
+#define STONE_MON_ONDISK_MAGIC "stone mon volume v012"
 
 // map of entity_type -> features -> count
 struct FeatureMap {
@@ -61,9 +61,9 @@ struct FeatureMap {
       return;
     }
     auto p = m.find(type);
-    ceph_assert(p != m.end());
+    stone_assert(p != m.end());
     auto q = p->second.find(features);
-    ceph_assert(q != p->second.end());
+    stone_assert(q != p->second.end());
     if (--q->second == 0) {
       p->second.erase(q);
       if (p->second.empty()) {
@@ -82,28 +82,28 @@ struct FeatureMap {
     return *this;
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(m, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(1, p);
     decode(m, p);
     DECODE_FINISH(p);
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     for (auto& p : m) {
-      f->open_array_section(ceph_entity_type_name(p.first));
+      f->open_array_section(stone_entity_type_name(p.first));
       for (auto& q : p.second) {
 	f->open_object_section("group");
         std::stringstream ss;
         ss << "0x" << std::hex << q.first << std::dec;
         f->dump_string("features", ss.str());
-	f->dump_string("release", ceph_release_name(
-			 ceph_release_from_features(q.first)));
+	f->dump_string("release", stone_release_name(
+			 stone_release_from_features(q.first)));
 	f->dump_unsigned("num", q.second);
 	f->close_section();
       }
@@ -135,8 +135,8 @@ struct LevelDBStoreStats {
     bytes_misc(0)
   {}
 
-  void dump(ceph::Formatter *f) const {
-    ceph_assert(f != NULL);
+  void dump(stone::Formatter *f) const {
+    stone_assert(f != NULL);
     f->dump_int("bytes_total", bytes_total);
     f->dump_int("bytes_sst", bytes_sst);
     f->dump_int("bytes_log", bytes_log);
@@ -144,7 +144,7 @@ struct LevelDBStoreStats {
     f->dump_stream("last_updated") << last_update;
   }
 
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
     ENCODE_START(1, 1, bl);
     encode(bytes_total, bl);
     encode(bytes_sst, bl);
@@ -154,7 +154,7 @@ struct LevelDBStoreStats {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator &p) {
+  void decode(stone::buffer::list::const_iterator &p) {
     DECODE_START(1, p);
     decode(bytes_total, p);
     decode(bytes_sst, p);
@@ -179,13 +179,13 @@ WRITE_CLASS_ENCODER(LevelDBStoreStats)
 // data stats
 
 struct DataStats {
-  ceph_data_stats_t fs_stats;
+  stone_data_stats_t fs_stats;
   // data dir
   utime_t last_update;
   LevelDBStoreStats store_stats;
 
-  void dump(ceph::Formatter *f) const {
-    ceph_assert(f != NULL);
+  void dump(stone::Formatter *f) const {
+    stone_assert(f != NULL);
     f->dump_int("kb_total", (fs_stats.byte_total/1024));
     f->dump_int("kb_used", (fs_stats.byte_used/1024));
     f->dump_int("kb_avail", (fs_stats.byte_avail/1024));
@@ -196,7 +196,7 @@ struct DataStats {
     f->close_section();
   }
 
-  void encode(ceph::buffer::list &bl) const {
+  void encode(stone::buffer::list &bl) const {
     ENCODE_START(3, 1, bl);
     encode(fs_stats.byte_total, bl);
     encode(fs_stats.byte_used, bl);
@@ -206,7 +206,7 @@ struct DataStats {
     encode(store_stats, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator &p) {
+  void decode(stone::buffer::list::const_iterator &p) {
     DECODE_START(1, p);
     // we moved from having fields in kb to fields in byte
     if (struct_v > 2) {
@@ -240,19 +240,19 @@ struct ScrubResult {
     return prefix_crc != other.prefix_crc || prefix_keys != other.prefix_keys;
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(prefix_crc, bl);
     encode(prefix_keys, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(1, p);
     decode(prefix_crc, p);
     decode(prefix_keys, p);
     DECODE_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->open_object_section("crc");
     for (auto p = prefix_crc.begin(); p != prefix_crc.end(); ++p)
       f->dump_unsigned(p->first.c_str(), p->second);
@@ -278,7 +278,7 @@ inline std::ostream& operator<<(std::ostream& out, const ScrubResult& r) {
 /// for information like os, kernel, hostname, memory info, cpu model.
 typedef std::map<std::string, std::string> Metadata;
 
-namespace ceph {
+namespace stone {
   namespace features {
     namespace mon {
       /**
@@ -299,9 +299,9 @@ namespace ceph {
 }
 
 
-inline const char *ceph_mon_feature_name(uint64_t b)
+inline const char *stone_mon_feature_name(uint64_t b)
 {
-  return ceph::features::mon::get_feature_name(b);
+  return stone::features::mon::get_feature_name(b);
 };
 
 class mon_feature_t {
@@ -440,34 +440,34 @@ public:
 
   void print(std::ostream& out) const {
     out << "[";
-    print_bit_str(features, out, ceph::features::mon::get_feature_name);
+    print_bit_str(features, out, stone::features::mon::get_feature_name);
     out << "]";
   }
 
   void print_with_value(std::ostream& out) const {
     out << "[";
-    print_bit_str(features, out, ceph::features::mon::get_feature_name, true);
+    print_bit_str(features, out, stone::features::mon::get_feature_name, true);
     out << "]";
   }
 
-  void dump(ceph::Formatter *f, const char *sec_name = NULL) const {
+  void dump(stone::Formatter *f, const char *sec_name = NULL) const {
     f->open_array_section((sec_name ? sec_name : "features"));
-    dump_bit_str(features, f, ceph::features::mon::get_feature_name);
+    dump_bit_str(features, f, stone::features::mon::get_feature_name);
     f->close_section();
   }
 
-  void dump_with_value(ceph::Formatter *f, const char *sec_name = NULL) const {
+  void dump_with_value(stone::Formatter *f, const char *sec_name = NULL) const {
     f->open_array_section((sec_name ? sec_name : "features"));
-    dump_bit_str(features, f, ceph::features::mon::get_feature_name, true);
+    dump_bit_str(features, f, stone::features::mon::get_feature_name, true);
     f->close_section();
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(HEAD_VERSION, COMPAT_VERSION, bl);
     encode(features, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(COMPAT_VERSION, p);
     decode(features, p);
     DECODE_FINISH(p);
@@ -475,7 +475,7 @@ public:
 };
 WRITE_CLASS_ENCODER(mon_feature_t)
 
-namespace ceph {
+namespace stone {
   namespace features {
     namespace mon {
       constexpr mon_feature_t FEATURE_KRAKEN(     (1ULL << 0));
@@ -545,30 +545,30 @@ namespace ceph {
   }
 }
 
-static inline ceph_release_t infer_ceph_release_from_mon_features(mon_feature_t f)
+static inline stone_release_t infer_stone_release_from_mon_features(mon_feature_t f)
 {
-  if (f.contains_all(ceph::features::mon::FEATURE_PACIFIC)) {
-    return ceph_release_t::pacific;
+  if (f.contains_all(stone::features::mon::FEATURE_PACIFIC)) {
+    return stone_release_t::pacific;
   }
-  if (f.contains_all(ceph::features::mon::FEATURE_OCTOPUS)) {
-    return ceph_release_t::octopus;
+  if (f.contains_all(stone::features::mon::FEATURE_OCTOPUS)) {
+    return stone_release_t::octopus;
   }
-  if (f.contains_all(ceph::features::mon::FEATURE_NAUTILUS)) {
-    return ceph_release_t::nautilus;
+  if (f.contains_all(stone::features::mon::FEATURE_NAUTILUS)) {
+    return stone_release_t::nautilus;
   }
-  if (f.contains_all(ceph::features::mon::FEATURE_MIMIC)) {
-    return ceph_release_t::mimic;
+  if (f.contains_all(stone::features::mon::FEATURE_MIMIC)) {
+    return stone_release_t::mimic;
   }
-  if (f.contains_all(ceph::features::mon::FEATURE_LUMINOUS)) {
-    return ceph_release_t::luminous;
+  if (f.contains_all(stone::features::mon::FEATURE_LUMINOUS)) {
+    return stone_release_t::luminous;
   }
-  if (f.contains_all(ceph::features::mon::FEATURE_KRAKEN)) {
-    return ceph_release_t::kraken;
+  if (f.contains_all(stone::features::mon::FEATURE_KRAKEN)) {
+    return stone_release_t::kraken;
   }
-  return ceph_release_t::unknown;
+  return stone_release_t::unknown;
 }
 
-static inline const char *ceph::features::mon::get_feature_name(uint64_t b) {
+static inline const char *stone::features::mon::get_feature_name(uint64_t b) {
   mon_feature_t f(b);
 
   if (f == FEATURE_KRAKEN) {
@@ -593,7 +593,7 @@ static inline const char *ceph::features::mon::get_feature_name(uint64_t b) {
   return "unknown";
 }
 
-inline mon_feature_t ceph::features::mon::get_feature_by_name(const std::string &n) {
+inline mon_feature_t stone::features::mon::get_feature_by_name(const std::string &n) {
 
   if (n == "kraken") {
     return FEATURE_KRAKEN;
@@ -628,31 +628,31 @@ inline std::ostream& operator<<(std::ostream& out, const mon_feature_t& f) {
 struct ProgressEvent {
   std::string message;                  ///< event description
   float progress;                  ///< [0..1]
-  bool add_to_ceph_s;
-  void encode(ceph::buffer::list& bl) const {
+  bool add_to_stone_s;
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 1, bl);
     encode(message, bl);
     encode(progress, bl);
-    encode(add_to_ceph_s, bl);
+    encode(add_to_stone_s, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(2, p);
     decode(message, p);
     decode(progress, p);
     if (struct_v >= 2){
-	decode(add_to_ceph_s, p);
+	decode(add_to_stone_s, p);
     } else {
       if (!message.empty()) {
-	add_to_ceph_s = true;
+	add_to_stone_s = true;
       }
     }
     DECODE_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_string("message", message);
     f->dump_float("progress", progress);
-    f->dump_bool("add_to_ceph_s", add_to_ceph_s);
+    f->dump_bool("add_to_stone_s", add_to_stone_s);
   }
 };
 WRITE_CLASS_ENCODER(ProgressEvent)

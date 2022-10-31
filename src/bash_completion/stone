@@ -1,5 +1,5 @@
 #
-# Ceph - scalable distributed file system
+# Stone - scalable distributed file system
 #
 # This is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -7,7 +7,7 @@
 # Foundation.
 #
 
-_ceph()
+_stone()
 {
     local options_noarg="-h --help -s --status -w --watch --watch-debug --watch-info --watch-sec --watch-warn --watch-error --version -v --verbose --concise"
     local options_arg="-c --conf -i --in-file -o --out-file --id --user -n --name --cluster --admin-daemon --admin-socket -f --format --connect-timeout"
@@ -47,4 +47,4 @@ _ceph()
     local IFS=$'\n'
     COMPREPLY=( $(${COMP_WORDS[0]} --completion "${hint_args[@]}" 2>/dev/null) )
 }
-complete -F _ceph ceph
+complete -F _stone stone

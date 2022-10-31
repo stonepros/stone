@@ -6,7 +6,7 @@ import cherrypy
 from .. import mgr
 from ..exceptions import DashboardException
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from . import APIDoc, APIRouter, EndpointDoc, RESTController
 
 FILTER_SCHEMA = [{
@@ -38,7 +38,7 @@ class ClusterConfiguration(RESTController):
         :param options: list of config options
         :return: list of config options extended by their current values
         """
-        config_dump = CephService.send_command('mon', 'config dump')
+        config_dump = StoneService.send_command('mon', 'config dump')
         mgr_config = mgr.get('config')
         config_dump.append({'name': 'fsid', 'section': 'mgr', 'value': mgr_config['fsid']})
 
@@ -94,20 +94,20 @@ class ClusterConfiguration(RESTController):
                     break
 
                 if entry['section'] == section:
-                    CephService.send_command('mon', 'config set', who=section, name=name,
+                    StoneService.send_command('mon', 'config set', who=section, name=name,
                                              value=str(entry['value']))
                     break
             else:
-                CephService.send_command('mon', 'config rm', who=section, name=name)
+                StoneService.send_command('mon', 'config rm', who=section, name=name)
 
     def delete(self, name, section):
-        return CephService.send_command('mon', 'config rm', who=section, name=name)
+        return StoneService.send_command('mon', 'config rm', who=section, name=name)
 
     def bulk_set(self, options):
         self._updateable_at_runtime(options.keys())
 
         for name, value in options.items():
-            CephService.send_command('mon', 'config set', who=value['section'],
+            StoneService.send_command('mon', 'config set', who=value['section'],
                                      name=name, value=str(value['value']))
 
     def _get_config_option(self, name):

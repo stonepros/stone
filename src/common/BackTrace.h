@@ -11,7 +11,7 @@
 #endif
 #include <stdlib.h>
 
-namespace ceph {
+namespace stone {
 
 class Formatter;
 

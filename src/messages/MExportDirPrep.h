@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -26,9 +26,9 @@ private:
 
   dirfrag_t dirfrag;
 public:
-  ceph::buffer::list basedir;
+  stone::buffer::list basedir;
   std::list<dirfrag_t> bounds;
-  std::list<ceph::buffer::list> traces;
+  std::list<stone::buffer::list> traces;
 private:
   std::set<mds_rank_t> bystanders;
   bool b_did_assim = false;
@@ -60,7 +60,7 @@ public:
   void add_bound(dirfrag_t df) {
     bounds.push_back( df );
   }
-  void add_trace(ceph::buffer::list& bl) {
+  void add_trace(stone::buffer::list& bl) {
     traces.push_back(bl);
   }
   void add_bystander(mds_rank_t who) {
@@ -68,7 +68,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(dirfrag, p);
     decode(basedir, p);
@@ -78,7 +78,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(dirfrag, payload);
     encode(basedir, payload);
     encode(bounds, payload);
@@ -87,7 +87,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

@@ -16,7 +16,7 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
@@ -26,14 +26,14 @@ function run() {
     export testobjects=100
     export loglen=12
     export trim=$(expr $loglen / 2)
-    export CEPH_MON="127.0.0.1:7115" # git grep '\<7115\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7115" # git grep '\<7115\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
     # so we will not force auth_log_shard to be acting_primary
-    CEPH_ARGS+="--osd_force_auth_primary_missing_objects=1000000 "
+    STONE_ARGS+="--osd_force_auth_primary_missing_objects=1000000 "
     # use small pg_log settings, so we always do backfill instead of recovery
-    CEPH_ARGS+="--osd_min_pg_log_entries=$loglen --osd_max_pg_log_entries=$loglen --osd_pg_log_trim_min=$trim "
+    STONE_ARGS+="--osd_min_pg_log_entries=$loglen --osd_max_pg_log_entries=$loglen --osd_pg_log_trim_min=$trim "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -58,15 +58,15 @@ function TEST_repeer_on_down_acting_member_coming_back() {
     done
 
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 3
-    ceph osd pool set $poolname min_size 2
-    local poolid=$(ceph pg dump pools -f json | jq '.pool_stats' | jq '.[].poolid')
+    stone osd pool set $poolname size 3
+    stone osd pool set $poolname min_size 2
+    local poolid=$(stone pg dump pools -f json | jq '.pool_stats' | jq '.[].poolid')
     local pgid=$poolid.0
 
     # enable required feature-bits for upmap
-    ceph osd set-require-min-compat-client luminous
+    stone osd set-require-min-compat-client luminous
     # reset up to [1,2,3]
-    ceph osd pg-upmap $pgid 1 2 3 || return 1
+    stone osd pg-upmap $pgid 1 2 3 || return 1
 
     flush_pg_stats || return 1
     wait_for_clean || return 1
@@ -81,23 +81,23 @@ function TEST_repeer_on_down_acting_member_coming_back() {
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
 
     # reset up to [1,4,5]
-    ceph osd pg-upmap $pgid 1 4 5 || return 1
+    stone osd pg-upmap $pgid 1 4 5 || return 1
 
     # wait for peering to complete
     sleep 2
 
     # make sure osd.2 belongs to current acting set
-    ceph pg $pgid query | jq '.acting' | grep 2 || return 1
+    stone pg $pgid query | jq '.acting' | grep 2 || return 1
 
     # kill osd.2
     kill_daemons $dir KILL osd.2 || return 1
-    ceph osd down osd.2
+    stone osd down osd.2
 
     # again, wait for peering to complete
     sleep 2
 
     # osd.2 should have been moved out from acting set
-    ceph pg $pgid query | jq '.acting' | grep 2 && return 1
+    stone pg $pgid query | jq '.acting' | grep 2 && return 1
 
     # bring up osd.2
     activate_osd $dir 2 || return 1
@@ -107,7 +107,7 @@ function TEST_repeer_on_down_acting_member_coming_back() {
     sleep 2
 
     # primary should be able to re-add osd.2 into acting
-    ceph pg $pgid query | jq '.acting' | grep 2 || return 1
+    stone pg $pgid query | jq '.acting' | grep 2 || return 1
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
 

@@ -23,7 +23,7 @@ namespace keystone {
  * regular user/pass). RadosGW actually does support the first two. */
 
 class TokenEngine : public rgw::auth::Engine {
-  CephContext* const cct;
+  StoneContext* const cct;
 
   using acl_strategy_t = rgw::auth::RemoteApplier::acl_strategy_t;
   using auth_info_t = rgw::auth::RemoteApplier::AuthInfo;
@@ -50,7 +50,7 @@ class TokenEngine : public rgw::auth::Engine {
                         const req_state* s) const;
 
 public:
-  TokenEngine(CephContext* const cct,
+  TokenEngine(StoneContext* const cct,
               const rgw::auth::TokenExtractor* const extractor,
               const rgw::auth::RemoteApplier::Factory* const apl_factory,
               rgw::keystone::Config& config,
@@ -82,7 +82,7 @@ class SecretCache {
     list<std::string>::iterator lru_iter;
   };
 
-  const boost::intrusive_ptr<CephContext> cct;
+  const boost::intrusive_ptr<StoneContext> cct;
 
   std::map<std::string, secret_entry> secrets;
   std::list<std::string> secrets_lru;
@@ -94,7 +94,7 @@ class SecretCache {
   const utime_t s3_token_expiry_length;
 
   SecretCache()
-    : cct(g_ceph_context),
+    : cct(g_stone_context),
       lock(),
       max(cct->_conf->rgw_keystone_token_cache_size),
       s3_token_expiry_length(300, 0) {
@@ -164,7 +164,7 @@ class EC2Engine : public rgw::auth::s3::AWSEngine {
                                                                         const std::string& user_id,
                                                                         const std::string_view& access_key_id) const;
 public:
-  EC2Engine(CephContext* const cct,
+  EC2Engine(StoneContext* const cct,
             const rgw::auth::s3::AWSEngine::VersionAbstractor* const ver_abstractor,
             const rgw::auth::RemoteApplier::Factory* const apl_factory,
             rgw::keystone::Config& config,

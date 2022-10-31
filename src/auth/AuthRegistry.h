@@ -8,17 +8,17 @@
 
 #include "AuthAuthorizeHandler.h"
 #include "AuthMethodList.h"
-#include "common/ceph_mutex.h"
-#include "common/ceph_context.h"
+#include "common/stone_mutex.h"
+#include "common/stone_context.h"
 #include "common/config_cacher.h"
 
 class AuthRegistry : public md_config_obs_t {
   StoneContext *cct;
-  mutable ceph::mutex lock = ceph::make_mutex("AuthRegistry::lock");
+  mutable stone::mutex lock = stone::make_mutex("AuthRegistry::lock");
 
   std::map<int,AuthAuthorizeHandler*> authorize_handlers;
 
-  bool _no_keyring_disabled_cephx = false;
+  bool _no_keyring_disabled_stonex = false;
 
   // STONE_AUTH_*
   std::vector<uint32_t> cluster_methods;
@@ -74,8 +74,8 @@ public:
   void handle_conf_change(const ConfigProxy& conf,
                           const std::set<std::string>& changed) override;
 
-  bool no_keyring_disabled_cephx() {
+  bool no_keyring_disabled_stonex() {
     std::scoped_lock l(lock);
-    return _no_keyring_disabled_cephx;
+    return _no_keyring_disabled_stonex;
   }
 };

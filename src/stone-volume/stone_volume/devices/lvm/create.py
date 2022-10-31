@@ -1,9 +1,9 @@
 from __future__ import print_function
 from textwrap import dedent
 import logging
-from ceph_volume.util import system
-from ceph_volume.util.arg_validators import exclude_group_options
-from ceph_volume import decorators, terminal
+from stone_volume.util import system
+from stone_volume.util.arg_validators import exclude_group_options
+from stone_volume import decorators, terminal
 from .common import create_parser, rollback_osd
 from .prepare import Prepare
 from .activate import Activate
@@ -35,7 +35,7 @@ class Create(object):
             logger.info('will rollback OSD ID creation')
             rollback_osd(args, osd_id)
             raise
-        terminal.success("ceph-volume lvm create successful for: %s" % args.data)
+        terminal.success("stone-volume lvm create successful for: %s" % args.data)
 
     def main(self):
         sub_command_help = dedent("""
@@ -49,20 +49,20 @@ class Create(object):
 
         Existing logical volume (lv):
 
-            ceph-volume lvm create --data {vg/lv}
+            stone-volume lvm create --data {vg/lv}
 
         Existing block device (a logical volume will be created):
 
-            ceph-volume lvm create --data /path/to/device
+            stone-volume lvm create --data /path/to/device
 
         Optionally, can consume db and wal block devices, partitions or logical
         volumes. A device will get a logical volume, partitions and existing
         logical volumes will be used as is:
 
-            ceph-volume lvm create --data {vg/lv} --block.wal {partition} --block.db {/path/to/device}
+            stone-volume lvm create --data {vg/lv} --block.wal {partition} --block.db {/path/to/device}
         """)
         parser = create_parser(
-            prog='ceph-volume lvm create',
+            prog='stone-volume lvm create',
             description=sub_command_help,
         )
         if len(self.argv) == 0:

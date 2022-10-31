@@ -1,7 +1,7 @@
 from io import StringIO
 
-from tasks.cephfs.fuse_mount import FuseMount
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.fuse_mount import FuseMount
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 from teuthology.orchestra.run import CommandFailedError
 import errno
 import time
@@ -10,7 +10,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class TestMisc(CephFSTestCase):
+class TestMisc(StoneFSTestCase):
     CLIENTS_REQUIRED = 2
 
     def test_statfs_on_deleted_fs(self):
@@ -38,13 +38,13 @@ class TestMisc(CephFSTestCase):
         if not isinstance(self.mount_a, FuseMount):
             self.skipTest("Require FUSE client")
 
-        # Enable debug. Client will requests CEPH_CAP_XATTR_SHARED
+        # Enable debug. Client will requests STONE_CAP_XATTR_SHARED
         # on lookup/open
         self.mount_b.umount_wait()
         self.set_conf('client', 'client debug getattr caps', 'true')
         self.mount_b.mount_wait()
 
-        # create a file and hold it open. MDS will issue CEPH_CAP_EXCL_*
+        # create a file and hold it open. MDS will issue STONE_CAP_EXCL_*
         # to mount_a
         p = self.mount_a.open_background("testfile")
         self.mount_b.wait_for_visible("testfile")
@@ -61,7 +61,7 @@ class TestMisc(CephFSTestCase):
         """
 
         t = time.time()
-        rctime = self.mount_a.getfattr(".", "ceph.dir.rctime")
+        rctime = self.mount_a.getfattr(".", "stone.dir.rctime")
         log.info("rctime = {}".format(rctime))
         self.assertGreaterEqual(float(rctime), t - 10)
 
@@ -200,7 +200,7 @@ class TestMisc(CephFSTestCase):
         assert info['path'] == "/foo"
 
 
-class TestCacheDrop(CephFSTestCase):
+class TestCacheDrop(StoneFSTestCase):
     CLIENTS_REQUIRED = 1
 
     def _run_drop_cache_cmd(self, timeout=None):

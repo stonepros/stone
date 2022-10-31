@@ -1,7 +1,7 @@
-CephFS Snapshots
+StoneFS Snapshots
 ================
 
-CephFS supports snapshots, generally created by invoking mkdir within the
+StoneFS supports snapshots, generally created by invoking mkdir within the
 ``.snap`` directory. Note this is a hidden, special directory, not visible
 during a directory listing.
 
@@ -10,7 +10,7 @@ Overview
 
 Generally, snapshots do what they sound like: they create an immutable view
 of the file system at the point in time they're taken. There are some headline
-features that make CephFS snapshots different from what you might expect:
+features that make StoneFS snapshots different from what you might expect:
 
 * Arbitrary subtrees. Snapshots are created within any directory you choose,
   and cover all data in the file system under that directory.
@@ -38,18 +38,18 @@ Important Data Structures
 
 Creating a snapshot
 -------------------
-CephFS snapshot feature is enabled by default on new file system. To enable it
+StoneFS snapshot feature is enabled by default on new file system. To enable it
 on existing file systems, use command below.
 
 .. code::
 
        $ ceph fs set <fs_name> allow_new_snaps true
 
-When snapshots are enabled, all directories in CephFS will have a special
+When snapshots are enabled, all directories in StoneFS will have a special
 ``.snap`` directory. (You may configure a different name with the ``client
 snapdir`` setting if you wish.)
 
-To create a CephFS snapshot, create a subdirectory under
+To create a StoneFS snapshot, create a subdirectory under
 ``.snap`` with a name of your choice. For example, to create a snapshot on
 directory "/1/2/3/", invoke ``mkdir /1/2/3/.snap/my-snapshot-name`` .
 

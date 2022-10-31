@@ -5,11 +5,11 @@
   tasks:
 
     - name: scan all running OSDs
-      command: "ceph-volume --cluster={{ cluster }} simple scan"
+      command: "stone-volume --cluster={{ cluster }} simple scan"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1
 
     - name: activate all scanned OSDs
-      command: "ceph-volume --cluster={{ cluster }} simple activate --all"
+      command: "stone-volume --cluster={{ cluster }} simple activate --all"
       environment:
-        CEPH_VOLUME_DEBUG: 1
+        STONE_VOLUME_DEBUG: 1

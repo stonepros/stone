@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Sebastien Ponce <sebastien.ponce@cern.ch>
  *
@@ -28,7 +28,7 @@
 #include "librados/IoCtxImpl.h"
 #include "librados/AioCompletionImpl.h"
 #include "common/RefCountedObj.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 namespace libradosstriper {
 
@@ -141,14 +141,14 @@ struct RadosStriperImpl {
 
   // internal versions of IO method
   int write_in_open_object(const std::string& soid,
-			   const ceph_file_layout& layout,
+			   const stone_file_layout& layout,
 			   const std::string& lockCookie,
 			   const bufferlist& bl,
 			   size_t len,
 			   uint64_t off);
   int aio_write_in_open_object(const std::string& soid,
 			       librados::AioCompletionImpl *c,
-			       const ceph_file_layout& layout,
+			       const stone_file_layout& layout,
 			       const std::string& lockCookie,
 			       const bufferlist& bl,
 			       size_t len,
@@ -158,18 +158,18 @@ struct RadosStriperImpl {
 			 const bufferlist& bl,
 			 size_t len,
 			 uint64_t off,
-			 const ceph_file_layout& layout);
+			 const stone_file_layout& layout);
 
   int extract_uint32_attr(std::map<std::string, bufferlist> &attrs,
 			  const std::string& key,
-			  ceph_le32 *value);
+			  stone_le32 *value);
 
   int extract_sizet_attr(std::map<std::string, bufferlist> &attrs,
 			 const std::string& key,
 			 size_t *value);
 
   int internal_get_layout_and_size(const std::string& oid,
-				   ceph_file_layout *layout,
+				   stone_file_layout *layout,
 				   uint64_t *size);
 
   int internal_aio_remove(const std::string& soid,
@@ -183,7 +183,7 @@ struct RadosStriperImpl {
    * In case the return code in not 0, no lock is taken
    */
   int openStripedObjectForRead(const std::string& soid,
-			       ceph_file_layout *layout,
+			       stone_file_layout *layout,
 			       uint64_t *size,
 			       std::string *lockCookie);
 
@@ -201,7 +201,7 @@ struct RadosStriperImpl {
    * In case the return code in not 0, no lock is taken
    */
   int openStripedObjectForWrite(const std::string& soid,
-				ceph_file_layout *layout,
+				stone_file_layout *layout,
 				uint64_t *size,
 				std::string *lockCookie,
 				bool isFileSizeAbsolute);
@@ -216,7 +216,7 @@ struct RadosStriperImpl {
    * In case the return code in not 0, no lock is taken
    */
   int createAndOpenStripedObject(const std::string& soid,
-				 ceph_file_layout *layout,
+				 stone_file_layout *layout,
 				 uint64_t size,
 				 std::string *lockCookie,
 				 bool isFileSizeAbsolute);
@@ -227,7 +227,7 @@ struct RadosStriperImpl {
   int truncate(const std::string& soid,
 	       uint64_t original_size,
 	       uint64_t size,
-	       ceph_file_layout &layout);
+	       stone_file_layout &layout);
 
   /**
    * truncates an object asynchronously. Should only be called with size < original_size
@@ -239,7 +239,7 @@ struct RadosStriperImpl {
 		   MultiAioCompletionImplPtr c,
 		   uint64_t original_size,
 		   uint64_t size,
-		   ceph_file_layout &layout);
+		   stone_file_layout &layout);
 
   /**
    * grows an object (adding 0s). Should only be called with size > original_size
@@ -247,15 +247,15 @@ struct RadosStriperImpl {
   int grow(const std::string& soid,
 	   uint64_t original_size,
 	   uint64_t size,
-	   ceph_file_layout &layout);
+	   stone_file_layout &layout);
 
   /**
    * creates a unique identifier
    */
   static std::string getUUID();
 
-  CephContext *cct() {
-    return (CephContext*)m_radosCluster.cct();
+  StoneContext *cct() {
+    return (StoneContext*)m_radosCluster.cct();
   }
 
   // reference counting
@@ -270,7 +270,7 @@ struct RadosStriperImpl {
   librados::IoCtxImpl *m_ioCtxImpl;
 
   // Default layout
-  ceph_file_layout m_layout;
+  stone_file_layout m_layout;
 };
 }
 #endif

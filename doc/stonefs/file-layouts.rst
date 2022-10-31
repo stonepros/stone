@@ -3,7 +3,7 @@
 File layouts
 ============
 
-The layout of a file controls how its contents are mapped to Ceph RADOS objects.  You can
+The layout of a file controls how its contents are mapped to Stone RADOS objects.  You can
 read and write a file's layout using *virtual extended attributes* or xattrs.
 
 The name of the layout xattrs depends on whether a file is a regular file or a directory.  Regular
@@ -43,7 +43,7 @@ object_size
 
 .. tip::
 
-    RADOS enforces a configurable limit on object sizes: if you increase CephFS
+    RADOS enforces a configurable limit on object sizes: if you increase StoneFS
     object sizes beyond that limit then writes may not succeed.  The OSD
     setting is ``osd_max_object_size``, which is 128MB by default.
     Very large RADOS objects may prevent smooth operation of the cluster,
@@ -248,7 +248,7 @@ directories do not have layouts set:
 Adding a data pool to the File System 
 -------------------------------------
 
-Before you can use a pool with CephFS you have to add it to the Metadata Servers.
+Before you can use a pool with StoneFS you have to add it to the Metadata Servers.
 
 .. code-block:: bash
 
@@ -258,7 +258,7 @@ Before you can use a pool with CephFS you have to add it to the Metadata Servers
 
 Make sure that your cephx keys allows the client to access this new pool.
 
-You can then update the layout on a directory in CephFS to use the pool you added:
+You can then update the layout on a directory in StoneFS to use the pool you added:
 
 .. code-block:: bash
 

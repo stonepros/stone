@@ -3,20 +3,20 @@ import json
 import logging
 import os
 from textwrap import dedent
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
-from tasks.cephfs.fuse_mount import FuseMount
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
+from tasks.stonefs.fuse_mount import FuseMount
 from teuthology.exceptions import CommandFailedError
 
 log = logging.getLogger(__name__)
 
 
-class TestVolumeClient(CephFSTestCase):
+class TestVolumeClient(StoneFSTestCase):
     # One for looking at the global filesystem, one for being
     # the VolumeClient, two for mounting the created shares
     CLIENTS_REQUIRED = 4
 
     def setUp(self):
-        CephFSTestCase.setUp(self)
+        StoneFSTestCase.setUp(self)
 
     def _volume_client_python(self, client, script, vol_prefix=None, ns_prefix=None):
         # Can't dedent this *and* the script we pass in, because they might have different
@@ -27,14 +27,14 @@ class TestVolumeClient(CephFSTestCase):
             ns_prefix = "\"" + ns_prefix + "\""
         return client.run_python("""
 from __future__ import print_function
-from ceph_volume_client import CephFSVolumeClient, VolumePath
+from stone_volume_client import StoneFSVolumeClient, VolumePath
 from sys import version_info as sys_version_info
 from rados import OSError as rados_OSError
 import logging
-log = logging.getLogger("ceph_volume_client")
+log = logging.getLogger("stone_volume_client")
 log.addHandler(logging.StreamHandler())
 log.setLevel(logging.DEBUG)
-vc = CephFSVolumeClient("manila", "{conf_path}", "ceph", {vol_prefix}, {ns_prefix})
+vc = StoneFSVolumeClient("manila", "{conf_path}", "stone", {vol_prefix}, {ns_prefix})
 vc.connect()
 {payload}
 vc.disconnect()
@@ -57,7 +57,7 @@ vc.disconnect()
         self.set_conf("client.{name}".format(name=id_name), "keyring", mount.get_keyring_path())
 
     def _configure_guest_auth(self, volumeclient_mount, guest_mount,
-                              guest_entity, cephfs_mntpt,
+                              guest_entity, stonefs_mntpt,
                               namespace_prefix=None, readonly=False,
                               tenant_id=None, allow_existing_id=False):
         """
@@ -67,7 +67,7 @@ vc.disconnect()
                                    volumeclient.
         :param guest_mount: mount used by the guest client.
         :param guest_entity: auth ID used by the guest client.
-        :param cephfs_mntpt: path of the volume.
+        :param stonefs_mntpt: path of the volume.
         :param namespace_prefix: name prefix of the RADOS namespace, which
                                  is used for the volume's layout.
         :param readonly: defaults to False. If set to 'True' only read-only
@@ -75,7 +75,7 @@ vc.disconnect()
         :param tenant_id: (OpenStack) tenant ID of the guest client.
         """
 
-        head, volume_id = os.path.split(cephfs_mntpt)
+        head, volume_id = os.path.split(stonefs_mntpt)
         head, group_id = os.path.split(head)
         head, volume_prefix = os.path.split(head)
         volume_prefix = "/" + volume_prefix
@@ -96,7 +96,7 @@ vc.disconnect()
             allow_existing_id=allow_existing_id)), volume_prefix, namespace_prefix
         )
 
-        # CephFSVolumeClient's authorize() does not return the secret
+        # StoneFSVolumeClient's authorize() does not return the secret
         # key to a caller who isn't multi-tenant aware. Explicitly
         # query the key for such a client.
         if not tenant_id:
@@ -121,7 +121,7 @@ vc.disconnect()
         guest_mount.client_remote.write_file(guest_mount.get_keyring_path(),
                                              keyring_txt, sudo=True)
 
-        # Add a guest client section to the ceph config file.
+        # Add a guest client section to the stone config file.
         self.set_conf("client.{0}".format(guest_entity), "client quota", "True")
         self.set_conf("client.{0}".format(guest_entity), "debug client", "20")
         self.set_conf("client.{0}".format(guest_entity), "debug objecter", "20")
@@ -150,7 +150,7 @@ vc.disconnect()
         self.mount_a.stat(os.path.join(DEFAULT_VOL_PREFIX, group_id, volume_id))
 
         #namespace should be set
-        ns_in_attr = self.mount_a.getfattr(os.path.join(DEFAULT_VOL_PREFIX, group_id, volume_id), "ceph.dir.layout.pool_namespace")
+        ns_in_attr = self.mount_a.getfattr(os.path.join(DEFAULT_VOL_PREFIX, group_id, volume_id), "stone.dir.layout.pool_namespace")
         namespace = "{0}{1}".format(DEFAULT_NS_PREFIX, volume_id)
         self.assertEqual(namespace, ns_in_attr)
 
@@ -166,7 +166,7 @@ vc.disconnect()
 
         # I'm going to leave mount_b unmounted and just use it as a handle for
         # driving volumeclient.  It's a little hacky but we don't have a more
-        # general concept for librados/libcephfs clients as opposed to full
+        # general concept for librados/libstonefs clients as opposed to full
         # blown mounting clients.
         self.mount_b.umount_wait()
         self._configure_vc_auth(self.mount_b, "manila")
@@ -180,7 +180,7 @@ vc.disconnect()
 
         # Create a 100MB volume
         volume_size = 100
-        cephfs_mntpt = self._volume_client_python(self.mount_b, dedent("""
+        stonefs_mntpt = self._volume_client_python(self.mount_b, dedent("""
             vp = VolumePath("{group_id}", "{volume_id}")
             create_result = vc.create_volume(vp, 1024*1024*{volume_size})
             print(create_result['mount_path'])
@@ -196,8 +196,8 @@ vc.disconnect()
         # Authorize and configure credentials for the guest to mount the
         # the volume.
         self._configure_guest_auth(self.mount_b, self.mounts[2], guest_entity,
-                                   cephfs_mntpt, namespace_prefix)
-        self.mounts[2].mount_wait(cephfs_mntpt=cephfs_mntpt)
+                                   stonefs_mntpt, namespace_prefix)
+        self.mounts[2].mount_wait(stonefs_mntpt=stonefs_mntpt)
 
         # The kernel client doesn't have the quota-based df behaviour,
         # or quotas at all, so only exercise the client behaviour when
@@ -209,7 +209,7 @@ vc.disconnect()
             self.assertEqual(
                     self.mount_a.getfattr(
                         os.path.join(volume_prefix.strip("/"), group_id, volume_id),
-                        "ceph.quota.max_bytes"),
+                        "stone.quota.max_bytes"),
                     "%s" % (volume_size * 1024 * 1024))
 
             # df granularity is 4MB block so have to write at least that much
@@ -240,16 +240,16 @@ vc.disconnect()
             self.wait_until_equal(
                     lambda: self.mount_a.getfattr(
                         os.path.join(volume_prefix.strip("/"), group_id, volume_id),
-                        "ceph.dir.rbytes"),
+                        "stone.dir.rbytes"),
                     "%s" % (data_bin_mb * 1024 * 1024), timeout=60)
 
             # sync so that file data are persist to rados
             self.mounts[2].run_shell(["sync"])
 
             # Our data should stay in particular rados namespace
-            pool_name = self.mount_a.getfattr(os.path.join("myprefix", group_id, volume_id), "ceph.dir.layout.pool")
+            pool_name = self.mount_a.getfattr(os.path.join("myprefix", group_id, volume_id), "stone.dir.layout.pool")
             namespace = "{0}{1}".format(namespace_prefix, volume_id)
-            ns_in_attr = self.mount_a.getfattr(os.path.join("myprefix", group_id, volume_id), "ceph.dir.layout.pool_namespace")
+            ns_in_attr = self.mount_a.getfattr(os.path.join("myprefix", group_id, volume_id), "stone.dir.layout.pool_namespace")
             self.assertEqual(namespace, ns_in_attr)
 
             objects_in_ns = set(self.fs.rados(["ls"], pool=pool_name, namespace=namespace, stdout=StringIO()).stdout.getvalue().split("\n"))
@@ -284,7 +284,7 @@ vc.disconnect()
             # volume it was authorised for)
             self.assertNotIn("client.{0}".format(guest_entity), [e['entity'] for e in self.auth_list()])
 
-            # Clean up the dead mount (ceph-fuse's behaviour here is a bit undefined)
+            # Clean up the dead mount (stone-fuse's behaviour here is a bit undefined)
             self.mounts[2].umount_wait()
 
         self._volume_client_python(self.mount_b, dedent("""
@@ -380,7 +380,7 @@ vc.disconnect()
     def test_15303(self):
         """
         Reproducer for #15303 "Client holds incorrect complete flag on dir
-        after losing caps" (http://tracker.ceph.com/issues/15303)
+        after losing caps" (http://tracker.stone.com/issues/15303)
         """
         for m in self.mounts:
             m.umount_wait()
@@ -421,7 +421,7 @@ vc.disconnect()
 
         guest_entity = "guest"
         group_id = "grpid"
-        cephfs_mntpts = []
+        stonefs_mntpts = []
         volume_ids = []
 
         # Create two volumes. Authorize 'guest' auth ID to mount the two
@@ -429,7 +429,7 @@ vc.disconnect()
         for i in range(2):
             # Create volume.
             volume_ids.append("volid_{0}".format(str(i)))
-            cephfs_mntpts.append(
+            stonefs_mntpts.append(
                 self._volume_client_python(volumeclient_mount, dedent("""
                     vp = VolumePath("{group_id}", "{volume_id}")
                     create_result = vc.create_volume(vp, 10 * 1024 * 1024)
@@ -441,12 +441,12 @@ vc.disconnect()
 
             # Authorize 'guest' auth ID to mount the volume.
             self._configure_guest_auth(volumeclient_mount, guest_mounts[i],
-                                       guest_entity, cephfs_mntpts[i])
+                                       guest_entity, stonefs_mntpts[i])
 
             # Mount the volume.
             guest_mounts[i].mountpoint_dir_name = 'mnt.{id}.{suffix}'.format(
                 id=guest_entity, suffix=str(i))
-            guest_mounts[i].mount_wait(cephfs_mntpt=cephfs_mntpts[i])
+            guest_mounts[i].mount_wait(stonefs_mntpt=stonefs_mntpts[i])
             guest_mounts[i].write_n_mb("data.bin", 1)
 
 
@@ -503,7 +503,7 @@ vc.disconnect()
         """
         # I'm going to leave mount_b unmounted and just use it as a handle for
         # driving volumeclient.  It's a little hacky but we don't have a more
-        # general concept for librados/libcephfs clients as opposed to full
+        # general concept for librados/libstonefs clients as opposed to full
         # blown mounting clients.
         self.mount_b.umount_wait()
         self._configure_vc_auth(self.mount_b, "manila")
@@ -513,7 +513,7 @@ vc.disconnect()
         volume_id = u"volid"
 
         # Create
-        cephfs_mntpt = self._volume_client_python(self.mount_b, dedent("""
+        stonefs_mntpt = self._volume_client_python(self.mount_b, dedent("""
             vp = VolumePath("{group_id}", u"{volume_id}")
             create_result = vc.create_volume(vp, 10)
             print(create_result['mount_path'])
@@ -523,14 +523,14 @@ vc.disconnect()
         )))
 
         # Strip leading "/"
-        cephfs_mntpt = cephfs_mntpt[1:]
+        stonefs_mntpt = stonefs_mntpt[1:]
 
         # A file with non-ascii characters
-        self.mount_a.run_shell(["touch", os.path.join(cephfs_mntpt, u"b\u00F6b")])
+        self.mount_a.run_shell(["touch", os.path.join(stonefs_mntpt, u"b\u00F6b")])
 
         # A file with no permissions to do anything
-        self.mount_a.run_shell(["touch", os.path.join(cephfs_mntpt, "noperms")])
-        self.mount_a.run_shell(["chmod", "0000", os.path.join(cephfs_mntpt, "noperms")])
+        self.mount_a.run_shell(["touch", os.path.join(stonefs_mntpt, "noperms")])
+        self.mount_a.run_shell(["chmod", "0000", os.path.join(stonefs_mntpt, "noperms")])
 
         self._volume_client_python(self.mount_b, dedent("""
             vp = VolumePath("{group_id}", u"{volume_id}")
@@ -563,7 +563,7 @@ vc.disconnect()
         volume_id = "volid"
 
         # Create a volume.
-        cephfs_mntpt = self._volume_client_python(volumeclient_mount, dedent("""
+        stonefs_mntpt = self._volume_client_python(volumeclient_mount, dedent("""
             vp = VolumePath("{group_id}", "{volume_id}")
             create_result = vc.create_volume(vp, 1024*1024*10)
             print(create_result['mount_path'])
@@ -575,10 +575,10 @@ vc.disconnect()
         # Authorize and configure credentials for the guest to mount the
         # the volume with read-write access.
         self._configure_guest_auth(volumeclient_mount, guest_mount,
-                                   guest_entity, cephfs_mntpt, readonly=False)
+                                   guest_entity, stonefs_mntpt, readonly=False)
 
         # Mount the volume, and write to it.
-        guest_mount.mount_wait(cephfs_mntpt=cephfs_mntpt)
+        guest_mount.mount_wait(stonefs_mntpt=stonefs_mntpt)
         guest_mount.write_n_mb("data.bin", 1)
 
         # Change the guest auth ID's authorization to read-only mount access.
@@ -591,13 +591,13 @@ vc.disconnect()
             guest_entity=guest_entity
         )))
         self._configure_guest_auth(volumeclient_mount, guest_mount, guest_entity,
-                                   cephfs_mntpt, readonly=True)
+                                   stonefs_mntpt, readonly=True)
 
         # The effect of the change in access level to read-only is not
         # immediate. The guest sees the change only after a remount of
         # the volume.
         guest_mount.umount_wait()
-        guest_mount.mount_wait(cephfs_mntpt=cephfs_mntpt)
+        guest_mount.mount_wait(stonefs_mntpt=stonefs_mntpt)
 
         # Read existing content of the volume.
         self.assertListEqual(guest_mount.ls(guest_mount.mountpoint), ["data.bin"])
@@ -610,7 +610,7 @@ vc.disconnect()
     def test_get_authorized_ids(self):
         """
         That for a volume, the authorized IDs and their access levels
-        can be obtained using CephFSVolumeClient's get_authorized_ids().
+        can be obtained using StoneFSVolumeClient's get_authorized_ids().
         """
         volumeclient_mount = self.mounts[1]
         volumeclient_mount.umount_wait()
@@ -830,10 +830,10 @@ vc.disconnect()
         )))
         self.assertNotIn(vol_metadata_filename, self.mounts[0].ls("volumes"))
 
-    def test_authorize_auth_id_not_created_by_ceph_volume_client(self):
+    def test_authorize_auth_id_not_created_by_stone_volume_client(self):
         """
         If the auth_id already exists and is not created by
-        ceph_volume_client, it's not allowed to authorize
+        stone_volume_client, it's not allowed to authorize
         the auth-id by default.
         """
         volumeclient_mount = self.mounts[1]
@@ -870,7 +870,7 @@ vc.disconnect()
 
         # Cannot authorize 'guestclient_1' to access the volume.
         # It uses auth ID 'guest1', which already exists and not
-        # created by ceph_volume_client
+        # created by stone_volume_client
         with self.assertRaises(CommandFailedError):
             self._volume_client_python(volumeclient_mount, dedent("""
                 vp = VolumePath("{group_id}", "{volume_id}")
@@ -894,7 +894,7 @@ vc.disconnect()
     def test_authorize_allow_existing_id_option(self):
         """
         If the auth_id already exists and is not created by
-        ceph_volume_client, it's not allowed to authorize
+        stone_volume_client, it's not allowed to authorize
         the auth-id by default but is allowed with option
         allow_existing_id.
         """
@@ -932,7 +932,7 @@ vc.disconnect()
 
         # Cannot authorize 'guestclient_1' to access the volume
         # by default, which already exists and not created by
-        # ceph_volume_client but is allowed with option 'allow_existing_id'.
+        # stone_volume_client but is allowed with option 'allow_existing_id'.
         self._volume_client_python(volumeclient_mount, dedent("""
             vp = VolumePath("{group_id}", "{volume_id}")
             vc.authorize(vp, "{auth_id}", tenant_id="{tenant_id}",
@@ -956,7 +956,7 @@ vc.disconnect()
 
     def test_deauthorize_auth_id_after_out_of_band_update(self):
         """
-        If the auth_id authorized by ceph_volume_client is updated
+        If the auth_id authorized by stone_volume_client is updated
         out of band, the auth_id should not be deleted after a
         deauthorize. It should only remove caps associated it.
         """
@@ -1000,7 +1000,7 @@ vc.disconnect()
         out = self.fs.mon_manager.raw_cluster_cmd(
             "auth", "caps", "client.guest1",
             "mds", "allow rw path=/volumes/groupid, allow rw path=/volumes/groupid/volumeid",
-            "osd", "allow rw pool=cephfs_data namespace=fsvolumens_volumeid",
+            "osd", "allow rw pool=stonefs_data namespace=fsvolumens_volumeid",
             "mon", "allow r",
             "mgr", "allow *"
         )
@@ -1092,8 +1092,8 @@ vc.disconnect()
 
     def test_update_old_style_auth_metadata_to_new_during_recover(self):
         """
-        From nautilus onwards 'volumes' created by ceph_volume_client were
-        renamed and used as CephFS subvolumes accessed via the ceph-mgr
+        From nautilus onwards 'volumes' created by stone_volume_client were
+        renamed and used as StoneFS subvolumes accessed via the stone-mgr
         interface. Hence it makes sense to store the subvolume data in
         auth-metadata file with 'subvolumes' key instead of 'volumes' key.
         This test validates the transparent update of 'volumes' key to
@@ -1213,8 +1213,8 @@ vc.disconnect()
 
     def test_update_old_style_auth_metadata_to_new_during_authorize(self):
         """
-        From nautilus onwards 'volumes' created by ceph_volume_client were
-        renamed and used as CephFS subvolumes accessed via the ceph-mgr
+        From nautilus onwards 'volumes' created by stone_volume_client were
+        renamed and used as StoneFS subvolumes accessed via the stone-mgr
         interface. Hence it makes sense to store the subvolume data in
         auth-metadata file with 'subvolumes' key instead of 'volumes' key.
         This test validates the transparent update of 'volumes' key to
@@ -1371,8 +1371,8 @@ vc.disconnect()
 
     def test_update_old_style_auth_metadata_to_new_during_deauthorize(self):
         """
-        From nautilus onwards 'volumes' created by ceph_volume_client were
-        renamed and used as CephFS subvolumes accessed via the ceph-mgr
+        From nautilus onwards 'volumes' created by stone_volume_client were
+        renamed and used as StoneFS subvolumes accessed via the stone-mgr
         interface. Hence it makes sense to store the subvolume data in
         auth-metadata file with 'subvolumes' key instead of 'volumes' key.
         This test validates the transparent update of 'volumes' key to
@@ -1657,8 +1657,8 @@ vc.disconnect()
 
     def test_21501(self):
         """
-        Reproducer for #21501 "ceph_volume_client: sets invalid caps for
-        existing IDs with no caps" (http://tracker.ceph.com/issues/21501)
+        Reproducer for #21501 "stone_volume_client: sets invalid caps for
+        existing IDs with no caps" (http://tracker.stone.com/issues/21501)
         """
 
         vc_mount = self.mounts[1]
@@ -1670,7 +1670,7 @@ vc.disconnect()
         # Create a volume
         group_id = "grpid"
         volume_id = "volid"
-        cephfs_mntpt = self._volume_client_python(vc_mount, dedent("""
+        stonefs_mntpt = self._volume_client_python(vc_mount, dedent("""
             vp = VolumePath("{group_id}", "{volume_id}")
             create_result = vc.create_volume(vp, 1024*1024*10)
             print(create_result['mount_path'])
@@ -1687,12 +1687,12 @@ vc.disconnect()
         guest_mount = self.mounts[2]
         guest_mount.umount_wait()
 # Set auth caps for the auth ID using the volumeclient
-        self._configure_guest_auth(vc_mount, guest_mount, guest_id, cephfs_mntpt,
+        self._configure_guest_auth(vc_mount, guest_mount, guest_id, stonefs_mntpt,
                                    allow_existing_id=True)
 
         # Mount the volume in the guest using the auth ID to assert that the
         # auth caps are valid
-        guest_mount.mount_wait(cephfs_mntpt=cephfs_mntpt)
+        guest_mount.mount_wait(stonefs_mntpt=stonefs_mntpt)
 
     def test_volume_without_namespace_isolation(self):
         """
@@ -1718,11 +1718,11 @@ vc.disconnect()
             volume_id=volume_id
         )), volume_prefix)
 
-        # The CephFS volume should be created
+        # The StoneFS volume should be created
         self.mounts[0].stat(os.path.join("myprefix", group_id, volume_id))
         vol_namespace = self.mounts[0].getfattr(
             os.path.join("myprefix", group_id, volume_id),
-            "ceph.dir.layout.pool_namespace")
+            "stone.dir.layout.pool_namespace")
         assert not vol_namespace
 
         self._volume_client_python(vc_mount, dedent("""

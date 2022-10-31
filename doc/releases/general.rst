@@ -1,7 +1,7 @@
-.. _ceph-releases-general:
+.. _stone-releases-general:
 
 =======================
-Ceph Releases (general)
+Stone Releases (general)
 =======================
 
 .. toctree::
@@ -10,7 +10,7 @@ Ceph Releases (general)
 Active stable releases
 ----------------------
 
-.. ceph_releases:: releases.yml
+.. stone_releases:: releases.yml
 
 Understanding the release cycle
 -------------------------------
@@ -20,7 +20,7 @@ every year, targeting March 1st. Each stable release series will receive a name
 (e.g., 'Mimic') and a major release number (e.g., 13 for Mimic because 'M' is
 the 13th letter of the alphabet).
 
-Releases are named after a species of cephalopod (usually the common
+Releases are named after a species of stonealopod (usually the common
 name, since the latin names are harder to remember or pronounce).
 
 Version numbers have three components, *x.y.z*.  *x* identifies the release
@@ -39,7 +39,7 @@ Development releases (x.0.z)
 
 Each development release (x.0.z) freezes the master development branch
 and applies `integration and upgrade tests
-<https://github.com/ceph/ceph/tree/master/qa/suites/>`_ before it is released.  Once
+<https://github.com/stone/stone/tree/master/qa/suites/>`_ before it is released.  Once
 released, there is no effort to backport fixes; developer focus is on
 the next development release which is usually only a few weeks away.
 
@@ -83,15 +83,15 @@ the next point release.
 For each stable release:
 
 * `Integration and upgrade tests
-  <https://github.com/ceph/ceph/tree/master/qa/suites/>`_ are run on a regular basis
-  and `their results <http://pulpito.ceph.com/>`_ analyzed by Ceph
+  <https://github.com/stone/stone/tree/master/qa/suites/>`_ are run on a regular basis
+  and `their results <http://pulpito.stone.com/>`_ analyzed by Stone
   developers.
-* `Issues <http://tracker.ceph.com/projects/ceph/issues?query_id=27>`_
+* `Issues <http://tracker.stone.com/projects/stone/issues?query_id=27>`_
   fixed in the development branch (master) are scheduled to be backported.
 * When an issue found in the stable release is `reported
-  <http://tracker.ceph.com/projects/ceph/issues/new>`_, it is
-  triaged by Ceph developers.
-* The `stable releases and backport team <http://tracker.ceph.com/projects/ceph-releases/wiki>`_
+  <http://tracker.stone.com/projects/stone/issues/new>`_, it is
+  triaged by Stone developers.
+* The `stable releases and backport team <http://tracker.stone.com/projects/stone-releases/wiki>`_
   publishes ``point releases`` including fixes that have been backported to the stable release.
 
 Lifetime of stable releases
@@ -114,12 +114,12 @@ release. Therefore,
 * Jewel was maintained until Mimic was released (June 2018).
 * Kraken is no longer maintained.
 
-Detailed information on all releases, past and present, can be found at :ref:`ceph-releases-index`
+Detailed information on all releases, past and present, can be found at :ref:`stone-releases-index`
 
 Release timeline
 ----------------
 
-.. ceph_timeline:: releases.yml development octopus nautilus mimic luminous kraken jewel infernalis hammer giant firefly
+.. stone_timeline:: releases.yml development octopus nautilus mimic luminous kraken jewel infernalis hammer giant firefly
 
 .. _Octopus: ../octopus
 .. _15.2.7: ../octopus#v15-2-7-octopus

@@ -6,7 +6,7 @@ import logging
 import struct
 import uuid
 
-import cephfs
+import stonefs
 
 from ..group import Group
 
@@ -90,7 +90,7 @@ class AuthMetadataManager(object):
                 # ensure that this does not happen.
                 try:
                     statbuf = self.fs.stat(path)
-                except cephfs.ObjectNotFound:
+                except stonefs.ObjectNotFound:
                     self.fs.close(fd)
                     continue
 
@@ -158,7 +158,7 @@ class AuthMetadataManager(object):
         vol_meta_path = self._subvolume_metadata_path(group_name, subvol_name)
         try:
             self.fs.unlink(vol_meta_path)
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             pass
 
     def subvol_metadata_lock(self, group_name, subvol_name):

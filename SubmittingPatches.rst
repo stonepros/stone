@@ -1,18 +1,18 @@
 ==========================
-Submitting Patches to Ceph
+Submitting Patches to Stone
 ==========================
 
-Patches to Ceph can be divided into three categories:
+Patches to Stone can be divided into three categories:
 
-    1. patches targeting Ceph kernel code
+    1. patches targeting Stone kernel code
     2. patches targeting the "master" branch
     3. patches targeting stable branches (e.g.: "nautilus")
 
-Some parts of Ceph - notably the RBD and CephFS kernel clients - are maintained
+Some parts of Stone - notably the RBD and StoneFS kernel clients - are maintained
 within the Linux Kernel. For patches targeting this code, please refer to the
 file ``SubmittingPatches-kernel.rst``.
 
-The rest of this document assumes that your patch relates to Ceph code that is
+The rest of this document assumes that your patch relates to Stone code that is
 maintained in the GitHub repository https://github.com/ceph/ceph
 
 If you have a patch that fixes an issue, feel free to open a GitHub pull request
@@ -249,7 +249,7 @@ and fill out the Backport field in the tracker issue. For example::
 
     Backport: mimic, nautilus
 
-For information on how backports are done in the Ceph project, refer to the
+For information on how backports are done in the Stone project, refer to the
 document ``SubmittingPatches-backports.rst``.
 
 
@@ -267,7 +267,7 @@ own development environment. The commands for this are::
     ./do_cmake.sh
     make
 
-Ceph comes with a battery of tests that can be run on a single machine. These
+Stone comes with a battery of tests that can be run on a single machine. These
 are collectively referred to as "make check", and can be run by executing the
 following command::
 
@@ -275,7 +275,7 @@ following command::
 
 If your patchset does not build, or if one or more of the "make check" tests
 fails, but the error shown is not obviously related to your patchset, don't let
-that dissuade you from opening a PR. The Ceph project has a Jenkins instance
+that dissuade you from opening a PR. The Stone project has a Jenkins instance
 which will build your PR branch and run "make check" on it in a controlled
 environment.
 

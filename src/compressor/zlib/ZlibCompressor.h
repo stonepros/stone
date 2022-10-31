@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Mirantis, Inc.
  *
@@ -22,9 +22,9 @@
 
 class ZlibCompressor : public Compressor {
   bool isal_enabled;
-  StoneeContext *const cct;
+  StoneContext *const cct;
 public:
-  ZlibCompressor(StoneeContext *cct, bool isal)
+  ZlibCompressor(StoneContext *cct, bool isal)
     : Compressor(COMP_ALG_ZLIB, "zlib"), isal_enabled(isal), cct(cct) {
 #ifdef HAVE_QATZIP
     if (cct->_conf->qat_compressor_enabled && qat_accel.init("zlib"))
@@ -34,12 +34,12 @@ public:
 #endif
   }
 
-  int compress(const ceph::buffer::list &in, ceph::buffer::list &out, boost::optional<int32_t> &compressor_message) override;
-  int decompress(const ceph::buffer::list &in, ceph::buffer::list &out, boost::optional<int32_t> compressor_message) override;
-  int decompress(ceph::buffer::list::const_iterator &p, size_t compressed_len, ceph::buffer::list &out, boost::optional<int32_t> compressor_message) override;
+  int compress(const stone::buffer::list &in, stone::buffer::list &out, boost::optional<int32_t> &compressor_message) override;
+  int decompress(const stone::buffer::list &in, stone::buffer::list &out, boost::optional<int32_t> compressor_message) override;
+  int decompress(stone::buffer::list::const_iterator &p, size_t compressed_len, stone::buffer::list &out, boost::optional<int32_t> compressor_message) override;
 private:
-  int zlib_compress(const ceph::buffer::list &in, ceph::buffer::list &out, boost::optional<int32_t> &compressor_message);
-  int isal_compress(const ceph::buffer::list &in, ceph::buffer::list &out, boost::optional<int32_t> &compressor_message);
+  int zlib_compress(const stone::buffer::list &in, stone::buffer::list &out, boost::optional<int32_t> &compressor_message);
+  int isal_compress(const stone::buffer::list &in, stone::buffer::list &out, boost::optional<int32_t> &compressor_message);
  };
 
 

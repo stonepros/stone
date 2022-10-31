@@ -72,7 +72,7 @@ class Cluster(multisite.Cluster):
         env = None
         if self.needs_reset:
             env = os.environ.copy()
-            env['CEPH_NUM_MDS'] = '0'
+            env['STONE_NUM_MDS'] = '0'
             cmd += ['-n']
             # cmd += ['-o']
             # cmd += ['rgw_cache_enabled=false']

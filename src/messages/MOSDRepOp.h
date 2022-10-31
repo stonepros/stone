@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -35,7 +35,7 @@ public:
 
   spg_t pgid;
 
-  ceph::buffer::list::const_iterator p;
+  stone::buffer::list::const_iterator p;
   // Decoding flags. Decoding is only needed for messages caught by pipe reader.
   bool final_decode_needed;
 
@@ -46,7 +46,7 @@ public:
   __u8 acks_wanted;
 
   // transaction to exec
-  ceph::buffer::list logbl;
+  stone::buffer::list logbl;
   pg_stat_t pg_stats;
 
   // subop metadata
@@ -77,7 +77,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     p = payload.cbegin();
     // split to partial and final
     decode(map_epoch, p);
@@ -92,7 +92,7 @@ public:
   }
 
   void finish_decode() {
-    using ceph::decode;
+    using stone::decode;
     if (!final_decode_needed)
       return; // Message is already final decoded
     decode(poid, p);
@@ -122,7 +122,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(map_epoch, payload);
     if (HAVE_FEATURE(features, SERVER_LUMINOUS)) {
       header.version = HEAD_VERSION;
@@ -153,7 +153,7 @@ public:
       final_decode_needed(true), acks_wanted (0) {}
   MOSDRepOp(osd_reqid_t r, pg_shard_t from,
 	    spg_t p, const hobject_t& po, int aw,
-	    epoch_t mape, epoch_t min_epoch, ceph_tid_t rtid, eversion_t v)
+	    epoch_t mape, epoch_t min_epoch, stone_tid_t rtid, eversion_t v)
     : MOSDFastDispatchOp{MSG_OSD_REPOP, HEAD_VERSION, COMPAT_VERSION},
       map_epoch(mape),
       min_epoch(min_epoch),
@@ -193,7 +193,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

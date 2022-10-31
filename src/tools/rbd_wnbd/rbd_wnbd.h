@@ -1,5 +1,5 @@
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 SUSE LINUX GmbH
  *
@@ -43,7 +43,7 @@
 #define DEFAULT_SERVICE_THREAD_COUNT 8
 
 static WnbdHandler* handler = nullptr;
-ceph::mutex shutdown_lock = ceph::make_mutex("RbdWnbd::ShutdownLock");
+stone::mutex shutdown_lock = stone::make_mutex("RbdWnbd::ShutdownLock");
 
 struct Config {
   bool exclusive = false;
@@ -84,7 +84,7 @@ struct Config {
   int io_reply_workers = DEFAULT_IO_WORKER_COUNT;
   int service_thread_count = DEFAULT_SERVICE_THREAD_COUNT;
 
-  // register the mapping, recreating it when the Ceph service starts.
+  // register the mapping, recreating it when the Stone service starts.
   bool persistent = true;
 };
 

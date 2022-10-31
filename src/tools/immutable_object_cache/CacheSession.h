@@ -13,13 +13,13 @@
 using boost::asio::local::stream_protocol;
 using boost::asio::io_service;
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 class CacheSession : public std::enable_shared_from_this<CacheSession> {
  public:
   CacheSession(io_service& io_service, ProcessMsg process_msg,
-                CephContext* ctx);
+                StoneContext* ctx);
   ~CacheSession();
   stream_protocol::socket& socket();
   void close();
@@ -41,7 +41,7 @@ class CacheSession : public std::enable_shared_from_this<CacheSession> {
  private:
   stream_protocol::socket m_dm_socket;
   ProcessMsg m_server_process_msg;
-  CephContext* m_cct;
+  StoneContext* m_cct;
 
   std::string m_client_version;
 
@@ -51,6 +51,6 @@ class CacheSession : public std::enable_shared_from_this<CacheSession> {
 typedef std::shared_ptr<CacheSession> CacheSessionPtr;
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone
 
 #endif  // STONE_CACHE_SESSION_H

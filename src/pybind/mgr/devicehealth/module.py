@@ -256,7 +256,7 @@ class Module(MgrModule):
             if osd["up"]:
                 up += 1
 
-        need = cast(int, self.get_ceph_option("osd_pool_default_size"))
+        need = cast(int, self.get_stone_option("osd_pool_default_size"))
         return up >= need
 
     def maybe_create_device_pool(self) -> bool:
@@ -689,7 +689,7 @@ class Module(MgrModule):
 
     def predict_lift_expectancy(self, devid: str) -> Tuple[int, str, str]:
         plugin_name = ''
-        model = self.get_ceph_option('device_failure_prediction_mode')
+        model = self.get_stone_option('device_failure_prediction_mode')
         if cast(str, model).lower() == 'local':
             plugin_name = 'diskprediction_local'
         else:
@@ -705,7 +705,7 @@ class Module(MgrModule):
 
     def predict_all_devices(self) -> Tuple[int, str, str]:
         plugin_name = ''
-        model = self.get_ceph_option('device_failure_prediction_mode')
+        model = self.get_stone_option('device_failure_prediction_mode')
         if cast(str, model).lower() == 'local':
             plugin_name = 'diskprediction_local'
         else:

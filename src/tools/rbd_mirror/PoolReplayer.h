@@ -5,7 +5,7 @@
 #define STONE_RBD_MIRROR_POOL_REPLAYER_H
 
 #include "common/Cond.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/rados/librados.hpp"
 #include "librbd/Utils.h"
 #include "librbd/asio/ContextWQ.h"
@@ -126,7 +126,7 @@ private:
     std::lock_guard locker{m_lock};
 
     if (m_namespace_replayers_locked) {
-      ceph_assert(m_on_namespace_replayers_unlocked == nullptr);
+      stone_assert(m_on_namespace_replayers_unlocked == nullptr);
       C_SaferCond cond;
       m_on_namespace_replayers_unlocked = &cond;
       m_lock.unlock();
@@ -136,9 +136,9 @@ private:
       m_namespace_replayers_locked = true;
     }
 
-    ceph_assert(m_namespace_replayers_locked);
+    stone_assert(m_namespace_replayers_locked);
     callback(); // may temporary release the lock
-    ceph_assert(m_namespace_replayers_locked);
+    stone_assert(m_namespace_replayers_locked);
 
     if (m_on_namespace_replayers_unlocked == nullptr) {
       m_namespace_replayers_locked = false;
@@ -159,7 +159,7 @@ private:
           [this, on_finish](int r) {
             {
               std::lock_guard locker{m_lock};
-              ceph_assert(m_namespace_replayers_locked);
+              stone_assert(m_namespace_replayers_locked);
 
               m_namespace_replayers_locked = false;
 
@@ -175,13 +175,13 @@ private:
     auto on_lock = new LambdaContext(
         [this, callback, on_finish](int) {
           std::lock_guard locker{m_lock};
-          ceph_assert(m_namespace_replayers_locked);
+          stone_assert(m_namespace_replayers_locked);
 
           callback(on_finish);
         });
 
     if (m_namespace_replayers_locked) {
-      ceph_assert(m_on_namespace_replayers_unlocked == nullptr);
+      stone_assert(m_on_namespace_replayers_unlocked == nullptr);
       m_on_namespace_replayers_unlocked = on_lock;
       return;
     }
@@ -200,8 +200,8 @@ private:
   PeerSpec m_peer;
   std::vector<const char*> m_args;
 
-  mutable ceph::mutex m_lock;
-  ceph::condition_variable m_cond;
+  mutable stone::mutex m_lock;
+  stone::condition_variable m_cond;
   std::string m_site_name;
   bool m_stopping = false;
   bool m_manual_stop = false;

@@ -6,35 +6,35 @@ tasks:
       - stone orch client-keyring set client.foo label:foo --mode 770 --owner 11111:22222
 - exec:
     host.a:
-      - while ! test -e /etc/stone/stone.client.foo.keyring ; do sleep 1 ; done
-      - ls -al /etc/stone/stone.client.foo.keyring | grep rwxrwx---
-      - ls -al /etc/stone/stone.client.foo.keyring | grep 11111
-      - ls -al /etc/stone/stone.client.foo.keyring | grep 22222
-      - test -e /etc/stone/stone.conf
+      - while ! test -e /etc/stonepros/stone.client.foo.keyring ; do sleep 1 ; done
+      - ls -al /etc/stonepros/stone.client.foo.keyring | grep rwxrwx---
+      - ls -al /etc/stonepros/stone.client.foo.keyring | grep 11111
+      - ls -al /etc/stonepros/stone.client.foo.keyring | grep 22222
+      - test -e /etc/stonepros/stone.conf
 - exec:
     host.b:
-      - test ! -e /etc/stone/stone.client.foo.keyring
+      - test ! -e /etc/stonepros/stone.client.foo.keyring
 - stoneadm.shell:
     host.b:
       - stone orch host label add `hostname` foo
 - exec:
     host.b:
-      - while ! test -e /etc/stone/stone.client.foo.keyring ; do sleep 1 ; done
-      - ls -al /etc/stone/stone.client.foo.keyring | grep rwxrwx---
-      - ls -al /etc/stone/stone.client.foo.keyring | grep 11111
-      - ls -al /etc/stone/stone.client.foo.keyring | grep 22222
+      - while ! test -e /etc/stonepros/stone.client.foo.keyring ; do sleep 1 ; done
+      - ls -al /etc/stonepros/stone.client.foo.keyring | grep rwxrwx---
+      - ls -al /etc/stonepros/stone.client.foo.keyring | grep 11111
+      - ls -al /etc/stonepros/stone.client.foo.keyring | grep 22222
 - stoneadm.shell:
     host.b:
       - stone orch host label rm `hostname` foo
 - exec:
     host.b:
-      - while test -e /etc/stone/stone.client.foo.keyring ; do sleep 1 ; done
+      - while test -e /etc/stonepros/stone.client.foo.keyring ; do sleep 1 ; done
 - exec:
     host.a:
-      - test -e /etc/stone/stone.client.foo.keyring
+      - test -e /etc/stonepros/stone.client.foo.keyring
 - stoneadm.shell:
     host.a:
       - stone orch client-keyring rm client.foo
 - exec:
     host.a:
-      - while test -e /etc/stone/stone.client.foo.keyring ; do sleep 1 ; done
+      - while test -e /etc/stonepros/stone.client.foo.keyring ; do sleep 1 ; done

@@ -25,7 +25,7 @@ fi
 function usage {
     echo
     echo "$SCRIPTNAME - automate setup of Python virtual environment"
-    echo "    (for use in building Ceph)"
+    echo "    (for use in building Stone)"
     echo
     echo "Usage:"
     echo "    $SCRIPTNAME [--python=PYTHON_BINARY] TARGET_DIRECTORY"

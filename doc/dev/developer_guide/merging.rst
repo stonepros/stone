@@ -4,7 +4,7 @@ Commit merging:  scope and cadence
 ==================================
 
 Commits are merged into branches according to criteria specific to each phase
-of the Ceph release lifecycle. This chapter codifies these criteria.
+of the Stone release lifecycle. This chapter codifies these criteria.
 
 Development releases (i.e. x.0.z)
 ---------------------------------

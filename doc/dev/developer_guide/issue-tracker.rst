@@ -3,10 +3,10 @@
 Issue Tracker
 =============
 
-See `Redmine Issue Tracker`_ for a brief introduction to the Ceph Issue
+See `Redmine Issue Tracker`_ for a brief introduction to the Stone Issue
 Tracker.
 
-Ceph developers use the issue tracker to
+Stone developers use the issue tracker to
 
 1. keep track of issues - bugs, fix requests, feature requests, backport
 requests, etc.
@@ -20,7 +20,7 @@ Issue tracker conventions
 When you start working on an existing issue, it's nice to let the other
 developers know this - to avoid duplication of labor. Typically, this is
 done by changing the :code:`Assignee` field (to yourself) and changing the
-:code:`Status` to *In progress*. Newcomers to the Ceph community typically do
+:code:`Status` to *In progress*. Newcomers to the Stone community typically do
 not have sufficient privileges to update these fields, however: they can
 simply update the issue with a brief note.
 

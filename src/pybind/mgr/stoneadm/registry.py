@@ -26,7 +26,7 @@ class Registry:
         raise ValueError(f'Unknown token reply {ret}')
 
     def parse_www_authenticate(self, text: str) -> Tuple[str, Dict[str, str]]:
-        # 'Www-Authenticate': 'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:ceph/ceph:pull"'
+        # 'Www-Authenticate': 'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:stone/stone:pull"'
         r: Dict[str, str] = {}
         for token in text.split(','):
             key, value = token.split('=', 1)

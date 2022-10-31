@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -55,7 +55,7 @@ class RGWSI_MDLog : public RGWServiceInstance
   std::unique_ptr<RGWPeriodHistory> period_history;
 
 public:
-  RGWSI_MDLog(CephContext *cct, bool run_sync);
+  RGWSI_MDLog(StoneContext *cct, bool run_sync);
   virtual ~RGWSI_MDLog();
 
   struct Svc {

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,12 +20,12 @@
 
 #include <boost/asio/async_result.hpp>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/function2.hpp"
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
-namespace ceph::async {
+namespace stone::async {
 namespace detail {
 // For safety reasons (avoiding undefined behavior around sequence
 // points) std::reference_wrapper disallows move construction. This
@@ -84,8 +84,8 @@ private:
 
 class base {
 protected:
-  ceph::mutex lock = ceph::make_mutex("ceph::async::detail::base::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("stone::async::detail::base::lock");
+  stone::condition_variable cond;
   bool has_value = false;
 
   ~base() = default;
@@ -100,7 +100,7 @@ protected:
     std::unique_lock l(lock);
     // There's no really good way to handle being called twice
     // without being reset.
-    ceph_assert(!has_value);
+    stone_assert(!has_value);
     has_value = true;
     cond.notify_one();
     return l;

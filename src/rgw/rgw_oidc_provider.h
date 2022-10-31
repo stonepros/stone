@@ -6,8 +6,8 @@
 
 #include <string>
 
-#include "common/ceph_context.h"
-#include "common/ceph_json.h"
+#include "common/stone_context.h"
+#include "common/stone_json.h"
 
 #include "rgw/rgw_rados.h"
 
@@ -24,7 +24,7 @@ class RGWOIDCProvider
   static constexpr int MAX_OIDC_THUMBPRINT_LEN = 40;
   static constexpr int MAX_OIDC_URL_LEN = 255;
 
-  CephContext *cct;
+  StoneContext *cct;
   RGWCtl *ctl;
   string id;
   string provider_url;
@@ -40,7 +40,7 @@ class RGWOIDCProvider
   bool validate_input();
 
 public:
-  RGWOIDCProvider(CephContext *cct,
+  RGWOIDCProvider(StoneContext *cct,
                     RGWCtl *ctl,
                     string provider_url,
                     string tenant,
@@ -54,7 +54,7 @@ public:
     thumbprints(std::move(thumbprints)) {
   }
 
-  RGWOIDCProvider(CephContext *cct,
+  RGWOIDCProvider(StoneContext *cct,
                     RGWCtl *ctl,
                     string arn,
                     string tenant)
@@ -64,14 +64,14 @@ public:
     tenant(std::move(tenant)) {
   }
 
-  RGWOIDCProvider(CephContext *cct,
+  RGWOIDCProvider(StoneContext *cct,
                     RGWCtl *ctl,
                     string tenant)
   : cct(cct),
     ctl(ctl),
     tenant(std::move(tenant)) {}
 
-  RGWOIDCProvider(CephContext *cct,
+  RGWOIDCProvider(StoneContext *cct,
           RGWCtl *ctl)
   : cct(cct),
     ctl(ctl) {}

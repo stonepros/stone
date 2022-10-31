@@ -17,28 +17,28 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.IOException;
 
 /**
- * Ceph is already mounted.
+ * Stone is already mounted.
  */
-public class CephAlreadyMountedException extends IOException {
+public class StoneAlreadyMountedException extends IOException {
 
   private static final long serialVersionUID = 1L;
 
   /**
-   * Construct CephAlreadyMountedException.
+   * Construct StoneAlreadyMountedException.
    */
-  public CephAlreadyMountedException() {
+  public StoneAlreadyMountedException() {
     super();
   }
 
   /**
-   * Construct CephAlreadyMountedException with message.
+   * Construct StoneAlreadyMountedException with message.
    */
-  public CephAlreadyMountedException(String s) {
+  public StoneAlreadyMountedException(String s) {
     super(s);
   }
 }

@@ -55,7 +55,7 @@ class forward_hash {
     return end_idx;
   }
   void push_back(uint8_t b) {
-    ceph_assert(end_idx < sizeof(data));
+    stone_assert(end_idx < sizeof(data));
     data[end_idx++] = b;
   }
   void push_back(uint16_t b) {
@@ -100,7 +100,7 @@ class DPDKDevice;
 struct ipv4_address;
 
 class interface {
-  StoneeContext *cct;
+  StoneContext *cct;
   struct l3_rx_stream {
     stream<Packet, ethernet_address> packet_stream;
     std::function<bool (forward_hash&, Packet&, size_t)> forward;
@@ -117,7 +117,7 @@ class interface {
  private:
   int dispatch_packet(EventCenter *c, Packet p);
  public:
-  explicit interface(StoneeContext *cct, std::shared_ptr<DPDKDevice> dev, EventCenter *center);
+  explicit interface(StoneContext *cct, std::shared_ptr<DPDKDevice> dev, EventCenter *center);
   ethernet_address hw_address() { return _hw_address; }
   const struct hw_features& get_hw_features() const { return _hw_features; }
   subscription<Packet, ethernet_address> register_l3(

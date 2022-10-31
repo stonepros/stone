@@ -4,7 +4,7 @@ import { Event, NavigationEnd, Router } from '@angular/router';
 import { NEVER, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { RgwDaemon } from '~/app/ceph/rgw/models/rgw-daemon';
+import { RgwDaemon } from '~/app/stone/rgw/models/rgw-daemon';
 import { RgwDaemonService } from '~/app/shared/api/rgw-daemon.service';
 import { Permissions } from '~/app/shared/models/permissions';
 import { AuthStorageService } from '~/app/shared/services/auth-storage.service';

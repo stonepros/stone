@@ -13,10 +13,10 @@ get_vm_ip () {
     echo -n $ip
 }
 
-if [[ -n "${JENKINS_HOME}" || (-z "${CYPRESS_BASE_URL}" && -z "$(get_vm_ip ceph-node-00)") ]]; then
+if [[ -n "${JENKINS_HOME}" || (-z "${CYPRESS_BASE_URL}" && -z "$(get_vm_ip stone-node-00)") ]]; then
     . "$(dirname $0)"/start-cluster.sh
 
-    CYPRESS_BASE_URL="https://$(get_vm_ip ceph-node-00):${DASHBOARD_PORT}"
+    CYPRESS_BASE_URL="https://$(get_vm_ip stone-node-00):${DASHBOARD_PORT}"
 fi
 
 export CYPRESS_BASE_URL CYPRESS_LOGIN_USER CYPRESS_LOGIN_PWD
@@ -34,8 +34,8 @@ cypress_run () {
     npx --no-install cypress run ${CYPRESS_ARGS} --browser chrome --headless --config "$override_config"
 }
 
-: ${CEPH_DEV_FOLDER:=${PWD}}
+: ${STONE_DEV_FOLDER:=${PWD}}
 
-cd ${CEPH_DEV_FOLDER}/src/pybind/mgr/dashboard/frontend
+cd ${STONE_DEV_FOLDER}/src/pybind/mgr/dashboard/frontend
 
 cypress_run "orchestrator/workflow/*-spec.ts"

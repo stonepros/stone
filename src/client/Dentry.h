@@ -15,12 +15,12 @@ public:
     dir(_dir), name(_name), inode_xlist_link(this)
   {
     auto r = dir->dentries.insert(make_pair(name, this));
-    ceph_assert(r.second);
+    stone_assert(r.second);
     dir->num_null_dentries++;
   }
   ~Dentry() {
-    ceph_assert(ref == 0);
-    ceph_assert(dir == nullptr);
+    stone_assert(ref == 0);
+    stone_assert(dir == nullptr);
   }
 
   /*
@@ -28,13 +28,13 @@ public:
    * ref >1 -> pinned in lru
    */
   void get() {
-    ceph_assert(ref > 0);
+    stone_assert(ref > 0);
     if (++ref == 2)
       lru_pin();
     //cout << "dentry.get on " << this << " " << name << " now " << ref << std::endl;
   }
   void put() {
-    ceph_assert(ref > 0);
+    stone_assert(ref > 0);
     if (--ref == 1)
       lru_unpin();
     //cout << "dentry.put on " << this << " " << name << " now " << ref << std::endl;
@@ -59,7 +59,7 @@ public:
       if (inode->ll_ref)
         put(); // ll_ref -> dn pin
     }
-    ceph_assert(inode_xlist_link.get_list() == &inode->dentries);
+    stone_assert(inode_xlist_link.get_list() == &inode->dentries);
     inode_xlist_link.remove_myself();
     inode.reset();
     dir->num_null_dentries++;
@@ -69,9 +69,9 @@ public:
       inode->dentries.push_front(&inode_xlist_link);
   }
   void detach(void) {
-    ceph_assert(!inode);
+    stone_assert(!inode);
     auto p = dir->dentries.find(name);
-    ceph_assert(p != dir->dentries.end());
+    stone_assert(p != dir->dentries.end());
     dir->dentries.erase(p);
     dir->num_null_dentries--;
     dir = nullptr;
@@ -88,7 +88,7 @@ public:
   mds_rank_t lease_mds = -1;
   utime_t lease_ttl;
   uint64_t lease_gen = 0;
-  ceph_seq_t lease_seq = 0;
+  stone_seq_t lease_seq = 0;
   int cap_shared_gen = 0;
   std::string alternate_name;
 

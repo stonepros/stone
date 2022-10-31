@@ -24,7 +24,7 @@ Service Status
 
 
 To see the status of one
-of the services running in the Ceph cluster, do the following:
+of the services running in the Stone cluster, do the following:
 
 #. Use the command line to print a list of services.
 #. Locate the service whose status you want to check.
@@ -158,7 +158,7 @@ The Specification can then be changed and re-applied as above.
 Updating Service Specifications
 -------------------------------
 
-The Ceph Orchestrator maintains a declarative state of each
+The Stone Orchestrator maintains a declarative state of each
 service in a ``ServiceSpec``. For certain operations, like updating
 the RGW HTTP port, we need to update the existing
 specification.
@@ -407,7 +407,7 @@ YAML can also be used to specify limits on hosts:
 Co-location of daemons
 ----------------------
 
-Cephadm supports the deployment of multiple daemons on the same host:
+Stoneadm supports the deployment of multiple daemons on the same host:
 
 .. code-block:: yaml
 
@@ -429,27 +429,27 @@ This feature was introduced in Pacific.
 Algorithm description
 ---------------------
 
-Cephadm's declarative state consists of a list of service specifications
+Stoneadm's declarative state consists of a list of service specifications
 containing placement specifications.
 
-Cephadm continually compares a list of daemons actually running in the cluster
-against the list in the service specifications. Cephadm adds new daemons and
+Stoneadm continually compares a list of daemons actually running in the cluster
+against the list in the service specifications. Stoneadm adds new daemons and
 removes old daemons as necessary in order to conform to the service
 specifications.
 
-Cephadm does the following to maintain compliance with the service
+Stoneadm does the following to maintain compliance with the service
 specifications.
 
-Cephadm first selects a list of candidate hosts. Cephadm seeks explicit host
+Stoneadm first selects a list of candidate hosts. Stoneadm seeks explicit host
 names and selects them. If cephadm finds no explicit host names, it looks for
 label specifications. If no label is defined in the specification, cephadm
 selects hosts based on a host pattern. If no host pattern is defined, as a last
 resort, cephadm selects all known hosts as candidates.
 
-Cephadm is aware of existing daemons running services and tries to avoid moving
+Stoneadm is aware of existing daemons running services and tries to avoid moving
 them.
 
-Cephadm supports the deployment of a specific amount of services.
+Stoneadm supports the deployment of a specific amount of services.
 Consider the following service specification:
 
 .. code-block:: yaml
@@ -486,7 +486,7 @@ Extra Container Arguments
   The arguments provided for extra container args are limited to whatever arguments are available for a `run` command from whichever container engine you are using. Providing any arguments the `run` command does not support (or invalid values for arguments) will cause the daemon to fail to start.
 
 
-Cephadm supports providing extra miscellaneous container arguments for
+Stoneadm supports providing extra miscellaneous container arguments for
 specific cases when they may be necessary. For example, if a user needed
 to limit the amount of cpus their mon daemons make use of they could apply
 a spec like
@@ -528,7 +528,7 @@ For example:
 Disabling automatic deployment of daemons
 =========================================
 
-Cephadm supports disabling the automated deployment and removal of daemons on a
+Stoneadm supports disabling the automated deployment and removal of daemons on a
 per service basis. The CLI supports two commands for this.
 
 In order to fully remove a service, see :ref:`orch-rm`.

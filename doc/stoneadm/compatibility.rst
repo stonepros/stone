@@ -8,15 +8,15 @@ Compatibility and Stability
 Compatibility with Podman Versions
 ----------------------------------
 
-Podman and Ceph have different end-of-life strategies that
-might make it challenging to find compatible Podman and Ceph 
+Podman and Stone have different end-of-life strategies that
+might make it challenging to find compatible Podman and Stone 
 versions
 
 Those versions are expected to work:
 
 
 +-----------+---------------------------------------+
-|  Ceph     |                 Podman                |
+|  Stone     |                 Podman                |
 +-----------+-------+-------+-------+-------+-------+
 |           | 1.9   |  2.0  |  2.1  |  2.2  |  3.0  |
 +===========+=======+=======+=======+=======+=======+
@@ -28,7 +28,7 @@ Those versions are expected to work:
 +-----------+-------+-------+-------+-------+-------+
 
 .. warning:: 
-  Only podman versions that are 2.0.0 and higher work with Ceph Pacific, with the exception of podman version 2.2.1, which does not work with Ceph Pacific. kubic stable is known to work with Ceph Pacific, but it must be run with a newer kernel.
+  Only podman versions that are 2.0.0 and higher work with Stone Pacific, with the exception of podman version 2.2.1, which does not work with Stone Pacific. kubic stable is known to work with Stone Pacific, but it must be run with a newer kernel.
 
 
 .. _cephadm-stability:
@@ -36,7 +36,7 @@ Those versions are expected to work:
 Stability
 ---------
 
-Cephadm is actively in development. Please be aware that some
+Stoneadm is actively in development. Please be aware that some
 functionality is still rough around the edges. Especially the 
 following components are working with cephadm, but the
 documentation is not as complete as we would like, and there may be some
@@ -44,11 +44,11 @@ changes in the near future:
 
 - RGW
 
-Cephadm support for the following features is still under development and may see breaking
+Stoneadm support for the following features is still under development and may see breaking
 changes in future releases:
 
 - Ingress
-- Cephadm exporter daemon
+- Stoneadm exporter daemon
 - cephfs-mirror
 
 In case you encounter issues, see also :ref:`cephadm-pause`.

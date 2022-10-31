@@ -30,7 +30,7 @@
 #include "include/encoding.h"
 #include "include/types.h"
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 class JSONObj;
 
@@ -39,19 +39,19 @@ struct objv {
   std::string instance;
   std::uint64_t ver{0};
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(instance, bl);
     encode(ver, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(instance, bl);
     decode(ver, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter* f) const;
+  void dump(stone::Formatter* f) const;
   void decode_json(JSONObj* obj);
 
   bool operator ==(const objv& rhs) const {
@@ -86,21 +86,21 @@ struct data_params {
   std::uint64_t max_entry_size{0};
   std::uint64_t full_size_threshold{0};
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(max_part_size, bl);
     encode(max_entry_size, bl);
     encode(full_size_threshold, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(max_part_size, bl);
     decode(max_entry_size, bl);
     decode(full_size_threshold, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter* f) const;
+  void dump(stone::Formatter* f) const;
   void decode_json(JSONObj* obj);
 
   bool operator ==(const data_params& rhs) const {
@@ -127,14 +127,14 @@ struct journal_entry {
   std::int64_t part_num{0};
   std::string part_tag;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode((int)op, bl);
     encode(part_num, bl);
     encode(part_tag, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     int i;
     decode(i, bl);
@@ -143,7 +143,7 @@ struct journal_entry {
     decode(part_tag, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter* f) const;
+  void dump(stone::Formatter* f) const;
 
   bool operator ==(const journal_entry& e) {
     return (op == e.op &&
@@ -322,7 +322,7 @@ struct info {
     return (max_push_part_num < min_push_part_num);
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(id, bl);
     encode(version, bl);
@@ -337,7 +337,7 @@ struct info {
     encode(journal, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(id, bl);
     decode(version, bl);
@@ -352,7 +352,7 @@ struct info {
     decode(journal, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter* f) const;
+  void dump(stone::Formatter* f) const;
   void decode_json(JSONObj* obj);
 
   std::string part_oid(std::int64_t part_num) const {
@@ -432,25 +432,25 @@ inline std::ostream& operator <<(std::ostream& m, const info& i) {
 }
 
 struct part_list_entry {
-  ceph::buffer::list data;
+  stone::buffer::list data;
   std::uint64_t ofs = 0;
-  ceph::real_time mtime;
+  stone::real_time mtime;
 
   part_list_entry() {}
-  part_list_entry(ceph::buffer::list&& data,
+  part_list_entry(stone::buffer::list&& data,
 		  uint64_t ofs,
-		  ceph::real_time mtime)
+		  stone::real_time mtime)
     : data(std::move(data)), ofs(ofs), mtime(mtime) {}
 
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(data, bl);
     encode(ofs, bl);
     encode(mtime, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(data, bl);
     decode(ofs, bl);
@@ -461,7 +461,7 @@ struct part_list_entry {
 WRITE_CLASS_ENCODER(part_list_entry)
 inline std::ostream& operator <<(std::ostream& m,
 				 const part_list_entry& p) {
-  using ceph::operator <<;
+  using stone::operator <<;
   return m << "data: " << p.data << ", "
 	   << "ofs: " << p.ofs << ", "
 	   << "mtime: " << p.mtime;
@@ -479,9 +479,9 @@ struct part_header {
   std::uint64_t next_ofs{0};
   std::uint64_t min_index{0};
   std::uint64_t max_index{0};
-  ceph::real_time max_time;
+  stone::real_time max_time;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(tag, bl);
     encode(params, bl);
@@ -494,7 +494,7 @@ struct part_header {
     encode(max_time, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(tag, bl);
     decode(params, bl);
@@ -510,7 +510,7 @@ struct part_header {
 };
 WRITE_CLASS_ENCODER(part_header)
 inline std::ostream& operator <<(std::ostream& m, const part_header& p) {
-  using ceph::operator <<;
+  using stone::operator <<;
   return m << "tag: " << p.tag << ", "
 	   << "params: {" << p.params << "}, "
 	   << "magic: " << p.magic << ", "

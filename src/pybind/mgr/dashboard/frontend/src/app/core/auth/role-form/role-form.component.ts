@@ -175,7 +175,7 @@ export class RoleFormComponent extends CdForm implements OnInit {
 
   /**
    * Checks if the specified row checkbox needs to be rendered as checked.
-   * @param {string} scope The scope to be checked, e.g. 'cephfs', 'grafana',
+   * @param {string} scope The scope to be checked, e.g. 'stonefs', 'grafana',
    *   'osd', 'pool' ...
    * @return Returns true if all permissions (read, create, update, delete)
    *   are checked for the specified scope, otherwise false.

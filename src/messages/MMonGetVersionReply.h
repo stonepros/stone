@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -40,14 +40,14 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(handle, payload);
     encode(version, payload);
     encode(oldest_version, payload);
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(handle, p);
     decode(version, p);
@@ -55,7 +55,7 @@ public:
       decode(oldest_version, p);
   }
 
-  ceph_tid_t handle = 0;
+  stone_tid_t handle = 0;
   version_t version = 0;
   version_t oldest_version = 0;
 

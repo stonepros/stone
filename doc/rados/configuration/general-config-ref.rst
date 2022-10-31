@@ -14,19 +14,19 @@
 ``admin_socket``
 
 :Description: The socket for executing administrative commands on a daemon, 
-              irrespective of whether Ceph Monitors have established a quorum.
+              irrespective of whether Stone Monitors have established a quorum.
 
 :Type: String
 :Required: No
-:Default: ``/var/run/ceph/$cluster-$name.asok`` 
+:Default: ``/var/run/stone/$cluster-$name.asok`` 
 
 
 ``pid_file``
 
 :Description: The file in which the mon, osd or mds will write its
               PID.  For instance, ``/var/run/$cluster/$type.$id.pid``
-              will create /var/run/ceph/mon.a.pid for the ``mon`` with
-              id ``a`` running in the ``ceph`` cluster. The ``pid
+              will create /var/run/stone/mon.a.pid for the ``mon`` with
+              id ``a`` running in the ``stone`` cluster. The ``pid
               file`` is removed when the daemon stops gracefully. If
               the process is not daemonized (i.e. runs with the ``-f``
               or ``-d`` option), the ``pid file`` is not created. 
@@ -37,7 +37,7 @@
 
 ``chdir``
 
-:Description: The directory Ceph daemons change to once they are 
+:Description: The directory Stone daemons change to once they are 
               up and running. Default ``/`` directory recommended.
 
 :Type: String
@@ -47,9 +47,9 @@
 
 ``max_open_files``
 
-:Description: If set, when the :term:`Ceph Storage Cluster` starts, Ceph sets 
+:Description: If set, when the :term:`Stone Storage Cluster` starts, Stone sets 
               the max open FDs at the OS level (i.e., the max # of file 
-              descriptors). A suitably large value prevents Ceph Daemons from running out
+              descriptors). A suitably large value prevents Stone Daemons from running out
               of file descriptors.
 
 :Type: 64-bit Integer

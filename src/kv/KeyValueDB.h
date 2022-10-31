@@ -27,24 +27,24 @@ public:
     /// Set Keys
     void set(
       const std::string &prefix,                      ///< [in] Prefix for keys, or CF name
-      const std::map<std::string, ceph::buffer::list> &to_set ///< [in] keys/values to set
+      const std::map<std::string, stone::buffer::list> &to_set ///< [in] keys/values to set
     ) {
       for (auto it = to_set.cbegin(); it != to_set.cend(); ++it)
 	set(prefix, it->first, it->second);
     }
 
-    /// Set Keys (via encoded ceph::buffer::list)
+    /// Set Keys (via encoded stone::buffer::list)
     void set(
       const std::string &prefix,      ///< [in] prefix, or CF name
-      ceph::buffer::list& to_set_bl           ///< [in] encoded key/values to set
+      stone::buffer::list& to_set_bl           ///< [in] encoded key/values to set
       ) {
-      using ceph::decode;
+      using stone::decode;
       auto p = std::cbegin(to_set_bl);
       uint32_t num;
       decode(num, p);
       while (num--) {
 	std::string key;
-	ceph::buffer::list value;
+	stone::buffer::list value;
 	decode(key, p);
 	decode(value, p);
 	set(prefix, key, value);
@@ -55,22 +55,22 @@ public:
     virtual void set(
       const std::string &prefix,      ///< [in] Prefix or CF for the key
       const std::string &k,	      ///< [in] Key to set
-      const ceph::buffer::list &bl            ///< [in] Value to set
+      const stone::buffer::list &bl            ///< [in] Value to set
       ) = 0;
     virtual void set(
       const std::string &prefix,
       const char *k,
       size_t keylen,
-      const ceph::buffer::list& bl) {
+      const stone::buffer::list& bl) {
       set(prefix, std::string(k, keylen), bl);
     }
 
-    /// Removes Keys (via encoded ceph::buffer::list)
+    /// Removes Keys (via encoded stone::buffer::list)
     void rmkeys(
       const std::string &prefix,     ///< [in] Prefix or CF to search for
-      ceph::buffer::list &keys_bl            ///< [in] Keys to remove
+      stone::buffer::list &keys_bl            ///< [in] Keys to remove
     ) {
-      using ceph::decode;
+      using stone::decode;
       auto p = std::cbegin(keys_bl);
       uint32_t num;
       decode(num, p);
@@ -128,15 +128,15 @@ public:
     virtual void merge(
       const std::string &prefix,   ///< [in] Prefix/CF ==> MUST match some established merge operator
       const std::string &key,      ///< [in] Key to be merged
-      const ceph::buffer::list  &value     ///< [in] value to be merged into key
-    ) { ceph_abort_msg("Not implemented"); }
+      const stone::buffer::list  &value     ///< [in] value to be merged into key
+    ) { stone_abort_msg("Not implemented"); }
 
     virtual ~TransactionImpl() {}
   };
   typedef std::shared_ptr< TransactionImpl > Transaction;
 
   /// create a new instance
-  static KeyValueDB *create(StoneeContext *cct, const std::string& type,
+  static KeyValueDB *create(StoneContext *cct, const std::string& type,
 			    const std::string& dir,
 			    std::map<std::string,std::string> options = {},
 			    void *p = NULL);
@@ -167,26 +167,26 @@ public:
   virtual int get(
     const std::string &prefix,               ///< [in] Prefix/CF for key
     const std::set<std::string> &key,        ///< [in] Key to retrieve
-    std::map<std::string, ceph::buffer::list> *out   ///< [out] Key value retrieved
+    std::map<std::string, stone::buffer::list> *out   ///< [out] Key value retrieved
     ) = 0;
   virtual int get(const std::string &prefix, ///< [in] prefix or CF name
 		  const std::string &key,    ///< [in] key
-		  ceph::buffer::list *value) {       ///< [out] value
+		  stone::buffer::list *value) {       ///< [out] value
     std::set<std::string> ks;
     ks.insert(key);
-    std::map<std::string,ceph::buffer::list> om;
+    std::map<std::string,stone::buffer::list> om;
     int r = get(prefix, ks, &om);
     if (om.find(key) != om.end()) {
       *value = std::move(om[key]);
     } else {
-      *value = ceph::buffer::list();
+      *value = stone::buffer::list();
       r = -ENOENT;
     }
     return r;
   }
   virtual int get(const std::string &prefix,
 		  const char *key, size_t keylen,
-		  ceph::buffer::list *value) {
+		  stone::buffer::list *value) {
     return get(prefix, std::string(key, keylen), value);
   }
 
@@ -204,7 +204,7 @@ public:
     virtual std::string tail_key() {
       return "";
     }
-    virtual ceph::buffer::list value() = 0;
+    virtual stone::buffer::list value() = 0;
     virtual int status() = 0;
     virtual ~SimplestIteratorImpl() {}
   };
@@ -215,14 +215,14 @@ public:
     virtual int seek_to_last() = 0;
     virtual int prev() = 0;
     virtual std::pair<std::string, std::string> raw_key() = 0;
-    virtual ceph::buffer::ptr value_as_ptr() {
-      ceph::buffer::list bl = value();
+    virtual stone::buffer::ptr value_as_ptr() {
+      stone::buffer::list bl = value();
       if (bl.length() == 1) {
         return *bl.buffers().begin();
       } else if (bl.length() == 0) {
-        return ceph::buffer::ptr();
+        return stone::buffer::ptr();
       } else {
-	ceph_abort();
+	stone_abort();
       }
     }
   };
@@ -243,13 +243,13 @@ public:
     virtual std::string key() = 0;
     virtual std::pair<std::string,std::string> raw_key() = 0;
     virtual bool raw_key_is_prefixed(const std::string &prefix) = 0;
-    virtual ceph::buffer::list value() = 0;
-    virtual ceph::buffer::ptr value_as_ptr() {
-      ceph::buffer::list bl = value();
+    virtual stone::buffer::list value() = 0;
+    virtual stone::buffer::ptr value_as_ptr() {
+      stone::buffer::list bl = value();
       if (bl.length()) {
         return *bl.buffers().begin();
       } else {
-        return ceph::buffer::ptr();
+        return stone::buffer::ptr();
       }
     }
     virtual int status() = 0;
@@ -302,10 +302,10 @@ private:
     std::pair<std::string, std::string> raw_key() override {
       return generic_iter->raw_key();
     }
-    ceph::buffer::list value() override {
+    stone::buffer::list value() override {
       return generic_iter->value();
     }
-    ceph::buffer::ptr value_as_ptr() override {
+    stone::buffer::ptr value_as_ptr() override {
       return generic_iter->value_as_ptr();
     }
     int status() override {
@@ -407,7 +407,7 @@ public:
     return -EOPNOTSUPP;
   }
 
-  virtual void get_statistics(ceph::Formatter *f) {
+  virtual void get_statistics(stone::Formatter *f) {
     return;
   }
 

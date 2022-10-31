@@ -26,7 +26,7 @@ public:
   EntityName name;
   /// cluster name
   std::string cluster;
-  ceph::logging::SubsystemMap subsys;
+  stone::logging::SubsystemMap subsys;
   bool no_mon_config = false;
   // Set of configuration options that have changed since the last
   // apply_changes

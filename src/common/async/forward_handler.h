@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat
  *
@@ -17,7 +17,7 @@
 
 #include <boost/asio.hpp>
 
-namespace ceph::async {
+namespace stone::async {
 
 /**
  * A forwarding completion handler for use with boost::asio.
@@ -53,16 +53,16 @@ struct ForwardingHandler {
   }
 };
 
-} // namespace ceph::async
+} // namespace stone::async
 
 namespace boost::asio {
 
 // specialize boost::asio::associated_executor<> for ForwardingHandler
 template <typename Handler, typename Executor>
-struct associated_executor<ceph::async::ForwardingHandler<Handler>, Executor> {
+struct associated_executor<stone::async::ForwardingHandler<Handler>, Executor> {
   using type = boost::asio::associated_executor_t<Handler, Executor>;
 
-  static type get(const ceph::async::ForwardingHandler<Handler>& handler,
+  static type get(const stone::async::ForwardingHandler<Handler>& handler,
                   const Executor& ex = Executor()) noexcept {
     return boost::asio::get_associated_executor(handler.handler, ex);
   }
@@ -70,7 +70,7 @@ struct associated_executor<ceph::async::ForwardingHandler<Handler>, Executor> {
 
 } // namespace boost::asio
 
-namespace ceph::async {
+namespace stone::async {
 
 /**
  * Returns a single-use completion handler that always forwards on operator().
@@ -98,6 +98,6 @@ auto forward_handler(Handler&& h)
   return ForwardingHandler{std::forward<Handler>(h)};
 }
 
-} // namespace ceph::async
+} // namespace stone::async
 
 #endif // STONE_ASYNC_FORWARD_HANDLER_H

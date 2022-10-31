@@ -69,7 +69,7 @@ cypress_run () {
 install_common
 install_chrome
 
-CYPRESS_BASE_URL=$(ceph mgr services | jq -r .dashboard)
+CYPRESS_BASE_URL=$(stone mgr services | jq -r .dashboard)
 export CYPRESS_BASE_URL
 
 cd $DASHBOARD_FRONTEND_DIR
@@ -81,33 +81,33 @@ npx cypress info
 
 # Remove device_health_metrics pool
 # Low pg count causes OSD removal failure.
-ceph device monitoring off
-ceph tell mon.\* injectargs '--mon-allow-pool-delete=true'
-ceph osd pool rm device_health_metrics device_health_metrics --yes-i-really-really-mean-it
+stone device monitoring off
+stone tell mon.\* injectargs '--mon-allow-pool-delete=true'
+stone osd pool rm device_health_metrics device_health_metrics --yes-i-really-really-mean-it
 
 # Take `orch device ls` and `orch ps` as ground truth.
-ceph orch device ls --refresh
-ceph orch ps --refresh
+stone orch device ls --refresh
+stone orch ps --refresh
 sleep 10  # the previous call is asynchronous
-ceph orch device ls --format=json | tee cypress/fixtures/orchestrator/inventory.json
-ceph orch ps --format=json | tee cypress/fixtures/orchestrator/services.json
+stone orch device ls --format=json | tee cypress/fixtures/orchestrator/inventory.json
+stone orch ps --format=json | tee cypress/fixtures/orchestrator/services.json
 
 DASHBOARD_ADMIN_SECRET_FILE="/tmp/dashboard-admin-secret.txt"
 printf 'admin' > "${DASHBOARD_ADMIN_SECRET_FILE}"
-ceph dashboard ac-user-set-password admin -i "${DASHBOARD_ADMIN_SECRET_FILE}" --force-password
+stone dashboard ac-user-set-password admin -i "${DASHBOARD_ADMIN_SECRET_FILE}" --force-password
 
 # Run Dashboard e2e tests.
 # These tests are designed with execution order in mind, since orchestrator operations
 # are likely to change cluster state, we can't just run tests in arbitrarily order.
-# See /ceph/src/pybind/mgr/dashboard/frontend/cypress/integration/orchestrator/ folder.
+# See /stonepros/src/pybind/mgr/dashboard/frontend/cypress/integration/orchestrator/ folder.
 find cypress # List all specs
 
 cypress_run "orchestrator/01-hosts.e2e-spec.ts"
 
 # Hosts are removed and added in the previous step. Do a refresh again.
-ceph orch device ls --refresh
+stone orch device ls --refresh
 sleep 10
-ceph orch device ls --format=json | tee cypress/fixtures/orchestrator/inventory.json
+stone orch device ls --format=json | tee cypress/fixtures/orchestrator/inventory.json
 
 cypress_run "orchestrator/03-inventory.e2e-spec.ts"
 cypress_run "orchestrator/04-osds.e2e-spec.ts" 300000

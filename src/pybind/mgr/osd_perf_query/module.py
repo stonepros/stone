@@ -24,20 +24,20 @@ class OSDPerfQuery(MgrModule):
     COMMANDS = [
         {
             "cmd": "osd perf query add "
-                   "name=query,type=CephChoices,"
+                   "name=query,type=StoneChoices,"
                    "strings=client_id|rbd_image_id|all_subkeys",
             "desc": "add osd perf query",
             "perm": "w"
         },
         {
             "cmd": "osd perf query remove "
-                   "name=query_id,type=CephInt,req=true",
+                   "name=query_id,type=StoneInt,req=true",
             "desc": "remove osd perf query",
             "perm": "w"
         },
         {
             "cmd": "osd perf counters get "
-                   "name=query_id,type=CephInt,req=true",
+                   "name=query_id,type=StoneInt,req=true",
             "desc": "fetch osd perf counters",
             "perm": "w"
         },

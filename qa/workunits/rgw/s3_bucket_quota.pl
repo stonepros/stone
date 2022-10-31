@@ -376,7 +376,7 @@ sub test_quota_size_disabled_user {
 # set bucket quota for specified user and verify
 
 #== Main starts here===
-ceph_os_info();
+stone_os_info();
 test_max_objects();
 test_max_objects_per_user();
 test_beyond_max_objs();

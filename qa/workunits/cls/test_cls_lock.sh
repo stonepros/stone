@@ -1,5 +1,5 @@
 #!/bin/sh -e
 
-ceph_test_cls_lock
+stone_test_cls_lock
 
 exit 0

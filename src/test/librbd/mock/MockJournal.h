@@ -21,7 +21,7 @@ struct ImageCtx;
 struct MockJournal {
   static MockJournal *s_instance;
   static MockJournal *get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return s_instance;
   }
 

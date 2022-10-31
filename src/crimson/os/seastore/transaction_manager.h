@@ -14,7 +14,7 @@
 
 #include <seastar/core/future.hh>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/buffer.h"
 
 #include "crimson/osd/exceptions.h"
@@ -93,7 +93,7 @@ public:
     return lba_manager.get_mapping(
       t, offset, length
     ).safe_then([this, &t, &pin_list_ref, &ret_ref](auto pins) {
-      crimson::get_logger(ceph_subsys_filestore).debug(
+      crimson::get_logger(stone_subsys_filestore).debug(
 	"read_extents: mappings {}",
 	pins);
       pins.swap(pin_list_ref);
@@ -101,7 +101,7 @@ public:
 	pin_list_ref.begin(),
 	pin_list_ref.end(),
 	[this, &t, &ret_ref](auto &pin) {
-	  crimson::get_logger(ceph_subsys_filestore).debug(
+	  crimson::get_logger(stone_subsys_filestore).debug(
 	    "read_extents: get_extent {}~{}",
 	    pin->get_paddr(),
 	    pin->get_length());
@@ -115,7 +115,7 @@ public:
 	      lba_manager.add_pin(ref->get_pin());
 	    }
 	    ret_ref.push_back(std::make_pair(ref->get_laddr(), ref));
-	    crimson::get_logger(ceph_subsys_filestore).debug(
+	    crimson::get_logger(stone_subsys_filestore).debug(
 	      "read_extents: got extent {}",
 	      *ref);
 	    return read_extent_ertr::now();
@@ -130,7 +130,7 @@ public:
 
   /// Obtain mutable copy of extent
   LogicalCachedExtentRef get_mutable_extent(Transaction &t, LogicalCachedExtentRef ref) {
-    auto &logger = crimson::get_logger(ceph_subsys_filestore);
+    auto &logger = crimson::get_logger(stone_subsys_filestore);
     auto ret = cache.duplicate_for_write(
       t,
       ref)->cast<LogicalCachedExtent>();

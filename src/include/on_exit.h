@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <vector>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 /*
  * Create a static instance at the file level to get callbacks called when the
  * process exits via main() or exit().
@@ -16,7 +16,7 @@ class OnExitManager {
 
     OnExitManager() {
       int ret = pthread_mutex_init(&lock_, NULL);
-      ceph_assert(ret == 0);
+      stone_assert(ret == 0);
     }
 
     ~OnExitManager() {

@@ -5,13 +5,13 @@ from setuptools import setup
 __version__ = '0.0.1'
 
 setup(
-    name='cephfs-shell',
+    name='stonefs-shell',
     version=__version__,
-    description='Interactive shell for Ceph file system',
-    keywords='cephfs, shell',
-    scripts=['cephfs-shell'],
+    description='Interactive shell for Stone file system',
+    keywords='stonefs, shell',
+    scripts=['stonefs-shell'],
     install_requires=[
-        'cephfs',
+        'stonefs',
         'cmd2',
         'colorama',
     ],

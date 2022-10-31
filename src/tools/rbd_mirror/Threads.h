@@ -6,7 +6,7 @@
 
 #include "include/common_fwd.h"
 #include "include/rados/librados_fwd.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include <memory>
 
@@ -28,7 +28,7 @@ public:
   librbd::asio::ContextWQ* work_queue = nullptr;
 
   SafeTimer *timer = nullptr;
-  ceph::mutex timer_lock = ceph::make_mutex("Threads::timer_lock");
+  stone::mutex timer_lock = stone::make_mutex("Threads::timer_lock");
 
   explicit Threads(std::shared_ptr<librados::Rados>& rados);
   Threads(const Threads&) = delete;

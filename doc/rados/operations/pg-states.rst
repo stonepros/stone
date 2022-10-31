@@ -2,22 +2,22 @@
  Placement Group States
 ========================
 
-When checking a cluster's status (e.g., running ``ceph -w`` or ``ceph -s``), 
-Ceph will report on the status of the placement groups. A placement group has 
+When checking a cluster's status (e.g., running ``stone -w`` or ``stone -s``), 
+Stone will report on the status of the placement groups. A placement group has 
 one or more states. The optimum state for placement groups in the placement group
 map is ``active + clean``. 
 
 *creating*
-  Ceph is still creating the placement group.
+  Stone is still creating the placement group.
 
 *activating*
   The placement group is peered but not yet active.
 
 *active*
-  Ceph will process requests to the placement group.
+  Stone will process requests to the placement group.
 
 *clean*
-  Ceph replicated all objects in the placement group the correct number of times.
+  Stone replicated all objects in the placement group the correct number of times.
 
 *down*
   A replica with necessary data is down, so the placement group is offline.
@@ -29,26 +29,26 @@ map is ``active + clean``.
   The set of OSDs for this PG has just changed and IO is temporarily paused until the previous interval's leases expire.
 
 *scrubbing*
-  Ceph is checking the placement group metadata for inconsistencies.
+  Stone is checking the placement group metadata for inconsistencies.
 
 *deep*
-  Ceph is checking the placement group data against stored checksums.
+  Stone is checking the placement group data against stored checksums.
 
 *degraded*
-  Ceph has not replicated some objects in the placement group the correct number of times yet.
+  Stone has not replicated some objects in the placement group the correct number of times yet.
 
 *inconsistent*
-  Ceph detects inconsistencies in the one or more replicas of an object in the placement group
+  Stone detects inconsistencies in the one or more replicas of an object in the placement group
   (e.g. objects are the wrong size, objects are missing from one replica *after* recovery finished, etc.).
 
 *peering*
   The placement group is undergoing the peering process
 
 *repair*
-  Ceph is checking the placement group and repairing any inconsistencies it finds (if possible).
+  Stone is checking the placement group and repairing any inconsistencies it finds (if possible).
 
 *recovering*
-  Ceph is migrating/synchronizing objects and their replicas.
+  Stone is migrating/synchronizing objects and their replicas.
 
 *forced_recovery*
   High recovery priority of that PG is enforced by user.
@@ -64,7 +64,7 @@ map is ``active + clean``.
   Recovery stopped due to unfound objects.
 
 *backfilling*
-  Ceph is scanning and synchronizing the entire contents of a placement group
+  Stone is scanning and synchronizing the entire contents of a placement group
   instead of inferring what contents need to be synchronized from the logs of
   recent operations. Backfill is a special case of recovery.
 
@@ -82,7 +82,7 @@ map is ``active + clean``.
   Backfill stopped due to unfound objects.
 
 *incomplete*
-  Ceph detects that a placement group is missing information about
+  Stone detects that a placement group is missing information about
   writes that may have occurred, or does not have any healthy
   copies. If you see this state, try to start any failed OSDs that may
   contain the needed information. In the case of an erasure coded pool
@@ -114,5 +114,5 @@ map is ``active + clean``.
   Error stopped trimming snaps.
 
 *unknown*
-  The ceph-mgr hasn't yet received any information about the PG's state from an
+  The stone-mgr hasn't yet received any information about the PG's state from an
   OSD since mgr started up.

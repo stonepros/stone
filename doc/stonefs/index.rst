@@ -1,16 +1,16 @@
 .. _ceph-file-system:
 
 =================
- Ceph File System
+ Stone File System
 =================
 
-The Ceph File System, or **CephFS**, is a POSIX-compliant file system built on
-top of Ceph's distributed object store, **RADOS**. CephFS endeavors to provide
+The Stone File System, or **StoneFS**, is a POSIX-compliant file system built on
+top of Stone's distributed object store, **RADOS**. StoneFS endeavors to provide
 a state-of-the-art, multi-use, highly available, and performant file store for
 a variety of applications, including traditional use-cases like shared home
 directories, HPC scratch space, and distributed workflow shared storage.
 
-CephFS achieves these goals through the use of some novel architectural
+StoneFS achieves these goals through the use of some novel architectural
 choices.  Notably, file metadata is stored in a separate RADOS pool from file
 data and served via a resizable cluster of *Metadata Servers*, or **MDS**,
 which may scale to support higher throughput metadata workloads.  Clients of
@@ -28,35 +28,35 @@ collaboration between clients within the context of a POSIX file system.
 
 .. image:: cephfs-architecture.svg
 
-CephFS is the subject of numerous academic papers for its novel designs and
+StoneFS is the subject of numerous academic papers for its novel designs and
 contributions to file system research. It is the oldest storage interface in
-Ceph and was once the primary use-case for RADOS.  Now it is joined by two
-other storage interfaces to form a modern unified storage system: RBD (Ceph
-Block Devices) and RGW (Ceph Object Storage Gateway).
+Stone and was once the primary use-case for RADOS.  Now it is joined by two
+other storage interfaces to form a modern unified storage system: RBD (Stone
+Block Devices) and RGW (Stone Object Storage Gateway).
 
 
-Getting Started with CephFS
+Getting Started with StoneFS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For most deployments of Ceph, setting up a CephFS file system is as simple as:
+For most deployments of Stone, setting up a StoneFS file system is as simple as:
 
 .. code:: bash
 
     ceph fs volume create <fs name>
 
-The Ceph `Orchestrator`_  will automatically create and configure MDS for
+The Stone `Orchestrator`_  will automatically create and configure MDS for
 your file system if the back-end deployment technology supports it (see
 `Orchestrator deployment table`_). Otherwise, please `deploy MDS manually
 as needed`_.
 
-Finally, to mount CephFS on your client nodes, see `Mount CephFS:
+Finally, to mount StoneFS on your client nodes, see `Mount StoneFS:
 Prerequisites`_ page. Additionally, a command-line shell utility is available
 for interactive access or scripting via the `cephfs-shell`_.
 
 .. _Orchestrator: ../mgr/orchestrator
 .. _deploy MDS manually as needed: add-remove-mds
 .. _Orchestrator deployment table: ../mgr/orchestrator/#current-implementation-status
-.. _Mount CephFS\: Prerequisites: mount-prerequisites
+.. _Mount StoneFS\: Prerequisites: mount-prerequisites
 .. _cephfs-shell: cephfs-shell
 
 
@@ -75,7 +75,7 @@ Administration
    :maxdepth: 1
    :hidden:
 
-    Create a CephFS file system <createfs>
+    Create a StoneFS file system <createfs>
     Administrative commands <administration>
     Creating Multiple File Systems <multifs>
     Provision/Add/Remove MDS(s) <add-remove-mds>
@@ -86,18 +86,18 @@ Administration
     Export over NFS <nfs>
     Application best practices <app-best-practices>
     FS volume and subvolumes <fs-volumes>
-    CephFS Quotas <quota>
+    StoneFS Quotas <quota>
     Health messages <health-messages>
     Upgrading old file systems <upgrading>
-    CephFS Top Utility <cephfs-top>
+    StoneFS Top Utility <cephfs-top>
     Scheduled Snapshots <snap-schedule>
-    CephFS Snapshot Mirroring <cephfs-mirroring>
+    StoneFS Snapshot Mirroring <cephfs-mirroring>
 
 .. raw:: html
 
    <!---
 
-Mounting CephFS
+Mounting StoneFS
 ^^^^^^^^^^^^^^^
 
 .. raw:: html
@@ -110,11 +110,11 @@ Mounting CephFS
 
     Client Configuration Settings <client-config-ref>
     Client Authentication <client-auth>
-    Mount CephFS: Prerequisites <mount-prerequisites>
-    Mount CephFS using Kernel Driver <mount-using-kernel-driver>
-    Mount CephFS using FUSE <mount-using-fuse>
-    Mount CephFS on Windows <ceph-dokan>
-    Use the CephFS Shell <cephfs-shell>
+    Mount StoneFS: Prerequisites <mount-prerequisites>
+    Mount StoneFS using Kernel Driver <mount-using-kernel-driver>
+    Mount StoneFS using FUSE <mount-using-fuse>
+    Mount StoneFS on Windows <ceph-dokan>
+    Use the StoneFS Shell <cephfs-shell>
     Supported Features of Kernel Driver <kernel-features>
     Manual: ceph-fuse <../../man/8/ceph-fuse>
     Manual: mount.ceph <../../man/8/mount.ceph>
@@ -125,7 +125,7 @@ Mounting CephFS
 
    <!---
 
-CephFS Concepts
+StoneFS Concepts
 ^^^^^^^^^^^^^^^
 
 .. raw:: html
@@ -141,8 +141,8 @@ CephFS Concepts
     MDS Journaling <mds-journaling>
     File layouts <file-layouts>
     Distributed Metadata Cache <mdcache>
-    Dynamic Metadata Management in CephFS <dynamic-metadata-management>
-    CephFS IO Path <cephfs-io-path>
+    Dynamic Metadata Management in StoneFS <dynamic-metadata-management>
+    StoneFS IO Path <cephfs-io-path>
     LazyIO <lazyio>
     Directory fragmentation <dirfrags>
     Multiple active MDS daemons <multimds>

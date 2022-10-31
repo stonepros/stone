@@ -24,7 +24,7 @@ class JwtManagerTest(unittest.TestCase):
 
         decoded_token = JwtManager.decode_token(token)
         self.assertIsInstance(decoded_token, dict)
-        self.assertEqual(decoded_token['iss'], 'ceph-dashboard')
+        self.assertEqual(decoded_token['iss'], 'stone-dashboard')
         self.assertEqual(decoded_token['username'], 'my-username')
 
 

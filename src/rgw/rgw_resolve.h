@@ -6,7 +6,7 @@
 
 #include "rgw_common.h"
 
-namespace ceph {
+namespace stone {
   class DNSResolver;
 }
 

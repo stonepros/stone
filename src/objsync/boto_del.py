@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Ceph - scalable distributed file system
+# Stone - scalable distributed file system
 #
 # Copyright (C) 2011 New Dream Network
 #

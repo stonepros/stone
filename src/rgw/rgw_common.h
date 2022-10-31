@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  * Copyright (C) 2015 Yehuda Sadeh <yehuda@redhat.com>
@@ -19,7 +19,7 @@
 #include <array>
 #include <string_view>
 
-#include "common/ceph_crypto.h"
+#include "common/stone_crypto.h"
 #include "common/random_string.h"
 #include "rgw_acl.h"
 #include "rgw_bucket_layout.h"
@@ -39,7 +39,7 @@
 #include "include/rados/librados.hpp"
 #include "rgw_public_access.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -47,10 +47,10 @@ namespace rgw::sal {
   class RGWUser;
   class RGWBucket;
   class RGWObject;
-  using RGWAttrs = std::map<std::string, ceph::buffer::list>;
+  using RGWAttrs = std::map<std::string, stone::buffer::list>;
 }
 
-using ceph::crypto::MD5;
+using stone::crypto::MD5;
 
 #define RGW_ATTR_PREFIX  "user.rgw."
 
@@ -388,7 +388,7 @@ class RGWConf {
   int enable_ops_log;
   int enable_usage_log;
   uint8_t defer_to_bucket_acls;
-  void init(CephContext *cct);
+  void init(StoneContext *cct);
 public:
   RGWConf()
     : enable_ops_log(1),
@@ -401,8 +401,8 @@ class RGWEnv {
   std::map<string, string, ltstr_nocase> env_map;
   RGWConf conf;
 public:
-  void init(CephContext *cct);
-  void init(CephContext *cct, char **envp);
+  void init(StoneContext *cct);
+  void init(StoneContext *cct, char **envp);
   void set(std::string name, std::string val);
   const char *get(const char *name, const char *def_val = nullptr) const;
   int get_int(const char *name, int def_val = 0) const;
@@ -427,7 +427,7 @@ public:
 
 // return true if the connection is secure. this either means that the
 // connection arrived via ssl, or was forwarded as https by a trusted proxy
-bool rgw_transport_is_secure(CephContext *cct, const RGWEnv& env);
+bool rgw_transport_is_secure(StoneContext *cct, const RGWEnv& env);
 
 enum http_op {
   OP_GET,
@@ -621,12 +621,12 @@ struct rgw_placement_rule {
   void encode(bufferlist& bl) const {
     /* no ENCODE_START/END due to backward compatibility */
     std::string s = to_str();
-    ceph::encode(s, bl);
+    stone::encode(s, bl);
   }
 
   void decode(bufferlist::const_iterator& bl) {
     std::string s;
-    ceph::decode(s, bl);
+    stone::decode(s, bl);
     from_str(s);
   } 
 
@@ -658,7 +658,7 @@ struct rgw_placement_rule {
 };
 WRITE_CLASS_ENCODER(rgw_placement_rule)
 
-void encode_json(const char *name, const rgw_placement_rule& val, ceph::Formatter *f);
+void encode_json(const char *name, const rgw_placement_rule& val, stone::Formatter *f);
 void decode_json_obj(rgw_placement_rule& v, JSONObj *obj);
 
 inline ostream& operator<<(ostream& out, const rgw_placement_rule& rule) {
@@ -964,7 +964,7 @@ struct RGWObjVersionTracker {
     write_version = obj_version();
   }
 
-  void generate_new_write_ver(CephContext *cct);
+  void generate_new_write_ver(StoneContext *cct);
 };
 
 inline ostream& operator<<(ostream& out, const obj_version &v)
@@ -995,7 +995,7 @@ struct RGWBucketInfo {
   rgw_user owner;
   uint32_t flags{0};
   string zonegroup;
-  ceph::real_time creation_time;
+  stone::real_time creation_time;
   rgw_placement_rule placement_rule;
   bool has_instance_obj{false};
   RGWObjVersionTracker objv_tracker; /* we don't need to serialize this, for runtime tracking */
@@ -1063,7 +1063,7 @@ struct RGWBucketEntryPoint
 {
   rgw_bucket bucket;
   rgw_user owner;
-  ceph::real_time creation_time;
+  stone::real_time creation_time;
   bool linked;
 
   bool has_bucket_info;
@@ -1168,7 +1168,7 @@ struct req_info {
   string domain;
   string storage_class;
 
-  req_info(CephContext *cct, const RGWEnv *env);
+  req_info(StoneContext *cct, const RGWEnv *env);
   void rebuild_from(req_info& src);
   void init_meta_info(const DoutPrefixProvider *dpp, bool *found_bad_meta);
 };
@@ -1487,13 +1487,13 @@ class RGWSysObjectCtx;
 
 /** Store all the state necessary to complete and respond to an HTTP request*/
 struct req_state : DoutPrefixProvider {
-  CephContext *cct;
+  StoneContext *cct;
   rgw::io::BasicClient *cio{nullptr};
   http_op op{OP_UNKNOWN};
   RGWOpType op_type{};
   bool content_started{false};
   int format{0};
-  ceph::Formatter *formatter{nullptr};
+  stone::Formatter *formatter{nullptr};
   string decoded_uri;
   string relative_uri;
   const char *length{nullptr};
@@ -1530,7 +1530,7 @@ struct req_state : DoutPrefixProvider {
   string redirect;
 
   real_time bucket_mtime;
-  std::map<std::string, ceph::bufferlist> bucket_attrs;
+  std::map<std::string, stone::bufferlist> bucket_attrs;
   bool bucket_exists{false};
   rgw_placement_rule dest_placement;
 
@@ -1566,7 +1566,7 @@ struct req_state : DoutPrefixProvider {
       std::string x_amz_credential;
       std::string x_amz_date;
       std::string x_amz_security_token;
-      ceph::bufferlist encoded_policy;
+      stone::bufferlist encoded_policy;
     } s3_postobj_creds;
   } auth;
 
@@ -1600,7 +1600,7 @@ struct req_state : DoutPrefixProvider {
   req_info info;
   req_init_state init_state;
 
-  using Clock = ceph::coarse_real_clock;
+  using Clock = stone::coarse_real_clock;
   Clock::time_point time;
 
   Clock::duration time_elapsed() const { return Clock::now() - time; }
@@ -1624,7 +1624,7 @@ struct req_state : DoutPrefixProvider {
 
   vector<rgw::IAM::Policy> session_policies;
 
-  req_state(CephContext* _cct, RGWEnv* e, uint64_t id);
+  req_state(StoneContext* _cct, RGWEnv* e, uint64_t id);
   ~req_state();
 
 
@@ -1633,8 +1633,8 @@ struct req_state : DoutPrefixProvider {
 
   // implements DoutPrefixProvider
   std::ostream& gen_prefix(std::ostream& out) const override;
-  CephContext* get_cct() const override { return cct; }
-  unsigned get_subsys() const override { return ceph_subsys_rgw; }
+  StoneContext* get_cct() const override { return cct; }
+  unsigned get_subsys() const override { return stone_subsys_rgw; }
 };
 
 void set_req_state_err(struct req_state*, int);
@@ -1647,7 +1647,7 @@ struct RGWBucketEnt {
   rgw_bucket bucket;
   size_t size;
   size_t size_rounded;
-  ceph::real_time creation_time;
+  stone::real_time creation_time;
   uint64_t count;
 
   /* The placement_rule is necessary to calculate per-storage-policy statics
@@ -1683,7 +1683,7 @@ struct RGWBucketEnt {
   void encode(bufferlist& bl) const {
     ENCODE_START(7, 5, bl);
     uint64_t s = size;
-    __u32 mt = ceph::real_clock::to_time_t(creation_time);
+    __u32 mt = stone::real_clock::to_time_t(creation_time);
     string empty_str;  // originally had the bucket name here, but we encode bucket later
     encode(empty_str, bl);
     encode(s, bl);
@@ -1706,7 +1706,7 @@ struct RGWBucketEnt {
     decode(mt, bl);
     size = s;
     if (struct_v < 6) {
-      creation_time = ceph::real_clock::from_time_t(mt);
+      creation_time = stone::real_clock::from_time_t(mt);
     }
     if (struct_v >= 2)
       decode(count, bl);
@@ -1932,7 +1932,7 @@ static inline int rgw_str_to_bool(const char *s, int def_val)
           strcasecmp(s, "1") == 0);
 }
 
-static inline void append_rand_alpha(CephContext *cct, const string& src, string& dest, int len)
+static inline void append_rand_alpha(StoneContext *cct, const string& src, string& dest, int len)
 {
   dest = src;
   char buf[len + 1];
@@ -2004,7 +2004,7 @@ extern void rgw_to_iso8601(const real_time& t, string *dest);
 extern std::string rgw_to_asctime(const utime_t& t);
 
 struct perm_state_base {
-  CephContext *cct;
+  StoneContext *cct;
   const rgw::IAM::Environment& env;
   rgw::auth::Identity *identity;
   const RGWBucketInfo bucket_info;
@@ -2012,7 +2012,7 @@ struct perm_state_base {
   bool defer_to_bucket_acls;
   boost::optional<PublicAccessBlockConfiguration> bucket_access_conf;
 
-  perm_state_base(CephContext *_cct,
+  perm_state_base(StoneContext *_cct,
                   const rgw::IAM::Environment& _env,
                   rgw::auth::Identity *_identity,
                   const RGWBucketInfo& _bucket_info,
@@ -2041,7 +2041,7 @@ struct perm_state : public perm_state_base {
   const char *referer;
   bool request_payer;
 
-  perm_state(CephContext *_cct,
+  perm_state(StoneContext *_cct,
              const rgw::IAM::Environment& _env,
              rgw::auth::Identity *_identity,
              const RGWBucketInfo& _bucket_info,
@@ -2237,12 +2237,12 @@ calc_hmac_sha256(const std::array<unsigned char, KeyLenN>& key,
 
 extern sha256_digest_t calc_hash_sha256(const std::string_view& msg);
 
-extern ceph::crypto::SHA256* calc_hash_sha256_open_stream();
-extern void calc_hash_sha256_update_stream(ceph::crypto::SHA256* hash,
+extern stone::crypto::SHA256* calc_hash_sha256_open_stream();
+extern void calc_hash_sha256_update_stream(stone::crypto::SHA256* hash,
                                            const char* msg,
                                            int len);
-extern std::string calc_hash_sha256_close_stream(ceph::crypto::SHA256** phash);
-extern std::string calc_hash_sha256_restart_stream(ceph::crypto::SHA256** phash);
+extern std::string calc_hash_sha256_close_stream(stone::crypto::SHA256** phash);
+extern std::string calc_hash_sha256_restart_stream(stone::crypto::SHA256** phash);
 
 extern int rgw_parse_op_type_list(const string& str, uint32_t *perm);
 
@@ -2308,7 +2308,7 @@ static inline ssize_t rgw_unescape_str(const string& s, ssize_t ofs,
   return string::npos;
 }
 
-static inline string rgw_bl_str(ceph::buffer::list& raw)
+static inline string rgw_bl_str(stone::buffer::list& raw)
 {
   size_t len = raw.length();
   string s(raw.c_str(), len);

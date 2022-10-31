@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,7 +20,7 @@
 #endif
 
 #include "common/config_fwd.h"
-#include "common/ceph_releases.h"
+#include "common/stone_releases.h"
 
 #include "include/err.h"
 #include "include/types.h"
@@ -36,7 +36,7 @@ namespace crimson::common {
 }
 #endif
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -82,8 +82,8 @@ struct mon_info_t {
   mon_info_t() { }
 
 
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& p);
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& p);
   void print(std::ostream& out) const;
 };
 WRITE_CLASS_ENCODER_FEATURES(mon_info_t)
@@ -145,7 +145,7 @@ class MonMap {
   }
 
   // upgrade gate
-  ceph_release_t min_mon_release{ceph_release_t::unknown};
+  stone_release_t min_mon_release{stone_release_t::unknown};
 
   void _add_ambiguous_addr(const std::string& name,
                            entity_addr_t addr,
@@ -216,15 +216,15 @@ public:
    * @param m monitor info of the new monitor
    */
   void add(const mon_info_t& m) {
-    ceph_assert(mon_info.count(m.name) == 0);
+    stone_assert(mon_info.count(m.name) == 0);
     for (auto& a : m.public_addrs.v) {
-      ceph_assert(addr_mons.count(a) == 0);
+      stone_assert(addr_mons.count(a) == 0);
     }
     mon_info[m.name] = m;
     if (get_required_features().contains_all(
-	  ceph::features::mon::FEATURE_NAUTILUS)) {
+	  stone::features::mon::FEATURE_NAUTILUS)) {
       ranks.push_back(m.name);
-      ceph_assert(ranks.size() == mon_info.size());
+      stone_assert(ranks.size() == mon_info.size());
     } else {
       calc_legacy_ranks();
     }
@@ -249,18 +249,18 @@ public:
    */
   void remove(const std::string &name) {
     // this must match what we do in ConnectionTracker::notify_rank_removed
-    ceph_assert(mon_info.count(name));
+    stone_assert(mon_info.count(name));
     int rank = get_rank(name);
     mon_info.erase(name);
     disallowed_leaders.erase(name);
-    ceph_assert(mon_info.count(name) == 0);
+    stone_assert(mon_info.count(name) == 0);
     if (rank >= 0 ) {
       removed_ranks.insert(rank);
     }
     if (get_required_features().contains_all(
-	  ceph::features::mon::FEATURE_NAUTILUS)) {
+	  stone::features::mon::FEATURE_NAUTILUS)) {
       ranks.erase(std::find(ranks.begin(), ranks.end(), name));
-      ceph_assert(ranks.size() == mon_info.size());
+      stone_assert(ranks.size() == mon_info.size());
     } else {
       calc_legacy_ranks();
     }
@@ -274,15 +274,15 @@ public:
    * @param newname monitor's new name (i.e., 'bar' in 'mon.bar')
    */
   void rename(std::string oldname, std::string newname) {
-    ceph_assert(contains(oldname));
-    ceph_assert(!contains(newname));
+    stone_assert(contains(oldname));
+    stone_assert(!contains(newname));
     mon_info[newname] = mon_info[oldname];
     mon_info.erase(oldname);
     mon_info[newname].name = newname;
     if (get_required_features().contains_all(
-	  ceph::features::mon::FEATURE_NAUTILUS)) {
+	  stone::features::mon::FEATURE_NAUTILUS)) {
       *std::find(ranks.begin(), ranks.end(), oldname) = newname;
-      ceph_assert(ranks.size() == mon_info.size());
+      stone_assert(ranks.size() == mon_info.size());
     } else {
       calc_legacy_ranks();
     }
@@ -347,7 +347,7 @@ public:
   }
 
   std::string get_name(unsigned n) const {
-    ceph_assert(n < ranks.size());
+    stone_assert(n < ranks.size());
     return ranks[n];
   }
   std::string get_name(const entity_addr_t& a) const {
@@ -396,41 +396,41 @@ public:
   }
 
   const entity_addrvec_t& get_addrs(const std::string& n) const {
-    ceph_assert(mon_info.count(n));
+    stone_assert(mon_info.count(n));
     std::map<std::string,mon_info_t>::const_iterator p = mon_info.find(n);
     return p->second.public_addrs;
   }
   const entity_addrvec_t& get_addrs(unsigned m) const {
-    ceph_assert(m < ranks.size());
+    stone_assert(m < ranks.size());
     return get_addrs(ranks[m]);
   }
   void set_addrvec(const std::string& n, const entity_addrvec_t& a) {
-    ceph_assert(mon_info.count(n));
+    stone_assert(mon_info.count(n));
     mon_info[n].public_addrs = a;
     calc_addr_mons();
   }
   uint16_t get_priority(const std::string& n) const {
     auto it = mon_info.find(n);
-    ceph_assert(it != mon_info.end());
+    stone_assert(it != mon_info.end());
     return it->second.priority;
   }
   uint16_t get_weight(const std::string& n) const {
     auto it = mon_info.find(n);
-    ceph_assert(it != mon_info.end());
+    stone_assert(it != mon_info.end());
     return it->second.weight;
   }
   void set_weight(const std::string& n, uint16_t v) {
     auto it = mon_info.find(n);
-    ceph_assert(it != mon_info.end());
+    stone_assert(it != mon_info.end());
     it->second.weight = v;
   }
 
-  void encode(ceph::buffer::list& blist, uint64_t con_features) const;
-  void decode(ceph::buffer::list& blist) {
+  void encode(stone::buffer::list& blist, uint64_t con_features) const;
+  void decode(stone::buffer::list& blist) {
     auto p = std::cbegin(blist);
     decode(p);
   }
-  void decode(ceph::buffer::list::const_iterator& p);
+  void decode(stone::buffer::list::const_iterator& p);
 
   void generate_fsid() {
     fsid.generate_random();
@@ -456,7 +456,7 @@ public:
 #ifdef WITH_SEASTAR
   seastar::future<> build_initial(const crimson::common::ConfigProxy& conf, bool for_mkfs);
 #else
-  int build_initial(CephContext *cct, bool for_mkfs, std::ostream& errout);
+  int build_initial(StoneContext *cct, bool for_mkfs, std::ostream& errout);
 #endif
   /**
    * filter monmap given a set of initial members.
@@ -471,7 +471,7 @@ public:
    * @param my_addr my addr
    * @param removed optional pointer to set to insert removed mon addrs to
    */
-  void set_initial_members(CephContext *cct,
+  void set_initial_members(StoneContext *cct,
 			   std::list<std::string>& initial_members,
 			   std::string my_name,
 			   const entity_addrvec_t& my_addrs,
@@ -479,8 +479,8 @@ public:
 
   void print(std::ostream& out) const;
   void print_summary(std::ostream& out) const;
-  void dump(ceph::Formatter *f) const;
-  void dump_summary(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
+  void dump_summary(stone::Formatter *f) const;
 
   void check_health(health_check_map_t *checks) const;
 
@@ -532,7 +532,7 @@ protected:
 #else
   /// read from encoded monmap file
   int init_with_monmap(const std::string& monmap, std::ostream& errout);
-  int init_with_dns_srv(CephContext* cct, std::string srv_name, bool for_mkfs,
+  int init_with_dns_srv(StoneContext* cct, std::string srv_name, bool for_mkfs,
 			std::ostream& errout);
 #endif
 };

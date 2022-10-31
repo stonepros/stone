@@ -39,7 +39,7 @@ inline seastar::future<> handle_system_shutdown(Func&& func, Args&&... args)
   .handle_exception([](std::exception_ptr eptr) {
     if (*eptr.__cxa_exception_type() ==
 	typeid(crimson::common::system_shutdown_exception)) {
-	crimson::get_logger(ceph_subsys_osd).debug(
+	crimson::get_logger(stone_subsys_osd).debug(
 	    "operation skipped, system shutdown");
 	return seastar::now();
     }

@@ -21,7 +21,7 @@ public:
   typedef cls::journal::ObjectSetPosition ObjectSetPosition;
 
   JournalTrimmer(librados::IoCtx &ioctx, const std::string &object_oid_prefix,
-                 const ceph::ref_t<JournalMetadata> &journal_metadata);
+                 const stone::ref_t<JournalMetadata> &journal_metadata);
   ~JournalTrimmer();
 
   void shut_down(Context *on_finish);
@@ -61,15 +61,15 @@ private:
   struct C_RemoveSet;
 
   librados::IoCtx m_ioctx;
-  StoneeContext *m_cct;
+  StoneContext *m_cct;
   std::string m_object_oid_prefix;
 
-  ceph::ref_t<JournalMetadata> m_journal_metadata;
+  stone::ref_t<JournalMetadata> m_journal_metadata;
   MetadataListener m_metadata_listener;
 
   AsyncOpTracker m_async_op_tracker;
 
-  ceph::mutex m_lock = ceph::make_mutex("JournalTrimmer::m_lock");
+  stone::mutex m_lock = stone::make_mutex("JournalTrimmer::m_lock");
 
   bool m_remove_set_pending;
   uint64_t m_remove_set;

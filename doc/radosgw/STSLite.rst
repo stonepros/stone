@@ -2,13 +2,13 @@
 STS Lite
 =========
 
-Ceph Object Gateway provides support for a subset of Amazon Secure Token Service
+Stone Object Gateway provides support for a subset of Amazon Secure Token Service
 (STS) APIs. STS Lite is an extension of STS and builds upon one of its APIs to
 decrease the load on external IDPs like Keystone and LDAP.
 
 A set of temporary security credentials is returned after authenticating
 a set of AWS credentials with the external IDP. These temporary credentials can be used
-to make subsequent S3 calls which will be authenticated by the STS engine in Ceph,
+to make subsequent S3 calls which will be authenticated by the STS engine in Stone,
 resulting in less load on the Keystone/ LDAP server.
 
 Temporary and limited privileged credentials can be obtained for a local user
@@ -17,7 +17,7 @@ also using the STS Lite API.
 STS Lite REST APIs
 ==================
 
-The following STS Lite REST API is part of STS Lite in Ceph Object Gateway:
+The following STS Lite REST API is part of STS Lite in Stone Object Gateway:
 
 1. GetSessionToken: Returns a set of temporary credentials for a set of AWS
 credentials. After initial authentication with Keystone/ LDAP, the temporary
@@ -76,7 +76,7 @@ configurable options will be::
   rgw keystone token cache size = {number of tokens to cache}
   rgw s3 auth use keystone = true
 
-The details of the integrating ldap with Ceph Object Gateway can be found here:
+The details of the integrating ldap with Stone Object Gateway can be found here:
 :doc:`keystone`
 
 The complete set of configurables to use STS Lite with LDAP are::
@@ -93,11 +93,11 @@ The complete set of configurables to use STS Lite with LDAP are::
   rgw_ldap_dnattr = {attribute being used in the constructed search filter to match a username}
   rgw_ldap_searchfilter = {search filter}
 
-The details of the integrating ldap with Ceph Object Gateway can be found here:
+The details of the integrating ldap with Stone Object Gateway can be found here:
 :doc:`ldap-auth`
 
 Note: By default, STS and S3 APIs co-exist in the same namespace, and both S3
-and STS APIs can be accessed via the same endpoint in Ceph Object Gateway.
+and STS APIs can be accessed via the same endpoint in Stone Object Gateway.
 
 Example showing how to Use STS Lite with Keystone
 =================================================

@@ -4,9 +4,9 @@
 #ifndef STONE_TRACEPOINT_PROVIDER_H
 #define STONE_TRACEPOINT_PROVIDER_H
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config_obs.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/dlfcn_compat.h"
 
 class TracepointProvider : public md_config_obs_t {
@@ -22,7 +22,7 @@ public:
 
   class Singleton {
   public:
-    Singleton(StoneeContext *cct, const char *library, const char *config_key)
+    Singleton(StoneContext *cct, const char *library, const char *config_key)
       : tracepoint_provider(new TracepointProvider(cct, library, config_key)) {
     }
     ~Singleton() {
@@ -39,12 +39,12 @@ public:
   template <const Traits &traits>
   class TypedSingleton : public Singleton {
   public:
-    explicit TypedSingleton(StoneeContext *cct)
+    explicit TypedSingleton(StoneContext *cct)
       : Singleton(cct, traits.library, traits.config_key) {
     }
   };
 
-  TracepointProvider(StoneeContext *cct, const char *library,
+  TracepointProvider(StoneContext *cct, const char *library,
                      const char *config_key);
   ~TracepointProvider() override;
 
@@ -54,7 +54,7 @@ public:
   TracepointProvider operator =(TracepointProvider&&) = delete;
 
   template <const Traits &traits>
-  static void initialize(StoneeContext *cct) {
+  static void initialize(StoneContext *cct) {
 #ifdef WITH_LTTNG
      cct->lookup_or_create_singleton_object<TypedSingleton<traits>>(
        traits.library, false, cct);
@@ -69,11 +69,11 @@ protected:
 			  const std::set <std::string> &changed) override;
 
 private:
-  StoneeContext *m_cct;
+  StoneContext *m_cct;
   std::string m_library;
   mutable const char* m_config_keys[2];
 
-  ceph::mutex m_lock = ceph::make_mutex("TracepointProvider::m_lock");
+  stone::mutex m_lock = stone::make_mutex("TracepointProvider::m_lock");
   void* m_handle = nullptr;
 
   void verify_config(const ConfigProxy& conf);

@@ -1,15 +1,15 @@
 ==================================
-CephFS Dynamic Metadata Management
+StoneFS Dynamic Metadata Management
 ==================================
 Metadata operations usually take up more than 50 percent of all
 file system operations. Also the metadata scales in a more complex
 fashion when compared to scaling storage (which in turn scales I/O
 throughput linearly). This is due to the hierarchical and
-interdependent nature of the file system metadata. So in CephFS,
+interdependent nature of the file system metadata. So in StoneFS,
 the metadata workload is decoupled from data workload so as to
 avoid placing unnecessary strain on the RADOS cluster. The metadata
 is hence handled by a cluster of Metadata Servers (MDSs). 
-CephFS distributes metadata across MDSs via `Dynamic Subtree Partitioning <https://ceph.com/wp-content/uploads/2016/08/weil-mds-sc04.pdf>`__.
+StoneFS distributes metadata across MDSs via `Dynamic Subtree Partitioning <https://ceph.com/wp-content/uploads/2016/08/weil-mds-sc04.pdf>`__.
 
 Dynamic Subtree Partitioning
 ----------------------------

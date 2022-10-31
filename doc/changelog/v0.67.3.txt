@@ -112,7 +112,7 @@ Date:   Tue Aug 13 17:16:08 2013 -0700
     
     Date: Sat, 27 Jul 2013 01:59:36 +0200
     From: Sylvain Munaut <s.munaut@whatever-company.com>
-    Subject: Re: Ceph rbd.cc GPL -> LGPL2 license change
+    Subject: Re: Stone rbd.cc GPL -> LGPL2 license change
     
     I hereby consent to the relicensing of any contribution I made to the
     aforementioned rbd.cc file from GPL to LGPL2.1.
@@ -129,7 +129,7 @@ Date:   Tue Aug 13 17:16:08 2013 -0700
     
     Date: Fri, 26 Jul 2013 17:00:48 -0700
     From: Yehuda Sadeh <yehuda@inktank.com>
-    Subject: Re: Ceph rbd.cc GPL -> LGPL2 license change
+    Subject: Re: Stone rbd.cc GPL -> LGPL2 license change
     
     I consent.
     
@@ -137,7 +137,7 @@ Date:   Tue Aug 13 17:16:08 2013 -0700
     
     Date: Fri, 26 Jul 2013 17:02:24 -0700
     From: Josh Durgin <josh.durgin@inktank.com>
-    Subject: Re: Ceph rbd.cc GPL -> LGPL2 license change
+    Subject: Re: Stone rbd.cc GPL -> LGPL2 license change
     
     I consent.
     
@@ -145,7 +145,7 @@ Date:   Tue Aug 13 17:16:08 2013 -0700
     
     Date: Fri, 26 Jul 2013 18:17:46 -0700
     From: Stanislav Sedov <stas@freebsd.org>
-    Subject: Re: Ceph rbd.cc GPL -> LGPL2 license change
+    Subject: Re: Stone rbd.cc GPL -> LGPL2 license change
     
     I consent.
     
@@ -165,7 +165,7 @@ Date:   Tue Aug 13 17:16:08 2013 -0700
     
     Date: Sat, 27 Jul 2013 07:08:12 +0200
     From: Christian Brunner <christian@brunner-muc.de>
-    Subject: Re: Ceph rbd.cc GPL -> LGPL2 license change
+    Subject: Re: Stone rbd.cc GPL -> LGPL2 license change
     
     I consent
     
@@ -175,7 +175,7 @@ Date:   Tue Aug 13 17:16:08 2013 -0700
     
     Date: Sat, 27 Jul 2013 12:17:34 +0300
     From: Stratos Psomadakis <psomas@grnet.gr>
-    Subject: Re: Ceph rbd.cc GPL -> LGPL2 license change
+    Subject: Re: Stone rbd.cc GPL -> LGPL2 license change
     
     Hi,
     
@@ -188,7 +188,7 @@ Date:   Tue Aug 13 17:16:08 2013 -0700
     
     Date: Sat, 27 Jul 2013 16:13:13 +0200
     From: Wido den Hollander <wido@42on.com>
-    Subject: Re: Ceph rbd.cc GPL -> LGPL2 license change
+    Subject: Re: Stone rbd.cc GPL -> LGPL2 license change
     
     I consent!
     
@@ -202,7 +202,7 @@ Date:   Tue Aug 13 17:16:08 2013 -0700
     
     Hi Sage,
     
-    I agree to switch the license of ceph_argparse.py and rbd.cc from GPL2
+    I agree to switch the license of stone_argparse.py and rbd.cc from GPL2
     to LGPL2.
     
     Regards
@@ -213,7 +213,7 @@ Date:   Tue Aug 13 17:16:08 2013 -0700
     
     Date: Tue, 13 Aug 2013 17:15:24 -0700
     From: Dan Mick <dan.mick@inktank.com>
-    Subject: Re: Ceph rbd.cc GPL -> LGPL2 license change
+    Subject: Re: Stone rbd.cc GPL -> LGPL2 license change
     
     I consent to relicense any contributed code that I wrote under LGPL2.1 license.
     
@@ -297,7 +297,7 @@ commit a708c8ab52e5b1476405a1f817c23b8845fbaab3
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Aug 30 09:41:29 2013 -0700
 
-    ceph-post-file: use mktemp instead of tempfile
+    stone-post-file: use mktemp instead of tempfile
     
     tempfile is a debian thing, apparently; mktemp is present everywhere.
     
@@ -330,12 +330,12 @@ commit 83cfd4386c1fd0fa41aea345704e27f82b524ece
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Thu Aug 22 17:30:24 2013 -0700
 
-    ceph_rest_api.py: create own default for log_file
+    stone_rest_api.py: create own default for log_file
     
     common/config thinks the default log_file for non-daemons should be "".
     Override that so that the default is
-        /var/log/ceph/{cluster}-{name}.{pid}.log
-    since ceph-rest-api is more of a daemon than a client.
+        /var/log/stone/{cluster}-{name}.{pid}.log
+    since stone-rest-api is more of a daemon than a client.
     
     Fixes: #6099
     Backport: dumpling
@@ -346,15 +346,15 @@ commit 8a1da62d9564a32f7b8963fe298e1ac3ad0ea3d9
 Author: Sage Weil <sage@inktank.com>
 Date:   Fri Aug 16 17:59:11 2013 -0700
 
-    ceph-post-file: single command to upload a file to cephdrop
+    stone-post-file: single command to upload a file to stonedrop
     
-    Use sftp to upload to a directory that only this user and ceph devs can
+    Use sftp to upload to a directory that only this user and stone devs can
     access.
     
     Distribute an ssh key to connect to the account.  This will let us revoke
     the key in the future if we feel the need.  Also distribute a known_hosts
     file so that users have some confidence that they are connecting to the
-    real ceph drop account and not some third party.
+    real stone drop account and not some third party.
     
     Signed-off-by: Sage Weil <sage@inktank.com>
     Reviewed-by: Dan Mick <dan.mick@inktank.com>
@@ -364,7 +364,7 @@ commit 3f8663477b585dcb528fdd7047c50d9a52d24b95
 Author: Gary Lowell <glowell@inktank.com>
 Date:   Thu Aug 22 13:29:32 2013 -0700
 
-    ceph.spec.in:  remove trailing paren in previous commit
+    stone.spec.in:  remove trailing paren in previous commit
     
     Signed-off-by: Gary Lowell  <gary.lowell@inktank.com>
 
@@ -372,7 +372,7 @@ commit 23fb908cb3ac969c874ac12755d20ed2f636e1b9
 Author: Gary Lowell <glowell@inktank.com>
 Date:   Thu Aug 22 11:07:16 2013 -0700
 
-    ceph.spec.in:  Don't invoke debug_package macro on centos.
+    stone.spec.in:  Don't invoke debug_package macro on centos.
     
     If the redhat-rpm-config package is installed, the debuginfo rpms will
     be built by default.   The build will fail when the package installed
@@ -397,14 +397,14 @@ commit 39adc0195e6016ce36828885515be1bffbc10ae1
 Author: Sage Weil <sage@inktank.com>
 Date:   Tue Aug 20 22:39:09 2013 -0700
 
-    ceph-disk: partprobe after creating journal partition
+    stone-disk: partprobe after creating journal partition
     
     At least one user reports that a partprobe is needed after creating the
     journal partition.  It is not clear why sgdisk is not doing it, but this
-    fixes ceph-disk for them, and should be harmless for other users.
+    fixes stone-disk for them, and should be harmless for other users.
     
     Fixes: #5599
-    Tested-by: lurbs in #ceph
+    Tested-by: lurbs in #stone
     Signed-off-by: Sage Weil <sage@inktank.com>
     (cherry picked from commit 2af59d5e81c5e3e3d7cfc50d9330d7364659c5eb)
     (cherry picked from commit 3e42df221315679605d68b2875aab6c7eb6b3cc4)
@@ -621,7 +621,7 @@ Date:   Thu Aug 22 03:40:22 2013 -0300
     rewritten.  AFAICT that's a bug.
     
     The other is that inodes that don't have a parent xattr (created by
-    even older versions of ceph) are reported as non-existing in the mds
+    even older versions of stone) are reported as non-existing in the mds
     rejoin message, because the absence of the parent xattr is signaled as
     a missing inode (?failed to reconnect caps for missing inodes?).  I
     suppose this may cause more serious recovery problems.
@@ -631,7 +631,7 @@ Date:   Thu Aug 22 03:40:22 2013 -0300
     xattrs still lacking current information; it might make sense to
     activate it as a background thread from the backtrace decoding
     function, when it finds a parent xattr that's too out-of-date, or as a
-    separate client (ceph-fsck?).
+    separate client (stone-fsck?).
     
     Backport: dumpling, cuttlefish
     Signed-off-by: Alexandre Oliva <oliva@gnu.org>
@@ -644,7 +644,7 @@ Date:   Mon Jul 29 17:05:44 2013 +0200
 
     mds: remove waiting lock before merging with neighbours
     
-    CephFS currently deadlocks under CTDB's ping_pong POSIX locking test
+    StoneFS currently deadlocks under CTDB's ping_pong POSIX locking test
     when run concurrently on multiple nodes.
     The deadlock is caused by failed removal of a waiting_locks entry when
     the waiting lock is merged with an existing lock, e.g:
@@ -693,7 +693,7 @@ commit 87b19c33ce29e2ca4fc49a2adeb12d3f14ca90a9
 Author: Alfredo Deza <alfredo.deza@inktank.com>
 Date:   Fri Aug 23 08:56:07 2013 -0400
 
-    ceph-disk: specify the filetype when mounting
+    stone-disk: specify the filetype when mounting
     
     Signed-off-by: Alfredo Deza <alfredo.deza@inktank.com>
     Reviewed-by: Sage Weil <sage@inktank.com>

@@ -60,7 +60,7 @@ class RbdMirroringTest(DashboardTestCase):
     @classmethod
     def tearDownClass(cls):
         super(RbdMirroringTest, cls).tearDownClass()
-        cls._ceph_cmd(['osd', 'pool', 'delete', 'rbd', 'rbd', '--yes-i-really-really-mean-it'])
+        cls._stone_cmd(['osd', 'pool', 'delete', 'rbd', 'rbd', '--yes-i-really-really-mean-it'])
 
     @DashboardTestCase.RunAs('test', 'test', [{'rbd-mirroring': ['create', 'update', 'delete']}])
     def test_read_access_permissions(self):

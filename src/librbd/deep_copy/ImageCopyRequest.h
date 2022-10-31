@@ -7,7 +7,7 @@
 #include "include/int_types.h"
 #include "include/rados/librados.hpp"
 #include "common/bit_vector.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/RefCountedObj.h"
 #include "librbd/Types.h"
 #include "librbd/deep_copy/Types.h"
@@ -89,7 +89,7 @@ private:
   Context *m_on_finish;
 
   StoneContext *m_cct;
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   bool m_canceled = false;
 
   uint64_t m_object_no = 0;

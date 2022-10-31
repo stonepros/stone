@@ -17,7 +17,7 @@ def task(ctx, config):
     prior to log_tail
 
     overrides:
-      ceph:
+      stone:
         conf:
           osd:
             debug osd: 5
@@ -29,7 +29,7 @@ def task(ctx, config):
     assert isinstance(config, dict), \
         'divergent_priors task only accepts a dict for configuration'
 
-    manager = ctx.managers['ceph']
+    manager = ctx.managers['stone']
 
     while len(manager.get_osd_status()['up']) < 3:
         time.sleep(10)

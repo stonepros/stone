@@ -1,20 +1,20 @@
 :orphan:
 
 ==========================================================
- ceph-diff-sorted -- compare two sorted files line by line
+ stone-diff-sorted -- compare two sorted files line by line
 ==========================================================
 
-.. program:: ceph-diff-sorted
+.. program:: stone-diff-sorted
 
 Synopsis
 ========
 
-| **ceph-diff-sorted** *file1* *file2*
+| **stone-diff-sorted** *file1* *file2*
 
 Description
 ===========
 
-:program:`ceph-diff-sorted` is a simplifed *diff* utility optimized
+:program:`stone-diff-sorted` is a simplifed *diff* utility optimized
 for comparing two files with lines that are lexically sorted.
 
 The output is simplified in comparison to that of the standard `diff`
@@ -39,7 +39,7 @@ Examples
 
 Compare two files::
 
-        $ ceph-diff-sorted fileA.txt fileB.txt
+        $ stone-diff-sorted fileA.txt fileB.txt
 
 Exit Status
 ===========
@@ -61,9 +61,9 @@ When complete, the exit status will be set to one of the following:
 Availability
 ============
 
-:program:`ceph-diff-sorted` is part of Ceph, a massively scalable,
-open-source, distributed storage system.  Please refer to the Ceph
-documentation at http://ceph.com/docs for more information.
+:program:`stone-diff-sorted` is part of Stone, a massively scalable,
+open-source, distributed storage system.  Please refer to the Stone
+documentation at http://stone.com/docs for more information.
 
 See also
 ========

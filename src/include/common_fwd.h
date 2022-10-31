@@ -3,7 +3,7 @@
 #if defined(WITH_SEASTAR) && !defined(WITH_ALIEN)
 #define TOPNSPC crimson
 #else
-#define TOPNSPC ceph
+#define TOPNSPC stone
 #endif
 
 namespace TOPNSPC::common {

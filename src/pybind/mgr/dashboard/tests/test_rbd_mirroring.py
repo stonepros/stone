@@ -14,14 +14,14 @@ from ..services import progress
 from ..tests import ControllerTestCase
 
 mock_list_servers = [{
-    'hostname': 'ceph-host',
+    'hostname': 'stone-host',
     'services': [{'id': 3, 'type': 'rbd-mirror'}]
 }]
 
 mock_get_metadata = {
     'id': 1,
     'instance_id': 3,
-    'ceph_version': 'ceph version 13.0.0-5719 mimic (dev)'
+    'stone_version': 'stone version 13.0.0-5719 mimic (dev)'
 }
 
 _status = {
@@ -127,14 +127,14 @@ class RbdMirroringSummaryControllerTest(ControllerTestCase):
             'fs_map': {'filesystems': []},
             'mgr_map': {
                 'services': {
-                    'dashboard': 'https://ceph.dev:11000/'
+                    'dashboard': 'https://stone.dev:11000/'
                 },
             }
         }[key]
         mgr.url_prefix = ''
         mgr.get_mgr_id.return_value = 0
         mgr.have_mon_connection.return_value = True
-        mgr.version = 'ceph version 13.1.0-534-g23d3751b89 ' \
+        mgr.version = 'stone version 13.1.0-534-g23d3751b89 ' \
                       '(23d3751b897b31d2bda57aeaf01acb5ff3c4a9cd) ' \
                       'nautilus (dev)'
 

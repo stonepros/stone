@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab ft=cpp
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 SUSE Linux Gmbh
  *
@@ -35,7 +35,7 @@ struct SyncRequest : public Request {
 class SyncScheduler: public Scheduler {
 public:
   template <typename ...Args>
-  SyncScheduler(CephContext *cct, GetClientCounters&& counters,
+  SyncScheduler(StoneContext *cct, GetClientCounters&& counters,
 		Args&& ...args);
   ~SyncScheduler();
 
@@ -62,15 +62,15 @@ private:
   static constexpr bool IsDelayed = false;
   using Queue = crimson::dmclock::PushPriorityQueue<client_id, SyncRequest, IsDelayed>;
   using RequestRef = typename Queue::RequestRef;
-  using Clock = ceph::coarse_real_clock;
+  using Clock = stone::coarse_real_clock;
 
   Queue queue;
-  CephContext const *cct;
+  StoneContext const *cct;
   GetClientCounters counters; //< provides per-client perf counters
 };
 
 template <typename ...Args>
-SyncScheduler::SyncScheduler(CephContext *cct, GetClientCounters&& counters,
+SyncScheduler::SyncScheduler(StoneContext *cct, GetClientCounters&& counters,
 			     Args&& ...args):
   queue(std::forward<Args>(args)...), cct(cct), counters(std::move(counters))
 {}

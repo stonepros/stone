@@ -1,7 +1,7 @@
-.. _ceph-releases-index:
+.. _stone-releases-index:
 
 =====================
-Ceph Releases (index)
+Stone Releases (index)
 =====================
 
 .. toctree::

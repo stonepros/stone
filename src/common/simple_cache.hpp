@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,19 +12,19 @@
  * 
  */
 
-#ifndef CEPH_SIMPLECACHE_H
-#define CEPH_SIMPLECACHE_H
+#ifndef STONE_SIMPLECACHE_H
+#define STONE_SIMPLECACHE_H
 
 #include <list>
 #include <map>
 #include <unordered_map>
 #include <utility>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 template <class K, class V, class C = std::less<K>, class H = std::hash<K> >
 class SimpleLRU {
-  ceph::mutex lock = ceph::make_mutex("SimpleLRU::lock");
+  stone::mutex lock = stone::make_mutex("SimpleLRU::lock");
   size_t max_size;
   size_t max_bytes = 0;
   size_t total_bytes = 0;

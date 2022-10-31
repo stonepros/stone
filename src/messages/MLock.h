@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -32,11 +32,11 @@ private:
   __u16      lock_type = 0;  // lock object type
   MDSCacheObjectInfo object_info;  
   
-  ceph::buffer::list lockdata;  // and possibly some data
+  stone::buffer::list lockdata;  // and possibly some data
   
 public:
-  ceph::buffer::list& get_data() { return lockdata; }
-  const ceph::buffer::list& get_data() const { return lockdata; }
+  stone::buffer::list& get_data() { return lockdata; }
+  const stone::buffer::list& get_data() const { return lockdata; }
   int get_asker() const { return asker; }
   int get_action() const { return action; }
   metareqid_t get_reqid() const { return reqid; }
@@ -57,7 +57,7 @@ protected:
     lock_type(lock->get_type()) {
     lock->get_parent()->set_object_info(object_info);
   }
-  MLock(SimpleLock *lock, int ac, mds_rank_t as, ceph::buffer::list& bl) :
+  MLock(SimpleLock *lock, int ac, mds_rank_t as, stone::buffer::list& bl) :
     MMDSOp{MSG_MDS_LOCK, HEAD_VERSION, COMPAT_VERSION},
     action(ac), asker(as), lock_type(lock->get_type()) {
     lock->get_parent()->set_object_info(object_info);
@@ -75,12 +75,12 @@ public:
   }
   
   void set_reqid(metareqid_t ri) { reqid = ri; }
-  void set_data(const ceph::buffer::list& lockdata) {
+  void set_data(const stone::buffer::list& lockdata) {
     this->lockdata = lockdata;
   }
   
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(asker, p);
     decode(action, p);
@@ -90,7 +90,7 @@ public:
     decode(lockdata, p);
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(asker, payload);
     encode(action, payload);
     encode(reqid, payload);
@@ -100,7 +100,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2009-2011 New Dream Network
  *
@@ -30,7 +30,7 @@ enum common_init_flags_t {
   // Don't close stderr (in daemonize)
   CINIT_FLAG_NO_CLOSE_STDERR = 0x4,
 
-  // don't do anything daemonish, like create /var/run/ceph, or print a banner
+  // don't do anything daemonish, like create /var/run/stone, or print a banner
   CINIT_FLAG_NO_DAEMON_ACTIONS = 0x8,
 
   // don't drop privileges
@@ -44,16 +44,16 @@ enum common_init_flags_t {
 };
 
 #ifndef WITH_SEASTAR
-class StoneeInitParameters;
+class StoneInitParameters;
 
 /*
- * NOTE: If you are writing a Stonee daemon, ignore this function and call
+ * NOTE: If you are writing a Stone daemon, ignore this function and call
  * global_init instead. It will call common_preinit for you.
  *
- * common_preinit creates the StoneeContext.
+ * common_preinit creates the StoneContext.
  *
- * After this function gives you a StoneeContext, you need to set up the
- * Stonee configuration, which lives inside theStoneneContext as md_config_t.
+ * After this function gives you a StoneContext, you need to set up the
+ * Stone configuration, which lives inside the StoneContext as md_config_t.
  * The initial settings are not very useful because they do not reflect what
  * the user asked for.
  *
@@ -63,12 +63,12 @@ class StoneeInitParameters;
  *
  * Your library may also supply functions to read a configuration file.
  */
-StoneeContext *common_preinit(constStoneneInitParameters &iparams,
+StoneContext *common_preinit(const StoneInitParameters &iparams,
 			    enum code_environment_t code_env, int flags);
 #endif // #ifndef WITH_SEASTAR
 
 /* Print out some parse error. */
-void complain_about_parse_error(StoneeContext *cct,
+void complain_about_parse_error(StoneContext *cct,
 				const std::string& parse_error);
 
 /* This function is called after you have done your last
@@ -78,11 +78,11 @@ void complain_about_parse_error(StoneeContext *cct,
  * This includes things like starting threads, initializing libraries that
  * can't handle forking, and so forth.
  *
- * If you are writing a Stonee library, you can call this pretty much any time.
- * We do not allow our library users to fork and continue using the Stonee
+ * If you are writing a Stone library, you can call this pretty much any time.
+ * We do not allow our library users to fork and continue using the Stone
  * libraries. The most obvious reason for this is that the threads started by
- * the Stonee libraries would be destroyed by a fork().
+ * the Stone libraries would be destroyed by a fork().
  */
-void common_init_finish(StoneeContext *cct);
+void common_init_finish(StoneContext *cct);
 
 #endif

@@ -45,7 +45,7 @@ struct extmap_node_meta_t {
 struct ExtMapNode : LogicalCachedExtent {
   using ExtMapNodeRef = TCachedExtentRef<ExtMapNode>;
 
-  ExtMapNode(ceph::bufferptr &&ptr) : LogicalCachedExtent(std::move(ptr)) {}
+  ExtMapNode(stone::bufferptr &&ptr) : LogicalCachedExtent(std::move(ptr)) {}
   ExtMapNode(const ExtMapNode &other)
   : LogicalCachedExtent(other) {}
 

@@ -1,10 +1,10 @@
 import logging
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 log = logging.getLogger(__name__)
 
 
-class TestReadahead(CephFSTestCase):
+class TestReadahead(StoneFSTestCase):
     def test_flush(self):
         # Create 32MB file
         self.mount_a.run_shell(["dd", "if=/dev/urandom", "of=foo", "bs=1M", "count=32"])

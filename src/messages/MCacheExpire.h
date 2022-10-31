@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -44,14 +44,14 @@ public:
       }
     }
 
-    void encode(ceph::buffer::list &bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list &bl) const {
+      using stone::encode;
       encode(inodes, bl);
       encode(dirs, bl);
       encode(dentries, bl);
     }
-    void decode(ceph::buffer::list::const_iterator &bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator &bl) {
+      using stone::decode;
       decode(inodes, bl);
       decode(dirs, bl);
       decode(dentries, bl);
@@ -91,20 +91,20 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(from, p);
     decode(realms, p);
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(from, payload);
     encode(realms, payload);
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 WRITE_CLASS_ENCODER(MCacheExpire::realm)

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -24,7 +24,7 @@
 #ifndef STONE_COMMON_CONVENIENCE_H
 #define STONE_COMMON_CONVENIENCE_H
 
-namespace ceph {
+namespace stone {
 // boost::optional is wonderful! Unfortunately it lacks a function for
 // the thing you would most obviously want to do with it: apply a
 // function to its contents.

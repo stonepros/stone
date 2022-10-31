@@ -11,20 +11,20 @@ import yaml
 from io import BytesIO
 
 from tarfile import ReadError
-from tasks.ceph_manager import CephManager
+from tasks.stone_manager import StoneManager
 from teuthology import misc as teuthology
 from teuthology.config import config as teuth_config
 from teuthology.contextutil import safe_while
 from teuthology.orchestra import run
 from teuthology import contextutil
-from tasks.ceph import healthy
-from tasks.cephadm import update_archive_setting
+from tasks.stone import healthy
+from tasks.stoneadm import update_archive_setting
 
 log = logging.getLogger(__name__)
 
 
 def _kubectl(ctx, config, args, **kwargs):
-    cluster_name = config.get('cluster', 'ceph')
+    cluster_name = config.get('cluster', 'stone')
     return ctx.rook[cluster_name].remote.run(
         args=['kubectl'] + args,
         **kwargs
@@ -39,7 +39,7 @@ def shell(ctx, config):
       - kubeadm:
       - rook:
       - rook.shell:
-          - ceph -s
+          - stone -s
 
     or
 
@@ -48,7 +48,7 @@ def shell(ctx, config):
       - rook:
       - rook.shell:
           commands:
-          - ceph -s
+          - stone -s
 
     """
     if isinstance(config, list):
@@ -61,11 +61,11 @@ def shell(ctx, config):
 
 
 def _shell(ctx, config, args, **kwargs):
-    cluster_name = config.get('cluster', 'ceph')
+    cluster_name = config.get('cluster', 'stone')
     return _kubectl(
         ctx, config,
         [
-            '-n', 'rook-ceph',
+            '-n', 'rook-stone',
             'exec',
             ctx.rook[cluster_name].toolbox, '--'
         ] + args,
@@ -95,7 +95,7 @@ def rook_operator(ctx, config):
 
     # operator.yaml
     operator_yaml = ctx.rook[cluster_name].remote.read_file(
-        'rook/cluster/examples/kubernetes/ceph/operator.yaml'
+        'rook/cluster/examples/kubernetes/stonepros/operator.yaml'
     )
     rook_image = config.get('rook_image')
     if rook_image:
@@ -111,16 +111,16 @@ def rook_operator(ctx, config):
         log.info('Deploying operator')
         _kubectl(ctx, config, [
             'create',
-            '-f', 'rook/cluster/examples/kubernetes/ceph/crds.yaml',
-            '-f', 'rook/cluster/examples/kubernetes/ceph/common.yaml',
+            '-f', 'rook/cluster/examples/kubernetes/stonepros/crds.yaml',
+            '-f', 'rook/cluster/examples/kubernetes/stonepros/common.yaml',
             '-f', 'operator.yaml',
         ])
 
         # on centos:
         if teuthology.get_distro(ctx) == 'centos':
             _kubectl(ctx, config, [
-                '-n', 'rook-ceph',
-                'set', 'env', 'deploy/rook-ceph-operator',
+                '-n', 'rook-stone',
+                'set', 'env', 'deploy/rook-stone-operator',
                 'ROOK_HOSTPATH_REQUIRES_PRIVILEGED=true'
             ])
 
@@ -130,7 +130,7 @@ def rook_operator(ctx, config):
             while not op_name and proceed():
                 p = _kubectl(
                     ctx, config,
-                    ['-n', 'rook-ceph', 'get', 'pods', '-l', 'app=rook-ceph-operator'],
+                    ['-n', 'rook-stone', 'get', 'pods', '-l', 'app=rook-stone-operator'],
                     stdout=BytesIO(),
                 )
                 for line in p.stdout.getvalue().decode('utf-8').strip().splitlines():
@@ -143,7 +143,7 @@ def rook_operator(ctx, config):
         op_job = _kubectl(
             ctx,
             config,
-            ['-n', 'rook-ceph', 'logs', '-f', op_name],
+            ['-n', 'rook-stone', 'logs', '-f', op_name],
             wait=False,
             logger=log.getChild('operator'),
         )
@@ -165,11 +165,11 @@ def rook_operator(ctx, config):
             # fails sometimes when deleting some of the CRDs... not sure why!)
             _kubectl(ctx, config, [
                 'delete',
-                '-f', 'rook/cluster/examples/kubernetes/ceph/common.yaml',
+                '-f', 'rook/cluster/examples/kubernetes/stonepros/common.yaml',
             ])
             _kubectl(ctx, config, [
                 'delete',
-                '-f', 'rook/cluster/examples/kubernetes/ceph/crds.yaml',
+                '-f', 'rook/cluster/examples/kubernetes/stonepros/crds.yaml',
             ])
         ctx.rook[cluster_name].remote.run(args=['rm', '-rf', 'rook', 'operator.yaml'])
         if op_job:
@@ -184,10 +184,10 @@ def rook_operator(ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_log(ctx, config):
+def stone_log(ctx, config):
     cluster_name = config['cluster']
 
-    log_dir = '/var/lib/rook/rook-ceph/log'
+    log_dir = '/var/lib/rook/rook-stone/log'
     update_archive_setting(ctx, 'log', log_dir)
 
     try:
@@ -200,9 +200,9 @@ def ceph_log(ctx, config):
 
     finally:
         log.info('Checking cluster log for badness...')
-        def first_in_ceph_log(pattern, excludes):
+        def first_in_stone_log(pattern, excludes):
             """
-            Find the first occurrence of the pattern specified in the Ceph log,
+            Find the first occurrence of the pattern specified in the Stone log,
             Returns None if none found.
 
             :param pattern: Pattern scanned for.
@@ -212,7 +212,7 @@ def ceph_log(ctx, config):
             args = [
                 'sudo',
                 'egrep', pattern,
-                f'{log_dir}/ceph.log',
+                f'{log_dir}/stone.log',
             ]
             if excludes:
                 for exclude in excludes:
@@ -229,14 +229,14 @@ def ceph_log(ctx, config):
                 return stdout
             return None
 
-        if first_in_ceph_log('\[ERR\]|\[WRN\]|\[SEC\]',
+        if first_in_stone_log('\[ERR\]|\[WRN\]|\[SEC\]',
                              config.get('log-ignorelist')) is not None:
             log.warning('Found errors (ERR|WRN|SEC) in cluster log')
             ctx.summary['success'] = False
             # use the most severe problem as the failure reason
             if 'failure_reason' not in ctx.summary:
                 for pattern in ['\[SEC\]', '\[ERR\]', '\[WRN\]']:
-                    match = first_in_ceph_log(pattern, config['log-ignorelist'])
+                    match = first_in_stone_log(pattern, config['log-ignorelist'])
                     if match is not None:
                         ctx.summary['failure_reason'] = \
                             '"{match}" in cluster log'.format(
@@ -290,7 +290,7 @@ def ceph_log(ctx, config):
 
 
 def build_initial_config(ctx, config):
-    path = os.path.join(os.path.dirname(__file__), 'rook-ceph.conf')
+    path = os.path.join(os.path.dirname(__file__), 'rook-stone.conf')
     conf = configobj.ConfigObj(path, file_error=True)
 
     # overrides
@@ -327,7 +327,7 @@ def rook_cluster(ctx, config):
         'kind': 'ConfigMap',
         'metadata': {
             'name': 'rook-config-override',
-            'namespace': 'rook-ceph'},
+            'namespace': 'rook-stone'},
         'data': {
             'config': config_fp.getvalue()
         }
@@ -335,11 +335,11 @@ def rook_cluster(ctx, config):
 
     # cluster
     cluster = {
-        'apiVersion': 'ceph.rook.io/v1',
-        'kind': 'CephCluster',
-        'metadata': {'name': 'rook-ceph', 'namespace': 'rook-ceph'},
+        'apiVersion': 'stone.rook.io/v1',
+        'kind': 'StoneCluster',
+        'metadata': {'name': 'rook-stone', 'namespace': 'rook-stone'},
         'spec': {
-            'cephVersion': {
+            'stoneVersion': {
                 'image': ctx.rook[cluster_name].image,
                 'allowUnsupported': True,
             },
@@ -404,7 +404,7 @@ def rook_cluster(ctx, config):
             while running and proceed():
                 p = _kubectl(
                     ctx, config,
-                    ['-n', 'rook-ceph', 'get', 'pods'],
+                    ['-n', 'rook-stone', 'get', 'pods'],
                     stdout=BytesIO(),
                 )
                 running = False
@@ -413,15 +413,15 @@ def rook_cluster(ctx, config):
                     if (
                             name != 'NAME'
                             and not name.startswith('csi-')
-                            and not name.startswith('rook-ceph-operator-')
-                            and not name.startswith('rook-ceph-tools-')
+                            and not name.startswith('rook-stone-operator-')
+                            and not name.startswith('rook-stone-tools-')
                     ):
                         running = True
                         break
 
         _kubectl(
             ctx, config,
-            ['-n', 'rook-ceph', 'delete', 'configmap', 'rook-config-override'],
+            ['-n', 'rook-stone', 'delete', 'configmap', 'rook-config-override'],
             check_status=False,
         )
         ctx.rook[cluster_name].remote.run(args=['rm', '-f', 'cluster.yaml'])
@@ -433,7 +433,7 @@ def rook_toolbox(ctx, config):
     try:
         _kubectl(ctx, config, [
             'create',
-            '-f', 'rook/cluster/examples/kubernetes/ceph/toolbox.yaml',
+            '-f', 'rook/cluster/examples/kubernetes/stonepros/toolbox.yaml',
         ])
 
         log.info('Waiting for tools container to start')
@@ -442,7 +442,7 @@ def rook_toolbox(ctx, config):
             while not toolbox and proceed():
                 p = _kubectl(
                     ctx, config,
-                    ['-n', 'rook-ceph', 'get', 'pods', '-l', 'app=rook-ceph-tools'],
+                    ['-n', 'rook-stone', 'get', 'pods', '-l', 'app=rook-stone-tools'],
                     stdout=BytesIO(),
                 )
                 for line in p.stdout.getvalue().decode('utf-8').strip().splitlines():
@@ -460,19 +460,19 @@ def rook_toolbox(ctx, config):
     finally:
         _kubectl(ctx, config, [
             'delete',
-            '-f', 'rook/cluster/examples/kubernetes/ceph/toolbox.yaml',
+            '-f', 'rook/cluster/examples/kubernetes/stonepros/toolbox.yaml',
         ], check_status=False)
 
 
 @contextlib.contextmanager
 def wait_for_osds(ctx, config):
-    cluster_name = config.get('cluster', 'ceph')
+    cluster_name = config.get('cluster', 'stone')
 
     want = ctx.rook[cluster_name].num_osds
     log.info(f'Waiting for {want} OSDs')
     with safe_while(sleep=10, tries=90, action="check osd count") as proceed:
         while proceed():
-            p = _shell(ctx, config, ['ceph', 'osd', 'stat', '-f', 'json'],
+            p = _shell(ctx, config, ['stone', 'osd', 'stat', '-f', 'json'],
                        stdout=BytesIO(),
                        check_status=False)
             if p.exitstatus == 0:
@@ -486,22 +486,22 @@ def wait_for_osds(ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_config_keyring(ctx, config):
+def stone_config_keyring(ctx, config):
     # get config and push to hosts
-    log.info('Distributing ceph config and client.admin keyring')
-    p = _shell(ctx, config, ['cat', '/etc/ceph/ceph.conf'], stdout=BytesIO())
+    log.info('Distributing stone config and client.admin keyring')
+    p = _shell(ctx, config, ['cat', '/etc/stonepros/stone.conf'], stdout=BytesIO())
     conf = p.stdout.getvalue()
-    p = _shell(ctx, config, ['cat', '/etc/ceph/keyring'], stdout=BytesIO())
+    p = _shell(ctx, config, ['cat', '/etc/stonepros/keyring'], stdout=BytesIO())
     keyring = p.stdout.getvalue()
-    ctx.cluster.run(args=['sudo', 'mkdir', '-p', '/etc/ceph'])
+    ctx.cluster.run(args=['sudo', 'mkdir', '-p', '/etc/stone'])
     for remote in ctx.cluster.remotes.keys():
         remote.write_file(
-            '/etc/ceph/ceph.conf',
+            '/etc/stonepros/stone.conf',
             conf,
             sudo=True,
         )
         remote.write_file(
-            '/etc/ceph/keyring',
+            '/etc/stonepros/keyring',
             keyring,
             sudo=True,
         )
@@ -517,13 +517,13 @@ def ceph_config_keyring(ctx, config):
         log.info('Cleaning up config and client.admin keyring')
         ctx.cluster.run(args=[
             'sudo', 'rm', '-f',
-            '/etc/ceph/ceph.conf',
-            '/etc/ceph/ceph.client.admin.keyring'
+            '/etc/stonepros/stone.conf',
+            '/etc/stonepros/stone.client.admin.keyring'
         ])
 
 
 @contextlib.contextmanager
-def ceph_clients(ctx, config):
+def stone_clients(ctx, config):
     cluster_name = config['cluster']
 
     log.info('Setting up client nodes...')
@@ -531,12 +531,12 @@ def ceph_clients(ctx, config):
     for remote, roles_for_host in clients.remotes.items():
         for role in teuthology.cluster_roles_of_type(roles_for_host, 'client',
                                                      cluster_name):
-            name = teuthology.ceph_role(role)
-            client_keyring = '/etc/ceph/{0}.{1}.keyring'.format(cluster_name,
+            name = teuthology.stone_role(role)
+            client_keyring = '/etc/stonepros/{0}.{1}.keyring'.format(cluster_name,
                                                                 name)
             r = _shell(ctx, config,
                 args=[
-                    'ceph', 'auth',
+                    'stone', 'auth',
                     'get-or-create', name,
                     'mon', 'allow *',
                     'osd', 'allow *',
@@ -553,7 +553,7 @@ def ceph_clients(ctx, config):
 @contextlib.contextmanager
 def task(ctx, config):
     """
-    Deploy rook-ceph cluster
+    Deploy rook-stone cluster
 
       tasks:
       - kubeadm:
@@ -564,7 +564,7 @@ def task(ctx, config):
               count: 1
 
     The spec item is deep-merged against the cluster.yaml.  The branch, sha1, or
-    image items are used to determine the Ceph container image.
+    image items are used to determine the Stone container image.
     """
     if not config:
         config = {}
@@ -574,7 +574,7 @@ def task(ctx, config):
     log.info('Rook start')
 
     overrides = ctx.config.get('overrides', {})
-    teuthology.deep_merge(config, overrides.get('ceph', {}))
+    teuthology.deep_merge(config, overrides.get('stone', {}))
     teuthology.deep_merge(config, overrides.get('rook', {}))
     log.info('Config: ' + str(config))
 
@@ -582,7 +582,7 @@ def task(ctx, config):
     if not hasattr(ctx, 'rook'):
         ctx.rook = {}
     if 'cluster' not in config:
-        config['cluster'] = 'ceph'
+        config['cluster'] = 'stone'
     cluster_name = config['cluster']
     if cluster_name not in ctx.rook:
         ctx.rook[cluster_name] = argparse.Namespace()
@@ -591,8 +591,8 @@ def task(ctx, config):
 
     # image
     teuth_defaults = teuth_config.get('defaults', {})
-    cephadm_defaults = teuth_defaults.get('cephadm', {})
-    containers_defaults = cephadm_defaults.get('containers', {})
+    stoneadm_defaults = teuth_defaults.get('stoneadm', {})
+    containers_defaults = stoneadm_defaults.get('containers', {})
     container_image_name = containers_defaults.get('image', None)
     if 'image' in config:
         ctx.rook[cluster_name].image = config.get('image')
@@ -608,23 +608,23 @@ def task(ctx, config):
             # hmm, fall back to branch?
             branch = config.get('branch', 'master')
             ctx.rook[cluster_name].image = container_image_name + ':' + branch
-    log.info('Ceph image is %s' % ctx.rook[cluster_name].image)
+    log.info('Stone image is %s' % ctx.rook[cluster_name].image)
     
     with contextutil.nested(
             lambda: rook_operator(ctx, config),
-            lambda: ceph_log(ctx, config),
+            lambda: stone_log(ctx, config),
             lambda: rook_cluster(ctx, config),
             lambda: rook_toolbox(ctx, config),
             lambda: wait_for_osds(ctx, config),
-            lambda: ceph_config_keyring(ctx, config),
-            lambda: ceph_clients(ctx, config),
+            lambda: stone_config_keyring(ctx, config),
+            lambda: stone_clients(ctx, config),
     ):
         if not hasattr(ctx, 'managers'):
             ctx.managers = {}
-        ctx.managers[cluster_name] = CephManager(
+        ctx.managers[cluster_name] = StoneManager(
             ctx.rook[cluster_name].remote,
             ctx=ctx,
-            logger=log.getChild('ceph_manager.' + cluster_name),
+            logger=log.getChild('stone_manager.' + cluster_name),
             cluster=cluster_name,
             rook=True,
         )

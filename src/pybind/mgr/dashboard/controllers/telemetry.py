@@ -119,8 +119,8 @@ REPORT_SCHEMA = {
                 "arch": ({
                     "x86_64": (int, ""),
                 }, ""),
-                "ceph_version": ({
-                    "ceph version 16.0.0-3151-gf202994fcf": (int, ""),
+                "stone_version": ({
+                    "stone version 16.0.0-3151-gf202994fcf": (int, ""),
                 }, ""),
                 "os": ({
                     "Linux": (int, ""),
@@ -145,8 +145,8 @@ REPORT_SCHEMA = {
                 "arch": ({
                     "x86_64": (int, ""),
                 }, ""),
-                "ceph_version": ({
-                    "ceph version 16.0.0-3151-gf202994fcf": (int, ""),
+                "stone_version": ({
+                    "stone version 16.0.0-3151-gf202994fcf": (int, ""),
                 }, ""),
                 "os": ({
                     "Linux": (int, ""),
@@ -210,8 +210,8 @@ class Telemetry(RESTController):
                  responses={200: REPORT_SCHEMA})
     def report(self):
         """
-        Get Ceph and device report data
-        :return: Ceph and device report data
+        Get Stone and device report data
+        :return: Stone and device report data
         :rtype: dict
         """
         return mgr.remote('telemetry', 'get_report', 'all')

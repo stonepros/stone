@@ -6,19 +6,19 @@ import pytest
 
 from unittest.mock import MagicMock, call, patch, ANY
 
-from cephadm.serve import CephadmServe
-from cephadm.services.cephadmservice import MonService, MgrService, MdsService, RgwService, \
-    RbdMirrorService, CrashService, CephadmDaemonDeploySpec
-from cephadm.services.iscsi import IscsiService
-from cephadm.services.nfs import NFSService
-from cephadm.services.osd import OSDService
-from cephadm.services.monitoring import GrafanaService, AlertmanagerService, PrometheusService, \
+from stoneadm.serve import StoneadmServe
+from stoneadm.services.stoneadmservice import MonService, MgrService, MdsService, RgwService, \
+    RbdMirrorService, CrashService, StoneadmDaemonDeploySpec
+from stoneadm.services.iscsi import IscsiService
+from stoneadm.services.nfs import NFSService
+from stoneadm.services.osd import OSDService
+from stoneadm.services.monitoring import GrafanaService, AlertmanagerService, PrometheusService, \
     NodeExporterService
-from cephadm.services.exporter import CephadmExporter
-from cephadm.module import CephadmOrchestrator
-from ceph.deployment.service_spec import IscsiServiceSpec, MonitoringSpec, AlertManagerSpec, \
+from stoneadm.services.exporter import StoneadmExporter
+from stoneadm.module import StoneadmOrchestrator
+from stone.deployment.service_spec import IscsiServiceSpec, MonitoringSpec, AlertManagerSpec, \
     ServiceSpec, RGWSpec, GrafanaSpec, SNMPGatewaySpec, IngressSpec, PlacementSpec
-from cephadm.tests.fixtures import with_host, with_service, _run_cephadm
+from stoneadm.tests.fixtures import with_host, with_service, _run_stoneadm
 
 from orchestrator import OrchestratorError
 from orchestrator._interface import DaemonDescription
@@ -47,14 +47,14 @@ class FakeMgr:
             return 0, 'value set', ''
         return -1, '', 'error'
 
-    def get_minimal_ceph_conf(self) -> str:
+    def get_minimal_stone_conf(self) -> str:
         return ''
 
     def get_mgr_ip(self) -> str:
         return '1.2.3.4'
 
 
-class TestCephadmService:
+class TestStoneadmService:
     def test_set_service_url_on_dashboard(self):
         # pylint: disable=protected-access
         mgr = FakeMgr()
@@ -83,8 +83,8 @@ class TestCephadmService:
         node_exporter_service = NodeExporterService(mgr)
         crash_service = CrashService(mgr)
         iscsi_service = IscsiService(mgr)
-        cephadm_exporter_service = CephadmExporter(mgr)
-        cephadm_services = {
+        stoneadm_exporter_service = StoneadmExporter(mgr)
+        stoneadm_services = {
             'mon': mon_service,
             'mgr': mgr_service,
             'osd': osd_service,
@@ -98,50 +98,50 @@ class TestCephadmService:
             'node-exporter': node_exporter_service,
             'crash': crash_service,
             'iscsi': iscsi_service,
-            'cephadm-exporter': cephadm_exporter_service,
+            'stoneadm-exporter': stoneadm_exporter_service,
         }
-        return cephadm_services
+        return stoneadm_services
 
     def test_get_auth_entity(self):
         mgr = FakeMgr()
-        cephadm_services = self._get_services(mgr)
+        stoneadm_services = self._get_services(mgr)
 
         for daemon_type in ['rgw', 'rbd-mirror', 'nfs', "iscsi"]:
             assert "client.%s.id1" % (daemon_type) == \
-                cephadm_services[daemon_type].get_auth_entity("id1", "host")
+                stoneadm_services[daemon_type].get_auth_entity("id1", "host")
             assert "client.%s.id1" % (daemon_type) == \
-                cephadm_services[daemon_type].get_auth_entity("id1", "")
+                stoneadm_services[daemon_type].get_auth_entity("id1", "")
             assert "client.%s.id1" % (daemon_type) == \
-                cephadm_services[daemon_type].get_auth_entity("id1")
+                stoneadm_services[daemon_type].get_auth_entity("id1")
 
         assert "client.crash.host" == \
-            cephadm_services["crash"].get_auth_entity("id1", "host")
+            stoneadm_services["crash"].get_auth_entity("id1", "host")
         with pytest.raises(OrchestratorError):
-            cephadm_services["crash"].get_auth_entity("id1", "")
-            cephadm_services["crash"].get_auth_entity("id1")
+            stoneadm_services["crash"].get_auth_entity("id1", "")
+            stoneadm_services["crash"].get_auth_entity("id1")
 
-        assert "mon." == cephadm_services["mon"].get_auth_entity("id1", "host")
-        assert "mon." == cephadm_services["mon"].get_auth_entity("id1", "")
-        assert "mon." == cephadm_services["mon"].get_auth_entity("id1")
+        assert "mon." == stoneadm_services["mon"].get_auth_entity("id1", "host")
+        assert "mon." == stoneadm_services["mon"].get_auth_entity("id1", "")
+        assert "mon." == stoneadm_services["mon"].get_auth_entity("id1")
 
-        assert "mgr.id1" == cephadm_services["mgr"].get_auth_entity("id1", "host")
-        assert "mgr.id1" == cephadm_services["mgr"].get_auth_entity("id1", "")
-        assert "mgr.id1" == cephadm_services["mgr"].get_auth_entity("id1")
+        assert "mgr.id1" == stoneadm_services["mgr"].get_auth_entity("id1", "host")
+        assert "mgr.id1" == stoneadm_services["mgr"].get_auth_entity("id1", "")
+        assert "mgr.id1" == stoneadm_services["mgr"].get_auth_entity("id1")
 
         for daemon_type in ["osd", "mds"]:
             assert "%s.id1" % daemon_type == \
-                cephadm_services[daemon_type].get_auth_entity("id1", "host")
+                stoneadm_services[daemon_type].get_auth_entity("id1", "host")
             assert "%s.id1" % daemon_type == \
-                cephadm_services[daemon_type].get_auth_entity("id1", "")
+                stoneadm_services[daemon_type].get_auth_entity("id1", "")
             assert "%s.id1" % daemon_type == \
-                cephadm_services[daemon_type].get_auth_entity("id1")
+                stoneadm_services[daemon_type].get_auth_entity("id1")
 
-        # services based on CephadmService shouldn't have get_auth_entity
+        # services based on StoneadmService shouldn't have get_auth_entity
         with pytest.raises(AttributeError):
-            for daemon_type in ['grafana', 'alertmanager', 'prometheus', 'node-exporter', 'cephadm-exporter']:
-                cephadm_services[daemon_type].get_auth_entity("id1", "host")
-                cephadm_services[daemon_type].get_auth_entity("id1", "")
-                cephadm_services[daemon_type].get_auth_entity("id1")
+            for daemon_type in ['grafana', 'alertmanager', 'prometheus', 'node-exporter', 'stoneadm-exporter']:
+                stoneadm_services[daemon_type].get_auth_entity("id1", "host")
+                stoneadm_services[daemon_type].get_auth_entity("id1", "")
+                stoneadm_services[daemon_type].get_auth_entity("id1")
 
 
 class TestISCSIService:
@@ -167,7 +167,7 @@ class TestISCSIService:
 
     def test_iscsi_client_caps(self):
 
-        iscsi_daemon_spec = CephadmDaemonDeploySpec(
+        iscsi_daemon_spec = StoneadmDaemonDeploySpec(
             host='host', daemon_id='a', service_name=self.iscsi_spec.service_name())
 
         self.iscsi_service.prepare_create(iscsi_daemon_spec)
@@ -187,7 +187,7 @@ class TestISCSIService:
         assert expected_call in self.mgr.mon_command.mock_calls
         assert expected_call2 in self.mgr.mon_command.mock_calls
 
-    @patch('cephadm.utils.resolve_ip')
+    @patch('stoneadm.utils.resolve_ip')
     def test_iscsi_dashboard_config(self, mock_resolve_ip):
 
         self.mgr.check_mon_command = MagicMock()
@@ -237,15 +237,15 @@ class TestISCSIService:
 
 
 class TestMonitoring:
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    def test_alertmanager_config(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    def test_alertmanager_config(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
 
-        with with_host(cephadm_module, 'test'):
-            with with_service(cephadm_module, AlertManagerSpec()):
+        with with_host(stoneadm_module, 'test'):
+            with with_service(stoneadm_module, AlertManagerSpec()):
 
                 y = dedent("""
-                # This file is generated by cephadm.
+                # This file is generated by stoneadm.
                 # See https://prometheus.io/docs/alerting/configuration/ for documentation.
 
                 global:
@@ -261,17 +261,17 @@ class TestMonitoring:
                       group_wait: 10s
                       group_interval: 10s
                       repeat_interval: 1h
-                      receiver: 'ceph-dashboard'
+                      receiver: 'stone-dashboard'
 
                 receivers:
                 - name: 'default'
                   webhook_configs:
-                - name: 'ceph-dashboard'
+                - name: 'stone-dashboard'
                   webhook_configs:
                   - url: 'http://[::1]:8080/api/prometheus_receiver'
                 """).lstrip()
 
-                _run_cephadm.assert_called_with(
+                _run_stoneadm.assert_called_with(
                     'test',
                     'alertmanager.test',
                     'deploy',
@@ -284,23 +284,23 @@ class TestMonitoring:
                     image='')\
 
 
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    def test_prometheus_config(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    def test_prometheus_config(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
 
-        with with_host(cephadm_module, 'test'):
-            with with_service(cephadm_module, MonitoringSpec('node-exporter')) as _, \
-                    with_service(cephadm_module, MonitoringSpec('prometheus')) as _:
+        with with_host(stoneadm_module, 'test'):
+            with with_service(stoneadm_module, MonitoringSpec('node-exporter')) as _, \
+                    with_service(stoneadm_module, MonitoringSpec('prometheus')) as _:
 
                 y = dedent("""
-                # This file is generated by cephadm.
+                # This file is generated by stoneadm.
                 global:
                   scrape_interval: 10s
                   evaluation_interval: 10s
                 rule_files:
                   - /etc/prometheus/alerting/*
                 scrape_configs:
-                  - job_name: 'ceph'
+                  - job_name: 'stone'
                     honor_labels: true
                     static_configs:
                     - targets:
@@ -314,7 +314,7 @@ class TestMonitoring:
 
                 """).lstrip()
 
-                _run_cephadm.assert_called_with(
+                _run_stoneadm.assert_called_with(
                     'test',
                     'prometheus.test',
                     'deploy',
@@ -328,20 +328,20 @@ class TestMonitoring:
                     stdin=json.dumps({"files": {"prometheus.yml": y}}),
                     image='')
 
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    @patch("cephadm.module.CephadmOrchestrator.get_mgr_ip", lambda _: '1::4')
-    @patch("cephadm.services.monitoring.verify_tls", lambda *_: None)
-    def test_grafana_config(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    @patch("stoneadm.module.StoneadmOrchestrator.get_mgr_ip", lambda _: '1::4')
+    @patch("stoneadm.services.monitoring.verify_tls", lambda *_: None)
+    def test_grafana_config(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
 
-        with with_host(cephadm_module, 'test'):
-            cephadm_module.set_store('grafana_crt', 'c')
-            cephadm_module.set_store('grafana_key', 'k')
-            with with_service(cephadm_module, MonitoringSpec('prometheus')) as _, \
-                    with_service(cephadm_module, GrafanaSpec('grafana')) as _:
+        with with_host(stoneadm_module, 'test'):
+            stoneadm_module.set_store('grafana_crt', 'c')
+            stoneadm_module.set_store('grafana_key', 'k')
+            with with_service(stoneadm_module, MonitoringSpec('prometheus')) as _, \
+                    with_service(stoneadm_module, GrafanaSpec('grafana')) as _:
                 files = {
                     'grafana.ini': dedent("""
-                        # This file is generated by cephadm.
+                        # This file is generated by stoneadm.
                         [users]
                           default_theme = light
                         [auth.anonymous]
@@ -360,8 +360,8 @@ class TestMonitoring:
                           cookie_secure = true
                           cookie_samesite = none
                           allow_embedding = true""").lstrip(),  # noqa: W291
-                    'provisioning/datasources/ceph-dashboard.yml': dedent("""
-                        # This file is generated by cephadm.
+                    'provisioning/datasources/stone-dashboard.yml': dedent("""
+                        # This file is generated by stoneadm.
                         deleteDatasources:
                           - name: 'Dashboard1'
                             orgId: 1
@@ -377,14 +377,14 @@ class TestMonitoring:
                             editable: false
                         """).lstrip(),
                     'certs/cert_file': dedent("""
-                        # generated by cephadm
+                        # generated by stoneadm
                         c""").lstrip(),
                     'certs/cert_key': dedent("""
-                        # generated by cephadm
+                        # generated by stoneadm
                         k""").lstrip(),
                 }
 
-                _run_cephadm.assert_called_with(
+                _run_stoneadm.assert_called_with(
                     'test',
                     'grafana.test',
                     'deploy',
@@ -396,12 +396,12 @@ class TestMonitoring:
                     stdin=json.dumps({"files": files}),
                     image='')
 
-    @patch("cephadm.serve.CephadmServe._run_cephadm", _run_cephadm('{}'))
-    def test_grafana_initial_admin_pw(self, cephadm_module: CephadmOrchestrator):
-        with with_host(cephadm_module, 'test'):
-            with with_service(cephadm_module, GrafanaSpec(initial_admin_password='secure')):
-                out = cephadm_module.cephadm_services['grafana'].generate_config(
-                    CephadmDaemonDeploySpec('test', 'daemon', 'grafana'))
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm", _run_stoneadm('{}'))
+    def test_grafana_initial_admin_pw(self, stoneadm_module: StoneadmOrchestrator):
+        with with_host(stoneadm_module, 'test'):
+            with with_service(stoneadm_module, GrafanaSpec(initial_admin_password='secure')):
+                out = stoneadm_module.stoneadm_services['grafana'].generate_config(
+                    StoneadmDaemonDeploySpec('test', 'daemon', 'grafana'))
                 assert out == (
                     {
                         'files':
@@ -409,7 +409,7 @@ class TestMonitoring:
                                 'certs/cert_file': ANY,
                                 'certs/cert_key': ANY,
                                 'grafana.ini':
-                                    '# This file is generated by cephadm.\n'
+                                    '# This file is generated by stoneadm.\n'
                                     '[users]\n'
                                     '  default_theme = light\n'
                                     '[auth.anonymous]\n'
@@ -429,8 +429,8 @@ class TestMonitoring:
                                     '  cookie_secure = true\n'
                                     '  cookie_samesite = none\n'
                                     '  allow_embedding = true',
-                                'provisioning/datasources/ceph-dashboard.yml':
-                                    '# This file is generated by cephadm.\n'
+                                'provisioning/datasources/stone-dashboard.yml':
+                                    '# This file is generated by stoneadm.\n'
                                     'deleteDatasources:\n'
                                     '\n'
                                     'datasources:\n'
@@ -439,11 +439,11 @@ class TestMonitoring:
                     [],
                 )
 
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    def test_monitoring_ports(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    def test_monitoring_ports(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
 
-        with with_host(cephadm_module, 'test'):
+        with with_host(stoneadm_module, 'test'):
 
             yaml_str = """service_type: alertmanager
 service_name: alertmanager
@@ -455,12 +455,12 @@ spec:
             yaml_file = yaml.safe_load(yaml_str)
             spec = ServiceSpec.from_json(yaml_file)
 
-            with patch("cephadm.services.monitoring.AlertmanagerService.generate_config", return_value=({}, [])):
-                with with_service(cephadm_module, spec):
+            with patch("stoneadm.services.monitoring.AlertmanagerService.generate_config", return_value=({}, [])):
+                with with_service(stoneadm_module, spec):
 
-                    CephadmServe(cephadm_module)._check_daemons()
+                    StoneadmServe(stoneadm_module)._check_daemons()
 
-                    _run_cephadm.assert_called_with(
+                    _run_stoneadm.assert_called_with(
                         'test', 'alertmanager.test', 'deploy', [
                             '--name', 'alertmanager.test',
                             '--meta-json', '{"service_name": "alertmanager", "ports": [4200, 9094], "ip": null, "deployed_by": [], "rank": null, "rank_generation": null, "extra_container_args": null}',
@@ -485,12 +485,12 @@ class TestRGWService:
              'civetweb port=[fd00:fd00:fd00:3000::1]:443s ssl_certificate=config://rgw/cert/rgw.foo'),
         ]
     )
-    @patch("cephadm.serve.CephadmServe._run_cephadm", _run_cephadm('{}'))
-    def test_rgw_update(self, frontend, ssl, expected, cephadm_module: CephadmOrchestrator):
-        with with_host(cephadm_module, 'host1'):
-            cephadm_module.cache.update_host_devices_networks(
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm", _run_stoneadm('{}'))
+    def test_rgw_update(self, frontend, ssl, expected, stoneadm_module: StoneadmOrchestrator):
+        with with_host(stoneadm_module, 'host1'):
+            stoneadm_module.cache.update_host_devices_networks(
                 'host1',
-                dls=cephadm_module.cache.devices['host1'],
+                dls=stoneadm_module.cache.devices['host1'],
                 nets={
                     'fd00:fd00:fd00:3000::/64': {
                         'if0': ['fd00:fd00:fd00:3000::1']
@@ -500,8 +500,8 @@ class TestRGWService:
                         networks=['fd00:fd00:fd00:3000::/64'],
                         ssl=ssl,
                         rgw_frontend_type=frontend)
-            with with_service(cephadm_module, s) as dds:
-                _, f, _ = cephadm_module.check_mon_command({
+            with with_service(stoneadm_module, s) as dds:
+                _, f, _ = stoneadm_module.check_mon_command({
                     'prefix': 'config get',
                     'who': f'client.{dds[0]}',
                     'key': 'rgw_frontends',
@@ -511,9 +511,9 @@ class TestRGWService:
 
 class TestSNMPGateway:
 
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    def test_snmp_v2c_deployment(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    def test_snmp_v2c_deployment(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
 
         spec = SNMPGatewaySpec(
             snmp_version='V2c',
@@ -528,9 +528,9 @@ class TestSNMPGateway:
             "snmp_community": spec.credentials.get('snmp_community')
         }
 
-        with with_host(cephadm_module, 'test'):
-            with with_service(cephadm_module, spec):
-                _run_cephadm.assert_called_with(
+        with with_host(stoneadm_module, 'test'):
+            with with_service(stoneadm_module, spec):
+                _run_stoneadm.assert_called_with(
                     'test',
                     'snmp-gateway.test',
                     'deploy',
@@ -545,9 +545,9 @@ class TestSNMPGateway:
                     image=''
                 )
 
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    def test_snmp_v2c_with_port(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    def test_snmp_v2c_with_port(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
 
         spec = SNMPGatewaySpec(
             snmp_version='V2c',
@@ -563,9 +563,9 @@ class TestSNMPGateway:
             "snmp_community": spec.credentials.get('snmp_community')
         }
 
-        with with_host(cephadm_module, 'test'):
-            with with_service(cephadm_module, spec):
-                _run_cephadm.assert_called_with(
+        with with_host(stoneadm_module, 'test'):
+            with with_service(stoneadm_module, spec):
+                _run_stoneadm.assert_called_with(
                     'test',
                     'snmp-gateway.test',
                     'deploy',
@@ -580,9 +580,9 @@ class TestSNMPGateway:
                     image=''
                 )
 
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    def test_snmp_v3nopriv_deployment(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    def test_snmp_v3nopriv_deployment(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
 
         spec = SNMPGatewaySpec(
             snmp_version='V3',
@@ -602,9 +602,9 @@ class TestSNMPGateway:
             'snmp_v3_engine_id': '8000C53F00000000'
         }
 
-        with with_host(cephadm_module, 'test'):
-            with with_service(cephadm_module, spec):
-                _run_cephadm.assert_called_with(
+        with with_host(stoneadm_module, 'test'):
+            with with_service(stoneadm_module, spec):
+                _run_stoneadm.assert_called_with(
                     'test',
                     'snmp-gateway.test',
                     'deploy',
@@ -619,9 +619,9 @@ class TestSNMPGateway:
                     image=''
                 )
 
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    def test_snmp_v3priv_deployment(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    def test_snmp_v3priv_deployment(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
 
         spec = SNMPGatewaySpec(
             snmp_version='V3',
@@ -646,9 +646,9 @@ class TestSNMPGateway:
             'snmp_v3_priv_password': spec.credentials.get('snmp_v3_priv_password'),
         }
 
-        with with_host(cephadm_module, 'test'):
-            with with_service(cephadm_module, spec):
-                _run_cephadm.assert_called_with(
+        with with_host(stoneadm_module, 'test'):
+            with with_service(stoneadm_module, spec):
+                _run_stoneadm.assert_called_with(
                     'test',
                     'snmp-gateway.test',
                     'deploy',
@@ -666,14 +666,14 @@ class TestSNMPGateway:
 
 class TestIngressService:
 
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    def test_ingress_config(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    def test_ingress_config(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
 
-        with with_host(cephadm_module, 'test'):
-            cephadm_module.cache.update_host_devices_networks(
+        with with_host(stoneadm_module, 'test'):
+            stoneadm_module.cache.update_host_devices_networks(
                 'test',
-                cephadm_module.cache.devices['test'],
+                stoneadm_module.cache.devices['test'],
                 {
                     '1.2.3.0/24': {
                         'if0': ['1.2.3.4/32']
@@ -695,16 +695,16 @@ class TestIngressService:
                                 keepalived_password='12345',
                                 virtual_interface_networks=['1.2.3.0/24'],
                                 virtual_ip="1.2.3.4/32")
-            with with_service(cephadm_module, s) as _, with_service(cephadm_module, ispec) as _:
+            with with_service(stoneadm_module, s) as _, with_service(stoneadm_module, ispec) as _:
                 # generate the keepalived conf based on the specified spec
-                keepalived_generated_conf = cephadm_module.cephadm_services['ingress'].keepalived_generate_config(
-                    CephadmDaemonDeploySpec(host='test', daemon_id='ingress', service_name=ispec.service_name()))
+                keepalived_generated_conf = stoneadm_module.stoneadm_services['ingress'].keepalived_generate_config(
+                    StoneadmDaemonDeploySpec(host='test', daemon_id='ingress', service_name=ispec.service_name()))
 
                 keepalived_expected_conf = {
                     'files':
                         {
                             'keepalived.conf':
-                                '# This file is generated by cephadm.\n'
+                                '# This file is generated by stoneadm.\n'
                                 'vrrp_script check_backend {\n    '
                                 'script "/usr/bin/curl http://localhost:8999/health"\n    '
                                 'weight -20\n    '
@@ -737,14 +737,14 @@ class TestIngressService:
                 assert keepalived_generated_conf[0] == keepalived_expected_conf
 
                 # generate the haproxy conf based on the specified spec
-                haproxy_generated_conf = cephadm_module.cephadm_services['ingress'].haproxy_generate_config(
-                    CephadmDaemonDeploySpec(host='test', daemon_id='ingress', service_name=ispec.service_name()))
+                haproxy_generated_conf = stoneadm_module.stoneadm_services['ingress'].haproxy_generate_config(
+                    StoneadmDaemonDeploySpec(host='test', daemon_id='ingress', service_name=ispec.service_name()))
 
                 haproxy_expected_conf = {
                     'files':
                         {
                             'haproxy.cfg':
-                                '# This file is generated by cephadm.'
+                                '# This file is generated by stoneadm.'
                                 '\nglobal\n    log         '
                                 '127.0.0.1 local2\n    '
                                 'chroot      /var/lib/haproxy\n    '
@@ -793,13 +793,13 @@ class TestIngressService:
                 assert haproxy_generated_conf[0] == haproxy_expected_conf
 
 
-class TestCephFsMirror:
-    @patch("cephadm.serve.CephadmServe._run_cephadm")
-    def test_config(self, _run_cephadm, cephadm_module: CephadmOrchestrator):
-        _run_cephadm.return_value = ('{}', '', 0)
-        with with_host(cephadm_module, 'test'):
-            with with_service(cephadm_module, ServiceSpec('cephfs-mirror')):
-                cephadm_module.assert_issued_mon_command({
+class TestStoneFsMirror:
+    @patch("stoneadm.serve.StoneadmServe._run_stoneadm")
+    def test_config(self, _run_stoneadm, stoneadm_module: StoneadmOrchestrator):
+        _run_stoneadm.return_value = ('{}', '', 0)
+        with with_host(stoneadm_module, 'test'):
+            with with_service(stoneadm_module, ServiceSpec('stonefs-mirror')):
+                stoneadm_module.assert_issued_mon_command({
                     'prefix': 'mgr module enable',
                     'module': 'mirroring'
                 })

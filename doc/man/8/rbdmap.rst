@@ -21,10 +21,10 @@ operations on one or more RBD (RADOS Block Device) images. While the script can 
 run manually by the system administrator at any time, the principal use case is
 automatic mapping/mounting of RBD images at boot time (and unmounting/unmapping
 at shutdown), as triggered by the init system (a systemd unit file,
-``rbdmap.service`` is included with the ceph-common package for this purpose).
+``rbdmap.service`` is included with the stone-common package for this purpose).
 
 The script takes a single argument, which can be either "map" or "unmap".
-In either case, the script parses a configuration file (defaults to ``/etc/ceph/rbdmap``,
+In either case, the script parses a configuration file (defaults to ``/etc/stone/rbdmap``,
 but can be overridden via an environment variable ``RBDMAPFILE``). Each line
 of the configuration file corresponds to an RBD image which is to be mapped, or
 unmapped.
@@ -79,20 +79,20 @@ sequence.)
 Examples
 ========
 
-Example ``/etc/ceph/rbdmap`` for three RBD images called "bar1", "bar2" and "bar3", 
+Example ``/etc/stone/rbdmap`` for three RBD images called "bar1", "bar2" and "bar3", 
 which are in pool "foopool"::
 
-    foopool/bar1    id=admin,keyring=/etc/ceph/ceph.client.admin.keyring
-    foopool/bar2    id=admin,keyring=/etc/ceph/ceph.client.admin.keyring
-    foopool/bar3    id=admin,keyring=/etc/ceph/ceph.client.admin.keyring,options='lock_on_read,queue_depth=1024'
+    foopool/bar1    id=admin,keyring=/etc/stone/stone.client.admin.keyring
+    foopool/bar2    id=admin,keyring=/etc/stone/stone.client.admin.keyring
+    foopool/bar3    id=admin,keyring=/etc/stone/stone.client.admin.keyring,options='lock_on_read,queue_depth=1024'
 
 Each line in the file contains two strings: the image spec and the options to
 be passed to ``rbd map``. These two lines get transformed into the following
 commands::
 
-    rbd map foopool/bar1 --id admin --keyring /etc/ceph/ceph.client.admin.keyring
-    rbd map foopool/bar2 --id admin --keyring /etc/ceph/ceph.client.admin.keyring
-    rbd map foopool/bar2 --id admin --keyring /etc/ceph/ceph.client.admin.keyring --options lock_on_read,queue_depth=1024
+    rbd map foopool/bar1 --id admin --keyring /etc/stone/stone.client.admin.keyring
+    rbd map foopool/bar2 --id admin --keyring /etc/stone/stone.client.admin.keyring
+    rbd map foopool/bar2 --id admin --keyring /etc/stone/stone.client.admin.keyring --options lock_on_read,queue_depth=1024
 
 If the images had XFS file systems on them, the corresponding ``/etc/fstab``
 entries might look like this::
@@ -101,7 +101,7 @@ entries might look like this::
     /dev/rbd/foopool/bar2 /mnt/bar2 xfs noauto 0 0
     /dev/rbd/foopool/bar3 /mnt/bar3 xfs noauto 0 0
 
-After creating the images and populating the ``/etc/ceph/rbdmap`` file, making
+After creating the images and populating the ``/etc/stone/rbdmap`` file, making
 the images get automatically mapped and mounted at boot is just a matter of
 enabling that unit::
 
@@ -117,9 +117,9 @@ None
 Availability
 ============
 
-**rbdmap** is part of Ceph, a massively scalable, open-source, distributed
-storage system. Please refer to the Ceph documentation at
-http://ceph.com/docs for more information.
+**rbdmap** is part of Stone, a massively scalable, open-source, distributed
+storage system. Please refer to the Stone documentation at
+http://stone.com/docs for more information.
 
 
 See also

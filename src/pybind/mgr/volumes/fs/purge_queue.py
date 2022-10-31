@@ -3,7 +3,7 @@ import logging
 import os
 import stat
 
-import cephfs
+import stonefs
 
 from .async_job import AsyncJobs
 from .exception import VolumeException
@@ -63,8 +63,8 @@ def purge_trash_entry_for_volume(fs_client, volspec, volname, purge_entry, shoul
             with open_trashcan(fs_handle, volspec) as trashcan:
                 try:
                     pth = os.path.join(trashcan.path, purge_entry)
-                    stx = fs_handle.statx(pth, cephfs.CEPH_STATX_MODE | cephfs.CEPH_STATX_SIZE,
-                                          cephfs.AT_SYMLINK_NOFOLLOW)
+                    stx = fs_handle.statx(pth, stonefs.STONE_STATX_MODE | stonefs.STONE_STATX_SIZE,
+                                          stonefs.AT_SYMLINK_NOFOLLOW)
                     if stat.S_ISLNK(stx['mode']):
                         tgt = fs_handle.readlink(pth, 4096)
                         tgt = tgt[:stx['size']]
@@ -84,7 +84,7 @@ def purge_trash_entry_for_volume(fs_client, volspec, volname, purge_entry, shoul
                     else:
                         log.debug("purging entry pointing to trash: {0}".format(pth))
                         trashcan.purge(pth, should_cancel)
-                except cephfs.Error as e:
+                except stonefs.Error as e:
                     log.warn("failed to remove trash entry: {0}".format(e))
     except VolumeException as ve:
         ret = ve.errno

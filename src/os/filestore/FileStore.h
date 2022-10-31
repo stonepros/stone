@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -28,7 +28,7 @@
 
 #include "include/unordered_map.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "os/ObjectStore.h"
 #include "JournalingObjectStore.h"
@@ -38,7 +38,7 @@
 #include "common/perf_counters.h"
 #include "common/zipkin_trace.h"
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "HashIndex.h"
 #include "IndexManager.h"
 #include "os/ObjectMap.h"
@@ -98,9 +98,9 @@ public:
 
   FSSuperblock() { }
 
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<FSSuperblock*>& o);
 };
 WRITE_CLASS_ENCODER(FSSuperblock)
@@ -120,7 +120,7 @@ public:
     return target_version;
   }
 
-  static int get_block_device_fsid(CephContext* cct, const std::string& path,
+  static int get_block_device_fsid(StoneContext* cct, const std::string& path,
 				   uuid_d *fsid);
   struct FSPerfTracker {
     PerfCounters::avg_tracker<uint64_t> os_commit_latency_ns;
@@ -194,11 +194,11 @@ private:
   int lock_fsid();
 
   // sync thread
-  ceph::mutex lock = ceph::make_mutex("FileStore::lock");
+  stone::mutex lock = stone::make_mutex("FileStore::lock");
   bool force_sync;
-  ceph::condition_variable sync_cond;
+  stone::condition_variable sync_cond;
 
-  ceph::mutex sync_entry_timeo_lock = ceph::make_mutex("FileStore::sync_entry_timeo_lock");
+  stone::mutex sync_entry_timeo_lock = stone::make_mutex("FileStore::sync_entry_timeo_lock");
   SafeTimer timer;
 
   std::list<Context*> sync_waiters;
@@ -225,21 +225,21 @@ private:
     bool registered_apply = false;
   };
   class OpSequencer : public CollectionImpl {
-    CephContext *cct;
+    StoneContext *cct;
     // to protect q, for benefit of flush (peek/dequeue also protected by lock)
-    ceph::mutex qlock =
-      ceph::make_mutex("FileStore::OpSequencer::qlock", false);
+    stone::mutex qlock =
+      stone::make_mutex("FileStore::OpSequencer::qlock", false);
     std::list<Op*> q;
     std::list<uint64_t> jq;
     std::list<std::pair<uint64_t, Context*> > flush_commit_waiters;
-    ceph::condition_variable cond;
+    stone::condition_variable cond;
     std::string osr_name_str;
     /// hash of pointers to ghobject_t's for in-flight writes
     std::unordered_multimap<uint32_t,const ghobject_t*> applying;
   public:
     // for apply mutual exclusion
-    ceph::mutex apply_lock =
-      ceph::make_mutex("FileStore::OpSequencer::apply_lock", false);
+    stone::mutex apply_lock =
+      stone::make_mutex("FileStore::OpSequencer::apply_lock", false);
     int id;
     const char *osr_name;
 
@@ -247,7 +247,7 @@ private:
     bool _get_max_uncompleted(
       uint64_t *seq ///< [out] max uncompleted seq
       ) {
-      ceph_assert(seq);
+      stone_assert(seq);
       *seq = 0;
       if (q.empty() && jq.empty())
 	return true;
@@ -264,7 +264,7 @@ private:
     bool _get_min_uncompleted(
       uint64_t *seq ///< [out] min uncompleted seq
       ) {
-      ceph_assert(seq);
+      stone_assert(seq);
       *seq = 0;
       if (q.empty() && jq.empty())
 	return true;
@@ -311,13 +311,13 @@ private:
     void wait_for_apply(const ghobject_t& oid);
     Op *peek_queue() {
       std::lock_guard l{qlock};
-      ceph_assert(ceph_mutex_is_locked(apply_lock));
+      stone_assert(stone_mutex_is_locked(apply_lock));
       return q.front();
     }
 
     Op *dequeue(std::list<Context*> *to_queue) {
-      ceph_assert(to_queue);
-      ceph_assert(ceph_mutex_is_locked(apply_lock));
+      stone_assert(to_queue);
+      stone_assert(stone_mutex_is_locked(apply_lock));
       std::lock_guard l{qlock};
       Op *o = q.front();
       q.pop_front();
@@ -360,19 +360,19 @@ private:
 
   private:
     FRIEND_MAKE_REF(OpSequencer);
-    OpSequencer(CephContext* cct, int i, coll_t cid)
+    OpSequencer(StoneContext* cct, int i, coll_t cid)
       : CollectionImpl(cct, cid),
 	cct(cct),
 	osr_name_str(stringify(cid)),
         id(i),
 	osr_name(osr_name_str.c_str()) {}
     ~OpSequencer() override {
-      ceph_assert(q.empty());
+      stone_assert(q.empty());
     }
   };
   typedef boost::intrusive_ptr<OpSequencer> OpSequencerRef;
 
-  ceph::mutex coll_lock = ceph::make_mutex("FileStore::coll_lock");
+  stone::mutex coll_lock = stone::make_mutex("FileStore::coll_lock");
   std::map<coll_t,OpSequencerRef> coll_map;
 
   friend std::ostream& operator<<(std::ostream& out, const OpSequencer& s);
@@ -393,8 +393,8 @@ private:
   struct OpWQ : public ThreadPool::WorkQueue<OpSequencer> {
     FileStore *store;
     OpWQ(FileStore *fs,
-	 ceph::timespan timeout,
-	 ceph::timespan suicide_timeout,
+	 stone::timespan timeout,
+	 stone::timespan suicide_timeout,
 	 ThreadPool *tp)
       : ThreadPool::WorkQueue<OpSequencer>("FileStore::OpWQ",
 					   timeout, suicide_timeout, tp),
@@ -405,7 +405,7 @@ private:
       return true;
     }
     void _dequeue(OpSequencer *o) override {
-      ceph_abort();
+      stone_abort();
     }
     bool _empty() override {
       return store->op_queue.empty();
@@ -424,7 +424,7 @@ private:
       store->_finish_op(osr);
     }
     void _clear() override {
-      ceph_assert(store->op_queue.empty());
+      stone_assert(store->op_queue.empty());
     }
   } op_wq;
 
@@ -463,7 +463,7 @@ public:
 		 bool force_clear_omap=false);
 
 public:
-  FileStore(CephContext* cct, const std::string &base, const std::string &jdev,
+  FileStore(StoneContext* cct, const std::string &base, const std::string &jdev,
 	    osflagbits_t flags = 0,
     const char *internal_name = "filestore", bool update_to=false);
   ~FileStore() override;
@@ -484,7 +484,7 @@ public:
   int validate_hobject_key(const hobject_t &obj) const override;
 
   unsigned get_max_attr_name_length() override {
-    // xattr limit is 128; leave room for our prefixes (user.ceph._),
+    // xattr limit is 128; leave room for our prefixes (user.stone._),
     // some margin, and cap at 100
     return 100;
   }
@@ -507,7 +507,7 @@ public:
   bool is_rotational() override;
   bool is_journal_rotational() override;
 
-  void dump_perf_counters(ceph::Formatter *f) override {
+  void dump_perf_counters(stone::Formatter *f) override {
     f->open_object_section("perf_counters");
     logger->dump_formatted(f, false);
     f->close_section();
@@ -620,19 +620,19 @@ public:
     const ghobject_t& oid,
     uint64_t offset,
     size_t len,
-    ceph::buffer::list& bl,
+    stone::buffer::list& bl,
     uint32_t op_flags = 0) override;
   int _do_fiemap(int fd, uint64_t offset, size_t len,
                  std::map<uint64_t, uint64_t> *m);
   int _do_seek_hole_data(int fd, uint64_t offset, size_t len,
                          std::map<uint64_t, uint64_t> *m);
   using ObjectStore::fiemap;
-  int fiemap(CollectionHandle& c, const ghobject_t& oid, uint64_t offset, size_t len, ceph::buffer::list& bl) override;
+  int fiemap(CollectionHandle& c, const ghobject_t& oid, uint64_t offset, size_t len, stone::buffer::list& bl) override;
   int fiemap(CollectionHandle& c, const ghobject_t& oid, uint64_t offset, size_t len, std::map<uint64_t, uint64_t>& destmap) override;
 
   int _touch(const coll_t& cid, const ghobject_t& oid);
   int _write(const coll_t& cid, const ghobject_t& oid, uint64_t offset, size_t len,
-	      const ceph::buffer::list& bl, uint32_t fadvise_flags = 0);
+	      const stone::buffer::list& bl, uint32_t fadvise_flags = 0);
   int _zero(const coll_t& cid, const ghobject_t& oid, uint64_t offset, size_t len);
   int _truncate(const coll_t& cid, const ghobject_t& oid, uint64_t size);
   int _clone(const coll_t& cid, const ghobject_t& oldoid, const ghobject_t& newoid,
@@ -645,9 +645,9 @@ public:
   int _do_copy_range(int from, int to, uint64_t srcoff, uint64_t len, uint64_t dstoff, bool skip_sloppycrc=false);
   int _remove(const coll_t& cid, const ghobject_t& oid, const SequencerPosition &spos);
 
-  int _fgetattr(int fd, const char *name, ceph::bufferptr& bp);
-  int _fgetattrs(int fd, std::map<std::string, ceph::bufferptr>& aset);
-  int _fsetattrs(int fd, std::map<std::string, ceph::bufferptr> &aset);
+  int _fgetattr(int fd, const char *name, stone::bufferptr& bp);
+  int _fgetattrs(int fd, std::map<std::string, stone::bufferptr>& aset);
+  int _fsetattrs(int fd, std::map<std::string, stone::bufferptr> &aset);
 
   void do_force_sync();
   void start_sync(Context *onsafe);
@@ -667,14 +667,14 @@ public:
   uint64_t estimate_objects_overhead(uint64_t num_objects) override;
 
   // DEBUG read error injection, an object is removed from both on delete()
-  ceph::mutex read_error_lock = ceph::make_mutex("FileStore::read_error_lock");
+  stone::mutex read_error_lock = stone::make_mutex("FileStore::read_error_lock");
   std::set<ghobject_t> data_error_set; // read() will return -EIO
   std::set<ghobject_t> mdata_error_set; // getattr(),stat() will return -EIO
   void inject_data_error(const ghobject_t &oid) override;
   void inject_mdata_error(const ghobject_t &oid) override;
 
   void compact() override {
-    ceph_assert(object_map);
+    stone_assert(object_map);
     object_map->compact();
   }
 
@@ -691,10 +691,10 @@ public:
   // attrs
   using ObjectStore::getattr;
   using ObjectStore::getattrs;
-  int getattr(CollectionHandle& c, const ghobject_t& oid, const char *name, ceph::bufferptr &bp) override;
-  int getattrs(CollectionHandle& c, const ghobject_t& oid, std::map<std::string,ceph::bufferptr>& aset) override;
+  int getattr(CollectionHandle& c, const ghobject_t& oid, const char *name, stone::bufferptr &bp) override;
+  int getattrs(CollectionHandle& c, const ghobject_t& oid, std::map<std::string,stone::bufferptr>& aset) override;
 
-  int _setattrs(const coll_t& cid, const ghobject_t& oid, std::map<std::string,ceph::bufferptr>& aset,
+  int _setattrs(const coll_t& cid, const ghobject_t& oid, std::map<std::string,stone::bufferptr>& aset,
 		const SequencerPosition &spos);
   int _rmattr(const coll_t& cid, const ghobject_t& oid, const char *name,
 	      const SequencerPosition &spos);
@@ -730,19 +730,19 @@ public:
 
   // omap (see ObjectStore.h for documentation)
   using ObjectStore::omap_get;
-  int omap_get(CollectionHandle& c, const ghobject_t &oid, ceph::buffer::list *header,
-	       std::map<std::string, ceph::buffer::list> *out) override;
+  int omap_get(CollectionHandle& c, const ghobject_t &oid, stone::buffer::list *header,
+	       std::map<std::string, stone::buffer::list> *out) override;
   using ObjectStore::omap_get_header;
   int omap_get_header(
     CollectionHandle& c,
     const ghobject_t &oid,
-    ceph::buffer::list *out,
+    stone::buffer::list *out,
     bool allow_eio = false) override;
   using ObjectStore::omap_get_keys;
   int omap_get_keys(CollectionHandle& c, const ghobject_t &oid, std::set<std::string> *keys) override;
   using ObjectStore::omap_get_values;
   int omap_get_values(CollectionHandle& c, const ghobject_t &oid, const std::set<std::string> &keys,
-		      std::map<std::string, ceph::buffer::list> *out) override;
+		      std::map<std::string, stone::buffer::list> *out) override;
   using ObjectStore::omap_check_keys;
   int omap_check_keys(CollectionHandle& c, const ghobject_t &oid, const std::set<std::string> &keys,
 		      std::set<std::string> *out) override;
@@ -783,7 +783,7 @@ public:
 
   virtual int apply_layout_settings(const coll_t &cid, int target_level);
 
-  void get_db_statistics(ceph::Formatter* f) override;
+  void get_db_statistics(stone::Formatter* f) override;
 
 private:
   void _inject_failure();
@@ -792,14 +792,14 @@ private:
   int _omap_clear(const coll_t& cid, const ghobject_t &oid,
 		  const SequencerPosition &spos);
   int _omap_setkeys(const coll_t& cid, const ghobject_t &oid,
-		    const std::map<std::string, ceph::buffer::list> &aset,
+		    const std::map<std::string, stone::buffer::list> &aset,
 		    const SequencerPosition &spos);
   int _omap_rmkeys(const coll_t& cid, const ghobject_t &oid, const std::set<std::string> &keys,
 		   const SequencerPosition &spos);
   int _omap_rmkeyrange(const coll_t& cid, const ghobject_t &oid,
 		       const std::string& first, const std::string& last,
 		       const SequencerPosition &spos);
-  int _omap_setheader(const coll_t& cid, const ghobject_t &oid, const ceph::buffer::list &bl,
+  int _omap_setheader(const coll_t& cid, const ghobject_t &oid, const stone::buffer::list &bl,
 		      const SequencerPosition &spos);
   int _split_collection(const coll_t& cid, uint32_t bits, uint32_t rem, coll_t dest,
                         const SequencerPosition &spos);
@@ -825,7 +825,7 @@ private:
   bool m_osd_use_stale_snap;
   bool m_filestore_do_dump;
   std::ofstream m_filestore_dump;
-  ceph::JSONFormatter m_filestore_dump_fmt;
+  stone::JSONFormatter m_filestore_dump_fmt;
   std::atomic<int64_t> m_filestore_kill_at = { 0 };
   bool m_filestore_sloppy_crc;
   int m_filestore_sloppy_crc_block_size;
@@ -906,7 +906,7 @@ public:
   explicit FileStoreBackend(FileStore *fs) : filestore(fs) {}
   virtual ~FileStoreBackend() {}
 
-  CephContext* cct() const {
+  StoneContext* cct() const {
     return filestore->cct;
   }
 
@@ -932,12 +932,12 @@ public:
   virtual bool has_splice() const = 0;
 
   // hooks for (sloppy) crc tracking
-  virtual int _crc_update_write(int fd, loff_t off, size_t len, const ceph::buffer::list& bl) = 0;
+  virtual int _crc_update_write(int fd, loff_t off, size_t len, const stone::buffer::list& bl) = 0;
   virtual int _crc_update_truncate(int fd, loff_t off) = 0;
   virtual int _crc_update_zero(int fd, loff_t off, size_t len) = 0;
   virtual int _crc_update_clone_range(int srcfd, int destfd,
 				      loff_t srcoff, size_t len, loff_t dstoff) = 0;
-  virtual int _crc_verify_read(int fd, loff_t off, size_t len, const ceph::buffer::list& bl,
+  virtual int _crc_verify_read(int fd, loff_t off, size_t len, const stone::buffer::list& bl,
 			       std::ostream *out) = 0;
 };
 

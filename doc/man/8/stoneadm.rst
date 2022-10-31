@@ -1,56 +1,56 @@
 :orphan:
 
 =========================================
- cephadm -- manage the local cephadm host
+ stoneadm -- manage the local stoneadm host
 =========================================
 
-.. program:: cephadm
+.. program:: stoneadm
 
 Synopsis
 ========
 
-| **cephadm**** [-h] [--image IMAGE] [--docker] [--data-dir DATA_DIR]
+| **stoneadm**** [-h] [--image IMAGE] [--docker] [--data-dir DATA_DIR]
 |               [--log-dir LOG_DIR] [--logrotate-dir LOGROTATE_DIR]
 |               [--unit-dir UNIT_DIR] [--verbose] [--timeout TIMEOUT]
 |               [--retry RETRY] [--no-container-init]
-|               {version,pull,inspect-image,ls,list-networks,adopt,rm-daemon,rm-cluster,run,shell,enter,ceph-volume,unit,logs,bootstrap,deploy,check-host,prepare-host,add-repo,rm-repo,install}
+|               {version,pull,inspect-image,ls,list-networks,adopt,rm-daemon,rm-cluster,run,shell,enter,stone-volume,unit,logs,bootstrap,deploy,check-host,prepare-host,add-repo,rm-repo,install}
 |               ...
 
 
-| **cephadm** **pull**
+| **stoneadm** **pull**
 
-| **cephadm** **inspect-image**
+| **stoneadm** **inspect-image**
 
-| **cephadm** **ls** [-h] [--no-detail] [--legacy-dir LEGACY_DIR]
+| **stoneadm** **ls** [-h] [--no-detail] [--legacy-dir LEGACY_DIR]
 
-| **cephadm** **list-networks**
+| **stoneadm** **list-networks**
 
-| **cephadm** **adopt** [-h] --name NAME --style STYLE [--cluster CLUSTER]
+| **stoneadm** **adopt** [-h] --name NAME --style STYLE [--cluster CLUSTER]
 |                       [--legacy-dir LEGACY_DIR] [--config-json CONFIG_JSON]
 |                       [--skip-firewalld] [--skip-pull]
 
-| **cephadm** **rm-daemon** [-h] --name NAME --fsid FSID [--force]
+| **stoneadm** **rm-daemon** [-h] --name NAME --fsid FSID [--force]
 |                           [--force-delete-data]
 
-| **cephadm** **rm-cluster** [-h] --fsid FSID [--force]
+| **stoneadm** **rm-cluster** [-h] --fsid FSID [--force]
 
-| **cephadm** **run** [-h] --name NAME --fsid FSID
+| **stoneadm** **run** [-h] --name NAME --fsid FSID
 
-| **cephadm** **shell** [-h] [--fsid FSID] [--name NAME] [--config CONFIG]
+| **stoneadm** **shell** [-h] [--fsid FSID] [--name NAME] [--config CONFIG]
                         [--keyring KEYRING] --mount [MOUNT [MOUNT ...]] [--env ENV]
                         [--] [command [command ...]]
 
-| **cephadm** **enter** [-h] [--fsid FSID] --name NAME [command [command ...]]
+| **stoneadm** **enter** [-h] [--fsid FSID] --name NAME [command [command ...]]
 
-| **cephadm** **ceph-volume** [-h] [--fsid FSID] [--config-json CONFIG_JSON]
+| **stoneadm** **stone-volume** [-h] [--fsid FSID] [--config-json CONFIG_JSON]
                               [--config CONFIG] [--keyring KEYRING]
                               command [command ...]
 
-| **cephadm** **unit**  [-h] [--fsid FSID] --name NAME command
+| **stoneadm** **unit**  [-h] [--fsid FSID] --name NAME command
 
-| **cephadm** **logs** [-h] [--fsid FSID] --name NAME [command [command ...]]
+| **stoneadm** **logs** [-h] [--fsid FSID] --name NAME [command [command ...]]
 
-| **cephadm** **bootstrap** [-h] [--config CONFIG] [--mon-id MON_ID]
+| **stoneadm** **bootstrap** [-h] [--config CONFIG] [--mon-id MON_ID]
 |                           [--mon-addrv MON_ADDRV] [--mon-ip MON_IP]
 |                           [--mgr-id MGR_ID] [--fsid FSID]
 |                           [--log-to-file] [--single-host-defaults]
@@ -81,25 +81,25 @@ Synopsis
 
 
 
-| **cephadm** **deploy** [-h] --name NAME --fsid FSID [--config CONFIG]
+| **stoneadm** **deploy** [-h] --name NAME --fsid FSID [--config CONFIG]
 |                        [--config-json CONFIG_JSON] [--keyring KEYRING]
 |                        [--key KEY] [--osd-fsid OSD_FSID] [--skip-firewalld]
 |                        [--tcp-ports TCP_PORTS] [--reconfig] [--allow-ptrace]
 
-| **cephadm** **check-host** [-h] [--expect-hostname EXPECT_HOSTNAME]
+| **stoneadm** **check-host** [-h] [--expect-hostname EXPECT_HOSTNAME]
 
-| **cephadm** **prepare-host**
+| **stoneadm** **prepare-host**
 
-| **cephadm** **add-repo** [-h] [--release RELEASE] [--version VERSION]
+| **stoneadm** **add-repo** [-h] [--release RELEASE] [--version VERSION]
 |                          [--dev DEV] [--dev-commit DEV_COMMIT]
 |                          [--gpg-url GPG_URL] [--repo-url REPO_URL]
 
 
-| **cephadm** **rm-repo**
+| **stoneadm** **rm-repo**
 
-| **cephadm** **install** [-h] [packages [packages ...]]
+| **stoneadm** **install** [-h] [packages [packages ...]]
 
-| **cephadm** **registry-login** [-h] [--registry-url REGISTRY_URL]
+| **stoneadm** **registry-login** [-h] [--registry-url REGISTRY_URL]
 |                                [--registry-username REGISTRY_USERNAME]
 |                                [--registry-password REGISTRY_PASSWORD]
 |                                [--registry-json REGISTRY_JSON] [--fsid FSID]
@@ -109,11 +109,11 @@ Synopsis
 Description
 ===========
 
-:program:`cephadm` is a command line tool to manage the local host for the cephadm orchestrator.
+:program:`stoneadm` is a command line tool to manage the local host for the stoneadm orchestrator.
 
 It provides commands to investigate and modify the state of the current host.
 
-:program:`cephadm` is not required on all hosts, but useful when investigating a particular
+:program:`stoneadm` is not required on all hosts, but useful when investigating a particular
 daemon.
 
 Options
@@ -130,11 +130,11 @@ Options
 
 .. option:: --data-dir DATA_DIR
 
-   base directory for daemon data (default: /var/lib/ceph)
+   base directory for daemon data (default: /var/lib/stone)
 
 .. option:: --log-dir LOG_DIR
 
-   base directory for daemon logs (default: /var/log/ceph)
+   base directory for daemon logs (default: /var/log/stone)
 
 .. option:: --logrotate-dir LOGROTATE_DIR
 
@@ -167,7 +167,7 @@ Commands
 add-repo
 --------
 
-configure local package repository to also include the ceph repository.
+configure local package repository to also include the stone repository.
 
 Arguments:
 
@@ -200,11 +200,11 @@ bootstrap
 
 Bootstrap a cluster on the local host. It deploys a MON and a MGR and then also automatically
 deploys the monitoring stack on this host (see --skip-monitoring-stack) and calls
-``ceph orch host add $(hostname)`` (see --skip-ssh).
+``stone orch host add $(hostname)`` (see --skip-ssh).
 
 Arguments:
 
-* [--config CONFIG, -c CONFIG]    ceph conf file to incorporate
+* [--config CONFIG, -c CONFIG]    stone conf file to incorporate
 * [--mon-id MON_ID]               mon id (default: local hostname)
 * [--mon-addrv MON_ADDRV]         mon IPs (e.g., [v2:localipaddr:3300,v1:localipaddr:6789])
 * [--mon-ip MON_IP]               mon IP
@@ -227,7 +227,7 @@ Arguments:
 * [--ssh-public-key SSH_PUBLIC_KEY] SSH public key
 * [--ssh-user SSH_USER]           set user for SSHing to cluster hosts, passwordless sudo will be needed for non-root users'
 * [--skip-mon-network]            set mon public_network based on bootstrap mon ip
-* [--skip-dashboard]              do not enable the Ceph Dashboard
+* [--skip-dashboard]              do not enable the Stone Dashboard
 * [--dashboard-password-noupdate] stop forced dashboard password change
 * [--no-minimize-config]          do not assimilate and minimize the config file
 * [--skip-ping-check]             do not verify that mon IP is pingable
@@ -245,12 +245,12 @@ Arguments:
 * [--registry-json REGISTRY_JSON] JSON file containing registry login info (see registry-login command documentation)
 
 
-ceph-volume
+stone-volume
 -----------
 
-Run ceph-volume inside a container::
+Run stone-volume inside a container::
 
-    cephadm ceph-volume inventory
+    stoneadm stone-volume inventory
 
 Positional arguments:
 * [command]               command
@@ -259,14 +259,14 @@ Arguments:
 
 * [--fsid FSID]                    cluster FSID
 * [--config-json CONFIG_JSON]      JSON file with config and (client.bootrap-osd) key
-* [--config CONFIG, -c CONFIG]     ceph conf file
-* [--keyring KEYRING, -k KEYRING]  ceph.keyring to pass through to the container
+* [--config CONFIG, -c CONFIG]     stone conf file
+* [--keyring KEYRING, -k KEYRING]  stone.keyring to pass through to the container
 
 
 check-host
 ----------
 
-check host configuration to be suitable for a Ceph cluster.
+check host configuration to be suitable for a Stone cluster.
 
 Arguments:
 
@@ -278,7 +278,7 @@ deploy
 
 deploy a daemon on the local host. Used by the orchestrator CLI::
 
-    cephadm shell -- ceph orch apply <type> ...
+    stoneadm shell -- stone orch apply <type> ...
 
 Arguments:
 
@@ -300,7 +300,7 @@ enter
 
 Run an interactive shell inside a running daemon container::
 
-    cephadm enter --name mgr.myhost.ysubfo
+    stoneadm enter --name mgr.myhost.ysubfo
 
 Positional arguments:
 * [command]               command
@@ -313,7 +313,7 @@ Arguments:
 install
 -------
 
-install ceph package(s)
+install stone package(s)
 
 Positional arguments:
 
@@ -323,7 +323,7 @@ Positional arguments:
 inspect-image
 -------------
 
-inspect local ceph container image.
+inspect local stone container image.
 
 list-networks
 -------------
@@ -334,18 +334,18 @@ list IP networks
 ls
 --
 
-list daemon instances known to cephadm on **this** host::
+list daemon instances known to stoneadm on **this** host::
 
-    $ cephadm ls
+    $ stoneadm ls
     [
         {
-            "style": "cephadm:v1",
+            "style": "stoneadm:v1",
             "name": "mgr.storage-14b-1.ysubfo",
             "fsid": "5110cb22-8332-11ea-9148-0894ef7e8bdc",
             "enabled": true,
             "state": "running",
             "container_id": "8562de72370a3836473ecfff8a22c9ccdd99815386b4692a2b30924fb5493c44",
-            "container_image_name": "docker.io/ceph/ceph:v15",
+            "container_image_name": "docker.io/stone/stone:v15",
             "container_image_id": "bc83a388465f0568dab4501fb7684398dca8b50ca12a342a57f21815721723c2",
             "version": "15.2.1",
             "started": "2020-04-21T01:16:41.831456",
@@ -365,7 +365,7 @@ logs
 
 print journald logs for a daemon container::
 
-    cephadm logs --name mgr.myhost.ysubfo
+    stoneadm logs --name mgr.myhost.ysubfo
 
 This is similar to::
 
@@ -373,8 +373,8 @@ This is similar to::
 
 Can also specify additional journal arguments::
 
-    cephadm logs --name mgr.myhost.ysubfo -- -n 20 # last 20 lines
-    cephadm logs --name mgr.myhost.ysubfo -- -f # follow the log
+    stoneadm logs --name mgr.myhost.ysubfo -- -n 20 # last 20 lines
+    stoneadm logs --name mgr.myhost.ysubfo -- -f # follow the log
 
 
 Positional arguments:
@@ -390,7 +390,7 @@ Arguments:
 prepare-host
 ------------
 
-prepare a host for cephadm use
+prepare a host for stoneadm use
 
 Arguments:
 
@@ -400,17 +400,17 @@ Arguments:
 pull
 ----
 
-Pull the ceph image::
+Pull the stone image::
 
-    cephadm pull
+    stoneadm pull
 
 registry-login
 --------------
 
-Give cephadm login information for an authenticated registry (url, username and password).
-Cephadm will attempt to log the calling host into that registry::
+Give stoneadm login information for an authenticated registry (url, username and password).
+Stoneadm will attempt to log the calling host into that registry::
 
-      cephadm registry-login --registry-url [REGISTRY_URL] --registry-username [USERNAME]
+      stoneadm registry-login --registry-url [REGISTRY_URL] --registry-username [USERNAME]
                              --registry-password [PASSWORD]
 
 Can also use a JSON file containing the login info formatted as::
@@ -423,7 +423,7 @@ Can also use a JSON file containing the login info formatted as::
 
 and turn it in with command::
 
-      cephadm registry-login --registry-json [JSON FILE]
+      stoneadm registry-login --registry-json [JSON FILE]
 
 Arguments:
 
@@ -464,7 +464,7 @@ remove package repository configuration
 run
 ---
 
-run a ceph daemon, in a container, in the foreground
+run a stone daemon, in a container, in the foreground
 
 Arguments:
 
@@ -477,11 +477,11 @@ shell
 
 Run an interactive shell::
 
-    cephadm shell
+    stoneadm shell
 
 Or one specific command inside a container::
 
-    cephadm shell -- ceph orch ls
+    stoneadm shell -- stone orch ls
 
 
 Positional arguments:
@@ -492,8 +492,8 @@ Arguments:
 
 * [--fsid FSID]                   cluster FSID
 * [--name NAME, -n NAME]          daemon name (type.id)
-* [--config CONFIG, -c CONFIG]    ceph.conf to pass through to the container
-* [--keyring KEYRING, -k KEYRING] ceph.keyring to pass through to the container
+* [--config CONFIG, -c CONFIG]    stone.conf to pass through to the container
+* [--keyring KEYRING, -k KEYRING] stone.keyring to pass through to the container
 * [--mount MOUNT, -m MOUNT]       mount a file or directory under /mnt in the container
 * [--env ENV, -e ENV]             set environment variable
 
@@ -516,11 +516,11 @@ Arguments:
 Availability
 ============
 
-:program:`cephadm` is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the documentation at http://docs.ceph.com/ for more information.
+:program:`stoneadm` is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the documentation at http://docs.stone.com/ for more information.
 
 
 See also
 ========
 
-:doc:`ceph-volume <ceph-volume>`\(8),
+:doc:`stone-volume <stone-volume>`\(8),

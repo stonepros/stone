@@ -8,16 +8,16 @@ from typing import TYPE_CHECKING, Dict, List, Iterator, Optional, Any, Tuple, Se
     NamedTuple, Type
 
 import orchestrator
-from ceph.deployment import inventory
-from ceph.deployment.service_spec import ServiceSpec, PlacementSpec
-from ceph.utils import str_to_datetime, datetime_to_str, datetime_now
+from stone.deployment import inventory
+from stone.deployment.service_spec import ServiceSpec, PlacementSpec
+from stone.utils import str_to_datetime, datetime_to_str, datetime_now
 from orchestrator import OrchestratorError, HostSpec, OrchestratorEvent, service_to_daemon_types
 
 from .utils import resolve_ip
 from .migrations import queue_migrate_nfs_spec
 
 if TYPE_CHECKING:
-    from .module import CephadmOrchestrator
+    from .module import StoneadmOrchestrator
 
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class Inventory:
     The inventory stores a HostSpec for all hosts persistently.
     """
 
-    def __init__(self, mgr: 'CephadmOrchestrator'):
+    def __init__(self, mgr: 'StoneadmOrchestrator'):
         self.mgr = mgr
         adjusted_addrs = False
 
@@ -171,7 +171,7 @@ class SpecDescription(NamedTuple):
 
 class SpecStore():
     def __init__(self, mgr):
-        # type: (CephadmOrchestrator) -> None
+        # type: (StoneadmOrchestrator) -> None
         self.mgr = mgr
         self._specs = {}  # type: Dict[str, ServiceSpec]
         # service_name -> rank -> gen -> daemon_id
@@ -350,7 +350,7 @@ class ClientKeyringSpec(object):
 
     @property
     def path(self) -> str:
-        return f'/etc/ceph/ceph.{self.entity}.keyring'
+        return f'/etc/stone/stone.{self.entity}.keyring'
 
     @classmethod
     def from_json(cls: Type, data: dict) -> 'ClientKeyringSpec':
@@ -368,8 +368,8 @@ class ClientKeyringStore():
     """
 
     def __init__(self, mgr):
-        # type: (CephadmOrchestrator) -> None
-        self.mgr: CephadmOrchestrator = mgr
+        # type: (StoneadmOrchestrator) -> None
+        self.mgr: StoneadmOrchestrator = mgr
         self.mgr = mgr
         self.keys: Dict[str, ClientKeyringSpec] = {}
 
@@ -406,7 +406,7 @@ class HostCache():
     Like for example we really need to know where daemons are deployed on
     hosts that are offline.
 
-    2. `devices`: ceph-volume inventory cache O(hosts)
+    2. `devices`: stone-volume inventory cache O(hosts)
 
     As soon as this is populated, it becomes more or less read-only.
 
@@ -416,8 +416,8 @@ class HostCache():
 
     4. `last_client_files` O(hosts)
 
-    Stores the last digest and owner/mode for files we've pushed to /etc/ceph
-    (ceph.conf or client keyrings).
+    Stores the last digest and owner/mode for files we've pushed to /etc/stone
+    (stone.conf or client keyrings).
 
     5. `scheduled_daemon_actions`: O(daemons)
 
@@ -427,8 +427,8 @@ class HostCache():
     """
 
     def __init__(self, mgr):
-        # type: (CephadmOrchestrator) -> None
-        self.mgr: CephadmOrchestrator = mgr
+        # type: (StoneadmOrchestrator) -> None
+        self.mgr: StoneadmOrchestrator = mgr
         self.daemons = {}   # type: Dict[str, Dict[str, orchestrator.DaemonDescription]]
         self.last_daemon_update = {}   # type: Dict[str, datetime.datetime]
         self.devices = {}              # type: Dict[str, List[inventory.Device]]
@@ -950,8 +950,8 @@ class HostCache():
 
 class EventStore():
     def __init__(self, mgr):
-        # type: (CephadmOrchestrator) -> None
-        self.mgr: CephadmOrchestrator = mgr
+        # type: (StoneadmOrchestrator) -> None
+        self.mgr: StoneadmOrchestrator = mgr
         self.events = {}  # type: Dict[str, List[OrchestratorEvent]]
 
     def add(self, event: OrchestratorEvent) -> None:

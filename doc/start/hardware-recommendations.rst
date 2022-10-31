@@ -4,36 +4,36 @@
  Hardware Recommendations
 ==========================
 
-Ceph was designed to run on commodity hardware, which makes building and
+Stone was designed to run on commodity hardware, which makes building and
 maintaining petabyte-scale data clusters economically feasible. 
 When planning out your cluster hardware, you will need to balance a number 
 of considerations, including failure domains and potential performance
-issues. Hardware planning should include distributing Ceph daemons and 
-other processes that use Ceph across many hosts. Generally, we recommend 
-running Ceph daemons of a specific type on a host configured for that type 
+issues. Hardware planning should include distributing Stone daemons and 
+other processes that use Stone across many hosts. Generally, we recommend 
+running Stone daemons of a specific type on a host configured for that type 
 of daemon. We recommend using other hosts for processes that utilize your 
 data cluster (e.g., OpenStack, CloudStack, etc).
 
 
-.. tip:: Check out the `Ceph blog`_ too.
+.. tip:: Check out the `Stone blog`_ too.
 
 
 CPU
 ===
 
-CephFS metadata servers are CPU intensive, so they should have significant
+StoneFS metadata servers are CPU intensive, so they should have significant
 processing power (e.g., quad core or better CPUs) and benefit from higher clock
-rate (frequency in GHz). Ceph OSDs run the :term:`RADOS` service, calculate
+rate (frequency in GHz). Stone OSDs run the :term:`RADOS` service, calculate
 data placement with :term:`CRUSH`, replicate data, and maintain their own copy of the
 cluster map. Therefore, OSD nodes should have a reasonable amount of processing
 power. Requirements vary by use-case; a starting point might be one core per
 OSD for light / archival usage, and two cores per OSD for heavy workloads such
 as RBD volumes attached to VMs.  Monitor / manager nodes do not have heavy CPU
 demands so a modest processor can be chosen for them.  Also consider whether the
-host machine will run CPU-intensive processes in addition to Ceph daemons. For
+host machine will run CPU-intensive processes in addition to Stone daemons. For
 example, if your hosts will run computing VMs (e.g., OpenStack Nova), you will
 need to ensure that these other processes leave sufficient processing power for
-Ceph daemons. We recommend running additional CPU-intensive processes on
+Stone daemons. We recommend running additional CPU-intensive processes on
 separate hosts to avoid resource contention.
 
 
@@ -97,9 +97,9 @@ option.
 .. important:: OSD memory autotuning is "best effort". Although the OSD may
    unmap memory to allow the kernel to reclaim it, there is no guarantee that
    the kernel will actually reclaim freed memory within a specific time
-   frame. This is especially true in older versions of Ceph where transparent
+   frame. This is especially true in older versions of Stone where transparent
    huge pages can prevent the kernel from reclaiming memory that was freed from
-   fragmented huge pages. Modern versions of Ceph disable transparent huge
+   fragmented huge pages. Modern versions of Stone disable transparent huge
    pages at the application level to avoid this, but that does not
    guarantee that the kernel will immediately reclaim unmapped memory. The OSD
    may still at times exceed its memory target. We recommend budgeting 
@@ -151,24 +151,24 @@ Storage drives are subject to limitations on seek time, access time, read and
 write times, as well as total throughput. These physical limitations affect
 overall system performance--especially during recovery. We recommend using a
 dedicated (ideally mirrored) drive for the operating system and software, and
-one drive for each Ceph OSD Daemon you run on the host (modulo NVMe above).
+one drive for each Stone OSD Daemon you run on the host (modulo NVMe above).
 Many "slow OSD" issues (when they are not attributable to hardware failure)
 arise from running an operating system and multiple OSDs on the same drive.
 
-It is technically possible to run multiple Ceph OSD Daemons per SAS / SATA
+It is technically possible to run multiple Stone OSD Daemons per SAS / SATA
 drive, but this will lead to resource contention and diminish overall
 throughput.
 
-To get the best performance out of Ceph, run the following on separate drives:
+To get the best performance out of Stone, run the following on separate drives:
 (1) operating systems, (2) OSD data, and (3) BlueStore db.  For more
 information on how to effectively use a mix of fast drives and slow drives in
-your Ceph cluster, see the `block and block.db`_ section of the Bluestore
+your Stone cluster, see the `block and block.db`_ section of the Bluestore
 Configuration Reference.
 
 Solid State Drives
 ------------------
 
-Ceph performance can be improved by using solid-state drives (SSDs). This
+Stone performance can be improved by using solid-state drives (SSDs). This
 reduces random access time and reduces latency while accelerating throughput. 
 
 SSDs cost more per gigabyte than do hard disk drives, but SSDs often offer
@@ -188,7 +188,7 @@ performance of sequential reads and writes.
 
 Relatively inexpensive SSDs may appeal to your sense of economy. Use caution.
 Acceptable IOPS are not the only factor to consider when selecting an SSD for
-use with Ceph. 
+use with Stone. 
 
 SSDs have historically been cost prohibitive for object storage, but emerging
 QLC drives are closing the gap, offering greater density with lower power
@@ -202,20 +202,20 @@ Ownership calculator`_
 Partition Alignment
 ~~~~~~~~~~~~~~~~~~~
 
-When using SSDs with Ceph, make sure that your partitions are properly aligned.
+When using SSDs with Stone, make sure that your partitions are properly aligned.
 Improperly aligned partitions suffer slower data transfer speeds than do
 properly aligned partitions. For more information about proper partition
 alignment and example commands that show how to align partitions properly, see
 `Werner Fischer's blog post on partition alignment`_.
 
-CephFS Metadata Segregation
+StoneFS Metadata Segregation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-One way that Ceph accelerates CephFS file system performance is by segregating
-the storage of CephFS metadata from the storage of the CephFS file contents.
-Ceph provides a default ``metadata`` pool for CephFS metadata. You will never
-have to create a pool for CephFS metadata, but you can create a CRUSH map
-hierarchy for your CephFS metadata pool that points only to SSD storage media.
+One way that Stone accelerates StoneFS file system performance is by segregating
+the storage of StoneFS metadata from the storage of the StoneFS file contents.
+Stone provides a default ``metadata`` pool for StoneFS metadata. You will never
+have to create a pool for StoneFS metadata, but you can create a CRUSH map
+hierarchy for your StoneFS metadata pool that points only to SSD storage media.
 See :ref:`CRUSH Device Class<crush-map-device-class>` for details.
 
 
@@ -229,8 +229,8 @@ than simpler "JBOD" (IT) mode HBAs. The RAID SoC, write cache, and battery
 backup can substantially increase hardware and maintenance costs. Some RAID
 HBAs can be configured with an IT-mode "personality".
 
-.. tip:: The `Ceph blog`_ is often an excellent source of information on Ceph
-   performance issues. See `Ceph Write Throughput 1`_ and `Ceph Write 
+.. tip:: The `Stone blog`_ is often an excellent source of information on Stone
+   performance issues. See `Stone Write Throughput 1`_ and `Stone Write 
    Throughput 2`_ for additional details.
 
 
@@ -242,7 +242,7 @@ aggregate throughput of your OSD drives doesn't exceed the network bandwidth
 required to service a client's need to read or write data. You should also
 consider what percentage of the overall data the cluster stores on each host. If
 the percentage on a particular host is large and the host fails, it can lead to
-problems such as exceeding the ``full ratio``,  which causes Ceph to halt
+problems such as exceeding the ``full ratio``,  which causes Stone to halt
 operations as a safety precaution that prevents data loss.
 
 When you run multiple OSDs per host, you also need to ensure that the kernel
@@ -299,7 +299,7 @@ domain.
 Minimum Hardware Recommendations
 ================================
 
-Ceph can run on inexpensive commodity hardware. Small production clusters
+Stone can run on inexpensive commodity hardware. Small production clusters
 and development clusters can run successfully with modest hardware.
 
 +--------------+----------------+-----------------------------------------+
@@ -311,7 +311,7 @@ and development clusters can run successfully with modest hardware.
 |              |                |                                         |
 |              |                | * Results are before replication.       |
 |              |                | * Results may vary with different       |
-|              |                |   CPU models and Ceph features.         |
+|              |                |   CPU models and Stone features.         |
 |              |                |   (erasure coding, compression, etc)    |
 |              |                | * ARM processors specifically may       |
 |              |                |   require additional cores.             |
@@ -354,9 +354,9 @@ and development clusters can run successfully with modest hardware.
 
 
 
-.. _Ceph blog: https://ceph.com/community/blog/
-.. _Ceph Write Throughput 1: http://ceph.com/community/ceph-performance-part-1-disk-controller-write-throughput/
-.. _Ceph Write Throughput 2: http://ceph.com/community/ceph-performance-part-2-write-throughput-without-ssd-journals/
+.. _Stone blog: https://ceph.com/community/blog/
+.. _Stone Write Throughput 1: http://ceph.com/community/ceph-performance-part-1-disk-controller-write-throughput/
+.. _Stone Write Throughput 2: http://ceph.com/community/ceph-performance-part-2-write-throughput-without-ssd-journals/
 .. _Mapping Pools to Different Types of OSDs: ../../rados/operations/crush-map#placing-different-pools-on-different-osds
 .. _OS Recommendations: ../os-recommendations
 .. _Werner Fischer's blog post on partition alignment: https://www.thomas-krenn.com/en/wiki/Partition_Alignment_detailed_explanation

@@ -78,7 +78,7 @@ def check_sanity():
     """
     Test if development headers and library for rados is available by compiling a dummy C program.
     """
-    CEPH_SRC_DIR = os.path.join(
+    STONE_SRC_DIR = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
         '..',
         '..'
@@ -102,11 +102,11 @@ def check_sanity():
     compiler = new_compiler()
     distutils.sysconfig.customize_compiler(compiler)
 
-    if 'CEPH_LIBDIR' in os.environ:
-        # The setup.py has been invoked by a top-level Ceph make.
+    if 'STONE_LIBDIR' in os.environ:
+        # The setup.py has been invoked by a top-level Stone make.
         # Set the appropriate CFLAGS and LDFLAGS
-        compiler.set_include_dirs([os.path.join(CEPH_SRC_DIR, 'include')])
-        compiler.set_library_dirs([os.environ.get('CEPH_LIBDIR')])
+        compiler.set_include_dirs([os.path.join(STONE_SRC_DIR, 'include')])
+        compiler.set_library_dirs([os.environ.get('STONE_LIBDIR')])
 
     try:
         link_objects = compiler.compile(
@@ -171,15 +171,15 @@ if (len(sys.argv) >= 2 and
 setup(
     name='rados',
     version=__version__,
-    description="Python bindings for the Ceph librados library",
+    description="Python bindings for the Stone librados library",
     long_description=(
-        "This package contains Python bindings for interacting with Ceph's "
+        "This package contains Python bindings for interacting with Stone's "
         "RADOS library. RADOS is a reliable, autonomic distributed object "
-        "storage cluster developed as part of the Ceph distributed storage "
+        "storage cluster developed as part of the Stone distributed storage "
         "system. This is a shared library allowing applications to access "
         "the distributed object store using a simple file-like interface."
     ),
-    url='https://github.com/ceph/ceph/tree/master/src/pybind/rados',
+    url='https://github.com/stone/stone/tree/master/src/pybind/rados',
     license='LGPLv2+',
     platforms='Linux',
     ext_modules=cythonize(

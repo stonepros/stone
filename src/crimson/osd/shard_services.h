@@ -51,7 +51,7 @@ class ShardServices : public md_config_obs_t {
   crimson::mgr::Client &mgrc;
   crimson::os::FuturizedStore &store;
 
-  crimson::common::CephContext cct;
+  crimson::common::StoneContext cct;
 
   PerfCounters *perf = nullptr;
   PerfCounters *recoverystate_perf = nullptr;
@@ -78,7 +78,7 @@ public:
     return store;
   }
 
-  crimson::common::CephContext *get_cct() {
+  crimson::common::StoneContext *get_cct() {
     return &cct;
   }
 
@@ -178,9 +178,9 @@ public:
   seastar::future<> osdmap_subscribe(version_t epoch, bool force_request);
 
   // Time state
-  ceph::mono_time startup_time = ceph::mono_clock::now();
-  ceph::signedspan get_mnow() const {
-    return ceph::mono_clock::now() - startup_time;
+  stone::mono_time startup_time = stone::mono_clock::now();
+  stone::signedspan get_mnow() const {
+    return stone::mono_clock::now() - startup_time;
   }
   HeartbeatStampsRef get_hb_stamps(int peer);
   std::map<int, HeartbeatStampsRef> heartbeat_stamps;

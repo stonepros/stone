@@ -36,7 +36,7 @@ class StrategyRegistry {
     s3_main_strategy_plain_t s3_main_strategy_plain;
     s3_main_strategy_boto2_t s3_main_strategy_boto2;
 
-    s3_main_strategy_t(CephContext* const cct,
+    s3_main_strategy_t(StoneContext* const cct,
 		       ImplicitTenants& implicit_tenant_context,
 		       RGWCtl* const ctl)
       : s3_main_strategy_plain(cct, implicit_tenant_context, ctl),
@@ -59,7 +59,7 @@ class StrategyRegistry {
   rgw::auth::sts::DefaultStrategy sts_strategy;
 
 public:
-  StrategyRegistry(CephContext* const cct,
+  StrategyRegistry(StoneContext* const cct,
                    ImplicitTenants& implicit_tenant_context,
                    RGWCtl* const ctl)
     : s3_main_strategy(cct, implicit_tenant_context, ctl),
@@ -85,7 +85,7 @@ public:
   }
 
   static std::shared_ptr<StrategyRegistry>
-  create(CephContext* const cct,
+  create(StoneContext* const cct,
          ImplicitTenants& implicit_tenant_context,
          RGWCtl* const ctl) {
     return std::make_shared<StrategyRegistry>(cct, implicit_tenant_context, ctl);

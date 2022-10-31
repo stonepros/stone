@@ -2,22 +2,22 @@
  Introduction to librados
 ==========================
 
-The :term:`Ceph Storage Cluster` provides the basic storage service that allows
-:term:`Ceph` to uniquely deliver **object, block, and file storage** in one
+The :term:`Stone Storage Cluster` provides the basic storage service that allows
+:term:`Stone` to uniquely deliver **object, block, and file storage** in one
 unified system. However, you are not limited to using the RESTful, block, or
 POSIX interfaces. Based upon :abbr:`RADOS (Reliable Autonomic Distributed Object
 Store)`, the ``librados`` API enables you to create your own interface to the
-Ceph Storage Cluster.
+Stone Storage Cluster.
 
 The ``librados`` API enables you to interact with the two types of daemons in
-the Ceph Storage Cluster: 
+the Stone Storage Cluster: 
 
-- The :term:`Ceph Monitor`, which maintains a master copy of the cluster map. 
-- The :term:`Ceph OSD Daemon` (OSD), which stores data as objects on a storage node.
+- The :term:`Stone Monitor`, which maintains a master copy of the cluster map. 
+- The :term:`Stone OSD Daemon` (OSD), which stores data as objects on a storage node.
 
 .. ditaa::
             +---------------------------------+
-            |  Ceph Storage Cluster Protocol  |
+            |  Stone Storage Cluster Protocol  |
             |           (librados)            |
             +---------------------------------+
             +---------------+ +---------------+
@@ -25,15 +25,15 @@ the Ceph Storage Cluster:
             +---------------+ +---------------+
 
 This guide provides a high-level introduction to using ``librados``. 
-Refer to :doc:`../../architecture` for additional details of the Ceph
-Storage Cluster. To use the API, you need a running Ceph Storage Cluster. 
+Refer to :doc:`../../architecture` for additional details of the Stone
+Storage Cluster. To use the API, you need a running Stone Storage Cluster. 
 See `Installation (Quick)`_ for details.
 
 
 Step 1: Getting librados
 ========================
 
-Your client application must bind with ``librados`` to connect to the Ceph
+Your client application must bind with ``librados`` to connect to the Stone
 Storage Cluster. You must install ``librados`` and any required packages to
 write applications that use ``librados``. The ``librados`` API is written in
 C++, with additional bindings for C, Python, Java and PHP. 
@@ -98,7 +98,7 @@ To install ``librados`` for Java, you need to execute the following procedure:
 
 #. Clone the ``rados-java`` repository::
 
-	git clone --recursive https://github.com/ceph/rados-java.git
+	git clone --recursive https://github.com/stone/rados-java.git
 
 #. Build the ``rados-java`` repository:: 
 
@@ -134,7 +134,7 @@ To install the ``librados`` extension for PHP, you need to execute the following
 
 #. Clone the ``phprados`` repository::
 
-	git clone https://github.com/ceph/phprados.git
+	git clone https://github.com/stone/phprados.git
 
 #. Build ``phprados``::
 
@@ -152,10 +152,10 @@ To install the ``librados`` extension for PHP, you need to execute the following
 Step 2: Configuring a Cluster Handle
 ====================================
 
-A :term:`Ceph Client`, via ``librados``, interacts directly with OSDs to store
+A :term:`Stone Client`, via ``librados``, interacts directly with OSDs to store
 and retrieve data. To interact with OSDs, the client app must invoke
-``librados``  and connect to a Ceph Monitor. Once connected, ``librados``
-retrieves the  :term:`Cluster Map` from the Ceph Monitor. When the client app
+``librados``  and connect to a Stone Monitor. Once connected, ``librados``
+retrieves the  :term:`Cluster Map` from the Stone Monitor. When the client app
 wants to read or write data, it creates an I/O context and binds to a
 :term:`Pool`. The pool has an associated :term:`CRUSH rule` that defines how it
 will place data in the storage cluster. Via the I/O context, the client 
@@ -181,11 +181,11 @@ of the cluster directly.
             +--------+  Selects  +---------------+
 
 
-The Ceph Storage Cluster handle encapsulates the client configuration, including:
+The Stone Storage Cluster handle encapsulates the client configuration, including:
 
 - The `user ID`_ for ``rados_create()`` or user name for ``rados_create2()`` 
   (preferred).
-- The :term:`cephx` authentication key
+- The :term:`stonex` authentication key
 - The monitor ID and IP address
 - Logging levels
 - Debugging levels
@@ -194,24 +194,24 @@ Thus, the first steps in using the cluster from your app are to 1) create
 a cluster handle that your app will use to connect to the storage cluster,
 and then 2) use that handle to connect. To connect to the cluster, the
 app must supply a monitor address, a username and an authentication key
-(cephx is enabled by default).
+(stonex is enabled by default).
 
-.. tip:: Talking to different Ceph Storage Clusters – or to the same cluster 
+.. tip:: Talking to different Stone Storage Clusters – or to the same cluster 
    with different users – requires different cluster handles.
 
 RADOS provides a number of ways for you to set the required values. For
 the monitor and encryption key settings, an easy way to handle them is to ensure
-that your Ceph configuration file contains a ``keyring`` path to a keyring file
+that your Stone configuration file contains a ``keyring`` path to a keyring file
 and at least one monitor address (e.g., ``mon host``). For example::
 
 	[global]
 	mon host = 192.168.1.1
-	keyring = /etc/ceph/ceph.client.admin.keyring
+	keyring = /etc/stone/stone.client.admin.keyring
 
-Once you create the handle, you can read a Ceph configuration file to configure
+Once you create the handle, you can read a Stone configuration file to configure
 the handle. You can also pass arguments to your app and parse them with the
 function for parsing command line arguments (e.g., ``rados_conf_parse_argv()``),
-or parse Ceph environment variables (e.g., ``rados_conf_parse_env()``). Some
+or parse Stone environment variables (e.g., ``rados_conf_parse_env()``). Some
 wrappers may not implement convenience methods, so you may need to implement
 these capabilities. The following diagram provides a high-level flow for the
 initial connection.
@@ -247,7 +247,7 @@ handle, you can:
 - Get and set the configuration
 
 
-One of the powerful features of Ceph is the ability to bind to different pools.
+One of the powerful features of Stone is the ability to bind to different pools.
 Each pool may have a different number of placement groups, object replicas and
 replication strategies. For example, a pool could be set up as a "hot" pool that
 uses SSDs for frequently used objects or a "cold" pool that uses erasure coding.
@@ -276,11 +276,11 @@ it and connecting to the cluster might look something like this:
 
 		/* Declare the cluster handle and required arguments. */
 		rados_t cluster;
-		char cluster_name[] = "ceph";
+		char cluster_name[] = "stone";
 		char user_name[] = "client.admin";
 		uint64_t flags = 0;
 	
-		/* Initialize the cluster handle with the "ceph" cluster name and the "client.admin" user */  
+		/* Initialize the cluster handle with the "stone" cluster name and the "client.admin" user */  
 		int err;
 		err = rados_create2(&cluster, cluster_name, user_name, flags);
 
@@ -292,8 +292,8 @@ it and connecting to the cluster might look something like this:
 		}
 
 
-		/* Read a Ceph configuration file to configure the cluster handle. */
-		err = rados_conf_read_file(cluster, "/etc/ceph/ceph.conf");
+		/* Read a Stone configuration file to configure the cluster handle. */
+		err = rados_conf_read_file(cluster, "/etc/stone/stone.conf");
 		if (err < 0) {
 			fprintf(stderr, "%s: cannot read config file: %s\n", argv[0], strerror(-err));
 			exit(EXIT_FAILURE);
@@ -323,13 +323,13 @@ it and connecting to the cluster might look something like this:
 
 Compile your client and link to ``librados`` using ``-lrados``. For example:: 
 
-	gcc ceph-client.c -lrados -o ceph-client
+	gcc stone-client.c -lrados -o stone-client
 
 
 C++ Example
 -----------
 
-The Ceph project provides a C++ example in the ``ceph/examples/librados``
+The Stone project provides a C++ example in the ``stone/examples/librados``
 directory. For C++, a simple cluster handle using the ``admin`` user requires
 you to initialize a ``librados::Rados`` cluster handle object:
 
@@ -346,11 +346,11 @@ you to initialize a ``librados::Rados`` cluster handle object:
 
 		/* Declare the cluster handle and required variables. */	
 		librados::Rados cluster;
-		char cluster_name[] = "ceph";
+		char cluster_name[] = "stone";
 		char user_name[] = "client.admin";
 		uint64_t flags = 0; 
 	
-		/* Initialize the cluster handle with the "ceph" cluster name and "client.admin" user */ 
+		/* Initialize the cluster handle with the "stone" cluster name and "client.admin" user */ 
 		{
 			ret = cluster.init2(user_name, cluster_name, flags);
 			if (ret < 0) {
@@ -361,14 +361,14 @@ you to initialize a ``librados::Rados`` cluster handle object:
 			}
 		}
 
-		/* Read a Ceph configuration file to configure the cluster handle. */	
+		/* Read a Stone configuration file to configure the cluster handle. */	
 		{	
-			ret = cluster.conf_read_file("/etc/ceph/ceph.conf");	
+			ret = cluster.conf_read_file("/etc/stone/stone.conf");	
 			if (ret < 0) {
-				std::cerr << "Couldn't read the Ceph configuration file! error " << ret << std::endl;
+				std::cerr << "Couldn't read the Stone configuration file! error " << ret << std::endl;
 				return EXIT_FAILURE;
 			} else {
-				std::cout << "Read the Ceph configuration file." << std::endl;
+				std::cout << "Read the Stone configuration file." << std::endl;
 			}
 		}
 		
@@ -401,16 +401,16 @@ you to initialize a ``librados::Rados`` cluster handle object:
 Compile the source; then, link ``librados`` using ``-lrados``. 
 For example::
 
-	g++ -g -c ceph-client.cc -o ceph-client.o
-	g++ -g ceph-client.o -lrados -o ceph-client
+	g++ -g -c stone-client.cc -o stone-client.o
+	g++ -g stone-client.o -lrados -o stone-client
 
 
 
 Python Example
 --------------
 
-Python uses the ``admin`` id and the ``ceph`` cluster name by default, and
-will read the standard ``ceph.conf`` file if the conffile parameter is
+Python uses the ``admin`` id and the ``stone`` cluster name by default, and
+will read the standard ``stone.conf`` file if the conffile parameter is
 set to the empty string. The Python binding converts C++ errors
 into exceptions.
 
@@ -438,31 +438,31 @@ into exceptions.
 
 Execute the example to verify that it connects to your cluster. ::
 
-	python ceph-client.py
+	python stone-client.py
 
 
 Java Example
 ------------
 
 Java requires you to specify the user ID (``admin``) or user name
-(``client.admin``), and uses the ``ceph`` cluster name by default . The Java
+(``client.admin``), and uses the ``stone`` cluster name by default . The Java
 binding converts C++-based errors into exceptions.
 
 .. code-block:: java
 
-	import com.ceph.rados.Rados;
-	import com.ceph.rados.RadosException;
+	import com.stone.rados.Rados;
+	import com.stone.rados.RadosException;
 	
 	import java.io.File;
 	
-	public class CephClient {
+	public class StoneClient {
 		public static void main (String args[]){
 	
 			try {
 				Rados cluster = new Rados("admin");
 				System.out.println("Created cluster handle.");
 	            
-				File f = new File("/etc/ceph/ceph.conf");
+				File f = new File("/etc/stone/stone.conf");
 				cluster.confReadFile(f);
 				System.out.println("Read the configuration file.");
 
@@ -480,8 +480,8 @@ Compile the source; then, run it. If you have copied the JAR to
 ``/usr/share/java`` and sym linked from your ``ext`` directory, you won't need
 to specify the classpath. For example::
 
-	javac CephClient.java
-	java CephClient
+	javac StoneClient.java
+	java StoneClient
 
 
 PHP Example
@@ -494,11 +494,11 @@ With the RADOS extension enabled in PHP you can start creating a new cluster han
 	<?php
 
 	$r = rados_create();
-	rados_conf_read_file($r, '/etc/ceph/ceph.conf');
+	rados_conf_read_file($r, '/etc/stone/stone.conf');
 	if (!rados_connect($r)) {
-		echo "Failed to connect to Ceph cluster";
+		echo "Failed to connect to Stone cluster";
 	} else {
-		echo "Successfully connected to Ceph cluster";
+		echo "Successfully connected to Stone cluster";
 	}
 
 
@@ -510,7 +510,7 @@ Save this as rados.php and run the code::
 Step 3: Creating an I/O Context
 ===============================
 
-Once your app has a cluster handle and a connection to a Ceph Storage Cluster,
+Once your app has a cluster handle and a connection to a Stone Storage Cluster,
 you may create an I/O Context and begin reading and writing data. An I/O Context
 binds the connection to a specific pool. The user must have appropriate
 `CAPS`_ permissions to access the specified pool. For example, a user with read
@@ -882,20 +882,20 @@ Java-Example
 
 .. code-block:: java
 
-	import com.ceph.rados.Rados;
-	import com.ceph.rados.RadosException;
+	import com.stone.rados.Rados;
+	import com.stone.rados.RadosException;
 
 	import java.io.File;
-	import com.ceph.rados.IoCTX;
+	import com.stone.rados.IoCTX;
 
-	public class CephClient {
+	public class StoneClient {
         	public static void main (String args[]){
 
                 	try {
 				Rados cluster = new Rados("admin");
 				System.out.println("Created cluster handle.");
 
-                        	File f = new File("/etc/ceph/ceph.conf");
+                        	File f = new File("/etc/stone/stone.conf");
                         	cluster.confReadFile(f);
                         	System.out.println("Read the configuration file.");
 

@@ -2,7 +2,7 @@ import { Component, Input, OnChanges } from '@angular/core';
 
 import _ from 'lodash';
 
-import { RgwDaemon } from '~/app/ceph/rgw/models/rgw-daemon';
+import { RgwDaemon } from '~/app/stone/rgw/models/rgw-daemon';
 import { RgwDaemonService } from '~/app/shared/api/rgw-daemon.service';
 import { Permission } from '~/app/shared/models/permissions';
 import { AuthStorageService } from '~/app/shared/services/auth-storage.service';

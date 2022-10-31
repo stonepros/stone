@@ -53,7 +53,7 @@ os._exit = os_exit_noop   # type: ignore
 
 _global_instance = None  # type: Optional[Module]
 cherrypy.config.update({
-    'response.headers.server': 'Ceph-Prometheus'
+    'response.headers.server': 'Stone-Prometheus'
 })
 
 
@@ -82,23 +82,23 @@ OSD_FLAGS = ('noup', 'nodown', 'noout', 'noin', 'nobackfill', 'norebalance',
 
 FS_METADATA = ('data_pools', 'fs_id', 'metadata_pool', 'name')
 
-MDS_METADATA = ('ceph_daemon', 'fs_id', 'hostname', 'public_addr', 'rank',
-                'ceph_version')
+MDS_METADATA = ('stone_daemon', 'fs_id', 'hostname', 'public_addr', 'rank',
+                'stone_version')
 
-MON_METADATA = ('ceph_daemon', 'hostname',
-                'public_addr', 'rank', 'ceph_version')
+MON_METADATA = ('stone_daemon', 'hostname',
+                'public_addr', 'rank', 'stone_version')
 
-MGR_METADATA = ('ceph_daemon', 'hostname', 'ceph_version')
+MGR_METADATA = ('stone_daemon', 'hostname', 'stone_version')
 
-MGR_STATUS = ('ceph_daemon',)
+MGR_STATUS = ('stone_daemon',)
 
 MGR_MODULE_STATUS = ('name',)
 
 MGR_MODULE_CAN_RUN = ('name',)
 
-OSD_METADATA = ('back_iface', 'ceph_daemon', 'cluster_addr', 'device_class',
+OSD_METADATA = ('back_iface', 'stone_daemon', 'cluster_addr', 'device_class',
                 'front_iface', 'hostname', 'objectstore', 'public_addr',
-                'ceph_version')
+                'stone_version')
 
 OSD_STATUS = ['weight', 'up', 'in']
 
@@ -106,12 +106,12 @@ OSD_STATS = ['apply_latency_ms', 'commit_latency_ms']
 
 POOL_METADATA = ('pool_id', 'name', 'type', 'description', 'compression_mode')
 
-RGW_METADATA = ('ceph_daemon', 'hostname', 'ceph_version', 'instance_id')
+RGW_METADATA = ('stone_daemon', 'hostname', 'stone_version', 'instance_id')
 
-RBD_MIRROR_METADATA = ('ceph_daemon', 'id', 'instance_id', 'hostname',
-                       'ceph_version')
+RBD_MIRROR_METADATA = ('stone_daemon', 'id', 'instance_id', 'hostname',
+                       'stone_version')
 
-DISK_OCCUPATION = ('ceph_daemon', 'device', 'db_device',
+DISK_OCCUPATION = ('stone_daemon', 'device', 'db_device',
                    'wal_device', 'instance', 'devices', 'device_ids')
 
 NUM_OBJECTS = ['degraded', 'misplaced', 'unfound']
@@ -334,7 +334,7 @@ class Metric(object):
             else:
                 result = result.replace("-", "_")
 
-            return "ceph_{0}".format(result)
+            return "stone_{0}".format(result)
 
         def floatstr(value: float) -> str:
             ''' represent as Go-compatible float '''
@@ -402,7 +402,7 @@ class Metric(object):
 
         The functionality of group by could roughly be compared with Prometheus'
 
-            group (ceph_disk_occupation) by (device, instance)
+            group (stone_disk_occupation) by (device, instance)
 
         with the exception that not all labels which aren't used as a condition
         to group a metric are discarded, but their values can are joined and the
@@ -642,7 +642,7 @@ class Module(MgrModule):
             'gauge',
             'mon_quorum_status',
             'Monitors in quorum',
-            ('ceph_daemon',)
+            ('stone_daemon',)
         )
         metrics['fs_metadata'] = Metric(
             'untyped',
@@ -699,14 +699,14 @@ class Module(MgrModule):
         metrics['disk_occupation'] = Metric(
             'untyped',
             'disk_occupation',
-            'Associate Ceph daemon with disk used',
+            'Associate Stone daemon with disk used',
             DISK_OCCUPATION
         )
 
         metrics['disk_occupation_human'] = Metric(
             'untyped',
             'disk_occupation_human',
-            'Associate Ceph daemon with disk used for displaying to humans,'
+            'Associate Stone daemon with disk used for displaying to humans,'
             ' not for joining tables (vector matching)',
             DISK_OCCUPATION,  # label names are automatically decimated on grouping
         )
@@ -759,7 +759,7 @@ class Module(MgrModule):
                 'untyped',
                 path,
                 'OSD status {}'.format(state),
-                ('ceph_daemon',)
+                ('stone_daemon',)
             )
         for stat in OSD_STATS:
             path = 'osd_{}'.format(stat)
@@ -767,7 +767,7 @@ class Module(MgrModule):
                 'gauge',
                 path,
                 'OSD stat {}'.format(stat),
-                ('ceph_daemon',)
+                ('stone_daemon',)
             )
         for stat in OSD_POOL_STATS:
             path = 'pool_{}'.format(stat)
@@ -1058,7 +1058,7 @@ class Module(MgrModule):
     def get_service_list(self) -> Dict[Tuple[str, str], Tuple[str, str, str]]:
         ret = {}
         for server in self.list_servers():
-            version = cast(str, server.get('ceph_version', ''))
+            version = cast(str, server.get('stone_version', ''))
             host = cast(str, server.get('hostname', ''))
             for service in cast(List[ServiceInfoT], server.get('services', [])):
                 ret.update({(service['id'], service['type']): (host, version, service.get('name', ''))})
@@ -1177,7 +1177,7 @@ class Module(MgrModule):
                 self.metrics['disk_occupation_human'] = \
                     self.metrics['disk_occupation'].group_by(
                         ['device', 'instance'],
-                        {'ceph_daemon': lambda daemons: ', '.join(daemons)},
+                        {'stone_daemon': lambda daemons: ', '.join(daemons)},
                         name='disk_occupation_human',
                 )
             except Exception as e:
@@ -1234,7 +1234,7 @@ class Module(MgrModule):
                 mirror_metadata = self.get_metadata('rbd-mirror', service_id)
                 if mirror_metadata is None:
                     continue
-                mirror_metadata['ceph_daemon'] = '{}.{}'.format(service_type,
+                mirror_metadata['stone_daemon'] = '{}.{}'.format(service_type,
                                                                 service_id)
                 rbd_mirror_metadata = cast(LabelValues,
                                            (mirror_metadata.get(k, '')
@@ -1504,7 +1504,7 @@ class Module(MgrModule):
         For backward compatibility, a new fixed name metric is created (instead of replacing)
         and details are put in new labels.
         Intended for RGW sync perf. counters but extendable as required.
-        See: https://tracker.ceph.com/issues/45311
+        See: https://tracker.stone.com/issues/45311
         """
         new_metrics = {}
         for metric_path, metrics in self.metrics.items():
@@ -1666,9 +1666,9 @@ class Module(MgrModule):
             def index(self) -> str:
                 return '''<!DOCTYPE html>
 <html>
-    <head><title>Ceph Exporter</title></head>
+    <head><title>Stone Exporter</title></head>
     <body>
-        <h1>Ceph Exporter</h1>
+        <h1>Stone Exporter</h1>
         <p><a href='/metrics'>Metrics</a></p>
     </body>
 </html>'''
@@ -1782,8 +1782,8 @@ class Module(MgrModule):
     def _list_healthchecks(self, format: Format = Format.plain) -> HandleCommandResult:
         """List all the healthchecks being tracked
 
-        The format options are parsed in ceph_argparse, before they get evaluated here so
-        we can safely assume that what we have to process is valid. ceph_argparse will throw
+        The format options are parsed in stone_argparse, before they get evaluated here so
+        we can safely assume that what we have to process is valid. stone_argparse will throw
         a ValueError if the cast to our Format class fails.
 
         Args:
@@ -1842,9 +1842,9 @@ class StandbyModule(MgrStandbyModule):
                     active_uri = module.get_active_uri()
                     return '''<!DOCTYPE html>
 <html>
-    <head><title>Ceph Exporter</title></head>
+    <head><title>Stone Exporter</title></head>
     <body>
-        <h1>Ceph Exporter</h1>
+        <h1>Stone Exporter</h1>
         <p><a href='{}metrics'>Metrics</a></p>
     </body>
 </html>'''.format(active_uri)

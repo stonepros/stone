@@ -13,7 +13,7 @@
 #include "os/ObjectMap.h"
 #include "kv/KeyValueDB.h"
 #include "osd/osd_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/simple_cache.hpp"
 #include <boost/optional/optional_io.hpp>
 
@@ -61,9 +61,9 @@ public:
   /**
    * Serializes access to next_seq as well as the in_use std::set
    */
-  ceph::mutex header_lock = ceph::make_mutex("DBOBjectMap");
-  ceph::condition_variable header_cond;
-  ceph::condition_variable map_header_cond;
+  stone::mutex header_lock = stone::make_mutex("DBOBjectMap");
+  stone::condition_variable header_cond;
+  stone::condition_variable map_header_cond;
 
   /**
    * Std::Set of headers currently in use
@@ -92,12 +92,12 @@ public:
     }
 
     const ghobject_t &get_locked() const {
-      ceph_assert(locked);
+      stone_assert(locked);
       return *locked;
     }
 
     void swap(MapHeaderLock &o) {
-      ceph_assert(db == o.db);
+      stone_assert(db == o.db);
 
       // centos6's boost optional doesn't seem to have swap :(
       boost::optional<ghobject_t> _locked = o.locked;
@@ -108,33 +108,33 @@ public:
     ~MapHeaderLock() {
       if (locked) {
 	std::lock_guard l{db->header_lock};
-	ceph_assert(db->map_header_in_use.count(*locked));
+	stone_assert(db->map_header_in_use.count(*locked));
 	db->map_header_cond.notify_all();
 	db->map_header_in_use.erase(*locked);
       }
     }
   };
 
-  DBObjectMap(CephContext* cct, KeyValueDB *db)
+  DBObjectMap(StoneContext* cct, KeyValueDB *db)
     : ObjectMap(cct, db),
       caches(cct->_conf->filestore_omap_header_cache_size)
     {}
 
   int set_keys(
     const ghobject_t &oid,
-    const std::map<std::string, ceph::buffer::list> &set,
+    const std::map<std::string, stone::buffer::list> &set,
     const SequencerPosition *spos=0
     ) override;
 
   int set_header(
     const ghobject_t &oid,
-    const ceph::buffer::list &bl,
+    const stone::buffer::list &bl,
     const SequencerPosition *spos=0
     ) override;
 
   int get_header(
     const ghobject_t &oid,
-    ceph::buffer::list *bl
+    stone::buffer::list *bl
     ) override;
 
   int clear(
@@ -155,8 +155,8 @@ public:
 
   int get(
     const ghobject_t &oid,
-    ceph::buffer::list *header,
-    std::map<std::string, ceph::buffer::list> *out
+    stone::buffer::list *header,
+    std::map<std::string, stone::buffer::list> *out
     ) override;
 
   int get_keys(
@@ -167,7 +167,7 @@ public:
   int get_values(
     const ghobject_t &oid,
     const std::set<std::string> &keys,
-    std::map<std::string, ceph::buffer::list> *out
+    std::map<std::string, stone::buffer::list> *out
     ) override;
 
   int check_keys(
@@ -179,7 +179,7 @@ public:
   int get_xattrs(
     const ghobject_t &oid,
     const std::set<std::string> &to_get,
-    std::map<std::string, ceph::buffer::list> *out
+    std::map<std::string, stone::buffer::list> *out
     ) override;
 
   int get_all_xattrs(
@@ -189,7 +189,7 @@ public:
 
   int set_xattrs(
     const ghobject_t &oid,
-    const std::map<std::string, ceph::buffer::list> &to_set,
+    const std::map<std::string, stone::buffer::list> &to_set,
     const SequencerPosition *spos=0
     ) override;
 
@@ -234,7 +234,7 @@ public:
   int sync(const ghobject_t *oid=0, const SequencerPosition *spos=0) override;
 
   void compact() override {
-    ceph_assert(db);
+    stone_assert(db);
     db->compact();
   }
 
@@ -272,7 +272,7 @@ public:
     State() : v(0), seq(1), legacy(false) {}
     explicit State(uint64_t seq) : v(0), seq(seq), legacy(false) {}
 
-    void encode(ceph::buffer::list &bl) const {
+    void encode(stone::buffer::list &bl) const {
       ENCODE_START(3, 1, bl);
       encode(v, bl);
       encode(seq, bl);
@@ -280,7 +280,7 @@ public:
       ENCODE_FINISH(bl);
     }
 
-    void decode(ceph::buffer::list::const_iterator &bl) {
+    void decode(stone::buffer::list::const_iterator &bl) {
       DECODE_START(3, bl);
       if (struct_v >= 2)
 	decode(v, bl);
@@ -294,7 +294,7 @@ public:
       DECODE_FINISH(bl);
     }
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_unsigned("v", v);
       f->dump_unsigned("seq", seq);
       f->dump_bool("legacy", legacy);
@@ -315,7 +315,7 @@ public:
 
     SequencerPosition spos;
 
-    void encode(ceph::buffer::list &bl) const {
+    void encode(stone::buffer::list &bl) const {
       coll_t unused;
       ENCODE_START(2, 1, bl);
       encode(seq, bl);
@@ -327,7 +327,7 @@ public:
       ENCODE_FINISH(bl);
     }
 
-    void decode(ceph::buffer::list::const_iterator &bl) {
+    void decode(stone::buffer::list::const_iterator &bl) {
       coll_t unused;
       DECODE_START(2, bl);
       decode(seq, bl);
@@ -340,7 +340,7 @@ public:
       DECODE_FINISH(bl);
     }
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_unsigned("seq", seq);
       f->dump_unsigned("parent", parent);
       f->dump_unsigned("num_children", num_children);
@@ -364,12 +364,12 @@ public:
   /// Std::String munging (public for testing)
   static std::string ghobject_key(const ghobject_t &oid);
   static std::string ghobject_key_v0(coll_t c, const ghobject_t &oid);
-  static int is_buggy_ghobject_key_v1(CephContext* cct,
+  static int is_buggy_ghobject_key_v1(StoneContext* cct,
 				      const std::string &in);
 private:
   /// Implicit lock on Header->seq
   typedef std::shared_ptr<_Header> Header;
-  ceph::mutex cache_lock = ceph::make_mutex("DBObjectMap::CacheLock");
+  stone::mutex cache_lock = stone::make_mutex("DBObjectMap::CacheLock");
   SimpleLRU<ghobject_t, _Header> caches;
 
   std::string map_header_key(const ghobject_t &oid);
@@ -390,9 +390,9 @@ private:
     int upper_bound(const std::string &after) override { return 0; }
     int lower_bound(const std::string &to) override { return 0; }
     bool valid() override { return false; }
-    int next() override { ceph_abort(); return 0; }
-    std::string key() override { ceph_abort(); return ""; }
-    ceph::buffer::list value() override { ceph_abort(); return ceph::buffer::list(); }
+    int next() override { stone_abort(); return 0; }
+    std::string key() override { stone_abort(); return ""; }
+    stone::buffer::list value() override { stone_abort(); return stone::buffer::list(); }
     int status() override { return 0; }
   };
 
@@ -430,7 +430,7 @@ private:
     bool valid() override;
     int next() override;
     std::string key() override;
-    ceph::buffer::list value() override;
+    stone::buffer::list value() override;
     int status() override;
 
     bool on_parent() {
@@ -523,13 +523,13 @@ private:
 
 
   /// Helpers
-  int _get_header(Header header, ceph::buffer::list *bl);
+  int _get_header(Header header, stone::buffer::list *bl);
 
   /// Scan keys in header into out_keys and out_values (if nonnull)
   int scan(Header header,
 	   const std::set<std::string> &in_keys,
 	   std::set<std::string> *out_keys,
-	   std::map<std::string, ceph::buffer::list> *out_values);
+	   std::map<std::string, stone::buffer::list> *out_values);
 
   /// Remove header and all related prefixes
   int _clear(Header header,
@@ -552,7 +552,7 @@ private:
 		     KeyValueDB::Transaction t);
 
   /// Sets header @see set_header
-  void _set_header(Header header, const ceph::buffer::list &bl,
+  void _set_header(Header header, const stone::buffer::list &bl,
 		   KeyValueDB::Transaction t);
 
   /**
@@ -568,7 +568,7 @@ private:
       db(db) {}
     void operator() (_Header *header) {
       std::lock_guard l{db->header_lock};
-      ceph_assert(db->in_use.count(header->seq));
+      stone_assert(db->in_use.count(header->seq));
       db->in_use.erase(header->seq);
       db->header_cond.notify_all();
       delete header;

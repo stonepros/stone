@@ -2,10 +2,10 @@
  Integrating with OpenStack Keystone
 =====================================
 
-It is possible to integrate the Ceph Object Gateway with Keystone, the OpenStack
+It is possible to integrate the Stone Object Gateway with Keystone, the OpenStack
 identity service. This sets up the gateway to accept Keystone as the users
 authority. A user that Keystone authorizes to access the gateway will also be
-automatically created on the Ceph Object Gateway (if didn't exist beforehand). A
+automatically created on the Stone Object Gateway (if didn't exist beforehand). A
 token that Keystone validates will be considered as valid by the gateway.
 
 The following configuration options are available for Keystone integration::
@@ -34,9 +34,9 @@ configuration options for are::
    rgw keystone admin tenant = {keystone service tenant name}
 
 
-A Ceph Object Gateway user is mapped into a Keystone ``tenant``. A Keystone user
+A Stone Object Gateway user is mapped into a Keystone ``tenant``. A Keystone user
 has different roles assigned to it on possibly more than a single tenant. When
-the Ceph Object Gateway gets the ticket, it looks at the tenant, and the user
+the Stone Object Gateway gets the ticket, it looks at the tenant, and the user
 roles that are assigned to that ticket, and accepts/rejects the request
 according to the ``rgw keystone accepted roles`` configurable.
 
@@ -57,7 +57,7 @@ only supported implicit tenants with swift.
 Ocata (and later)
 -----------------
 
-Keystone itself needs to be configured to point to the Ceph Object Gateway as an
+Keystone itself needs to be configured to point to the Stone Object Gateway as an
 object-storage endpoint::
 
   openstack service create --name=swift \

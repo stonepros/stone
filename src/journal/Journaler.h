@@ -15,7 +15,7 @@
 #include <list>
 #include <map>
 #include <string>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 class ContextWQ;
 class ThreadPool;
@@ -32,14 +32,14 @@ class Settings;
 class Journaler {
 public:
   struct Threads {
-    Threads(StoneeContext *cct);
+    Threads(StoneContext *cct);
     ~Threads();
 
     ThreadPool *thread_pool = nullptr;
     ContextWQ *work_queue = nullptr;
 
     SafeTimer *timer;
-    ceph::mutex timer_lock = ceph::make_mutex("Journaler::timer_lock");
+    stone::mutex timer_lock = stone::make_mutex("Journaler::timer_lock");
   };
 
   typedef cls::journal::Tag Tag;
@@ -53,7 +53,7 @@ public:
   Journaler(librados::IoCtx &header_ioctx, const std::string &journal_id,
 	    const std::string &client_id, const Settings &settings,
             CacheManagerHandler *cache_manager_handler);
-  Journaler(ContextWQ *work_queue, SafeTimer *timer, ceph::mutex *timer_lock,
+  Journaler(ContextWQ *work_queue, SafeTimer *timer, stone::mutex *timer_lock,
             librados::IoCtx &header_ioctx, const std::string &journal_id,
 	    const std::string &client_id, const Settings &settings,
             CacheManagerHandler *cache_manager_handler);
@@ -138,7 +138,7 @@ private:
 
   mutable librados::IoCtx m_header_ioctx;
   librados::IoCtx m_data_ioctx;
-  StoneeContext *m_cct;
+  StoneContext *m_cct;
   std::string m_client_id;
   CacheManagerHandler *m_cache_manager_handler;
 
@@ -146,12 +146,12 @@ private:
   std::string m_object_oid_prefix;
 
   bool m_initialized = false;
-  ceph::ref_t<class JournalMetadata> m_metadata;
+  stone::ref_t<class JournalMetadata> m_metadata;
   std::unique_ptr<class JournalPlayer> m_player;
   std::unique_ptr<class JournalRecorder> m_recorder;
   JournalTrimmer *m_trimmer = nullptr;
 
-  void set_up(ContextWQ *work_queue, SafeTimer *timer, ceph::mutex *timer_lock,
+  void set_up(ContextWQ *work_queue, SafeTimer *timer, stone::mutex *timer_lock,
               librados::IoCtx &header_ioctx, const std::string &journal_id,
               const Settings &settings);
 

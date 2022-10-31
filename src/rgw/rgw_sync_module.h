@@ -76,14 +76,14 @@ public:
     return false;
   }
   virtual bool supports_data_export() = 0;
-  virtual int create_instance(CephContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) = 0;
+  virtual int create_instance(StoneContext *cct, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) = 0;
 };
 
 typedef std::shared_ptr<RGWSyncModule> RGWSyncModuleRef;
 
 
 class RGWSyncModulesManager {
-  ceph::mutex lock = ceph::make_mutex("RGWSyncModulesManager");
+  stone::mutex lock = stone::make_mutex("RGWSyncModulesManager");
 
   map<string, RGWSyncModuleRef> modules;
 public:
@@ -119,7 +119,7 @@ public:
     return module->supports_data_export();
   }
 
-  int create_instance(CephContext *cct, const string& name, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) {
+  int create_instance(StoneContext *cct, const string& name, const JSONFormattable& config, RGWSyncModuleInstanceRef *instance) {
     RGWSyncModuleRef module;
     if (!get_module(name, &module)) {
       return -ENOENT;
@@ -147,7 +147,7 @@ protected:
   rgw_bucket src_bucket;
   rgw_obj_key key;
 
-  ceph::real_time mtime;
+  stone::real_time mtime;
   uint64_t size = 0;
   string etag;
   map<string, bufferlist> attrs;
@@ -157,7 +157,7 @@ public:
                        rgw_bucket& _src_bucket, rgw_obj_key& _key);
   ~RGWStatRemoteObjCBCR() override {}
 
-  void set_result(ceph::real_time& _mtime,
+  void set_result(stone::real_time& _mtime,
                   uint64_t _size,
                   const string& _etag,
                   map<string, bufferlist>&& _attrs,
@@ -171,7 +171,7 @@ public:
 };
 
 class RGWCallStatRemoteObjCR : public RGWCoroutine {
-  ceph::real_time mtime;
+  stone::real_time mtime;
   uint64_t size{0};
   string etag;
   map<string, bufferlist> attrs;

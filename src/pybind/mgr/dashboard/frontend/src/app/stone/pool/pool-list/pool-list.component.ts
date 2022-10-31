@@ -3,7 +3,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import _ from 'lodash';
 import { mergeMap } from 'rxjs/operators';
 
-import { PgCategoryService } from '~/app/ceph/shared/pg-category.service';
+import { PgCategoryService } from '~/app/stone/shared/pg-category.service';
 import { ConfigurationService } from '~/app/shared/api/configuration.service';
 import { ErasureCodeProfileService } from '~/app/shared/api/erasure-code-profile.service';
 import { PoolService } from '~/app/shared/api/pool.service';

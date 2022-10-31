@@ -4,19 +4,19 @@
 
 .. py:currentmodule:: orchestrator
 
-ceph-mgr orchestrator modules
+stone-mgr orchestrator modules
 =============================
 
 .. warning::
 
-    This is developer documentation, describing Ceph internals that
-    are only relevant to people writing ceph-mgr orchestrator modules.
+    This is developer documentation, describing Stone internals that
+    are only relevant to people writing stone-mgr orchestrator modules.
 
 In this context, *orchestrator* refers to some external service that
-provides the ability to discover devices and create Ceph services.  This
+provides the ability to discover devices and create Stone services.  This
 includes external projects such as Rook.
 
-An *orchestrator module* is a ceph-mgr module (:ref:`mgr-module-dev`)
+An *orchestrator module* is a stone-mgr module (:ref:`mgr-module-dev`)
 which implements common management operations using a particular
 orchestrator.
 
@@ -36,16 +36,16 @@ the dashboard, to work with various different backends.
             dashboard [label="mgr/dashboard"]
             orchestrator_cli [label="mgr/orchestrator"]
             orchestrator [label="Orchestrator Interface"]
-            cephadm [label="mgr/cephadm"]
+            stoneadm [label="mgr/stoneadm"]
 
-            label = "ceph-mgr";
+            label = "stone-mgr";
         }
 
         volumes -> orchestrator
         dashboard -> orchestrator
         orchestrator_cli -> orchestrator
         orchestrator -> rook -> rook_io
-        orchestrator -> cephadm
+        orchestrator -> stoneadm
 
 
         rook_io [label="Rook"]
@@ -54,11 +54,11 @@ the dashboard, to work with various different backends.
     }
 
 Behind all the abstraction, the purpose of orchestrator modules is simple:
-enable Ceph to do things like discover available hardware, create and
+enable Stone to do things like discover available hardware, create and
 destroy OSDs, and run MDS and RGW services.
 
 A tutorial is not included here: for full and concrete examples, see
-the existing implemented orchestrator modules in the Ceph source tree.
+the existing implemented orchestrator modules in the Stone source tree.
 
 Glossary
 --------
@@ -95,7 +95,7 @@ any internal copies of this information, and read it directly from
 the orchestrator backend as much as possible.
 
 Bootstrapping hosts and adding them to the underlying orchestration
-system is outside the scope of Ceph's orchestrator interface.  Ceph
+system is outside the scope of Stone's orchestrator interface.  Stone
 can only work on hosts when the orchestrator is already aware of them.
 
 Where possible, placement of stateless services should be left up to the
@@ -169,11 +169,11 @@ logged into the mgr log file. If there is a completion object at that point,
 Excluded functionality
 ----------------------
 
-- Ceph's orchestrator interface is not a general purpose framework for
+- Stone's orchestrator interface is not a general purpose framework for
   managing linux servers -- it is deliberately constrained to manage
-  the Ceph cluster's services only.
+  the Stone cluster's services only.
 - Multipathed storage is not handled (multipathing is unnecessary for
-  Ceph clusters).  Each drive is assumed to be visible only on
+  Stone clusters).  Each drive is assumed to be visible only on
   a single host.
 
 Host management
@@ -194,7 +194,7 @@ Devices
 .. automethod:: Orchestrator.get_inventory
 .. autoclass:: InventoryFilter
 
-.. py:currentmodule:: ceph.deployment.inventory
+.. py:currentmodule:: stone.deployment.inventory
 
 .. autoclass:: Devices
    :members:
@@ -217,7 +217,7 @@ functionality to choose a location in this way. Optionally, you can
 specify a location when creating a stateless service.
 
 
-.. py:currentmodule:: ceph.deployment.service_spec
+.. py:currentmodule:: stone.deployment.service_spec
 
 .. autoclass:: PlacementSpec
    :members:
@@ -230,7 +230,7 @@ Services
 
 .. autoclass:: ServiceDescription
 
-.. py:currentmodule:: ceph.deployment.service_spec
+.. py:currentmodule:: stone.deployment.service_spec
 
 .. autoclass:: ServiceSpec
   :members:
@@ -279,7 +279,7 @@ the OSD as destroyed.
 
 Phase two is a call to  :meth:`Orchestrator.create_osds` with a Drive Group with
 
-.. py:currentmodule:: ceph.deployment.drive_group
+.. py:currentmodule:: stone.deployment.drive_group
 
 :attr:`DriveGroupSpec.osd_id_claims` set to the destroyed OSD ids.
 
@@ -294,7 +294,7 @@ Services
 .. automethod:: Orchestrator.apply_mds
 .. automethod:: Orchestrator.apply_rbd_mirror
 
-.. py:currentmodule:: ceph.deployment.service_spec
+.. py:currentmodule:: stone.deployment.service_spec
 
 .. autoclass:: RGWSpec
   :noindex:
@@ -303,7 +303,7 @@ Services
 
 .. automethod:: Orchestrator.apply_rgw
 
-.. py:currentmodule:: ceph.deployment.service_spec
+.. py:currentmodule:: stone.deployment.service_spec
 
 .. autoclass:: NFSServiceSpec
 

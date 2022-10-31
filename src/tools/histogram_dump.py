@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 #
-# Ceph - scalable distributed file system
+# Stone - scalable distributed file system
 #
 # Copyright (C) 2017 OVH
 # Copyright (C) 2020 Marc Schöchlin <ms-github@256bit.org>
@@ -39,7 +39,7 @@ def create_histogram(sockets, counter, last, seconds, batch):
     for socket in sockets:
        try:
            out = subprocess.check_output(
-               "ceph --admin-daemon {} perf histogram dump".format(socket),
+               "stone --admin-daemon {} perf histogram dump".format(socket),
                shell=True)
            json_d = json.loads(out.decode('utf-8'))
        except Exception as e:
@@ -128,11 +128,11 @@ def loop_print(sockets, counter, loop_seconds, batch):
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Continuously display ceph performance histogram for selected osd operations')
+        description='Continuously display stone performance histogram for selected osd operations')
     parser.add_argument(
         '--asok',
         type=str,
-        default=['/var/run/ceph/*.asok'],
+        default=['/var/run/stone/*.asok'],
         nargs='+',
         help='Path to asok file, you can use wildcards')
     parser.add_argument(
@@ -140,7 +140,7 @@ def main():
         type=str,
 	help=textwrap.dedent('''\
          Specify name of the counter to calculate statistics
-         see "ceph --admin-daemon /var/run/ceph/<osd>.asok  perf histogram dump"
+         see "stone --admin-daemon /var/run/stone/<osd>.asok  perf histogram dump"
          '''),
         default='op_w_latency_in_bytes_histogram')
     parser.add_argument(

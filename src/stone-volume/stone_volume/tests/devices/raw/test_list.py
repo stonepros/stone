@@ -1,6 +1,6 @@
 import pytest
 from mock.mock import patch
-from ceph_volume.devices import raw
+from stone_volume.devices import raw
 
 # Sample lsblk output is below that overviews the test scenario. (--json output for reader clarity)
 #  - sda and all its children are used for the OS
@@ -26,8 +26,8 @@ from ceph_volume.devices import raw
 #         {"name": "/dev/sdc", "maj:min": "8:32", "rm": "0", "size": "1T", "ro": "0", "type": "disk", "mountpoint": null},
 #         {"name": "/dev/sdd", "maj:min": "8:48", "rm": "0", "size": "1T", "ro": "0", "type": "disk", "mountpoint": null,
 #            "children": [
-#               {"name": "/dev/mapper/ceph--osd--block--1", "maj:min": "253:0", "rm": "0", "size": "512G", "ro": "0", "type": "lvm", "mountpoint": null},
-#               {"name": "/dev/mapper/ceph--osd--block--2", "maj:min": "253:1", "rm": "0", "size": "512G", "ro": "0", "type": "lvm", "mountpoint": null}
+#               {"name": "/dev/mapper/stone--osd--block--1", "maj:min": "253:0", "rm": "0", "size": "512G", "ro": "0", "type": "lvm", "mountpoint": null},
+#               {"name": "/dev/mapper/stone--osd--block--2", "maj:min": "253:1", "rm": "0", "size": "512G", "ro": "0", "type": "lvm", "mountpoint": null}
 #            ]
 #         }
 #      ]
@@ -44,8 +44,8 @@ def _devices_side_effect():
         "/dev/sdb3": {},
         "/dev/sdc": {},
         "/dev/sdd": {},
-        "/dev/mapper/ceph--osd--block--1": {},
-        "/dev/mapper/ceph--osd--block--2": {},
+        "/dev/mapper/stone--osd--block--1": {},
+        "/dev/mapper/stone--osd--block--2": {},
     }
 
 def _lsblk_list_output():
@@ -59,8 +59,8 @@ def _lsblk_list_output():
         '/dev/sdb3',
         '/dev/sdc',
         '/dev/sdd',
-        '/dev/mapper/ceph--osd--block--1',
-        '/dev/mapper/ceph--osd--block--2',
+        '/dev/mapper/stone--osd--block--1',
+        '/dev/mapper/stone--osd--block--2',
     ]
 
 # dummy lsblk output for device with optional parent output
@@ -82,9 +82,9 @@ def _bluestore_tool_label_output_sdb():
         "bfm_bytes_per_block": "4096",
         "bfm_size": "1099511627776",
         "bluefs": "1",
-        "ceph_fsid": "sdb-fsid",
+        "stone_fsid": "sdb-fsid",
         "kv_backend": "rocksdb",
-        "magic": "ceph osd volume v026",
+        "magic": "stone osd volume v026",
         "mkfs_done": "yes",
         "osd_key": "AQAO6PpgK+y4CBAAixq/X7OVimbaezvwD/cDmg==",
         "ready": "ready",
@@ -105,9 +105,9 @@ def _bluestore_tool_label_output_sdb2():
         "bfm_bytes_per_block": "4096",
         "bfm_size": "1099511627776",
         "bluefs": "1",
-        "ceph_fsid": "sdb2-fsid",
+        "stone_fsid": "sdb2-fsid",
         "kv_backend": "rocksdb",
-        "magic": "ceph osd volume v026",
+        "magic": "stone osd volume v026",
         "mkfs_done": "yes",
         "osd_key": "AQAO6PpgK+y4CBAAixq/X7OVimbaezvwD/cDmg==",
         "ready": "ready",
@@ -118,7 +118,7 @@ def _bluestore_tool_label_output_sdb2():
 
 def _bluestore_tool_label_output_dm_okay():
     return '''{
-    "/dev/mapper/ceph--osd--block--1": {
+    "/dev/mapper/stone--osd--block--1": {
         "osd_uuid": "lvm-1-uuid",
         "size": 549751619584,
         "btime": "2021-07-23T16:04:37.881060+0000",
@@ -128,9 +128,9 @@ def _bluestore_tool_label_output_dm_okay():
         "bfm_bytes_per_block": "4096",
         "bfm_size": "549751619584",
         "bluefs": "1",
-        "ceph_fsid": "lvm-1-fsid",
+        "stone_fsid": "lvm-1-fsid",
         "kv_backend": "rocksdb",
-        "magic": "ceph osd volume v026",
+        "magic": "stone osd volume v026",
         "mkfs_done": "yes",
         "osd_key": "AQCU6Ppgz+UcIRAAh6IUjtPjiXBlEXfwO8ixzw==",
         "ready": "ready",
@@ -156,14 +156,14 @@ def _process_call_side_effect(command, **kw):
             return _lsblk_list_output(), '', 0
         pytest.fail('command {} needs behavior specified for it'.format(command))
 
-    if "ceph-bluestore-tool" in command:
+    if "stone-bluestore-tool" in command:
         if "/dev/sdb" in command:
             # sdb is a bluestore OSD
             return _bluestore_tool_label_output_sdb(), '', 0
         if "/dev/sdb2" in command:
             # sdb2 is a phantom atari partition that appears to have some valid bluestore info
             return _bluestore_tool_label_output_sdb2(), '', 0
-        if "/dev/mapper/ceph--osd--block--1" in command:
+        if "/dev/mapper/stone--osd--block--1" in command:
             # dm device 1 is a valid bluestore OSD (the other is corrupted/invalid)
             return _bluestore_tool_label_output_dm_okay(), '', 0
         # sda and children, sdb's children, sdc, sdd, dm device 2 all do NOT have bluestore OSD data
@@ -181,17 +181,17 @@ def _has_bluestore_label_side_effect(disk_path):
         return False # empty disk
     if disk_path == "/dev/sdd":
         return False # has LVM subdevices
-    if disk_path == "/dev/mapper/ceph--osd--block--1":
+    if disk_path == "/dev/mapper/stone--osd--block--1":
         return True # good OSD
-    if disk_path == "/dev/mapper/ceph--osd--block--2":
+    if disk_path == "/dev/mapper/stone--osd--block--2":
         return False # corrupted
     pytest.fail('device {} needs behavior specified for it'.format(disk_path))
 
 class TestList(object):
 
-    @patch('ceph_volume.util.device.disk.get_devices')
-    @patch('ceph_volume.util.disk.has_bluestore_label')
-    @patch('ceph_volume.process.call')
+    @patch('stone_volume.util.device.disk.get_devices')
+    @patch('stone_volume.util.disk.has_bluestore_label')
+    @patch('stone_volume.process.call')
     def test_raw_list(self, patched_call, patched_bluestore_label, patched_get_devices):
         raw.list.logger.setLevel("DEBUG")
         patched_call.side_effect = _process_call_side_effect
@@ -206,19 +206,19 @@ class TestList(object):
         assert sdb['osd_uuid'] == 'sdb-uuid'
         assert sdb['osd_id'] == 0
         assert sdb['device'] == '/dev/sdb'
-        assert sdb['ceph_fsid'] == 'sdb-fsid'
+        assert sdb['stone_fsid'] == 'sdb-fsid'
         assert sdb['type'] == 'bluestore'
 
         lvm1 = result['lvm-1-uuid']
         assert lvm1['osd_uuid'] == 'lvm-1-uuid'
         assert lvm1['osd_id'] == 2
-        assert lvm1['device'] == '/dev/mapper/ceph--osd--block--1'
-        assert lvm1['ceph_fsid'] == 'lvm-1-fsid'
+        assert lvm1['device'] == '/dev/mapper/stone--osd--block--1'
+        assert lvm1['stone_fsid'] == 'lvm-1-fsid'
         assert lvm1['type'] == 'bluestore'
 
-    @patch('ceph_volume.util.device.disk.get_devices')
-    @patch('ceph_volume.util.disk.has_bluestore_label')
-    @patch('ceph_volume.process.call')
+    @patch('stone_volume.util.device.disk.get_devices')
+    @patch('stone_volume.util.disk.has_bluestore_label')
+    @patch('stone_volume.process.call')
     def test_raw_list_with_OSError(self, patched_call, patched_bluestore_label, patched_get_devices):
         def _has_bluestore_label_side_effect_with_OSError(device_path):
             if device_path == "/dev/sdd":

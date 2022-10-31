@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 SUSE LLC
  *
@@ -42,7 +42,7 @@ class PublicAccessBlockConfiguration {
     return RestrictPublicBuckets;
   }
 
-  void encode(ceph::bufferlist& bl) const {
+  void encode(stone::bufferlist& bl) const {
     ENCODE_START(1,1, bl);
     encode(BlockPublicAcls, bl);
     encode(IgnorePublicAcls, bl);
@@ -51,7 +51,7 @@ class PublicAccessBlockConfiguration {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::bufferlist::const_iterator& bl) {
+  void decode(stone::bufferlist::const_iterator& bl) {
     DECODE_START(1,bl);
     decode(BlockPublicAcls, bl);
     decode(IgnorePublicAcls, bl);

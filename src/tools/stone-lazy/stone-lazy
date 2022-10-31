@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-#  ceph-lazy : Be efficient, be lazy !
+#  stone-lazy : Be efficient, be lazy !
 #
 #  Author: Gregory Charot <gcharot@redhat.com>
 #
@@ -10,8 +10,8 @@
 #  version 2.1 of the License, or (at your option) any later version.
 #
 
-# Specify exta option for ceph like the username/keyring/etc. Can also be done with CEPH_ARGS global variable
-#CEPH_OPT="-n client.username"
+# Specify exta option for stone like the username/keyring/etc. Can also be done with STONE_ARGS global variable
+#STONE_OPT="-n client.username"
 VERSION="1.1.2"
 
 #
@@ -33,9 +33,9 @@ function echoerr() {
 
 
 function help() {
-  >&2 echo "Usage : ceph-lazy [-d | -h] [command] [parameters]
+  >&2 echo "Usage : stone-lazy [-d | -h] [command] [parameters]
 
-Ceph complex querying tool - Version $VERSION
+Stone complex querying tool - Version $VERSION
 
 OPTIONS
 ========
@@ -95,20 +95,20 @@ function check_requirements()
 {
 
   # List of command dependencies
-  local bin_dep="ceph rados rbd osdmaptool jq"
+  local bin_dep="stone rados rbd osdmaptool jq"
 
   for cmd in $bin_dep; do
     [ $DEBUG -eq 1 ] && echoinfo "Checking for $cmd..."
     $cmd --version  >/dev/null 2>&1 || { echoerr "$cmd cannot be found... Aborting."; return 1; }
   done
 
-  CEPH="ceph $CEPH_OPT"
+  STONE="stone $STONE_OPT"
 
-  [ $DEBUG -eq 1 ] && echoinfo "Checking Ceph connectivity & basic permissions..."
+  [ $DEBUG -eq 1 ] && echoinfo "Checking Stone connectivity & basic permissions..."
 
-  if ! $CEPH -s &> /dev/null; then
+  if ! $STONE -s &> /dev/null; then
     echoerr "Cannot connect to cluster, please check your username & permissions"
-    echoerr "Command $CEPH -s failed"
+    echoerr "Command $STONE -s failed"
     return 1
   fi
 
@@ -130,9 +130,9 @@ function find_host_from_pg() {
 
   [ $DEBUG -eq 1 ] && echoinfo "PG $PGID has been found at (first is primary) : "
 
-  for osd in $($CEPH pg $PGID  query | $JQ -cr .up[]); do
+  for osd in $($STONE pg $PGID  query | $JQ -cr .up[]); do
   	echo -n "OSD:osd.$osd | Host:"
-  	$CEPH osd find $osd --format json 2> /dev/null | $JQ .crush_location.host
+  	$STONE osd find $osd --format json 2> /dev/null | $JQ .crush_location.host
   done
 }
 
@@ -151,7 +151,7 @@ function find_host_from_object() {
     exit 1
   fi
 
-  local pgid=$($CEPH osd map $pool $objid --format json 2> /dev/null | $JQ -cr .pgid)
+  local pgid=$($STONE osd map $pool $objid --format json 2> /dev/null | $JQ -cr .pgid)
 
   [ $DEBUG -eq 1 ] && echoinfo $objid found into PG $pgid
 
@@ -175,7 +175,7 @@ function find_prim_pg_from_osd() {
   fi
 
   [ $DEBUG -eq 1 ] && echoinfo "Looking for primary PGs belonging to OSD $posd"
-  $CEPH pg dump pgs --format json 2>/dev/null | $JQ --argjson posd $posd '.[] | select(.acting_primary==$posd).pgid'
+  $STONE pg dump pgs --format json 2>/dev/null | $JQ --argjson posd $posd '.[] | select(.acting_primary==$posd).pgid'
 }
 
 
@@ -193,7 +193,7 @@ function find_all_pg_from_osd() {
   fi
 
   [ $DEBUG -eq 1 ] && echoinfo "Looking for all PGs mapped to OSD $osd"
-  $CEPH pg dump pgs --format json 2> /dev/null | $JQ -M --argjson osd $osd '.[] | select(.up[]==$osd).pgid'
+  $STONE pg dump pgs --format json 2> /dev/null | $JQ -M --argjson osd $osd '.[] | select(.up[]==$osd).pgid'
 }
 
 
@@ -291,19 +291,19 @@ function find_prim_host_from_rbd() {
   [ -z $rbd_prefix ] && exit 1
 
 # Get pool ID from pool name
-  local pool_id=$(ceph osd lspools -f json | $JQ  -M --arg pool $pool '.[]|select(.poolname==$pool).poolnum')
+  local pool_id=$(stone osd lspools -f json | $JQ  -M --arg pool $pool '.[]|select(.poolname==$pool).poolnum')
   
   [ $DEBUG -eq 1 ] && echoinfo "RBD image $pool/$rbd has prefix $rbd_prefix; now finding primary host..."
 
   [ $DEBUG -eq 1 ] && echoinfo "Dumping OSD map to $osdmap_t"
-  if ! $CEPH osd getmap > $osdmap_t 2> /dev/null; then
+  if ! $STONE osd getmap > $osdmap_t 2> /dev/null; then
     echoerr "Failed to retrieve OSD map"
     exit 1
   fi
 
   [ $DEBUG -eq 1 ] && echoinfo "Dumping OSD tree to $osdtree_t"
 
-  if ! $CEPH osd tree --format json > $osdtree_t; then
+  if ! $STONE osd tree --format json > $osdtree_t; then
     echoerr "Failed to retrieve OSD tree"
     exit 1
   fi
@@ -352,7 +352,7 @@ function find_prim_osd_from_rbd() {
   [ $DEBUG -eq 1 ] && echoinfo "RBD image $pool/$rbd has prefix $rbd_prefix; now finding primary OSDs..."
 
   [ $DEBUG -eq 1 ] && echoinfo "Dumping OSD map to $osdmap_t"
-  if ! $CEPH osd getmap > $osdmap_t; then
+  if ! $STONE osd getmap > $osdmap_t; then
     echoerr "Failed to retrieve OSD map"
     exit 1
   fi
@@ -371,7 +371,7 @@ function find_prim_osd_from_rbd() {
 
 
 #
-#  Print RBD image real size - Source http://ceph.com/planet/real-size-of-a-ceph-rbd-image/
+#  Print RBD image real size - Source http://stone.com/planet/real-size-of-a-stone-rbd-image/
 #
 
 function print_rbd_real_size {
@@ -431,7 +431,7 @@ function list_osd_from_host() {
     exit 1
   fi
 
-  $CEPH osd tree --format json-pretty 2> /dev/null | $JQ  --arg host $host '.nodes[] | select(.type=="host") | select(.name == $host).children[]' | sort -V
+  $STONE osd tree --format json-pretty 2> /dev/null | $JQ  --arg host $host '.nodes[] | select(.type=="host") | select(.name == $host).children[]' | sort -V
 
 }
 
@@ -443,7 +443,7 @@ function list_osd_from_host() {
 function list_all_nodes() {
 
 
-  $CEPH osd tree --format json | $JQ  -M --raw-output '.nodes[] | select(.type=="host") | .name' | sort -V
+  $STONE osd tree --format json | $JQ  -M --raw-output '.nodes[] | select(.type=="host") | .name' | sort -V
 
 }
 
@@ -475,7 +475,7 @@ function show_host_osd_usage() {
   local nb_osd=0
 
   [ $DEBUG -eq 1 ] && echoinfo "Dumping PG map..."
-  if ! $CEPH pg dump osds --format json 2>/dev/null > $pgmap_t; then
+  if ! $STONE pg dump osds --format json 2>/dev/null > $pgmap_t; then
     echoerr "Failed to retrieve PG map"
     exit 1
   fi
@@ -526,8 +526,8 @@ function list_all_nodes_osd_usage() {
 
 function find_most_used_osd() {
 
-  local osd=$($CEPH pg dump osds --format json 2> /dev/null| $JQ 'max_by(.kb_used) | .osd')
-  local host=$($CEPH osd find $osd 2> /dev/null | $JQ .crush_location.host)
+  local osd=$($STONE pg dump osds --format json 2> /dev/null| $JQ 'max_by(.kb_used) | .osd')
+  local host=$($STONE osd find $osd 2> /dev/null | $JQ .crush_location.host)
 
   echo "OSD:osd.${osd} | host:$host"
 }
@@ -539,8 +539,8 @@ function find_most_used_osd() {
 
 function find_less_used_osd() {
 
-  local osd=$($CEPH pg dump osds --format json 2> /dev/null| $JQ 'min_by(.kb_used) | .osd')
-  local host=$($CEPH osd find $osd 2> /dev/null | $JQ .crush_location.host)
+  local osd=$($STONE pg dump osds --format json 2> /dev/null| $JQ 'min_by(.kb_used) | .osd')
+  local host=$($STONE osd find $osd 2> /dev/null | $JQ .crush_location.host)
 
   echo "OSD:osd.${osd} | host:$host"
 }
@@ -563,7 +563,7 @@ function pg_stat_query() {
   local pgmap_t=$(mktemp)
 
   [ $DEBUG -eq 1 ] && echoinfo "Dumping PG map..."
-  if ! $CEPH pg dump pgs --format json 2>/dev/null > $pgmap_t; then
+  if ! $STONE pg dump pgs --format json 2>/dev/null > $pgmap_t; then
     echoerr "Failed to retrieve PG map"
     exit 1
   fi
@@ -574,7 +574,7 @@ function pg_stat_query() {
   local osd=$($JQ --arg pgid $pgid '.[] | select(.pgid == $pgid).acting_primary' $pgmap_t)
   [ $DEBUG -eq 1 ] && echoinfo "Found OSD $osd"
 
-  local host=$($CEPH osd find $osd --format json 2> /dev/null | $JQ .crush_location.host)
+  local host=$($STONE osd find $osd --format json 2> /dev/null | $JQ .crush_location.host)
   [ $DEBUG -eq 1 ] && echoinfo "Found host $host"
 
   echo "PG:$pgid | OSD:osd.$osd | Host:$host"
@@ -589,7 +589,7 @@ function pg_stat_query() {
 
 function find_empty_pg() {
 
-  $CEPH pg dump pgs --format json 2>/dev/null | $JQ '.[] | select(.stat_sum.num_objects == 0).pgid'
+  $STONE pg dump pgs --format json 2>/dev/null | $JQ '.[] | select(.stat_sum.num_objects == 0).pgid'
 
 }
 

@@ -28,7 +28,7 @@
 #include "xxhash.h"
 #include "include/buffer.h"
 #include "common/cohort_lru.h"
-#include "common/ceph_timer.h"
+#include "common/stone_timer.h"
 #include "rgw_common.h"
 #include "rgw_user.h"
 #include "rgw_lib.h"
@@ -43,7 +43,7 @@
  * ASSERT_H somehow not defined after all the above (which bring
  * in common/debug.h [e.g., dout])
  */
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 
 #define RGW_RWXMODE  (S_IRWXU | S_IRWXG | S_IRWXO)
@@ -246,8 +246,8 @@ namespace rgw {
     uint16_t depth;
     uint32_t flags;
 
-    ceph::buffer::list etag;
-    ceph::buffer::list acls;
+    stone::buffer::list etag;
+    stone::buffer::list acls;
 
   public:
     const static std::string root_name;
@@ -352,7 +352,7 @@ namespace rgw {
       decode(state.owner_uid, bl);
       decode(state.owner_gid, bl);
       decode(state.unix_mode, bl);
-      ceph::real_time enc_time;
+      stone::real_time enc_time;
       for (auto t : { &(state.ctime), &(state.mtime), &(state.atime) }) {
 	decode(enc_time, bl);
 	*t = real_clock::to_timespec(enc_time);
@@ -368,8 +368,8 @@ namespace rgw {
       DECODE_FINISH(bl);
     }
 
-    friend void encode(const RGWFileHandle& c, ::ceph::buffer::list &bl, uint64_t features);
-    friend void decode(RGWFileHandle &c, ::ceph::bufferlist::const_iterator &p);
+    friend void encode(const RGWFileHandle& c, ::stone::buffer::list &bl, uint64_t features);
+    friend void decode(RGWFileHandle &c, ::stone::bufferlist::const_iterator &p);
   public:
     RGWFileHandle(RGWLibFS* _fs, RGWFileHandle* _parent,
 		  const fh_key& _fhk, std::string& _name, uint32_t _flags)
@@ -455,8 +455,8 @@ namespace rgw {
     struct timespec get_ctime() const { return state.ctime; }
     struct timespec get_mtime() const { return state.mtime; }
 
-    const ceph::buffer::list& get_etag() const { return etag; }
-    const ceph::buffer::list& get_acls() const { return acls; }
+    const stone::buffer::list& get_etag() const { return etag; }
+    const stone::buffer::list& get_acls() const { return acls; }
 
     void create_stat(struct stat* st, uint32_t mask) {
       if (mask & RGW_SETATTR_UID)
@@ -729,20 +729,20 @@ namespace rgw {
       state.atime = ts;
     }
 
-    void set_etag(const ceph::buffer::list& _etag ) {
+    void set_etag(const stone::buffer::list& _etag ) {
       etag = _etag;
     }
 
-    void set_acls(const ceph::buffer::list& _acls ) {
+    void set_acls(const stone::buffer::list& _acls ) {
       acls = _acls;
     }
 
-    void encode_attrs(ceph::buffer::list& ux_key1,
-		      ceph::buffer::list& ux_attrs1,
+    void encode_attrs(stone::buffer::list& ux_key1,
+		      stone::buffer::list& ux_attrs1,
 		      bool inc_ov = true);
 
-    DecodeAttrsResult decode_attrs(const ceph::buffer::list* ux_key1,
-                                   const ceph::buffer::list* ux_attrs1);
+    DecodeAttrsResult decode_attrs(const stone::buffer::list* ux_key1,
+                                   const stone::buffer::list* ux_attrs1);
 
     void invalidate();
 
@@ -858,7 +858,7 @@ namespace rgw {
 
   class RGWLibFS
   {
-    CephContext* cct;
+    StoneContext* cct;
     struct rgw_fs fs{};
     RGWFileHandle root_fh;
     rgw_fh_callback_t invalidate_cb;
@@ -912,7 +912,7 @@ namespace rgw {
       }
     };
 
-    static ceph::timer<ceph::mono_clock> write_timer;
+    static stone::timer<stone::mono_clock> write_timer;
 
     struct State {
       std::mutex mtx;
@@ -945,7 +945,7 @@ namespace rgw {
       uint64_t num_entries;
     };
 
-    RGWLibFS(CephContext* _cct, const char *_uid, const char *_user_id,
+    RGWLibFS(StoneContext* _cct, const char *_uid, const char *_user_id,
 	    const char* _key, const char *root)
       : cct(_cct), root_fh(this), invalidate_cb(nullptr),
 	invalidate_arg(nullptr), shutdown(false), refcnt(1),
@@ -1303,7 +1303,7 @@ namespace rgw {
       return fh;
     }
 
-    CephContext* get_context() {
+    StoneContext* get_context() {
       return cct;
     }
 
@@ -1354,7 +1354,7 @@ public:
   uint32_t d_count;
   bool rcb_eof; // caller forced early stop in readdir cycle
 
-  RGWListBucketsRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWListBucketsRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 			RGWFileHandle* _rgw_fh, rgw_readdir_cb _rcb,
 			void* _cb_arg, RGWFileHandle::readdir_offset& _offset)
     : RGWLibRequest(_cct, std::move(_user)), rgw_fh(_rgw_fh), offset(_offset),
@@ -1385,7 +1385,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -1453,7 +1453,7 @@ public:
   }
 
   bool eof() {
-    if (unlikely(cct->_conf->subsys.should_gather(ceph_subsys_rgw, 15))) {
+    if (unlikely(cct->_conf->subsys.should_gather(stone_subsys_rgw, 15))) {
       bool is_offset =
 	unlikely(! get<const char*>(&offset)) ||
 	!! get<const char*>(offset);
@@ -1484,7 +1484,7 @@ public:
   uint32_t d_count;
   bool rcb_eof; // caller forced early stop in readdir cycle
 
-  RGWReaddirRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWReaddirRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		    RGWFileHandle* _rgw_fh, rgw_readdir_cb _rcb,
 		    void* _cb_arg, RGWFileHandle::readdir_offset& _offset)
     : RGWLibRequest(_cct, std::move(_user)), rgw_fh(_rgw_fh), offset(_offset),
@@ -1521,7 +1521,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -1549,7 +1549,7 @@ public:
   }
 
   int operator()(const std::string_view name, const rgw_obj_key& marker,
-		 const ceph::real_time& t, const uint64_t fsz, uint8_t type) {
+		 const stone::real_time& t, const uint64_t fsz, uint8_t type) {
 
     assert(name.length() > 0); // all cases handled in callers
 
@@ -1566,11 +1566,11 @@ public:
     /* set c/mtime and size from bucket index entry */
     struct stat st = {};
 #ifdef HAVE_STAT_ST_MTIMESPEC_TV_NSEC
-    st.st_atimespec = ceph::real_clock::to_timespec(t);
+    st.st_atimespec = stone::real_clock::to_timespec(t);
     st.st_mtimespec = st.st_atimespec;
     st.st_ctimespec = st.st_atimespec;
 #else
-    st.st_atim = ceph::real_clock::to_timespec(t);
+    st.st_atim = stone::real_clock::to_timespec(t);
     st.st_mtim = st.st_atim;
     st.st_ctim = st.st_atim;
 #endif
@@ -1781,7 +1781,7 @@ public:
   }
 
   bool eof() {
-    if (unlikely(cct->_conf->subsys.should_gather(ceph_subsys_rgw, 15))) {
+    if (unlikely(cct->_conf->subsys.should_gather(stone_subsys_rgw, 15))) {
       bool is_offset =
 	unlikely(! get<const char*>(&offset)) ||
 	!! get<const char*>(offset);
@@ -1808,7 +1808,7 @@ public:
   bool valid;
   bool has_children;
 
-  RGWRMdirCheck (CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWRMdirCheck (StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		 const RGWFileHandle* _rgw_fh)
     : RGWLibRequest(_cct, std::move(_user)), rgw_fh(_rgw_fh), valid(false),
       has_children(false) {
@@ -1823,7 +1823,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -1887,7 +1887,7 @@ class RGWCreateBucketRequest : public RGWLibRequest,
 public:
   const std::string& bucket_name;
 
-  RGWCreateBucketRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWCreateBucketRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 			std::string& _bname)
     : RGWLibRequest(_cct, std::move(_user)), bucket_name(_bname) {
     op = this;
@@ -1905,7 +1905,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -1952,7 +1952,7 @@ class RGWDeleteBucketRequest : public RGWLibRequest,
 public:
   const std::string& bucket_name;
 
-  RGWDeleteBucketRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWDeleteBucketRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 			std::string& _bname)
     : RGWLibRequest(_cct, std::move(_user)), bucket_name(_bname) {
     op = this;
@@ -1965,7 +1965,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -2004,7 +2004,7 @@ public:
   buffer::list& bl; /* XXX */
   size_t bytes_written;
 
-  RGWPutObjRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWPutObjRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		  const std::string& _bname, const std::string& _oname,
 		  buffer::list& _bl)
     : RGWLibRequest(_cct, std::move(_user)), bucket_name(_bname), obj_name(_oname),
@@ -2019,7 +2019,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
 
@@ -2096,7 +2096,7 @@ public:
   size_t read_resid; /* initialize to len, <= sizeof(ulp_buffer) */
   bool do_hexdump = false;
 
-  RGWReadRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWReadRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		 RGWFileHandle* _rgw_fh, uint64_t off, uint64_t len,
 		 void *_ulp_buffer)
     : RGWLibRequest(_cct, std::move(_user)), rgw_fh(_rgw_fh), ulp_buffer(_ulp_buffer),
@@ -2118,7 +2118,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -2145,7 +2145,7 @@ public:
     return 0;
   }
 
-  int send_response_data(ceph::buffer::list& bl, off_t bl_off,
+  int send_response_data(stone::buffer::list& bl, off_t bl_off,
                          off_t bl_len) override {
     size_t bytes;
     for (auto& bp : bl.buffers()) {
@@ -2189,7 +2189,7 @@ public:
   const std::string& bucket_name;
   const std::string& obj_name;
 
-  RGWDeleteObjRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWDeleteObjRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		      const std::string& _bname, const std::string& _oname)
     : RGWLibRequest(_cct, std::move(_user)), bucket_name(_bname), obj_name(_oname) {
     op = this;
@@ -2202,7 +2202,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -2240,7 +2240,7 @@ public:
 
   static constexpr uint32_t FLAG_NONE = 0x000;
 
-  RGWStatObjRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWStatObjRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		    const std::string& _bname, const std::string& _oname,
 		    uint32_t _flags)
     : RGWLibRequest(_cct, std::move(_user)), bucket_name(_bname), obj_name(_oname),
@@ -2280,7 +2280,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -2306,7 +2306,7 @@ public:
     return 0;
   }
 
-  int send_response_data(ceph::buffer::list& _bl, off_t s_off,
+  int send_response_data(stone::buffer::list& _bl, off_t s_off,
                          off_t e_off) override {
     /* NOP */
     /* XXX save attrs? */
@@ -2333,7 +2333,7 @@ public:
   std::map<std::string, buffer::list> attrs;
   RGWLibFS::BucketStats& bs;
 
-  RGWStatBucketRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWStatBucketRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		       const std::string& _path,
 		       RGWLibFS::BucketStats& _stats)
     : RGWLibRequest(_cct, std::move(_user)), bs(_stats) {
@@ -2357,7 +2357,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -2408,7 +2408,7 @@ public:
   bool is_dir;
   bool exact_matched;
 
-  RGWStatLeafRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWStatLeafRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		     RGWFileHandle* _rgw_fh, const std::string& _path)
     : RGWLibRequest(_cct, std::move(_user)), rgw_fh(_rgw_fh), path(_path),
       matched(false), is_dir(false), exact_matched(false) {
@@ -2423,7 +2423,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -2548,7 +2548,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -2620,7 +2620,7 @@ public:
   const std::string& src_name;
   const std::string& dst_name;
 
-  RGWCopyObjRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWCopyObjRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		    RGWFileHandle* _src_parent, RGWFileHandle* _dst_parent,
 		    const std::string& _src_name, const std::string& _dst_name)
     : RGWLibRequest(_cct, std::move(_user)), src_parent(_src_parent),
@@ -2639,7 +2639,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
 
@@ -2706,7 +2706,7 @@ public:
   const std::string& bucket_name;
   const std::string& obj_name;
 
-  RGWGetAttrsRequest(CephContext* _cct,
+  RGWGetAttrsRequest(StoneContext* _cct,
 		     std::unique_ptr<rgw::sal::RGWUser> _user,
 		     const std::string& _bname, const std::string& _oname)
     : RGWLibRequest(_cct, std::move(_user)), RGWGetAttrs(),
@@ -2762,7 +2762,7 @@ public:
   const std::string& bucket_name;
   const std::string& obj_name;
 
-  RGWSetAttrsRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWSetAttrsRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
 		     const std::string& _bname, const std::string& _oname)
     : RGWLibRequest(_cct, std::move(_user)), bucket_name(_bname), obj_name(_oname) {
     op = this;
@@ -2779,7 +2779,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;
@@ -2817,7 +2817,7 @@ public:
   const std::string& bucket_name;
   const std::string& obj_name;
 
-  RGWRMAttrsRequest(CephContext* _cct,
+  RGWRMAttrsRequest(StoneContext* _cct,
 		     std::unique_ptr<rgw::sal::RGWUser> _user,
 		     const std::string& _bname, const std::string& _oname)
     : RGWLibRequest(_cct, std::move(_user)), RGWRMAttrs(),
@@ -2873,7 +2873,7 @@ class RGWGetClusterStatReq : public RGWLibRequest,
         public RGWGetClusterStat {
 public:
   struct rados_cluster_stat_t& stats_req;
-  RGWGetClusterStatReq(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
+  RGWGetClusterStatReq(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user,
                        rados_cluster_stat_t& _stats):
   RGWLibRequest(_cct, std::move(_user)), stats_req(_stats){
     op = this;
@@ -2884,7 +2884,7 @@ public:
     RGWObjectCtx* rados_ctx
       = static_cast<RGWObjectCtx*>(get_state()->obj_ctx);
     // framework promises to call op_init after parent init
-    ceph_assert(rados_ctx);
+    stone_assert(rados_ctx);
     RGWOp::init(rados_ctx->get_store(), get_state(), this);
     op = this; // assign self as op: REQUIRED
     return 0;

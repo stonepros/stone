@@ -12,12 +12,12 @@ class DaemonWatchdog(Greenlet):
     """
     DaemonWatchdog::
 
-    Watch Ceph daemons for failures. If an extended failure is detected (i.e.
+    Watch Stone daemons for failures. If an extended failure is detected (i.e.
     not intentional), then the watchdog will unmount file systems and send
     SIGTERM to all daemons. The duration of an extended failure is configurable
     with watchdog_daemon_timeout.
 
-    ceph:
+    stone:
       watchdog:
         daemon_restart [default: no]: restart daemon if "normal" exit (status==0).
 
@@ -32,7 +32,7 @@ class DaemonWatchdog(Greenlet):
         self.ctx = ctx
         self.e = None
         self.logger = log.getChild('daemon_watchdog')
-        self.cluster = config.get('cluster', 'ceph')
+        self.cluster = config.get('cluster', 'stone')
         self.name = 'watchdog'
         self.stopping = Event()
         self.thrashers = thrashers

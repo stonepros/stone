@@ -1,6 +1,6 @@
 ---
 
-ceph_dev: True
+stone_dev: True
 cluster: test
 public_network: "192.168.3.0/24"
 cluster_network: "192.168.4.0/24"
@@ -8,8 +8,8 @@ monitor_interface: eth1
 osd_objectstore: "bluestore"
 osd_scenario: lvm
 num_osds: 2
-ceph_origin: 'repository'
-ceph_repository: 'dev'
+stone_origin: 'repository'
+stone_repository: 'dev'
 copy_admin_key: false
 devices:
   - /dev/vdb
@@ -19,7 +19,7 @@ devices:
 os_tuning_params:
   - { name: kernel.pid_max, value: 4194303 }
   - { name: fs.file-max, value: 26234859 }
-ceph_conf_overrides:
+stone_conf_overrides:
   global:
     osd_pool_default_pg_num: 8
     osd_pool_default_size: 1
@@ -27,7 +27,7 @@ ceph_conf_overrides:
 block_db_size: 9663676416
 
 # The following is only needed for testing purposes and is not part of
-# ceph-ansible supported variables
+# stone-ansible supported variables
 
 osd_ids:
   - 0

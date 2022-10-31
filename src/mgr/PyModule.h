@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 John Spray <john.spray@redhat.com>
  *
@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 #include <boost/optional.hpp>
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "Python.h"
 #include "Gil.h"
 #include "mon/MgrMap.h"
@@ -31,7 +31,7 @@ std::string handle_pyerror();
 std::string peek_pyerror();
 
 /**
- * A Stonee CLI command description provided from a Python module
+ * A Stone CLI command description provided from a Python module
  */
 class ModuleCommand {
 public:
@@ -46,7 +46,7 @@ public:
 
 class PyModule
 {
-  mutable ceph::mutex lock = ceph::make_mutex("PyModule::lock");
+  mutable stone::mutex lock = stone::make_mutex("PyModule::lock");
 private:
   const std::string module_name;
   std::string get_site_packages();
@@ -112,8 +112,8 @@ public:
     const std::string& value);
 
   int load(PyThreadState *pMainThreadState);
-  static PyObject* init_ceph_logger();
-  static PyObject* init_ceph_module();
+  static PyObject* init_stone_logger();
+  static PyObject* init_stone_module();
 
   void set_enabled(const bool enabled_)
   {
@@ -130,7 +130,7 @@ public:
   void get_commands(std::vector<ModuleCommand> *out) const
   {
     std::lock_guard l(lock);
-    ceph_assert(out != nullptr);
+    stone_assert(out != nullptr);
     out->insert(out->end(), commands.begin(), commands.end());
   }
 
@@ -174,7 +174,7 @@ typedef std::shared_ptr<PyModule> PyModuleRef;
 
 class PyModuleConfig {
 public:
-  mutable ceph::mutex lock = ceph::make_mutex("PyModuleConfig::lock");
+  mutable stone::mutex lock = stone::make_mutex("PyModuleConfig::lock");
   std::map<std::string, std::string> config;
 
   PyModuleConfig();

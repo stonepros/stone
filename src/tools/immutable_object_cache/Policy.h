@@ -7,7 +7,7 @@
 #include <list>
 #include <string>
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 typedef enum {
@@ -30,5 +30,5 @@ class Policy {
 };
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone
 #endif

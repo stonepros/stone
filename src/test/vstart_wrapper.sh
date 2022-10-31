@@ -16,35 +16,35 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
-export CEPH_VSTART_WRAPPER=1
-export CEPH_DIR="${TMPDIR:-$PWD}/td/t-$CEPH_PORT"
-export CEPH_DEV_DIR="$CEPH_DIR/dev"
-export CEPH_OUT_DIR="$CEPH_DIR/out"
-export CEPH_ASOK_DIR="$CEPH_DIR/out"
+export STONE_VSTART_WRAPPER=1
+export STONE_DIR="${TMPDIR:-$PWD}/td/t-$STONE_PORT"
+export STONE_DEV_DIR="$STONE_DIR/dev"
+export STONE_OUT_DIR="$STONE_DIR/out"
+export STONE_ASOK_DIR="$STONE_DIR/out"
 
-export MGR_PYTHON_PATH=$CEPH_ROOT/src/pybind/mgr
+export MGR_PYTHON_PATH=$STONE_ROOT/src/pybind/mgr
 
 function vstart_setup()
 {
-    rm -fr $CEPH_DEV_DIR $CEPH_OUT_DIR
-    mkdir -p $CEPH_DEV_DIR
-    trap "teardown $CEPH_DIR" EXIT
+    rm -fr $STONE_DEV_DIR $STONE_OUT_DIR
+    mkdir -p $STONE_DEV_DIR
+    trap "teardown $STONE_DIR" EXIT
     export LC_ALL=C # some tests are vulnerable to i18n
     export PATH="$(pwd):${PATH}"
     OBJSTORE_ARGS=""
-    if [ "bluestore" = "${CEPH_OBJECTSTORE}" ]; then
+    if [ "bluestore" = "${STONE_OBJECTSTORE}" ]; then
         OBJSTORE_ARGS="-b"
     fi
-    $CEPH_ROOT/src/vstart.sh \
+    $STONE_ROOT/src/vstart.sh \
         --short \
         $OBJSTORE_ARGS \
         -o 'paxos propose interval = 0.01' \
         -d -n -l || return 1
-    export CEPH_CONF=$CEPH_DIR/ceph.conf
+    export STONE_CONF=$STONE_DIR/stone.conf
 
-    crit=$(expr 100 - $(ceph-conf --show-config-value mon_data_avail_crit))
+    crit=$(expr 100 - $(stone-conf --show-config-value mon_data_avail_crit))
     if [ $(df . | perl -ne 'print if(s/.*\s(\d+)%.*/\1/)') -ge $crit ] ; then
         df . 
         cat <<EOF
@@ -53,7 +53,7 @@ The mon will shutdown with a message such as
  "reached critical levels of available space on local monitor storage -- shutdown!"
 as soon as it finds the disk has is more than ${crit}% full. 
 This is a limit determined by
- ceph-conf --show-config-value mon_data_avail_crit
+ stone-conf --show-config-value mon_data_avail_crit
 EOF
         return 1
     fi
@@ -61,13 +61,13 @@ EOF
 
 function main()
 {
-    teardown $CEPH_DIR
+    teardown $STONE_DIR
     vstart_setup || return 1
-    if CEPH_CONF=$CEPH_DIR/ceph.conf "$@"; then
+    if STONE_CONF=$STONE_DIR/stone.conf "$@"; then
         code=0
     else
         code=1
-        display_logs $CEPH_OUT_DIR
+        display_logs $STONE_OUT_DIR
     fi
     return $code
 }

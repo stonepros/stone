@@ -5,14 +5,14 @@ import json
 import logging
 from contextlib import contextmanager
 
-import cephfs
+import stonefs
 import cherrypy
 import rados
 import rbd
 from orchestrator import OrchestratorError
 
 from ..exceptions import DashboardException, ViewCacheNoDataException
-from ..services.ceph_service import SendCommandError
+from ..services.stone_service import SendCommandError
 
 logger = logging.getLogger('exception')
 
@@ -57,11 +57,11 @@ def dashboard_exception_handler(handler, *args, **kwargs):
 
 
 @contextmanager
-def handle_cephfs_error():
+def handle_stonefs_error():
     try:
         yield
-    except cephfs.OSError as e:
-        raise DashboardException(e, component='cephfs') from e
+    except stonefs.OSError as e:
+        raise DashboardException(e, component='stonefs') from e
 
 
 @contextmanager

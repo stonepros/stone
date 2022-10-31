@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-. $(dirname $0)/../../standalone/ceph-helpers.sh
+. $(dirname $0)/../../standalone/stone-helpers.sh
 
 export RBD_FORCE_ALLOW_V1=1
 
@@ -15,7 +15,7 @@ expect_fail() {
 }
 
 tiered=0
-if ceph osd dump | grep ^pool | grep "'rbd'" | grep tier; then
+if stone osd dump | grep ^pool | grep "'rbd'" | grep tier; then
     tiered=1
 fi
 
@@ -143,7 +143,7 @@ test_rename() {
     rbd rename bar bar2
     rbd rename bar2 foo2 2>&1 | grep exists
 
-    ceph osd pool create rbd2 8
+    stone osd pool create rbd2 8
     rbd pool init rbd2
     rbd create -p rbd2 -s 1 foo
     rbd rename rbd2/foo rbd2/bar
@@ -153,7 +153,7 @@ test_rename() {
     ! rbd rename rbd2/bar --dest-pool rbd foo
     rbd rename --pool rbd2 bar --dest-pool rbd2 foo
     rbd -p rbd2 ls | grep foo
-    ceph osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
+    stone osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
 
     remove_images
 }
@@ -310,8 +310,8 @@ test_pool_image_args() {
     echo "testing pool and image args..."
     remove_images
 
-    ceph osd pool delete test test --yes-i-really-really-mean-it || true
-    ceph osd pool create test 32
+    stone osd pool delete test test --yes-i-really-really-mean-it || true
+    stone osd pool create test 32
     rbd pool init test
     truncate -s 1 /tmp/empty /tmp/empty@snap
 
@@ -366,7 +366,7 @@ test_pool_image_args() {
     rbd ls test | grep -qv test12
 
     rm -f /tmp/empty /tmp/empty@snap
-    ceph osd pool delete test test --yes-i-really-really-mean-it
+    stone osd pool delete test test --yes-i-really-really-mean-it
 
     for f in foo test1 test10 test12 test2 test3 ; do
 	rbd rm $f
@@ -380,7 +380,7 @@ test_clone() {
     rbd snap create test1@s1
     rbd snap protect test1@s1
 
-    ceph osd pool create rbd2 8
+    stone osd pool create rbd2 8
     rbd pool init rbd2
     rbd clone test1@s1 rbd2/clone
     rbd -p rbd2 ls | grep clone
@@ -401,7 +401,7 @@ test_clone() {
     rbd snap unprotect test1@s1
     rbd snap rm test1@s1
     rbd rm test1
-    ceph osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
+    stone osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
 }
 
 test_trash() {
@@ -918,7 +918,7 @@ get_migration_state() {
 test_migration() {
     echo "testing migration..."
     remove_images
-    ceph osd pool create rbd2 8
+    stone osd pool create rbd2 8
     rbd pool init rbd2
 
     # Convert to new format
@@ -1073,7 +1073,7 @@ test_migration() {
     done
 
     remove_images
-    ceph osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
+    stone osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
 }
 
 test_config() {
@@ -1125,7 +1125,7 @@ test_config() {
 test_trash_purge_schedule() {
     echo "testing trash purge schedule..."
     remove_images
-    ceph osd pool create rbd2 8
+    stone osd pool create rbd2 8
     rbd pool init rbd2
     rbd namespace create rbd2/ns1
 
@@ -1216,7 +1216,7 @@ test_trash_purge_schedule() {
         done
         rbd trash ls rbd2/ns1 | wc -l | grep '^0$'
 
-        # repeat with kicked in schedule, see https://tracker.ceph.com/issues/53915
+        # repeat with kicked in schedule, see https://tracker.stone.com/issues/53915
         rbd trash purge schedule list -p rbd2 -R | grep 'every 1m'
         rbd trash purge schedule list -p rbd2/ns1 -R | grep 'every 1m'
 
@@ -1240,13 +1240,13 @@ test_trash_purge_schedule() {
     test "$(rbd trash purge schedule ls -R --format json)" = "[]"
 
     remove_images
-    ceph osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
+    stone osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
 }
 
 test_mirror_snapshot_schedule() {
     echo "testing mirror snapshot schedule..."
     remove_images
-    ceph osd pool create rbd2 8
+    stone osd pool create rbd2 8
     rbd pool init rbd2
     rbd namespace create rbd2/ns1
 
@@ -1285,7 +1285,7 @@ test_mirror_snapshot_schedule() {
     test "$(rbd mirror image status rbd2/ns1/test1 |
         grep -c mirror.primary)" -gt '1'
 
-    # repeat with kicked in schedule, see https://tracker.ceph.com/issues/53915
+    # repeat with kicked in schedule, see https://tracker.stone.com/issues/53915
     expect_fail rbd mirror snapshot schedule ls
     rbd mirror snapshot schedule ls -R | grep 'rbd2 *ns1 *test1 *every 1m'
     expect_fail rbd mirror snapshot schedule ls -p rbd2
@@ -1335,7 +1335,7 @@ test_mirror_snapshot_schedule() {
     test "$(rbd mirror snapshot schedule ls -R --format json)" = "[]"
 
     remove_images
-    ceph osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
+    stone osd pool rm rbd2 rbd2 --yes-i-really-really-mean-it
 }
 
 test_pool_image_args

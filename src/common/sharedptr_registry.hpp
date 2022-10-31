@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -12,12 +12,12 @@
  *
  */
 
-#ifndef CEPH_SHAREDPTR_REGISTRY_H
-#define CEPH_SHAREDPTR_REGISTRY_H
+#ifndef STONE_SHAREDPTR_REGISTRY_H
+#define STONE_SHAREDPTR_REGISTRY_H
 
 #include <map>
 #include <memory>
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 /**
  * Provides a registry of shared_ptr<V> indexed by K while
@@ -30,8 +30,8 @@ public:
   typedef std::weak_ptr<V> WeakVPtr;
   int waiting;
 private:
-  ceph::mutex lock = ceph::make_mutex("SharedPtrRegistry::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("SharedPtrRegistry::lock");
+  stone::condition_variable cond;
   std::map<K, std::pair<WeakVPtr, V*>, C> contents;
 
   class OnRemoval {

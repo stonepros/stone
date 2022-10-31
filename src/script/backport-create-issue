@@ -3,9 +3,9 @@
 # backport-create-issue
 #
 # Standalone version of the "backport-create-issue" subcommand of
-# "ceph-workbench" by Loic Dachary.
+# "stone-workbench" by Loic Dachary.
 #
-# This script scans Redmine (tracker.ceph.com) for issues in "Pending Backport"
+# This script scans Redmine (tracker.stone.com) for issues in "Pending Backport"
 # status and creates backport issues for them, based on the contents of the
 # "Backport" field while trying to avoid creating duplicate backport issues.
 #
@@ -35,8 +35,8 @@ import re
 import time
 from redminelib import Redmine  # https://pypi.org/project/python-redmine/
 
-redmine_endpoint = "https://tracker.ceph.com"
-project_name = "Ceph"
+redmine_endpoint = "https://tracker.stone.com"
+project_name = "Stone"
 release_id = 16
 delay_seconds = 5
 redmine_key_file="~/.redmine_key"
@@ -308,8 +308,8 @@ if __name__ == '__main__':
     report_dry_run(args)
     redmine = connect_to_redmine(args)
     project = redmine.project.get(project_name)
-    ceph_project_id = project.id
-    logging.debug("Project {} has ID {}".format(project_name, ceph_project_id))
+    stone_project_id = project.id
+    logging.debug("Project {} has ID {}".format(project_name, stone_project_id))
     populate_status_dict(redmine)
     pending_backport_status_id = status2status_id["Pending Backport"]
     logging.debug("Pending Backport status has ID {}"
@@ -322,17 +322,17 @@ if __name__ == '__main__':
         if args.force:
             force_create = True
             logging.warn("--force option was given: ignoring issue status!")
-            issues = redmine.issue.filter(project_id=ceph_project_id,
+            issues = redmine.issue.filter(project_id=stone_project_id,
                                           issue_id=issue_list)
 
         else:
-            issues = redmine.issue.filter(project_id=ceph_project_id,
+            issues = redmine.issue.filter(project_id=stone_project_id,
                                           issue_id=issue_list,
                                           status_id=pending_backport_status_id)
     else:
         if args.force:
             logging.warn("ignoring --force option, which can only be used with an explicit issue list")
-        issues = redmine.issue.filter(project_id=ceph_project_id,
+        issues = redmine.issue.filter(project_id=stone_project_id,
                                       status_id=pending_backport_status_id)
     if force_create:
         logging.info("Processing {} issues regardless of status"

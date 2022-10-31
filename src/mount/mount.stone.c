@@ -23,7 +23,7 @@ bool v2_addrs = false;
 static const char * const EMPTY_STRING = "";
 
 /* TODO duplicates logic from kernel */
-#define CEPH_AUTH_NAME_DEFAULT "guest"
+#define STONE_AUTH_NAME_DEFAULT "guest"
 
 #include "mtab.c"
 
@@ -351,7 +351,7 @@ static int parse_options(const char *data, struct stone_mount_info *cmi)
 out:
 	name_pos = safe_cat(&cmi->cmi_name, &name_len, name_pos, "client.");
 	name_pos = safe_cat(&cmi->cmi_name, &name_len, name_pos,
-			    name ? name : CEPH_AUTH_NAME_DEFAULT);
+			    name ? name : STONE_AUTH_NAME_DEFAULT);
 
 	if (cmi->cmi_opts)
 		mount_stone_debug("mount.stone: options \"%s\" will pass to kernel.\n",

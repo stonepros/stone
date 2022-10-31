@@ -1,25 +1,25 @@
 :orphan:
 
 ==============================================
- ceph-dencoder -- ceph encoder/decoder utility
+ stone-dencoder -- stone encoder/decoder utility
 ==============================================
 
-.. program:: ceph-dencoder
+.. program:: stone-dencoder
 
 Synopsis
 ========
 
-| **ceph-dencoder** [commands...]
+| **stone-dencoder** [commands...]
 
 
 Description
 ===========
 
-**ceph-dencoder** is a utility to encode, decode, and dump ceph data
+**stone-dencoder** is a utility to encode, decode, and dump stone data
 structures.  It is used for debugging and for testing inter-version
 compatibility.
 
-**ceph-dencoder** takes a simple list of commands and performs them
+**stone-dencoder** takes a simple list of commands and performs them
 in order.
 
 Commands
@@ -27,7 +27,7 @@ Commands
 
 .. option:: version
 
-   Print the version string for the **ceph-dencoder** binary.
+   Print the version string for the **stone-dencoder** binary.
 
 .. option:: import <file>
 
@@ -41,7 +41,7 @@ Commands
 
 .. option:: list_types
 
-   List the data types known to this build of **ceph-dencoder**.
+   List the data types known to this build of **stone-dencoder**.
 
 .. option:: type <name>
 
@@ -69,7 +69,7 @@ Commands
 .. option:: count_tests
 
    Print the number of built-in test instances of the previously
-   selected type that **ceph-dencoder** is able to generate.
+   selected type that **stone-dencoder** is able to generate.
 
 .. option:: select_test <n>
 
@@ -79,8 +79,8 @@ Commands
 .. option:: get_features
 
    Print the decimal value of the feature set supported by this version
-   of **ceph-dencoder**.  Each bit represents a feature.  These correspond to
-   CEPH_FEATURE_* defines in src/include/ceph_features.h.
+   of **stone-dencoder**.  Each bit represents a feature.  These correspond to
+   CEPH_FEATURE_* defines in src/include/stone_features.h.
 
 .. option:: set_features <f>
 
@@ -91,16 +91,16 @@ Commands
 Example
 =======
 
-Say you want to examine an attribute on an object stored by ``ceph-osd``.  You can do this:
+Say you want to examine an attribute on an object stored by ``stone-osd``.  You can do this:
 
 ::
 
     $ cd /mnt/osd.12/current/2.b_head
     $ attr -l foo_bar_head_EFE6384B
-    Attribute "ceph.snapset" has a 31 byte value for foo_bar_head_EFE6384B
-    Attribute "ceph._" has a 195 byte value for foo_bar_head_EFE6384B
-    $ attr foo_bar_head_EFE6384B -g ceph._ -q > /tmp/a
-    $ ceph-dencoder type object_info_t import /tmp/a decode dump_json
+    Attribute "stone.snapset" has a 31 byte value for foo_bar_head_EFE6384B
+    Attribute "stone._" has a 195 byte value for foo_bar_head_EFE6384B
+    $ attr foo_bar_head_EFE6384B -g stone._ -q > /tmp/a
+    $ stone-dencoder type object_info_t import /tmp/a decode dump_json
     { "oid": { "oid": "foo",
           "key": "bar",
           "snapid": -2,
@@ -122,13 +122,13 @@ Say you want to examine an attribute on an object stored by ``ceph-osd``.  You c
       "truncate_size": 0,
       "watchers": {}}
 
-Alternatively, perhaps you wish to dump an internal CephFS metadata object, you might
+Alternatively, perhaps you wish to dump an internal StoneFS metadata object, you might
 do that like this:
 
 ::
 
    $ rados -p metadata get mds_snaptable mds_snaptable.bin
-   $ ceph-dencoder type SnapServer skip 8 import mds_snaptable.bin decode dump_json
+   $ stone-dencoder type SnapServer skip 8 import mds_snaptable.bin decode dump_json
    { "snapserver": { "last_snap": 1,
       "pending_noop": [],
       "snaps": [],
@@ -140,12 +140,12 @@ do that like this:
 Availability
 ============
 
-**ceph-dencoder** is part of Ceph, a massively scalable, open-source, distributed storage system. Please
-refer to the Ceph documentation at http://ceph.com/docs for more
+**stone-dencoder** is part of Stone, a massively scalable, open-source, distributed storage system. Please
+refer to the Stone documentation at http://stone.com/docs for more
 information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)

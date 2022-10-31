@@ -1,5 +1,5 @@
 
-Handling a full Ceph file system
+Handling a full Stone file system
 ================================
 
 When a RADOS cluster reaches its ``mon_osd_full_ratio`` (default
@@ -45,7 +45,7 @@ more on the epoch barrier mechanism, see :ref:`background_blocklisting_and_osd_e
 Legacy (pre-hammer) behavior
 ----------------------------
 
-In versions of Ceph earlier than hammer, the MDS would ignore
+In versions of Stone earlier than hammer, the MDS would ignore
 the full status of the RADOS cluster, and any data writes from
 clients would stall until the cluster ceased to be full.
 

@@ -14,14 +14,14 @@
 #ifndef OMAP_BENCH_HPP_
 #define OMAP_BENCH_HPP_
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "include/rados/librados.hpp"
 #include <string>
 #include <map>
 #include <cfloat>
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 struct o_bench_data {
   double avg_latency;
@@ -86,11 +86,11 @@ protected:
   omap_generator_t omap_generator;
 
   //aio things
-  ceph::condition_variable thread_is_free;
-  ceph::mutex thread_is_free_lock =
-    ceph::make_mutex("OmapBench::thread_is_free_lock");
-  ceph::mutex data_lock =
-    ceph::make_mutex("OmapBench::data_lock");
+  stone::condition_variable thread_is_free;
+  stone::mutex thread_is_free_lock =
+    stone::make_mutex("OmapBench::thread_is_free_lock");
+  stone::mutex data_lock =
+    stone::make_mutex("OmapBench::data_lock");
   int busythreads_count;
   librados::callback_t comp;
 

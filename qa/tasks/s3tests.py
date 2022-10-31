@@ -38,7 +38,7 @@ def download(ctx, config):
 
         log.info("Using branch '%s' for s3tests", s3tests_branch)
         sha1 = client_config.get('sha1')
-        git_remote = client_config.get('git_remote', teuth_config.ceph_git_base_url)
+        git_remote = client_config.get('git_remote', teuth_config.stone_git_base_url)
         ctx.cluster.only(client).run(
             args=[
                 'git', 'clone',
@@ -113,7 +113,7 @@ def create_users(ctx, config):
                     ctx.cluster.only(client).run(
                         args=[
                             'adjust-ulimits',
-                            'ceph-coverage',
+                            'stone-coverage',
                             '{tdir}/archive/coverage'.format(tdir=testdir),
                             'radosgw-admin',
                             '-n', client_with_id,
@@ -128,7 +128,7 @@ def create_users(ctx, config):
                     ctx.cluster.only(client).run(
                         args=[
                             'adjust-ulimits',
-                            'ceph-coverage',
+                            'stone-coverage',
                             '{tdir}/archive/coverage'.format(tdir=testdir),
                             'radosgw-admin',
                             '-n', client_with_id,
@@ -141,7 +141,7 @@ def create_users(ctx, config):
                     ctx.cluster.only(client).run(
                         args=[
                             'adjust-ulimits',
-                            'ceph-coverage',
+                            'stone-coverage',
                             '{tdir}/archive/coverage'.format(tdir=testdir),
                             'radosgw-admin',
                             '-n', client_with_id,
@@ -154,7 +154,7 @@ def create_users(ctx, config):
                     ctx.cluster.only(client).run(
                         args=[
                             'adjust-ulimits',
-                            'ceph-coverage',
+                            'stone-coverage',
                             '{tdir}/archive/coverage'.format(tdir=testdir),
                             'radosgw-admin',
                             '-n', client_with_id,
@@ -169,7 +169,7 @@ def create_users(ctx, config):
                     ctx.cluster.only(client).run(
                         args=[
                             'adjust-ulimits',
-                            'ceph-coverage',
+                            'stone-coverage',
                             '{tdir}/archive/coverage'.format(tdir=testdir),
                             'radosgw-admin',
                             '-n', client_with_id,
@@ -186,7 +186,7 @@ def create_users(ctx, config):
                     ctx.cluster.only(client).run(
                         args=[
                             'adjust-ulimits',
-                            'ceph-coverage',
+                            'stone-coverage',
                             '{tdir}/archive/coverage'.format(tdir=testdir),
                             'radosgw-admin',
                             '-n', client_with_id,
@@ -215,7 +215,7 @@ def create_users(ctx, config):
                 ctx.cluster.only(client).run(
                         args=[
                             'adjust-ulimits',
-                            'ceph-coverage',
+                            'stone-coverage',
                             '{tdir}/archive/coverage'.format(tdir=testdir),
                             'radosgw-admin',
                             '-n', client_with_id,
@@ -232,7 +232,7 @@ def create_users(ctx, config):
                 ctx.cluster.only(client).run(
                         args=[
                             'adjust-ulimits',
-                            'ceph-coverage',
+                            'stone-coverage',
                             '{tdir}/archive/coverage'.format(tdir=testdir),
                             'radosgw-admin',
                             '-n', client_with_id,
@@ -265,7 +265,7 @@ def create_users(ctx, config):
                 ctx.cluster.only(client).run(
                     args=[
                         'adjust-ulimits',
-                        'ceph-coverage',
+                        'stone-coverage',
                         '{tdir}/archive/coverage'.format(tdir=testdir),
                         'radosgw-admin',
                         '-n', client_with_id,
@@ -345,7 +345,7 @@ def configure(ctx, config):
             s3tests_conf['DEFAULT']['kms_keyid'] = properties.get('kms_key', keys[0])
             s3tests_conf['DEFAULT']['kms_keyid2'] = properties.get('kms_key2', keys[1])
         else:
-            # Fallback scenario where it's the local (ceph.conf) kms being tested
+            # Fallback scenario where it's the local (stone.conf) kms being tested
             s3tests_conf['DEFAULT']['kms_keyid'] = 'testkey-1'
             s3tests_conf['DEFAULT']['kms_keyid2'] = 'testkey-2'
 
@@ -471,7 +471,7 @@ def scan_for_leaked_encryption_keys(ctx, config):
                     'grep',
                     '--binary-files=text',
                     s3test_customer_key,
-                    '/var/log/ceph/rgw.{client}.log'.format(client=client_with_cluster),
+                    '/var/log/stonepros/rgw.{client}.log'.format(client=client_with_cluster),
                 ],
                 wait=False,
                 check_status=False,
@@ -493,21 +493,21 @@ def task(ctx, config):
     To run all tests on all clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw:
         - s3tests:
 
     To restrict testing to particular clients::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.0]
         - s3tests: [client.0]
 
     To run against a server on client.1 and increase the boto timeout to 10m::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.1]
         - s3tests:
             client.0:
@@ -517,7 +517,7 @@ def task(ctx, config):
     To pass extra arguments to nose (e.g. to run a certain test)::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.0]
         - s3tests:
             client.0:
@@ -528,7 +528,7 @@ def task(ctx, config):
     To run any sts-tests don't forget to set a config variable named 'sts_tests' to 'True' as follows::
 
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.0]
         - s3tests:
             client.0:

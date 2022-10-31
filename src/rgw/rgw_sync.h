@@ -36,7 +36,7 @@ struct rgw_mdlog_entry {
   string id;
   string section;
   string name;
-  ceph::real_time timestamp;
+  stone::real_time timestamp;
   RGWMetadataLogData log_data;
 
   void decode_json(JSONObj *obj);
@@ -133,7 +133,7 @@ public:
 class RGWBackoffControlCR : public RGWCoroutine
 {
   RGWCoroutine *cr;
-  ceph::mutex lock;
+  stone::mutex lock;
 
   RGWSyncBackoff backoff;
   bool reset_backoff;
@@ -145,7 +145,7 @@ protected:
     return &reset_backoff;
   }
 
-  ceph::mutex& cr_lock() {
+  stone::mutex& cr_lock() {
     return lock;
   }
 
@@ -154,10 +154,10 @@ protected:
   }
 
 public:
-  RGWBackoffControlCR(CephContext *_cct, bool _exit_on_error)
+  RGWBackoffControlCR(StoneContext *_cct, bool _exit_on_error)
     : RGWCoroutine(_cct),
       cr(nullptr),
-      lock(ceph::make_mutex("RGWBackoffControlCR::lock:" + stringify(this))),
+      lock(stone::make_mutex("RGWBackoffControlCR::lock:" + stringify(this))),
       reset_backoff(false), exit_on_error(_exit_on_error) {
   }
 
@@ -175,7 +175,7 @@ public:
 
 struct RGWMetaSyncEnv {
   const DoutPrefixProvider *dpp;
-  CephContext *cct{nullptr};
+  StoneContext *cct{nullptr};
   rgw::sal::RGWRadosStore *store{nullptr};
   RGWRESTConn *conn{nullptr};
   RGWAsyncRadosProcessor *async_rados{nullptr};
@@ -185,7 +185,7 @@ struct RGWMetaSyncEnv {
 
   RGWMetaSyncEnv() {}
 
-  void init(const DoutPrefixProvider *_dpp, CephContext *_cct, rgw::sal::RGWRadosStore *_store, RGWRESTConn *_conn,
+  void init(const DoutPrefixProvider *_dpp, StoneContext *_cct, rgw::sal::RGWRadosStore *_store, RGWRESTConn *_conn,
             RGWAsyncRadosProcessor *_async_rados, RGWHTTPManager *_http_manager,
             RGWSyncErrorLogger *_error_logger, RGWSyncTraceManager *_sync_tracer);
 
@@ -267,7 +267,7 @@ class RGWMetaSyncStatusManager : public DoutPrefixProvider {
     }
   };
 
-  ceph::shared_mutex ts_to_shard_lock = ceph::make_shared_mutex("ts_to_shard_lock");
+  stone::shared_mutex ts_to_shard_lock = stone::make_shared_mutex("ts_to_shard_lock");
   map<utime_shard, int> ts_to_shard;
   vector<string> clone_markers;
 
@@ -295,7 +295,7 @@ public:
 
 
   // implements DoutPrefixProvider
-  CephContext *get_cct() const override { return store->ctx(); }
+  StoneContext *get_cct() const override { return store->ctx(); }
   unsigned get_subsys() const override;
   std::ostream& gen_prefix(std::ostream& out) const override;
 
@@ -308,7 +308,7 @@ public:
 class RGWOrderCallCR : public RGWCoroutine
 {
 public:
-  RGWOrderCallCR(CephContext *cct) : RGWCoroutine(cct) {}
+  RGWOrderCallCR(StoneContext *cct) : RGWCoroutine(cct) {}
 
   virtual void call_cr(RGWCoroutine *_cr) = 0;
 };
@@ -318,7 +318,7 @@ class RGWLastCallerWinsCR : public RGWOrderCallCR
   RGWCoroutine *cr{nullptr};
 
 public:
-  explicit RGWLastCallerWinsCR(CephContext *cct) : RGWOrderCallCR(cct) {}
+  explicit RGWLastCallerWinsCR(StoneContext *cct) : RGWOrderCallCR(cct) {}
   ~RGWLastCallerWinsCR() {
     if (cr) {
       cr->put();
@@ -517,7 +517,7 @@ class RGWShardCollectCR : public RGWCoroutine {
   int status;
 
 public:
-  RGWShardCollectCR(CephContext *_cct, int _max_concurrent) : RGWCoroutine(_cct),
+  RGWShardCollectCR(StoneContext *_cct, int _max_concurrent) : RGWCoroutine(_cct),
                                                              current_running(0),
                                                              max_concurrent(_max_concurrent),
                                                              status(0) {}

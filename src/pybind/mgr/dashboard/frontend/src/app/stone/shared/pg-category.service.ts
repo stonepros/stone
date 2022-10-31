@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 
 import _ from 'lodash';
 
-import { CephSharedModule } from './ceph-shared.module';
+import { StoneSharedModule } from './stone-shared.module';
 import { PgCategory } from './pg-category.model';
 
 @Injectable({
-  providedIn: CephSharedModule
+  providedIn: StoneSharedModule
 })
 export class PgCategoryService {
   private categories: object;

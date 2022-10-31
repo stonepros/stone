@@ -1,5 +1,5 @@
 ===========================
-Ceph Dashboard Design Goals
+Stone Dashboard Design Goals
 ===========================
 
 .. note:: This document is intended to provide a focal point for discussing the overall design
@@ -13,7 +13,7 @@ to Operations teams who are typically stretched across multiple product and plat
 general terms, the complexity of any solution can have a direct bearing on the operational costs
 incurred to manage it. The answer is simple...make it simple :)
 
-This document is intended to highlight Ceph Dashboard design goals which may help to  
+This document is intended to highlight Stone Dashboard design goals which may help to  
 
 * reduce complexity
 * increase productivity
@@ -24,8 +24,8 @@ This document is intended to highlight Ceph Dashboard design goals which may hel
 Understanding the Persona of the Target User
 ============================================
 
-Ceph has historically been administered from the CLI. The CLI has always and will always offer the
-richest, most flexible way to install and manage a Ceph cluster. Administrators who require and
+Stone has historically been administered from the CLI. The CLI has always and will always offer the
+richest, most flexible way to install and manage a Stone cluster. Administrators who require and
 demand this level of control are unlikely to adopt a UI for anything more than a technical curiosity.
 
 The relevance of the UI is therefore more critical for a new SysAdmin, where it can help technology
@@ -33,7 +33,7 @@ adoption and reduce the operational friction that is normally experienced when i
 solution.
 
 Understanding the target user persona is therefore a fundamental first step in design. Attempting to
-design a UI that meets the requirements of a 'seasoned' Ceph Administrator or Developer, and a
+design a UI that meets the requirements of a 'seasoned' Stone Administrator or Developer, and a
 relatively new SysAdmin is unlikely to satisfy either user group.
 
 Design Principles
@@ -56,7 +56,7 @@ ______________
    establish a flow and deeper integration between the alertmanager implementation and the dashboard
    elements enabling an Admin to efficiently step from alert to affected component.
 #. **Platform visibility**. The platform (OS and hardware configuration) is a fundamental component of the
-   solution, so providing platform level insights can help deliver a more holistic view of the Ceph cluster.
+   solution, so providing platform level insights can help deliver a more holistic view of the Stone cluster.
 #. **Jargon Busting**. Jargon is an unavoidable component of most systems. However, a good system will
    include inline help to support new and infrequent users of the UI.
 
@@ -68,7 +68,7 @@ _______________
   to automate tasks, so by simply adding a CLI feature we miss the workflow and add complexity, which
   potentially 'bloats' the UI.
 * Don't think like a developer...try and adopt the mindset of an Administrator, who only works with the
-  Ceph cluster part-time - this is the reality for today's Operations teams.
+  Stone cluster part-time - this is the reality for today's Operations teams.
 
 
 Focus On User Experience

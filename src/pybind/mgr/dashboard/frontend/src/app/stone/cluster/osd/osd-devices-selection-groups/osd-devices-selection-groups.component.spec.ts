@@ -6,8 +6,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { ToastrModule } from 'ngx-toastr';
 
-import { InventoryDevice } from '~/app/ceph/cluster/inventory/inventory-devices/inventory-device.model';
-import { InventoryDevicesComponent } from '~/app/ceph/cluster/inventory/inventory-devices/inventory-devices.component';
+import { InventoryDevice } from '~/app/stone/cluster/inventory/inventory-devices/inventory-device.model';
+import { InventoryDevicesComponent } from '~/app/stone/cluster/inventory/inventory-devices/inventory-devices.component';
 import { SharedModule } from '~/app/shared/shared.module';
 import { configureTestBed, FixtureHelper, Mocks } from '~/testing/unit-test-helper';
 import { OsdDevicesSelectionGroupsComponent } from './osd-devices-selection-groups.component';

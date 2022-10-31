@@ -2,9 +2,9 @@
  Manual Deployment
 ===================
 
-All Ceph clusters require at least one monitor, and at least as many OSDs as
+All Stone clusters require at least one monitor, and at least as many OSDs as
 copies of an object stored on the cluster.  Bootstrapping the initial monitor(s)
-is the first step in deploying a Ceph Storage Cluster. Monitor deployment also
+is the first step in deploying a Stone Storage Cluster. Monitor deployment also
 sets important criteria for the entire cluster, such as the number of replicas
 for pools, the number of placement groups per OSD, the heartbeat intervals,
 whether authentication is required, etc. Most of these values are set by
@@ -40,16 +40,16 @@ We will set up a cluster with ``node1`` as  the monitor node, and ``node2`` and
 Monitor Bootstrapping
 =====================
 
-Bootstrapping a monitor (a Ceph Storage Cluster, in theory) requires
+Bootstrapping a monitor (a Stone Storage Cluster, in theory) requires
 a number of things:
 
 - **Unique Identifier:** The ``fsid`` is a unique identifier for the cluster,
-  and stands for File System ID from the days when the Ceph Storage Cluster was
-  principally for the Ceph File System. Ceph now supports native interfaces,
+  and stands for File System ID from the days when the Stone Storage Cluster was
+  principally for the Stone File System. Stone now supports native interfaces,
   block devices, and object storage gateway interfaces too, so ``fsid`` is a
   bit of a misnomer.
 
-- **Cluster Name:** Ceph clusters have a cluster name, which is a simple string
+- **Cluster Name:** Stone clusters have a cluster name, which is a simple string
   without spaces. The default cluster name is ``ceph``, but you may specify
   a different cluster name. Overriding the default cluster name is
   especially useful when you are working with multiple clusters and you need to
@@ -58,14 +58,14 @@ a number of things:
   For example, when you run multiple clusters in a :ref:`multisite configuration <multisite>`,
   the cluster name (e.g., ``us-west``, ``us-east``) identifies the cluster for
   the current CLI session. **Note:** To identify the cluster name on the
-  command line interface, specify the Ceph configuration file with the
+  command line interface, specify the Stone configuration file with the
   cluster name (e.g., ``ceph.conf``, ``us-west.conf``, ``us-east.conf``, etc.).
   Also see CLI usage (``ceph --cluster {cluster-name}``).
 
 - **Monitor Name:** Each monitor instance within a cluster has a unique name.
-  In common practice, the Ceph Monitor name is the host name (we recommend one
-  Ceph Monitor per host, and no commingling of Ceph OSD Daemons with
-  Ceph Monitors). You may retrieve the short hostname with ``hostname -s``.
+  In common practice, the Stone Monitor name is the host name (we recommend one
+  Stone Monitor per host, and no commingling of Stone OSD Daemons with
+  Stone Monitors). You may retrieve the short hostname with ``hostname -s``.
 
 - **Monitor Map:** Bootstrapping the initial monitor(s) requires you to
   generate a monitor map. The monitor map requires the ``fsid``, the cluster
@@ -79,16 +79,16 @@ a number of things:
   a ``client.admin`` user. So you must generate the admin user and keyring,
   and you must also add the ``client.admin`` user to the monitor keyring.
 
-The foregoing requirements do not imply the creation of a Ceph Configuration
-file. However, as a best practice, we recommend creating a Ceph configuration
+The foregoing requirements do not imply the creation of a Stone Configuration
+file. However, as a best practice, we recommend creating a Stone configuration
 file and populating it with the ``fsid``, the ``mon initial members`` and the
 ``mon host`` settings.
 
 You can get and set all of the monitor settings at runtime as well. However,
-a Ceph Configuration file may contain only those settings that override the
-default values. When you add settings to a Ceph configuration file, these
+a Stone Configuration file may contain only those settings that override the
+default values. When you add settings to a Stone configuration file, these
 settings override the default settings. Maintaining those settings in a
-Ceph configuration file makes it easier to maintain your cluster.
+Stone configuration file makes it easier to maintain your cluster.
 
 The procedure is as follows:
 
@@ -102,14 +102,14 @@ The procedure is as follows:
 	ssh node1
 
 
-#. Ensure you have a directory for the Ceph configuration file. By default,
-   Ceph uses ``/etc/ceph``. When you install ``ceph``, the installer will
+#. Ensure you have a directory for the Stone configuration file. By default,
+   Stone uses ``/etc/ceph``. When you install ``ceph``, the installer will
    create the ``/etc/ceph`` directory automatically. ::
 
 	ls /etc/ceph
 
 
-#. Create a Ceph configuration file. By default, Ceph uses
+#. Create a Stone configuration file. By default, Stone uses
    ``ceph.conf``, where ``ceph`` reflects the cluster name. ::
 
 	sudo vim /etc/ceph/ceph.conf
@@ -120,7 +120,7 @@ The procedure is as follows:
 	uuidgen
 
 
-#. Add the unique ID to your Ceph configuration file. ::
+#. Add the unique ID to your Stone configuration file. ::
 
 	fsid = {UUID}
 
@@ -129,7 +129,7 @@ The procedure is as follows:
 	fsid = a7f64266-0894-4f1e-a635-d0aeaca0e993
 
 
-#. Add the initial monitor(s) to your Ceph configuration file. ::
+#. Add the initial monitor(s) to your Stone configuration file. ::
 
 	mon initial members = {hostname}[,{hostname}]
 
@@ -138,7 +138,7 @@ The procedure is as follows:
 	mon initial members = node1
 
 
-#. Add the IP address(es) of the initial monitor(s) to your Ceph configuration
+#. Add the IP address(es) of the initial monitor(s) to your Stone configuration
    file and save the file. ::
 
 	mon host = {ip-address}[,{ip-address}]
@@ -204,7 +204,7 @@ The procedure is as follows:
 	sudo -u ceph ceph-mon --mkfs -i node1 --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
 
 
-#. Consider settings for a Ceph configuration file. Common settings include
+#. Consider settings for a Stone configuration file. Common settings include
    the following::
 
 	[global]
@@ -289,15 +289,15 @@ Once you have your initial monitor(s) running, you should add OSDs. Your cluster
 cannot reach an ``active + clean`` state until you have enough OSDs to handle the
 number of copies of an object (e.g., ``osd pool default size = 2`` requires at
 least two OSDs). After bootstrapping your monitor, your cluster has a default
-CRUSH map; however, the CRUSH map doesn't have any Ceph OSD Daemons mapped to
-a Ceph Node.
+CRUSH map; however, the CRUSH map doesn't have any Stone OSD Daemons mapped to
+a Stone Node.
 
 
 Short Form
 ----------
 
-Ceph provides the ``ceph-volume`` utility, which can prepare a logical volume, disk, or partition
-for use with Ceph. The ``ceph-volume`` utility creates the OSD ID by
+Stone provides the ``ceph-volume`` utility, which can prepare a logical volume, disk, or partition
+for use with Stone. The ``ceph-volume`` utility creates the OSD ID by
 incrementing the index. Additionally, ``ceph-volume`` will add the new OSD to the
 CRUSH map under the host for you. Execute ``ceph-volume -h`` for CLI details.
 The ``ceph-volume`` utility automates the steps of the `Long Form`_ below. To
@@ -425,7 +425,7 @@ OSDs with the long form procedure, execute the following steps for each OSD.
      mkdir /var/lib/ceph/osd/ceph-$ID
 
 #. If the OSD is for a drive other than the OS drive, prepare it
-   for use with Ceph, and mount it to the directory you just created. ::
+   for use with Stone, and mount it to the directory you just created. ::
 
      mkfs.xfs /dev/{DEV}
      mount /dev/{DEV} /var/lib/ceph/osd/ceph-$ID
@@ -443,7 +443,7 @@ OSDs with the long form procedure, execute the following steps for each OSD.
 
      chown -R ceph:ceph /var/lib/ceph/osd/ceph-$ID
 
-#. After you add an OSD to Ceph, the OSD is in your configuration. However,
+#. After you add an OSD to Stone, the OSD is in your configuration. However,
    it is not yet running. You must start
    your new OSD before it can begin receiving data.
 
@@ -494,7 +494,7 @@ In the below instructions, ``{id}`` is an arbitrary name, such as the hostname o
 
    Then make sure you do not have a keyring set in ceph.conf in the global section; move it to the client section; or add a keyring setting specific to this mds daemon. And verify that you see the same key in the mds data directory and ``ceph auth get mds.{id}`` output.
 
-#. Now you are ready to `create a Ceph file system`_.
+#. Now you are ready to `create a Stone file system`_.
 
 
 Summary
@@ -519,11 +519,11 @@ You should see output that looks something like this::
 	1	1			osd.1	up	1
 
 To add (or remove) additional monitors, see `Add/Remove Monitors`_.
-To add (or remove) additional Ceph OSD Daemons, see `Add/Remove OSDs`_.
+To add (or remove) additional Stone OSD Daemons, see `Add/Remove OSDs`_.
 
 
 .. _Add/Remove Monitors: ../../rados/operations/add-or-rm-mons
 .. _Add/Remove OSDs: ../../rados/operations/add-or-rm-osds
 .. _Network Configuration Reference: ../../rados/configuration/network-config-ref
 .. _Monitor Config Reference - Data: ../../rados/configuration/mon-config-ref#data
-.. _create a Ceph file system: ../../cephfs/createfs
+.. _create a Stone file system: ../../cephfs/createfs

@@ -8,14 +8,14 @@ except:
     # make it work for python2
     pass
 from teuthology.orchestra.run import CommandFailedError
-from tasks.cephfs.fuse_mount import FuseMount
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.fuse_mount import FuseMount
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 
 log = logging.getLogger(__name__)
 
 
-class FullnessTestCase(CephFSTestCase):
+class FullnessTestCase(StoneFSTestCase):
     CLIENTS_REQUIRED = 2
 
     # Subclasses define whether they're filling whole cluster or just data pool
@@ -29,7 +29,7 @@ class FullnessTestCase(CephFSTestCase):
         return self.fs.is_full()
 
     def setUp(self):
-        CephFSTestCase.setUp(self)
+        StoneFSTestCase.setUp(self)
 
         mds_status = self.fs.rank_asok(["status"])
 
@@ -237,7 +237,7 @@ class FullnessTestCase(CephFSTestCase):
             print("writing some data through which we expect to succeed")
             bytes = 0
             f = os.open("{file_path}", os.O_WRONLY | os.O_CREAT)
-            os.setxattr("{file_path}", 'ceph.file.layout', b'{file_layout}')
+            os.setxattr("{file_path}", 'stone.file.layout', b'{file_layout}')
             bytes += os.write(f, b'a' * 512 * 1024)
             os.fsync(f)
             print("fsync'ed data successfully, will now attempt to fill fs")
@@ -283,7 +283,7 @@ class FullnessTestCase(CephFSTestCase):
                 else:
                     raise RuntimeError("close() failed to raise error")
             else:
-                # The kernel cephfs client does not raise errors on fclose
+                # The kernel stonefs client does not raise errors on fclose
                 os.close(f)
 
             os.unlink("{file_path}")
@@ -309,7 +309,7 @@ class FullnessTestCase(CephFSTestCase):
             print("writing some data through which we expect to succeed")
             bytes = 0
             f = os.open("{file_path}", os.O_WRONLY | os.O_CREAT)
-            os.setxattr("{file_path}", 'ceph.file.layout', b'{file_layout}')
+            os.setxattr("{file_path}", 'stone.file.layout', b'{file_layout}')
             bytes += os.write(f, b'a' * 4096)
             os.fsync(f)
             print("fsync'ed data successfully, will now attempt to fill fs")

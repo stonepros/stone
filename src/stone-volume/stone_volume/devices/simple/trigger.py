@@ -1,8 +1,8 @@
 from __future__ import print_function
 import argparse
 from textwrap import dedent
-from ceph_volume.exceptions import SuffixParsingError
-from ceph_volume import decorators
+from stone_volume.exceptions import SuffixParsingError
+from stone_volume import decorators
 from .activate import Activate
 
 
@@ -37,10 +37,10 @@ class Trigger(object):
         ** DO NOT USE DIRECTLY **
         This tool is meant to help the systemd unit that knows about OSDs.
 
-        Proxy OSD activation to ``ceph-volume simple activate`` by parsing the
+        Proxy OSD activation to ``stone-volume simple activate`` by parsing the
         input from systemd, detecting the UUID and ID associated with an OSD::
 
-            ceph-volume simple trigger {SYSTEMD-DATA}
+            stone-volume simple trigger {SYSTEMD-DATA}
 
         The systemd "data" is expected to be in the format of::
 
@@ -50,7 +50,7 @@ class Trigger(object):
         so that all needed metadata can be used for starting the OSD process.
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume simple trigger',
+            prog='stone-volume simple trigger',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=sub_command_help,
         )

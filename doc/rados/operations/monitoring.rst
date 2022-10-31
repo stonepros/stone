@@ -2,7 +2,7 @@
  Monitoring a Cluster
 ======================
 
-Once you have a running cluster, you may use the ``ceph`` tool to monitor your
+Once you have a running cluster, you may use the ``stone`` tool to monitor your
 cluster. Monitoring a cluster typically involves checking OSD status, monitor 
 status, placement group status and metadata server status.
 
@@ -12,14 +12,14 @@ Using the command line
 Interactive mode
 ----------------
 
-To run the ``ceph`` tool in interactive mode, type ``ceph`` at the command line
+To run the ``stone`` tool in interactive mode, type ``stone`` at the command line
 with no arguments.  For example:: 
 
-	ceph
-	ceph> health
-	ceph> status
-	ceph> quorum_status
-	ceph> mon stat
+	stone
+	stone> health
+	stone> status
+	stone> quorum_status
+	stone> mon stat
 
 Non-default paths
 -----------------
@@ -27,7 +27,7 @@ Non-default paths
 If you specified non-default locations for your configuration or keyring,
 you may specify their locations::
 
-   ceph -c /path/to/conf -k /path/to/keyring health
+   stone -c /path/to/conf -k /path/to/keyring health
 
 Checking a Cluster's Status
 ===========================
@@ -37,17 +37,17 @@ writing data, check your cluster's status first.
 
 To check a cluster's status, execute the following:: 
 
-	ceph status
+	stone status
 	
 Or:: 
 
-	ceph -s
+	stone -s
 
 In interactive mode, type ``status`` and press **Enter**. ::
 
-	ceph> status
+	stone> status
 
-Ceph will print the cluster status. For example, a tiny Ceph demonstration
+Stone will print the cluster status. For example, a tiny Stone demonstration
 cluster with one of each service may print the following:
 
 ::
@@ -59,7 +59,7 @@ cluster with one of each service may print the following:
   services:
     mon: 3 daemons, quorum a,b,c
     mgr: x(active)
-    mds: cephfs_a-1/1/1 up  {0=a=up:active}, 2 up:standby
+    mds: stonefs_a-1/1/1 up  {0=a=up:active}, 2 up:standby
     osd: 3 osds: 3 up, 3 in
   
   data:
@@ -69,32 +69,32 @@ cluster with one of each service may print the following:
     pgs:     16 active+clean
 
 
-.. topic:: How Ceph Calculates Data Usage
+.. topic:: How Stone Calculates Data Usage
 
    The ``usage`` value reflects the *actual* amount of raw storage used. The 
    ``xxx GB / xxx GB`` value means the amount available (the lesser number)
    of the overall storage capacity of the cluster. The notional number reflects 
    the size of the stored data before it is replicated, cloned or snapshotted.
    Therefore, the amount of data actually stored typically exceeds the notional
-   amount stored, because Ceph creates replicas of the data and may also use 
+   amount stored, because Stone creates replicas of the data and may also use 
    storage capacity for cloning and snapshotting.
 
 
 Watching a Cluster
 ==================
 
-In addition to local logging by each daemon, Ceph clusters maintain
+In addition to local logging by each daemon, Stone clusters maintain
 a *cluster log* that records high level events about the whole system.
-This is logged to disk on monitor servers (as ``/var/log/ceph/ceph.log`` by
+This is logged to disk on monitor servers (as ``/var/log/stone/stone.log`` by
 default), but can also be monitored via the command line.
 
 To follow the cluster log, use the following command
 
 :: 
 
-	ceph -w
+	stone -w
 
-Ceph will print the status of the system, followed by each log message as it
+Stone will print the status of the system, followed by each log message as it
 is emitted.  For example:
 
 :: 
@@ -106,7 +106,7 @@ is emitted.  For example:
   services:
     mon: 3 daemons, quorum a,b,c
     mgr: x(active)
-    mds: cephfs_a-1/1/1 up  {0=a=up:active}, 2 up:standby
+    mds: stonefs_a-1/1/1 up  {0=a=up:active}, 2 up:standby
     osd: 3 osds: 3 up, 3 in
   
   data:
@@ -121,16 +121,16 @@ is emitted.  For example:
   2017-07-24 08:15:15.446025 mon.a mon.0 172.21.9.34:6789/0 47 : cluster [INF] Manager daemon x is now available
 
 
-In addition to using ``ceph -w`` to print log lines as they are emitted,
-use ``ceph log last [n]`` to see the most recent ``n`` lines from the cluster
+In addition to using ``stone -w`` to print log lines as they are emitted,
+use ``stone log last [n]`` to see the most recent ``n`` lines from the cluster
 log.
 
 Monitoring Health Checks
 ========================
 
-Ceph continuously runs various *health checks* against its own status.  When
-a health check fails, this is reflected in the output of ``ceph status`` (or
-``ceph health``).  In addition, messages are sent to the cluster log to
+Stone continuously runs various *health checks* against its own status.  When
+a health check fails, this is reflected in the output of ``stone status`` (or
+``stone health``).  In addition, messages are sent to the cluster log to
 indicate when a check fails, and when the cluster recovers.
 
 For example, when an OSD goes down, the ``health`` section of the status
@@ -162,7 +162,7 @@ to a health state:
 Network Performance Checks
 --------------------------
 
-Ceph OSDs send heartbeat ping messages amongst themselves to monitor daemon availability.  We
+Stone OSDs send heartbeat ping messages amongst themselves to monitor daemon availability.  We
 also use the response times to monitor network performance.
 While it is possible that a busy OSD could delay a ping response, we can assume
 that if a network switch fails multiple delays will be detected between distinct pairs of OSDs.
@@ -192,7 +192,7 @@ The following command will show all gathered network performance data by specify
 
 ::
 
-    $ ceph daemon /var/run/ceph/ceph-mgr.x.asok dump_osd_network 0
+    $ stone daemon /var/run/stone/stone-mgr.x.asok dump_osd_network 0
     {
         "threshold": 0,
         "entries": [
@@ -276,39 +276,39 @@ Health checks can be muted so that they do not affect the overall
 reported status of the cluster.  Alerts are specified using the health
 check code (see :ref:`health-checks`)::
 
-  ceph health mute <code>
+  stone health mute <code>
 
 For example, if there is a health warning, muting it will make the
 cluster report an overall status of ``HEALTH_OK``.  For example, to
 mute an ``OSD_DOWN`` alert,::
 
-  ceph health mute OSD_DOWN
+  stone health mute OSD_DOWN
 
-Mutes are reported as part of the short and long form of the ``ceph health`` command.
+Mutes are reported as part of the short and long form of the ``stone health`` command.
 For example, in the above scenario, the cluster would report::
 
-  $ ceph health
+  $ stone health
   HEALTH_OK (muted: OSD_DOWN)
-  $ ceph health detail
+  $ stone health detail
   HEALTH_OK (muted: OSD_DOWN)
   (MUTED) OSD_DOWN 1 osds down
       osd.1 is down
 
 A mute can be explicitly removed with::
 
-  ceph health unmute <code>
+  stone health unmute <code>
 
 For example,::
 
-  ceph health unmute OSD_DOWN
+  stone health unmute OSD_DOWN
 
 A health check mute may optionally have a TTL (time to live)
 associated with it, such that the mute will automatically expire
 after the specified period of time has elapsed.  The TTL is specified as an optional
 duration argument, e.g.::
 
-  ceph health mute OSD_DOWN 4h    # mute for 4 hours
-  ceph health mute MON_DOWN 15m   # mute for 15  minutes
+  stone health mute OSD_DOWN 4h    # mute for 4 hours
+  stone health mute MON_DOWN 15m   # mute for 15  minutes
 
 Normally, if a muted health alert is resolved (e.g., in the example
 above, the OSD comes back up), the mute goes away.  If the alert comes
@@ -317,7 +317,7 @@ back later, it will be reported in the usual way.
 It is possible to make a mute "sticky" such that the mute will remain even if the
 alert clears.  For example,::
 
-  ceph health mute OSD_DOWN 1h --sticky   # ignore any/all down OSDs for next hour
+  stone health mute OSD_DOWN 1h --sticky   # ignore any/all down OSDs for next hour
 
 Most health mutes also disappear if the extent of an alert gets worse.  For example,
 if there is one OSD down, and the alert is muted, the mute will disappear if one
@@ -329,11 +329,11 @@ error.
 Detecting configuration issues
 ==============================
 
-In addition to the health checks that Ceph continuously runs on its
+In addition to the health checks that Stone continuously runs on its
 own status, there are some configuration issues that may only be detected
 by an external tool.
 
-Use the `ceph-medic`_ tool to run these additional checks on your Ceph
+Use the `stone-medic`_ tool to run these additional checks on your Stone
 cluster's configuration.
 
 Checking a Cluster's Usage Stats
@@ -343,9 +343,9 @@ To check a cluster's data usage and data distribution among pools, you can
 use the ``df`` option. It is similar to Linux ``df``. Execute 
 the following::
 
-	ceph df
+	stone df
 
-The output of ``ceph df`` looks like this::
+The output of ``stone df`` looks like this::
 
    CLASS     SIZE    AVAIL     USED  RAW USED  %RAW USED
    ssd    202 GiB  200 GiB  2.0 GiB   2.0 GiB       1.00
@@ -354,8 +354,8 @@ The output of ``ceph df`` looks like this::
    --- POOLS ---
    POOL                   ID  PGS   STORED   (DATA)   (OMAP)   OBJECTS     USED  (DATA)   (OMAP)   %USED  MAX AVAIL  QUOTA OBJECTS  QUOTA BYTES  DIRTY  USED COMPR  UNDER COMPR
    device_health_metrics   1    1  242 KiB   15 KiB  227 KiB         4  251 KiB  24 KiB  227 KiB       0    297 GiB            N/A          N/A      4         0 B          0 B
-   cephfs.a.meta           2   32  6.8 KiB  6.8 KiB      0 B        22   96 KiB  96 KiB      0 B       0    297 GiB            N/A          N/A     22         0 B          0 B
-   cephfs.a.data           3   32      0 B      0 B      0 B         0      0 B     0 B      0 B       0     99 GiB            N/A          N/A      0         0 B          0 B
+   stonefs.a.meta           2   32  6.8 KiB  6.8 KiB      0 B        22   96 KiB  96 KiB      0 B       0    297 GiB            N/A          N/A     22         0 B          0 B
+   stonefs.a.data           3   32      0 B      0 B      0 B         0      0 B     0 B      0 B       0     99 GiB            N/A          N/A      0         0 B          0 B
    test                    4   32   22 MiB   22 MiB   50 KiB       248   19 MiB  19 MiB   50 KiB       0    297 GiB            N/A          N/A    248         0 B          0 B
 
 
@@ -384,13 +384,13 @@ notional usage will be 1MB, but the actual usage may be 2MB or more depending
 on the number of replicas, clones and snapshots.  
 
 - **ID:** The number of the node within the pool.
-- **STORED:** actual amount of data user/Ceph has stored in a pool. This is
-  similar to the USED column in earlier versions of Ceph but the calculations
+- **STORED:** actual amount of data user/Stone has stored in a pool. This is
+  similar to the USED column in earlier versions of Stone but the calculations
   (for BlueStore!) are more precise (gaps are properly handled).
 
-  - **(DATA):** usage for RBD (RADOS Block Device), CephFS file data, and RGW
+  - **(DATA):** usage for RBD (RADOS Block Device), StoneFS file data, and RGW
     (RADOS Gateway) object data.
-  - **(OMAP):** key-value pairs. Used primarily by CephFS and RGW (RADOS
+  - **(OMAP):** key-value pairs. Used primarily by StoneFS and RGW (RADOS
     Gateway) for metadata storage.
 
 - **OBJECTS:** The notional number of objects stored per pool. "Notional" is
@@ -400,9 +400,9 @@ on the number of replicas, clones and snapshots.
   savings and object content gaps are also taken into account. BlueStore's
   database is not included in this amount.
 
-  - **(DATA):** object usage for RBD (RADOS Block Device), CephFS file data, and RGW
+  - **(DATA):** object usage for RBD (RADOS Block Device), StoneFS file data, and RGW
     (RADOS Gateway) object data.
-  - **(OMAP):** object key-value pairs. Used primarily by CephFS and RGW (RADOS
+  - **(OMAP):** object key-value pairs. Used primarily by StoneFS and RGW (RADOS
     Gateway) for metadata storage.
 
 - **%USED:** The notional percentage of storage used per pool.
@@ -438,22 +438,22 @@ following command:
 
 .. prompt:: bash #
 
-  ceph osd stat
+  stone osd stat
 	
 Or: 
 
 .. prompt:: bash #
 
-  ceph osd dump
+  stone osd dump
 	
 You can also check view OSDs according to their position in the CRUSH map by
 using the folloiwng command:
 
 .. prompt:: bash #
 
-   ceph osd tree
+   stone osd tree
 
-Ceph will print out a CRUSH tree with a host, its OSDs, whether they are up
+Stone will print out a CRUSH tree with a host, its OSDs, whether they are up
 and their weight:
 
 .. code-block:: bash
@@ -478,17 +478,17 @@ monitor status periodically to ensure that they are running.
 
 To see display the monitor map, execute the following::
 
-	ceph mon stat
+	stone mon stat
 	
 Or:: 
 
-	ceph mon dump
+	stone mon dump
 	
 To check the quorum status for the monitor cluster, execute the following:: 
 	
-	ceph quorum_status
+	stone quorum_status
 
-Ceph will return the quorum status. For example, a Ceph  cluster consisting of
+Stone will return the quorum status. For example, a Stone  cluster consisting of
 three monitors may return the following:
 
 .. code-block:: javascript
@@ -533,15 +533,15 @@ three monitors may return the following:
 Checking MDS Status
 ===================
 
-Metadata servers provide metadata services for  CephFS. Metadata servers have
+Metadata servers provide metadata services for  StoneFS. Metadata servers have
 two sets of states: ``up | down`` and ``active | inactive``. To ensure your
 metadata servers are ``up`` and ``active``,  execute the following:: 
 
-	ceph mds stat
+	stone mds stat
 	
 To display details of the metadata cluster, execute the following:: 
 
-	ceph fs dump
+	stone fs dump
 
 
 Checking Placement Group States
@@ -558,31 +558,31 @@ For a detailed discussion, refer to `Monitoring OSDs and Placement Groups`_.
 Using the Admin Socket
 ======================
 
-The Ceph admin socket allows you to query a daemon via a socket interface. 
-By default, Ceph sockets reside under ``/var/run/ceph``. To access a daemon
+The Stone admin socket allows you to query a daemon via a socket interface. 
+By default, Stone sockets reside under ``/var/run/stone``. To access a daemon
 via the admin socket, login to the host running the daemon and use the 
 following command:: 
 
-	ceph daemon {daemon-name}
-	ceph daemon {path-to-socket-file}
+	stone daemon {daemon-name}
+	stone daemon {path-to-socket-file}
 
 For example, the following are equivalent::
 
-    ceph daemon osd.0 foo
-    ceph daemon /var/run/ceph/ceph-osd.0.asok foo
+    stone daemon osd.0 foo
+    stone daemon /var/run/stone/stone-osd.0.asok foo
 
 To view the available admin socket commands, execute the following command:: 
 
-	ceph daemon {daemon-name} help
+	stone daemon {daemon-name} help
 
 The admin socket command enables you to show and set your configuration at
 runtime. See `Viewing a Configuration at Runtime`_ for details.
 
 Additionally, you can set configuration values at runtime directly (i.e., the
-admin socket bypasses the monitor, unlike ``ceph tell {daemon-type}.{id}
+admin socket bypasses the monitor, unlike ``stone tell {daemon-type}.{id}
 config set``, which relies on the monitor but doesn't require you to login
 directly to the host in question ).
 
-.. _Viewing a Configuration at Runtime: ../../configuration/ceph-conf#viewing-a-configuration-at-runtime
+.. _Viewing a Configuration at Runtime: ../../configuration/stone-conf#viewing-a-configuration-at-runtime
 .. _Storage Capacity: ../../configuration/mon-config-ref#storage-capacity
-.. _ceph-medic: http://docs.ceph.com/ceph-medic/master/
+.. _stone-medic: http://docs.stone.com/stone-medic/master/

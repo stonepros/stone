@@ -344,7 +344,7 @@ struct metrics_message_t {
   }
 
   void encode(bufferlist &bl, uint64_t features) const {
-    using ceph::encode;
+    using stone::encode;
     ENCODE_START(1, 1, bl);
     encode(seq, bl);
     encode(rank, bl);
@@ -353,7 +353,7 @@ struct metrics_message_t {
   }
 
   void decode(bufferlist::const_iterator &iter) {
-    using ceph::decode;
+    using stone::decode;
     DECODE_START(1, iter);
     decode(seq, iter);
     decode(rank, iter);

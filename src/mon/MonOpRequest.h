@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat <contact@redhat.com>
  * Copyright (C) 2015 SUSE LINUX GmbH
@@ -87,7 +87,7 @@ private:
   MonOpRequest(Message *req, OpTracker *tracker) :
     TrackedOp(tracker,
       req->get_recv_stamp().is_zero() ?
-      ceph_clock_now() : req->get_recv_stamp()),
+      stone_clock_now() : req->get_recv_stamp()),
     request(req),
     con(NULL),
     forwarded_to_leader(false),
@@ -101,7 +101,7 @@ private:
     }
   }
 
-  void _dump(ceph::Formatter *f) const override {
+  void _dump(stone::Formatter *f) const override {
     {
       f->open_array_section("events");
       std::lock_guard l(lock);

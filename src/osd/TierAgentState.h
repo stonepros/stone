@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Sage Weil <sage@inktank.com>
  *
@@ -53,7 +53,7 @@ struct TierAgentState {
     case FLUSH_MODE_IDLE: return "idle";
     case FLUSH_MODE_LOW: return "low";
     case FLUSH_MODE_HIGH: return "high";
-    default: ceph_abort_msg("bad flush mode");
+    default: stone_abort_msg("bad flush mode");
     }
   }
   const char *get_flush_mode_name() const {
@@ -70,7 +70,7 @@ struct TierAgentState {
     case EVICT_MODE_IDLE: return "idle";
     case EVICT_MODE_SOME: return "some";
     case EVICT_MODE_FULL: return "full";
-    default: ceph_abort_msg("bad evict mode");
+    default: stone_abort_msg("bad evict mode");
     }
   }
   const char *get_evict_mode_name() const {
@@ -114,7 +114,7 @@ struct TierAgentState {
     hit_set_map.clear();
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_string("flush_mode", get_flush_mode_name());
     f->dump_string("evict_mode", get_evict_mode_name());
     f->dump_unsigned("evict_effort", evict_effort);

@@ -1,10 +1,10 @@
 # Orchestrator CLI
 
-See also [orchestrator cli doc](https://docs.ceph.com/en/latest/mgr/orchestrator/).
+See also [orchestrator cli doc](https://docs.stone.com/en/latest/mgr/orchestrator/).
 
 ## Running the Teuthology tests
 
-To run the API tests against a real Ceph cluster, we leverage the Teuthology
+To run the API tests against a real Stone cluster, we leverage the Teuthology
 framework and the `test_orchestrator` backend.
 
 ``source`` the script and run the tests manually::

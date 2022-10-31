@@ -108,7 +108,7 @@ mkdir -p $test_dir
 pushd $test_dir
 
 dir_max_entries=100
-ceph config set mds mds_dir_max_entries $dir_max_entries
+stone config set mds mds_dir_max_entries $dir_max_entries
 
 ok_dir_max_entries=$dir_max_entries
 fail_dir_max_entries=$((dir_max_entries+1))
@@ -139,7 +139,7 @@ expect_false make_links $fail_dir_max_entries
 
 # no limit (e.g., default value)
 dir_max_entries=0
-ceph config set mds mds_dir_max_entries $dir_max_entries
+stone config set mds mds_dir_max_entries $dir_max_entries
 
 make_files 500
 make_dirs 500

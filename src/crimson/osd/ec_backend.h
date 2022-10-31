@@ -22,14 +22,14 @@ public:
   }
   void on_actingset_changed(peering_info_t pi) final {}
 private:
-  ll_read_errorator::future<ceph::bufferlist> _read(const hobject_t& hoid,
+  ll_read_errorator::future<stone::bufferlist> _read(const hobject_t& hoid,
                                                     uint64_t off,
                                                     uint64_t len,
                                                     uint32_t flags) override;
   seastar::future<crimson::osd::acked_peers_t>
   _submit_transaction(std::set<pg_shard_t>&& pg_shards,
 		      const hobject_t& hoid,
-		      ceph::os::Transaction&& txn,
+		      stone::os::Transaction&& txn,
 		      const osd_op_params_t& req,
 		      epoch_t min_epoch, epoch_t max_epoch,
 		      std::vector<pg_log_entry_t>&& log_entries) final;

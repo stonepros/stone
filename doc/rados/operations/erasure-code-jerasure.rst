@@ -3,7 +3,7 @@ Jerasure erasure code plugin
 ============================
 
 The *jerasure* plugin is the most generic and flexible plugin, it is
-also the default for Ceph erasure coded pools. 
+also the default for Stone erasure coded pools. 
 
 The *jerasure* plugin encapsulates the `Jerasure
 <http://jerasure.org>`_ library. It is
@@ -15,7 +15,7 @@ Create a jerasure profile
 
 To create a new *jerasure* erasure code profile::
 
-        ceph osd erasure-code-profile set {name} \
+        stone osd erasure-code-profile set {name} \
              plugin=jerasure \
              k={data-chunks} \
              m={coding-chunks} \
@@ -108,7 +108,7 @@ Where:
 
 :Type: String
 :Required: No.
-:Default: /usr/lib/ceph/erasure-code
+:Default: /usr/lib/stone/erasure-code
 
 ``--force``
 

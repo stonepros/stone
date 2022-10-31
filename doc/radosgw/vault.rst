@@ -37,7 +37,7 @@ HashiCorp `Vault`_ can be used as a secure key management service for
 #. `Vault authentication`_
 #. `Vault namespaces`_
 #. `Create a key in Vault`_
-#. `Configure the Ceph Object Gateway`_
+#. `Configure the Stone Object Gateway`_
 #. `Upload object`_
 
 Some examples below use the Vault command line utility to interact with
@@ -92,7 +92,7 @@ Most tokens in Vault have limited lifetimes and powers.  The only
 sort of Vault token that does not have a lifetime are root tokens.
 For all other tokens, it is necesary to periodically refresh them,
 either by performing initial authentication, or by renewing the token.
-Ceph does not have any logic to perform either operation.
+Stone does not have any logic to perform either operation.
 The simplest best way to use Vault tokens with ceph is to
 also run the Vault agent and have it refresh the token file.
 When the Vault agent is used in this mode, file system permissions
@@ -356,10 +356,10 @@ Sample output::
   name                      mybucketkey
   type                      aes256-gcm96
 
-Configure the Ceph Object Gateway
+Configure the Stone Object Gateway
 =================================
 
-Edit the Ceph configuration file to enable Vault as a KMS backend for
+Edit the Stone configuration file to enable Vault as a KMS backend for
 server-side encryption::
 
   rgw crypt s3 kms backend = vault

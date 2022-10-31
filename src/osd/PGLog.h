@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -17,7 +17,7 @@
 #pragma once
 
 // re-include our assert to clobber boost's
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/common_fwd.h"
 #include "osd_types.h"
 #include "os/ObjectStore.h"
@@ -117,9 +117,9 @@ struct PGLog : DoutPrefixProvider {
     return out;
   }
   unsigned get_subsys() const override {
-    return static_cast<unsigned>(ceph_subsys_osd);
+    return static_cast<unsigned>(stone_subsys_osd);
   }
-  StoneeContext *get_cct() const override {
+  StoneContext *get_cct() const override {
     return cct;
   }
 
@@ -146,10 +146,10 @@ public:
    * plus some methods to manipulate it all.
    */
   struct IndexedLog : public pg_log_t {
-    mutable ceph::unordered_map<hobject_t,pg_log_entry_t*> objects;  // ptrs into log.  be careful!
-    mutable ceph::unordered_map<osd_reqid_t,pg_log_entry_t*> caller_ops;
-    mutable ceph::unordered_multimap<osd_reqid_t,pg_log_entry_t*> extra_caller_ops;
-    mutable ceph::unordered_map<osd_reqid_t,pg_log_dup_t*> dup_index;
+    mutable stone::unordered_map<hobject_t,pg_log_entry_t*> objects;  // ptrs into log.  be careful!
+    mutable stone::unordered_map<osd_reqid_t,pg_log_entry_t*> caller_ops;
+    mutable stone::unordered_multimap<osd_reqid_t,pg_log_entry_t*> extra_caller_ops;
+    mutable stone::unordered_map<osd_reqid_t,pg_log_dup_t*> dup_index;
 
     // recovery pointers
     std::list<pg_log_entry_t>::iterator complete_to; // not inclusive of referenced item
@@ -283,8 +283,8 @@ public:
     /****/
     void claim_log_and_clear_rollback_info(const pg_log_t& o) {
       // we must have already trimmed the old entries
-      ceph_assert(rollback_info_trimmed_to == head);
-      ceph_assert(rollback_info_trimmed_to_riter == log.rbegin());
+      stone_assert(rollback_info_trimmed_to == head);
+      stone_assert(rollback_info_trimmed_to_riter == log.rbegin());
 
       *this = IndexedLog(o);
 
@@ -299,8 +299,8 @@ public:
 
     void zero() {
       // we must have already trimmed the old entries
-      ceph_assert(rollback_info_trimmed_to == head);
-      ceph_assert(rollback_info_trimmed_to_riter == log.rbegin());
+      stone_assert(rollback_info_trimmed_to == head);
+      stone_assert(rollback_info_trimmed_to_riter == log.rbegin());
 
       unindex();
       pg_log_t::clear();
@@ -343,9 +343,9 @@ public:
       int *return_code,
       std::vector<pg_log_op_return_item_t> *op_returns) const
     {
-      ceph_assert(version);
-      ceph_assert(user_version);
-      ceph_assert(return_code);
+      stone_assert(version);
+      stone_assert(user_version);
+      stone_assert(return_code);
       if (!(indexed_data & PGLOG_INDEXED_CALLER_OPS)) {
         index_caller_ops();
       }
@@ -383,7 +383,7 @@ public:
 	    return true;
 	  }
 	}
-	ceph_abort_msg("in extra_caller_ops but not extra_reqids");
+	stone_abort_msg("in extra_caller_ops but not extra_reqids");
       }
 
       if (!(indexed_data & PGLOG_INDEXED_DUPS)) {
@@ -590,7 +590,7 @@ public:
     // actors
     void add(const pg_log_entry_t& e, bool applied = true) {
       if (!applied) {
-	ceph_assert(get_can_rollback_to() == head);
+	stone_assert(get_can_rollback_to() == head);
       }
 
       // make sure our buffers don't pin bigger buffers
@@ -603,8 +603,8 @@ public:
       if (rollback_info_trimmed_to_riter == log.rbegin())
 	++rollback_info_trimmed_to_riter;
 
-      ceph_assert(e.version > head);
-      ceph_assert(head.version == 0 || e.version.version > head.version);
+      stone_assert(e.version > head);
+      stone_assert(head.version == 0 || e.version.version > head.version);
       head = e.version;
 
       // to our index
@@ -631,7 +631,7 @@ public:
     } // add
 
     void trim(
-      StoneeContext* cct,
+      StoneContext* cct,
       eversion_t s,
       std::set<eversion_t> *trimmed,
       std::set<std::string>* trimmed_dups,
@@ -655,7 +655,7 @@ protected:
   eversion_t dirty_from_dups;  ///< must clear/writeout all dups >= dirty_from_dups
   eversion_t write_from_dups;  ///< must write keys >= write_from_dups
   std::set<std::string> trimmed_dups;    ///< must clear keys in trimmed_dups
-  StoneeContext *cct;
+  StoneContext *cct;
   bool pg_log_debug;
   /// Log is clean on [dirty_to, dirty_from)
   bool touched_log;
@@ -749,7 +749,7 @@ protected:
 public:
 
   // cppcheck-suppress noExplicitConstructor
-  PGLog(StoneeContext *cct) :
+  PGLog(StoneContext *cct) :
     dirty_from(eversion_t::max()),
     writeout_from(eversion_t::max()),
     dirty_from_dups(eversion_t::max()),
@@ -899,19 +899,19 @@ public:
       }
     }
 
-    ceph_assert(log.get_can_rollback_to() >= v);
+    stone_assert(log.get_can_rollback_to() >= v);
   }
 
   void reset_complete_to(pg_info_t *info) {
     if (log.log.empty()) // caller is split_into()
       return;
     log.complete_to = log.log.begin();
-    ceph_assert(log.complete_to != log.log.end());
+    stone_assert(log.complete_to != log.log.end());
     auto oldest_need = missing.get_oldest_need();
     if (oldest_need != eversion_t()) {
       while (log.complete_to->version < oldest_need) {
         ++log.complete_to;
-        ceph_assert(log.complete_to != log.log.end());
+        stone_assert(log.complete_to != log.log.end());
       }
     }
     if (!info)
@@ -994,7 +994,7 @@ protected:
     }
 
     // entries is non-empty
-    ceph_assert(!orig_entries.empty());
+    stone_assert(!orig_entries.empty());
     // strip out and ignore ERROR entries
     mempool::osd_pglog::list<pg_log_entry_t> entries;
     eversion_t last;
@@ -1003,7 +1003,7 @@ protected:
 	 i != orig_entries.end();
 	 ++i) {
       // all entries are on hoid
-      ceph_assert(i->soid == hoid);
+      stone_assert(i->soid == hoid);
       // did not see error entries before this entry and this entry is not error
       // then this entry is the first non error entry
       bool first_non_error = ! seen_non_error && ! i->is_error();
@@ -1020,9 +1020,9 @@ protected:
       if (i != orig_entries.begin() && i->prior_version != eversion_t() &&
           ! first_non_error) {
 	// in increasing order of version
-	ceph_assert(i->version > last);
+	stone_assert(i->version > last);
 	// prior_version correct (unless it is an ERROR entry)
-	ceph_assert(i->prior_version == last || i->is_error());
+	stone_assert(i->prior_version == last || i->is_error());
       }
       if (i->is_error()) {
 	ldpp_dout(dpp, 20) << __func__ << ": ignoring " << *i << dendl;
@@ -1058,15 +1058,15 @@ protected:
       ldpp_dout(dpp, 10) << __func__ << ": more recent entry found: "
 			 << *objiter->second << ", already merged" << dendl;
 
-      ceph_assert(objiter->second->version > last_divergent_update);
+      stone_assert(objiter->second->version > last_divergent_update);
 
       // ensure missing has been updated appropriately
       if (objiter->second->is_update() ||
 	  (missing.may_include_deletes && objiter->second->is_delete())) {
-	ceph_assert(missing.is_missing(hoid) &&
+	stone_assert(missing.is_missing(hoid) &&
 	       missing.get_items().at(hoid).need == objiter->second->version);
       } else {
-	ceph_assert(!missing.is_missing(hoid));
+	stone_assert(!missing.is_missing(hoid));
       }
       missing.revise_have(hoid, eversion_t());
       missing.mark_fully_dirty(hoid);
@@ -1156,7 +1156,7 @@ protected:
     if (can_rollback) {
       /// Case 4)
       for (auto i = entries.rbegin(); i != entries.rend(); ++i) {
-	ceph_assert(i->can_rollback() && i->version > olog_can_rollback_to);
+	stone_assert(i->can_rollback() && i->version > olog_can_rollback_to);
 	ldpp_dout(dpp, 10) << __func__ << ": hoid " << hoid
 			   << " rolling back " << *i << dendl;
 	if (rollbacker)
@@ -1261,7 +1261,7 @@ public:
     const DoutPrefixProvider *dpp) {
     bool invalidate_stats = false;
     if (log && !entries.empty()) {
-      ceph_assert(log->head < entries.begin()->version);
+      stone_assert(log->head < entries.begin()->version);
     }
     for (auto p = entries.begin(); p != entries.end(); ++p) {
       invalidate_stats = invalidate_stats || !p->is_error();
@@ -1323,14 +1323,14 @@ public:
 
   void write_log_and_missing(
     ObjectStore::Transaction& t,
-    std::map<std::string,ceph::buffer::list> *km,
+    std::map<std::string,stone::buffer::list> *km,
     const coll_t& coll,
     const ghobject_t &log_oid,
     bool require_rollback);
 
   static void write_log_and_missing_wo_missing(
     ObjectStore::Transaction& t,
-    std::map<std::string,ceph::buffer::list>* km,
+    std::map<std::string,stone::buffer::list>* km,
     pg_log_t &log,
     const coll_t& coll,
     const ghobject_t &log_oid, std::map<eversion_t, hobject_t> &divergent_priors,
@@ -1338,7 +1338,7 @@ public:
 
   static void write_log_and_missing(
     ObjectStore::Transaction& t,
-    std::map<std::string,ceph::buffer::list>* km,
+    std::map<std::string,stone::buffer::list>* km,
     pg_log_t &log,
     const coll_t& coll,
     const ghobject_t &log_oid,
@@ -1348,7 +1348,7 @@ public:
 
   static void _write_log_and_missing_wo_missing(
     ObjectStore::Transaction& t,
-    std::map<std::string,ceph::buffer::list>* km,
+    std::map<std::string,stone::buffer::list>* km,
     pg_log_t &log,
     const coll_t& coll, const ghobject_t &log_oid,
     std::map<eversion_t, hobject_t> &divergent_priors,
@@ -1366,7 +1366,7 @@ public:
 
   static void _write_log_and_missing(
     ObjectStore::Transaction& t,
-    std::map<std::string,ceph::buffer::list>* km,
+    std::map<std::string,stone::buffer::list>* km,
     pg_log_t &log,
     const coll_t& coll, const ghobject_t &log_oid,
     eversion_t dirty_to,
@@ -1425,8 +1425,8 @@ public:
     // legacy?
     struct stat st;
     int r = store->stat(ch, pgmeta_oid, &st);
-    ceph_assert(r == 0);
-    ceph_assert(st.st_size == 0);
+    stone_assert(r == 0);
+    stone_assert(st.st_size == 0);
 
     // will get overridden below if it had been recorded
     eversion_t on_disk_can_rollback_to = info.last_update;
@@ -1439,12 +1439,12 @@ public:
     std::list<pg_log_entry_t> entries;
     std::list<pg_log_dup_t> dups;
     if (p) {
-      using ceph::decode;
+      using stone::decode;
       for (p->seek_to_first(); p->valid() ; p->next()) {
 	// non-log pgmeta_oid keys are prefixed with _; skip those
 	if (p->key()[0] == '_')
 	  continue;
-	auto bl = p->value();//Copy ceph::buffer::list before creating iterator
+	auto bl = p->value();//Copy stone::buffer::list before creating iterator
 	auto bp = bl.cbegin();
 	if (p->key() == "divergent_priors") {
 	  decode(divergent_priors, bp);
@@ -1465,14 +1465,14 @@ public:
 	  decode(item, bp);
           ldpp_dout(dpp, 20) << "read_log_and_missing " << item << dendl;
 	  if (item.is_delete()) {
-	    ceph_assert(missing.may_include_deletes);
+	    stone_assert(missing.may_include_deletes);
 	  }
 	  missing.add(oid, std::move(item));
 	} else if (p->key().substr(0, 4) == std::string("dup_")) {
 	  pg_log_dup_t dup;
 	  decode(dup, bp);
 	  if (!dups.empty()) {
-	    ceph_assert(dups.back().version < dup.version);
+	    stone_assert(dups.back().version < dup.version);
 	  }
 	  dups.push_back(dup);
 	} else {
@@ -1481,8 +1481,8 @@ public:
 	  ldpp_dout(dpp, 20) << "read_log_and_missing " << e << dendl;
 	  if (!entries.empty()) {
 	    pg_log_entry_t last_e(entries.back());
-	    ceph_assert(last_e.version.version < e.version.version);
-	    ceph_assert(last_e.version.epoch <= e.version.epoch);
+	    stone_assert(last_e.version.version < e.version.version);
+	    stone_assert(last_e.version.epoch <= e.version.epoch);
 	  }
 	  entries.push_back(e);
 	  if (log_keys_debug)
@@ -1520,7 +1520,7 @@ public:
 	  if (!missing.may_include_deletes && i->is_delete())
 	    continue;
 
-	  ceph::buffer::list bv;
+	  stone::buffer::list bv;
 	  int r = store->getattr(
 	    ch,
 	    ghobject_t(i->soid, ghobject_t::NO_GEN, info.pgid.shard),
@@ -1535,11 +1535,11 @@ public:
 
 	      if (debug_verify_stored_missing) {
 		auto miter = missing.get_items().find(i->soid);
-		ceph_assert(miter != missing.get_items().end());
-		ceph_assert(miter->second.need == i->version);
+		stone_assert(miter != missing.get_items().end());
+		stone_assert(miter->second.need == i->version);
 		// the 'have' version is reset if an object is deleted,
 		// then created again
-		ceph_assert(miter->second.have == oi.version || miter->second.have == eversion_t());
+		stone_assert(miter->second.have == oi.version || miter->second.have == eversion_t());
 		checked.insert(i->soid);
 	      } else {
 		missing.add(i->soid, i->version, oi.version, i->is_delete());
@@ -1550,13 +1550,13 @@ public:
 	    if (debug_verify_stored_missing) {
 	      auto miter = missing.get_items().find(i->soid);
 	      if (i->is_delete()) {
-		ceph_assert(miter == missing.get_items().end() ||
+		stone_assert(miter == missing.get_items().end() ||
 		       (miter->second.need == i->version &&
 			miter->second.have == eversion_t()));
 	      } else {
-		ceph_assert(miter != missing.get_items().end());
-		ceph_assert(miter->second.need == i->version);
-		ceph_assert(miter->second.have == eversion_t());
+		stone_assert(miter != missing.get_items().end());
+		stone_assert(miter->second.need == i->version);
+		stone_assert(miter->second.have == eversion_t());
 	      }
 	      checked.insert(i->soid);
 	    } else {
@@ -1574,9 +1574,9 @@ public:
 				<< i.first << " " << i.second
 				<< " last_backfill = " << info.last_backfill
 				<< dendl;
-	      ceph_abort_msg("invalid missing std::set entry found");
+	      stone_abort_msg("invalid missing std::set entry found");
 	    }
-	    ceph::buffer::list bv;
+	    stone::buffer::list bv;
 	    int r = store->getattr(
 	      ch,
 	      ghobject_t(i.first, ghobject_t::NO_GEN, info.pgid.shard),
@@ -1584,13 +1584,13 @@ public:
 	      bv);
 	    if (r >= 0) {
 	      object_info_t oi(bv);
-	      ceph_assert(oi.version == i.second.have || eversion_t() == i.second.have);
+	      stone_assert(oi.version == i.second.have || eversion_t() == i.second.have);
 	    } else {
-	      ceph_assert(i.second.is_delete() || eversion_t() == i.second.have);
+	      stone_assert(i.second.is_delete() || eversion_t() == i.second.have);
 	    }
 	  }
 	} else {
-	  ceph_assert(must_rebuild);
+	  stone_assert(must_rebuild);
 	  for (auto i = divergent_priors.rbegin();
 	       i != divergent_priors.rend();
 	       ++i) {
@@ -1599,7 +1599,7 @@ public:
 	      continue;
 	    if (did.count(i->second)) continue;
 	    did.insert(i->second);
-	    ceph::buffer::list bv;
+	    stone::buffer::list bv;
 	    int r = store->getattr(
 	      ch,
 	      ghobject_t(i->second, ghobject_t::NO_GEN, info.pgid.shard),
@@ -1620,17 +1620,17 @@ public:
 		 */
 	      /**
 		 * Unfortunately the assessment above is incorrect because of
-		 * http://tracker.ceph.com/issues/17916 (we were incorrectly
+		 * http://tracker.stone.com/issues/17916 (we were incorrectly
 		 * not removing the divergent_priors std::set from disk state!),
 		 * so let's check that.
 		 */
 	      if (oi.version > i->first && tolerate_divergent_missing_log) {
 		ldpp_dout(dpp, 0) << "read_log divergent_priors entry (" << *i
 				  << ") inconsistent with disk state (" <<  oi
-				  << "), assuming it is tracker.ceph.com/issues/17916"
+				  << "), assuming it is tracker.stone.com/issues/17916"
 				  << dendl;
 	      } else {
-		ceph_assert(oi.version == i->first);
+		stone_assert(oi.version == i->first);
 	      }
 	    } else {
 	      ldpp_dout(dpp, 15) << "read_log_and_missing  missing " << *i << dendl;

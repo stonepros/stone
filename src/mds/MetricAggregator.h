@@ -10,7 +10,7 @@
 
 #include "msg/msg_types.h"
 #include "msg/Dispatcher.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
 #include "messages/MMDSMetrics.h"
 
@@ -54,7 +54,7 @@ public:
 private:
   // drop this lock when calling ->send_message_mds() else mds might
   // deadlock
-  ceph::mutex lock = ceph::make_mutex("MetricAggregator::lock");
+  stone::mutex lock = stone::make_mutex("MetricAggregator::lock");
   MDSRank *mds;
   MgrClient *mgrc;
 

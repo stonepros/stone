@@ -3,18 +3,18 @@
 FS volumes and subvolumes
 =========================
 
-A  single source of truth for CephFS exports is implemented in the volumes
-module of the :term:`Ceph Manager` daemon (ceph-mgr). The OpenStack shared
-file system service (manila_), Ceph Container Storage Interface (CSI_),
+A  single source of truth for StoneFS exports is implemented in the volumes
+module of the :term:`Stone Manager` daemon (ceph-mgr). The OpenStack shared
+file system service (manila_), Stone Container Storage Interface (CSI_),
 storage administrators among others can use the common CLI provided by the
-ceph-mgr volumes module to manage the CephFS exports.
+ceph-mgr volumes module to manage the StoneFS exports.
 
 The ceph-mgr volumes module implements the following file system export
 abstactions:
 
-* FS volumes, an abstraction for CephFS file systems
+* FS volumes, an abstraction for StoneFS file systems
 
-* FS subvolumes, an abstraction for independent CephFS directory trees
+* FS subvolumes, an abstraction for independent StoneFS directory trees
 
 * FS subvolume groups, an abstraction for a directory level higher than FS
   subvolumes to effect policies (e.g., :doc:`/cephfs/file-layouts`) across a
@@ -29,9 +29,9 @@ Some possible use-cases for the export abstractions:
 Requirements
 ------------
 
-* Nautilus (14.2.x) or a later version of Ceph
+* Nautilus (14.2.x) or a later version of Stone
 
-* Cephx client user (see :doc:`/rados/operations/user-management`) with
+* Stonex client user (see :doc:`/rados/operations/user-management`) with
   the following minimum capabilities::
 
     mon 'allow r'
@@ -45,7 +45,7 @@ Create a volume using::
 
     $ ceph fs volume create <vol_name> [<placement>]
 
-This creates a CephFS file system and its data and metadata pools. It can also
+This creates a StoneFS file system and its data and metadata pools. It can also
 try to create MDSes for the filesystem using the enabled ceph-mgr orchestrator
 module (see :doc:`/mgr/orchestrator`), e.g. rook.
 
@@ -111,7 +111,7 @@ List subvolume groups using::
 
     $ ceph fs subvolumegroup ls <vol_name>
 
-.. note:: Subvolume group snapshot feature is no longer supported in mainline CephFS (existing group
+.. note:: Subvolume group snapshot feature is no longer supported in mainline StoneFS (existing group
           snapshots can still be listed and deleted)
 
 Remove a snapshot of a subvolume group using::
@@ -283,7 +283,7 @@ data sets.
 
 Protecting snapshots prior to cloning was a pre-requisite in the Nautilus release, and the commands to protect/unprotect
 snapshots were introduced for this purpose. This pre-requisite, and hence the commands to protect/unprotect, is being
-deprecated in mainline CephFS, and may be removed from a future release.
+deprecated in mainline StoneFS, and may be removed from a future release.
 
 The commands being deprecated are:
   $ ceph fs subvolume snapshot protect <vol_name> <subvol_name> <snap_name> [--group_name <subvol_group_name>]

@@ -28,7 +28,7 @@ describe('NfsDetailsComponent', () => {
     component.selection = {
       export_id: 1,
       path: '/qwe',
-      fsal: { name: 'CEPH', user_id: 'fs', fs_name: 1 },
+      fsal: { name: 'STONE', user_id: 'fs', fs_name: 1 },
       cluster_id: 'cluster1',
       pseudo: '/qwe',
       access_type: 'RW',
@@ -54,15 +54,15 @@ describe('NfsDetailsComponent', () => {
   it('should prepare data', () => {
     expect(component.data).toEqual({
       'Access Type': 'RW',
-      'CephFS Filesystem': 1,
-      'CephFS User': 'fs',
+      'StoneFS Filesystem': 1,
+      'StoneFS User': 'fs',
       Cluster: 'cluster1',
       'NFS Protocol': ['NFSv4'],
       Path: '/qwe',
       Pseudo: '/qwe',
       'Security Label': undefined,
       Squash: 'no_root_squash',
-      'Storage Backend': 'CephFS',
+      'Storage Backend': 'StoneFS',
       Transport: ['TCP', 'UDP']
     });
   });

@@ -1,5 +1,5 @@
 ============================
- Ceph Block Device Manpages
+ Stone Block Device Manpages
 ============================
 
 .. toctree::

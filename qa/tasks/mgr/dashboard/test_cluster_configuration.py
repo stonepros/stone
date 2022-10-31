@@ -27,14 +27,14 @@ class ClusterConfigurationTest(DashboardTestCase):
 
         orig_value = self._get_config_by_name(config_name)
 
-        self._ceph_cmd(['config', 'set', 'mon', config_name, 'true'])
+        self._stone_cmd(['config', 'set', 'mon', config_name, 'true'])
         self.wait_until_equal(
             lambda: self._get_config_by_name(config_name),
             [{'section': 'mon', 'value': 'true'}],
             timeout=30,
             period=1)
 
-        self._ceph_cmd(['config', 'set', 'mon', config_name, 'false'])
+        self._stone_cmd(['config', 'set', 'mon', config_name, 'false'])
         self.wait_until_equal(
             lambda: self._get_config_by_name(config_name),
             [{'section': 'mon', 'value': 'false'}],
@@ -43,7 +43,7 @@ class ClusterConfigurationTest(DashboardTestCase):
 
         # restore value
         if orig_value:
-            self._ceph_cmd(['config', 'set', 'mon', config_name, orig_value[0]['value']])
+            self._stone_cmd(['config', 'set', 'mon', config_name, orig_value[0]['value']])
 
     def test_filter_config_options(self):
         config_names = ['osd_scrub_during_recovery', 'osd_scrub_begin_hour', 'osd_scrub_end_hour']
@@ -390,9 +390,9 @@ class ClusterConfigurationTest(DashboardTestCase):
         values = self._get_config_by_name(config_name)
         if values:
             for value in values:
-                self._ceph_cmd(['config', 'rm', value['section'], config_name])
+                self._stone_cmd(['config', 'rm', value['section'], config_name])
 
     def _reset_original_values(self, config_name, orig_values):
         if orig_values:
             for value in orig_values:
-                self._ceph_cmd(['config', 'set', value['section'], config_name, value['value']])
+                self._stone_cmd(['config', 'set', value['section'], config_name, value['value']])

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# This is a test for https://tracker.ceph.com/issues/41036, but it also
-# triggers https://tracker.ceph.com/issues/41404 in some environments.
+# This is a test for https://tracker.stone.com/issues/41036, but it also
+# triggers https://tracker.stone.com/issues/41404 in some environments.
 
 set -ex
 
@@ -52,7 +52,7 @@ function run_unmap_by_spec() {
 }
 
 # Can't test with exclusive-lock, don't bother enabling deep-flatten.
-# See https://tracker.ceph.com/issues/42492.
+# See https://tracker.stone.com/issues/42492.
 for i in {1..300}; do
     rbd create --size 1 --image-feature '' img$i
 done

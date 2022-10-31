@@ -1,22 +1,22 @@
-ceph-python-common
+stone-python-common
 ==================
 
 This library is meant to be used to keep common data structures and
-functions usable throughout the Ceph project.
+functions usable throughout the Stone project.
 
 Like for example:
 
 - All different Cython bindings.
 - MGR modules.
-- ``ceph`` command line interface and other Ceph tools.
+- ``stone`` command line interface and other Stone tools.
 - Also external tools.
 
 Usage
 =====
 
-From within the Ceph git, just import it:
+From within the Stone git, just import it:
 
 .. code:: python
 
-    from ceph.deployment_utils import DriveGroupSpec
-    from ceph.exceptions import OSError
+    from stone.deployment_utils import DriveGroupSpec
+    from stone.exceptions import OSError

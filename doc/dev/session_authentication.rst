@@ -1,10 +1,10 @@
 ==============================================
-Session Authentication for the Cephx Protocol
+Session Authentication for the Stonex Protocol
 ==============================================
 Peter Reiher
 7/30/12
 
-The original Cephx protocol authenticated the client to the authenticator and set up a session 
+The original Stonex protocol authenticated the client to the authenticator and set up a session 
 key used to authenticate the client to the server it needs to talk to.  It did not, however,
 authenticate the ongoing messages between the client and server.  Based on the fact that they
 share a secret key, these ongoing session messages can be easily authenticated by using the
@@ -13,12 +13,12 @@ key to sign the messages.
 This document describes changes to the code that allow such ongoing session authentication.
 The changes allow for future changes that permit other authentication protocols (and the 
 existing null NONE and UNKNOWN protocols) to handle signatures, but the only protocol that 
-actually does signatures, at the time of the writing, is the Cephx protocol.
+actually does signatures, at the time of the writing, is the Stonex protocol.
 
 Introduction
 -------------
 
-This code comes into play after the Cephx protocol has completed.  At this point, the client and
+This code comes into play after the Stonex protocol has completed.  At this point, the client and
 server share a secret key.  This key will be used for authentication.  For other protocols, there
 may or may not be such a key in place, and perhaps the actual procedures used to perform 
 signing will be different, so the code is written to be general.
@@ -43,7 +43,7 @@ signed, and received messages must have their signatures checked.
 The signature could be computed in a variety of ways, but currently its size is limited to 64 bits.
 A message's signature is placed in its footer, in a field called ``sig``.
 
-The signature code in Cephx can be turned on and off at runtime, using a Ceph boolean option called 
+The signature code in Stonex can be turned on and off at runtime, using a Stone boolean option called 
 ``cephx\_sign\_messages``.  It is currently set to false, by default, so no messages will be signed.  It
 must be changed to true to cause signatures to be calculated and checked.
 
@@ -57,7 +57,7 @@ messages going in both directions will be signed with the same key, so only that
 saved.
 
 The key is saved when the pipe is established.  On the client side, this happens in ``connect()``,
-which is located in ``msg/Pipe.cc``.  The key is obtained from a run of the Cephx protocol,
+which is located in ``msg/Pipe.cc``.  The key is obtained from a run of the Stonex protocol,
 which results in a successfully checked authorizer structure.  If there is such an authorizer
 available, the code calls ``get\_auth\_session\_handler()`` to create a new authentication session handler
 and stores it in the pipe data structure.  On the server side, a similar thing is done in 
@@ -85,12 +85,12 @@ call ``sign\_message()`` as soon as we've calculated that CRC.
 a specific version of it must be written for each authentication protocol supported.  Currently,
 only UNKNOWN, NONE and CEPHX are supported.  So there is a separate version of ``sign\_message()`` in
 ``auth/unknown/AuthUnknownSessionHandler.h``, ``auth/none/AuthNoneSessionHandler.h`` and 
-``auth/cephx/CephxSessionHandler.cc``.  The UNKNOWN and NONE versions simply return 0, indicating 
+``auth/cephx/StonexSessionHandler.cc``.  The UNKNOWN and NONE versions simply return 0, indicating 
 success.
 
-The CEPHX version is more extensive.  It is found in ``auth/cephx/CephxSessionHandler.cc``.  
+The CEPHX version is more extensive.  It is found in ``auth/cephx/StonexSessionHandler.cc``.  
 The first thing done is to determine if the run time option to handle signatures (see above) is on.  
-If not, the Cephx version of ``sign\_message()`` simply returns success without actually calculating 
+If not, the Stonex version of ``sign\_message()`` simply returns success without actually calculating 
 a signature or inserting it into the message.
 
 If the run time option is enabled, ``sign\_message()`` copies all of the message's CRCs (one from the
@@ -114,7 +114,7 @@ NONE versions are stored in ``auth/unknown/AuthUnknownSessionHandler.h`` and
 success.
 
 The CEPHX version of ``check\_message\_signature()`` performs a real signature check.  This routine 
-(stored in ``auth/cephx/CephxSessionHandler.cc``) exits with success if the run time option has 
+(stored in ``auth/cephx/StonexSessionHandler.cc``) exits with success if the run time option has 
 disabled signatures.  Otherwise, it takes the CRCs from the header and footer, encrypts the result, 
 and compares it to the signature stored in the footer.  Since an earlier routine has checked that
 the CRCs actually match the contents of the message, it is unnecessary to recompute the CRCs
@@ -129,7 +129,7 @@ Adding New Session Authentication Methods
 -----------------------------------------
 
 For the purpose of session authentication only (not the basic authentication of client and 
-server currently performed by the Cephx protocol), in addition to adding a new protocol, that
+server currently performed by the Stonex protocol), in addition to adding a new protocol, that
 protocol must have a ``sign\_message()`` routine and a ``check\_message\_signature`` routine.
 These routines will take a message pointer as a parameter and return 0 on success.  The procedure
 used to sign and check will be specific to the new method, but probably there will be a
@@ -151,7 +151,7 @@ rather than explicitly saying ``sign`` or ``encrypt``.
 Session Security Statistics
 ---------------------------
 
-The existing Cephx authentication code keeps statistics on how many messages were signed, how
+The existing Stonex authentication code keeps statistics on how many messages were signed, how
 many message signature were checked, and how many checks succeeded and failed.  It is prepared
 to keep similar statistics on encryption and decryption.  These statistics can be accessed through
 the call ``printAuthSessionHandlerStats`` in ``auth/AuthSessionHandler.cc``.  

@@ -7,11 +7,11 @@ describe('nfsExport page', () => {
   const services = new ServicesPageHelper();
   const buckets = new BucketsPageHelper();
   const bucketName = 'e2e.nfs.bucket';
-  // @TODO: uncomment this when a CephFS volume can be created through Dashboard.
+  // @TODO: uncomment this when a StoneFS volume can be created through Dashboard.
   // const fsPseudo = '/fsPseudo';
   const rgwPseudo = '/rgwPseudo';
   const editPseudo = '/editPseudo';
-  const backends = ['CephFS', 'Object Gateway'];
+  const backends = ['StoneFS', 'Object Gateway'];
   const squash = 'no_root_squash';
   const client: object = { addresses: '192.168.0.10' };
 
@@ -49,8 +49,8 @@ describe('nfsExport page', () => {
       nfsExport.existTableCell(rgwPseudo);
     });
 
-    // @TODO: uncomment this when a CephFS volume can be created through Dashboard.
-    // it('should create a nfs-export with CephFS backend', () => {
+    // @TODO: uncomment this when a StoneFS volume can be created through Dashboard.
+    // it('should create a nfs-export with StoneFS backend', () => {
     //   nfsExport.navigateTo();
     //   nfsExport.existTableCell(fsPseudo, false);
     //   nfsExport.navigateTo('create');

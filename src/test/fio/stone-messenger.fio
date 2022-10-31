@@ -3,8 +3,8 @@ bs=4k
 size=1g
 iodepth=128
 
-ioengine=libfio_ceph_messenger.so
-#ceph_conf_file=ceph-messenger.conf
+ioengine=libfio_stone_messenger.so
+#stone_conf_file=stone-messenger.conf
 
 # In order to select protocol explicitly add 'v1:' or 'v2:' prefix.
 # By default v2 is used.

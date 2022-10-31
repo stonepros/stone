@@ -6,7 +6,7 @@
 
 #include "include/rbd/librbd.hpp"
 #include "include/xlist.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Thread.h"
 
 namespace rbd {
@@ -55,9 +55,9 @@ private:
   Driver *m_drv;
   librbd::Image &m_image;
 
-  mutable ceph::mutex m_lock =
-    ceph::make_mutex("rbd::ggate::Server::m_lock");
-  ceph::condition_variable m_cond;
+  mutable stone::mutex m_lock =
+    stone::make_mutex("rbd::ggate::Server::m_lock");
+  stone::condition_variable m_cond;
   bool m_stopping = false;
   ThreadHelper m_reader_thread, m_writer_thread;
   xlist<IOContext*> m_io_pending;

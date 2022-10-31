@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 
-import { PerformanceCounterModule } from '~/app/ceph/performance-counter/performance-counter.module';
-import { RgwDaemon } from '~/app/ceph/rgw/models/rgw-daemon';
+import { PerformanceCounterModule } from '~/app/stone/performance-counter/performance-counter.module';
+import { RgwDaemon } from '~/app/stone/rgw/models/rgw-daemon';
 import { SharedModule } from '~/app/shared/shared.module';
 import { configureTestBed } from '~/testing/unit-test-helper';
 import { RgwDaemonDetailsComponent } from './rgw-daemon-details.component';

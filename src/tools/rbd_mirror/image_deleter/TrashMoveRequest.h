@@ -89,7 +89,7 @@ private:
   librbd::asio::ContextWQ *m_op_work_queue;
   Context *m_on_finish;
 
-  ceph::bufferlist m_out_bl;
+  stone::bufferlist m_out_bl;
   std::string m_image_id;
   cls::rbd::MirrorImage m_mirror_image;
   librbd::mirror::PromotionState m_promotion_state;

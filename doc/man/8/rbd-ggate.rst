@@ -67,13 +67,13 @@ character ('/'), *pool-name* is required.
 Availability
 ============
 
-**rbd-ggate** is part of Ceph, a massively scalable, open-source,
-distributed storage system. Please refer to the Ceph documentation at
-http://ceph.com/docs for more information.
+**rbd-ggate** is part of Stone, a massively scalable, open-source,
+distributed storage system. Please refer to the Stone documentation at
+http://stone.com/docs for more information.
 
 
 See also
 ========
 
 :doc:`rbd <rbd>`\(8)
-:doc:`ceph <ceph>`\(8)
+:doc:`stone <stone>`\(8)

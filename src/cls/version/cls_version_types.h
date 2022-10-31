@@ -16,14 +16,14 @@ struct obj_version {
 
   obj_version() : ver(0) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(ver, bl);
     encode(tag, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(ver, bl);
     decode(tag, bl);
@@ -53,7 +53,7 @@ struct obj_version {
             tag.compare(v.tag) == 0);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
   static void generate_test_instances(std::list<obj_version*>& o);
 };
@@ -74,7 +74,7 @@ struct obj_version_cond {
   struct obj_version ver;
   VersionCond cond;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(ver, bl);
     uint32_t c = (uint32_t)cond;
@@ -82,7 +82,7 @@ struct obj_version_cond {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(ver, bl);
     uint32_t c;

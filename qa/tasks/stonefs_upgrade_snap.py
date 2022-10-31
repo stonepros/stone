@@ -5,13 +5,13 @@ Upgrade cluster snap format.
 import logging
 import time
 
-from tasks.cephfs.filesystem import Filesystem
+from tasks.stonefs.filesystem import Filesystem
 
 log = logging.getLogger(__name__)
 
 def task(ctx, config):
     """
-    Upgrade CephFS file system snap format.
+    Upgrade StoneFS file system snap format.
     """
 
     if config is None:
@@ -43,5 +43,5 @@ def task(ctx, config):
         if (mds_map['flags'] & (1<<1)) != 0 and (mds_map['flags'] & (1<<4)) != 0:
             break
         time.sleep(10)
-    assert((mds_map['flags'] & (1<<1)) != 0) # Test CEPH_MDSMAP_ALLOW_SNAPS
-    assert((mds_map['flags'] & (1<<4)) != 0) # Test CEPH_MDSMAP_ALLOW_MULTIMDS_SNAPS
+    assert((mds_map['flags'] & (1<<1)) != 0) # Test STONE_MDSMAP_ALLOW_SNAPS
+    assert((mds_map['flags'] & (1<<4)) != 0) # Test STONE_MDSMAP_ALLOW_MULTIMDS_SNAPS

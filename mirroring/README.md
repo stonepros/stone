@@ -1,14 +1,14 @@
-# Mirroring Ceph
-Ceph is primarily distributed from download.ceph.com which is based in the US.
+# Mirroring Stone
+Stone is primarily distributed from download.ceph.com which is based in the US.
 
 However, globally there are multiple mirrors which offer the same content. Often
 faster than downloading from the primary source.
 
-Using the script found in this directory you can easily mirror Ceph to your local
+Using the script found in this directory you can easily mirror Stone to your local
 datacenter and serve packages from there to your servers.
 
 ## Guidelines
-If you want to mirror Ceph please follow these guidelines:
+If you want to mirror Stone please follow these guidelines:
 * Please use a mirror close to you
 * Do not sync in a shorter interval than 3 hours
 * Avoid syncing at minute 0 of the hour, use something between 0 and 59.
@@ -48,10 +48,10 @@ A few things which are required:
 
 You can then run the *mirror-ceph.sh* script and mirror all the contents.
 
-Mirror maintainers should sign up to the [Ceph-mirrors mailing list](https://lists.ceph.io/postorius/lists/ceph-mirrors.ceph.io/).
+Mirror maintainers should sign up to the [Stone-mirrors mailing list](https://lists.ceph.io/postorius/lists/ceph-mirrors.ceph.io/).
 
 ### Logs
-The project wants to analyze the downloads of Ceph a few times a year. From mirrors
+The project wants to analyze the downloads of Stone a few times a year. From mirrors
 we expect that they store HTTP access logs for at least 6 months so they can be
 used for analysis.
 

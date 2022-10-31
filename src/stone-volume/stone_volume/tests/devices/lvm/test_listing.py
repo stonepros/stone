@@ -1,21 +1,21 @@
 import pytest
-from ceph_volume.devices import lvm
-from ceph_volume.api import lvm as api
+from stone_volume.devices import lvm
+from stone_volume.api import lvm as api
 
 # TODO: add tests for following commands -
-# ceph-volume list
-# ceph-volume list <path-to-pv>
-# ceph-volume list <path-to-vg>
-# ceph-volume list <path-to-lv>
+# stone-volume list
+# stone-volume list <path-to-pv>
+# stone-volume list <path-to-vg>
+# stone-volume list <path-to-lv>
 
 class TestReadableTag(object):
 
     def test_dots_get_replaced(self):
-        result = lvm.listing.readable_tag('ceph.foo')
+        result = lvm.listing.readable_tag('stone.foo')
         assert result == 'foo'
 
     def test_underscores_are_replaced_with_spaces(self):
-        result = lvm.listing.readable_tag('ceph.long_tag')
+        result = lvm.listing.readable_tag('stone.long_tag')
         assert result == 'long tag'
 
 
@@ -45,7 +45,7 @@ class TestPrettyReport(object):
             {0: [{
                 'type': 'data',
                 'path': '/dev/sda1',
-                'tags': {'ceph.osd_id': '0'},
+                'tags': {'stone.osd_id': '0'},
                 'devices': ['/dev/sda'],
             }]}
         )
@@ -86,8 +86,8 @@ class TestList(object):
 
 class TestFullReport(object):
 
-    def test_no_ceph_lvs(self, monkeypatch):
-        # ceph lvs are detected by looking into its tags
+    def test_no_stone_lvs(self, monkeypatch):
+        # stone lvs are detected by looking into its tags
         osd = api.Volume(lv_name='volume1', lv_path='/dev/VolGroup/lv',
                          lv_tags={})
         volumes = []
@@ -98,8 +98,8 @@ class TestFullReport(object):
         result = lvm.listing.List([]).full_report()
         assert result == {}
 
-    def test_ceph_data_lv_reported(self, monkeypatch):
-        tags = 'ceph.osd_id=0,ceph.journal_uuid=x,ceph.type=data'
+    def test_stone_data_lv_reported(self, monkeypatch):
+        tags = 'stone.osd_id=0,stone.journal_uuid=x,stone.type=data'
         pv = api.PVolume(pv_name='/dev/sda1', pv_tags={}, pv_uuid="0000",
                          vg_name='VolGroup', lv_uuid="aaaa")
         osd = api.Volume(lv_name='volume1', lv_uuid='y', lv_tags=tags,
@@ -113,9 +113,9 @@ class TestFullReport(object):
         result = lvm.listing.List([]).full_report()
         assert result['0'][0]['name'] == 'volume1'
 
-    def test_ceph_journal_lv_reported(self, monkeypatch):
-        tags = 'ceph.osd_id=0,ceph.journal_uuid=x,ceph.type=data'
-        journal_tags = 'ceph.osd_id=0,ceph.journal_uuid=x,ceph.type=journal'
+    def test_stone_journal_lv_reported(self, monkeypatch):
+        tags = 'stone.osd_id=0,stone.journal_uuid=x,stone.type=data'
+        journal_tags = 'stone.osd_id=0,stone.journal_uuid=x,stone.type=journal'
         pv = api.PVolume(pv_name='/dev/sda1', pv_tags={}, pv_uuid="0000",
                          vg_name="VolGroup", lv_uuid="aaaa")
         osd = api.Volume(lv_name='volume1', lv_uuid='y', lv_tags=tags,
@@ -134,9 +134,9 @@ class TestFullReport(object):
         assert result['0'][0]['name'] == 'volume1'
         assert result['0'][1]['name'] == 'journal'
 
-    def test_ceph_wal_lv_reported(self, monkeypatch):
-        tags = 'ceph.osd_id=0,ceph.wal_uuid=x,ceph.type=data'
-        wal_tags = 'ceph.osd_id=0,ceph.wal_uuid=x,ceph.type=wal'
+    def test_stone_wal_lv_reported(self, monkeypatch):
+        tags = 'stone.osd_id=0,stone.wal_uuid=x,stone.type=data'
+        wal_tags = 'stone.osd_id=0,stone.wal_uuid=x,stone.type=wal'
         osd = api.Volume(lv_name='volume1', lv_uuid='y', lv_tags=tags,
                          lv_path='/dev/VolGroup/lv', vg_name='VolGroup')
         wal = api.Volume(lv_name='wal', lv_uuid='x', lv_tags=wal_tags,
@@ -153,8 +153,8 @@ class TestFullReport(object):
 
     @pytest.mark.parametrize('type_', ['journal', 'db', 'wal'])
     def test_physical_2nd_device_gets_reported(self, type_, monkeypatch):
-        tags = ('ceph.osd_id=0,ceph.{t}_uuid=x,ceph.type=data,'
-                'ceph.{t}_device=/dev/sda1').format(t=type_)
+        tags = ('stone.osd_id=0,stone.{t}_uuid=x,stone.type=data,'
+                'stone.{t}_device=/dev/sda1').format(t=type_)
         osd = api.Volume(lv_name='volume1', lv_uuid='y', lv_tags=tags,
                          vg_name='VolGroup', lv_path='/dev/VolGroup/lv')
         monkeypatch.setattr(lvm.listing.api, 'get_lvs', lambda **kwargs:
@@ -168,8 +168,8 @@ class TestFullReport(object):
 
 class TestSingleReport(object):
 
-    def test_not_a_ceph_lv(self, monkeypatch):
-        # ceph lvs are detected by looking into its tags
+    def test_not_a_stone_lv(self, monkeypatch):
+        # stone lvs are detected by looking into its tags
         lv = api.Volume(lv_name='lv', lv_tags={}, lv_path='/dev/VolGroup/lv',
                         vg_name='VolGroup')
         monkeypatch.setattr(lvm.listing.api, 'get_lvs', lambda **kwargs:
@@ -178,9 +178,9 @@ class TestSingleReport(object):
         result = lvm.listing.List([]).single_report('VolGroup/lv')
         assert result == {}
 
-    def test_report_a_ceph_lv(self, monkeypatch):
-        # ceph lvs are detected by looking into its tags
-        tags = 'ceph.osd_id=0,ceph.journal_uuid=x,ceph.type=data'
+    def test_report_a_stone_lv(self, monkeypatch):
+        # stone lvs are detected by looking into its tags
+        tags = 'stone.osd_id=0,stone.journal_uuid=x,stone.type=data'
         lv = api.Volume(lv_name='lv', vg_name='VolGroup', lv_uuid='aaaa',
                         lv_path='/dev/VolGroup/lv', lv_tags=tags)
         volumes = []
@@ -194,10 +194,10 @@ class TestSingleReport(object):
         assert result['0'][0]['path'] == '/dev/VolGroup/lv'
         assert result['0'][0]['devices'] == []
 
-    def test_report_a_ceph_journal_device(self, monkeypatch):
-        # ceph lvs are detected by looking into its tags
-        tags = 'ceph.osd_id=0,ceph.journal_uuid=x,ceph.type=data,' + \
-               'ceph.journal_device=/dev/sda1'
+    def test_report_a_stone_journal_device(self, monkeypatch):
+        # stone lvs are detected by looking into its tags
+        tags = 'stone.osd_id=0,stone.journal_uuid=x,stone.type=data,' + \
+               'stone.journal_device=/dev/sda1'
         lv = api.Volume(lv_name='lv', lv_uuid='aaa', lv_tags=tags,
                         lv_path='/dev/VolGroup/lv', vg_name='VolGroup')
         monkeypatch.setattr(lvm.listing.api, 'get_lvs', lambda **kwargs:
@@ -208,10 +208,10 @@ class TestSingleReport(object):
         assert result['0'][0]['type'] == 'journal'
         assert result['0'][0]['path'] == '/dev/sda1'
 
-    def test_report_a_ceph_lv_with_devices(self, monkeypatch):
+    def test_report_a_stone_lv_with_devices(self, monkeypatch):
         pvolumes = []
 
-        tags = 'ceph.osd_id=0,ceph.type=data'
+        tags = 'stone.osd_id=0,stone.type=data'
         pv1 = api.PVolume(vg_name="VolGroup", pv_name='/dev/sda1',
                           pv_uuid='', pv_tags={}, lv_uuid="aaaa")
         pv2 = api.PVolume(vg_name="VolGroup", pv_name='/dev/sdb1',
@@ -242,8 +242,8 @@ class TestSingleReport(object):
         assert result['0'][0]['path'] == '/dev/VolGroup/lv'
         assert result['0'][0]['devices'] == ['/dev/sda1', '/dev/sdb1']
 
-    def test_report_a_ceph_lv_with_no_matching_devices(self, monkeypatch):
-        tags = 'ceph.osd_id=0,ceph.type=data'
+    def test_report_a_stone_lv_with_no_matching_devices(self, monkeypatch):
+        tags = 'stone.osd_id=0,stone.type=data'
         lv = api.Volume(lv_name='lv', vg_name='VolGroup', lv_uuid='aaaa',
                         lv_path='/dev/VolGroup/lv', lv_tags=tags)
         volumes = []

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat Inc.
  *
@@ -17,10 +17,10 @@
 #include <ostream>
 #include <variant>
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "osd/scheduler/OpSchedulerItem.h"
 
-namespace ceph::osd::scheduler {
+namespace stone::osd::scheduler {
 
 using client = uint64_t;
 using WorkItem = std::variant<std::monostate, OpSchedulerItem, double>;
@@ -45,7 +45,7 @@ public:
   virtual WorkItem dequeue() = 0;
 
   // Dump formatted representation for the queue
-  virtual void dump(ceph::Formatter &f) const = 0;
+  virtual void dump(stone::Formatter &f) const = 0;
 
   // Print human readable brief description with relevant parameters
   virtual void print(std::ostream &out) const = 0;
@@ -61,7 +61,7 @@ std::ostream &operator<<(std::ostream &lhs, const OpScheduler &);
 using OpSchedulerRef = std::unique_ptr<OpScheduler>;
 
 OpSchedulerRef make_scheduler(
-  StoneeContext *cct, uint32_t num_shards, bool is_rotational);
+  StoneContext *cct, uint32_t num_shards, bool is_rotational);
 
 /**
  * Implements OpScheduler in terms of OpQueue
@@ -76,7 +76,7 @@ class ClassedOpQueueScheduler final : public OpScheduler {
   unsigned cutoff;
   T queue;
 
-  static unsigned int get_io_prio_cut(StoneeContext *cct) {
+  static unsigned int get_io_prio_cut(StoneContext *cct) {
     if (cct->_conf->osd_op_queue_cut_off == "debug_random") {
       srand(time(NULL));
       return (rand() % 2 < 1) ? STONE_MSG_PRIO_HIGH : STONE_MSG_PRIO_LOW;
@@ -89,7 +89,7 @@ class ClassedOpQueueScheduler final : public OpScheduler {
   }
 public:
   template <typename... Args>
-  ClassedOpQueueScheduler(StoneeContext *cct, Args&&... args) :
+  ClassedOpQueueScheduler(StoneContext *cct, Args&&... args) :
     cutoff(get_io_prio_cut(cct)),
     queue(std::forward<Args>(args)...)
   {}
@@ -127,7 +127,7 @@ public:
     return queue.dequeue();
   }
 
-  void dump(ceph::Formatter &f) const final {
+  void dump(stone::Formatter &f) const final {
     return queue.dump(&f);
   }
 

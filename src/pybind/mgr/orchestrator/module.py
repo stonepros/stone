@@ -8,11 +8,11 @@ import datetime
 import yaml
 from prettytable import PrettyTable
 
-from ceph.deployment.inventory import Device
-from ceph.deployment.drive_group import DriveGroupSpec, DeviceSelection
-from ceph.deployment.service_spec import PlacementSpec, ServiceSpec, service_spec_allow_invalid_from_json
-from ceph.deployment.hostspec import SpecValidationError
-from ceph.utils import datetime_now
+from stone.deployment.inventory import Device
+from stone.deployment.drive_group import DriveGroupSpec, DeviceSelection
+from stone.deployment.service_spec import PlacementSpec, ServiceSpec, service_spec_allow_invalid_from_json
+from stone.deployment.hostspec import SpecValidationError
+from stone.utils import datetime_now
 
 from mgr_util import to_pretty_timedelta, format_dimless, format_bytes
 from mgr_module import MgrModule, HandleCommandResult, Option
@@ -51,7 +51,7 @@ class ServiceType(enum.Enum):
     mon = 'mon'
     mgr = 'mgr'
     rbd_mirror = 'rbd-mirror'
-    cephfs_mirror = 'cephfs-mirror'
+    stonefs_mirror = 'stonefs-mirror'
     crash = 'crash'
     alertmanager = 'alertmanager'
     grafana = 'grafana'
@@ -61,7 +61,7 @@ class ServiceType(enum.Enum):
     rgw = 'rgw'
     nfs = 'nfs'
     iscsi = 'iscsi'
-    cephadm_exporter = 'cephadm-exporter'
+    stoneadm_exporter = 'stoneadm-exporter'
     snmp_gateway = 'snmp-gateway'
 
 
@@ -208,7 +208,7 @@ class OrchestratorCli(OrchestratorClientMixin, MgrModule,
             type='str',
             default=None,
             desc='Orchestrator backend',
-            enum_allowed=['cephadm', 'rook', 'test_orchestrator'],
+            enum_allowed=['stoneadm', 'rook', 'test_orchestrator'],
             runtime=True,
         )
     ]
@@ -302,7 +302,7 @@ class OrchestratorCli(OrchestratorClientMixin, MgrModule,
         except Exception:
             # There are several reasons the try: block might fail:
             # 1. the device no longer exist
-            # 2. the device is no longer known to Ceph
+            # 2. the device is no longer known to Stone
             # 3. the host is not reachable
             if force and devid in getattr(self, fault_ident):
                 getattr(self, fault_ident).remove(devid)
@@ -438,7 +438,7 @@ class OrchestratorCli(OrchestratorClientMixin, MgrModule,
         'orch host maintenance enter')
     def _host_maintenance_enter(self, hostname: str, force: bool = False) -> HandleCommandResult:
         """
-        Prepare a host for maintenance by shutting down and disabling all Ceph daemons (cephadm only)
+        Prepare a host for maintenance by shutting down and disabling all Stone daemons (stoneadm only)
         """
         completion = self.enter_host_maintenance(hostname, force=force)
         raise_if_exception(completion)
@@ -449,7 +449,7 @@ class OrchestratorCli(OrchestratorClientMixin, MgrModule,
         'orch host maintenance exit')
     def _host_maintenance_exit(self, hostname: str) -> HandleCommandResult:
         """
-        Return a host from maintenance, restarting all Ceph daemons (cephadm only)
+        Return a host from maintenance, restarting all Stone daemons (stoneadm only)
         """
         completion = self.exit_host_maintenance(hostname)
         raise_if_exception(completion)
@@ -783,7 +783,7 @@ class OrchestratorCli(OrchestratorClientMixin, MgrModule,
 
         usage = """
 Usage:
-  ceph orch daemon add osd host:device1,device2,...
+  stone orch daemon add osd host:device1,device2,...
 """
         if not svc_arg:
             return HandleCommandResult(-errno.EINVAL, stderr=usage)
@@ -857,8 +857,8 @@ Usage:
                         inbuf: Optional[str] = None) -> HandleCommandResult:
         """Add daemon(s)"""
         usage = f"""Usage:
-    ceph orch daemon add -i <json_file>
-    ceph orch daemon add {daemon_type or '<daemon_type>'} <placement>"""
+    stone orch daemon add -i <json_file>
+    stone orch daemon add {daemon_type or '<daemon_type>'} <placement>"""
         if inbuf:
             if daemon_type or placement:
                 raise OrchestratorValidationError(usage)
@@ -1013,8 +1013,8 @@ Usage:
                    inbuf: Optional[str] = None) -> HandleCommandResult:
         """Update the size or placement for a service or apply a large yaml spec"""
         usage = """Usage:
-  ceph orch apply -i <yaml spec> [--dry-run]
-  ceph orch apply <service_type> [--placement=<placement_string>] [--unmanaged]
+  stone orch apply -i <yaml spec> [--dry-run]
+  stone orch apply <service_type> [--placement=<placement_string>] [--unmanaged]
         """
         if inbuf:
             if service_type or placement or unmanaged:
@@ -1028,7 +1028,7 @@ Usage:
                 if isinstance(spec, ServiceSpec) and spec.config:
                     for k, v in spec.config.items():
                         try:
-                            self.get_foreign_ceph_option('mon', k)
+                            self.get_foreign_stone_option('mon', k)
                         except KeyError:
                             raise SpecValidationError(f'Invalid config option {k} in spec')
 
@@ -1191,7 +1191,7 @@ Usage:
                             format: Format = Format.plain,
                             no_overwrite: bool = False,
                             inbuf: Optional[str] = None) -> HandleCommandResult:
-        """Add a Prometheus to SNMP gateway service (cephadm only)"""
+        """Add a Prometheus to SNMP gateway service (stoneadm only)"""
 
         if not inbuf:
             raise OrchestratorValidationError(
@@ -1248,7 +1248,7 @@ Usage:
             if not enabled:
                 return HandleCommandResult(-errno.EINVAL,
                                            stderr="Module '{module_name}' is not enabled. \n Run "
-                                                  "`ceph mgr module enable {module_name}` "
+                                                  "`stone mgr module enable {module_name}` "
                                                   "to enable.".format(module_name=module_name))
 
             try:
@@ -1341,27 +1341,27 @@ Usage:
             assert e.args == ('hello, world',)
 
     @staticmethod
-    def _upgrade_check_image_name(image: Optional[str], ceph_version: Optional[str]) -> None:
+    def _upgrade_check_image_name(image: Optional[str], stone_version: Optional[str]) -> None:
         """
         >>> OrchestratorCli._upgrade_check_image_name('v15.2.0', None)
         Traceback (most recent call last):
         orchestrator._interface.OrchestratorValidationError: Error: unable to pull image name `v15.2.0`.
-          Maybe you meant `--ceph-version 15.2.0`?
+          Maybe you meant `--stone-version 15.2.0`?
 
         """
-        if image and re.match(r'^v?\d+\.\d+\.\d+$', image) and ceph_version is None:
+        if image and re.match(r'^v?\d+\.\d+\.\d+$', image) and stone_version is None:
             ver = image[1:] if image.startswith('v') else image
             s = f"Error: unable to pull image name `{image}`.\n" \
-                f"  Maybe you meant `--ceph-version {ver}`?"
+                f"  Maybe you meant `--stone-version {ver}`?"
             raise OrchestratorValidationError(s)
 
     @_cli_write_command('orch upgrade check')
     def _upgrade_check(self,
                        image: Optional[str] = None,
-                       ceph_version: Optional[str] = None) -> HandleCommandResult:
+                       stone_version: Optional[str] = None) -> HandleCommandResult:
         """Check service versions vs available and target containers"""
-        self._upgrade_check_image_name(image, ceph_version)
-        completion = self.upgrade_check(image=image, version=ceph_version)
+        self._upgrade_check_image_name(image, stone_version)
+        completion = self.upgrade_check(image=image, version=stone_version)
         raise_if_exception(completion)
         return HandleCommandResult(stdout=completion.result_str())
 
@@ -1393,10 +1393,10 @@ Usage:
     @_cli_write_command('orch upgrade start')
     def _upgrade_start(self,
                        image: Optional[str] = None,
-                       ceph_version: Optional[str] = None) -> HandleCommandResult:
+                       stone_version: Optional[str] = None) -> HandleCommandResult:
         """Initiate upgrade"""
-        self._upgrade_check_image_name(image, ceph_version)
-        completion = self.upgrade_start(image, ceph_version)
+        self._upgrade_check_image_name(image, stone_version)
+        completion = self.upgrade_start(image, stone_version)
         raise_if_exception(completion)
         return HandleCommandResult(stdout=completion.result_str())
 

@@ -7,7 +7,7 @@ describe('when cluster creation is completed', () => {
   const services = new ServicesPageHelper();
   const hosts = new HostsPageHelper();
 
-  const hostnames = ['ceph-node-00', 'ceph-node-01', 'ceph-node-02', 'ceph-node-03'];
+  const hostnames = ['stone-node-00', 'stone-node-01', 'stone-node-02', 'stone-node-03'];
 
   beforeEach(() => {
     cy.login();

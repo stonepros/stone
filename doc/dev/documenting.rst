@@ -1,12 +1,12 @@
 ==================
- Documenting Ceph
+ Documenting Stone
 ==================
 
 User documentation
 ==================
 
 The documentation on docs.ceph.com is generated from the restructuredText
-sources in ``/doc/`` in the Ceph git repository.
+sources in ``/doc/`` in the Stone git repository.
 
 Please make sure that your changes are written in a way that is intended
 for end users of the software, unless you are making additions in
@@ -21,7 +21,7 @@ button in the github user interface when looking at a diff on
 an .rst file, or build the docs locally using the ``admin/build-doc``
 script.
 
-For more information about the Ceph documentation, see 
+For more information about the Stone documentation, see 
 :doc:`/start/documenting-ceph`.
 
 Code Documentation

@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 CERN (Switzerland)
  *
@@ -26,7 +26,7 @@
 #define STONE_ERASURE_CODE_ISA_TABLE_CACHE_H
 
 // -----------------------------------------------------------------------------
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "erasure-code/ErasureCodeInterface.h"
 // -----------------------------------------------------------------------------
 #include <list>
@@ -47,7 +47,7 @@ public:
 
   static const int decoding_tables_lru_length = 2516;
 
-  typedef std::pair<std::list<std::string>::iterator, ceph::buffer::ptr> lru_entry_t;
+  typedef std::pair<std::list<std::string>::iterator, stone::buffer::ptr> lru_entry_t;
   typedef std::map< int, unsigned char** > codec_table_t;
   typedef std::map< int, codec_table_t > codec_tables_t;
   typedef std::map< int, codec_tables_t > codec_technique_tables_t;
@@ -60,7 +60,7 @@ public:
   virtual ~ErasureCodeIsaTableCache();
 
   // mutex used to protect modifications in encoding/decoding table maps
-  ceph::mutex codec_tables_guard = ceph::make_mutex("isa-lru-cache");
+  stone::mutex codec_tables_guard = stone::make_mutex("isa-lru-cache");
 
   bool getDecodingTableFromCache(std::string &signature,
                                  unsigned char* &table,
@@ -96,7 +96,7 @@ private:
 
   lru_list_t* getDecodingTablesLru(int matrix_type);
 
-  ceph::mutex* getLock();
+  stone::mutex* getLock();
 
 };
 

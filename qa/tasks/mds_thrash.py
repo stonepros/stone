@@ -12,8 +12,8 @@ from gevent.greenlet import Greenlet
 from gevent.event import Event
 from teuthology import misc as teuthology
 
-from tasks import ceph_manager
-from tasks.cephfs.filesystem import MDSCluster, Filesystem, FSMissing
+from tasks import stone_manager
+from tasks.stonefs.filesystem import MDSCluster, Filesystem, FSMissing
 from tasks.thrasher import Thrasher
 
 log = logging.getLogger(__name__)
@@ -75,13 +75,13 @@ class MDSThrasher(Thrasher, Greenlet):
       Thrash weights do not have to sum to 1.
 
       tasks:
-      - ceph:
+      - stone:
       - mds_thrash:
           thrash_weights:
             - mds.a: 0.8
             - mds.b: 0.2
           thrash_in_replay: 0.4
-      - ceph-fuse:
+      - stone-fuse:
       - workunit:
           clients:
             all: [suites/fsx.sh]
@@ -89,7 +89,7 @@ class MDSThrasher(Thrasher, Greenlet):
       The following example disables randomization, and uses the max delay values:
 
       tasks:
-      - ceph:
+      - stone:
       - mds_thrash:
           max_thrash_delay: 10
           max_revive_delay: 1
@@ -129,9 +129,9 @@ class MDSThrasher(Thrasher, Greenlet):
             # Also allow successful completion as gevent exception handling is a broken mess:
             #
             # 2017-02-03T14:34:01.259 CRITICAL:root:  File "gevent.libev.corecext.pyx", line 367, in gevent.libev.corecext.loop.handle_error (src/gevent/libev/gevent.corecext.c:5051)
-            #   File "/home/teuthworker/src/git.ceph.com_git_teuthology_master/virtualenv/local/lib/python2.7/site-packages/gevent/hub.py", line 558, in handle_error
+            #   File "/home/teuthworker/src/git.stone.com_git_teuthology_master/virtualenv/local/lib/python2.7/site-packages/gevent/hub.py", line 558, in handle_error
             #     self.print_exception(context, type, value, tb)
-            #   File "/home/teuthworker/src/git.ceph.com_git_teuthology_master/virtualenv/local/lib/python2.7/site-packages/gevent/hub.py", line 605, in print_exception
+            #   File "/home/teuthworker/src/git.stone.com_git_teuthology_master/virtualenv/local/lib/python2.7/site-packages/gevent/hub.py", line 605, in print_exception
             #     traceback.print_exception(type, value, tb, file=errstream)
             #   File "/usr/lib/python2.7/traceback.py", line 124, in print_exception
             #     _print(file, 'Traceback (most recent call last):')
@@ -391,8 +391,8 @@ def task(ctx, config):
     random.seed(seed)
 
     (first,) = ctx.cluster.only('mds.{_id}'.format(_id=mdslist[0])).remotes.keys()
-    manager = ceph_manager.CephManager(
-        first, ctx=ctx, logger=log.getChild('ceph_manager'),
+    manager = stone_manager.StoneManager(
+        first, ctx=ctx, logger=log.getChild('stone_manager'),
     )
 
     # make sure everyone is in active, standby, or standby-replay
@@ -415,12 +415,12 @@ def task(ctx, config):
     assert manager.is_clean()
 
     if 'cluster' not in config:
-        config['cluster'] = 'ceph'
+        config['cluster'] = 'stone'
 
     for fs in status.get_filesystems():
         thrasher = MDSThrasher(ctx, manager, config, Filesystem(ctx, fscid=fs['id']), fs['mdsmap']['max_mds'])
         thrasher.start()
-        ctx.ceph[config['cluster']].thrashers.append(thrasher)
+        ctx.stone[config['cluster']].thrashers.append(thrasher)
 
     try:
         log.debug('Yielding')

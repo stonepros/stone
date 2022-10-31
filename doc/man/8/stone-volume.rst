@@ -1,35 +1,35 @@
 :orphan:
 
 =======================================================
- ceph-volume -- Ceph OSD deployment and inspection tool
+ stone-volume -- Stone OSD deployment and inspection tool
 =======================================================
 
-.. program:: ceph-volume
+.. program:: stone-volume
 
 Synopsis
 ========
 
-| **ceph-volume** [-h] [--cluster CLUSTER] [--log-level LOG_LEVEL]
+| **stone-volume** [-h] [--cluster CLUSTER] [--log-level LOG_LEVEL]
 |                 [--log-path LOG_PATH]
 
-| **ceph-volume** **inventory**
+| **stone-volume** **inventory**
 
-| **ceph-volume** **lvm** [ *trigger* | *create* | *activate* | *prepare*
+| **stone-volume** **lvm** [ *trigger* | *create* | *activate* | *prepare*
 | *zap* | *list* | *batch* | *new-wal* | *new-db* | *migrate* ]
 
-| **ceph-volume** **simple** [ *trigger* | *scan* | *activate* ]
+| **stone-volume** **simple** [ *trigger* | *scan* | *activate* ]
 
 
 Description
 ===========
 
-:program:`ceph-volume` is a single purpose command line tool to deploy logical
-volumes as OSDs, trying to maintain a similar API to ``ceph-disk`` when
+:program:`stone-volume` is a single purpose command line tool to deploy logical
+volumes as OSDs, trying to maintain a similar API to ``stone-disk`` when
 preparing, activating, and creating OSDs.
 
-It deviates from ``ceph-disk`` by not interacting or relying on the udev rules
-that come installed for Ceph. These rules allow automatic detection of
-previously setup devices that are in turn fed into ``ceph-disk`` to activate
+It deviates from ``stone-disk`` by not interacting or relying on the udev rules
+that come installed for Stone. These rules allow automatic detection of
+previously setup devices that are in turn fed into ``stone-disk`` to activate
 them.
 
 
@@ -42,14 +42,14 @@ inventory
 This subcommand provides information about a host's physical disc inventory and
 reports metadata about these discs. Among this metadata one can find disc
 specific data items (like model, size, rotational or solid state) as well as
-data items specific to ceph using a device, such as if it is available for
-use with ceph or if logical volumes are present.
+data items specific to stone using a device, such as if it is available for
+use with stone or if logical volumes are present.
 
 Examples::
 
-    ceph-volume inventory
-    ceph-volume inventory /dev/sda
-    ceph-volume inventory --format json-pretty
+    stone-volume inventory
+    stone-volume inventory /dev/sda
+    stone-volume inventory --format json-pretty
 
 Optional arguments:
 
@@ -73,7 +73,7 @@ and logical volumes required to have a working OSD.
 
 Example usage with three devices::
 
-    ceph-volume lvm batch --bluestore /dev/sda /dev/sdb /dev/sdc
+    stone-volume lvm batch --bluestore /dev/sda /dev/sdb /dev/sdc
 
 Optional arguments:
 
@@ -99,12 +99,12 @@ Required positional arguments:
 
 **activate**
 Enables a systemd unit that persists the OSD ID and its UUID (also called
-``fsid`` in Ceph CLI tools), so that at boot time it can understand what OSD is
+``fsid`` in Stone CLI tools), so that at boot time it can understand what OSD is
 enabled and needs to be mounted.
 
 Usage::
 
-    ceph-volume lvm activate --bluestore <osd id> <osd fsid>
+    stone-volume lvm activate --bluestore <osd id> <osd fsid>
 
 Optional Arguments:
 
@@ -119,7 +119,7 @@ Optional Arguments:
 
 Multiple OSDs can be activated at once by using the (idempotent) ``--all`` flag::
 
-    ceph-volume lvm activate --all
+    stone-volume lvm activate --all
 
 
 **prepare**
@@ -129,7 +129,7 @@ except for adding extra metadata.
 
 Usage::
 
-    ceph-volume lvm prepare --filestore --data <data lv> --journal <journal device>
+    stone-volume lvm prepare --filestore --data <data lv> --journal <journal device>
 
 Optional arguments:
 
@@ -164,12 +164,12 @@ equivalent to those of the ``prepare`` and ``activate`` subcommand.
 
 **trigger**
 This subcommand is not meant to be used directly, and it is used by systemd so
-that it proxies input to ``ceph-volume lvm activate`` by parsing the
+that it proxies input to ``stone-volume lvm activate`` by parsing the
 input from systemd, detecting the UUID and ID associated with an OSD.
 
 Usage::
 
-    ceph-volume lvm trigger <SYSTEMD-DATA>
+    stone-volume lvm trigger <SYSTEMD-DATA>
 
 The systemd "data" is expected to be in the format of::
 
@@ -183,25 +183,25 @@ Positional arguments:
 * <SYSTEMD_DATA>  Data from a systemd unit containing ID and UUID of the OSD.
 
 **list**
-List devices or logical volumes associated with Ceph. An association is
+List devices or logical volumes associated with Stone. An association is
 determined if a device has information relating to an OSD. This is
 verified by querying LVM's metadata and correlating it with devices.
 
 The lvs associated with the OSD need to have been prepared previously by
-ceph-volume so that all needed tags and metadata exist.
+stone-volume so that all needed tags and metadata exist.
 
 Usage::
 
-    ceph-volume lvm list
+    stone-volume lvm list
 
 List a particular device, reporting all metadata about it::
 
-    ceph-volume lvm list /dev/sda1
+    stone-volume lvm list /dev/sda1
 
 List a logical volume, along with all its metadata (vg is a volume
 group, and lv the logical volume name)::
 
-    ceph-volume lvm list {vg/lv}
+    stone-volume lvm list {vg/lv}
 
 Positional arguments:
 
@@ -218,21 +218,21 @@ However, the lv or partition will be kept intact.
 
 Usage, for logical volumes::
 
-      ceph-volume lvm zap {vg/lv}
+      stone-volume lvm zap {vg/lv}
 
 Usage, for logical partitions::
 
-      ceph-volume lvm zap /dev/sdc1
+      stone-volume lvm zap /dev/sdc1
 
 For full removal of the device use the ``--destroy`` flag (allowed for all
 device types)::
 
-      ceph-volume lvm zap --destroy /dev/sdc1
+      stone-volume lvm zap --destroy /dev/sdc1
 
 Multiple devices can be removed by specifying the OSD ID and/or the OSD FSID::
 
-      ceph-volume lvm zap --destroy --osd-id 1
-      ceph-volume lvm zap --destroy --osd-id 1 --osd-fsid C9605912-8395-4D76-AFC0-7DFDAC315D59
+      stone-volume lvm zap --destroy --osd-id 1
+      stone-volume lvm zap --destroy --osd-id 1 --osd-fsid C9605912-8395-4D76-AFC0-7DFDAC315D59
 
 
 Positional arguments:
@@ -249,7 +249,7 @@ name format is vg/lv. Fails if OSD has already got attached WAL.
 
 Usage::
 
-    ceph-volume lvm new-wal --osd-id OSD_ID --osd-fsid OSD_FSID --target <target lv>
+    stone-volume lvm new-wal --osd-id OSD_ID --osd-fsid OSD_FSID --target <target lv>
 
 Optional arguments:
 
@@ -275,7 +275,7 @@ name format is vg/lv. Fails if OSD has already got attached DB.
 
 Usage::
 
-    ceph-volume lvm new-db --osd-id OSD_ID --osd-fsid OSD_FSID --target <target lv>
+    stone-volume lvm new-db --osd-id OSD_ID --osd-fsid OSD_FSID --target <target lv>
 
 Optional arguments:
 
@@ -309,7 +309,7 @@ replacement rules apply (in the order of precedence, stop on the first match):
 
 Usage::
 
-    ceph-volume lvm migrate --osd-id OSD_ID --osd-fsid OSD_FSID --target <target lv> --from {data|db|wal} [{data|db|wal} ...]
+    stone-volume lvm migrate --osd-id OSD_ID --osd-fsid OSD_FSID --target <target lv> --from {data|db|wal} [{data|db|wal} ...]
 
 Optional arguments:
 
@@ -335,19 +335,19 @@ simple
 ------
 
 Scan legacy OSD directories or data devices that may have been created by
-ceph-disk, or manually.
+stone-disk, or manually.
 
 Subcommands:
 
 **activate**
 Enables a systemd unit that persists the OSD ID and its UUID (also called
-``fsid`` in Ceph CLI tools), so that at boot time it can understand what OSD is
+``fsid`` in Stone CLI tools), so that at boot time it can understand what OSD is
 enabled and needs to be mounted, while reading information that was previously
-created and persisted at ``/etc/ceph/osd/`` in JSON format.
+created and persisted at ``/etc/stone/osd/`` in JSON format.
 
 Usage::
 
-    ceph-volume simple activate --bluestore <osd id> <osd fsid>
+    stone-volume simple activate --bluestore <osd id> <osd fsid>
 
 Optional Arguments:
 
@@ -357,12 +357,12 @@ Optional Arguments:
 
 Note: It requires a matching JSON file with the following format::
 
-    /etc/ceph/osd/<osd id>-<osd fsid>.json
+    /etc/stone/osd/<osd id>-<osd fsid>.json
 
 
 **scan**
 Scan a running OSD or data device for an OSD for metadata that can later be
-used to activate and manage the OSD with ceph-volume. The scan method will
+used to activate and manage the OSD with stone-volume. The scan method will
 create a JSON file with the required information plus anything found in the OSD
 directory as well.
 
@@ -370,15 +370,15 @@ Optionally, the JSON blob can be sent to stdout for further inspection.
 
 Usage on all running OSDs::
 
-    ceph-volume simple scan
+    stone-volume simple scan
 
 Usage on data devices::
 
-    ceph-volume simple scan <data device>
+    stone-volume simple scan <data device>
 
 Running OSD directories::
 
-    ceph-volume simple scan <path to osd dir>
+    stone-volume simple scan <path to osd dir>
 
 
 Optional arguments:
@@ -393,12 +393,12 @@ Optional Positional arguments:
 
 **trigger**
 This subcommand is not meant to be used directly, and it is used by systemd so
-that it proxies input to ``ceph-volume simple activate`` by parsing the
+that it proxies input to ``stone-volume simple activate`` by parsing the
 input from systemd, detecting the UUID and ID associated with an OSD.
 
 Usage::
 
-    ceph-volume simple trigger <SYSTEMD-DATA>
+    stone-volume simple trigger <SYSTEMD-DATA>
 
 The systemd "data" is expected to be in the format of::
 
@@ -415,11 +415,11 @@ Positional arguments:
 Availability
 ============
 
-:program:`ceph-volume` is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the documentation at http://docs.ceph.com/ for more information.
+:program:`stone-volume` is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the documentation at http://docs.stone.com/ for more information.
 
 
 See also
 ========
 
-:doc:`ceph-osd <ceph-osd>`\(8),
+:doc:`stone-osd <stone-osd>`\(8),

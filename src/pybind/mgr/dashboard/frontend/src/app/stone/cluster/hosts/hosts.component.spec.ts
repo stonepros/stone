@@ -6,8 +6,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ToastrModule } from 'ngx-toastr';
 import { of } from 'rxjs';
 
-import { CephModule } from '~/app/ceph/ceph.module';
-import { CephSharedModule } from '~/app/ceph/shared/ceph-shared.module';
+import { StoneModule } from '~/app/stone/stone.module';
+import { StoneSharedModule } from '~/app/stone/shared/stone-shared.module';
 import { CoreModule } from '~/app/core/core.module';
 import { HostService } from '~/app/shared/api/host.service';
 import { OrchestratorService } from '~/app/shared/api/orchestrator.service';
@@ -55,12 +55,12 @@ describe('HostsComponent', () => {
   configureTestBed({
     imports: [
       BrowserAnimationsModule,
-      CephSharedModule,
+      StoneSharedModule,
       SharedModule,
       HttpClientTestingModule,
       RouterTestingModule,
       ToastrModule.forRoot(),
-      CephModule,
+      StoneModule,
       CoreModule
     ],
     providers: [
@@ -82,7 +82,7 @@ describe('HostsComponent', () => {
   });
 
   it('should render hosts list even with not permission mapped services', () => {
-    const hostname = 'ceph.dev';
+    const hostname = 'stone.dev';
     const payload = [
       {
         services: [
@@ -213,7 +213,7 @@ describe('HostsComponent', () => {
 
   it('should not show force maintenance modal when error is an ALERT', () => {
     const errorMsg = `ALERT: Cannot stop active Mgr daemon, Please switch active Mgrs
-                    with 'ceph mgr fail ceph-node-00'`;
+                    with 'stone mgr fail stone-node-00'`;
     showForceMaintenanceModal.showModalDialog(errorMsg);
     expect(showForceMaintenanceModal.showModal).toBeFalsy();
   });
@@ -222,8 +222,8 @@ describe('HostsComponent', () => {
     const errorMsg = `WARNING: Stopping 1 out of 1 daemons in Grafana service.
                     Service will not be operational with no daemons left. At
                     least 1 daemon must be running to guarantee service.
-                    It is NOT safe to stop ['mon.ceph-node-00']: not enough
-                    monitors would be available (ceph-node-02) after stopping mons`;
+                    It is NOT safe to stop ['mon.stone-node-00']: not enough
+                    monitors would be available (stone-node-02) after stopping mons`;
     showForceMaintenanceModal.showModalDialog(errorMsg);
     expect(showForceMaintenanceModal.showModal).toBeFalsy();
   });

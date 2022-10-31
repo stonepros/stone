@@ -7,20 +7,20 @@ The ``rados`` module is a thin Python wrapper for ``librados``.
 Installation
 ============
 
-To install Python libraries for Ceph, see `Getting librados for Python`_.
+To install Python libraries for Stone, see `Getting librados for Python`_.
 
 
 Getting Started
 ===============
 
-You can create your own Ceph client using Python. The following tutorial will
-show you how to import the Ceph Python module, connect to a Ceph cluster,  and
+You can create your own Stone client using Python. The following tutorial will
+show you how to import the Stone Python module, connect to a Stone cluster,  and
 perform object operations as a ``client.admin`` user.
 
-.. note:: To use the Ceph Python bindings, you must have access to a
-   running Ceph cluster. To set one up quickly, see `Getting Started`_.
+.. note:: To use the Stone Python bindings, you must have access to a
+   running Stone cluster. To set one up quickly, see `Getting Started`_.
 
-First, create a Python source file for your Ceph client. ::
+First, create a Python source file for your Stone client. ::
    :linenos:
 
 	sudo vim client.py
@@ -40,15 +40,15 @@ To use the ``rados`` module, import it into your source file.
 Configure a Cluster Handle
 --------------------------
 
-Before connecting to the Ceph Storage Cluster, create a cluster handle. By
-default, the cluster handle assumes a cluster named ``ceph`` (i.e., the default
+Before connecting to the Stone Storage Cluster, create a cluster handle. By
+default, the cluster handle assumes a cluster named ``stone`` (i.e., the default
 for deployment tools, and our Getting Started guides too),  and a
 ``client.admin`` user name. You may change these defaults to suit your needs.
 
-To connect to the Ceph Storage Cluster, your application needs to know where to
-find the  Ceph Monitor. Provide this information to your application by
-specifying the path to your Ceph configuration file, which contains the location
-of the initial Ceph monitors.
+To connect to the Stone Storage Cluster, your application needs to know where to
+find the  Stone Monitor. Provide this information to your application by
+specifying the path to your Stone configuration file, which contains the location
+of the initial Stone monitors.
 
 .. code-block:: python
    :linenos:
@@ -56,21 +56,21 @@ of the initial Ceph monitors.
 	import rados, sys
 
 	#Create Handle Examples.
-	cluster = rados.Rados(conffile='ceph.conf')
+	cluster = rados.Rados(conffile='stone.conf')
 	cluster = rados.Rados(conffile=sys.argv[1])
-	cluster = rados.Rados(conffile = 'ceph.conf', conf = dict (keyring = '/path/to/keyring'))
+	cluster = rados.Rados(conffile = 'stone.conf', conf = dict (keyring = '/path/to/keyring'))
 
 Ensure that the ``conffile`` argument provides the path and file name of your
-Ceph configuration file. You may use the ``sys`` module to avoid hard-coding the
-Ceph configuration path and file name.
+Stone configuration file. You may use the ``sys`` module to avoid hard-coding the
+Stone configuration path and file name.
 
 Your Python client also requires a client keyring. For this example, we use the
 ``client.admin`` key by default. If you would like to specify the keyring when
 creating the cluster handle, you may use the ``conf`` argument. Alternatively,
-you may specify the keyring path in your Ceph configuration file. For example,
-you may add something like the following line to you Ceph configuration file::
+you may specify the keyring path in your Stone configuration file. For example,
+you may add something like the following line to you Stone configuration file::
 
-	keyring = /path/to/ceph.client.admin.keyring
+	keyring = /path/to/stone.client.admin.keyring
 
 For additional details on modifying your configuration via Python, see `Configuration`_.
 
@@ -88,7 +88,7 @@ information about the cluster.
 
 	import rados, sys
 
-	cluster = rados.Rados(conffile='ceph.conf')
+	cluster = rados.Rados(conffile='stone.conf')
 	print "\nlibrados version: " + str(cluster.version())
 	print "Will attempt to connect to: " + str(cluster.conf_get('mon host'))
 
@@ -103,10 +103,10 @@ information about the cluster.
 		print key, value
 
 
-By default, Ceph authentication is ``on``. Your application will need to know
-the location of the keyring. The ``python-ceph`` module doesn't have the default
+By default, Stone authentication is ``on``. Your application will need to know
+the location of the keyring. The ``python-stone`` module doesn't have the default
 location, so you need to specify the keyring path. The easiest way to specify
-the keyring is to add it to the Ceph configuration file. The following Ceph
+the keyring is to add it to the Stone configuration file. The following Stone
 configuration file example uses the ``client.admin`` keyring.
 
 .. code-block:: ini
@@ -114,7 +114,7 @@ configuration file example uses the ``client.admin`` keyring.
 
 	[global]
 	# ... elided configuration
-	keyring=/path/to/keyring/ceph.client.admin.keyring
+	keyring=/path/to/keyring/stone.client.admin.keyring
 
 
 Manage Pools
@@ -160,7 +160,7 @@ pool.
 Input/Output Context
 --------------------
 
-Reading from and writing to the Ceph Storage Cluster requires an input/output
+Reading from and writing to the Stone Storage Cluster requires an input/output
 context (ioctx). You can create an ioctx with the ``open_ioctx()`` or
 ``open_ioctx2()`` method of the ``Rados`` class. The ``ioctx_name`` parameter
 is the name of the  pool and ``pool_id`` is the ID of the pool you wish to use.
@@ -194,8 +194,8 @@ Writing, Reading and Removing Objects
 -------------------------------------
 
 Once you create an I/O context, you can write objects to the cluster. If you
-write to an object that doesn't exist, Ceph creates it. If you write to an
-object that exists, Ceph overwrites it (except when you specify a range, and
+write to an object that doesn't exist, Stone creates it. If you write to an
+object that exists, Stone overwrites it (except when you specify a range, and
 then it only overwrites the range). You may read objects (and object ranges)
 from the cluster. You may also remove objects from the cluster. For example:
 
@@ -260,15 +260,15 @@ the I/O context provide additional functionality and asynchronous capabilities.
 Cluster Handle API
 ==================
 
-The ``Rados`` class provides an interface into the Ceph Storage Daemon.
+The ``Rados`` class provides an interface into the Stone Storage Daemon.
 
 
 Configuration
 -------------
 
 The ``Rados`` class provides methods for getting and setting configuration
-values, reading the Ceph configuration file, and parsing arguments. You
-do not need to be connected to the Ceph Storage Cluster to invoke the following
+values, reading the Stone configuration file, and parsing arguments. You
+do not need to be connected to the Stone Storage Cluster to invoke the following
 methods. See `Storage Cluster Configuration`_ for details on settings.
 
 .. currentmodule:: rados
@@ -308,7 +308,7 @@ state (e.g., "configuring", "connecting", etc.).
 Pool Operations
 ---------------
 
-To use pool operation methods, you must connect to the Ceph Storage Cluster
+To use pool operation methods, you must connect to the Stone Storage Cluster
 first.  You may list the available pools, create a pool, check to see if a pool
 exists,  and delete a pool.
 
@@ -321,7 +321,7 @@ exists,  and delete a pool.
 CLI Commands
 ------------
 
-The Ceph CLI command is internally using the following librados Python binding methods.
+The Stone CLI command is internally using the following librados Python binding methods.
 
 In order to send a command, choose the correct method and choose the correct target.
 
@@ -334,7 +334,7 @@ In order to send a command, choose the correct method and choose the correct tar
 Input/Output Context API
 ========================
 
-To write data to and read data from the Ceph Object Store, you must create
+To write data to and read data from the Stone Object Store, you must create
 an Input/Output context (ioctx). The `Rados` class provides `open_ioctx()`
 and `open_ioctx2()` methods. The remaining ``ioctx`` operations involve
 invoking methods of the `Ioctx` and other classes.
@@ -349,7 +349,7 @@ invoking methods of the `Ioctx` and other classes.
 .. Pool Snapshots
 .. --------------
 
-.. The Ceph Storage Cluster allows you to make a snapshot of a pool's state.
+.. The Stone Storage Cluster allows you to make a snapshot of a pool's state.
 .. Whereas, basic pool operations only require a connection to the cluster,
 .. snapshots require an I/O context.
 
@@ -365,7 +365,7 @@ invoking methods of the `Ioctx` and other classes.
 Object Operations
 -----------------
 
-The Ceph Storage Cluster stores data as objects. You can read and write objects
+The Stone Storage Cluster stores data as objects. You can read and write objects
 synchronously or asynchronously. You can read and write from offsets. An object
 has a name (or key) and data.
 

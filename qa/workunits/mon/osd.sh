@@ -6,19 +6,19 @@ ua=`uuidgen`
 ub=`uuidgen`
 
 # should get same id with same uuid
-na=`ceph osd create $ua`
-test $na -eq `ceph osd create $ua`
+na=`stone osd create $ua`
+test $na -eq `stone osd create $ua`
 
-nb=`ceph osd create $ub`
-test $nb -eq `ceph osd create $ub`
+nb=`stone osd create $ub`
+test $nb -eq `stone osd create $ub`
 test $nb -ne $na
 
-ceph osd rm $na
-ceph osd rm $na
-ceph osd rm $nb
-ceph osd rm 1000
+stone osd rm $na
+stone osd rm $na
+stone osd rm $nb
+stone osd rm 1000
 
-na2=`ceph osd create $ua`
+na2=`stone osd create $ua`
 
 echo OK
 

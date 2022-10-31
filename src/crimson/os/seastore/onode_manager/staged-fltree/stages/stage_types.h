@@ -90,7 +90,7 @@ struct MatchHistory {
     } else if (*match == MatchKindCMP::GT) {
       return os << "GT";
     } else {
-      ceph_abort("impossble path");
+      stone_abort("impossble path");
     }
   }
 
@@ -178,14 +178,14 @@ struct staged_position_t {
     return *this;
   }
 
-  void encode(ceph::bufferlist& encoded) const {
-    ceph::encode(index, encoded);
+  void encode(stone::bufferlist& encoded) const {
+    stone::encode(index, encoded);
     nxt.encode(encoded);
   }
 
-  static me_t decode(ceph::bufferlist::const_iterator& delta) {
+  static me_t decode(stone::bufferlist::const_iterator& delta) {
     me_t ret;
-    ceph::decode(ret.index, delta);
+    stone::decode(ret.index, delta);
     ret.nxt = nxt_t::decode(delta);
     return ret;
   }
@@ -253,13 +253,13 @@ struct staged_position_t<STAGE_BOTTOM> {
     return *this;
   }
 
-  void encode(ceph::bufferlist& encoded) const {
-    ceph::encode(index, encoded);
+  void encode(stone::bufferlist& encoded) const {
+    stone::encode(index, encoded);
   }
 
-  static me_t decode(ceph::bufferlist::const_iterator& delta) {
+  static me_t decode(stone::bufferlist::const_iterator& delta) {
     me_t ret;
-    ceph::decode(ret.index, delta);
+    stone::decode(ret.index, delta);
     return ret;
   }
 
@@ -307,7 +307,7 @@ const staged_position_t<STAGE>& cast_down(const search_position_t& pos) {
 #endif
     return pos.nxt.nxt;
   } else {
-    ceph_abort("impossible path");
+    stone_abort("impossible path");
   }
 }
 
@@ -329,7 +329,7 @@ staged_position_t<STAGE>& cast_down_fill_0(search_position_t& pos) {
     pos.nxt.index = 0;
     return pos.nxt.nxt;
   } else {
-    ceph_abort("impossible path");
+    stone_abort("impossible path");
   }
 }
 
@@ -345,7 +345,7 @@ search_position_t normalize(staged_position_t<STAGE>&& pos) {
   } else if (STAGE == STAGE_RIGHT) {
     return {0u, {0u, std::move(pos)}};
   } else {
-    ceph_abort("impossible path");
+    stone_abort("impossible path");
   }
 }
 

@@ -16,7 +16,7 @@ public:
     GET_ATTRIBUTE_LIST,
     DESTROY
   };
-  CephContext *cct;
+  StoneContext *cct;
   kmip_operation operation;
   char *name = 0;
   char *unique_id = 0;
@@ -33,11 +33,11 @@ public:
   // end must free
   int ret;
   bool done;
-  ceph::mutex lock = ceph::make_mutex("rgw_kmip_req::lock");
-  ceph::condition_variable cond;
+  stone::mutex lock = stone::make_mutex("rgw_kmip_req::lock");
+  stone::condition_variable cond;
 
   int wait(optional_yield y);
-  RGWKMIPTransceiver(CephContext * const cct,
+  RGWKMIPTransceiver(StoneContext * const cct,
     kmip_operation operation)
   : cct(cct),
     operation(operation),
@@ -52,9 +52,9 @@ public:
 
 class RGWKMIPManager {
 protected:
-  CephContext *cct;
+  StoneContext *cct;
   bool is_started = false;
-  RGWKMIPManager(CephContext *cct) : cct(cct) {};
+  RGWKMIPManager(StoneContext *cct) : cct(cct) {};
 public:
   virtual ~RGWKMIPManager() { };
   virtual int start() = 0;

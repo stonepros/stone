@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
-* Ceph - scalable distributed file system
+* Stone - scalable distributed file system
 *
 * Copyright (C) 2012 Inktank, Inc.
 *
@@ -23,7 +23,7 @@
 #include <fstream>
 #include "kv/KeyValueDB.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/Formatter.h"
 #include "common/Finisher.h"
 #include "common/errno.h"
@@ -32,7 +32,7 @@
 #include "common/blkdev.h"
 #include "common/PriorityCache.h"
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 class MonitorDBStore
 {
@@ -41,7 +41,7 @@ class MonitorDBStore
   bool do_dump;
   int dump_fd_binary;
   std::ofstream dump_fd_json;
-  ceph::JSONFormatter dump_fmt;
+  stone::JSONFormatter dump_fmt;
   
 
   Finisher io_work;
@@ -69,18 +69,18 @@ class MonitorDBStore
     uint8_t type;
     std::string prefix;
     std::string key, endkey;
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
 
     Op()
       : type(0) { }
     Op(int t, const std::string& p, const std::string& k)
       : type(t), prefix(p), key(k) { }
-    Op(int t, const std::string& p, const std::string& k, const ceph::buffer::list& b)
+    Op(int t, const std::string& p, const std::string& k, const stone::buffer::list& b)
       : type(t), prefix(p), key(k), bl(b) { }
     Op(int t, const std::string& p, const std::string& start, const std::string& end)
       : type(t), prefix(p), key(start), endkey(end) { }
 
-    void encode(ceph::buffer::list& encode_bl) const {
+    void encode(stone::buffer::list& encode_bl) const {
       ENCODE_START(2, 1, encode_bl);
       encode(type, encode_bl);
       encode(prefix, encode_bl);
@@ -90,7 +90,7 @@ class MonitorDBStore
       ENCODE_FINISH(encode_bl);
     }
 
-    void decode(ceph::buffer::list::const_iterator& decode_bl) {
+    void decode(stone::buffer::list::const_iterator& decode_bl) {
       DECODE_START(2, decode_bl);
       decode(type, decode_bl);
       decode(prefix, decode_bl);
@@ -101,7 +101,7 @@ class MonitorDBStore
       DECODE_FINISH(decode_bl);
     }
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_int("type", type);
       f->dump_string("prefix", prefix);
       f->dump_string("key", key);
@@ -139,21 +139,21 @@ class MonitorDBStore
       OP_ERASE_RANGE = 4,
     };
 
-    void put(const std::string& prefix, const std::string& key, const ceph::buffer::list& bl) {
+    void put(const std::string& prefix, const std::string& key, const stone::buffer::list& bl) {
       ops.push_back(Op(OP_PUT, prefix, key, bl));
       ++keys;
       bytes += ops.back().approx_size();
     }
 
-    void put(const std::string& prefix, version_t ver, const ceph::buffer::list& bl) {
+    void put(const std::string& prefix, version_t ver, const stone::buffer::list& bl) {
       std::ostringstream os;
       os << ver;
       put(prefix, os.str(), bl);
     }
 
     void put(const std::string& prefix, const std::string& key, version_t ver) {
-      using ceph::encode;
-      ceph::buffer::list bl;
+      using stone::encode;
+      stone::buffer::list bl;
       encode(ver, bl);
       put(prefix, key, bl);
     }
@@ -186,7 +186,7 @@ class MonitorDBStore
       ops.push_back(Op(OP_COMPACT, prefix, start, end));
     }
 
-    void encode(ceph::buffer::list& bl) const {
+    void encode(stone::buffer::list& bl) const {
       ENCODE_START(2, 1, bl);
       encode(ops, bl);
       encode(bytes, bl);
@@ -194,7 +194,7 @@ class MonitorDBStore
       ENCODE_FINISH(bl);
     }
 
-    void decode(ceph::buffer::list::const_iterator& bl) {
+    void decode(stone::buffer::list::const_iterator& bl) {
       DECODE_START(2, bl);
       decode(ops, bl);
       if (struct_v >= 2) {
@@ -207,7 +207,7 @@ class MonitorDBStore
     static void generate_test_instances(std::list<Transaction*>& ls) {
       ls.push_back(new Transaction);
       ls.push_back(new Transaction);
-      ceph::buffer::list bl;
+      stone::buffer::list bl;
       bl.append("value");
       ls.back()->put("prefix", "key", bl);
       ls.back()->erase("prefix2", "key2");
@@ -222,7 +222,7 @@ class MonitorDBStore
       bytes += other->bytes;
     }
 
-    void append_from_encoded(ceph::buffer::list& bl) {
+    void append_from_encoded(stone::buffer::list& bl) {
       auto other(std::make_shared<Transaction>());
       auto it = bl.cbegin();
       other->decode(it);
@@ -243,7 +243,7 @@ class MonitorDBStore
       return bytes;
     }
 
-    void dump(ceph::Formatter *f, bool dump_val=false) const {
+    void dump(stone::Formatter *f, bool dump_val=false) const {
       f->open_object_section("transaction");
       f->open_array_section("ops");
       int op_num = 0;
@@ -309,7 +309,7 @@ class MonitorDBStore
 
     if (do_dump) {
       if (!g_conf()->mon_debug_dump_json) {
-        ceph::buffer::list bl;
+        stone::buffer::list bl;
         t->encode(bl);
         bl.write_fd(dump_fd_binary);
       } else {
@@ -337,7 +337,7 @@ class MonitorDBStore
 	break;
       default:
 	derr << __func__ << " unknown op type " << op.type << dendl;
-	ceph_abort();
+	stone_abort();
 	break;
       }
     }
@@ -352,7 +352,7 @@ class MonitorDBStore
 	compact.pop_front();
       }
     } else {
-      ceph_abort_msg("failed to write to db");
+      stone_abort_msg("failed to write to db");
     }
     return r;
   }
@@ -379,7 +379,7 @@ class MonitorDBStore
         utime_t delay;
         double delay_max = g_conf()->mon_inject_transaction_delay_max;
         delay.set_from_double(delay_max * (double)(rand() % 10000) / 10000.0);
-        lsubdout(g_ceph_context, mon, 1)
+        lsubdout(g_stone_context, mon, 1)
           << "apply_transaction will be delayed for " << delay
           << " seconds" << dendl;
         delay.sleep();
@@ -411,7 +411,7 @@ class MonitorDBStore
   protected:
     bool done;
     std::pair<std::string,std::string> last_key;
-    ceph::buffer::list crc_bl;
+    stone::buffer::list crc_bl;
 
     StoreIteratorImpl() : done(false) { }
     virtual ~StoreIteratorImpl() { }
@@ -461,15 +461,15 @@ class MonitorDBStore
      */
     void get_chunk_tx(TransactionRef tx, uint64_t max_bytes,
 		      uint64_t max_keys) override {
-      using ceph::encode;
-      ceph_assert(done == false);
-      ceph_assert(iter->valid() == true);
+      using stone::encode;
+      stone_assert(done == false);
+      stone_assert(iter->valid() == true);
 
       while (iter->valid()) {
 	std::string prefix(iter->raw_key().first);
 	std::string key(iter->raw_key().second);
 	if (sync_prefixes.count(prefix)) {
-	  ceph::buffer::list value = iter->value();
+	  stone::buffer::list value = iter->value();
 	  if (tx->empty() ||
 	      (tx->get_bytes() + value.length() + key.size() +
 	       prefix.size() < max_bytes &&
@@ -492,12 +492,12 @@ class MonitorDBStore
 	}
 	iter->next();
       }
-      ceph_assert(iter->valid() == false);
+      stone_assert(iter->valid() == false);
       done = true;
     }
 
     std::pair<std::string,std::string> get_next_key() override {
-      ceph_assert(iter->valid());
+      stone_assert(iter->valid());
 
       for (; iter->valid(); iter->next()) {
 	std::pair<std::string,std::string> r = iter->raw_key();
@@ -530,7 +530,7 @@ class MonitorDBStore
   }
 
   KeyValueDB::Iterator get_iterator(const std::string &prefix) {
-    ceph_assert(!prefix.empty());
+    stone_assert(!prefix.empty());
     KeyValueDB::Iterator iter = db->get_iterator(prefix);
     iter->seek_to_first();
     return iter;
@@ -543,20 +543,20 @@ class MonitorDBStore
     return iter;
   }
 
-  int get(const std::string& prefix, const std::string& key, ceph::buffer::list& bl) {
-    ceph_assert(bl.length() == 0);
+  int get(const std::string& prefix, const std::string& key, stone::buffer::list& bl) {
+    stone_assert(bl.length() == 0);
     return db->get(prefix, key, &bl);
   }
 
-  int get(const std::string& prefix, const version_t ver, ceph::buffer::list& bl) {
+  int get(const std::string& prefix, const version_t ver, stone::buffer::list& bl) {
     std::ostringstream os;
     os << ver;
     return get(prefix, os.str(), bl);
   }
 
   version_t get(const std::string& prefix, const std::string& key) {
-    using ceph::decode;
-    ceph::buffer::list bl;
+    using stone::decode;
+    stone::buffer::list bl;
     int err = get(prefix, key, bl);
     if (err < 0) {
       if (err == -ENOENT) // if key doesn't exist, assume its value is 0
@@ -566,10 +566,10 @@ class MonitorDBStore
       generic_dout(0) << "MonitorDBStore::get() error obtaining"
                       << " (" << prefix << ":" << key << "): "
                       << cpp_strerror(err) << dendl;
-      ceph_abort_msg("error obtaining key");
+      stone_abort_msg("error obtaining key");
     }
 
-    ceph_assert(bl.length());
+    stone_assert(bl.length());
     version_t ver;
     auto p = bl.cbegin();
     decode(ver, p);
@@ -611,7 +611,7 @@ class MonitorDBStore
       dbt->rmkeys_by_prefix((*iter));
     }
     int r = db->submit_transaction_sync(dbt);
-    ceph_assert(r >= 0);
+    stone_assert(r >= 0);
   }
 
   void _open(const std::string& kv_type) {
@@ -624,14 +624,14 @@ class MonitorDBStore
     os << path.substr(0, path.size() - pos) << "/store.db";
     std::string full_path = os.str();
 
-    KeyValueDB *db_ptr = KeyValueDB::create(g_ceph_context,
+    KeyValueDB *db_ptr = KeyValueDB::create(g_stone_context,
 					    kv_type,
 					    full_path);
     if (!db_ptr) {
       derr << __func__ << " error initializing "
 	   << kv_type << " db back storage in "
 	   << full_path << dendl;
-      ceph_abort_msg("MonitorDBStore: error initializing keyvaluedb back storage");
+      stone_abort_msg("MonitorDBStore: error initializing keyvaluedb back storage");
     }
     db.reset(db_ptr);
 
@@ -789,11 +789,11 @@ class MonitorDBStore
       do_dump(false),
       dump_fd_binary(-1),
       dump_fmt(true),
-      io_work(g_ceph_context, "monstore", "fn_monstore"),
+      io_work(g_stone_context, "monstore", "fn_monstore"),
       is_open(false) {
   }
   ~MonitorDBStore() {
-    ceph_assert(!is_open);
+    stone_assert(!is_open);
     if (do_dump) {
       if (!g_conf()->mon_debug_dump_json) {
         ::close(dump_fd_binary);

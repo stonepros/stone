@@ -42,8 +42,8 @@ class MDSRank;
 class Beacon : public Dispatcher
 {
 public:
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
 
   Beacon(StoneContext *cct, MonClient *monc, std::string_view name);
   ~Beacon() override;

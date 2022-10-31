@@ -5,19 +5,19 @@
 .. toctree:: 
    :maxdepth: 1
 
-   ../../man/8/ceph-volume.rst
-   ../../man/8/ceph-volume-systemd.rst
-   ../../man/8/ceph.rst
-   ../../man/8/ceph-authtool.rst
-   ../../man/8/ceph-clsinfo.rst
-   ../../man/8/ceph-conf.rst
-   ../../man/8/ceph-debugpack.rst
-   ../../man/8/ceph-dencoder.rst
-   ../../man/8/ceph-mon.rst
-   ../../man/8/ceph-osd.rst
-   ../../man/8/ceph-kvstore-tool.rst
-   ../../man/8/ceph-run.rst
-   ../../man/8/ceph-syn.rst
+   ../../man/8/stone-volume.rst
+   ../../man/8/stone-volume-systemd.rst
+   ../../man/8/stone.rst
+   ../../man/8/stone-authtool.rst
+   ../../man/8/stone-clsinfo.rst
+   ../../man/8/stone-conf.rst
+   ../../man/8/stone-debugpack.rst
+   ../../man/8/stone-dencoder.rst
+   ../../man/8/stone-mon.rst
+   ../../man/8/stone-osd.rst
+   ../../man/8/stone-kvstore-tool.rst
+   ../../man/8/stone-run.rst
+   ../../man/8/stone-syn.rst
    ../../man/8/crushtool.rst
    ../../man/8/librados-config.rst
    ../../man/8/monmaptool.rst
@@ -28,4 +28,4 @@
 .. toctree::
 	:hidden:
 	
-	../../man/8/ceph-post-file.rst
+	../../man/8/stone-post-file.rst

@@ -3,7 +3,7 @@
 
 #include "include/rados/librados_fwd.hpp"
 #include "mds/mdstypes.h"
-#include "cls_cephfs.h"
+#include "cls_stonefs.h"
 
 class AccumulateArgs;
 
@@ -30,5 +30,5 @@ class ClsStoneFSClient
 
   static void build_tag_filter(
       const std::string &scrub_tag,
-      ceph::buffer::list *out_bl);
+      stone::buffer::list *out_bl);
 };

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  * Copyright (C) 2017 OVH
@@ -26,11 +26,11 @@
 #include "common/perf_histogram.h"
 #include "include/utime.h"
 #include "include/common_fwd.h"
-#include "common/ceph_mutex.h"
-#include "common/ceph_time.h"
+#include "common/stone_mutex.h"
+#include "common/stone_time.h"
 
 namespace TOPNSPC::common {
-  class StoneeContext;
+  class StoneContext;
   class PerfCountersBuilder;
   class PerfCounters;
 }
@@ -63,19 +63,19 @@ namespace TOPNSPC::common {
 class PerfCountersBuilder
 {
 public:
-  PerfCountersBuilder(StoneeContext *cct, const std::string &name,
+  PerfCountersBuilder(StoneContext *cct, const std::string &name,
 		    int first, int last);
   ~PerfCountersBuilder();
 
   // prio values: higher is better, and higher values get included in
-  // 'ceph daemonperf' (and similar) results.
+  // 'stone daemonperf' (and similar) results.
   // Use of priorities enables us to add large numbers of counters
   // internally without necessarily overwhelming consumers.
   enum {
     PRIO_CRITICAL = 10,
     // 'interesting' is the default threshold for `daemonperf` output
     PRIO_INTERESTING = 8,
-    // `useful` is the default threshold for transmission to ceph-mgr
+    // `useful` is the default threshold for transmission to stone-mgr
     // and inclusion in prometheus/influxdb plugin output
     PRIO_USEFUL = 5,
     PRIO_UNINTERESTING = 2,
@@ -240,17 +240,17 @@ public:
 
   void tset(int idx, utime_t v);
   void tinc(int idx, utime_t v);
-  void tinc(int idx, ceph::timespan v);
+  void tinc(int idx, stone::timespan v);
   utime_t tget(int idx) const;
 
   void hinc(int idx, int64_t x, int64_t y);
 
   void reset();
-  void dump_formatted(ceph::Formatter *f, bool schema,
+  void dump_formatted(stone::Formatter *f, bool schema,
                       const std::string &counter = "") const {
     dump_formatted_generic(f, schema, false, counter);
   }
-  void dump_formatted_histograms(ceph::Formatter *f, bool schema,
+  void dump_formatted_histograms(stone::Formatter *f, bool schema,
                                  const std::string &counter = "") const {
     dump_formatted_generic(f, schema, true, counter);
   }
@@ -273,16 +273,16 @@ public:
   }
 
 private:
-  PerfCounters(StoneeContext *cct, const std::string &name,
+  PerfCounters(StoneContext *cct, const std::string &name,
 	     int lower_bound, int upper_bound);
   PerfCounters(const PerfCounters &rhs);
   PerfCounters& operator=(const PerfCounters &rhs);
-  void dump_formatted_generic(ceph::Formatter *f, bool schema, bool histograms,
+  void dump_formatted_generic(stone::Formatter *f, bool schema, bool histograms,
                               const std::string &counter = "") const;
 
   typedef std::vector<perf_counter_data_any_d> perf_counter_data_vec_t;
 
-  StoneeContext *m_cct;
+  StoneContext *m_cct;
   int m_lower_bound;
   int m_upper_bound;
   std::string m_name;
@@ -292,7 +292,7 @@ private:
 #if !defined(WITH_SEASTAR) || defined(WITH_ALIEN)
   const std::string m_lock_name;
   /** Protects m_data */
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
 #endif
 
   perf_counter_data_vec_t m_data;
@@ -311,7 +311,7 @@ public:
 typedef std::set <PerfCounters*, SortPerfCountersByName> perf_counters_set_t;
 
 /*
- * PerfCountersCollectionImp manages PerfCounters objects for a Stonee process.
+ * PerfCountersCollectionImp manages PerfCounters objects for a Stone process.
  */
 class PerfCountersCollectionImpl
 {
@@ -323,13 +323,13 @@ public:
   void clear();
   bool reset(const std::string &name);
 
-  void dump_formatted(ceph::Formatter *f, bool schema,
+  void dump_formatted(stone::Formatter *f, bool schema,
                       const std::string &logger = "",
                       const std::string &counter = "") const {
     dump_formatted_generic(f, schema, false, logger, counter);
   }
 
-  void dump_formatted_histograms(ceph::Formatter *f, bool schema,
+  void dump_formatted_histograms(stone::Formatter *f, bool schema,
                                  const std::string &logger = "",
                                  const std::string &counter = "") const {
     dump_formatted_generic(f, schema, true, logger, counter);
@@ -350,7 +350,7 @@ public:
   void with_counters(std::function<void(const CounterMap &)>) const;
 
 private:
-  void dump_formatted_generic(ceph::Formatter *f, bool schema, bool histograms,
+  void dump_formatted_generic(stone::Formatter *f, bool schema, bool histograms,
                               const std::string &logger = "",
                               const std::string &counter = "") const;
 
@@ -361,20 +361,20 @@ private:
 
 
 class PerfGuard {
-  const ceph::real_clock::time_point start;
+  const stone::real_clock::time_point start;
   PerfCounters* const counters;
   const int event;
 
 public:
   PerfGuard(PerfCounters* const counters,
             const int event)
-  : start(ceph::real_clock::now()),
+  : start(stone::real_clock::now()),
     counters(counters),
     event(event) {
   }
 
   ~PerfGuard() {
-    counters->tinc(event, ceph::real_clock::now() - start);
+    counters->tinc(event, stone::real_clock::now() - start);
   }
 };
 

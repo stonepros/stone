@@ -16,14 +16,14 @@ describe('FeatureTogglesGuardService', () => {
   let router: Router;
   let ngZone: NgZone;
 
-  @Component({ selector: 'cd-cephfs', template: '' })
-  class CephfsComponent {}
+  @Component({ selector: 'cd-stonefs', template: '' })
+  class StonefsComponent {}
 
   @Component({ selector: 'cd-404', template: '' })
   class NotFoundComponent {}
 
   const routes: Routes = [
-    { path: 'cephfs', component: CephfsComponent },
+    { path: 'stonefs', component: StonefsComponent },
     { path: '404', component: NotFoundComponent }
   ];
 
@@ -33,7 +33,7 @@ describe('FeatureTogglesGuardService', () => {
       { provide: FeatureTogglesService, useValue: { get: null } },
       FeatureTogglesGuardService
     ],
-    declarations: [CephfsComponent, NotFoundComponent]
+    declarations: [StonefsComponent, NotFoundComponent]
   });
 
   beforeEach(() => {
@@ -62,11 +62,11 @@ describe('FeatureTogglesGuardService', () => {
   }
 
   it('should allow the feature if enabled', fakeAsync(() => {
-    expect(testCanActivate('cephfs', { cephfs: true })).toBe(true);
+    expect(testCanActivate('stonefs', { stonefs: true })).toBe(true);
     expect(router.url).toBe('/');
   }));
 
   it('should throw error if disable', fakeAsync(() => {
-    expect(() => testCanActivate('cephfs', { cephfs: false })).toThrowError(DashboardNotFoundError);
+    expect(() => testCanActivate('stonefs', { stonefs: false })).toThrowError(DashboardNotFoundError);
   }));
 });

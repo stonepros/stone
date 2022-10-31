@@ -5,12 +5,12 @@ import json
 import logging
 import sys
 
-from ceph.deployment.drive_group import DriveGroupSpec
-from ceph.deployment.drive_selection.selector import DriveSelection
-from ceph.deployment.translate import to_ceph_volume
-from ceph.deployment.inventory import Device
-from ceph_volume.inventory import Inventory
-from ceph_volume.devices.lvm.batch import Batch
+from stone.deployment.drive_group import DriveGroupSpec
+from stone.deployment.drive_selection.selector import DriveSelection
+from stone.deployment.translate import to_stone_volume
+from stone.deployment.inventory import Device
+from stone_volume.inventory import Inventory
+from stone_volume.devices.lvm.batch import Batch
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class Deploy(object):
 
     def main(self):
         parser = argparse.ArgumentParser(
-            prog='ceph-volume drive-group',
+            prog='stone-volume drive-group',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self.help,
         )
@@ -74,10 +74,10 @@ class Deploy(object):
             logger.error('DriveGroup didn\'t produce any commands')
             return
         if self.args.dry_run:
-            logger.info('Returning ceph-volume command (--dry-run was passed): {}'.format(cmd))
+            logger.info('Returning stone-volume command (--dry-run was passed): {}'.format(cmd))
             print(cmd)
         else:
-            logger.info('Running ceph-volume command: {}'.format(cmd))
+            logger.info('Running stone-volume command: {}'.format(cmd))
             batch_args = cmd.split(' ')[2:]
             b = Batch(batch_args)
             b.main()
@@ -95,4 +95,4 @@ class Deploy(object):
         inventory = i.get_report()
         devices = [Device.from_json(i) for i in inventory]
         selection = DriveSelection(dg_spec, devices)
-        return to_ceph_volume(selection)
+        return to_stone_volume(selection)

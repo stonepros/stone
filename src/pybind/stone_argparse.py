@@ -1,5 +1,5 @@
 """
-Types and routines used by the ceph CLI as well as the RESTful
+Types and routines used by the stone CLI as well as the RESTful
 interface.  These have to do with querying the daemons for
 command-description information, validating user command input against
 those descriptions, and submitting the command to the appropriate
@@ -113,9 +113,9 @@ class JsonFormat(Exception):
     pass
 
 
-class CephArgtype(object):
+class StoneArgtype(object):
     """
-    Base class for all Ceph argument types
+    Base class for all Stone argument types
 
     Instantiating an object sets any validation parameters
     (allowable strings, numeric ranges, etc.).  The 'valid'
@@ -175,18 +175,18 @@ class CephArgtype(object):
         if orig_type in (abc.Sequence, Sequence, List, list):
             assert len(type_args) == 1
             attrs['n'] = 'N'
-            return CephArgtype.to_argdesc(type_args[0], attrs)
+            return StoneArgtype.to_argdesc(type_args[0], attrs)
         elif orig_type is Tuple:
             assert len(type_args) >= 1
             inner_tp = type_args[0]
             assert type_args.count(inner_tp) == len(type_args), \
                 f'all elements in {tp} should be identical'
             attrs['n'] = str(len(type_args))
-            return CephArgtype.to_argdesc(inner_tp, attrs)
+            return StoneArgtype.to_argdesc(inner_tp, attrs)
         elif get_origin(tp) is Union:
             # should be Union[t, NoneType]
             assert len(type_args) == 2 and isinstance(None, type_args[1])
-            return CephArgtype.to_argdesc(type_args[0], attrs, True)
+            return StoneArgtype.to_argdesc(type_args[0], attrs, True)
         else:
             raise ValueError(f"unknown type '{tp}': '{attrs}'")
 
@@ -194,21 +194,21 @@ class CephArgtype(object):
     def to_argdesc(tp, attrs, has_default=False):
         if has_default:
             attrs['req'] = 'false'
-        CEPH_ARG_TYPES = {
-            str: CephString,
-            int: CephInt,
-            float: CephFloat,
-            bool: CephBool
+        STONE_ARG_TYPES = {
+            str: StoneString,
+            int: StoneInt,
+            float: StoneFloat,
+            bool: StoneBool
         }
         try:
-            return CEPH_ARG_TYPES[tp]().argdesc(attrs)
+            return STONE_ARG_TYPES[tp]().argdesc(attrs)
         except KeyError:
-            if isinstance(tp, CephArgtype):
+            if isinstance(tp, StoneArgtype):
                 return tp.argdesc(attrs)
             elif isinstance(tp, type) and issubclass(tp, enum.Enum):
-                return CephChoices(tp=tp).argdesc(attrs)
+                return StoneChoices(tp=tp).argdesc(attrs)
             else:
-                return CephArgtype._compound_type_to_argdesc(tp, attrs)
+                return StoneArgtype._compound_type_to_argdesc(tp, attrs)
 
     def argdesc(self, attrs):
         attrs['type'] = type(self).__name__
@@ -219,13 +219,13 @@ class CephArgtype(object):
         orig_type = get_origin(tp)
         type_args = get_args(tp)
         if orig_type in (abc.Sequence, Sequence, List, list):
-            return [CephArgtype.cast_to(type_args[0], e) for e in v]
+            return [StoneArgtype.cast_to(type_args[0], e) for e in v]
         elif orig_type is Tuple:
-            return tuple(CephArgtype.cast_to(type_args[0], e) for e in v)
+            return tuple(StoneArgtype.cast_to(type_args[0], e) for e in v)
         elif get_origin(tp) is Union:
             # should be Union[t, NoneType]
             assert len(type_args) == 2 and isinstance(None, type_args[1])
-            return CephArgtype.cast_to(type_args[0], v)
+            return StoneArgtype.cast_to(type_args[0], v)
         else:
             raise ValueError(f"unknown type '{tp}': '{v}'")
 
@@ -242,10 +242,10 @@ class CephArgtype(object):
         elif isinstance(tp, type) and issubclass(tp, enum.Enum):
             return tp(v)
         else:
-            return CephArgtype._cast_to_compound_type(tp, v)
+            return StoneArgtype._cast_to_compound_type(tp, v)
 
 
-class CephInt(CephArgtype):
+class StoneInt(StoneArgtype):
     """
     range-limited integers, [+|-][0-9]+ or 0x[0-9a-f]+
     range: list of 1 or 2 ints, [min] or [min,max]
@@ -285,7 +285,7 @@ class CephInt(CephArgtype):
         return super().argdesc(attrs)
 
 
-class CephFloat(CephArgtype):
+class StoneFloat(StoneArgtype):
     """
     range-limited float type
     range: list of 1 or 2 floats, [min] or [min, max]
@@ -324,7 +324,7 @@ class CephFloat(CephArgtype):
         return super().argdesc(attrs)
 
 
-class CephString(CephArgtype):
+class StoneString(StoneArgtype):
     """
     String; pretty generic.  goodchars is a RE char class of valid chars
     """
@@ -333,7 +333,7 @@ class CephString(CephArgtype):
         try:
             re.compile(goodchars)
         except re.error:
-            raise ValueError('CephString(): "{0}" is not a valid RE'.
+            raise ValueError('StoneString(): "{0}" is not a valid RE'.
                              format(goodchars))
         self.goodchars = goodchars
         self.goodset = frozenset(
@@ -365,7 +365,7 @@ class CephString(CephArgtype):
         return super().argdesc(attrs)
 
 
-class CephSocketpath(CephArgtype):
+class StoneSocketpath(StoneArgtype):
     """
     Admin socket path; check that it's readable and S_ISSOCK
     """
@@ -379,7 +379,7 @@ class CephSocketpath(CephArgtype):
         return '<admin-socket-path>'
 
 
-class CephIPAddr(CephArgtype):
+class StoneIPAddr(StoneArgtype):
     """
     IP address (v4 or v6) with optional port
     """
@@ -433,7 +433,7 @@ class CephIPAddr(CephArgtype):
         return '<IPaddr[:port]>'
 
 
-class CephEntityAddr(CephIPAddr):
+class StoneEntityAddr(StoneIPAddr):
     """
     EntityAddress, that is, IP address[/nonce]
     """
@@ -461,7 +461,7 @@ class CephEntityAddr(CephIPAddr):
         return '<EntityAddr>'
 
 
-class CephPoolname(CephArgtype):
+class StonePoolname(StoneArgtype):
     """
     Pool name; very little utility
     """
@@ -469,7 +469,7 @@ class CephPoolname(CephArgtype):
         return '<poolname>'
 
 
-class CephObjectname(CephArgtype):
+class StoneObjectname(StoneArgtype):
     """
     Object name.  Maybe should be combined with Pool name as they're always
     present in pairs, and then could be checked for presence
@@ -478,7 +478,7 @@ class CephObjectname(CephArgtype):
         return '<objectname>'
 
 
-class CephPgid(CephArgtype):
+class StonePgid(StoneArgtype):
     """
     pgid, in form N.xxx (N = pool number, xxx = hex pgnum)
     """
@@ -502,7 +502,7 @@ class CephPgid(CephArgtype):
         return '<pgid>'
 
 
-class CephName(CephArgtype):
+class StoneName(StoneArgtype):
     """
     Name (type.id) where:
     type is osd|mon|client|mds
@@ -527,7 +527,7 @@ class CephName(CephArgtype):
             self.val = s
             return
         if s.find('.') == -1:
-            raise ArgumentFormat('CephName: no . in {0}'.format(s))
+            raise ArgumentFormat('StoneName: no . in {0}'.format(s))
         else:
             t, i = s.split('.', 1)
             if t not in ('osd', 'mon', 'client', 'mds', 'mgr'):
@@ -546,9 +546,9 @@ class CephName(CephArgtype):
         return '<name (type.id)>'
 
 
-class CephOsdName(CephArgtype):
+class StoneOsdName(StoneArgtype):
     """
-    Like CephName, but specific to osds: allow <id> alone
+    Like StoneName, but specific to osds: allow <id> alone
 
     osd.<id>, or <id>, or *, where id is a base10 int
     """
@@ -581,7 +581,7 @@ class CephOsdName(CephArgtype):
         return '<osdname (id|osd.id)>'
 
 
-class CephChoices(CephArgtype):
+class StoneChoices(StoneArgtype):
     """
     Set of string literals; init with valid choices
     """
@@ -627,7 +627,7 @@ class CephChoices(CephArgtype):
         return super().argdesc(attrs)
 
 
-class CephBool(CephArgtype):
+class StoneBool(StoneArgtype):
     """
     A boolean argument, values may be case insensitive 'true', 'false', '0',
     '1'.  In keyword form, value may be left off (implies true).
@@ -648,7 +648,7 @@ class CephBool(CephArgtype):
         return '<bool>'
 
 
-class CephFilepath(CephArgtype):
+class StoneFilepath(StoneArgtype):
     """
     Openable file
     """
@@ -675,7 +675,7 @@ class CephFilepath(CephArgtype):
         return '<outfilename>'
 
 
-class CephFragment(CephArgtype):
+class StoneFragment(StoneArgtype):
     """
     'Fragment' ??? XXX
     """
@@ -697,12 +697,12 @@ class CephFragment(CephArgtype):
         self.val = s
 
     def __str__(self):
-        return "<CephFS fragment ID (0xvvv/bbb)>"
+        return "<StoneFS fragment ID (0xvvv/bbb)>"
 
 
-class CephUUID(CephArgtype):
+class StoneUUID(StoneArgtype):
     """
-    CephUUID: pretty self-explanatory
+    StoneUUID: pretty self-explanatory
     """
     def valid(self, s, partial=False):
         try:
@@ -715,9 +715,9 @@ class CephUUID(CephArgtype):
         return '<uuid>'
 
 
-class CephPrefix(CephArgtype):
+class StonePrefix(StoneArgtype):
     """
-    CephPrefix: magic type for "all the first n fixed strings"
+    StonePrefix: magic type for "all the first n fixed strings"
     """
     def __init__(self, prefix=''):
         self.prefix = prefix
@@ -777,7 +777,7 @@ class argdesc(object):
     """
     def __init__(self, t, name=None, n=1, req=True, **kwargs):
         if isinstance(t, basestring):
-            self.t = CephPrefix
+            self.t = StonePrefix
             self.typeargs = {'prefix': t}
             self.req = True
         else:
@@ -812,8 +812,8 @@ class argdesc(object):
         return r[:-2] + ')'
 
     def __str__(self):
-        if ((self.t == CephChoices and len(self.instance.strings) == 1)
-           or (self.t == CephPrefix)):
+        if ((self.t == StoneChoices and len(self.instance.strings) == 1)
+           or (self.t == StonePrefix)):
             s = str(self.instance)
         else:
             s = '{0}({1})'.format(self.name, str(self.instance))
@@ -825,29 +825,29 @@ class argdesc(object):
 
     def helpstr(self):
         """
-        like str(), but omit parameter names (except for CephString,
+        like str(), but omit parameter names (except for StoneString,
         which really needs them)
         """
-        if self.t == CephBool:
+        if self.t == StoneBool:
             chunk = "--{0}".format(self.name.replace("_", "-"))
-        elif self.t == CephPrefix:
+        elif self.t == StonePrefix:
             chunk = str(self.instance)
-        elif self.t == CephChoices:
+        elif self.t == StoneChoices:
             if self.name == 'format':
                 chunk = f'--{self.name} {{{str(self.instance)}}}'
             else:
                 chunk = str(self.instance)
-        elif self.t == CephOsdName:
-            # it just so happens all CephOsdName commands are named 'id' anyway,
+        elif self.t == StoneOsdName:
+            # it just so happens all StoneOsdName commands are named 'id' anyway,
             # so <id|osd.id> is perfect.
             chunk = '<id|osd.id>'
-        elif self.t == CephName:
-            # CephName commands similarly only have one arg of the
+        elif self.t == StoneName:
+            # StoneName commands similarly only have one arg of the
             # type, so <type.id> is good.
             chunk = '<type.id>'
-        elif self.t == CephInt:
+        elif self.t == StoneInt:
             chunk = '<{0}:int>'.format(self.name)
-        elif self.t == CephFloat:
+        elif self.t == StoneFloat:
             chunk = '<{0}:float>'.format(self.name)
         else:
             chunk = '<{0}>'.format(self.name)
@@ -887,7 +887,7 @@ def descsort(sh1, sh2):
 def parse_funcsig(sig: Sequence[Union[str, Dict[str, str]]]) -> List[argdesc]:
     """
     parse a single descriptor (array of strings or dicts) into a
-    dict of function descriptor/validators (objects of CephXXX type)
+    dict of function descriptor/validators (objects of StoneXXX type)
 
     :returns: list of ``argdesc``
     """
@@ -896,7 +896,7 @@ def parse_funcsig(sig: Sequence[Union[str, Dict[str, str]]]) -> List[argdesc]:
     for desc in sig:
         argnum += 1
         if isinstance(desc, basestring):
-            t = CephPrefix
+            t = StonePrefix
             desc = {'type': t, 'name': 'prefix', 'prefix': desc}
         else:
             # not a simple string, must be dict
@@ -990,8 +990,8 @@ def validate_one(word, desc, is_kwarg, partial=False):
     contain the validated value (in the appropriate type).
     """
     vals = []
-    # CephString option might contain "," in it
-    allow_csv = is_kwarg or desc.t is not CephString
+    # StoneString option might contain "," in it
+    allow_csv = is_kwarg or desc.t is not StoneString
     if desc.N and allow_csv:
         for part in word.split(','):
             desc.instance.valid(part, partial)
@@ -1071,11 +1071,11 @@ def store_arg(desc: argdesc, args: List[ValidatedArg], d: ValidatedArgs):
             d[desc.name] += args
         else:
             d[desc.name] = args
-    elif (desc.t == CephPrefix) and (desc.name in d):
+    elif (desc.t == StonePrefix) and (desc.name in d):
         # prefixes' values should be a space-joined concatenation
         d[desc.name] += ' ' + desc.instance.val
     else:
-        # if first CephPrefix or any other type, just set it
+        # if first StonePrefix or any other type, just set it
         d[desc.name] = desc.instance.val
 
 
@@ -1090,7 +1090,7 @@ def validate(args: List[str],
     command input following format of signature.  Runs a validation; no
     exception means it's OK.  Return a dict containing all arguments keyed
     by their descriptor name, with duplicate args per name accumulated
-    into a list (or space-separated value for CephPrefix).
+    into a list (or space-separated value for StonePrefix).
 
     Mismatches of prefix are non-fatal, as this probably just means the
     search hasn't hit the correct command.  Mismatches of non-prefix
@@ -1109,7 +1109,7 @@ def validate(args: List[str],
     save_exception = None
 
     arg_descs_by_name = dict([desc.name, desc] for desc in mysig
-                             if desc.t != CephPrefix)
+                             if desc.t != StonePrefix)
 
     # Special case: detect "injectargs" (legacy way of modifying daemon
     # configs) and permit "--" string arguments if so.
@@ -1166,7 +1166,7 @@ def validate(args: List[str],
 
                         kwarg_desc = arg_descs_by_name.get(kwarg_k, None)
                         if kwarg_desc:
-                            if kwarg_desc.t == CephBool:
+                            if kwarg_desc.t == StoneBool:
                                 kwarg_v = 'true'
                             elif len(myargs):  # Some trailing arguments exist
                                 kwarg_v = myargs.pop(0)
@@ -1181,13 +1181,13 @@ def validate(args: List[str],
                     continue
 
             # Don't handle something as a positional argument if it
-            # has a leading "--" unless it's a CephChoices (used for
+            # has a leading "--" unless it's a StoneChoices (used for
             # "--yes-i-really-mean-it")
             if myarg and myarg.startswith("--"):
                 # Special cases for instances of confirmation flags
-                # that were defined as CephString/CephChoices instead of CephBool
-                # in pre-nautilus versions of Ceph daemons.
-                is_value = desc.t == CephChoices \
+                # that were defined as StoneString/StoneChoices instead of StoneBool
+                # in pre-nautilus versions of Stone daemons.
+                is_value = desc.t == StoneChoices \
                         or myarg == "--yes-i-really-mean-it" \
                         or myarg == "--yes-i-really-really-mean-it" \
                         or myarg == "--yes-i-really-really-mean-it-not-faking" \
@@ -1281,7 +1281,7 @@ def validate_command(sigdict: Dict[str, Dict[str, Any]],
     the arguments do not match any command.
 
     :param sigdict: A command description dictionary, as returned
-                    from Ceph daemons by the get_command_descriptions
+                    from Stone daemons by the get_command_descriptions
                     command.
     :param args: List of strings, should match one of the command
                  signatures in ``sigdict``
@@ -1389,7 +1389,7 @@ def find_cmd_target(childargs: List[str]) -> Tuple[str, str]:
     right daemon.
     Returns ('osd', osdid), ('pg', pgid), ('mgr', '') or ('mon', '')
     """
-    sig = parse_funcsig(['tell', {'name': 'target', 'type': 'CephName'}])
+    sig = parse_funcsig(['tell', {'name': 'target', 'type': 'StoneName'}])
     try:
         valid_dict = validate(childargs, sig, partial=True)
     except ArgumentError:
@@ -1397,13 +1397,13 @@ def find_cmd_target(childargs: List[str]) -> Tuple[str, str]:
     else:
         if len(valid_dict) == 2:
             # revalidate to isolate type and id
-            name = CephName()
+            name = StoneName()
             # if this fails, something is horribly wrong, as it just
             # validated successfully above
             name.valid(valid_dict['target'])
             return name.nametype, name.nameid
 
-    sig = parse_funcsig(['tell', {'name': 'pgid', 'type': 'CephPgid'}])
+    sig = parse_funcsig(['tell', {'name': 'pgid', 'type': 'StonePgid'}])
     try:
         valid_dict = validate(childargs, sig, partial=True)
     except ArgumentError:
@@ -1417,27 +1417,27 @@ def find_cmd_target(childargs: List[str]) -> Tuple[str, str]:
     # obtain a proper target from childargs.  This may mean that we are not
     # dealing with a 'tell' command, or that the specified target is invalid.
     # If the latter, we likely were unable to catch it because we were not
-    # really looking for it: first we tried to parse a 'CephName' (osd, mon,
+    # really looking for it: first we tried to parse a 'StoneName' (osd, mon,
     # mds, followed by and id); given our failure to parse, we tried to parse
-    # a 'CephPgid' instead (e.g., 0.4a).  Considering we got this far though
+    # a 'StonePgid' instead (e.g., 0.4a).  Considering we got this far though
     # we were unable to do so.
     #
     # We will now check if this is a tell and, if so, forcefully validate the
-    # target as a 'CephName'.  This must be so because otherwise we will end
+    # target as a 'StoneName'.  This must be so because otherwise we will end
     # up sending garbage to a monitor, which is the default target when a
     # target is not explicitly specified.
     # e.g.,
-    #   'ceph status' -> target is any one monitor
-    #   'ceph tell mon.* status -> target is all monitors
-    #   'ceph tell foo status -> target is invalid!
+    #   'stone status' -> target is any one monitor
+    #   'stone tell mon.* status -> target is all monitors
+    #   'stone tell foo status -> target is invalid!
     if len(childargs) > 1 and childargs[0] == 'tell':
-        name = CephName()
-        # CephName.valid() raises on validation error; find_cmd_target()'s
+        name = StoneName()
+        # StoneName.valid() raises on validation error; find_cmd_target()'s
         # caller should handle them
         name.valid(childargs[1])
         return name.nametype, name.nameid
 
-    sig = parse_funcsig(['pg', {'name': 'pgid', 'type': 'CephPgid'}])
+    sig = parse_funcsig(['pg', {'name': 'pgid', 'type': 'StonePgid'}])
     try:
         valid_dict = validate(childargs, sig, partial=True)
     except ArgumentError:
@@ -1591,11 +1591,11 @@ def send_command(cluster,
                       file=sys.stderr)
 
             try:
-                from cephfs import LibCephFS
+                from stonefs import LibStoneFS
             except ImportError:
-                raise RuntimeError("CephFS unavailable, have you installed libcephfs?")
+                raise RuntimeError("StoneFS unavailable, have you installed libstonefs?")
 
-            filesystem = LibCephFS(rados_inst=cluster)
+            filesystem = LibStoneFS(rados_inst=cluster)
             filesystem.init()
             ret, outbuf, outs = \
                 filesystem.mds_command(mds_spec, cmd, inbuf)
@@ -1641,7 +1641,7 @@ def json_command(cluster,
 
     try:
         if target[0] == 'osd':
-            osdtarg = CephName()
+            osdtarg = StoneName()
             osdtarget = '{0}.{1}'.format(*target)
             # prefer target from cmddict if present and valid
             if 'target' in cmddict:

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat
  *
@@ -73,8 +73,8 @@ private:
   std::map<std::string, std::vector<std::string>> postponed_commands;
   std::map<std::string, test_functions> tests;
 
-  std::string prefix = "ceph-";
-  fs::path socketdir = "/var/run/ceph";
+  std::string prefix = "stone-";
+  fs::path socketdir = "/var/run/stone";
 };
 
 #endif // STONE_ADMIN_SOCKET_OUTPUT_H

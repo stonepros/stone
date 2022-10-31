@@ -152,7 +152,7 @@ public:
    * Must return a valid delta usable in apply_delta() in submit_transaction
    * if state == MUTATION_PENDING.
    */
-  virtual ceph::bufferlist get_delta() = 0;
+  virtual stone::bufferlist get_delta() = 0;
 
   /**
    * apply_delta
@@ -172,7 +172,7 @@ public:
    * apply_delta override for LogicalCachedExtent implementers.
    */
   virtual void apply_delta_and_adjust_crc(
-    paddr_t base, const ceph::bufferlist &bl) = 0;
+    paddr_t base, const stone::bufferlist &bl) = 0;
 
   /**
    * Called on dirty CachedExtent implementation after replay.
@@ -219,14 +219,14 @@ public:
 
   /// Returns true if extent is clean (does not have deltas on disk)
   bool is_clean() const {
-    ceph_assert(is_valid());
+    stone_assert(is_valid());
     return state == extent_state_t::INITIAL_WRITE_PENDING ||
       state == extent_state_t::CLEAN;
   }
 
   /// Returns true if extent is dirty (has deltas on disk)
   bool is_dirty() const {
-    ceph_assert(is_valid());
+    stone_assert(is_valid());
     return !is_clean();
   }
 
@@ -261,7 +261,7 @@ public:
 
   /// Returns crc32c of buffer
   uint32_t get_crc32c() {
-    return ceph_crc32c(
+    return stone_crc32c(
       1,
       reinterpret_cast<const unsigned char *>(get_bptr().c_str()),
       get_length());
@@ -313,7 +313,7 @@ private:
     primary_ref_list_member_options>;
 
   /// Actual data contents
-  ceph::bufferptr ptr;
+  stone::bufferptr ptr;
 
   /// number of deltas since initial write
   extent_version_t version = EXTENT_VERSION_NULL;
@@ -324,11 +324,11 @@ private:
   /// used to wait while in-progress commit completes
   std::optional<seastar::shared_promise<>> io_wait_promise;
   void set_io_wait() {
-    ceph_assert(!io_wait_promise);
+    stone_assert(!io_wait_promise);
     io_wait_promise = seastar::shared_promise<>();
   }
   void complete_io() {
-    ceph_assert(io_wait_promise);
+    stone_assert(io_wait_promise);
     io_wait_promise->set_value();
     io_wait_promise = std::nullopt;
   }
@@ -342,7 +342,7 @@ private:
 
 protected:
   CachedExtent(CachedExtent &&other) = delete;
-  CachedExtent(ceph::bufferptr &&ptr) : ptr(std::move(ptr)) {}
+  CachedExtent(stone::bufferptr &&ptr) : ptr(std::move(ptr)) {}
   CachedExtent(const CachedExtent &other)
     : state(other.state),
       dirty_from(other.dirty_from),
@@ -400,8 +400,8 @@ protected:
     } else if (is_mutation_pending()) {
       return addr;
     } else {
-      ceph_assert(is_initial_pending());
-      ceph_assert(get_paddr().is_record_relative());
+      stone_assert(is_initial_pending());
+      stone_assert(get_paddr().is_record_relative());
       return addr - get_paddr();
     }
   }
@@ -488,7 +488,7 @@ public:
     auto [a, b] = get_overlap(
       extent.get_paddr(),
       extent.get_length());
-    ceph_assert(a == b);
+    stone_assert(a == b);
 
     extent_index.insert(extent);
     extent.parent_index = this;
@@ -600,7 +600,7 @@ public:
   }
 
   void apply_delta_and_adjust_crc(
-    paddr_t base, const ceph::bufferlist &bl) final {
+    paddr_t base, const stone::bufferlist &bl) final {
     apply_delta(bl);
     set_last_committed_crc(get_crc32c());
   }
@@ -611,7 +611,7 @@ public:
 
   std::ostream &print_detail(std::ostream &out) const final;
 protected:
-  virtual void apply_delta(const ceph::bufferlist &bl) = 0;
+  virtual void apply_delta(const stone::bufferlist &bl) = 0;
   virtual std::ostream &print_detail_l(std::ostream &out) const {
     return out;
   }

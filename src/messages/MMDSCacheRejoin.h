@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -34,7 +34,7 @@ public:
     case OP_WEAK: return "weak";
     case OP_STRONG: return "strong";
     case OP_ACK: return "ack";
-    default: ceph_abort(); return 0;
+    default: stone_abort(); return 0;
     }
   }
 
@@ -47,16 +47,16 @@ public:
     inode_strong(int n, int cw, int dl, int nl, int dftl) :
       nonce(n), caps_wanted(cw),
       filelock(dl), nestlock(nl), dftlock(dftl) { }
-    void encode(ceph::buffer::list &bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list &bl) const {
+      using stone::encode;
       encode(nonce, bl);
       encode(caps_wanted, bl);
       encode(filelock, bl);
       encode(nestlock, bl);
       encode(dftlock, bl);
     }
-    void decode(ceph::buffer::list::const_iterator &bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator &bl) {
+      using stone::decode;
       decode(nonce, bl);
       decode(caps_wanted, bl);
       decode(filelock, bl);
@@ -71,13 +71,13 @@ public:
     int8_t  dir_rep = 0;
     dirfrag_strong() {}
     dirfrag_strong(int n, int dr) : nonce(n), dir_rep(dr) {}
-    void encode(ceph::buffer::list &bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list &bl) const {
+      using stone::encode;
       encode(nonce, bl);
       encode(dir_rep, bl);
     }
-    void decode(ceph::buffer::list::const_iterator &bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator &bl) {
+      using stone::decode;
       decode(nonce, bl);
       decode(dir_rep, bl);
     }
@@ -98,8 +98,8 @@ public:
     bool is_primary() const { return ino > 0; }
     bool is_remote() const { return remote_ino > 0; }
     bool is_null() const { return ino == 0 && remote_ino == 0; }
-    void encode(ceph::buffer::list &bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list &bl) const {
+      using stone::encode;
       encode(first, bl);
       encode(ino, bl);
       encode(remote_ino, bl);
@@ -108,8 +108,8 @@ public:
       encode(lock, bl);
       encode(alternate_name, bl);
     }
-    void decode(ceph::buffer::list::const_iterator &bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator &bl) {
+      using stone::decode;
       decode(first, bl);
       decode(ino, bl);
       decode(remote_ino, bl);
@@ -126,13 +126,13 @@ public:
     inodeno_t ino = 0;
     dn_weak() = default;
     dn_weak(snapid_t f, inodeno_t pi) : first(f), ino(pi) {}
-    void encode(ceph::buffer::list &bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list &bl) const {
+      using stone::encode;
       encode(first, bl);
       encode(ino, bl);
     }
-    void decode(ceph::buffer::list::const_iterator &bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator &bl) {
+      using stone::decode;
       decode(first, bl);
       decode(ino, bl);
     }
@@ -140,15 +140,15 @@ public:
   WRITE_CLASS_ENCODER(dn_weak)
 
   struct lock_bls {
-    ceph::buffer::list file, nest, dft;
-    void encode(ceph::buffer::list& bl) const {
-      using ceph::encode;
+    stone::buffer::list file, nest, dft;
+    void encode(stone::buffer::list& bl) const {
+      using stone::encode;
       encode(file, bl);
       encode(nest, bl);
       encode(dft, bl);
     }
-    void decode(ceph::buffer::list::const_iterator& bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& bl) {
+      using stone::decode;
       decode(file, bl);
       decode(nest, bl);
       decode(dft, bl);
@@ -163,13 +163,13 @@ public:
     peer_reqid() : attempt(0) {}
     peer_reqid(const metareqid_t& r, __u32 a)
       : reqid(r), attempt(a) {}
-    void encode(ceph::buffer::list& bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl) const {
+      using stone::encode;
       encode(reqid, bl);
       encode(attempt, bl);
     }
-    void decode(ceph::buffer::list::const_iterator& bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& bl) {
+      using stone::decode;
       decode(reqid, bl);
       decode(attempt, bl);
     }
@@ -188,18 +188,18 @@ public:
   void add_strong_inode(vinodeno_t i, int n, int cw, int dl, int nl, int dftl) {
     strong_inodes[i] = inode_strong(n, cw, dl, nl, dftl);
   }
-  void add_inode_locks(CInode *in, __u32 nonce, ceph::buffer::list& bl) {
-    using ceph::encode;
+  void add_inode_locks(CInode *in, __u32 nonce, stone::buffer::list& bl) {
+    using stone::encode;
     encode(in->ino(), inode_locks);
     encode(in->last, inode_locks);
     encode(nonce, inode_locks);
     encode(bl, inode_locks);
   }
   void add_inode_base(CInode *in, uint64_t features) {
-    using ceph::encode;
+    using stone::encode;
     encode(in->ino(), inode_base);
     encode(in->last, inode_base);
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     in->_encode_base(bl, features);
     encode(bl, inode_base);
   }
@@ -229,7 +229,7 @@ public:
     strong_dirfrags[df] = dirfrag_strong(n, dr);
   }
   void add_dirfrag_base(CDir *dir) {
-    ceph::buffer::list& bl = dirfrag_bases[dir->dirfrag()];
+    stone::buffer::list& bl = dirfrag_bases[dir->dirfrag()];
     dir->_encode_base(bl);
   }
 
@@ -258,7 +258,7 @@ public:
 
   // -- encoding --
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(op, payload);
     encode(strong_inodes, payload);
     encode(inode_base, payload);
@@ -283,7 +283,7 @@ public:
   }
   void decode_payload() override {
     auto p = payload.cbegin();
-    using ceph::decode;
+    using stone::decode;
     decode(op, p);
     decode(strong_inodes, p);
     decode(inode_base, p);
@@ -326,12 +326,12 @@ public:
   std::map<inodeno_t,std::map<client_t, cap_reconnect_t> > cap_exports;
   std::map<client_t, entity_inst_t> client_map;
   std::map<client_t,client_metadata_t> client_metadata_map;
-  ceph::buffer::list imported_caps;
+  stone::buffer::list imported_caps;
 
   // full
-  ceph::buffer::list inode_base;
-  ceph::buffer::list inode_locks;
-  std::map<dirfrag_t, ceph::buffer::list> dirfrag_bases;
+  stone::buffer::list inode_base;
+  stone::buffer::list inode_locks;
+  std::map<dirfrag_t, stone::buffer::list> dirfrag_bases;
 
   std::map<vinodeno_t, std::list<peer_reqid> > authpinned_inodes;
   std::map<vinodeno_t, peer_reqid> frozen_authpin_inodes;
@@ -342,7 +342,7 @@ public:
 
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 
   static constexpr int HEAD_VERSION = 2;
   static constexpr int COMPAT_VERSION = 1;

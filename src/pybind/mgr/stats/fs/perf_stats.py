@@ -204,7 +204,7 @@ class FSPerfStats(object):
                     self.process_mds_reports()
                     self.r_cv.notify()
 
-                    stats_period = int(self.module.get_ceph_option("mgr_stats_period"))
+                    stats_period = int(self.module.get_stone_option("mgr_stats_period"))
                     self.q_cv.wait(stats_period)
                 self.log.debug("FSPerfStats::tick")
         except Exception as e:

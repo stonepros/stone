@@ -4,20 +4,20 @@ Looking up Monitors through DNS
 
 Since version 11.0.0 RADOS supports looking up Monitors through DNS.
 
-This way daemons and clients do not require a *mon host* configuration directive in their ceph.conf configuration file.
+This way daemons and clients do not require a *mon host* configuration directive in their stone.conf configuration file.
 
 Using DNS SRV TCP records clients are able to look up the monitors.
 
 This allows for less configuration on clients and monitors. Using a DNS update clients and daemons can be made aware of changes in the monitor topology.
 
-By default clients and daemons will look for the TCP service called *ceph-mon* which is configured by the *mon_dns_srv_name* configuration directive.
+By default clients and daemons will look for the TCP service called *stone-mon* which is configured by the *mon_dns_srv_name* configuration directive.
 
 
 ``mon dns srv name``
 
 :Description: the service name used querying the DNS for the monitor hosts/addresses
 :Type: String
-:Default: ``ceph-mon``
+:Default: ``stone-mon``
 
 Example
 -------
@@ -38,13 +38,13 @@ First, create records for the Monitors, either IPv4 (A) or IPv6 (AAAA).
     mon3.example.com. A 192.168.0.3
 
 
-With those records now existing we can create the SRV TCP records with the name *ceph-mon* pointing to the three Monitors.
+With those records now existing we can create the SRV TCP records with the name *stone-mon* pointing to the three Monitors.
 
 ::
 
-    _ceph-mon._tcp.example.com. 60 IN SRV 10 20 6789 mon1.example.com.
-    _ceph-mon._tcp.example.com. 60 IN SRV 10 30 6789 mon2.example.com.
-    _ceph-mon._tcp.example.com. 60 IN SRV 20 50 6789 mon3.example.com.
+    _stone-mon._tcp.example.com. 60 IN SRV 10 20 6789 mon1.example.com.
+    _stone-mon._tcp.example.com. 60 IN SRV 10 30 6789 mon2.example.com.
+    _stone-mon._tcp.example.com. 60 IN SRV 20 50 6789 mon3.example.com.
 
 Now all Monitors are running on port *6789*, with priorities 10, 10, 20 and weights 20, 30, 50 respectively.
 

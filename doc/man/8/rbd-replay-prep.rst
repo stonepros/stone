@@ -44,8 +44,8 @@ To prepare workload1-trace for replay::
 Availability
 ============
 
-**rbd-replay-prep** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**rbd-replay-prep** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 
 See also

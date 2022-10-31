@@ -6,7 +6,7 @@
 #include <map>
 #include <string>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "include/types.h"
 
 // mon subscriptions
@@ -36,10 +36,10 @@ public:
   void unwant(const std::string& what);
 private:
   // my subs, and current versions
-  std::map<std::string,ceph_mon_subscribe_item> sub_sent;
+  std::map<std::string,stone_mon_subscribe_item> sub_sent;
   // unsent new subs
-  std::map<std::string,ceph_mon_subscribe_item> sub_new;
-  using time_point = ceph::coarse_mono_time;
+  std::map<std::string,stone_mon_subscribe_item> sub_new;
+  using time_point = stone::coarse_mono_time;
   using clock = typename time_point::clock;
   time_point renew_sent;
   time_point renew_after;

@@ -4,8 +4,8 @@
 #ifndef STONE_RBD_MIRROR_H
 #define STONE_RBD_MIRROR_H
 
-#include "common/ceph_context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_context.h"
+#include "common/stone_mutex.h"
 #include "include/rados/librados.hpp"
 #include "include/utime.h"
 #include "ClusterWatcher.h"
@@ -38,7 +38,7 @@ class PoolMetaCache;
  */
 class Mirror {
 public:
-  Mirror(CephContext *cct, const std::vector<const char*> &args);
+  Mirror(StoneContext *cct, const std::vector<const char*> &args);
   Mirror(const Mirror&) = delete;
   Mirror& operator=(const Mirror&) = delete;
   ~Mirror();
@@ -64,11 +64,11 @@ private:
   void create_cache_manager();
   void run_cache_manager(utime_t *next_run_interval);
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   std::vector<const char*> m_args;
   Threads<librbd::ImageCtx> *m_threads = nullptr;
-  ceph::mutex m_lock = ceph::make_mutex("rbd::mirror::Mirror");
-  ceph::condition_variable m_cond;
+  stone::mutex m_lock = stone::make_mutex("rbd::mirror::Mirror");
+  stone::condition_variable m_cond;
   RadosRef m_local;
   std::unique_ptr<ServiceDaemon<librbd::ImageCtx>> m_service_daemon;
 

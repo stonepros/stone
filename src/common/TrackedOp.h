@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 New Dream Network/Sage Weil <sage@newdream.net>
  *
@@ -15,7 +15,7 @@
 #define TRACKEDREQUEST_H_
 
 #include <atomic>
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/histogram.h"
 #include "common/Thread.h"
 #include "common/Clock.h"
@@ -34,7 +34,7 @@ class OpHistoryServiceThread : public Thread
 private:
   std::list<std::pair<utime_t, TrackedOpRef>> _external_queue;
   OpHistory* _ophistory;
-  mutable ceph::spinlock queue_spinlock;
+  mutable stone::spinlock queue_spinlock;
   bool _break_thread;
 public:
   explicit OpHistoryServiceThread(OpHistory* parent)
@@ -56,7 +56,7 @@ class OpHistory {
   std::set<std::pair<utime_t, TrackedOpRef> > arrived;
   std::set<std::pair<double, TrackedOpRef> > duration;
   std::set<std::pair<utime_t, TrackedOpRef> > slow_op;
-  ceph::mutex ops_history_lock = ceph::make_mutex("OpHistory::ops_history_lock");
+  stone::mutex ops_history_lock = stone::make_mutex("OpHistory::ops_history_lock");
   void cleanup(utime_t now);
   std::atomic_size_t history_size{0};
   std::atomic_uint32_t history_duration{0};
@@ -71,9 +71,9 @@ public:
     opsvc.create("OpHistorySvc");
   }
   ~OpHistory() {
-    ceph_assert(arrived.empty());
-    ceph_assert(duration.empty());
-    ceph_assert(slow_op.empty());
+    stone_assert(arrived.empty());
+    stone_assert(duration.empty());
+    stone_assert(slow_op.empty());
   }
   void insert(const utime_t& now, TrackedOpRef op)
   {
@@ -84,8 +84,8 @@ public:
   }
 
   void _insert_delayed(const utime_t& now, TrackedOpRef op);
-  void dump_ops(utime_t now, ceph::Formatter *f, std::set<std::string> filters = {""}, bool by_duration=false);
-  void dump_slow_ops(utime_t now, ceph::Formatter *f, std::set<std::string> filters = {""});
+  void dump_ops(utime_t now, stone::Formatter *f, std::set<std::string> filters = {""}, bool by_duration=false);
+  void dump_slow_ops(utime_t now, stone::Formatter *f, std::set<std::string> filters = {""});
   void on_shutdown();
   void set_size_and_duration(size_t new_size, uint32_t new_duration) {
     history_size = new_size;
@@ -107,11 +107,11 @@ class OpTracker {
   float complaint_time;
   int log_threshold;
   std::atomic<bool> tracking_enabled;
-  ceph::shared_mutex lock = ceph::make_shared_mutex("OpTracker::lock");
+  stone::shared_mutex lock = stone::make_shared_mutex("OpTracker::lock");
 
 public:
-  StoneeContext *cct;
-  OpTracker(StoneeContext *cct_, bool tracking, uint32_t num_shards);
+  StoneContext *cct;
+  OpTracker(StoneContext *cct_, bool tracking, uint32_t num_shards);
       
   void set_complaint_and_threshold(float time, int threshold) {
     complaint_time = time;
@@ -129,9 +129,9 @@ public:
   void set_tracking(bool enable) {
     tracking_enabled = enable;
   }
-  bool dump_ops_in_flight(ceph::Formatter *f, bool print_only_blocked = false, std::set<std::string> filters = {""});
-  bool dump_historic_ops(ceph::Formatter *f, bool by_duration = false, std::set<std::string> filters = {""});
-  bool dump_historic_slow_ops(ceph::Formatter *f, std::set<std::string> filters = {""});
+  bool dump_ops_in_flight(stone::Formatter *f, bool print_only_blocked = false, std::set<std::string> filters = {""});
+  bool dump_historic_ops(stone::Formatter *f, bool by_duration = false, std::set<std::string> filters = {""});
+  bool dump_historic_slow_ops(stone::Formatter *f, std::set<std::string> filters = {""});
   bool register_inflight_op(TrackedOp *i);
   void unregister_inflight_op(TrackedOp *i);
   void record_history_op(TrackedOpRef&& i);
@@ -240,14 +240,14 @@ protected:
       return str.c_str();
     }
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_stream("time") << stamp;
       f->dump_string("event", str);
     }
   };
 
   std::vector<Event> events;    ///< std::list of events and their times
-  mutable ceph::mutex lock = ceph::make_mutex("TrackedOp::lock"); ///< to protect the events list
+  mutable stone::mutex lock = stone::make_mutex("TrackedOp::lock"); ///< to protect the events list
   uint64_t seq = 0;        ///< a unique value std::set by the OpTracker
 
   uint32_t warn_interval_multiplier = 1; //< limits output of a given op warning
@@ -271,7 +271,7 @@ protected:
   }
 
   /// output any type-specific data you want to get when dump() is called
-  virtual void _dump(ceph::Formatter *f) const {}
+  virtual void _dump(stone::Formatter *f) const {}
   /// if you want something else to happen when events are marked, implement
   virtual void _event_marked() {}
   /// return a unique descriptor of the Op; eg the message it's attached to
@@ -320,7 +320,7 @@ public:
 	break;
 
       default:
-	ceph_abort();
+	stone_abort();
       }
     } else if (!nref.compare_exchange_weak(nref_snap, nref_snap - 1)) {
       goto again;
@@ -356,10 +356,10 @@ public:
     if (!events.empty() && events.rbegin()->compare("done") == 0)
       return events.rbegin()->stamp - get_initiated();
     else
-      return ceph_clock_now() - get_initiated();
+      return stone_clock_now() - get_initiated();
   }
 
-  void mark_event(std::string_view event, utime_t stamp=ceph_clock_now());
+  void mark_event(std::string_view event, utime_t stamp=stone_clock_now());
 
   void mark_nowarn() {
     warn_interval_multiplier = 0;
@@ -370,7 +370,7 @@ public:
     return events.empty() ? std::string_view() : std::string_view(events.rbegin()->str);
   }
 
-  void dump(utime_t now, ceph::Formatter *f) const;
+  void dump(utime_t now, stone::Formatter *f) const;
 
   void tracking_start() {
     if (tracker->register_inflight_op(this)) {

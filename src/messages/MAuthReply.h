@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -24,10 +24,10 @@ public:
   errorcode32_t result;
   uint64_t global_id;      // if zero, meaningless
   std::string result_msg;
-  ceph::buffer::list result_bl;
+  stone::buffer::list result_bl;
 
   MAuthReply() : Message(STONE_MSG_AUTH_REPLY), protocol(0), result(0), global_id(0) {}
-  MAuthReply(__u32 p, ceph::buffer::list *bl = NULL, int r = 0, uint64_t gid=0, const char *msg = "") :
+  MAuthReply(__u32 p, stone::buffer::list *bl = NULL, int r = 0, uint64_t gid=0, const char *msg = "") :
     Message(STONE_MSG_AUTH_REPLY),
     protocol(p), result(r), global_id(gid),
     result_msg(msg) {
@@ -47,7 +47,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(protocol, p);
     decode(result, p);
@@ -56,7 +56,7 @@ public:
     decode(result_msg, p);
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(protocol, payload);
     encode(result, payload);
     encode(global_id, payload);

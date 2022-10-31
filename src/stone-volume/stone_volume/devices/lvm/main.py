@@ -1,6 +1,6 @@
 import argparse
 from textwrap import dedent
-from ceph_volume import terminal
+from stone_volume import terminal
 from . import activate
 from . import deactivate
 from . import prepare
@@ -45,7 +45,7 @@ class LVM(object):
     def main(self):
         terminal.dispatch(self.mapper, self.argv)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume lvm',
+            prog='stone-volume lvm',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self.print_help(terminal.subhelp(self.mapper)),
         )

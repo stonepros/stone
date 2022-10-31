@@ -2,13 +2,13 @@ v14.2.16 Nautilus
 =================
 
 This is the 16th backport release in the Nautilus series. This release fixes a
-security flaw in CephFS. We recommend users to update to this release.
+security flaw in StoneFS. We recommend users to update to this release.
 
 Notable Changes
 ---------------
 
 * CVE-2020-27781 : OpenStack Manila use of ceph_volume_client.py library allowed
-  tenant access to any Ceph credential's secret. (Kotresh Hiremath Ravishankar,
+  tenant access to any Stone credential's secret. (Kotresh Hiremath Ravishankar,
   Ramana Raja)
 
 
@@ -114,7 +114,7 @@ v14.2.12 Nautilus
 =================
 
 This is the 12th backport release in the Nautilus series. This release
-brings a number of bugfixes across all major components of Ceph. We recommend
+brings a number of bugfixes across all major components of Stone. We recommend
 that all Nautilus users upgrade to this release.
 
 Notable Changes
@@ -131,10 +131,10 @@ Notable Changes
   to the command and specify the value of ``mon_osd_warn_num_repaired``.
   This command will be replaced in future releases by the health mute/unmute feature.
 
-* It is now possible to specify the initial monitor to contact for Ceph tools
+* It is now possible to specify the initial monitor to contact for Stone tools
   and daemons using the ``mon_host_override`` config option or
   ``--mon-host-override <ip>`` command-line switch. This generally should only
-  be used for debugging and only affects initial communication with Ceph's
+  be used for debugging and only affects initial communication with Stone's
   monitor cluster.
 
 * Fix an issue with osdmaps not being trimmed in a healthy cluster (`issue#47296
@@ -268,7 +268,7 @@ v14.2.11 Nautilus
 =================
 
 This is the eleventh backport release in the Nautilus series. This release
-brings a number of bugfixes across all major components of Ceph. We recommend
+brings a number of bugfixes across all major components of Stone. We recommend
 that all Nautilus users upgrade to this release.
 
 Notable Changes
@@ -370,7 +370,7 @@ v14.2.10 Nautilus
 
 This is the tenth release in the Nautilus series. In addition to fixing
 a security-related bug in RGW, this release brings a number of bugfixes
-across all major components of Ceph. We recommend that all Nautilus users
+across all major components of Stone. We recommend that all Nautilus users
 upgrade to this release.
 
 Notable Changes
@@ -399,7 +399,7 @@ Notable Changes
 
 * The format of MDSs in `ceph fs dump` has changed.
 
-* Ceph will issue a health warning if a RADOS pool's ``size`` is set to 1
+* Stone will issue a health warning if a RADOS pool's ``size`` is set to 1
   or in other words the pool is configured with no redundancy. This can
   be fixed by setting the pool size to the minimum recommended value
   with::
@@ -624,7 +624,7 @@ Notable Changes
 v14.2.8 Nautilus
 ================
 
-This is the eighth update to the Ceph Nautilus release series. This release
+This is the eighth update to the Stone Nautilus release series. This release
 fixes issues across a range of subsystems. We recommend that all users upgrade
 to this release.
 
@@ -666,15 +666,15 @@ Notable Changes
   from a subscription in a 'pubsub' zone, as these are already wrapped inside
   that array.
 
-* CephFS: multiple active MDS forward scrub is now rejected. Scrub currently
+* StoneFS: multiple active MDS forward scrub is now rejected. Scrub currently
   only is permitted on a file system with a single rank. Reduce the ranks to one
   via ``ceph fs set <fs_name> max_mds 1``.
 
-* Ceph now refuses to create a file system with a default EC data pool. For
+* Stone now refuses to create a file system with a default EC data pool. For
   further explanation, see:
   https://docs.ceph.com/docs/nautilus/cephfs/createfs/#creating-pools
 
-* Ceph will now issue a health warning if a RADOS pool has a ``pg_num``
+* Stone will now issue a health warning if a RADOS pool has a ``pg_num``
   value that is not a power of two. This can be fixed by adjusting
   the pool to a nearby power of two::
 
@@ -785,7 +785,7 @@ Changelog
 * doc: remove invalid option mon_pg_warn_max_per_osd (`pr#31300 <https://github.com/ceph/ceph/pull/31300>`_, zhang daolong)
 * doc/_templates/page.html: redirect to etherpad (`pr#32248 <https://github.com/ceph/ceph/pull/32248>`_, Neha Ojha)
 * doc: wrong datatype describing crush_rule (`pr#32254 <https://github.com/ceph/ceph/pull/32254>`_, Kefu Chai)
-* global: disable THP for Ceph daemons (`pr#31646 <https://github.com/ceph/ceph/pull/31646>`_, Patrick Donnelly, Mark Nelson)
+* global: disable THP for Stone daemons (`pr#31646 <https://github.com/ceph/ceph/pull/31646>`_, Patrick Donnelly, Mark Nelson)
 * kv: fix shutdown vs async compaction (`pr#32715 <https://github.com/ceph/ceph/pull/32715>`_, Sage Weil)
 * librbd: diff iterate with fast-diff now correctly includes parent (`pr#32469 <https://github.com/ceph/ceph/pull/32469>`_, Jason Dillaman)
 * librbd: fix rbd_open_by_id, rbd_open_by_id_read_only (`pr#32837 <https://github.com/ceph/ceph/pull/32837>`_, yangjun)
@@ -806,7 +806,7 @@ Changelog
 * mgr/dashboard: fix restored RBD image naming issue (`pr#31810 <https://github.com/ceph/ceph/pull/31810>`_, Kiefer Chang)
 * mgr/dashboard: grafana charts match time picker selection (`pr#31999 <https://github.com/ceph/ceph/pull/31999>`_, Alfonso Martínez)
 * mgr/dashboard,grafana: remove shortcut menu (`pr#31980 <https://github.com/ceph/ceph/pull/31980>`_, Ernesto Puerta)
-* mgr/dashboard: Handle always-on Ceph Manager modules correctly (`pr#31782 <https://github.com/ceph/ceph/pull/31782>`_, Volker Theile)
+* mgr/dashboard: Handle always-on Stone Manager modules correctly (`pr#31782 <https://github.com/ceph/ceph/pull/31782>`_, Volker Theile)
 * mgr/dashboard: Hardening accessing the metadata (`pr#32128 <https://github.com/ceph/ceph/pull/32128>`_, Volker Theile)
 * mgr/dashboard: iSCSI targets not available if any gateway is down (and more...) (`pr#32304 <https://github.com/ceph/ceph/pull/32304>`_, Ricardo Marques)
 * mgr/dashboard: KeyError on dashboard reload (`pr#32233 <https://github.com/ceph/ceph/pull/32233>`_, Patrick Seidensal)
@@ -908,14 +908,14 @@ Changelog
 v14.2.7 Nautilus
 ================
 
-This is the seventh update to the Ceph Nautilus release series. This is
+This is the seventh update to the Stone Nautilus release series. This is
 a hotfix release primarily fixing a couple of security issues. We
 recommend that all users upgrade to this release.
 
 Notable Changes
 ---------------
 
-* CVE-2020-1699: Fixed a path traversal flaw in Ceph dashboard that
+* CVE-2020-1699: Fixed a path traversal flaw in Stone dashboard that
   could allow for potential information disclosure (Ernesto Puerta)
 * CVE-2020-1700: Fixed a flaw in RGW beast frontend that could lead to
   denial of service from an unauthenticated client (Or Friedmann)
@@ -924,7 +924,7 @@ Notable Changes
 v14.2.6 Nautilus
 ================
 
-This is the sixth update to the Ceph Nautilus release series. This is a hotfix
+This is the sixth update to the Stone Nautilus release series. This is a hotfix
 release primarily fixing a regression introduced in v14.2.5, all nautilus users
 are advised to upgrade to this release.
 
@@ -938,7 +938,7 @@ Notable Changes
 v14.2.5 Nautilus
 ================
 
-This is the fifth release of the Ceph Nautilus release series. Among the many
+This is the fifth release of the Stone Nautilus release series. Among the many
 notable changes, this release fixes a critical BlueStore bug that was introduced
 in 14.2.3. All Nautilus users are advised to upgrade to this release.
 
@@ -953,7 +953,7 @@ Critical fix:
 
 New health warnings:
 
-* Ceph will now issue health warnings if daemons have recently crashed. Ceph
+* Stone will now issue health warnings if daemons have recently crashed. Stone
   has been collecting crash reports since the initial Nautilus release, but the
   health alerts are new. To view new crashes (or all crashes, if you've just
   upgraded)::
@@ -965,8 +965,8 @@ New health warnings:
     ceph crash archive <crash-id>
     ceph crash archive-all
 
-* Ceph will issue a health warning if a RADOS pool's ``size`` is set to 1
-  or, in other words, if the pool is configured with no redundancy. Ceph will
+* Stone will issue a health warning if a RADOS pool's ``size`` is set to 1
+  or, in other words, if the pool is configured with no redundancy. Stone will
   stop issuing the warning if the pool size is set to the minimum
   recommended value::
 
@@ -1003,7 +1003,7 @@ Changes in the telemetry module:
 
     ceph config set mgr mgr/telemetry/channel_device false
 
-  Second, we now report more information about CephFS file systems,
+  Second, we now report more information about StoneFS file systems,
   including:
 
     - how many MDS daemons (in total and per file system)
@@ -1015,7 +1015,7 @@ Changes in the telemetry module:
 
   We have also added:
 
-    - which Ceph release the monitors are running
+    - which Stone release the monitors are running
     - whether msgr v1 or v2 addresses are used for the monitors
     - whether IPv4 or IPv6 addresses are used for the monitors
     - whether RADOS cache tiering is enabled (and which mode)
@@ -1087,7 +1087,7 @@ Changelog
 * tools: ceph-objectstore-tool: update-mon-db: do not fail if incmap is missing (`pr#30740 <https://github.com/ceph/ceph/pull/30740>`_, Kefu Chai)
 * ceph-volume: PVolumes.filter shouldn't purge itself (`pr#30805 <https://github.com/ceph/ceph/pull/30805>`_, Rishabh Dave)
 * ceph-volume: VolumeGroups.filter shouldn't purge itself (`pr#30807 <https://github.com/ceph/ceph/pull/30807>`_, Rishabh Dave)
-* ceph-volume: add Ceph's device id to inventory (`pr#31210 <https://github.com/ceph/ceph/pull/31210>`_, Sebastian Wagner)
+* ceph-volume: add Stone's device id to inventory (`pr#31210 <https://github.com/ceph/ceph/pull/31210>`_, Sebastian Wagner)
 * ceph-volume: allow to skip restorecon calls (`pr#31555 <https://github.com/ceph/ceph/pull/31555>`_, Alfredo Deza)
 * ceph-volume: api/lvm: check if list of LVs is empty (`pr#31228 <https://github.com/ceph/ceph/pull/31228>`_, Rishabh Dave)
 * ceph-volume: check if we run in an selinux environment (`pr#31812 <https://github.com/ceph/ceph/pull/31812>`_, Jan Fajerski)
@@ -1193,7 +1193,7 @@ Changelog
 * mgr/dashboard: Allow disabling redirection on standby dashboards (`issue#41813 <https://tracker.ceph.com/issues/41813>`_, `pr#30382 <https://github.com/ceph/ceph/pull/30382>`_, Volker Theile)
 * mgr/dashboard: Configuring an URL prefix does not work as expected (`pr#31375 <https://github.com/ceph/ceph/pull/31375>`_, Volker Theile)
 * mgr/dashbaord: Fix calculation of PG status percentage (`issue#41809 <https://tracker.ceph.com/issues/41089>`_, `pr#30394 <https://github.com/ceph/ceph/pull/30394>`_, Tiago Melo)
-* mgr/dashboard: Fix CephFS chart (`pr#30691 <https://github.com/ceph/ceph/pull/30691>`_, Stephan Müller)
+* mgr/dashboard: Fix StoneFS chart (`pr#30691 <https://github.com/ceph/ceph/pull/30691>`_, Stephan Müller)
 * mgr/dashboard: Fix grafana dashboards (`pr#31733 <https://github.com/ceph/ceph/pull/31733>`_, Radu Toader)
 * mgr/dashboard: Improve position of MDS chart tooltip (`pr#31565 <https://github.com/ceph/ceph/pull/31565>`_, Tiago Melo)
 * mgr/dashboard: Provide the name of the object being deleted (`pr#31263 <https://github.com/ceph/ceph/pull/31263>`_, Ricardo Marques)
@@ -1314,7 +1314,7 @@ Changelog
 v14.2.4 Nautilus
 ================
 
-This is the fourth release in the Ceph Nautilus stable release series. Its sole
+This is the fourth release in the Stone Nautilus stable release series. Its sole
 purpose is to fix a regression that found its way into the previous release.
 
 Notable Changes
@@ -1334,7 +1334,7 @@ Changelog
 v14.2.3 Nautilus
 ================
 
-This is the third bug fix release of Ceph Nautilus release series. We recommend
+This is the third bug fix release of Stone Nautilus release series. We recommend
 all Nautilus users upgrade to this release. For upgrading from older releases of
 ceph, general guidelines for upgrade to nautilus must be followed
 :ref:`nautilus-old-upgrade`.
@@ -1343,7 +1343,7 @@ Notable Changes
 ---------------
 
 * `CVE-2019-10222` - Fixed a denial of service vulnerability where an
-  unauthenticated client of Ceph Object Gateway could trigger a crash from an
+  unauthenticated client of Stone Object Gateway could trigger a crash from an
   uncaught exception
 
 * Nautilus-based librbd clients can now open images on Jewel clusters.
@@ -1359,7 +1359,7 @@ Notable Changes
 * "osd_deep_scrub_large_omap_object_key_threshold" has been lowered to detect an
   object with large number of omap keys more easily.
 
-* The Ceph Dashboard now supports silencing Prometheus alert notifications.
+* The Stone Dashboard now supports silencing Prometheus alert notifications.
 
 Changelog
 ---------
@@ -1524,7 +1524,7 @@ Changelog
 v14.2.2 Nautilus
 ================
 
-This is the second bug fix release of Ceph Nautilus release series. We recommend
+This is the second bug fix release of Stone Nautilus release series. We recommend
 all Nautilus users upgrade to this release. For upgrading from older releases of
 ceph, general guidelines for upgrade to nautilus must be followed
 :ref:`nautilus-old-upgrade`.
@@ -1590,7 +1590,7 @@ Changelog
 * bluestore: fix missing discard in BlueStore::_kv_sync_thread (`issue#39672 <http://tracker.ceph.com/issues/39672>`_, `pr#28258 <https://github.com/ceph/ceph/pull/28258>`_, Junhui Tang)
 * bluestore: fix out-of-bound access in bmap allocator (`pr#27740 <https://github.com/ceph/ceph/pull/27740>`_, Igor Fedotov)
 * bluestore: fix duplicate allocations in bmap allocator (`issue#40080 <http://tracker.ceph.com/issues/40080>`_, `pr#28646 <https://github.com/ceph/ceph/pull/28646>`_, Igor Fedotov)
-* build/ops: Ceph RPM build fails on openSUSE Tumbleweed with GCC 9 (`issue#40067 <http://tracker.ceph.com/issues/40067>`_, `issue#39974 <http://tracker.ceph.com/issues/39974>`_, `pr#28299 <https://github.com/ceph/ceph/pull/28299>`_, Martin Liška)
+* build/ops: Stone RPM build fails on openSUSE Tumbleweed with GCC 9 (`issue#40067 <http://tracker.ceph.com/issues/40067>`_, `issue#39974 <http://tracker.ceph.com/issues/39974>`_, `pr#28299 <https://github.com/ceph/ceph/pull/28299>`_, Martin Liška)
 * build/ops: cmake: Fix build against ncurses with separate libtinfo (`pr#27532 <https://github.com/ceph/ceph/pull/27532>`_, Lars Wendler)
 * build/ops: cmake: set empty-string RPATH for ceph-osd (`issue#40301 <http://tracker.ceph.com/issues/40301>`_, `issue#40295 <http://tracker.ceph.com/issues/40295>`_, `pr#28516 <https://github.com/ceph/ceph/pull/28516>`_, Nathan Cutler)
 * build/ops: do_cmake.sh: source not found (`issue#39981 <http://tracker.ceph.com/issues/39981>`_, `issue#40003 <http://tracker.ceph.com/issues/40003>`_, `pr#28215 <https://github.com/ceph/ceph/pull/28215>`_, Nathan Cutler)
@@ -1612,7 +1612,7 @@ Changelog
 * cephfs: client: fix "ceph.snap.btime" vxattr value (`issue#40169 <http://tracker.ceph.com/issues/40169>`_, `pr#28499 <https://github.com/ceph/ceph/pull/28499>`_, David Disseldorp)
 * cephfs: client: fix fuse client hang because its bad session PipeConnection (`issue#39686 <http://tracker.ceph.com/issues/39686>`_, `issue#39305 <http://tracker.ceph.com/issues/39305>`_, `pr#28375 <https://github.com/ceph/ceph/pull/28375>`_, Guan yunfei)
 * cephfs: kclient: nofail option not supported (`issue#39232 <http://tracker.ceph.com/issues/39232>`_, `pr#27851 <https://github.com/ceph/ceph/pull/27851>`_, Kenneth Waegeman)
-* cephfs: mds: Expose CephFS snapshot creation time to clients (`issue#39471 <http://tracker.ceph.com/issues/39471>`_, `pr#27901 <https://github.com/ceph/ceph/pull/27901>`_, David Disseldorp)
+* cephfs: mds: Expose StoneFS snapshot creation time to clients (`issue#39471 <http://tracker.ceph.com/issues/39471>`_, `pr#27901 <https://github.com/ceph/ceph/pull/27901>`_, David Disseldorp)
 * cephfs: mds: MDSTableServer.cc: 83: FAILED assert(version == tid) (`issue#39211 <http://tracker.ceph.com/issues/39211>`_, `issue#38835 <http://tracker.ceph.com/issues/38835>`_, `pr#27853 <https://github.com/ceph/ceph/pull/27853>`_, "Yan, Zheng")
 * cephfs: mds: avoid sending too many osd requests at once after mds restarts (`issue#40028 <http://tracker.ceph.com/issues/40028>`_, `issue#40040 <http://tracker.ceph.com/issues/40040>`_, `pr#28582 <https://github.com/ceph/ceph/pull/28582>`_, simon gao)
 * cephfs: mds: behind on trimming and "[dentry] was purgeable but no longer is! (`issue#39222 <http://tracker.ceph.com/issues/39222>`_, `issue#38679 <http://tracker.ceph.com/issues/38679>`_, `pr#27879 <https://github.com/ceph/ceph/pull/27879>`_, "Yan, Zheng")
@@ -1644,7 +1644,7 @@ Changelog
 * core: mon/Monitor: allow probe if MMonProbe::mon_release == 0 (`issue#38850 <http://tracker.ceph.com/issues/38850>`_, `pr#28262 <https://github.com/ceph/ceph/pull/28262>`_, Sage Weil)
 * core: mon: fix off-by-one rendering progress bar (`pr#28398 <https://github.com/ceph/ceph/pull/28398>`_, Sage Weil)
 * core: mon: use per-pool stats only when all OSDs are reporting (`pr#29032 <https://github.com/ceph/ceph/pull/29032>`_, Sage Weil)
-* core: monitoring: Provide a base set of Prometheus alert manager rules that notify the user about common Ceph error conditions (`issue#39540 <http://tracker.ceph.com/issues/39540>`_, `pr#27998 <https://github.com/ceph/ceph/pull/27998>`_, Jan Fajerski)
+* core: monitoring: Provide a base set of Prometheus alert manager rules that notify the user about common Stone error conditions (`issue#39540 <http://tracker.ceph.com/issues/39540>`_, `pr#27998 <https://github.com/ceph/ceph/pull/27998>`_, Jan Fajerski)
 * core: monitoring: update Grafana dashboards (`issue#39652 <http://tracker.ceph.com/issues/39652>`_, `issue#40006 <http://tracker.ceph.com/issues/40006>`_, `issue#39971 <http://tracker.ceph.com/issues/39971>`_, `issue#39932 <http://tracker.ceph.com/issues/39932>`_, `pr#28101 <https://github.com/ceph/ceph/pull/28101>`_, Kiefer Chang, Jan Fajerski)
 * core: osd/OSD.cc: make osd bench description consistent with parameters (`issue#39006 <http://tracker.ceph.com/issues/39006>`_, `issue#39375 <http://tracker.ceph.com/issues/39375>`_, `pr#28035 <https://github.com/ceph/ceph/pull/28035>`_, Neha Ojha)
 * core: osd/OSDMap: Replace get_out_osds with get_out_existing_osds (`issue#39421 <http://tracker.ceph.com/issues/39421>`_, `issue#39154 <http://tracker.ceph.com/issues/39154>`_, `pr#28072 <https://github.com/ceph/ceph/pull/28072>`_, Brad Hubbard)
@@ -1715,7 +1715,7 @@ Changelog
 * mgr/rook: Remove support for Rook older than v0.9 (`issue#39356 <http://tracker.ceph.com/issues/39356>`_, `issue#39278 <http://tracker.ceph.com/issues/39278>`_, `pr#27862 <https://github.com/ceph/ceph/pull/27862>`_, Sebastian Wagner)
 * mgr/test_orchestrator: AttributeError: 'TestWriteCompletion' object has no attribute 'id (`issue#39536 <http://tracker.ceph.com/issues/39536>`_, `pr#27920 <https://github.com/ceph/ceph/pull/27920>`_, Sebastian Wagner')
 * mgr/volumes: FS subvolumes enhancements (`issue#40429 <http://tracker.ceph.com/issues/40429>`_, `pr#28767 <https://github.com/ceph/ceph/pull/28767>`_, Ramana Raja)
-* mgr/volumes: add CephFS subvolumes library (`issue#39750 <http://tracker.ceph.com/issues/39750>`_, `issue#40152 <http://tracker.ceph.com/issues/40152>`_, `issue#39949 <http://tracker.ceph.com/issues/39949>`_, `issue#40014 <http://tracker.ceph.com/issues/40014>`_, `issue#39610 <http://tracker.ceph.com/issues/39610>`_, `pr#28429 <https://github.com/ceph/ceph/pull/28429>`_, Sage Weil, Venky Shankar, Ramana Raja, Rishabh Dave)
+* mgr/volumes: add StoneFS subvolumes library (`issue#39750 <http://tracker.ceph.com/issues/39750>`_, `issue#40152 <http://tracker.ceph.com/issues/40152>`_, `issue#39949 <http://tracker.ceph.com/issues/39949>`_, `issue#40014 <http://tracker.ceph.com/issues/40014>`_, `issue#39610 <http://tracker.ceph.com/issues/39610>`_, `pr#28429 <https://github.com/ceph/ceph/pull/28429>`_, Sage Weil, Venky Shankar, Ramana Raja, Rishabh Dave)
 * mgr/volumes: refactor volume module (`issue#40378 <http://tracker.ceph.com/issues/40378>`_, `issue#39969 <http://tracker.ceph.com/issues/39969>`_, `pr#28595 <https://github.com/ceph/ceph/pull/28595>`_, Venky Shankar)
 * mgr: Update the restful module in nautilus (`pr#28291 <https://github.com/ceph/ceph/pull/28291>`_, Kefu Chai, Boris Ranto)
 * mgr: deadlock (`issue#39040 <http://tracker.ceph.com/issues/39040>`_, `issue#39425 <http://tracker.ceph.com/issues/39425>`_, `pr#28098 <https://github.com/ceph/ceph/pull/28098>`_, xie xingguo)
@@ -1796,7 +1796,7 @@ Changelog
 v14.2.1 Nautilus
 ================
 
-This is the first bug fix release of Ceph Nautilus release series. We recommend
+This is the first bug fix release of Stone Nautilus release series. We recommend
 all nautilus users upgrade to this release. For upgrading from older releases of
 ceph, general guidelines for upgrade to nautilus must be followed
 :ref:`nautilus-old-upgrade`.
@@ -1804,7 +1804,7 @@ ceph, general guidelines for upgrade to nautilus must be followed
 Notable Changes
 ---------------
 
-* Ceph now packages python bindings for python3.6 instead of
+* Stone now packages python bindings for python3.6 instead of
   python3.4, because EPEL7 recently switched from python3.4 to
   python3.6 as the native python3. see the `announcement <https://lists.fedoraproject.org/archives/list/epel-announce@lists.fedoraproject.org/message/EGUMKAIMPK2UD5VSHXM53BH2MBDGDWMO/>`_
   for more details on the background of this change.
@@ -1876,7 +1876,7 @@ Changelog
 * mgr/dashboard: FixtureHelper (`issue#39041 <http://tracker.ceph.com/issues/39041>`_, `pr#27398 <https://github.com/ceph/ceph/pull/27398>`_, Stephan Müller)
 * mgr/dashboard: NFS Squash field should be required (`issue#39106 <http://tracker.ceph.com/issues/39106>`_, `issue#39064 <http://tracker.ceph.com/issues/39064>`_, `pr#27371 <https://github.com/ceph/ceph/pull/27371>`_, Tiago Melo)
 * mgr/dashboard: PreventDefault isn't working on 400 errors (`pr#27389 <https://github.com/ceph/ceph/pull/27389>`_, Stephan Müller)
-* mgr/dashboard: Typo in "CephFS Name" field on NFS form (`issue#39067 <http://tracker.ceph.com/issues/39067>`_, `pr#27449 <https://github.com/ceph/ceph/pull/27449>`_, Tiago Melo)
+* mgr/dashboard: Typo in "StoneFS Name" field on NFS form (`issue#39067 <http://tracker.ceph.com/issues/39067>`_, `pr#27449 <https://github.com/ceph/ceph/pull/27449>`_, Tiago Melo)
 * mgr/dashboard: dashboard giving 401 unauthorized (`issue#38871 <http://tracker.ceph.com/issues/38871>`_, `pr#27219 <https://github.com/ceph/ceph/pull/27219>`_, ming416)
 * mgr/dashboard: fix sparkline component (`issue#38866 <http://tracker.ceph.com/issues/38866>`_, `pr#27260 <https://github.com/ceph/ceph/pull/27260>`_, Alfonso Martínez)
 * mgr/dashboard: readonly user can't see any pages (`issue#39240 <http://tracker.ceph.com/issues/39240>`_, `pr#27611 <https://github.com/ceph/ceph/pull/27611>`_, Stephan Müller)
@@ -1933,7 +1933,7 @@ Changelog
 v14.2.0 Nautilus
 ================
 
-This is the first stable release of Ceph Nautilus.
+This is the first stable release of Stone Nautilus.
 
 Major Changes from Mimic
 ------------------------
@@ -1949,22 +1949,22 @@ Major Changes from Mimic
   * I18N support
   * REST API documentation with Swagger API
 
-  New Ceph management features include:
+  New Stone management features include:
 
   * OSD management (mark as down/out, change OSD settings, recovery profiles)
   * Cluster config settings editor
-  * Ceph Pool management (create/modify/delete)
+  * Stone Pool management (create/modify/delete)
   * ECP management
   * RBD mirroring configuration
-  * Embedded Grafana Dashboards (derived from Ceph Metrics)
+  * Embedded Grafana Dashboards (derived from Stone Metrics)
   * CRUSH map viewer
   * NFS Ganesha management
   * iSCSI target management (via :ref:`ceph-iscsi`)
   * RBD QoS configuration
-  * Ceph Manager (ceph-mgr) module management
+  * Stone Manager (ceph-mgr) module management
   * Prometheus alert Management
 
-  Also, the Ceph Dashboard is now split into its own package named
+  Also, the Stone Dashboard is now split into its own package named
   ``ceph-mgr-dashboard``. You might want to install it separately,
   if your package management software fails to do so when it installs
   ``ceph-mgr``.
@@ -2009,13 +2009,13 @@ Major Changes from Mimic
   * The new archive zone federation feature enables full preservation
     of all objects (including history) in a separate zone.
 
-- *CephFS*:
+- *StoneFS*:
 
   * MDS stability has been greatly improved for large caches and
     long-running clients with a lot of RAM. Cache trimming and client
     capability recall is now throttled to prevent overloading the MDS.
-  * CephFS may now be exported via NFS-Ganesha clusters in environments managed
-    by Rook. Ceph manages the clusters and ensures high-availability and
+  * StoneFS may now be exported via NFS-Ganesha clusters in environments managed
+    by Rook. Stone manages the clusters and ensures high-availability and
     scalability. An `introductory demo
     <https://ceph.com/community/deploying-a-cephnfs-server-cluster-with-rook/>`_
     is available. More automation of this feature is expected to be forthcoming
@@ -2023,7 +2023,7 @@ Major Changes from Mimic
   * The MDS ``mds_standby_for_*``, ``mon_force_standby_active``, and
     ``mds_standby_replay`` configuration options have been obsoleted. Instead,
     the operator :ref:`may now set <mds-standby-replay>` the new
-    ``allow_standby_replay`` flag on the CephFS file system. This setting
+    ``allow_standby_replay`` flag on the StoneFS file system. This setting
     causes standbys to become standby-replay for any available rank in the file
     system.
   * MDS now supports dropping its cache which concurrently asks clients
@@ -2034,14 +2034,14 @@ Major Changes from Mimic
     documentation <mds-scrub>` for more information.
   * A new interface for creating volumes is provided via the ``ceph volume``
     command-line-interface.
-  * A new cephfs-shell tool is available for manipulating a CephFS file
+  * A new cephfs-shell tool is available for manipulating a StoneFS file
     system without mounting.
-  * CephFS-related output from ``ceph status`` has been reformatted for brevity,
+  * StoneFS-related output from ``ceph status`` has been reformatted for brevity,
     clarity, and usefulness.
   * Lazy IO has been revamped. It can be turned on by the client using the new
     CEPH_O_LAZY flag to the ``ceph_open`` C/C++ API or via the config option
     ``client_force_lazyio``.
-  * CephFS file system can now be brought down rapidly via the ``ceph fs fail``
+  * StoneFS file system can now be brought down rapidly via the ``ceph fs fail``
     command. See :ref:`the administration page <cephfs-administration>` for
     more information.
 
@@ -2057,7 +2057,7 @@ Major Changes from Mimic
 
 - *Misc*:
 
-  * Ceph has a new set of :ref:`orchestrator modules
+  * Stone has a new set of :ref:`orchestrator modules
     <orchestrator-cli-module>` to directly interact with external
     orchestrators like ceph-ansible, DeepSea, Rook, or simply ssh via
     a consistent CLI (and, eventually, Dashboard) interface.
@@ -2113,7 +2113,7 @@ Instructions
      # ceph pg dump pgs_brief | cut -d " " -f 1 | xargs -n1 ceph pg scrub
 
    You should take into consideration that this forced scrub may
-   possibly have a negative impact on your Ceph clients' performance.
+   possibly have a negative impact on your Stone clients' performance.
 
 #. Make sure your cluster is stable and healthy (no down or
    recovering OSDs).  (Optional, but recommended.)
@@ -2146,7 +2146,7 @@ Instructions
 
      # systemctl restart ceph-mgr.target
 
-   Please note, if you are using Ceph Dashboard, you will probably need to
+   Please note, if you are using Stone Dashboard, you will probably need to
    install ``ceph-mgr-dashboard`` separately after upgrading ``ceph-mgr``
    package. The install script of ``ceph-mgr-dashboard`` will restart the
    manager daemons automatically for you. So in this case, you can just skip
@@ -2202,7 +2202,7 @@ Instructions
    The output will include the appopriate ``ceph-volume simple
    activate`` command to enable the OSD.
 
-#. Upgrade all CephFS MDS daemons.  For each CephFS file system,
+#. Upgrade all StoneFS MDS daemons.  For each StoneFS file system,
 
    #. Reduce the number of ranks to 1.  (Make note of the original
       number of MDS daemons first if you plan to restore it later.)::
@@ -2254,13 +2254,13 @@ Instructions
 
 #. Verify the cluster is healthy with ``ceph health``.
 
-   If your CRUSH tunables are older than Hammer, Ceph will now issue a
+   If your CRUSH tunables are older than Hammer, Stone will now issue a
    health warning.  If you see a health alert to that effect, you can
    revert this change with::
 
      ceph config set mon mon_crush_min_required_version firefly
 
-   If Ceph does not complain, however, then we recommend you also
+   If Stone does not complain, however, then we recommend you also
    switch any existing CRUSH buckets to straw2, which was added back
    in the Hammer release.  If you have any 'straw' buckets, this will
    result in a modest amount of data movement, but generally nothing
@@ -2333,7 +2333,7 @@ Instructions
    For more information, see :ref:`msgr2_ceph_conf`.
 
 #. Consider enabling the :ref:`telemetry module <telemetry>` to send
-   anonymized usage statistics and crash information to the Ceph
+   anonymized usage statistics and crash information to the Stone
    upstream developers.  To see what would be reported (without actually
    sending any information to anyone),::
 
@@ -2379,7 +2379,7 @@ These changes occurred between the Mimic and Nautilus releases.
   - new 'USED' column shows the space (accumulated over all OSDs) allocated
     purely for data objects kept at block(slow) device.
   - 'RAW USED' is now a sum of 'USED' space and space allocated/reserved at
-     block device for Ceph purposes, e.g. BlueFS part for BlueStore.
+     block device for Stone purposes, e.g. BlueFS part for BlueStore.
 
 * ``ceph df [detail]`` output (GLOBAL section) has been modified in json
   format:
@@ -2387,7 +2387,7 @@ These changes occurred between the Mimic and Nautilus releases.
   - 'total_used_bytes' column now shows the space (accumulated over all OSDs)
     allocated purely for data objects kept at block(slow) device
   - new 'total_used_raw_bytes' column shows a sum of 'USED' space and space
-    allocated/reserved at block device for Ceph purposes, e.g. BlueFS part for
+    allocated/reserved at block device for Stone purposes, e.g. BlueFS part for
     BlueStore.
 
 * ``ceph df [detail]`` output (POOLS section) has been modified in plain
@@ -2454,7 +2454,7 @@ These changes occurred between the Mimic and Nautilus releases.
   - new 'USED' column shows the space (accumulated over all OSDs) allocated
     purely for data objects kept at block(slow) device.
   - 'USED_RAW' is now a sum of 'USED' space and space allocated/reserved at
-    block device for Ceph purposes, e.g. BlueFS part for BlueStore.
+    block device for Stone purposes, e.g. BlueFS part for BlueStore.
 
 * The ``ceph osd rm`` command has been deprecated.  Users should use
   ``ceph osd destroy`` or ``ceph osd purge`` (but after first confirming it is
@@ -2489,7 +2489,7 @@ These changes occurred between the Mimic and Nautilus releases.
 
 * The *rbd-mirror* daemon can now retrieve remote peer cluster configuration
   secrets from the monitor. To use this feature, the rbd-mirror daemon
-  CephX user for the local cluster must use the ``profile rbd-mirror`` mon cap.
+  StoneX user for the local cluster must use the ``profile rbd-mirror`` mon cap.
   The secrets can be set using the ``rbd mirror pool peer add`` and
   ``rbd mirror pool peer set`` actions.
 
@@ -2548,7 +2548,7 @@ These changes occurred between the Mimic and Nautilus releases.
   via the ``ceph tell mds.<foo> cache drop`` command or large reductions in the
   cache size will no longer cause service unavailability.
 
-* The CephFS MDS behavior with recalling caps has been significantly improved
+* The StoneFS MDS behavior with recalling caps has been significantly improved
   to not attempt recalling too many caps at once, leading to instability.
   MDS with a large cache (64GB+) should be more stable.
 
@@ -2583,7 +2583,7 @@ These changes occurred between the Mimic and Nautilus releases.
   field with an ``addrs`` section to reflect that OSDs may bind to
   multiple addresses.
 
-* CephFS clients without the 's' flag in their authentication capability
+* StoneFS clients without the 's' flag in their authentication capability
   string will no longer be able to create/delete snapshots. To allow
   ``client.foo`` to create/delete snapshots in the ``bar`` directory of
   filesystem ``cephfs_a``, use command:
@@ -2635,7 +2635,7 @@ These changes occurred between the Mimic and Nautilus releases.
   option, you will need to adjust your config to set the new global option
   or revert to the default of .05 (5%).
 
-* By default, Ceph no longer issues a health warning when there are
+* By default, Stone no longer issues a health warning when there are
   misplaced objects (objects that are fully replicated but not stored
   on the intended OSDs).  You can reenable the old warning by setting
   ``mon_warn_on_misplaced`` to ``true``.
@@ -2852,7 +2852,7 @@ Detailed Changelog
 * build/ops,tests: tools/ceph-dencoder: conditionally link against mds (`pr#25255 <https://github.com/ceph/ceph/pull/25255>`_, Kefu Chai)
 * build/ops,tools: tool: link rbd-ggate against librados-cxx (`pr#24901 <https://github.com/ceph/ceph/pull/24901>`_, Willem Jan Withagen)
 * ceph-disk: get_partition_dev() should fail until get_dev_path(partnam… (`pr#21415 <https://github.com/ceph/ceph/pull/21415>`_, Erwan Velu)
-* cephfs: doc/releases: update CephFS mimic notes (`issue#23775 <http://tracker.ceph.com/issues/23775>`_, `pr#22232 <https://github.com/ceph/ceph/pull/22232>`_, Patrick Donnelly)
+* cephfs: doc/releases: update StoneFS mimic notes (`issue#23775 <http://tracker.ceph.com/issues/23775>`_, `pr#22232 <https://github.com/ceph/ceph/pull/22232>`_, Patrick Donnelly)
 * cephfs: mgr/dashboard: NFS Ganesha management REST API (`pr#25918 <https://github.com/ceph/ceph/pull/25918>`_, Lenz Grimmer, Ricardo Dias, Jeff Layton)
 * cephfs,mgr,pybind: pybind/mgr: Unified bits of volumes and orchestrator (`pr#25492 <https://github.com/ceph/ceph/pull/25492>`_, Sebastian Wagner)
 * cephfs,mon: MDSMonitor: silence unable to load metadata (`pr#25693 <https://github.com/ceph/ceph/pull/25693>`_, Song Shun)
@@ -3242,7 +3242,7 @@ Detailed Changelog
 * core,tools: osdmaptool: fix wrong test_map_pgs_dump_all output (`pr#22280 <https://github.com/ceph/ceph/pull/22280>`_, huangjun)
 * core,tools: rados: provide user with more meaningful error message (`pr#26275 <https://github.com/ceph/ceph/pull/26275>`_, Mykola Golub)
 * core,tools: tools/rados: allow reuse object for write test (`pr#25128 <https://github.com/ceph/ceph/pull/25128>`_, Li Wang)
-* core: vstart.sh: Support SPDK in Ceph development deployment (`pr#22975 <https://github.com/ceph/ceph/pull/22975>`_, tone.zhang)
+* core: vstart.sh: Support SPDK in Stone development deployment (`pr#22975 <https://github.com/ceph/ceph/pull/22975>`_, tone.zhang)
 * crimson: add MonClient (`pr#23849 <https://github.com/ceph/ceph/pull/23849>`_, Kefu Chai)
 * crimson: cache osdmap using LRU cache (`pr#26254 <https://github.com/ceph/ceph/pull/26254>`_, Kefu Chai, Jianpeng Ma)
 * crimson/common: apply config changes also on shard.0 (`pr#23631 <https://github.com/ceph/ceph/pull/23631>`_, Yingxin)
@@ -3279,7 +3279,7 @@ Detailed Changelog
 * crush: fix upmap overkill (`issue#37968 <http://tracker.ceph.com/issues/37968>`_, `pr#26179 <https://github.com/ceph/ceph/pull/26179>`_, xie xingguo)
 * dashboard/mgr: Save button doesn't prevent saving an invalid form (`issue#36426 <http://tracker.ceph.com/issues/36426>`_, `pr#24577 <https://github.com/ceph/ceph/pull/24577>`_, Patrick Nawracay)
 * dashboard: Return float if rate not available (`pr#22313 <https://github.com/ceph/ceph/pull/22313>`_, Boris Ranto)
-* doc: add Ceph Manager Dashboard to top-level TOC (`pr#26390 <https://github.com/ceph/ceph/pull/26390>`_, Nathan Cutler)
+* doc: add Stone Manager Dashboard to top-level TOC (`pr#26390 <https://github.com/ceph/ceph/pull/26390>`_, Nathan Cutler)
 * doc: add ceph-volume inventory sections (`pr#25092 <https://github.com/ceph/ceph/pull/25092>`_, Jan Fajerski)
 * doc: add documentation for iostat (`pr#22034 <https://github.com/ceph/ceph/pull/22034>`_, Mohamad Gebai)
 * doc: added demo document changes section (`pr#24791 <https://github.com/ceph/ceph/pull/24791>`_, James McClune)
@@ -3499,8 +3499,8 @@ Detailed Changelog
 * doc: typo fixes, s/Requered/Required/ (`pr#26406 <https://github.com/ceph/ceph/pull/26406>`_, Drunkard Zhang)
 * doc: update blkin changes (`pr#22317 <https://github.com/ceph/ceph/pull/22317>`_, Mahati Chamarthy)
 * doc: Update cpp.rst to accommodate the new APIs in libs3 (`pr#22162 <https://github.com/ceph/ceph/pull/22162>`_, Zhanhao Liu)
-* doc: Updated Ceph Dashboard documentation (`pr#26626 <https://github.com/ceph/ceph/pull/26626>`_, Lenz Grimmer)
-* doc: updated Ceph documentation links (`pr#25797 <https://github.com/ceph/ceph/pull/25797>`_, James McClune)
+* doc: Updated Stone Dashboard documentation (`pr#26626 <https://github.com/ceph/ceph/pull/26626>`_, Lenz Grimmer)
+* doc: updated Stone documentation links (`pr#25797 <https://github.com/ceph/ceph/pull/25797>`_, James McClune)
 * doc: updated cluster map reference link (`pr#24460 <https://github.com/ceph/ceph/pull/24460>`_, James McClune)
 * doc: updated crush map tunables link (`pr#24462 <https://github.com/ceph/ceph/pull/24462>`_, James McClune)
 * doc: Updated dashboard documentation (features, SSL config) (`pr#22059 <https://github.com/ceph/ceph/pull/22059>`_, Lenz Grimmer)
@@ -3691,7 +3691,7 @@ Detailed Changelog
 * mgr/dashboard: Can't handle user editing when tenants are specified (`pr#24757 <https://github.com/ceph/ceph/pull/24757>`_, Volker Theile)
 * mgr/dashboard: Catch LookupError when checking the RGW status (`pr#24028 <https://github.com/ceph/ceph/pull/24028>`_, Volker Theile)
 * mgr/dashboard: CdFormGroup (`pr#22644 <https://github.com/ceph/ceph/pull/22644>`_, Stephan Müller)
-* mgr/dashboard: Ceph dashboard user management from the UI (`pr#22758 <https://github.com/ceph/ceph/pull/22758>`_, Ricardo Marques)
+* mgr/dashboard: Stone dashboard user management from the UI (`pr#22758 <https://github.com/ceph/ceph/pull/22758>`_, Ricardo Marques)
 * mgr/dashboard: Change 'Client Recovery' title (`pr#26883 <https://github.com/ceph/ceph/pull/26883>`_, Ernesto Puerta)
 * mgr/dashboard: Changed background color of Masthead to brand gray (`issue#35690 <http://tracker.ceph.com/issues/35690>`_, `pr#25628 <https://github.com/ceph/ceph/pull/25628>`_, Neha Gupta)
 * mgr/dashboard: Changed default value of decimal point to 1 (`pr#22386 <https://github.com/ceph/ceph/pull/22386>`_, Tiago Melo)
@@ -3714,7 +3714,7 @@ Detailed Changelog
 * mgr/dashboard: configs textarea disallow horizontal resize (`issue#36452 <http://tracker.ceph.com/issues/36452>`_, `pr#24614 <https://github.com/ceph/ceph/pull/24614>`_, Tatjana Dehler)
 * mgr/dashboard: Configure all mgr modules in UI (`pr#26116 <https://github.com/ceph/ceph/pull/26116>`_, Volker Theile)
 * mgr/dashboard: Confirmation modal doesn't close (`pr#24544 <https://github.com/ceph/ceph/pull/24544>`_, Volker Theile)
-* mgr/dashboard: Confusing tilted time stamps in the CephFS performance graph (`pr#25909 <https://github.com/ceph/ceph/pull/25909>`_, Volker Theile)
+* mgr/dashboard: Confusing tilted time stamps in the StoneFS performance graph (`pr#25909 <https://github.com/ceph/ceph/pull/25909>`_, Volker Theile)
 * mgr/dashboard: consider config option default values (`issue#37683 <http://tracker.ceph.com/issues/37683>`_, `pr#25616 <https://github.com/ceph/ceph/pull/25616>`_, Tatjana Dehler)
 * mgr/dashboard: controller infrastructure refactor and new features (`pr#22210 <https://github.com/ceph/ceph/pull/22210>`_, Patrick Nawracay, Ricardo Dias)
 * mgr/dashboard: Correct permission decorator (`pr#26135 <https://github.com/ceph/ceph/pull/26135>`_, Tina Kallio)
@@ -4020,9 +4020,9 @@ Detailed Changelog
 * mgr: mgr/status: Add standby-replay MDS ceph version (`pr#23624 <https://github.com/ceph/ceph/pull/23624>`_, Zhi Zhang)
 * mgr: mgr/status: output to stdout, not stderr (`issue#24175 <http://tracker.ceph.com/issues/24175>`_, `pr#22089 <https://github.com/ceph/ceph/pull/22089>`_, John Spray)
 * mgr: mgr/telegraf: Send more PG status information to Telegraf (`pr#22436 <https://github.com/ceph/ceph/pull/22436>`_, Wido den Hollander)
-* mgr: mgr/telegraf: Telegraf module for Ceph Mgr (`pr#21782 <https://github.com/ceph/ceph/pull/21782>`_, Wido den Hollander)
+* mgr: mgr/telegraf: Telegraf module for Stone Mgr (`pr#21782 <https://github.com/ceph/ceph/pull/21782>`_, Wido den Hollander)
 * mgr: mgr/telegraf: Use Python generator and catch OSError (`pr#22418 <https://github.com/ceph/ceph/pull/22418>`_, Wido den Hollander)
-* mgr: mgr/telemetry: Add Ceph Telemetry module to send reports back to project (`pr#21982 <https://github.com/ceph/ceph/pull/21982>`_, Wido den Hollander)
+* mgr: mgr/telemetry: Add Stone Telemetry module to send reports back to project (`pr#21982 <https://github.com/ceph/ceph/pull/21982>`_, Wido den Hollander)
 * mgr: mgr/telemetry: Check if boolean is False or not present (`pr#22223 <https://github.com/ceph/ceph/pull/22223>`_, Wido den Hollander)
 * mgr: mgr/telemetry: Fix various issues (`pr#25770 <https://github.com/ceph/ceph/pull/25770>`_, Volker Theile)
 * mgr: mgr/volumes: fix orchestrator remove operation (`pr#25339 <https://github.com/ceph/ceph/pull/25339>`_, Jeff Layton)
@@ -4436,7 +4436,7 @@ Detailed Changelog
 * rgw: Improvements to STS Lite documentation (`pr#24847 <https://github.com/ceph/ceph/pull/24847>`_, Pritha Srivastava)
 * rgw: Initial commit for AssumeRoleWithWebIdentity (`pr#26002 <https://github.com/ceph/ceph/pull/26002>`_, Pritha Srivastava)
 * rgw: initial RGWRados refactoring work (`pr#24014 <https://github.com/ceph/ceph/pull/24014>`_, Yehuda Sadeh, Casey Bodley)
-* rgw: Initial work for OPA-Ceph integration (`pr#22624 <https://github.com/ceph/ceph/pull/22624>`_, Ashutosh Narkar)
+* rgw: Initial work for OPA-Stone integration (`pr#22624 <https://github.com/ceph/ceph/pull/22624>`_, Ashutosh Narkar)
 * rgw: librgw: initialize curl and http client for multisite (`issue#36302 <http://tracker.ceph.com/issues/36302>`_, `pr#24402 <https://github.com/ceph/ceph/pull/24402>`_, Casey Bodley)
 * rgw: librgw: support symbolic link (`pr#19684 <https://github.com/ceph/ceph/pull/19684>`_, Tao Chen)
 * rgw: lifcycle: don't reject compound rules with empty prefix (`issue#37879 <http://tracker.ceph.com/issues/37879>`_, `pr#25926 <https://github.com/ceph/ceph/pull/25926>`_, Matt Benjamin)

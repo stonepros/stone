@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -32,14 +32,14 @@ public:
   std::map<std::string,std::string> daemon_status;
 
   // encode map<string,map<int32_t,string>> of current config
-  ceph::buffer::list config_bl;
+  stone::buffer::list config_bl;
 
   // encode map<string,string> of compiled-in defaults
-  ceph::buffer::list config_defaults_bl;
+  stone::buffer::list config_defaults_bl;
 
   void decode_payload() override
   {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(daemon_name, p);
     if (header.version >= 2) {
@@ -57,7 +57,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(daemon_name, payload);
     encode(service_name, payload);
     encode(service_daemon, payload);
@@ -75,7 +75,7 @@ public:
     if (service_name.length()) {
       out << service_name;
     } else {
-      out << ceph_entity_type_name(get_source().type());
+      out << stone_entity_type_name(get_source().type());
     }
     out << "." << daemon_name;
     if (service_daemon) {
@@ -91,7 +91,7 @@ private:
   using RefCountedObject::put;
   using RefCountedObject::get;
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

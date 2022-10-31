@@ -2,15 +2,15 @@ import json
 import logging
 from typing import TYPE_CHECKING, Iterator, Optional, Dict, Any
 
-from ceph.deployment.service_spec import PlacementSpec, ServiceSpec, HostPlacementSpec
-from cephadm.schedule import HostAssignment
+from stone.deployment.service_spec import PlacementSpec, ServiceSpec, HostPlacementSpec
+from stoneadm.schedule import HostAssignment
 import rados
 
 from mgr_module import NFS_POOL_NAME
 from orchestrator import OrchestratorError, DaemonDescription
 
 if TYPE_CHECKING:
-    from .module import CephadmOrchestrator
+    from .module import StoneadmOrchestrator
 
 LAST_MIGRATION = 5
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class Migrations:
-    def __init__(self, mgr: "CephadmOrchestrator"):
+    def __init__(self, mgr: "StoneadmOrchestrator"):
         self.mgr = mgr
 
         # Why having a global counter, instead of spec versions?
@@ -27,7 +27,7 @@ class Migrations:
         # The specs don't change in (this) migration. but the scheduler here.
         # Adding the version to the specs at this time just felt wrong to me.
         #
-        # And the specs are only another part of cephadm which needs potential upgrades.
+        # And the specs are only another part of stoneadm which needs potential upgrades.
         # We have the cache, the inventory, the config store, the upgrade (imagine changing the
         # upgrade code, while an old upgrade is still in progress), naming of daemons,
         # fs-layout of the daemons, etc.
@@ -53,7 +53,7 @@ class Migrations:
         if self.is_migration_ongoing():
             # this is raised in module.serve()
             raise OrchestratorError(
-                "cephadm migration still ongoing. Please wait, until the migration is complete.")
+                "stoneadm migration still ongoing. Please wait, until the migration is complete.")
 
     def migrate(self, startup: bool = False) -> None:
         if self.mgr.migration_current == 0:
@@ -245,7 +245,7 @@ class Migrations:
             self.mgr.remove_daemons(daemons)
         else:
             # redeploy all ganesha daemons to ensures that the daemon
-            # cephx are correct AND container configs are set up properly
+            # stonex are correct AND container configs are set up properly
             daemons = [d.name() for d in self.mgr.cache.get_daemons_by_service(f'nfs.{service_id}')]
             self.mgr.log.info(f'Removing old nfs.{service_id} daemons {daemons}')
             self.mgr.remove_daemons(daemons)
@@ -275,7 +275,7 @@ class Migrations:
 
     def migrate_3_4(self) -> bool:
         # We can't set any host with the _admin label, but we're
-        # going to warn when calling `ceph orch host rm...`
+        # going to warn when calling `stone orch host rm...`
         if 'client.admin' not in self.mgr.keys.keys:
             self.mgr._client_keyring_set(
                 entity='client.admin',
@@ -297,26 +297,26 @@ class Migrations:
             self.mgr.check_mon_command({
                 'prefix': 'config rm',
                 'who': 'mgr',
-                'key': 'mgr/cephadm/registry_url',
+                'key': 'mgr/stoneadm/registry_url',
             })
             self.mgr.set_module_option('registry_username', None)
             self.mgr.check_mon_command({
                 'prefix': 'config rm',
                 'who': 'mgr',
-                'key': 'mgr/cephadm/registry_username',
+                'key': 'mgr/stoneadm/registry_username',
             })
             self.mgr.set_module_option('registry_password', None)
             self.mgr.check_mon_command({
                 'prefix': 'config rm',
                 'who': 'mgr',
-                'key': 'mgr/cephadm/registry_password',
+                'key': 'mgr/stoneadm/registry_password',
             })
 
             self.mgr.log.info('Done migrating registry login info')
         return True
 
 
-def queue_migrate_nfs_spec(mgr: "CephadmOrchestrator", spec_dict: Dict[Any, Any]) -> None:
+def queue_migrate_nfs_spec(mgr: "StoneadmOrchestrator", spec_dict: Dict[Any, Any]) -> None:
     """
     After 16.2.5 we dropped the NFSServiceSpec pool and namespace properties.
     Queue up a migration to process later, once we are sure that RADOS is available

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat Inc
  *
@@ -22,25 +22,25 @@ class CommandOp
 {
   public:
   ConnectionRef con;
-  ceph_tid_t tid;
+  stone_tid_t tid;
 
   std::vector<std::string> cmd;
-  ceph::buffer::list    inbl;
+  stone::buffer::list    inbl;
   Context      *on_finish;
-  ceph::buffer::list   *outbl;
+  stone::buffer::list   *outbl;
   std::string  *outs;
 
   MessageRef get_message(const uuid_d &fsid,
 			 bool mgr=false) const
   {
     if (mgr) {
-      auto m = ceph::make_message<MMgrCommand>(fsid);
+      auto m = stone::make_message<MMgrCommand>(fsid);
       m->cmd = cmd;
       m->set_data(inbl);
       m->set_tid(tid);
       return m;
     } else {
-      auto m = ceph::make_message<MCommand>(fsid);
+      auto m = stone::make_message<MCommand>(fsid);
       m->cmd = cmd;
       m->set_data(inbl);
       m->set_tid(tid);
@@ -48,7 +48,7 @@ class CommandOp
     }
   }
 
-  CommandOp(const ceph_tid_t t) : tid(t), on_finish(nullptr),
+  CommandOp(const stone_tid_t t) : tid(t), on_finish(nullptr),
                                   outbl(nullptr), outs(nullptr) {}
   CommandOp() : tid(0), on_finish(nullptr), outbl(nullptr), outs(nullptr) {}
 };
@@ -61,8 +61,8 @@ template<typename T>
 class CommandTable
 {
 protected:
-  ceph_tid_t last_tid;
-  std::map<ceph_tid_t, T> commands;
+  stone_tid_t last_tid;
+  std::map<stone_tid_t, T> commands;
 
 public:
 
@@ -72,33 +72,33 @@ public:
 
   ~CommandTable()
   {
-    ceph_assert(commands.empty());
+    stone_assert(commands.empty());
   }
 
   T& start_command()
   {
-    ceph_tid_t tid = last_tid++;
+    stone_tid_t tid = last_tid++;
     commands.insert(std::make_pair(tid, T(tid)) );
 
     return commands.at(tid);
   }
 
-  const std::map<ceph_tid_t, T> &get_commands() const
+  const std::map<stone_tid_t, T> &get_commands() const
   {
     return commands;
   }
 
-  bool exists(ceph_tid_t tid) const
+  bool exists(stone_tid_t tid) const
   {
     return commands.count(tid) > 0;
   }
 
-  T& get_command(ceph_tid_t tid)
+  T& get_command(stone_tid_t tid)
   {
     return commands.at(tid);
   }
 
-  void erase(ceph_tid_t tid)
+  void erase(stone_tid_t tid)
   {
     commands.erase(tid);
   }

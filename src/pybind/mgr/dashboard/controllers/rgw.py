@@ -10,7 +10,7 @@ from ..exceptions import DashboardException
 from ..rest_client import RequestException
 from ..security import Permission, Scope
 from ..services.auth import AuthManager, JwtManager
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from ..services.rgw_client import NoRgwDaemonsException, RgwClient
 from ..tools import json_str_to_object, str_to_bool
 from . import APIDoc, APIRouter, BaseController, Endpoint, EndpointDoc, \
@@ -31,7 +31,7 @@ RGW_SCHEMA = {
 
 RGW_DAEMON_SCHEMA = {
     "id": (str, "Daemon ID"),
-    "version": (str, "Ceph Version"),
+    "version": (str, "Stone Version"),
     "server_hostname": (str, ""),
     "zonegroup_name": (str, "Zone Group"),
     "zone_name": (str, "Zone")
@@ -92,7 +92,7 @@ class RgwDaemon(RESTController):
         except NoRgwDaemonsException:
             return daemons
 
-        for hostname, server in CephService.get_service_map('rgw').items():
+        for hostname, server in StoneService.get_service_map('rgw').items():
             for service in server['services']:
                 metadata = service['metadata']
 
@@ -100,7 +100,7 @@ class RgwDaemon(RESTController):
                 daemon = {
                     'id': metadata['id'],
                     'service_map_id': service['id'],
-                    'version': metadata['ceph_version'],
+                    'version': metadata['stone_version'],
                     'server_hostname': hostname,
                     'realm_name': metadata['realm_name'],
                     'zonegroup_name': metadata['zonegroup_name'],
@@ -119,7 +119,7 @@ class RgwDaemon(RESTController):
             'rgw_id': svc_id,
             'rgw_status': []
         }
-        service = CephService.get_service('rgw', svc_id)
+        service = StoneService.get_service('rgw', svc_id)
         if not service:
             raise cherrypy.NotFound('Service rgw {} is not available'.format(svc_id))
 
@@ -173,7 +173,7 @@ class RgwBucket(RgwRESTController):
     def _append_bid(self, bucket):
         """
         Append the bucket identifier that looks like [<tenant>/]<bucket>.
-        See http://docs.ceph.com/docs/nautilus/radosgw/multitenancy/ for
+        See http://docs.stone.com/docs/nautilus/radosgw/multitenancy/ for
         more information.
         :param bucket: The bucket parameters.
         :type bucket: dict
@@ -338,7 +338,7 @@ class RgwUser(RgwRESTController):
     def _append_uid(self, user):
         """
         Append the user identifier that looks like [<tenant>$]<user>.
-        See http://docs.ceph.com/docs/jewel/radosgw/multitenancy/ for
+        See http://docs.stone.com/docs/jewel/radosgw/multitenancy/ for
         more information.
         :param user: The user parameters.
         :type user: dict

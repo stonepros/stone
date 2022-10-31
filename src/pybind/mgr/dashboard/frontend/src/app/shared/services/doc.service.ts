@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { CephReleaseNamePipe } from '../pipes/ceph-release-name.pipe';
+import { StoneReleaseNamePipe } from '../pipes/stone-release-name.pipe';
 import { SummaryService } from './summary.service';
 
 @Injectable({
@@ -15,18 +15,18 @@ export class DocService {
 
   constructor(
     private summaryservice: SummaryService,
-    private cephReleaseNamePipe: CephReleaseNamePipe
+    private stoneReleaseNamePipe: StoneReleaseNamePipe
   ) {
     this.summaryservice.subscribeOnce((summary) => {
-      const releaseName = this.cephReleaseNamePipe.transform(summary.version);
+      const releaseName = this.stoneReleaseNamePipe.transform(summary.version);
       this.releaseDataSource.next(releaseName);
     });
   }
 
   urlGenerator(section: string, release = 'master'): string {
     const docVersion = release === 'master' ? 'latest' : release;
-    const domain = `https://docs.ceph.com/en/${docVersion}/`;
-    const domainCeph = `https://ceph.io/`;
+    const domain = `https://docs.stone.com/en/${docVersion}/`;
+    const domainStone = `https://stone.io/`;
 
     const sections = {
       iscsi: `${domain}mgr/dashboard/#enabling-iscsi-management`,
@@ -37,10 +37,10 @@ export class DocService {
       dashboard: `${domain}mgr/dashboard`,
       grafana: `${domain}mgr/dashboard/#enabling-the-embedding-of-grafana-dashboards`,
       orch: `${domain}mgr/orchestrator`,
-      pgs: `${domainCeph}pgcalc`,
-      help: `${domainCeph}help/`,
-      security: `${domainCeph}security/`,
-      trademarks: `${domainCeph}legal-page/trademarks/`,
+      pgs: `${domainStone}pgcalc`,
+      help: `${domainStone}help/`,
+      security: `${domainStone}security/`,
+      trademarks: `${domainStone}legal-page/trademarks/`,
       'dashboard-landing-page-status': `${domain}mgr/dashboard/#dashboard-landing-page-status`,
       'dashboard-landing-page-performance': `${domain}mgr/dashboard/#dashboard-landing-page-performance`,
       'dashboard-landing-page-capacity': `${domain}mgr/dashboard/#dashboard-landing-page-capacity`

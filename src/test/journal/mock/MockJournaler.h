@@ -22,7 +22,7 @@ struct Settings;
 struct MockFuture {
   static MockFuture *s_instance;
   static MockFuture &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -52,7 +52,7 @@ struct MockFutureProxy {
 struct MockReplayEntry {
   static MockReplayEntry *s_instance;
   static MockReplayEntry &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -77,7 +77,7 @@ struct MockReplayEntryProxy {
 struct MockJournaler {
   static MockJournaler *s_instance;
   static MockJournaler &get_instance() {
-    ceph_assert(s_instance != nullptr);
+    stone_assert(s_instance != nullptr);
     return *s_instance;
   }
 
@@ -149,7 +149,7 @@ struct MockJournalerProxy {
   }
 
   template <typename WorkQueue, typename Timer>
-  MockJournalerProxy(WorkQueue *work_queue, Timer *timer, ceph::mutex *timer_lock,
+  MockJournalerProxy(WorkQueue *work_queue, Timer *timer, stone::mutex *timer_lock,
                      librados::IoCtx &header_ioctx,
                      const std::string &journal_id,
                      const std::string &client_id, const Settings&,

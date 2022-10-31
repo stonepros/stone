@@ -7,9 +7,9 @@ import uuid
 
 from time import time as now
 
-from ..configchecks import CephadmConfigChecks
+from ..configchecks import StoneadmConfigChecks
 from ..inventory import HostCache
-from ..upgrade import CephadmUpgrade, UpgradeState
+from ..upgrade import StoneadmUpgrade, UpgradeState
 from orchestrator import DaemonDescription
 
 from typing import List, Dict, Any, Optional
@@ -152,7 +152,7 @@ host_sample = {
     "subscribed": "Yes",
     "system_uptime": 777600.0,
     "timestamp": now(),
-    "vendor": "Ceph Servers Inc",
+    "vendor": "Stone Servers Inc",
 }
 
 
@@ -186,7 +186,7 @@ def generate_testdata(count: int = 10, public_network: str = '10.7.17.0/24', clu
     for n in range(1, count + 1, 1):
 
         new_host = copy.deepcopy(host_sample)
-        hostname = f"node-{n}.ceph.com"
+        hostname = f"node-{n}.stone.com"
 
         new_host['hostname'] = hostname
         new_host['interfaces']['eth0']['ipv4_address'] = f"{public_ip_list.pop(0)}/{public_netmask}"
@@ -219,7 +219,7 @@ def generate_testdata(count: int = 10, public_network: str = '10.7.17.0/24', clu
 
 @pytest.fixture()
 def mgr():
-    """Provide a fake ceph mgr object preloaded with a configuration"""
+    """Provide a fake stone mgr object preloaded with a configuration"""
     mgr = FakeMgr()
     mgr.cache.facts, mgr.cache.daemons, mgr.daemon_to_host = \
         generate_testdata(public_network='10.9.64.0/24', cluster_network='')
@@ -240,7 +240,7 @@ class FakeMgr:
         self.daemon_to_host = {}
 
         self.cache = HostCache(self)
-        self.upgrade = CephadmUpgrade(self)
+        self.upgrade = StoneadmUpgrade(self)
 
     def set_health_checks(self, checks: dict):
         return
@@ -258,7 +258,7 @@ class FakeMgr:
         self.datastore[keyname] = value
         return None
 
-    def _ceph_get_server(self) -> None:
+    def _stone_get_server(self) -> None:
         pass
 
     def get_metadata(self, daemon_type: str, daemon_id: str) -> Dict[str, Any]:
@@ -269,7 +269,7 @@ class FakeMgr:
         else:
             version_str = self.default_version
 
-        return {"ceph_release": version_str, "hostname": self.daemon_to_host[key]}
+        return {"stone_release": version_str, "hostname": self.daemon_to_host[key]}
 
     def list_servers(self) -> List[Dict[str, List[Dict[str, str]]]]:
         num_disks = host_sample['hdd_count']
@@ -305,17 +305,17 @@ class FakeMgr:
 class TestConfigCheck:
 
     def test_to_json(self, mgr):
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         out = checker.to_json()
         assert out
         assert len(out) == len(checker.health_checks)
 
     def test_lookup_check(self, mgr):
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         check = checker.lookup_check('osd_mtu_size')
         logger.debug(json.dumps(check.to_json()))
         assert check
-        assert check.healthcheck_name == "CEPHADM_CHECK_MTU"
+        assert check.healthcheck_name == "STONEADM_CHECK_MTU"
 
     def test_old_checks_removed(self, mgr):
         mgr.datastore.update({
@@ -323,9 +323,9 @@ class TestConfigCheck:
                              '"kernel_security": "enabled", "public_network": "enabled", '
                              '"kernel_version": "enabled", "network_missing": "enabled", '
                              '"osd_mtu_size": "enabled", "osd_linkspeed": "enabled", '
-                             '"os_subscription": "enabled", "ceph_release": "enabled"}'
+                             '"os_subscription": "enabled", "stone_release": "enabled"}'
         })
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         raw = mgr.get_store('config_checks')
         checks = json.loads(raw)
         assert "bogus_one" not in checks
@@ -337,13 +337,13 @@ class TestConfigCheck:
             "config_checks": '{"kernel_security": "enabled", "public_network": "enabled", '
                              '"osd_mtu_size": "enabled", "osd_linkspeed": "enabled"}'
         })
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         raw = mgr.get_store('config_checks')
         checks = json.loads(raw)
         assert len(checks) == len(checker.health_checks)
 
     def test_no_issues(self, mgr):
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
         checker.run_checks()
@@ -351,21 +351,21 @@ class TestConfigCheck:
         assert not mgr.health_checks
 
     def test_no_public_network(self, mgr):
-        bad_node = mgr.cache.facts['node-1.ceph.com']
+        bad_node = mgr.cache.facts['node-1.stone.com']
         bad_node['interfaces']['eth0']['ipv4_address'] = "192.168.1.20/24"
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
         checker.run_checks()
         logger.debug(mgr.health_checks)
         assert len(mgr.health_checks) == 1
-        assert 'CEPHADM_CHECK_PUBLIC_MEMBERSHIP' in mgr.health_checks
-        assert mgr.health_checks['CEPHADM_CHECK_PUBLIC_MEMBERSHIP']['detail'][0] == \
-            'node-1.ceph.com does not have an interface on any public network'
+        assert 'STONEADM_CHECK_PUBLIC_MEMBERSHIP' in mgr.health_checks
+        assert mgr.health_checks['STONEADM_CHECK_PUBLIC_MEMBERSHIP']['detail'][0] == \
+            'node-1.stone.com does not have an interface on any public network'
 
     def test_missing_networks(self, mgr):
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.66.0/24']
         checker.run_checks()
@@ -373,48 +373,48 @@ class TestConfigCheck:
         logger.info(json.dumps(mgr.health_checks))
         logger.info(checker.subnet_lookup)
         assert len(mgr.health_checks) == 1
-        assert 'CEPHADM_CHECK_NETWORK_MISSING' in mgr.health_checks
-        assert mgr.health_checks['CEPHADM_CHECK_NETWORK_MISSING']['detail'][0] == \
+        assert 'STONEADM_CHECK_NETWORK_MISSING' in mgr.health_checks
+        assert mgr.health_checks['STONEADM_CHECK_NETWORK_MISSING']['detail'][0] == \
             "10.9.66.0/24 not found on any host in the cluster"
 
     def test_bad_mtu_single(self, mgr):
 
-        bad_node = mgr.cache.facts['node-1.ceph.com']
+        bad_node = mgr.cache.facts['node-1.stone.com']
         bad_node['interfaces']['eth0']['mtu'] = 1500
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
         checker.run_checks()
         logger.info(json.dumps(mgr.health_checks))
         logger.info(checker.subnet_lookup)
-        assert "CEPHADM_CHECK_MTU" in mgr.health_checks and len(mgr.health_checks) == 1
-        assert mgr.health_checks['CEPHADM_CHECK_MTU']['detail'][0] == \
-            'host node-1.ceph.com(eth0) is using MTU 1500 on 10.9.64.0/24, NICs on other hosts use 9000'
+        assert "STONEADM_CHECK_MTU" in mgr.health_checks and len(mgr.health_checks) == 1
+        assert mgr.health_checks['STONEADM_CHECK_MTU']['detail'][0] == \
+            'host node-1.stone.com(eth0) is using MTU 1500 on 10.9.64.0/24, NICs on other hosts use 9000'
 
     def test_bad_mtu_multiple(self, mgr):
 
         for n in [1, 5]:
-            bad_node = mgr.cache.facts[f'node-{n}.ceph.com']
+            bad_node = mgr.cache.facts[f'node-{n}.stone.com']
             bad_node['interfaces']['eth0']['mtu'] = 1500
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
         checker.run_checks()
         logger.info(json.dumps(mgr.health_checks))
         logger.info(checker.subnet_lookup)
-        assert "CEPHADM_CHECK_MTU" in mgr.health_checks and len(mgr.health_checks) == 1
-        assert mgr.health_checks['CEPHADM_CHECK_MTU']['count'] == 2
+        assert "STONEADM_CHECK_MTU" in mgr.health_checks and len(mgr.health_checks) == 1
+        assert mgr.health_checks['STONEADM_CHECK_MTU']['count'] == 2
 
     def test_bad_linkspeed_single(self, mgr):
 
-        bad_node = mgr.cache.facts['node-1.ceph.com']
+        bad_node = mgr.cache.facts['node-1.stone.com']
         bad_node['interfaces']['eth0']['speed'] = 100
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
@@ -422,16 +422,16 @@ class TestConfigCheck:
         logger.info(json.dumps(mgr.health_checks))
         logger.info(checker.subnet_lookup)
         assert mgr.health_checks
-        assert "CEPHADM_CHECK_LINKSPEED" in mgr.health_checks and len(mgr.health_checks) == 1
-        assert mgr.health_checks['CEPHADM_CHECK_LINKSPEED']['detail'][0] == \
-            'host node-1.ceph.com(eth0) has linkspeed of 100 on 10.9.64.0/24, NICs on other hosts use 1000'
+        assert "STONEADM_CHECK_LINKSPEED" in mgr.health_checks and len(mgr.health_checks) == 1
+        assert mgr.health_checks['STONEADM_CHECK_LINKSPEED']['detail'][0] == \
+            'host node-1.stone.com(eth0) has linkspeed of 100 on 10.9.64.0/24, NICs on other hosts use 1000'
 
     def test_super_linkspeed_single(self, mgr):
 
-        bad_node = mgr.cache.facts['node-1.ceph.com']
+        bad_node = mgr.cache.facts['node-1.stone.com']
         bad_node['interfaces']['eth0']['speed'] = 10000
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
@@ -446,15 +446,15 @@ class TestConfigCheck:
             "osd.1": "pacific",
         }
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
         checker.run_checks()
         logger.info(json.dumps(mgr.health_checks))
         assert mgr.health_checks
-        assert "CEPHADM_CHECK_CEPH_RELEASE" in mgr.health_checks and len(mgr.health_checks) == 1
-        assert mgr.health_checks['CEPHADM_CHECK_CEPH_RELEASE']['detail'][0] == \
+        assert "STONEADM_CHECK_STONE_RELEASE" in mgr.health_checks and len(mgr.health_checks) == 1
+        assert mgr.health_checks['STONEADM_CHECK_STONE_RELEASE']['detail'][0] == \
             'osd.1 is running pacific (majority of cluster is using quincy)'
 
     def test_release_mismatch_multi(self, mgr):
@@ -464,78 +464,78 @@ class TestConfigCheck:
             "osd.5": "octopus",
         }
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
         checker.run_checks()
         logger.info(json.dumps(mgr.health_checks))
         assert mgr.health_checks
-        assert "CEPHADM_CHECK_CEPH_RELEASE" in mgr.health_checks and len(mgr.health_checks) == 1
-        assert len(mgr.health_checks['CEPHADM_CHECK_CEPH_RELEASE']['detail']) == 2
+        assert "STONEADM_CHECK_STONE_RELEASE" in mgr.health_checks and len(mgr.health_checks) == 1
+        assert len(mgr.health_checks['STONEADM_CHECK_STONE_RELEASE']['detail']) == 2
 
     def test_kernel_mismatch(self, mgr):
 
-        bad_host = mgr.cache.facts['node-1.ceph.com']
+        bad_host = mgr.cache.facts['node-1.stone.com']
         bad_host['kernel'] = "5.10.18.0-241.10.1.el8.x86_64"
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
         checker.run_checks()
         logger.info(json.dumps(mgr.health_checks))
         assert len(mgr.health_checks) == 1
-        assert 'CEPHADM_CHECK_KERNEL_VERSION' in mgr.health_checks
-        assert mgr.health_checks['CEPHADM_CHECK_KERNEL_VERSION']['detail'][0] == \
-            "host node-1.ceph.com running kernel 5.10, majority of hosts(9) running 4.18"
-        assert mgr.health_checks['CEPHADM_CHECK_KERNEL_VERSION']['count'] == 1
+        assert 'STONEADM_CHECK_KERNEL_VERSION' in mgr.health_checks
+        assert mgr.health_checks['STONEADM_CHECK_KERNEL_VERSION']['detail'][0] == \
+            "host node-1.stone.com running kernel 5.10, majority of hosts(9) running 4.18"
+        assert mgr.health_checks['STONEADM_CHECK_KERNEL_VERSION']['count'] == 1
 
     def test_inconsistent_subscription(self, mgr):
 
-        bad_host = mgr.cache.facts['node-5.ceph.com']
+        bad_host = mgr.cache.facts['node-5.stone.com']
         bad_host['subscribed'] = "no"
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
         checker.run_checks()
         logger.info(json.dumps(mgr.health_checks))
         assert len(mgr.health_checks) == 1
-        assert "CEPHADM_CHECK_SUBSCRIPTION" in mgr.health_checks
-        assert mgr.health_checks['CEPHADM_CHECK_SUBSCRIPTION']['detail'][0] == \
-            "node-5.ceph.com does not have an active subscription"
+        assert "STONEADM_CHECK_SUBSCRIPTION" in mgr.health_checks
+        assert mgr.health_checks['STONEADM_CHECK_SUBSCRIPTION']['detail'][0] == \
+            "node-5.stone.com does not have an active subscription"
 
     def test_kernel_security_inconsistent(self, mgr):
 
-        bad_node = mgr.cache.facts['node-3.ceph.com']
+        bad_node = mgr.cache.facts['node-3.stone.com']
         bad_node['kernel_security'] = {
             "SELINUX": "permissive",
             "SELINUXTYPE": "targeted",
             "description": "SELinux: Enabled(permissive, targeted)",
             "type": "SELinux"
         }
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
         checker.run_checks()
         logger.info(json.dumps(mgr.health_checks))
         assert len(mgr.health_checks) == 1
-        assert 'CEPHADM_CHECK_KERNEL_LSM' in mgr.health_checks
-        assert mgr.health_checks['CEPHADM_CHECK_KERNEL_LSM']['detail'][0] == \
-            "node-3.ceph.com has inconsistent KSM settings compared to the majority of hosts(9) in the cluster"
+        assert 'STONEADM_CHECK_KERNEL_LSM' in mgr.health_checks
+        assert mgr.health_checks['STONEADM_CHECK_KERNEL_LSM']['detail'][0] == \
+            "node-3.stone.com has inconsistent KSM settings compared to the majority of hosts(9) in the cluster"
 
     def test_release_and_bad_mtu(self, mgr):
 
         mgr.version_overrides = {
             "osd.1": "pacific",
         }
-        bad_node = mgr.cache.facts['node-1.ceph.com']
+        bad_node = mgr.cache.facts['node-1.stone.com']
         bad_node['interfaces']['eth0']['mtu'] = 1500
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
@@ -544,24 +544,24 @@ class TestConfigCheck:
         logger.info(checker.subnet_lookup)
         assert mgr.health_checks
         assert len(mgr.health_checks) == 2
-        assert "CEPHADM_CHECK_CEPH_RELEASE" in mgr.health_checks and \
-            "CEPHADM_CHECK_MTU" in mgr.health_checks
+        assert "STONEADM_CHECK_STONE_RELEASE" in mgr.health_checks and \
+            "STONEADM_CHECK_MTU" in mgr.health_checks
 
     def test_release_mtu_LSM(self, mgr):
 
         mgr.version_overrides = {
             "osd.1": "pacific",
         }
-        bad_node1 = mgr.cache.facts['node-1.ceph.com']
+        bad_node1 = mgr.cache.facts['node-1.stone.com']
         bad_node1['interfaces']['eth0']['mtu'] = 1500
-        bad_node2 = mgr.cache.facts['node-3.ceph.com']
+        bad_node2 = mgr.cache.facts['node-3.stone.com']
         bad_node2['kernel_security'] = {
             "SELINUX": "permissive",
             "SELINUXTYPE": "targeted",
             "description": "SELinux: Enabled(permissive, targeted)",
             "type": "SELinux"
         }
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
@@ -571,26 +571,26 @@ class TestConfigCheck:
         assert mgr.health_checks
         assert len(mgr.health_checks) == 3
         assert \
-            "CEPHADM_CHECK_CEPH_RELEASE" in mgr.health_checks and \
-            "CEPHADM_CHECK_MTU" in mgr.health_checks and \
-            "CEPHADM_CHECK_KERNEL_LSM" in mgr.health_checks
+            "STONEADM_CHECK_STONE_RELEASE" in mgr.health_checks and \
+            "STONEADM_CHECK_MTU" in mgr.health_checks and \
+            "STONEADM_CHECK_KERNEL_LSM" in mgr.health_checks
 
     def test_release_mtu_LSM_subscription(self, mgr):
 
         mgr.version_overrides = {
             "osd.1": "pacific",
         }
-        bad_node1 = mgr.cache.facts['node-1.ceph.com']
+        bad_node1 = mgr.cache.facts['node-1.stone.com']
         bad_node1['interfaces']['eth0']['mtu'] = 1500
         bad_node1['subscribed'] = "no"
-        bad_node2 = mgr.cache.facts['node-3.ceph.com']
+        bad_node2 = mgr.cache.facts['node-3.stone.com']
         bad_node2['kernel_security'] = {
             "SELINUX": "permissive",
             "SELINUXTYPE": "targeted",
             "description": "SELinux: Enabled(permissive, targeted)",
             "type": "SELinux"
         }
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
@@ -600,10 +600,10 @@ class TestConfigCheck:
         assert mgr.health_checks
         assert len(mgr.health_checks) == 4
         assert \
-            "CEPHADM_CHECK_CEPH_RELEASE" in mgr.health_checks and \
-            "CEPHADM_CHECK_MTU" in mgr.health_checks and \
-            "CEPHADM_CHECK_KERNEL_LSM" in mgr.health_checks and \
-            "CEPHADM_CHECK_SUBSCRIPTION" in mgr.health_checks
+            "STONEADM_CHECK_STONE_RELEASE" in mgr.health_checks and \
+            "STONEADM_CHECK_MTU" in mgr.health_checks and \
+            "STONEADM_CHECK_KERNEL_LSM" in mgr.health_checks and \
+            "STONEADM_CHECK_SUBSCRIPTION" in mgr.health_checks
 
     def test_skip_release_during_upgrade(self, mgr):
         mgr.upgrade.upgrade_state = UpgradeState.from_json({
@@ -613,20 +613,20 @@ class TestConfigCheck:
             'error': '',
             'paused': False,
         })
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
         checker.run_checks()
         logger.info(f"{checker.skipped_checks_count} skipped check(s): {checker.skipped_checks}")
         assert checker.skipped_checks_count == 1
-        assert 'ceph_release' in checker.skipped_checks
+        assert 'stone_release' in checker.skipped_checks
 
     def test_skip_when_disabled(self, mgr):
         mgr.module_option.update({
             "config_checks_enabled": "false"
         })
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
@@ -640,7 +640,7 @@ class TestConfigCheck:
             'config_checks': '{"osd_mtu_size": "disabled"}'
         })
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 
@@ -655,7 +655,7 @@ class TestConfigCheck:
             'config_checks': '{"osd_mtu_size": "disabled", "kernel_security": "disabled"}'
         })
 
-        checker = CephadmConfigChecks(mgr)
+        checker = StoneadmConfigChecks(mgr)
         checker.cluster_network_list = []
         checker.public_network_list = ['10.9.64.0/24']
 

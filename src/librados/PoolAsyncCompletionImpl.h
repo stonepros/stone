@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Sage Weil <sage@newdream.net>
  *
@@ -15,7 +15,7 @@
 #ifndef STONE_LIBRADOS_POOLASYNCCOMPLETIONIMPL_H
 #define STONE_LIBRADOS_POOLASYNCCOMPLETIONIMPL_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 #include <boost/intrusive_ptr.hpp>
 
@@ -24,8 +24,8 @@
 
 namespace librados {
   struct PoolAsyncCompletionImpl {
-    ceph::mutex lock = ceph::make_mutex("PoolAsyncCompletionImpl lock");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("PoolAsyncCompletionImpl lock");
+    stone::condition_variable cond;
     int ref = 1;
     int rval = 0;
     bool released = false;
@@ -58,12 +58,12 @@ namespace librados {
     }
     void get() {
       std::scoped_lock l(lock);
-      ceph_assert(ref > 0);
+      stone_assert(ref > 0);
       ref++;
     }
     void release() {
       std::scoped_lock l(lock);
-      ceph_assert(!released);
+      stone_assert(!released);
       released = true;
     }
     void put() {

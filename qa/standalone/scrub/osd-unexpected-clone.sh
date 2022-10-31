@@ -16,18 +16,18 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7144" # git grep '\<7144\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7144" # git grep '\<7144\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
-    export -n CEPH_CLI_TEST_DUP_COMMAND
+    export -n STONE_CLI_TEST_DUP_COMMAND
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
         setup $dir || return 1
@@ -45,7 +45,7 @@ function TEST_recover_unexpected() {
     run_osd $dir 1 || return 1
     run_osd $dir 2 || return 1
 
-    ceph osd pool create foo 1
+    stone osd pool create foo 1
     rados -p foo put foo /etc/passwd
     rados -p foo mksnap snap
     rados -p foo put foo /etc/group
@@ -69,16 +69,16 @@ function TEST_recover_unexpected() {
 
     sleep 5
 
-    ceph pg repair 1.0 || return 1
+    stone pg repair 1.0 || return 1
 
     sleep 10
 
-    ceph log last
+    stone log last
 
     # make sure osds are still up
-    timeout 60 ceph tell osd.0 version || return 1
-    timeout 60 ceph tell osd.1 version || return 1
-    timeout 60 ceph tell osd.2 version || return 1
+    timeout 60 stone tell osd.0 version || return 1
+    timeout 60 stone tell osd.1 version || return 1
+    timeout 60 stone tell osd.2 version || return 1
 }
 
 

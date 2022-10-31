@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,7 +18,7 @@
 
 #include "messages/PaxosServiceMessage.h"
 #include "mon/mon_types.h"
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 
 class MMonPaxos final : public Message {
 private:
@@ -43,7 +43,7 @@ private:
     case OP_COMMIT: return "commit";
     case OP_LEASE: return "lease";
     case OP_LEASE_ACK: return "lease_ack";
-    default: ceph_abort(); return 0;
+    default: stone_abort(); return 0;
     }
   }
 
@@ -59,11 +59,11 @@ private:
   utime_t sent_timestamp;
 
   version_t latest_version = 0;
-  ceph::buffer::list latest_value;
+  stone::buffer::list latest_value;
 
-  std::map<version_t,ceph::buffer::list> values;
+  std::map<version_t,stone::buffer::list> values;
 
-  ceph::buffer::list feature_map;
+  stone::buffer::list feature_map;
 
   MMonPaxos() : Message{MSG_MON_PAXOS, HEAD_VERSION, COMPAT_VERSION} { }
   MMonPaxos(epoch_t e, int o, utime_t now) : 
@@ -92,7 +92,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     header.version = HEAD_VERSION;
     encode(epoch, payload);
     encode(op, payload);
@@ -109,7 +109,7 @@ public:
     encode(feature_map, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(epoch, p);
     decode(op, p);
@@ -129,7 +129,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

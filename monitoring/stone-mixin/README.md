@@ -1,5 +1,5 @@
-## Prometheus Monitoring Mixin for Ceph
-A set of Grafana dashboards and Prometheus alerts for Ceph.
+## Prometheus Monitoring Mixin for Stone
+A set of Grafana dashboards and Prometheus alerts for Stone.
 
 All the Grafana dashboards are already generated in the `dashboards_out`
 directory and alerts in the `prometheus_alerts.yml` file.
@@ -8,9 +8,9 @@ You can use the Grafana dashboards and alerts with Jsonnet like any other
 prometheus mixin. You can find more ressources about mixins in general on
 [monitoring.mixins.dev](https://monitoring.mixins.dev/).
 
-### Grafana dashboards for Ceph
+### Grafana dashboards for Stone
 In `dashboards_out` you can find a collection of
-[Grafana](https://grafana.com/grafana) dashboards for Ceph Monitoring.
+[Grafana](https://grafana.com/grafana) dashboards for Stone Monitoring.
 
 These dashboards are based on metrics collected
 from [prometheus](https://prometheus.io/) scraping the [prometheus mgr
@@ -28,11 +28,11 @@ plugin](http://docs.ceph.com/en/latest/mgr/prometheus/) and the
 ### Prometheus alerts
 In `prometheus_alerts.yml` you'll find a set of Prometheus
 alert rules that should provide a decent set of default alerts for a
-Ceph cluster. Just put this file in a place according to your Prometheus
+Stone cluster. Just put this file in a place according to your Prometheus
 configuration (wherever the `rules` configuration stanza points).
 
 #### SNMP
-Ceph provides a MIB (CEPH-PROMETHEUS-ALERT-MIB.txt) to support sending Prometheus
+Stone provides a MIB (CEPH-PROMETHEUS-ALERT-MIB.txt) to support sending Prometheus
 alerts through to an SNMP management platform. The translation from Prometheus
 alert to SNMP trap requires the Prometheus alert to contain an OID that maps to
 a definition within the MIB. When making changes to the Prometheus alert rules

@@ -23,14 +23,14 @@ public:
 
   struct OpenFile {
     std::string path;
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     bool dirty = false;
     int ref = 0;
   };
   std::map<std::string,OpenFile*> open_files;
 
   int open_file(std::string p, struct fuse_file_info *fi,
-		std::function<int(ceph::buffer::list *bl)> f);
+		std::function<int(stone::buffer::list *bl)> f);
 
   class FuseThread : public Thread {
     FuseStore *fs;

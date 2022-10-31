@@ -1,6 +1,6 @@
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
-class TestMetaInjection(CephFSTestCase):
+class TestMetaInjection(StoneFSTestCase):
     def test_meta_injection(self):
         conf_ori = self.fs.mds_asok(['config', 'show'])
         self.fs.mds_asok(['config', 'set', 'mds_log_max_segments', '1'])

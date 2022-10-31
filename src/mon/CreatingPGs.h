@@ -28,8 +28,8 @@ struct creating_pgs_t {
     pg_history_t history;
     PastIntervals past_intervals;
 
-    void encode(ceph::buffer::list& bl, uint64_t features) const {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl, uint64_t features) const {
+      using stone::encode;
       if (!HAVE_FEATURE(features, SERVER_OCTOPUS)) {
 	// was pair<epoch_t,utime_t> prior to octopus
 	encode(create_epoch, bl);
@@ -47,13 +47,13 @@ struct creating_pgs_t {
       encode(past_intervals, bl);
       ENCODE_FINISH(bl);
     }
-    void decode_legacy(ceph::buffer::list::const_iterator& p) {
-      using ceph::decode;
+    void decode_legacy(stone::buffer::list::const_iterator& p) {
+      using stone::decode;
       decode(create_epoch, p);
       decode(create_stamp, p);
     }
-    void decode(ceph::buffer::list::const_iterator& p) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& p) {
+      using stone::decode;
       DECODE_START(1, p);
       decode(create_epoch, p);
       decode(create_stamp, p);
@@ -65,7 +65,7 @@ struct creating_pgs_t {
       decode(past_intervals, p);
       DECODE_FINISH(p);
     }
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       f->dump_unsigned("create_epoch", create_epoch);
       f->dump_stream("create_stamp") << create_stamp;
       f->open_array_section("up");
@@ -104,15 +104,15 @@ struct creating_pgs_t {
     bool done() const {
       return start >= end;
     }
-    void encode(ceph::buffer::list& bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl) const {
+      using stone::encode;
       encode(created, bl);
       encode(modified, bl);
       encode(start, bl);
       encode(end, bl);
     }
-    void decode(ceph::buffer::list::const_iterator& p) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& p) {
+      using stone::decode;
       decode(created, p);
       decode(modified, p);
       decode(start, p);
@@ -139,7 +139,7 @@ struct creating_pgs_t {
   }
   void create_pool(int64_t poolid, uint32_t pg_num,
 		   epoch_t created, utime_t modified) {
-    ceph_assert(created_pools.count(poolid) == 0);
+    stone_assert(created_pools.count(poolid) == 0);
     auto& c = queue[poolid];
     c.created = created;
     c.modified = modified;
@@ -155,7 +155,7 @@ struct creating_pgs_t {
     queue.erase(removed_pool);
     return total - pgs.size();
   }
-  void encode(ceph::buffer::list& bl, uint64_t features) const {
+  void encode(stone::buffer::list& bl, uint64_t features) const {
     unsigned v = 3;
     if (!HAVE_FEATURE(features, SERVER_OCTOPUS)) {
       v = 2;
@@ -167,7 +167,7 @@ struct creating_pgs_t {
     encode(queue, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(3, bl);
     decode(last_scan_epoch, bl);
     if (struct_v >= 3) {
@@ -188,7 +188,7 @@ struct creating_pgs_t {
       decode(queue, bl);
     DECODE_FINISH(bl);
   }
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->dump_unsigned("last_scan_epoch", last_scan_epoch);
     f->open_array_section("creating_pgs");
     for (auto& pg : pgs) {

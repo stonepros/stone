@@ -31,7 +31,7 @@ namespace rados {
         static int check(StoneContext *cct, librados::IoCtx& ioctx, const std::string& oid,
                          const std::string& id, const std::string& val, otp_check_t *result);
         static int get_current_time(librados::IoCtx& ioctx, const std::string& oid,
-                                    ceph::real_time *result);
+                                    stone::real_time *result);
 #endif
       };
 

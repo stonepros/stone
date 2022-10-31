@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -38,7 +38,7 @@
 #include <sys/vfs.h>    /* or <sys/statfs.h> */
 #endif
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -49,8 +49,8 @@ namespace ceph {
 class Logger;
 class ContextQueue;
 
-static inline void encode(const std::map<std::string,ceph::buffer::ptr> *attrset, ceph::buffer::list &bl) {
-  using ceph::encode;
+static inline void encode(const std::map<std::string,stone::buffer::ptr> *attrset, stone::buffer::list &bl) {
+  using stone::encode;
   encode(*attrset, bl);
 }
 
@@ -64,9 +64,9 @@ protected:
   std::string path;
 
 public:
-  using Transaction = ceph::os::Transaction;
+  using Transaction = stone::os::Transaction;
 
-  CephContext* cct;
+  StoneContext* cct;
   /**
    * create - create an ObjectStore instance.
    *
@@ -77,7 +77,7 @@ public:
    * @param journal path (or other descriptor) for journal (optional)
    * @param flags which filestores should check if applicable
    */
-  static ObjectStore *create(CephContext *cct,
+  static ObjectStore *create(StoneContext *cct,
 			     const std::string& type,
 			     const std::string& data,
 			     const std::string& journal,
@@ -91,7 +91,7 @@ public:
    * @param fsid [out] osd uuid
    */
   static int probe_block_device_fsid(
-    CephContext *cct,
+    StoneContext *cct,
     const std::string& path,
     uuid_d *fsid);
 
@@ -148,10 +148,10 @@ public:
     }
   protected:
     CollectionImpl() = delete;
-    CollectionImpl(CephContext* cct, const coll_t& c) : RefCountedObject(cct), cid(c) {}
+    CollectionImpl(StoneContext* cct, const coll_t& c) : RefCountedObject(cct), cid(c) {}
     ~CollectionImpl() = default;
   };
-  using CollectionHandle = ceph::ref_t<CollectionImpl>;
+  using CollectionHandle = stone::ref_t<CollectionImpl>;
 
 
   /*********************************
@@ -179,9 +179,9 @@ public:
    * systems. Xattrs are a std::set of key/value pairs.  Sub-value access
    * is not required. It is possible to enumerate the std::set of xattrs in
    * key order.  At the implementation level, xattrs are used
-   * exclusively internal to Ceph and the implementer can expect the
+   * exclusively internal to Stone and the implementer can expect the
    * total size of all of the xattrs on an object to be relatively
-   * small, i.e., less than 64KB. Much of Ceph assumes that accessing
+   * small, i.e., less than 64KB. Much of Stone assumes that accessing
    * xattrs on temporally adjacent object accesses (recent past or
    * near future) is inexpensive.
    *
@@ -228,7 +228,7 @@ public:
 
 
  public:
-  ObjectStore(CephContext* cct,
+  ObjectStore(StoneContext* cct,
 	      const std::string& path_) : path(path_), cct(cct) {}
   virtual ~ObjectStore() {}
 
@@ -241,11 +241,11 @@ public:
     return 0;
   }
 
-  virtual void get_db_statistics(ceph::Formatter *f) { }
-  virtual void generate_db_histogram(ceph::Formatter *f) { }
+  virtual void get_db_statistics(stone::Formatter *f) { }
+  virtual void generate_db_histogram(stone::Formatter *f) { }
   virtual int flush_cache(std::ostream *os = NULL) { return -1; }
-  virtual void dump_perf_counters(ceph::Formatter *f) {}
-  virtual void dump_cache_stats(ceph::Formatter *f) {}
+  virtual void dump_perf_counters(stone::Formatter *f) {}
+  virtual void dump_cache_stats(stone::Formatter *f) {}
   virtual void dump_cache_stats(std::ostream& os) {}
 
   virtual std::string get_type() = 0;
@@ -457,7 +457,7 @@ public:
    * @param oid oid of object
    * @param offset location offset of first byte to be read
    * @param len number of bytes to be read
-   * @param bl output ceph::buffer::list
+   * @param bl output stone::buffer::list
    * @param op_flags is STONE_OSD_OP_FLAG_*
    * @returns number of bytes read on success, or negative error code on failure.
    */
@@ -466,7 +466,7 @@ public:
      const ghobject_t& oid,
      uint64_t offset,
      size_t len,
-     ceph::buffer::list& bl,
+     stone::buffer::list& bl,
      uint32_t op_flags = 0) = 0;
 
   /**
@@ -482,11 +482,11 @@ public:
    * @param oid oid of object
    * @param offset location offset of first byte to be read
    * @param len number of bytes to be read
-   * @param bl output ceph::buffer::list for extent std::map information.
+   * @param bl output stone::buffer::list for extent std::map information.
    * @returns 0 on success, negative error code on failure.
    */
    virtual int fiemap(CollectionHandle& c, const ghobject_t& oid,
-		      uint64_t offset, size_t len, ceph::buffer::list& bl) = 0;
+		      uint64_t offset, size_t len, stone::buffer::list& bl) = 0;
    virtual int fiemap(CollectionHandle& c, const ghobject_t& oid,
 		      uint64_t offset, size_t len, std::map<uint64_t, uint64_t>& destmap) = 0;
 
@@ -504,7 +504,7 @@ public:
    * @param cid collection for object
    * @param oid oid of object
    * @param m intervals to be read
-   * @param bl output ceph::buffer::list
+   * @param bl output stone::buffer::list
    * @param op_flags is STONE_OSD_OP_FLAG_*
    * @returns number of bytes read on success, or negative error code on failure.
    */
@@ -512,11 +512,11 @@ public:
      CollectionHandle &c,
      const ghobject_t& oid,
      interval_set<uint64_t>& m,
-     ceph::buffer::list& bl,
+     stone::buffer::list& bl,
      uint32_t op_flags = 0) {
      int total = 0;
      for (auto p = m.begin(); p != m.end(); p++) {
-       ceph::buffer::list t;
+       stone::buffer::list t;
        int r = read(c, oid, p.get_start(), p.get_len(), t, op_flags);
        if (r < 0)
          return r;
@@ -556,7 +556,7 @@ public:
     CollectionHandle &c,
     const ghobject_t& oid,
     const std::string& section_name,
-    ceph::Formatter *f) {
+    stone::Formatter *f) {
     return -ENOTSUP;
   }
 
@@ -570,7 +570,7 @@ public:
    * @returns 0 on success, negative error code on failure.
    */
   virtual int getattr(CollectionHandle &c, const ghobject_t& oid,
-		      const char *name, ceph::buffer::ptr& value) = 0;
+		      const char *name, stone::buffer::ptr& value) = 0;
 
   /**
    * getattr -- get an xattr of an object
@@ -583,8 +583,8 @@ public:
    */
   int getattr(
     CollectionHandle &c, const ghobject_t& oid,
-    const std::string& name, ceph::buffer::list& value) {
-    ceph::buffer::ptr bp;
+    const std::string& name, stone::buffer::list& value) {
+    stone::buffer::ptr bp;
     int r = getattr(c, oid, name.c_str(), bp);
     value.push_back(bp);
     return r;
@@ -599,7 +599,7 @@ public:
    * @returns 0 on success, negative error code on failure.
    */
   virtual int getattrs(CollectionHandle &c, const ghobject_t& oid,
-		       std::map<std::string,ceph::buffer::ptr>& aset) = 0;
+		       std::map<std::string,stone::buffer::ptr>& aset) = 0;
 
   /**
    * getattrs -- get all of the xattrs of an object
@@ -610,8 +610,8 @@ public:
    * @returns 0 on success, negative error code on failure.
    */
   int getattrs(CollectionHandle &c, const ghobject_t& oid,
-	       std::map<std::string,ceph::buffer::list>& aset) {
-    std::map<std::string,ceph::buffer::ptr> bmap;
+	       std::map<std::string,stone::buffer::list>& aset) {
+    std::map<std::string,stone::buffer::ptr> bmap;
     int r = getattrs(c, oid, bmap);
     for (auto i = bmap.begin(); i != bmap.end(); ++i) {
       aset[i->first].append(i->second);
@@ -687,15 +687,15 @@ public:
   virtual int omap_get(
     CollectionHandle &c,     ///< [in] Collection containing oid
     const ghobject_t &oid,   ///< [in] Object containing omap
-    ceph::buffer::list *header,      ///< [out] omap header
-    std::map<std::string, ceph::buffer::list> *out /// < [out] Key to value std::map
+    stone::buffer::list *header,      ///< [out] omap header
+    std::map<std::string, stone::buffer::list> *out /// < [out] Key to value std::map
     ) = 0;
 
   /// Get omap header
   virtual int omap_get_header(
     CollectionHandle &c,     ///< [in] Collection containing oid
     const ghobject_t &oid,   ///< [in] Object containing omap
-    ceph::buffer::list *header,      ///< [out] omap header
+    stone::buffer::list *header,      ///< [out] omap header
     bool allow_eio = false ///< [in] don't assert on eio
     ) = 0;
 
@@ -711,7 +711,7 @@ public:
     CollectionHandle &c,         ///< [in] Collection containing oid
     const ghobject_t &oid,       ///< [in] Object containing omap
     const std::set<std::string> &keys,     ///< [in] Keys to get
-    std::map<std::string, ceph::buffer::list> *out ///< [out] Returned keys and values
+    std::map<std::string, stone::buffer::list> *out ///< [out] Returned keys and values
     ) = 0;
 
 #ifdef WITH_SEASTAR
@@ -719,7 +719,7 @@ public:
     CollectionHandle &c,         ///< [in] Collection containing oid
     const ghobject_t &oid,       ///< [in] Object containing omap
     const std::optional<std::string> &start_after,     ///< [in] Keys to get
-    std::map<std::string, ceph::buffer::list> *out ///< [out] Returned keys and values
+    std::map<std::string, stone::buffer::list> *out ///< [out] Returned keys and values
     ) = 0;
 #endif
 

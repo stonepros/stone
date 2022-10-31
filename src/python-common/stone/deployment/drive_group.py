@@ -1,8 +1,8 @@
 import yaml
 
-from ceph.deployment.inventory import Device
-from ceph.deployment.service_spec import ServiceSpec, PlacementSpec
-from ceph.deployment.hostspec import SpecValidationError
+from stone.deployment.inventory import Device
+from stone.deployment.service_spec import ServiceSpec, PlacementSpec
+from stone.deployment.hostspec import SpecValidationError
 
 try:
     from typing import Optional, List, Dict, Any, Union
@@ -12,7 +12,7 @@ except ImportError:
 
 class DeviceSelection(object):
     """
-    Used within :class:`ceph.deployment.drive_group.DriveGroupSpec` to specify the devices
+    Used within :class:`stone.deployment.drive_group.DriveGroupSpec` to specify the devices
     used by the Drive Group.
 
     Any attributes (even none) can be included in the device
@@ -46,14 +46,14 @@ class DeviceSelection(object):
 
         #: Size specification of format LOW:HIGH.
         #: Can also take the the form :HIGH, LOW:
-        #: or an exact value (as ceph-volume inventory reports)
+        #: or an exact value (as stone-volume inventory reports)
         self.size:  Optional[str] = size
 
         #: is the drive rotating or not
         self.rotational = rotational
 
         #: Limit the number of devices added to this Drive Group. Devices
-        #: are used from top to bottom in the output of ``ceph-volume inventory``
+        #: are used from top to bottom in the output of ``stone-volume inventory``
         self.limit = limit
 
         #: Matches all devices. Can only be used for data devices
@@ -134,7 +134,7 @@ class DriveGroupValidationError(SpecValidationError):
 
 class DriveGroupSpec(ServiceSpec):
     """
-    Describe a drive group in the same form that ceph-volume
+    Describe a drive group in the same form that stone-volume
     understands.
     """
 
@@ -176,16 +176,16 @@ class DriveGroupSpec(ServiceSpec):
                                              preview_only=preview_only,
                                              extra_container_args=extra_container_args)
 
-        #: A :class:`ceph.deployment.drive_group.DeviceSelection`
+        #: A :class:`stone.deployment.drive_group.DeviceSelection`
         self.data_devices = data_devices
 
-        #: A :class:`ceph.deployment.drive_group.DeviceSelection`
+        #: A :class:`stone.deployment.drive_group.DeviceSelection`
         self.db_devices = db_devices
 
-        #: A :class:`ceph.deployment.drive_group.DeviceSelection`
+        #: A :class:`stone.deployment.drive_group.DeviceSelection`
         self.wal_devices = wal_devices
 
-        #: A :class:`ceph.deployment.drive_group.DeviceSelection`
+        #: A :class:`stone.deployment.drive_group.DeviceSelection`
         self.journal_devices = journal_devices
 
         #: Set (or override) the "bluestore_block_wal_size" value, in bytes

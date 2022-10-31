@@ -2,13 +2,13 @@
  Differences from POSIX
 ========================
 
-CephFS aims to adhere to POSIX semantics wherever possible.  For
+StoneFS aims to adhere to POSIX semantics wherever possible.  For
 example, in contrast to many other common network file systems like
-NFS, CephFS maintains strong cache coherency across clients.  The goal
+NFS, StoneFS maintains strong cache coherency across clients.  The goal
 is for processes communicating via the file system to behave the same
 when they are on different hosts as when they are on the same host.
 
-However, there are a few places where CephFS diverges from strict
+However, there are a few places where StoneFS diverges from strict
 POSIX semantics for various reasons:
 
 - If a client is writing to a file and fails, its writes are not
@@ -22,18 +22,18 @@ POSIX semantics for various reasons:
   simultaneously (where | is the object boundary), and end up with
   "aa|bb" rather than the proper "aa|aa" or "bb|bb".
 - Sparse files propagate incorrectly to the stat(2) st_blocks field.
-  Because CephFS does not explicitly track which parts of a file are
+  Because StoneFS does not explicitly track which parts of a file are
   allocated/written, the st_blocks field is always populated by the
   file size divided by the block size.  This will cause tools like
   du(1) to overestimate consumed space.  (The recursive size field,
-  maintained by CephFS, also includes file "holes" in its count.)
+  maintained by StoneFS, also includes file "holes" in its count.)
 - When a file is mapped into memory via mmap(2) on multiple hosts,
   writes are not coherently propagated to other clients' caches.  That
   is, if a page is cached on host A, and then updated on host B, host
   A's page is not coherently invalidated.  (Shared writable mmap
   appears to be quite rare--we have yet to here any complaints about this
   behavior, and implementing cache coherency properly is complex.)
-- CephFS clients present a hidden ``.snap`` directory that is used to
+- StoneFS clients present a hidden ``.snap`` directory that is used to
   access, create, delete, and rename snapshots.  Although the virtual
   directory is excluded from readdir(2), any process that tries to
   create a file or directory with the same name will get an error
@@ -60,7 +60,7 @@ applications notice depends on whether data is being shared between
 clients or not.  NFS may also "tear" the results of concurrent writers
 as client data may not even be flushed to the server until the file is
 closed (and more generally writes will be significantly more
-time-shifted than CephFS, leading to less predictable results).
+time-shifted than StoneFS, leading to less predictable results).
 
 However, all of there are very close to POSIX, and most of the time
 applications don't notice too much.  Many other storage systems (e.g.,
@@ -72,21 +72,21 @@ modifications, truncate, or directory renames.
 Bottom line
 -----------
 
-CephFS relaxes more than local Linux kernel file systems (e.g., writes
+StoneFS relaxes more than local Linux kernel file systems (e.g., writes
 spanning object boundaries may be torn).  It relaxes strictly less
 than NFS when it comes to multiclient consistency, and generally less
 than NFS when it comes to write atomicity.
 
 In other words, when it comes to POSIX, ::
 
-  HDFS < NFS < CephFS < {XFS, ext4}
+  HDFS < NFS < StoneFS < {XFS, ext4}
 
 
 fsync() and error reporting
 ---------------------------
 
 POSIX is somewhat vague about the state of an inode after fsync reports
-an error. In general, CephFS uses the standard error-reporting
+an error. In general, StoneFS uses the standard error-reporting
 mechanisms in the client's kernel, and therefore follows the same
 conventions as other file systems.
 

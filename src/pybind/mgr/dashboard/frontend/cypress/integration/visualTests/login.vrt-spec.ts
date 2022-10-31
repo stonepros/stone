@@ -2,7 +2,7 @@ describe('Login Page', () => {
   beforeEach(() => {
     cy.visit('#/login');
     cy.eyesOpen({
-      appName: 'Ceph',
+      appName: 'Stone',
       testName: 'Login Component Check'
     });
   });

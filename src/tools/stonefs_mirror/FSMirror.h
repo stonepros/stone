@@ -13,7 +13,7 @@
 
 class ContextWQ;
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 class MirrorAdminSocketHook;
@@ -24,7 +24,7 @@ class ServiceDaemon;
 
 class FSMirror {
 public:
-  FSMirror(CephContext *cct, const Filesystem &filesystem, uint64_t pool_id,
+  FSMirror(StoneContext *cct, const Filesystem &filesystem, uint64_t pool_id,
            ServiceDaemon *service_daemon, std::vector<const char*> args,
            ContextWQ *work_queue);
   ~FSMirror();
@@ -73,7 +73,7 @@ public:
   void reopen_logs();
 
 private:
-  bool is_blocklisted(const std::scoped_lock<ceph::mutex> &locker) const {
+  bool is_blocklisted(const std::scoped_lock<stone::mutex> &locker) const {
     bool blocklisted = false;
     if (m_instance_watcher) {
       blocklisted = m_instance_watcher->is_blocklisted();
@@ -101,14 +101,14 @@ private:
     }
   };
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   Filesystem m_filesystem;
   uint64_t m_pool_id;
   ServiceDaemon *m_service_daemon;
   std::vector<const char *> m_args;
   ContextWQ *m_work_queue;
 
-  ceph::mutex m_lock = ceph::make_mutex("cephfs::mirror::fs_mirror");
+  stone::mutex m_lock = stone::make_mutex("stonefs::mirror::fs_mirror");
   SnapListener m_snap_listener;
   std::set<std::string, std::less<>> m_directories;
   Peers m_all_peers;
@@ -153,6 +153,6 @@ private:
 };
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_FS_MIRROR_H

@@ -2,7 +2,7 @@
 # -*- mode:python; tab-width:4; indent-tabs-mode:nil; coding:utf-8 -*-
 # vim: ts=4 sw=4 smarttab expandtab fileencoding=utf-8
 #
-# Ceph - scalable distributed file system
+# Stone - scalable distributed file system
 #
 # Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
 # Copyright (C) 2014 Red Hat <contact@redhat.com>
@@ -21,7 +21,7 @@ from nose.tools import assert_equal, assert_raises, \
     nottest
 from unittest import TestCase
 
-from ceph_argparse import validate_command, parse_json_funcsigs, validate, \
+from stone_argparse import validate_command, parse_json_funcsigs, validate, \
     parse_funcsig, ArgumentError, ArgumentTooFew, ArgumentMissing, \
     ArgumentNumber, ArgumentValid
 
@@ -37,17 +37,17 @@ except ImportError:
 
 
 def get_command_descriptions(what):
-    CEPH_BIN = os.environ['CEPH_BIN']
-    if CEPH_BIN == "":
-        CEPH_BIN = "."
-    return os.popen(CEPH_BIN + "/get_command_descriptions " + "--" + what).read()
+    STONE_BIN = os.environ['STONE_BIN']
+    if STONE_BIN == "":
+        STONE_BIN = "."
+    return os.popen(STONE_BIN + "/get_command_descriptions " + "--" + what).read()
 
 
 def test_parse_json_funcsigs():
     commands = get_command_descriptions("all")
     cmd_json = parse_json_funcsigs(commands, 'cli')
 
-    # syntax error https://github.com/ceph/ceph/pull/585
+    # syntax error https://github.com/stone/stone/pull/585
     commands = get_command_descriptions("pull585")
     assert_raises(TypeError, parse_json_funcsigs, commands, 'cli')
 
@@ -130,7 +130,7 @@ class TestBasic:
         # choke on it.
         assert_equal({}, validate_command(sigdict, [u'章鱼和鱿鱼']))
         assert_equal({}, validate_command(sigdict, [u'–w']))
-        # actually we always pass unicode strings to validate_command() in "ceph"
+        # actually we always pass unicode strings to validate_command() in "stone"
         # CLI, but we also use bytestrings in our tests, so make sure it does not
         # break.
         assert_equal({}, validate_command(sigdict, ['章鱼和鱿鱼']))
@@ -272,7 +272,7 @@ class TestAuth(TestArgparse):
         caps = ['mon',
                 'allow r',
                 'osd',
-                'allow rw pool=nfs-ganesha namespace=test, allow rw tag cephfs data=user_test_fs',
+                'allow rw pool=nfs-ganesha namespace=test, allow rw tag stonefs data=user_test_fs',
                 'mds',
                 'allow rw path=/']
         cmd = prefix.split() + [entity] + caps
@@ -470,9 +470,9 @@ class TestFS(TestArgparse):
         assert_equal({}, validate_command(sigdict, ['fs', 'ls', 'toomany']))
 
     def test_fs_set_default(self):
-        self.assert_valid_command(['fs', 'set-default', 'cephfs'])
+        self.assert_valid_command(['fs', 'set-default', 'stonefs'])
         assert_equal({}, validate_command(sigdict, ['fs', 'set-default']))
-        assert_equal({}, validate_command(sigdict, ['fs', 'set-default', 'cephfs', 'toomany']))
+        assert_equal({}, validate_command(sigdict, ['fs', 'set-default', 'stonefs', 'toomany']))
 
 
 class TestMon(TestArgparse):
@@ -1274,16 +1274,16 @@ class TestValidate(TestCase):
     def setUp(self):
         self.prefix = ['some', 'random', 'cmd']
         self.args_dict = [
-            {'name': 'variable_one', 'type': 'CephString'},
-            {'name': 'variable_two', 'type': 'CephString'},
-            {'name': 'variable_three', 'type': 'CephString'},
-            {'name': 'variable_four', 'type': 'CephInt'},
-            {'name': 'variable_five', 'type': 'CephString'}]
+            {'name': 'variable_one', 'type': 'StoneString'},
+            {'name': 'variable_two', 'type': 'StoneString'},
+            {'name': 'variable_three', 'type': 'StoneString'},
+            {'name': 'variable_four', 'type': 'StoneInt'},
+            {'name': 'variable_five', 'type': 'StoneString'}]
         self.args = []
         for d in self.args_dict:
-            if d['type'] == 'CephInt':
+            if d['type'] == 'StoneInt':
                 val = "{}".format(random.randint(0, 100))
-            elif d['type'] == 'CephString':
+            elif d['type'] == 'StoneString':
                 letters = string.ascii_letters
                 str_len = random.randint(5, 10)
                 val = ''.join(random.choice(letters) for _ in range(str_len))
@@ -1334,7 +1334,7 @@ class TestValidate(TestCase):
 
 # Local Variables:
 # compile-command: "cd ../../..; cmake --build build --target get_command_descriptions -j4 &&
-#  CEPH_BIN=build/bin \
+#  STONE_BIN=build/bin \
 #  PYTHONPATH=src/pybind nosetests --stop \
-#  src/test/pybind/test_ceph_argparse.py:TestOSD.test_rm"
+#  src/test/pybind/test_stone_argparse.py:TestOSD.test_rm"
 # End:

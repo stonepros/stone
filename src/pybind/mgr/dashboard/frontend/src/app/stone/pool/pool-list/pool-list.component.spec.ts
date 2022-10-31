@@ -8,8 +8,8 @@ import _ from 'lodash';
 import { ToastrModule } from 'ngx-toastr';
 import { of } from 'rxjs';
 
-import { RbdConfigurationListComponent } from '~/app/ceph/block/rbd-configuration-list/rbd-configuration-list.component';
-import { PgCategoryService } from '~/app/ceph/shared/pg-category.service';
+import { RbdConfigurationListComponent } from '~/app/stone/block/rbd-configuration-list/rbd-configuration-list.component';
+import { PgCategoryService } from '~/app/stone/shared/pg-category.service';
 import { ConfigurationService } from '~/app/shared/api/configuration.service';
 import { ErasureCodeProfileService } from '~/app/shared/api/erasure-code-profile.service';
 import { PoolService } from '~/app/shared/api/pool.service';

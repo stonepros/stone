@@ -38,7 +38,7 @@ class NotImplementedException(Exception):
 
 class ClusterTimeout(Exception):
     """
-    Exception indicating that we timed out trying to talk to the Ceph cluster,
+    Exception indicating that we timed out trying to talk to the Stone cluster,
     either to the mons, or to any individual daemon that the mons indicate ought
     to be up but isn't responding to us.
     """

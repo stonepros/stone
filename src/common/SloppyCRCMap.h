@@ -6,7 +6,7 @@
 
 #include "include/encoding.h"
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 
@@ -31,9 +31,9 @@ public:
 
   void set_block_size(uint32_t b) {
     block_size = b;
-    //zero_crc = ceph_crc32c(0xffffffff, NULL, block_size);
+    //zero_crc = stone_crc32c(0xffffffff, NULL, block_size);
     if (b) {
-      ceph::buffer::list bl;
+      stone::buffer::list bl;
       bl.append_zero(block_size);
       zero_crc = bl.crc32c(crc_iv);
     } else {
@@ -42,7 +42,7 @@ public:
   }
 
   /// update based on a write
-  void write(uint64_t offset, uint64_t len, const ceph::buffer::list& bl,
+  void write(uint64_t offset, uint64_t len, const stone::buffer::list& bl,
 	     std::ostream *out = NULL);
 
   /// update based on a truncate
@@ -64,11 +64,11 @@ public:
    * @param err option ostream to describe errors in detail
    * @returns error count, 0 for success
    */
-  int read(uint64_t offset, uint64_t len, const ceph::buffer::list& bl, std::ostream *err);
+  int read(uint64_t offset, uint64_t len, const stone::buffer::list& bl, std::ostream *err);
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<SloppyCRCMap*>& ls);
 };
 WRITE_CLASS_ENCODER(SloppyCRCMap)

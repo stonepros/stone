@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_IO_IMAGE_DISPATCHER_H
 
 #include "include/int_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/io/Dispatcher.h"
 #include "librbd/io/ImageDispatchInterface.h"
 #include "librbd/io/ImageDispatchSpec.h"

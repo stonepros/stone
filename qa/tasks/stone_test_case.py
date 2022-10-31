@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 class TestTimeoutError(RuntimeError):
     pass
 
-class CephTestCase(unittest.TestCase):
+class StoneTestCase(unittest.TestCase):
     """
     For test tasks that want to define a structured set of
     tests implemented in python.  Subclass this with appropriate
@@ -25,7 +25,7 @@ class CephTestCase(unittest.TestCase):
     fs = None
     recovery_fs = None
     backup_fs = None
-    ceph_cluster = None
+    stone_cluster = None
     mds_cluster = None
     mgr_cluster: Optional['MgrCluster'] = None
     ctx = None
@@ -39,11 +39,11 @@ class CephTestCase(unittest.TestCase):
     def setUp(self):
         self._mon_configs_set = set()
 
-        self.ceph_cluster.mon_manager.raw_cluster_cmd("log",
+        self.stone_cluster.mon_manager.raw_cluster_cmd("log",
             "Starting test {0}".format(self.id()))
 
         if self.REQUIRE_MEMSTORE:
-            objectstore = self.ceph_cluster.get_config("osd_objectstore", "osd")
+            objectstore = self.stone_cluster.get_config("osd_objectstore", "osd")
             if objectstore != "memstore":
                 # You certainly *could* run this on a real OSD, but you don't want to sit
                 # here for hours waiting for the test to fill up a 1TB drive!
@@ -53,7 +53,7 @@ class CephTestCase(unittest.TestCase):
     def tearDown(self):
         self.config_clear()
 
-        self.ceph_cluster.mon_manager.raw_cluster_cmd("log",
+        self.stone_cluster.mon_manager.raw_cluster_cmd("log",
             "Ended test {0}".format(self.id()))
 
     def config_clear(self):
@@ -66,36 +66,36 @@ class CephTestCase(unittest.TestCase):
 
     def config_get(self, section, key):
        key = self._fix_key(key)
-       return self.ceph_cluster.mon_manager.raw_cluster_cmd("config", "get", section, key).strip()
+       return self.stone_cluster.mon_manager.raw_cluster_cmd("config", "get", section, key).strip()
 
     def config_show(self, entity, key):
        key = self._fix_key(key)
-       return self.ceph_cluster.mon_manager.raw_cluster_cmd("config", "show", entity, key).strip()
+       return self.stone_cluster.mon_manager.raw_cluster_cmd("config", "show", entity, key).strip()
 
     def config_minimal(self):
-       return self.ceph_cluster.mon_manager.raw_cluster_cmd("config", "generate-minimal-conf").strip()
+       return self.stone_cluster.mon_manager.raw_cluster_cmd("config", "generate-minimal-conf").strip()
 
     def config_rm(self, section, key):
        key = self._fix_key(key)
-       self.ceph_cluster.mon_manager.raw_cluster_cmd("config", "rm", section, key)
+       self.stone_cluster.mon_manager.raw_cluster_cmd("config", "rm", section, key)
        # simplification: skip removing from _mon_configs_set;
        # let tearDown clear everything again
 
     def config_set(self, section, key, value):
        key = self._fix_key(key)
        self._mon_configs_set.add((section, key))
-       self.ceph_cluster.mon_manager.raw_cluster_cmd("config", "set", section, key, str(value))
+       self.stone_cluster.mon_manager.raw_cluster_cmd("config", "set", section, key, str(value))
 
     def cluster_cmd(self, command: str):
-        assert self.ceph_cluster is not None
-        return self.ceph_cluster.mon_manager.raw_cluster_cmd(*(command.split(" ")))
+        assert self.stone_cluster is not None
+        return self.stone_cluster.mon_manager.raw_cluster_cmd(*(command.split(" ")))
 
 
     def assert_cluster_log(self, expected_pattern, invert_match=False,
                            timeout=10, watch_channel=None):
         """
         Context manager.  Assert that during execution, or up to 5 seconds later,
-        the Ceph cluster log emits a message matching the expected pattern.
+        the Stone cluster log emits a message matching the expected pattern.
 
         :param expected_pattern: A string that you expect to see in the log output
         :type expected_pattern: str
@@ -104,7 +104,7 @@ class CephTestCase(unittest.TestCase):
         :type watch_channel: str
         """
 
-        ceph_manager = self.ceph_cluster.mon_manager
+        stone_manager = self.stone_cluster.mon_manager
 
         class ContextManager(object):
             def match(self):
@@ -115,7 +115,7 @@ class CephTestCase(unittest.TestCase):
                 return found
 
             def __enter__(self):
-                self.watcher_process = ceph_manager.run_ceph_w(watch_channel)
+                self.watcher_process = stone_manager.run_stone_w(watch_channel)
 
             def __exit__(self, exc_type, exc_val, exc_tb):
                 if not self.watcher_process.finished:
@@ -142,10 +142,10 @@ class CephTestCase(unittest.TestCase):
 
     def wait_for_health(self, pattern, timeout):
         """
-        Wait until 'ceph health' contains messages matching the pattern
+        Wait until 'stone health' contains messages matching the pattern
         """
         def seen_health_warning():
-            health = self.ceph_cluster.mon_manager.get_mon_health()
+            health = self.stone_cluster.mon_manager.get_mon_health()
             codes = [s for s in health['checks']]
             summary_strings = [s[1]['summary']['message'] for s in health['checks'].items()]
             if len(summary_strings) == 0:
@@ -165,10 +165,10 @@ class CephTestCase(unittest.TestCase):
 
     def wait_for_health_clear(self, timeout):
         """
-        Wait until `ceph health` returns no messages
+        Wait until `stone health` returns no messages
         """
         def is_clear():
-            health = self.ceph_cluster.mon_manager.get_mon_health()
+            health = self.stone_cluster.mon_manager.get_mon_health()
             return len(health['checks']) == 0
 
         self.wait_until_true(is_clear, timeout)

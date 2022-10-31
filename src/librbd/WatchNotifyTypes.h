@@ -14,7 +14,7 @@
 #include <string>
 #include <boost/variant.hpp>
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 

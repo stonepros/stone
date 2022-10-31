@@ -1,9 +1,9 @@
 import base64
 import os
 import logging
-from ceph_volume import process, conf
-from ceph_volume.util import constants, system
-from ceph_volume.util.device import Device
+from stone_volume import process, conf
+from stone_volume.util import constants, system
+from stone_volume.util.device import Device
 from .prepare import write_keyring
 from .disk import lsblk, device_family, get_part_entry_type
 
@@ -15,7 +15,7 @@ def get_key_size_from_conf():
     Default is 512.
     """
     default_key_size = '512'
-    key_size = conf.ceph.get_safe(
+    key_size = conf.stone.get_safe(
         'osd',
         'osd_dmcrypt_key_size',
         default='512')
@@ -60,7 +60,7 @@ def plain_open(key, device, mapping):
     """
     Decrypt (open) an encrypted device, previously prepared with cryptsetup in plain mode
 
-    .. note: ceph-disk will require an additional b64decode call for this to work
+    .. note: stone-disk will require an additional b64decode call for this to work
 
     :param key: dmcrypt secret key
     :param device: absolute path to device
@@ -85,7 +85,7 @@ def luks_open(key, device, mapping):
     """
     Decrypt (open) an encrypted device, previously prepared with cryptsetup
 
-    .. note: ceph-disk will require an additional b64decode call for this to work
+    .. note: stone-disk will require an additional b64decode call for this to work
 
     :param key: dmcrypt secret key
     :param device: absolute path to device
@@ -131,13 +131,13 @@ def get_dmcrypt_key(osd_id, osd_fsid, lockbox_keyring=None):
     (e.g. inside a lockbox partition mounted in a temporary location)
     """
     if lockbox_keyring is None:
-        lockbox_keyring = '/var/lib/ceph/osd/%s-%s/lockbox.keyring' % (conf.cluster, osd_id)
+        lockbox_keyring = '/var/lib/stone/osd/%s-%s/lockbox.keyring' % (conf.cluster, osd_id)
     name = 'client.osd-lockbox.%s' % osd_fsid
     config_key = 'dm-crypt/osd/%s/luks' % osd_fsid
 
     stdout, stderr, returncode = process.call(
         [
-            'ceph',
+            'stone',
             '--cluster', conf.cluster,
             '--name', name,
             '--keyring', lockbox_keyring,
@@ -166,7 +166,7 @@ def write_lockbox_keyring(osd_id, osd_fsid, secret):
     then the data device is mounted on that directory, making the keyring
     "disappear".
     """
-    if os.path.exists('/var/lib/ceph/osd/%s-%s/lockbox.keyring' % (conf.cluster, osd_id)):
+    if os.path.exists('/var/lib/stone/osd/%s-%s/lockbox.keyring' % (conf.cluster, osd_id)):
         return
 
     name = 'client.osd-lockbox.%s' % osd_fsid
@@ -225,7 +225,7 @@ def status(device):
 
 def legacy_encrypted(device):
     """
-    Detect if a device was encrypted with ceph-disk or not. In the case of
+    Detect if a device was encrypted with stone-disk or not. In the case of
     encrypted devices, include the type of encryption (LUKS, or PLAIN), and
     infer what the lockbox partition is.
 
@@ -252,7 +252,7 @@ def legacy_encrypted(device):
         metadata['device'] = device
     else:
         uuid = get_part_entry_type(device)
-        guid_match = constants.ceph_disk_guids.get(uuid, {})
+        guid_match = constants.stone_disk_guids.get(uuid, {})
         encrypted_guid = guid_match.get('encrypted', False)
         if encrypted_guid:
             metadata['encrypted'] = True
@@ -261,7 +261,7 @@ def legacy_encrypted(device):
     # Lets find the lockbox location now, to do this, we need to find out the
     # parent device name for the device so that we can query all of its
     # associated devices and *then* look for one that has the 'lockbox' label
-    # on it. Thanks for being awesome ceph-disk
+    # on it. Thanks for being awesome stone-disk
     disk_meta = lsblk(device, abspath=True)
     if not disk_meta:
         return metadata
@@ -269,7 +269,7 @@ def legacy_encrypted(device):
     # With the parent device set, we can now look for the lockbox listing associated devices
     devices = [Device(i['NAME']) for i in device_family(parent_device)]
     for d in devices:
-        if d.ceph_disk.type == 'lockbox':
+        if d.stone_disk.type == 'lockbox':
             metadata['lockbox'] = d.abspath
             break
     return metadata

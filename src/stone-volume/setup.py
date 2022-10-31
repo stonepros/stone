@@ -3,29 +3,29 @@ import os
 
 
 setup(
-    name='ceph-volume',
+    name='stone-volume',
     version='1.0.0',
     packages=find_packages(),
 
     author='',
     author_email='contact@redhat.com',
-    description='Deploy Ceph OSDs using different device technologies like lvm or physical disks',
+    description='Deploy Stone OSDs using different device technologies like lvm or physical disks',
     license='LGPLv2+',
-    keywords='ceph volume disk devices lvm',
-    url="https://github.com/ceph/ceph",
+    keywords='stone volume disk devices lvm',
+    url="https://github.com/stone/stone",
     zip_safe = False,
-    install_requires='ceph',
+    install_requires='stone',
     dependency_links=[''.join(['file://', os.path.join(os.getcwd(), '../',
-                                                       'python-common#egg=ceph-1.0.0')])],
+                                                       'python-common#egg=stone-1.0.0')])],
     tests_require=[
         'pytest >=2.1.3',
         'tox',
-        'ceph',
+        'stone',
     ],
     entry_points = dict(
         console_scripts = [
-            'ceph-volume = ceph_volume.main:Volume',
-            'ceph-volume-systemd = ceph_volume.systemd:main',
+            'stone-volume = stone_volume.main:Volume',
+            'stone-volume-systemd = stone_volume.systemd:main',
         ],
     ),
     classifiers = [

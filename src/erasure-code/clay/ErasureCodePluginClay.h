@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee distributed storage system
+ * Stone distributed storage system
  *
  * Copyright (C) 2018 Indian Institute of Science <office.ece@iisc.ac.in>
  *
@@ -19,11 +19,11 @@
 
 #include "erasure-code/ErasureCodePlugin.h"
 
-class ErasureCodePluginClay : public ceph::ErasureCodePlugin {
+class ErasureCodePluginClay : public stone::ErasureCodePlugin {
 public:
   int factory(const std::string& directory,
-	      ceph::ErasureCodeProfile &profile,
-	      ceph::ErasureCodeInterfaceRef *erasure_code,
+	      stone::ErasureCodeProfile &profile,
+	      stone::ErasureCodeInterfaceRef *erasure_code,
 	      std::ostream *ss) override;
 };
 

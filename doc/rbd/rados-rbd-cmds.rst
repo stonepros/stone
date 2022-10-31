@@ -2,7 +2,7 @@
  Basic Block Device Commands
 =============================
 
-.. index:: Ceph Block Device; image management
+.. index:: Stone Block Device; image management
 
 The ``rbd`` command enables you to create, list, introspect and remove block
 device images. You can also use it to clone images, create snapshots,
@@ -10,8 +10,8 @@ rollback an image to a snapshot, view a snapshot, etc. For details on using
 the ``rbd`` command, see `RBD – Manage RADOS Block Device (RBD) Images`_ for
 details. 
 
-.. important:: To use Ceph Block Device commands, you must have access to 
-   a running Ceph cluster.
+.. important:: To use Stone Block Device commands, you must have access to 
+   a running Stone cluster.
 
 Create a Block Device Pool
 ==========================
@@ -28,11 +28,11 @@ Create a Block Device Pool
 Create a Block Device User
 ==========================
 
-Unless specified, the ``rbd`` command will access the Ceph cluster using the ID
+Unless specified, the ``rbd`` command will access the Stone cluster using the ID
 ``admin``. This ID allows full administrative access to the cluster. It is
 recommended that you utilize a more restricted user wherever possible.
 
-To `create a Ceph user`_, with ``ceph`` specify the ``auth get-or-create``
+To `create a Stone user`_, with ``ceph`` specify the ``auth get-or-create``
 command, user name, monitor caps, and OSD caps::
 
         ceph auth get-or-create client.{ID} mon 'profile rbd' osd 'profile {profile name} [pool={pool-name}][, profile ...]' mgr 'profile rbd [pool={pool-name}]'
@@ -53,7 +53,7 @@ Creating a Block Device Image
 =============================
 
 Before you can add a block device to a node, you must create an image for it in
-the :term:`Ceph Storage Cluster` first. To create a block device image, execute
+the :term:`Stone Storage Cluster` first. To create a block device image, execute
 the  following::
 
 	rbd create --size {megabytes} {pool-name}/{image-name}
@@ -128,10 +128,10 @@ For example::
 Resizing a Block Device Image
 =============================
 
-:term:`Ceph Block Device` images are thin provisioned. They don't actually use
+:term:`Stone Block Device` images are thin provisioned. They don't actually use
 any physical storage  until you begin saving data to them. However, they do have
 a maximum capacity  that you set with the ``--size`` option. If you want to
-increase (or decrease) the maximum size of a Ceph Block Device image, execute
+increase (or decrease) the maximum size of a Stone Block Device image, execute
 the following:: 
 
 	rbd resize --size 2048 foo (to increase)
@@ -221,4 +221,4 @@ For example::
 .. _create a pool: ../../rados/operations/pools/#create-a-pool
 .. _Storage Pools: ../../rados/operations/pools
 .. _RBD – Manage RADOS Block Device (RBD) Images: ../../man/8/rbd/
-.. _create a Ceph user: ../../rados/operations/user-management#add-a-user
+.. _create a Stone user: ../../rados/operations/user-management#add-a-user

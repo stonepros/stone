@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013,2014 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -34,10 +34,10 @@
 #include "include/btree_map.h"
 #include "include/common_fwd.h"
 #include "include/types.h"
-#include "common/ceph_releases.h"
+#include "common/stone_releases.h"
 #include "osd_types.h"
 
-//#include "include/ceph_features.h"
+//#include "include/stone_features.h"
 #include "crush/CrushWrapper.h"
 
 // forward declaration
@@ -77,9 +77,9 @@ struct osd_info_t {
   osd_info_t() : last_clean_begin(0), last_clean_end(0),
 		 up_from(0), up_thru(0), down_at(0), lost_at(0) {}
 
-  void dump(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
   static void generate_test_instances(std::list<osd_info_t*>& o);
 };
 WRITE_CLASS_ENCODER(osd_info_t)
@@ -98,9 +98,9 @@ struct osd_xinfo_t {
   osd_xinfo_t() : laggy_probability(0), laggy_interval(0),
                   features(0), old_weight(0) {}
 
-  void dump(ceph::Formatter *f) const;
-  void encode(ceph::buffer::list& bl, uint64_t features) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void dump(stone::Formatter *f) const;
+  void encode(stone::buffer::list& bl, uint64_t features) const;
+  void decode(stone::buffer::list::const_iterator& bl);
   static void generate_test_instances(std::list<osd_xinfo_t*>& o);
 };
 WRITE_CLASS_ENCODER_FEATURES(osd_xinfo_t)
@@ -110,21 +110,21 @@ std::ostream& operator<<(std::ostream& out, const osd_xinfo_t& xi);
 
 struct PGTempMap {
 #if 1
-  ceph::buffer::list data;
-  typedef btree::btree_map<pg_t,ceph_le32*> map_t;
+  stone::buffer::list data;
+  typedef btree::btree_map<pg_t,stone_le32*> map_t;
   map_t map;
 
-  void encode(ceph::buffer::list& bl) const {
-    using ceph::encode;
+  void encode(stone::buffer::list& bl) const {
+    using stone::encode;
     uint32_t n = map.size();
     encode(n, bl);
     for (auto &p : map) {
       encode(p.first, bl);
-      bl.append((char*)p.second, (*p.second + 1) * sizeof(ceph_le32));
+      bl.append((char*)p.second, (*p.second + 1) * sizeof(stone_le32));
     }
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
-    using ceph::decode;
+  void decode(stone::buffer::list::const_iterator& p) {
+    using stone::decode;
     data.clear();
     map.clear();
     uint32_t n;
@@ -152,11 +152,11 @@ struct PGTempMap {
     //map.reserve(n);
     char *start = data.c_str();
     for (auto i : offsets) {
-      map.insert(map.end(), std::make_pair(i.first, (ceph_le32*)(start + i.second)));
+      map.insert(map.end(), std::make_pair(i.first, (stone_le32*)(start + i.second)));
     }
   }
   void rebuild() {
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     encode(bl);
     auto p = std::cbegin(bl);
     decode(p);
@@ -174,9 +174,9 @@ struct PGTempMap {
     void init_current() {
       if (it != end) {
 	current.first = it->first;
-	ceph_assert(it->second);
+	stone_assert(it->second);
 	current.second.resize(*it->second);
-	ceph_le32 *p = it->second + 1;
+	stone_le32 *p = it->second + 1;
 	for (uint32_t n = 0; n < *it->second; ++n, ++p) {
 	  current.second[n] = *p;
 	}
@@ -238,19 +238,19 @@ struct PGTempMap {
     data.clear();
   }
   void set(pg_t pgid, const mempool::osdmap::vector<int32_t>& v) {
-    using ceph::encode;
-    size_t need = sizeof(ceph_le32) * (1 + v.size());
+    using stone::encode;
+    size_t need = sizeof(stone_le32) * (1 + v.size());
     if (need < data.get_append_buffer_unused_tail_length()) {
-      ceph::buffer::ptr z(data.get_append_buffer_unused_tail_length());
+      stone::buffer::ptr z(data.get_append_buffer_unused_tail_length());
       z.zero();
       data.append(z.c_str(), z.length());
     }
     encode(v, data);
-    map[pgid] = (ceph_le32*)(data.back().end_c_str()) - (1 + v.size());
+    map[pgid] = (stone_le32*)(data.back().end_c_str()) - (1 + v.size());
   }
   mempool::osdmap::vector<int32_t> get(pg_t pgid) {
     mempool::osdmap::vector<int32_t> v;
-    ceph_le32 *p = map[pgid];
+    stone_le32 *p = map[pgid];
     size_t n = *p++;
     v.resize(n);
     for (size_t i = 0; i < n; ++i, ++p) {
@@ -262,10 +262,10 @@ struct PGTempMap {
   // trivial implementation
   mempool::osdmap::map<pg_t,mempool::osdmap::vector<int32_t> > pg_temp;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     encode(pg_temp, bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     decode(pg_temp, p);
   }
   friend bool operator==(const PGTempMap& l, const PGTempMap& r) {
@@ -331,7 +331,7 @@ struct PGTempMap {
     return pg_temp.at(pgid);
   }
 #endif
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     for (const auto &pg : *this) {
       f->open_object_section("osds");
       f->dump_stream("pgid") << pg.first;
@@ -363,7 +363,7 @@ public:
     utime_t modified;
     int64_t new_pool_max; //incremented by the OSDMonitor on each pool create
     int32_t new_flags;
-    ceph_release_t new_require_osd_release{0xff};
+    stone_release_t new_require_osd_release{0xff};
     uint32_t new_stretch_bucket_count{0};
     uint32_t new_degraded_stretch_mode{0};
     uint32_t new_recovering_stretch_mode{0};
@@ -372,8 +372,8 @@ public:
     bool change_stretch_mode{false};
 
     // full (rare)
-    ceph::buffer::list fullmap;  // in lieu of below.
-    ceph::buffer::list crush;
+    stone::buffer::list fullmap;  // in lieu of below.
+    stone::buffer::list crush;
 
     // incremental
     int32_t new_max_osd;
@@ -415,7 +415,7 @@ public:
     float new_backfillfull_ratio = -1;
     float new_full_ratio = -1;
 
-    ceph_release_t new_require_min_compat_client{0xff};
+    stone_release_t new_require_min_compat_client{0xff};
 
     utime_t new_last_up_change, new_last_in_change;
 
@@ -427,12 +427,12 @@ public:
     int get_net_marked_down(const OSDMap *previous) const;
     int identify_osd(uuid_d u) const;
 
-    void encode_client_old(ceph::buffer::list& bl) const;
-    void encode_classic(ceph::buffer::list& bl, uint64_t features) const;
-    void encode(ceph::buffer::list& bl, uint64_t features=STONE_FEATURES_ALL) const;
-    void decode_classic(ceph::buffer::list::const_iterator &p);
-    void decode(ceph::buffer::list::const_iterator &bl);
-    void dump(ceph::Formatter *f) const;
+    void encode_client_old(stone::buffer::list& bl) const;
+    void encode_classic(stone::buffer::list& bl, uint64_t features) const;
+    void encode(stone::buffer::list& bl, uint64_t features=STONE_FEATURES_ALL) const;
+    void decode_classic(stone::buffer::list::const_iterator &p);
+    void decode(stone::buffer::list::const_iterator &bl);
+    void dump(stone::Formatter *f) const;
     static void generate_test_instances(std::list<Incremental*>& o);
 
     explicit Incremental(epoch_t e=0) :
@@ -440,11 +440,11 @@ public:
       epoch(e), new_pool_max(-1), new_flags(-1), new_max_osd(-1),
       have_crc(false), full_crc(0), inc_crc(0) {
     }
-    explicit Incremental(ceph::buffer::list &bl) {
+    explicit Incremental(stone::buffer::list &bl) {
       auto p = std::cbegin(bl);
       decode(p);
     }
-    explicit Incremental(ceph::buffer::list::const_iterator &p) {
+    explicit Incremental(stone::buffer::list::const_iterator &p) {
       decode(p);
     }
 
@@ -466,11 +466,11 @@ public:
     }
 
     /// propagate update pools' (snap and other) metadata to any of their tiers
-    int propagate_base_properties_to_tiers(StoneeContext *cct, const OSDMap &base);
+    int propagate_base_properties_to_tiers(StoneContext *cct, const OSDMap &base);
 
     /// filter out osds with any pending state changing
     size_t get_pending_state_osds(std::vector<int> *osds) {
-      ceph_assert(osds);
+      stone_assert(osds);
       osds->clear();
 
       for (auto &p : new_state) {
@@ -600,11 +600,11 @@ private:
   float full_ratio = 0, backfillfull_ratio = 0, nearfull_ratio = 0;
 
   /// min compat client we want to support
-  ceph_release_t require_min_compat_client{ceph_release_t::unknown};
+  stone_release_t require_min_compat_client{stone_release_t::unknown};
 
 public:
   /// require osds to run at least this release
-  ceph_release_t require_osd_release{ceph_release_t::unknown};
+  stone_release_t require_osd_release{stone_release_t::unknown};
 
 private:
   mutable uint64_t cached_up_osd_features;
@@ -713,7 +713,7 @@ public:
   float get_nearfull_ratio() const {
     return nearfull_ratio;
   }
-  void get_full_pools(StoneeContext *cct,
+  void get_full_pools(StoneContext *cct,
                       std::set<int64_t> *full,
                       std::set<int64_t> *backfillfull,
                       std::set<int64_t> *nearfull) const;
@@ -755,27 +755,27 @@ public:
   static void calc_state_set(int state, std::set<std::string>& st);
 
   int get_state(int o) const {
-    ceph_assert(o < max_osd);
+    stone_assert(o < max_osd);
     return osd_state[o];
   }
   int get_state(int o, std::set<std::string>& st) const {
-    ceph_assert(o < max_osd);
+    stone_assert(o < max_osd);
     unsigned t = osd_state[o];
     calc_state_set(t, st);
     return osd_state[o];
   }
   void set_state(int o, unsigned s) {
-    ceph_assert(o < max_osd);
+    stone_assert(o < max_osd);
     osd_state[o] = s;
   }
   void set_weight(int o, unsigned w) {
-    ceph_assert(o < max_osd);
+    stone_assert(o < max_osd);
     osd_weight[o] = w;
     if (w)
       osd_state[o] |= STONE_OSD_EXISTS;
   }
   unsigned get_weight(int o) const {
-    ceph_assert(o < max_osd);
+    stone_assert(o < max_osd);
     return osd_weight[o];
   }
   float get_weightf(int o) const {
@@ -784,7 +784,7 @@ public:
   void adjust_osd_weights(const std::map<int,double>& weights, Incremental& inc) const;
 
   void set_primary_affinity(int o, int w) {
-    ceph_assert(o < max_osd);
+    stone_assert(o < max_osd);
     if (!osd_primary_affinity)
       osd_primary_affinity.reset(
 	new mempool::osdmap::vector<__u32>(
@@ -792,7 +792,7 @@ public:
     (*osd_primary_affinity)[o] = w;
   }
   unsigned get_primary_affinity(int o) const {
-    ceph_assert(o < max_osd);
+    stone_assert(o < max_osd);
     if (!osd_primary_affinity)
       return STONE_OSD_DEFAULT_PRIMARY_AFFINITY;
     return (*osd_primary_affinity)[o];
@@ -805,7 +805,7 @@ public:
     auto i = erasure_code_profiles.find(name);
     return i != erasure_code_profiles.end();
   }
-  int get_erasure_code_profile_default(StoneeContext *cct,
+  int get_erasure_code_profile_default(StoneContext *cct,
 				       std::map<std::string,std::string> &profile_map,
 				       std::ostream *ss);
   void set_erasure_code_profile(const std::string &name,
@@ -942,9 +942,9 @@ public:
    * check if an entire crush subtree is down
    */
   bool subtree_is_down(int id, std::set<int> *down_cache) const;
-  bool containing_subtree_is_down(StoneeContext *cct, int osd, int subtree_type, std::set<int> *down_cache) const;
+  bool containing_subtree_is_down(StoneContext *cct, int osd, int subtree_type, std::set<int> *down_cache) const;
 
-  bool subtree_type_is_down(StoneeContext *cct, int id, int subtree_type, std::set<int> *down_in_osds, std::set<int> *up_in_osds,
+  bool subtree_type_is_down(StoneContext *cct, int id, int subtree_type, std::set<int> *down_in_osds, std::set<int> *up_in_osds,
                             std::set<int> *subtree_up, std::unordered_map<int, std::set<int> > *subtree_type_down) const;
 
   int identify_osd(const entity_addr_t& addr) const;
@@ -957,7 +957,7 @@ public:
   int find_osd_on_ip(const entity_addr_t& ip) const;
 
   const entity_addrvec_t& get_addrs(int osd) const {
-    ceph_assert(exists(osd));
+    stone_assert(exists(osd));
     return osd_addrs->client_addrs[osd] ?
       *osd_addrs->client_addrs[osd] : _blank_addrvec;
   }
@@ -965,45 +965,45 @@ public:
     return get_addrs(osd);
   }
   const entity_addrvec_t &get_cluster_addrs(int osd) const {
-    ceph_assert(exists(osd));
+    stone_assert(exists(osd));
     return osd_addrs->cluster_addrs[osd] ?
       *osd_addrs->cluster_addrs[osd] : _blank_addrvec;
   }
   const entity_addrvec_t &get_hb_back_addrs(int osd) const {
-    ceph_assert(exists(osd));
+    stone_assert(exists(osd));
     return osd_addrs->hb_back_addrs[osd] ?
       *osd_addrs->hb_back_addrs[osd] : _blank_addrvec;
   }
   const entity_addrvec_t &get_hb_front_addrs(int osd) const {
-    ceph_assert(exists(osd));
+    stone_assert(exists(osd));
     return osd_addrs->hb_front_addrs[osd] ?
       *osd_addrs->hb_front_addrs[osd] : _blank_addrvec;
   }
 
   const uuid_d& get_uuid(int osd) const {
-    ceph_assert(exists(osd));
+    stone_assert(exists(osd));
     return (*osd_uuid)[osd];
   }
 
   const epoch_t& get_up_from(int osd) const {
-    ceph_assert(exists(osd));
+    stone_assert(exists(osd));
     return osd_info[osd].up_from;
   }
   const epoch_t& get_up_thru(int osd) const {
-    ceph_assert(exists(osd));
+    stone_assert(exists(osd));
     return osd_info[osd].up_thru;
   }
   const epoch_t& get_down_at(int osd) const {
-    ceph_assert(exists(osd));
+    stone_assert(exists(osd));
     return osd_info[osd].down_at;
   }
   const osd_info_t& get_info(int osd) const {
-    ceph_assert(osd < max_osd);
+    stone_assert(osd < max_osd);
     return osd_info[osd];
   }
 
   const osd_xinfo_t& get_xinfo(int osd) const {
-    ceph_assert(osd < max_osd);
+    stone_assert(osd < max_osd);
     return osd_xinfo[osd];
   }
   
@@ -1055,12 +1055,12 @@ public:
    * get oldest *client* version (firefly, hammer, etc.) that can connect given
    * the feature bits required (according to get_features()).
    */
-  ceph_release_t get_min_compat_client() const;
+  stone_release_t get_min_compat_client() const;
 
   /**
    * gets the required minimum *client* version that can connect to the cluster.
    */
-  ceph_release_t get_require_min_compat_client() const;
+  stone_release_t get_require_min_compat_client() const;
 
   /**
    * get intersection of features supported by up osds
@@ -1069,37 +1069,37 @@ public:
 
   void get_upmap_pgs(std::vector<pg_t> *upmap_pgs) const;
   bool check_pg_upmaps(
-    StoneeContext *cct,
+    StoneContext *cct,
     const std::vector<pg_t>& to_check,
     std::vector<pg_t> *to_cancel,
     std::map<pg_t, mempool::osdmap::vector<std::pair<int,int>>> *to_remap) const;
   void clean_pg_upmaps(
-    StoneeContext *cct,
+    StoneContext *cct,
     Incremental *pending_inc,
     const std::vector<pg_t>& to_cancel,
     const std::map<pg_t, mempool::osdmap::vector<std::pair<int,int>>>& to_remap) const;
-  bool clean_pg_upmaps(StoneeContext *cct, Incremental *pending_inc) const;
+  bool clean_pg_upmaps(StoneContext *cct, Incremental *pending_inc) const;
 
   int apply_incremental(const Incremental &inc);
 
   /// try to re-use/reference addrs in oldmap from newmap
   static void dedup(const OSDMap *oldmap, OSDMap *newmap);
 
-  static void clean_temps(StoneeContext *cct,
+  static void clean_temps(StoneContext *cct,
 			  const OSDMap& oldmap,
 			  const OSDMap& nextmap,
 			  Incremental *pending_inc);
 
   // serialize, unserialize
 private:
-  void encode_client_old(ceph::buffer::list& bl) const;
-  void encode_classic(ceph::buffer::list& bl, uint64_t features) const;
-  void decode_classic(ceph::buffer::list::const_iterator& p);
+  void encode_client_old(stone::buffer::list& bl) const;
+  void encode_classic(stone::buffer::list& bl, uint64_t features) const;
+  void decode_classic(stone::buffer::list::const_iterator& p);
   void post_decode();
 public:
-  void encode(ceph::buffer::list& bl, uint64_t features=STONE_FEATURES_ALL) const;
-  void decode(ceph::buffer::list& bl);
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list& bl, uint64_t features=STONE_FEATURES_ALL) const;
+  void decode(stone::buffer::list& bl);
+  void decode(stone::buffer::list::const_iterator& bl);
 
 
   /****   mapping facilities   ****/
@@ -1115,7 +1115,7 @@ public:
 			    const object_locator_t& loc) const {
     pg_t pg;
     int ret = object_locator_to_pg(oid, loc, pg);
-    ceph_assert(ret == 0);
+    stone_assert(ret == 0);
     return pg;
   }
 
@@ -1124,18 +1124,18 @@ public:
     return object_locator_t(layout.pool_id, layout.pool_ns);
   }
 
-  ceph_object_layout file_to_object_layout(object_t oid,
+  stone_object_layout file_to_object_layout(object_t oid,
 					   file_layout_t& layout) const {
     return make_object_layout(oid, layout.pool_id, layout.pool_ns);
   }
 
-  ceph_object_layout make_object_layout(object_t oid, int pg_pool,
+  stone_object_layout make_object_layout(object_t oid, int pg_pool,
 					std::string nspace) const;
 
   int get_pg_num(int pg_pool) const
   {
     const pg_pool_t *pool = get_pg_pool(pg_pool);
-    ceph_assert(NULL != pool);
+    stone_assert(NULL != pool);
     return pool->get_pg_num();
   }
 
@@ -1149,7 +1149,7 @@ public:
       return -ENOENT;
     }
     const pg_pool_t *p = get_pg_pool(pgid.pool());
-    ceph_assert(p);
+    stone_assert(p);
     return p->get_min_size();
   }
 
@@ -1158,7 +1158,7 @@ public:
       return -ENOENT;
     }
     const pg_pool_t *p = get_pg_pool(pgid.pool());
-    ceph_assert(p);
+    stone_assert(p);
     return p->get_size();
   }
 
@@ -1167,7 +1167,7 @@ public:
       return -ENOENT;
     }
     const pg_pool_t *p = get_pg_pool(pgid.pool());
-    ceph_assert(p);
+    stone_assert(p);
     return p->get_crush_rule();
   }
 
@@ -1247,7 +1247,7 @@ public:
   }
   bool pg_is_ec(pg_t pg) const {
     auto i = pools.find(pg.pool());
-    ceph_assert(i != pools.end());
+    stone_assert(i != pools.end());
     return i->second.is_erasure();
   }
   bool get_primary_shard(const pg_t& pgid, spg_t *out) const {
@@ -1329,19 +1329,19 @@ public:
     return pools;
   }
   void get_pool_ids_by_rule(int rule_id, std::set<int64_t> *pool_ids) const {
-    ceph_assert(pool_ids);
+    stone_assert(pool_ids);
     for (auto &p: pools) {
       if (p.second.get_crush_rule() == rule_id) {
         pool_ids->insert(p.first);
       }
     }
   }
-  void get_pool_ids_by_osd(StoneeContext *cct,
+  void get_pool_ids_by_osd(StoneContext *cct,
                            int osd,
                            std::set<int64_t> *pool_ids) const;
   const std::string& get_pool_name(int64_t p) const {
     auto i = pool_name.find(p);
-    ceph_assert(i != pool_name.end());
+    stone_assert(i != pool_name.end());
     return i->second;
   }
   const mempool::osdmap::map<int64_t,std::string>& get_pool_names() const {
@@ -1358,12 +1358,12 @@ public:
   }
   unsigned get_pg_size(pg_t pg) const {
     auto p = pools.find(pg.pool());
-    ceph_assert(p != pools.end());
+    stone_assert(p != pools.end());
     return p->second.get_size();
   }
   int get_pg_type(pg_t pg) const {
     auto p = pools.find(pg.pool());
-    ceph_assert(p != pools.end());
+    stone_assert(p != pools.end());
     return p->second.get_type();
   }
   int get_pool_crush_rule(int64_t pool_id) const {
@@ -1376,7 +1376,7 @@ public:
 
   pg_t raw_pg_to_pg(pg_t pg) const {
     auto p = pools.find(pg.pool());
-    ceph_assert(p != pools.end());
+    stone_assert(p != pools.end());
     return p->second.raw_pg_to_pg(pg);
   }
 
@@ -1417,7 +1417,7 @@ public:
   }
 
   bool try_pg_upmap(
-    StoneeContext *cct,
+    StoneContext *cct,
     pg_t pg,                       ///< pg to potentially remap
     const std::set<int>& overfull,      ///< osds we'd want to evacuate
     const std::vector<int>& underfull,  ///< osds to move to, in order of preference
@@ -1426,7 +1426,7 @@ public:
     std::vector<int> *out);             ///< resulting alternative mapping
 
   int calc_pg_upmaps(
-    StoneeContext *cct,
+    StoneContext *cct,
     uint32_t max_deviation, ///< max deviation from target (value >= 1)
     int max_iterations,  ///< max iterations to run
     const std::set<int64_t>& pools,        ///< [optional] restrict to pool
@@ -1457,34 +1457,34 @@ public:
    * single host. If **num_osd** is < 0 the layout of the OSD map will 
    * be built by reading the content of the configuration file.
    *
-   * @param cct [in] in core ceph context 
+   * @param cct [in] in core stone context 
    * @param e [in] initial epoch
    * @param fsid [in] id of the cluster
    * @param num_osd [in] number of OSDs if >= 0 or read from conf if < 0
    * @return **0** on success, negative errno on error.
    */
 private:
-  int build_simple_optioned(StoneeContext *cct, epoch_t e, uuid_d &fsid,
+  int build_simple_optioned(StoneContext *cct, epoch_t e, uuid_d &fsid,
 			    int num_osd, int pg_bits, int pgp_bits,
 			    bool default_pool);
 public:
-  int build_simple(StoneeContext *cct, epoch_t e, uuid_d &fsid,
+  int build_simple(StoneContext *cct, epoch_t e, uuid_d &fsid,
 		   int num_osd) {
     return build_simple_optioned(cct, e, fsid, num_osd, 0, 0, false);
   }
-  int build_simple_with_pool(StoneeContext *cct, epoch_t e, uuid_d &fsid,
+  int build_simple_with_pool(StoneContext *cct, epoch_t e, uuid_d &fsid,
 			     int num_osd, int pg_bits, int pgp_bits) {
     return build_simple_optioned(cct, e, fsid, num_osd,
 				 pg_bits, pgp_bits, true);
   }
   static int _build_crush_types(CrushWrapper& crush);
-  static int build_simple_crush_map(StoneeContext *cct, CrushWrapper& crush,
+  static int build_simple_crush_map(StoneContext *cct, CrushWrapper& crush,
 				    int num_osd, std::ostream *ss);
-  static int build_simple_crush_map_from_conf(StoneeContext *cct,
+  static int build_simple_crush_map_from_conf(StoneContext *cct,
 					      CrushWrapper& crush,
 					      std::ostream *ss);
   static int build_simple_crush_rules(
-    StoneeContext *cct, CrushWrapper& crush,
+    StoneContext *cct, CrushWrapper& crush,
     const std::string& root,
     std::ostream *ss);
 
@@ -1498,13 +1498,13 @@ public:
   }
 
 private:
-  void print_osd_line(int cur, std::ostream *out, ceph::Formatter *f) const;
+  void print_osd_line(int cur, std::ostream *out, stone::Formatter *f) const;
 public:
   void print(std::ostream& out) const;
   void print_osd(int id, std::ostream& out) const;
   void print_osds(std::ostream& out) const;
   void print_pools(std::ostream& out) const;
-  void print_summary(ceph::Formatter *f, std::ostream& out,
+  void print_summary(stone::Formatter *f, std::ostream& out,
 		     const std::string& prefix, bool extra=false) const;
   void print_oneline_summary(std::ostream& out) const;
 
@@ -1515,27 +1515,27 @@ public:
     DUMP_DOWN = 8,       // only 'down' osds
     DUMP_DESTROYED = 16, // only 'destroyed' osds
   };
-  void print_tree(ceph::Formatter *f, std::ostream *out,
+  void print_tree(stone::Formatter *f, std::ostream *out,
 		  unsigned dump_flags=0, std::string bucket="") const;
 
   int summarize_mapping_stats(
     OSDMap *newmap,
     const std::set<int64_t> *pools,
     std::string *out,
-    ceph::Formatter *f) const;
+    stone::Formatter *f) const;
 
   std::string get_flag_string() const;
   static std::string get_flag_string(unsigned flags);
   static void dump_erasure_code_profiles(
     const mempool::osdmap::map<std::string,std::map<std::string,std::string> > &profiles,
-    ceph::Formatter *f);
-  void dump(ceph::Formatter *f) const;
-  void dump_osd(int id, ceph::Formatter *f) const;
-  void dump_osds(ceph::Formatter *f) const;
+    stone::Formatter *f);
+  void dump(stone::Formatter *f) const;
+  void dump_osd(int id, stone::Formatter *f) const;
+  void dump_osds(stone::Formatter *f) const;
   static void generate_test_instances(std::list<OSDMap*>& o);
   bool check_new_blocklist_entries() const { return new_blocklist_entries; }
 
-  void check_health(StoneeContext *cct, health_check_map_t *checks) const;
+  void check_health(StoneContext *cct, health_check_map_t *checks) const;
 
   int parse_osd_id_list(const std::vector<std::string>& ls,
 			std::set<int> *out,
@@ -1565,7 +1565,7 @@ class PGMap;
 void print_osd_utilization(const OSDMap& osdmap,
                            const PGMap& pgmap,
                            std::ostream& out,
-                           ceph::Formatter *f,
+                           stone::Formatter *f,
                            bool tree,
                            const std::string& filter);
 

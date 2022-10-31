@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_CACHE_OBJECT_CACHER_OBJECT_DISPATCH_H
 
 #include "librbd/io/ObjectDispatchInterface.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "osdc/ObjectCacher.h"
 
 struct WritebackHandler;
@@ -56,7 +56,7 @@ public:
       Context** on_finish, Context* on_dispatched) override;
 
   bool write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
       IOContext io_context, int op_flags, int write_flags,
       std::optional<uint64_t> assert_version,
       const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
@@ -65,15 +65,15 @@ public:
 
   bool write_same(
       uint64_t object_no, uint64_t object_off, uint64_t object_len,
-      io::LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+      io::LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
       IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, int* object_dispatch_flags,
       uint64_t* journal_tid, io::DispatchResult* dispatch_result,
       Context** on_finish, Context* on_dispatched) override;
 
   bool compare_and_write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-      ceph::bufferlist&& write_data, IOContext io_context, int op_flags,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+      stone::bufferlist&& write_data, IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, uint64_t* mismatch_offset,
       int* object_dispatch_flags, uint64_t* journal_tid,
       io::DispatchResult* dispatch_result, Context** on_finish,
@@ -114,7 +114,7 @@ private:
   size_t m_max_dirty;
   bool m_writethrough_until_flush;
 
-  ceph::mutex m_cache_lock;
+  stone::mutex m_cache_lock;
   ObjectCacher *m_object_cacher = nullptr;
   ObjectCacher::ObjectSet *m_object_set = nullptr;
 

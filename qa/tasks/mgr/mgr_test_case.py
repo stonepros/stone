@@ -4,16 +4,16 @@ import logging
 from unittest import SkipTest
 
 from teuthology import misc
-from tasks.ceph_test_case import CephTestCase
+from tasks.stone_test_case import StoneTestCase
 
-# TODO move definition of CephCluster away from the CephFS stuff
-from tasks.cephfs.filesystem import CephCluster
+# TODO move definition of StoneCluster away from the StoneFS stuff
+from tasks.stonefs.filesystem import StoneCluster
 
 
 log = logging.getLogger(__name__)
 
 
-class MgrCluster(CephCluster):
+class MgrCluster(StoneCluster):
     def __init__(self, ctx):
         super(MgrCluster, self).__init__(ctx)
         self.mgr_ids = list(misc.all_roles_of_type(ctx.cluster, 'mgr'))
@@ -60,7 +60,7 @@ class MgrCluster(CephCluster):
         self.mon_manager.raw_cluster_cmd(*cmd)
 
 
-class MgrTestCase(CephTestCase):
+class MgrTestCase(StoneTestCase):
     MGRS_REQUIRED = 1
 
     @classmethod
@@ -75,7 +75,7 @@ class MgrTestCase(CephTestCase):
         # Unload all non-default plugins
         loaded = json.loads(cls.mgr_cluster.mon_manager.raw_cluster_cmd(
                    "mgr", "module", "ls"))['enabled_modules']
-        unload_modules = set(loaded) - {"cephadm", "restful"}
+        unload_modules = set(loaded) - {"stoneadm", "restful"}
 
         for m in unload_modules:
             cls.mgr_cluster.mon_manager.raw_cluster_cmd(
@@ -138,8 +138,8 @@ class MgrTestCase(CephTestCase):
 
         for daemon in mgr_daemons:
             if daemon["name"] == initial_mgr_map["active_name"]:
-                ceph_version = daemon["ceph_release"]
-                always_on = initial_mgr_map["always_on_modules"].get(ceph_version, [])
+                stone_version = daemon["stone_release"]
+                always_on = initial_mgr_map["always_on_modules"].get(stone_version, [])
                 if module_name in always_on:
                     return
 
@@ -190,7 +190,7 @@ class MgrTestCase(CephTestCase):
         This is already taken care of for us when running in a vstart
         environment.
         """
-        # Start handing out ports well above Ceph's range.
+        # Start handing out ports well above Stone's range.
         assign_port = min_port
 
         for mgr_id in cls.mgr_cluster.mgr_ids:

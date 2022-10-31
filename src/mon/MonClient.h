@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -47,7 +47,7 @@ class RotatingKeyRing;
 
 class MonConnection {
 public:
-  MonConnection(CephContext *cct,
+  MonConnection(StoneContext *cct,
 		ConnectionRef conn,
 		uint64_t global_id,
 		AuthRegistry *auth_registry);
@@ -77,18 +77,18 @@ public:
   int get_auth_request(
     uint32_t *method,
     std::vector<uint32_t> *preferred_modes,
-    ceph::buffer::list *out,
+    stone::buffer::list *out,
     const EntityName& entity_name,
     uint32_t want_keys,
     RotatingKeyRing* keyring);
   int handle_auth_reply_more(
     AuthConnectionMeta *auth_meta,
-    const ceph::buffer::list& bl,
-    ceph::buffer::list *reply);
+    const stone::buffer::list& bl,
+    stone::buffer::list *reply);
   int handle_auth_done(
     AuthConnectionMeta *auth_meta,
     uint64_t global_id,
-    const ceph::buffer::list& bl,
+    const stone::buffer::list& bl,
     CryptoKey *session_key,
     std::string *connection_secret);
   int handle_auth_bad_method(
@@ -116,7 +116,7 @@ private:
 		 bool msgr2);
 
 private:
-  CephContext *cct;
+  StoneContext *cct;
   enum class State {
     NONE,
     NEGOTIATING,       // v1 only
@@ -139,14 +139,14 @@ private:
 
 struct MonClientPinger : public Dispatcher,
 			 public AuthClient {
-  ceph::mutex lock = ceph::make_mutex("MonClientPinger::lock");
-  ceph::condition_variable ping_recvd_cond;
+  stone::mutex lock = stone::make_mutex("MonClientPinger::lock");
+  stone::condition_variable ping_recvd_cond;
   std::string *result;
   bool done;
   RotatingKeyRing *keyring;
   std::unique_ptr<MonConnection> mc;
 
-  MonClientPinger(CephContext *cct_,
+  MonClientPinger(StoneContext *cct_,
 		  RotatingKeyRing *keyring,
 		  std::string *res_) :
     Dispatcher(cct_),
@@ -162,7 +162,7 @@ struct MonClientPinger : public Dispatcher,
     }
     done = false;
     if (ping_recvd_cond.wait_for(locker,
-				 ceph::make_timespan(timeout),
+				 stone::make_timespan(timeout),
 				 [this] { return done; })) {
       return 0;
     } else {
@@ -171,12 +171,12 @@ struct MonClientPinger : public Dispatcher,
   }
 
   bool ms_dispatch(Message *m) override {
-    using ceph::decode;
+    using stone::decode;
     std::lock_guard l(lock);
     if (m->get_type() != STONE_MSG_PING)
       return false;
 
-    ceph::buffer::list &payload = m->get_payload();
+    stone::buffer::list &payload = m->get_payload();
     if (result && payload.length() > 0) {
       auto p = std::cbegin(payload);
       decode(*result, p);
@@ -203,15 +203,15 @@ struct MonClientPinger : public Dispatcher,
     AuthConnectionMeta *auth_meta,
     uint32_t *auth_method,
     std::vector<uint32_t> *preferred_modes,
-    ceph::buffer::list *bl) override {
+    stone::buffer::list *bl) override {
     return mc->get_auth_request(auth_method, preferred_modes, bl,
 				cct->_conf->name, 0, keyring);
   }
   int handle_auth_reply_more(
     Connection *con,
     AuthConnectionMeta *auth_meta,
-    const ceph::buffer::list& bl,
-    ceph::buffer::list *reply) override {
+    const stone::buffer::list& bl,
+    stone::buffer::list *reply) override {
     return mc->handle_auth_reply_more(auth_meta, bl, reply);
   }
   int handle_auth_done(
@@ -219,7 +219,7 @@ struct MonClientPinger : public Dispatcher,
     AuthConnectionMeta *auth_meta,
     uint64_t global_id,
     uint32_t con_mode,
-    const ceph::buffer::list& bl,
+    const stone::buffer::list& bl,
     CryptoKey *session_key,
     std::string *connection_secret) override {
     return mc->handle_auth_done(auth_meta, global_id, bl,
@@ -270,15 +270,15 @@ const boost::system::error_category& monc_category() noexcept;
 class MonClient : public Dispatcher,
 		  public AuthClient,
 		  public AuthServer /* for mgr, osd, mds */ {
-  static constexpr auto dout_subsys = ceph_subsys_monc;
+  static constexpr auto dout_subsys = stone_subsys_monc;
 public:
   // Error, Newest, Oldest
   using VersionSig = void(boost::system::error_code, version_t, version_t);
-  using VersionCompletion = ceph::async::Completion<VersionSig>;
+  using VersionCompletion = stone::async::Completion<VersionSig>;
 
   using CommandSig = void(boost::system::error_code, std::string,
-			  ceph::buffer::list);
-  using CommandCompletion = ceph::async::Completion<CommandSig>;
+			  stone::buffer::list);
+  using CommandCompletion = stone::async::Completion<CommandSig>;
 
   MonMap monmap;
   std::map<std::string,std::string> config_mgr;
@@ -292,7 +292,7 @@ private:
 
   EntityName entity_name;
 
-  mutable ceph::mutex monc_lock = ceph::make_mutex("MonClient::monc_lock");
+  mutable stone::mutex monc_lock = stone::make_mutex("MonClient::monc_lock");
   SafeTimer timer;
   boost::asio::io_context& service;
   boost::asio::io_context::strand finish_strand{service};
@@ -324,17 +324,17 @@ private:
 
   // monclient
   bool want_monmap;
-  ceph::condition_variable map_cond;
+  stone::condition_variable map_cond;
   bool passthrough_monmap = false;
 
   bool want_bootstrap_config = false;
-  ceph::ref_t<MConfig> bootstrap_config;
+  stone::ref_t<MConfig> bootstrap_config;
 
   // authenticate
   std::unique_ptr<AuthClientHandler> auth;
   uint32_t want_keys = 0;
   uint64_t global_id = 0;
-  ceph::condition_variable auth_cond;
+  stone::condition_variable auth_cond;
   int authenticate_err = 0;
   bool authenticated = false;
 
@@ -372,18 +372,18 @@ public:
     AuthConnectionMeta *auth_meta,
     uint32_t *method,
     std::vector<uint32_t> *preferred_modes,
-    ceph::buffer::list *bl) override;
+    stone::buffer::list *bl) override;
   int handle_auth_reply_more(
     Connection *con,
     AuthConnectionMeta *auth_meta,
-    const ceph::buffer::list& bl,
-    ceph::buffer::list *reply) override;
+    const stone::buffer::list& bl,
+    stone::buffer::list *reply) override;
   int handle_auth_done(
     Connection *con,
     AuthConnectionMeta *auth_meta,
     uint64_t global_id,
     uint32_t con_mode,
-    const ceph::buffer::list& bl,
+    const stone::buffer::list& bl,
     CryptoKey *session_key,
     std::string *connection_secret) override;
   int handle_auth_bad_method(
@@ -399,8 +399,8 @@ public:
     AuthConnectionMeta *auth_meta,
     bool more,
     uint32_t auth_method,
-    const ceph::buffer::list& bl,
-    ceph::buffer::list *reply) override;
+    const stone::buffer::list& bl,
+    stone::buffer::list *reply) override;
 
   void set_entity_name(EntityName name) { entity_name = name; }
   void set_handle_authentication_dispatcher(Dispatcher *d) {
@@ -454,7 +454,7 @@ public:
   std::unique_ptr<RotatingKeyRing> rotating_secrets;
 
  public:
-  MonClient(CephContext *cct_, boost::asio::io_context& service);
+  MonClient(StoneContext *cct_, boost::asio::io_context& service);
   MonClient(const MonClient &) = delete;
   MonClient& operator=(const MonClient &) = delete;
   ~MonClient() override;
@@ -551,7 +551,7 @@ private:
     utime_t last_send_attempt;
     uint64_t tid;
     std::vector<std::string> cmd;
-    ceph::buffer::list inbl;
+    stone::buffer::list inbl;
     std::unique_ptr<CommandCompletion> onfinish;
     std::optional<boost::asio::steady_timer> cancel_timer;
 
@@ -591,7 +591,7 @@ private:
 public:
   template<typename CompletionToken>
   auto start_mon_command(const std::vector<std::string>& cmd,
-                         const ceph::buffer::list& inbl,
+                         const stone::buffer::list& inbl,
 			 CompletionToken&& token) {
     ldout(cct,10) << __func__ << " cmd=" << cmd << dendl;
     boost::asio::async_completion<CompletionToken, CommandSig> init(token);
@@ -600,7 +600,7 @@ public:
       auto h = CommandCompletion::create(service.get_executor(),
 					 std::move(init.completion_handler));
       if (!initialized || stopping) {
-	ceph::async::post(std::move(h), monc_errc::shutting_down, std::string{},
+	stone::async::post(std::move(h), monc_errc::shutting_down, std::string{},
 			  bufferlist{});
       } else {
 	auto r = new MonCommand(*this, ++last_mon_command_tid, std::move(h));
@@ -615,7 +615,7 @@ public:
 
   template<typename CompletionToken>
   auto start_mon_command(int mon_rank, const std::vector<std::string>& cmd,
-			 const ceph::buffer::list& inbl, CompletionToken&& token) {
+			 const stone::buffer::list& inbl, CompletionToken&& token) {
     ldout(cct,10) << __func__ << " cmd=" << cmd << dendl;
     boost::asio::async_completion<CompletionToken, CommandSig> init(token);
     {
@@ -623,7 +623,7 @@ public:
       auto h = CommandCompletion::create(service.get_executor(),
 					 std::move(init.completion_handler));
       if (!initialized || stopping) {
-	ceph::async::post(std::move(h), monc_errc::shutting_down, std::string{},
+	stone::async::post(std::move(h), monc_errc::shutting_down, std::string{},
 			  bufferlist{});
       } else {
 	auto r = new MonCommand(*this, ++last_mon_command_tid, std::move(h));
@@ -640,7 +640,7 @@ public:
   template<typename CompletionToken>
   auto start_mon_command(const std::string& mon_name,
                          const std::vector<std::string>& cmd,
-			 const ceph::buffer::list& inbl,
+			 const stone::buffer::list& inbl,
 			 CompletionToken&& token) {
     ldout(cct,10) << __func__ << " cmd=" << cmd << dendl;
     boost::asio::async_completion<CompletionToken, CommandSig> init(token);
@@ -649,7 +649,7 @@ public:
       auto h = CommandCompletion::create(service.get_executor(),
 					 std::move(init.completion_handler));
       if (!initialized || stopping) {
-	ceph::async::post(std::move(h), monc_errc::shutting_down, std::string{},
+	stone::async::post(std::move(h), monc_errc::shutting_down, std::string{},
 			  bufferlist{});
       } else {
 	auto r = new MonCommand(*this, ++last_mon_command_tid, std::move(h));
@@ -674,11 +674,11 @@ public:
 
   class ContextVerter {
     std::string* outs;
-    ceph::bufferlist* outbl;
+    stone::bufferlist* outbl;
     Context* onfinish;
 
   public:
-    ContextVerter(std::string* outs, ceph::bufferlist* outbl, Context* onfinish)
+    ContextVerter(std::string* outs, stone::bufferlist* outbl, Context* onfinish)
       : outs(outs), outbl(outbl), onfinish(onfinish) {}
     ~ContextVerter() = default;
     ContextVerter(const ContextVerter&) = default;
@@ -688,13 +688,13 @@ public:
 
     void operator()(boost::system::error_code e,
 		    std::string s,
-		    ceph::bufferlist bl) {
+		    stone::bufferlist bl) {
       if (outs)
 	*outs = std::move(s);
       if (outbl)
 	*outbl = std::move(bl);
       if (onfinish)
-	onfinish->complete(ceph::from_error_code(e));
+	onfinish->complete(stone::from_error_code(e));
     }
   };
 
@@ -733,7 +733,7 @@ public:
     boost::asio::async_completion<CompletionToken, VersionSig> init(token);
     {
       std::scoped_lock l(monc_lock);
-      auto m = ceph::make_message<MMonGetVersion>();
+      auto m = stone::make_message<MMonGetVersion>();
       m->what = std::move(map);
       m->handle = ++version_req_id;
       version_requests.emplace(m->handle,
@@ -764,8 +764,8 @@ public:
 
 private:
 
-  std::map<ceph_tid_t, std::unique_ptr<VersionCompletion>> version_requests;
-  ceph_tid_t version_req_id;
+  std::map<stone_tid_t, std::unique_ptr<VersionCompletion>> version_requests;
+  stone_tid_t version_req_id;
   void handle_get_version_reply(MMonGetVersionReply* m);
   md_config_t::config_callback config_cb;
   std::function<void(void)> config_notify_cb;

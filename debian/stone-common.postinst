@@ -1,6 +1,6 @@
 #!/bin/sh
 # vim: set noet ts=8:
-# postinst script for ceph-mds
+# postinst script for stone-mds
 #
 # see: dh_installdeb(1)
 
@@ -21,12 +21,12 @@ set -e
 
 # Let the admin override these distro-specified defaults.  This is NOT
 # recommended!
-[ -f "/etc/default/ceph" ] && . /etc/default/ceph
+[ -f "/etc/default/stone" ] && . /etc/default/stone
 
-[ -z "$SERVER_HOME" ] && SERVER_HOME=/var/lib/ceph
-[ -z "$SERVER_USER" ] && SERVER_USER=ceph
-[ -z "$SERVER_NAME" ] && SERVER_NAME="Ceph storage service"
-[ -z "$SERVER_GROUP" ] && SERVER_GROUP=ceph
+[ -z "$SERVER_HOME" ] && SERVER_HOME=/var/lib/stone
+[ -z "$SERVER_USER" ] && SERVER_USER=stone
+[ -z "$SERVER_NAME" ] && SERVER_NAME="Stone storage service"
+[ -z "$SERVER_GROUP" ] && SERVER_GROUP=stone
 [ -z "$SERVER_UID" ] && SERVER_UID=64045  # alloc by Debian base-passwd maintainer
 [ -z "$SERVER_GID" ] && SERVER_GID=$SERVER_UID
 
@@ -76,24 +76,24 @@ case "$1" in
            chown $SERVER_USER:$SERVER_GROUP $SERVER_HOME
            chmod u=rwx,g=rx,o= $SERVER_HOME
        fi
-       if ! dpkg-statoverride --list /var/log/ceph >/dev/null
+       if ! dpkg-statoverride --list /var/log/stone >/dev/null
        then
-	   # take care not to touch cephadm log subdirs
-           chown $SERVER_USER:$SERVER_GROUP /var/log/ceph
-	   chown $SERVER_USER:$SERVER_GROUP /var/log/ceph/*.log* || true
-	   # members of group ceph can log here, but cannot remove
+	   # take care not to touch stoneadm log subdirs
+           chown $SERVER_USER:$SERVER_GROUP /var/log/stone
+	   chown $SERVER_USER:$SERVER_GROUP /var/log/stone/*.log* || true
+	   # members of group stone can log here, but cannot remove
 	   # others' files.  non-members cannot read any logs.
-           chmod u=rwx,g=rwxs,o=t /var/log/ceph
+           chmod u=rwx,g=rwxs,o=t /var/log/stone
        fi
 
-       # 6. fix /var/run/ceph
-       if [ -d /var/run/ceph ]; then
-	   echo -n "Fixing /var/run/ceph ownership.."
-	   chown $SERVER_USER:$SERVER_GROUP /var/run/ceph
+       # 6. fix /var/run/stone
+       if [ -d /var/run/stone ]; then
+	   echo -n "Fixing /var/run/stone ownership.."
+	   chown $SERVER_USER:$SERVER_GROUP /var/run/stone
 	   echo "..done"
        fi
 
-       # create /run/ceph.  fail softly if systemd isn't present or
+       # create /run/stone.  fail softly if systemd isn't present or
        # something.
        [ -x /bin/systemd-tmpfiles ] && systemd-tmpfiles --create || true
     ;;

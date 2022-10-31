@@ -18,17 +18,17 @@ constexpr unsigned int QUEUE_ENTRY_OVERHEAD = sizeof(uint16_t) + sizeof(uint64_t
 
 struct cls_queue_entry
 {
-  ceph::buffer::list data;
+  stone::buffer::list data;
   std::string marker;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(data, bl);
     encode(marker, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(data, bl);
     decode(marker, bl);
@@ -42,14 +42,14 @@ struct cls_queue_marker
   uint64_t offset{0};
   uint64_t gen{0};
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(gen, bl);
     encode(offset, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(gen, bl);
     decode(offset, bl);
@@ -91,9 +91,9 @@ struct cls_queue_head
   cls_queue_marker tail{QUEUE_START_OFFSET_1K, 0};
   uint64_t queue_size{0}; // size of queue requested by user, with head size added to it
   uint64_t max_urgent_data_size{0};
-  ceph::buffer::list bl_urgent_data;  // special data known to application using queue
+  stone::buffer::list bl_urgent_data;  // special data known to application using queue
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(max_head_size, bl);
     encode(front, bl);
@@ -104,7 +104,7 @@ struct cls_queue_head
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(max_head_size, bl);
     decode(front, bl);

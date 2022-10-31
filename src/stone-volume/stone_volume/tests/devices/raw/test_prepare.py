@@ -1,5 +1,5 @@
 import pytest
-from ceph_volume.devices import raw
+from stone_volume.devices import raw
 from mock.mock import patch
 
 
@@ -41,53 +41,53 @@ class TestPrepare(object):
         assert 'Path to bluestore block.wal block device' in stdout
         assert 'Enable device encryption via dm-crypt' in stdout
 
-    @patch('ceph_volume.util.arg_validators.ValidDevice.__call__')
+    @patch('stone_volume.util.arg_validators.ValidDevice.__call__')
     def test_prepare_dmcrypt_no_secret_passed(self, m_valid_device, capsys):
         m_valid_device.return_value = '/dev/foo'
         with pytest.raises(SystemExit):
             raw.prepare.Prepare(argv=['--bluestore', '--data', '/dev/foo', '--dmcrypt']).main()
         stdout, stderr = capsys.readouterr()
-        assert 'CEPH_VOLUME_DMCRYPT_SECRET is not set, you must set' in stderr
+        assert 'STONE_VOLUME_DMCRYPT_SECRET is not set, you must set' in stderr
 
-    @patch('ceph_volume.util.encryption.luks_open')
-    @patch('ceph_volume.util.encryption.luks_format')
-    @patch('ceph_volume.util.disk.lsblk')
+    @patch('stone_volume.util.encryption.luks_open')
+    @patch('stone_volume.util.encryption.luks_format')
+    @patch('stone_volume.util.disk.lsblk')
     def test_prepare_dmcrypt_block(self, m_lsblk, m_luks_format, m_luks_open):
         m_lsblk.return_value = {'KNAME': 'foo'}
         m_luks_format.return_value = True
         m_luks_open.return_value = True
         result = raw.prepare.prepare_dmcrypt('foo', '/dev/foo', 'block', '123')
-        m_luks_open.assert_called_with('foo', '/dev/foo', 'ceph-123-foo-block-dmcrypt')
+        m_luks_open.assert_called_with('foo', '/dev/foo', 'stone-123-foo-block-dmcrypt')
         m_luks_format.assert_called_with('foo', '/dev/foo')
-        assert result == '/dev/mapper/ceph-123-foo-block-dmcrypt'
+        assert result == '/dev/mapper/stone-123-foo-block-dmcrypt'
 
-    @patch('ceph_volume.util.encryption.luks_open')
-    @patch('ceph_volume.util.encryption.luks_format')
-    @patch('ceph_volume.util.disk.lsblk')
+    @patch('stone_volume.util.encryption.luks_open')
+    @patch('stone_volume.util.encryption.luks_format')
+    @patch('stone_volume.util.disk.lsblk')
     def test_prepare_dmcrypt_db(self, m_lsblk, m_luks_format, m_luks_open):
         m_lsblk.return_value = {'KNAME': 'foo'}
         m_luks_format.return_value = True
         m_luks_open.return_value = True
         result = raw.prepare.prepare_dmcrypt('foo', '/dev/foo', 'db', '123')
-        m_luks_open.assert_called_with('foo', '/dev/foo', 'ceph-123-foo-db-dmcrypt')
+        m_luks_open.assert_called_with('foo', '/dev/foo', 'stone-123-foo-db-dmcrypt')
         m_luks_format.assert_called_with('foo', '/dev/foo')
-        assert result == '/dev/mapper/ceph-123-foo-db-dmcrypt'
+        assert result == '/dev/mapper/stone-123-foo-db-dmcrypt'
 
-    @patch('ceph_volume.util.encryption.luks_open')
-    @patch('ceph_volume.util.encryption.luks_format')
-    @patch('ceph_volume.util.disk.lsblk')
+    @patch('stone_volume.util.encryption.luks_open')
+    @patch('stone_volume.util.encryption.luks_format')
+    @patch('stone_volume.util.disk.lsblk')
     def test_prepare_dmcrypt_wal(self, m_lsblk, m_luks_format, m_luks_open):
         m_lsblk.return_value = {'KNAME': 'foo'}
         m_luks_format.return_value = True
         m_luks_open.return_value = True
         result = raw.prepare.prepare_dmcrypt('foo', '/dev/foo', 'wal', '123')
-        m_luks_open.assert_called_with('foo', '/dev/foo', 'ceph-123-foo-wal-dmcrypt')
+        m_luks_open.assert_called_with('foo', '/dev/foo', 'stone-123-foo-wal-dmcrypt')
         m_luks_format.assert_called_with('foo', '/dev/foo')
-        assert result == '/dev/mapper/ceph-123-foo-wal-dmcrypt'
+        assert result == '/dev/mapper/stone-123-foo-wal-dmcrypt'
 
-    @patch('ceph_volume.devices.raw.prepare.rollback_osd')
-    @patch('ceph_volume.devices.raw.prepare.Prepare.prepare')
-    @patch('ceph_volume.util.arg_validators.ValidDevice.__call__')
+    @patch('stone_volume.devices.raw.prepare.rollback_osd')
+    @patch('stone_volume.devices.raw.prepare.Prepare.prepare')
+    @patch('stone_volume.util.arg_validators.ValidDevice.__call__')
     def test_safe_prepare_exception_raised(self, m_valid_device, m_prepare, m_rollback_osd):
         m_valid_device.return_value = '/dev/foo'
         m_prepare.side_effect=Exception('foo')

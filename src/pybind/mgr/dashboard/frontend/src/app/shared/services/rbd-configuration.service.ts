@@ -8,7 +8,7 @@ import {
 
 /**
  * Define here which options should be made available under which section heading.
- * The display name and description needs to be added manually as long as Ceph does not provide
+ * The display name and description needs to be added manually as long as Stone does not provide
  * this information.
  */
 @Injectable({

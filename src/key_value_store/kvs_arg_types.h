@@ -13,7 +13,7 @@
 #include "include/encoding.h"
 #include "key_value_store/kv_flat_btree_async.h"
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 struct assert_size_args {
   uint64_t bound; //the size to compare to - should be k or 2k

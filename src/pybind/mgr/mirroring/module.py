@@ -33,12 +33,12 @@ class Module(MgrModule):
                                  remote_cluster_spec: str,
                                  remote_fs_name: Optional[str] = None,
                                  remote_mon_host: Optional[str] = None,
-                                 cephx_key: Optional[str] = None):
+                                 stonex_key: Optional[str] = None):
         """Add a remote filesystem peer"""
         conf = {}
-        if remote_mon_host and cephx_key:
+        if remote_mon_host and stonex_key:
             conf['mon_host'] = remote_mon_host
-            conf['key'] = cephx_key
+            conf['key'] = stonex_key
         return self.fs_snapshot_mirror.peer_add(fs_name, remote_cluster_spec,
                                                 remote_fs_name, remote_conf=conf)
 

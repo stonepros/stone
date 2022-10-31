@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -33,7 +33,7 @@ public:
 
   MPoolOp()
     : PaxosServiceMessage{STONE_MSG_POOLOP, 0, HEAD_VERSION, COMPAT_VERSION} {}
-  MPoolOp(const uuid_d& f, ceph_tid_t t, int p, std::string& n, int o, version_t v)
+  MPoolOp(const uuid_d& f, stone_tid_t t, int p, std::string& n, int o, version_t v)
     : PaxosServiceMessage{STONE_MSG_POOLOP, v, HEAD_VERSION, COMPAT_VERSION},
       fsid(f), pool(p), name(n), op(o),
       snapid(0), crush_rule(0) {
@@ -46,14 +46,14 @@ private:
 public:
   std::string_view get_type_name() const override { return "poolop"; }
   void print(std::ostream& out) const override {
-    out << "pool_op(" << ceph_pool_op_name(op) << " pool " << pool
+    out << "pool_op(" << stone_pool_op_name(op) << " pool " << pool
 	<< " tid " << get_tid()
 	<< " name " << name
 	<< " v" << version << ")";
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(fsid, payload);
     encode(pool, payload);
@@ -66,7 +66,7 @@ public:
     encode(crush_rule, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(fsid, p);
@@ -92,7 +92,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

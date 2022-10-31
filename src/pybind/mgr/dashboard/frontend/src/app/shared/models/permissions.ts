@@ -21,7 +21,7 @@ export class Permissions {
   iscsi: Permission;
   rbdMirroring: Permission;
   rgw: Permission;
-  cephfs: Permission;
+  stonefs: Permission;
   manager: Permission;
   log: Permission;
   user: Permission;
@@ -39,7 +39,7 @@ export class Permissions {
     this.iscsi = new Permission(serverPermissions['iscsi']);
     this.rbdMirroring = new Permission(serverPermissions['rbd-mirroring']);
     this.rgw = new Permission(serverPermissions['rgw']);
-    this.cephfs = new Permission(serverPermissions['cephfs']);
+    this.stonefs = new Permission(serverPermissions['stonefs']);
     this.manager = new Permission(serverPermissions['manager']);
     this.log = new Permission(serverPermissions['log']);
     this.user = new Permission(serverPermissions['user']);

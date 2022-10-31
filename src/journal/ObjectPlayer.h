@@ -7,7 +7,7 @@
 #include "include/Context.h"
 #include "include/interval_set.h"
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "common/RefCountedObj.h"
 #include "journal/Entry.h"
@@ -15,7 +15,7 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 #include <boost/unordered_map.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace journal {
 
@@ -75,7 +75,7 @@ public:
 private:
   FRIEND_MAKE_REF(ObjectPlayer);
   ObjectPlayer(librados::IoCtx &ioctx, const std::string& object_oid_prefix,
-               uint64_t object_num, SafeTimer &timer, ceph::mutex &timer_lock,
+               uint64_t object_num, SafeTimer &timer, stone::mutex &timer_lock,
                uint8_t order, uint64_t max_fetch_bytes);
   ~ObjectPlayer() override;
 
@@ -83,7 +83,7 @@ private:
   typedef boost::unordered_map<EntryKey, Entries::iterator> EntryKeys;
 
   struct C_Fetch : public Context {
-    ceph::ref_t<ObjectPlayer> object_player;
+    stone::ref_t<ObjectPlayer> object_player;
     Context *on_finish;
     bufferlist read_bl;
     C_Fetch(ObjectPlayer *o, Context *ctx) : object_player(o), on_finish(ctx) {
@@ -91,7 +91,7 @@ private:
     void finish(int r) override;
   };
   struct C_WatchFetch : public Context {
-    ceph::ref_t<ObjectPlayer> object_player;
+    stone::ref_t<ObjectPlayer> object_player;
     C_WatchFetch(ObjectPlayer *o) : object_player(o) {
     }
     void finish(int r) override;
@@ -100,10 +100,10 @@ private:
   librados::IoCtx m_ioctx;
   uint64_t m_object_num;
   std::string m_oid;
-  StoneeContext *m_cct = nullptr;
+  StoneContext *m_cct = nullptr;
 
   SafeTimer &m_timer;
-  ceph::mutex &m_timer_lock;
+  stone::mutex &m_timer_lock;
 
   uint8_t m_order;
   uint64_t m_max_fetch_bytes;
@@ -111,7 +111,7 @@ private:
   double m_watch_interval = 0;
   Context *m_watch_task = nullptr;
 
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
   bool m_fetch_in_progress = false;
   bufferlist m_read_bl;
   uint32_t m_read_off = 0;

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-. $(dirname $0)/../../standalone/ceph-helpers.sh
+. $(dirname $0)/../../standalone/stone-helpers.sh
 
 TEMPDIR=
 IMAGE1=image1
@@ -95,7 +95,7 @@ test_import_native_format() {
     rbd migration prepare --import-only "rbd/${base_image}@2" ${dest_image}
     rbd migration abort ${dest_image}
 
-    local pool_id=$(ceph osd pool ls detail --format xml | xmlstarlet sel -t -v "//pools/pool[pool_name='rbd']/pool_id")
+    local pool_id=$(stone osd pool ls detail --format xml | xmlstarlet sel -t -v "//pools/pool[pool_name='rbd']/pool_id")
     cat > ${TEMPDIR}/spec.json <<EOF
 {
   "type": "native",

@@ -3,9 +3,9 @@ import errno
 import logging
 from typing import TYPE_CHECKING
 
-import cephfs
+import stonefs
 
-from mgr_util import CephfsClient
+from mgr_util import StonefsClient
 
 from .fs_util import listdir
 
@@ -47,7 +47,7 @@ def name_to_json(names):
     return json.dumps(namedict, indent=4, sort_keys=True)
 
 
-class VolumeClient(CephfsClient["Module"]):
+class VolumeClient(StonefsClient["Module"]):
     def __init__(self, mgr):
         super().__init__(mgr)
         # volume specification
@@ -65,7 +65,7 @@ class VolumeClient(CephfsClient["Module"]):
             self.purge_queue.queue_job(fs['mdsmap']['fs_name'])
 
     def shutdown(self):
-        # Overrides CephfsClient.shutdown()
+        # Overrides StonefsClient.shutdown()
         log.info("shutting down")
         # first, note that we're shutting down
         self.stopping.set()
@@ -73,7 +73,7 @@ class VolumeClient(CephfsClient["Module"]):
         self.cloner.shutdown()
         # stop purge threads
         self.purge_queue.shutdown()
-        # last, delete all libcephfs handles from connection pool
+        # last, delete all libstonefs handles from connection pool
         self.connection_pool.del_all_connections()
 
     def cluster_log(self, msg, lvl=None):
@@ -283,7 +283,7 @@ class VolumeClient(CephfsClient["Module"]):
             if isinstance(e, VolumeException):
                 ret = self.volume_exception_to_retval(e)
             elif isinstance(e, ClusterTimeout):
-                ret = -errno.ETIMEDOUT , "", "Timedout trying to talk to ceph cluster"
+                ret = -errno.ETIMEDOUT , "", "Timedout trying to talk to stone cluster"
             elif isinstance(e, ClusterError):
                 ret = e._result_code , "", e._result_str
             elif isinstance(e, EvictionError):
@@ -663,8 +663,8 @@ class VolumeClient(CephfsClient["Module"]):
         try:
             with open_volume(self, volname) as fs_handle:
                 with open_group(fs_handle, self.volspec, groupname) as group:
-                    # as subvolumes are marked with the vxattr ceph.dir.subvolume deny snapshots
-                    # at the subvolume group (see: https://tracker.ceph.com/issues/46074)
+                    # as subvolumes are marked with the vxattr stone.dir.subvolume deny snapshots
+                    # at the subvolume group (see: https://tracker.stone.com/issues/46074)
                     # group.create_snapshot(snapname)
                     pass
         except VolumeException as ve:

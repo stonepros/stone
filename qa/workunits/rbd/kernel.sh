@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -ex
 
-CEPH_SECRET_FILE=${CEPH_SECRET_FILE:-}
-CEPH_ID=${CEPH_ID:-admin}
+STONE_SECRET_FILE=${STONE_SECRET_FILE:-}
+STONE_ID=${STONE_ID:-admin}
 SECRET_ARGS=''
-if [ ! -z $CEPH_SECRET_FILE ]; then
-	SECRET_ARGS="--secret $CEPH_SECRET_FILE"
+if [ ! -z $STONE_SECRET_FILE ]; then
+	SECRET_ARGS="--secret $STONE_SECRET_FILE"
 fi
 
 TMP_FILES="/tmp/img1 /tmp/img1.small /tmp/img1.snap1 /tmp/img1.export /tmp/img1.trunc"
@@ -47,7 +47,7 @@ dd if=/dev/zero of=/tmp/img1 count=0 seek=150000
 
 # import
 rbd import /tmp/img1 testimg1
-sudo rbd device map testimg1 --user $CEPH_ID $SECRET_ARGS
+sudo rbd device map testimg1 --user $STONE_ID $SECRET_ARGS
 
 DEV_ID1=$(get_device_dir rbd testimg1 -)
 echo "dev_id1 = $DEV_ID1"
@@ -59,7 +59,7 @@ cmp /tmp/img1 /tmp/img1.export
 
 # snapshot
 rbd snap create testimg1 --snap=snap1
-sudo rbd device map --snap=snap1 testimg1 --user $CEPH_ID $SECRET_ARGS
+sudo rbd device map --snap=snap1 testimg1 --user $STONE_ID $SECRET_ARGS
 
 DEV_ID2=$(get_device_dir rbd testimg1 snap1)
 cat /sys/bus/rbd/devices/$DEV_ID2/size | grep 76800000

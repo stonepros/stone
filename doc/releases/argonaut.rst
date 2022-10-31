@@ -95,7 +95,7 @@ Upgrading
 
 * The radosgw usage trim function was effectively broken in v0.48.  Earlier it would remove more usage data than what was requested.  This is fixed in v0.48.1, but the fix is incompatible.  The v0.48 radosgw-admin tool cannot be used to initiate the trimming; please use the v0.48.1 version.
 
-* v0.48.1 now explicitly indicates support for the CRUSH_TUNABLES feature.  No other version of Ceph requires this, yet, but future versions will when the tunables are adjusted from their historical defaults.
+* v0.48.1 now explicitly indicates support for the CRUSH_TUNABLES feature.  No other version of Stone requires this, yet, but future versions will when the tunables are adjusted from their historical defaults.
 
 * There are no other compatibility changes between v0.48.1 and v0.48.
 

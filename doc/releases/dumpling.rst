@@ -16,13 +16,13 @@ Notable Changes
 ---------------
 
 * buffer: fix buffer rebuild alignment corner case (#6614 #6003 Loic Dachary, Samuel Just)
-* ceph-disk: reprobe partitions after zap (#9665 #9721 Loic Dachary)
-* ceph-disk: use partx instead of partprobe when appropriate (Loic Dachary)
+* stone-disk: reprobe partitions after zap (#9665 #9721 Loic Dachary)
+* stone-disk: use partx instead of partprobe when appropriate (Loic Dachary)
 * common: add $cctid meta variable (#6228 Adam Crume)
 * crush: fix get_full_location_ordered (Sage Weil)
 * crush: pick ruleset id that matches rule_id (#9675 Xiaoxi Chen)
-* libcephfs: fix tid wrap bug (#9869 Greg Farnum)
-* libcephfs: get osd location on -1 should return EINVAL (Sage Weil)
+* libstonefs: fix tid wrap bug (#9869 Greg Farnum)
+* libstonefs: get osd location on -1 should return EINVAL (Sage Weil)
 * librados: fix race condition with C API and op timeouts (#9582 Sage Weil)
 * librbd: constrain max number of in-flight read requests (#9854 Jason Dillaman)
 * librbd: enforce cache size on read requests (Jason Dillaman)
@@ -59,7 +59,7 @@ Notable Changes
 
 * common: fix sending dup cluster log items (#9080 Sage Weil)
 * doc: several doc updates (Alfredo Deza)
-* libcephfs-java: fix build against older JNI headesr (Greg Farnum)
+* libstonefs-java: fix build against older JNI headesr (Greg Farnum)
 * librados: fix crash in op timeout path (#9362 Matthias Kiefer, Sage Weil)
 * librbd: fix crash using clone of flattened image (#8845 Josh Durgin)
 * librbd: fix error path cleanup when failing to open image (#8912 Josh Durgin)
@@ -83,13 +83,13 @@ We recommend that all Dumpling users upgrade at their convenience.
 Notable Changes
 ---------------
 
-* ceph-disk: partprobe befoere settle, fixing dm-crypt (#6966, Eric Eastman)
+* stone-disk: partprobe befoere settle, fixing dm-crypt (#6966, Eric Eastman)
 * librbd: add invalidate cache interface (Josh Durgin)
 * librbd: close image if remove_child fails (Ilya Dryomov)
 * librbd: fix potential null pointer dereference (Danny Al-Gaaf)
 * librbd: improve writeback checks, performance (Haomai Wang)
 * librbd: skip zeroes when copying image (#6257, Josh Durgin)
-* mon: fix rule(set) check on 'ceph pool set ... crush_ruleset ...' (#8599, John Spray)
+* mon: fix rule(set) check on 'stone pool set ... crush_ruleset ...' (#8599, John Spray)
 * mon: shut down if mon is removed from cluster (#6789, Joao Eduardo Luis)
 * osd: fix filestore perf reports to mon (Sage Weil)
 * osd: force any new or updated xattr into leveldb if E2BIG from XFS (#7779, Sage Weil)
@@ -126,7 +126,7 @@ We recommend that all Dumpling users upgrade at their convenience.
 Notable Changes
 ---------------
 
-* ceph-fuse, libcephfs: client admin socket command to kick and inspect MDS sessions (#8021, Zheng Yan)
+* stone-fuse, libstonefs: client admin socket command to kick and inspect MDS sessions (#8021, Zheng Yan)
 * monclient: fix failure detection during mon handshake (#8278, Sage Weil)
 * mon: set tid on no-op PGStatsAck messages (#8280, Sage Weil)
 * msgr: fix a rare bug with connection negotiation between OSDs (Guang Yang)
@@ -160,16 +160,16 @@ Upgrading
 * The 'rbd ls' function now returns success and returns an empty when a pool
   does not store any rbd images.  Previously it would return an ENOENT error.
 
-* Ceph will now issue a health warning if the 'mon osd down out
+* Stone will now issue a health warning if the 'mon osd down out
   interval' config option is set to zero.  This warning can be
   disabled by adding 'mon warn on osd down out interval zero = false'
-  to ceph.conf.
+  to stone.conf.
 
 Notable Changes
 ---------------
 
 * all: improve keepalive detection of failed monitor connections (#7888, Sage Weil)
-* ceph-fuse, libcephfs: pin inodes during readahead, fixing rare crash (#7867, Sage Weil)
+* stone-fuse, libstonefs: pin inodes during readahead, fixing rare crash (#7867, Sage Weil)
 * librbd: make cache writeback a bit less aggressive (Sage Weil)
 * librbd: make symlink for qemu to detect librbd in RPM (#7293, Josh Durgin)
 * mon: allow 'hashpspool' pool flag to be set and unset (Loic Dachary)
@@ -219,7 +219,7 @@ Upgrading
 Notable Changes
 ---------------
 
-* ceph-disk: additional unit tests
+* stone-disk: additional unit tests
 * librbd: revert caching behavior change in v0.67.6
 * osd: fix problem reading xattrs due to incomplete backport in v0.67.6
 * radosgw-admin: fix reading object policy
@@ -253,7 +253,7 @@ Upgrading
   be triggered by very large multipart objects, but could be caused by
   other workloads as well.  Although there is some small risk that
   performance for certain workloads will degrade, it is more important
-  that data be retrievable.  Note that newer versions of Ceph (e.g.,
+  that data be retrievable.  Note that newer versions of Stone (e.g.,
   firefly) do some additional work to avoid the potential performance
   regression in this case, but that is current considered too complex
   for backport to the Dumpling stable series.
@@ -266,10 +266,10 @@ Upgrading
 Notable changes
 ---------------
 
-* ceph-disk: misc bug fixes, particularly on RHEL (Loic Dachary, Alfredo Deza, various)
-* ceph-fuse, libcephfs: fix crash from read over certain sparseness patterns (Sage Weil)
-* ceph-fuse, libcephfs: fix integer overflow for sync reads racing with appends (Sage Weil)
-* ceph.spec: fix udev rule when building RPM under RHEL (Derek Yarnell)
+* stone-disk: misc bug fixes, particularly on RHEL (Loic Dachary, Alfredo Deza, various)
+* stone-fuse, libstonefs: fix crash from read over certain sparseness patterns (Sage Weil)
+* stone-fuse, libstonefs: fix integer overflow for sync reads racing with appends (Sage Weil)
+* stone.spec: fix udev rule when building RPM under RHEL (Derek Yarnell)
 * common: fix crash from bad format from admin socket (Loic Dachary)
 * librados: add optional timeouts (Josh Durgin)
 * librados: do not leak budget when resending localized or redirected ops (Josh Durgin)
@@ -311,7 +311,7 @@ We recommend that all 0.67.x Dumpling users upgrade.
 Notable changes
 ---------------
 
-* ceph-fuse: fix crash in caching code
+* stone-fuse: fix crash in caching code
 * mds: fix looping in populate_mydir()
 * mds: fix standby-replay race
 * mon: accept 'osd pool set ...' as string
@@ -348,8 +348,8 @@ Notable changes
 * mds: be more careful when decoding LogEvents
 * mds: fix heap check debugging commands
 * mon: avoid rebuilding old full osdmaps
-* mon: fix 'ceph crush move ...'
-* mon: fix 'ceph osd crush reweight ...'
+* mon: fix 'stone crush move ...'
+* mon: fix 'stone osd crush reweight ...'
 * mon: fix writeout of full osdmaps during trim
 * mon: limit size of transactions
 * mon: prevent both unmanaged and pool snaps
@@ -377,10 +377,10 @@ upgrade.
 Notable Changes
 ---------------
 
-* ceph-disk: partprobe after creation journal partition
-* ceph-disk: specify fs type when mounting
-* ceph-post-file: new utility to help share logs and other files with ceph developers
-* libcephfs: fix truncate vs readahead race (crash)
+* stone-disk: partprobe after creation journal partition
+* stone-disk: specify fs type when mounting
+* stone-post-file: new utility to help share logs and other files with stone developers
+* libstonefs: fix truncate vs readahead race (crash)
 * mds: fix flock/fcntl lock deadlock
 * mds: fix rejoin loop when encountering pre-dumpling backpointers
 * mon: allow name and addr discovery during election stage
@@ -408,14 +408,14 @@ This is an important point release for Dumpling.  Most notably, it
 fixes a problem when upgrading directly from v0.56.x Bobtail to
 v0.67.x Dumpling (without stopping at v0.61.x Cuttlefish along the
 way).  It also fixes a problem with the CLI parsing of the CEPH_ARGS
-environment variable, high CPU utilization by the ceph-osd daemons,
+environment variable, high CPU utilization by the stone-osd daemons,
 and cleans up the radosgw shutdown sequence.
 
 Notable Changes
 ---------------
 
 * objecter: resend linger requests when cluster goes from full to non-full
-* ceph: parse CEPH_ARGS environment variable
+* stone: parse CEPH_ARGS environment variable
 * librados: fix small memory leak
 * osd: remove old log objects on upgrade (fixes bobtail -> dumpling jump)
 * osd: disable PGLog::check() via config option (fixes CPU burn)
@@ -438,8 +438,8 @@ Notable changes
   usages (in particular, that used by OpenStack)
 * librados, librbd: fix aio_flush wakeup when cache is disabled
 * librados: fix locking for aio completion refcounting
-* fixes 'ceph --admin-daemon ...' command error code on error
-* fixes 'ceph daemon ... config set ...' command for boolean config
+* fixes 'stone --admin-daemon ...' command error code on error
+* fixes 'stone daemon ... config set ...' command for boolean config
   options.
 
 For more detailed information, see :download:`the complete changelog <../changelog/v0.67.1.txt>`.
@@ -447,20 +447,20 @@ For more detailed information, see :download:`the complete changelog <../changel
 v0.67 "Dumpling"
 ================
 
-This is the fourth major release of Ceph, code-named "Dumpling."  The
+This is the fourth major release of Stone, code-named "Dumpling."  The
 headline features for this release include:
 
 * Multi-site support for radosgw.  This includes the ability to set up
-  separate "regions" in the same or different Ceph clusters that share
+  separate "regions" in the same or different Stone clusters that share
   a single S3/Swift bucket/container namespace.
 
-* RESTful API endpoint for Ceph cluster administration.
-  ceph-rest-api, a wrapper around ceph_rest_api.py, can be used to
+* RESTful API endpoint for Stone cluster administration.
+  stone-rest-api, a wrapper around stone_rest_api.py, can be used to
   start up a test single-threaded HTTP server that provides access to
   cluster information and administration in very similar ways to the
-  ceph commandline tool.  ceph_rest_api.py can be used as a WSGI
+  stone commandline tool.  stone_rest_api.py can be used as a WSGI
   application for deployment in a more-capable web server.  See
-  ceph-rest-api.8 for more.
+  stone-rest-api.8 for more.
 
 * Object namespaces in librados.
 
@@ -472,15 +472,15 @@ Upgrade Sequencing
 
 It is possible to do a rolling upgrade from Cuttlefish to Dumpling.
 
-#. Upgrade ceph-common on all nodes that will use the command line
-   'ceph' utility.
-#. Upgrade all monitors (upgrade ceph package, restart ceph-mon
+#. Upgrade stone-common on all nodes that will use the command line
+   'stone' utility.
+#. Upgrade all monitors (upgrade stone package, restart stone-mon
    daemons).  This can happen one daemon or host at a time.  Note that
    because cuttlefish and dumpling monitors can't talk to each other,
    all monitors should be upgraded in relatively short succession to
    minimize the risk that an a untimely failure will reduce
    availability.
-#. Upgrade all osds (upgrade ceph package, restart ceph-osd daemons).
+#. Upgrade all osds (upgrade stone package, restart stone-osd daemons).
    This can happen one daemon or host at a time.
 #. Upgrade radosgw (upgrade radosgw package, restart radosgw daemons).
 
@@ -489,41 +489,41 @@ Upgrading from v0.66
 --------------------
 
 * There is monitor internal protocol change, which means that v0.67
-  ceph-mon daemons cannot talk to v0.66 or older daemons.  We
+  stone-mon daemons cannot talk to v0.66 or older daemons.  We
   recommend upgrading all monitors at once (or in relatively quick
   succession) to minimize the possibility of downtime.
 
-* The output of 'ceph status --format=json' or 'ceph -s --format=json'
+* The output of 'stone status --format=json' or 'stone -s --format=json'
   has changed to return status information in a more structured and
   usable format.
 
-* The 'ceph pg dump_stuck [threshold]' command used to require a
+* The 'stone pg dump_stuck [threshold]' command used to require a
   --threshold or -t prefix to the threshold argument, but now does
   not.
 
-* Many more ceph commands now output formatted information; select
+* Many more stone commands now output formatted information; select
   with '--format=<format>', where <format> can be 'json', 'json-pretty',
   'xml', or 'xml-pretty'.
 
-* The 'ceph pg <pgid> ...' commands (like 'ceph pg <pgid> query') are
-  deprecated in favor of 'ceph tell <pgid> ...'.  This makes the
-  distinction between 'ceph pg <command> <pgid>' and 'ceph pg <pgid>
+* The 'stone pg <pgid> ...' commands (like 'stone pg <pgid> query') are
+  deprecated in favor of 'stone tell <pgid> ...'.  This makes the
+  distinction between 'stone pg <command> <pgid>' and 'stone pg <pgid>
   <command>' less awkward by making it clearer that the 'tell'
   commands are talking to the OSD serving the placement group, not the
   monitor.
 
-* The 'ceph --admin-daemon <path> <command ...>' used to accept the
+* The 'stone --admin-daemon <path> <command ...>' used to accept the
   command and arguments as either a single string or as separate
   arguments.  It will now only accept the command spread across
   multiple arguments.  This means that any script which does something
   like::
 
-    ceph --admin-daemon /var/run/ceph/ceph-osd.0.asok 'config set debug_ms 1'
+    stone --admin-daemon /var/run/stone/stone-osd.0.asok 'config set debug_ms 1'
 
   needs to remove the quotes.  Also, note that the above can now be
   shortened to::
 
-    ceph daemon osd.0 config set debug_ms 1
+    stone daemon osd.0 config set debug_ms 1
 
 * The radosgw caps were inconsistently documented to be either 'mon =
   allow r' or 'mon = allow rw'.  The 'mon = allow rw' is required for
@@ -540,54 +540,54 @@ Upgrading from v0.66
   for new pools, but has been disabled again until Linux kernel client
   support reaches more distributions and users.
 
-* ceph-osd now requires a max file descriptor limit (e.g., ``ulimit -n
+* stone-osd now requires a max file descriptor limit (e.g., ``ulimit -n
   ...``) of at least
   filestore_wbthrottle_(xfs|btrfs)_inodes_hard_limit (5000 by default)
   in order to accommodate the new write back throttle system.  On
   Ubuntu, upstart now sets the fd limit to 32k.  On other platforms,
   the sysvinit script will set it to 32k by default (still
   overrideable via max_open_files).  If this field has been customized
-  in ceph.conf it should likely be adjusted upwards.
+  in stone.conf it should likely be adjusted upwards.
 
 Upgrading from v0.61 "Cuttlefish"
 ---------------------------------
 
 In addition to the above notes about upgrading from v0.66:
 
-* There has been a huge revamp of the 'ceph' command-line interface
-  implementation.  The ``ceph-common`` client library needs to be
-  upgrade before ``ceph-mon`` is restarted in order to avoid problems
-  using the CLI (the old ``ceph`` client utility cannot talk to the
-  new ``ceph-mon``).
+* There has been a huge revamp of the 'stone' command-line interface
+  implementation.  The ``stone-common`` client library needs to be
+  upgrade before ``stone-mon`` is restarted in order to avoid problems
+  using the CLI (the old ``stone`` client utility cannot talk to the
+  new ``stone-mon``).
 
 * The CLI is now very careful about sending the 'status' one-liner
   output to stderr and command output to stdout.  Scripts relying on
   output should take care.
 
-* The 'ceph osd tell ...' and 'ceph mon tell ...' commands are no
+* The 'stone osd tell ...' and 'stone mon tell ...' commands are no
   longer supported.  Any callers should use::
 
-   ceph tell osd.<id or *> ...
-   ceph tell mon.<id or name or *> ...
+   stone tell osd.<id or *> ...
+   stone tell mon.<id or name or *> ...
 
-  The 'ceph mds tell ...' command is still there, but will soon also
-  transition to 'ceph tell mds.<id or name or \*> ...'
+  The 'stone mds tell ...' command is still there, but will soon also
+  transition to 'stone tell mds.<id or name or \*> ...'
 
-* The 'ceph osd crush add ...' command used to take one of two forms::
+* The 'stone osd crush add ...' command used to take one of two forms::
 
-    ceph osd crush add 123 osd.123 <weight> <location ...>
-    ceph osd crush add osd.123 <weight> <location ...>
+    stone osd crush add 123 osd.123 <weight> <location ...>
+    stone osd crush add osd.123 <weight> <location ...>
 
   This is because the id and crush name are redundant.  Now only the
   simple form is supported, where the osd name/id can either be a bare
   id (integer) or name (osd.<id>)::
 
-    ceph osd crush add osd.123 <weight> <location ...>
-    ceph osd crush add 123 <weight> <location ...>
+    stone osd crush add osd.123 <weight> <location ...>
+    stone osd crush add 123 <weight> <location ...>
 
 * There is now a maximum RADOS object size, configurable via 'osd max
   object size', defaulting to 100 GB.  Note that this has no effect on
-  RBD, CephFS, or radosgw, which all stripe over objects. If you are
+  RBD, StoneFS, or radosgw, which all stripe over objects. If you are
   using librados and storing objects larger than that, you will need
   to adjust 'osd max object size', and should consider using smaller
   objects instead.
@@ -596,7 +596,7 @@ In addition to the above notes about upgrading from v0.66:
   renamed to 'mon osd min down {reporters|reports}', and the
   documentation has been updated to reflect that these options apply
   to the monitors (who process failure reports) and not OSDs.  If you
-  have adjusted these settings, please update your ``ceph.conf``
+  have adjusted these settings, please update your ``stone.conf``
   accordingly.
 
 
@@ -613,12 +613,12 @@ Notable changes since v0.66
 * mon, osd: fix old osdmap trimming logic
 * mon: enable leveldb caching by default
 * mon: more efficient storage of PG metadata
-* ceph-rest-api: RESTful endpoint for administer cluster (mirrors CLI)
+* stone-rest-api: RESTful endpoint for administer cluster (mirrors CLI)
 * rgw: multi-region support
 * rgw: infrastructure to support georeplication of bucket and user metadata
 * rgw: infrastructure to support georeplication of bucket data
 * rgw: COPY object support between regions
-* rbd: /etc/ceph/rbdmap file for mapping rbd images on startup
+* rbd: /etc/stone/rbdmap file for mapping rbd images on startup
 * osd: many bug fixes
 * osd: limit number of incremental osdmaps sent to peers (could cause osds to be wrongly marked down)
 * osd: more efficient small object recovery
@@ -628,8 +628,8 @@ Notable changes since v0.66
 * mds: fix O_TRUNC locking
 * msgr: fixed race condition in inter-osd network communication
 * msgr: fixed various memory leaks related to network sessions
-* ceph-disk: fixes for unusual device names, partition detection
-* hypertable: fixes for hypertable CephBroker bindings
+* stone-disk: fixes for unusual device names, partition detection
+* hypertable: fixes for hypertable StoneBroker bindings
 * use SSE4.2 crc32c instruction if present
 
 
@@ -637,29 +637,29 @@ Notable changes since v0.61 "Cuttlefish"
 ----------------------------------------
 
 * add 'config get' admin socket command
-* ceph-conf: --show-config-value now reflects daemon defaults
-* ceph-disk: add '[un]suppress-active DEV' command
-* ceph-disk: avoid mounting over an existing osd in /var/lib/ceph/osd/*
-* ceph-disk: fixes for unusual device names, partition detection
-* ceph-disk: improved handling of odd device names
-* ceph-disk: many fixes for RHEL/CentOS, Fedora, wheezy
-* ceph-disk: simpler, more robust locking
-* ceph-fuse, libcephfs: fix a few caps revocation bugs
-* ceph-fuse, libcephfs: fix read zeroing at EOF
-* ceph-fuse, libcephfs: fix request refcounting bug (hang on shutdown)
-* ceph-fuse, libcephfs: fix truncatation bug on >4MB files (Yan, Zheng)
-* ceph-fuse, libcephfs: fix for cap release/hang
-* ceph-fuse: add ioctl support
-* ceph-fuse: fixed long-standing O_NOATIME vs O_LAZY bug
-* ceph-rest-api: RESTful endpoint for administer cluster (mirrors CLI)
-* ceph, librados: fix resending of commands on mon reconnect
-* daemons: create /var/run/ceph as needed
+* stone-conf: --show-config-value now reflects daemon defaults
+* stone-disk: add '[un]suppress-active DEV' command
+* stone-disk: avoid mounting over an existing osd in /var/lib/stone/osd/*
+* stone-disk: fixes for unusual device names, partition detection
+* stone-disk: improved handling of odd device names
+* stone-disk: many fixes for RHEL/CentOS, Fedora, wheezy
+* stone-disk: simpler, more robust locking
+* stone-fuse, libstonefs: fix a few caps revocation bugs
+* stone-fuse, libstonefs: fix read zeroing at EOF
+* stone-fuse, libstonefs: fix request refcounting bug (hang on shutdown)
+* stone-fuse, libstonefs: fix truncatation bug on >4MB files (Yan, Zheng)
+* stone-fuse, libstonefs: fix for cap release/hang
+* stone-fuse: add ioctl support
+* stone-fuse: fixed long-standing O_NOATIME vs O_LAZY bug
+* stone-rest-api: RESTful endpoint for administer cluster (mirrors CLI)
+* stone, librados: fix resending of commands on mon reconnect
+* daemons: create /var/run/stone as needed
 * debian wheezy: fix udev rules
 * debian, specfile: packaging cleanups
 * debian: fix upstart behavior with upgrades
 * debian: rgw: stop daemon on uninstall
 * debian: stop daemons on uninstall; fix dependencies
-* hypertable: fixes for hypertable CephBroker bindings
+* hypertable: fixes for hypertable StoneBroker bindings
 * librados python binding cleanups
 * librados python: fix xattrs > 4KB (Josh Durgin)
 * librados: configurable max object size (default 100 GB)
@@ -678,7 +678,7 @@ Notable changes since v0.61 "Cuttlefish"
 * mds: misc stability fixes (Yan, Zheng, Greg Farnum)
 * mds: new robust open-by-ino support (Yan, Zheng)
 * mds: support robust lookup by ino number (good for NFS) (Yan, Zheng)
-* mon, ceph: huge revamp of CLI and internal admin API. (Dan Mick)
+* mon, stone: huge revamp of CLI and internal admin API. (Dan Mick)
 * mon, osd: fix old osdmap trimming logic
 * mon, osd: many memory leaks fixed
 * mon: better trim/compaction behavior
@@ -688,7 +688,7 @@ Notable changes since v0.61 "Cuttlefish"
 * mon: fix election timeout
 * mon: fix leveldb compression, trimming
 * mon: fix start fork behavior
-* mon: fix units in 'ceph df' output
+* mon: fix units in 'stone df' output
 * mon: fix validation of mds ids from CLI commands
 * mon: fixed bugs in recovery and io rate reporting (negative/large values)
 * mon: generate health warnings from slow or stuck requests
@@ -731,7 +731,7 @@ Notable changes since v0.61 "Cuttlefish"
 * osd: verify both front and back network are working before rejoining cluster
 * rados: clonedata command for cli
 * radosgw-admin: create keys for new users by default
-* rbd: /etc/ceph/rbdmap file for mapping rbd images on startup
+* rbd: /etc/stone/rbdmap file for mapping rbd images on startup
 * rgw: COPY object support between regions
 * rgw: fix CORS bugs
 * rgw: fix locking issue, user operation mask,
@@ -743,7 +743,7 @@ Notable changes since v0.61 "Cuttlefish"
 * rgw: multi-region support
 * sysvinit: fix enumeration of local daemons
 * sysvinit: fix osd crush weight calculation when using -a
-* sysvinit: handle symlinks in /var/lib/ceph/osd/*
+* sysvinit: handle symlinks in /var/lib/stone/osd/*
 * use SSE4.2 crc32c instruction if present
 
 
@@ -767,18 +767,18 @@ Notable changes
 * rgw: fix radosgw-admin buckets list (Yehuda Sadeh)
 * mds: support robust lookup by ino number (good for NFS) (Yan, Zheng)
 * mds: fix several bugs (Yan, Zheng)
-* ceph-fuse, libcephfs: fix truncatation bug on >4MB files (Yan, Zheng)
-* ceph/librados: fix resending of commands on mon reconnect
+* stone-fuse, libstonefs: fix truncatation bug on >4MB files (Yan, Zheng)
+* stone/librados: fix resending of commands on mon reconnect
 * librados python: fix xattrs > 4KB (Josh Durgin)
 * librados: configurable max object size (default 100 GB)
 * msgr: fix various memory leaks
-* ceph-fuse: fixed long-standing O_NOATIME vs O_LAZY bug
-* ceph-fuse, libcephfs: fix request refcounting bug (hang on shutdown)
-* ceph-fuse, libcephfs: fix read zeroing at EOF
-* ceph-conf: --show-config-value now reflects daemon defaults
-* ceph-disk: simpler, more robust locking
-* ceph-disk: avoid mounting over an existing osd in /var/lib/ceph/osd/*
-* sysvinit: handle symlinks in /var/lib/ceph/osd/*
+* stone-fuse: fixed long-standing O_NOATIME vs O_LAZY bug
+* stone-fuse, libstonefs: fix request refcounting bug (hang on shutdown)
+* stone-fuse, libstonefs: fix read zeroing at EOF
+* stone-conf: --show-config-value now reflects daemon defaults
+* stone-disk: simpler, more robust locking
+* stone-disk: avoid mounting over an existing osd in /var/lib/stone/osd/*
+* sysvinit: handle symlinks in /var/lib/stone/osd/*
 
 
 v0.65
@@ -787,46 +787,46 @@ v0.65
 Upgrading
 ---------
 
-* Huge revamp of the 'ceph' command-line interface implementation.
-  The ``ceph-common`` client library needs to be upgrade before
-  ``ceph-mon`` is restarted in order to avoid problems using the CLI
-  (the old ``ceph`` client utility cannot talk to the new
-  ``ceph-mon``).
+* Huge revamp of the 'stone' command-line interface implementation.
+  The ``stone-common`` client library needs to be upgrade before
+  ``stone-mon`` is restarted in order to avoid problems using the CLI
+  (the old ``stone`` client utility cannot talk to the new
+  ``stone-mon``).
 
 * The CLI is now very careful about sending the 'status' one-liner
   output to stderr and command output to stdout.  Scripts relying on
   output should take care.
 
-* The 'ceph osd tell ...' and 'ceph mon tell ...' commands are no
+* The 'stone osd tell ...' and 'stone mon tell ...' commands are no
   longer supported.  Any callers should use::
 
-    ceph tell osd.<id or *> ...
-    ceph tell mon.<id or name or *> ...
+    stone tell osd.<id or *> ...
+    stone tell mon.<id or name or *> ...
 
-  The 'ceph mds tell ...' command is still there, but will soon also
-  transition to 'ceph tell mds.<id or name or \*> ...'
+  The 'stone mds tell ...' command is still there, but will soon also
+  transition to 'stone tell mds.<id or name or \*> ...'
 
-* The 'ceph osd crush add ...' command used to take one of two forms::
+* The 'stone osd crush add ...' command used to take one of two forms::
 
-    ceph osd crush add 123 osd.123 <weight> <location ...>
-    ceph osd crush add osd.123 <weight> <location ...>
+    stone osd crush add 123 osd.123 <weight> <location ...>
+    stone osd crush add osd.123 <weight> <location ...>
 
   This is because the id and crush name are redundant.  Now only the
   simple form is supported, where the osd name/id can either be a bare
   id (integer) or name (osd.<id>)::
 
-    ceph osd crush add osd.123 <weight> <location ...>
-    ceph osd crush add 123 <weight> <location ...>
+    stone osd crush add osd.123 <weight> <location ...>
+    stone osd crush add 123 <weight> <location ...>
 
 * There is now a maximum RADOS object size, configurable via 'osd max
   object size', defaulting to 100 GB.  Note that this has no effect on
-  RBD, CephFS, or radosgw, which all stripe over objects.
+  RBD, StoneFS, or radosgw, which all stripe over objects.
 
 
 Notable changes
 ---------------
 
-* mon, ceph: huge revamp of CLI and internal admin API. (Dan Mick)
+* mon, stone: huge revamp of CLI and internal admin API. (Dan Mick)
 * mon: new capability syntax
 * osd: do not use fadvise(DONTNEED) on XFS (data corruption on power cycle)
 * osd: recovery and peering performance improvements
@@ -840,13 +840,13 @@ Notable changes
 * mds: misc stability fixes (Yan, Zheng, Greg Farnum)
 * mds: many backpointer improvements (Yan, Zheng)
 * mds: new robust open-by-ino support (Yan, Zheng)
-* ceph-fuse, libcephfs: fix a few caps revocation bugs
+* stone-fuse, libstonefs: fix a few caps revocation bugs
 * librados: new calls to administer the cluster
 * librbd: locking tests (Josh Durgin)
-* ceph-disk: improved handling of odd device names
-* ceph-disk: many fixes for RHEL/CentOS, Fedora, wheezy
+* stone-disk: improved handling of odd device names
+* stone-disk: many fixes for RHEL/CentOS, Fedora, wheezy
 * many many fixes from static code analysis (Danny Al-Gaaf)
-* daemons: create /var/run/ceph as needed
+* daemons: create /var/run/stone as needed
 
 
 v0.64
@@ -859,7 +859,7 @@ Upgrading
   better distribution over OSDs.  Support for this feature was
   introduced in v0.59 and Linux kernel version v3.9.  If you wish to
   access the cluster from an older kernel, set the 'osd pool default
-  flag hashpspool = false' option in your ceph.conf prior to creating
+  flag hashpspool = false' option in your stone.conf prior to creating
   the cluster or creating new pools.  Note that the presence of any
   pool in the cluster with the flag enabled will make the OSD require
   support from all clients.
@@ -874,16 +874,16 @@ Notable changes
 * mon: fix start fork behavior
 * mon: fix election timeout
 * mon: better trim/compaction behavior
-* mon: fix units in 'ceph df' output
+* mon: fix units in 'stone df' output
 * mon, osd: misc memory leaks
 * librbd: make default options/features for newly created images (e.g., via qemu-img) configurable
 * mds: many fixes for mds clustering
 * mds: fix rare hang after client restart
-* ceph-fuse: add ioctl support
-* ceph-fuse/libcephfs: fix for cap release/hang
+* stone-fuse: add ioctl support
+* stone-fuse/libstonefs: fix for cap release/hang
 * rgw: handle deep uri resources
 * rgw: fix CORS bugs
-* ceph-disk: add '[un]suppress-active DEV' command
+* stone-disk: add '[un]suppress-active DEV' command
 * debian: rgw: stop daemon on uninstall
 * debian: fix upstart behavior with upgrades
 
@@ -898,7 +898,7 @@ Upgrading
   renamed to 'mon osd min down {reporters|reports}', and the
   documentation has been updated to reflect that these options apply
   to the monitors (who process failure reports) and not OSDs.  If you
-  have adjusted these settings, please update your ``ceph.conf``
+  have adjusted these settings, please update your ``stone.conf``
   accordingly.
 
 Notable Changes

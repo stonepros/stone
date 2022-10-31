@@ -200,7 +200,7 @@ private:
 
   StoneContext *cct;
   const mds_rank_t rank;
-  ceph::mutex lock = ceph::make_mutex("PurgeQueue");
+  stone::mutex lock = stone::make_mutex("PurgeQueue");
   bool readonly = false;
 
   int64_t metadata_pool;

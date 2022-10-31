@@ -6,7 +6,7 @@
 #include <seastar/core/future.hh>
 #include <seastar/core/shared_mutex.hh>
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "os/ObjectStore.h"
 #include "osd/osd_types.h"
 
@@ -14,7 +14,7 @@
 #include "crimson/os/futurized_collection.h"
 #include "crimson/os/futurized_store.h"
 
-namespace ceph::os {
+namespace stone::os {
 class Transaction;
 }
 
@@ -32,7 +32,7 @@ public:
     seastar::future<> next();
     std::string key();
     seastar::future<std::string> tail_key();
-    ceph::buffer::list value();
+    stone::buffer::list value();
     int status() const;
   private:
     ObjectMap::ObjectMapIterator iter;
@@ -47,18 +47,18 @@ public:
   seastar::future<> umount() final;
 
   seastar::future<> mkfs(uuid_d new_osd_fsid) final;
-  read_errorator::future<ceph::bufferlist> read(CollectionRef c,
+  read_errorator::future<stone::bufferlist> read(CollectionRef c,
                                    const ghobject_t& oid,
                                    uint64_t offset,
                                    size_t len,
                                    uint32_t op_flags = 0) final;
-  read_errorator::future<ceph::bufferlist> readv(CollectionRef c,
+  read_errorator::future<stone::bufferlist> readv(CollectionRef c,
 						 const ghobject_t& oid,
 						 interval_set<uint64_t>& m,
 						 uint32_t op_flags = 0) final;
 					      
 
-  get_attr_errorator::future<ceph::bufferptr> get_attr(CollectionRef c,
+  get_attr_errorator::future<stone::bufferptr> get_attr(CollectionRef c,
                                             const ghobject_t& oid,
                                             std::string_view name) const final;
   get_attrs_ertr::future<attrs_t> get_attrs(CollectionRef c,
@@ -87,7 +87,7 @@ public:
   seastar::future<std::vector<coll_t>> list_collections() final;
 
   seastar::future<> do_transaction(CollectionRef c,
-                                   ceph::os::Transaction&& txn) final;
+                                   stone::os::Transaction&& txn) final;
 
   seastar::future<> write_meta(const std::string& key,
                   const std::string& value) final;
@@ -99,7 +99,7 @@ public:
   seastar::future<struct stat> stat(
     CollectionRef,
     const ghobject_t&) final;
-  read_errorator::future<ceph::bufferlist> omap_get_header(
+  read_errorator::future<stone::bufferlist> omap_get_header(
     CollectionRef,
     const ghobject_t&) final;
   seastar::future<std::map<uint64_t, uint64_t>> fiemap(
@@ -117,7 +117,7 @@ private:
   const std::string path;
   uint64_t used_bytes = 0;
   std::unique_ptr<ObjectStore> store;
-  std::unique_ptr<CephContext> cct;
+  std::unique_ptr<StoneContext> cct;
   seastar::gate transaction_gate;
   std::unordered_map<coll_t, CollectionRef> coll_map;
   seastar::shared_mutex tp_mutex;

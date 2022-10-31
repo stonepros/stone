@@ -9,7 +9,7 @@ Merge: cb35d7c 466b7fe
 Author: Loic Dachary <loic@dachary.org>
 Date:   Thu May 12 17:30:14 2016 +0200
 
-    Merge pull request #8853 from ceph/wip-jewel-backports
+    Merge pull request #8853 from stone/wip-jewel-backports
     
     jewel: several backports
     
@@ -91,7 +91,7 @@ Merge: f88e2df 9bb17db
 Author: Yehuda Sadeh <yehuda@redhat.com>
 Date:   Wed May 11 10:38:02 2016 -0700
 
-    Merge pull request #9047 from ceph/wip-rgw-period-delete-jewel
+    Merge pull request #9047 from stone/wip-rgw-period-delete-jewel
     
     jewel: rgw: period delete fixes
 
@@ -151,7 +151,7 @@ commit e1c67d4684c485711b2b9af02edabe161f3d7779
 Author: Sage Weil <sage@redhat.com>
 Date:   Sat Apr 30 17:12:05 2016 -0400
 
-    qa/workunits/ceph-helpers.sh: make ceph-osd behave on ext4
+    qa/workunits/stone-helpers.sh: make stone-osd behave on ext4
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 475cc08c330e639b226f2ab57dedbe4495f63022)
@@ -165,7 +165,7 @@ Date:   Tue May 10 15:51:27 2016 -0400
     if no --remote or --url is given, set --remote = master_zone_id to
     override the rest_master_conn (which refers to the old master zone)
     
-    Fixes: http://tracker.ceph.com/issues/15828
+    Fixes: http://tracker.stone.com/issues/15828
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit fbe1a05355549dfe0c05750683eeb61e275950c2)
@@ -217,7 +217,7 @@ Date:   Thu May 5 14:02:25 2016 -0700
 
     rgw: handle stripe transition when flushing final pending_data_bl
     
-    Fixes: http://tracker.ceph.com/issues/15745
+    Fixes: http://tracker.stone.com/issues/15745
     
     When complete_writing_data() is called, if pending_data_bl is not empty
     we still need to handle stripe transition correctly. If pending_data_bl
@@ -263,9 +263,9 @@ commit 8bb4c7f92ca784a116d0f7a9a22677b514e7e6ca
 Author: Sage Weil <sage@redhat.com>
 Date:   Fri Apr 22 16:38:14 2016 -0400
 
-    ceph_test_keyvaluedb: clean up test dir
+    stone_test_keyvaluedb: clean up test dir
     
-    Just like ceph_test_objectstore
+    Just like stone_test_objectstore
     
     Signed-off-by: Sage Weil <sage@redhat.com>
     (cherry picked from commit 2b075aa52d4475338c0f3cd3360e1ee4de8befa7)
@@ -274,9 +274,9 @@ commit 108cdfdff65bcce98cb3b2da799fe46bed4421f4
 Author: Allen Samuels <allen.samuels@sandisk.com>
 Date:   Fri Apr 22 14:06:56 2016 -0400
 
-    ceph_test_keyvaluedb: fixup unit test for keyvaluedb
+    stone_test_keyvaluedb: fixup unit test for keyvaluedb
     
-    Fixes: http://tracker.ceph.com/issues/15435
+    Fixes: http://tracker.stone.com/issues/15435
     Signed-off-by: Allen Samuels <allen.samuels@sandisk.com>
     (cherry picked from commit 85c14de20936ff9ee224f9b6569a73f9bae75f19)
 
@@ -689,7 +689,7 @@ Date:   Tue May 3 07:41:30 2016 -0400
     owner lock is released.  Use a stack reference to prevent
     use-after-free.
     
-    Fixes: http://tracker.ceph.com/issues/15690
+    Fixes: http://tracker.stone.com/issues/15690
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit d9421a25b582e41550526714b71fb55f05abb1de)
 
@@ -741,7 +741,7 @@ Date:   Fri May 6 15:18:46 2016 -0400
 
     rgw: 'period delete' cleans up all period objects
     
-    Fixes: http://tracker.ceph.com/issues/15469
+    Fixes: http://tracker.stone.com/issues/15469
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit a286b32224d4a9757058415f98a2feff683ac520)
@@ -801,7 +801,7 @@ Date:   Mon May 2 08:31:54 2016 -0400
 
     librbd: avoid recursive locking within operation state machine
     
-    Fixes: http://tracker.ceph.com/issues/15664
+    Fixes: http://tracker.stone.com/issues/15664
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 91a4890ee78c25391c1548fdacb2b51c46a47415)
 
@@ -942,7 +942,7 @@ Date:   Thu May 5 15:28:16 2016 +0530
     to improve the same by providing helpful error messages (by
     pointing to dmesg, etc..).
     
-    Fixes: http://http://tracker.ceph.com/issues/15816
+    Fixes: http://http://tracker.stone.com/issues/15816
     Signed-off-by: Venky Shankar <vshankar@redhat.com>
 
 commit f221fedb3b34bccd80383096d6ccfa19a4a72db9
@@ -965,7 +965,7 @@ Date:   Fri May 6 11:05:50 2016 -0400
     we do not want to alert the user that entries are available since
     try_pop_front already indicated more records were available.
     
-    Fixes: http://tracker.ceph.com/issues/15755
+    Fixes: http://tracker.stone.com/issues/15755
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 3b8d21ac13865791d8fc4c519f47c1f7d6096e76)
 
@@ -1123,7 +1123,7 @@ commit bb1aeb7c7bb296d9264f051519d100ecf1f50f1d
 Author: Alexandre Derumier <aderumier@odiso.com>
 Date:   Thu Apr 28 22:55:37 2016 +0200
 
-    etc/default/ceph: set 128MB tcmalloc cache size
+    etc/default/stone: set 128MB tcmalloc cache size
     
     Signed-off-by: Alexandre Derumier <aderumier@odiso.com>
     (cherry picked from commit 9decbd1026c6ab0474c73a26a9c84c24557beb8a)
@@ -1143,7 +1143,7 @@ Date:   Mon Apr 25 15:09:47 2016 -0700
 
     rgw: fix suffix in RGWZoneParams::fix_pool_names()
     
-    Fixes: http://tracker.ceph.com/issues/15598
+    Fixes: http://tracker.stone.com/issues/15598
     
     Signed-off-by: Yehuda Sadeh <yehuda@redhat.com>
     (cherry picked from commit 6f6b0c925994b0369eda390a6b3fd20005e70c9b)
@@ -1163,7 +1163,7 @@ Date:   Tue Apr 26 11:31:43 2016 -0700
 
     rgw: upgrade default zonegroup and set correct zone[group] id
     
-    Fixes: http://tracker.ceph.com/issues/15597
+    Fixes: http://tracker.stone.com/issues/15597
     
     Signed-off-by: Yehuda Sadeh <yehuda@redhat.com>
     (cherry picked from commit 27806c71922eef2f4cde360d7ba40dee9d5bd4bd)
@@ -1315,7 +1315,7 @@ Date:   Sun Apr 24 17:41:55 2016 +0200
     This patch rectifies this behavior and makes that only the user
     identifier will be placed there.
     
-    Fixes: http://tracker.ceph.com/issues/15667
+    Fixes: http://tracker.stone.com/issues/15667
     Signed-off-by: Radoslaw Zarzynski <rzarzynski@mirantis.com>
     (cherry picked from commit 88f4c67d822388d2038454a25ead7e9a11f404b5)
 
@@ -1360,7 +1360,7 @@ Date:   Tue Apr 26 15:29:41 2016 -0700
 
     rgw: don't pass object context into async coroutines
     
-    Fixes: http://tracker.ceph.com/issues/15625
+    Fixes: http://tracker.stone.com/issues/15625
     
     The async read data/attrs coroutines may outlive the callers. Instead
     of introducing a complicated refcounting scheme, just don't pass it in.
@@ -1413,7 +1413,7 @@ Date:   Wed Apr 27 20:28:08 2016 +0200
 
     rgw: add AWS4 completion support for RGW_OP_SET_BUCKET_WEBSITE
     
-    Fixes: http://tracker.ceph.com/issues/15626
+    Fixes: http://tracker.stone.com/issues/15626
     
     Signed-off-by: Javier M. Mellid <jmunhoz@igalia.com>
     (cherry picked from commit 05373354e4725c3fc675df652fbf97da26160bcb)
@@ -1453,7 +1453,7 @@ Date:   Mon May 2 11:38:24 2016 -0400
 
     radosgw-admin: add missing 'zonegroup remove'
     
-    Fixes: http://tracker.ceph.com/issues/15684
+    Fixes: http://tracker.stone.com/issues/15684
     
     Signed-off-by: Casey Bodley <cbodley@redhat.com>
     (cherry picked from commit db0fa48ed5958d37928f893acd44cd66b6b9b990)
@@ -1476,7 +1476,7 @@ Date:   Tue May 3 10:15:08 2016 -0400
     Explicitly unlock to prevent a client from accidentally blacklisting
     itself when retrying the lock.
     
-    Fixes: http://tracker.ceph.com/issues/15709
+    Fixes: http://tracker.stone.com/issues/15709
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit a11f5e8e55fc448ed60616cbf66a3ea7db2247b9)
 
@@ -1500,7 +1500,7 @@ Date:   Sat Apr 30 15:22:29 2016 +0800
     Change aio_callback return code handling for NBD_CMD_READ command.
     
     Tracker:
-    http://tracker.ceph.com/issues/15604
+    http://tracker.stone.com/issues/15604
     
     Signed-off-by: Chang-Yi Lee <cy.l@inwinstack.com>
     (cherry picked from commit ee211295441b126a995c07820176cfc966ab61c5)
@@ -1522,7 +1522,7 @@ Date:   Fri Apr 22 11:20:31 2016 -0400
 
     rbd:make a distinction of help message between ''rbd snap rollback" and "rbd snap revert"
     
-    Fixes: https://tracker.ceph.com/issues/15521
+    Fixes: https://tracker.stone.com/issues/15521
     
     Signed-off-by: Yongqiang He <he.yongqiang@h3c.com>
     (cherry picked from commit 1bf26509c6efd06a8facc0e45ab42255592ca74d)
@@ -1558,7 +1558,7 @@ Date:   Mon May 2 15:06:51 2016 -0400
     Image format 1 doesn't support clones, so unless the user
     overrode the setting, default to format 2.
     
-    Fixes: http://tracker.ceph.com/issues/15685
+    Fixes: http://tracker.stone.com/issues/15685
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit f24c70f54343aa6698af8ac1f0774282b0659968)
 
@@ -1582,7 +1582,7 @@ Date:   Fri Apr 29 20:12:20 2016 +0100
     world it did not: map this during the upgrade/downgrade
     paths in decode/encode.
     
-    Fixes: http://tracker.ceph.com/issues/15591
+    Fixes: http://tracker.stone.com/issues/15591
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit d94115aa2a4bd92c56552e9fd11205d391a1c673)
 
@@ -1590,7 +1590,7 @@ commit 6c1b792b7b2fba729f21b0f10ec70d14b830ffa9
 Author: John Spray <john.spray@redhat.com>
 Date:   Wed Mar 30 12:06:27 2016 +0100
 
-    doc: add cephfs daemon management docs
+    doc: add stonefs daemon management docs
     
     Principally to tell people how to configure
     standby, but more generally as a place to define
@@ -1658,12 +1658,12 @@ Date:   Tue Mar 22 17:44:22 2016 +0000
 
     mds: remove ONESHOT_REPLAY mode
     
-    This predated cephfs-journal-tool.  Don't bother
+    This predated stonefs-journal-tool.  Don't bother
     with any backwards-compatibility mechanisms here, as
     it was a seriously niche undocumented thing.
     
-    On the off chance that someone ran an old ceph-mds against
-    a newer ceph-mon with oneshot enabled, it shouldn't break
+    On the off chance that someone ran an old stone-mds against
+    a newer stone-mon with oneshot enabled, it shouldn't break
     anything, it just won't do what they want.
     
     Signed-off-by: John Spray <john.spray@redhat.com>
@@ -1694,7 +1694,7 @@ Date:   Thu Apr 7 12:37:08 2016 +0100
     lower numbers than the overall map epoch (incrementing
     the counters always corresponded to a map change).
     
-    Fixes: http://tracker.ceph.com/issues/15399
+    Fixes: http://tracker.stone.com/issues/15399
     Signed-off-by: John Spray <john.spray@redhat.com>
     (cherry picked from commit 30a375ebf814245fbbb5155fd39d8ff673f0a32a)
 
@@ -1733,7 +1733,7 @@ Date:   Tue Apr 19 15:20:53 2016 +0200
     we process it in the zone locally, otherwise we reach a situation where
     we drop the bucket locally and master will still maintain an index
     
-    Fixes: http://tracker.ceph.com/issues/15540
+    Fixes: http://tracker.stone.com/issues/15540
     Signed-off-by: Abhishek Lekshmanan <abhishek@suse.com>
     (cherry picked from commit da6b44a6e47399493adae53ad3c36a029f1e2a23)
 
@@ -1753,10 +1753,10 @@ commit 791eba81a5467dd5de4f1680ed0deb647eb3fb8b
 Author: Alexandre Derumier <aderumier@odiso.com>
 Date:   Thu Apr 28 22:48:52 2016 +0200
 
-    fix deb package /etc/default/ceph location
+    fix deb package /etc/default/stone location
     
     commit 7384a14f243519547a61534d22e21e6069aae016 have introduce
-    the /etc/default/ceph file at a wrong location : /etc/default/ceph/ceph
+    the /etc/default/stone file at a wrong location : /etc/default/stone/stone
     
     (cherry picked from commit 13804fafd4c33068d8ed6d0480b594daec0f9341)
 
@@ -1815,7 +1815,7 @@ Date:   Tue May 3 08:05:23 2016 -0500
 
     Merge pull request #8787 from xiaoxichen/wip-15631
     
-    jewel: CephFSVolumeClient should isolate volumes by RADOS namespace
+    jewel: StoneFSVolumeClient should isolate volumes by RADOS namespace
     
     Reviewed-by: John Spray <john.spray@redhat.com>
 
@@ -1825,7 +1825,7 @@ Date:   Thu Apr 28 13:47:48 2016 -0700
 
     OSDMonitor: avoid underflow in reweight-by-utilization if max_change=1
     
-    Fixes: http://tracker.ceph.com/issues/15655
+    Fixes: http://tracker.stone.com/issues/15655
     Signed-off-by: Samuel Just <sjust@redhat.com>
     (cherry picked from commit c121bc51a5a877a49094cfbd3bd16af1f3ae5090)
 
@@ -1902,7 +1902,7 @@ Date:   Thu Apr 28 10:52:15 2016 -0400
 
     librbd: reduce log level for interrupted maint ops
     
-    Fixes: http://tracker.ceph.com/issues/15572
+    Fixes: http://tracker.stone.com/issues/15572
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 1617328402345c68bf5d54828da6d687e51ef42b)
 
@@ -2018,7 +2018,7 @@ Date:   Wed Apr 27 15:45:25 2016 -0400
 
     librbd: avoid second close attempt of invalid parent image
     
-    Fixes: http://tracker.ceph.com/issues/15574
+    Fixes: http://tracker.stone.com/issues/15574
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit e91e7f8d9ce10f0d19c48facfb6318d6b49798e8)
 
@@ -2031,7 +2031,7 @@ Date:   Wed Apr 27 15:22:59 2016 -0400
     Properly shut down the journaler if a shut down has been requested
     while start up is in-progress.
     
-    Fixes: http://tracker.ceph.com/issues/15630
+    Fixes: http://tracker.stone.com/issues/15630
     Signed-off-by: Jason Dillaman <dillaman@redhat.com>
     (cherry picked from commit 3a71052a5b14af34ed81f6ee77f862f576a7a5cc)
 
@@ -2072,7 +2072,7 @@ Date:   Fri Apr 29 08:22:01 2016 +0200
 
     Merge pull request #8801 from SUSE/wip-15633-jewel
     
-    jewel: ceph-{mds,mon,osd} packages need scriptlets with systemd code
+    jewel: stone-{mds,mon,osd} packages need scriptlets with systemd code
     
     Reviewed-by: Nathan Cutler <ncutler@suse.com>
     Reviewed-by: Boris Ranto <branto@redhat.com>
@@ -2087,7 +2087,7 @@ Date:   Thu Apr 21 14:48:55 2016 +0800
     initialize the exclusive lock, or we may end with two async Contexts
     to finish the same SetSnapRequest instance
     
-    Fixes: http://tracker.ceph.com/issues/15571
+    Fixes: http://tracker.stone.com/issues/15571
     Signed-off-by: runsisi <runsisi@zte.com.cn>
     (cherry picked from commit 0a6eaac12fe29762c3dd29068f9427840cfea100)
 
@@ -2095,9 +2095,9 @@ commit 37ccacf7d1ce57291d6cbadd416fb96aed7db36a
 Author: Boris Ranto <branto@redhat.com>
 Date:   Wed Apr 27 18:10:51 2016 +0200
 
-    rpm: Add rpm scripts for ceph-rbd-mirror
+    rpm: Add rpm scripts for stone-rbd-mirror
     
-    We are currently missing the systemd scripts for the new ceph-rbd-mirror
+    We are currently missing the systemd scripts for the new stone-rbd-mirror
     daemons. This patch introduces them.
     
     Signed-off-by: Boris Ranto <branto@redhat.com>
@@ -2109,7 +2109,7 @@ Date:   Wed Apr 27 18:00:08 2016 +0200
 
     rpm: Start all the targets in %post
     
-    We need to have the sub-targets active for the ceph.target to be able
+    We need to have the sub-targets active for the stone.target to be able
     to propagate its calls to the services. If the sub-target is inactive,
     the main target won't propagate the stop/restart calls.
     
@@ -2122,17 +2122,17 @@ Date:   Tue Apr 19 14:48:41 2016 +0200
 
     rpm: implement scriptlets for the post-split daemon packages
     
-    This patch gives each of the ceph-{mds,mon,osd,radosgw} packages its own
+    This patch gives each of the stone-{mds,mon,osd,radosgw} packages its own
     %post, %preun, and %postun scriptlets dealing with the package's unit files.
     
-    The scriptlets of ceph-base are adapted to handle the ceph.target unit file
+    The scriptlets of stone-base are adapted to handle the stone.target unit file
     only.
     
-    The scriptlets of ceph-mon handle ceph-create-keys services in addition to ceph-mon.
+    The scriptlets of stone-mon handle stone-create-keys services in addition to stone-mon.
     
-    The scriptlets of ceph-osd handle ceph-disk services in addition to ceph-osd.
+    The scriptlets of stone-osd handle stone-disk services in addition to stone-osd.
     
-    Fixes: http://tracker.ceph.com/issues/14941
+    Fixes: http://tracker.stone.com/issues/14941
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     Signed-off-by: Boris Ranto <branto@redhat.com>
     (cherry picked from commit 644aba9270714e5e231ac7d7e3437477837531eb)
@@ -2141,13 +2141,13 @@ commit 81f407337da18b5b555c6737e394a0e054d7c7da
 Author: Nathan Cutler <ncutler@suse.com>
 Date:   Tue Apr 19 14:51:01 2016 +0200
 
-    systemd: enable all the ceph .target services by default
+    systemd: enable all the stone .target services by default
     
     Some distros, like Fedora and openSUSE, have a policy that all services are
     disabled by default.
     
-    This patch changes that default for the ceph.target and
-    ceph-{mds,mon,osd,radosgw}.target services.
+    This patch changes that default for the stone.target and
+    stone-{mds,mon,osd,radosgw}.target services.
     
     Signed-off-by: Nathan Cutler <ncutler@suse.com>
     Signed-off-by: Boris Ranto <branto@redhat.com>
@@ -2157,7 +2157,7 @@ commit f4d63af533b22f740d809272e2e47ebc9d8d6845
 Author: Xiaoxi Chen <xiaoxchen@ebay.com>
 Date:   Wed Apr 6 22:50:05 2016 +0800
 
-    python_cephfs: rule out empty/None volume_id
+    python_stonefs: rule out empty/None volume_id
     
     Signed-off-by: Xiaoxi Chen <xiaoxchen@ebay.com>
     (cherry picked from commit 73368069dd466cdbde1ebeae97771d603ce431f5)
@@ -2166,9 +2166,9 @@ commit b609017a52e3140e9ff6314b8d312a409af52a57
 Author: Xiaoxi Chen <xiaoxchen@ebay.com>
 Date:   Wed Apr 6 22:45:02 2016 +0800
 
-    python-cephfs: use rados namespace for data isolation.
+    python-stonefs: use rados namespace for data isolation.
     
-    As cephfs dir layout supports rados namespace in jewel, it would be
+    As stonefs dir layout supports rados namespace in jewel, it would be
     good to use rados namespace instead of pool, since it is free,
     we always enforce namespace isolation for volumes.
     
@@ -2187,10 +2187,10 @@ Date:   Tue Apr 26 17:34:52 2016 -0700
 
     Signed-off-by: Tamil Muthamizhan <tmuthami@redhat.com>
     
-    s/ceph-deploy/ceph-tests, hence removing ceph-deploy folder
+    s/stone-deploy/stone-tests, hence removing stone-deploy folder
 
 commit 77fdbf1747d73fd809607efd3325cc38b2fbafc0
-Author: Tamil Muthamizhan <tamil@magna002.ceph.redhat.com>
+Author: Tamil Muthamizhan <tamil@magna002.stone.redhat.com>
 Date:   Fri Apr 22 18:25:46 2016 -0400
 
     Signed-off-by: Tamil Muthamizhan <tmuthami@redhat.com>
@@ -2203,7 +2203,7 @@ commit 1fa533e83d8e541315aa4925a6192ab0401b688b
 Author: Alexandre Derumier <aderumier@odiso.com>
 Date:   Sun Apr 24 09:55:35 2016 +0200
 
-    fix ceph init script
+    fix stone init script
     
     commit 65963739cd6815b8008282c8f64cd64365662e60 have introduce a bug
     
@@ -2215,9 +2215,9 @@ commit 7acbefadace28412f395bb98aec5651d5ec70666
 Author: David Zafman <dzafman@redhat.com>
 Date:   Mon Apr 18 18:27:52 2016 -0700
 
-    test: Fix ceph-objectstore-tool test to run manually from src non-cmake
+    test: Fix stone-objectstore-tool test to run manually from src non-cmake
     
-    Fix init-ceph to handle it when CEPH_* values set
+    Fix init-stone to handle it when CEPH_* values set
     
     Signed-off-by: David Zafman <dzafman@redhat.com>
     (cherry picked from commit 5e8e03b4d030db57c93047551d5b92db0b604063)
@@ -2228,13 +2228,13 @@ Date:   Tue Apr 5 16:58:58 2016 +0100
 
     Drop --setuser/--setgroup from osd prestart
     
-    These are not supported by /usr/lib/ceph/ceph-osd-prestart.sh,
+    These are not supported by /usr/lib/stone/stone-osd-prestart.sh,
     resulting in warnings:
     
-     ceph-osd-prestart.sh[23367]: getopt: unrecognized option '--setuser'
-     ceph-osd-prestart.sh[23367]: getopt: unrecognized option '--setgroup'
+     stone-osd-prestart.sh[23367]: getopt: unrecognized option '--setuser'
+     stone-osd-prestart.sh[23367]: getopt: unrecognized option '--setgroup'
     
-    --setuser and --setgroup are only needed for the ceph-osd process.
+    --setuser and --setgroup are only needed for the stone-osd process.
     
     Signed-off-by: James Page <james.page@ubuntu.com>
     (cherry picked from commit 74977f78840fe95b67788f3aa135ac69a2353c43)

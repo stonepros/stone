@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 from typing import List, Dict
 
-import cephfs
+import stonefs
 
 from .metadata_manager import MetadataManager
 from .subvolume_attrs import SubvolumeTypes, SubvolumeStates, SubvolumeFeatures
@@ -62,14 +62,14 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
         return [SubvolumeFeatures.FEATURE_SNAPSHOT_CLONE.value, SubvolumeFeatures.FEATURE_SNAPSHOT_AUTOPROTECT.value]
 
     def mark_subvolume(self):
-        # set subvolume attr, on subvolume root, marking it as a CephFS subvolume
+        # set subvolume attr, on subvolume root, marking it as a StoneFS subvolume
         # subvolume root is where snapshots would be taken, and hence is the <uuid> dir for v1 subvolumes
         try:
             # MDS treats this as a noop for already marked subvolume
-            self.fs.setxattr(self.path, 'ceph.dir.subvolume', b'1', 0)
-        except cephfs.InvalidValue as e:
-            raise VolumeException(-errno.EINVAL, "invalid value specified for ceph.dir.subvolume")
-        except cephfs.Error as e:
+            self.fs.setxattr(self.path, 'stone.dir.subvolume', b'1', 0)
+        except stonefs.InvalidValue as e:
+            raise VolumeException(-errno.EINVAL, "invalid value specified for stone.dir.subvolume")
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     def snapshot_base_path(self):
@@ -110,7 +110,7 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
             # persist subvolume metadata
             qpath = subvol_path.decode('utf-8')
             self.init_config(SubvolumeV1.VERSION, subvolume_type, qpath, initial_state)
-        except (VolumeException, MetadataMgrException, cephfs.Error) as e:
+        except (VolumeException, MetadataMgrException, stonefs.Error) as e:
             try:
                 log.info("cleaning up subvolume with path: {0}".format(self.subvolname))
                 self.remove()
@@ -120,7 +120,7 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
             if isinstance(e, MetadataMgrException):
                 log.error("metadata manager exception: {0}".format(e))
                 e = VolumeException(-errno.EINVAL, "exception in subvolume metadata")
-            elif isinstance(e, cephfs.Error):
+            elif isinstance(e, stonefs.Error):
                 e = VolumeException(-e.args[0], e.args[1])
             raise e
 
@@ -153,7 +153,7 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
             attrs = source_subvolume.get_attrs(source_subvolume.snapshot_data_path(snapname))
 
             # The source of the clone may have exceeded its quota limit as
-            # CephFS quotas are imprecise. Cloning such a source may fail if
+            # StoneFS quotas are imprecise. Cloning such a source may fail if
             # the quota on the destination is set before starting the clone
             # copy. So always set the quota on destination after cloning is
             # successful.
@@ -174,7 +174,7 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
             self.metadata_mgr.init(SubvolumeV1.VERSION, subvolume_type.value, qpath, initial_state.value)
             self.add_clone_source(source_volname, source_subvolume, snapname)
             self.metadata_mgr.flush()
-        except (VolumeException, MetadataMgrException, cephfs.Error) as e:
+        except (VolumeException, MetadataMgrException, stonefs.Error) as e:
             try:
                 log.info("cleaning up subvolume with path: {0}".format(self.subvolname))
                 self.remove()
@@ -184,7 +184,7 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
             if isinstance(e, MetadataMgrException):
                 log.error("metadata manager exception: {0}".format(e))
                 e = VolumeException(-errno.EINVAL, "exception in subvolume metadata")
-            elif isinstance(e, cephfs.Error):
+            elif isinstance(e, stonefs.Error):
                 e = VolumeException(-e.args[0], e.args[1])
             raise e
 
@@ -239,10 +239,10 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
             if me.errno == -errno.ENOENT:
                 raise VolumeException(-errno.ENOENT, "subvolume '{0}' does not exist".format(self.subvolname))
             raise VolumeException(me.args[0], me.args[1])
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             log.debug("missing subvolume path '{0}' for subvolume '{1}'".format(subvol_path, self.subvolname))
             raise VolumeException(-errno.ENOENT, "mount path missing for subvolume '{0}'".format(self.subvolname))
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
     def _recover_auth_meta(self, auth_id, auth_meta):
@@ -263,7 +263,7 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
                 subvol_meta = self.auth_mdata_mgr.subvol_metadata_get(group_name, subvol_name)
 
                 # No SVMeta update indicates that there was no auth update
-                # in Ceph either. So it's safe to remove corresponding
+                # in Stone either. So it's safe to remove corresponding
                 # partial update in AMeta.
                 if not subvol_meta or auth_id not in subvol_meta['auths']:
                     remove_subvolumes.append(subvol)
@@ -273,7 +273,7 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
                     'access_level': access_level,
                     'dirty': False,
                 }
-                # SVMeta update looks clean. Ceph auth update must have been
+                # SVMeta update looks clean. Stone auth update must have been
                 # clean. Update the dirty flag and continue
                 if subvol_meta['auths'][auth_id] == want_auth:
                     auth_meta['subvolumes'][subvol]['dirty'] = False
@@ -316,15 +316,15 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
 
     def authorize(self, auth_id, access_level, tenant_id=None, allow_existing_id=False):
         """
-        Get-or-create a Ceph auth identity for `auth_id` and grant them access
+        Get-or-create a Stone auth identity for `auth_id` and grant them access
         to
         :param auth_id:
         :param access_level:
         :param tenant_id: Optionally provide a stringizable object to
-                          restrict any created cephx IDs to other callers
+                          restrict any created stonex IDs to other callers
                           passing the same tenant ID.
         :allow_existing_id: Optionally authorize existing auth-ids not
-                          created by ceph_volume_client.
+                          created by stone_volume_client.
         :return:
         """
 
@@ -439,18 +439,18 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
 
     def _authorize(self, auth_id, access_level, existing_caps):
         subvol_path = self.path
-        log.debug("Authorizing Ceph id '{0}' for path '{1}'".format(auth_id, subvol_path))
+        log.debug("Authorizing Stone id '{0}' for path '{1}'".format(auth_id, subvol_path))
 
         # First I need to work out what the data pool is for this share:
         # read the layout
         try:
-            pool = self.fs.getxattr(subvol_path, 'ceph.dir.layout.pool').decode('utf-8')
-        except cephfs.Error as e:
+            pool = self.fs.getxattr(subvol_path, 'stone.dir.layout.pool').decode('utf-8')
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
         try:
-            namespace = self.fs.getxattr(subvol_path, 'ceph.dir.layout.pool_namespace').decode('utf-8')
-        except cephfs.NoData:
+            namespace = self.fs.getxattr(subvol_path, 'stone.dir.layout.pool_namespace').decode('utf-8')
+        except stonefs.NoData:
             namespace = None
 
         # Now construct auth capabilities that give the guest just enough
@@ -539,7 +539,7 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
             self._deauthorize(auth_id)
 
             # Remove the auth_id from the metadata *after* removing it
-            # from ceph, so that if we crashed here, we would actually
+            # from stone, so that if we crashed here, we would actually
             # recreate the auth ID during recovery (i.e. end up with
             # a consistent state).
 
@@ -554,13 +554,13 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
         client_entity = "client.{0}".format(auth_id)
         subvol_path = self.path
         try:
-            pool_name = self.fs.getxattr(subvol_path, 'ceph.dir.layout.pool').decode('utf-8')
-        except cephfs.Error as e:
+            pool_name = self.fs.getxattr(subvol_path, 'stone.dir.layout.pool').decode('utf-8')
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], e.args[1])
 
         try:
-            namespace = self.fs.getxattr(subvol_path, 'ceph.dir.layout.pool_namespace').decode('utf-8')
-        except cephfs.NoData:
+            namespace = self.fs.getxattr(subvol_path, 'stone.dir.layout.pool_namespace').decode('utf-8')
+        except stonefs.NoData:
             namespace = None
 
         # The auth_id might have read-only or read-write mount access for the
@@ -700,7 +700,7 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
                                                self.vol_spec.snapshot_dir_prefix.encode('utf-8'),
                                                snapname.encode('utf-8'))
             self.fs.stat(group_snapshot_path)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             if e.args[0] == errno.ENOENT:
                 snappath = self.snapshot_path(snapname)
                 mksnap(self.fs, snappath)
@@ -730,15 +730,15 @@ class SubvolumeV1(SubvolumeBase, SubvolumeTemplate):
         snappath = self.snapshot_data_path(snapname)
         snap_info = {}
         try:
-            snap_attrs = {'created_at':'ceph.snap.btime', 'size':'ceph.dir.rbytes',
-                          'data_pool':'ceph.dir.layout.pool'}
+            snap_attrs = {'created_at':'stone.snap.btime', 'size':'stone.dir.rbytes',
+                          'data_pool':'stone.dir.layout.pool'}
             for key, val in snap_attrs.items():
                 snap_info[key] = self.fs.getxattr(snappath, val)
             return {'size': int(snap_info['size']),
                     'created_at': str(datetime.fromtimestamp(float(snap_info['created_at']))),
                     'data_pool': snap_info['data_pool'].decode('utf-8'),
                     'has_pending_clones': "yes" if self.has_pending_clones(snapname) else "no"}
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             if e.errno == errno.ENOENT:
                 raise VolumeException(-errno.ENOENT,
                                       "snapshot '{0}' does not exist".format(snapname))

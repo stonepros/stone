@@ -11,7 +11,7 @@
 
 #include "rgw_common.h"
 #include "rgw_http_client.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "global/global_init.h"
 
 #include <atomic>
@@ -52,16 +52,16 @@ public:
   virtual std::string_view get_admin_domain() const noexcept = 0;
 };
 
-class CephCtxConfig : public Config {
+class StoneCtxConfig : public Config {
 protected:
-  CephCtxConfig() = default;
-  virtual ~CephCtxConfig() = default;
+  StoneCtxConfig() = default;
+  virtual ~StoneCtxConfig() = default;
 
   const static std::string empty;
 
 public:
-  static CephCtxConfig& get_instance() {
-    static CephCtxConfig instance;
+  static StoneCtxConfig& get_instance() {
+    static StoneCtxConfig instance;
     return instance;
   }
 
@@ -71,21 +71,21 @@ public:
   std::string get_admin_token() const noexcept override;
 
   std::string_view get_admin_user() const noexcept override {
-    return g_ceph_context->_conf->rgw_keystone_admin_user;
+    return g_stone_context->_conf->rgw_keystone_admin_user;
   }
 
   std::string get_admin_password() const noexcept override;
 
   std::string_view get_admin_tenant() const noexcept override {
-    return g_ceph_context->_conf->rgw_keystone_admin_tenant;
+    return g_stone_context->_conf->rgw_keystone_admin_tenant;
   }
 
   std::string_view get_admin_project() const noexcept override {
-    return g_ceph_context->_conf->rgw_keystone_admin_project;
+    return g_stone_context->_conf->rgw_keystone_admin_project;
   }
 
   std::string_view get_admin_domain() const noexcept override {
-    return g_ceph_context->_conf->rgw_keystone_admin_domain;
+    return g_stone_context->_conf->rgw_keystone_admin_domain;
   }
 };
 
@@ -97,7 +97,7 @@ class Service {
 public:
   class RGWKeystoneHTTPTransceiver : public RGWHTTPTransceiver {
   public:
-    RGWKeystoneHTTPTransceiver(CephContext * const cct,
+    RGWKeystoneHTTPTransceiver(StoneContext * const cct,
                                const string& method,
                                const string& url,
                                bufferlist * const token_body_bl)
@@ -119,14 +119,14 @@ public:
   typedef RGWKeystoneHTTPTransceiver RGWValidateKeystoneToken;
   typedef RGWKeystoneHTTPTransceiver RGWGetKeystoneAdminToken;
 
-  static int get_admin_token(CephContext* const cct,
+  static int get_admin_token(StoneContext* const cct,
                              TokenCache& token_cache,
                              const Config& config,
                              std::string& token);
-  static int issue_admin_token_request(CephContext* const cct,
+  static int issue_admin_token_request(StoneContext* const cct,
                                        const Config& config,
                                        TokenEnvelope& token);
-  static int get_keystone_barbican_token(CephContext * const cct,
+  static int get_keystone_barbican_token(StoneContext * const cct,
                                          std::string& token);
 };
 
@@ -193,12 +193,12 @@ public:
   const std::string& get_user_name() const {return user.name;};
   bool has_role(const string& r) const;
   bool expired() const {
-    const uint64_t now = ceph_clock_now().sec();
+    const uint64_t now = stone_clock_now().sec();
     return now >= static_cast<uint64_t>(get_expires());
   }
-  int parse(CephContext* cct,
+  int parse(StoneContext* cct,
             const std::string& token_str,
-            ceph::buffer::list& bl /* in */,
+            stone::buffer::list& bl /* in */,
             ApiVersion version);
 };
 
@@ -210,19 +210,19 @@ class TokenCache {
   };
 
   std::atomic<bool> down_flag = { false };
-  const boost::intrusive_ptr<CephContext> cct;
+  const boost::intrusive_ptr<StoneContext> cct;
 
   std::string admin_token_id;
   std::string barbican_token_id;
   std::map<std::string, token_entry> tokens;
   std::list<std::string> tokens_lru;
 
-  ceph::mutex lock = ceph::make_mutex("rgw::keystone::TokenCache");
+  stone::mutex lock = stone::make_mutex("rgw::keystone::TokenCache");
 
   const size_t max;
 
   explicit TokenCache(const rgw::keystone::Config& config)
-    : cct(g_ceph_context),
+    : cct(g_stone_context),
       max(cct->_conf->rgw_keystone_token_cache_size) {
   }
 
@@ -293,20 +293,20 @@ public:
 };
 
 class BarbicanTokenRequestVer2 : public AdminTokenRequest {
-  CephContext *cct;
+  StoneContext *cct;
 
 public:
-  explicit BarbicanTokenRequestVer2(CephContext * const _cct)
+  explicit BarbicanTokenRequestVer2(StoneContext * const _cct)
     : cct(_cct) {
   }
   void dump(Formatter *f) const override;
 };
 
 class BarbicanTokenRequestVer3 : public AdminTokenRequest {
-  CephContext *cct;
+  StoneContext *cct;
 
 public:
-  explicit BarbicanTokenRequestVer3(CephContext * const _cct)
+  explicit BarbicanTokenRequestVer3(StoneContext * const _cct)
     : cct(_cct) {
   }
   void dump(Formatter *f) const override;

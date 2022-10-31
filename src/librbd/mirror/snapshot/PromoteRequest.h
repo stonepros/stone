@@ -6,7 +6,7 @@
 
 #include "include/buffer.h"
 #include "include/rbd/librbd.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "librbd/internal.h"
 
@@ -105,7 +105,7 @@ private:
   uint64_t m_update_watcher_handle = 0;
   uint64_t m_scheduler_ticks = 0;
   SafeTimer *m_timer = nullptr;
-  ceph::mutex *m_timer_lock = nullptr;
+  stone::mutex *m_timer_lock = nullptr;
 
   void refresh_image();
   void handle_refresh_image(int r);

@@ -12,7 +12,7 @@ from .lock import GlobalLock
 from ..exception import VolumeException
 from ..fs_util import create_pool, remove_pool, create_filesystem, \
     remove_filesystem, create_mds, volume_exists
-from mgr_util import open_filesystem, CephfsConnectionException
+from mgr_util import open_filesystem, StonefsConnectionException
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def gen_pool_names(volname):
     """
     return metadata and data pool name (from a filesystem/volume name) as a tuple
     """
-    return "cephfs.{}.meta".format(volname), "cephfs.{}.data".format(volname)
+    return "stonefs.{}.meta".format(volname), "stonefs.{}.data".format(volname)
 
 def get_mds_map(mgr, volname):
     """
@@ -140,14 +140,14 @@ def open_volume(vc, volname):
 
     :param vc: volume client instance
     :param volname: volume name
-    :return: yields a volume handle (ceph filesystem handle)
+    :return: yields a volume handle (stone filesystem handle)
     """
     g_lock = GlobalLock()
     with g_lock.lock_op():
         try:
             with open_filesystem(vc, volname) as fs_handle:
                 yield fs_handle
-        except CephfsConnectionException as ce:
+        except StonefsConnectionException as ce:
             raise VolumeException(ce.errno, ce.error_str)
 
 
@@ -159,10 +159,10 @@ def open_volume_lockless(vc, volname):
 
     :param vc: volume client instance
     :param volname: volume name
-    :return: yields a volume handle (ceph filesystem handle)
+    :return: yields a volume handle (stone filesystem handle)
     """
     try:
         with open_filesystem(vc, volname) as fs_handle:
             yield fs_handle
-    except CephfsConnectionException as ce:
+    except StonefsConnectionException as ce:
         raise VolumeException(ce.errno, ce.error_str)

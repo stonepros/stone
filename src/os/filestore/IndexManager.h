@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,7 +16,7 @@
 
 #include "include/unordered_map.h"
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Cond.h"
 #include "common/config.h"
 #include "common/debug.h"
@@ -48,11 +48,11 @@ struct Index {
  * This is enforced by using CollectionIndex::access_lock
  */
 class IndexManager {
-  CephContext* cct;
+  StoneContext* cct;
   /// Lock for Index Manager
-  ceph::shared_mutex lock = ceph::make_shared_mutex("IndexManager lock");
+  stone::shared_mutex lock = stone::make_shared_mutex("IndexManager lock");
   bool upgrade;
-  ceph::unordered_map<coll_t, CollectionIndex* > col_indices;
+  stone::unordered_map<coll_t, CollectionIndex* > col_indices;
 
   /**
    * Index factory
@@ -69,7 +69,7 @@ class IndexManager {
   bool get_index_optimistic(coll_t c, Index *index);
 public:
   /// Constructor
-  explicit IndexManager(CephContext* cct,
+  explicit IndexManager(StoneContext* cct,
 			bool upgrade) : cct(cct),
 					upgrade(upgrade) {}
 

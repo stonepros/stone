@@ -22,7 +22,7 @@
 #include "include/utime.h"
 #include "include/types.h"
 #include "include/encoding.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Clock.h"
 #include "common/Formatter.h"
 #include "global/global_context.h"
@@ -32,7 +32,7 @@
 #include <sstream>
 #include <stdarg.h>
 
-using ceph::bufferlist;
+using stone::bufferlist;
 
 enum {
   ADD_PREFIX = 1,
@@ -518,9 +518,9 @@ protected:
   bool verbose;//if true, display lots of debug output
 
   //shared variables protected with mutexes
-  ceph::mutex client_index_lock = ceph::make_mutex("client_index_lock");
+  stone::mutex client_index_lock = stone::make_mutex("client_index_lock");
   int client_index; //names of new objects are client_name.client_index
-  ceph::mutex icache_lock = ceph::make_mutex("icache_lock");
+  stone::mutex icache_lock = stone::make_mutex("icache_lock");
   IndexCache icache;
   friend struct index_data;
 

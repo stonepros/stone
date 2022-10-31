@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -39,7 +39,7 @@ public:
     case OP_ABORT: return "abort";
     case OP_PAUSE: return "pause";
     case OP_RESUME: return "resume";
-    default: ceph_abort(); return nullptr;
+    default: stone_abort(); return nullptr;
     }
   }
 
@@ -54,7 +54,7 @@ public:
     out << ")";
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(op, payload);
     encode(ino, payload);
     encode(frags, payload);
@@ -63,7 +63,7 @@ public:
     encode(flags, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(op, p);
     decode(ino, p);
@@ -121,7 +121,7 @@ protected:
   ~MMDSScrub() override {}
 private:
   template<class T, typename... Args>
-    friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+    friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 
   static constexpr unsigned FLAG_INTERNAL_TAG	= 1<<0;
   static constexpr unsigned FLAG_FORCE		= 1<<1;

@@ -187,7 +187,7 @@ typedef void *rados_t;
 /**
  * @typedef rados_config_t
  *
- * A handle for the ceph configuration context for the rados_t cluster
+ * A handle for the stone configuration context for the rados_t cluster
  * instance.  This can be used to share configuration context/state
  * (e.g., logging configuration) between librados instance.
  *
@@ -482,7 +482,7 @@ STONE_RADOS_API int rados_ping_monitor(rados_t cluster, const char *mon_id,
  * cluster will crash.
  *
  * @pre The cluster handle is configured with at least a monitor
- * address. If cephx is enabled, a client name and secret must also be
+ * address. If stonex is enabled, a client name and secret must also be
  * set.
  *
  * @post If this succeeds, any function in librados may be used
@@ -523,11 +523,11 @@ STONE_RADOS_API void rados_shutdown(rados_t cluster);
  * Options that librados users might want to set include:
  * - mon_host
  * - auth_supported
- * - key, keyfile, or keyring when using cephx
+ * - key, keyfile, or keyring when using stonex
  * - log_file, log_to_stderr, err_to_stderr, and log_to_syslog
  * - debug_rados, debug_objecter, debug_monc, debug_auth, or debug_ms
  *
- * See docs.ceph.com for information about available configuration options`
+ * See docs.stone.com for information about available configuration options`
  *
  * @{
  */
@@ -538,9 +538,9 @@ STONE_RADOS_API void rados_shutdown(rados_t cluster);
  * If path is NULL, the default locations are searched, and the first
  * found is used. The locations are:
  * - $STONE_CONF (environment variable)
- * - /etc/ceph/ceph.conf
- * - ~/.ceph/config
- * - ceph.conf (in the current working directory)
+ * - /etc/stone/stone.conf
+ * - ~/.stone/config
+ * - stone.conf (in the current working directory)
  *
  * @pre rados_connect() has not been called on the cluster handle
  *
@@ -1832,7 +1832,7 @@ STONE_RADOS_API int rados_stat(rados_ioctx_t io, const char *o, uint64_t *psize,
  * operations on an object atomically. These plugins are called
  * classes. This function allows librados users to call the custom
  * methods. The input and output formats are defined by the class.
- * Classes in ceph.git can be found in src/cls subdirectories
+ * Classes in stone.git can be found in src/cls subdirectories
  *
  * @param io the context in which to call the method
  * @param oid the object to call the method on
@@ -2245,7 +2245,7 @@ STONE_RADOS_API int rados_aio_cancel(rados_ioctx_t io,
  * operations on an object atomically. These plugins are called
  * classes. This function allows librados users to call the custom
  * methods. The input and output formats are defined by the class.
- * Classes in ceph.git can be found in src/cls subdirectories
+ * Classes in stone.git can be found in src/cls subdirectories
  *
  * @param io the context in which to call the method
  * @param o name of the object
@@ -2417,7 +2417,7 @@ typedef void (*rados_watchcb2_t)(void *arg,
  *
  * @note BUG: librados should provide a way for watchers to notice connection resets
  * @note BUG: the ver parameter does not work, and -ERANGE will never be returned
- *            (See URL tracker.ceph.com/issues/2592)
+ *            (See URL tracker.stone.com/issues/2592)
  *
  * @param io the pool the object is in
  * @param o the object to watch
@@ -3886,7 +3886,7 @@ STONE_RADOS_API int rados_mon_command(rados_t cluster, const char **cmd,
                                      size_t *outslen);
 
 /**
- * Send ceph-mgr command.
+ * Send stone-mgr command.
  *
  * @note Takes command string in carefully-formatted JSON; must match
  * defined commands, types, etc.
@@ -3914,7 +3914,7 @@ STONE_RADOS_API int rados_mgr_command(rados_t cluster, const char **cmd,
                                      size_t *outslen);
 
 /**
- * Send ceph-mgr tell command.
+ * Send stone-mgr tell command.
  *
  * @note Takes command string in carefully-formatted JSON; must match
  * defined commands, types, etc.

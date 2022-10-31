@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -119,9 +119,9 @@ struct MDSHealthMetric
   std::string message;
   std::map<std::string, std::string> metadata;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
-    ceph_assert(type != MDS_HEALTH_NULL);
+    stone_assert(type != MDS_HEALTH_NULL);
     encode((uint16_t)type, bl);
     encode((uint8_t)sev, bl);
     encode(message, bl);
@@ -129,12 +129,12 @@ struct MDSHealthMetric
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     uint16_t raw_type;
     decode(raw_type, bl);
     type = (mds_metric_t)raw_type;
-    ceph_assert(type != MDS_HEALTH_NULL);
+    stone_assert(type != MDS_HEALTH_NULL);
     uint8_t raw_sev;
     decode(raw_sev, bl);
     sev = (health_status_t)raw_sev;
@@ -163,13 +163,13 @@ struct MDSHealth
 {
   std::vector<MDSHealthMetric> metrics;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(metrics, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(metrics, bl);
     DECODE_FINISH(bl);
@@ -244,7 +244,7 @@ public:
 
   void print(std::ostream& out) const override {
     out << "mdsbeacon(" << global_id << "/" << name
-	<< " " << ceph_mds_state_name(state);
+	<< " " << stone_mds_state_name(state);
     if (fs.size()) {
       out << " fs=" << fs;
     }
@@ -252,7 +252,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(fsid, payload);
     encode(global_id, payload);
@@ -272,7 +272,7 @@ public:
     encode(fs, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(fsid, p);
@@ -316,7 +316,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

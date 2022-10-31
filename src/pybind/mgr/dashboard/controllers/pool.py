@@ -8,7 +8,7 @@ import cherrypy
 
 from .. import mgr
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from ..services.exception import handle_send_command_error
 from ..services.rbd import RbdConfiguration
 from ..tools import TaskManager, str_to_bool
@@ -125,9 +125,9 @@ class Pool(RESTController):
             attrs = attrs.split(',')
 
         if str_to_bool(stats):
-            pools = CephService.get_pool_list_with_stats()
+            pools = StoneService.get_pool_list_with_stats()
         else:
-            pools = CephService.get_pool_list()
+            pools = StoneService.get_pool_list()
 
         return [cls._serialize_pool(pool, attrs) for pool in pools]
 
@@ -156,7 +156,7 @@ class Pool(RESTController):
     @pool_task('delete', ['{pool_name}'])
     @handle_send_command_error('pool')
     def delete(self, pool_name):
-        return CephService.send_command('mon', 'osd pool delete', pool=pool_name, pool2=pool_name,
+        return StoneService.send_command('mon', 'osd pool delete', pool=pool_name, pool2=pool_name,
                                         yes_i_really_really_mean_it=True)
 
     @pool_task('edit', ['{pool_name}'])
@@ -172,7 +172,7 @@ class Pool(RESTController):
     def create(self, pool, pg_num, pool_type, erasure_code_profile=None, flags=None,
                application_metadata=None, rule_name=None, configuration=None, **kwargs):
         ecp = erasure_code_profile if erasure_code_profile else None
-        CephService.send_command('mon', 'osd pool create', pool=pool, pg_num=int(pg_num),
+        StoneService.send_command('mon', 'osd pool create', pool=pool, pg_num=int(pg_num),
                                  pgp_num=int(pg_num), pool_type=pool_type, erasure_code_profile=ecp,
                                  rule=rule_name)
         self._set_pool_values(pool, application_metadata, flags, False, kwargs)
@@ -185,11 +185,11 @@ class Pool(RESTController):
         if update_existing and kwargs.get('compression_mode') == 'unset':
             self._prepare_compression_removal(current_pool.get('options'), kwargs)
         if flags and 'ec_overwrites' in flags:
-            CephService.send_command('mon', 'osd pool set', pool=pool, var='allow_ec_overwrites',
+            StoneService.send_command('mon', 'osd pool set', pool=pool, var='allow_ec_overwrites',
                                      val='true')
         if application_metadata is not None:
             def set_app(what, app):
-                CephService.send_command('mon', 'osd pool application ' + what, pool=pool, app=app,
+                StoneService.send_command('mon', 'osd pool application ' + what, pool=pool, app=app,
                                          yes_i_really_mean_it=True)
             if update_existing:
                 original_app_metadata = set(
@@ -203,7 +203,7 @@ class Pool(RESTController):
                 set_app('enable', app)
 
         def set_key(key, value):
-            CephService.send_command('mon', 'osd pool set', pool=pool, var=key, val=str(value))
+            StoneService.send_command('mon', 'osd pool set', pool=pool, var=key, val=str(value))
 
         quotas = {}
         quotas['max_objects'] = kwargs.pop('quota_max_objects', None)
@@ -219,12 +219,12 @@ class Pool(RESTController):
                 if key == 'pg_num':
                     set_key('pgp_num', value)
         if update_name:
-            CephService.send_command('mon', 'osd pool rename', srcpool=pool, destpool=destpool)
+            StoneService.send_command('mon', 'osd pool rename', srcpool=pool, destpool=destpool)
 
     def _set_quotas(self, pool, quotas):
         for field, value in quotas.items():
             if value is not None:
-                CephService.send_command('mon', 'osd pool set-quota',
+                StoneService.send_command('mon', 'osd pool set-quota',
                                          pool=pool, field=field, val=str(value))
 
     def _prepare_compression_removal(self, options, kwargs):
@@ -309,7 +309,7 @@ class PoolUi(Pool):
                     for o in options
                     if o['name'] == conf_name][0]
 
-        profiles = CephService.get_erasure_code_profiles()
+        profiles = StoneService.get_erasure_code_profiles()
         used_rules: Dict[str, List[str]] = {}
         used_profiles: Dict[str, List[str]] = {}
         pool_names = []

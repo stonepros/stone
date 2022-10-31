@@ -22,7 +22,7 @@ logger = logging.getLogger('controllers.auth')
 AUTH_CHECK_SCHEMA = {
     "username": (str, "Username"),
     "permissions": ({
-        "cephfs": ([str], "")
+        "stonefs": ([str], "")
     }, "List of permissions acquired"),
     "sso": (bool, "Uses single sign on?"),
     "pwdUpdateRequired": (bool, "Is password update required?")
@@ -30,7 +30,7 @@ AUTH_CHECK_SCHEMA = {
 
 
 @APIRouter('/auth', secure=False)
-@APIDoc("Initiate a session with Ceph", "Auth")
+@APIDoc("Initiate a session with Stone", "Auth")
 class Auth(RESTController, ControllerAuthMixin):
     """
     Provide authenticates and returns JWT token.

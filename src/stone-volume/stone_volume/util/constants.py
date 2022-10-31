@@ -15,9 +15,9 @@ mkfs = dict(
     ],
 )
 
-# The fantastical world of ceph-disk labels, they should give you the
+# The fantastical world of stone-disk labels, they should give you the
 # collywobbles
-ceph_disk_guids = {
+stone_disk_guids = {
     # luks
     '45b0969e-9b03-4f30-b4c6-35865ceff106': {'type': 'journal', 'encrypted': True, 'encryption_type': 'luks'},
     'cafecafe-9b03-4f30-b4c6-35865ceff106': {'type': 'block', 'encrypted': True, 'encryption_type': 'luks'},

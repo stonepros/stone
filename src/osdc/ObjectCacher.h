@@ -52,7 +52,7 @@ enum {
 class ObjectCacher {
   PerfCounters *perfcounter;
  public:
-  StoneeContext *cct;
+  StoneContext *cct;
   class Object;
   struct ObjectSet;
   class C_ReadFinish;
@@ -63,13 +63,13 @@ class ObjectCacher {
   struct OSDRead {
     std::vector<ObjectExtent> extents;
     snapid_t snap;
-    ceph::buffer::list *bl;
+    stone::buffer::list *bl;
     int fadvise_flags;
-    OSDRead(snapid_t s, ceph::buffer::list *b, int f)
+    OSDRead(snapid_t s, stone::buffer::list *b, int f)
       : snap(s), bl(b), fadvise_flags(f) {}
   };
 
-  OSDRead *prepare_read(snapid_t snap, ceph::buffer::list *b, int f) const {
+  OSDRead *prepare_read(snapid_t snap, stone::buffer::list *b, int f) const {
     return new OSDRead(snap, b, f);
   }
 
@@ -77,21 +77,21 @@ class ObjectCacher {
   struct OSDWrite {
     std::vector<ObjectExtent> extents;
     SnapContext snapc;
-    ceph::buffer::list bl;
-    ceph::real_time mtime;
+    stone::buffer::list bl;
+    stone::real_time mtime;
     int fadvise_flags;
-    ceph_tid_t journal_tid;
-    OSDWrite(const SnapContext& sc, const ceph::buffer::list& b, ceph::real_time mt,
-	     int f, ceph_tid_t _journal_tid)
+    stone_tid_t journal_tid;
+    OSDWrite(const SnapContext& sc, const stone::buffer::list& b, stone::real_time mt,
+	     int f, stone_tid_t _journal_tid)
       : snapc(sc), bl(b), mtime(mt), fadvise_flags(f),
 	journal_tid(_journal_tid) {}
   };
 
   OSDWrite *prepare_write(const SnapContext& sc,
-			  const ceph::buffer::list &b,
-			  ceph::real_time mt,
+			  const stone::buffer::list &b,
+			  stone::real_time mt,
 			  int f,
-			  ceph_tid_t journal_tid) const {
+			  stone_tid_t journal_tid) const {
     return new OSDWrite(sc, b, mt, f, journal_tid);
   }
 
@@ -121,12 +121,12 @@ class ObjectCacher {
 
   public:
     Object *ob;
-    ceph::buffer::list  bl;
-    ceph_tid_t last_write_tid;  // version of bh (if non-zero)
-    ceph_tid_t last_read_tid;   // tid of last read op (if any)
-    ceph::real_time last_write;
+    stone::buffer::list  bl;
+    stone_tid_t last_write_tid;  // version of bh (if non-zero)
+    stone_tid_t last_read_tid;   // tid of last read op (if any)
+    stone::real_time last_write;
     SnapContext snapc;
-    ceph_tid_t journal_tid;
+    stone_tid_t journal_tid;
     int error; // holds return value for failed reads
 
     std::map<loff_t, std::list<Context*> > waitfor_read;
@@ -168,10 +168,10 @@ class ObjectCacher {
       error = _error;
     }
 
-    inline ceph_tid_t get_journal_tid() const {
+    inline stone_tid_t get_journal_tid() const {
       return journal_tid;
     }
-    inline void set_journal_tid(ceph_tid_t _journal_tid) {
+    inline void set_journal_tid(stone_tid_t _journal_tid) {
       journal_tid = _journal_tid;
     }
 
@@ -185,12 +185,12 @@ class ObjectCacher {
 
     // reference counting
     int get() {
-      ceph_assert(ref >= 0);
+      stone_assert(ref >= 0);
       if (ref == 0) lru_pin();
       return ++ref;
     }
     int put() {
-      ceph_assert(ref > 0);
+      stone_assert(ref > 0);
       if (ref == 1) lru_unpin();
       --ref;
       return ref;
@@ -252,12 +252,12 @@ class ObjectCacher {
 
     std::map<loff_t, BufferHead*>     data;
 
-    ceph_tid_t last_write_tid;  // version of bh (if non-zero)
-    ceph_tid_t last_commit_tid; // last update committed.
+    stone_tid_t last_write_tid;  // version of bh (if non-zero)
+    stone_tid_t last_commit_tid; // last update committed.
 
     int dirty_or_tx;
 
-    std::map< ceph_tid_t, std::list<Context*> > waitfor_commit;
+    std::map< stone_tid_t, std::list<Context*> > waitfor_commit;
     xlist<C_ReadFinish*> reads;
 
     Object(const Object&) = delete;
@@ -277,9 +277,9 @@ class ObjectCacher {
     }
     ~Object() {
       reads.clear();
-      ceph_assert(ref == 0);
-      ceph_assert(data.empty());
-      ceph_assert(dirty_or_tx == 0);
+      stone_assert(ref == 0);
+      stone_assert(data.empty());
+      stone_assert(dirty_or_tx == 0);
       set_item.remove_myself();
     }
 
@@ -295,8 +295,8 @@ class ObjectCacher {
 
     bool can_close() const {
       if (lru_is_expireable()) {
-	ceph_assert(data.empty());
-	ceph_assert(waitfor_commit.empty());
+	stone_assert(data.empty());
+	stone_assert(waitfor_commit.empty());
 	return true;
       }
       return false;
@@ -332,11 +332,11 @@ class ObjectCacher {
     void add_bh(BufferHead *bh) {
       if (data.empty())
 	get();
-      ceph_assert(data.count(bh->start()) == 0);
+      stone_assert(data.count(bh->start()) == 0);
       data[bh->start()] = bh;
     }
     void remove_bh(BufferHead *bh) {
-      ceph_assert(data.count(bh->start()));
+      stone_assert(data.count(bh->start()));
       data.erase(bh->start());
       if (data.empty())
 	put();
@@ -358,20 +358,20 @@ class ObjectCacher {
                  std::map<loff_t, BufferHead*>& missing,
                  std::map<loff_t, BufferHead*>& rx,
 		 std::map<loff_t, BufferHead*>& errors);
-    BufferHead *map_write(ObjectExtent &ex, ceph_tid_t tid);
+    BufferHead *map_write(ObjectExtent &ex, stone_tid_t tid);
 
-    void replace_journal_tid(BufferHead *bh, ceph_tid_t tid);
+    void replace_journal_tid(BufferHead *bh, stone_tid_t tid);
     void truncate(loff_t s);
     void discard(loff_t off, loff_t len, C_GatherBuilder* commit_gather);
 
     // reference counting
     int get() {
-      ceph_assert(ref >= 0);
+      stone_assert(ref >= 0);
       if (ref == 0) lru_pin();
       return ++ref;
     }
     int put() {
-      ceph_assert(ref > 0);
+      stone_assert(ref > 0);
       if (ref == 1) lru_unpin();
       --ref;
       return ref;
@@ -406,10 +406,10 @@ class ObjectCacher {
   bool scattered_write;
 
   std::string name;
-  ceph::mutex& lock;
+  stone::mutex& lock;
 
   uint64_t max_dirty, target_dirty, max_size, max_objects;
-  ceph::timespan max_dirty_age;
+  stone::timespan max_dirty_age;
   bool block_writes_upfront;
 
   ZTracer::Endpoint trace_endpoint;
@@ -418,17 +418,17 @@ class ObjectCacher {
   void *flush_set_callback_arg;
 
   // indexed by pool_id
-  std::vector<ceph::unordered_map<sobject_t, Object*> > objects;
+  std::vector<stone::unordered_map<sobject_t, Object*> > objects;
 
   std::list<Context*> waitfor_read;
 
-  ceph_tid_t last_read_tid;
+  stone_tid_t last_read_tid;
 
   std::set<BufferHead*, BufferHead::ptr_lt> dirty_or_tx_bh;
   LRU   bh_lru_dirty, bh_lru_rest;
   LRU   ob_lru;
 
-  ceph::condition_variable flusher_cond;
+  stone::condition_variable flusher_cond;
   bool flusher_stop;
   void flusher_entry();
   class FlusherThread : public Thread {
@@ -458,7 +458,7 @@ class ObjectCacher {
   void close_object(Object *ob);
 
   // bh stats
-  ceph::condition_variable  stat_cond;
+  stone::condition_variable  stat_cond;
 
   loff_t stat_clean;
   loff_t stat_zero;
@@ -526,7 +526,7 @@ class ObjectCacher {
   void mark_dirty(BufferHead *bh) {
     bh_set_state(bh, BufferHead::STATE_DIRTY);
     bh_lru_dirty.lru_touch(bh);
-    //bh->set_dirty_stamp(ceph_clock_now());
+    //bh->set_dirty_stamp(stone_clock_now());
   }
 
   void bh_add(Object *ob, BufferHead *bh);
@@ -537,7 +537,7 @@ class ObjectCacher {
                const ZTracer::Trace &parent_trace);
   void bh_write(BufferHead *bh, const ZTracer::Trace &parent_trace);
   void bh_write_scattered(std::list<BufferHead*>& blist);
-  void bh_write_adjacencies(BufferHead *bh, ceph::real_time cutoff,
+  void bh_write_adjacencies(BufferHead *bh, stone::real_time cutoff,
 			    int64_t *amount, int *max_count);
 
   void trim();
@@ -560,20 +560,20 @@ class ObjectCacher {
   void purge(Object *o);
 
   int64_t reads_outstanding;
-  ceph::condition_variable read_cond;
+  stone::condition_variable read_cond;
 
   int _readx(OSDRead *rd, ObjectSet *oset, Context *onfinish,
 	     bool external_call, ZTracer::Trace *trace);
   void retry_waiting_reads();
 
  public:
-  void bh_read_finish(int64_t poolid, sobject_t oid, ceph_tid_t tid,
+  void bh_read_finish(int64_t poolid, sobject_t oid, stone_tid_t tid,
 		      loff_t offset, uint64_t length,
-		      ceph::buffer::list &bl, int r,
+		      stone::buffer::list &bl, int r,
 		      bool trust_enoent);
   void bh_write_commit(int64_t poolid, sobject_t oid,
 		       std::vector<std::pair<loff_t, uint64_t> >& ranges,
-		       ceph_tid_t t, int r);
+		       stone_tid_t t, int r);
 
   class C_WriteCommit;
   class C_WaitForWrite;
@@ -583,7 +583,7 @@ class ObjectCacher {
 
 
 
-  ObjectCacher(StoneeContext *cct_, std::string name, WritebackHandler& wb, ceph::mutex& l,
+  ObjectCacher(StoneContext *cct_, std::string name, WritebackHandler& wb, stone::mutex& l,
 	       flush_set_callback_t flush_callback,
 	       void *flush_callback_arg,
 	       uint64_t max_bytes, uint64_t max_objects,
@@ -595,7 +595,7 @@ class ObjectCacher {
     flusher_thread.create("flusher");
   }
   void stop() {
-    ceph_assert(flusher_thread.is_started());
+    stone_assert(flusher_thread.is_started());
     lock.lock();  // hmm.. watch out for deadlock!
     flusher_stop = true;
     flusher_cond.notify_all();
@@ -671,7 +671,7 @@ public:
     max_size = v;
   }
   void set_max_dirty_age(double a) {
-    max_dirty_age = ceph::make_timespan(a);
+    max_dirty_age = stone::make_timespan(a);
   }
   void set_max_objects(int64_t v) {
     max_objects = v;
@@ -690,7 +690,7 @@ public:
   }
 
   int file_read(ObjectSet *oset, file_layout_t *layout, snapid_t snapid,
-		loff_t offset, uint64_t len, ceph::buffer::list *bl, int flags,
+		loff_t offset, uint64_t len, stone::buffer::list *bl, int flags,
 		Context *onfinish) {
     OSDRead *rd = prepare_read(snapid, bl, flags);
     Striper::file_to_extents(cct, oset->ino, layout, offset, len,
@@ -700,7 +700,7 @@ public:
 
   int file_write(ObjectSet *oset, file_layout_t *layout,
 		 const SnapContext& snapc, loff_t offset, uint64_t len,
-		 ceph::buffer::list& bl, ceph::real_time mtime, int flags) {
+		 stone::buffer::list& bl, stone::real_time mtime, int flags) {
     OSDWrite *wr = prepare_write(snapc, bl, mtime, flags, 0);
     Striper::file_to_extents(cct, oset->ino, layout, offset, len,
 			     oset->truncate_size, wr->extents);

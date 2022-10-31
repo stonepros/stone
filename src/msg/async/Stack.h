@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -28,7 +28,7 @@ class ConnectedSocketImpl {
   virtual ~ConnectedSocketImpl() {}
   virtual int is_connected() = 0;
   virtual ssize_t read(char*, size_t) = 0;
-  virtual ssize_t send(ceph::buffer::list &bl, bool more) = 0;
+  virtual ssize_t send(stone::buffer::list &bl, bool more) = 0;
   virtual void shutdown() = 0;
   virtual void close() = 0;
   virtual int fd() const = 0;
@@ -96,7 +96,7 @@ class ConnectedSocket {
   /// Gets the output stream.
   ///
   /// Gets an object that sends data to the remote endpoint.
-  ssize_t send(ceph::buffer::list &bl, bool more) {
+  ssize_t send(stone::buffer::list &bl, bool more) {
     return _csi->send(bl, more);
   }
   /// Disables output to the socket.
@@ -214,7 +214,7 @@ class Worker {
  public:
   bool done = false;
 
-  StoneeContext *cct;
+  StoneContext *cct;
   PerfCounters *perf_logger;
   unsigned id;
 
@@ -224,7 +224,7 @@ class Worker {
   Worker(const Worker&) = delete;
   Worker& operator=(const Worker&) = delete;
 
-  Worker(StoneeContext *c, unsigned worker_id)
+  Worker(StoneContext *c, unsigned worker_id)
     : cct(c), perf_logger(NULL), id(worker_id), references(0), center(c) {
     char name[128];
     sprintf(name, "AsyncMessenger::Worker-%u", id);
@@ -266,7 +266,7 @@ class Worker {
   PerfCounters *get_perf_counter() { return perf_logger; }
   void release_worker() {
     int oldref = references.fetch_sub(1);
-    ceph_assert(oldref > 0);
+    stone_assert(oldref > 0);
   }
   void init_done() {
     init_lock.lock();
@@ -294,18 +294,18 @@ class Worker {
 
 class NetworkStack {
   unsigned num_workers = 0;
-  ceph::spinlock pool_spin;
+  stone::spinlock pool_spin;
   bool started = false;
 
   std::function<void ()> add_thread(unsigned i);
 
-  virtual Worker* create_worker(StoneeContext *c, unsigned i) = 0;
+  virtual Worker* create_worker(StoneContext *c, unsigned i) = 0;
 
  protected:
-  StoneeContext *cct;
+  StoneContext *cct;
   std::vector<Worker*> workers;
 
-  explicit NetworkStack(StoneeContext *c);
+  explicit NetworkStack(StoneContext *c);
  public:
   NetworkStack(const NetworkStack &) = delete;
   NetworkStack& operator=(const NetworkStack &) = delete;
@@ -315,7 +315,7 @@ class NetworkStack {
   }
 
   static std::shared_ptr<NetworkStack> create(
-    StoneeContext *c, const std::string &type);
+    StoneContext *c, const std::string &type);
 
   // backend need to override this method if backend doesn't support shared
   // listen table.

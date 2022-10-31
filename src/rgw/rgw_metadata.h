@@ -15,7 +15,7 @@
 #include "cls/version/cls_version_types.h"
 #include "cls/log/cls_log_types.h"
 #include "common/RefCountedObj.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "services/svc_meta_be.h"
 
 
@@ -32,7 +32,7 @@ struct obj_version;
 class RGWMetadataObject {
 protected:
   obj_version objv;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   std::map<string, bufferlist> *pattrs{nullptr};
   
 public:
@@ -56,18 +56,18 @@ class RGWMetadataHandler {
   friend class RGWMetadataManager;
 
 protected:
-  CephContext *cct;
+  StoneContext *cct;
 
 public:
   RGWMetadataHandler() {}
   virtual ~RGWMetadataHandler() {}
   virtual string get_type() = 0;
 
-  void base_init(CephContext *_cct) {
+  void base_init(StoneContext *_cct) {
     cct = _cct;
   }
 
-  virtual RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const ceph::real_time& mtime) = 0;
+  virtual RGWMetadataObject *get_meta_obj(JSONObj *jo, const obj_version& objv, const stone::real_time& mtime) = 0;
 
   virtual int get(string& entry, RGWMetadataObject **obj, optional_yield, const DoutPrefixProvider *dpp) = 0;
   virtual int put(string& entry,
@@ -80,7 +80,7 @@ public:
   virtual int remove(string& entry, RGWObjVersionTracker& objv_tracker, optional_yield, const DoutPrefixProvider *dpp) = 0;
 
   virtual int mutate(const string& entry,
-		     const ceph::real_time& mtime,
+		     const stone::real_time& mtime,
 		     RGWObjVersionTracker *objv_tracker,
                      optional_yield y,
                      const DoutPrefixProvider *dpp,
@@ -122,7 +122,7 @@ protected:
 public:
   RGWMetadataHandler_GenericMetaBE() {}
 
-  void base_init(CephContext *_cct,
+  void base_init(StoneContext *_cct,
             RGWSI_MetaBackend_Handler *_be_handler) {
     RGWMetadataHandler::base_init(_cct);
     be_handler = _be_handler;
@@ -173,7 +173,7 @@ public:
   int remove(string& entry, RGWObjVersionTracker& objv_tracker, optional_yield, const DoutPrefixProvider *dpp) override;
 
   int mutate(const string& entry,
-	     const ceph::real_time& mtime,
+	     const stone::real_time& mtime,
 	     RGWObjVersionTracker *objv_tracker,
              optional_yield y,
              const DoutPrefixProvider *dpp,
@@ -224,7 +224,7 @@ class RGWMetadataTopHandler;
 class RGWMetadataManager {
   friend class RGWMetadataHandler;
 
-  CephContext *cct;
+  StoneContext *cct;
   RGWSI_Meta *meta_svc;
   map<string, RGWMetadataHandler *> handlers;
   std::unique_ptr<RGWMetadataTopHandler> md_top_handler;
@@ -247,7 +247,7 @@ public:
   int remove(string& metadata_key, optional_yield y, const DoutPrefixProvider *dpp);
 
   int mutate(const string& metadata_key,
-	     const ceph::real_time& mtime,
+	     const stone::real_time& mtime,
 	     RGWObjVersionTracker *objv_tracker,
              optional_yield y,
              const DoutPrefixProvider *dpp,

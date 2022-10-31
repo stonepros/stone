@@ -1,5 +1,5 @@
 [Unit]
-Description=Ceph Volume activation: %i
+Description=Stone Volume activation: %i
 After=local-fs.target
 Wants=local-fs.target
 

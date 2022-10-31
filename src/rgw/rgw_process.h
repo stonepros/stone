@@ -11,7 +11,7 @@
 #include "rgw_op.h"
 #include "rgw_rest.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 #include "common/WorkQueue.h"
 #include "common/Throttle.h"
@@ -19,11 +19,11 @@
 #include <atomic>
 
 #if !defined(dout_subsys)
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 #define def_dout_subsys
 #endif
 
-#define dout_context g_ceph_context
+#define dout_context g_stone_context
 
 extern void signal_shutdown();
 
@@ -46,7 +46,7 @@ class RGWRequest;
 class RGWProcess {
   deque<RGWRequest*> m_req_queue;
 protected:
-  CephContext *cct;
+  StoneContext *cct;
   rgw::sal::RGWRadosStore* store;
   rgw_auth_registry_ptr_t auth_registry;
   OpsLogSink* olog;
@@ -59,7 +59,7 @@ protected:
 
   struct RGWWQ : public DoutPrefixProvider, public ThreadPool::WorkQueue<RGWRequest> {
     RGWProcess* process;
-    RGWWQ(RGWProcess* p, ceph::timespan timeout, ceph::timespan suicide_timeout,
+    RGWWQ(RGWProcess* p, stone::timespan timeout, stone::timespan suicide_timeout,
 	  ThreadPool* tp)
       : ThreadPool::WorkQueue<RGWRequest>("RGWWQ", timeout, suicide_timeout,
 					  tp), process(p) {}
@@ -67,7 +67,7 @@ protected:
     bool _enqueue(RGWRequest* req) override;
 
     void _dequeue(RGWRequest* req) override {
-      ceph_abort();
+      stone_abort();
     }
 
     bool _empty() override {
@@ -83,17 +83,17 @@ protected:
     void _dump_queue();
 
     void _clear() override {
-      ceph_assert(process->m_req_queue.empty());
+      stone_assert(process->m_req_queue.empty());
     }
 
-  CephContext *get_cct() const override { return process->cct; }
-  unsigned get_subsys() const { return ceph_subsys_rgw; }
+  StoneContext *get_cct() const override { return process->cct; }
+  unsigned get_subsys() const { return stone_subsys_rgw; }
   std::ostream& gen_prefix(std::ostream& out) const { return out << "rgw request work queue: ";}
 
   } req_wq;
 
 public:
-  RGWProcess(CephContext* const cct,
+  RGWProcess(StoneContext* const cct,
              RGWProcessEnv* const pe,
              const int num_threads,
              RGWFrontendConfig* const conf)
@@ -108,8 +108,8 @@ public:
       sock_fd(-1),
       uri_prefix(pe->uri_prefix),
       req_wq(this,
-	     ceph::make_timespan(g_conf()->rgw_op_thread_timeout),
-	     ceph::make_timespan(g_conf()->rgw_op_thread_suicide_timeout),
+	     stone::make_timespan(g_conf()->rgw_op_thread_timeout),
+	     stone::make_timespan(g_conf()->rgw_op_thread_suicide_timeout),
 	     &m_tp) {
   }
   
@@ -143,7 +143,7 @@ public:
 
   /* have a bit more connections than threads so that requests are
    * still accepted even if we're still processing older requests */
-  RGWFCGXProcess(CephContext* const cct,
+  RGWFCGXProcess(StoneContext* const cct,
                  RGWProcessEnv* const pe,
                  const int num_threads,
                  RGWFrontendConfig* const conf)
@@ -169,7 +169,7 @@ public:
 class RGWLoadGenProcess : public RGWProcess {
   RGWAccessKey access_key;
 public:
-  RGWLoadGenProcess(CephContext* cct, RGWProcessEnv* pe, int num_threads,
+  RGWLoadGenProcess(StoneContext* cct, RGWProcessEnv* pe, int num_threads,
 		  RGWFrontendConfig* _conf) :
   RGWProcess(cct, pe, num_threads, _conf) {}
   void run() override;
@@ -191,7 +191,7 @@ extern int process_request(rgw::sal::RGWRadosStore* store,
                            optional_yield y,
                            rgw::dmclock::Scheduler *scheduler,
                            std::string* user,
-                           ceph::coarse_real_clock::duration* latency,
+                           stone::coarse_real_clock::duration* latency,
                            int* http_ret = nullptr);
 
 extern int rgw_process_authenticated(RGWHandler_REST* handler,

@@ -9,7 +9,7 @@ def rados(ctx, remote, cmd, wait=True, check_status=False):
     log.info("rados %s" % ' '.join(cmd))
     pre = [
         'adjust-ulimits',
-        'ceph-coverage',
+        'stone-coverage',
         '{tdir}/archive/coverage'.format(tdir=testdir),
         'rados',
         ];
@@ -24,33 +24,33 @@ def rados(ctx, remote, cmd, wait=True, check_status=False):
     else:
         return proc
 
-def create_ec_pool(remote, name, profile_name, pgnum, profile={}, cluster_name="ceph", application=None):
-    remote.run(args=['sudo', 'ceph'] +
+def create_ec_pool(remote, name, profile_name, pgnum, profile={}, cluster_name="stone", application=None):
+    remote.run(args=['sudo', 'stone'] +
                cmd_erasure_code_profile(profile_name, profile) + ['--cluster', cluster_name])
     remote.run(args=[
-        'sudo', 'ceph', 'osd', 'pool', 'create', name,
+        'sudo', 'stone', 'osd', 'pool', 'create', name,
         str(pgnum), str(pgnum), 'erasure', profile_name, '--cluster', cluster_name
         ])
     if application:
         remote.run(args=[
-            'sudo', 'ceph', 'osd', 'pool', 'application', 'enable', name, application, '--cluster', cluster_name
+            'sudo', 'stone', 'osd', 'pool', 'application', 'enable', name, application, '--cluster', cluster_name
         ], check_status=False) # may fail as EINVAL when run in jewel upgrade test
 
-def create_replicated_pool(remote, name, pgnum, cluster_name="ceph", application=None):
+def create_replicated_pool(remote, name, pgnum, cluster_name="stone", application=None):
     remote.run(args=[
-        'sudo', 'ceph', 'osd', 'pool', 'create', name, str(pgnum), str(pgnum), '--cluster', cluster_name
+        'sudo', 'stone', 'osd', 'pool', 'create', name, str(pgnum), str(pgnum), '--cluster', cluster_name
         ])
     if application:
         remote.run(args=[
-            'sudo', 'ceph', 'osd', 'pool', 'application', 'enable', name, application, '--cluster', cluster_name
+            'sudo', 'stone', 'osd', 'pool', 'application', 'enable', name, application, '--cluster', cluster_name
         ], check_status=False)
 
-def create_cache_pool(remote, base_name, cache_name, pgnum, size, cluster_name="ceph"):
+def create_cache_pool(remote, base_name, cache_name, pgnum, size, cluster_name="stone"):
     remote.run(args=[
-        'sudo', 'ceph', 'osd', 'pool', 'create', cache_name, str(pgnum), '--cluster', cluster_name
+        'sudo', 'stone', 'osd', 'pool', 'create', cache_name, str(pgnum), '--cluster', cluster_name
     ])
     remote.run(args=[
-        'sudo', 'ceph', 'osd', 'tier', 'add-cache', base_name, cache_name,
+        'sudo', 'stone', 'osd', 'tier', 'add-cache', base_name, cache_name,
         str(size), '--cluster', cluster_name
     ])
 

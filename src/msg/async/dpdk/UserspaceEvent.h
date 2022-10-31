@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -23,11 +23,11 @@
 #include <vector>
 #include <list>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/int_types.h"
 #include "common/Tub.h"
 
-class StoneeContext;
+class StoneContext;
 
 class UserspaceEventManager {
   struct UserspaceFDImpl {
@@ -38,7 +38,7 @@ class UserspaceEventManager {
     int8_t activating_mask = 0;
     uint32_t magic = 4921;
   };
-  StoneeContext *cct;
+  StoneContext *cct;
   int max_fd = 0;
   uint32_t max_wait_idx = 0;
   std::vector<Tub<UserspaceFDImpl> > fds;
@@ -46,7 +46,7 @@ class UserspaceEventManager {
   std::list<uint32_t> unused_fds;
 
  public:
-  explicit UserspaceEventManager(StoneeContext *c): cct(c) {
+  explicit UserspaceEventManager(StoneContext *c): cct(c) {
     waiting_fds.resize(1024);
   }
 
@@ -81,7 +81,7 @@ class UserspaceEventManager {
     impl->listening_mask &= (~mask);
     if (!(impl->activating_mask & impl->listening_mask) && impl->waiting_idx) {
       if (waiting_fds[max_wait_idx] == fd) {
-        ceph_assert(impl->waiting_idx == max_wait_idx);
+        stone_assert(impl->waiting_idx == max_wait_idx);
         --max_wait_idx;
       }
       waiting_fds[impl->waiting_idx] = -1;

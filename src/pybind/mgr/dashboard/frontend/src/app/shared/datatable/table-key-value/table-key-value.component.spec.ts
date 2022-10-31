@@ -109,15 +109,15 @@ describe('TableKeyValueComponent', () => {
     expect(makePairs([['dash', 'board']])).toEqual([{ key: 'dash', value: 'board' }]);
     const pair = [
       { key: 'dash', value: 'board' },
-      { key: 'ceph', value: 'mimic' }
+      { key: 'stone', value: 'mimic' }
     ];
     const pairInverse = [
-      { key: 'ceph', value: 'mimic' },
+      { key: 'stone', value: 'mimic' },
       { key: 'dash', value: 'board' }
     ];
     expect(makePairs(pair)).toEqual(pairInverse);
     expect(makePairs({ dash: 'board' })).toEqual([{ key: 'dash', value: 'board' }]);
-    expect(makePairs({ dash: 'board', ceph: 'mimic' })).toEqual(pairInverse);
+    expect(makePairs({ dash: 'board', stone: 'mimic' })).toEqual(pairInverse);
   });
 
   it('tests makePairsFromArray()', () => {
@@ -125,7 +125,7 @@ describe('TableKeyValueComponent', () => {
     expect(makePairsFromArray([['dash', 'board']])).toEqual([{ key: 'dash', value: 'board' }]);
     const pair = [
       { key: 'dash', value: 'board' },
-      { key: 'ceph', value: 'mimic' }
+      { key: 'stone', value: 'mimic' }
     ];
     expect(makePairsFromArray(pair)).toEqual(pair);
   });
@@ -133,9 +133,9 @@ describe('TableKeyValueComponent', () => {
   it('tests makePairsFromObject()', () => {
     const makePairsFromObject = (data: object) => component['makePairsFromObject'](data);
     expect(makePairsFromObject({ dash: 'board' })).toEqual([{ key: 'dash', value: 'board' }]);
-    expect(makePairsFromObject({ dash: 'board', ceph: 'mimic' })).toEqual([
+    expect(makePairsFromObject({ dash: 'board', stone: 'mimic' })).toEqual([
       { key: 'dash', value: 'board' },
-      { key: 'ceph', value: 'mimic' }
+      { key: 'stone', value: 'mimic' }
     ]);
   });
 

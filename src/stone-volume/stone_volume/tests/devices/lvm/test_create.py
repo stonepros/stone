@@ -1,5 +1,5 @@
 import pytest
-from ceph_volume.devices import lvm
+from stone_volume.devices import lvm
 
 
 class TestCreate(object):
@@ -40,7 +40,7 @@ class TestCreate(object):
         device_info()
         with pytest.raises(SystemExit):
             lvm.create.Create(argv=[
-                '--bluestore', '--data', '/dev/sdfoo', '--block.db', 'vg/ceph1',
+                '--bluestore', '--data', '/dev/sdfoo', '--block.db', 'vg/stone1',
                 '--journal', '/dev/sf14',
             ]).main()
         stdout, stderr = capsys.readouterr()

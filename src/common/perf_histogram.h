@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 OVH
  *
@@ -21,7 +21,7 @@
 
 #include "common/Formatter.h"
 #include "include/int_types.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 class PerfHistogramCommon {
 public:
@@ -52,7 +52,7 @@ public:
 
 protected:
   /// Dump configuration of one axis to a formatter
-  static void dump_formatted_axis(ceph::Formatter *f, const axis_config_d &ac);
+  static void dump_formatted_axis(stone::Formatter *f, const axis_config_d &ac);
 
   /// Quantize given value and convert to bucket number on given axis
   static int64_t get_bucket_for_axis(int64_t value, const axis_config_d &ac);
@@ -74,13 +74,13 @@ class PerfHistogram : public PerfHistogramCommon {
 public:
   /// Initialize new histogram object
   PerfHistogram(std::initializer_list<axis_config_d> axes_config) {
-    ceph_assert(axes_config.size() == DIM &&
+    stone_assert(axes_config.size() == DIM &&
 		"Invalid number of axis configuration objects");
 
     int i = 0;
     for (const auto &ac : axes_config) {
-      ceph_assertf(ac.m_buckets > 0, "Must have at least one bucket on axis");
-      ceph_assertf(ac.m_quant_size > 0,
+      stone_assertf(ac.m_buckets > 0, "Must have at least one bucket on axis");
+      stone_assertf(ac.m_quant_size > 0,
              "Quantization unit must be non-zero positive integer value");
 
       m_axes_config[i++] = ac;
@@ -129,7 +129,7 @@ public:
   }
 
   /// Dump data to a Formatter object
-  void dump_formatted(ceph::Formatter *f) const {
+  void dump_formatted(stone::Formatter *f) const {
     // Dump axes configuration
     f->open_array_section("axes");
     for (auto &ac : m_axes_config) {
@@ -150,7 +150,7 @@ protected:
   std::array<axis_config_d, DIM> m_axes_config;
 
   /// Dump histogram counters to a formatter
-  void dump_formatted_values(ceph::Formatter *f) const {
+  void dump_formatted_values(stone::Formatter *f) const {
     visit_values([f](int) { f->open_array_section("values"); },
                  [f](int64_t value) { f->dump_unsigned("value", value); },
                  [f](int) { f->close_section(); });
@@ -178,8 +178,8 @@ protected:
     static_assert(sizeof...(T) == DIM, "Incorrect number of arguments");
     return get_raw_index_internal<0>(
         [](int64_t bucket, const axis_config_d &ac) {
-          ceph_assertf(bucket >= 0, "Bucket index can not be negative");
-          ceph_assertf(bucket < ac.m_buckets, "Bucket index too large");
+          stone_assertf(bucket >= 0, "Bucket index can not be negative");
+          stone_assertf(bucket < ac.m_buckets, "Bucket index too large");
           return bucket;
         },
         0, buckets...);

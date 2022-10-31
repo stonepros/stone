@@ -19,7 +19,7 @@ Next either set the github token as an env variable
 
 Example:
 
-  ceph-release-notes -r tags/v0.87..origin/giant \
+  stone-release-notes -r tags/v0.87..origin/giant \
       $(git rev-parse --show-toplevel)
 
 """
@@ -37,20 +37,20 @@ from git import Repo
 
 fixes_re = re.compile(r"Fixes\:? #(\d+)")
 reviewed_by_re = re.compile(r"Rev(.*)By", re.IGNORECASE)
-# labels is the list of relevant labels defined for github.com/ceph/ceph
-labels = {'bluestore', 'build/ops', 'cephfs', 'common', 'core', 'mgr',
+# labels is the list of relevant labels defined for github.com/stone/stone
+labels = {'bluestore', 'build/ops', 'stonefs', 'common', 'core', 'mgr',
           'mon', 'performance', 'pybind', 'rdma', 'rgw', 'rbd', 'tests',
           'tools'}
 merge_re = re.compile("Merge (pull request|PR) #(\d+).*")
 # prefixes is the list of commit description prefixes we recognize
-prefixes = ['bluestore', 'build/ops', 'cephfs', 'cephx', 'cli', 'cmake',
+prefixes = ['bluestore', 'build/ops', 'stonefs', 'stonex', 'cli', 'cmake',
             'common', 'core', 'crush', 'doc', 'fs', 'librados', 'librbd',
             'log', 'mds', 'mgr', 'mon', 'msg', 'objecter', 'osd', 'pybind',
             'rbd', 'rbd-mirror', 'rbd-nbd', 'rgw', 'tests', 'tools']
 signed_off_re = re.compile("Signed-off-by: (.+) <")
-tracker_re = re.compile("http://tracker.ceph.com/issues/(\d+)")
+tracker_re = re.compile("http://tracker.stone.com/issues/(\d+)")
 rst_link_re = re.compile(r"([a-zA-Z0-9])_(\W)")
-tracker_uri = "http://tracker.ceph.com/issues/{0}.json"
+tracker_uri = "http://tracker.stone.com/issues/{0}.json"
 
 
 def get_original_issue(issue, verbose):
@@ -61,7 +61,7 @@ def get_original_issue(issue, verbose):
     # when dealing with an issue in the Backport tracker
     if r["issue"]["tracker"]["name"] != "Backport":
         if verbose:
-            print ("http://tracker.ceph.com/issues/" + issue +
+            print ("http://tracker.stone.com/issues/" + issue +
                    " is from the tracker " + r["issue"]["tracker"]["name"] +
                    ", do not look for the original issue")
         return issue
@@ -69,7 +69,7 @@ def get_original_issue(issue, verbose):
     # if a Backport issue does not have a relation, keep it
     if "relations" not in r["issue"]:
         if verbose:
-            print ("http://tracker.ceph.com/issues/" + issue +
+            print ("http://tracker.stone.com/issues/" + issue +
                    " has no relations, do not look for the original issue")
         return issue
 
@@ -80,17 +80,17 @@ def get_original_issue(issue, verbose):
     if copied_to:
         if len(copied_to) > 1:
             if verbose:
-                print ("ERROR: http://tracker.ceph.com/issues/" + issue +
+                print ("ERROR: http://tracker.stone.com/issues/" + issue +
                        " has more than one Copied To relation")
             return issue
         if verbose:
-            print ("http://tracker.ceph.com/issues/" + issue +
-                   " is the backport of http://tracker.ceph.com/issues/" +
+            print ("http://tracker.stone.com/issues/" + issue +
+                   " is the backport of http://tracker.stone.com/issues/" +
                    copied_to[0])
         return copied_to[0]
     else:
         if verbose:
-            print ("http://tracker.ceph.com/issues/" + issue +
+            print ("http://tracker.stone.com/issues/" + issue +
                    " has no copied_to relations; do not look for the" +
                    " original issue")
         return issue
@@ -102,7 +102,7 @@ def split_component(title, gh, number):
     if match:
         return match.group(1)+match.group(2)
     else:
-        issue = gh.repos("ceph")("ceph").issues(number).get()
+        issue = gh.repos("stone")("stone").issues(number).get()
         issue_labels = {it['name'] for it in issue['labels']}
         if 'documentation' in issue_labels:
             return 'doc: ' + title
@@ -149,12 +149,12 @@ def make_release_notes(gh, repo, ref, plaintext, verbose, strict, use_tags):
             continue
         number = merge.group(2)
         print ("Considering PR#" + number)
-        # do not pick up ceph/ceph-qa-suite.git PRs
+        # do not pick up stone/stone-qa-suite.git PRs
         if int(number) < 1311:
             print ("Ignoring low-numbered PR, probably picked up from"
-                   " ceph/ceph-qa-suite.git")
+                   " stone/stone-qa-suite.git")
             continue
-        pr = gh.repos("ceph")("ceph").pulls(number).get()
+        pr = gh.repos("stone")("stone").pulls(number).get()
         (title, message) = _title_message(commit, pr, strict)
         issues = []
         if pr['body']:
@@ -178,7 +178,7 @@ def make_release_notes(gh, repo, ref, plaintext, verbose, strict, use_tags):
             author = commit.parents[-1].author.name
 
         if strict and not issues:
-            print ("ERROR: https://github.com/ceph/ceph/pull/" +
+            print ("ERROR: https://github.com/stone/stone/pull/" +
                    str(number) + " has no associated issue")
             continue
 
@@ -190,7 +190,7 @@ def make_release_notes(gh, repo, ref, plaintext, verbose, strict, use_tags):
             )
             match = re.match(title_re, title)
             if not match:
-                print ("ERROR: https://github.com/ceph/ceph/pull/" +
+                print ("ERROR: https://github.com/stone/stone/pull/" +
                        str(number) + " title " + title.encode("utf-8") +
                        " does not match " + title_re)
             else:
@@ -229,7 +229,7 @@ def make_release_notes(gh, repo, ref, plaintext, verbose, strict, use_tags):
                 issues = map(lambda issue: '#' + str(issue), pr2issues[pr])
             else:
                 issues = map(lambda issue: (
-                    '`issue#{issue} <http://tracker.ceph.com/issues/{issue}>`_'
+                    '`issue#{issue} <http://tracker.stone.com/issues/{issue}>`_'
                     ).format(issue=issue), pr2issues[pr]
                 )
             issues = ", ".join(issues) + ", "
@@ -246,7 +246,7 @@ def make_release_notes(gh, repo, ref, plaintext, verbose, strict, use_tags):
             print (
                 (
                     "* {title} ({issues}`pr#{pr} <"
-                    "https://github.com/ceph/ceph/pull/{pr}"
+                    "https://github.com/stone/stone/pull/{pr}"
                     ">`_, {author})"
                 ).format(
                     title=title.encode("utf-8"),
@@ -260,9 +260,9 @@ def make_release_notes(gh, repo, ref, plaintext, verbose, strict, use_tags):
 
 if __name__ == "__main__":
     desc = '''
-    Make ceph release notes for a given revision. Eg usage:
+    Make stone release notes for a given revision. Eg usage:
 
-    $ ceph-release-notes -r tags/v0.87..origin/giant \
+    $ stone-release-notes -r tags/v0.87..origin/giant \
         $(git rev-parse --show-toplevel)
 
     It is recommended to set the github env. token in order to avoid
@@ -286,7 +286,7 @@ if __name__ == "__main__":
                         action='store_true', default=None,
                         help="strict, recommended only for backport releases")
     parser.add_argument("repo", metavar="repo",
-                        help="path to ceph git repo")
+                        help="path to stone git repo")
     parser.add_argument(
         "--token",
         default=os.getenv("GITHUB_ACCESS_TOKEN"),

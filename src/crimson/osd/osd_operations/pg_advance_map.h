@@ -11,7 +11,7 @@
 #include "crimson/common/type_helpers.h"
 #include "osd/PeeringState.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -43,7 +43,7 @@ public:
   ~PGAdvanceMap();
 
   void print(std::ostream &) const final;
-  void dump_detail(ceph::Formatter *f) const final;
+  void dump_detail(stone::Formatter *f) const final;
   seastar::future<> start();
 };
 

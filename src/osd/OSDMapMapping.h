@@ -24,12 +24,12 @@ public:
     bool aborted = false;
     Context *onfinish = nullptr;
 
-    ceph::mutex lock = ceph::make_mutex("ParallelPGMapper::Job::lock");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("ParallelPGMapper::Job::lock");
+    stone::condition_variable cond;
 
-    Job(const OSDMap *om) : start(ceph_clock_now()), osdmap(om) {}
+    Job(const OSDMap *om) : start(stone_clock_now()), osdmap(om) {}
     virtual ~Job() {
-      ceph_assert(shards == 0);
+      stone_assert(shards == 0);
     }
 
     // child must implement either form of process
@@ -65,7 +65,7 @@ public:
       until += duration;
       std::unique_lock l(lock);
       while (shards > 0) {
-	if (ceph_clock_now() >= until) {
+	if (stone_clock_now() >= until) {
 	  return false;
 	}
 	cond.wait(l);
@@ -94,7 +94,7 @@ public:
   };
 
 protected:
-  StoneeContext *cct;
+  StoneContext *cct;
 
   struct Item {
     Job *job;
@@ -117,8 +117,8 @@ protected:
     WQ(ParallelPGMapper *m_, ThreadPool *tp)
       : ThreadPool::WorkQueue<Item>(
 	"ParallelPGMapper::WQ",
-	ceph::make_timespan(m_->cct->_conf->threadpool_default_timeout),
-	ceph::timespan::zero(),
+	stone::make_timespan(m_->cct->_conf->threadpool_default_timeout),
+	stone::timespan::zero(),
 	tp),
         m(m_) {}
 
@@ -127,7 +127,7 @@ protected:
       return true;
     }
     void _dequeue(Item *i) override {
-      ceph_abort();
+      stone_abort();
     }
     Item *_dequeue() override {
       while (!m->q.empty()) {
@@ -146,7 +146,7 @@ protected:
     void _process(Item *i, ThreadPool::TPHandle &h) override;
 
     void _clear() override {
-      ceph_assert(_empty());
+      stone_assert(_empty());
     }
 
     bool _empty() override {
@@ -155,7 +155,7 @@ protected:
   } wq;
 
 public:
-  ParallelPGMapper(StoneeContext *cct, ThreadPool *tp)
+  ParallelPGMapper(StoneContext *cct, ThreadPool *tp)
     : cct(cct),
       wq(this, tp) {}
 
@@ -295,8 +295,8 @@ public:
 	   std::vector<int> *acting,
 	   int *acting_primary) const {
     auto p = pools.find(pgid.pool());
-    ceph_assert(p != pools.end());
-    ceph_assert(pgid.ps() < p->second.pg_num);
+    stone_assert(p != pools.end());
+    stone_assert(pgid.ps() < p->second.pg_num);
     p->second.get(pgid.ps(), up, up_primary, acting, acting_primary);
   }
 
@@ -304,8 +304,8 @@ public:
 			     int *acting_primary,
 			     spg_t *spgid) {
     auto p = pools.find(pgid.pool());
-    ceph_assert(p != pools.end());
-    ceph_assert(pgid.ps() < p->second.pg_num);
+    stone_assert(p != pools.end());
+    stone_assert(pgid.ps() < p->second.pg_num);
     std::vector<int> acting;
     p->second.get(pgid.ps(), nullptr, nullptr, &acting, acting_primary);
     if (p->second.erasure) {
@@ -323,7 +323,7 @@ public:
   }
 
   const mempool::osdmap_mapping::vector<pg_t>& get_osd_acting_pgs(unsigned osd) {
-    ceph_assert(osd < acting_rmap.size());
+    stone_assert(osd < acting_rmap.size());
     return acting_rmap[osd];
   }
 

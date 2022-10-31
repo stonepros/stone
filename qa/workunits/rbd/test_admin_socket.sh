@@ -5,7 +5,7 @@ TMPDIR=/tmp/rbd_test_admin_socket$$
 mkdir $TMPDIR
 trap "rm -fr $TMPDIR" 0
 
-. $(dirname $0)/../../standalone/ceph-helpers.sh
+. $(dirname $0)/../../standalone/stone-helpers.sh
 
 function expect_false()
 {
@@ -39,12 +39,12 @@ function rbd_get_perfcounter()
     local counter=$2
     local name
 
-    name=$(ceph --format xml --admin-daemon $(rbd_watch_asok ${image}) \
+    name=$(stone --format xml --admin-daemon $(rbd_watch_asok ${image}) \
 		perf schema | $XMLSTARLET el -d3 |
 		  grep "/librbd-.*-${image}/${counter}\$")
     test -n "${name}" || return 1
 
-    ceph --format xml --admin-daemon $(rbd_watch_asok ${image}) perf dump |
+    stone --format xml --admin-daemon $(rbd_watch_asok ${image}) perf dump |
 	$XMLSTARLET sel -t -m "${name}" -v .
 }
 
@@ -89,7 +89,7 @@ function rbd_watch_start()
     test -S "${asok}"
 
     # configure debug level
-    ceph --admin-daemon "${asok}" config set debug_rbd 20
+    stone --admin-daemon "${asok}" config set debug_rbd 20
 
     # check that watcher is registered
     rbd status ${image} | expect_false grep "Watchers: none"
@@ -115,7 +115,7 @@ function rbd_watch_end()
 
 pool="rbd"
 image=testimg$$
-ceph_admin="ceph --admin-daemon $(rbd_watch_asok ${image})"
+stone_admin="stone --admin-daemon $(rbd_watch_asok ${image})"
 
 rbd create --size 128 ${pool}/${image}
 
@@ -124,8 +124,8 @@ rbd_cache_flush="rbd cache flush ${pool}/${image}"
 rbd_cache_invalidate="rbd cache invalidate ${pool}/${image}"
 
 rbd_watch_start ${image}
-${ceph_admin} help | fgrep "${rbd_cache_flush}"
-${ceph_admin} help | fgrep "${rbd_cache_invalidate}"
+${stone_admin} help | fgrep "${rbd_cache_flush}"
+${stone_admin} help | fgrep "${rbd_cache_invalidate}"
 rbd_watch_end ${image}
 
 # test rbd cache commands with disabled and enabled cache
@@ -136,12 +136,12 @@ for conf_rbd_cache in false true; do
     rbd_watch_start ${image}
 
     rbd_check_perfcounter ${image} flush 0
-    ${ceph_admin} ${rbd_cache_flush}
+    ${stone_admin} ${rbd_cache_flush}
     # 'flush' counter should increase regardless if cache is enabled
     rbd_check_perfcounter ${image} flush 1
 
     rbd_check_perfcounter ${image} invalidate_cache 0
-    ${ceph_admin} ${rbd_cache_invalidate}
+    ${stone_admin} ${rbd_cache_invalidate}
     # 'invalidate_cache' counter should increase regardless if cache is enabled
     rbd_check_perfcounter ${image} invalidate_cache 1
 

@@ -1,35 +1,35 @@
 .. _Get Involved:
 
 =====================================
- Get Involved in the Ceph Community!
+ Get Involved in the Stone Community!
 =====================================
 
-These are exciting times in the Ceph community! Get involved!
+These are exciting times in the Stone community! Get involved!
 
 +----------------------+-------------------------------------------------+-----------------------------------------------+
 |Channel               | Description                                     | Contact Info                                  |
 +======================+=================================================+===============================================+
-| **Blog**             | Check the Ceph Blog_ periodically to keep track | http://ceph.com/community/blog/               |
-|                      | of Ceph progress and important announcements.   |                                               |
+| **Blog**             | Check the Stone Blog_ periodically to keep track | http://ceph.com/community/blog/               |
+|                      | of Stone progress and important announcements.   |                                               |
 +----------------------+-------------------------------------------------+-----------------------------------------------+
-| **Planet Ceph**      | Check the blog aggregation on Planet Ceph for   | https://ceph.com/category/planet/             |
+| **Planet Stone**      | Check the blog aggregation on Planet Stone for   | https://ceph.com/category/planet/             |
 |                      | interesting stories, information and            |                                               |
 |                      | experiences from the community.                 |                                               |
 +----------------------+-------------------------------------------------+-----------------------------------------------+
-| **Wiki**             | Check the Ceph Wiki is a source for more        | http://wiki.ceph.com/                         |
+| **Wiki**             | Check the Stone Wiki is a source for more        | http://wiki.ceph.com/                         |
 |                      | community and development related topics. You   |                                               |
 |                      | can find there information about blueprints,    |                                               |
-|                      | meetups, the Ceph Developer Summits and more.   |                                               |
+|                      | meetups, the Stone Developer Summits and more.   |                                               |
 +----------------------+-------------------------------------------------+-----------------------------------------------+
-| **IRC**              | As you delve into Ceph, you may have questions  |                                               |
-|                      | or feedback for the Ceph development team. Ceph | - **Domain:**                                 |
+| **IRC**              | As you delve into Stone, you may have questions  |                                               |
+|                      | or feedback for the Stone development team. Stone | - **Domain:**                                 |
 |                      | developers are often available on the ``#ceph`` |     ``irc.oftc.net``                          |
 |                      | IRC channel particularly during daytime hours   | - **Channels:**                               |
 |                      | in the US Pacific Standard Time zone.           |     ``#ceph``,                                |
 |                      | While ``#ceph`` is a good starting point for    |     ``#ceph-devel``,                          |
 |                      | cluster operators and users, there is also      |     ``#ceph-dashboard``                       |
 |                      | ``#ceph-devel`` and ``#ceph-dashboard``         |                                               |
-|                      | dedicated for Ceph developers.                  |                                               |
+|                      | dedicated for Stone developers.                  |                                               |
 +----------------------+-------------------------------------------------+-----------------------------------------------+
 | **User List**        | Ask and answer user-related questions by        |                                               |
 |                      | subscribing to the email list at                | - `User Subscribe`_                           |
@@ -52,22 +52,22 @@ These are exciting times in the Ceph community! Get involved!
 |                      | of the email list at any time by unsubscribing. | - `QA Unsubscribe`_                           |
 |                      | A simple email is all it takes!                 | - `Mailing list archives`_                    |
 +----------------------+-------------------------------------------------+-----------------------------------------------+
-| **Community List**   | For all discussions related to the Ceph User    |                                               |
+| **Community List**   | For all discussions related to the Stone User    |                                               |
 |                      | Committee and other community topics. You can   | - `Community Subscribe`_                      |
 |                      | opt out of the email list at any time by        | - `Community Unsubscribe`_                    |
 |                      | unsubscribing. A simple email is all it takes!  | - `Mailing list archives`_                    |
 +----------------------+-------------------------------------------------+-----------------------------------------------+
-| **Bug Tracker**      | You can help keep Ceph production worthy by     | http://tracker.ceph.com/projects/ceph         |
+| **Bug Tracker**      | You can help keep Stone production worthy by     | http://tracker.ceph.com/projects/ceph         |
 |                      | filing and tracking bugs, and providing feature |                                               |
 |                      | requests using the Bug Tracker_.                |                                               |
 +----------------------+-------------------------------------------------+-----------------------------------------------+
 | **Source Code**      | If you would like to participate in             |                                               |
 |                      | development, bug fixing, or if you just want    | - http://github.com/ceph/ceph                 |
-|                      | the very latest code for Ceph, you can get it   | - http://download.ceph.com/tarballs/          |
-|                      | at http://github.com. See `Ceph Source Code`_   |                                               |
+|                      | the very latest code for Stone, you can get it   | - http://download.ceph.com/tarballs/          |
+|                      | at http://github.com. See `Stone Source Code`_   |                                               |
 |                      | for details on cloning from github.             |                                               |
 +----------------------+-------------------------------------------------+-----------------------------------------------+
-| **Ceph Calendar**    | Learn about upcoming Ceph events.               | https://ceph.io/contribute/                   |
+| **Stone Calendar**    | Learn about upcoming Stone events.               | https://ceph.io/contribute/                   |
 +----------------------+-------------------------------------------------+-----------------------------------------------+
 
 
@@ -87,5 +87,5 @@ These are exciting times in the Ceph community! Get involved!
 .. _Mailing list archives: http://lists.ceph.com/
 .. _Blog: http://ceph.com/community/blog/
 .. _Tracker: http://tracker.ceph.com/
-.. _Ceph Source Code: http://github.com/ceph/ceph
+.. _Stone Source Code: http://github.com/ceph/ceph
 

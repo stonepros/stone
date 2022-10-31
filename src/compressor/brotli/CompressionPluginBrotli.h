@@ -1,5 +1,5 @@
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 BI SHUN KE <aionshun@livemail.tw>
  *
@@ -13,13 +13,13 @@
 #ifndef STONE_COMPRESSION_PLUGIN_BROTLI_H
 #define STONE_COMPRESSION_PLUGIN_BROTLI_H
 
-#include "ceph_ver.h"
+#include "stone_ver.h"
 #include "compressor/CompressionPlugin.h"
 #include "BrotliCompressor.h"
 
 class CompressionPluginBrotli : public CompressionPlugin {
 public:
-  explicit CompressionPluginBrotli(StoneeContext *cct) : CompressionPlugin(cct)
+  explicit CompressionPluginBrotli(StoneContext *cct) : CompressionPlugin(cct)
   {}
   
   virtual int factory(CompressorRef *cs, std::ostream *ss)

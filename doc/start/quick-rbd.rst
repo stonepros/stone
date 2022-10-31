@@ -2,10 +2,10 @@
  Block Device Quick Start
 ==========================
 
-Ensure your :term:`Ceph Storage Cluster` is in an ``active + clean`` state
-before working with the :term:`Ceph Block Device`.
+Ensure your :term:`Stone Storage Cluster` is in an ``active + clean`` state
+before working with the :term:`Stone Block Device`.
 
-.. note:: The Ceph Block Device is also known as :term:`RBD` or :term:`RADOS`
+.. note:: The Stone Block Device is also known as :term:`RBD` or :term:`RADOS`
    Block Device.
 
 
@@ -19,7 +19,7 @@ before working with the :term:`Ceph Block Device`.
 
 
 You may use a virtual machine for your ``ceph-client`` node, but do not 
-execute the following procedures on the same physical node as your Ceph 
+execute the following procedures on the same physical node as your Stone 
 Storage Cluster nodes (unless you use a VM). See `FAQ`_ for details.
 
 Create a Block Device Pool
@@ -64,6 +64,6 @@ See `block devices`_ for additional details.
 
 .. _create a pool: ../../rados/operations/pools/#create-a-pool
 .. _block devices: ../../rbd
-.. _FAQ: http://wiki.ceph.com/How_Can_I_Give_Ceph_a_Try
+.. _FAQ: http://wiki.ceph.com/How_Can_I_Give_Stone_a_Try
 .. _OS Recommendations: ../os-recommendations
 .. _rbdmap manpage: ../../man/8/rbdmap

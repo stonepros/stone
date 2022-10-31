@@ -1,11 +1,11 @@
 # Integrate with the kubernetes events API. 
 # This module sends events to Kubernetes, and also captures/tracks all events
-# in the rook-ceph namespace so kubernetes activity like pod restarts,
-# imagepulls etc can be seen from within the ceph cluster itself.
+# in the rook-stone namespace so kubernetes activity like pod restarts,
+# imagepulls etc can be seen from within the stone cluster itself.
 #
 # To interact with the events API, the mgr service to access needs to be 
 # granted additional permissions
-# e.g. kubectl -n rook-ceph edit clusterrole rook-ceph-mgr-cluster-rules
+# e.g. kubectl -n rook-stone edit clusterrole rook-stone-mgr-cluster-rules
 #
 # These are the changes needed;
 # - apiGroups:
@@ -78,7 +78,7 @@ log = logging.getLogger(__name__)
 
 # use a simple local class to represent UTC
 # datetime pkg modules vary between python2 and 3 and pytz is not available on older
-# ceph container images, so taking a pragmatic approach!
+# stone container images, so taking a pragmatic approach!
 class UTC(tzinfo):
     def utcoffset(self, dt):
         return timedelta(0)
@@ -230,7 +230,7 @@ class LogEntry(object):
     @property
     def event_msg(self):
         if self.msg_type == 'audit':
-            return "Client '{}' issued: ceph {}".format(self.event_entity, self.cmd)
+            return "Client '{}' issued: stone {}".format(self.event_entity, self.cmd)
 
         elif self.healthcheck:
             return self.healthcheck.text
@@ -269,7 +269,7 @@ class NamespaceWatcher(BaseThread):
     """Watch events in a given namespace 
     
     Using the watch package we can listen to event traffic in the namespace to 
-    get an idea of what kubernetes related events surround the ceph cluster. The
+    get an idea of what kubernetes related events surround the stone cluster. The
     thing to bear in mind is that events have a TTL enforced by the kube-apiserver
     so this stream will only really show activity inside this retention window.
     """
@@ -402,12 +402,12 @@ class KubernetesEvent(object):
 
         # field_path is needed to prevent problems in the namespacewatcher when
         # deleted event are received
-        obj_ref = client.V1ObjectReference(kind="CephCluster",
+        obj_ref = client.V1ObjectReference(kind="StoneCluster",
                                            field_path='spec.containers{mgr}', 
                                            name=self.event_name, 
                                            namespace=self.namespace)
 
-        event_source = client.V1EventSource(component="ceph-mgr", 
+        event_source = client.V1EventSource(component="stone-mgr", 
                                             host=self.host)
         return  client.V1Event(
                     involved_object=obj_ref, 
@@ -457,36 +457,36 @@ class KubernetesEvent(object):
                 # 'first_timestamp': datetime.datetime(2019, 7, 18, 5, 24, 59, tzinfo=tzlocal()),
                 # 'involved_object': {'api_version': None,
                 #                     'field_path': None,
-                #                     'kind': 'CephCluster',
-                #                     'name': 'ceph-mgr.k8sevent-module',
-                #                     'namespace': 'rook-ceph',
+                #                     'kind': 'StoneCluster',
+                #                     'name': 'stone-mgr.k8sevent-module',
+                #                     'namespace': 'rook-stone',
                 #                     'resource_version': None,
                 #                     'uid': None},
                 # 'kind': 'Event',
                 # 'last_timestamp': datetime.datetime(2019, 7, 18, 5, 24, 59, tzinfo=tzlocal()),
-                # 'message': 'Ceph log -> event tracking started',
+                # 'message': 'Stone log -> event tracking started',
                 # 'metadata': {'annotations': None,
                 #             'cluster_name': None,
                 #             'creation_timestamp': datetime.datetime(2019, 7, 18, 5, 24, 59, tzinfo=tzlocal()),
                 #             'deletion_grace_period_seconds': None,
                 #             'deletion_timestamp': None,
                 #             'finalizers': None,
-                #             'generate_name': 'ceph-mgr.k8sevent-module',
+                #             'generate_name': 'stone-mgr.k8sevent-module',
                 #             'generation': None,
                 #             'initializers': None,
                 #             'labels': None,
-                #             'name': 'ceph-mgr.k8sevent-module5z7kq',
-                #             'namespace': 'rook-ceph',
+                #             'name': 'stone-mgr.k8sevent-module5z7kq',
+                #             'namespace': 'rook-stone',
                 #             'owner_references': None,
                 #             'resource_version': '1195832',
-                #             'self_link': '/api/v1/namespaces/rook-ceph/events/ceph-mgr.k8sevent-module5z7kq',
+                #             'self_link': '/api/v1/namespaces/rook-stone/events/stone-mgr.k8sevent-module5z7kq',
                 #             'uid': '62fde5f1-a91c-11e9-9c80-6cde63a9debf'},
                 # 'reason': 'Started',
                 # 'related': None,
                 # 'reporting_component': '',
                 # 'reporting_instance': '',
                 # 'series': None,
-                # 'source': {'component': 'ceph-mgr', 'host': 'minikube'},
+                # 'source': {'component': 'stone-mgr', 'host': 'minikube'},
                 # 'type': 'Normal'}
 
                 # conflict event already exists
@@ -560,7 +560,7 @@ class EventProcessor(BaseThread):
         event = KubernetesEvent(
             LogEntry(
                 source='self',
-                msg='Ceph log -> event tracking started',
+                msg='Stone log -> event tracking started',
                 msg_type='startup',
                 level='INF',
                 tstamp=None
@@ -619,7 +619,7 @@ class EventProcessor(BaseThread):
             unique_name = False
             
         elif log_object.msg_type == 'heartbeat':
-            # hourly health message summary from Ceph
+            # hourly health message summary from Stone
             event_out = True
             unique_name = False
             log_object.msg = str(self.config_watcher)
@@ -650,7 +650,7 @@ class EventProcessor(BaseThread):
             log.debug("K8sevents ignored message : {}".format(log_object.msg))
 
     def run(self):
-        log.info("Ceph event processing thread started, "
+        log.info("Stone event processing thread started, "
                  "event retention set to {} days".format(self.event_retention_days))
 
         while True:
@@ -675,7 +675,7 @@ class EventProcessor(BaseThread):
 
             time.sleep(0.5)
 
-        log.warning("Ceph event processing thread stopped")
+        log.warning("Stone event processing thread stopped")
 
 
 class ListDiff(object):
@@ -696,11 +696,11 @@ class ListDiff(object):
         return self.before == self.after
 
 
-class CephConfigWatcher(BaseThread):
+class StoneConfigWatcher(BaseThread):
     """Detect configuration changes within the cluster and generate human readable events"""
 
     def __init__(self, mgr):
-        super(CephConfigWatcher, self).__init__()
+        super(StoneConfigWatcher, self).__init__()
         self.mgr = mgr
         self.server_map = dict()
         self.osd_map = dict()
@@ -855,7 +855,7 @@ class CephConfigWatcher(BaseThread):
             pass
         else:
             # osd changes detected
-            osd_msg = "Ceph OSD '{}' ({} @ {}B) has been {} host {}"
+            osd_msg = "Stone OSD '{}' ({} @ {}B) has been {} host {}"
 
             osds = ListDiff(before_osds, after_osds)
             for new_osd in osds.added:
@@ -949,13 +949,13 @@ class CephConfigWatcher(BaseThread):
         changes.extend(self._check_pools(pool_map))
 
         # FUTURE
-        # Could generate an event if a ceph daemon has moved hosts
-        # (assumes the ceph metadata host information is valid though!)
+        # Could generate an event if a stone daemon has moved hosts
+        # (assumes the stone metadata host information is valid though!)
 
         return changes
 
     def run(self):
-        log.info("Ceph configuration watcher started, interval set to {}s".format(self.config_check_secs))
+        log.info("Stone configuration watcher started, interval set to {}s".format(self.config_check_secs))
 
         self.server_map, self.service_map = self.fetch_servers()
         self.pool_map = self.fetch_pools()
@@ -1004,7 +1004,7 @@ class CephConfigWatcher(BaseThread):
                 log.exception(self.health)
                 break
 
-        log.warning("Ceph configuration watcher stopped")
+        log.warning("Stone configuration watcher stopped")
 
 
 class Module(MgrModule):
@@ -1016,22 +1016,22 @@ class Module(MgrModule):
         },
         {
             "cmd": "k8sevents ls",
-            "desc": "List all current Kuberenetes events from the Ceph namespace",
+            "desc": "List all current Kuberenetes events from the Stone namespace",
             "perm": "r"
         },
         {
-            "cmd": "k8sevents ceph",
-            "desc": "List Ceph events tracked & sent to the kubernetes cluster",
+            "cmd": "k8sevents stone",
+            "desc": "List Stone events tracked & sent to the kubernetes cluster",
             "perm": "r"
         },
         {
-            "cmd": "k8sevents set-access name=key,type=CephString",
-            "desc": "Set kubernetes access credentials. <key> must be cacrt or token and use -i <filename> syntax (e.g., ceph k8sevents set-access cacrt -i /root/ca.crt).",
+            "cmd": "k8sevents set-access name=key,type=StoneString",
+            "desc": "Set kubernetes access credentials. <key> must be cacrt or token and use -i <filename> syntax (e.g., stone k8sevents set-access cacrt -i /root/ca.crt).",
             "perm": "rw"
         },
         {
-            "cmd": "k8sevents set-config name=key,type=CephString name=value,type=CephString",
-            "desc": "Set kubernetes config paramters. <key> must be server or namespace (e.g., ceph k8sevents set-config server https://localhost:30433).",
+            "cmd": "k8sevents set-config name=key,type=StoneString name=value,type=StoneString",
+            "desc": "Set kubernetes config paramters. <key> must be server or namespace (e.g., stone k8sevents set-config server https://localhost:30433).",
             "perm": "rw"
         },
         {
@@ -1046,10 +1046,10 @@ class Module(MgrModule):
          'default': 10,
          'min': 10,
          'desc': "interval (secs) to check for cluster configuration changes"},
-        {'name': 'ceph_event_retention_days',
+        {'name': 'stone_event_retention_days',
          'type': 'int',
          'default': 7,
-         'desc': "Days to hold ceph event information within local cache"}
+         'desc': "Days to hold stone event information within local cache"}
     ]
     NOTIFY_TYPES = [NotifyType.clog]
 
@@ -1066,7 +1066,7 @@ class Module(MgrModule):
         
         # Declare the module options we accept
         self.config_check_secs = None
-        self.ceph_event_retention_days = None
+        self.stone_event_retention_days = None
 
         self.k8s_config = dict(
             cacrt = None,
@@ -1141,7 +1141,7 @@ class Module(MgrModule):
 
     def notify(self, notify_type: NotifyType, notify_id):
         """
-        Called by the ceph-mgr service to notify the Python plugin
+        Called by the stone-mgr service to notify the Python plugin
         that new state is available.
 
         :param notify_type: string indicating what kind of notification,
@@ -1185,7 +1185,7 @@ class Module(MgrModule):
         return s
 
     def show_events(self, events):
-        """Show events we're holding from the ceph namespace - most recent 1st"""
+        """Show events we're holding from the stone namespace - most recent 1st"""
 
         if len(events):
             return 0, "", self._show_events(events)
@@ -1201,7 +1201,7 @@ class Module(MgrModule):
             s += "- {:<20} : {}\n".format(t.__class__.__name__, t.health)
         s += "Tracked Events\n"
         s += "- namespace   : {:>3}\n".format(len(self.ns_watcher.events))
-        s += "- ceph events : {:>3}\n".format(len(self.event_processor.events))
+        s += "- stone events : {:>3}\n".format(len(self.event_processor.events))
         return 0, "", s
 
     def _valid_server(self, server):
@@ -1330,7 +1330,7 @@ class Module(MgrModule):
         elif cmd["prefix"] == "k8sevents ls":
             return self.show_events(self.ns_watcher.events)
 
-        elif cmd["prefix"] == "k8sevents ceph":
+        elif cmd["prefix"] == "k8sevents stone":
             return self.show_events(self.event_processor.events)
 
         else:
@@ -1384,18 +1384,18 @@ class Module(MgrModule):
             self.error_msg = "Unable to start : python kubernetes package is missing"
         else:
             if self.kubernetes_control:
-                # running under rook-ceph
+                # running under rook-stone
                 config.load_incluster_config()
                 self.k8s_config['server'] = "https://{}:{}".format(os.environ.get('KUBERNETES_SERVICE_HOST', 'UNKNOWN'),
                                                                    os.environ.get('KUBERNETES_SERVICE_PORT_HTTPS', 'UNKNOWN'))
                 self._api_client_config = None
-                self._namespace = os.environ.get("POD_NAMESPACE", "rook-ceph")
+                self._namespace = os.environ.get("POD_NAMESPACE", "rook-stone")
             else:
-                # running outside of rook-ceph, so we need additional settings to tell us
+                # running outside of rook-stone, so we need additional settings to tell us
                 # how to connect to the kubernetes cluster
                 ready, errors = self.k8s_ready()
                 if not ready:
-                    self.error_msg = "Required settings missing. Use ceph k8sevents set-access | set-config to define {}".format(",".join(errors))
+                    self.error_msg = "Required settings missing. Use stone k8sevents set-access | set-config to define {}".format(",".join(errors))
                 else:
                     try:
                         self._api_client_config = self.load_kubernetes_config()
@@ -1410,10 +1410,10 @@ class Module(MgrModule):
             return
 
         # All checks have passed
-        self.config_watcher = CephConfigWatcher(self)
+        self.config_watcher = StoneConfigWatcher(self)
 
         self.event_processor = EventProcessor(self.config_watcher, 
-                                              self.ceph_event_retention_days,
+                                              self.stone_event_retention_days,
                                               self._api_client_config,
                                               self._namespace)
 
@@ -1421,11 +1421,11 @@ class Module(MgrModule):
                                            namespace=self._namespace)
 
         if self.event_processor.ok:
-            log.info("Ceph Log processor thread starting")
+            log.info("Stone Log processor thread starting")
             self.event_processor.start()        # start log consumer thread
-            log.info("Ceph config watcher thread starting")
+            log.info("Stone config watcher thread starting")
             self.config_watcher.start()
-            log.info("Rook-ceph namespace events watcher starting")
+            log.info("Rook-stone namespace events watcher starting")
             self.ns_watcher.start()
 
             self.trackers.extend([self.event_processor, self.config_watcher, self.ns_watcher])

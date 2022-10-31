@@ -9,7 +9,7 @@
 #include <boost/smart_ptr/intrusive_ref_counter.hpp>
 #include <seastar/core/future.hh>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "crimson/osd/exceptions.h"
 
 #include "crimson/os/seastore/extentmap_manager.h"

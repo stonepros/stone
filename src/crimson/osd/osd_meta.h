@@ -9,7 +9,7 @@
 #include "osd/osd_types.h"
 #include "crimson/os/futurized_collection.h"
 
-namespace ceph::os {
+namespace stone::os {
   class Transaction;
 }
 
@@ -35,13 +35,13 @@ public:
   auto collection() {
     return coll;
   }
-  void create(ceph::os::Transaction& t);
+  void create(stone::os::Transaction& t);
 
-  void store_map(ceph::os::Transaction& t,
+  void store_map(stone::os::Transaction& t,
                  epoch_t e, const bufferlist& m);
   seastar::future<bufferlist> load_map(epoch_t e);
 
-  void store_superblock(ceph::os::Transaction& t,
+  void store_superblock(stone::os::Transaction& t,
                         const OSDSuperblock& sb);
   seastar::future<OSDSuperblock> load_superblock();
 

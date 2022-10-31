@@ -4,7 +4,7 @@
 #pragma once
 
 #include "rgw_rest_client.h"
-#include "common/ceph_json.h"
+#include "common/stone_json.h"
 #include "common/RefCountedObj.h"
 #include "include/common_fwd.h"
 
@@ -66,7 +66,7 @@ inline param_vec_t make_param_list(const map<string, string> *pp)
 
 class RGWRESTConn
 {
-  CephContext *cct;
+  StoneContext *cct;
   vector<string> endpoints;
   RGWAccessKey key;
   string self_zone_group;
@@ -76,8 +76,8 @@ class RGWRESTConn
 
 public:
 
-  RGWRESTConn(CephContext *_cct, RGWSI_Zone *zone_svc, const string& _remote_id, const list<string>& endpoints, HostStyle _host_style = PathStyle);
-  RGWRESTConn(CephContext *_cct, RGWSI_Zone *zone_svc, const string& _remote_id, const list<string>& endpoints, RGWAccessKey _cred, HostStyle _host_style = PathStyle);
+  RGWRESTConn(StoneContext *_cct, RGWSI_Zone *zone_svc, const string& _remote_id, const list<string>& endpoints, HostStyle _host_style = PathStyle);
+  RGWRESTConn(StoneContext *_cct, RGWSI_Zone *zone_svc, const string& _remote_id, const list<string>& endpoints, RGWAccessKey _cred, HostStyle _host_style = PathStyle);
 
   // custom move needed for atomic
   RGWRESTConn(RGWRESTConn&& other);
@@ -100,7 +100,7 @@ public:
     return host_style;
   }
 
-  CephContext *get_ctx() {
+  StoneContext *get_ctx() {
     return cct;
   }
   size_t get_endpoint_count() const { return endpoints.size(); }
@@ -116,13 +116,13 @@ public:
   int put_obj_async(const DoutPrefixProvider *dpp, const rgw_user& uid, rgw::sal::RGWObject* obj, uint64_t obj_size,
                     map<string, bufferlist>& attrs, bool send, RGWRESTStreamS3PutObj **req);
   int complete_request(RGWRESTStreamS3PutObj *req, string& etag,
-                       ceph::real_time *mtime, optional_yield y);
+                       stone::real_time *mtime, optional_yield y);
 
   struct get_obj_params {
     rgw_user uid;
     req_info *info{nullptr};
-    const ceph::real_time *mod_ptr{nullptr};
-    const ceph::real_time *unmod_ptr{nullptr};
+    const stone::real_time *mod_ptr{nullptr};
+    const stone::real_time *unmod_ptr{nullptr};
     bool high_precision_time{true};
 
     string etag;
@@ -146,13 +146,13 @@ public:
   int get_obj(const DoutPrefixProvider *dpp, const rgw::sal::RGWObject* obj, const get_obj_params& params, bool send, RGWRESTStreamRWRequest **req);
 
   int get_obj(const DoutPrefixProvider *dpp, const rgw_user& uid, req_info *info /* optional */, const rgw::sal::RGWObject* obj,
-              const ceph::real_time *mod_ptr, const ceph::real_time *unmod_ptr,
+              const stone::real_time *mod_ptr, const stone::real_time *unmod_ptr,
               uint32_t mod_zone_id, uint64_t mod_pg_ver,
               bool prepend_metadata, bool get_op, bool rgwx_stat, bool sync_manifest,
               bool skip_decrypt, bool send, RGWHTTPStreamRWRequest::ReceiveCB *cb, RGWRESTStreamRWRequest **req);
   int complete_request(RGWRESTStreamRWRequest *req,
                        string *etag,
-                       ceph::real_time *mtime,
+                       stone::real_time *mtime,
                        uint64_t *psize,
                        map<string, string> *pattrs,
                        map<string, string> *pheaders,
@@ -197,10 +197,10 @@ class S3RESTConn : public RGWRESTConn {
 
 public:
 
-  S3RESTConn(CephContext *_cct, RGWSI_Zone *svc_zone, const string& _remote_id, const list<string>& endpoints, HostStyle _host_style = PathStyle) :
+  S3RESTConn(StoneContext *_cct, RGWSI_Zone *svc_zone, const string& _remote_id, const list<string>& endpoints, HostStyle _host_style = PathStyle) :
     RGWRESTConn(_cct, svc_zone, _remote_id, endpoints, _host_style) {}
 
-  S3RESTConn(CephContext *_cct, RGWSI_Zone *svc_zone, const string& _remote_id, const list<string>& endpoints, RGWAccessKey _cred, HostStyle _host_style = PathStyle):
+  S3RESTConn(StoneContext *_cct, RGWSI_Zone *svc_zone, const string& _remote_id, const list<string>& endpoints, RGWAccessKey _cred, HostStyle _host_style = PathStyle):
     RGWRESTConn(_cct, svc_zone, _remote_id, endpoints, _cred, _host_style) {}
   ~S3RESTConn() override = default;
 
@@ -255,7 +255,7 @@ public:
 };
 
 class RGWRESTReadResource : public RefCountedObject, public RGWIOProvider {
-  CephContext *cct;
+  StoneContext *cct;
   RGWRESTConn *conn;
   string resource;
   param_vec_t params;
@@ -375,7 +375,7 @@ int RGWRESTReadResource::wait(T *dest, optional_yield y)
 }
 
 class RGWRESTSendResource : public RefCountedObject, public RGWIOProvider {
-  CephContext *cct;
+  StoneContext *cct;
   RGWRESTConn *conn;
   string method;
   string resource;

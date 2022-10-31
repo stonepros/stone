@@ -18,7 +18,7 @@
 #include <boost/intrusive/list.hpp>
 #define BOOST_ICL_USE_STATIC_BOUNDED_INTERVALS
 #include <boost/icl/interval_set.hpp>
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 class Client;
 
@@ -29,7 +29,7 @@ typedef boost::icl::interval<uint64_t>::type barrier_interval;
  * we keep count of uncommitted writes on the inode, so that
  * ll_commit_blocks can do the right thing.
  *
- * This is just a hacked copy of Stonee's sync callback.
+ * This is just a hacked copy of Stone's sync callback.
  */
 
 enum CBlockSync_State
@@ -54,7 +54,7 @@ typedef boost::intrusive::list< C_Block_Sync,
 class Barrier
 {
 private:
-  ceph::condition_variable cond;
+  stone::condition_variable cond;
   boost::icl::interval_set<uint64_t> span;
   BlockSyncList write_list;
 
@@ -79,7 +79,7 @@ class BarrierContext
 private:
   Client *cl;
   uint64_t ino;
-  ceph::mutex lock = ceph::make_mutex("BarrierContext");
+  stone::mutex lock = stone::make_mutex("BarrierContext");
 
   // writes not claimed by a commit
   BlockSyncList outstanding_writes;

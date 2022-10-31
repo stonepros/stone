@@ -13,7 +13,7 @@
 #include "include/types.h"
 #include "crimson/osd/osd_operation.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 

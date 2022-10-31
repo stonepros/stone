@@ -1,7 +1,7 @@
 import os
 import errno
 
-import cephfs
+import stonefs
 
 from ..exception import VolumeException
 from distutils.util import strtobool
@@ -12,9 +12,9 @@ _pin_value = {
     "random": lambda x: float(x),
 }
 _pin_xattr = {
-    "export": "ceph.dir.pin",
-    "distributed": "ceph.dir.pin.distributed",
-    "random": "ceph.dir.pin.random",
+    "export": "stone.dir.pin",
+    "distributed": "stone.dir.pin.distributed",
+    "random": "stone.dir.pin.random",
 }
 
 def pin(fs, path, pin_type, pin_setting):
@@ -30,5 +30,5 @@ def pin(fs, path, pin_type, pin_setting):
 
     try:
         fs.setxattr(path, _pin_xattr[pin_type], str(pin_setting).encode('utf-8'), 0)
-    except cephfs.Error as e:
+    except stonefs.Error as e:
         raise VolumeException(-e.args[0], e.args[1])

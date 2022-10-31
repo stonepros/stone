@@ -4,33 +4,33 @@
 
 .. index:: heartbeat
 
-After you have completed your initial Ceph configuration, you may deploy and run
-Ceph.  When you execute a command such as ``ceph health`` or ``ceph -s``,  the
-:term:`Ceph Monitor` reports on the current state of the :term:`Ceph Storage
-Cluster`. The Ceph Monitor knows about the Ceph Storage Cluster by requiring
-reports from each :term:`Ceph OSD Daemon`, and by receiving reports from Ceph
-OSD Daemons about the status of their neighboring Ceph OSD Daemons. If the Ceph
+After you have completed your initial Stone configuration, you may deploy and run
+Stone.  When you execute a command such as ``stone health`` or ``stone -s``,  the
+:term:`Stone Monitor` reports on the current state of the :term:`Stone Storage
+Cluster`. The Stone Monitor knows about the Stone Storage Cluster by requiring
+reports from each :term:`Stone OSD Daemon`, and by receiving reports from Stone
+OSD Daemons about the status of their neighboring Stone OSD Daemons. If the Stone
 Monitor doesn't receive reports, or if it receives reports of changes in the
-Ceph Storage Cluster, the Ceph Monitor updates the status of the :term:`Ceph
+Stone Storage Cluster, the Stone Monitor updates the status of the :term:`Stone
 Cluster Map`.
 
-Ceph provides reasonable default settings for Ceph Monitor/Ceph OSD Daemon
+Stone provides reasonable default settings for Stone Monitor/Stone OSD Daemon
 interaction. However, you may override the defaults. The following sections
-describe how Ceph Monitors and Ceph OSD Daemons interact for the purposes of
-monitoring the Ceph Storage Cluster.
+describe how Stone Monitors and Stone OSD Daemons interact for the purposes of
+monitoring the Stone Storage Cluster.
 
 .. index:: heartbeat interval
 
 OSDs Check Heartbeats
 =====================
 
-Each Ceph OSD Daemon checks the heartbeat of other Ceph OSD Daemons at random
-intervals less than every 6 seconds.  If a neighboring Ceph OSD Daemon doesn't
-show a heartbeat within a 20 second grace period, the Ceph OSD Daemon may
-consider the neighboring Ceph OSD Daemon ``down`` and report it back to a Ceph
-Monitor, which will update the Ceph Cluster Map. You may change this grace
+Each Stone OSD Daemon checks the heartbeat of other Stone OSD Daemons at random
+intervals less than every 6 seconds.  If a neighboring Stone OSD Daemon doesn't
+show a heartbeat within a 20 second grace period, the Stone OSD Daemon may
+consider the neighboring Stone OSD Daemon ``down`` and report it back to a Stone
+Monitor, which will update the Stone Cluster Map. You may change this grace
 period by adding an ``osd heartbeat grace`` setting under the ``[mon]``
-and ``[osd]`` or ``[global]`` section of your Ceph configuration file,
+and ``[osd]`` or ``[global]`` section of your Stone configuration file,
 or by setting the value at runtime.
 
 
@@ -72,9 +72,9 @@ or by setting the value at runtime.
 OSDs Report Down OSDs
 =====================
 
-By default, two Ceph OSD Daemons from different hosts must report to the Ceph
-Monitors that another Ceph OSD Daemon is ``down`` before the Ceph Monitors
-acknowledge that the reported Ceph OSD Daemon is ``down``. But there is chance
+By default, two Stone OSD Daemons from different hosts must report to the Stone
+Monitors that another Stone OSD Daemon is ``down`` before the Stone Monitors
+acknowledge that the reported Stone OSD Daemon is ``down``. But there is chance
 that all the OSDs reporting the failure are hosted in a rack with a bad switch
 which has trouble connecting to another OSD. To avoid this sort of false alarm,
 we consider the peers reporting a failure a proxy for a potential "subcluster"
@@ -83,11 +83,11 @@ all cases, but will sometimes help us localize the grace correction to a subset
 of the system that is unhappy. ``mon osd reporter subtree level`` is used to
 group the peers into the "subcluster" by their common ancestor type in CRUSH
 map. By default, only two reports from different subtree are required to report
-another Ceph OSD Daemon ``down``. You can change the number of reporters from
-unique subtrees and the common ancestor type required to report a Ceph OSD
-Daemon ``down`` to a Ceph Monitor by adding an ``mon osd min down reporters``
+another Stone OSD Daemon ``down``. You can change the number of reporters from
+unique subtrees and the common ancestor type required to report a Stone OSD
+Daemon ``down`` to a Stone Monitor by adding an ``mon osd min down reporters``
 and ``mon osd reporter subtree level`` settings  under the ``[mon]`` section of
-your Ceph configuration file, or by setting the value at runtime.
+your Stone configuration file, or by setting the value at runtime.
 
 
 .. ditaa::
@@ -114,11 +114,11 @@ your Ceph configuration file, or by setting the value at runtime.
 OSDs Report Peering Failure
 ===========================
 
-If a Ceph OSD Daemon cannot peer with any of the Ceph OSD Daemons defined in its
-Ceph configuration file (or the cluster map), it will ping a Ceph Monitor for
+If a Stone OSD Daemon cannot peer with any of the Stone OSD Daemons defined in its
+Stone configuration file (or the cluster map), it will ping a Stone Monitor for
 the most recent copy of the cluster map every 30 seconds. You can change the
-Ceph Monitor heartbeat interval by adding an ``osd mon heartbeat interval``
-setting under the ``[osd]`` section of your Ceph configuration file, or by
+Stone Monitor heartbeat interval by adding an ``osd mon heartbeat interval``
+setting under the ``[osd]`` section of your Stone configuration file, or by
 setting the value at runtime.
 
 .. ditaa::
@@ -152,17 +152,17 @@ setting the value at runtime.
 OSDs Report Their Status
 ========================
 
-If an Ceph OSD Daemon doesn't report to a Ceph Monitor, the Ceph Monitor will
-consider the Ceph OSD Daemon ``down`` after the  ``mon osd report timeout``
-elapses. A Ceph OSD Daemon sends a report to a Ceph Monitor when a reportable
+If an Stone OSD Daemon doesn't report to a Stone Monitor, the Stone Monitor will
+consider the Stone OSD Daemon ``down`` after the  ``mon osd report timeout``
+elapses. A Stone OSD Daemon sends a report to a Stone Monitor when a reportable
 event such as a failure, a change in placement group stats, a change in
-``up_thru`` or when it boots within 5 seconds. You can change the Ceph OSD
+``up_thru`` or when it boots within 5 seconds. You can change the Stone OSD
 Daemon minimum report interval by adding an ``osd mon report interval``
-setting under the ``[osd]`` section of your Ceph configuration file, or by
-setting the value at runtime. A Ceph OSD Daemon sends a report to a Ceph
+setting under the ``[osd]`` section of your Stone configuration file, or by
+setting the value at runtime. A Stone OSD Daemon sends a report to a Stone
 Monitor every 120 seconds irrespective of whether any notable changes occur.
-You can change the Ceph Monitor report interval by adding an ``osd mon report
-interval max`` setting under the ``[osd]`` section of your Ceph configuration
+You can change the Stone Monitor report interval by adding an ``osd mon report
+interval max`` setting under the ``[osd]`` section of your Stone configuration
 file, or by setting the value at runtime.
 
 
@@ -219,8 +219,8 @@ Monitor Settings
 
 ``mon osd min up ratio``
 
-:Description: The minimum ratio of ``up`` Ceph OSD Daemons before Ceph will
-              mark Ceph OSD Daemons ``down``.
+:Description: The minimum ratio of ``up`` Stone OSD Daemons before Stone will
+              mark Stone OSD Daemons ``down``.
 
 :Type: Double
 :Default: ``.3``
@@ -228,8 +228,8 @@ Monitor Settings
 
 ``mon osd min in ratio``
 
-:Description: The minimum ratio of ``in`` Ceph OSD Daemons before Ceph will
-              mark Ceph OSD Daemons ``out``.
+:Description: The minimum ratio of ``in`` Stone OSD Daemons before Stone will
+              mark Stone OSD Daemons ``out``.
 
 :Type: Double
 :Default: ``.75``
@@ -261,22 +261,22 @@ Monitor Settings
 
 ``mon osd adjust heartbeat grace``
 
-:Description: If set to ``true``, Ceph will scale based on laggy estimations.
+:Description: If set to ``true``, Stone will scale based on laggy estimations.
 :Type: Boolean
 :Default: ``true``
 
 
 ``mon osd adjust down out interval``
 
-:Description: If set to ``true``, Ceph will scaled based on laggy estimations.
+:Description: If set to ``true``, Stone will scaled based on laggy estimations.
 :Type: Boolean
 :Default: ``true``
 
 
 ``mon osd auto mark in``
 
-:Description: Ceph will mark any booting Ceph OSD Daemons as ``in``
-              the Ceph Storage Cluster.
+:Description: Stone will mark any booting Stone OSD Daemons as ``in``
+              the Stone Storage Cluster.
 
 :Type: Boolean
 :Default: ``false``
@@ -284,8 +284,8 @@ Monitor Settings
 
 ``mon osd auto mark auto out in``
 
-:Description: Ceph will mark booting Ceph OSD Daemons auto marked ``out``
-              of the Ceph Storage Cluster as ``in`` the cluster.
+:Description: Stone will mark booting Stone OSD Daemons auto marked ``out``
+              of the Stone Storage Cluster as ``in`` the cluster.
 
 :Type: Boolean
 :Default: ``true``
@@ -293,8 +293,8 @@ Monitor Settings
 
 ``mon osd auto mark new in``
 
-:Description: Ceph will mark booting new Ceph OSD Daemons as ``in`` the
-              Ceph Storage Cluster.
+:Description: Stone will mark booting new Stone OSD Daemons as ``in`` the
+              Stone Storage Cluster.
 
 :Type: Boolean
 :Default: ``true``
@@ -302,7 +302,7 @@ Monitor Settings
 
 ``mon osd down out interval``
 
-:Description: The number of seconds Ceph waits before marking a Ceph OSD Daemon
+:Description: The number of seconds Stone waits before marking a Stone OSD Daemon
               ``down`` and ``out`` if it doesn't respond.
 
 :Type: 32-bit Integer
@@ -311,9 +311,9 @@ Monitor Settings
 
 ``mon osd down out subtree limit``
 
-:Description: The smallest :term:`CRUSH` unit type that Ceph will **not**
+:Description: The smallest :term:`CRUSH` unit type that Stone will **not**
               automatically mark out. For instance, if set to ``host`` and if
-              all OSDs of a host are down, Ceph will not automatically mark out
+              all OSDs of a host are down, Stone will not automatically mark out
               these OSDs.
 
 :Type: String
@@ -323,15 +323,15 @@ Monitor Settings
 ``mon osd report timeout``
 
 :Description: The grace period in seconds before declaring
-              unresponsive Ceph OSD Daemons ``down``.
+              unresponsive Stone OSD Daemons ``down``.
 
 :Type: 32-bit Integer
 :Default: ``900``
 
 ``mon osd min down reporters``
 
-:Description: The minimum number of Ceph OSD Daemons required to report a
-              ``down`` Ceph OSD Daemon.
+:Description: The minimum number of Stone OSD Daemons required to report a
+              ``down`` Stone OSD Daemon.
 
 :Type: 32-bit Integer
 :Default: ``2``
@@ -353,15 +353,15 @@ OSD Settings
 
 ``osd_heartbeat_interval``
 
-:Description: How often an Ceph OSD Daemon pings its peers (in seconds).
+:Description: How often an Stone OSD Daemon pings its peers (in seconds).
 :Type: 32-bit Integer
 :Default: ``6``
 
 
 ``osd_heartbeat_grace``
 
-:Description: The elapsed time when a Ceph OSD Daemon hasn't shown a heartbeat
-              that the Ceph Storage Cluster considers it ``down``.
+:Description: The elapsed time when a Stone OSD Daemon hasn't shown a heartbeat
+              that the Stone Storage Cluster considers it ``down``.
               This setting must be set in both the [mon] and [osd] or [global]
               sections so that it is read by both monitor and OSD daemons.
 :Type: 32-bit Integer
@@ -370,8 +370,8 @@ OSD Settings
 
 ``osd_mon_heartbeat_interval``
 
-:Description: How often the Ceph OSD Daemon pings a Ceph Monitor if it has no
-              Ceph OSD Daemon peers.
+:Description: How often the Stone OSD Daemon pings a Stone Monitor if it has no
+              Stone OSD Daemon peers.
 
 :Type: 32-bit Integer
 :Default: ``30``
@@ -388,9 +388,9 @@ OSD Settings
 
 ``osd_mon_report_interval``
 
-:Description: The number of seconds a Ceph OSD Daemon may wait
+:Description: The number of seconds a Stone OSD Daemon may wait
               from startup or another reportable event before reporting
-              to a Ceph Monitor.
+              to a Stone Monitor.
 
 :Type: 32-bit Integer
 :Default: ``5``

@@ -28,7 +28,7 @@ classes to be imported:
 	import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 
-If you are just testing the Ceph Object Storage services, consider
+If you are just testing the Stone Object Storage services, consider
 using HTTP protocol instead of HTTPS protocol. 
 
 First, import the ``ClientConfiguration`` and ``Protocol`` classes. 

@@ -55,7 +55,7 @@ private:
     const hobject_t& soid,
     const ObjectRecoveryInfo& recovery_info,
     bool is_delete,
-    ceph::os::Transaction& t);
+    stone::os::Transaction& t);
   void on_global_recover (
     const hobject_t& soid,
     const object_stat_sum_t& stat_diff,
@@ -84,7 +84,7 @@ private:
   // backfill begin
   std::unique_ptr<crimson::osd::BackfillState> backfill_state;
   std::map<pg_shard_t,
-           ceph::ref_t<MOSDPGBackfillRemove>> backfill_drop_requests;
+           stone::ref_t<MOSDPGBackfillRemove>> backfill_drop_requests;
 
   template <class EventT>
   void start_backfill_recovery(

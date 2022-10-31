@@ -2,9 +2,9 @@ import argparse
 import json
 from textwrap import dedent
 
-# import ceph_volume.process
+# import stone_volume.process
 
-from ceph_volume_zfs.util.disk import Disks
+from stone_volume_zfs.util.disk import Disks
 
 class Inventory(object):
 
@@ -26,7 +26,7 @@ class Inventory(object):
 	Generate an inventory of available devices
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume zfs inventory',
+            prog='stone-volume zfs inventory',
             description=sub_command_help,
         )
         parser.add_argument(

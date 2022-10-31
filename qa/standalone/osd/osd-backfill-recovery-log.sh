@@ -15,17 +15,17 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
     # Fix port????
-    export CEPH_MON="127.0.0.1:7129" # git grep '\<7129\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON --osd_max_backfills=1 --debug_reserver=20 "
+    export STONE_MON="127.0.0.1:7129" # git grep '\<7129\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON --osd_max_backfills=1 --debug_reserver=20 "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -48,7 +48,7 @@ function _common_test() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
     export EXTRA_OPTS=" $extra_opts"
 
     for osd in $(seq 0 $(expr $OSDS - 1))
@@ -64,7 +64,7 @@ function _common_test() {
     done
 
     # Mark out all OSDs for this pool
-    ceph osd out $(ceph pg dump pgs --format=json | jq '.pg_stats[0].up[]')
+    stone osd out $(stone pg dump pgs --format=json | jq '.pg_stats[0].up[]')
     if [ "$moreobjects" != "0" ]; then
       for j in $(seq 1 $moreobjects)
       do
@@ -76,7 +76,7 @@ function _common_test() {
 
     flush_pg_stats
 
-    newprimary=$(ceph pg dump pgs --format=json | jq '.pg_stats[0].up_primary')
+    newprimary=$(stone pg dump pgs --format=json | jq '.pg_stats[0].up_primary')
     kill_daemons
 
     ERRORS=0

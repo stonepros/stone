@@ -90,7 +90,7 @@ describe('TaskWrapperService', () => {
       expect(summaryService.addRunningTask).not.toHaveBeenCalled();
       /**
        * A notification will be raised by the API interceptor.
-       * This resolves this bug https://tracker.ceph.com/issues/25139
+       * This resolves this bug https://tracker.stone.com/issues/25139
        */
       expect(notify.notifyTask).not.toHaveBeenCalled();
     });

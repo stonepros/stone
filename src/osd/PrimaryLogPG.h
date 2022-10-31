@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  * Copyright (C) 2013 Cloudwatt <libre.licensing@cloudwatt.com>
@@ -18,7 +18,7 @@
 #define STONE_REPLICATEDPG_H
 
 #include <boost/tuple/tuple.hpp>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "DynamicPerfStats.h"
 #include "OSD.h"
 #include "PG.h"
@@ -73,7 +73,7 @@ public:
    * CopyResults stores the object metadata of interest to a copy initiator.
    */
   struct CopyResults {
-    ceph::real_time mtime; ///< the copy source's mtime
+    stone::real_time mtime; ///< the copy source's mtime
     uint64_t object_size; ///< the copied object's size
     bool started_temp_obj; ///< true if the callback needs to delete temp object
     hobject_t temp_oid;    ///< temp object (if any)
@@ -97,7 +97,7 @@ public:
     uint32_t data_digest, omap_digest;
     mempool::osd_pglog::vector<std::pair<osd_reqid_t, version_t> > reqids; // [(reqid, user_version)]
     mempool::osd_pglog::map<uint32_t, int> reqid_return_codes; // std::map reqids by index to error code
-    std::map<std::string, ceph::buffer::list> attrs; // xattrs
+    std::map<std::string, stone::buffer::list> attrs; // xattrs
     uint64_t truncate_seq;
     uint64_t truncate_size;
     bool is_data_digest() {
@@ -131,14 +131,14 @@ public:
 
     CopyResults results;
 
-    ceph_tid_t objecter_tid;
-    ceph_tid_t objecter_tid2;
+    stone_tid_t objecter_tid;
+    stone_tid_t objecter_tid2;
 
     object_copy_cursor_t cursor;
-    std::map<std::string,ceph::buffer::list> attrs;
-    ceph::buffer::list data;
-    ceph::buffer::list omap_header;
-    ceph::buffer::list omap_data;
+    std::map<std::string,stone::buffer::list> attrs;
+    stone::buffer::list data;
+    stone::buffer::list omap_header;
+    stone::buffer::list omap_data;
     int rval;
 
     object_copy_cursor_t temp_cursor;
@@ -200,7 +200,7 @@ public:
   struct ProxyReadOp {
     OpRequestRef op;
     hobject_t soid;
-    ceph_tid_t objecter_tid;
+    stone_tid_t objecter_tid;
     std::vector<OSDOp> &ops;
     version_t user_version;
     int data_offset;
@@ -218,7 +218,7 @@ public:
     OpContext *ctx;
     OpRequestRef op;
     hobject_t soid;
-    ceph_tid_t objecter_tid;
+    stone_tid_t objecter_tid;
     std::vector<OSDOp> &ops;
     version_t user_version;
     bool sent_reply;
@@ -240,30 +240,30 @@ public:
     OpRequestRef op;            ///< initiating op
     std::list<OpRequestRef> dup_ops; ///< bandwagon jumpers
     version_t flushed_version;  ///< user version we are flushing
-    ceph_tid_t objecter_tid;    ///< copy-from request tid
+    stone_tid_t objecter_tid;    ///< copy-from request tid
     int rval;                   ///< copy-from result
     bool blocking;              ///< whether we are blocking updates
     bool removal;               ///< we are removing the backend object
     std::optional<std::function<void()>> on_flush; ///< callback, may be null
     // for chunked object
     std::map<uint64_t, int> io_results;
-    std::map<uint64_t, ceph_tid_t> io_tids;
+    std::map<uint64_t, stone_tid_t> io_tids;
     uint64_t chunks;
 
     FlushOp()
       : flushed_version(0), objecter_tid(0), rval(0),
 	blocking(false), removal(false), chunks(0) {}
-    ~FlushOp() { ceph_assert(!on_flush); }
+    ~FlushOp() { stone_assert(!on_flush); }
   };
   typedef std::shared_ptr<FlushOp> FlushOpRef;
 
   friend struct RefCountCallback;
   struct ManifestOp {
     RefCountCallback *cb;
-    ceph_tid_t objecter_tid;
+    stone_tid_t objecter_tid;
     OpRequestRef op;
     std::map<uint64_t, int> results;
-    std::map<uint64_t, ceph_tid_t> tids; 
+    std::map<uint64_t, stone_tid_t> tids; 
     std::map<hobject_t, pair<uint64_t, uint64_t>> chunks;
     uint64_t num_chunks = 0;
     object_manifest_t new_manifest;
@@ -407,7 +407,7 @@ public:
 
   ObjectContextRef get_obc(
     const hobject_t &hoid,
-    const std::map<std::string, ceph::buffer::list> &attrs) override {
+    const std::map<std::string, stone::buffer::list> &attrs) override {
     return get_object_context(hoid, true, &attrs);
   }
 
@@ -470,7 +470,7 @@ public:
     ObjectStore::Transaction &t,
     bool async = false) override {
     if (is_primary()) {
-      ceph_assert(trim_to <= recovery_state.get_last_update_ondisk());
+      stone_assert(trim_to <= recovery_state.get_last_update_ondisk());
     }
     if (hset_history) {
       recovery_state.update_hset(*hset_history);
@@ -570,7 +570,7 @@ public:
 
   PerfCounters *get_logger() override;
 
-  ceph_tid_t get_tid() override { return osd->get_tid(); }
+  stone_tid_t get_tid() override { return osd->get_tid(); }
 
   OstreamTemp clog_error() override { return osd->clog->error(); }
   OstreamTemp clog_warn() override { return osd->clog->warn(); }
@@ -630,9 +630,9 @@ public:
     struct NotifyAck {
       std::optional<uint64_t> watch_cookie;
       uint64_t notify_id;
-      ceph::buffer::list reply_bl;
+      stone::buffer::list reply_bl;
       explicit NotifyAck(uint64_t notify_id) : notify_id(notify_id) {}
-      NotifyAck(uint64_t notify_id, uint64_t cookie, ceph::buffer::list& rbl)
+      NotifyAck(uint64_t notify_id, uint64_t cookie, stone::buffer::list& rbl)
 	: watch_cookie(cookie), notify_id(notify_id) {
 	reply_bl = std::move(rbl);
       }
@@ -700,7 +700,7 @@ public:
 
     // pending async reads <off, len, op_flags> -> <outbl, outr>
     std::list<std::pair<boost::tuple<uint64_t, uint64_t, unsigned>,
-	      std::pair<ceph::buffer::list*, Context*> > > pending_async_reads;
+	      std::pair<stone::buffer::list*, Context*> > > pending_async_reads;
     int inflightreads;
     friend struct OnReadComplete;
     void start_async_reads(PrimaryLogPG *pg);
@@ -760,11 +760,11 @@ public:
       }
     }
     ~OpContext() {
-      ceph_assert(!op_t);
+      stone_assert(!op_t);
       if (reply)
 	reply->put();
       for (std::list<std::pair<boost::tuple<uint64_t, uint64_t, unsigned>,
-		     std::pair<ceph::buffer::list*, Context*> > >::iterator i =
+		     std::pair<stone::buffer::list*, Context*> > >::iterator i =
 	     pending_async_reads.begin();
 	   i != pending_async_reads.end();
 	   pending_async_reads.erase(i++)) {
@@ -794,7 +794,7 @@ public:
     eversion_t v;
     int r = 0;
 
-    ceph_tid_t rep_tid;
+    stone_tid_t rep_tid;
 
     bool rep_aborted;
     bool all_committed;
@@ -810,7 +810,7 @@ public:
     std::list<std::function<void()>> on_finish;
 
     RepGather(
-      OpContext *c, ceph_tid_t rt,
+      OpContext *c, stone_tid_t rt,
       eversion_t lc) :
       hoid(c->obc->obs.oi.soid),
       op(c->op),
@@ -829,7 +829,7 @@ public:
       ObcLockManager &&manager,
       OpRequestRef &&o,
       std::optional<std::function<void(void)> > &&on_complete,
-      ceph_tid_t rt,
+      stone_tid_t rt,
       eversion_t lc,
       int r) :
       op(o),
@@ -851,7 +851,7 @@ public:
       return this;
     }
     void put() {
-      ceph_assert(nref > 0);
+      stone_assert(nref > 0);
       if (--nref == 0) {
 	delete this;
 	//generic_dout(0) << "deleting " << this << dendl;
@@ -879,12 +879,12 @@ protected:
     } else if (write_ordered) {
       ctx->lock_type = RWState::RWWRITE;
     } else {
-      ceph_assert(ctx->op->may_read());
+      stone_assert(ctx->op->may_read());
       ctx->lock_type = RWState::RWREAD;
     }
 
     if (ctx->head_obc) {
-      ceph_assert(!ctx->obc->obs.exists);
+      stone_assert(!ctx->obc->obs.exists);
       if (!ctx->lock_manager.get_lock_type(
 	    ctx->lock_type,
 	    ctx->head_obc->obs.oi.soid,
@@ -901,7 +901,7 @@ protected:
 	  ctx->op)) {
       return true;
     } else {
-      ceph_assert(!ctx->head_obc);
+      stone_assert(!ctx->head_obc);
       ctx->lock_type = RWState::RWNONE;
       return false;
     }
@@ -934,7 +934,7 @@ protected:
   RepGather *new_repop(
     OpContext *ctx,
     ObjectContextRef obc,
-    ceph_tid_t rep_tid);
+    stone_tid_t rep_tid);
   boost::intrusive_ptr<RepGather> new_repop(
     eversion_t version,
     int r,
@@ -963,7 +963,7 @@ protected:
     std::set<pg_shard_t> waiting_on;
   };
   void cancel_log_updates();
-  std::map<ceph_tid_t, LogUpdateCtx> log_entry_update_waiting_on;
+  std::map<stone_tid_t, LogUpdateCtx> log_entry_update_waiting_on;
 
 
   // hot/cold tracking
@@ -1023,11 +1023,11 @@ protected:
   SharedLRU<hobject_t, ObjectContext> object_contexts;
   // std::map from oid.snapdir() to SnapSetContext *
   std::map<hobject_t, SnapSetContext*> snapset_contexts;
-  ceph::mutex snapset_contexts_lock =
-    ceph::make_mutex("PrimaryLogPG::snapset_contexts_lock");
+  stone::mutex snapset_contexts_lock =
+    stone::make_mutex("PrimaryLogPG::snapset_contexts_lock");
 
   // debug order that client ops are applied
-  std::map<hobject_t, std::map<client_t, ceph_tid_t>> debug_op_order;
+  std::map<hobject_t, std::map<client_t, stone_tid_t>> debug_op_order;
 
   void populate_obc_watchers(ObjectContextRef obc);
   void check_blocklisted_obc_watchers(ObjectContextRef obc);
@@ -1042,7 +1042,7 @@ protected:
   ObjectContextRef get_object_context(
     const hobject_t& soid,
     bool can_create,
-    const std::map<std::string, ceph::buffer::list> *attrs = 0
+    const std::map<std::string, stone::buffer::list> *attrs = 0
     );
 
   void context_registry_on_change();
@@ -1062,7 +1062,7 @@ protected:
   SnapSetContext *get_snapset_context(
     const hobject_t& oid,
     bool can_create,
-    const std::map<std::string, ceph::buffer::list> *attrs = 0,
+    const std::map<std::string, stone::buffer::list> *attrs = 0,
     bool oid_existed = true //indicate this oid whether exsited in backend
     );
   void register_snapset_context(SnapSetContext *ssc) {
@@ -1070,9 +1070,9 @@ protected:
     _register_snapset_context(ssc);
   }
   void _register_snapset_context(SnapSetContext *ssc) {
-    ceph_assert(ceph_mutex_is_locked(snapset_contexts_lock));
+    stone_assert(stone_mutex_is_locked(snapset_contexts_lock));
     if (!ssc->registered) {
-      ceph_assert(snapset_contexts.count(ssc->oid) == 0);
+      stone_assert(snapset_contexts.count(ssc->oid) == 0);
       ssc->registered = true;
       snapset_contexts[ssc->oid] = ssc;
     }
@@ -1098,7 +1098,7 @@ protected:
   std::set<hobject_t> backfills_in_flight;
   std::map<hobject_t, pg_stat_t> pending_backfill_updates;
 
-  void dump_recovery_info(ceph::Formatter *f) const override {
+  void dump_recovery_info(stone::Formatter *f) const override {
     f->open_array_section("waiting_on_backfill");
     for (std::set<pg_shard_t>::const_iterator p = waiting_on_backfill.begin();
         p != waiting_on_backfill.end(); ++p)
@@ -1331,7 +1331,7 @@ protected:
   // -- copyfrom --
   std::map<hobject_t, CopyOpRef> copy_ops;
 
-  int do_copy_get(OpContext *ctx, ceph::buffer::list::const_iterator& bp, OSDOp& op,
+  int do_copy_get(OpContext *ctx, stone::buffer::list::const_iterator& bp, OSDOp& op,
 		  ObjectContextRef& obc);
   int finish_copy_get();
 
@@ -1351,7 +1351,7 @@ protected:
 		  object_locator_t oloc, version_t version, unsigned flags,
 		  bool mirror_snapset, unsigned src_obj_fadvise_flags,
 		  unsigned dest_obj_fadvise_flags);
-  void process_copy_chunk(hobject_t oid, ceph_tid_t tid, int r);
+  void process_copy_chunk(hobject_t oid, stone_tid_t tid, int r);
   void _write_copy_chunk(CopyOpRef cop, PGTransaction *t);
   uint64_t get_copy_chunk_size() const {
     uint64_t size = cct->_conf->osd_copyfrom_max_chunk;
@@ -1366,8 +1366,8 @@ protected:
   void _copy_some(ObjectContextRef obc, CopyOpRef cop);
   void finish_copyfrom(CopyFromCallback *cb);
   void finish_promote(int r, CopyResults *results, ObjectContextRef obc);
-  void cancel_copy(CopyOpRef cop, bool requeue, std::vector<ceph_tid_t> *tids);
-  void cancel_copy_ops(bool requeue, std::vector<ceph_tid_t> *tids);
+  void cancel_copy(CopyOpRef cop, bool requeue, std::vector<stone_tid_t> *tids);
+  void cancel_copy_ops(bool requeue, std::vector<stone_tid_t> *tids);
 
   friend struct C_Copyfrom;
 
@@ -1379,10 +1379,10 @@ protected:
     OpRequestRef op, ObjectContextRef obc,
     bool blocking, hobject_t *pmissing,
     std::optional<std::function<void()>> &&on_flush);
-  void finish_flush(hobject_t oid, ceph_tid_t tid, int r);
+  void finish_flush(hobject_t oid, stone_tid_t tid, int r);
   int try_flush_mark_clean(FlushOpRef fop);
-  void cancel_flush(FlushOpRef fop, bool requeue, std::vector<ceph_tid_t> *tids);
-  void cancel_flush_ops(bool requeue, std::vector<ceph_tid_t> *tids);
+  void cancel_flush(FlushOpRef fop, bool requeue, std::vector<stone_tid_t> *tids);
+  void cancel_flush_ops(bool requeue, std::vector<stone_tid_t> *tids);
 
   /// @return false if clone is has been evicted
   bool is_present_clone(hobject_t coid);
@@ -1397,19 +1397,19 @@ protected:
                    unsigned split_bits) override;
   void apply_and_flush_repops(bool requeue);
 
-  int do_xattr_cmp_u64(int op, __u64 v1, ceph::buffer::list& xattr);
-  int do_xattr_cmp_str(int op, std::string& v1s, ceph::buffer::list& xattr);
+  int do_xattr_cmp_u64(int op, __u64 v1, stone::buffer::list& xattr);
+  int do_xattr_cmp_str(int op, std::string& v1s, stone::buffer::list& xattr);
 
   // -- checksum --
-  int do_checksum(OpContext *ctx, OSDOp& osd_op, ceph::buffer::list::const_iterator *bl_it);
+  int do_checksum(OpContext *ctx, OSDOp& osd_op, stone::buffer::list::const_iterator *bl_it);
   int finish_checksum(OSDOp& osd_op, Checksummer::CSumType csum_type,
-                      ceph::buffer::list::const_iterator *init_value_bl_it,
-                      const ceph::buffer::list &read_bl);
+                      stone::buffer::list::const_iterator *init_value_bl_it,
+                      const stone::buffer::list &read_bl);
 
   friend struct C_ChecksumRead;
 
   int do_extent_cmp(OpContext *ctx, OSDOp& osd_op);
-  int finish_extent_cmp(OSDOp& osd_op, const ceph::buffer::list &read_bl);
+  int finish_extent_cmp(OSDOp& osd_op, const stone::buffer::list &read_bl);
 
   friend struct C_ExtentCmpRead;
 
@@ -1420,27 +1420,27 @@ protected:
   bool pgls_filter(const PGLSFilter& filter, const hobject_t& sobj);
 
   std::pair<int, std::unique_ptr<const PGLSFilter>> get_pgls_filter(
-    ceph::buffer::list::const_iterator& iter);
+    stone::buffer::list::const_iterator& iter);
 
   std::map<hobject_t, std::list<OpRequestRef>> in_progress_proxy_ops;
   void kick_proxy_ops_blocked(hobject_t& soid);
-  void cancel_proxy_ops(bool requeue, std::vector<ceph_tid_t> *tids);
+  void cancel_proxy_ops(bool requeue, std::vector<stone_tid_t> *tids);
 
   // -- proxyread --
-  std::map<ceph_tid_t, ProxyReadOpRef> proxyread_ops;
+  std::map<stone_tid_t, ProxyReadOpRef> proxyread_ops;
 
   void do_proxy_read(OpRequestRef op, ObjectContextRef obc = NULL);
-  void finish_proxy_read(hobject_t oid, ceph_tid_t tid, int r);
-  void cancel_proxy_read(ProxyReadOpRef prdop, std::vector<ceph_tid_t> *tids);
+  void finish_proxy_read(hobject_t oid, stone_tid_t tid, int r);
+  void cancel_proxy_read(ProxyReadOpRef prdop, std::vector<stone_tid_t> *tids);
 
   friend struct C_ProxyRead;
 
   // -- proxywrite --
-  std::map<ceph_tid_t, ProxyWriteOpRef> proxywrite_ops;
+  std::map<stone_tid_t, ProxyWriteOpRef> proxywrite_ops;
 
   void do_proxy_write(OpRequestRef op, ObjectContextRef obc = NULL);
-  void finish_proxy_write(hobject_t oid, ceph_tid_t tid, int r);
-  void cancel_proxy_write(ProxyWriteOpRef pwop, std::vector<ceph_tid_t> *tids);
+  void finish_proxy_write(hobject_t oid, stone_tid_t tid, int r);
+  void cancel_proxy_write(ProxyWriteOpRef pwop, std::vector<stone_tid_t> *tids);
 
   friend struct C_ProxyWrite_Commit;
 
@@ -1457,11 +1457,11 @@ protected:
 			     uint64_t req_total_len, bool write_ordered);
   bool can_proxy_chunked_read(OpRequestRef op, ObjectContextRef obc);
   void _copy_some_manifest(ObjectContextRef obc, CopyOpRef cop, uint64_t start_offset);
-  void process_copy_chunk_manifest(hobject_t oid, ceph_tid_t tid, int r, uint64_t offset);
+  void process_copy_chunk_manifest(hobject_t oid, stone_tid_t tid, int r, uint64_t offset);
   void finish_promote_manifest(int r, CopyResults *results, ObjectContextRef obc);
   void cancel_and_requeue_proxy_ops(hobject_t oid);
-  void cancel_manifest_ops(bool requeue, vector<ceph_tid_t> *tids);
-  ceph_tid_t refcount_manifest(hobject_t src_soid, hobject_t tgt_soid, refcount_t type,
+  void cancel_manifest_ops(bool requeue, vector<stone_tid_t> *tids);
+  stone_tid_t refcount_manifest(hobject_t src_soid, hobject_t tgt_soid, refcount_t type,
 			      Context *cb, std::optional<bufferlist> chunk);
   void dec_all_refcount_manifest(const object_info_t& oi, OpContext* ctx);
   void dec_refcount(const hobject_t& soid, const object_ref_delta_t& refs);
@@ -1476,7 +1476,7 @@ protected:
 	     std::map<uint64_t, bufferlist>& chunks);
   int start_dedup(OpRequestRef op, ObjectContextRef obc);
   hobject_t get_fpoid_from_chunk(const hobject_t soid, bufferlist& chunk);
-  int finish_set_dedup(hobject_t oid, int r, ceph_tid_t tid, uint64_t offset);
+  int finish_set_dedup(hobject_t oid, int r, stone_tid_t tid, uint64_t offset);
 
   friend struct C_ProxyChunkRead;
   friend class PromoteManifestCallback;
@@ -1494,8 +1494,8 @@ public:
   void do_command(
     const std::string_view& prefix,
     const cmdmap_t& cmdmap,
-    const ceph::buffer::list& idata,
-    std::function<void(int,const std::string&,ceph::buffer::list&)> on_finish) override;
+    const stone::buffer::list& idata,
+    std::function<void(int,const std::string&,stone::buffer::list&)> on_finish) override;
 
   void clear_cache() override;
   int get_cache_obj_count() override {
@@ -1527,10 +1527,10 @@ public:
   void snap_trimmer_scrub_complete() override;
   int do_osd_ops(OpContext *ctx, std::vector<OSDOp>& ops);
 
-  int _get_tmap(OpContext *ctx, ceph::buffer::list *header, ceph::buffer::list *vals);
+  int _get_tmap(OpContext *ctx, stone::buffer::list *header, stone::buffer::list *vals);
   int do_tmap2omap(OpContext *ctx, unsigned flags);
-  int do_tmapup(OpContext *ctx, ceph::buffer::list::const_iterator& bp, OSDOp& osd_op);
-  int do_tmapup_slow(OpContext *ctx, ceph::buffer::list::const_iterator& bp, OSDOp& osd_op, ceph::buffer::list& bl);
+  int do_tmapup(OpContext *ctx, stone::buffer::list::const_iterator& bp, OSDOp& osd_op);
+  int do_tmapup_slow(OpContext *ctx, stone::buffer::list::const_iterator& bp, OSDOp& osd_op, stone::buffer::list& bl);
 
   void do_osd_op_effects(OpContext *ctx, const ConnectionRef& conn);
 private:
@@ -1623,8 +1623,8 @@ private:
       : my_base(ctx),
 	NamedState(nullptr, "Trimming") {
       context< SnapTrimmer >().log_enter(state_name);
-      ceph_assert(context< SnapTrimmer >().permit_trim());
-      ceph_assert(in_flight.empty());
+      stone_assert(context< SnapTrimmer >().permit_trim());
+      stone_assert(in_flight.empty());
     }
     void exit() {
       context< SnapTrimmer >().log_exit(state_name, enter_time);
@@ -1648,7 +1648,7 @@ private:
       : my_base(ctx),
 	NamedState(nullptr, "Trimming/WaitTrimTimer") {
       context< SnapTrimmer >().log_enter(state_name);
-      ceph_assert(context<Trimming>().in_flight.empty());
+      stone_assert(context<Trimming>().in_flight.empty());
       struct OnTimer : Context {
 	PrimaryLogPGRef pg;
 	epoch_t epoch;
@@ -1699,7 +1699,7 @@ private:
       : my_base(ctx),
 	NamedState(nullptr, "Trimming/WaitRWLock") {
       context< SnapTrimmer >().log_enter(state_name);
-      ceph_assert(context<Trimming>().in_flight.empty());
+      stone_assert(context<Trimming>().in_flight.empty());
     }
     void exit() {
       context< SnapTrimmer >().log_exit(state_name, enter_time);
@@ -1722,7 +1722,7 @@ private:
       : my_base(ctx),
 	NamedState(nullptr, "Trimming/WaitRepops") {
       context< SnapTrimmer >().log_enter(state_name);
-      ceph_assert(!context<Trimming>().in_flight.empty());
+      stone_assert(!context<Trimming>().in_flight.empty());
     }
     void exit() {
       context< SnapTrimmer >().log_exit(state_name, enter_time);
@@ -1765,8 +1765,8 @@ private:
 	pg->unlock();
       }
       void cancel() {
-	ceph_assert(pg->is_locked());
-	ceph_assert(!canceled);
+	stone_assert(pg->is_locked());
+	stone_assert(!canceled);
 	canceled = true;
       }
     };
@@ -1776,7 +1776,7 @@ private:
       : my_base(ctx),
 	NamedState(nullptr, "Trimming/WaitReservation") {
       context< SnapTrimmer >().log_enter(state_name);
-      ceph_assert(context<Trimming>().in_flight.empty());
+      stone_assert(context<Trimming>().in_flight.empty());
       auto *pg = context< SnapTrimmer >().pg;
       pending = new ReservationCB(pg);
       pg->osd->snap_reserver.request_reservation(
@@ -1838,7 +1838,7 @@ private:
   // whiteout or no change.
   void maybe_create_new_object(OpContext *ctx, bool ignore_transaction=false);
   int _delete_oid(OpContext *ctx, bool no_whiteout, bool try_no_whiteout);
-  int _rollback_to(OpContext *ctx, ceph_osd_op& op);
+  int _rollback_to(OpContext *ctx, stone_osd_op& op);
 public:
   bool is_missing_object(const hobject_t& oid) const;
   bool is_unreadable_object(const hobject_t &oid) const {
@@ -1887,7 +1887,7 @@ public:
 
   void mark_all_unfound_lost(
     int what,
-    std::function<void(int,const std::string&,ceph::buffer::list&)> on_finish);
+    std::function<void(int,const std::string&,stone::buffer::list&)> on_finish);
   eversion_t pick_newest_available(const hobject_t& oid);
 
   void do_update_log_missing(
@@ -1913,11 +1913,11 @@ public:
     ObjectContextRef obc,
     PGTransaction *t,
     const std::string &key,
-    ceph::buffer::list &val);
+    stone::buffer::list &val);
   void setattrs_maybe_cache(
     ObjectContextRef obc,
     PGTransaction *t,
-    std::map<std::string, ceph::buffer::list> &attrs);
+    std::map<std::string, stone::buffer::list> &attrs);
   void rmattr_maybe_cache(
     ObjectContextRef obc,
     PGTransaction *t,
@@ -1925,10 +1925,10 @@ public:
   int getattr_maybe_cache(
     ObjectContextRef obc,
     const std::string &key,
-    ceph::buffer::list *val);
+    stone::buffer::list *val);
   int getattrs_maybe_cache(
     ObjectContextRef obc,
-    std::map<std::string, ceph::buffer::list> *out);
+    std::map<std::string, stone::buffer::list> *out);
 
 public:
   void set_dynamic_perf_stats_queries(

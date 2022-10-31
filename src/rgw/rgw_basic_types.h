@@ -31,14 +31,14 @@ struct rgw_user {
       ns(std::move(ns)) {
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 1, bl);
     encode(tenant, bl);
     encode(id, bl);
     encode(ns, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(2, bl);
     decode(tenant, bl);
     decode(id, bl);
@@ -138,7 +138,7 @@ struct rgw_user {
     }
     return (id < rhs.id);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<rgw_user*>& o);
 };
 WRITE_CLASS_ENCODER(rgw_user)
@@ -174,16 +174,16 @@ struct rgw_pool {
     return ns.compare(p.ns);
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
      ENCODE_START(10, 10, bl);
     encode(name, bl);
     encode(ns, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode_from_bucket(ceph::buffer::list::const_iterator& bl);
+  void decode_from_bucket(stone::buffer::list::const_iterator& bl);
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START_LEGACY_COMPAT_LEN(10, 3, 3, bl);
 
     decode(name, bl);
@@ -267,7 +267,7 @@ struct rgw_data_placement_target {
     return index_pool.compare(t.index_pool);
   };
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
 };
 
@@ -313,7 +313,7 @@ struct rgw_bucket {
 
   void convert(cls_user_bucket *b) const;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
      ENCODE_START(10, 10, bl);
     encode(name, bl);
     encode(marker, bl);
@@ -328,7 +328,7 @@ struct rgw_bucket {
     }
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START_LEGACY_COMPAT_LEN(10, 3, 3, bl);
     decode(name, bl);
     if (struct_v < 10) {
@@ -384,7 +384,7 @@ struct rgw_bucket {
     return explicit_placement.get_data_extra_pool();
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   void decode_json(JSONObj *obj);
   static void generate_test_instances(std::list<rgw_bucket*>& o);
 
@@ -464,14 +464,14 @@ struct rgw_zone_id {
   rgw_zone_id(const std::string& _id) : id(_id) {}
   rgw_zone_id(std::string&& _id) : id(std::move(_id)) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     /* backward compatiblity, not using ENCODE_{START,END} macros */
-    ceph::encode(id, bl);
+    stone::encode(id, bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     /* backward compatiblity, not using DECODE_{START,END} macros */
-    ceph::decode(id, bl);
+    stone::decode(id, bl);
   }
 
   void clear() {
@@ -505,7 +505,7 @@ inline std::ostream& operator<<(std::ostream& os, const rgw_zone_id& zid) {
   return os;
 }
 
-void encode_json_impl(const char *name, const rgw_zone_id& zid, ceph::Formatter *f);
+void encode_json_impl(const char *name, const rgw_zone_id& zid, stone::Formatter *f);
 void decode_json_obj(rgw_zone_id& zid, JSONObj *obj);
 
 
@@ -618,8 +618,8 @@ std::ostream& operator <<(std::ostream& m, const Principal& p);
 class JSONObj;
 
 void decode_json_obj(rgw_user& val, JSONObj *obj);
-void encode_json(const char *name, const rgw_user& val, ceph::Formatter *f);
-void encode_xml(const char *name, const rgw_user& val, ceph::Formatter *f);
+void encode_json(const char *name, const rgw_user& val, stone::Formatter *f);
+void encode_xml(const char *name, const rgw_user& val, stone::Formatter *f);
 
 inline std::ostream& operator<<(std::ostream& out, const rgw_user &u) {
   std::string s;

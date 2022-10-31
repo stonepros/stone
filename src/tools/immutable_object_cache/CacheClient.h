@@ -9,8 +9,8 @@
 #include <boost/asio/error.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "include/ceph_assert.h"
-#include "common/ceph_mutex.h"
+#include "include/stone_assert.h"
+#include "common/stone_mutex.h"
 #include "include/Context.h"
 #include "Types.h"
 #include "SocketCommon.h"
@@ -18,12 +18,12 @@
 
 using boost::asio::local::stream_protocol;
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 class CacheClient {
  public:
-  CacheClient(const std::string& file, CephContext* ceph_ctx);
+  CacheClient(const std::string& file, StoneContext* stone_ctx);
   ~CacheClient();
   void run();
   bool is_session_work();
@@ -56,7 +56,7 @@ class CacheClient {
                         size_t bytes_transferred);
 
  private:
-  CephContext* m_cct;
+  StoneContext* m_cct;
   boost::asio::io_service m_io_service;
   boost::asio::io_service::work m_io_service_work;
   stream_protocol::socket m_dm_socket;
@@ -72,13 +72,13 @@ class CacheClient {
   std::atomic<bool> m_writing;
   std::atomic<bool> m_reading;
   std::atomic<uint64_t> m_sequence_id;
-  ceph::mutex m_lock =
-    ceph::make_mutex("ceph::cache::cacheclient::m_lock");
+  stone::mutex m_lock =
+    stone::make_mutex("stone::cache::cacheclient::m_lock");
   std::map<uint64_t, ObjectCacheRequest*> m_seq_to_req;
   bufferlist m_outcoming_bl;
   bufferptr m_bp_header;
 };
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone
 #endif  // STONE_CACHE_CACHE_CLIENT_H

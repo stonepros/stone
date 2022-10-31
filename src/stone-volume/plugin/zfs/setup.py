@@ -25,20 +25,20 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
     ],
-    description="Manage Ceph OSDs on ZFS pool/volume/filesystem",
+    description="Manage Stone OSDs on ZFS pool/volume/filesystem",
     install_requires=requirements,
     license="BSD license",
     include_package_data=True,
-    keywords='ceph-volume-zfs',
-    name='ceph-volume-zfs',
-    packages=find_packages(include=['ceph_volume_zfs']),
+    keywords='stone-volume-zfs',
+    name='stone-volume-zfs',
+    packages=find_packages(include=['stone_volume_zfs']),
     setup_requires=setup_requirements,
-    url='https://github.com/ceph/ceph/src/ceph-volume/plugin/zfs',
+    url='https://github.com/stone/stone/src/stone-volume/plugin/zfs',
     version='0.1.0',
     zip_safe=False,
     entry_points = dict(
-        ceph_volume_handlers = [
-            'zfs = ceph_volume_zfs.zfs:ZFS',
+        stone_volume_handlers = [
+            'zfs = stone_volume_zfs.zfs:ZFS',
         ],
     ),
 )

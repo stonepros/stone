@@ -2,7 +2,7 @@ import errno
 import logging
 import importlib
 
-import cephfs
+import stonefs
 
 from .subvolume_base import SubvolumeBase
 from .subvolume_attrs import SubvolumeTypes
@@ -78,7 +78,7 @@ class SubvolumeLoader(object):
         assert subvolume.legacy_mode
         try:
             fs.mkdirs(subvolume.legacy_dir, 0o700)
-        except cephfs.Error as e:
+        except stonefs.Error as e:
             raise VolumeException(-e.args[0], "error accessing subvolume")
         subvolume_type = SubvolumeTypes.TYPE_NORMAL
         try:

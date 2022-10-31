@@ -10,7 +10,7 @@
 #include "ServiceDaemon.h"
 #include "Types.h"
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 class FSMirror;
@@ -18,7 +18,7 @@ class PeerReplayerAdminSocketHook;
 
 class PeerReplayer {
 public:
-  PeerReplayer(CephContext *cct, FSMirror *fs_mirror,
+  PeerReplayer(StoneContext *cct, FSMirror *fs_mirror,
                RadosRef local_cluster, const Filesystem &filesystem,
                const Peer &peer, const std::set<std::string, std::less<>> &directories,
                MountRef mount, ServiceDaemon *service_daemon);
@@ -100,21 +100,21 @@ private:
 
   struct SyncEntry {
     std::string epath;
-    ceph_dir_result *dirp; // valid for directories
-    struct ceph_statx stx;
+    stone_dir_result *dirp; // valid for directories
+    struct stone_statx stx;
     // set by incremental sync _after_ ensuring missing entries
     // in the currently synced snapshot have been propagated to
     // the remote filesystem.
     bool remote_synced = false;
 
     SyncEntry(std::string_view path,
-              const struct ceph_statx &stx)
+              const struct stone_statx &stx)
       : epath(path),
         stx(stx) {
     }
     SyncEntry(std::string_view path,
-              ceph_dir_result *dirp,
-              const struct ceph_statx &stx)
+              stone_dir_result *dirp,
+              const struct stone_statx &stx)
       : epath(path),
         dirp(dirp),
         stx(stx) {
@@ -132,8 +132,8 @@ private:
     }
   };
 
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
 
   // stats sent to service daemon
   struct ServiceDaemonStats {
@@ -155,8 +155,8 @@ private:
   };
 
   void _inc_failed_count(const std::string &dir_root) {
-    auto max_failures = g_ceph_context->_conf.get_val<uint64_t>(
-    "cephfs_mirror_max_consecutive_failures_per_directory");
+    auto max_failures = g_stone_context->_conf.get_val<uint64_t>(
+    "stonefs_mirror_max_consecutive_failures_per_directory");
     auto &sync_stat = m_snap_sync_stats.at(dir_root);
     sync_stat.last_failed = clock::now();
     if (++sync_stat.nr_failures >= max_failures && !sync_stat.failed) {
@@ -230,7 +230,7 @@ private:
 
     std::scoped_lock locker(m_lock);
     if (is_stopping()) {
-      // ceph defines EBLOCKLISTED to ESHUTDOWN (108). so use
+      // stone defines EBLOCKLISTED to ESHUTDOWN (108). so use
       // EINPROGRESS to identify shutdown.
       *retval = -EINPROGRESS;
       return true;
@@ -247,7 +247,7 @@ private:
 
   typedef std::vector<std::unique_ptr<SnapshotReplayerThread>> SnapshotReplayers;
 
-  CephContext *m_cct;
+  StoneContext *m_cct;
   FSMirror *m_fs_mirror;
   RadosRef m_local_cluster;
   Filesystem m_filesystem;
@@ -260,8 +260,8 @@ private:
   ServiceDaemon *m_service_daemon;
   PeerReplayerAdminSocketHook *m_asok_hook = nullptr;
 
-  ceph::mutex m_lock;
-  ceph::condition_variable m_cond;
+  stone::mutex m_lock;
+  stone::condition_variable m_cond;
   RadosRef m_remote_cluster;
   MountRef m_remote_mount;
   bool m_stopping = false;
@@ -277,7 +277,7 @@ private:
   int try_lock_directory(const std::string &dir_root, SnapshotReplayerThread *replayer,
                          DirRegistry *registry);
   void unlock_directory(const std::string &dir_root, const DirRegistry &registry);
-  void sync_snaps(const std::string &dir_root, std::unique_lock<ceph::mutex> &locker);
+  void sync_snaps(const std::string &dir_root, std::unique_lock<stone::mutex> &locker);
 
 
   int build_snap_map(const std::string &dir_root, std::map<uint64_t, std::string> *snap_map,
@@ -291,7 +291,7 @@ private:
   int cleanup_remote_dir(const std::string &dir_root, const std::string &epath,
                          const FHandles &fh);
 
-  int should_sync_entry(const std::string &epath, const struct ceph_statx &cstx,
+  int should_sync_entry(const std::string &epath, const struct stone_statx &cstx,
                         const FHandles &fh, bool *need_data_sync, bool *need_attr_sync);
 
   int open_dir(MountRef mnt, const std::string &dir_path, boost::optional<uint64_t> snap_id);
@@ -306,14 +306,14 @@ private:
                   boost::optional<Snapshot> prev);
   int do_sync_snaps(const std::string &dir_root);
 
-  int remote_mkdir(const std::string &epath, const struct ceph_statx &stx, const FHandles &fh);
-  int remote_file_op(const std::string &dir_root, const std::string &epath, const struct ceph_statx &stx,
+  int remote_mkdir(const std::string &epath, const struct stone_statx &stx, const FHandles &fh);
+  int remote_file_op(const std::string &dir_root, const std::string &epath, const struct stone_statx &stx,
                      const FHandles &fh, bool need_data_sync, bool need_attr_sync);
-  int copy_to_remote(const std::string &dir_root, const std::string &epath, const struct ceph_statx &stx,
+  int copy_to_remote(const std::string &dir_root, const std::string &epath, const struct stone_statx &stx,
                      const FHandles &fh);
 };
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_PEER_REPLAYER_H

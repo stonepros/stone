@@ -1,5 +1,5 @@
 ============
- CephFS APIs
+ StoneFS APIs
 ============
 
 .. toctree::

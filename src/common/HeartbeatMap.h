@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 Sage Weil <sage@newdream.net>
  *
@@ -20,11 +20,11 @@
 #include <string>
 #include <pthread.h>
 
-#include "common/ceph_time.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_time.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
 
-namespace ceph {
+namespace stone {
 
 /*
  * HeartbeatMap -
@@ -40,12 +40,12 @@ namespace ceph {
 struct heartbeat_handle_d {
   const std::string name;
   pthread_t thread_id = 0;
-  using clock = ceph::coarse_mono_clock;
-  using time = ceph::coarse_mono_time;
+  using clock = stone::coarse_mono_clock;
+  using time = stone::coarse_mono_time;
   std::atomic<time> timeout = clock::zero();
   std::atomic<time> suicide_timeout = clock::zero();
-  ceph::timespan grace = ceph::timespan::zero();
-  ceph::timespan suicide_grace = ceph::timespan::zero();
+  stone::timespan grace = stone::timespan::zero();
+  stone::timespan suicide_grace = stone::timespan::zero();
   std::list<heartbeat_handle_d*>::iterator list_item;
 
   explicit heartbeat_handle_d(const std::string& n)
@@ -61,8 +61,8 @@ class HeartbeatMap {
 
   // reset the timeout so that it expects another touch within grace amount of time
   void reset_timeout(heartbeat_handle_d *h,
-		     ceph::timespan grace,
-		     ceph::timespan suicide_grace);
+		     stone::timespan grace,
+		     stone::timespan suicide_grace);
   // clear the timeout so that it's not checked on
   void clear_timeout(heartbeat_handle_d *h);
 
@@ -78,21 +78,21 @@ class HeartbeatMap {
   // get the number of total workers
   int get_total_workers() const;
 
-  explicit HeartbeatMap(StoneeContext *cct);
+  explicit HeartbeatMap(StoneContext *cct);
   ~HeartbeatMap();
 
  private:
-  using clock = ceph::coarse_mono_clock;
-  StoneeContext *m_cct;
-  ceph::shared_mutex m_rwlock =
-    ceph::make_shared_mutex("HeartbeatMap::m_rwlock");
+  using clock = stone::coarse_mono_clock;
+  StoneContext *m_cct;
+  stone::shared_mutex m_rwlock =
+    stone::make_shared_mutex("HeartbeatMap::m_rwlock");
   clock::time_point m_inject_unhealthy_until;
   std::list<heartbeat_handle_d*> m_workers;
   std::atomic<unsigned> m_unhealthy_workers = { 0 };
   std::atomic<unsigned> m_total_workers = { 0 };
 
   bool _check(const heartbeat_handle_d *h, const char *who,
-	      ceph::coarse_mono_time now);
+	      stone::coarse_mono_time now);
 };
 
 }

@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 John Spray <john.spray@inktank.com>
  *
@@ -16,7 +16,7 @@
 
 #include "mds/FSMap.h"
 #include "mon/MgrMap.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 #include "osdc/Objecter.h"
 #include "mon/MonClient.h"
@@ -39,7 +39,7 @@ protected:
   Objecter *objecter;
   FSMap fsmap;
   ServiceMap servicemap;
-  mutable ceph::mutex lock = ceph::make_mutex("ClusterState");
+  mutable stone::mutex lock = stone::make_mutex("ClusterState");
 
   MgrMap mgr_map;
 
@@ -55,7 +55,7 @@ protected:
 public:
 
   void load_digest(MMgrDigest *m);
-  void ingest_pgstats(ceph::ref_t<MPGStats> stats);
+  void ingest_pgstats(stone::ref_t<MPGStats> stats);
 
   void update_delta_stats();
 
@@ -114,7 +114,7 @@ public:
   auto with_monmap(Args &&... args) const
   {
     std::lock_guard l(lock);
-    ceph_assert(monc != nullptr);
+    stone_assert(monc != nullptr);
     return monc->with_monmap(std::forward<Args>(args)...);
   }
 
@@ -122,14 +122,14 @@ public:
   auto with_osdmap(Args &&... args) const ->
     decltype(objecter->with_osdmap(std::forward<Args>(args)...))
   {
-    ceph_assert(objecter != nullptr);
+    stone_assert(objecter != nullptr);
     return objecter->with_osdmap(std::forward<Args>(args)...);
   }
 
   // call cb(osdmap, pg_map, ...args) with the appropriate locks
   template <typename Callback, typename ...Args>
   auto with_osdmap_and_pgmap(Callback&& cb, Args&& ...args) const {
-    ceph_assert(objecter != nullptr);
+    stone_assert(objecter != nullptr);
     std::lock_guard l(lock);
     return objecter->with_osdmap(
       std::forward<Callback>(cb),

@@ -6,7 +6,7 @@ import json
 from .. import mgr
 from ..rest_client import RequestException
 from ..security import Permission, Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from ..services.iscsi_cli import IscsiGatewaysConfig
 from ..services.iscsi_client import IscsiClient
 from ..tools import partial_dict
@@ -131,7 +131,7 @@ class HealthData(object):
         if self._has_permissions(Permission.READ, Scope.MONITOR):
             result['mon_status'] = self.mon_status()
 
-        if self._has_permissions(Permission.READ, Scope.CEPHFS):
+        if self._has_permissions(Permission.READ, Scope.STONEFS):
             result['fs_map'] = self.fs_map()
 
         if self._has_permissions(Permission.READ, Scope.OSD):
@@ -174,7 +174,7 @@ class HealthData(object):
         return health
 
     def client_perf(self):
-        result = CephService.get_client_perf()
+        result = StoneService.get_client_perf()
         if self._minimal:
             result = partial_dict(
                 result,
@@ -260,19 +260,19 @@ class HealthData(object):
         return osd_map
 
     def pg_info(self):
-        return CephService.get_pg_info()
+        return StoneService.get_pg_info()
 
     def pools(self):
-        pools = CephService.get_pool_list_with_stats()
+        pools = StoneService.get_pool_list_with_stats()
         if self._minimal:
             pools = [{}] * len(pools)
         return pools
 
     def rgw_count(self):
-        return len(CephService.get_service_list('rgw'))
+        return len(StoneService.get_service_list('rgw'))
 
     def scrub_status(self):
-        return CephService.get_scrub_status()
+        return StoneService.get_scrub_status()
 
 
 @APIRouter('/health')

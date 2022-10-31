@@ -12,16 +12,16 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library Public License for more details.
 #
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7125" # git grep '\<7125\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7125" # git grep '\<7125\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -36,13 +36,13 @@ function TEST_mon_created_time() {
 
     run_mon $dir a || return 1
 
-    ceph mon dump || return 1
+    stone mon dump || return 1
 
-    if test "$(ceph mon dump 2>/dev/null | sed -n '/created/p' | awk '{print $NF}')"x = ""x ; then
+    if test "$(stone mon dump 2>/dev/null | sed -n '/created/p' | awk '{print $NF}')"x = ""x ; then
         return 1
     fi
 
-    if test "$(ceph mon dump 2>/dev/null | sed -n '/created/p' | awk '{print $NF}')"x = "0.000000"x ; then
+    if test "$(stone mon dump 2>/dev/null | sed -n '/created/p' | awk '{print $NF}')"x = "0.000000"x ; then
         return 1
     fi
 }

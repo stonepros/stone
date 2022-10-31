@@ -2,14 +2,14 @@
 
 set -x
 
-./bin/ceph config set osd osd_crush_update_on_start false
+./bin/stone config set osd osd_crush_update_on_start false
 
-./bin/ceph osd crush move osd.0 host=host1-1 datacenter=site1 root=default
-./bin/ceph osd crush move osd.1 host=host1-2 datacenter=site1 root=default
-./bin/ceph osd crush move osd.2 host=host2-1 datacenter=site2 root=default
-./bin/ceph osd crush move osd.3 host=host2-2 datacenter=site2 root=default
+./bin/stone osd crush move osd.0 host=host1-1 datacenter=site1 root=default
+./bin/stone osd crush move osd.1 host=host1-2 datacenter=site1 root=default
+./bin/stone osd crush move osd.2 host=host2-1 datacenter=site2 root=default
+./bin/stone osd crush move osd.3 host=host2-2 datacenter=site2 root=default
 
-./bin/ceph osd getcrushmap > crush.map.bin
+./bin/stone osd getcrushmap > crush.map.bin
 ./bin/crushtool -d crush.map.bin -o crush.map.txt
 cat <<EOF >> crush.map.txt
 rule stretch_rule {
@@ -50,11 +50,11 @@ rule stretch_rule3 {
 }
 EOF
 ./bin/crushtool -c crush.map.txt -o crush2.map.bin
-./bin/ceph osd setcrushmap -i crush2.map.bin
-./bin/ceph mon set election_strategy connectivity
+./bin/stone osd setcrushmap -i crush2.map.bin
+./bin/stone mon set election_strategy connectivity
 
-./bin/ceph mon set_location a datacenter=site1
-./bin/ceph mon set_location b datacenter=site2
-./bin/ceph mon set_location c datacenter=site3
-./bin/ceph osd pool create test_stretch1 1024 1024 replicated
-./bin/ceph mon enable_stretch_mode c stretch_rule datacenter
+./bin/stone mon set_location a datacenter=site1
+./bin/stone mon set_location b datacenter=site2
+./bin/stone mon set_location c datacenter=site3
+./bin/stone osd pool create test_stretch1 1024 1024 replicated
+./bin/stone mon enable_stretch_mode c stretch_rule datacenter

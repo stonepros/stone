@@ -1,13 +1,13 @@
 #
 # More information at
-#  http://tracker.ceph.com/projects/ceph/wiki/Ceph_contributors_list_maintenance_guide
+#  http://tracker.stone.com/projects/stone/wiki/Stone_contributors_list_maintenance_guide
 #
 # See .githubmap for GitHub username contributors
 # See .mailmap for name and mail normalization.
 # See .peoplemap for unique list of people
 #
 # To display the 10 organization who contributed 
-# most commits to ceph ( requires git >= 1.8.4 ):
+# most commits to stone ( requires git >= 1.8.4 ):
 #
 # git log --pretty='%aN <%aE>' | \
 #   git -c mailmap.file=.organizationmap check-mailmap --stdin | \
@@ -420,7 +420,7 @@ IT Refined <contact@itrefined.com> Ron Allred <rallred@itrefined.com>
 IWeb <contact@iweb.com> David Moreau Simard <dmsimard@iweb.com>
 Johannes Gutenberg-Universität Mainz <contact@uni-mainz.de> Marcel Lauhoff <lauhoff@uni-mainz.de>
 Juniper Networks <contact@juniper.net> Michal Skalski <mskalski@juniper.net>
-Karlsruhe Institute of Technology <ceph@lists.kit.edu> Daniel J. Hofmann <daniel@trvx.org>
+Karlsruhe Institute of Technology <stone@lists.kit.edu> Daniel J. Hofmann <daniel@trvx.org>
 Keeper Technology <contact@keepertech.com> Wyllys Ingersoll <wyllys.ingersoll@keepertech.com>
 KuaiShou <contact@kuaishou.com> shenhang <shenhang@kuaishou.com>
 Kylin Cloud <contact@kylin-cloud.com> Jie Wang <jie.wang@kylin-cloud.com>
@@ -485,10 +485,10 @@ OpenSUSE <contact@opensuse.org> Dominique Leuenberger <dimstar@opensuse.org>
 OpenSUSE <contact@opensuse.org> Richard Brown <RBrownCCB@opensuse.org>
 Opower <contact@opower.com> Derrick Schneider <derrick.schneider@opower.com>
 Oracle <contact@oracle.com> Nikita Gerasimov <nikita.gerasimov@oracle.com>
-OVH <ceph@ovh.net> Bartłomiej Święcki <bartlomiej.swiecki@corp.ovh.com>
-OVH <ceph@ovh.net> Etienne Menguy <etienne.menguy@corp.ovh.com>
-OVH <ceph@ovh.net> Paweł Sadowski <pawel.sadowski@corp.ovh.com>
-OVH <ceph@ovh.net> Piotr Dałek <piotr.dalek@corp.ovh.com>
+OVH <stone@ovh.net> Bartłomiej Święcki <bartlomiej.swiecki@corp.ovh.com>
+OVH <stone@ovh.net> Etienne Menguy <etienne.menguy@corp.ovh.com>
+OVH <stone@ovh.net> Paweł Sadowski <pawel.sadowski@corp.ovh.com>
+OVH <stone@ovh.net> Piotr Dałek <piotr.dalek@corp.ovh.com>
 Pacific Northwest National Laboratory <contact@pnl.gov> Brown, David M JR <david.brown@pnl.gov>
 Pacific Northwest National Laboratory <contact@pnl.gov> Erwin, Brock A <Brock.Erwin@pnl.gov>
 Pacific Northwest National Laboratory <contact@pnl.gov> Evan Felix <evan.felix@pnnl.gov>
@@ -564,7 +564,7 @@ Red Hat <contact@redhat.com> J. Eric Ivancich <ivancich@redhat.com>
 Red Hat <contact@redhat.com> Jason Dillaman <dillaman@redhat.com>
 Red Hat <contact@redhat.com> Jean-Charles Lopez <jelopez@redhat.com>
 Red Hat <contact@redhat.com> Jeff Layton <jlayton@redhat.com>
-Red Hat <contact@redhat.com> Jenkins <jenkins@ceph.com>
+Red Hat <contact@redhat.com> Jenkins <jenkins@stone.com>
 Red Hat <contact@redhat.com> John Spray <jspray@redhat.com>
 Red Hat <contact@redhat.com> John Wilkins <jwilkins@redhat.com>
 Red Hat <contact@redhat.com> Jos Collin <jcollin@redhat.com>
@@ -935,7 +935,7 @@ Unaffiliated <no@organization.net> Gaël Fenet-Garde <gael.fenet.garde@gmail.com
 Unaffiliated <no@organization.net> Germain Chipaux <germain.chipaux@gmail.com>
 Unaffiliated <no@organization.net> Grégory Charot <buixor@gmail.com>
 Unaffiliated <no@organization.net> Gu Zhongyan <guzhongyan@360.cn>
-Unaffiliated <no@organization.net> Gu Zhongyan <guzhongyan@ceph01v.ops.corp.qihoo.net>
+Unaffiliated <no@organization.net> Gu Zhongyan <guzhongyan@stone01v.ops.corp.qihoo.net>
 Unaffiliated <no@organization.net> Hannes von Haugwitz <hannes@vonhaugwitz.com>
 Unaffiliated <no@organization.net> Hans Bogert <hansbogert@gmail.com>
 Unaffiliated <no@organization.net> haodong.tang <tanghaodong25@gmail.com>
@@ -1167,7 +1167,7 @@ Unaffiliated <no@organization.net> Xingyi Wu <wuxingyi2015@outlook.com>
 Unaffiliated <no@organization.net> Xinze Chi <xmdxcxz@gmail.com>
 Unaffiliated <no@organization.net> Xiong Yiliang <xiongyiliang@xunlei.com>
 Unaffiliated <no@organization.net> Xu Biao <xubiao.codeyz@gmail.com>
-Unaffiliated <no@organization.net> Xu Xue Han <xuxuehan@ceph10v.ops.corp.qihoo.net>
+Unaffiliated <no@organization.net> Xu Xue Han <xuxuehan@stone10v.ops.corp.qihoo.net>
 Unaffiliated <no@organization.net> Xuehan Xu <xuxuehan@360.cn>
 Unaffiliated <no@organization.net> Yang Honggang <joseph.yang@xtaotech.com>
 Unaffiliated <no@organization.net> Yanhu Cao <gmayyyha@gmail.com>

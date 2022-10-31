@@ -33,18 +33,18 @@ function run() {
 
     local old_path="$PATH"
     export PATH="bin:$PATH"
-    ceph osd pool create mypool
+    stone osd pool create mypool
     rados -p mypool bench 10 write -b 123
-    ceph osd out 0
-    ceph osd in 0
-    init-ceph restart osd.1
+    stone osd out 0
+    stone osd in 0
+    init-stone restart osd.1
     for f in ../qa/workunits/cls/*.sh ; do
         $f
     done
     ../qa/workunits/rados/test.sh
-    ceph_test_librbd
-    ceph_test_libcephfs
-    init-ceph restart mds.a
+    stone_test_librbd
+    stone_test_libstonefs
+    init-stone restart mds.a
     ../qa/workunits/rgw/run-s3tests.sh
     PATH="$old_path"
 
@@ -61,11 +61,11 @@ function import_corpus() {
     ../src/test/encoding/import.sh \
         ${encode_dump_path} \
         ${version} \
-        ../ceph-object-corpus/archive
+        ../stone-object-corpus/archive
     ../src/test/encoding/import-generated.sh \
-        ../ceph-object-corpus/archive
+        ../stone-object-corpus/archive
     # prune it
-    pushd ../ceph-object-corpus
+    pushd ../stone-object-corpus
     bin/prune-archive.sh
     popd
 }
@@ -78,11 +78,11 @@ function commit_and_push() {
     local version=$1
     shift
 
-    pushd ../ceph-object-corpus
+    pushd ../stone-object-corpus
     git checkout -b wip-${version}
     git add archive/${version}
     git commit --signoff --message=${version}
-    git remote add cc git@github.com:ceph/ceph-object-corpus.git
+    git remote add cc git@github.com:stone/stone-object-corpus.git
     git push cc wip-${version}
     popd
 }
@@ -91,7 +91,7 @@ encode_dump_path=$(mktemp -d)
 build $encode_dump_path
 echo "generating corpus objects.."
 run
-version=$(bin/ceph-dencoder version)
+version=$(bin/stone-dencoder version)
 echo "importing corpus. it may take over 30 minutes.."
 import_corpus $encode_dump_path $version
 echo "verifying imported corpus.."

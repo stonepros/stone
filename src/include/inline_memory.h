@@ -70,10 +70,10 @@ void *maybe_inline_memcpy(void *dest, const void *src, size_t l,
 
 #if defined(__GNUC__) && defined(__x86_64__)
 
-namespace ceph {
+namespace stone {
 typedef unsigned uint128_t __attribute__ ((mode (TI)));
 }
-using ceph::uint128_t;
+using stone::uint128_t;
 
 static inline bool mem_is_zero(const char *data, size_t len)
   __attribute__((always_inline));

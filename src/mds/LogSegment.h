@@ -26,7 +26,7 @@
 
 #include "include/unordered_set.h"
 
-using ceph::unordered_set;
+using stone::unordered_set;
 
 class CDir;
 class CInode;
@@ -59,12 +59,12 @@ class LogSegment {
       purged_cb->complete(0);
   }
   void set_purged_cb(MDSContext* c){
-    ceph_assert(purged_cb == NULL);
+    stone_assert(purged_cb == NULL);
     purged_cb = c;
   }
   void wait_for_expiry(MDSContext *c)
   {
-    ceph_assert(c != NULL);
+    stone_assert(c != NULL);
     expiry_waiters.push_back(c);
   }
 
@@ -87,13 +87,13 @@ class LogSegment {
   interval_set<inodeno_t> purging_inodes;
   MDSContext* purged_cb = nullptr;
 
-  map<int, ceph::unordered_set<version_t> > pending_commit_tids;  // mdstable
+  map<int, stone::unordered_set<version_t> > pending_commit_tids;  // mdstable
   set<metareqid_t> uncommitted_leaders;
   set<metareqid_t> uncommitted_peers;
   set<dirfrag_t> uncommitted_fragments;
 
   // client request ids
-  map<int, ceph_tid_t> last_client_tids;
+  map<int, stone_tid_t> last_client_tids;
 
   // potentially dirty sessions
   std::set<entity_name_t> touched_sessions;

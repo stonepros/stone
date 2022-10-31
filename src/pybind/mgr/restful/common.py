@@ -9,7 +9,7 @@ OSD_IMPLEMENTED_COMMANDS = [
     'scrub', 'deep-scrub', 'repair'
 ]
 
-# Valid values for the 'var' argument to 'ceph osd pool set'
+# Valid values for the 'var' argument to 'stone osd pool set'
 POOL_PROPERTIES_1 = [
     'size', 'min_size', 'pg_num',
     'crush_rule', 'hashpspool',
@@ -21,7 +21,7 @@ POOL_PROPERTIES_2 = [
 
 POOL_PROPERTIES = POOL_PROPERTIES_1 + POOL_PROPERTIES_2
 
-# Valid values for the 'ceph osd pool set-quota' command
+# Valid values for the 'stone osd pool set-quota' command
 POOL_QUOTA_PROPERTIES = [
     ('quota_max_bytes', 'max_bytes'),
     ('quota_max_objects', 'max_objects'),

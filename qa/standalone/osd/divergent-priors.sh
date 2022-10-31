@@ -15,7 +15,7 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
@@ -31,14 +31,14 @@ function run() {
     export poolname=test
     export testobjects=100
     # Fix port????
-    export CEPH_MON="127.0.0.1:7115" # git grep '\<7115\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7115" # git grep '\<7115\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
     # so we will not force auth_log_shard to be acting_primary
-    CEPH_ARGS+="--osd_force_auth_primary_missing_objects=1000000 "
-    CEPH_ARGS+="--osd_debug_pg_log_writeout=true "
-    CEPH_ARGS+="--osd_min_pg_log_entries=$loglen --osd_max_pg_log_entries=$loglen --osd_pg_log_trim_min=$trim "
+    STONE_ARGS+="--osd_force_auth_primary_missing_objects=1000000 "
+    STONE_ARGS+="--osd_debug_pg_log_writeout=true "
+    STONE_ARGS+="--osd_min_pg_log_entries=$loglen --osd_max_pg_log_entries=$loglen --osd_pg_log_trim_min=$trim "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -69,20 +69,20 @@ function TEST_divergent() {
       run_osd $dir $i || return 1
     done
 
-    ceph osd set noout
-    ceph osd set noin
-    ceph osd set nodown
+    stone osd set noout
+    stone osd set noin
+    stone osd set nodown
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 3
-    ceph osd pool set $poolname min_size 2
+    stone osd pool set $poolname size 3
+    stone osd pool set $poolname min_size 2
 
     flush_pg_stats || return 1
     wait_for_clean || return 1
 
     # determine primary
-    local divergent="$(ceph pg dump pgs --format=json | jq '.pg_stats[0].up_primary')"
+    local divergent="$(stone pg dump pgs --format=json | jq '.pg_stats[0].up_primary')"
     echo "primary and soon to be divergent is $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     local non_divergent=""
     for i in $osds
     do
@@ -105,10 +105,10 @@ function TEST_divergent() {
 
     # blackhole non_divergent
     echo "blackholing osds $non_divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
+      STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
     done
 
     local case5=$testobjects
@@ -124,27 +124,27 @@ function TEST_divergent() {
 
     # kill all the osds but leave divergent in
     echo 'killing all the osds'
-    ceph pg dump pgs
+    stone pg dump pgs
     kill_daemons $dir KILL osd || return 1
     for i in $osds
     do
-      ceph osd down osd.$i
+      stone osd down osd.$i
     done
     for i in $non_divergent
     do
-      ceph osd out osd.$i
+      stone osd out osd.$i
     done
 
     # bring up non-divergent
     echo "bringing up non_divergent $non_divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
       activate_osd $dir $i || return 1
     done
     for i in $non_divergent
     do
-      ceph osd in osd.$i
+      stone osd in osd.$i
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -152,59 +152,59 @@ function TEST_divergent() {
     # write 1 non-divergent object (ensure that old divergent one is divergent)
     objname="existing_$(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE)"
     echo "writing non-divergent object $objname"
-    ceph pg dump pgs
+    stone pg dump pgs
     rados -p $poolname put $objname $dummyfile2
 
     # ensure no recovery of up osds first
     echo 'delay recovery'
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
+      STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
     done
 
     # bring in our divergent friend
     echo "revive divergent $divergent"
-    ceph pg dump pgs
-    ceph osd set noup
+    stone pg dump pgs
+    stone osd set noup
     activate_osd $dir $divergent
     sleep 5
 
     echo 'delay recovery divergent'
-    ceph pg dump pgs
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${divergent}) set_recovery_delay 100000
+    stone pg dump pgs
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${divergent}) set_recovery_delay 100000
 
-    ceph osd unset noup
+    stone osd unset noup
 
     wait_for_osd up 0
     wait_for_osd up 1
     wait_for_osd up 2
 
-    ceph pg dump pgs
+    stone pg dump pgs
     echo 'wait for peering'
-    ceph pg dump pgs
+    stone pg dump pgs
     rados -p $poolname put foo $dummyfile
 
     echo "killing divergent $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     kill_daemons $dir KILL osd.$divergent
     #_objectstore_tool_nodown $dir $divergent --op log --pgid $pgid
     echo "reviving divergent $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     activate_osd $dir $divergent
 
     sleep 20
 
     echo "allowing recovery"
-    ceph pg dump pgs
+    stone pg dump pgs
     # Set osd_recovery_delay_start back to 0 and kick the queue
     for i in $osds
     do
-	 ceph tell osd.$i debug kick_recovery_wq 0
+	 stone tell osd.$i debug kick_recovery_wq 0
     done
 
     echo 'reading divergent objects'
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE))
     do
       rados -p $poolname get existing_$i $dir/existing || return 1
@@ -240,18 +240,18 @@ function TEST_divergent_ec() {
       run_osd $dir $i || return 1
     done
 
-    ceph osd set noout
-    ceph osd set noin
-    ceph osd set nodown
+    stone osd set noout
+    stone osd set noin
+    stone osd set nodown
     create_ec_pool $poolname true k=2 m=1 || return 1
 
     flush_pg_stats || return 1
     wait_for_clean || return 1
 
     # determine primary
-    local divergent="$(ceph pg dump pgs --format=json | jq '.pg_stats[0].up_primary')"
+    local divergent="$(stone pg dump pgs --format=json | jq '.pg_stats[0].up_primary')"
     echo "primary and soon to be divergent is $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     local non_divergent=""
     for i in $osds
     do
@@ -274,10 +274,10 @@ function TEST_divergent_ec() {
 
     # blackhole non_divergent
     echo "blackholing osds $non_divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
+      STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
     done
 
     # Write some soon to be divergent
@@ -292,27 +292,27 @@ function TEST_divergent_ec() {
 
     # kill all the osds but leave divergent in
     echo 'killing all the osds'
-    ceph pg dump pgs
+    stone pg dump pgs
     kill_daemons $dir KILL osd || return 1
     for i in $osds
     do
-      ceph osd down osd.$i
+      stone osd down osd.$i
     done
     for i in $non_divergent
     do
-      ceph osd out osd.$i
+      stone osd out osd.$i
     done
 
     # bring up non-divergent
     echo "bringing up non_divergent $non_divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
       activate_osd $dir $i || return 1
     done
     for i in $non_divergent
     do
-      ceph osd in osd.$i
+      stone osd in osd.$i
     done
 
     sleep 5
@@ -321,7 +321,7 @@ function TEST_divergent_ec() {
     # write 1 non-divergent object (ensure that old divergent one is divergent)
     objname="existing_$(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE)"
     echo "writing non-divergent object $objname"
-    ceph pg dump pgs
+    stone pg dump pgs
     rados -p $poolname put $objname $dummyfile2
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -339,54 +339,54 @@ function TEST_divergent_ec() {
 
     # ensure no recovery of up osds first
     echo 'delay recovery'
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
+      STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
     done
 
     # bring in our divergent friend
     echo "revive divergent $divergent"
-    ceph pg dump pgs
-    ceph osd set noup
+    stone pg dump pgs
+    stone osd set noup
     activate_osd $dir $divergent
     sleep 5
 
     echo 'delay recovery divergent'
-    ceph pg dump pgs
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${divergent}) set_recovery_delay 100000
+    stone pg dump pgs
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${divergent}) set_recovery_delay 100000
 
-    ceph osd unset noup
+    stone osd unset noup
 
     wait_for_osd up 0
     wait_for_osd up 1
     wait_for_osd up 2
 
-    ceph pg dump pgs
+    stone pg dump pgs
     echo 'wait for peering'
-    ceph pg dump pgs
+    stone pg dump pgs
     rados -p $poolname put foo $dummyfile
 
     echo "killing divergent $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     kill_daemons $dir KILL osd.$divergent
     #_objectstore_tool_nodown $dir $divergent --op log --pgid $pgid
     echo "reviving divergent $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     activate_osd $dir $divergent
 
     sleep 20
 
     echo "allowing recovery"
-    ceph pg dump pgs
+    stone pg dump pgs
     # Set osd_recovery_delay_start back to 0 and kick the queue
     for i in $osds
     do
-	 ceph tell osd.$i debug kick_recovery_wq 0
+	 stone tell osd.$i debug kick_recovery_wq 0
     done
 
     echo 'reading divergent objects'
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE))
     do
       rados -p $poolname get existing_$i $dir/existing || return 1
@@ -413,9 +413,9 @@ function TEST_divergent_ec() {
     kill_daemons $dir || return 1
 }
 
-# Special case divergence test with ceph-objectstore-tool export/remove/import
+# Special case divergence test with stone-objectstore-tool export/remove/import
 # 	Test handling of divergent entries with prior_version
-# 	prior to log_tail and a ceph-objectstore-tool export/import
+# 	prior to log_tail and a stone-objectstore-tool export/import
 # 	based on qa/tasks/divergent_prior2.py
 function TEST_divergent_2() {
     local dir=$1
@@ -433,20 +433,20 @@ function TEST_divergent_2() {
       run_osd $dir $i || return 1
     done
 
-    ceph osd set noout
-    ceph osd set noin
-    ceph osd set nodown
+    stone osd set noout
+    stone osd set noin
+    stone osd set nodown
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 3
-    ceph osd pool set $poolname min_size 2
+    stone osd pool set $poolname size 3
+    stone osd pool set $poolname min_size 2
 
     flush_pg_stats || return 1
     wait_for_clean || return 1
 
     # determine primary
-    local divergent="$(ceph pg dump pgs --format=json | jq '.pg_stats[0].up_primary')"
+    local divergent="$(stone pg dump pgs --format=json | jq '.pg_stats[0].up_primary')"
     echo "primary and soon to be divergent is $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     local non_divergent=""
     for i in $osds
     do
@@ -469,10 +469,10 @@ function TEST_divergent_2() {
 
     # blackhole non_divergent
     echo "blackholing osds $non_divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
+      STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
     done
 
     # Do some creates to hit case 2
@@ -499,27 +499,27 @@ function TEST_divergent_2() {
 
     # kill all the osds but leave divergent in
     echo 'killing all the osds'
-    ceph pg dump pgs
+    stone pg dump pgs
     kill_daemons $dir KILL osd || return 1
     for i in $osds
     do
-      ceph osd down osd.$i
+      stone osd down osd.$i
     done
     for i in $non_divergent
     do
-      ceph osd out osd.$i
+      stone osd out osd.$i
     done
 
     # bring up non-divergent
     echo "bringing up non_divergent $non_divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
       activate_osd $dir $i || return 1
     done
     for i in $non_divergent
     do
-      ceph osd in osd.$i
+      stone osd in osd.$i
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -527,45 +527,45 @@ function TEST_divergent_2() {
     # write 1 non-divergent object (ensure that old divergent one is divergent)
     objname="existing_$(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE)"
     echo "writing non-divergent object $objname"
-    ceph pg dump pgs
+    stone pg dump pgs
     rados -p $poolname put $objname $dummyfile2
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
 
     # ensure no recovery of up osds first
     echo 'delay recovery'
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
+      STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
     done
 
     # bring in our divergent friend
     echo "revive divergent $divergent"
-    ceph pg dump pgs
-    ceph osd set noup
+    stone pg dump pgs
+    stone osd set noup
     activate_osd $dir $divergent
     sleep 5
 
     echo 'delay recovery divergent'
-    ceph pg dump pgs
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${divergent}) set_recovery_delay 100000
+    stone pg dump pgs
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${divergent}) set_recovery_delay 100000
 
-    ceph osd unset noup
+    stone osd unset noup
 
     wait_for_osd up 0
     wait_for_osd up 1
     wait_for_osd up 2
 
-    ceph pg dump pgs
+    stone pg dump pgs
     echo 'wait for peering'
-    ceph pg dump pgs
+    stone pg dump pgs
     rados -p $poolname put foo $dummyfile
 
     # At this point the divergent_priors should have been detected
 
     echo "killing divergent $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     kill_daemons $dir KILL osd.$divergent
 
     # export a pg
@@ -574,23 +574,23 @@ function TEST_divergent_2() {
     _objectstore_tool_nodown $dir $divergent --op import --file $expfile
 
     echo "reviving divergent $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     activate_osd $dir $divergent
     wait_for_osd up $divergent
 
     sleep 20
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${divergent}) dump_ops_in_flight
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${divergent}) dump_ops_in_flight
 
     echo "allowing recovery"
-    ceph pg dump pgs
+    stone pg dump pgs
     # Set osd_recovery_delay_start back to 0 and kick the queue
     for i in $osds
     do
-	 ceph tell osd.$i debug kick_recovery_wq 0
+	 stone tell osd.$i debug kick_recovery_wq 0
     done
 
     echo 'reading divergent objects'
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE))
     do
       rados -p $poolname get existing_$i $dir/existing || return 1
@@ -623,7 +623,7 @@ function TEST_divergent_2() {
 }
 
 # this is the same as case _2 above, except we enable pg autoscaling in order
-# to reproduce https://tracker.ceph.com/issues/41816
+# to reproduce https://tracker.stone.com/issues/41816
 function TEST_divergent_3() {
     local dir=$1
 
@@ -640,23 +640,23 @@ function TEST_divergent_3() {
       run_osd $dir $i || return 1
     done
 
-    ceph osd set noout
-    ceph osd set noin
-    ceph osd set nodown
+    stone osd set noout
+    stone osd set noin
+    stone osd set nodown
     create_pool $poolname 1 1
-    ceph osd pool set $poolname size 3
-    ceph osd pool set $poolname min_size 2
+    stone osd pool set $poolname size 3
+    stone osd pool set $poolname min_size 2
 
-    # reproduce https://tracker.ceph.com/issues/41816
-    ceph osd pool set $poolname pg_autoscale_mode on
+    # reproduce https://tracker.stone.com/issues/41816
+    stone osd pool set $poolname pg_autoscale_mode on
 
     flush_pg_stats || return 1
     wait_for_clean || return 1
 
     # determine primary
-    local divergent="$(ceph pg dump pgs --format=json | jq '.pg_stats[0].up_primary')"
+    local divergent="$(stone pg dump pgs --format=json | jq '.pg_stats[0].up_primary')"
     echo "primary and soon to be divergent is $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     local non_divergent=""
     for i in $osds
     do
@@ -679,10 +679,10 @@ function TEST_divergent_3() {
 
     # blackhole non_divergent
     echo "blackholing osds $non_divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
+      STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${i}) config set objectstore_blackhole 1
     done
 
     # Do some creates to hit case 2
@@ -709,27 +709,27 @@ function TEST_divergent_3() {
 
     # kill all the osds but leave divergent in
     echo 'killing all the osds'
-    ceph pg dump pgs
+    stone pg dump pgs
     kill_daemons $dir KILL osd || return 1
     for i in $osds
     do
-      ceph osd down osd.$i
+      stone osd down osd.$i
     done
     for i in $non_divergent
     do
-      ceph osd out osd.$i
+      stone osd out osd.$i
     done
 
     # bring up non-divergent
     echo "bringing up non_divergent $non_divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
       activate_osd $dir $i || return 1
     done
     for i in $non_divergent
     do
-      ceph osd in osd.$i
+      stone osd in osd.$i
     done
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
@@ -737,45 +737,45 @@ function TEST_divergent_3() {
     # write 1 non-divergent object (ensure that old divergent one is divergent)
     objname="existing_$(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE)"
     echo "writing non-divergent object $objname"
-    ceph pg dump pgs
+    stone pg dump pgs
     rados -p $poolname put $objname $dummyfile2
 
     WAIT_FOR_CLEAN_TIMEOUT=20 wait_for_clean
 
     # ensure no recovery of up osds first
     echo 'delay recovery'
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $non_divergent
     do
-      CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
+      STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${i}) set_recovery_delay 100000
     done
 
     # bring in our divergent friend
     echo "revive divergent $divergent"
-    ceph pg dump pgs
-    ceph osd set noup
+    stone pg dump pgs
+    stone osd set noup
     activate_osd $dir $divergent
     sleep 5
 
     echo 'delay recovery divergent'
-    ceph pg dump pgs
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${divergent}) set_recovery_delay 100000
+    stone pg dump pgs
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${divergent}) set_recovery_delay 100000
 
-    ceph osd unset noup
+    stone osd unset noup
 
     wait_for_osd up 0
     wait_for_osd up 1
     wait_for_osd up 2
 
-    ceph pg dump pgs
+    stone pg dump pgs
     echo 'wait for peering'
-    ceph pg dump pgs
+    stone pg dump pgs
     rados -p $poolname put foo $dummyfile
 
     # At this point the divergent_priors should have been detected
 
     echo "killing divergent $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     kill_daemons $dir KILL osd.$divergent
 
     # export a pg
@@ -784,23 +784,23 @@ function TEST_divergent_3() {
     _objectstore_tool_nodown $dir $divergent --op import --file $expfile
 
     echo "reviving divergent $divergent"
-    ceph pg dump pgs
+    stone pg dump pgs
     activate_osd $dir $divergent
     wait_for_osd up $divergent
 
     sleep 20
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.${divergent}) dump_ops_in_flight
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.${divergent}) dump_ops_in_flight
 
     echo "allowing recovery"
-    ceph pg dump pgs
+    stone pg dump pgs
     # Set osd_recovery_delay_start back to 0 and kick the queue
     for i in $osds
     do
-	 ceph tell osd.$i debug kick_recovery_wq 0
+	 stone tell osd.$i debug kick_recovery_wq 0
     done
 
     echo 'reading divergent objects'
-    ceph pg dump pgs
+    stone pg dump pgs
     for i in $(seq 1 $(expr $DIVERGENT_WRITE + $DIVERGENT_REMOVE))
     do
       rados -p $poolname get existing_$i $dir/existing || return 1

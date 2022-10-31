@@ -1,11 +1,11 @@
 ======================================
- Ceph Object Gateway Config Reference
+ Stone Object Gateway Config Reference
 ======================================
 
-The following settings may added to the Ceph configuration file (i.e., usually
+The following settings may added to the Stone configuration file (i.e., usually
 ``ceph.conf``) under the ``[client.radosgw.{instance-name}]`` section. The
 settings may contain default values. If you do not specify each setting in the
-Ceph configuration file, the default value will be set automatically.
+Stone configuration file, the default value will be set automatically.
 
 Configuration variables set under the ``[client.radosgw.{instance-name}]``
 section will not apply to rgw or radosgw-admin commands without an instance-name
@@ -26,7 +26,7 @@ instances or all radosgw-admin options can be put into the ``[global]`` or the
 
 ``rgw_data``
 
-:Description: Sets the location of the data files for Ceph RADOS Gateway.
+:Description: Sets the location of the data files for Stone RADOS Gateway.
 :Type: String
 :Default: ``/var/lib/ceph/radosgw/$cluster-$id``
 
@@ -45,14 +45,14 @@ instances or all radosgw-admin options can be put into the ``[global]`` or the
 
 ``rgw_cache_enabled``
 
-:Description: Whether the Ceph Object Gateway cache is enabled.
+:Description: Whether the Stone Object Gateway cache is enabled.
 :Type: Boolean
 :Default: ``true``
 
 
 ``rgw_cache_lru_size``
 
-:Description: The number of entries in the Ceph Object Gateway cache.
+:Description: The number of entries in the Stone Object Gateway cache.
 :Type: Integer
 :Default: ``10000``
 
@@ -60,7 +60,7 @@ instances or all radosgw-admin options can be put into the ``[global]`` or the
 ``rgw_socket_path``
 
 :Description: The socket path for the domain socket. ``FastCgiExternalServer``
-              uses this socket. If you do not specify a socket path, Ceph
+              uses this socket. If you do not specify a socket path, Stone
               Object Gateway will not run as an external server. The path you
               specify here must be the same as the path specified in the
               ``rgw.conf`` file.
@@ -76,7 +76,7 @@ instances or all radosgw-admin options can be put into the ``[global]`` or the
 
 ``rgw_host``
 
-:Description: The host for the Ceph Object Gateway instance. Can be an IP
+:Description: The host for the Stone Object Gateway instance. Can be an IP
               address or a hostname.
 
 :Type: String
@@ -86,7 +86,7 @@ instances or all radosgw-admin options can be put into the ``[global]`` or the
 ``rgw_port``
 
 :Description: Port the instance listens for requests. If not specified,
-              Ceph Object Gateway runs external FastCGI.
+              Stone Object Gateway runs external FastCGI.
 
 :Type: String
 :Default: None
@@ -143,7 +143,7 @@ instances or all radosgw-admin options can be put into the ``[global]`` or the
 
 ``rgw_op_thread_suicide_timeout``
 
-:Description: The time ``timeout`` in seconds before a Ceph Object Gateway
+:Description: The time ``timeout`` in seconds before a Stone Object Gateway
               process dies. Disabled if set to ``0``.
 
 :Type: Integer
@@ -168,7 +168,7 @@ instances or all radosgw-admin options can be put into the ``[global]`` or the
 
 ``rgw_init_timeout``
 
-:Description: The number of seconds before Ceph Object Gateway gives up on
+:Description: The number of seconds before Stone Object Gateway gives up on
               initialization.
 
 :Type: Integer
@@ -202,7 +202,7 @@ instances or all radosgw-admin options can be put into the ``[global]`` or the
 
 ``rgw_obj_stripe_size``
 
-:Description: The size of an object stripe for Ceph Object Gateway objects.
+:Description: The size of an object stripe for Stone Object Gateway objects.
               See `Architecture`_ for details on striping.
 
 :Type: Integer
@@ -241,7 +241,7 @@ instances or all radosgw-admin options can be put into the ``[global]`` or the
 ``rgw_get_obj_max_req_size``
 
 :Description: The maximum request size of a single get operation sent to the
-              Ceph Storage Cluster.
+              Stone Storage Cluster.
 
 :Type: Integer
 :Default: ``4 << 20``
@@ -387,8 +387,8 @@ Lifecycle Settings
 Bucket Lifecycle configuration can be used to manage your objects so they are stored
 effectively throughout their lifetime. In past releases Lifecycle processing was rate-limited
 by single threaded processing. With the Nautilus release this has been addressed and the
-Ceph Object Gateway now allows for parallel thread processing of bucket lifecycles across
-additional Ceph Object Gateway instances and replaces the in-order
+Stone Object Gateway now allows for parallel thread processing of bucket lifecycles across
+additional Stone Object Gateway instances and replaces the in-order
 index shard enumeration with a random ordered sequence.
 
 There are two options in particular to look at when looking to increase the
@@ -415,17 +415,17 @@ workload with a smaller number of buckets but higher number of objects (hundreds
 per bucket you would consider decreasing ``rgw_lc_max_wp_worker`` from the default value of 3.
 
 :NOTE: When looking to tune either of these specific values please validate the
-       current Cluster performance and Ceph Object Gateway utilization before increasing.
+       current Cluster performance and Stone Object Gateway utilization before increasing.
 
 Garbage Collection Settings
 ===========================
 
-The Ceph Object Gateway allocates storage for new objects immediately.
+The Stone Object Gateway allocates storage for new objects immediately.
 
-The Ceph Object Gateway purges the storage space used for deleted and overwritten 
-objects in the Ceph Storage cluster some time after the gateway deletes the 
+The Stone Object Gateway purges the storage space used for deleted and overwritten 
+objects in the Stone Storage cluster some time after the gateway deletes the 
 objects from the bucket index. The process of purging the deleted object data 
-from the Ceph Storage cluster is known as Garbage Collection or GC.
+from the Stone Storage cluster is known as Garbage Collection or GC.
 
 To view the queue of objects awaiting garbage collection, execute the following::
 
@@ -435,9 +435,9 @@ To view the queue of objects awaiting garbage collection, execute the following:
   
 Garbage collection is a background activity that may
 execute continuously or during times of low loads, depending upon how the
-administrator configures the Ceph Object Gateway. By default, the Ceph Object
+administrator configures the Stone Object Gateway. By default, the Stone Object
 Gateway conducts GC operations continuously. Since GC operations are a normal
-part of Ceph Object Gateway operations, especially with object delete
+part of Stone Object Gateway operations, especially with object delete
 operations, objects eligible for garbage collection exist most of the time.
 
 Some workloads may temporarily or permanently outpace the rate of garbage
@@ -493,7 +493,7 @@ configuration parameters.
 
 :Tuning Garbage Collection for Delete Heavy Workloads:
 
-As an initial step towards tuning Ceph Garbage Collection to be more aggressive the following options are suggested to be increased from their default configuration values:
+As an initial step towards tuning Stone Garbage Collection to be more aggressive the following options are suggested to be increased from their default configuration values:
 
 ``rgw_gc_max_concurrent_io = 20``
 ``rgw_gc_max_trim_chunk = 64``
@@ -507,7 +507,7 @@ Multisite Settings
 
 .. versionadded:: Jewel
 
-You may include the following settings in your Ceph configuration
+You may include the following settings in your Stone configuration
 file under each ``[client.radosgw.{instance-name}]`` instance.
 
 
@@ -615,7 +615,7 @@ Swift Settings
 
 ``rgw_swift_url``
 
-:Description: The URL for the Ceph Object Gateway Swift API.
+:Description: The URL for the Stone Object Gateway Swift API.
 :Type: String
 :Default: None
 
@@ -733,7 +733,7 @@ Logging Settings
 
 ``rgw_log_nonexistent_bucket``
 
-:Description: Enables Ceph Object Gateway to log a request for a non-existent
+:Description: Enables Stone Object Gateway to log a request for a non-existent
               bucket.
 
 :Type: Boolean
@@ -776,7 +776,7 @@ Logging Settings
 
 ``rgw_enable_ops_log``
 
-:Description: Enable logging for each successful Ceph Object Gateway operation.
+:Description: Enable logging for each successful Stone Object Gateway operation.
 :Type: Boolean
 :Default: ``false``
 
@@ -791,7 +791,7 @@ Logging Settings
 ``rgw_ops_log_rados``
 
 :Description: Whether the operations log should be written to the
-              Ceph Storage Cluster backend.
+              Stone Storage Cluster backend.
 
 :Type: Boolean
 :Default: ``true``
@@ -904,7 +904,7 @@ Keystone Settings
 
 ``rgw_keystone_admin_token``
 
-:Description: The Keystone admin token (shared secret). In Ceph RGW
+:Description: The Keystone admin token (shared secret). In Stone RGW
               authentication with the admin token has priority over
               authentication with the admin credentials
               (``rgw_keystone_admin_user``, ``rgw_keystone_admin_password``,
@@ -919,7 +919,7 @@ Keystone Settings
 ``rgw_keystone_admin_token_path``
 
 :Description: Path to a file containing the Keystone admin token
-	      (shared secret).  In Ceph RadosGW authentication with
+	      (shared secret).  In Stone RadosGW authentication with
 	      the admin token has priority over authentication with
 	      the admin credentials
               (``rgw_keystone_admin_user``, ``rgw_keystone_admin_password``,

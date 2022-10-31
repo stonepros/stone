@@ -1,7 +1,7 @@
 import os
 import sys
 
-project = u'Ceph'
+project = u'Stone'
 copyright = u'2010-2014, Inktank Storage, Inc. and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0)'
 version = 'dev'
 release = 'dev'
@@ -63,4 +63,4 @@ def _get_manpages():
 man_pages = list(_get_manpages())
 # sphinx warns if no toc is found, so feed it with a random file
 # which is also rendered in this run.
-master_doc = '8/ceph'
+master_doc = '8/stone'

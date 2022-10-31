@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -34,7 +34,7 @@ private:
   bool is_ack_wanted() const { return ack_wanted; }
   void mark_ack_wanted() { ack_wanted = true; }
 
-  ceph::buffer::list basebl;
+  stone::buffer::list basebl;
 
 protected:
   MMDSFragmentNotify() :
@@ -53,14 +53,14 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(base_dirfrag, payload);
     encode(bits, payload);
     encode(basebl, payload);
     encode(ack_wanted, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(base_dirfrag, p);
     decode(bits, p);
@@ -70,7 +70,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);  
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);  
 };
 
 #endif

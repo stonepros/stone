@@ -3881,7 +3881,7 @@ def test_ps_versioned_deletion():
 
     # cleanup
     # follwing is needed for the cleanup in the case of 3-zones
-    # see: http://tracker.ceph.com/issues/39142
+    # see: http://tracker.stone.com/issues/39142
     realm = get_realm()
     zonegroup = realm.master_zonegroup()
     zonegroup_conns = ZonegroupConns(zonegroup)

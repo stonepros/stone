@@ -41,10 +41,10 @@ custom/ns2/img2@snap2
 custom/ns2/img3
 )
 
-ceph osd pool create custom 8
+stone osd pool create custom 8
 rbd pool init custom
 
-ceph osd set-require-min-compat-client nautilus
+stone osd set-require-min-compat-client nautilus
 rbd namespace create rbd/ns1
 rbd namespace create rbd/ns2
 rbd namespace create custom/ns1
@@ -111,6 +111,6 @@ rbd namespace rm custom/ns1
 rbd namespace rm rbd/ns2
 rbd namespace rm rbd/ns1
 
-ceph osd pool delete custom custom --yes-i-really-really-mean-it
+stone osd pool delete custom custom --yes-i-really-really-mean-it
 
 echo OK

@@ -4,7 +4,7 @@ MDS States
 
 
 The Metadata Server (MDS) goes through several states during normal operation
-in CephFS. For example, some states indicate that the MDS is recovering from a
+in StoneFS. For example, some states indicate that the MDS is recovering from a
 failover by a previous instance of the MDS. Here we'll document all of these
 states and include a state diagram to visualize the transitions.
 
@@ -51,7 +51,7 @@ Less common or transitory states
 
     up:boot
 
-This state is broadcast to the Ceph monitors during startup. This state is
+This state is broadcast to the Stone monitors during startup. This state is
 never visible as the Monitor immediately assign the MDS to an available rank or
 commands the MDS to operate as a standby. The state is documented here for
 completeness.
@@ -96,7 +96,7 @@ recovering its journal and other metadata.
 
     up:resolve
 
-The MDS enters this state from ``up:replay`` if the Ceph file system has
+The MDS enters this state from ``up:replay`` if the Stone file system has
 multiple ranks (including this one), i.e. it's not a single active MDS cluster.
 The MDS is resolving any uncommitted inter-MDS operations. All ranks in the
 file system must be in this state or later for progress to be made, i.e. no

@@ -108,7 +108,7 @@ class Docs(BaseController):
     def _add_param_info(cls, parameters, p_info):
         # Cases to consider:
         #     * Parameter name (if not nested) misspelt in decorator => parameter not displayed
-        #     * Sometimes a parameter is used for several endpoints (e.g. fs_id in CephFS).
+        #     * Sometimes a parameter is used for several endpoints (e.g. fs_id in StoneFS).
         #       Currently, there is no possibility of reuse. Should there be?
         #       But what if there are two parameters with same name but different functionality?
         """
@@ -368,9 +368,9 @@ class Docs(BaseController):
         spec = {
             'openapi': "3.0.0",
             'info': {
-                'description': "This is the official Ceph REST API",
+                'description': "This is the official Stone REST API",
                 'version': "v1",
-                'title': "Ceph REST API"
+                'title': "Stone REST API"
             },
             'host': host,
             'basePath': base_url,

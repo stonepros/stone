@@ -1,5 +1,5 @@
 """
-This module is a thin wrapper around libcephfs.
+This module is a thin wrapper around libstonefs.
 """
 
 from cpython cimport PyObject, ref, exc
@@ -8,12 +8,12 @@ from libc.stdlib cimport malloc, realloc, free
 
 from types cimport *
 IF BUILD_DOC:
-    include "mock_cephfs.pxi"
+    include "mock_stonefs.pxi"
     cdef class Rados:
         cdef:
             rados_t cluster
 ELSE:
-    from c_cephfs cimport *
+    from c_stonefs cimport *
     from rados cimport Rados
 
 from collections import namedtuple
@@ -24,76 +24,76 @@ import time
 AT_NO_ATTR_SYNC = 0x4000
 AT_SYMLINK_NOFOLLOW = 0x100
 cdef int AT_SYMLINK_NOFOLLOW_CDEF = AT_SYMLINK_NOFOLLOW
-CEPH_STATX_BASIC_STATS = 0x7ff
-cdef int CEPH_STATX_BASIC_STATS_CDEF = CEPH_STATX_BASIC_STATS
-CEPH_STATX_MODE = 0x1
-CEPH_STATX_NLINK = 0x2
-CEPH_STATX_UID = 0x4
-CEPH_STATX_GID = 0x8
-CEPH_STATX_RDEV = 0x10
-CEPH_STATX_ATIME = 0x20
-CEPH_STATX_MTIME = 0x40
-CEPH_STATX_CTIME = 0x80
-CEPH_STATX_INO = 0x100
-CEPH_STATX_SIZE = 0x200
-CEPH_STATX_BLOCKS = 0x400
-CEPH_STATX_BTIME = 0x800
-CEPH_STATX_VERSION = 0x1000
+STONE_STATX_BASIC_STATS = 0x7ff
+cdef int STONE_STATX_BASIC_STATS_CDEF = STONE_STATX_BASIC_STATS
+STONE_STATX_MODE = 0x1
+STONE_STATX_NLINK = 0x2
+STONE_STATX_UID = 0x4
+STONE_STATX_GID = 0x8
+STONE_STATX_RDEV = 0x10
+STONE_STATX_ATIME = 0x20
+STONE_STATX_MTIME = 0x40
+STONE_STATX_CTIME = 0x80
+STONE_STATX_INO = 0x100
+STONE_STATX_SIZE = 0x200
+STONE_STATX_BLOCKS = 0x400
+STONE_STATX_BTIME = 0x800
+STONE_STATX_VERSION = 0x1000
 
 FALLOC_FL_KEEP_SIZE = 0x01
 FALLOC_FL_PUNCH_HOLE = 0x02
 FALLOC_FL_NO_HIDE_STALE = 0x04
 
-CEPH_SETATTR_MODE = 0x1
-CEPH_SETATTR_UID = 0x2
-CEPH_SETATTR_GID = 0x4
-CEPH_SETATTR_MTIME = 0x8
-CEPH_SETATTR_ATIME = 0x10
-CEPH_SETATTR_SIZE  = 0x20
-CEPH_SETATTR_CTIME = 0x40
-CEPH_SETATTR_BTIME = 0x200
+STONE_SETATTR_MODE = 0x1
+STONE_SETATTR_UID = 0x2
+STONE_SETATTR_GID = 0x4
+STONE_SETATTR_MTIME = 0x8
+STONE_SETATTR_ATIME = 0x10
+STONE_SETATTR_SIZE  = 0x20
+STONE_SETATTR_CTIME = 0x40
+STONE_SETATTR_BTIME = 0x200
 
 # errno definitions
 cdef enum:
-    CEPHFS_EBLOCKLISTED = 108
-    CEPHFS_EPERM = 1
-    CEPHFS_ESTALE = 116
-    CEPHFS_ENOSPC = 28
-    CEPHFS_ETIMEDOUT = 110
-    CEPHFS_EIO = 5
-    CEPHFS_ENOTCONN = 107
-    CEPHFS_EEXIST = 17
-    CEPHFS_EINTR = 4
-    CEPHFS_EINVAL = 22
-    CEPHFS_EBADF = 9
-    CEPHFS_EROFS = 30
-    CEPHFS_EAGAIN = 11
-    CEPHFS_EACCES = 13
-    CEPHFS_ELOOP = 40
-    CEPHFS_EISDIR = 21
-    CEPHFS_ENOENT = 2
-    CEPHFS_ENOTDIR = 20
-    CEPHFS_ENAMETOOLONG = 36
-    CEPHFS_EBUSY = 16
-    CEPHFS_EDQUOT = 122
-    CEPHFS_EFBIG = 27
-    CEPHFS_ERANGE = 34
-    CEPHFS_ENXIO = 6
-    CEPHFS_ECANCELED = 125
-    CEPHFS_ENODATA = 61
-    CEPHFS_EOPNOTSUPP = 95
-    CEPHFS_EXDEV = 18
-    CEPHFS_ENOMEM = 12
-    CEPHFS_ENOTRECOVERABLE = 131
-    CEPHFS_ENOSYS = 38
-    CEPHFS_EWOULDBLOCK = CEPHFS_EAGAIN
-    CEPHFS_ENOTEMPTY = 39
-    CEPHFS_EDEADLK = 35
-    CEPHFS_EDEADLOCK = CEPHFS_EDEADLK
-    CEPHFS_EDOM = 33
-    CEPHFS_EMLINK = 31
-    CEPHFS_ETIME = 62
-    CEPHFS_EOLDSNAPC = 85
+    STONEFS_EBLOCKLISTED = 108
+    STONEFS_EPERM = 1
+    STONEFS_ESTALE = 116
+    STONEFS_ENOSPC = 28
+    STONEFS_ETIMEDOUT = 110
+    STONEFS_EIO = 5
+    STONEFS_ENOTCONN = 107
+    STONEFS_EEXIST = 17
+    STONEFS_EINTR = 4
+    STONEFS_EINVAL = 22
+    STONEFS_EBADF = 9
+    STONEFS_EROFS = 30
+    STONEFS_EAGAIN = 11
+    STONEFS_EACCES = 13
+    STONEFS_ELOOP = 40
+    STONEFS_EISDIR = 21
+    STONEFS_ENOENT = 2
+    STONEFS_ENOTDIR = 20
+    STONEFS_ENAMETOOLONG = 36
+    STONEFS_EBUSY = 16
+    STONEFS_EDQUOT = 122
+    STONEFS_EFBIG = 27
+    STONEFS_ERANGE = 34
+    STONEFS_ENXIO = 6
+    STONEFS_ECANCELED = 125
+    STONEFS_ENODATA = 61
+    STONEFS_EOPNOTSUPP = 95
+    STONEFS_EXDEV = 18
+    STONEFS_ENOMEM = 12
+    STONEFS_ENOTRECOVERABLE = 131
+    STONEFS_ENOSYS = 38
+    STONEFS_EWOULDBLOCK = STONEFS_EAGAIN
+    STONEFS_ENOTEMPTY = 39
+    STONEFS_EDEADLK = 35
+    STONEFS_EDEADLOCK = STONEFS_EDEADLK
+    STONEFS_EDOM = 33
+    STONEFS_EMLINK = 31
+    STONEFS_ETIME = 62
+    STONEFS_EOLDSNAPC = 85
 
 cdef extern from "Python.h":
     # These are in cpython/string.pxd, but use "object" types instead of
@@ -111,7 +111,7 @@ class Error(Exception):
         return 1
 
 
-class LibCephFSStateError(Error):
+class LibStoneFSStateError(Error):
     pass
 
 
@@ -179,25 +179,25 @@ class DiskQuotaExceeded(OSError):
 
 
 cdef errno_to_exception =  {
-    CEPHFS_EPERM      : PermissionError,
-    CEPHFS_ENOENT     : ObjectNotFound,
-    CEPHFS_EIO        : IOError,
-    CEPHFS_ENOSPC     : NoSpace,
-    CEPHFS_EEXIST     : ObjectExists,
-    CEPHFS_ENODATA    : NoData,
-    CEPHFS_EINVAL     : InvalidValue,
-    CEPHFS_EOPNOTSUPP : OperationNotSupported,
-    CEPHFS_ERANGE     : OutOfRange,
-    CEPHFS_EWOULDBLOCK: WouldBlock,
-    CEPHFS_ENOTEMPTY  : ObjectNotEmpty,
-    CEPHFS_ENOTDIR    : NotDirectory,
-    CEPHFS_EDQUOT     : DiskQuotaExceeded,
+    STONEFS_EPERM      : PermissionError,
+    STONEFS_ENOENT     : ObjectNotFound,
+    STONEFS_EIO        : IOError,
+    STONEFS_ENOSPC     : NoSpace,
+    STONEFS_EEXIST     : ObjectExists,
+    STONEFS_ENODATA    : NoData,
+    STONEFS_EINVAL     : InvalidValue,
+    STONEFS_EOPNOTSUPP : OperationNotSupported,
+    STONEFS_ERANGE     : OutOfRange,
+    STONEFS_EWOULDBLOCK: WouldBlock,
+    STONEFS_ENOTEMPTY  : ObjectNotEmpty,
+    STONEFS_ENOTDIR    : NotDirectory,
+    STONEFS_EDQUOT     : DiskQuotaExceeded,
 }
 
 
 cdef make_ex(ret, msg):
     """
-    Translate a libcephfs return code into an exception.
+    Translate a libstonefs return code into an exception.
 
     :param ret: the return code
     :type ret: int
@@ -232,12 +232,12 @@ StatResult = namedtuple('StatResult',
                          "st_blocks", "st_atime", "st_mtime", "st_ctime"])
 
 cdef class DirResult(object):
-    cdef LibCephFS lib
-    cdef ceph_dir_result* handle
+    cdef LibStoneFS lib
+    cdef stone_dir_result* handle
 
 # Bug in older Cython instances prevents this from being a static method.
 #    @staticmethod
-#    cdef create(LibCephFS lib, ceph_dir_result* handle):
+#    cdef create(LibStoneFS lib, stone_dir_result* handle):
 #        d = DirResult()
 #        d.lib = lib
 #        d.handle = handle
@@ -248,10 +248,10 @@ cdef class DirResult(object):
 
     def __enter__(self):
         if not self.handle:
-            raise make_ex(CEPHFS_EBADF, "dir is not open")
+            raise make_ex(STONEFS_EBADF, "dir is not open")
         self.lib.require_state("mounted")
         with nogil:
-            ceph_rewinddir(self.lib.cluster, self.handle)
+            stone_rewinddir(self.lib.cluster, self.handle)
         return self
 
     def __exit__(self, type_, value, traceback):
@@ -262,7 +262,7 @@ cdef class DirResult(object):
         self.lib.require_state("mounted")
 
         with nogil:
-            dirent = ceph_readdir(self.lib.cluster, self.handle)
+            dirent = stone_readdir(self.lib.cluster, self.handle)
         if not dirent:
             return None
 
@@ -283,37 +283,37 @@ cdef class DirResult(object):
         if self.handle:
             self.lib.require_state("mounted")
             with nogil:
-                ret = ceph_closedir(self.lib.cluster, self.handle)
+                ret = stone_closedir(self.lib.cluster, self.handle)
             if ret < 0:
                 raise make_ex(ret, "closedir failed")
             self.handle = NULL
 
     def rewinddir(self):
         if not self.handle:
-            raise make_ex(CEPHFS_EBADF, "dir is not open")
+            raise make_ex(STONEFS_EBADF, "dir is not open")
         self.lib.require_state("mounted")
         with nogil:
-            ceph_rewinddir(self.lib.cluster, self.handle)
+            stone_rewinddir(self.lib.cluster, self.handle)
 
     def telldir(self):
         if not self.handle:
-            raise make_ex(CEPHFS_EBADF, "dir is not open")
+            raise make_ex(STONEFS_EBADF, "dir is not open")
         self.lib.require_state("mounted")
         with nogil:
-            ret = ceph_telldir(self.lib.cluster, self.handle)
+            ret = stone_telldir(self.lib.cluster, self.handle)
         if ret < 0:
             raise make_ex(ret, "telldir failed")
         return ret
 
     def seekdir(self, offset):
         if not self.handle:
-            raise make_ex(CEPHFS_EBADF, "dir is not open")
+            raise make_ex(STONEFS_EBADF, "dir is not open")
         if not isinstance(offset, int):
             raise TypeError('offset must be an int')
         self.lib.require_state("mounted")
         cdef int64_t _offset = offset
         with nogil:
-            ceph_seekdir(self.lib.cluster, self.handle, _offset)
+            stone_seekdir(self.lib.cluster, self.handle, _offset)
 
 
 def cstr(val, name, encoding="utf-8", opt=False):
@@ -404,23 +404,23 @@ cdef iovec * to_iovec(buffers) except NULL:
     return iov
 
 
-cdef class LibCephFS(object):
-    """libcephfs python wrapper"""
+cdef class LibStoneFS(object):
+    """libstonefs python wrapper"""
 
     cdef public object state
-    cdef ceph_mount_info *cluster
+    cdef stone_mount_info *cluster
 
     def require_state(self, *args):
         if self.state in args:
             return
-        raise LibCephFSStateError("You cannot perform that operation on a "
-                                  "CephFS object in state %s." % (self.state))
+        raise LibStoneFSStateError("You cannot perform that operation on a "
+                                  "StoneFS object in state %s." % (self.state))
 
     def __cinit__(self, conf=None, conffile=None, auth_id=None, rados_inst=None):
-        """Create a libcephfs wrapper
+        """Create a libstonefs wrapper
 
         :param conf dict opt: settings overriding the default ones and conffile
-        :param conffile str opt: the path to ceph.conf to override the default settings
+        :param conffile str opt: the path to stone.conf to override the default settings
         :auth_id str opt: the id used to authenticate the client entity
         :rados_inst Rados opt: a rados.Rados instance
         """
@@ -428,7 +428,7 @@ cdef class LibCephFS(object):
         self.state = "uninitialized"
         if rados_inst is not None:
             if auth_id is not None or conffile is not None or conf is not None:
-                raise make_ex(CEPHFS_EINVAL,
+                raise make_ex(STONEFS_EINVAL,
                               "May not pass RADOS instance as well as other configuration")
 
             self.create_with_rados(rados_inst)
@@ -438,9 +438,9 @@ cdef class LibCephFS(object):
     def create_with_rados(self, Rados rados_inst):
         cdef int ret
         with nogil:
-            ret = ceph_create_from_rados(&self.cluster, rados_inst.cluster)
+            ret = stone_create_from_rados(&self.cluster, rados_inst.cluster)
         if ret != 0:
-            raise Error("libcephfs_initialize failed with error code: %d" % ret)
+            raise Error("libstonefs_initialize failed with error code: %d" % ret)
         self.state = "configuring"
 
     NO_CONF_FILE = -1
@@ -450,11 +450,11 @@ cdef class LibCephFS(object):
 
     def create(self, conf=None, conffile=NO_CONF_FILE, auth_id=None):
         """
-        Create a mount handle for interacting with Ceph.  All libcephfs
+        Create a mount handle for interacting with Stone.  All libstonefs
         functions operate on a mount info handle.
         
         :param conf dict opt: settings overriding the default ones and conffile
-        :param conffile Union[int,str], optional: the path to ceph.conf to override the default settings
+        :param conffile Union[int,str], optional: the path to stone.conf to override the default settings
         :auth_id str opt: the id used to authenticate the client entity
         """
         if conf is not None and not isinstance(conf, dict):
@@ -467,9 +467,9 @@ cdef class LibCephFS(object):
             int ret
 
         with nogil:
-            ret = ceph_create(&self.cluster, <const char*>_auth_id)
+            ret = stone_create(&self.cluster, <const char*>_auth_id)
         if ret != 0:
-            raise Error("libcephfs_initialize failed with error code: %d" % ret)
+            raise Error("libstonefs_initialize failed with error code: %d" % ret)
 
         self.state = "configuring"
         if conffile in (self.NO_CONF_FILE, None):
@@ -488,7 +488,7 @@ cdef class LibCephFS(object):
         """
         self.require_state("mounted")
         with nogil:
-            ret = ceph_get_fs_cid(self.cluster)
+            ret = stone_get_fs_cid(self.cluster)
         if ret < 0:
             raise make_ex(ret, "error fetching fscid")
         return ret
@@ -505,26 +505,26 @@ cdef class LibCephFS(object):
         try:
 
             with nogil:
-                ret = ceph_getaddrs(self.cluster, &addrs)
+                ret = stone_getaddrs(self.cluster, &addrs)
             if ret:
                 raise make_ex(ret, "error calling getaddrs")
 
             return decode_cstr(addrs)
         finally:
-            ceph_buffer_free(addrs)
+            stone_buffer_free(addrs)
 
 
     def conf_read_file(self, conffile=None):
         """
-        Load the ceph configuration from the specified config file.
+        Load the stone configuration from the specified config file.
          
-        :param conffile str opt: the path to ceph.conf to override the default settings
+        :param conffile str opt: the path to stone.conf to override the default settings
         """
         conffile = cstr(conffile, 'conffile', opt=True)
         cdef:
             char *_conffile = opt_str(conffile)
         with nogil:
-            ret = ceph_conf_read_file(self.cluster, <const char*>_conffile)
+            ret = stone_conf_read_file(self.cluster, <const char*>_conffile)
         if ret != 0:
             raise make_ex(ret, "error calling conf_read_file")
 
@@ -542,7 +542,7 @@ cdef class LibCephFS(object):
 
         try:
             with nogil:
-                ret = ceph_conf_parse_argv(self.cluster, _argc,
+                ret = stone_conf_parse_argv(self.cluster, _argc,
                                            <const char **>_argv)
             if ret != 0:
                 raise make_ex(ret, "error calling conf_parse_argv")
@@ -551,11 +551,11 @@ cdef class LibCephFS(object):
 
     def shutdown(self):
         """
-        Unmount and destroy the ceph mount handle.
+        Unmount and destroy the stone mount handle.
         """
         if self.state in ["initialized", "mounted"]:
             with nogil:
-                ceph_shutdown(self.cluster)
+                stone_shutdown(self.cluster)
             self.state = "shutdown"
 
     def __enter__(self):
@@ -571,17 +571,17 @@ cdef class LibCephFS(object):
 
     def version(self):
         """
-        Get the version number of the ``libcephfs`` C library.
+        Get the version number of the ``libstonefs`` C library.
 
         :returns: a tuple of ``(major, minor, extra)`` components of the
-                  libcephfs version
+                  libstonefs version
         """
         cdef:
             int major = 0
             int minor = 0
             int extra = 0
         with nogil:
-            ceph_version(&major, &minor, &extra)
+            stone_version(&major, &minor, &extra)
         return (major, minor, extra)
 
     def conf_get(self, option):
@@ -602,12 +602,12 @@ cdef class LibCephFS(object):
             while True:
                 ret_buf = <char *>realloc_chk(ret_buf, length)
                 with nogil:
-                    ret = ceph_conf_get(self.cluster, _option, ret_buf, length)
+                    ret = stone_conf_get(self.cluster, _option, ret_buf, length)
                 if ret == 0:
                     return decode_cstr(ret_buf)
-                elif ret == -CEPHFS_ENAMETOOLONG:
+                elif ret == -STONEFS_ENAMETOOLONG:
                     length = length * 2
-                elif ret == -CEPHFS_ENOENT:
+                elif ret == -STONEFS_ENOENT:
                     return None
                 else:
                     raise make_ex(ret, "error calling conf_get")
@@ -630,7 +630,7 @@ cdef class LibCephFS(object):
             char *_val = val
 
         with nogil:
-            ret = ceph_conf_set(self.cluster, _option, _val)
+            ret = stone_conf_set(self.cluster, _option, _val)
         if ret != 0:
             raise make_ex(ret, "error calling conf_set")
 
@@ -644,11 +644,11 @@ cdef class LibCephFS(object):
         if not isinstance(timeout, int):
             raise TypeError('timeout must be an integer')
         if timeout < 0:
-            raise make_ex(CEPHFS_EINVAL, 'timeout must be greater than or equal to 0')
+            raise make_ex(STONEFS_EINVAL, 'timeout must be greater than or equal to 0')
         cdef:
             uint32_t _timeout = timeout
         with nogil:
-            ret = ceph_set_mount_timeout(self.cluster, _timeout)
+            ret = stone_set_mount_timeout(self.cluster, _timeout)
         if ret != 0:
             raise make_ex(ret, "error setting mount timeout")
 
@@ -658,9 +658,9 @@ cdef class LibCephFS(object):
         """
         self.require_state("configuring")
         with nogil:
-            ret = ceph_init(self.cluster)
+            ret = stone_init(self.cluster)
         if ret != 0:
-            raise make_ex(ret, "error calling ceph_init")
+            raise make_ex(ret, "error calling stone_init")
         self.state = "initialized"
 
     def mount(self, mount_root=None, filesystem_name=None):
@@ -680,10 +680,10 @@ cdef class LibCephFS(object):
             char *_filesystem_name = filesystem_name
         if filesystem_name:
             with nogil:
-                ret = ceph_select_filesystem(self.cluster,
+                ret = stone_select_filesystem(self.cluster,
                         _filesystem_name)
             if ret != 0:
-                raise make_ex(ret, "error calling ceph_select_filesystem")
+                raise make_ex(ret, "error calling stone_select_filesystem")
 
         # Prepare mount_root argument, default to "/"
         root = b"/" if mount_root is None else mount_root
@@ -691,9 +691,9 @@ cdef class LibCephFS(object):
             char *_mount_root = root
 
         with nogil:
-            ret = ceph_mount(self.cluster, _mount_root)
+            ret = stone_mount(self.cluster, _mount_root)
         if ret != 0:
-            raise make_ex(ret, "error calling ceph_mount")
+            raise make_ex(ret, "error calling stone_mount")
         self.state = "mounted"
 
     def unmount(self):
@@ -702,9 +702,9 @@ cdef class LibCephFS(object):
         """
         self.require_state("mounted")
         with nogil:
-            ret = ceph_unmount(self.cluster)
+            ret = stone_unmount(self.cluster)
         if ret != 0:
-            raise make_ex(ret, "error calling ceph_unmount")
+            raise make_ex(ret, "error calling stone_unmount")
         self.state = "initialized"
 
     def abort_conn(self):
@@ -713,9 +713,9 @@ cdef class LibCephFS(object):
         """
         self.require_state("mounted")
         with nogil:
-            ret = ceph_abort_conn(self.cluster)
+            ret = stone_abort_conn(self.cluster)
         if ret != 0:
-            raise make_ex(ret, "error calling ceph_abort_conn")
+            raise make_ex(ret, "error calling stone_abort_conn")
         self.state = "initialized"
 
     def get_instance_id(self):
@@ -724,12 +724,12 @@ cdef class LibCephFS(object):
         """
         self.require_state("initialized", "mounted")
         with nogil:
-            ret = ceph_get_instance_id(self.cluster)
+            ret = stone_get_instance_id(self.cluster)
         return ret;
 
     def statfs(self, path):
         """
-        Perform a statfs on the ceph file system.  This call fills in file system wide statistics
+        Perform a statfs on the stone file system.  This call fills in file system wide statistics
         into the passed in buffer.
         
         :param path: any path within the mounted filesystem
@@ -741,7 +741,7 @@ cdef class LibCephFS(object):
             statvfs statbuf
 
         with nogil:
-            ret = ceph_statfs(self.cluster, _path, &statbuf)
+            ret = stone_statfs(self.cluster, _path, &statbuf)
         if ret < 0:
             raise make_ex(ret, "statfs failed: %s" % path)
         return {'f_bsize': statbuf.f_bsize,
@@ -762,7 +762,7 @@ cdef class LibCephFS(object):
         """
         self.require_state("mounted")
         with nogil:
-            ret = ceph_sync_fs(self.cluster)
+            ret = stone_sync_fs(self.cluster)
         if ret < 0:
             raise make_ex(ret, "sync_fs failed")
 
@@ -776,7 +776,7 @@ cdef class LibCephFS(object):
         """
         self.require_state("mounted")
         with nogil:
-            ret = ceph_fsync(self.cluster, fd, syncdataonly)
+            ret = stone_fsync(self.cluster, fd, syncdataonly)
         if ret < 0:
             raise make_ex(ret, "fsync failed")
 
@@ -799,7 +799,7 @@ cdef class LibCephFS(object):
             int _enable = enable
 
         with nogil:
-            ret = ceph_lazyio(self.cluster, _fd, _enable)
+            ret = stone_lazyio(self.cluster, _fd, _enable)
         if ret < 0:
             raise make_ex(ret, "lazyio failed")
 
@@ -826,7 +826,7 @@ cdef class LibCephFS(object):
             size_t _count = count
 
         with nogil:
-            ret = ceph_lazyio_propagate(self.cluster, _fd, _offset, _count)
+            ret = stone_lazyio_propagate(self.cluster, _fd, _offset, _count)
         if ret < 0:
             raise make_ex(ret, "lazyio_propagate failed")
 
@@ -855,7 +855,7 @@ cdef class LibCephFS(object):
             size_t _count = count
 
         with nogil:
-            ret = ceph_lazyio_synchronize(self.cluster, _fd, _offset, _count)
+            ret = stone_lazyio_synchronize(self.cluster, _fd, _offset, _count)
         if ret < 0:
             raise make_ex(ret, "lazyio_synchronize failed")
 
@@ -892,7 +892,7 @@ cdef class LibCephFS(object):
             int64_t _length = length
 
         with nogil:
-            ret = ceph_fallocate(self.cluster, _fd, _mode, _offset, _length)
+            ret = stone_fallocate(self.cluster, _fd, _mode, _offset, _length)
         if ret < 0:
             raise make_ex(ret, "fallocate failed")
 
@@ -904,7 +904,7 @@ cdef class LibCephFS(object):
         """
         self.require_state("mounted")
         with nogil:
-            ret = ceph_getcwd(self.cluster)
+            ret = stone_getcwd(self.cluster)
         return ret
 
     def chdir(self, path):
@@ -918,7 +918,7 @@ cdef class LibCephFS(object):
         path = cstr(path, 'path')
         cdef char* _path = path
         with nogil:
-            ret = ceph_chdir(self.cluster, _path)
+            ret = stone_chdir(self.cluster, _path)
         if ret < 0:
             raise make_ex(ret, "chdir failed")
 
@@ -935,9 +935,9 @@ cdef class LibCephFS(object):
         path = cstr(path, 'path')
         cdef:
             char* _path = path
-            ceph_dir_result* handle
+            stone_dir_result* handle
         with nogil:
-            ret = ceph_opendir(self.cluster, _path, &handle);
+            ret = stone_opendir(self.cluster, _path, &handle);
         if ret < 0:
             raise make_ex(ret, "opendir failed")
         d = DirResult()
@@ -984,7 +984,7 @@ cdef class LibCephFS(object):
 
         :param handle: the open directory stream handle
         :return value: The position of the directory stream. Note that the offsets
-                       returned by ceph_telldir do not have a particular order (cannot
+                       returned by stone_telldir do not have a particular order (cannot
                        be compared with inequality).
         """
         return handle.telldir()
@@ -1018,7 +1018,7 @@ cdef class LibCephFS(object):
             char* _path = path
             int _mode = mode
         with nogil:
-            ret = ceph_mkdir(self.cluster, _path, _mode)
+            ret = stone_mkdir(self.cluster, _path, _mode)
         if ret < 0:
             raise make_ex(ret, "error in mkdir {}".format(path.decode('utf-8')))
 
@@ -1061,7 +1061,7 @@ cdef class LibCephFS(object):
             _snap_meta[i] = snap_metadata(<char*>key, <char*>value)
             i += 1
         with nogil:
-            ret = ceph_mksnap(self.cluster, _path, _name, _mode, _snap_meta, nr)
+            ret = stone_mksnap(self.cluster, _path, _name, _mode, _snap_meta, nr)
         free(_snap_meta)
         if ret < 0:
             raise make_ex(ret, "mksnap error")
@@ -1083,7 +1083,7 @@ cdef class LibCephFS(object):
         cdef:
             char* _path = path
             char* _name = name
-        ret = ceph_rmsnap(self.cluster, _path, _name)
+        ret = stone_rmsnap(self.cluster, _path, _name)
         if ret < 0:
             raise make_ex(ret, "rmsnap error")
         return 0
@@ -1102,14 +1102,14 @@ cdef class LibCephFS(object):
         cdef:
             char* _path = path
             snap_info info
-        ret = ceph_get_snap_info(self.cluster, _path, &info)
+        ret = stone_get_snap_info(self.cluster, _path, &info)
         if ret < 0:
             raise make_ex(ret, "snap_info error")
         md = {}
         if info.nr_snap_metadata:
             md = {snap_meta.key.decode('utf-8'): snap_meta.value.decode('utf-8') for snap_meta in
                   info.snap_metadata[:info.nr_snap_metadata]}
-            ceph_free_snap_info_buffer(&info)
+            stone_free_snap_info_buffer(&info)
         return {'id': info.id, 'metadata': md}
 
     def chmod(self, path, mode) :
@@ -1128,7 +1128,7 @@ cdef class LibCephFS(object):
             char* _path = path
             int _mode = mode
         with nogil:
-            ret = ceph_chmod(self.cluster, _path, _mode)
+            ret = stone_chmod(self.cluster, _path, _mode)
         if ret < 0:
             raise make_ex(ret, "error in chmod {}".format(path.decode('utf-8')))
 
@@ -1148,7 +1148,7 @@ cdef class LibCephFS(object):
             char* _path = path
             int _mode = mode
         with nogil:
-            ret = ceph_lchmod(self.cluster, _path, _mode)
+            ret = stone_lchmod(self.cluster, _path, _mode)
         if ret < 0:
             raise make_ex(ret, "error in chmod {}".format(path.decode('utf-8')))
 
@@ -1167,7 +1167,7 @@ cdef class LibCephFS(object):
             int _fd = fd
             int _mode = mode
         with nogil:
-            ret = ceph_fchmod(self.cluster, _fd, _mode)
+            ret = stone_fchmod(self.cluster, _fd, _mode)
         if ret < 0:
             raise make_ex(ret, "error in fchmod")
 
@@ -1194,10 +1194,10 @@ cdef class LibCephFS(object):
             int _gid = gid
         if follow_symlink:
             with nogil:
-                ret = ceph_chown(self.cluster, _path, _uid, _gid)
+                ret = stone_chown(self.cluster, _path, _uid, _gid)
         else:
             with nogil:
-                ret = ceph_lchown(self.cluster, _path, _uid, _gid)
+                ret = stone_lchown(self.cluster, _path, _uid, _gid)
         if ret < 0:
             raise make_ex(ret, "error in chown {}".format(path.decode('utf-8')))
 
@@ -1230,7 +1230,7 @@ cdef class LibCephFS(object):
             int _uid = uid
             int _gid = gid
         with nogil:
-            ret = ceph_fchown(self.cluster, _fd, _uid, _gid)
+            ret = stone_fchown(self.cluster, _fd, _uid, _gid)
         if ret < 0:
             raise make_ex(ret, "error in fchown")
 
@@ -1251,7 +1251,7 @@ cdef class LibCephFS(object):
             int _mode = mode
 
         with nogil:
-            ret = ceph_mkdirs(self.cluster, _path, _mode)
+            ret = stone_mkdirs(self.cluster, _path, _mode)
         if ret < 0:
             raise make_ex(ret, "error in mkdirs {}".format(path.decode('utf-8')))
 
@@ -1264,7 +1264,7 @@ cdef class LibCephFS(object):
         self.require_state("mounted")
         path = cstr(path, 'path')
         cdef char* _path = path
-        ret = ceph_rmdir(self.cluster, _path)
+        ret = stone_rmdir(self.cluster, _path)
         if ret < 0:
             raise make_ex(ret, "error in rmdir {}".format(path.decode('utf-8')))
 
@@ -1284,9 +1284,9 @@ cdef class LibCephFS(object):
         if not isinstance(mode, int):
             raise TypeError('mode must be an int')
         if isinstance(flags, str):
-            cephfs_flags = 0
+            stonefs_flags = 0
             if flags == '':
-                cephfs_flags = os.O_RDONLY
+                stonefs_flags = os.O_RDONLY
             else:
                 access_flags = 0;
                 for c in flags:
@@ -1294,32 +1294,32 @@ cdef class LibCephFS(object):
                         access_flags = 1;
                     elif c == 'w':
                         access_flags = 2;
-                        cephfs_flags |= os.O_TRUNC | os.O_CREAT
+                        stonefs_flags |= os.O_TRUNC | os.O_CREAT
                     elif access_flags > 0 and c == '+':
                         access_flags = 3;
                     else:
-                        raise make_ex(CEPHFS_EOPNOTSUPP,
+                        raise make_ex(STONEFS_EOPNOTSUPP,
                                       "open flags doesn't support %s" % c)
 
                 if access_flags == 1:
-                    cephfs_flags |= os.O_RDONLY;
+                    stonefs_flags |= os.O_RDONLY;
                 elif access_flags == 2:
-                    cephfs_flags |= os.O_WRONLY;
+                    stonefs_flags |= os.O_WRONLY;
                 else:
-                    cephfs_flags |= os.O_RDWR;
+                    stonefs_flags |= os.O_RDWR;
 
         elif isinstance(flags, int):
-            cephfs_flags = flags
+            stonefs_flags = flags
         else:
             raise TypeError("flags must be a string or an integer")
 
         cdef:
             char* _path = path
-            int _flags = cephfs_flags
+            int _flags = stonefs_flags
             int _mode = mode
 
         with nogil:
-            ret = ceph_open(self.cluster, _path, _flags, _mode)
+            ret = stone_open(self.cluster, _path, _flags, _mode)
         if ret < 0:
             raise make_ex(ret, "error in open {}".format(path.decode('utf-8')))
         return ret
@@ -1336,7 +1336,7 @@ cdef class LibCephFS(object):
             raise TypeError('fd must be an int')
         cdef int _fd = fd
         with nogil:
-            ret = ceph_close(self.cluster, _fd)
+            ret = stone_close(self.cluster, _fd)
         if ret < 0:
             raise make_ex(ret, "error in close")
 
@@ -1368,7 +1368,7 @@ cdef class LibCephFS(object):
         try:
             ret_buf = PyBytes_AsString(ret_s)
             with nogil:
-                ret = ceph_read(self.cluster, _fd, ret_buf, _length, _offset)
+                ret = stone_read(self.cluster, _fd, ret_buf, _length, _offset)
             if ret < 0:
                 raise make_ex(ret, "error in read")
 
@@ -1410,7 +1410,7 @@ cdef class LibCephFS(object):
             iovec *_iov = to_iovec(buffers)
         try:
             with nogil:
-                ret = ceph_preadv(self.cluster, _fd, _iov, _iovcnt, _offset)
+                ret = stone_preadv(self.cluster, _fd, _iov, _iovcnt, _offset)
             if ret < 0:
                 raise make_ex(ret, "error in preadv")
             return ret
@@ -1442,7 +1442,7 @@ cdef class LibCephFS(object):
             size_t length = len(buf)
 
         with nogil:
-            ret = ceph_write(self.cluster, _fd, _data, length, _offset)
+            ret = stone_write(self.cluster, _fd, _data, length, _offset)
         if ret < 0:
             raise make_ex(ret, "error in write")
         return ret
@@ -1474,7 +1474,7 @@ cdef class LibCephFS(object):
             iovec *_iov = to_iovec(buffers)
         try:
             with nogil:
-                ret = ceph_pwritev(self.cluster, _fd, _iov, _iovcnt, _offset)
+                ret = stone_pwritev(self.cluster, _fd, _iov, _iovcnt, _offset)
             if ret < 0:
                 raise make_ex(ret, "error in pwritev")
             return ret
@@ -1501,7 +1501,7 @@ cdef class LibCephFS(object):
             uint64_t _owner = owner
 
         with nogil:
-            ret = ceph_flock(self.cluster, _fd, _op, _owner)
+            ret = stone_flock(self.cluster, _fd, _op, _owner)
         if ret < 0:
             raise make_ex(ret, "error in write")
         return ret
@@ -1520,7 +1520,7 @@ cdef class LibCephFS(object):
 
         statx_dict = dict()
         statx_dict["size"] = size
-        self.setattrx(path, statx_dict, CEPH_SETATTR_SIZE, AT_SYMLINK_NOFOLLOW)
+        self.setattrx(path, statx_dict, STONE_SETATTR_SIZE, AT_SYMLINK_NOFOLLOW)
 
     def ftruncate(self, fd, size):
         """
@@ -1536,7 +1536,7 @@ cdef class LibCephFS(object):
 
         statx_dict = dict()
         statx_dict["size"] = size
-        self.fsetattrx(fd, statx_dict, CEPH_SETATTR_SIZE)
+        self.fsetattrx(fd, statx_dict, STONE_SETATTR_SIZE)
 
     def mknod(self, path, mode, rdev=0):
         """
@@ -1564,7 +1564,7 @@ cdef class LibCephFS(object):
             dev_t _rdev = rdev
 
         with nogil:
-            ret = ceph_mknod(self.cluster, _path, _mode, _rdev)
+            ret = stone_mknod(self.cluster, _path, _mode, _rdev)
         if ret < 0:
             raise make_ex(ret, "error in mknod {}".format(path.decode('utf-8')))
 
@@ -1592,11 +1592,11 @@ cdef class LibCephFS(object):
             ret_buf = <char *>realloc_chk(ret_buf, ret_length)
             if follow_symlink:
                 with nogil:
-                    ret = ceph_getxattr(self.cluster, _path, _name, ret_buf,
+                    ret = stone_getxattr(self.cluster, _path, _name, ret_buf,
                                         ret_length)
             else:
                 with nogil:
-                    ret = ceph_lgetxattr(self.cluster, _path, _name, ret_buf,
+                    ret = stone_lgetxattr(self.cluster, _path, _name, ret_buf,
                                          ret_length)
 
             if ret < 0:
@@ -1630,7 +1630,7 @@ cdef class LibCephFS(object):
         try:
             ret_buf = <char *>realloc_chk(ret_buf, ret_length)
             with nogil:
-                ret = ceph_fgetxattr(self.cluster, _fd, _name, ret_buf,
+                ret = stone_fgetxattr(self.cluster, _fd, _name, ret_buf,
                                     ret_length)
 
             if ret < 0:
@@ -1643,7 +1643,7 @@ cdef class LibCephFS(object):
     def lgetxattr(self, path, name, size=255):
         """
          Get an extended attribute without following symbolic links. This
-         function is identical to ceph_getxattr, but if the path refers to
+         function is identical to stone_getxattr, but if the path refers to
          a symbolic link, we get the extended attributes of the symlink
          rather than the attributes of the file it points to.
 
@@ -1680,11 +1680,11 @@ cdef class LibCephFS(object):
 
         if follow_symlink:
             with nogil:
-                ret = ceph_setxattr(self.cluster, _path, _name,
+                ret = stone_setxattr(self.cluster, _path, _name,
                                     _value, _value_len, _flags)
         else:
             with nogil:
-                ret = ceph_lsetxattr(self.cluster, _path, _name,
+                ret = stone_lsetxattr(self.cluster, _path, _name,
                                     _value, _value_len, _flags)
 
         if ret < 0:
@@ -1716,7 +1716,7 @@ cdef class LibCephFS(object):
             int _flags = flags
 
         with nogil:
-            ret = ceph_fsetxattr(self.cluster, _fd, _name,
+            ret = stone_fsetxattr(self.cluster, _fd, _name,
                                  _value, _value_len, _flags)
         if ret < 0:
             raise make_ex(ret, "error in fsetxattr")
@@ -1750,10 +1750,10 @@ cdef class LibCephFS(object):
 
         if follow_symlink:
             with nogil:
-                ret = ceph_removexattr(self.cluster, _path, _name)
+                ret = stone_removexattr(self.cluster, _path, _name)
         else:
             with nogil:
-                ret = ceph_lremovexattr(self.cluster, _path, _name)
+                ret = stone_lremovexattr(self.cluster, _path, _name)
 
         if ret < 0:
             raise make_ex(ret, "error in removexattr")
@@ -1776,7 +1776,7 @@ cdef class LibCephFS(object):
             char *_name = name
 
         with nogil:
-            ret = ceph_fremovexattr(self.cluster, _fd, _name)
+            ret = stone_fremovexattr(self.cluster, _fd, _name)
         if ret < 0:
             raise make_ex(ret, "error in fremovexattr")
 
@@ -1809,10 +1809,10 @@ cdef class LibCephFS(object):
             ret_buf = <char *>realloc_chk(ret_buf, ret_length)
             if follow_symlink:
                 with nogil:
-                    ret = ceph_listxattr(self.cluster, _path, ret_buf, ret_length)
+                    ret = stone_listxattr(self.cluster, _path, ret_buf, ret_length)
             else:
                 with nogil:
-                    ret = ceph_llistxattr(self.cluster, _path, ret_buf, ret_length)
+                    ret = stone_llistxattr(self.cluster, _path, ret_buf, ret_length)
 
             if ret < 0:
                 raise make_ex(ret, "error in listxattr")
@@ -1841,7 +1841,7 @@ cdef class LibCephFS(object):
         try:
             ret_buf = <char *>realloc_chk(ret_buf, ret_length)
             with nogil:
-                ret = ceph_flistxattr(self.cluster, _fd, ret_buf, ret_length)
+                ret = stone_flistxattr(self.cluster, _fd, ret_buf, ret_length)
 
             if ret < 0:
                 raise make_ex(ret, "error in flistxattr")
@@ -1875,12 +1875,12 @@ cdef class LibCephFS(object):
 
         if follow_symlink:
             with nogil:
-                ret = ceph_statx(self.cluster, _path, &stx,
-                                 CEPH_STATX_BASIC_STATS_CDEF, 0)
+                ret = stone_statx(self.cluster, _path, &stx,
+                                 STONE_STATX_BASIC_STATS_CDEF, 0)
         else:
             with nogil:
-                ret = ceph_statx(self.cluster, _path, &stx,
-                                 CEPH_STATX_BASIC_STATS_CDEF, AT_SYMLINK_NOFOLLOW_CDEF)
+                ret = stone_statx(self.cluster, _path, &stx,
+                                 STONE_STATX_BASIC_STATS_CDEF, AT_SYMLINK_NOFOLLOW_CDEF)
 
         if ret < 0:
             raise make_ex(ret, "error in stat: {}".format(path.decode('utf-8')))
@@ -1919,8 +1919,8 @@ cdef class LibCephFS(object):
             statx stx
 
         with nogil:
-            ret = ceph_fstatx(self.cluster, _fd, &stx,
-                              CEPH_STATX_BASIC_STATS_CDEF, 0)
+            ret = stone_fstatx(self.cluster, _fd, &stx,
+                              STONE_STATX_BASIC_STATS_CDEF, 0)
         if ret < 0:
             raise make_ex(ret, "error in fsat")
         return StatResult(st_dev=stx.stx_dev, st_ino=stx.stx_ino,
@@ -1938,7 +1938,7 @@ cdef class LibCephFS(object):
         Get a file's extended statistics and attributes.
 
         :param path: the file or directory to get the statistics of.
-        :param mask: want bitfield of CEPH_STATX_* flags showing designed attributes.
+        :param mask: want bitfield of STONE_STATX_* flags showing designed attributes.
         :param flag: bitfield that can be used to set AT_* modifier flags (only AT_NO_ATTR_SYNC and AT_SYMLINK_NOFOLLOW)
         """
 
@@ -1957,35 +1957,35 @@ cdef class LibCephFS(object):
             dict_result = dict()
 
         with nogil:
-            ret = ceph_statx(self.cluster, _path, &stx, _mask, _flag)
+            ret = stone_statx(self.cluster, _path, &stx, _mask, _flag)
         if ret < 0:
             raise make_ex(ret, "error in stat: %s" % path)
 
-        if (_mask & CEPH_STATX_MODE):
+        if (_mask & STONE_STATX_MODE):
             dict_result["mode"] = stx.stx_mode
-        if (_mask & CEPH_STATX_NLINK):
+        if (_mask & STONE_STATX_NLINK):
             dict_result["nlink"] = stx.stx_nlink
-        if (_mask & CEPH_STATX_UID):
+        if (_mask & STONE_STATX_UID):
             dict_result["uid"] = stx.stx_uid
-        if (_mask & CEPH_STATX_GID):
+        if (_mask & STONE_STATX_GID):
             dict_result["gid"] = stx.stx_gid
-        if (_mask & CEPH_STATX_RDEV):
+        if (_mask & STONE_STATX_RDEV):
             dict_result["rdev"] = stx.stx_rdev
-        if (_mask & CEPH_STATX_ATIME):
+        if (_mask & STONE_STATX_ATIME):
             dict_result["atime"] = datetime.fromtimestamp(stx.stx_atime.tv_sec)
-        if (_mask & CEPH_STATX_MTIME):
+        if (_mask & STONE_STATX_MTIME):
             dict_result["mtime"] = datetime.fromtimestamp(stx.stx_mtime.tv_sec)
-        if (_mask & CEPH_STATX_CTIME):
+        if (_mask & STONE_STATX_CTIME):
             dict_result["ctime"] = datetime.fromtimestamp(stx.stx_ctime.tv_sec)
-        if (_mask & CEPH_STATX_INO):
+        if (_mask & STONE_STATX_INO):
             dict_result["ino"] = stx.stx_ino
-        if (_mask & CEPH_STATX_SIZE):
+        if (_mask & STONE_STATX_SIZE):
             dict_result["size"] = stx.stx_size
-        if (_mask & CEPH_STATX_BLOCKS):
+        if (_mask & STONE_STATX_BLOCKS):
             dict_result["blocks"] = stx.stx_blocks
-        if (_mask & CEPH_STATX_BTIME):
+        if (_mask & STONE_STATX_BTIME):
             dict_result["btime"] = datetime.fromtimestamp(stx.stx_btime.tv_sec)
-        if (_mask & CEPH_STATX_VERSION):
+        if (_mask & STONE_STATX_VERSION):
             dict_result["version"] = stx.stx_version
 
         return dict_result
@@ -1995,7 +1995,7 @@ cdef class LibCephFS(object):
         Set a file's attributes.
 
         :param path: the path to the file/directory to set the attributes of.
-        :param mask: a mask of all the CEPH_SETATTR_* values that have been set in the statx struct.
+        :param mask: a mask of all the STONE_SETATTR_* values that have been set in the statx struct.
         :param stx: a dict of statx structure that must include attribute values to set on the file.
         :param flags: mask of AT_* flags (only AT_ATTR_NOFOLLOW is respected for now)
         """
@@ -2011,21 +2011,21 @@ cdef class LibCephFS(object):
 
         cdef statx stx
 
-        if (mask & CEPH_SETATTR_MODE):
+        if (mask & STONE_SETATTR_MODE):
             stx.stx_mode = dict_stx["mode"]
-        if (mask & CEPH_SETATTR_UID):
+        if (mask & STONE_SETATTR_UID):
             stx.stx_uid = dict_stx["uid"]
-        if (mask & CEPH_SETATTR_GID):
+        if (mask & STONE_SETATTR_GID):
             stx.stx_gid = dict_stx["gid"]
-        if (mask & CEPH_SETATTR_MTIME):
+        if (mask & STONE_SETATTR_MTIME):
             stx.stx_mtime = to_timespec(dict_stx["mtime"].timestamp())
-        if (mask & CEPH_SETATTR_ATIME):
+        if (mask & STONE_SETATTR_ATIME):
             stx.stx_atime = to_timespec(dict_stx["atime"].timestamp())
-        if (mask & CEPH_SETATTR_CTIME):
+        if (mask & STONE_SETATTR_CTIME):
             stx.stx_ctime = to_timespec(dict_stx["ctime"].timestamp())
-        if (mask & CEPH_SETATTR_SIZE):
+        if (mask & STONE_SETATTR_SIZE):
             stx.stx_size = dict_stx["size"]
-        if (mask & CEPH_SETATTR_BTIME):
+        if (mask & STONE_SETATTR_BTIME):
             stx.stx_btime = to_timespec(dict_stx["btime"].timestamp())
 
         cdef:
@@ -2035,7 +2035,7 @@ cdef class LibCephFS(object):
             dict_result = dict()
 
         with nogil:
-            ret = ceph_setattrx(self.cluster, _path, &stx, _mask, _flags)
+            ret = stone_setattrx(self.cluster, _path, &stx, _mask, _flags)
         if ret < 0:
             raise make_ex(ret, "error in setattrx: %s" % path)
 
@@ -2044,7 +2044,7 @@ cdef class LibCephFS(object):
         Set a file's attributes.
 
         :param path: the path to the file/directory to set the attributes of.
-        :param mask: a mask of all the CEPH_SETATTR_* values that have been set in the statx struct.
+        :param mask: a mask of all the STONE_SETATTR_* values that have been set in the statx struct.
         :param stx: a dict of statx structure that must include attribute values to set on the file.
         """
 
@@ -2058,21 +2058,21 @@ cdef class LibCephFS(object):
 
         cdef statx stx
 
-        if (mask & CEPH_SETATTR_MODE):
+        if (mask & STONE_SETATTR_MODE):
             stx.stx_mode = dict_stx["mode"]
-        if (mask & CEPH_SETATTR_UID):
+        if (mask & STONE_SETATTR_UID):
             stx.stx_uid = dict_stx["uid"]
-        if (mask & CEPH_SETATTR_GID):
+        if (mask & STONE_SETATTR_GID):
             stx.stx_gid = dict_stx["gid"]
-        if (mask & CEPH_SETATTR_MTIME):
+        if (mask & STONE_SETATTR_MTIME):
             stx.stx_mtime = to_timespec(dict_stx["mtime"].timestamp())
-        if (mask & CEPH_SETATTR_ATIME):
+        if (mask & STONE_SETATTR_ATIME):
             stx.stx_atime = to_timespec(dict_stx["atime"].timestamp())
-        if (mask & CEPH_SETATTR_CTIME):
+        if (mask & STONE_SETATTR_CTIME):
             stx.stx_ctime = to_timespec(dict_stx["ctime"].timestamp())
-        if (mask & CEPH_SETATTR_SIZE):
+        if (mask & STONE_SETATTR_SIZE):
             stx.stx_size = dict_stx["size"]
-        if (mask & CEPH_SETATTR_BTIME):
+        if (mask & STONE_SETATTR_BTIME):
             stx.stx_btime = to_timespec(dict_stx["btime"].timestamp())
 
         cdef:
@@ -2081,7 +2081,7 @@ cdef class LibCephFS(object):
             dict_result = dict()
 
         with nogil:
-            ret = ceph_fsetattrx(self.cluster, _fd, &stx, _mask)
+            ret = stone_fsetattrx(self.cluster, _fd, &stx, _mask)
         if ret < 0:
             raise make_ex(ret, "error in fsetattrx")
 
@@ -2100,7 +2100,7 @@ cdef class LibCephFS(object):
             char* _newname = newname
 
         with nogil:
-            ret = ceph_symlink(self.cluster, _existing, _newname)
+            ret = stone_symlink(self.cluster, _existing, _newname)
         if ret < 0:
             raise make_ex(ret, "error in symlink")
     
@@ -2120,7 +2120,7 @@ cdef class LibCephFS(object):
             char* _newname = newname
         
         with nogil:
-            ret = ceph_link(self.cluster, _existing, _newname)
+            ret = stone_link(self.cluster, _existing, _newname)
         if ret < 0:
             raise make_ex(ret, "error in link")    
     
@@ -2143,7 +2143,7 @@ cdef class LibCephFS(object):
         try:
             buf = <char *>realloc_chk(buf, _size)
             with nogil:
-                ret = ceph_readlink(self.cluster, _path, buf, _size)
+                ret = stone_readlink(self.cluster, _path, buf, _size)
             if ret < 0:
                 raise make_ex(ret, "error in readlink")
             return buf[:ret]
@@ -2161,7 +2161,7 @@ cdef class LibCephFS(object):
         path = cstr(path, 'path')
         cdef char* _path = path
         with nogil:
-            ret = ceph_unlink(self.cluster, _path)
+            ret = stone_unlink(self.cluster, _path)
         if ret < 0:
             raise make_ex(ret, "error in unlink: {}".format(path.decode('utf-8')))
 
@@ -2183,7 +2183,7 @@ cdef class LibCephFS(object):
             char* _dst = dst
 
         with nogil:
-            ret = ceph_rename(self.cluster, _src, _dst)
+            ret = stone_rename(self.cluster, _src, _dst)
         if ret < 0:
             raise make_ex(ret, "error in rename {} to {}".format(src.decode(
                           'utf-8'), dst.decode('utf-8')))
@@ -2211,7 +2211,7 @@ cdef class LibCephFS(object):
 
         try:
             with nogil:
-                ret = ceph_mds_command(self.cluster, _mds_spec,
+                ret = stone_mds_command(self.cluster, _mds_spec,
                                        <const char **>_cmd, _cmdlen,
                                        <const char*>_inbuf, _inbuf_len,
                                        &_outbuf, &_outbuf_len,
@@ -2219,9 +2219,9 @@ cdef class LibCephFS(object):
             my_outs = decode_cstr(_outs[:_outs_len])
             my_outbuf = _outbuf[:_outbuf_len]
             if _outs_len:
-                ceph_buffer_free(_outs)
+                stone_buffer_free(_outs)
             if _outbuf_len:
-                ceph_buffer_free(_outbuf)
+                stone_buffer_free(_outbuf)
             return (ret, my_outbuf, my_outs)
         finally:
             free(_cmd)
@@ -2231,7 +2231,7 @@ cdef class LibCephFS(object):
         cdef:
             mode_t _mode = mode
         with nogil:
-            ret = ceph_umask(self.cluster, _mode)
+            ret = stone_umask(self.cluster, _mode)
         if ret < 0:
             raise make_ex(ret, "error in umask")
         return ret
@@ -2259,7 +2259,7 @@ cdef class LibCephFS(object):
             int64_t _whence = whence
 
         with nogil:
-            ret = ceph_lseek(self.cluster, _fd, _offset, _whence)
+            ret = stone_lseek(self.cluster, _fd, _offset, _whence)
 
         if ret < 0:
             raise make_ex(ret, "error in lseek")
@@ -2292,7 +2292,7 @@ cdef class LibCephFS(object):
             char *pth = path
             utimbuf buf = utimbuf(actime, modtime)
         with nogil:
-            ret = ceph_utime(self.cluster, pth, &buf)
+            ret = stone_utime(self.cluster, pth, &buf)
         if ret < 0:
             raise make_ex(ret, "error in utime {}".format(path.decode('utf-8')))
 
@@ -2323,7 +2323,7 @@ cdef class LibCephFS(object):
             int _fd = fd
             utimbuf buf = utimbuf(actime, modtime)
         with nogil:
-            ret = ceph_futime(self.cluster, _fd, &buf)
+            ret = stone_futime(self.cluster, _fd, &buf)
         if ret < 0:
             raise make_ex(ret, "error in futime")
 
@@ -2356,10 +2356,10 @@ cdef class LibCephFS(object):
             timeval *buf = [to_timeval(actime), to_timeval(modtime)]
         if follow_symlink:
             with nogil:
-                ret = ceph_utimes(self.cluster, pth, buf)
+                ret = stone_utimes(self.cluster, pth, buf)
         else:
             with nogil:
-                ret = ceph_lutimes(self.cluster, pth, buf)
+                ret = stone_lutimes(self.cluster, pth, buf)
         if ret < 0:
             raise make_ex(ret, "error in utimes {}".format(path.decode('utf-8')))
 
@@ -2400,7 +2400,7 @@ cdef class LibCephFS(object):
             int _fd = fd
             timeval *buf = [to_timeval(actime), to_timeval(modtime)]
         with nogil:
-                ret = ceph_futimes(self.cluster, _fd, buf)
+                ret = stone_futimes(self.cluster, _fd, buf)
         if ret < 0:
             raise make_ex(ret, "error in futimes")
 
@@ -2431,7 +2431,7 @@ cdef class LibCephFS(object):
             int _fd = fd
             timespec *buf = [to_timespec(actime), to_timespec(modtime)]
         with nogil:
-                ret = ceph_futimens(self.cluster, _fd, buf)
+                ret = stone_futimens(self.cluster, _fd, buf)
         if ret < 0:
             raise make_ex(ret, "error in futimens")
 
@@ -2450,7 +2450,7 @@ cdef class LibCephFS(object):
             int _fd = fd
 
         with nogil:
-            ret = ceph_get_file_replication(self.cluster, _fd)
+            ret = stone_get_file_replication(self.cluster, _fd)
         if ret < 0:
             raise make_ex(ret, "error in get_file_replication")
 
@@ -2469,7 +2469,7 @@ cdef class LibCephFS(object):
             char* _path = path
 
         with nogil:
-            ret = ceph_get_path_replication(self.cluster, _path)
+            ret = stone_get_path_replication(self.cluster, _path)
         if ret < 0:
             raise make_ex(ret, "error in get_path_replication")
 
@@ -2489,7 +2489,7 @@ cdef class LibCephFS(object):
             char* _pool_name = pool_name
 
         with nogil:
-            ret = ceph_get_pool_id(self.cluster, _pool_name)
+            ret = stone_get_pool_id(self.cluster, _pool_name)
         if ret < 0:
             raise make_ex(ret, "error in get_pool_id")
 
@@ -2510,7 +2510,7 @@ cdef class LibCephFS(object):
             int _pool_id = pool_id
 
         with nogil:
-            ret = ceph_get_pool_replication(self.cluster, _pool_id)
+            ret = stone_get_pool_replication(self.cluster, _pool_id)
         if ret < 0:
             raise make_ex(ret, "error in get_pool_replication")
 
@@ -2531,7 +2531,7 @@ cdef class LibCephFS(object):
             int _fd = fd
 
         with nogil:
-            ret = ceph_debug_get_fd_caps(self.cluster, _fd)
+            ret = stone_debug_get_fd_caps(self.cluster, _fd)
         if ret < 0:
             raise make_ex(ret, "error in debug_get_fd_caps")
 
@@ -2551,7 +2551,7 @@ cdef class LibCephFS(object):
             char* _path = path
 
         with nogil:
-            ret = ceph_debug_get_file_caps(self.cluster, _path)
+            ret = stone_debug_get_file_caps(self.cluster, _path)
         if ret < 0:
             raise make_ex(ret, "error in debug_get_file_caps")
 
@@ -2569,7 +2569,7 @@ cdef class LibCephFS(object):
         self.require_state("mounted")
 
         with nogil:
-            ret = ceph_get_cap_return_timeout(self.cluster)
+            ret = stone_get_cap_return_timeout(self.cluster)
         if ret < 0:
             raise make_ex(ret, "error in get_cap_return_timeout")
 
@@ -2577,7 +2577,7 @@ cdef class LibCephFS(object):
 
     def set_uuid(self, uuid):
         """
-        Set ceph client uuid. Must be called before mount.
+        Set stone client uuid. Must be called before mount.
 
         :param uuid: the uuid to set
         """
@@ -2588,11 +2588,11 @@ cdef class LibCephFS(object):
             char* _uuid = uuid
 
         with nogil:
-            ceph_set_uuid(self.cluster, _uuid)
+            stone_set_uuid(self.cluster, _uuid)
 
     def set_session_timeout(self, timeout):
         """
-        Set ceph client session timeout. Must be called before mount.
+        Set stone client session timeout. Must be called before mount.
 
         :param timeout: the timeout to set
         """
@@ -2604,11 +2604,11 @@ cdef class LibCephFS(object):
             int _timeout = timeout
 
         with nogil:
-            ceph_set_session_timeout(self.cluster, _timeout)
+            stone_set_session_timeout(self.cluster, _timeout)
 
     def get_layout(self, fd):
         """
-        Set ceph client session timeout. Must be called before mount.
+        Set stone client session timeout. Must be called before mount.
 
         :param fd: file descriptor of the file/directory for which to get the layout
         """
@@ -2627,7 +2627,7 @@ cdef class LibCephFS(object):
             dict_result = dict()
 
         with nogil:
-            ret = ceph_get_file_layout(self.cluster, _fd, &stripe_unit, &stripe_count, &object_size, &pool_id)
+            ret = stone_get_file_layout(self.cluster, _fd, &stripe_unit, &stripe_count, &object_size, &pool_id)
         if ret < 0:
             raise make_ex(stripe_unit, "error in get_file_layout")
         dict_result["stripe_unit"] = stripe_unit
@@ -2639,11 +2639,11 @@ cdef class LibCephFS(object):
             while True:
                 buf = <char *>realloc_chk(buf, buflen)
                 with nogil:
-                    ret = ceph_get_file_pool_name(self.cluster, _fd, buf, buflen)
+                    ret = stone_get_file_pool_name(self.cluster, _fd, buf, buflen)
                 if ret > 0:
                     dict_result["pool_name"] = decode_cstr(buf)
                     return dict_result
-                elif ret == -CEPHFS_ERANGE:
+                elif ret == -STONEFS_ERANGE:
                     buflen = buflen * 2
                 else:
                     raise make_ex(ret, "error in get_file_pool_name")
@@ -2653,7 +2653,7 @@ cdef class LibCephFS(object):
 
     def get_default_pool(self):
         """
-        Get the default pool name and id of cephfs. This returns dict{pool_name, pool_id}.
+        Get the default pool name and id of stonefs. This returns dict{pool_name, pool_id}.
         """
 
         cdef:
@@ -2665,17 +2665,17 @@ cdef class LibCephFS(object):
             while True:
                 buf = <char *>realloc_chk(buf, buflen)
                 with nogil:
-                    ret = ceph_get_default_data_pool_name(self.cluster, buf, buflen)
+                    ret = stone_get_default_data_pool_name(self.cluster, buf, buflen)
                 if ret > 0:
                     dict_result["pool_name"] = decode_cstr(buf)
                     break
-                elif ret == -CEPHFS_ERANGE:
+                elif ret == -STONEFS_ERANGE:
                     buflen = buflen * 2
                 else:
                     raise make_ex(ret, "error in get_default_data_pool_name")
 
             with nogil:
-                ret = ceph_get_pool_id(self.cluster, buf)
+                ret = stone_get_pool_id(self.cluster, buf)
             if ret < 0:
                 raise make_ex(ret, "error in get_pool_id")
             dict_result["pool_id"] = ret

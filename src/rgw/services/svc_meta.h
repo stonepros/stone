@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -35,7 +35,7 @@ class RGWSI_Meta : public RGWServiceInstance
   vector<unique_ptr<RGWSI_MetaBackend_Handler> > be_handlers;
 
 public:
-  RGWSI_Meta(CephContext *cct);
+  RGWSI_Meta(StoneContext *cct);
   ~RGWSI_Meta();
 
   void init(RGWSI_SysObj *_sysobj_svc,

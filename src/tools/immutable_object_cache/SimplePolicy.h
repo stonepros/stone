@@ -4,20 +4,20 @@
 #ifndef STONE_CACHE_SIMPLE_POLICY_H
 #define STONE_CACHE_SIMPLE_POLICY_H
 
-#include "common/ceph_context.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_context.h"
+#include "common/stone_mutex.h"
 #include "include/lru.h"
 #include "Policy.h"
 
 #include <unordered_map>
 #include <string>
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 class SimplePolicy : public Policy {
  public:
-  SimplePolicy(CephContext *cct, uint64_t block_num, uint64_t max_inflight,
+  SimplePolicy(StoneContext *cct, uint64_t block_num, uint64_t max_inflight,
                double watermark);
   ~SimplePolicy();
 
@@ -48,15 +48,15 @@ class SimplePolicy : public Policy {
     uint64_t size;
   };
 
-  CephContext* cct;
+  StoneContext* cct;
   double m_watermark;
   uint64_t m_max_inflight_ops;
   uint64_t m_max_cache_size;
   std::atomic<uint64_t> inflight_ops = 0;
 
   std::unordered_map<std::string, Entry*> m_cache_map;
-  ceph::shared_mutex m_cache_map_lock =
-    ceph::make_shared_mutex("rbd::cache::SimplePolicy::m_cache_map_lock");
+  stone::shared_mutex m_cache_map_lock =
+    stone::make_shared_mutex("rbd::cache::SimplePolicy::m_cache_map_lock");
 
   std::atomic<uint64_t> m_cache_size;
 
@@ -64,5 +64,5 @@ class SimplePolicy : public Policy {
 };
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone
 #endif  // STONE_CACHE_SIMPLE_POLICY_H

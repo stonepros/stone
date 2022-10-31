@@ -5,10 +5,10 @@
 Rook
 ====
 
-Rook (https://rook.io/) is an orchestration tool that can run Ceph inside
+Rook (https://rook.io/) is an orchestration tool that can run Stone inside
 a Kubernetes cluster.
 
-The ``rook`` module provides integration between Ceph's orchestrator framework
+The ``rook`` module provides integration between Stone's orchestrator framework
 (used by modules such as ``dashboard`` to control cluster services) and
 Rook.
 
@@ -19,14 +19,14 @@ to use the :ref:`Orchestrator CLI <orchestrator-cli-module>` module.
 Requirements
 ------------
 
-- Running ceph-mon and ceph-mgr services that were set up with Rook in
+- Running stone-mon and stone-mgr services that were set up with Rook in
   Kubernetes.
 - Rook 0.9 or newer.
 
 Configuration
 -------------
 
-Because a Rook cluster's ceph-mgr daemon is running as a Kubernetes pod, 
+Because a Rook cluster's stone-mgr daemon is running as a Kubernetes pod, 
 the ``rook`` module can connect to the Kubernetes API without any explicit
 configuration.
 

@@ -14,7 +14,7 @@ class Finisher;
 
 class FakeWriteback : public WritebackHandler {
 public:
-  FakeWriteback(StoneeContext *cct, ceph::mutex *lock, uint64_t delay_ns);
+  FakeWriteback(StoneContext *cct, stone::mutex *lock, uint64_t delay_ns);
   ~FakeWriteback() override;
 
   void read(const object_t& oid, uint64_t object_no,
@@ -24,11 +24,11 @@ public:
 		    const ZTracer::Trace &parent_trace,
                     Context *onfinish) override;
 
-  ceph_tid_t write(const object_t& oid, const object_locator_t& oloc,
+  stone_tid_t write(const object_t& oid, const object_locator_t& oloc,
 			   uint64_t off, uint64_t len,
 			   const SnapContext& snapc, const bufferlist &bl,
-			   ceph::real_time mtime, uint64_t trunc_size,
-			   __u32 trunc_seq, ceph_tid_t journal_tid,
+			   stone::real_time mtime, uint64_t trunc_size,
+			   __u32 trunc_seq, stone_tid_t journal_tid,
                            const ZTracer::Trace &parent_trace,
 			   Context *oncommit) override;
 
@@ -37,8 +37,8 @@ public:
   bool may_copy_on_write(const object_t&, uint64_t, uint64_t,
 				 snapid_t) override;
 private:
-  StoneeContext *m_cct;
-  ceph::mutex *m_lock;
+  StoneContext *m_cct;
+  stone::mutex *m_lock;
   uint64_t m_delay_ns;
   std::atomic<unsigned> m_tid = { 0 };
   Finisher *m_finisher;

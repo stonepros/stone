@@ -2,32 +2,32 @@
  Architecture
 ==============
 
-:term:`Ceph` uniquely delivers **object, block, and file storage** in one
-unified system. Ceph is highly reliable, easy to manage, and free. The power of
-Ceph can transform your company's IT infrastructure and your ability to manage
-vast amounts of data. Ceph delivers extraordinary scalability–thousands of
-clients accessing petabytes to exabytes of data. A :term:`Ceph Node` leverages
-commodity hardware and intelligent daemons, and a :term:`Ceph Storage Cluster`
+:term:`Stone` uniquely delivers **object, block, and file storage** in one
+unified system. Stone is highly reliable, easy to manage, and free. The power of
+Stone can transform your company's IT infrastructure and your ability to manage
+vast amounts of data. Stone delivers extraordinary scalability–thousands of
+clients accessing petabytes to exabytes of data. A :term:`Stone Node` leverages
+commodity hardware and intelligent daemons, and a :term:`Stone Storage Cluster`
 accommodates large numbers of nodes, which communicate with each other to
 replicate and redistribute data dynamically.
 
 .. image:: images/stack.png
 
 
-The Ceph Storage Cluster
+The Stone Storage Cluster
 ========================
 
-Ceph provides an infinitely scalable :term:`Ceph Storage Cluster` based upon
+Stone provides an infinitely scalable :term:`Stone Storage Cluster` based upon
 :abbr:`RADOS (Reliable Autonomic Distributed Object Store)`, which you can read
 about in `RADOS - A Scalable, Reliable Storage Service for Petabyte-scale
 Storage Clusters`_.
 
-A Ceph Storage Cluster consists of multiple types of daemons:
+A Stone Storage Cluster consists of multiple types of daemons:
 
-- :term:`Ceph Monitor`
-- :term:`Ceph OSD Daemon`
-- :term:`Ceph Manager`
-- :term:`Ceph Metadata Server`
+- :term:`Stone Monitor`
+- :term:`Stone OSD Daemon`
+- :term:`Stone Manager`
+- :term:`Stone Metadata Server`
 
 .. ditaa::
 
@@ -35,23 +35,23 @@ A Ceph Storage Cluster consists of multiple types of daemons:
             |      OSDs     | |    Monitors   | |    Managers   | |      MDS      |
             +---------------+ +---------------+ +---------------+ +---------------+ 
 
-A Ceph Monitor maintains a master copy of the cluster map. A cluster of Ceph
+A Stone Monitor maintains a master copy of the cluster map. A cluster of Stone
 monitors ensures high availability should a monitor daemon fail. Storage cluster
-clients retrieve a copy of the cluster map from the Ceph Monitor.
+clients retrieve a copy of the cluster map from the Stone Monitor.
 
-A Ceph OSD Daemon checks its own state and the state of other OSDs and reports 
+A Stone OSD Daemon checks its own state and the state of other OSDs and reports 
 back to monitors.
 
-A Ceph Manager acts as an endpoint for monitoring, orchestration, and plug-in
+A Stone Manager acts as an endpoint for monitoring, orchestration, and plug-in
 modules.
 
-A Ceph Metadata Server (MDS) manages file metadata when CephFS is used to
+A Stone Metadata Server (MDS) manages file metadata when StoneFS is used to
 provide file services.
 
-Storage cluster clients and each :term:`Ceph OSD Daemon` use the CRUSH algorithm
+Storage cluster clients and each :term:`Stone OSD Daemon` use the CRUSH algorithm
 to efficiently compute information about data location, instead of having to
-depend on a central lookup table. Ceph's high-level features include a
-native interface to the Ceph Storage Cluster via ``librados``, and a number of
+depend on a central lookup table. Stone's high-level features include a
+native interface to the Stone Storage Cluster via ``librados``, and a number of
 service interfaces built on top of ``librados``.
 
 
@@ -59,11 +59,11 @@ service interfaces built on top of ``librados``.
 Storing Data
 ------------
 
-The Ceph Storage Cluster receives data from :term:`Ceph Clients`--whether it
-comes through a :term:`Ceph Block Device`, :term:`Ceph Object Storage`, the
-:term:`Ceph File System` or a custom implementation you create using
+The Stone Storage Cluster receives data from :term:`Stone Clients`--whether it
+comes through a :term:`Stone Block Device`, :term:`Stone Object Storage`, the
+:term:`Stone File System` or a custom implementation you create using
 ``librados``-- which is stored as RADOS objects. Each object is stored on an
-:term:`Object Storage Device`. Ceph OSD Daemons handle read, write, and
+:term:`Object Storage Device`. Stone OSD Daemons handle read, write, and
 replication operations on storage drives.  With the older Filestore back end,
 each RADOS object was stored as a separate file on a conventional filesystem
 (usually XFS).  With the new and default BlueStore back end, objects are
@@ -77,10 +77,10 @@ stored in a monolithic database-like fashion.
    
             Object         OSD          Drive
 
-Ceph OSD Daemons store data as objects in a flat namespace (e.g., no
+Stone OSD Daemons store data as objects in a flat namespace (e.g., no
 hierarchy of directories). An object has an identifier, binary data, and
 metadata consisting of a set of name/value pairs. The semantics are completely
-up to :term:`Ceph Clients`. For example, CephFS uses metadata to store file
+up to :term:`Stone Clients`. For example, StoneFS uses metadata to store file
 attributes such as the file owner, created date, last modified date, and so
 forth.
 
@@ -110,10 +110,10 @@ complex subsystem. This imposes a limit to both performance and scalability,
 while introducing a single point of failure (i.e., if the centralized component
 goes down, the whole system goes down, too).
 
-Ceph eliminates the centralized gateway to enable clients to interact with 
-Ceph OSD Daemons directly. Ceph OSD Daemons create object replicas on other
-Ceph Nodes to ensure data safety and high availability. Ceph also uses a cluster
-of monitors to ensure high availability. To eliminate centralization, Ceph 
+Stone eliminates the centralized gateway to enable clients to interact with 
+Stone OSD Daemons directly. Stone OSD Daemons create object replicas on other
+Stone Nodes to ensure data safety and high availability. Stone also uses a cluster
+of monitors to ensure high availability. To eliminate centralization, Stone 
 uses an algorithm called CRUSH.
 
 
@@ -122,7 +122,7 @@ uses an algorithm called CRUSH.
 CRUSH Introduction
 ~~~~~~~~~~~~~~~~~~
 
-Ceph Clients and Ceph OSD Daemons both use the :abbr:`CRUSH (Controlled
+Stone Clients and Stone OSD Daemons both use the :abbr:`CRUSH (Controlled
 Replication Under Scalable Hashing)` algorithm to efficiently compute
 information about object location, instead of having to depend on a
 central lookup table. CRUSH provides a better data management mechanism compared
@@ -138,19 +138,19 @@ Placement of Replicated Data`_.
 Cluster Map
 ~~~~~~~~~~~
 
-Ceph depends upon Ceph Clients and Ceph OSD Daemons having knowledge of the
+Stone depends upon Stone Clients and Stone OSD Daemons having knowledge of the
 cluster topology, which is inclusive of 5 maps collectively referred to as the
 "Cluster Map":
 
 #. **The Monitor Map:** Contains the cluster ``fsid``, the position, name 
    address and port of each monitor. It also indicates the current epoch, 
    when the map was created, and the last time it changed. To view a monitor
-   map, execute ``ceph mon dump``.   
+   map, execute ``stone mon dump``.   
    
 #. **The OSD Map:** Contains the cluster ``fsid``, when the map was created and
    last modified, a list of pools, replica sizes, PG numbers, a list of OSDs
    and their status (e.g., ``up``, ``in``). To view an OSD map, execute
-   ``ceph osd dump``. 
+   ``stone osd dump``. 
    
 #. **The PG Map:** Contains the PG version, its time stamp, the last OSD
    map epoch, the full ratios, and details on each placement group such as
@@ -160,35 +160,35 @@ cluster topology, which is inclusive of 5 maps collectively referred to as the
 #. **The CRUSH Map:** Contains a list of storage devices, the failure domain
    hierarchy (e.g., device, host, rack, row, room, etc.), and rules for 
    traversing the hierarchy when storing data. To view a CRUSH map, execute
-   ``ceph osd getcrushmap -o {filename}``; then, decompile it by executing
+   ``stone osd getcrushmap -o {filename}``; then, decompile it by executing
    ``crushtool -d {comp-crushmap-filename} -o {decomp-crushmap-filename}``.
    You can view the decompiled map in a text editor or with ``cat``. 
 
 #. **The MDS Map:** Contains the current MDS map epoch, when the map was 
    created, and the last time it changed. It also contains the pool for 
    storing metadata, a list of metadata servers, and which metadata servers
-   are ``up`` and ``in``. To view an MDS map, execute ``ceph fs dump``.
+   are ``up`` and ``in``. To view an MDS map, execute ``stone fs dump``.
 
-Each map maintains an iterative history of its operating state changes. Ceph
+Each map maintains an iterative history of its operating state changes. Stone
 Monitors maintain a master copy of the cluster map including the cluster
-members, state, changes, and the overall health of the Ceph Storage Cluster.
+members, state, changes, and the overall health of the Stone Storage Cluster.
 
 .. index:: high availability; monitor architecture
 
 High Availability Monitors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before Ceph Clients can read or write data, they must contact a Ceph Monitor
-to obtain the most recent copy of the cluster map. A Ceph Storage Cluster
+Before Stone Clients can read or write data, they must contact a Stone Monitor
+to obtain the most recent copy of the cluster map. A Stone Storage Cluster
 can operate with a single monitor; however, this introduces a single 
-point of failure (i.e., if the monitor goes down, Ceph Clients cannot
+point of failure (i.e., if the monitor goes down, Stone Clients cannot
 read or write data).
 
-For added reliability and fault tolerance, Ceph supports a cluster of monitors.
+For added reliability and fault tolerance, Stone supports a cluster of monitors.
 In a cluster of monitors, latency and other faults can cause one or more
-monitors to fall behind the current state of the cluster. For this reason, Ceph
+monitors to fall behind the current state of the cluster. For this reason, Stone
 must have agreement among various monitor instances regarding the state of the
-cluster. Ceph always uses a majority of monitors (e.g., 1, 2:3, 3:5, 4:6, etc.)
+cluster. Stone always uses a majority of monitors (e.g., 1, 2:3, 3:5, 4:6, etc.)
 and the `Paxos`_ algorithm to establish a consensus among the monitors about the
 current state of the cluster.
 
@@ -199,46 +199,46 @@ For details on configuring monitors, see the `Monitor Config Reference`_.
 High Availability Authentication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To identify users and protect against man-in-the-middle attacks, Ceph provides
-its ``cephx`` authentication system to authenticate users and daemons.
+To identify users and protect against man-in-the-middle attacks, Stone provides
+its ``stonex`` authentication system to authenticate users and daemons.
 
-.. note:: The ``cephx`` protocol does not address data encryption in transport 
+.. note:: The ``stonex`` protocol does not address data encryption in transport 
    (e.g., SSL/TLS) or encryption at rest.
 
-Cephx uses shared secret keys for authentication, meaning both the client and
+Stonex uses shared secret keys for authentication, meaning both the client and
 the monitor cluster have a copy of the client's secret key. The authentication
 protocol is such that both parties are able to prove to each other they have a
 copy of the key without actually revealing it. This provides mutual
 authentication, which means the cluster is sure the user possesses the secret
 key, and the user is sure that the cluster has a copy of the secret key.
 
-A key scalability feature of Ceph is to avoid a centralized interface to the
-Ceph object store, which means that Ceph clients must be able to interact with
-OSDs directly. To protect data, Ceph provides its ``cephx`` authentication
-system, which authenticates users operating Ceph clients. The ``cephx`` protocol
+A key scalability feature of Stone is to avoid a centralized interface to the
+Stone object store, which means that Stone clients must be able to interact with
+OSDs directly. To protect data, Stone provides its ``stonex`` authentication
+system, which authenticates users operating Stone clients. The ``stonex`` protocol
 operates in a manner with behavior similar to `Kerberos`_. 
 
-A user/actor invokes a Ceph client to contact a monitor. Unlike Kerberos, each
+A user/actor invokes a Stone client to contact a monitor. Unlike Kerberos, each
 monitor can authenticate users and distribute keys, so there is no single point
-of failure or bottleneck when using ``cephx``. The monitor returns an
+of failure or bottleneck when using ``stonex``. The monitor returns an
 authentication data structure similar to a Kerberos ticket that contains a
-session key for use in obtaining Ceph services.  This session key is itself
+session key for use in obtaining Stone services.  This session key is itself
 encrypted with the user's permanent  secret key, so that only the user can
-request services from the Ceph Monitor(s). The client then uses the session key
+request services from the Stone Monitor(s). The client then uses the session key
 to request its desired services from the monitor, and the monitor provides the
 client with a ticket that will authenticate the client to the OSDs that actually
-handle data. Ceph Monitors and OSDs share a secret, so the client can use the
+handle data. Stone Monitors and OSDs share a secret, so the client can use the
 ticket provided by the monitor with any OSD or metadata server in the cluster.
-Like Kerberos, ``cephx`` tickets expire, so an attacker cannot use an expired
+Like Kerberos, ``stonex`` tickets expire, so an attacker cannot use an expired
 ticket or session key obtained surreptitiously. This form of authentication will
 prevent attackers with access to the communications medium from either creating
 bogus messages under another user's identity or altering another user's
 legitimate messages, as long as the user's secret key is not divulged before it
 expires.
 
-To use ``cephx``, an administrator must set up users first. In the following
-diagram, the ``client.admin`` user invokes  ``ceph auth get-or-create-key`` from
-the command line to generate a username and secret key. Ceph's ``auth``
+To use ``stonex``, an administrator must set up users first. In the following
+diagram, the ``client.admin`` user invokes  ``stone auth get-or-create-key`` from
+the command line to generate a username and secret key. Stone's ``auth``
 subsystem generates the username and key, stores a copy with the monitor(s) and
 transmits the user's secret back to the ``client.admin`` user. This means that 
 the client and the monitor share a secret key.
@@ -299,8 +299,8 @@ cluster.
                 |<----+         |              
 
 
-The ``cephx`` protocol authenticates ongoing communications between the client
-machine and the Ceph servers. Each message sent between a client and server,
+The ``stonex`` protocol authenticates ongoing communications between the client
+machine and the Stone servers. Each message sent between a client and server,
 subsequent to the initial authentication, is signed using a ticket that the
 monitors, OSDs and metadata servers can verify with their shared secret.
 
@@ -328,23 +328,23 @@ monitors, OSDs and metadata servers can verify with their shared secret.
                 |<--------------|              |             |
                 | recv. ticket  |              |             |
                 |               |              |             |
-                |   make request (CephFS only) |             |
+                |   make request (StoneFS only) |             |
                 |----------------------------->|             |
                 |<-----------------------------|             |
-                | receive response (CephFS only)             |
+                | receive response (StoneFS only)             |
                 |                                            |
                 |                make request                |
                 |------------------------------------------->|  
                 |<-------------------------------------------|
                                receive response
 
-The protection offered by this authentication is between the Ceph client and the
-Ceph server hosts. The authentication is not extended beyond the Ceph client. If
-the user accesses the Ceph client from a remote host, Ceph authentication is not
+The protection offered by this authentication is between the Stone client and the
+Stone server hosts. The authentication is not extended beyond the Stone client. If
+the user accesses the Stone client from a remote host, Stone authentication is not
 applied to the connection between the user's host and the client host.
 
 
-For configuration details, see `Cephx Config Guide`_. For user management 
+For configuration details, see `Stonex Config Guide`_. For user management 
 details, see `User Management`_.
 
 
@@ -358,52 +358,52 @@ so that a centralized interface knows which nodes it can access. Then the
 centralized interface provides services to the client through a double
 dispatch--which is a **huge** bottleneck at the petabyte-to-exabyte scale.
 
-Ceph eliminates the bottleneck: Ceph's OSD Daemons AND Ceph Clients are cluster
-aware. Like Ceph clients, each Ceph OSD Daemon knows about other Ceph OSD
-Daemons in the cluster.  This enables Ceph OSD Daemons to interact directly with
-other Ceph OSD Daemons and Ceph Monitors. Additionally, it enables Ceph Clients
-to interact directly with Ceph OSD Daemons.
+Stone eliminates the bottleneck: Stone's OSD Daemons AND Stone Clients are cluster
+aware. Like Stone clients, each Stone OSD Daemon knows about other Stone OSD
+Daemons in the cluster.  This enables Stone OSD Daemons to interact directly with
+other Stone OSD Daemons and Stone Monitors. Additionally, it enables Stone Clients
+to interact directly with Stone OSD Daemons.
 
-The ability of Ceph Clients, Ceph Monitors and Ceph OSD Daemons to interact with
-each other means that Ceph OSD Daemons can utilize the CPU and RAM of the Ceph
+The ability of Stone Clients, Stone Monitors and Stone OSD Daemons to interact with
+each other means that Stone OSD Daemons can utilize the CPU and RAM of the Stone
 nodes to easily perform tasks that would bog down a centralized server. The
 ability to leverage this computing power leads to several major benefits:
 
 #. **OSDs Service Clients Directly:** Since any network device has a limit to 
    the number of concurrent connections it can support, a centralized system 
-   has a low physical limit at high scales. By enabling Ceph Clients to contact 
-   Ceph OSD Daemons directly, Ceph increases both performance and total system 
-   capacity simultaneously, while removing a single point of failure. Ceph 
-   Clients can maintain a session when they need to, and with a particular Ceph 
+   has a low physical limit at high scales. By enabling Stone Clients to contact 
+   Stone OSD Daemons directly, Stone increases both performance and total system 
+   capacity simultaneously, while removing a single point of failure. Stone 
+   Clients can maintain a session when they need to, and with a particular Stone 
    OSD Daemon instead of a centralized server.
 
-#. **OSD Membership and Status**: Ceph OSD Daemons join a cluster and report 
-   on their status. At the lowest level, the Ceph OSD Daemon status is ``up`` 
+#. **OSD Membership and Status**: Stone OSD Daemons join a cluster and report 
+   on their status. At the lowest level, the Stone OSD Daemon status is ``up`` 
    or ``down`` reflecting whether or not it is running and able to service 
-   Ceph Client requests. If a Ceph OSD Daemon is ``down`` and ``in`` the Ceph 
-   Storage Cluster, this status may indicate the failure of the Ceph OSD 
-   Daemon. If a Ceph OSD Daemon is not running (e.g., it crashes), the Ceph OSD 
-   Daemon cannot notify the Ceph Monitor that it is ``down``. The OSDs
-   periodically send messages to the Ceph Monitor (``MPGStats`` pre-luminous,
-   and a new ``MOSDBeacon`` in luminous).  If the Ceph Monitor doesn't see that
+   Stone Client requests. If a Stone OSD Daemon is ``down`` and ``in`` the Stone 
+   Storage Cluster, this status may indicate the failure of the Stone OSD 
+   Daemon. If a Stone OSD Daemon is not running (e.g., it crashes), the Stone OSD 
+   Daemon cannot notify the Stone Monitor that it is ``down``. The OSDs
+   periodically send messages to the Stone Monitor (``MPGStats`` pre-luminous,
+   and a new ``MOSDBeacon`` in luminous).  If the Stone Monitor doesn't see that
    message after a configurable period of time then it marks the OSD down.
-   This mechanism is a failsafe, however. Normally, Ceph OSD Daemons will
-   determine if a neighboring OSD is down and report it to the Ceph Monitor(s).
-   This assures that Ceph Monitors are lightweight processes.  See `Monitoring
+   This mechanism is a failsafe, however. Normally, Stone OSD Daemons will
+   determine if a neighboring OSD is down and report it to the Stone Monitor(s).
+   This assures that Stone Monitors are lightweight processes.  See `Monitoring
    OSDs`_ and `Heartbeats`_ for additional details.
 
 #. **Data Scrubbing:** As part of maintaining data consistency and cleanliness, 
-   Ceph OSD Daemons can scrub objects. That is, Ceph OSD Daemons can compare
+   Stone OSD Daemons can scrub objects. That is, Stone OSD Daemons can compare
    their local objects metadata with its replicas stored on other OSDs. Scrubbing
    happens on a per-Placement Group base. Scrubbing (usually performed daily)
-   catches mismatches in size and other metadata. Ceph OSD Daemons also perform deeper
+   catches mismatches in size and other metadata. Stone OSD Daemons also perform deeper
    scrubbing by comparing data in objects bit-for-bit with their checksums.
    Deep scrubbing (usually performed weekly) finds bad sectors on a drive that
    weren't apparent in a light scrub. See `Data Scrubbing`_ for details on
    configuring scrubbing.
 
-#. **Replication:** Like Ceph Clients, Ceph OSD Daemons use the CRUSH 
-   algorithm, but the Ceph OSD Daemon uses it to compute where replicas of 
+#. **Replication:** Like Stone Clients, Stone OSD Daemons use the CRUSH 
+   algorithm, but the Stone OSD Daemon uses it to compute where replicas of 
    objects should be stored (and for rebalancing). In a typical write scenario, 
    a client uses the CRUSH algorithm to compute where to store an object, maps 
    the object to a pool and placement group, then looks at the CRUSH map to 
@@ -441,17 +441,17 @@ ability to leverage this computing power leads to several major benefits:
  |               |   |               |
  +---------------+   +---------------+
 
-With the ability to perform data replication, Ceph OSD Daemons relieve Ceph
+With the ability to perform data replication, Stone OSD Daemons relieve Stone
 clients from that duty, while ensuring high data availability and data safety.
 
 
 Dynamic Cluster Management
 --------------------------
 
-In the `Scalability and High Availability`_ section, we explained how Ceph uses
+In the `Scalability and High Availability`_ section, we explained how Stone uses
 CRUSH, cluster awareness and intelligent daemons to scale and maintain high
-availability. Key to Ceph's design is the autonomous, self-healing, and
-intelligent Ceph OSD Daemon. Let's take a deeper look at how CRUSH works to
+availability. Key to Stone's design is the autonomous, self-healing, and
+intelligent Stone OSD Daemon. Let's take a deeper look at how CRUSH works to
 enable modern cloud storage infrastructures to place data, rebalance the cluster
 and recover from faults dynamically.
 
@@ -460,12 +460,12 @@ and recover from faults dynamically.
 About Pools
 ~~~~~~~~~~~
 
-The Ceph storage system supports the notion of 'Pools', which are logical
+The Stone storage system supports the notion of 'Pools', which are logical
 partitions for storing objects.
 
-Ceph Clients retrieve a `Cluster Map`_ from a Ceph Monitor, and write objects to
+Stone Clients retrieve a `Cluster Map`_ from a Stone Monitor, and write objects to
 pools. The pool's ``size`` or number of replicas, the CRUSH rule and the
-number of placement groups determine how Ceph will place the data.
+number of placement groups determine how Stone will place the data.
 
 .. ditaa::
 
@@ -499,17 +499,17 @@ Mapping PGs to OSDs
 ~~~~~~~~~~~~~~~~~~~
 
 Each pool has a number of placement groups. CRUSH maps PGs to OSDs dynamically.
-When a Ceph Client stores objects, CRUSH will map each object to a placement
+When a Stone Client stores objects, CRUSH will map each object to a placement
 group.
 
 Mapping objects to placement groups creates a layer of indirection between the
-Ceph OSD Daemon and the Ceph Client. The Ceph Storage Cluster must be able to
-grow (or shrink) and rebalance where it stores objects dynamically. If the Ceph
-Client "knew" which Ceph OSD Daemon had which object, that would create a tight
-coupling between the Ceph Client and the Ceph OSD Daemon. Instead, the CRUSH
+Stone OSD Daemon and the Stone Client. The Stone Storage Cluster must be able to
+grow (or shrink) and rebalance where it stores objects dynamically. If the Stone
+Client "knew" which Stone OSD Daemon had which object, that would create a tight
+coupling between the Stone Client and the Stone OSD Daemon. Instead, the CRUSH
 algorithm maps each object to a placement group and then maps each placement
-group to one or more Ceph OSD Daemons. This layer of indirection allows Ceph to
-rebalance dynamically when new Ceph OSD Daemons and the underlying OSD devices
+group to one or more Stone OSD Daemons. This layer of indirection allows Stone to
+rebalance dynamically when new Stone OSD Daemons and the underlying OSD devices
 come online. The following diagram depicts how CRUSH maps objects to placement
 groups, and placement groups to OSDs.
 
@@ -545,7 +545,7 @@ exactly which OSD to use when reading or writing a particular object.
 Calculating PG IDs
 ~~~~~~~~~~~~~~~~~~
 
-When a Ceph Client binds to a Ceph Monitor, it retrieves the latest copy of the
+When a Stone Client binds to a Stone Monitor, it retrieves the latest copy of the
 `Cluster Map`_. With the cluster map, the client knows about all of the monitors,
 OSDs, and metadata servers in the cluster. **However, it doesn't know anything
 about object locations.** 
@@ -556,19 +556,19 @@ about object locations.**
 
 
 The only input required by the client is the object ID and the pool.
-It's simple: Ceph stores data in named pools (e.g., "liverpool"). When a client
+It's simple: Stone stores data in named pools (e.g., "liverpool"). When a client
 wants to store a named object (e.g., "john," "paul," "george," "ringo", etc.)
 it calculates a placement group using the object name, a hash code, the
-number of PGs in the pool and the pool name. Ceph clients use the following
+number of PGs in the pool and the pool name. Stone clients use the following
 steps to compute PG IDs.
 
 #. The client inputs the pool name and the object ID. (e.g., pool = "liverpool" 
    and object-id = "john")
-#. Ceph takes the object ID and hashes it.
-#. Ceph calculates the hash modulo the number of PGs. (e.g., ``58``) to get 
+#. Stone takes the object ID and hashes it.
+#. Stone calculates the hash modulo the number of PGs. (e.g., ``58``) to get 
    a PG ID.
-#. Ceph gets the pool ID given the pool name (e.g., "liverpool" = ``4``)
-#. Ceph prepends the pool ID to the PG ID (e.g., ``4.58``).
+#. Stone gets the pool ID given the pool name (e.g., "liverpool" = ``4``)
+#. Stone prepends the pool ID to the PG ID (e.g., ``4.58``).
 
 Computing object locations is much faster than performing object location query
 over a chatty session. The :abbr:`CRUSH (Controlled Replication Under Scalable
@@ -581,25 +581,25 @@ objects.
 Peering and Sets
 ~~~~~~~~~~~~~~~~
 
-In previous sections, we noted that Ceph OSD Daemons check each others
-heartbeats and report back to the Ceph Monitor. Another thing Ceph OSD daemons
+In previous sections, we noted that Stone OSD Daemons check each others
+heartbeats and report back to the Stone Monitor. Another thing Stone OSD daemons
 do is called 'peering', which is the process of bringing all of the OSDs that
 store a Placement Group (PG) into agreement about the state of all of the
-objects (and their metadata) in that PG. In fact, Ceph OSD Daemons `Report
-Peering Failure`_ to the Ceph Monitors. Peering issues  usually resolve
+objects (and their metadata) in that PG. In fact, Stone OSD Daemons `Report
+Peering Failure`_ to the Stone Monitors. Peering issues  usually resolve
 themselves; however, if the problem persists, you may need to refer to the
 `Troubleshooting Peering Failure`_ section.
 
 .. Note:: Agreeing on the state does not mean that the PGs have the latest contents.
 
-The Ceph Storage Cluster was designed to store at least two copies of an object
+The Stone Storage Cluster was designed to store at least two copies of an object
 (i.e., ``size = 2``), which is the minimum requirement for data safety. For high
-availability, a Ceph Storage Cluster should store more than two copies of an object
+availability, a Stone Storage Cluster should store more than two copies of an object
 (e.g., ``size = 3`` and ``min size = 2``) so that it can continue to run in a 
 ``degraded`` state while maintaining data safety.
 
 Referring back to the diagram in `Smart Daemons Enable Hyperscale`_, we do not 
-name the Ceph OSD Daemons specifically (e.g., ``osd.0``, ``osd.1``, etc.), but 
+name the Stone OSD Daemons specifically (e.g., ``osd.0``, ``osd.1``, etc.), but 
 rather refer to them as *Primary*, *Secondary*, and so forth. By convention, 
 the *Primary* is the first OSD in the *Acting Set*, and is responsible for 
 coordinating the peering process for each placement group where it acts as 
@@ -607,14 +607,14 @@ the *Primary*, and is the **ONLY** OSD that that will accept client-initiated
 writes to objects for a given placement group where it acts as the *Primary*.
 
 When a series of OSDs are responsible for a placement group, that series of
-OSDs, we refer to them as an *Acting Set*. An *Acting Set* may refer to the Ceph
-OSD Daemons that are currently responsible for the placement group, or the Ceph
+OSDs, we refer to them as an *Acting Set*. An *Acting Set* may refer to the Stone
+OSD Daemons that are currently responsible for the placement group, or the Stone
 OSD Daemons that were responsible  for a particular placement group as of some
 epoch.
 
-The Ceph OSD daemons that are part of an *Acting Set* may not always be  ``up``.
+The Stone OSD daemons that are part of an *Acting Set* may not always be  ``up``.
 When an OSD in the *Acting Set* is ``up``, it is part of the  *Up Set*. The *Up
-Set* is an important distinction, because Ceph can remap PGs to other Ceph OSD
+Set* is an important distinction, because Stone can remap PGs to other Stone OSD
 Daemons when an OSD fails. 
 
 .. note:: In an *Acting Set* for a PG containing ``osd.25``, ``osd.32`` and 
@@ -628,7 +628,7 @@ Daemons when an OSD fails.
 Rebalancing
 ~~~~~~~~~~~
 
-When you add a Ceph OSD Daemon to a Ceph Storage Cluster, the cluster map gets
+When you add a Stone OSD Daemon to a Stone Storage Cluster, the cluster map gets
 updated with the new OSD. Referring back to `Calculating PG IDs`_, this changes
 the cluster map. Consequently, it changes object placement, because it changes
 an input for the calculations. The following diagram depicts the rebalancing
@@ -668,8 +668,8 @@ new OSD after rebalancing is complete.
 Data Consistency
 ~~~~~~~~~~~~~~~~
 
-As part of maintaining data consistency and cleanliness, Ceph OSDs also scrub
-objects within placement groups. That is, Ceph OSDs compare object metadata in
+As part of maintaining data consistency and cleanliness, Stone OSDs also scrub
+objects within placement groups. That is, Stone OSDs compare object metadata in
 one placement group with its replicas in placement groups stored in other
 OSDs. Scrubbing (usually performed daily) catches OSD bugs or filesystem
 errors, often as a result of hardware issues.  OSDs also perform deeper
@@ -840,7 +840,7 @@ version 1).
    +-------------+
    |    OSD 1    |             +-------------+
    |         log |  Write Full |             |
-   |  +----+     |<------------+ Ceph Client |
+   |  +----+     |<------------+ Stone Client |
    |  |D1v1| 1,1 |      v1     |             |
    |  +----+     |             +-------------+
    +------+------+
@@ -887,7 +887,7 @@ as ``D2v2`` ) while others are acknowledged and persisted to storage drives
    |         log |
    |  +----+     |             +-------------+
    |  |D1v2| 1,2 |  Write Full |             |
-   |  +----+     +<------------+ Ceph Client |
+   |  +----+     +<------------+ Stone Client |
    |             |      v2     |             |
    |  +----+     |             +-------------+
    |  |D1v1| 1,1 |           
@@ -928,7 +928,7 @@ the logs' ``last_complete`` pointer can move from ``1,1`` to ``1,2``.
    |         log |
    |  +----+     |             +-------------+
    |  |D1v2| 1,2 |  Write Full |             |
-   |  +----+     +<------------+ Ceph Client |
+   |  +----+     +<------------+ Stone Client |
    |             |      v2     |             |
    |  +----+     |             +-------------+
    |  |D1v1| 1,1 |           
@@ -1091,26 +1091,26 @@ See `Erasure Code Notes`_ for additional details.
 Cache Tiering
 -------------
 
-A cache tier provides Ceph Clients with better I/O performance for a subset of
+A cache tier provides Stone Clients with better I/O performance for a subset of
 the data stored in a backing storage tier. Cache tiering involves creating a
 pool of relatively fast/expensive storage devices (e.g., solid state drives)
 configured to act as a cache tier, and a backing pool of either erasure-coded
 or relatively slower/cheaper devices configured to act as an economical storage
-tier. The Ceph objecter handles where to place the objects and the tiering
+tier. The Stone objecter handles where to place the objects and the tiering
 agent determines when to flush objects from the cache to the backing storage
 tier. So the cache tier and the backing storage tier are completely transparent 
-to Ceph clients.
+to Stone clients.
 
 
 .. ditaa::
 
            +-------------+
-           | Ceph Client |
+           | Stone Client |
            +------+------+
                   ^
      Tiering is   |  
     Transparent   |              Faster I/O
-        to Ceph   |           +---------------+
+        to Stone   |           +---------------+
      Client Ops   |           |               |   
                   |    +----->+   Cache Tier  |
                   |    |      |               |
@@ -1133,28 +1133,28 @@ See `Cache Tiering`_ for additional details.  Note that Cache Tiers can be
 tricky and their use is now discouraged.
 
 
-.. index:: Extensibility, Ceph Classes
+.. index:: Extensibility, Stone Classes
 
-Extending Ceph
+Extending Stone
 --------------
 
-You can extend Ceph by creating shared object classes called 'Ceph Classes'.
-Ceph loads ``.so`` classes stored in the ``osd class dir`` directory dynamically
+You can extend Stone by creating shared object classes called 'Stone Classes'.
+Stone loads ``.so`` classes stored in the ``osd class dir`` directory dynamically
 (i.e., ``$libdir/rados-classes`` by default). When you implement a class, you
 can create new object methods that have the ability to call the native methods
-in the Ceph Object Store, or other class methods you incorporate via libraries
+in the Stone Object Store, or other class methods you incorporate via libraries
 or create yourself.
 
-On writes, Ceph Classes can call native or class methods, perform any series of
+On writes, Stone Classes can call native or class methods, perform any series of
 operations on the inbound data and generate a resulting write transaction  that
-Ceph will apply atomically.
+Stone will apply atomically.
 
-On reads, Ceph Classes can call native or class methods, perform any series of
+On reads, Stone Classes can call native or class methods, perform any series of
 operations on the outbound data and return the data to the client.
 
-.. topic:: Ceph Class Example
+.. topic:: Stone Class Example
 
-   A Ceph class for a content management system that presents pictures of a
+   A Stone class for a content management system that presents pictures of a
    particular size and aspect ratio could take an inbound bitmap image, crop it
    to a particular aspect ratio, resize it and embed an invisible copyright or 
    watermark to help protect the intellectual property; then, save the 
@@ -1167,29 +1167,29 @@ exemplary implementations.
 Summary
 -------
 
-Ceph Storage Clusters are dynamic--like a living organism. Whereas, many storage
+Stone Storage Clusters are dynamic--like a living organism. Whereas, many storage
 appliances do not fully utilize the CPU and RAM of a typical commodity server,
-Ceph does. From heartbeats, to  peering, to rebalancing the cluster or
-recovering from faults,  Ceph offloads work from clients (and from a centralized
-gateway which doesn't exist in the Ceph architecture) and uses the computing
+Stone does. From heartbeats, to  peering, to rebalancing the cluster or
+recovering from faults,  Stone offloads work from clients (and from a centralized
+gateway which doesn't exist in the Stone architecture) and uses the computing
 power of the OSDs to perform the work. When referring to `Hardware
 Recommendations`_ and the `Network Config Reference`_,  be cognizant of the
-foregoing concepts to understand how Ceph utilizes computing resources.
+foregoing concepts to understand how Stone utilizes computing resources.
 
-.. index:: Ceph Protocol, librados
+.. index:: Stone Protocol, librados
 
-Ceph Protocol
+Stone Protocol
 =============
 
-Ceph Clients use the native protocol for interacting with the Ceph Storage
-Cluster. Ceph packages this functionality into the ``librados`` library so that
-you can create your own custom Ceph Clients. The following diagram depicts the
+Stone Clients use the native protocol for interacting with the Stone Storage
+Cluster. Stone packages this functionality into the ``librados`` library so that
+you can create your own custom Stone Clients. The following diagram depicts the
 basic architecture.
 
 .. ditaa::
 
             +---------------------------------+
-            |  Ceph Storage Cluster Protocol  |
+            |  Stone Storage Cluster Protocol  |
             |           (librados)            |
             +---------------------------------+
             +---------------+ +---------------+
@@ -1201,7 +1201,7 @@ Native Protocol and ``librados``
 --------------------------------
 
 Modern applications need a simple object storage interface with asynchronous
-communication capability. The Ceph Storage Cluster provides a simple object
+communication capability. The Stone Storage Cluster provides a simple object
 storage interface with asynchronous communication capability. The interface
 provides direct, parallel access to objects throughout the cluster.
 
@@ -1284,27 +1284,27 @@ Storage devices have throughput limitations, which impact performance and
 scalability. So storage systems often support `striping`_--storing sequential
 pieces of information across multiple storage devices--to increase throughput
 and performance. The most common form of data striping comes from `RAID`_.
-The RAID type most similar to Ceph's striping is `RAID 0`_, or a 'striped
-volume'. Ceph's striping offers the throughput of RAID 0 striping, the
+The RAID type most similar to Stone's striping is `RAID 0`_, or a 'striped
+volume'. Stone's striping offers the throughput of RAID 0 striping, the
 reliability of n-way RAID mirroring and faster recovery.
 
-Ceph provides three types of clients: Ceph Block Device, Ceph File System, and
-Ceph Object Storage. A Ceph Client converts its data from the representation 
-format it provides to its users (a block device image, RESTful objects, CephFS
-filesystem directories) into objects for storage in the Ceph Storage Cluster. 
+Stone provides three types of clients: Stone Block Device, Stone File System, and
+Stone Object Storage. A Stone Client converts its data from the representation 
+format it provides to its users (a block device image, RESTful objects, StoneFS
+filesystem directories) into objects for storage in the Stone Storage Cluster. 
 
-.. tip:: The objects Ceph stores in the Ceph Storage Cluster are not striped. 
-   Ceph Object Storage, Ceph Block Device, and the Ceph File System stripe their 
-   data over multiple Ceph Storage Cluster objects. Ceph Clients that write 
-   directly to the Ceph Storage Cluster via ``librados`` must perform the
+.. tip:: The objects Stone stores in the Stone Storage Cluster are not striped. 
+   Stone Object Storage, Stone Block Device, and the Stone File System stripe their 
+   data over multiple Stone Storage Cluster objects. Stone Clients that write 
+   directly to the Stone Storage Cluster via ``librados`` must perform the
    striping (and parallel I/O) for themselves to obtain these benefits.
 
-The simplest Ceph striping format involves a stripe count of 1 object. Ceph
-Clients write stripe units to a Ceph Storage Cluster object until the object is
+The simplest Stone striping format involves a stripe count of 1 object. Stone
+Clients write stripe units to a Stone Storage Cluster object until the object is
 at its maximum capacity, and then create another object for additional stripes
 of data. The simplest form of striping may be sufficient for small block device
-images, S3 or Swift objects and CephFS files. However, this simple form doesn't
-take maximum advantage of Ceph's ability to distribute data across placement
+images, S3 or Swift objects and StoneFS files. However, this simple form doesn't
+take maximum advantage of Stone's ability to distribute data across placement
 groups, and consequently doesn't improve performance very much. The following
 diagram depicts the simplest form of striping:
 
@@ -1341,7 +1341,7 @@ diagram depicts the simplest form of striping:
    
 
 If you anticipate large images sizes, large S3 or Swift objects (e.g., video),
-or large CephFS directories, you may see considerable read/write performance
+or large StoneFS directories, you may see considerable read/write performance
 improvements by striping client data over multiple objects within an object set.
 Significant write performance occurs when the client writes the stripe units to
 their corresponding objects in parallel. Since objects get mapped to different
@@ -1349,7 +1349,7 @@ placement groups and further mapped to different OSDs, each write occurs in
 parallel at the maximum write speed. A write to a single drive would be limited
 by the head movement (e.g. 6ms per seek) and bandwidth of that one device (e.g.
 100MB/s).  By spreading that write over multiple objects (which map to different
-placement groups and OSDs) Ceph can reduce the number of seeks per drive and
+placement groups and OSDs) Stone can reduce the number of seeks per drive and
 combine the throughput of multiple drives to achieve much faster write (or read)
 speeds.
 
@@ -1424,22 +1424,22 @@ stripe (``stripe unit 16``) in the first object in the new object set (``object
                                                                       |
                                                                    +--/
 
-Three important variables determine how Ceph stripes data: 
+Three important variables determine how Stone stripes data: 
 
-- **Object Size:** Objects in the Ceph Storage Cluster have a maximum
+- **Object Size:** Objects in the Stone Storage Cluster have a maximum
   configurable size (e.g., 2MB, 4MB, etc.). The object size should be large
   enough to accommodate many stripe units, and should be a multiple of
   the stripe unit.
 
 - **Stripe Width:** Stripes have a configurable unit size (e.g., 64kb).
-  The Ceph Client divides the data it will write to objects into equally 
+  The Stone Client divides the data it will write to objects into equally 
   sized stripe units, except for the last stripe unit. A stripe width, 
   should be a fraction of the Object Size so that an object may contain 
   many stripe units.
 
-- **Stripe Count:** The Ceph Client writes a sequence of stripe units
+- **Stripe Count:** The Stone Client writes a sequence of stripe units
   over a series of objects determined by the stripe count. The series 
-  of objects is called an object set. After the Ceph Client writes to 
+  of objects is called an object set. After the Stone Client writes to 
   the last object in the object set, it returns to the first object in
   the object set.
   
@@ -1447,9 +1447,9 @@ Three important variables determine how Ceph stripes data:
    putting your cluster into production. You CANNOT change these striping
    parameters after you stripe the data and write it to objects.
 
-Once the Ceph Client has striped data to stripe units and mapped the stripe
-units to objects, Ceph's CRUSH algorithm maps the objects to placement groups,
-and the placement groups to Ceph OSD Daemons before the objects are stored as 
+Once the Stone Client has striped data to stripe units and mapped the stripe
+units to objects, Stone's CRUSH algorithm maps the objects to placement groups,
+and the placement groups to Stone OSD Daemons before the objects are stored as 
 files on a storage drive.
 
 .. note:: Since a client writes to a single pool, all data striped into objects
@@ -1457,44 +1457,44 @@ files on a storage drive.
    map and the same access controls.
 
 
-.. index:: architecture; Ceph Clients
+.. index:: architecture; Stone Clients
 
-Ceph Clients
+Stone Clients
 ============
 
-Ceph Clients include a number of service interfaces. These include:
+Stone Clients include a number of service interfaces. These include:
 
-- **Block Devices:** The :term:`Ceph Block Device` (a.k.a., RBD) service 
+- **Block Devices:** The :term:`Stone Block Device` (a.k.a., RBD) service 
   provides resizable, thin-provisioned block devices with snapshotting and
-  cloning. Ceph stripes a block device across the cluster for high
-  performance. Ceph supports both kernel objects (KO) and a QEMU hypervisor 
+  cloning. Stone stripes a block device across the cluster for high
+  performance. Stone supports both kernel objects (KO) and a QEMU hypervisor 
   that uses ``librbd`` directly--avoiding the kernel object overhead for 
   virtualized systems.
 
-- **Object Storage:** The :term:`Ceph Object Storage` (a.k.a., RGW) service 
+- **Object Storage:** The :term:`Stone Object Storage` (a.k.a., RGW) service 
   provides RESTful APIs with interfaces that are compatible with Amazon S3
   and OpenStack Swift. 
   
-- **Filesystem**: The :term:`Ceph File System` (CephFS) service provides 
+- **Filesystem**: The :term:`Stone File System` (StoneFS) service provides 
   a POSIX compliant filesystem usable with ``mount`` or as 
   a filesystem in user space (FUSE).
 
-Ceph can run additional instances of OSDs, MDSs, and monitors for scalability
+Stone can run additional instances of OSDs, MDSs, and monitors for scalability
 and high availability. The following diagram depicts the high-level
 architecture. 
 
 .. ditaa::
 
             +--------------+  +----------------+  +-------------+
-            | Block Device |  | Object Storage |  |   CephFS    |
+            | Block Device |  | Object Storage |  |   StoneFS    |
             +--------------+  +----------------+  +-------------+            
 
             +--------------+  +----------------+  +-------------+
-            |    librbd    |  |     librgw     |  |  libcephfs  |
+            |    librbd    |  |     librgw     |  |  libstonefs  |
             +--------------+  +----------------+  +-------------+
 
             +---------------------------------------------------+
-            |      Ceph Storage Cluster Protocol (librados)     |
+            |      Stone Storage Cluster Protocol (librados)     |
             +---------------------------------------------------+
 
             +---------------+ +---------------+ +---------------+
@@ -1502,13 +1502,13 @@ architecture.
             +---------------+ +---------------+ +---------------+
 
 
-.. index:: architecture; Ceph Object Storage
+.. index:: architecture; Stone Object Storage
 
-Ceph Object Storage
+Stone Object Storage
 -------------------
 
-The Ceph Object Storage daemon, ``radosgw``, is a FastCGI service that provides
-a RESTful_ HTTP API to store objects and metadata. It layers on top of the Ceph
+The Stone Object Storage daemon, ``radosgw``, is a FastCGI service that provides
+a RESTful_ HTTP API to store objects and metadata. It layers on top of the Stone
 Storage Cluster with its own data formats, and maintains its own user database,
 authentication, and access control. The RADOS Gateway uses a unified namespace,
 which means you can use either the OpenStack Swift-compatible API or the Amazon
@@ -1518,68 +1518,68 @@ another application.
 
 .. topic:: S3/Swift Objects and Store Cluster Objects Compared
 
-   Ceph's Object Storage uses the term *object* to describe the data it stores.
-   S3 and Swift objects are not the same as the objects that Ceph writes to the 
-   Ceph Storage Cluster. Ceph Object Storage objects are mapped to Ceph Storage
+   Stone's Object Storage uses the term *object* to describe the data it stores.
+   S3 and Swift objects are not the same as the objects that Stone writes to the 
+   Stone Storage Cluster. Stone Object Storage objects are mapped to Stone Storage
    Cluster objects. The S3 and Swift objects do not necessarily 
    correspond in a 1:1 manner with an object stored in the storage cluster. It 
-   is possible for an S3 or Swift object to map to multiple Ceph objects.
+   is possible for an S3 or Swift object to map to multiple Stone objects.
 
-See `Ceph Object Storage`_ for details.
+See `Stone Object Storage`_ for details.
 
 
-.. index:: Ceph Block Device; block device; RBD; Rados Block Device
+.. index:: Stone Block Device; block device; RBD; Rados Block Device
 
-Ceph Block Device
+Stone Block Device
 -----------------
 
-A Ceph Block Device stripes a block device image over multiple objects in the
-Ceph Storage Cluster, where each object gets mapped to a placement group and
-distributed, and the placement groups are spread across separate ``ceph-osd``
+A Stone Block Device stripes a block device image over multiple objects in the
+Stone Storage Cluster, where each object gets mapped to a placement group and
+distributed, and the placement groups are spread across separate ``stone-osd``
 daemons throughout the cluster.
 
 .. important:: Striping allows RBD block devices to perform better than a single 
    server could!
 
-Thin-provisioned snapshottable Ceph Block Devices are an attractive option for
+Thin-provisioned snapshottable Stone Block Devices are an attractive option for
 virtualization and cloud computing. In virtual machine scenarios, people
-typically deploy a Ceph Block Device with the ``rbd`` network storage driver in
+typically deploy a Stone Block Device with the ``rbd`` network storage driver in
 QEMU/KVM, where the host machine uses ``librbd`` to provide a block device
 service to the guest. Many cloud computing stacks use ``libvirt`` to integrate
-with hypervisors. You can use thin-provisioned Ceph Block Devices with QEMU and
+with hypervisors. You can use thin-provisioned Stone Block Devices with QEMU and
 ``libvirt`` to support OpenStack and CloudStack among other solutions.
 
 While we do not provide ``librbd`` support with other hypervisors at this time,
-you may also use Ceph Block Device kernel objects to provide a block device to a
-client. Other virtualization technologies such as Xen can access the Ceph Block
+you may also use Stone Block Device kernel objects to provide a block device to a
+client. Other virtualization technologies such as Xen can access the Stone Block
 Device kernel object(s). This is done with the  command-line tool ``rbd``.
 
 
-.. index:: CephFS; Ceph File System; libcephfs; MDS; metadata server; ceph-mds
+.. index:: StoneFS; Stone File System; libstonefs; MDS; metadata server; stone-mds
 
-.. _arch-cephfs:
+.. _arch-stonefs:
 
-Ceph File System
+Stone File System
 ----------------
 
-The Ceph File System (CephFS) provides a POSIX-compliant filesystem as a
-service that is layered on top of the object-based Ceph Storage Cluster.
-CephFS files get mapped to objects that Ceph stores in the Ceph Storage
-Cluster. Ceph Clients mount a CephFS filesystem as a kernel object or as
+The Stone File System (StoneFS) provides a POSIX-compliant filesystem as a
+service that is layered on top of the object-based Stone Storage Cluster.
+StoneFS files get mapped to objects that Stone stores in the Stone Storage
+Cluster. Stone Clients mount a StoneFS filesystem as a kernel object or as
 a Filesystem in User Space (FUSE).
 
 .. ditaa::
 
             +-----------------------+  +------------------------+
-            | CephFS Kernel Object  |  |      CephFS FUSE       |
+            | StoneFS Kernel Object  |  |      StoneFS FUSE       |
             +-----------------------+  +------------------------+            
 
             +---------------------------------------------------+
-            |            CephFS Library (libcephfs)             |
+            |            StoneFS Library (libstonefs)             |
             +---------------------------------------------------+
 
             +---------------------------------------------------+
-            |      Ceph Storage Cluster Protocol (librados)     |
+            |      Stone Storage Cluster Protocol (librados)     |
             +---------------------------------------------------+
 
             +---------------+ +---------------+ +---------------+
@@ -1587,60 +1587,60 @@ a Filesystem in User Space (FUSE).
             +---------------+ +---------------+ +---------------+
 
 
-The Ceph File System service includes the Ceph Metadata Server (MDS) deployed
-with the Ceph Storage cluster. The purpose of the MDS is to store all the
+The Stone File System service includes the Stone Metadata Server (MDS) deployed
+with the Stone Storage cluster. The purpose of the MDS is to store all the
 filesystem metadata (directories, file ownership, access modes, etc) in
-high-availability Ceph Metadata Servers where the metadata resides in memory.
-The reason for the MDS (a daemon called ``ceph-mds``) is that simple filesystem
+high-availability Stone Metadata Servers where the metadata resides in memory.
+The reason for the MDS (a daemon called ``stone-mds``) is that simple filesystem
 operations like listing a directory or changing a directory (``ls``, ``cd``)
-would tax the Ceph OSD Daemons unnecessarily. So separating the metadata from
-the data means that the Ceph File System can provide high performance services
-without taxing the Ceph Storage Cluster.
+would tax the Stone OSD Daemons unnecessarily. So separating the metadata from
+the data means that the Stone File System can provide high performance services
+without taxing the Stone Storage Cluster.
 
-CephFS separates the metadata from the data, storing the metadata in the MDS,
-and storing the file data in one or more objects in the Ceph Storage Cluster.
-The Ceph filesystem aims for POSIX compatibility. ``ceph-mds`` can run as a
+StoneFS separates the metadata from the data, storing the metadata in the MDS,
+and storing the file data in one or more objects in the Stone Storage Cluster.
+The Stone filesystem aims for POSIX compatibility. ``stone-mds`` can run as a
 single process, or it can be distributed out to multiple physical machines,
 either for high availability or for scalability. 
 
-- **High Availability**: The extra ``ceph-mds`` instances can be `standby`, 
-  ready to take over the duties of any failed ``ceph-mds`` that was
+- **High Availability**: The extra ``stone-mds`` instances can be `standby`, 
+  ready to take over the duties of any failed ``stone-mds`` that was
   `active`. This is easy because all the data, including the journal, is
-  stored on RADOS. The transition is triggered automatically by ``ceph-mon``.
+  stored on RADOS. The transition is triggered automatically by ``stone-mon``.
 
-- **Scalability**: Multiple ``ceph-mds`` instances can be `active`, and they
+- **Scalability**: Multiple ``stone-mds`` instances can be `active`, and they
   will split the directory tree into subtrees (and shards of a single
   busy directory), effectively balancing the load amongst all `active`
   servers.
 
 Combinations of `standby` and `active` etc are possible, for example
-running 3 `active` ``ceph-mds`` instances for scaling, and one `standby`
+running 3 `active` ``stone-mds`` instances for scaling, and one `standby`
 instance for high availability.
 
 
 
-.. _RADOS - A Scalable, Reliable Storage Service for Petabyte-scale Storage Clusters: https://ceph.com/wp-content/uploads/2016/08/weil-rados-pdsw07.pdf
+.. _RADOS - A Scalable, Reliable Storage Service for Petabyte-scale Storage Clusters: https://stone.com/wp-content/uploads/2016/08/weil-rados-pdsw07.pdf
 .. _Paxos: https://en.wikipedia.org/wiki/Paxos_(computer_science)
 .. _Monitor Config Reference: ../rados/configuration/mon-config-ref
 .. _Monitoring OSDs and PGs: ../rados/operations/monitoring-osd-pg
 .. _Heartbeats: ../rados/configuration/mon-osd-interaction
 .. _Monitoring OSDs: ../rados/operations/monitoring-osd-pg/#monitoring-osds
-.. _CRUSH - Controlled, Scalable, Decentralized Placement of Replicated Data: https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf
+.. _CRUSH - Controlled, Scalable, Decentralized Placement of Replicated Data: https://stone.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf
 .. _Data Scrubbing: ../rados/configuration/osd-config-ref#scrubbing
 .. _Report Peering Failure: ../rados/configuration/mon-osd-interaction#osds-report-peering-failure
 .. _Troubleshooting Peering Failure: ../rados/troubleshooting/troubleshooting-pg#placement-group-down-peering-failure
-.. _Ceph Authentication and Authorization: ../rados/operations/auth-intro/
+.. _Stone Authentication and Authorization: ../rados/operations/auth-intro/
 .. _Hardware Recommendations: ../start/hardware-recommendations
 .. _Network Config Reference: ../rados/configuration/network-config-ref
 .. _Data Scrubbing: ../rados/configuration/osd-config-ref#scrubbing
 .. _striping: https://en.wikipedia.org/wiki/Data_striping
 .. _RAID: https://en.wikipedia.org/wiki/RAID
 .. _RAID 0: https://en.wikipedia.org/wiki/RAID_0#RAID_0
-.. _Ceph Object Storage: ../radosgw/
+.. _Stone Object Storage: ../radosgw/
 .. _RESTful: https://en.wikipedia.org/wiki/RESTful
-.. _Erasure Code Notes: https://github.com/ceph/ceph/blob/40059e12af88267d0da67d8fd8d9cd81244d8f93/doc/dev/osd_internals/erasure_coding/developer_notes.rst
+.. _Erasure Code Notes: https://github.com/stone/stone/blob/40059e12af88267d0da67d8fd8d9cd81244d8f93/doc/dev/osd_internals/erasure_coding/developer_notes.rst
 .. _Cache Tiering: ../rados/operations/cache-tiering
 .. _Set Pool Values: ../rados/operations/pools#set-pool-values
 .. _Kerberos: https://en.wikipedia.org/wiki/Kerberos_(protocol)
-.. _Cephx Config Guide: ../rados/configuration/auth-config-ref
+.. _Stonex Config Guide: ../rados/configuration/auth-config-ref
 .. _User Management: ../rados/operations/user-management

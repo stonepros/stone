@@ -6,8 +6,8 @@ cause:
 solution:
   ./rbd-recover-tool database
 
-2. Error initializing leveldb: IO error: lock /var/lib/ceph/osd/ceph-0/current/omap/LOCK: Resource temporarily unavailable
-   ERROR: error flushing journal /var/lib/ceph/osd/ceph-0/journal for object store /var/lib/ceph/osd/ceph-0: (1) Operation not permitted
+2. Error initializing leveldb: IO error: lock /var/lib/stone/osd/stone-0/current/omap/LOCK: Resource temporarily unavailable
+   ERROR: error flushing journal /var/lib/stone/osd/stone-0/journal for object store /var/lib/stone/osd/stone-0: (1) Operation not permitted
 cause: 
   when ./rbd-recover-tool database is interrupted , but command has been sent to each osd node, and there is a process reading leveldb and it is LOCKED
   if run ./rbd-recover-tool database again, all command are sent to osd nodes again, while previous process is locking leveldb, so all new command

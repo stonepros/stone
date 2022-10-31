@@ -3,7 +3,7 @@ v11.2.1 Kraken
 
 This is the first bugfix release for Kraken, and probably the last release of
 the Kraken series (Kraken will be declared "End Of Life" (EOL) when Luminous
-is declared stable). It contains a large number of bugfixes across all Ceph
+is declared stable). It contains a large number of bugfixes across all Stone
 components.
 
 We recommend that all v11.2.x users upgrade.
@@ -48,7 +48,7 @@ Other Notable Changes
 * build/ops: logrotate is missing from debian package (kraken, master) (`issue#19670 <http://tracker.ceph.com/issues/19670>`_, `issue#19390 <http://tracker.ceph.com/issues/19390>`_, `pr#14734 <https://github.com/ceph/ceph/pull/14734>`_, Kefu Chai)
 * build/ops: selinux: Do parallel relabel on package install (`issue#20077 <http://tracker.ceph.com/issues/20077>`_, `issue#20184 <http://tracker.ceph.com/issues/20184>`_, `issue#20191 <http://tracker.ceph.com/issues/20191>`_, `issue#20193 <http://tracker.ceph.com/issues/20193>`_, `pr#15509 <https://github.com/ceph/ceph/pull/15509>`_, Boris Ranto)
 * build/ops: spec file mentions non-existent ceph-create-keys systemd unit file, causing ceph-mon units to not be enabled via preset (`issue#19460 <http://tracker.ceph.com/issues/19460>`_, `pr#14315 <https://github.com/ceph/ceph/pull/14315>`_, Sébastien Han)
-* build/ops: systemd restarts Ceph Mon to quickly after failing to start (`issue#18635 <http://tracker.ceph.com/issues/18635>`_, `issue#18721 <http://tracker.ceph.com/issues/18721>`_, `pr#13185 <https://github.com/ceph/ceph/pull/13185>`_, Wido den Hollander)
+* build/ops: systemd restarts Stone Mon to quickly after failing to start (`issue#18635 <http://tracker.ceph.com/issues/18635>`_, `issue#18721 <http://tracker.ceph.com/issues/18721>`_, `pr#13185 <https://github.com/ceph/ceph/pull/13185>`_, Wido den Hollander)
 * build/ops: systemd: Start OSDs after MONs (`issue#18907 <http://tracker.ceph.com/issues/18907>`_, `issue#18516 <http://tracker.ceph.com/issues/18516>`_, `pr#13494 <https://github.com/ceph/ceph/pull/13494>`_, Boris Ranto)
 * ceph-disk: Add fix subcommand kraken back-port (`issue#19544 <http://tracker.ceph.com/issues/19544>`_, `pr#14345 <https://github.com/ceph/ceph/pull/14345>`_, Boris Ranto)
 * ceph-disk: does not support cluster names different than 'ceph' (`issue#18973 <http://tracker.ceph.com/issues/18973>`_, `issue#17821 <http://tracker.ceph.com/issues/17821>`_, `pr#13497 <https://github.com/ceph/ceph/pull/13497>`_, Loic Dachary)
@@ -60,7 +60,7 @@ Other Notable Changes
 * ceph-disk prepare get wrong group name in bluestore (`issue#18997 <http://tracker.ceph.com/issues/18997>`_, `pr#13543 <https://github.com/ceph/ceph/pull/13543>`_, craigchi)
 * ceph-disk: Racing between partition creation & device node creation (`issue#20034 <http://tracker.ceph.com/issues/20034>`_, `pr#16138 <https://github.com/ceph/ceph/pull/16138>`_, Erwan Velu)
 * ceph-disk: separate ceph-osd --check-needs-\* logs (`issue#20010 <http://tracker.ceph.com/issues/20010>`_, `issue#19888 <http://tracker.ceph.com/issues/19888>`_, `pr#16135 <https://github.com/ceph/ceph/pull/16135>`_, Loic Dachary)
-* cephfs: buffer overflow in test LibCephFS.DirLs (`issue#18941 <http://tracker.ceph.com/issues/18941>`_, `issue#19045 <http://tracker.ceph.com/issues/19045>`_, `pr#14571 <https://github.com/ceph/ceph/pull/14571>`_, "Yan, Zheng")
+* cephfs: buffer overflow in test LibStoneFS.DirLs (`issue#18941 <http://tracker.ceph.com/issues/18941>`_, `issue#19045 <http://tracker.ceph.com/issues/19045>`_, `pr#14571 <https://github.com/ceph/ceph/pull/14571>`_, "Yan, Zheng")
 * cephfs: ceph-fuse crash during snapshot tests (`issue#18552 <http://tracker.ceph.com/issues/18552>`_, `issue#18460 <http://tracker.ceph.com/issues/18460>`_, `pr#14563 <https://github.com/ceph/ceph/pull/14563>`_, Yan, Zheng)
 * cephfs: ceph-fuse does not recover after lost connection to MDS (`issue#19678 <http://tracker.ceph.com/issues/19678>`_, `issue#18757 <http://tracker.ceph.com/issues/18757>`_, `pr#16105 <https://github.com/ceph/ceph/pull/16105>`_, Henrik Korkuc)
 * cephfs: client: fix the cross-quota rename boundary check conditions (`issue#18700 <http://tracker.ceph.com/issues/18700>`_, `pr#14567 <https://github.com/ceph/ceph/pull/14567>`_, Greg Farnum)
@@ -344,7 +344,7 @@ Major Changes from Jewel
     configurable maximum.
   * The rbd Python API now supports asynchronous IO operations.
 
-- *CephFS*:
+- *StoneFS*:
 
   * libcephfs function definitions have been changed to enable proper
     uid/gid control.  The library version has been increased to reflect the
@@ -395,7 +395,7 @@ BlueStore is a new backend for managing data stored by each OSD on the directly
 hard disk or SSD.  Unlike the existing FileStore implementation, which makes
 use of an XFS file system to store objects as files, BlueStore manages the
 underlying block device directly.  Implements its own file system-like on-disk
-structure the is designed specifically for Ceph OSD workloads.  Key features
+structure the is designed specifically for Stone OSD workloads.  Key features
 of BlueStore include:
 
  * Checksums on all data written to disk, with checksum verifications on all
@@ -822,7 +822,7 @@ Notable Changes
 * cmake: replace civetweb symlink w/file copy (`pr#11900 <http://github.com/ceph/ceph/pull/11900>`_, Matt Benjamin)
 * cmake: should link against ${ALLOC_LIBS} (`pr#11978 <http://github.com/ceph/ceph/pull/11978>`_, Kefu Chai)
 * cmake: src/test/CMakeLists.txt: Exclude test on HAVE_BLKID (`pr#12301 <http://github.com/ceph/ceph/pull/12301>`_, Willem Jan Withagen)
-* cmake: Support for embedding Ceph Daemons (`pr#11764 <http://github.com/ceph/ceph/pull/11764>`_, Bassam Tabbara)
+* cmake: Support for embedding Stone Daemons (`pr#11764 <http://github.com/ceph/ceph/pull/11764>`_, Bassam Tabbara)
 * cmake: use external project for rocksdb (`pr#11385 <http://github.com/ceph/ceph/pull/11385>`_, Bassam Tabbara)
 * common: Add throttle_get_started perf counter (`pr#12163 <http://github.com/ceph/ceph/pull/12163>`_, Bartłomiej Święcki)
 * common: assert(0) -> ceph_abort() (`pr#12031 <http://github.com/ceph/ceph/pull/12031>`_, Sage Weil)
@@ -843,7 +843,7 @@ Notable Changes
 * common: osd/osdmap: fix divide by zero error (`pr#12521 <http://github.com/ceph/ceph/pull/12521>`_, Yunchuan Wen)
 * common: release g_ceph_context before returns (`issue#17762 <http://tracker.ceph.com/issues/17762>`_, `pr#11733 <http://github.com/ceph/ceph/pull/11733>`_, Kefu Chai)
 * common: Remove the runtime dependency on lsb_release (`issue#17425 <http://tracker.ceph.com/issues/17425>`_, `pr#11365 <http://github.com/ceph/ceph/pull/11365>`_, Brad Hubbard)
-* common: test/fio: fix global CephContext life cycle (`pr#12245 <http://github.com/ceph/ceph/pull/12245>`_, Igor Fedotov)
+* common: test/fio: fix global StoneContext life cycle (`pr#12245 <http://github.com/ceph/ceph/pull/12245>`_, Igor Fedotov)
 * core: auth: tolerate missing MGR keys during upgrade (`pr#11401 <http://github.com/ceph/ceph/pull/11401>`_, Sage Weil)
 * core,bluestore: os/bluestore: fix warning and uninit variable (`pr#12032 <http://github.com/ceph/ceph/pull/12032>`_, Sage Weil)
 * core,bluestore: os: fix offsets for move_ranges operation (`pr#11595 <http://github.com/ceph/ceph/pull/11595>`_, Sage Weil)
@@ -892,7 +892,7 @@ Notable Changes
 * core: msg/async: DPDKStack as AsyncMessenger backend (`pr#10748 <http://github.com/ceph/ceph/pull/10748>`_, Haomai Wang)
 * core: msg/async/rdma: change log level: 0 -> 1 (`pr#12334 <http://github.com/ceph/ceph/pull/12334>`_, Avner BenHanoch)
 * core: msg/async/rdma: don't use more buffers than what device capabilities … (`pr#12263 <http://github.com/ceph/ceph/pull/12263>`_, Avner BenHanoch)
-* core: msg/async/rdma: ensure CephContext existed (`pr#12068 <http://github.com/ceph/ceph/pull/12068>`_, Haomai Wang)
+* core: msg/async/rdma: ensure StoneContext existed (`pr#12068 <http://github.com/ceph/ceph/pull/12068>`_, Haomai Wang)
 * core: msg/async/rdma: event polling thread can block on event (`pr#12270 <http://github.com/ceph/ceph/pull/12270>`_, Haomai Wang)
 * core: msg/async/rdma: fixup memory free (`pr#12236 <http://github.com/ceph/ceph/pull/12236>`_, gongchuang)
 * core: msg/async/rdma: set correct value to memory manager (`pr#12299 <http://github.com/ceph/ceph/pull/12299>`_, Adir Lev)
@@ -1656,7 +1656,7 @@ Notable Changes
 * cephfs,core,rbd: ObjectCacher: fix bh_read_finish offset logic (`issue#16002 <http://tracker.ceph.com/issues/16002>`_, `pr#9606 <http://github.com/ceph/ceph/pull/9606>`_, Greg Farnum)
 * cephfs,core,rbd: osdc/ObjectCacher: move C_ReadFinish, C_RetryRead (`pr#10781 <http://github.com/ceph/ceph/pull/10781>`_, Michal Jarzabek)
 * cephfs: Add ceph_ll_setlk and ceph_ll_getlk (`pr#9566 <http://github.com/ceph/ceph/pull/9566>`_, Frank S. Filz)
-* cephfs: CephFS: misc. cleanups and remove legacy cephfs tool (`issue#16195 <http://tracker.ceph.com/issues/16195>`_, `issue#16035 <http://tracker.ceph.com/issues/16035>`_, `issue#15923 <http://tracker.ceph.com/issues/15923>`_, `pr#10243 <http://github.com/ceph/ceph/pull/10243>`_, John Spray)
+* cephfs: StoneFS: misc. cleanups and remove legacy cephfs tool (`issue#16195 <http://tracker.ceph.com/issues/16195>`_, `issue#16035 <http://tracker.ceph.com/issues/16035>`_, `issue#15923 <http://tracker.ceph.com/issues/15923>`_, `pr#10243 <http://github.com/ceph/ceph/pull/10243>`_, John Spray)
 * cephfs: Clean up handling of "/.." in ceph client (`pr#10691 <http://github.com/ceph/ceph/pull/10691>`_, Jeff Layton)
 * cephfs: Client: fixup param type and return value (`pr#10463 <http://github.com/ceph/ceph/pull/10463>`_, gongchuang)
 * cephfs: Client: pass "UserPerm" struct everywhere for security checks (`issue#16367 <http://tracker.ceph.com/issues/16367>`_, `issue#17368 <http://tracker.ceph.com/issues/17368>`_, `pr#11218 <http://github.com/ceph/ceph/pull/11218>`_, Greg Farnum)
@@ -1769,7 +1769,7 @@ Notable Changes
 * common: msg/AsyncMessenger.cc: remove code duplication (`pr#10030 <http://github.com/ceph/ceph/pull/10030>`_, Michal Jarzabek)
 * common: msg/async: less verbose debug messages at debug_ms=1 (`pr#11205 <http://github.com/ceph/ceph/pull/11205>`_, Sage Weil)
 * common: msg/async: remove static member variable (`issue#16686 <http://tracker.ceph.com/issues/16686>`_, `pr#10440 <http://github.com/ceph/ceph/pull/10440>`_, Kefu Chai)
-* common: only call crypto::init once per CephContext (`issue#17205 <http://tracker.ceph.com/issues/17205>`_, `pr#10965 <http://github.com/ceph/ceph/pull/10965>`_, Casey Bodley)
+* common: only call crypto::init once per StoneContext (`issue#17205 <http://tracker.ceph.com/issues/17205>`_, `pr#10965 <http://github.com/ceph/ceph/pull/10965>`_, Casey Bodley)
 * common: osdc/ObjectCacher: change iterator to const_iterator and add const to member functions (`pr#9644 <http://github.com/ceph/ceph/pull/9644>`_, Michal Jarzabek)
 * common: preforker: prevent call to 'write' on an fd that was already closed (`pr#10949 <http://github.com/ceph/ceph/pull/10949>`_, Avner BenHanoch)
 * common: remove basename() dependency (`pr#9845 <http://github.com/ceph/ceph/pull/9845>`_, John Coyle)
@@ -1915,7 +1915,7 @@ Notable Changes
 * doc: doc/dev: Fix missing code section due to no lexer for "none" (`pr#9083 <http://github.com/ceph/ceph/pull/9083>`_, Brad Hubbard)
 * doc: doc/radosgw: fix description of response elements 'Part' (`pr#10641 <http://github.com/ceph/ceph/pull/10641>`_, weiqiaomiao)
 * doc: doc/radosgw: rename config.rst to config-fcgi.rst (`pr#10381 <http://github.com/ceph/ceph/pull/10381>`_, Nathan Cutler)
-* doc: extend the CephFS troubleshooting guide (`pr#10458 <http://github.com/ceph/ceph/pull/10458>`_, Greg Farnum)
+* doc: extend the StoneFS troubleshooting guide (`pr#10458 <http://github.com/ceph/ceph/pull/10458>`_, Greg Farnum)
 * doc: fix broken link in SHEC erasure code plugin (`issue#16996 <http://tracker.ceph.com/issues/16996>`_, `pr#10675 <http://github.com/ceph/ceph/pull/10675>`_, Albert Tu)
 * doc: fix description for rsize and rasize (`pr#11101 <http://github.com/ceph/ceph/pull/11101>`_, Andreas Gerstmayr)
 * doc: fix rados/configuration/osd-config-ref.rst (`pr#10619 <http://github.com/ceph/ceph/pull/10619>`_, Chengwei Yang)
@@ -1943,7 +1943,7 @@ Notable Changes
 * doc: rm SysV instructions, add systemd (`pr#10184 <http://github.com/ceph/ceph/pull/10184>`_, Ken Dreyer)
 * doc: silence sphinx warnings (`pr#10621 <http://github.com/ceph/ceph/pull/10621>`_, Kefu Chai)
 * doc: small standby doc edits (`pr#10479 <http://github.com/ceph/ceph/pull/10479>`_, Patrick Donnelly)
-* doc: update CephFS "early adopters" info (`pr#10068 <http://github.com/ceph/ceph/pull/10068>`_, John Spray)
+* doc: update StoneFS "early adopters" info (`pr#10068 <http://github.com/ceph/ceph/pull/10068>`_, John Spray)
 * doc: update canonical tarballs URL (`pr#9695 <http://github.com/ceph/ceph/pull/9695>`_, Ken Dreyer)
 * doc: update rbd glance configuration notes (`pr#10629 <http://github.com/ceph/ceph/pull/10629>`_, Jason Dillaman)
 * doc: update s3 static webiste feature support status (`pr#10223 <http://github.com/ceph/ceph/pull/10223>`_, Jiaying Ren)

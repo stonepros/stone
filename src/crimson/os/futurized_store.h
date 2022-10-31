@@ -15,7 +15,7 @@
 #include "include/uuid.h"
 #include "osd/osd_types.h"
 
-namespace ceph::os {
+namespace stone::os {
 class Transaction;
 }
 
@@ -40,7 +40,7 @@ public:
     virtual seastar::future<std::string> tail_key() {
       return seastar::make_ready_future<std::string>();
     }
-    virtual ceph::buffer::list value() {
+    virtual stone::buffer::list value() {
       return {};
     }
     virtual int status() const {
@@ -77,13 +77,13 @@ public:
   using CollectionRef = boost::intrusive_ptr<FuturizedCollection>;
   using read_errorator = crimson::errorator<crimson::ct_error::enoent,
                                             crimson::ct_error::input_output_error>;
-  virtual read_errorator::future<ceph::bufferlist> read(
+  virtual read_errorator::future<stone::bufferlist> read(
     CollectionRef c,
     const ghobject_t& oid,
     uint64_t offset,
     size_t len,
     uint32_t op_flags = 0) = 0;
-  virtual read_errorator::future<ceph::bufferlist> readv(
+  virtual read_errorator::future<stone::bufferlist> readv(
     CollectionRef c,
     const ghobject_t& oid,
     interval_set<uint64_t>& m,
@@ -92,14 +92,14 @@ public:
   using get_attr_errorator = crimson::errorator<
     crimson::ct_error::enoent,
     crimson::ct_error::enodata>;
-  virtual get_attr_errorator::future<ceph::bufferptr> get_attr(
+  virtual get_attr_errorator::future<stone::bufferptr> get_attr(
     CollectionRef c,
     const ghobject_t& oid,
     std::string_view name) const = 0;
 
   using get_attrs_ertr = crimson::errorator<
     crimson::ct_error::enoent>;
-  using attrs_t = std::map<std::string, ceph::bufferptr, std::less<>>;
+  using attrs_t = std::map<std::string, stone::bufferptr, std::less<>>;
   virtual get_attrs_ertr::future<attrs_t> get_attrs(
     CollectionRef c,
     const ghobject_t& oid) = 0;
@@ -133,7 +133,7 @@ public:
   virtual seastar::future<std::vector<coll_t>> list_collections() = 0;
 
   virtual seastar::future<> do_transaction(CollectionRef ch,
-					   ceph::os::Transaction&& txn) = 0;
+					   stone::os::Transaction&& txn) = 0;
   virtual seastar::future<OmapIteratorRef> get_omap_iterator(
     CollectionRef ch,
     const ghobject_t& oid) = 0;

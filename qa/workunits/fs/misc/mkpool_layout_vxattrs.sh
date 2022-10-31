@@ -3,13 +3,13 @@
 set -e
 
 touch foo.$$
-ceph osd pool create foo.$$ 8
-ceph fs add_data_pool cephfs foo.$$
-setfattr -n ceph.file.layout.pool -v foo.$$ foo.$$
+stone osd pool create foo.$$ 8
+stone fs add_data_pool stonefs foo.$$
+setfattr -n stone.file.layout.pool -v foo.$$ foo.$$
 
 # cleanup
 rm foo.$$
-ceph fs rm_data_pool cephfs foo.$$
-ceph osd pool rm foo.$$ foo.$$ --yes-i-really-really-mean-it
+stone fs rm_data_pool stonefs foo.$$
+stone osd pool rm foo.$$ foo.$$ --yes-i-really-really-mean-it
 
 echo OK

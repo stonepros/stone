@@ -1,8 +1,8 @@
 
 """
-ceph-mgr orchestrator interface
+stone-mgr orchestrator interface
 
-Please see the ceph-mgr module developer's guide for more information.
+Please see the stone-mgr module developer's guide for more information.
 """
 
 import copy
@@ -29,12 +29,12 @@ except ImportError:
 
 import yaml
 
-from ceph.deployment import inventory
-from ceph.deployment.service_spec import ServiceSpec, NFSServiceSpec, RGWSpec, \
+from stone.deployment import inventory
+from stone.deployment.service_spec import ServiceSpec, NFSServiceSpec, RGWSpec, \
     IscsiServiceSpec, IngressSpec, SNMPGatewaySpec, MDSSpec
-from ceph.deployment.drive_group import DriveGroupSpec
-from ceph.deployment.hostspec import HostSpec, SpecValidationError
-from ceph.utils import datetime_to_str, str_to_datetime
+from stone.deployment.drive_group import DriveGroupSpec
+from stone.deployment.hostspec import HostSpec, SpecValidationError
+from stone.utils import datetime_to_str, str_to_datetime
 
 from mgr_module import MgrModule, CLICommand, HandleCommandResult
 
@@ -69,7 +69,7 @@ class NoOrchestrator(OrchestratorError):
     No orchestrator in configured.
     """
 
-    def __init__(self, msg: str = "No orchestrator configured (try `ceph orch set backend`)") -> None:
+    def __init__(self, msg: str = "No orchestrator configured (try `stone orch set backend`)") -> None:
         super(NoOrchestrator, self).__init__(msg, errno=-errno.ENOENT)
 
 
@@ -420,7 +420,7 @@ class Orchestrator(object):
 
     def get_inventory(self, host_filter: Optional['InventoryFilter'] = None, refresh: bool = False) -> OrchResult[List['InventoryHost']]:
         """
-        Returns something that was created by `ceph-volume inventory`.
+        Returns something that was created by `stone-volume inventory`.
 
         :return: list of InventoryHost
         """
@@ -433,7 +433,7 @@ class Orchestrator(object):
         we might like to also display information about the orchestrator's
         view of the service (like the kubernetes pod ID).
 
-        When viewing a CephFS filesystem in the dashboard, we would use this
+        When viewing a StoneFS filesystem in the dashboard, we would use this
         to display the pods being currently run for MDS daemons.
 
         :return: list of ServiceDescription objects.
@@ -471,7 +471,7 @@ class Orchestrator(object):
             'ingress': self.apply_ingress,
             'snmp-gateway': self.apply_snmp_gateway,
             'host': self.add_host,
-            'cephadm-exporter': self.apply_cephadm_exporter,
+            'stoneadm-exporter': self.apply_stoneadm_exporter,
         }
 
         def merge(l: OrchResult[List[str]], r: OrchResult[str]) -> OrchResult[List[str]]:  # noqa: E741
@@ -510,7 +510,7 @@ class Orchestrator(object):
 
         :param action: one of "start", "stop", "restart", "redeploy", "reconfig"
         :param service_name: service_type + '.' + service_id
-                            (e.g. "mon", "mgr", "mds.mycephfs", "rgw.realm.zone", ...)
+                            (e.g. "mon", "mgr", "mds.mystonefs", "rgw.realm.zone", ...)
         :rtype: OrchResult
         """
         # assert action in ["start", "stop", "reload, "restart", "redeploy"]
@@ -658,8 +658,8 @@ class Orchestrator(object):
         """Update an existing snmp gateway service"""
         raise NotImplementedError()
 
-    def apply_cephadm_exporter(self, spec: ServiceSpec) -> OrchResult[str]:
-        """Update an existing cephadm exporter daemon"""
+    def apply_stoneadm_exporter(self, spec: ServiceSpec) -> OrchResult[str]:
+        """Update an existing stoneadm exporter daemon"""
         raise NotImplementedError()
 
     def upgrade_check(self, image: Optional[str], version: Optional[str]) -> OrchResult[str]:
@@ -720,7 +720,7 @@ def daemon_type_to_service(dtype: str) -> str:
         'keepalived': 'ingress',
         'iscsi': 'iscsi',
         'rbd-mirror': 'rbd-mirror',
-        'cephfs-mirror': 'cephfs-mirror',
+        'stonefs-mirror': 'stonefs-mirror',
         'nfs': 'nfs',
         'grafana': 'grafana',
         'alertmanager': 'alertmanager',
@@ -729,7 +729,7 @@ def daemon_type_to_service(dtype: str) -> str:
         'crash': 'crash',
         'crashcollector': 'crash',  # Specific Rook Daemon
         'container': 'container',
-        'cephadm-exporter': 'cephadm-exporter',
+        'stoneadm-exporter': 'stoneadm-exporter',
         'snmp-gateway': 'snmp-gateway',
     }
     return mapping[dtype]
@@ -745,7 +745,7 @@ def service_to_daemon_types(stype: str) -> List[str]:
         'ingress': ['haproxy', 'keepalived'],
         'iscsi': ['iscsi'],
         'rbd-mirror': ['rbd-mirror'],
-        'cephfs-mirror': ['cephfs-mirror'],
+        'stonefs-mirror': ['stonefs-mirror'],
         'nfs': ['nfs'],
         'grafana': ['grafana'],
         'alertmanager': ['alertmanager'],
@@ -753,7 +753,7 @@ def service_to_daemon_types(stype: str) -> List[str]:
         'node-exporter': ['node-exporter'],
         'crash': ['crash'],
         'container': ['container'],
-        'cephadm-exporter': ['cephadm-exporter'],
+        'stoneadm-exporter': ['stoneadm-exporter'],
         'snmp-gateway': ['snmp-gateway'],
     }
     return mapping[stype]
@@ -810,9 +810,9 @@ class DaemonDescription(object):
     stateful or stateless.
 
     This is not about health or performance monitoring of daemons: it's
-    about letting the orchestrator tell Ceph whether and where a
+    about letting the orchestrator tell Stone whether and where a
     daemon is scheduled in the cluster.  When an orchestrator tells
-    Ceph "it's running on host123", that's not a promise that the process
+    Stone "it's running on host123", that's not a promise that the process
     is literally up this second, it's a description of where the orchestrator
     has decided the daemon should run.
     """
@@ -1099,7 +1099,7 @@ class DaemonDescription(object):
         if 'service_name' in c and c['service_name'].startswith('osd.'):
             # if the service_name is a osd.NNN (numeric osd id) then
             # ignore it -- it is not a valid service_name and
-            # (presumably) came from an older version of cephadm.
+            # (presumably) came from an older version of stoneadm.
             try:
                 int(c['service_name'][4:])
                 del c['service_name']
@@ -1126,9 +1126,9 @@ class ServiceDescription(object):
     stateful or stateless.
 
     This is not about health or performance monitoring of services: it's
-    about letting the orchestrator tell Ceph whether and where a
+    about letting the orchestrator tell Stone whether and where a
     service is scheduled in the cluster.  When an orchestrator tells
-    Ceph "it's running on host123", that's not a promise that the process
+    Stone "it's running on host123", that's not a promise that the process
     is literally up this second, it's a description of where the orchestrator
     has decided the service should run.
     """
@@ -1261,8 +1261,8 @@ class InventoryFilter(object):
 
       filter by host when presentig UI workflow for configuring
       a particular server.
-      filter by label when not all of estate is Ceph servers,
-      and we want to only learn about the Ceph servers.
+      filter by label when not all of estate is Stone servers,
+      and we want to only learn about the Stone servers.
       filter by label when we are interested particularly
       in e.g. OSD servers.
     """
@@ -1344,7 +1344,7 @@ class DeviceLightLoc(namedtuple('DeviceLightLoc', ['host', 'dev', 'path'])):
     hostname as in :func:`orchestrator.Orchestrator.get_hosts`
 
     device_id: e.g. ``ABC1234DEF567-1R1234_ABC8DE0Q``.
-       See ``ceph osd metadata | jq '.[].device_ids'``
+       See ``stone osd metadata | jq '.[].device_ids'``
     """
     __slots__ = ()
 

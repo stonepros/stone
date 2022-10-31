@@ -12,7 +12,7 @@ import _ from 'lodash';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, map, mergeMap } from 'rxjs/operators';
 
-import { NfsFSAbstractionLayer } from '~/app/ceph/nfs/models/nfs.fsal';
+import { NfsFSAbstractionLayer } from '~/app/stone/nfs/models/nfs.fsal';
 import { Directory, NfsService } from '~/app/shared/api/nfs.service';
 import { RgwBucketService } from '~/app/shared/api/rgw-bucket.service';
 import { RgwSiteService } from '~/app/shared/api/rgw-site.service';
@@ -148,7 +148,7 @@ export class NfsFormComponent extends CdForm implements OnInit {
         fs_name: new FormControl('', {
           validators: [
             CdValidators.requiredIf({
-              name: 'CEPH'
+              name: 'STONE'
             })
           ]
         })
@@ -185,13 +185,13 @@ export class NfsFormComponent extends CdForm implements OnInit {
       security_label: new FormControl(false),
       sec_label_xattr: new FormControl(
         'security.selinux',
-        CdValidators.requiredIf({ security_label: true, 'fsal.name': 'CEPH' })
+        CdValidators.requiredIf({ security_label: true, 'fsal.name': 'STONE' })
       )
     });
   }
 
   resolveModel(res: any) {
-    if (res.fsal.name === 'CEPH') {
+    if (res.fsal.name === 'STONE') {
       res.sec_label_xattr = res.fsal.sec_label_xattr;
     }
 
@@ -392,8 +392,8 @@ export class NfsFormComponent extends CdForm implements OnInit {
     let newPseudo = this.nfsForm.getValue('pseudo');
     if (this.nfsForm.get('pseudo') && !this.nfsForm.get('pseudo').dirty) {
       newPseudo = undefined;
-      if (this.nfsForm.getValue('fsal') === 'CEPH') {
-        newPseudo = '/cephfs';
+      if (this.nfsForm.getValue('fsal') === 'STONE') {
+        newPseudo = '/stonefs';
         if (_.isString(this.nfsForm.getValue('path'))) {
           newPseudo += this.nfsForm.getValue('path');
         }

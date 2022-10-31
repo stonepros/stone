@@ -1,4 +1,4 @@
-lib/systemd/system/ceph-mgr*
-usr/bin/ceph-mgr
-usr/share/ceph/mgr/mgr_module.*
-usr/share/ceph/mgr/mgr_util.*
+lib/systemd/system/stone-mgr*
+usr/bin/stone-mgr
+usr/share/stone/mgr/mgr_module.*
+usr/share/stone/mgr/mgr_util.*

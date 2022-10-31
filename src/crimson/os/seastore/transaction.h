@@ -44,7 +44,7 @@ public:
   }
 
   void add_to_retired_set(CachedExtentRef ref) {
-    ceph_assert(!is_weak());
+    stone_assert(!is_weak());
     if (!ref->is_initial_pending()) {
       // && retired_set.count(ref->get_paddr()) == 0
       // If it's already in the set, insert here will be a noop,
@@ -61,12 +61,12 @@ public:
   void add_to_read_set(CachedExtentRef ref) {
     if (is_weak()) return;
 
-    ceph_assert(read_set.count(ref) == 0);
+    stone_assert(read_set.count(ref) == 0);
     read_set.insert(ref);
   }
 
   void add_fresh_extent(CachedExtentRef ref) {
-    ceph_assert(!is_weak());
+    stone_assert(!is_weak());
     fresh_block_list.push_back(ref);
     ref->set_paddr(make_record_relative_paddr(offset));
     offset += ref->get_length();
@@ -74,7 +74,7 @@ public:
   }
 
   void add_mutated_extent(CachedExtentRef ref) {
-    ceph_assert(!is_weak());
+    stone_assert(!is_weak());
     mutated_block_list.push_back(ref);
     write_set.insert(*ref);
   }

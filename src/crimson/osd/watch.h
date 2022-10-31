@@ -75,7 +75,7 @@ public:
   /// Call when notify_ack received on notify_id
   seastar::future<> notify_ack(
     uint64_t notify_id, ///< [in] id of acked notify
-    const ceph::bufferlist& reply_bl); ///< [in] notify reply buffer
+    const stone::bufferlist& reply_bl); ///< [in] notify reply buffer
 
   template <class... Args>
   static seastar::shared_ptr<Watch> create(Args&&... args) {
@@ -96,7 +96,7 @@ using WatchRef = seastar::shared_ptr<Watch>;
 struct notify_reply_t {
   uint64_t watcher_gid;
   uint64_t watcher_cookie;
-  ceph::bufferlist bl;
+  stone::bufferlist bl;
 
   bool operator<(const notify_reply_t& rhs) const;
   DENC(notify_reply_t, v, p) {
@@ -150,7 +150,7 @@ public:
 
   seastar::future<> remove_watcher(WatchRef watch);
   seastar::future<> complete_watcher(WatchRef watch,
-                                     const ceph::bufferlist& reply_bl);
+                                     const stone::bufferlist& reply_bl);
 };
 
 

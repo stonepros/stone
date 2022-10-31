@@ -3,14 +3,14 @@ import functools
 import os
 import json
 
-from ceph.deployment import inventory
-from ceph.deployment.service_spec import ServiceSpec, NFSServiceSpec, RGWSpec, PlacementSpec
-from ceph.utils import datetime_now
+from stone.deployment import inventory
+from stone.deployment.service_spec import ServiceSpec, NFSServiceSpec, RGWSpec, PlacementSpec
+from stone.utils import datetime_now
 
 from typing import List, Dict, Optional, Callable, Any, TypeVar, Tuple
 
 try:
-    from ceph.deployment.drive_group import DriveGroupSpec
+    from stone.deployment.drive_group import DriveGroupSpec
 except ImportError:
     pass  # just for type checking
 
@@ -46,14 +46,14 @@ ServiceSpecT = TypeVar('ServiceSpecT', bound=ServiceSpec)
 class RookEnv(object):
     def __init__(self) -> None:
         # POD_NAMESPACE already exist for Rook 0.9
-        self.namespace = os.environ.get('POD_NAMESPACE', 'rook-ceph')
+        self.namespace = os.environ.get('POD_NAMESPACE', 'rook-stone')
 
-        # ROOK_CEPH_CLUSTER_CRD_NAME is new is Rook 1.0
-        self.cluster_name = os.environ.get('ROOK_CEPH_CLUSTER_CRD_NAME', self.namespace)
+        # ROOK_STONE_CLUSTER_CRD_NAME is new is Rook 1.0
+        self.cluster_name = os.environ.get('ROOK_STONE_CLUSTER_CRD_NAME', self.namespace)
 
         self.operator_namespace = os.environ.get('ROOK_OPERATOR_NAMESPACE', self.namespace)
-        self.crd_version = os.environ.get('ROOK_CEPH_CLUSTER_CRD_VERSION', 'v1')
-        self.api_name = "ceph.rook.io/" + self.crd_version
+        self.crd_version = os.environ.get('ROOK_STONE_CLUSTER_CRD_VERSION', 'v1')
+        self.api_name = "stone.rook.io/" + self.crd_version
 
     def api_version_match(self) -> bool:
         return self.crd_version == 'v1'
@@ -67,7 +67,7 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
     Writes are a two-phase thing, firstly sending
     the write to the k8s API (fast) and then waiting
     for the corresponding change to appear in the
-    Ceph cluster (slow)
+    Stone cluster (slow)
 
     Right now, we are calling the k8s API synchronously.
     """
@@ -88,7 +88,7 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
         if not kubernetes_imported:
             return False, "`kubernetes` python module not found", {}
         elif not self._rook_env.has_namespace():
-            return False, "ceph-mgr not running in Rook cluster", {}
+            return False, "stone-mgr not running in Rook cluster", {}
 
         try:
             self.k8s.list_namespaced_pod(self._rook_env.namespace)
@@ -180,8 +180,8 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
         for host_name, host_devs in discovered_devs.items():
             devs = []
             for d in host_devs:
-                if 'cephVolumeData' in d and d['cephVolumeData']:
-                    devs.append(inventory.Device.from_json(json.loads(d['cephVolumeData'])))
+                if 'stoneVolumeData' in d and d['stoneVolumeData']:
+                    devs.append(inventory.Device.from_json(json.loads(d['stoneVolumeData'])))
                 else:
                     devs.append(inventory.Device(
                         path = '/dev/' + d['name'],
@@ -190,7 +190,7 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
                             size = d['size']
                         ),
                         available = False,
-                        rejected_reasons=['device data coming from ceph-volume not provided'],
+                        rejected_reasons=['device data coming from stone-volume not provided'],
                     ))
 
             result.append(orchestrator.InventoryHost(host_name, inventory.Devices(devs)))
@@ -209,11 +209,11 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
                          refresh: bool = False) -> List[orchestrator.ServiceDescription]:
         now = datetime_now()
 
-        # CephCluster
+        # StoneCluster
         cl = self.rook_cluster.rook_api_get(
-            "cephclusters/{0}".format(self.rook_cluster.rook_env.cluster_name))
-        self.log.debug('CephCluster %s' % cl)
-        image_name = cl['spec'].get('cephVersion', {}).get('image', None)
+            "stoneclusters/{0}".format(self.rook_cluster.rook_env.cluster_name))
+        self.log.debug('StoneCluster %s' % cl)
+        image_name = cl['spec'].get('stoneVersion', {}).get('image', None)
         num_nodes = len(self.rook_cluster.get_node_names())
 
         spec = {}
@@ -251,10 +251,10 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
             )
 
         if service_type == 'mds' or service_type is None:
-            # CephFilesystems
+            # StoneFilesystems
             all_fs = self.rook_cluster.rook_api_get(
-                "cephfilesystems/")
-            self.log.debug('CephFilesystems %s' % all_fs)
+                "stonefilesystems/")
+            self.log.debug('StoneFilesystems %s' % all_fs)
             for fs in all_fs.get('items', []):
                 svc = 'mds.' + fs['metadata']['name']
                 if svc in spec:
@@ -276,10 +276,10 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
                     )
 
         if service_type == 'rgw' or service_type is None:
-            # CephObjectstores
+            # StoneObjectstores
             all_zones = self.rook_cluster.rook_api_get(
-                "cephobjectstores/")
-            self.log.debug('CephObjectstores %s' % all_zones)
+                "stoneobjectstores/")
+            self.log.debug('StoneObjectstores %s' % all_zones)
             for zone in all_zones.get('items', []):
                 rgw_realm = zone['metadata']['name']
                 rgw_zone = rgw_realm
@@ -308,10 +308,10 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
                 )
 
         if service_type == 'nfs' or service_type is None:
-            # CephNFSes
+            # StoneNFSes
             all_nfs = self.rook_cluster.rook_api_get(
-                "cephnfses/")
-            self.log.warning('CephNFS %s' % all_nfs)
+                "stonenfses/")
+            self.log.warning('StoneNFS %s' % all_nfs)
             for nfs in all_nfs.get('items', []):
                 nfs_name = nfs['metadata']['name']
                 svc = 'nfs.' + nfs_name
@@ -368,7 +368,7 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
         for p in pods:
             sd = orchestrator.DaemonDescription()
             sd.hostname = p['hostname']
-            sd.daemon_type = p['labels']['app'].replace('rook-ceph-', '')
+            sd.daemon_type = p['labels']['app'].replace('rook-stone-', '')
             status = {
                 'Pending': orchestrator.DaemonDescriptionStatus.starting,
                 'Running': orchestrator.DaemonDescriptionStatus.running,
@@ -378,10 +378,10 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
             }[p['phase']]
             sd.status = status
 
-            if 'ceph_daemon_id' in p['labels']:
-                sd.daemon_id = p['labels']['ceph_daemon_id']
-            elif 'ceph-osd-id' in p['labels']:
-                sd.daemon_id = p['labels']['ceph-osd-id']
+            if 'stone_daemon_id' in p['labels']:
+                sd.daemon_id = p['labels']['stone_daemon_id']
+            elif 'stone-osd-id' in p['labels']:
+                sd.daemon_id = p['labels']['stone-osd-id']
             else:
                 # Unknown type -- skip it
                 continue
@@ -403,11 +403,11 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
     def remove_service(self, service_name: str, force: bool = False) -> str:
         service_type, service_name = service_name.split('.', 1)
         if service_type == 'mds':
-            return self.rook_cluster.rm_service('cephfilesystems', service_name)
+            return self.rook_cluster.rm_service('stonefilesystems', service_name)
         elif service_type == 'rgw':
-            return self.rook_cluster.rm_service('cephobjectstores', service_name)
+            return self.rook_cluster.rm_service('stoneobjectstores', service_name)
         elif service_type == 'nfs':
-            return self.rook_cluster.rm_service('cephnfses', service_name)
+            return self.rook_cluster.rm_service('stonenfses', service_name)
         else:
             raise orchestrator.OrchestratorError(f'Service type {service_type} not supported')
 
@@ -443,7 +443,7 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
         # type: (DriveGroupSpec) -> str
         """ Creates OSDs from a drive group specification.
 
-        $: ceph orch osd create -i <dg.file>
+        $: stone orch osd create -i <dg.file>
 
         The drivegroup file must only contain one spec at a time.
         """
@@ -480,12 +480,12 @@ class RookOrchestrator(MgrModule, orchestrator.Orchestrator):
             # Find OSD pods on this host
             pod_osd_ids = set()
             pods = self.k8s.list_namespaced_pod(self._rook_env.namespace,
-                                                label_selector="rook_cluster={},app=rook-ceph-osd".format(self._rook_env.cluster_name),
+                                                label_selector="rook_cluster={},app=rook-stone-osd".format(self._rook_env.cluster_name),
                                                 field_selector="spec.nodeName={0}".format(
                                                     matching_hosts[0]
                                                 )).items
             for p in pods:
-                pod_osd_ids.add(int(p.metadata.labels['ceph-osd-id']))
+                pod_osd_ids.add(int(p.metadata.labels['stone-osd-id']))
 
             self.log.debug('pod_osd_ids={0}'.format(pod_osd_ids))
 

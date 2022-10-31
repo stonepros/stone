@@ -59,7 +59,7 @@ function blocklist_add() {
     local client_addr
     client_addr="$(< $SYSFS_DIR/$dev_id/client_addr)"
 
-    ceph osd blocklist add $client_addr
+    stone osd blocklist add $client_addr
 }
 
 SYSFS_DIR="/sys/bus/rbd/devices"

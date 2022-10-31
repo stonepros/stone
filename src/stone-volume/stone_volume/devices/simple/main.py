@@ -1,6 +1,6 @@
 import argparse
 from textwrap import dedent
-from ceph_volume import terminal
+from stone_volume import terminal
 from . import scan
 from . import activate
 from . import trigger
@@ -8,11 +8,11 @@ from . import trigger
 
 class Simple(object):
 
-    help = 'Manage already deployed OSDs with ceph-volume'
+    help = 'Manage already deployed OSDs with stone-volume'
 
     _help = dedent("""
-    Take over a deployed OSD, persisting its metadata in /etc/ceph/osd/ so that it can be managed
-    with ceph-volume directly. Avoids UDEV and ceph-disk handling.
+    Take over a deployed OSD, persisting its metadata in /etc/stone/osd/ so that it can be managed
+    with stone-volume directly. Avoids UDEV and stone-disk handling.
 
     {sub_help}
     """)
@@ -32,7 +32,7 @@ class Simple(object):
     def main(self):
         terminal.dispatch(self.mapper, self.argv)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume simple',
+            prog='stone-volume simple',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self.print_help(terminal.subhelp(self.mapper)),
         )

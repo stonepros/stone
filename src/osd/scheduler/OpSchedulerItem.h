@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat Inc.
  *
@@ -27,7 +27,7 @@
 class OSD;
 class OSDShard;
 
-namespace ceph::osd::scheduler {
+namespace stone::osd::scheduler {
 
 enum class op_scheduler_class : uint8_t {
   background_recovery = 0,
@@ -79,7 +79,7 @@ public:
       return false;
     }
     virtual bool peering_requires_pg() const {
-      ceph_abort();
+      stone_abort();
     }
     virtual const PGCreateInfo *creates_pg() const {
       return nullptr;

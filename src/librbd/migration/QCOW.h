@@ -30,7 +30,7 @@
 #ifndef STONE_LIBRBD_MIGRATION_QCOW2_H
 #define STONE_LIBRBD_MIGRATION_QCOW2_H
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/int_types.h"
 #include "librbd/migration/QCOW.h"
 

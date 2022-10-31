@@ -9,8 +9,8 @@
 #include "../include/types.h"
 #include "msg/msg_types.h"
 #include "common/hobject.h"
-#include "common/ceph_time.h"
-#include "common/ceph_releases.h"
+#include "common/stone_time.h"
+#include "common/stone_releases.h"
 #include "include/rados/objclass.h"
 
 struct obj_list_watch_response_t;
@@ -84,22 +84,22 @@ extern int cls_register_cxx_filter(cls_handle_t hclass,
 				   cls_cxx_filter_factory_t fn,
                                    cls_filter_handle_t *handle=NULL);
 
-extern int cls_cxx_stat2(cls_method_context_t hctx, uint64_t *size, ceph::real_time *mtime);
+extern int cls_cxx_stat2(cls_method_context_t hctx, uint64_t *size, stone::real_time *mtime);
 extern int cls_cxx_read2(cls_method_context_t hctx, int ofs, int len,
-                         ceph::buffer::list *bl, uint32_t op_flags);
+                         stone::buffer::list *bl, uint32_t op_flags);
 extern int cls_cxx_write2(cls_method_context_t hctx, int ofs, int len,
-                          ceph::buffer::list *bl, uint32_t op_flags);
-extern int cls_cxx_write_full(cls_method_context_t hctx, ceph::buffer::list *bl);
+                          stone::buffer::list *bl, uint32_t op_flags);
+extern int cls_cxx_write_full(cls_method_context_t hctx, stone::buffer::list *bl);
 extern int cls_cxx_getxattrs(cls_method_context_t hctx, std::map<std::string,
-			     ceph::buffer::list> *attrset);
+			     stone::buffer::list> *attrset);
 extern int cls_cxx_replace(cls_method_context_t hctx, int ofs, int len,
-			   ceph::buffer::list *bl);
+			   stone::buffer::list *bl);
 extern int cls_cxx_truncate(cls_method_context_t hctx, int ofs);
 extern int cls_cxx_write_zero(cls_method_context_t hctx, int ofs, int len);
 extern int cls_cxx_snap_revert(cls_method_context_t hctx, snapid_t snapid);
 extern int cls_cxx_map_clear(cls_method_context_t hctx);
 extern int cls_cxx_map_get_all_vals(cls_method_context_t hctx,
-                                    std::map<std::string, ceph::buffer::list> *vals,
+                                    std::map<std::string, stone::buffer::list> *vals,
                                     bool *more);
 extern int cls_cxx_map_get_keys(cls_method_context_t hctx,
                                 const std::string &start_after,
@@ -110,23 +110,23 @@ extern int cls_cxx_map_get_vals(cls_method_context_t hctx,
                                 const std::string& start_after,
                                 const std::string& filter_prefix,
                                 uint64_t max_to_get,
-                                std::map<std::string, ceph::buffer::list> *vals,
+                                std::map<std::string, stone::buffer::list> *vals,
                                 bool *more);
 extern int cls_cxx_map_get_val(cls_method_context_t hctx, const std::string &key,
                                bufferlist *outbl);
 extern int cls_cxx_map_get_vals_by_keys(cls_method_context_t hctx,
                                         const std::set<std::string> &keys,
                                         std::map<std::string, bufferlist> *map);
-extern int cls_cxx_map_read_header(cls_method_context_t hctx, ceph::buffer::list *outbl);
+extern int cls_cxx_map_read_header(cls_method_context_t hctx, stone::buffer::list *outbl);
 extern int cls_cxx_map_set_vals(cls_method_context_t hctx,
-                                const std::map<std::string, ceph::buffer::list> *map);
-extern int cls_cxx_map_write_header(cls_method_context_t hctx, ceph::buffer::list *inbl);
+                                const std::map<std::string, stone::buffer::list> *map);
+extern int cls_cxx_map_write_header(cls_method_context_t hctx, stone::buffer::list *inbl);
 extern int cls_cxx_map_remove_key(cls_method_context_t hctx, const std::string &key);
 /* remove keys in the range [key_begin, key_end) */
 extern int cls_cxx_map_remove_range(cls_method_context_t hctx,
                                     const std::string& key_begin,
                                     const std::string& key_end);
-extern int cls_cxx_map_update(cls_method_context_t hctx, ceph::buffer::list *inbl);
+extern int cls_cxx_map_update(cls_method_context_t hctx, stone::buffer::list *inbl);
 
 extern int cls_cxx_list_watchers(cls_method_context_t hctx,
 				 obj_list_watch_response_t *watchers);
@@ -140,8 +140,8 @@ extern uint64_t cls_current_version(cls_method_context_t hctx);
 extern int cls_current_subop_num(cls_method_context_t hctx);
 extern uint64_t cls_get_features(cls_method_context_t hctx);
 extern uint64_t cls_get_client_features(cls_method_context_t hctx);
-extern ceph_release_t cls_get_required_osd_release(cls_method_context_t hctx);
-extern ceph_release_t cls_get_min_compatible_client(cls_method_context_t hctx);
+extern stone_release_t cls_get_required_osd_release(cls_method_context_t hctx);
+extern stone_release_t cls_get_min_compatible_client(cls_method_context_t hctx);
 
 /* helpers */
 extern void cls_cxx_subop_version(cls_method_context_t hctx, std::string *s);
@@ -155,7 +155,7 @@ extern int cls_get_snapset_seq(cls_method_context_t hctx, uint64_t *snap_seq);
 #define STONE_OSD_TMAP_RM 'r'
 
 int cls_cxx_chunk_write_and_set(cls_method_context_t hctx, int ofs, int len,
-                   ceph::buffer::list *write_inbl, uint32_t op_flags, ceph::buffer::list *set_inbl,
+                   stone::buffer::list *write_inbl, uint32_t op_flags, stone::buffer::list *set_inbl,
 		   int set_len);
 int cls_get_manifest_ref_count(cls_method_context_t hctx, std::string fp_oid);
 

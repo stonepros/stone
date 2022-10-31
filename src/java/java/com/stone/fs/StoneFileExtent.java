@@ -17,19 +17,19 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.util.Arrays;
 
 /**
- * Holds information about a file extent in CephFS.
+ * Holds information about a file extent in StoneFS.
  */
-public class CephFileExtent {
+public class StoneFileExtent {
   private long offset;
   private long length;
   private int[] osds;
 
-  CephFileExtent(long offset, long length, int[] osds) {
+  StoneFileExtent(long offset, long length, int[] osds) {
     this.offset = offset;
     this.length = length;
     this.osds = osds;

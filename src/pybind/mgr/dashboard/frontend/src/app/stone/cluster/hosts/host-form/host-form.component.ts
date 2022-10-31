@@ -96,13 +96,13 @@ export class HostFormComponent extends CdForm implements OnInit {
   }
 
   private isCommaSeparatedPattern(hostname: string) {
-    // eg. ceph-node-01.cephlab.com,ceph-node-02.cephlab.com
+    // eg. stone-node-01.stonelab.com,stone-node-02.stonelab.com
     return hostname.includes(',');
   }
 
   private isRangeTypePattern(hostname: string) {
     // check if it is a range expression or comma separated range expression
-    // eg. ceph-mon-[01-05].lab.com,ceph-osd-[02-08].lab.com,ceph-rgw-[01-09]
+    // eg. stone-mon-[01-05].lab.com,stone-osd-[02-08].lab.com,stone-rgw-[01-09]
     return hostname.includes('[') && hostname.includes(']') && !hostname.match(/(?![^(]*\)),/g);
   }
 

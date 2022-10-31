@@ -24,7 +24,7 @@ Short segments:
   $ sudo rbd unmap $DEV
   $ rbd rm --no-progress img
 
-Short segment, ceph_msg_data_bio_cursor_init():
+Short segment, stone_msg_data_bio_cursor_init():
 
   $ rbd create --size 12M img
   $ DEV=$(sudo rbd map img)
@@ -41,7 +41,7 @@ Short segment, ceph_msg_data_bio_cursor_init():
   $ sudo rbd unmap $DEV
   $ rbd rm --no-progress img
 
-Short segment, ceph_msg_data_bio_advance():
+Short segment, stone_msg_data_bio_advance():
 
   $ rbd create --size 12M img
   $ DEV=$(sudo rbd map img)

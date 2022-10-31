@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -35,7 +35,7 @@ using std::deque;
 #endif
 
 // re-include our assert to clobber the system one; fix dout:
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 /**
  * Implements journaling on top of block device or file.
@@ -58,24 +58,24 @@ public:
   };
   struct write_item {
     uint64_t seq;
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     uint32_t orig_len;
     TrackedOpRef tracked_op;
     ZTracer::Trace trace;
-    write_item(uint64_t s, ceph::buffer::list& b, int ol, TrackedOpRef opref) :
+    write_item(uint64_t s, stone::buffer::list& b, int ol, TrackedOpRef opref) :
       seq(s), orig_len(ol), tracked_op(opref) {
       bl = std::move(b);
     }
     write_item() : seq(0), orig_len(0) {}
   };
 
-  ceph::mutex finisher_lock = ceph::make_mutex("FileJournal::finisher_lock");
-  ceph::condition_variable finisher_cond;
+  stone::mutex finisher_lock = stone::make_mutex("FileJournal::finisher_lock");
+  stone::condition_variable finisher_cond;
   uint64_t journaled_seq;
   bool plug_journal_completions;
 
-  ceph::mutex writeq_lock = ceph::make_mutex("FileJournal::writeq_lock");
-  ceph::condition_variable writeq_cond;
+  stone::mutex writeq_lock = stone::make_mutex("FileJournal::writeq_lock");
+  stone::condition_variable writeq_cond;
   std::list<write_item> writeq;
   bool writeq_empty();
   write_item &peek_write();
@@ -83,8 +83,8 @@ public:
   void batch_pop_write(std::list<write_item> &items);
   void batch_unpop_write(std::list<write_item> &items);
 
-  ceph::mutex completions_lock =
-    ceph::make_mutex("FileJournal::completions_lock");
+  stone::mutex completions_lock =
+    stone::make_mutex("FileJournal::completions_lock");
   std::list<completion_item> completions;
   bool completions_empty() {
     std::lock_guard l{completions_lock};
@@ -100,18 +100,18 @@ public:
   }
   completion_item completion_peek_front() {
     std::lock_guard l{completions_lock};
-    ceph_assert(!completions.empty());
+    stone_assert(!completions.empty());
     return completions.front();
   }
   void completion_pop_front() {
     std::lock_guard l{completions_lock};
-    ceph_assert(!completions.empty());
+    stone_assert(!completions.empty());
     completions.pop_front();
   }
 
-  int prepare_entry(std::vector<ObjectStore::Transaction>& tls, ceph::buffer::list* tbl) override;
+  int prepare_entry(std::vector<ObjectStore::Transaction>& tls, stone::buffer::list* tbl) override;
 
-  void submit_entry(uint64_t seq, ceph::buffer::list& bl, uint32_t orig_len,
+  void submit_entry(uint64_t seq, stone::buffer::list& bl, uint32_t orig_len,
 		    Context *oncommit,
 		    TrackedOpRef osd_op = TrackedOpRef()) override;
   /// End protected by finisher_lock
@@ -161,11 +161,11 @@ public:
       return *(uint64_t*)fsid.bytes();
     }
 
-    void encode(ceph::buffer::list& bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl) const {
+      using stone::encode;
       __u32 v = 4;
       encode(v, bl);
-      ceph::buffer::list em;
+      stone::buffer::list em;
       {
 	encode(flags, em);
 	encode(fsid, em);
@@ -178,8 +178,8 @@ public:
       }
       encode(em, bl);
     }
-    void decode(ceph::buffer::list::const_iterator& bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& bl) {
+      using stone::decode;
       __u32 v;
       decode(v, bl);
       if (v < 2) {  // normally 0, but conceivably 1
@@ -198,7 +198,7 @@ public:
 	start_seq = 0;
 	return;
       }
-      ceph::buffer::list em;
+      stone::buffer::list em;
       decode(em, bl);
       auto t = em.cbegin();
       decode(flags, t);
@@ -257,13 +257,13 @@ private:
   /// Protected by aio_lock
   struct aio_info {
     struct iocb iocb {};
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     struct iovec *iov;
     bool done;
     uint64_t off, len;    ///< these are for debug only
     uint64_t seq;         ///< seq number to complete on aio completion, if non-zero
 
-    aio_info(ceph::buffer::list& b, uint64_t o, uint64_t s)
+    aio_info(stone::buffer::list& b, uint64_t o, uint64_t s)
       : iov(NULL), done(false), off(o), len(b.length()), seq(s) {
       bl = std::move(b);
     }
@@ -271,9 +271,9 @@ private:
       delete[] iov;
     }
   };
-  ceph::mutex aio_lock = ceph::make_mutex("FileJournal::aio_lock");
-  ceph::condition_variable aio_cond;
-  ceph::condition_variable write_finish_cond;
+  stone::mutex aio_lock = stone::make_mutex("FileJournal::aio_lock");
+  stone::condition_variable aio_cond;
+  stone::condition_variable write_finish_cond;
   io_context_t aio_ctx = 0;
   std::list<aio_info> aio_queue;
   int aio_num = 0, aio_bytes = 0;
@@ -328,11 +328,11 @@ private:
   JournalThrottle throttle;
 
   // write thread
-  ceph::mutex write_lock = ceph::make_mutex("FileJournal::write_lock");
+  stone::mutex write_lock = stone::make_mutex("FileJournal::write_lock");
   bool write_stop;
   bool aio_stop;
 
-  ceph::condition_variable commit_cond;
+  stone::condition_variable commit_cond;
 
   int _open(bool wr, bool create=false);
   int _open_block_device();
@@ -341,7 +341,7 @@ private:
   int _dump(std::ostream& out, bool simple);
   void print_header(const header_t &hdr) const;
   int read_header(header_t *hdr) const;
-  ceph::bufferptr prepare_header();
+  stone::bufferptr prepare_header();
   void start_writer();
   void stop_writer();
   void write_thread_entry();
@@ -349,25 +349,25 @@ private:
   void queue_completions_thru(uint64_t seq);
 
   int check_for_full(uint64_t seq, off64_t pos, off64_t size);
-  int prepare_multi_write(ceph::buffer::list& bl, uint64_t& orig_ops, uint64_t& orig_bytee);
-  int prepare_single_write(write_item &next_write, ceph::buffer::list& bl, off64_t& queue_pos,
+  int prepare_multi_write(stone::buffer::list& bl, uint64_t& orig_ops, uint64_t& orig_bytee);
+  int prepare_single_write(write_item &next_write, stone::buffer::list& bl, off64_t& queue_pos,
     uint64_t& orig_ops, uint64_t& orig_bytes);
-  void do_write(ceph::buffer::list& bl);
+  void do_write(stone::buffer::list& bl);
 
   void write_finish_thread_entry();
   void check_aio_completion();
-  void do_aio_write(ceph::buffer::list& bl);
-  int write_aio_bl(off64_t& pos, ceph::buffer::list& bl, uint64_t seq);
+  void do_aio_write(stone::buffer::list& bl);
+  int write_aio_bl(off64_t& pos, stone::buffer::list& bl, uint64_t seq);
 
 
-  void check_align(off64_t pos, ceph::buffer::list& bl);
-  int write_bl(off64_t& pos, ceph::buffer::list& bl);
+  void check_align(off64_t pos, stone::buffer::list& bl);
+  int write_bl(off64_t& pos, stone::buffer::list& bl);
 
   /// read len from journal starting at in_pos and wrapping up to len
   void wrap_read_bl(
     off64_t in_pos,   ///< [in] start position
     int64_t len,      ///< [in] length to read
-    ceph::buffer::list* bl,   ///< [out] result
+    stone::buffer::list* bl,   ///< [out] result
     off64_t *out_pos  ///< [out] next position to read, will be wrapped
     ) const;
 
@@ -400,7 +400,7 @@ private:
   ZTracer::Endpoint trace_endpoint;
 
  public:
-  FileJournal(CephContext* cct, uuid_d fsid, Finisher *fin, ceph::condition_variable *sync_cond,
+  FileJournal(StoneContext* cct, uuid_d fsid, Finisher *fin, stone::condition_variable *sync_cond,
 	      const char *f, bool dio=false, bool ai=true, bool faio=false) :
     Journal(cct, fsid, fin, sync_cond),
     journaled_seq(0),
@@ -438,7 +438,7 @@ private:
       cct->_conf.add_observer(this);
   }
   ~FileJournal() override {
-    ceph_assert(fd == -1);
+    stone_assert(fd == -1);
     delete[] zero_buf;
     cct->_conf.remove_observer(this);
   }
@@ -451,7 +451,7 @@ private:
 
   int dump(std::ostream& out) override;
   int simple_dump(std::ostream& out);
-  int _fdump(ceph::Formatter &f, bool simple);
+  int _fdump(stone::Formatter &f, bool simple);
 
   void flush() override;
 
@@ -504,20 +504,20 @@ private:
   read_entry_result do_read_entry(
     off64_t pos,          ///< [in] position to read
     off64_t *next_pos,    ///< [out] next position to read
-    ceph::buffer::list* bl,       ///< [out] payload for successful read
+    stone::buffer::list* bl,       ///< [out] payload for successful read
     uint64_t *seq,        ///< [out] seq of successful read
     std::ostream *ss,          ///< [out] error output
     entry_header_t *h = 0 ///< [out] header
     ) const; ///< @return result code
 
   bool read_entry(
-    ceph::buffer::list &bl,
+    stone::buffer::list &bl,
     uint64_t &last_seq,
     bool *corrupt
     );
 
   bool read_entry(
-    ceph::buffer::list &bl,
+    stone::buffer::list &bl,
     uint64_t &last_seq) override {
     return read_entry(bl, last_seq, 0);
   }

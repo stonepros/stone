@@ -11,12 +11,12 @@ CC_INC=$(LOCAL_LIBRADOS_INC)
 CC_LIBS?=-lrados
 CC_CC=$(CC) $(CC_FLAGS) $(CC_INC) $(LOCAL_LIBRADOS)
 
-# Relative path to the Ceph source:
-CEPH_SRC_HOME?=../../src
-CEPH_BLD_HOME?=../../build
+# Relative path to the Stone source:
+STONE_SRC_HOME?=../../src
+STONE_BLD_HOME?=../../build
 
-LOCAL_LIBRADOS?=-L$(CEPH_BLD_HOME)/lib/ -Wl,-rpath,$(CEPH_BLD_HOME)/lib
-LOCAL_LIBRADOS_INC?=-I$(CEPH_SRC_HOME)/include
+LOCAL_LIBRADOS?=-L$(STONE_BLD_HOME)/lib/ -Wl,-rpath,$(STONE_BLD_HOME)/lib
+LOCAL_LIBRADOS_INC?=-I$(STONE_SRC_HOME)/include
 
 all: hello_world_cpp hello_radosstriper_cpp hello_world_c
 

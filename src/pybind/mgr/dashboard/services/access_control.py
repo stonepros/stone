@@ -266,17 +266,17 @@ POOL_MGR_ROLE = Role(
         Scope.GRAFANA: [_P.READ],
     })
 
-# CephFS manager role provides all permissions for CephFS related scopes
-CEPHFS_MGR_ROLE = Role(
-    'cephfs-manager', 'allows full permissions for the cephfs scope', {
-        Scope.CEPHFS: [_P.READ, _P.CREATE, _P.UPDATE, _P.DELETE],
+# StoneFS manager role provides all permissions for StoneFS related scopes
+STONEFS_MGR_ROLE = Role(
+    'stonefs-manager', 'allows full permissions for the stonefs scope', {
+        Scope.STONEFS: [_P.READ, _P.CREATE, _P.UPDATE, _P.DELETE],
         Scope.GRAFANA: [_P.READ],
     })
 
 GANESHA_MGR_ROLE = Role(
     'ganesha-manager', 'allows full permissions for the nfs-ganesha scope', {
         Scope.NFS_GANESHA: [_P.READ, _P.CREATE, _P.UPDATE, _P.DELETE],
-        Scope.CEPHFS: [_P.READ, _P.CREATE, _P.UPDATE, _P.DELETE],
+        Scope.STONEFS: [_P.READ, _P.CREATE, _P.UPDATE, _P.DELETE],
         Scope.RGW: [_P.READ, _P.CREATE, _P.UPDATE, _P.DELETE],
         Scope.GRAFANA: [_P.READ],
     })
@@ -289,7 +289,7 @@ SYSTEM_ROLES = {
     RGW_MGR_ROLE.name: RGW_MGR_ROLE,
     CLUSTER_MGR_ROLE.name: CLUSTER_MGR_ROLE,
     POOL_MGR_ROLE.name: POOL_MGR_ROLE,
-    CEPHFS_MGR_ROLE.name: CEPHFS_MGR_ROLE,
+    STONEFS_MGR_ROLE.name: STONEFS_MGR_ROLE,
     GANESHA_MGR_ROLE.name: GANESHA_MGR_ROLE,
 }
 

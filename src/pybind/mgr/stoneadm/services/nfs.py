@@ -8,16 +8,16 @@ from typing import Dict, Tuple, Any, List, cast, Optional
 from mgr_module import HandleCommandResult
 from mgr_module import NFS_POOL_NAME as POOL_NAME
 
-from ceph.deployment.service_spec import ServiceSpec, NFSServiceSpec
+from stone.deployment.service_spec import ServiceSpec, NFSServiceSpec
 
 from orchestrator import DaemonDescription
 
-from cephadm.services.cephadmservice import AuthEntity, CephadmDaemonDeploySpec, CephService
+from stoneadm.services.stoneadmservice import AuthEntity, StoneadmDaemonDeploySpec, StoneService
 
 logger = logging.getLogger(__name__)
 
 
-class NFSService(CephService):
+class NFSService(StoneService):
     TYPE = 'nfs'
 
     def ranked(self) -> bool:
@@ -61,12 +61,12 @@ class NFSService(CephService):
         assert self.TYPE == spec.service_type
         create_ganesha_pool(self.mgr)
 
-    def prepare_create(self, daemon_spec: CephadmDaemonDeploySpec) -> CephadmDaemonDeploySpec:
+    def prepare_create(self, daemon_spec: StoneadmDaemonDeploySpec) -> StoneadmDaemonDeploySpec:
         assert self.TYPE == daemon_spec.daemon_type
         daemon_spec.final_config, daemon_spec.deps = self.generate_config(daemon_spec)
         return daemon_spec
 
-    def generate_config(self, daemon_spec: CephadmDaemonDeploySpec) -> Tuple[Dict[str, Any], List[str]]:
+    def generate_config(self, daemon_spec: StoneadmDaemonDeploySpec) -> Tuple[Dict[str, Any], List[str]]:
         assert self.TYPE == daemon_spec.daemon_type
 
         daemon_type = daemon_spec.daemon_type
@@ -108,8 +108,8 @@ class NFSService(CephService):
             }
             return self.mgr.template.render('services/nfs/ganesha.conf.j2', context)
 
-        # generate the cephadm config json
-        def get_cephadm_config() -> Dict[str, Any]:
+        # generate the stoneadm config json
+        def get_stoneadm_config() -> Dict[str, Any]:
             config: Dict[str, Any] = {}
             config['pool'] = POOL_NAME
             config['namespace'] = spec.service_id
@@ -126,14 +126,14 @@ class NFSService(CephService):
                 )
             )
             config['rgw'] = {
-                'cluster': 'ceph',
+                'cluster': 'stone',
                 'user': rgw_user,
                 'keyring': rgw_keyring,
             }
-            logger.debug('Generated cephadm config-json: %s' % config)
+            logger.debug('Generated stoneadm config-json: %s' % config)
             return config
 
-        return get_cephadm_config(), deps
+        return get_stoneadm_config(), deps
 
     def create_rados_config_obj(self,
                                 spec: NFSServiceSpec,
@@ -142,7 +142,7 @@ class NFSService(CephService):
         cmd = [
             'rados',
             '-n', f"mgr.{self.mgr.get_mgr_id()}",
-            '-k', str(self.mgr.get_ceph_option('keyring')),
+            '-k', str(self.mgr.get_stone_option('keyring')),
             '-p', POOL_NAME,
             '--namespace', cast(str, spec.service_id),
         ]
@@ -164,7 +164,7 @@ class NFSService(CephService):
                 )
                 raise RuntimeError(result.stderr.decode("utf-8"))
 
-    def create_keyring(self, daemon_spec: CephadmDaemonDeploySpec) -> str:
+    def create_keyring(self, daemon_spec: StoneadmDaemonDeploySpec) -> str:
         daemon_id = daemon_spec.daemon_id
         spec = cast(NFSServiceSpec, self.mgr.spec_store[daemon_spec.service_name].spec)
         entity: AuthEntity = self.get_auth_entity(daemon_id)
@@ -178,7 +178,7 @@ class NFSService(CephService):
 
         return keyring
 
-    def create_rgw_keyring(self, daemon_spec: CephadmDaemonDeploySpec) -> str:
+    def create_rgw_keyring(self, daemon_spec: StoneadmDaemonDeploySpec) -> str:
         daemon_id = daemon_spec.daemon_id
         entity: AuthEntity = self.get_auth_entity(f'{daemon_id}-rgw')
 
@@ -196,7 +196,7 @@ class NFSService(CephService):
         # write a temp keyring and referencing config file.  this is a kludge
         # because the ganesha-grace-tool can only authenticate as a client (and
         # not a mgr).  Also, it doesn't allow you to pass a keyring location via
-        # the command line, nor does it parse the CEPH_ARGS env var.
+        # the command line, nor does it parse the STONE_ARGS env var.
         tmp_id = f'mgr.nfs.grace.{spec.service_name()}'
         entity = AuthEntity(f'client.{tmp_id}')
         keyring = self.get_keyring_with_caps(
@@ -208,13 +208,13 @@ class NFSService(CephService):
         tmp_keyring.write(keyring)
         tmp_keyring.flush()
         tmp_conf = tempfile.NamedTemporaryFile(mode='w', prefix='mgr-grace-conf')
-        tmp_conf.write(self.mgr.get_minimal_ceph_conf())
+        tmp_conf.write(self.mgr.get_minimal_stone_conf())
         tmp_conf.write(f'\tkeyring = {tmp_keyring.name}\n')
         tmp_conf.flush()
         try:
             cmd: List[str] = [
                 'ganesha-rados-grace',
-                '--cephconf', tmp_conf.name,
+                '--stoneconf', tmp_conf.name,
                 '--userid', tmp_id,
                 '--pool', POOL_NAME,
                 '--ns', cast(str, spec.service_id),
@@ -277,7 +277,7 @@ class NFSService(CephService):
         cmd = [
             'rados',
             '-n', f"mgr.{self.mgr.get_mgr_id()}",
-            '-k', str(self.mgr.get_ceph_option('keyring')),
+            '-k', str(self.mgr.get_stone_option('keyring')),
             '-p', POOL_NAME,
             '--namespace', cast(str, spec.service_id),
             'rm', 'grace',

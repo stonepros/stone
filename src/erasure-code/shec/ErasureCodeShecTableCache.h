@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 FUJITSU LIMITED
  * Copyright (C) 2014 CERN (Switzerland)
@@ -21,7 +21,7 @@
 #define STONE_ERASURE_CODE_SHEC_TABLE_CACHE_H
 
 // -----------------------------------------------------------------------------
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "erasure-code/ErasureCodeInterface.h"
 // -----------------------------------------------------------------------------
 #include <list>
@@ -81,7 +81,7 @@ class ErasureCodeShecTableCache {
   ErasureCodeShecTableCache()  = default;
   virtual ~ErasureCodeShecTableCache();
   // mutex used to protect modifications in encoding/decoding table maps
-  ceph::mutex codec_tables_guard = ceph::make_mutex("shec-lru-cache");
+  stone::mutex codec_tables_guard = stone::make_mutex("shec-lru-cache");
   
   bool getDecodingTableFromCache(int* matrix,
                                  int* dm_row, int* dm_column,
@@ -114,7 +114,7 @@ class ErasureCodeShecTableCache {
   uint64_t getDecodingCacheSignature(int k, int m, int c, int w,
                                      int *want, int *avails);
 
-  ceph::mutex* getLock();
+  stone::mutex* getLock();
 };
 
 #endif

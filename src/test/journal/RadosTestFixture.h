@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "test/librados/test.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "journal/JournalMetadata.h"
 #include "cls/journal/cls_journal_types.h"
@@ -23,7 +23,7 @@ public:
 
   int create(const std::string &oid, uint8_t order = 14,
              uint8_t splay_width = 2);
-  ceph::ref_t<journal::JournalMetadata> create_metadata(const std::string &oid,
+  stone::ref_t<journal::JournalMetadata> create_metadata(const std::string &oid,
                                               const std::string &client_id = "client",
                                               double commit_internal = 0.1,
                                               int max_concurrent_object_sets = 0);
@@ -38,8 +38,8 @@ public:
 
   struct Listener : public journal::JournalMetadataListener {
     RadosTestFixture *test_fixture;
-    ceph::mutex mutex = ceph::make_mutex("mutex");
-    ceph::condition_variable cond;
+    stone::mutex mutex = stone::make_mutex("mutex");
+    stone::condition_variable cond;
     std::map<journal::JournalMetadata*, uint32_t> updates;
 
     Listener(RadosTestFixture *_test_fixture)
@@ -52,9 +52,9 @@ public:
     }
   };
 
-  int init_metadata(const ceph::ref_t<journal::JournalMetadata>& metadata);
+  int init_metadata(const stone::ref_t<journal::JournalMetadata>& metadata);
 
-  bool wait_for_update(const ceph::ref_t<journal::JournalMetadata>& metadata);
+  bool wait_for_update(const stone::ref_t<journal::JournalMetadata>& metadata);
 
   static std::string _pool_name;
   static librados::Rados _rados;
@@ -65,10 +65,10 @@ public:
 
   ContextWQ *m_work_queue = nullptr;
 
-  ceph::mutex m_timer_lock;
+  stone::mutex m_timer_lock;
   SafeTimer *m_timer = nullptr;
 
   Listener m_listener;
 
-  std::list<ceph::ref_t<journal::JournalMetadata>> m_metadatas;
+  std::list<stone::ref_t<journal::JournalMetadata>> m_metadatas;
 };

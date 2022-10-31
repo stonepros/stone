@@ -6,14 +6,14 @@ import logging
 import os
 from contextlib import contextmanager
 
-import cephfs
+import stonefs
 
 from .. import mgr
 
-logger = logging.getLogger('cephfs')
+logger = logging.getLogger('stonefs')
 
 
-class CephFS(object):
+class StoneFS(object):
     @classmethod
     def list_filesystems(cls):
         fsmap = mgr.get("fs_map")
@@ -37,17 +37,17 @@ class CephFS(object):
         return fs_info[0]['mdsmap']['fs_name']
 
     def __init__(self, fs_name=None):
-        logger.debug("initializing cephfs connection")
-        self.cfs = cephfs.LibCephFS(rados_inst=mgr.rados)
-        logger.debug("mounting cephfs filesystem: %s", fs_name)
+        logger.debug("initializing stonefs connection")
+        self.cfs = stonefs.LibStoneFS(rados_inst=mgr.rados)
+        logger.debug("mounting stonefs filesystem: %s", fs_name)
         if fs_name:
             self.cfs.mount(filesystem_name=fs_name)
         else:
             self.cfs.mount()
-        logger.debug("mounted cephfs filesystem")
+        logger.debug("mounted stonefs filesystem")
 
     def __del__(self):
-        logger.debug("shutting down cephfs filesystem")
+        logger.debug("shutting down stonefs filesystem")
         self.cfs.shutdown()
 
     @contextmanager
@@ -134,7 +134,7 @@ class CephFS(object):
         try:
             with self.opendir(path):
                 return True
-        except cephfs.ObjectNotFound:
+        except stonefs.ObjectNotFound:
             return False
 
     def mk_dirs(self, path):
@@ -236,12 +236,12 @@ class CephFS(object):
         :rtype: dict
         """
         try:
-            max_bytes = int(self.cfs.getxattr(path, 'ceph.quota.max_bytes'))
-        except cephfs.NoData:
+            max_bytes = int(self.cfs.getxattr(path, 'stone.quota.max_bytes'))
+        except stonefs.NoData:
             max_bytes = 0
         try:
-            max_files = int(self.cfs.getxattr(path, 'ceph.quota.max_files'))
-        except cephfs.NoData:
+            max_files = int(self.cfs.getxattr(path, 'stone.quota.max_files'))
+        except stonefs.NoData:
             max_files = 0
         return {'max_bytes': max_bytes, 'max_files': max_files}
 
@@ -256,8 +256,8 @@ class CephFS(object):
         :type max_files: int | None
         """
         if max_bytes is not None:
-            self.cfs.setxattr(path, 'ceph.quota.max_bytes',
+            self.cfs.setxattr(path, 'stone.quota.max_bytes',
                               str(max_bytes).encode(), 0)
         if max_files is not None:
-            self.cfs.setxattr(path, 'ceph.quota.max_files',
+            self.cfs.setxattr(path, 'stone.quota.max_files',
                               str(max_files).encode(), 0)

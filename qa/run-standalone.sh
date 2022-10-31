@@ -121,8 +121,8 @@ do
     echo "--- $cmd ---"
     if [[ "$dryrun" != "true" ]]; then
         if ! PATH=$PATH:bin \
-	    CEPH_ROOT=.. \
-	    CEPH_LIB=lib \
+	    STONE_ROOT=.. \
+	    STONE_LIB=lib \
 	    LOCALRUN=yes \
 	    time -f "Elapsed %E (%e seconds)" $cmd ; then
           echo "$f .............. FAILED"

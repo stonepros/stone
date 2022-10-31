@@ -3,11 +3,11 @@
 import logging
 import os
 from functools import total_ordering
-from ceph_volume import sys_info
-from ceph_volume.api import lvm
-from ceph_volume.util import disk, system
-from ceph_volume.util.lsmdisk import LSMDisk
-from ceph_volume.util.constants import ceph_disk_guids
+from stone_volume import sys_info
+from stone_volume.api import lvm
+from stone_volume.util import disk, system
+from stone_volume.util.lsmdisk import LSMDisk
+from stone_volume.util.constants import stone_disk_guids
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def encryption_status(abspath):
     a circular import issue (encryption module imports from this module) and to
     ease testing by allowing monkeypatching of this function.
     """
-    from ceph_volume.util import encryption
+    from stone_volume.util import encryption
     return encryption.status(abspath)
 
 
@@ -182,7 +182,7 @@ class Device(object):
             if device_type in ['part', 'disk']:
                 self._set_lvm_membership()
 
-        self.ceph_disk = CephDiskDevice(self)
+        self.stone_disk = StoneDiskDevice(self)
 
     def __repr__(self):
         prefix = 'Unknown'
@@ -347,12 +347,12 @@ class Device(object):
         return self._is_lvm_member
 
     @property
-    def is_ceph_disk_member(self):
-        is_member = self.ceph_disk.is_member
+    def is_stone_disk_member(self):
+        is_member = self.stone_disk.is_member
         if self.sys_api.get("partitions"):
             for part in self.sys_api.get("partitions").keys():
                 part = Device("/dev/%s" % part)
-                if part.is_ceph_disk_member:
+                if part.is_stone_disk_member:
                     is_member = True
                     break
         return is_member
@@ -414,7 +414,7 @@ class Device(object):
             # if disk APIs are reporting this is encrypted use that:
             if 'crypto_LUKS' in crypt_reports:
                 return True
-            # if ceph-volume created this, then a tag would let us know
+            # if stone-volume created this, then a tag would let us know
             elif self.lv_api.encrypted:
                 return True
             return False
@@ -432,10 +432,10 @@ class Device(object):
             return None
 
     @property
-    def used_by_ceph(self):
+    def used_by_stone(self):
         # only filter out data devices as journals could potentially be reused
-        osd_ids = [lv.tags.get("ceph.osd_id") is not None for lv in self.lvs
-                   if lv.tags.get("ceph.type") in ["data", "block"]]
+        osd_ids = [lv.tags.get("stone.osd_id") is not None for lv in self.lvs
+                   if lv.tags.get("stone.type") in ["data", "block"]]
         return any(osd_ids)
 
     @property
@@ -497,8 +497,8 @@ class Device(object):
                 rejected.append('Insufficient space (<5GB)')
         else:
             rejected.append("Device type is not acceptable. It should be raw device or partition")
-        if self.is_ceph_disk_member:
-            rejected.append("Used by ceph-disk")
+        if self.is_stone_disk_member:
+            rejected.append("Used by stone-disk")
 
         try:
             if self.has_bluestore_label:
@@ -554,15 +554,15 @@ class Device(object):
         return self.is_device or self.is_lv
 
 
-class CephDiskDevice(object):
+class StoneDiskDevice(object):
     """
-    Detect devices that have been created by ceph-disk, report their type
+    Detect devices that have been created by stone-disk, report their type
     (journal, data, etc..). Requires a ``Device`` object as input.
     """
 
     def __init__(self, device):
         self.device = device
-        self._is_ceph_disk_member = None
+        self._is_stone_disk_member = None
 
     @property
     def partlabel(self):
@@ -588,25 +588,25 @@ class CephDiskDevice(object):
 
     @property
     def is_member(self):
-        if self._is_ceph_disk_member is None:
-            if 'ceph' in self.partlabel:
-                self._is_ceph_disk_member = True
+        if self._is_stone_disk_member is None:
+            if 'stone' in self.partlabel:
+                self._is_stone_disk_member = True
                 return True
-            elif self.parttype in ceph_disk_guids.keys():
+            elif self.parttype in stone_disk_guids.keys():
                 return True
             return False
-        return self._is_ceph_disk_member
+        return self._is_stone_disk_member
 
     @property
     def type(self):
         types = [
             'data', 'wal', 'db', 'lockbox', 'journal',
-            # ceph-disk uses 'ceph block' when placing data in bluestore, but
-            # keeps the regular OSD files in 'ceph data' :( :( :( :(
+            # stone-disk uses 'stone block' when placing data in bluestore, but
+            # keeps the regular OSD files in 'stone data' :( :( :( :(
             'block',
         ]
         for t in types:
             if t in self.partlabel:
                 return t
-        label = ceph_disk_guids.get(self.parttype, {})
+        label = stone_disk_guids.get(self.parttype, {})
         return label.get('type', 'unknown').split('.')[-1]

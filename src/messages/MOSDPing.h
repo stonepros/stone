@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,7 +19,7 @@
  * outgoing pings and responses to those. If you set the
  * min_message in the constructor, the message will inflate itself
  * to the specified size -- this is good for dealing with network
- * issues with jumbo frames. See http://tracker.ceph.com/issues/20087
+ * issues with jumbo frames. See http://tracker.stone.com/issues/20087
  *
  */
 
@@ -62,20 +62,20 @@ private:
   epoch_t map_epoch = 0;
   __u8 op = 0;
   utime_t ping_stamp;               ///< when the PING was sent
-  ceph::signedspan mono_ping_stamp; ///< relative to sender's clock
-  ceph::signedspan mono_send_stamp; ///< replier's send stamp
-  std::optional<ceph::signedspan> delta_ub;  ///< ping sender
+  stone::signedspan mono_ping_stamp; ///< relative to sender's clock
+  stone::signedspan mono_send_stamp; ///< replier's send stamp
+  std::optional<stone::signedspan> delta_ub;  ///< ping sender
   epoch_t up_from = 0;
 
   uint32_t min_message_size = 0;
 
   MOSDPing(const uuid_d& f, epoch_t e, __u8 o,
 	   utime_t s,
-	   ceph::signedspan ms,
-	   ceph::signedspan mss,
+	   stone::signedspan ms,
+	   stone::signedspan mss,
 	   epoch_t upf,
 	   uint32_t min_message,
-	   std::optional<ceph::signedspan> delta_ub = {})
+	   std::optional<stone::signedspan> delta_ub = {})
     : Message{MSG_OSD_PING, HEAD_VERSION, COMPAT_VERSION},
       fsid(f), map_epoch(e), op(o),
       ping_stamp(s),
@@ -93,7 +93,7 @@ private:
 
 public:
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(fsid, p);
     decode(map_epoch, p);
@@ -115,7 +115,7 @@ public:
     min_message_size = size + payload_mid_length;
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(fsid, payload);
     encode(map_epoch, payload);
     encode(op, payload);
@@ -139,11 +139,11 @@ public:
       // that at runtime we are only adding a bufferptr reference to it.
       static char zeros[16384] = {};
       while (s > sizeof(zeros)) {
-        payload.append(ceph::buffer::create_static(sizeof(zeros), zeros));
+        payload.append(stone::buffer::create_static(sizeof(zeros), zeros));
         s -= sizeof(zeros);
       }
       if (s) {
-        payload.append(ceph::buffer::create_static(s, zeros));
+        payload.append(stone::buffer::create_static(s, zeros));
       }
     }
   }
@@ -162,7 +162,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

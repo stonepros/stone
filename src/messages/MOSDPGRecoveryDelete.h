@@ -68,7 +68,7 @@ public:
   }
 
   void encode_payload(uint64_t features) {
-    using ceph::encode;
+    using stone::encode;
     encode(from, payload);
     encode(pgid, payload);
     encode(map_epoch, payload);
@@ -77,7 +77,7 @@ public:
     encode(objects, payload);
   }
   void decode_payload() {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(from, p);
     decode(pgid, p);
@@ -88,7 +88,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

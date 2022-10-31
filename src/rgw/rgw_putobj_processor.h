@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2018 Red Hat, Inc.
  *
@@ -37,9 +37,9 @@ class ObjectProcessor : public DataProcessor {
 
   // complete the operation and make its result visible to clients
   virtual int complete(size_t accounted_size, const std::string& etag,
-                       ceph::real_time *mtime, ceph::real_time set_mtime,
+                       stone::real_time *mtime, stone::real_time set_mtime,
                        std::map<std::string, bufferlist>& attrs,
-                       ceph::real_time delete_at,
+                       stone::real_time delete_at,
                        const char *if_match, const char *if_nomatch,
                        const std::string *user_data,
                        rgw_zone_set *zones_trace, bool *canceled,
@@ -201,9 +201,9 @@ class AtomicObjectProcessor : public ManifestObjectProcessor {
   int prepare(optional_yield y) override;
   // write the head object atomically in a bucket index transaction
   int complete(size_t accounted_size, const std::string& etag,
-               ceph::real_time *mtime, ceph::real_time set_mtime,
+               stone::real_time *mtime, stone::real_time set_mtime,
                std::map<std::string, bufferlist>& attrs,
-               ceph::real_time delete_at,
+               stone::real_time delete_at,
                const char *if_match, const char *if_nomatch,
                const std::string *user_data,
                rgw_zone_set *zones_trace, bool *canceled,
@@ -248,9 +248,9 @@ class MultipartObjectProcessor : public ManifestObjectProcessor {
   // write the head object attributes in a bucket index transaction, then
   // register the completed part with the multipart meta object
   int complete(size_t accounted_size, const std::string& etag,
-               ceph::real_time *mtime, ceph::real_time set_mtime,
+               stone::real_time *mtime, stone::real_time set_mtime,
                std::map<std::string, bufferlist>& attrs,
-               ceph::real_time delete_at,
+               stone::real_time delete_at,
                const char *if_match, const char *if_nomatch,
                const std::string *user_data,
                rgw_zone_set *zones_trace, bool *canceled,
@@ -286,8 +286,8 @@ class MultipartObjectProcessor : public ManifestObjectProcessor {
     {}
     int prepare(optional_yield y) override;
     int complete(size_t accounted_size, const string& etag,
-                 ceph::real_time *mtime, ceph::real_time set_mtime,
-                 map<string, bufferlist>& attrs, ceph::real_time delete_at,
+                 stone::real_time *mtime, stone::real_time set_mtime,
+                 map<string, bufferlist>& attrs, stone::real_time delete_at,
                  const char *if_match, const char *if_nomatch, const string *user_data,
                  rgw_zone_set *zones_trace, bool *canceled,
                  optional_yield y) override;

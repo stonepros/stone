@@ -9,7 +9,7 @@
 #include "include/buffer_fwd.h"
 
 namespace crimson {
-  seastar::future<> write_file(ceph::buffer::list&& bl,
+  seastar::future<> write_file(stone::buffer::list&& bl,
                                seastar::sstring fn,
                                seastar::file_permissions= // 0644
                                  (seastar::file_permissions::user_read |

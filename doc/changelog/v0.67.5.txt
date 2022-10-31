@@ -36,7 +36,7 @@ Date:   Mon Jul 22 15:15:38 2013 +0200
 
     rgw: Allow wildcard in supported keystone roles.
     
-    http://tracker.ceph.com/issues/4365 fixes #4365
+    http://tracker.stone.com/issues/4365 fixes #4365
     
     Signed-off-by: Christophe Courtaut <christophe.courtaut@gmail.com>
     (cherry picked from commit 60195581273aee259e8c83d0b471af859d928342)
@@ -149,7 +149,7 @@ Date:   Tue Dec 3 21:51:26 2013 -0800
 
     osd/OSDMonitor: accept 'osd pool set ...' value as string
     
-    Newer monitors take this as a CephString.  Accept that so that if we are
+    Newer monitors take this as a StoneString.  Accept that so that if we are
     mid-upgrade and get a forwarded message using the alternate schema from
     a future mon we will handle it properly.
     
@@ -163,14 +163,14 @@ Date:   Mon Nov 25 13:43:43 2013 -0800
     init, upstart: prevent daemons being started by both
     
     There can be only one init system starting a daemon. If there is a
-    host entry in ceph.conf for a daemon, sysvinit would try to start it
+    host entry in stone.conf for a daemon, sysvinit would try to start it
     even if the daemon's directory did not include a sysvinit file. This
     preserves backwards compatibility with older installs using sysvinit,
     but if an upstart file is present in the daemon's directory, upstart
-    will try to start them, regardless of host entries in ceph.conf.
+    will try to start them, regardless of host entries in stone.conf.
     
     If there's an upstart file in a daemon's directory and a host entry
-    for that daemon in ceph.conf, both sysvinit and upstart would attempt
+    for that daemon in stone.conf, both sysvinit and upstart would attempt
     to manage it.
     
     Fix this by only starting daemons if the marker file for the other
@@ -270,7 +270,7 @@ Date:   Wed Sep 25 09:19:16 2013 -0700
       Store sharded_objects state using CompatSet
       Add set_allow_sharded_objects() and get_allow_sharded_objects() to FileStore/ObjectStore
       Add read_superblock()/write_superblock() internal filestore functions
-    ceph_filestore_dump
+    stone_filestore_dump
       Add OSDsuperblock to export format
       Use CompatSet from OSD code itself in filestore-dump tool
       Always check compatibility of OSD features with on-disk features
@@ -291,7 +291,7 @@ Date:   Wed Sep 25 09:19:16 2013 -0700
     
     Excluded from cherry-pick:
       Didn't add set_allow_sharded_objects() and get_allow_sharded_objects() to FileStore/ObjectStore
-      Didn't add code to check for incomplete transition to sharded objects in ceph-filestore-dump
+      Didn't add code to check for incomplete transition to sharded objects in stone-filestore-dump
 
 commit 372f62717c56d9ab883ae2942e13d6d8d37c2925
 Author: Ray Lv <xiangyulv@gmail.com>
@@ -308,7 +308,7 @@ Merge: 7ef210a f1fa811
 Author: Yehuda Sadeh <yehuda@inktank.com>
 Date:   Tue Nov 5 12:27:42 2013 -0800
 
-    Merge pull request #805 from ceph/wip-rgw-replica-log-dumpling
+    Merge pull request #805 from stone/wip-rgw-replica-log-dumpling
     
     backport a bunch of rgw stuff to dumpling
     
@@ -678,7 +678,7 @@ commit 62db186a19f902b0a23d14034552c83db8de7ece
 Author: Gary Lowell <gary.lowell@inktank.com>
 Date:   Tue Aug 27 09:53:12 2013 -0700
 
-    ceph.spec.in:  radosgw package doesn't require mod_fcgi
+    stone.spec.in:  radosgw package doesn't require mod_fcgi
     
     Fixes #5702
     
@@ -689,13 +689,13 @@ Merge: ad85b8b 67ac3cf
 Author: Gary Lowell <gary.lowell@inktank.com>
 Date:   Fri Oct 4 19:51:32 2013 +0000
 
-    Merge branch 'dumpling' of jenkins:ceph/ceph into dumpling
+    Merge branch 'dumpling' of jenkins:stone/stone into dumpling
 
 commit 67ac3cffa1066030ad840937958bd534e8b26272
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Oct 3 21:47:26 2013 -0700
 
-    ceph_test_rados: do not let rollback race with snap delete
+    stone_test_rados: do not let rollback race with snap delete
     
     Note that the OSD behaves in a weird way when you rollback to a non-
     existent snap, so the test probably isn't the only party at fault here.

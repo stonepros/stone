@@ -24,7 +24,7 @@ struct RGWUploadPartInfo {
   uint64_t size;
   uint64_t accounted_size{0};
   string etag;
-  ceph::real_time modified;
+  stone::real_time modified;
   RGWObjManifest manifest;
   RGWCompressionInfo cs_info;
 
@@ -111,7 +111,7 @@ extern bool is_v2_upload_id(const string& upload_id);
 
 extern int list_multipart_parts(const DoutPrefixProvider *dpp, 
                                 rgw::sal::RGWRadosStore *store, RGWBucketInfo& bucket_info,
-				CephContext *cct,
+				StoneContext *cct,
                                 const string& upload_id,
                                 const string& meta_oid, int num_parts,
                                 int marker, map<uint32_t, RGWUploadPartInfo>& parts,
@@ -126,7 +126,7 @@ extern int list_multipart_parts(const DoutPrefixProvider *dpp,
                                 int *next_marker, bool *truncated,
                                 bool assume_unsorted = false);
 
-extern int abort_multipart_upload(const DoutPrefixProvider *dpp, rgw::sal::RGWRadosStore *store, CephContext *cct, RGWObjectCtx *obj_ctx,
+extern int abort_multipart_upload(const DoutPrefixProvider *dpp, rgw::sal::RGWRadosStore *store, StoneContext *cct, RGWObjectCtx *obj_ctx,
                                 RGWBucketInfo& bucket_info, RGWMPObj& mp_obj);
 
 extern int list_bucket_multiparts(const DoutPrefixProvider* dpp,
@@ -142,6 +142,6 @@ extern int list_bucket_multiparts(const DoutPrefixProvider* dpp,
 
 extern int abort_bucket_multiparts(const DoutPrefixProvider* dpp,
 				   rgw::sal::RGWRadosStore* store,
-				   CephContext* cct,
+				   StoneContext* cct,
 				   RGWBucketInfo& bucket_info);
 #endif

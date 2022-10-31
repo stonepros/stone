@@ -6,12 +6,12 @@ import datetime
 import gevent
 
 from teuthology.orchestra.run import CommandFailedError, Raw
-from tasks.cephfs.cephfs_test_case import CephFSTestCase, for_teuthology
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase, for_teuthology
 
 log = logging.getLogger(__name__)
 
 
-class TestStrays(CephFSTestCase):
+class TestStrays(StoneFSTestCase):
     MDSS_REQUIRED = 2
 
     OPS_THROTTLE = 1
@@ -604,7 +604,7 @@ class TestStrays(CephFSTestCase):
         :param watch_ino: Inode number to look for at destination to confirm move
         :return: None
         """
-        self.mount_a.run_shell(["setfattr", "-n", "ceph.dir.pin", "-v", str(rank), path])
+        self.mount_a.run_shell(["setfattr", "-n", "stone.dir.pin", "-v", str(rank), path])
         rpath = "/"+path
         self._wait_subtrees([(rpath, rank)], rank=rank, path=rpath)
 
@@ -843,7 +843,7 @@ ln dir_1/original dir_2/linkto
         self.fs.mds_asok(["flush", "journal"])
 
         # Wait for purging to complete, which requires the OSDMap to propagate to the OSDs.
-        # See also: http://tracker.ceph.com/issues/20072
+        # See also: http://tracker.stone.com/issues/20072
         self.wait_until_true(
             lambda: self.fs.data_objects_absent(file_a_ino, size_mb * 1024 * 1024),
             timeout=60
@@ -864,7 +864,7 @@ ln dir_1/original dir_2/linkto
         self.mount_a.run_shell(["touch", file_name])
 
         file_layout = "stripe_unit=1048576 stripe_count=4 object_size=8388608"
-        self.mount_a.setfattr(file_name, "ceph.file.layout", file_layout)
+        self.mount_a.setfattr(file_name, "stone.file.layout", file_layout)
 
         # 35MB requires 7 objects
         size_mb = 35

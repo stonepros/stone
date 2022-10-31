@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank Storage, Inc.
  *
@@ -12,8 +12,8 @@
  *
  */
 
-#ifndef CEPH_TRACKEDINTPTR_H
-#define CEPH_TRACKEDINTPTR_H
+#ifndef STONE_TRACKEDINTPTR_H
+#define STONE_TRACKEDINTPTR_H
 
 
 template <class T>
@@ -27,7 +27,7 @@ public:
     if (ptr)
       put_with_id(ptr, id);
     else
-      ceph_assert(id == 0);
+      stone_assert(id == 0);
   }
   void swap(TrackedIntPtr &other) {
     T *optr = other.ptr;

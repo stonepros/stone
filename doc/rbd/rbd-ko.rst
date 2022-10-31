@@ -2,9 +2,9 @@
  Kernel Module Operations
 ==========================
 
-.. index:: Ceph Block Device; kernel module
+.. index:: Stone Block Device; kernel module
 
-.. important:: To use kernel module operations, you must have a running Ceph cluster.
+.. important:: To use kernel module operations, you must have a running Stone cluster.
 
 Get a List of Images
 ====================

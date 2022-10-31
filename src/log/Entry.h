@@ -14,7 +14,7 @@
 
 #include <string_view>
 
-namespace ceph {
+namespace stone {
 namespace logging {
 
 class Entry {

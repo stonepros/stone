@@ -14,7 +14,7 @@ pip install mypy
 
 MYPY_INI="$PWD"/mypy.ini
 
-export MYPYPATH="$PWD/pybind/rados:$PWD/pybind/rbd:$PWD/pybind/cephfs"
+export MYPYPATH="$PWD/pybind/rados:$PWD/pybind/rbd:$PWD/pybind/stonefs"
 
 echo -n > mypy_report.txt
 pushd pybind
@@ -25,8 +25,8 @@ pushd pybind/mgr
 mypy --config-file="$MYPY_INI" $(find * -name '*.py' | grep -v -e venv -e tox -e env -e gyp -e node_modules) | awk '{print "pybind/mgr/" $0}' >> ../../mypy_report.txt
 popd
 
-pushd ceph-volume/ceph_volume
-mypy --config-file="$MYPY_INI" $(find * -name '*.py' | grep -v -e venv -e tox -e env -e gyp -e node_modules -e tests) | awk '{print "ceph-volume/ceph_volume/" $0}' >> ../../mypy_report.txt
+pushd stone-volume/stone_volume
+mypy --config-file="$MYPY_INI" $(find * -name '*.py' | grep -v -e venv -e tox -e env -e gyp -e node_modules -e tests) | awk '{print "stone-volume/stone_volume/" $0}' >> ../../mypy_report.txt
 popd
 
 SORT_MYPY=$(cat <<-EOF

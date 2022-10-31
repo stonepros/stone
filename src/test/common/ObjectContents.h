@@ -60,7 +60,7 @@ public:
     Iterator &operator++() {
       ++pos;
       if (iter != parent->seeds.end() && pos >= iter->first) {
-	ceph_assert(pos == iter->first);
+	stone_assert(pos == iter->first);
 	current_state = iter->second;
 	++iter;
       }
@@ -111,7 +111,7 @@ public:
   }
 
   void encode(bufferlist &bl) const {
-    using ceph::encode;
+    using stone::encode;
     encode(_size, bl);
     encode(seeds, bl);
     encode(written, bl);

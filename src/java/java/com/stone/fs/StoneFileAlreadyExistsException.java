@@ -17,28 +17,28 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.IOException;
 
 /**
- * Ceph file/directory already exists.
+ * Stone file/directory already exists.
  */
-public class CephFileAlreadyExistsException extends IOException {
+public class StoneFileAlreadyExistsException extends IOException {
 
   private static final long serialVersionUID = 1L;
 
   /**
-   * Construct CephFileAlreadyExistsException.
+   * Construct StoneFileAlreadyExistsException.
    */
-  public CephFileAlreadyExistsException() {
+  public StoneFileAlreadyExistsException() {
     super();
   }
 
   /**
-   * Construct CephFileAlreadyExistsException with message.
+   * Construct StoneFileAlreadyExistsException with message.
    */
-  public CephFileAlreadyExistsException(String s) {
+  public StoneFileAlreadyExistsException(String s) {
     super(s);
   }
 }

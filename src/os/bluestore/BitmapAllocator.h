@@ -14,10 +14,10 @@
 
 class BitmapAllocator : public Allocator,
   public AllocatorLevel02<AllocatorLevel01Loose> {
-  CephContext* cct;
+  StoneContext* cct;
 
 public:
-  BitmapAllocator(CephContext* _cct, int64_t capacity, int64_t alloc_unit, const std::string& name);
+  BitmapAllocator(StoneContext* _cct, int64_t capacity, int64_t alloc_unit, const std::string& name);
   ~BitmapAllocator() override
   {
   }

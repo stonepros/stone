@@ -42,7 +42,7 @@ class Onodes {
   ~Onodes() = default;
 
   const onode_t& create(size_t size) {
-    ceph_assert(size <= std::numeric_limits<uint16_t>::max());
+    stone_assert(size <= std::numeric_limits<uint16_t>::max());
     onode_t config{static_cast<uint16_t>(size), id++};
     auto onode = onode_t::allocate(config);
     auto p_onode = onode.get();
@@ -61,11 +61,11 @@ class Onodes {
 
   static void validate_cursor(
       const Btree::Cursor& cursor, const ghobject_t& key, const onode_t& onode) {
-    ceph_assert(!cursor.is_end());
-    ceph_assert(cursor.get_ghobj() == key);
-    ceph_assert(cursor.value());
-    ceph_assert(cursor.value() != &onode);
-    ceph_assert(*cursor.value() == onode);
+    stone_assert(!cursor.is_end());
+    stone_assert(cursor.get_ghobj() == key);
+    stone_assert(cursor.value());
+    stone_assert(cursor.value() != &onode);
+    stone_assert(*cursor.value() == onode);
     onode_t::validate_tail_magic(*cursor.value());
   }
 
@@ -114,12 +114,12 @@ class KVPool {
          const std::pair<unsigned, unsigned>& range1,
          const std::pair<unsigned, unsigned>& range0)
       : str_sizes{str_sizes}, onodes{onode_sizes} {
-    ceph_assert(range2.first < range2.second);
-    ceph_assert(range2.second - 1 <= (unsigned)std::numeric_limits<shard_t>::max());
-    ceph_assert(range2.second - 1 <= std::numeric_limits<crush_hash_t>::max());
-    ceph_assert(range1.first < range1.second);
-    ceph_assert(range1.second - 1 <= 9);
-    ceph_assert(range0.first < range0.second);
+    stone_assert(range2.first < range2.second);
+    stone_assert(range2.second - 1 <= (unsigned)std::numeric_limits<shard_t>::max());
+    stone_assert(range2.second - 1 <= std::numeric_limits<crush_hash_t>::max());
+    stone_assert(range1.first < range1.second);
+    stone_assert(range1.second - 1 <= 9);
+    stone_assert(range0.first < range0.second);
     std::random_device rd;
     for (unsigned i = range2.first; i < range2.second; ++i) {
       for (unsigned j = range1.first; j < range1.second; ++j) {
@@ -246,8 +246,8 @@ class TreeBuilder {
         Onodes::validate_cursor(cursor, key, *p_value);
         return tree->lower_bound(t, key).safe_then([this, cursor](auto cursor_) {
           auto [key, p_value] = kv_iter.get_kv();
-          ceph_assert(cursor_.get_ghobj() == key);
-          ceph_assert(cursor_.value() == cursor.value());
+          stone_assert(cursor_.get_ghobj() == key);
+          stone_assert(cursor_.value() == cursor.value());
           ++kv_iter;
           return ertr::make_ready_future<bool>(false);
         });
@@ -322,7 +322,7 @@ class TreeBuilder {
 
  private:
   static seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 
   KVPool& kvs;

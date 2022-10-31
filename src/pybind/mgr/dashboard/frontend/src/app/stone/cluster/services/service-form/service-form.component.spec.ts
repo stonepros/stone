@@ -8,7 +8,7 @@ import { NgbActiveModal, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import _ from 'lodash';
 import { ToastrModule } from 'ngx-toastr';
 
-import { CephServiceService } from '~/app/shared/api/ceph-service.service';
+import { StoneServiceService } from '~/app/shared/api/stone-service.service';
 import { CdFormGroup } from '~/app/shared/forms/cd-form-group';
 import { SharedModule } from '~/app/shared/shared.module';
 import { configureTestBed, FormHelper } from '~/testing/unit-test-helper';
@@ -17,7 +17,7 @@ import { ServiceFormComponent } from './service-form.component';
 describe('ServiceFormComponent', () => {
   let component: ServiceFormComponent;
   let fixture: ComponentFixture<ServiceFormComponent>;
-  let cephServiceService: CephServiceService;
+  let stoneServiceService: StoneServiceService;
   let form: CdFormGroup;
   let formHelper: FormHelper;
 
@@ -49,8 +49,8 @@ describe('ServiceFormComponent', () => {
 
   describe('should test form', () => {
     beforeEach(() => {
-      cephServiceService = TestBed.inject(CephServiceService);
-      spyOn(cephServiceService, 'create').and.stub();
+      stoneServiceService = TestBed.inject(StoneServiceService);
+      spyOn(stoneServiceService, 'create').and.stub();
     });
 
     it('should test placement (host)', () => {
@@ -59,7 +59,7 @@ describe('ServiceFormComponent', () => {
       formHelper.setValue('hosts', ['mgr0', 'mon0', 'osd0']);
       formHelper.setValue('count', 2);
       component.onSubmit();
-      expect(cephServiceService.create).toHaveBeenCalledWith({
+      expect(stoneServiceService.create).toHaveBeenCalledWith({
         service_type: 'crash',
         placement: {
           hosts: ['mgr0', 'mon0', 'osd0'],
@@ -74,7 +74,7 @@ describe('ServiceFormComponent', () => {
       formHelper.setValue('placement', 'label');
       formHelper.setValue('label', 'foo');
       component.onSubmit();
-      expect(cephServiceService.create).toHaveBeenCalledWith({
+      expect(stoneServiceService.create).toHaveBeenCalledWith({
         service_type: 'mgr',
         placement: {
           label: 'foo'
@@ -108,7 +108,7 @@ describe('ServiceFormComponent', () => {
       formHelper.setValue('label', 'bar');
       formHelper.setValue('unmanaged', true);
       component.onSubmit();
-      expect(cephServiceService.create).toHaveBeenCalledWith({
+      expect(stoneServiceService.create).toHaveBeenCalledWith({
         service_type: 'mgr',
         service_id: 'svc',
         placement: {},
@@ -132,7 +132,7 @@ describe('ServiceFormComponent', () => {
         (serviceType) => {
           formHelper.setValue('service_type', serviceType);
           component.onSubmit();
-          expect(cephServiceService.create).toHaveBeenCalledWith({
+          expect(stoneServiceService.create).toHaveBeenCalledWith({
             service_type: serviceType,
             placement: {},
             unmanaged: false
@@ -148,7 +148,7 @@ describe('ServiceFormComponent', () => {
 
       it('should submit nfs', () => {
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'nfs',
           placement: {},
           unmanaged: false
@@ -187,7 +187,7 @@ describe('ServiceFormComponent', () => {
       it('should submit rgw with realm and zone', () => {
         formHelper.setValue('service_id', 'svc.my-realm.my-zone');
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'rgw',
           service_id: 'svc',
           rgw_realm: 'my-realm',
@@ -202,7 +202,7 @@ describe('ServiceFormComponent', () => {
         formHelper.setValue('rgw_frontend_port', 1234);
         formHelper.setValue('ssl', true);
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'rgw',
           service_id: 'svc',
           placement: {},
@@ -246,7 +246,7 @@ describe('ServiceFormComponent', () => {
       it('should submit rgw w/o port', () => {
         formHelper.setValue('ssl', false);
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'rgw',
           service_id: 'svc',
           placement: {},
@@ -291,7 +291,7 @@ x4Ea7kGVgx9kWh5XjWz9wjZvY49UKIT5ppIAWPMbLl3UpfckiuNhTA==
 
       it('should submit iscsi', () => {
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'iscsi',
           placement: {},
           unmanaged: false,
@@ -306,7 +306,7 @@ x4Ea7kGVgx9kWh5XjWz9wjZvY49UKIT5ppIAWPMbLl3UpfckiuNhTA==
         formHelper.setValue('ssl', true);
         formHelper.setValue('trusted_ip_list', ' 172.16.0.5, 192.1.1.10  ');
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'iscsi',
           placement: {},
           unmanaged: false,
@@ -323,7 +323,7 @@ x4Ea7kGVgx9kWh5XjWz9wjZvY49UKIT5ppIAWPMbLl3UpfckiuNhTA==
       it('should submit iscsi with port', () => {
         formHelper.setValue('api_port', 456);
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'iscsi',
           placement: {},
           unmanaged: false,
@@ -380,7 +380,7 @@ x4Ea7kGVgx9kWh5XjWz9wjZvY49UKIT5ppIAWPMbLl3UpfckiuNhTA==
 
       it('should submit ingress', () => {
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'ingress',
           placement: {},
           unmanaged: false,
@@ -448,7 +448,7 @@ x4Ea7kGVgx9kWh5XjWz9wjZvY49UKIT5ppIAWPMbLl3UpfckiuNhTA==
         formHelper.setValue('snmp_version', 'V2c');
         formHelper.setValue('snmp_community', 'public');
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'snmp-gateway',
           placement: {},
           unmanaged: false,
@@ -469,7 +469,7 @@ x4Ea7kGVgx9kWh5XjWz9wjZvY49UKIT5ppIAWPMbLl3UpfckiuNhTA==
         formHelper.setValue('snmp_v3_auth_password', 'testpass');
         formHelper.setValue('snmp_v3_priv_password', 'testencrypt');
         component.onSubmit();
-        expect(cephServiceService.create).toHaveBeenCalledWith({
+        expect(stoneServiceService.create).toHaveBeenCalledWith({
           service_type: 'snmp-gateway',
           placement: {},
           unmanaged: false,
@@ -512,9 +512,9 @@ x4Ea7kGVgx9kWh5XjWz9wjZvY49UKIT5ppIAWPMbLl3UpfckiuNhTA==
       });
 
       it('should check whether edit field is correctly loaded', () => {
-        const cephServiceSpy = spyOn(cephServiceService, 'list').and.callThrough();
+        const stoneServiceSpy = spyOn(stoneServiceService, 'list').and.callThrough();
         component.ngOnInit();
-        expect(cephServiceSpy).toBeCalledTimes(2);
+        expect(stoneServiceSpy).toBeCalledTimes(2);
         expect(component.action).toBe('Edit');
         const serviceType = fixture.debugElement.query(By.css('#service_type')).nativeElement;
         const serviceId = fixture.debugElement.query(By.css('#service_id')).nativeElement;

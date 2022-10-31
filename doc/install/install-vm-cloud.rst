@@ -2,7 +2,7 @@
  Install Virtualization for Block Device
 =========================================
 
-If you intend to use Ceph Block Devices and the Ceph Storage Cluster as a
+If you intend to use Stone Block Devices and the Stone Storage Cluster as a
 backend for Virtual Machines (VMs) or  :term:`Cloud Platforms` the QEMU/KVM and
 ``libvirt`` packages are important for enabling VMs and cloud platforms.
 Examples of VMs include: QEMU/KVM, XEN, VMWare, LXC, VirtualBox, etc. Examples
@@ -31,8 +31,8 @@ of Cloud Platforms include OpenStack, CloudStack, OpenNebula, etc.
 Install QEMU
 ============
 
-QEMU KVM can interact with Ceph Block Devices via ``librbd``, which is an
-important feature for using Ceph with cloud platforms. Once you install QEMU,
+QEMU KVM can interact with Stone Block Devices via ``librbd``, which is an
+important feature for using Stone with cloud platforms. Once you install QEMU,
 see `QEMU and Block Devices`_ for usage.
 
 
@@ -55,7 +55,7 @@ To install QEMU, execute the following:
 
 	sudo yum update
 
-#. Install QEMU for Ceph. ::
+#. Install QEMU for Stone. ::
 
 	sudo yum install qemu-kvm qemu-kvm-tools qemu-img
 
@@ -80,8 +80,8 @@ To build QEMU from source, use the following procedure::
 Install libvirt
 ===============
 
-To use ``libvirt`` with Ceph, you must have a running Ceph Storage Cluster, and
-you must have installed and configured QEMU. See `Using libvirt with Ceph Block
+To use ``libvirt`` with Stone, you must have a running Stone Storage Cluster, and
+you must have installed and configured QEMU. See `Using libvirt with Stone Block
 Device`_ for usage.
 
 
@@ -98,7 +98,7 @@ execute the following::
 RPM Packages
 ------------
 
-To use ``libvirt`` with a Ceph Storage Cluster, you must  have a running Ceph
+To use ``libvirt`` with a Stone Storage Cluster, you must  have a running Stone
 Storage Cluster and you must also install a version of QEMU with ``rbd`` format
 support.  See `Install QEMU`_ for details.
 
@@ -129,4 +129,4 @@ See `libvirt Installation`_ for details.
 .. _libvirt Installation: http://www.libvirt.org/compiling.html
 .. _AutoGen: http://www.gnu.org/software/autogen/
 .. _QEMU and Block Devices: ../../rbd/qemu-rbd
-.. _Using libvirt with Ceph Block Device: ../../rbd/libvirt
+.. _Using libvirt with Stone Block Device: ../../rbd/libvirt

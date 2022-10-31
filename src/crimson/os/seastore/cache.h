@@ -491,7 +491,7 @@ private:
   /// alloc buffer for cached extent
   bufferptr alloc_cache_buf(size_t size) {
     // TODO: memory pooling etc
-    auto bp = ceph::bufferptr(
+    auto bp = stone::bufferptr(
       buffer::create_page_aligned(size));
     bp.zero();
     return bp;

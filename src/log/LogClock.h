@@ -9,14 +9,14 @@
 #include <ctime>
 #include <sys/time.h>
 
-#include "include/ceph_assert.h"
-#include "common/ceph_time.h"
+#include "include/stone_assert.h"
+#include "common/stone_time.h"
 
 #ifndef suseconds_t
 typedef long suseconds_t;
 #endif
 
-namespace ceph {
+namespace stone {
 namespace logging {
 namespace _logclock {
 // Because the underlying representations of a duration can be any
@@ -159,7 +159,7 @@ inline int append_time(const log_time& t, char *out, int outlen) {
   }
   // Since our caller just adds the return value to something without
   // checking it…
-  ceph_assert(r >= 0);
+  stone_assert(r >= 0);
   return r;
 }
 }

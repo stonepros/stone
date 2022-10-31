@@ -1,10 +1,10 @@
 
 from textwrap import dedent
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
-from tasks.cephfs.filesystem import ObjectNotFound, ROOT_INO
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
+from tasks.stonefs.filesystem import ObjectNotFound, ROOT_INO
 
 
-class TestFlush(CephFSTestCase):
+class TestFlush(StoneFSTestCase):
     def test_flush(self):
         self.mount_a.run_shell(["mkdir", "mydir"])
         self.mount_a.run_shell(["touch", "mydir/alpha"])

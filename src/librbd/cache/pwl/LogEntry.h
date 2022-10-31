@@ -4,7 +4,7 @@
 #ifndef STONE_LIBRBD_CACHE_PWL_LOG_ENTRY_H
 #define STONE_LIBRBD_CACHE_PWL_LOG_ENTRY_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "librbd/Utils.h"
 #include "librbd/cache/pwl/Types.h"
 #include <atomic>
@@ -41,7 +41,7 @@ public:
     return false;
   }
   virtual void set_flushed(bool flushed) {
-    ceph_assert(false);
+    stone_assert(false);
   }
   virtual unsigned int write_bytes() const {
     return 0;
@@ -54,11 +54,11 @@ public:
   }
   virtual void writeback(librbd::cache::ImageWritebackInterface &image_writeback,
                          Context *ctx) {
-    ceph_assert(false);
+    stone_assert(false);
   };
   virtual void writeback_bl(librbd::cache::ImageWritebackInterface &image_writeback,
-                 Context *ctx, ceph::bufferlist &&bl) {
-    ceph_assert(false);
+                 Context *ctx, stone::bufferlist &&bl) {
+    stone_assert(false);
   }
   virtual bool is_write_entry() const {
     return false;
@@ -163,7 +163,7 @@ protected:
   buffer::list cache_bl;
   std::atomic<int> bl_refs = {0}; /* The refs held on cache_bp by cache_bl */
   /* Used in WriteLogEntry::get_cache_bl() to syncronize between threads making entries readable */
-  mutable ceph::mutex m_entry_bl_lock;
+  mutable stone::mutex m_entry_bl_lock;
 
   virtual void init_cache_bp() {}
 
@@ -173,12 +173,12 @@ public:
   WriteLogEntry(std::shared_ptr<SyncPointLogEntry> sync_point_entry,
                 uint64_t image_offset_bytes, uint64_t write_bytes)
     : GenericWriteLogEntry(sync_point_entry, image_offset_bytes, write_bytes),
-      m_entry_bl_lock(ceph::make_mutex(pwl::unique_lock_name(
+      m_entry_bl_lock(stone::make_mutex(pwl::unique_lock_name(
         "librbd::cache::pwl::WriteLogEntry::m_entry_bl_lock", this)))
   { }
   WriteLogEntry(uint64_t image_offset_bytes, uint64_t write_bytes)
     : GenericWriteLogEntry(nullptr, image_offset_bytes, write_bytes),
-      m_entry_bl_lock(ceph::make_mutex(pwl::unique_lock_name(
+      m_entry_bl_lock(stone::make_mutex(pwl::unique_lock_name(
         "librbd::cache::pwl::WriteLogEntry::m_entry_bl_lock", this)))
   { }
   WriteLogEntry(std::shared_ptr<SyncPointLogEntry> sync_point_entry,
@@ -261,7 +261,7 @@ public:
     return this->completed;
   }
   void copy_cache_bl(bufferlist *out_bl) override {
-    ceph_assert(false);
+    stone_assert(false);
   }
   void writeback(librbd::cache::ImageWritebackInterface &image_writeback,
                  Context *ctx) override;

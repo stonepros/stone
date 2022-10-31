@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 John Spray <john.spray@inktank.com>
  *
@@ -37,9 +37,9 @@ protected:
   Messenger *messenger;
   MonClient *monc;
 
-  ceph::mutex lock = ceph::make_mutex("MDSUtility::lock");
+  stone::mutex lock = stone::make_mutex("MDSUtility::lock");
   Finisher finisher;
-  ceph::async::io_context_pool poolctx;
+  stone::async::io_context_pool poolctx;
 
   Context *waiting_for_mds_map;
 

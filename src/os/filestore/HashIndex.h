@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -82,9 +82,9 @@ private:
 
     subdir_info_s() : objs(0), subdirs(0), hash_level(0) {}
 
-    void encode(ceph::buffer::list &bl) const
+    void encode(stone::buffer::list &bl) const
     {
-      using ceph::encode;
+      using stone::encode;
       __u8 v = 1;
       encode(v, bl);
       encode(objs, bl);
@@ -92,12 +92,12 @@ private:
       encode(hash_level, bl);
     }
 
-    void decode(ceph::buffer::list::const_iterator &bl)
+    void decode(stone::buffer::list::const_iterator &bl)
     {
-      using ceph::decode;
+      using stone::decode;
       __u8 v;
       decode(v, bl);
-      ceph_assert(v == 1);
+      stone_assert(v == 1);
       decode(objs, bl);
       decode(subdirs, bl);
       decode(hash_level, bl);
@@ -107,16 +107,16 @@ private:
   struct settings_s {
     uint32_t split_rand_factor; ///< random factor added to split threshold (only on root of collection)
     settings_s() : split_rand_factor(0) {}
-    void encode(ceph::buffer::list &bl) const
+    void encode(stone::buffer::list &bl) const
     {
-      using ceph::encode;
+      using stone::encode;
       __u8 v = 1;
       encode(v, bl);
       encode(split_rand_factor, bl);
     }
-    void decode(ceph::buffer::list::const_iterator &bl)
+    void decode(stone::buffer::list::const_iterator &bl)
     {
-      using ceph::decode;
+      using stone::decode;
       __u8 v;
       decode(v, bl);
       decode(split_rand_factor, bl);
@@ -134,7 +134,7 @@ private:
     InProgressOp(int op, const std::vector<std::string> &path)
       : op(op), path(path) {}
 
-    explicit InProgressOp(ceph::buffer::list::const_iterator &bl) {
+    explicit InProgressOp(stone::buffer::list::const_iterator &bl) {
       decode(bl);
     }
 
@@ -142,19 +142,19 @@ private:
     bool is_col_split() const { return op == COL_SPLIT; }
     bool is_merge() const { return op == MERGE; }
 
-    void encode(ceph::buffer::list &bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list &bl) const {
+      using stone::encode;
       __u8 v = 1;
       encode(v, bl);
       encode(op, bl);
       encode(path, bl);
     }
 
-    void decode(ceph::buffer::list::const_iterator &bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator &bl) {
+      using stone::decode;
       __u8 v;
       decode(v, bl);
-      ceph_assert(v == 1);
+      stone_assert(v == 1);
       decode(op, bl);
       decode(path, bl);
     }
@@ -164,7 +164,7 @@ private:
 public:
   /// Constructor.
   HashIndex(
-    CephContext* cct,
+    StoneContext* cct,
     coll_t collection,     ///< [in] Collection
     const char *base_path, ///< [in] Path to the index root.
     int merge_at,          ///< [in] Merge threshold.
@@ -395,7 +395,7 @@ private:
 
   /// Convert a number to hex std::string (upper case).
   static std::string to_hex(int n) {
-    ceph_assert(n >= 0 && n < 16);
+    stone_assert(n >= 0 && n < 16);
     char c = (n <= 9 ? ('0' + n) : ('A' + n - 10));
     std::string str;
     str.append(1, c);

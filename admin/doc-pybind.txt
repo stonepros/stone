@@ -1,4 +1,4 @@
 src/pybind/rados
-src/pybind/cephfs
+src/pybind/stonefs
 src/pybind/rbd
 src/pybind/rgw

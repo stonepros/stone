@@ -48,13 +48,13 @@ from pathlib import Path
 FuncT = TypeVar('FuncT', bound=Callable)
 
 # Default container images -----------------------------------------------------
-DEFAULT_IMAGE = 'quay.io/ceph/ceph:v16'
+DEFAULT_IMAGE = 'quay.io/stone/stone:v16'
 DEFAULT_IMAGE_IS_MASTER = False
 DEFAULT_IMAGE_RELEASE = 'pacific'
 DEFAULT_PROMETHEUS_IMAGE = 'quay.io/prometheus/prometheus:v2.33.4'
 DEFAULT_NODE_EXPORTER_IMAGE = 'quay.io/prometheus/node-exporter:v1.3.1'
 DEFAULT_ALERT_MANAGER_IMAGE = 'quay.io/prometheus/alertmanager:v0.23.0'
-DEFAULT_GRAFANA_IMAGE = 'quay.io/ceph/ceph-grafana:8.3.5'
+DEFAULT_GRAFANA_IMAGE = 'quay.io/stone/stone-grafana:8.3.5'
 DEFAULT_HAPROXY_IMAGE = 'docker.io/library/haproxy:2.3'
 DEFAULT_KEEPALIVED_IMAGE = 'docker.io/arcts/keepalived'
 DEFAULT_SNMP_GATEWAY_IMAGE = 'docker.io/maxwo/snmp-notifier:v1.2.1'
@@ -62,9 +62,9 @@ DEFAULT_REGISTRY = 'docker.io'   # normalize unqualified digests to this
 # ------------------------------------------------------------------------------
 
 LATEST_STABLE_RELEASE = 'pacific'
-DATA_DIR = '/var/lib/ceph'
-LOG_DIR = '/var/log/ceph'
-LOCK_DIR = '/run/cephadm'
+DATA_DIR = '/var/lib/stone'
+LOG_DIR = '/var/log/stone'
+LOCK_DIR = '/run/stoneadm'
 LOGROTATE_DIR = '/etc/logrotate.d'
 SYSCTL_DIR = '/etc/sysctl.d'
 UNIT_DIR = '/etc/systemd/system'
@@ -73,17 +73,17 @@ DATA_DIR_MODE = 0o700
 CONTAINER_INIT = True
 MIN_PODMAN_VERSION = (2, 0, 2)
 CGROUPS_SPLIT_PODMAN_VERSION = (2, 1, 0)
-CUSTOM_PS1 = r'[ceph: \u@\h \W]\$ '
+CUSTOM_PS1 = r'[stone: \u@\h \W]\$ '
 DEFAULT_TIMEOUT = None  # in seconds
 DEFAULT_RETRY = 15
-SHELL_DEFAULT_CONF = '/etc/ceph/ceph.conf'
-SHELL_DEFAULT_KEYRING = '/etc/ceph/ceph.client.admin.keyring'
+SHELL_DEFAULT_CONF = '/etc/stone/stone.conf'
+SHELL_DEFAULT_KEYRING = '/etc/stone/stone.client.admin.keyring'
 DATEFMT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 logger: logging.Logger = None  # type: ignore
 
 """
-You can invoke cephadm in two ways:
+You can invoke stoneadm in two ways:
 
 1. The normal way, at the command line.
 
@@ -134,7 +134,7 @@ class BaseConfig:
                 setattr(self, k, v)
 
 
-class CephadmContext:
+class StoneadmContext:
 
     def __init__(self) -> None:
         self.__dict__['_args'] = None
@@ -193,7 +193,7 @@ class Podman(ContainerEngine):
             raise RuntimeError('Please call `get_version` first')
         return self._version
 
-    def get_version(self, ctx: CephadmContext) -> None:
+    def get_version(self, ctx: StoneadmContext) -> None:
         out, _, _ = call_throws(ctx, [self.path, 'version', '--format', '{{.Client.Version}}'])
         self._version = _parse_podman_version(out)
 
@@ -214,7 +214,7 @@ logging_config = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
-        'cephadm': {
+        'stoneadm': {
             'format': '%(asctime)s %(thread)x %(levelname)s %(message)s'
         },
     },
@@ -226,8 +226,8 @@ logging_config = {
         'log_file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.WatchedFileHandler',
-            'formatter': 'cephadm',
-            'filename': '%s/cephadm.log' % LOG_DIR,
+            'formatter': 'stoneadm',
+            'filename': '%s/stoneadm.log' % LOG_DIR,
         }
     },
     'loggers': {
@@ -259,9 +259,9 @@ class UnauthorizedRegistryError(Error):
 ##################################
 
 
-class Ceph(object):
+class Stone(object):
     daemons = ('mon', 'mgr', 'mds', 'osd', 'rgw', 'rbd-mirror',
-               'crash', 'cephfs-mirror')
+               'crash', 'stonefs-mirror')
 
 ##################################
 
@@ -288,7 +288,7 @@ class SNMPGateway:
     env_filename = 'snmp-gateway.conf'
 
     def __init__(self,
-                 ctx: CephadmContext,
+                 ctx: StoneadmContext,
                  fsid: str,
                  daemon_id: Union[int, str],
                  config_json: Dict[str, Any],
@@ -315,14 +315,14 @@ class SNMPGateway:
         self.validate()
 
     @classmethod
-    def init(cls, ctx: CephadmContext, fsid: str,
+    def init(cls, ctx: StoneadmContext, fsid: str,
              daemon_id: Union[int, str]) -> 'SNMPGateway':
         assert ctx.config_json
         return cls(ctx, fsid, daemon_id,
                    get_parm(ctx.config_json), ctx.image)
 
     @staticmethod
-    def get_version(ctx: CephadmContext, fsid: str, daemon_id: str) -> Optional[str]:
+    def get_version(ctx: StoneadmContext, fsid: str, daemon_id: str) -> Optional[str]:
         """Return the version of the notifer from it's http endpoint"""
         path = os.path.join(ctx.data_dir, fsid, f'snmp-gateway.{daemon_id}', 'unit.meta')
         try:
@@ -462,7 +462,7 @@ class Monitoring(object):
             'args': [],
             'config-json-files': [
                 'grafana.ini',
-                'provisioning/datasources/ceph-dashboard.yml',
+                'provisioning/datasources/stone-dashboard.yml',
                 'certs/cert_file',
                 'certs/cert_key',
             ],
@@ -485,7 +485,7 @@ class Monitoring(object):
 
     @staticmethod
     def get_version(ctx, container_id, daemon_type):
-        # type: (CephadmContext, str, str) -> str
+        # type: (StoneadmContext, str, str) -> str
         """
         :param: daemon_type Either "prometheus", "alertmanager" or "node-exporter"
         """
@@ -547,7 +547,7 @@ class NFSGanesha(object):
                  daemon_id,
                  config_json,
                  image=DEFAULT_IMAGE):
-        # type: (CephadmContext, str, Union[int, str], Dict, str) -> None
+        # type: (StoneadmContext, str, Union[int, str], Dict, str) -> None
         self.ctx = ctx
         self.fsid = fsid
         self.daemon_id = daemon_id
@@ -566,33 +566,33 @@ class NFSGanesha(object):
 
     @classmethod
     def init(cls, ctx, fsid, daemon_id):
-        # type: (CephadmContext, str, Union[int, str]) -> NFSGanesha
+        # type: (StoneadmContext, str, Union[int, str]) -> NFSGanesha
         return cls(ctx, fsid, daemon_id, get_parm(ctx.config_json), ctx.image)
 
     def get_container_mounts(self, data_dir):
         # type: (str) -> Dict[str, str]
         mounts = dict()
-        mounts[os.path.join(data_dir, 'config')] = '/etc/ceph/ceph.conf:z'
-        mounts[os.path.join(data_dir, 'keyring')] = '/etc/ceph/keyring:z'
+        mounts[os.path.join(data_dir, 'config')] = '/etc/stone/stone.conf:z'
+        mounts[os.path.join(data_dir, 'keyring')] = '/etc/stone/keyring:z'
         mounts[os.path.join(data_dir, 'etc/ganesha')] = '/etc/ganesha:z'
         if self.rgw:
-            cluster = self.rgw.get('cluster', 'ceph')
+            cluster = self.rgw.get('cluster', 'stone')
             rgw_user = self.rgw.get('user', 'admin')
             mounts[os.path.join(data_dir, 'keyring.rgw')] = \
-                '/var/lib/ceph/radosgw/%s-%s/keyring:z' % (cluster, rgw_user)
+                '/var/lib/stone/radosgw/%s-%s/keyring:z' % (cluster, rgw_user)
         return mounts
 
     @staticmethod
     def get_container_envs():
         # type: () -> List[str]
         envs = [
-            'CEPH_CONF=%s' % ('/etc/ceph/ceph.conf')
+            'STONE_CONF=%s' % ('/etc/stone/stone.conf')
         ]
         return envs
 
     @staticmethod
     def get_version(ctx, container_id):
-        # type: (CephadmContext, str) -> Optional[str]
+        # type: (StoneadmContext, str) -> Optional[str]
         version = None
         out, err, code = call(ctx,
                               [ctx.container_engine.path, 'exec', container_id,
@@ -632,7 +632,7 @@ class NFSGanesha(object):
 
     def get_container_name(self, desc=None):
         # type: (Optional[str]) -> str
-        cname = 'ceph-%s-%s' % (self.fsid, self.get_daemon_name())
+        cname = 'stone-%s-%s' % (self.fsid, self.get_daemon_name())
         if desc:
             cname = '%s-%s' % (cname, desc)
         return cname
@@ -667,8 +667,8 @@ class NFSGanesha(object):
 ##################################
 
 
-class CephIscsi(object):
-    """Defines a Ceph-Iscsi container"""
+class StoneIscsi(object):
+    """Defines a Stone-Iscsi container"""
 
     daemon_type = 'iscsi'
     entrypoint = '/usr/bin/rbd-target-api'
@@ -681,7 +681,7 @@ class CephIscsi(object):
                  daemon_id,
                  config_json,
                  image=DEFAULT_IMAGE):
-        # type: (CephadmContext, str, Union[int, str], Dict, str) -> None
+        # type: (StoneadmContext, str, Union[int, str], Dict, str) -> None
         self.ctx = ctx
         self.fsid = fsid
         self.daemon_id = daemon_id
@@ -695,7 +695,7 @@ class CephIscsi(object):
 
     @classmethod
     def init(cls, ctx, fsid, daemon_id):
-        # type: (CephadmContext, str, Union[int, str]) -> CephIscsi
+        # type: (StoneadmContext, str, Union[int, str]) -> StoneIscsi
         return cls(ctx, fsid, daemon_id,
                    get_parm(ctx.config_json), ctx.image)
 
@@ -703,9 +703,9 @@ class CephIscsi(object):
     def get_container_mounts(data_dir, log_dir):
         # type: (str, str) -> Dict[str, str]
         mounts = dict()
-        mounts[os.path.join(data_dir, 'config')] = '/etc/ceph/ceph.conf:z'
-        mounts[os.path.join(data_dir, 'keyring')] = '/etc/ceph/keyring:z'
-        mounts[os.path.join(data_dir, 'iscsi-gateway.cfg')] = '/etc/ceph/iscsi-gateway.cfg:z'
+        mounts[os.path.join(data_dir, 'config')] = '/etc/stone/stone.conf:z'
+        mounts[os.path.join(data_dir, 'keyring')] = '/etc/stone/keyring:z'
+        mounts[os.path.join(data_dir, 'iscsi-gateway.cfg')] = '/etc/stone/iscsi-gateway.cfg:z'
         mounts[os.path.join(data_dir, 'configfs')] = '/sys/kernel/config'
         mounts[log_dir] = '/var/log:z'
         mounts['/dev'] = '/dev'
@@ -724,11 +724,11 @@ class CephIscsi(object):
 
     @staticmethod
     def get_version(ctx, container_id):
-        # type: (CephadmContext, str) -> Optional[str]
+        # type: (StoneadmContext, str) -> Optional[str]
         version = None
         out, err, code = call(ctx,
                               [ctx.container_engine.path, 'exec', container_id,
-                               '/usr/bin/python3', '-c', "import pkg_resources; print(pkg_resources.require('ceph_iscsi')[0].version)"],
+                               '/usr/bin/python3', '-c', "import pkg_resources; print(pkg_resources.require('stone_iscsi')[0].version)"],
                               verbosity=CallVerbosity.DEBUG)
         if code == 0:
             version = out.strip()
@@ -755,7 +755,7 @@ class CephIscsi(object):
 
     def get_container_name(self, desc=None):
         # type: (Optional[str]) -> str
-        cname = 'ceph-%s-%s' % (self.fsid, self.get_daemon_name())
+        cname = 'stone-%s-%s' % (self.fsid, self.get_daemon_name())
         if desc:
             cname = '%s-%s' % (cname, desc)
         return cname
@@ -766,7 +766,7 @@ class CephIscsi(object):
         if not os.path.isdir(data_dir):
             raise OSError('data_dir is not a directory: %s' % (data_dir))
 
-        logger.info('Creating ceph-iscsi config...')
+        logger.info('Creating stone-iscsi config...')
         configfs_dir = os.path.join(data_dir, 'configfs')
         makedirs(configfs_dir, uid, gid, 0o755)
 
@@ -786,7 +786,7 @@ class CephIscsi(object):
         return cmd.split()
 
     def get_tcmu_runner_container(self):
-        # type: () -> CephContainer
+        # type: () -> StoneContainer
         tcmu_container = get_container(self.ctx, self.fsid, self.daemon_type, self.daemon_id)
         tcmu_container.entrypoint = '/usr/bin/tcmu-runner'
         tcmu_container.cname = self.get_container_name(desc='tcmu')
@@ -805,7 +805,7 @@ class HAproxy(object):
     default_image = DEFAULT_HAPROXY_IMAGE
 
     def __init__(self,
-                 ctx: CephadmContext,
+                 ctx: StoneadmContext,
                  fsid: str, daemon_id: Union[int, str],
                  config_json: Dict, image: str) -> None:
         self.ctx = ctx
@@ -819,7 +819,7 @@ class HAproxy(object):
         self.validate()
 
     @classmethod
-    def init(cls, ctx: CephadmContext,
+    def init(cls, ctx: StoneadmContext,
              fsid: str, daemon_id: Union[int, str]) -> 'HAproxy':
         return cls(ctx, fsid, daemon_id, get_parm(ctx.config_json),
                    ctx.image)
@@ -860,7 +860,7 @@ class HAproxy(object):
 
     def get_container_name(self, desc=None):
         # type: (Optional[str]) -> str
-        cname = 'ceph-%s-%s' % (self.fsid, self.get_daemon_name())
+        cname = 'stone-%s-%s' % (self.fsid, self.get_daemon_name())
         if desc:
             cname = '%s-%s' % (cname, desc)
         return cname
@@ -892,7 +892,7 @@ class Keepalived(object):
     default_image = DEFAULT_KEEPALIVED_IMAGE
 
     def __init__(self,
-                 ctx: CephadmContext,
+                 ctx: StoneadmContext,
                  fsid: str, daemon_id: Union[int, str],
                  config_json: Dict, image: str) -> None:
         self.ctx = ctx
@@ -906,7 +906,7 @@ class Keepalived(object):
         self.validate()
 
     @classmethod
-    def init(cls, ctx: CephadmContext, fsid: str,
+    def init(cls, ctx: StoneadmContext, fsid: str,
              daemon_id: Union[int, str]) -> 'Keepalived':
         return cls(ctx, fsid, daemon_id,
                    get_parm(ctx.config_json), ctx.image)
@@ -944,7 +944,7 @@ class Keepalived(object):
 
     def get_container_name(self, desc=None):
         # type: (Optional[str]) -> str
-        cname = 'ceph-%s-%s' % (self.fsid, self.get_daemon_name())
+        cname = 'stone-%s-%s' % (self.fsid, self.get_daemon_name())
         if desc:
             cname = '%s-%s' % (cname, desc)
         return cname
@@ -1006,7 +1006,7 @@ class CustomContainer(object):
         self.files = dict_get(config_json, 'files', {})
 
     @classmethod
-    def init(cls, ctx: CephadmContext,
+    def init(cls, ctx: StoneadmContext,
              fsid: str, daemon_id: Union[int, str]) -> 'CustomContainer':
         return cls(fsid, daemon_id,
                    get_parm(ctx.config_json), ctx.image)
@@ -1047,7 +1047,7 @@ class CustomContainer(object):
     def get_container_mounts(self, data_dir: str) -> Dict[str, str]:
         """
         Get the volume mounts. Relative source paths will be located below
-        `/var/lib/ceph/<cluster-fsid>/<daemon-name>`.
+        `/var/lib/stone/<cluster-fsid>/<daemon-name>`.
 
         Example:
         {
@@ -1057,7 +1057,7 @@ class CustomContainer(object):
         becomes
         {
             /foo/conf: /conf
-            /var/lib/ceph/<cluster-fsid>/<daemon-name>/foo/conf: /conf
+            /var/lib/stone/<cluster-fsid>/<daemon-name>/foo/conf: /conf
         }
         """
         mounts = {}
@@ -1069,7 +1069,7 @@ class CustomContainer(object):
     def get_container_binds(self, data_dir: str) -> List[List[str]]:
         """
         Get the bind mounts. Relative `source=...` paths will be located below
-        `/var/lib/ceph/<cluster-fsid>/<daemon-name>`.
+        `/var/lib/stone/<cluster-fsid>/<daemon-name>`.
 
         Example:
         [
@@ -1081,7 +1081,7 @@ class CustomContainer(object):
         becomes
         [
             ...
-            'source=/var/lib/ceph/<cluster-fsid>/<daemon-name>/lib/modules',
+            'source=/var/lib/stone/<cluster-fsid>/<daemon-name>/lib/modules',
             ...
         ]
         """
@@ -1147,12 +1147,12 @@ def dict_get_join(d: Dict, key: str) -> Any:
 
 def get_supported_daemons():
     # type: () -> List[str]
-    supported_daemons = list(Ceph.daemons)
+    supported_daemons = list(Stone.daemons)
     supported_daemons.extend(Monitoring.components)
     supported_daemons.append(NFSGanesha.daemon_type)
-    supported_daemons.append(CephIscsi.daemon_type)
+    supported_daemons.append(StoneIscsi.daemon_type)
     supported_daemons.append(CustomContainer.daemon_type)
-    supported_daemons.append(CephadmDaemon.daemon_type)
+    supported_daemons.append(StoneadmDaemon.daemon_type)
     supported_daemons.append(HAproxy.daemon_type)
     supported_daemons.append(Keepalived.daemon_type)
     supported_daemons.append(SNMPGateway.daemon_type)
@@ -1167,7 +1167,7 @@ class PortOccupiedError(Error):
 
 
 def attempt_bind(ctx, s, address, port):
-    # type: (CephadmContext, socket.socket, str, int) -> None
+    # type: (StoneadmContext, socket.socket, str, int) -> None
     try:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((address, port))
@@ -1185,7 +1185,7 @@ def attempt_bind(ctx, s, address, port):
 
 
 def port_in_use(ctx, port_num):
-    # type: (CephadmContext, int) -> bool
+    # type: (StoneadmContext, int) -> bool
     """Detect whether a port is in use on the local machine - IPv4 and IPv6"""
     logger.info('Verifying port %d ...' % port_num)
 
@@ -1211,7 +1211,7 @@ def port_in_use(ctx, port_num):
 
 
 def check_ip_port(ctx, ip, port):
-    # type: (CephadmContext, str, int) -> None
+    # type: (StoneadmContext, str, int) -> None
     if not ctx.skip_ping_check:
         logger.info('Verifying IP %s port %d ...' % (ip, port))
         if is_ipv6(ip):
@@ -1261,7 +1261,7 @@ class _Acquire_ReturnProxy(object):
 
 
 class FileLock(object):
-    def __init__(self, ctx: CephadmContext, name: str, timeout: int = -1) -> None:
+    def __init__(self, ctx: StoneadmContext, name: str, timeout: int = -1) -> None:
         if not os.path.exists(LOCK_DIR):
             os.mkdir(LOCK_DIR, 0o700)
         self._lock_file = os.path.join(LOCK_DIR, name + '.lock')
@@ -1414,7 +1414,7 @@ class FileLock(object):
 
 
 ##################################
-# Popen wrappers, lifted from ceph-volume
+# Popen wrappers, lifted from stone-volume
 
 class CallVerbosity(Enum):
     SILENT = 0
@@ -1546,7 +1546,7 @@ except ImportError:
                 loop.close()
 
 
-def call(ctx: CephadmContext,
+def call(ctx: StoneadmContext,
          command: List[str],
          desc: Optional[str] = None,
          verbosity: CallVerbosity = CallVerbosity.VERBOSE_ON_FAILURE,
@@ -1608,7 +1608,7 @@ def call(ctx: CephadmContext,
 
 
 def call_throws(
-        ctx: CephadmContext,
+        ctx: StoneadmContext,
         command: List[str],
         desc: Optional[str] = None,
         verbosity: CallVerbosity = CallVerbosity.VERBOSE_ON_FAILURE,
@@ -1624,7 +1624,7 @@ def call_throws(
 
 
 def call_timeout(ctx, command, timeout):
-    # type: (CephadmContext, List[str], int) -> int
+    # type: (StoneadmContext, List[str], int) -> int
     logger.debug('Running command (timeout=%s): %s'
                  % (timeout, ' '.join(command)))
 
@@ -1653,7 +1653,7 @@ def json_loads_retry(cli_func: Callable[[], str]) -> Any:
 
 
 def is_available(ctx, what, func):
-    # type: (CephadmContext, str, Callable[[], bool]) -> None
+    # type: (StoneadmContext, str, Callable[[], bool]) -> None
     """
     Wait for a service to become available
 
@@ -1813,7 +1813,7 @@ def is_fsid(s):
 
 def validate_fsid(func: FuncT) -> FuncT:
     @wraps(func)
-    def _validate_fsid(ctx: CephadmContext) -> Any:
+    def _validate_fsid(ctx: StoneadmContext) -> Any:
         if 'fsid' in ctx and ctx.fsid:
             if not is_fsid(ctx.fsid):
                 raise Error('not an fsid: %s' % ctx.fsid)
@@ -1823,11 +1823,11 @@ def validate_fsid(func: FuncT) -> FuncT:
 
 def infer_fsid(func: FuncT) -> FuncT:
     """
-    If we only find a single fsid in /var/lib/ceph/*, use that
+    If we only find a single fsid in /var/lib/stone/*, use that
     """
     @infer_config
     @wraps(func)
-    def _infer_fsid(ctx: CephadmContext) -> Any:
+    def _infer_fsid(ctx: StoneadmContext) -> Any:
         if 'fsid' in ctx and ctx.fsid:
             logger.debug('Using specified fsid: %s' % ctx.fsid)
             return func(ctx)
@@ -1869,7 +1869,7 @@ def infer_config(func: FuncT) -> FuncT:
     If we find a MON daemon, use the config from that container
     """
     @wraps(func)
-    def _infer_config(ctx: CephadmContext) -> Any:
+    def _infer_config(ctx: StoneadmContext) -> Any:
         ctx.config = ctx.config if 'config' in ctx else None
         if ctx.config:
             logger.debug('Using specified config: %s' % ctx.config)
@@ -1887,7 +1887,7 @@ def infer_config(func: FuncT) -> FuncT:
                     if (
                         daemon.get('name', '').startswith('mon.')
                         and daemon.get('fsid', '') == ctx.fsid
-                        and daemon.get('style', '') == 'cephadm:v1'
+                        and daemon.get('style', '') == 'stoneadm:v1'
                         and os.path.exists(config_path('mon', daemon['name'].split('.', 1)[1]))
                     ):
                         name = daemon['name']
@@ -1904,11 +1904,11 @@ def infer_config(func: FuncT) -> FuncT:
     return cast(FuncT, _infer_config)
 
 
-def _get_default_image(ctx: CephadmContext) -> str:
+def _get_default_image(ctx: StoneadmContext) -> str:
     if DEFAULT_IMAGE_IS_MASTER:
-        warn = """This is a development version of cephadm.
+        warn = """This is a development version of stoneadm.
 For information regarding the latest stable release:
-    https://docs.ceph.com/docs/{}/cephadm/install
+    https://docs.stone.com/docs/{}/stoneadm/install
 """.format(LATEST_STABLE_RELEASE)
         for line in warn.splitlines():
             logger.warning('{}{}{}'.format(termcolor.yellow, line, termcolor.end))
@@ -1917,14 +1917,14 @@ For information regarding the latest stable release:
 
 def infer_image(func: FuncT) -> FuncT:
     """
-    Use the most recent ceph image
+    Use the most recent stone image
     """
     @wraps(func)
-    def _infer_image(ctx: CephadmContext) -> Any:
+    def _infer_image(ctx: StoneadmContext) -> Any:
         if not ctx.image:
-            ctx.image = os.environ.get('CEPHADM_IMAGE')
+            ctx.image = os.environ.get('STONEADM_IMAGE')
         if not ctx.image:
-            ctx.image = get_last_local_ceph_image(ctx, ctx.container_engine.path)
+            ctx.image = get_last_local_stone_image(ctx, ctx.container_engine.path)
         if not ctx.image:
             ctx.image = _get_default_image(ctx)
         return func(ctx)
@@ -1934,7 +1934,7 @@ def infer_image(func: FuncT) -> FuncT:
 
 def default_image(func: FuncT) -> FuncT:
     @wraps(func)
-    def _default_image(ctx: CephadmContext) -> Any:
+    def _default_image(ctx: StoneadmContext) -> Any:
         if not ctx.image:
             if 'name' in ctx and ctx.name:
                 type_ = ctx.name.split('.', 1)[0]
@@ -1947,7 +1947,7 @@ def default_image(func: FuncT) -> FuncT:
                 if type_ == SNMPGateway.daemon_type:
                     ctx.image = SNMPGateway.default_image
             if not ctx.image:
-                ctx.image = os.environ.get('CEPHADM_IMAGE')
+                ctx.image = os.environ.get('STONEADM_IMAGE')
             if not ctx.image:
                 ctx.image = _get_default_image(ctx)
 
@@ -1956,23 +1956,23 @@ def default_image(func: FuncT) -> FuncT:
     return cast(FuncT, _default_image)
 
 
-def get_last_local_ceph_image(ctx: CephadmContext, container_path: str) -> Optional[str]:
+def get_last_local_stone_image(ctx: StoneadmContext, container_path: str) -> Optional[str]:
     """
-    :return: The most recent local ceph image (already pulled)
+    :return: The most recent local stone image (already pulled)
     """
     out, _, _ = call_throws(ctx,
                             [container_path, 'images',
-                             '--filter', 'label=ceph=True',
+                             '--filter', 'label=stone=True',
                              '--filter', 'dangling=false',
                              '--format', '{{.Repository}}@{{.Digest}}'])
-    return _filter_last_local_ceph_image(out)
+    return _filter_last_local_stone_image(out)
 
 
-def _filter_last_local_ceph_image(out):
+def _filter_last_local_stone_image(out):
     # type: (str) -> Optional[str]
     for image in out.splitlines():
         if image and not image.endswith('@'):
-            logger.info('Using recent ceph image %s' % image)
+            logger.info('Using recent stone image %s' % image)
             return image
     return None
 
@@ -1980,7 +1980,7 @@ def _filter_last_local_ceph_image(out):
 def write_tmp(s, uid, gid):
     # type: (str, int, int) -> IO[str]
     tmp_f = tempfile.NamedTemporaryFile(mode='w',
-                                        prefix='ceph-tmp')
+                                        prefix='stone-tmp')
     os.fchown(tmp_f.fileno(), uid, gid)
     tmp_f.write(s)
     tmp_f.flush()
@@ -2019,7 +2019,7 @@ def make_data_dir_base(fsid, data_dir, uid, gid):
 
 
 def make_data_dir(ctx, fsid, daemon_type, daemon_id, uid=None, gid=None):
-    # type: (CephadmContext, str, str, Union[int, str], Optional[int], Optional[int]) -> str
+    # type: (StoneadmContext, str, str, Union[int, str], Optional[int], Optional[int]) -> str
     if uid is None or gid is None:
         uid, gid = extract_uid_gid(ctx)
     make_data_dir_base(fsid, ctx.data_dir, uid, gid)
@@ -2029,7 +2029,7 @@ def make_data_dir(ctx, fsid, daemon_type, daemon_id, uid=None, gid=None):
 
 
 def make_log_dir(ctx, fsid, uid=None, gid=None):
-    # type: (CephadmContext, str, Optional[int], Optional[int]) -> str
+    # type: (StoneadmContext, str, Optional[int], Optional[int]) -> str
     if uid is None or gid is None:
         uid, gid = extract_uid_gid(ctx)
     log_dir = get_log_dir(fsid, ctx.log_dir)
@@ -2038,13 +2038,13 @@ def make_log_dir(ctx, fsid, uid=None, gid=None):
 
 
 def make_var_run(ctx, fsid, uid, gid):
-    # type: (CephadmContext, str, int, int) -> None
+    # type: (StoneadmContext, str, int, int) -> None
     call_throws(ctx, ['install', '-d', '-m0770', '-o', str(uid), '-g', str(gid),
-                      '/var/run/ceph/%s' % fsid])
+                      '/var/run/stone/%s' % fsid])
 
 
 def copy_tree(ctx, src, dst, uid=None, gid=None):
-    # type: (CephadmContext, List[str], str, Optional[int], Optional[int]) -> None
+    # type: (StoneadmContext, List[str], str, Optional[int], Optional[int]) -> None
     """
     Copy a directory tree from src to dst
     """
@@ -2069,7 +2069,7 @@ def copy_tree(ctx, src, dst, uid=None, gid=None):
 
 
 def copy_files(ctx, src, dst, uid=None, gid=None):
-    # type: (CephadmContext, List[str], str, Optional[int], Optional[int]) -> None
+    # type: (StoneadmContext, List[str], str, Optional[int], Optional[int]) -> None
     """
     Copy a files from src to dst
     """
@@ -2089,7 +2089,7 @@ def copy_files(ctx, src, dst, uid=None, gid=None):
 
 
 def move_files(ctx, src, dst, uid=None, gid=None):
-    # type: (CephadmContext, List[str], str, Optional[int], Optional[int]) -> None
+    # type: (StoneadmContext, List[str], str, Optional[int], Optional[int]) -> None
     """
     Move files from src to dst
     """
@@ -2166,7 +2166,7 @@ def find_program(filename):
     return name
 
 
-def find_container_engine(ctx: CephadmContext) -> Optional[ContainerEngine]:
+def find_container_engine(ctx: StoneadmContext) -> Optional[ContainerEngine]:
     if ctx.docker:
         return Docker()
     else:
@@ -2178,7 +2178,7 @@ def find_container_engine(ctx: CephadmContext) -> Optional[ContainerEngine]:
     return None
 
 
-def check_container_engine(ctx: CephadmContext) -> ContainerEngine:
+def check_container_engine(ctx: StoneadmContext) -> ContainerEngine:
     engine = ctx.container_engine
     if not isinstance(engine, CONTAINER_PREFERENCE):
         # See https://github.com/python/mypy/issues/8993
@@ -2194,15 +2194,15 @@ def check_container_engine(ctx: CephadmContext) -> ContainerEngine:
 def get_unit_name(fsid, daemon_type, daemon_id=None):
     # type: (str, str, Optional[Union[int, str]]) -> str
     # accept either name or type + id
-    if daemon_type == CephadmDaemon.daemon_type and daemon_id is not None:
-        return 'ceph-%s-%s.%s' % (fsid, daemon_type, daemon_id)
+    if daemon_type == StoneadmDaemon.daemon_type and daemon_id is not None:
+        return 'stone-%s-%s.%s' % (fsid, daemon_type, daemon_id)
     elif daemon_id is not None:
-        return 'ceph-%s@%s.%s' % (fsid, daemon_type, daemon_id)
+        return 'stone-%s@%s.%s' % (fsid, daemon_type, daemon_id)
     else:
-        return 'ceph-%s@%s' % (fsid, daemon_type)
+        return 'stone-%s@%s' % (fsid, daemon_type)
 
 
-def get_unit_name_by_daemon_name(ctx: CephadmContext, fsid: str, name: str) -> str:
+def get_unit_name_by_daemon_name(ctx: StoneadmContext, fsid: str, name: str) -> str:
     daemon = get_daemon_description(ctx, fsid, name)
     try:
         return daemon['systemd_unit']
@@ -2211,7 +2211,7 @@ def get_unit_name_by_daemon_name(ctx: CephadmContext, fsid: str, name: str) -> s
 
 
 def check_unit(ctx, unit_name):
-    # type: (CephadmContext, str) -> Tuple[bool, str, bool]
+    # type: (StoneadmContext, str) -> Tuple[bool, str, bool]
     # NOTE: we ignore the exit code here because systemctl outputs
     # various exit codes based on the state of the service, but the
     # string result is more explicit (and sufficient).
@@ -2250,7 +2250,7 @@ def check_unit(ctx, unit_name):
 
 
 def check_units(ctx, units, enabler=None):
-    # type: (CephadmContext, List[str], Optional[Packager]) -> bool
+    # type: (StoneadmContext, List[str], Optional[Packager]) -> bool
     for u in units:
         (enabled, state, installed) = check_unit(ctx, u)
         if enabled and state == 'running':
@@ -2263,11 +2263,11 @@ def check_units(ctx, units, enabler=None):
     return False
 
 
-def is_container_running(ctx: CephadmContext, c: 'CephContainer') -> bool:
+def is_container_running(ctx: StoneadmContext, c: 'StoneContainer') -> bool:
     return bool(get_running_container_name(ctx, c))
 
 
-def get_running_container_name(ctx: CephadmContext, c: 'CephContainer') -> Optional[str]:
+def get_running_container_name(ctx: StoneadmContext, c: 'StoneContainer') -> Optional[str]:
     for name in [c.cname, c.old_cname]:
         out, err, ret = call(ctx, [
             ctx.container_engine.path, 'container', 'inspect',
@@ -2280,7 +2280,7 @@ def get_running_container_name(ctx: CephadmContext, c: 'CephContainer') -> Optio
 
 def get_legacy_config_fsid(cluster, legacy_dir=None):
     # type: (str, Optional[str]) -> Optional[str]
-    config_file = '/etc/ceph/%s.conf' % cluster
+    config_file = '/etc/stone/%s.conf' % cluster
     if legacy_dir is not None:
         config_file = os.path.abspath(legacy_dir + config_file)
 
@@ -2293,14 +2293,14 @@ def get_legacy_config_fsid(cluster, legacy_dir=None):
 
 def get_legacy_daemon_fsid(ctx, cluster,
                            daemon_type, daemon_id, legacy_dir=None):
-    # type: (CephadmContext, str, str, Union[int, str], Optional[str]) -> Optional[str]
+    # type: (StoneadmContext, str, str, Union[int, str], Optional[str]) -> Optional[str]
     fsid = None
     if daemon_type == 'osd':
         try:
             fsid_file = os.path.join(ctx.data_dir,
                                      daemon_type,
-                                     'ceph-%s' % daemon_id,
-                                     'ceph_fsid')
+                                     'stone-%s' % daemon_id,
+                                     'stone_fsid')
             if legacy_dir is not None:
                 fsid_file = os.path.abspath(legacy_dir + fsid_file)
             with open(fsid_file, 'r') as f:
@@ -2313,13 +2313,13 @@ def get_legacy_daemon_fsid(ctx, cluster,
 
 
 def get_daemon_args(ctx, fsid, daemon_type, daemon_id):
-    # type: (CephadmContext, str, str, Union[int, str]) -> List[str]
+    # type: (StoneadmContext, str, str, Union[int, str]) -> List[str]
     r = list()  # type: List[str]
 
-    if daemon_type in Ceph.daemons and daemon_type != 'crash':
+    if daemon_type in Stone.daemons and daemon_type != 'crash':
         r += [
-            '--setuser', 'ceph',
-            '--setgroup', 'ceph',
+            '--setuser', 'stone',
+            '--setgroup', 'stone',
             '--default-log-to-file=false',
             '--default-log-to-stderr=true',
             '--default-log-stderr-prefix=debug ',
@@ -2372,10 +2372,10 @@ def get_daemon_args(ctx, fsid, daemon_type, daemon_id):
 
 def create_daemon_dirs(ctx, fsid, daemon_type, daemon_id, uid, gid,
                        config=None, keyring=None):
-    # type: (CephadmContext, str, str, Union[int, str], int, int, Optional[str], Optional[str]) ->  None
+    # type: (StoneadmContext, str, str, Union[int, str], int, int, Optional[str], Optional[str]) ->  None
     data_dir = make_data_dir(ctx, fsid, daemon_type, daemon_id, uid=uid, gid=gid)
 
-    if daemon_type in Ceph.daemons:
+    if daemon_type in Stone.daemons:
         make_log_dir(ctx, fsid, uid=uid, gid=gid)
 
     if config:
@@ -2442,9 +2442,9 @@ def create_daemon_dirs(ctx, fsid, daemon_type, daemon_id, uid, gid,
         nfs_ganesha = NFSGanesha.init(ctx, fsid, daemon_id)
         nfs_ganesha.create_daemon_dirs(data_dir, uid, gid)
 
-    elif daemon_type == CephIscsi.daemon_type:
-        ceph_iscsi = CephIscsi.init(ctx, fsid, daemon_id)
-        ceph_iscsi.create_daemon_dirs(data_dir, uid, gid)
+    elif daemon_type == StoneIscsi.daemon_type:
+        stone_iscsi = StoneIscsi.init(ctx, fsid, daemon_id)
+        stone_iscsi.create_daemon_dirs(data_dir, uid, gid)
 
     elif daemon_type == HAproxy.daemon_type:
         haproxy = HAproxy.init(ctx, fsid, daemon_id)
@@ -2496,7 +2496,7 @@ def get_parm(option):
 
 
 def get_config_and_keyring(ctx):
-    # type: (CephadmContext) -> Tuple[Optional[str], Optional[str]]
+    # type: (StoneadmContext) -> Tuple[Optional[str], Optional[str]]
     config = None
     keyring = None
 
@@ -2527,11 +2527,11 @@ def get_config_and_keyring(ctx):
 
 
 def get_container_binds(ctx, fsid, daemon_type, daemon_id):
-    # type: (CephadmContext, str, str, Union[int, str, None]) -> List[List[str]]
+    # type: (StoneadmContext, str, str, Union[int, str, None]) -> List[List[str]]
     binds = list()
 
-    if daemon_type == CephIscsi.daemon_type:
-        binds.extend(CephIscsi.get_container_binds())
+    if daemon_type == StoneIscsi.daemon_type:
+        binds.extend(StoneIscsi.get_container_binds())
     elif daemon_type == CustomContainer.daemon_type:
         assert daemon_id
         cc = CustomContainer.init(ctx, fsid, daemon_id)
@@ -2543,63 +2543,63 @@ def get_container_binds(ctx, fsid, daemon_type, daemon_id):
 
 def get_container_mounts(ctx, fsid, daemon_type, daemon_id,
                          no_config=False):
-    # type: (CephadmContext, str, str, Union[int, str, None], Optional[bool]) -> Dict[str, str]
+    # type: (StoneadmContext, str, str, Union[int, str, None], Optional[bool]) -> Dict[str, str]
     mounts = dict()
 
-    if daemon_type in Ceph.daemons:
+    if daemon_type in Stone.daemons:
         if fsid:
-            run_path = os.path.join('/var/run/ceph', fsid)
+            run_path = os.path.join('/var/run/stone', fsid)
             if os.path.exists(run_path):
-                mounts[run_path] = '/var/run/ceph:z'
+                mounts[run_path] = '/var/run/stone:z'
             log_dir = get_log_dir(fsid, ctx.log_dir)
-            mounts[log_dir] = '/var/log/ceph:z'
-            crash_dir = '/var/lib/ceph/%s/crash' % fsid
+            mounts[log_dir] = '/var/log/stone:z'
+            crash_dir = '/var/lib/stone/%s/crash' % fsid
             if os.path.exists(crash_dir):
-                mounts[crash_dir] = '/var/lib/ceph/crash:z'
+                mounts[crash_dir] = '/var/lib/stone/crash:z'
 
-    if daemon_type in Ceph.daemons and daemon_id:
+    if daemon_type in Stone.daemons and daemon_id:
         data_dir = get_data_dir(fsid, ctx.data_dir, daemon_type, daemon_id)
         if daemon_type == 'rgw':
-            cdata_dir = '/var/lib/ceph/radosgw/ceph-rgw.%s' % (daemon_id)
+            cdata_dir = '/var/lib/stone/radosgw/stone-rgw.%s' % (daemon_id)
         else:
-            cdata_dir = '/var/lib/ceph/%s/ceph-%s' % (daemon_type, daemon_id)
+            cdata_dir = '/var/lib/stone/%s/stone-%s' % (daemon_type, daemon_id)
         if daemon_type != 'crash':
             mounts[data_dir] = cdata_dir + ':z'
         if not no_config:
-            mounts[data_dir + '/config'] = '/etc/ceph/ceph.conf:z'
-        if daemon_type in ['rbd-mirror', 'cephfs-mirror', 'crash']:
+            mounts[data_dir + '/config'] = '/etc/stone/stone.conf:z'
+        if daemon_type in ['rbd-mirror', 'stonefs-mirror', 'crash']:
             # these do not search for their keyrings in a data directory
-            mounts[data_dir + '/keyring'] = '/etc/ceph/ceph.client.%s.%s.keyring' % (daemon_type, daemon_id)
+            mounts[data_dir + '/keyring'] = '/etc/stone/stone.client.%s.%s.keyring' % (daemon_type, daemon_id)
 
-    if daemon_type in ['mon', 'osd', 'clusterless-ceph-volume']:
+    if daemon_type in ['mon', 'osd', 'clusterless-stone-volume']:
         mounts['/dev'] = '/dev'  # FIXME: narrow this down?
         mounts['/run/udev'] = '/run/udev'
-    if daemon_type in ['osd', 'clusterless-ceph-volume']:
+    if daemon_type in ['osd', 'clusterless-stone-volume']:
         mounts['/sys'] = '/sys'  # for numa.cc, pick_address, cgroups, ...
         mounts['/run/lvm'] = '/run/lvm'
         mounts['/run/lock/lvm'] = '/run/lock/lvm'
     if daemon_type == 'osd':
         # selinux-policy in the container may not match the host.
         if HostFacts(ctx).selinux_enabled:
-            selinux_folder = '/var/lib/ceph/%s/selinux' % fsid
+            selinux_folder = '/var/lib/stone/%s/selinux' % fsid
             if not os.path.exists(selinux_folder):
                 os.makedirs(selinux_folder, mode=0o755)
             mounts[selinux_folder] = '/sys/fs/selinux:ro'
         mounts['/'] = '/rootfs'
 
     try:
-        if ctx.shared_ceph_folder:  # make easy manager modules/ceph-volume development
-            ceph_folder = pathify(ctx.shared_ceph_folder)
-            if os.path.exists(ceph_folder):
-                mounts[ceph_folder + '/src/ceph-volume/ceph_volume'] = '/usr/lib/python3.6/site-packages/ceph_volume'
-                mounts[ceph_folder + '/src/cephadm/cephadm'] = '/usr/sbin/cephadm'
-                mounts[ceph_folder + '/src/pybind/mgr'] = '/usr/share/ceph/mgr'
-                mounts[ceph_folder + '/src/python-common/ceph'] = '/usr/lib/python3.6/site-packages/ceph'
-                mounts[ceph_folder + '/monitoring/ceph-mixin/dashboards_out'] = '/etc/grafana/dashboards/ceph-dashboard'
-                mounts[ceph_folder + '/monitoring/ceph-mixin/prometheus_alerts.yml'] = '/etc/prometheus/ceph/ceph_default_alerts.yml'
+        if ctx.shared_stone_folder:  # make easy manager modules/stone-volume development
+            stone_folder = pathify(ctx.shared_stone_folder)
+            if os.path.exists(stone_folder):
+                mounts[stone_folder + '/src/stone-volume/stone_volume'] = '/usr/lib/python3.6/site-packages/stone_volume'
+                mounts[stone_folder + '/src/stoneadm/stoneadm'] = '/usr/sbin/stoneadm'
+                mounts[stone_folder + '/src/pybind/mgr'] = '/usr/share/stone/mgr'
+                mounts[stone_folder + '/src/python-common/stone'] = '/usr/lib/python3.6/site-packages/stone'
+                mounts[stone_folder + '/monitoring/stone-mixin/dashboards_out'] = '/etc/grafana/dashboards/stone-dashboard'
+                mounts[stone_folder + '/monitoring/stone-mixin/prometheus_alerts.yml'] = '/etc/prometheus/stone/stone_default_alerts.yml'
             else:
                 logger.error('{}{}{}'.format(termcolor.red,
-                                             'Ceph shared source folder does not exist.',
+                                             'Stone shared source folder does not exist.',
                                              termcolor.end))
     except AttributeError:
         pass
@@ -2632,11 +2632,11 @@ def get_container_mounts(ctx, fsid, daemon_type, daemon_id,
         data_dir = get_data_dir(fsid, ctx.data_dir, daemon_type, daemon_id)
         mounts.update(HAproxy.get_container_mounts(data_dir))
 
-    if daemon_type == CephIscsi.daemon_type:
+    if daemon_type == StoneIscsi.daemon_type:
         assert daemon_id
         data_dir = get_data_dir(fsid, ctx.data_dir, daemon_type, daemon_id)
         log_dir = get_log_dir(fsid, ctx.log_dir)
-        mounts.update(CephIscsi.get_container_mounts(data_dir, log_dir))
+        mounts.update(StoneIscsi.get_container_mounts(data_dir, log_dir))
 
     if daemon_type == Keepalived.daemon_type:
         assert daemon_id
@@ -2652,22 +2652,22 @@ def get_container_mounts(ctx, fsid, daemon_type, daemon_id,
     return mounts
 
 
-def get_ceph_volume_container(ctx: CephadmContext,
+def get_stone_volume_container(ctx: StoneadmContext,
                               privileged: bool = True,
                               cname: str = '',
                               volume_mounts: Dict[str, str] = {},
                               bind_mounts: Optional[List[List[str]]] = None,
                               args: List[str] = [],
-                              envs: Optional[List[str]] = None) -> 'CephContainer':
+                              envs: Optional[List[str]] = None) -> 'StoneContainer':
     if envs is None:
         envs = []
-    envs.append('CEPH_VOLUME_SKIP_RESTORECON=yes')
-    envs.append('CEPH_VOLUME_DEBUG=1')
+    envs.append('STONE_VOLUME_SKIP_RESTORECON=yes')
+    envs.append('STONE_VOLUME_DEBUG=1')
 
-    return CephContainer(
+    return StoneContainer(
         ctx,
         image=ctx.image,
-        entrypoint='/usr/sbin/ceph-volume',
+        entrypoint='/usr/sbin/stone-volume',
         args=args,
         volume_mounts=volume_mounts,
         bind_mounts=bind_mounts,
@@ -2679,18 +2679,18 @@ def get_ceph_volume_container(ctx: CephadmContext,
     )
 
 
-def get_container(ctx: CephadmContext,
+def get_container(ctx: StoneadmContext,
                   fsid: str, daemon_type: str, daemon_id: Union[int, str],
                   privileged: bool = False,
                   ptrace: bool = False,
-                  container_args: Optional[List[str]] = None) -> 'CephContainer':
+                  container_args: Optional[List[str]] = None) -> 'StoneContainer':
     entrypoint: str = ''
     name: str = ''
-    ceph_args: List[str] = []
+    stone_args: List[str] = []
     envs: List[str] = []
     host_network: bool = True
 
-    if daemon_type in Ceph.daemons:
+    if daemon_type in Stone.daemons:
         envs.append('TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=134217728')
     if container_args is None:
         container_args = []
@@ -2703,14 +2703,14 @@ def get_container(ctx: CephadmContext,
     elif daemon_type == 'rbd-mirror':
         entrypoint = '/usr/bin/rbd-mirror'
         name = 'client.rbd-mirror.%s' % daemon_id
-    elif daemon_type == 'cephfs-mirror':
-        entrypoint = '/usr/bin/cephfs-mirror'
-        name = 'client.cephfs-mirror.%s' % daemon_id
+    elif daemon_type == 'stonefs-mirror':
+        entrypoint = '/usr/bin/stonefs-mirror'
+        name = 'client.stonefs-mirror.%s' % daemon_id
     elif daemon_type == 'crash':
-        entrypoint = '/usr/bin/ceph-crash'
+        entrypoint = '/usr/bin/stone-crash'
         name = 'client.crash.%s' % daemon_id
     elif daemon_type in ['mon', 'mgr', 'mds', 'osd']:
-        entrypoint = '/usr/bin/ceph-' + daemon_type
+        entrypoint = '/usr/bin/stone-' + daemon_type
         name = '%s.%s' % (daemon_type, daemon_id)
     elif daemon_type in Monitoring.components:
         entrypoint = ''
@@ -2725,8 +2725,8 @@ def get_container(ctx: CephadmContext,
         name = '%s.%s' % (daemon_type, daemon_id)
         envs.extend(Keepalived.get_container_envs())
         container_args.extend(['--cap-add=NET_ADMIN', '--cap-add=NET_RAW'])
-    elif daemon_type == CephIscsi.daemon_type:
-        entrypoint = CephIscsi.entrypoint
+    elif daemon_type == StoneIscsi.daemon_type:
+        entrypoint = StoneIscsi.entrypoint
         name = '%s.%s' % (daemon_type, daemon_id)
         # So the container can modprobe iscsi_target_mod and have write perms
         # to configfs we need to make this a privileged container.
@@ -2753,9 +2753,9 @@ def get_container(ctx: CephadmContext,
             # between the node-exporter container and the host to avoid selinux denials
             container_args.extend(['--security-opt', 'label=disable'])
     elif daemon_type == 'crash':
-        ceph_args = ['-n', name]
-    elif daemon_type in Ceph.daemons:
-        ceph_args = ['-n', name, '-f']
+        stone_args = ['-n', name]
+    elif daemon_type in Stone.daemons:
+        stone_args = ['-n', name, '-f']
     elif daemon_type == SNMPGateway.daemon_type:
         sg = SNMPGateway.init(ctx, fsid, daemon_id)
         container_args.append(
@@ -2769,20 +2769,20 @@ def get_container(ctx: CephadmContext,
         container_args.extend([
             '-d', '--log-driver', 'journald',
             '--conmon-pidfile',
-            runtime_dir + '/ceph-%s@%s.%s.service-pid' % (fsid, daemon_type, daemon_id),
+            runtime_dir + '/stone-%s@%s.%s.service-pid' % (fsid, daemon_type, daemon_id),
             '--cidfile',
-            runtime_dir + '/ceph-%s@%s.%s.service-cid' % (fsid, daemon_type, daemon_id),
+            runtime_dir + '/stone-%s@%s.%s.service-cid' % (fsid, daemon_type, daemon_id),
         ])
         if ctx.container_engine.version >= CGROUPS_SPLIT_PODMAN_VERSION:
             container_args.append('--cgroups=split')
 
-    return CephContainer.for_daemon(
+    return StoneContainer.for_daemon(
         ctx,
         fsid=fsid,
         daemon_type=daemon_type,
         daemon_id=str(daemon_id),
         entrypoint=entrypoint,
-        args=ceph_args + get_daemon_args(ctx, fsid, daemon_type, daemon_id),
+        args=stone_args + get_daemon_args(ctx, fsid, daemon_type, daemon_id),
         container_args=container_args,
         volume_mounts=get_container_mounts(ctx, fsid, daemon_type, daemon_id),
         bind_mounts=get_container_binds(ctx, fsid, daemon_type, daemon_id),
@@ -2793,8 +2793,8 @@ def get_container(ctx: CephadmContext,
     )
 
 
-def extract_uid_gid(ctx, img='', file_path='/var/lib/ceph'):
-    # type: (CephadmContext, str, Union[str, List[str]]) -> Tuple[int, int]
+def extract_uid_gid(ctx, img='', file_path='/var/lib/stone'):
+    # type: (StoneadmContext, str, Union[str, List[str]]) -> Tuple[int, int]
 
     if not img:
         img = ctx.image
@@ -2808,7 +2808,7 @@ def extract_uid_gid(ctx, img='', file_path='/var/lib/ceph'):
 
     for fp in paths:
         try:
-            out = CephContainer(
+            out = StoneContainer(
                 ctx,
                 image=img,
                 entrypoint='stat',
@@ -2829,7 +2829,7 @@ def deploy_daemon(ctx, fsid, daemon_type, daemon_id, c, uid, gid,
                   osd_fsid=None,
                   reconfig=False,
                   ports=None):
-    # type: (CephadmContext, str, str, Union[int, str], Optional[CephContainer], int, int, Optional[str], Optional[str], Optional[str], Optional[bool], Optional[List[int]]) -> None
+    # type: (StoneadmContext, str, str, Union[int, str], Optional[StoneContainer], int, int, Optional[str], Optional[str], Optional[str], Optional[bool], Optional[List[int]]) -> None
 
     ports = ports or []
     if any([port_in_use(ctx, port) for port in ports]):
@@ -2837,7 +2837,7 @@ def deploy_daemon(ctx, fsid, daemon_type, daemon_id, c, uid, gid,
             # non-fatal for mgr when we are in mgr_standby_modules=false, but we can't
             # tell whether that is the case here.
             logger.warning(
-                f"ceph-mgr TCP port(s) {','.join(map(str, ports))} already in use"
+                f"stone-mgr TCP port(s) {','.join(map(str, ports))} already in use"
             )
         else:
             raise Error("TCP Port(s) '{}' required for {} already in use".format(','.join(map(str, ports)), daemon_type))
@@ -2858,10 +2858,10 @@ def deploy_daemon(ctx, fsid, daemon_type, daemon_id, c, uid, gid,
         create_daemon_dirs(ctx, fsid, daemon_type, daemon_id, uid, gid)
         mon_dir = get_data_dir(fsid, ctx.data_dir, 'mon', daemon_id)
         log_dir = get_log_dir(fsid, ctx.log_dir)
-        CephContainer(
+        StoneContainer(
             ctx,
             image=ctx.image,
-            entrypoint='/usr/bin/ceph-mon',
+            entrypoint='/usr/bin/stone-mon',
             args=[
                 '--mkfs',
                 '-i', str(daemon_id),
@@ -2870,8 +2870,8 @@ def deploy_daemon(ctx, fsid, daemon_type, daemon_id, c, uid, gid,
                 '--keyring', '/tmp/keyring',
             ] + get_daemon_args(ctx, fsid, 'mon', daemon_id),
             volume_mounts={
-                log_dir: '/var/log/ceph:z',
-                mon_dir: '/var/lib/ceph/mon/ceph-%s:z' % (daemon_id),
+                log_dir: '/var/log/stone:z',
+                mon_dir: '/var/lib/stone/mon/stone-%s:z' % (daemon_id),
                 tmp_keyring.name: '/tmp/keyring:z',
                 tmp_config.name: '/tmp/config:z',
             },
@@ -2891,7 +2891,7 @@ def deploy_daemon(ctx, fsid, daemon_type, daemon_id, c, uid, gid,
             config, keyring)
 
     if not reconfig:
-        if daemon_type == CephadmDaemon.daemon_type:
+        if daemon_type == StoneadmDaemon.daemon_type:
             port = next(iter(ports), None)  # get first tcp port provided or None
 
             if ctx.config_json == '-':
@@ -2901,8 +2901,8 @@ def deploy_daemon(ctx, fsid, daemon_type, daemon_id, c, uid, gid,
             assert isinstance(config_js, dict)
             assert isinstance(daemon_id, str)
 
-            cephadm_exporter = CephadmDaemon(ctx, fsid, daemon_id, port)
-            cephadm_exporter.deploy_daemon_unit(config_js)
+            stoneadm_exporter = StoneadmDaemon(ctx, fsid, daemon_id, port)
+            stoneadm_exporter.deploy_daemon_unit(config_js)
         else:
             if c:
                 deploy_daemon_units(ctx, fsid, uid, gid, daemon_type, daemon_id,
@@ -2929,8 +2929,8 @@ def deploy_daemon(ctx, fsid, daemon_type, daemon_id, c, uid, gid,
         fw.open_ports(ports)
         fw.apply_rules()
 
-    if reconfig and daemon_type not in Ceph.daemons:
-        # ceph daemons do not need a restart; others (presumably) do to pick
+    if reconfig and daemon_type not in Stone.daemons:
+        # stone daemons do not need a restart; others (presumably) do to pick
         # up the new config
         call_throws(ctx, ['systemctl', 'reset-failed',
                           get_unit_name(fsid, daemon_type, daemon_id)])
@@ -2939,7 +2939,7 @@ def deploy_daemon(ctx, fsid, daemon_type, daemon_id, c, uid, gid,
 
 
 def _write_container_cmd_to_bash(ctx, file_obj, container, comment=None, background=False):
-    # type: (CephadmContext, IO[str], CephContainer, Optional[str], Optional[bool]) -> None
+    # type: (StoneadmContext, IO[str], StoneContainer, Optional[str], Optional[bool]) -> None
     if comment:
         # Sometimes adding a comment, especially if there are multiple containers in one
         # unit file, makes it easier to read and grok.
@@ -2964,16 +2964,16 @@ def _write_container_cmd_to_bash(ctx, file_obj, container, comment=None, backgro
         + (' &' if background else '') + '\n')
 
 
-def clean_cgroup(ctx: CephadmContext, fsid: str, unit_name: str) -> None:
+def clean_cgroup(ctx: StoneadmContext, fsid: str, unit_name: str) -> None:
     # systemd may fail to cleanup cgroups from previous stopped unit, which will cause next "systemctl start" to fail.
-    # see https://tracker.ceph.com/issues/50998
+    # see https://tracker.stone.com/issues/50998
 
     CGROUPV2_PATH = Path('/sys/fs/cgroup')
     if not (CGROUPV2_PATH / 'system.slice').exists():
         # Only unified cgroup is affected, skip if not the case
         return
 
-    slice_name = 'system-ceph\\x2d{}.slice'.format(fsid.replace('-', '\\x2d'))
+    slice_name = 'system-stone\\x2d{}.slice'.format(fsid.replace('-', '\\x2d'))
     cg_path = CGROUPV2_PATH / 'system.slice' / slice_name / f'{unit_name}.service'
     if not cg_path.exists():
         return
@@ -2990,13 +2990,13 @@ def clean_cgroup(ctx: CephadmContext, fsid: str, unit_name: str) -> None:
 
 
 def deploy_daemon_units(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     fsid: str,
     uid: int,
     gid: int,
     daemon_type: str,
     daemon_id: Union[int, str],
-    c: 'CephContainer',
+    c: 'StoneContainer',
     enable: bool = True,
     start: bool = True,
     osd_fsid: Optional[str] = None,
@@ -3008,36 +3008,36 @@ def deploy_daemon_units(
             open(data_dir + '/unit.meta.new', 'w') as metaf:
         f.write('set -e\n')
 
-        if daemon_type in Ceph.daemons:
+        if daemon_type in Stone.daemons:
             install_path = find_program('install')
-            f.write('{install_path} -d -m0770 -o {uid} -g {gid} /var/run/ceph/{fsid}\n'.format(install_path=install_path, fsid=fsid, uid=uid, gid=gid))
+            f.write('{install_path} -d -m0770 -o {uid} -g {gid} /var/run/stone/{fsid}\n'.format(install_path=install_path, fsid=fsid, uid=uid, gid=gid))
 
         # pre-start cmd(s)
         if daemon_type == 'osd':
             # osds have a pre-start step
             assert osd_fsid
-            simple_fn = os.path.join('/etc/ceph/osd',
-                                     '%s-%s.json.adopted-by-cephadm' % (daemon_id, osd_fsid))
+            simple_fn = os.path.join('/etc/stone/osd',
+                                     '%s-%s.json.adopted-by-stoneadm' % (daemon_id, osd_fsid))
             if os.path.exists(simple_fn):
                 f.write('# Simple OSDs need chown on startup:\n')
                 for n in ['block', 'block.db', 'block.wal']:
                     p = os.path.join(data_dir, n)
                     f.write('[ ! -L {p} ] || chown {uid}:{gid} {p}\n'.format(p=p, uid=uid, gid=gid))
             else:
-                # if ceph-volume does not support 'ceph-volume activate', we must
-                # do 'ceph-volume lvm activate'.
-                test_cv = get_ceph_volume_container(
+                # if stone-volume does not support 'stone-volume activate', we must
+                # do 'stone-volume lvm activate'.
+                test_cv = get_stone_volume_container(
                     ctx,
                     args=['activate', '--bad-option'],
                     volume_mounts=get_container_mounts(ctx, fsid, daemon_type, daemon_id),
                     bind_mounts=get_container_binds(ctx, fsid, daemon_type, daemon_id),
-                    cname='ceph-%s-%s.%s-activate-test' % (fsid, daemon_type, daemon_id),
+                    cname='stone-%s-%s.%s-activate-test' % (fsid, daemon_type, daemon_id),
                 )
                 out, err, ret = call(ctx, test_cv.run_cmd(), verbosity=CallVerbosity.SILENT)
-                #  bad: ceph-volume: error: unrecognized arguments: activate --bad-option
-                # good: ceph-volume: error: unrecognized arguments: --bad-option
+                #  bad: stone-volume: error: unrecognized arguments: activate --bad-option
+                # good: stone-volume: error: unrecognized arguments: --bad-option
                 if 'unrecognized arguments: activate' in err:
-                    # older ceph-volume without top-level activate or --no-tmpfs
+                    # older stone-volume without top-level activate or --no-tmpfs
                     cmd = [
                         'lvm', 'activate',
                         str(daemon_id), osd_fsid,
@@ -3052,18 +3052,18 @@ def deploy_daemon_units(
                         '--no-tmpfs',
                     ]
 
-                prestart = get_ceph_volume_container(
+                prestart = get_stone_volume_container(
                     ctx,
                     args=cmd,
                     volume_mounts=get_container_mounts(ctx, fsid, daemon_type, daemon_id),
                     bind_mounts=get_container_binds(ctx, fsid, daemon_type, daemon_id),
-                    cname='ceph-%s-%s.%s-activate' % (fsid, daemon_type, daemon_id),
+                    cname='stone-%s-%s.%s-activate' % (fsid, daemon_type, daemon_id),
                 )
-                _write_container_cmd_to_bash(ctx, f, prestart, 'LVM OSDs use ceph-volume lvm activate')
-        elif daemon_type == CephIscsi.daemon_type:
-            f.write(' '.join(CephIscsi.configfs_mount_umount(data_dir, mount=True)) + '\n')
-            ceph_iscsi = CephIscsi.init(ctx, fsid, daemon_id)
-            tcmu_container = ceph_iscsi.get_tcmu_runner_container()
+                _write_container_cmd_to_bash(ctx, f, prestart, 'LVM OSDs use stone-volume lvm activate')
+        elif daemon_type == StoneIscsi.daemon_type:
+            f.write(' '.join(StoneIscsi.configfs_mount_umount(data_dir, mount=True)) + '\n')
+            stone_iscsi = StoneIscsi.init(ctx, fsid, daemon_id)
+            tcmu_container = stone_iscsi.get_tcmu_runner_container()
             _write_container_cmd_to_bash(ctx, f, tcmu_container, 'iscsi tcmu-runner container', background=True)
 
         _write_container_cmd_to_bash(ctx, f, c, '%s.%s' % (daemon_type, str(daemon_id)))
@@ -3091,7 +3091,7 @@ def deploy_daemon_units(
     with open(data_dir + '/unit.poststop.new', 'w') as f:
         if daemon_type == 'osd':
             assert osd_fsid
-            poststop = get_ceph_volume_container(
+            poststop = get_stone_volume_container(
                 ctx,
                 args=[
                     'lvm', 'deactivate',
@@ -3099,16 +3099,16 @@ def deploy_daemon_units(
                 ],
                 volume_mounts=get_container_mounts(ctx, fsid, daemon_type, daemon_id),
                 bind_mounts=get_container_binds(ctx, fsid, daemon_type, daemon_id),
-                cname='ceph-%s-%s.%s-deactivate' % (fsid, daemon_type,
+                cname='stone-%s-%s.%s-deactivate' % (fsid, daemon_type,
                                                     daemon_id),
             )
             _write_container_cmd_to_bash(ctx, f, poststop, 'deactivate osd')
-        elif daemon_type == CephIscsi.daemon_type:
+        elif daemon_type == StoneIscsi.daemon_type:
             # make sure we also stop the tcmu container
-            ceph_iscsi = CephIscsi.init(ctx, fsid, daemon_id)
-            tcmu_container = ceph_iscsi.get_tcmu_runner_container()
+            stone_iscsi = StoneIscsi.init(ctx, fsid, daemon_id)
+            tcmu_container = stone_iscsi.get_tcmu_runner_container()
             f.write('! ' + ' '.join(tcmu_container.stop_cmd()) + '\n')
-            f.write(' '.join(CephIscsi.configfs_mount_umount(data_dir, mount=False)) + '\n')
+            f.write(' '.join(StoneIscsi.configfs_mount_umount(data_dir, mount=False)) + '\n')
         os.fchmod(f.fileno(), 0o600)
         os.rename(data_dir + '/unit.poststop.new',
                   data_dir + '/unit.poststop')
@@ -3135,7 +3135,7 @@ def deploy_daemon_units(
     # systemd
     install_base_units(ctx, fsid)
     unit = get_unit_file(ctx, fsid)
-    unit_file = 'ceph-%s@.service' % (fsid)
+    unit_file = 'stone-%s@.service' % (fsid)
     with open(ctx.unit_dir + '/' + unit_file + '.new', 'w') as f:
         f.write(unit)
         os.rename(ctx.unit_dir + '/' + unit_file + '.new',
@@ -3156,7 +3156,7 @@ def deploy_daemon_units(
 
 class Firewalld(object):
     def __init__(self, ctx):
-        # type: (CephadmContext) -> None
+        # type: (StoneadmContext) -> None
         self.ctx = ctx
         self.available = self.check()
 
@@ -3184,9 +3184,9 @@ class Firewalld(object):
             return
 
         if daemon_type == 'mon':
-            svc = 'ceph-mon'
+            svc = 'stone-mon'
         elif daemon_type in ['mgr', 'mds', 'osd']:
-            svc = 'ceph'
+            svc = 'stone'
         elif daemon_type == NFSGanesha.daemon_type:
             svc = 'nfs'
         else:
@@ -3261,20 +3261,20 @@ class Firewalld(object):
 
 
 def update_firewalld(ctx, daemon_type):
-    # type: (CephadmContext, str) -> None
+    # type: (StoneadmContext, str) -> None
     if not ('skip_firewalld' in ctx and ctx.skip_firewalld):
         firewall = Firewalld(ctx)
         firewall.enable_service_for(daemon_type)
         firewall.apply_rules()
 
 
-def install_sysctl(ctx: CephadmContext, fsid: str, daemon_type: str) -> None:
+def install_sysctl(ctx: StoneadmContext, fsid: str, daemon_type: str) -> None:
     """
     Set up sysctl settings
     """
     def _write(conf: Path, lines: List[str]) -> None:
         lines = [
-            '# created by cephadm',
+            '# created by stoneadm',
             '',
             *lines,
             '',
@@ -3282,7 +3282,7 @@ def install_sysctl(ctx: CephadmContext, fsid: str, daemon_type: str) -> None:
         with open(conf, 'w') as f:
             f.write('\n'.join(lines))
 
-    conf = Path(ctx.sysctl_dir).joinpath(f'90-ceph-{fsid}-{daemon_type}.conf')
+    conf = Path(ctx.sysctl_dir).joinpath(f'90-stone-{fsid}-{daemon_type}.conf')
     lines: Optional[List] = None
 
     if daemon_type == 'osd':
@@ -3299,13 +3299,13 @@ def install_sysctl(ctx: CephadmContext, fsid: str, daemon_type: str) -> None:
         call_throws(ctx, ['sysctl', '--system'])
 
 
-def migrate_sysctl_dir(ctx: CephadmContext, fsid: str) -> None:
+def migrate_sysctl_dir(ctx: StoneadmContext, fsid: str) -> None:
     """
-    Cephadm once used '/usr/lib/sysctl.d' for storing sysctl configuration.
+    Stoneadm once used '/usr/lib/sysctl.d' for storing sysctl configuration.
     This moves it to '/etc/sysctl.d'.
     """
     deprecated_location: str = '/usr/lib/sysctl.d'
-    deprecated_confs: List[str] = glob(f'{deprecated_location}/90-ceph-{fsid}-*.conf')
+    deprecated_confs: List[str] = glob(f'{deprecated_location}/90-stone-{fsid}-*.conf')
     if not deprecated_confs:
         return
 
@@ -3341,67 +3341,67 @@ def migrate_sysctl_dir(ctx: CephadmContext, fsid: str) -> None:
 
 
 def install_base_units(ctx, fsid):
-    # type: (CephadmContext, str) -> None
+    # type: (StoneadmContext, str) -> None
     """
-    Set up ceph.target and ceph-$fsid.target units.
+    Set up stone.target and stone-$fsid.target units.
     """
     # global unit
-    existed = os.path.exists(ctx.unit_dir + '/ceph.target')
-    with open(ctx.unit_dir + '/ceph.target.new', 'w') as f:
+    existed = os.path.exists(ctx.unit_dir + '/stone.target')
+    with open(ctx.unit_dir + '/stone.target.new', 'w') as f:
         f.write('[Unit]\n'
-                'Description=All Ceph clusters and services\n'
+                'Description=All Stone clusters and services\n'
                 '\n'
                 '[Install]\n'
                 'WantedBy=multi-user.target\n')
-        os.rename(ctx.unit_dir + '/ceph.target.new',
-                  ctx.unit_dir + '/ceph.target')
+        os.rename(ctx.unit_dir + '/stone.target.new',
+                  ctx.unit_dir + '/stone.target')
     if not existed:
-        # we disable before enable in case a different ceph.target
+        # we disable before enable in case a different stone.target
         # (from the traditional package) is present; while newer
         # systemd is smart enough to disable the old
         # (/lib/systemd/...) and enable the new (/etc/systemd/...),
         # some older versions of systemd error out with EEXIST.
-        call_throws(ctx, ['systemctl', 'disable', 'ceph.target'])
-        call_throws(ctx, ['systemctl', 'enable', 'ceph.target'])
-        call_throws(ctx, ['systemctl', 'start', 'ceph.target'])
+        call_throws(ctx, ['systemctl', 'disable', 'stone.target'])
+        call_throws(ctx, ['systemctl', 'enable', 'stone.target'])
+        call_throws(ctx, ['systemctl', 'start', 'stone.target'])
 
     # cluster unit
-    existed = os.path.exists(ctx.unit_dir + '/ceph-%s.target' % fsid)
-    with open(ctx.unit_dir + '/ceph-%s.target.new' % fsid, 'w') as f:
+    existed = os.path.exists(ctx.unit_dir + '/stone-%s.target' % fsid)
+    with open(ctx.unit_dir + '/stone-%s.target.new' % fsid, 'w') as f:
         f.write(
             '[Unit]\n'
-            'Description=Ceph cluster {fsid}\n'
-            'PartOf=ceph.target\n'
-            'Before=ceph.target\n'
+            'Description=Stone cluster {fsid}\n'
+            'PartOf=stone.target\n'
+            'Before=stone.target\n'
             '\n'
             '[Install]\n'
-            'WantedBy=multi-user.target ceph.target\n'.format(
+            'WantedBy=multi-user.target stone.target\n'.format(
                 fsid=fsid)
         )
-        os.rename(ctx.unit_dir + '/ceph-%s.target.new' % fsid,
-                  ctx.unit_dir + '/ceph-%s.target' % fsid)
+        os.rename(ctx.unit_dir + '/stone-%s.target.new' % fsid,
+                  ctx.unit_dir + '/stone-%s.target' % fsid)
     if not existed:
-        call_throws(ctx, ['systemctl', 'enable', 'ceph-%s.target' % fsid])
-        call_throws(ctx, ['systemctl', 'start', 'ceph-%s.target' % fsid])
+        call_throws(ctx, ['systemctl', 'enable', 'stone-%s.target' % fsid])
+        call_throws(ctx, ['systemctl', 'start', 'stone-%s.target' % fsid])
 
     # logrotate for the cluster
-    with open(ctx.logrotate_dir + '/ceph-%s' % fsid, 'w') as f:
+    with open(ctx.logrotate_dir + '/stone-%s' % fsid, 'w') as f:
         """
-        This is a bit sloppy in that the killall/pkill will touch all ceph daemons
+        This is a bit sloppy in that the killall/pkill will touch all stone daemons
         in all containers, but I don't see an elegant way to send SIGHUP *just* to
         the daemons for this cluster.  (1) systemd kill -s will get the signal to
         podman, but podman will exit.  (2) podman kill will get the signal to the
-        first child (bash), but that isn't the ceph daemon.  This is simpler and
+        first child (bash), but that isn't the stone daemon.  This is simpler and
         should be harmless.
         """
-        f.write("""# created by cephadm
-/var/log/ceph/%s/*.log {
+        f.write("""# created by stoneadm
+/var/log/stone/%s/*.log {
     rotate 7
     daily
     compress
     sharedscripts
     postrotate
-        killall -q -1 ceph-mon ceph-mgr ceph-mds ceph-osd ceph-fuse radosgw rbd-mirror cephfs-mirror || pkill -1 -x 'ceph-mon|ceph-mgr|ceph-mds|ceph-osd|ceph-fuse|radosgw|rbd-mirror|cephfs-mirror' || true
+        killall -q -1 stone-mon stone-mgr stone-mds stone-osd stone-fuse radosgw rbd-mirror stonefs-mirror || pkill -1 -x 'stone-mon|stone-mgr|stone-mds|stone-osd|stone-fuse|radosgw|rbd-mirror|stonefs-mirror' || true
     endscript
     missingok
     notifempty
@@ -3411,7 +3411,7 @@ def install_base_units(ctx, fsid):
 
 
 def get_unit_file(ctx, fsid):
-    # type: (CephadmContext, str) -> str
+    # type: (StoneadmContext, str) -> str
     extra_args = ''
     if isinstance(ctx.container_engine, Podman):
         extra_args = ('ExecStartPre=-/bin/rm -f %t/%n-pid %t/%n-cid\n'
@@ -3422,27 +3422,27 @@ def get_unit_file(ctx, fsid):
             extra_args += 'Delegate=yes\n'
 
     docker = isinstance(ctx.container_engine, Docker)
-    u = """# generated by cephadm
+    u = """# generated by stoneadm
 [Unit]
-Description=Ceph %i for {fsid}
+Description=Stone %i for {fsid}
 
 # According to:
 #   http://www.freedesktop.org/wiki/Software/systemd/NetworkTarget
-# these can be removed once ceph-mon will dynamically change network
+# these can be removed once stone-mon will dynamically change network
 # configuration.
 After=network-online.target local-fs.target time-sync.target{docker_after}
 Wants=network-online.target local-fs.target time-sync.target
 {docker_requires}
 
-PartOf=ceph-{fsid}.target
-Before=ceph-{fsid}.target
+PartOf=stone-{fsid}.target
+Before=stone-{fsid}.target
 
 [Service]
 LimitNOFILE=1048576
 LimitNPROC=1048576
 EnvironmentFile=-/etc/environment
 ExecStart=/bin/bash {data_dir}/{fsid}/%i/unit.run
-ExecStop=-/bin/bash -c '{container_path} stop ceph-{fsid}-%i ; bash {data_dir}/{fsid}/%i/unit.stop'
+ExecStop=-/bin/bash -c '{container_path} stop stone-{fsid}-%i ; bash {data_dir}/{fsid}/%i/unit.stop'
 ExecStopPost=-/bin/bash {data_dir}/{fsid}/%i/unit.poststop
 KillMode=none
 Restart=on-failure
@@ -3453,7 +3453,7 @@ StartLimitInterval=30min
 StartLimitBurst=5
 {extra_args}
 [Install]
-WantedBy=ceph-{fsid}.target
+WantedBy=stone-{fsid}.target
 """.format(container_path=ctx.container_engine.path,
            fsid=fsid,
            data_dir=ctx.data_dir,
@@ -3467,9 +3467,9 @@ WantedBy=ceph-{fsid}.target
 ##################################
 
 
-class CephContainer:
+class StoneContainer:
     def __init__(self,
-                 ctx: CephadmContext,
+                 ctx: StoneadmContext,
                  image: str,
                  entrypoint: str,
                  args: List[str] = [],
@@ -3503,7 +3503,7 @@ class CephContainer:
 
     @classmethod
     def for_daemon(cls,
-                   ctx: CephadmContext,
+                   ctx: StoneadmContext,
                    fsid: str,
                    daemon_type: str,
                    daemon_id: str,
@@ -3519,14 +3519,14 @@ class CephContainer:
                    host_network: bool = True,
                    memory_request: Optional[str] = None,
                    memory_limit: Optional[str] = None,
-                   ) -> 'CephContainer':
+                   ) -> 'StoneContainer':
         return cls(
             ctx,
             image=ctx.image,
             entrypoint=entrypoint,
             args=args,
             volume_mounts=volume_mounts,
-            cname='ceph-%s-%s.%s' % (fsid, daemon_type, daemon_id),
+            cname='stone-%s-%s.%s' % (fsid, daemon_type, daemon_id),
             container_args=container_args,
             envs=envs,
             privileged=privileged,
@@ -3546,7 +3546,7 @@ class CephContainer:
         `hostname -f`, when we have the container names containing
         dots in it.:
 
-        # podman run --name foo.bar.baz.com ceph/ceph /bin/bash
+        # podman run --name foo.bar.baz.com stone/stone /bin/bash
         [root@sebastians-laptop /]# cat /etc/hosts
         127.0.0.1   localhost
         ::1         localhost
@@ -3581,8 +3581,8 @@ class CephContainer:
         ]
 
         if isinstance(self.ctx.container_engine, Podman):
-            if os.path.exists('/etc/ceph/podman-auth.json'):
-                cmd_args.append('--authfile=/etc/ceph/podman-auth.json')
+            if os.path.exists('/etc/stone/podman-auth.json'):
+                cmd_args.append('--authfile=/etc/stone/podman-auth.json')
 
         envs: List[str] = [
             '-e', 'CONTAINER_IMAGE=%s' % self.image,
@@ -3613,7 +3613,7 @@ class CephContainer:
             cmd_args.append('--cap-add=SYS_PTRACE')
         if self.init:
             cmd_args.append('--init')
-            envs += ['-e', 'CEPH_USE_RANDOM_NONCE=1']
+            envs += ['-e', 'STONE_USE_RANDOM_NONCE=1']
         if self.cname:
             cmd_args.extend(['--name', self.cname])
         if self.envs:
@@ -3657,7 +3657,7 @@ class CephContainer:
             ])
         if self.init:
             cmd_args.append('--init')
-            envs += ['-e', 'CEPH_USE_RANDOM_NONCE=1']
+            envs += ['-e', 'STONE_USE_RANDOM_NONCE=1']
         if self.envs:
             for env in self.envs:
                 envs.extend(['-e', env])
@@ -3716,8 +3716,8 @@ class CephContainer:
 
 @infer_image
 def command_version(ctx):
-    # type: (CephadmContext) -> int
-    c = CephContainer(ctx, ctx.image, 'ceph', ['--version'])
+    # type: (StoneadmContext) -> int
+    c = StoneContainer(ctx, ctx.image, 'stone', ['--version'])
     out, err, ret = call(ctx, c.run_cmd(), desc=c.entrypoint)
     if not ret:
         print(out.strip())
@@ -3728,7 +3728,7 @@ def command_version(ctx):
 
 @default_image
 def command_pull(ctx):
-    # type: (CephadmContext) -> int
+    # type: (StoneadmContext) -> int
 
     try:
         _pull_image(ctx, ctx.image, ctx.insecure)
@@ -3740,7 +3740,7 @@ def command_pull(ctx):
 
 
 def _pull_image(ctx, image, insecure=False):
-    # type: (CephadmContext, str, bool) -> None
+    # type: (StoneadmContext, str, bool) -> None
     logger.info('Pulling container image %s...' % image)
 
     ignorelist = [
@@ -3754,8 +3754,8 @@ def _pull_image(ctx, image, insecure=False):
         if insecure:
             cmd.append('--tls-verify=false')
 
-        if os.path.exists('/etc/ceph/podman-auth.json'):
-            cmd.append('--authfile=/etc/ceph/podman-auth.json')
+        if os.path.exists('/etc/stone/podman-auth.json'):
+            cmd.append('--authfile=/etc/stone/podman-auth.json')
     cmd_str = ' '.join(cmd)
 
     for sleep_secs in [1, 4, 25]:
@@ -3779,7 +3779,7 @@ def _pull_image(ctx, image, insecure=False):
 
 @infer_image
 def command_inspect_image(ctx):
-    # type: (CephadmContext) -> int
+    # type: (StoneadmContext) -> int
     out, err, ret = call_throws(ctx, [
         ctx.container_engine.path, 'inspect',
         '--format', '{{.ID}},{{.RepoDigests}}',
@@ -3788,8 +3788,8 @@ def command_inspect_image(ctx):
         return errno.ENOENT
     info_from = get_image_info_from_inspect(out.strip(), ctx.image)
 
-    ver = CephContainer(ctx, ctx.image, 'ceph', ['--version']).run().strip()
-    info_from['ceph_version'] = ver
+    ver = StoneContainer(ctx, ctx.image, 'stone', ['--version']).run().strip()
+    info_from['stone_version'] = ver
 
     print(json.dumps(info_from, indent=4, sort_keys=True))
     return 0
@@ -3798,23 +3798,23 @@ def command_inspect_image(ctx):
 def normalize_image_digest(digest: str) -> str:
     """
     Normal case:
-    >>> normalize_image_digest('ceph/ceph', 'docker.io')
-    'docker.io/ceph/ceph'
+    >>> normalize_image_digest('stone/stone', 'docker.io')
+    'docker.io/stone/stone'
 
     No change:
-    >>> normalize_image_digest('quay.ceph.io/ceph/ceph', 'docker.io')
-    'quay.ceph.io/ceph/ceph'
+    >>> normalize_image_digest('quay.stone.io/stone/stone', 'docker.io')
+    'quay.stone.io/stone/stone'
 
     >>> normalize_image_digest('docker.io/ubuntu', 'docker.io')
     'docker.io/ubuntu'
 
-    >>> normalize_image_digest('localhost/ceph', 'docker.io')
-    'localhost/ceph'
+    >>> normalize_image_digest('localhost/stone', 'docker.io')
+    'localhost/stone'
     """
     known_shortnames = [
-        'ceph/ceph',
-        'ceph/daemon',
-        'ceph/daemon-base',
+        'stone/stone',
+        'stone/daemon',
+        'stone/daemon-base',
     ]
     for image in known_shortnames:
         if digest.startswith(image):
@@ -3897,7 +3897,7 @@ def is_ipv6(address):
 
 
 def prepare_mon_addresses(
-    ctx: CephadmContext
+    ctx: StoneadmContext
 ) -> Tuple[str, bool, Optional[str]]:
     r = re.compile(r':(\d+)$')
     base_ip = ''
@@ -3970,7 +3970,7 @@ def prepare_mon_addresses(
     return (addr_arg, ipv6, mon_network)
 
 
-def prepare_cluster_network(ctx: CephadmContext) -> Tuple[str, bool]:
+def prepare_cluster_network(ctx: StoneadmContext) -> Tuple[str, bool]:
     cluster_network = ''
     ipv6_cluster_network = False
     # the cluster network may not exist on this node, so all we can do is
@@ -3990,7 +3990,7 @@ def prepare_cluster_network(ctx: CephadmContext) -> Tuple[str, bool]:
 
 
 def create_initial_keys(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     uid: int, gid: int,
     mgr_id: str
 ) -> Tuple[str, str, str, Any, Any]:  # type: ignore
@@ -3999,22 +3999,22 @@ def create_initial_keys(
 
     # create some initial keys
     logger.info('Creating initial keys...')
-    mon_key = CephContainer(
+    mon_key = StoneContainer(
         ctx,
         image=_image,
-        entrypoint='/usr/bin/ceph-authtool',
+        entrypoint='/usr/bin/stone-authtool',
         args=['--gen-print-key'],
     ).run().strip()
-    admin_key = CephContainer(
+    admin_key = StoneContainer(
         ctx,
         image=_image,
-        entrypoint='/usr/bin/ceph-authtool',
+        entrypoint='/usr/bin/stone-authtool',
         args=['--gen-print-key'],
     ).run().strip()
-    mgr_key = CephContainer(
+    mgr_key = StoneContainer(
         ctx,
         image=_image,
-        entrypoint='/usr/bin/ceph-authtool',
+        entrypoint='/usr/bin/stone-authtool',
         args=['--gen-print-key'],
     ).run().strip()
 
@@ -4045,14 +4045,14 @@ def create_initial_keys(
 
 
 def create_initial_monmap(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     uid: int, gid: int,
     fsid: str,
     mon_id: str, mon_addr: str
 ) -> Any:
     logger.info('Creating initial monmap...')
     monmap = write_tmp('', 0, 0)
-    out = CephContainer(
+    out = StoneContainer(
         ctx,
         image=ctx.image,
         entrypoint='/usr/bin/monmaptool',
@@ -4069,13 +4069,13 @@ def create_initial_monmap(
     ).run()
     logger.debug(f'monmaptool for {mon_id} {mon_addr} on {out}')
 
-    # pass monmap file to ceph user for use by ceph-mon --mkfs below
+    # pass monmap file to stone user for use by stone-mon --mkfs below
     os.fchown(monmap.fileno(), uid, gid)
     return monmap
 
 
 def prepare_create_mon(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     uid: int, gid: int,
     fsid: str, mon_id: str,
     bootstrap_keyring_path: str,
@@ -4085,10 +4085,10 @@ def prepare_create_mon(
     create_daemon_dirs(ctx, fsid, 'mon', mon_id, uid, gid)
     mon_dir = get_data_dir(fsid, ctx.data_dir, 'mon', mon_id)
     log_dir = get_log_dir(fsid, ctx.log_dir)
-    out = CephContainer(
+    out = StoneContainer(
         ctx,
         image=ctx.image,
-        entrypoint='/usr/bin/ceph-mon',
+        entrypoint='/usr/bin/stone-mon',
         args=[
             '--mkfs',
             '-i', mon_id,
@@ -4098,8 +4098,8 @@ def prepare_create_mon(
             '--keyring', '/tmp/keyring',
         ] + get_daemon_args(ctx, fsid, 'mon', mon_id),
         volume_mounts={
-            log_dir: '/var/log/ceph:z',
-            mon_dir: '/var/lib/ceph/mon/ceph-%s:z' % (mon_id),
+            log_dir: '/var/log/stone:z',
+            mon_dir: '/var/lib/stone/mon/stone-%s:z' % (mon_id),
             bootstrap_keyring_path: '/tmp/keyring:z',
             monmap_path: '/tmp/monmap:z',
         },
@@ -4109,7 +4109,7 @@ def prepare_create_mon(
 
 
 def create_mon(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     uid: int, gid: int,
     fsid: str, mon_id: str
 ) -> None:
@@ -4120,21 +4120,21 @@ def create_mon(
 
 
 def wait_for_mon(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     mon_id: str, mon_dir: str,
     admin_keyring_path: str, config_path: str
 ) -> None:
     logger.info('Waiting for mon to start...')
-    c = CephContainer(
+    c = StoneContainer(
         ctx,
         image=ctx.image,
-        entrypoint='/usr/bin/ceph',
+        entrypoint='/usr/bin/stone',
         args=[
             'status'],
         volume_mounts={
-            mon_dir: '/var/lib/ceph/mon/ceph-%s:z' % (mon_id),
-            admin_keyring_path: '/etc/ceph/ceph.client.admin.keyring:z',
-            config_path: '/etc/ceph/ceph.conf:z',
+            mon_dir: '/var/lib/stone/mon/stone-%s:z' % (mon_id),
+            admin_keyring_path: '/etc/stone/stone.client.admin.keyring:z',
+            config_path: '/etc/stone/stone.conf:z',
         },
     )
 
@@ -4151,7 +4151,7 @@ def wait_for_mon(
 
 
 def create_mgr(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     uid: int, gid: int,
     fsid: str, mgr_id: str, mgr_key: str,
     config: str, clifunc: Callable
@@ -4181,31 +4181,31 @@ def create_mgr(
 
 
 def prepare_ssh(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     cli: Callable, wait_for_mgr_restart: Callable
 ) -> None:
 
-    cli(['cephadm', 'set-user', ctx.ssh_user])
+    cli(['stoneadm', 'set-user', ctx.ssh_user])
 
     if ctx.ssh_config:
         logger.info('Using provided ssh config...')
         mounts = {
-            pathify(ctx.ssh_config.name): '/tmp/cephadm-ssh-config:z',
+            pathify(ctx.ssh_config.name): '/tmp/stoneadm-ssh-config:z',
         }
-        cli(['cephadm', 'set-ssh-config', '-i', '/tmp/cephadm-ssh-config'], extra_mounts=mounts)
+        cli(['stoneadm', 'set-ssh-config', '-i', '/tmp/stoneadm-ssh-config'], extra_mounts=mounts)
 
     if ctx.ssh_private_key and ctx.ssh_public_key:
         logger.info('Using provided ssh keys...')
         mounts = {
-            pathify(ctx.ssh_private_key.name): '/tmp/cephadm-ssh-key:z',
-            pathify(ctx.ssh_public_key.name): '/tmp/cephadm-ssh-key.pub:z'
+            pathify(ctx.ssh_private_key.name): '/tmp/stoneadm-ssh-key:z',
+            pathify(ctx.ssh_public_key.name): '/tmp/stoneadm-ssh-key.pub:z'
         }
-        cli(['cephadm', 'set-priv-key', '-i', '/tmp/cephadm-ssh-key'], extra_mounts=mounts)
-        cli(['cephadm', 'set-pub-key', '-i', '/tmp/cephadm-ssh-key.pub'], extra_mounts=mounts)
+        cli(['stoneadm', 'set-priv-key', '-i', '/tmp/stoneadm-ssh-key'], extra_mounts=mounts)
+        cli(['stoneadm', 'set-pub-key', '-i', '/tmp/stoneadm-ssh-key.pub'], extra_mounts=mounts)
     else:
         logger.info('Generating ssh key...')
-        cli(['cephadm', 'generate-key'])
-        ssh_pub = cli(['cephadm', 'get-pub-key'])
+        cli(['stoneadm', 'generate-key'])
+        ssh_pub = cli(['stoneadm', 'get-pub-key'])
 
         with open(ctx.output_pub_ssh_key, 'w') as f:
             f.write(ssh_pub)
@@ -4269,24 +4269,24 @@ def prepare_ssh(
             cli(['orch', 'apply', t])
 
 
-def enable_cephadm_mgr_module(
+def enable_stoneadm_mgr_module(
     cli: Callable, wait_for_mgr_restart: Callable
 ) -> None:
 
-    logger.info('Enabling cephadm module...')
-    cli(['mgr', 'module', 'enable', 'cephadm'])
+    logger.info('Enabling stoneadm module...')
+    cli(['mgr', 'module', 'enable', 'stoneadm'])
     wait_for_mgr_restart()
-    logger.info('Setting orchestrator backend to cephadm...')
-    cli(['orch', 'set', 'backend', 'cephadm'])
+    logger.info('Setting orchestrator backend to stoneadm...')
+    cli(['orch', 'set', 'backend', 'stoneadm'])
 
 
 def prepare_dashboard(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     uid: int, gid: int,
     cli: Callable, wait_for_mgr_restart: Callable
 ) -> None:
 
-    # Configure SSL port (cephadm only allows to configure dashboard SSL port)
+    # Configure SSL port (stoneadm only allows to configure dashboard SSL port)
     # if the user does not want to use SSL he can change this setting once the cluster is up
     cli(['config', 'set', 'mgr', 'mgr/dashboard/ssl_server_port', str(ctx.ssl_dashboard_port)])
 
@@ -4325,7 +4325,7 @@ def prepare_dashboard(
         fw.open_ports([port])
         fw.apply_rules()
 
-    logger.info('Ceph Dashboard is now available at:\n\n'
+    logger.info('Stone Dashboard is now available at:\n\n'
                 '\t     URL: https://%s:%s/\n'
                 '\t    User: %s\n'
                 '\tPassword: %s\n' % (
@@ -4335,7 +4335,7 @@ def prepare_dashboard(
 
 
 def prepare_bootstrap_config(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     fsid: str, mon_addr: str, image: str
 
 ) -> str:
@@ -4396,7 +4396,7 @@ def prepare_bootstrap_config(
 
 
 def finish_bootstrap_config(
-    ctx: CephadmContext,
+    ctx: StoneadmContext,
     fsid: str,
     config: str,
     mon_id: str, mon_dir: str,
@@ -4406,19 +4406,19 @@ def finish_bootstrap_config(
 
 ) -> None:
     if not ctx.no_minimize_config:
-        logger.info('Assimilating anything we can from ceph.conf...')
+        logger.info('Assimilating anything we can from stone.conf...')
         cli([
             'config', 'assimilate-conf',
-            '-i', '/var/lib/ceph/mon/ceph-%s/config' % mon_id
+            '-i', '/var/lib/stone/mon/stone-%s/config' % mon_id
         ], {
-            mon_dir: '/var/lib/ceph/mon/ceph-%s:z' % mon_id
+            mon_dir: '/var/lib/stone/mon/stone-%s:z' % mon_id
         })
-        logger.info('Generating new minimal ceph.conf...')
+        logger.info('Generating new minimal stone.conf...')
         cli([
             'config', 'generate-minimal-conf',
-            '-o', '/var/lib/ceph/mon/ceph-%s/config' % mon_id
+            '-o', '/var/lib/stone/mon/stone-%s/config' % mon_id
         ], {
-            mon_dir: '/var/lib/ceph/mon/ceph-%s:z' % mon_id
+            mon_dir: '/var/lib/stone/mon/stone-%s:z' % mon_id
         })
         # re-read our minimized config
         with open(mon_dir + '/config', 'r') as f:
@@ -4490,9 +4490,9 @@ def parse_yaml_objs(f: Iterable[str]) -> List[Dict[str, str]]:
     return objs
 
 
-def _distribute_ssh_keys(ctx: CephadmContext, host_spec: Dict[str, str], bootstrap_hostname: str) -> int:
+def _distribute_ssh_keys(ctx: StoneadmContext, host_spec: Dict[str, str], bootstrap_hostname: str) -> int:
     # copy ssh key to hosts in host spec (used for apply spec)
-    ssh_key = '/etc/ceph/ceph.pub'
+    ssh_key = '/etc/stone/stone.pub'
     if ctx.ssh_public_key:
         ssh_key = ctx.ssh_public_key.name
 
@@ -4512,15 +4512,15 @@ def _distribute_ssh_keys(ctx: CephadmContext, host_spec: Dict[str, str], bootstr
 
 @default_image
 def command_bootstrap(ctx):
-    # type: (CephadmContext) -> int
+    # type: (StoneadmContext) -> int
 
     if not ctx.output_config:
-        ctx.output_config = os.path.join(ctx.output_dir, 'ceph.conf')
+        ctx.output_config = os.path.join(ctx.output_dir, 'stone.conf')
     if not ctx.output_keyring:
         ctx.output_keyring = os.path.join(ctx.output_dir,
-                                          'ceph.client.admin.keyring')
+                                          'stone.client.admin.keyring')
     if not ctx.output_pub_ssh_key:
-        ctx.output_pub_ssh_key = os.path.join(ctx.output_dir, 'ceph.pub')
+        ctx.output_pub_ssh_key = os.path.join(ctx.output_dir, 'stone.pub')
 
     # verify output files
     for f in [ctx.output_config, ctx.output_keyring,
@@ -4574,19 +4574,19 @@ def command_bootstrap(ctx):
             logger.debug(f'Pulling image for bootstrap on {hostname} failed: {err_str}')
             raise Error(err_str)
 
-    image_ver = CephContainer(ctx, ctx.image, 'ceph', ['--version']).run().strip()
-    logger.info(f'Ceph version: {image_ver}')
+    image_ver = StoneContainer(ctx, ctx.image, 'stone', ['--version']).run().strip()
+    logger.info(f'Stone version: {image_ver}')
 
     if not ctx.allow_mismatched_release:
         image_release = image_ver.split()[4]
         if image_release not in \
                 [DEFAULT_IMAGE_RELEASE, LATEST_STABLE_RELEASE]:
             raise Error(
-                f'Container release {image_release} != cephadm release {DEFAULT_IMAGE_RELEASE};'
-                ' please use matching version of cephadm (pass --allow-mismatched-release to continue anyway)'
+                f'Container release {image_release} != stoneadm release {DEFAULT_IMAGE_RELEASE};'
+                ' please use matching version of stoneadm (pass --allow-mismatched-release to continue anyway)'
             )
 
-    logger.info('Extracting ceph user uid/gid from container image...')
+    logger.info('Extracting stone user uid/gid from container image...')
     (uid, gid) = extract_uid_gid(ctx)
 
     # create some initial keys
@@ -4613,17 +4613,17 @@ def command_bootstrap(ctx):
     def cli(cmd, extra_mounts={}, timeout=DEFAULT_TIMEOUT):
         # type: (List[str], Dict[str, str], Optional[int]) -> str
         mounts = {
-            log_dir: '/var/log/ceph:z',
-            admin_keyring.name: '/etc/ceph/ceph.client.admin.keyring:z',
-            tmp_config.name: '/etc/ceph/ceph.conf:z',
+            log_dir: '/var/log/stone:z',
+            admin_keyring.name: '/etc/stone/stone.client.admin.keyring:z',
+            tmp_config.name: '/etc/stone/stone.conf:z',
         }
         for k, v in extra_mounts.items():
             mounts[k] = v
         timeout = timeout or ctx.timeout
-        return CephContainer(
+        return StoneContainer(
             ctx,
             image=ctx.image,
-            entrypoint='/usr/bin/ceph',
+            entrypoint='/usr/bin/stone',
             args=cmd,
             volume_mounts=mounts,
         ).run(timeout=timeout)
@@ -4647,15 +4647,15 @@ def command_bootstrap(ctx):
     if user_conf:
         # user given config settings were already assimilated earlier
         # but if the given settings contained any attributes in
-        # the mgr (e.g. mgr/cephadm/container_image_prometheus)
+        # the mgr (e.g. mgr/stoneadm/container_image_prometheus)
         # they don't seem to be stored if there isn't a mgr yet.
         # Since re-assimilating the same conf settings should be
         # idempotent we can just do it again here.
         with tempfile.NamedTemporaryFile(buffering=0) as tmp:
             tmp.write(user_conf.encode('utf-8'))
             cli(['config', 'assimilate-conf',
-                 '-i', '/var/lib/ceph/user.conf'],
-                {tmp.name: '/var/lib/ceph/user.conf:z'})
+                 '-i', '/var/lib/stone/user.conf'],
+                {tmp.name: '/var/lib/stone/user.conf:z'})
 
     # wait for mgr to restart (after enabling a module)
     def wait_for_mgr_restart() -> None:
@@ -4682,7 +4682,7 @@ def command_bootstrap(ctx):
                 return False
         is_available(ctx, 'mgr epoch %d' % epoch, mgr_has_latest_epoch)
 
-    enable_cephadm_mgr_module(cli, wait_for_mgr_restart)
+    enable_stoneadm_mgr_module(cli, wait_for_mgr_restart)
 
     # ssh
     if not ctx.skip_ssh:
@@ -4690,41 +4690,41 @@ def command_bootstrap(ctx):
 
     if ctx.registry_url and ctx.registry_username and ctx.registry_password:
         registry_credentials = {'url': ctx.registry_url, 'username': ctx.registry_username, 'password': ctx.registry_password}
-        cli(['config-key', 'set', 'mgr/cephadm/registry_credentials', json.dumps(registry_credentials)])
+        cli(['config-key', 'set', 'mgr/stoneadm/registry_credentials', json.dumps(registry_credentials)])
 
-    cli(['config', 'set', 'mgr', 'mgr/cephadm/container_init', str(ctx.container_init), '--force'])
+    cli(['config', 'set', 'mgr', 'mgr/stoneadm/container_init', str(ctx.container_init), '--force'])
 
     if ctx.with_exporter:
-        cli(['config-key', 'set', 'mgr/cephadm/exporter_enabled', 'true'])
+        cli(['config-key', 'set', 'mgr/stoneadm/exporter_enabled', 'true'])
         if ctx.exporter_config:
-            logger.info('Applying custom cephadm exporter settings')
+            logger.info('Applying custom stoneadm exporter settings')
             # validated within the parser, so we can just apply to the store
             with tempfile.NamedTemporaryFile(buffering=0) as tmp:
                 tmp.write(json.dumps(ctx.exporter_config).encode('utf-8'))
                 mounts = {
                     tmp.name: '/tmp/exporter-config.json:z'
                 }
-                cli(['cephadm', 'set-exporter-config', '-i', '/tmp/exporter-config.json'], extra_mounts=mounts)
-            logger.info('-> Use ceph orch apply cephadm-exporter to deploy')
+                cli(['stoneadm', 'set-exporter-config', '-i', '/tmp/exporter-config.json'], extra_mounts=mounts)
+            logger.info('-> Use stone orch apply stoneadm-exporter to deploy')
         else:
             # generate a default SSL configuration for the exporter(s)
-            logger.info('Generating a default cephadm exporter configuration (self-signed)')
-            cli(['cephadm', 'generate-exporter-config'])
+            logger.info('Generating a default stoneadm exporter configuration (self-signed)')
+            cli(['stoneadm', 'generate-exporter-config'])
         #
-        # deploy the service (commented out until the cephadm changes are in the ceph container build)
-        logger.info('Deploying cephadm exporter service with default placement...')
-        cli(['orch', 'apply', 'cephadm-exporter'])
+        # deploy the service (commented out until the stoneadm changes are in the stone container build)
+        logger.info('Deploying stoneadm exporter service with default placement...')
+        cli(['orch', 'apply', 'stoneadm-exporter'])
 
     if not ctx.skip_dashboard:
         prepare_dashboard(ctx, uid, gid, cli, wait_for_mgr_restart)
 
-    if ctx.output_config == '/etc/ceph/ceph.conf' and not ctx.skip_admin_label:
+    if ctx.output_config == '/etc/stone/stone.conf' and not ctx.skip_admin_label:
         logger.info('Enabling client.admin keyring and conf on hosts with "admin" label')
         try:
             cli(['orch', 'client-keyring', 'set', 'client.admin', 'label:_admin'])
             cli(['orch', 'host', 'label', 'add', get_hostname(), '_admin'])
         except Exception:
-            logger.info('Unable to set up "admin" label; assuming older version of Ceph')
+            logger.info('Unable to set up "admin" label; assuming older version of Stone')
 
     if ctx.apply_spec:
         logger.info('Applying %s to cluster' % ctx.apply_spec)
@@ -4752,7 +4752,7 @@ def command_bootstrap(ctx):
     # Notify the Dashboard to show the 'Expand cluster' page on first log in.
     cli(['config-key', 'set', 'mgr/dashboard/cluster/status', 'INSTALLED'])
 
-    logger.info('You can access the Ceph CLI as following in case of multi-cluster or non-default config:\n\n'
+    logger.info('You can access the Stone CLI as following in case of multi-cluster or non-default config:\n\n'
                 '\tsudo %s shell --fsid %s -c %s -k %s\n' % (
                     sys.argv[0],
                     fsid,
@@ -4761,17 +4761,17 @@ def command_bootstrap(ctx):
 
     logger.info('Or, if you are only running a single cluster on this host:\n\n\tsudo %s shell \n' % (sys.argv[0]))
 
-    logger.info('Please consider enabling telemetry to help improve Ceph:\n\n'
-                '\tceph telemetry on\n\n'
+    logger.info('Please consider enabling telemetry to help improve Stone:\n\n'
+                '\tstone telemetry on\n\n'
                 'For more information see:\n\n'
-                '\thttps://docs.ceph.com/en/pacific/mgr/telemetry/\n')
+                '\thttps://docs.stone.com/en/pacific/mgr/telemetry/\n')
     logger.info('Bootstrap complete.')
     return 0
 
 ##################################
 
 
-def command_registry_login(ctx: CephadmContext) -> int:
+def command_registry_login(ctx: StoneadmContext) -> int:
     if ctx.registry_json:
         logger.info('Pulling custom registry login info from %s.' % ctx.registry_json)
         d = get_parm(ctx.registry_json)
@@ -4797,7 +4797,7 @@ def command_registry_login(ctx: CephadmContext) -> int:
     return 0
 
 
-def registry_login(ctx: CephadmContext, url: Optional[str], username: Optional[str], password: Optional[str]) -> None:
+def registry_login(ctx: StoneadmContext, url: Optional[str], username: Optional[str], password: Optional[str]) -> None:
     logger.info('Logging into custom registry.')
     try:
         engine = ctx.container_engine
@@ -4805,10 +4805,10 @@ def registry_login(ctx: CephadmContext, url: Optional[str], username: Optional[s
                '-u', username, '-p', password,
                url]
         if isinstance(engine, Podman):
-            cmd.append('--authfile=/etc/ceph/podman-auth.json')
+            cmd.append('--authfile=/etc/stone/podman-auth.json')
         out, _, _ = call_throws(ctx, cmd)
         if isinstance(engine, Podman):
-            os.chmod('/etc/ceph/podman-auth.json', 0o600)
+            os.chmod('/etc/stone/podman-auth.json', 0o600)
     except Exception:
         raise Error('Failed to login to custom registry @ %s as %s with given password' % (ctx.registry_url, ctx.registry_username))
 
@@ -4816,7 +4816,7 @@ def registry_login(ctx: CephadmContext, url: Optional[str], username: Optional[s
 
 
 def extract_uid_gid_monitoring(ctx, daemon_type):
-    # type: (CephadmContext, str) -> Tuple[int, int]
+    # type: (StoneadmContext, str) -> Tuple[int, int]
 
     if daemon_type == 'prometheus':
         uid, gid = extract_uid_gid(ctx, file_path='/etc/prometheus')
@@ -4831,11 +4831,11 @@ def extract_uid_gid_monitoring(ctx, daemon_type):
     return uid, gid
 
 
-def get_container_with_extra_args(ctx: CephadmContext,
+def get_container_with_extra_args(ctx: StoneadmContext,
                                   fsid: str, daemon_type: str, daemon_id: Union[int, str],
                                   privileged: bool = False,
                                   ptrace: bool = False,
-                                  container_args: Optional[List[str]] = None) -> 'CephContainer':
+                                  container_args: Optional[List[str]] = None) -> 'StoneContainer':
     # wrapper for get_container that additionally adds extra_container_args if present
     # used for deploying daemons with additional podman/docker container arguments
     c = get_container(ctx, fsid, daemon_type, daemon_id, privileged, ptrace, container_args)
@@ -4846,7 +4846,7 @@ def get_container_with_extra_args(ctx: CephadmContext,
 
 @default_image
 def command_deploy(ctx):
-    # type: (CephadmContext) -> None
+    # type: (StoneadmContext) -> None
     daemon_type, daemon_id = ctx.name.split('.', 1)
 
     lock = FileLock(ctx, ctx.fsid)
@@ -4858,7 +4858,7 @@ def command_deploy(ctx):
     redeploy = False
     unit_name = get_unit_name(ctx.fsid, daemon_type, daemon_id)
     (_, state, _) = check_unit(ctx, unit_name)
-    if state == 'running' or is_container_running(ctx, CephContainer.for_daemon(ctx, ctx.fsid, daemon_type, daemon_id, 'bash')):
+    if state == 'running' or is_container_running(ctx, StoneContainer.for_daemon(ctx, ctx.fsid, daemon_type, daemon_id, 'bash')):
         redeploy = True
 
     if ctx.reconfig:
@@ -4880,7 +4880,7 @@ def command_deploy(ctx):
         if ctx.tcp_ports:
             daemon_ports = list(map(int, ctx.tcp_ports.split()))
 
-    if daemon_type in Ceph.daemons:
+    if daemon_type in Stone.daemons:
         config, keyring = get_config_and_keyring(ctx)
         uid, gid = extract_uid_gid(ctx)
         make_var_run(ctx, ctx.fsid, uid, gid)
@@ -4928,7 +4928,7 @@ def command_deploy(ctx):
                       reconfig=ctx.reconfig,
                       ports=daemon_ports)
 
-    elif daemon_type == CephIscsi.daemon_type:
+    elif daemon_type == StoneIscsi.daemon_type:
         config, keyring = get_config_and_keyring(ctx)
         uid, gid = extract_uid_gid(ctx)
         c = get_container_with_extra_args(ctx, ctx.fsid, daemon_type, daemon_id)
@@ -4965,16 +4965,16 @@ def command_deploy(ctx):
                       keyring=None, reconfig=ctx.reconfig,
                       ports=daemon_ports)
 
-    elif daemon_type == CephadmDaemon.daemon_type:
+    elif daemon_type == StoneadmDaemon.daemon_type:
         # get current user gid and uid
         uid = os.getuid()
         gid = os.getgid()
         config_js = get_parm(ctx.config_json)  # type: Dict[str, str]
         if not daemon_ports:
-            logger.info('cephadm-exporter will use default port ({})'.format(CephadmDaemon.default_port))
-            daemon_ports = [CephadmDaemon.default_port]
+            logger.info('stoneadm-exporter will use default port ({})'.format(StoneadmDaemon.default_port))
+            daemon_ports = [StoneadmDaemon.default_port]
 
-        CephadmDaemon.validate_config(config_js)
+        StoneadmDaemon.validate_config(config_js)
 
         deploy_daemon(ctx, ctx.fsid, daemon_type, daemon_id, None,
                       uid, gid, ports=daemon_ports)
@@ -4995,7 +4995,7 @@ def command_deploy(ctx):
 
 @infer_image
 def command_run(ctx):
-    # type: (CephadmContext) -> int
+    # type: (StoneadmContext) -> int
     (daemon_type, daemon_id) = ctx.name.split('.', 1)
     c = get_container(ctx, ctx.fsid, daemon_type, daemon_id)
     command = c.run_cmd()
@@ -5009,11 +5009,11 @@ def command_run(ctx):
 @infer_image
 @validate_fsid
 def command_shell(ctx):
-    # type: (CephadmContext) -> int
+    # type: (StoneadmContext) -> int
     cp = read_config(ctx.config)
     if cp.has_option('global', 'fsid') and \
        cp.get('global', 'fsid') != ctx.fsid:
-        raise Error('fsid does not match ceph.conf')
+        raise Error('fsid does not match stone.conf')
 
     if ctx.name:
         if '.' in ctx.name:
@@ -5025,13 +5025,13 @@ def command_shell(ctx):
         daemon_type = 'osd'  # get the most mounts
         daemon_id = None
 
-    if ctx.fsid and daemon_type in Ceph.daemons:
+    if ctx.fsid and daemon_type in Stone.daemons:
         make_log_dir(ctx, ctx.fsid)
 
     if daemon_id and not ctx.fsid:
         raise Error('must pass --fsid to specify cluster')
 
-    # use /etc/ceph files by default, if present.  we do this instead of
+    # use /etc/stone files by default, if present.  we do this instead of
     # making these defaults in the arg parser because we don't want an error
     # if they don't exist.
     if not ctx.keyring and os.path.exists(SHELL_DEFAULT_KEYRING):
@@ -5042,9 +5042,9 @@ def command_shell(ctx):
                                   no_config=True if ctx.config else False)
     binds = get_container_binds(ctx, ctx.fsid, daemon_type, daemon_id)
     if ctx.config:
-        mounts[pathify(ctx.config)] = '/etc/ceph/ceph.conf:z'
+        mounts[pathify(ctx.config)] = '/etc/stone/stone.conf:z'
     if ctx.keyring:
-        mounts[pathify(ctx.keyring)] = '/etc/ceph/ceph.keyring:z'
+        mounts[pathify(ctx.keyring)] = '/etc/stone/stone.keyring:z'
     if ctx.mount:
         for _mount in ctx.mount:
             split_src_dst = _mount.split(':')
@@ -5082,7 +5082,7 @@ def command_shell(ctx):
         a, b = i.split(':', 1)
         mounts[a] = b
 
-    c = CephContainer(
+    c = StoneContainer(
         ctx,
         image=ctx.image,
         entrypoint='doesnotmatter',
@@ -5101,7 +5101,7 @@ def command_shell(ctx):
 
 @infer_fsid
 def command_enter(ctx):
-    # type: (CephadmContext) -> int
+    # type: (StoneadmContext) -> int
     if not ctx.fsid:
         raise Error('must pass --fsid to specify cluster')
     (daemon_type, daemon_id) = ctx.name.split('.', 1)
@@ -5115,12 +5115,12 @@ def command_enter(ctx):
             '-e', 'LANG=C',
             '-e', 'PS1=%s' % CUSTOM_PS1,
         ]
-    c = CephContainer(
+    c = StoneContainer(
         ctx,
         image=ctx.image,
         entrypoint='doesnotmatter',
         container_args=container_args,
-        cname='ceph-%s-%s.%s' % (ctx.fsid, daemon_type, daemon_id),
+        cname='stone-%s-%s.%s' % (ctx.fsid, daemon_type, daemon_id),
     )
     command = c.exec_cmd(command)
     return call_timeout(ctx, command, ctx.timeout)
@@ -5131,12 +5131,12 @@ def command_enter(ctx):
 @infer_fsid
 @infer_image
 @validate_fsid
-def command_ceph_volume(ctx):
-    # type: (CephadmContext) -> None
+def command_stone_volume(ctx):
+    # type: (StoneadmContext) -> None
     cp = read_config(ctx.config)
     if cp.has_option('global', 'fsid') and \
        cp.get('global', 'fsid') != ctx.fsid:
-        raise Error('fsid does not match ceph.conf')
+        raise Error('fsid does not match stone.conf')
 
     if ctx.fsid:
         make_log_dir(ctx, ctx.fsid)
@@ -5144,7 +5144,7 @@ def command_ceph_volume(ctx):
         lock = FileLock(ctx, ctx.fsid)
         lock.acquire()
 
-    (uid, gid) = (0, 0)  # ceph-volume runs as root
+    (uid, gid) = (0, 0)  # stone-volume runs as root
     mounts = get_container_mounts(ctx, ctx.fsid, 'osd', None)
 
     tmp_config = None
@@ -5155,14 +5155,14 @@ def command_ceph_volume(ctx):
     if config:
         # tmp config file
         tmp_config = write_tmp(config, uid, gid)
-        mounts[tmp_config.name] = '/etc/ceph/ceph.conf:z'
+        mounts[tmp_config.name] = '/etc/stone/stone.conf:z'
 
     if keyring:
         # tmp keyring file
         tmp_keyring = write_tmp(keyring, uid, gid)
-        mounts[tmp_keyring.name] = '/var/lib/ceph/bootstrap-osd/ceph.keyring:z'
+        mounts[tmp_keyring.name] = '/var/lib/stone/bootstrap-osd/stone.keyring:z'
 
-    c = get_ceph_volume_container(
+    c = get_stone_volume_container(
         ctx,
         envs=ctx.env,
         args=ctx.command,
@@ -5178,7 +5178,7 @@ def command_ceph_volume(ctx):
 
 @infer_fsid
 def command_unit(ctx):
-    # type: (CephadmContext) -> None
+    # type: (StoneadmContext) -> None
     if not ctx.fsid:
         raise Error('must pass --fsid to specify cluster')
 
@@ -5197,7 +5197,7 @@ def command_unit(ctx):
 
 @infer_fsid
 def command_logs(ctx):
-    # type: (CephadmContext) -> None
+    # type: (StoneadmContext) -> None
     if not ctx.fsid:
         raise Error('must pass --fsid to specify cluster')
 
@@ -5217,7 +5217,7 @@ def command_logs(ctx):
 
 
 def list_networks(ctx):
-    # type: (CephadmContext) -> Dict[str,Dict[str, Set[str]]]
+    # type: (StoneadmContext) -> Dict[str,Dict[str, Set[str]]]
 
     # sadly, 18.04's iproute2 4.15.0-2ubun doesn't support the -j flag,
     # so we'll need to use a regex to parse 'ip' command output.
@@ -5230,7 +5230,7 @@ def list_networks(ctx):
     return res
 
 
-def _list_ipv4_networks(ctx: CephadmContext) -> Dict[str, Dict[str, Set[str]]]:
+def _list_ipv4_networks(ctx: StoneadmContext) -> Dict[str, Dict[str, Set[str]]]:
     execstr: Optional[str] = find_executable('ip')
     if not execstr:
         raise FileNotFoundError("unable to find 'ip' command")
@@ -5256,7 +5256,7 @@ def _parse_ipv4_route(out: str) -> Dict[str, Dict[str, Set[str]]]:
     return r
 
 
-def _list_ipv6_networks(ctx: CephadmContext) -> Dict[str, Dict[str, Set[str]]]:
+def _list_ipv6_networks(ctx: StoneadmContext) -> Dict[str, Dict[str, Set[str]]]:
     execstr: Optional[str] = find_executable('ip')
     if not execstr:
         raise FileNotFoundError("unable to find 'ip' command")
@@ -5304,7 +5304,7 @@ def _parse_ipv6_route(routes: str, ips: str) -> Dict[str, Dict[str, Set[str]]]:
 
 
 def command_list_networks(ctx):
-    # type: (CephadmContext) -> None
+    # type: (StoneadmContext) -> None
     r = list_networks(ctx)
 
     def serialize_sets(obj: Any) -> Any:
@@ -5316,7 +5316,7 @@ def command_list_networks(ctx):
 
 
 def command_ls(ctx):
-    # type: (CephadmContext) -> None
+    # type: (StoneadmContext) -> None
     ls = list_daemons(ctx, detail=not ctx.no_detail,
                       legacy_dir=ctx.legacy_dir)
     print(json.dumps(ls, indent=4))
@@ -5344,7 +5344,7 @@ def with_units_to_int(v: str) -> int:
 
 
 def list_daemons(ctx, detail=True, legacy_dir=None):
-    # type: (CephadmContext, bool, Optional[str]) -> List[Dict[str, str]]
+    # type: (StoneadmContext, bool, Optional[str]) -> List[Dict[str, str]]
     host_version: Optional[str] = None
     ls = []
     container_path = ctx.container_engine.path
@@ -5353,7 +5353,7 @@ def list_daemons(ctx, detail=True, legacy_dir=None):
     if legacy_dir is not None:
         data_dir = os.path.abspath(legacy_dir + data_dir)
 
-    # keep track of ceph versions we see
+    # keep track of stone versions we see
     seen_versions = {}  # type: Dict[str, Optional[str]]
 
     # keep track of image digests
@@ -5368,7 +5368,7 @@ def list_daemons(ctx, detail=True, legacy_dir=None):
     )
     seen_memusage_cid_len, seen_memusage = _parse_mem_usage(code, out)
 
-    # /var/lib/ceph
+    # /var/lib/stone
     if os.path.exists(data_dir):
         for i in os.listdir(data_dir):
             if i in ['mon', 'osd', 'mds', 'mgr']:
@@ -5380,7 +5380,7 @@ def list_daemons(ctx, detail=True, legacy_dir=None):
                     fsid = get_legacy_daemon_fsid(ctx,
                                                   cluster, daemon_type, daemon_id,
                                                   legacy_dir=legacy_dir)
-                    legacy_unit_name = 'ceph-%s@%s' % (daemon_type, daemon_id)
+                    legacy_unit_name = 'stone-%s@%s' % (daemon_type, daemon_id)
                     val: Dict[str, Any] = {
                         'style': 'legacy',
                         'name': '%s.%s' % (daemon_type, daemon_id),
@@ -5393,9 +5393,9 @@ def list_daemons(ctx, detail=True, legacy_dir=None):
                         if not host_version:
                             try:
                                 out, err, code = call(ctx,
-                                                      ['ceph', '-v'],
+                                                      ['stone', '-v'],
                                                       verbosity=CallVerbosity.DEBUG)
-                                if not code and out.startswith('ceph version '):
+                                if not code and out.startswith('stone version '):
                                     host_version = out.split(' ')[2]
                             except Exception:
                                 pass
@@ -5413,7 +5413,7 @@ def list_daemons(ctx, detail=True, legacy_dir=None):
                     else:
                         continue
                     val = {
-                        'style': 'cephadm:v1',
+                        'style': 'stoneadm:v1',
                         'name': name,
                         'fsid': fsid,
                         'systemd_unit': unit_name,
@@ -5458,16 +5458,16 @@ def list_daemons(ctx, detail=True, legacy_dir=None):
                                 version = seen_versions.get(image_id, None)
                             if daemon_type == NFSGanesha.daemon_type:
                                 version = NFSGanesha.get_version(ctx, container_id)
-                            if daemon_type == CephIscsi.daemon_type:
-                                version = CephIscsi.get_version(ctx, container_id)
+                            if daemon_type == StoneIscsi.daemon_type:
+                                version = StoneIscsi.get_version(ctx, container_id)
                             elif not version:
-                                if daemon_type in Ceph.daemons:
+                                if daemon_type in Stone.daemons:
                                     out, err, code = call(ctx,
                                                           [container_path, 'exec', container_id,
-                                                           'ceph', '-v'],
+                                                           'stone', '-v'],
                                                           verbosity=CallVerbosity.DEBUG)
                                     if not code and \
-                                       out.startswith('ceph version '):
+                                       out.startswith('stone version '):
                                         version = out.split(' ')[2]
                                         seen_versions[image_id] = version
                                 elif daemon_type == 'grafana':
@@ -5571,7 +5571,7 @@ def _parse_mem_usage(code: int, out: str) -> Tuple[int, Dict[str, int]]:
 
 
 def get_daemon_description(ctx, fsid, name, detail=False, legacy_dir=None):
-    # type: (CephadmContext, str, str, bool, Optional[str]) -> Dict[str, str]
+    # type: (StoneadmContext, str, str, bool, Optional[str]) -> Dict[str, str]
 
     for d in list_daemons(ctx, detail=detail, legacy_dir=legacy_dir):
         if d['fsid'] != fsid:
@@ -5579,16 +5579,16 @@ def get_daemon_description(ctx, fsid, name, detail=False, legacy_dir=None):
         if d['name'] != name:
             continue
         return d
-    raise Error('Daemon not found: {}. See `cephadm ls`'.format(name))
+    raise Error('Daemon not found: {}. See `stoneadm ls`'.format(name))
 
 
-def get_container_stats(ctx: CephadmContext, container_path: str, fsid: str, daemon_type: str, daemon_id: str) -> Tuple[str, str, int]:
-    c = CephContainer.for_daemon(ctx, fsid, daemon_type, daemon_id, 'bash')
+def get_container_stats(ctx: StoneadmContext, container_path: str, fsid: str, daemon_type: str, daemon_id: str) -> Tuple[str, str, int]:
+    c = StoneContainer.for_daemon(ctx, fsid, daemon_type, daemon_id, 'bash')
     out, err, code = '', '', -1
     for name in (c.cname, c.old_cname):
         cmd = [
             container_path, 'inspect',
-            '--format', '{{.Id}},{{.Config.Image}},{{.Image}},{{.Created}},{{index .Config.Labels "io.ceph.version"}}',
+            '--format', '{{.Id}},{{.Config.Image}},{{.Image}},{{.Created}},{{index .Config.Labels "io.stone.version"}}',
             name
         ]
         out, err, code = call(ctx, cmd, verbosity=CallVerbosity.DEBUG)
@@ -5601,13 +5601,13 @@ def get_container_stats(ctx: CephadmContext, container_path: str, fsid: str, dae
 
 @default_image
 def command_adopt(ctx):
-    # type: (CephadmContext) -> None
+    # type: (StoneadmContext) -> None
 
     if not ctx.skip_pull:
         try:
             _pull_image(ctx, ctx.image)
         except UnauthorizedRegistryError:
-            err_str = 'Failed to pull container image. Host may not be logged into container registry. Try `cephadm registry-login --registry-url <url> --registry-username <username> --registry-password <password>` or supply login info via a json file with `cephadm registry-login --registry-json <file>`'
+            err_str = 'Failed to pull container image. Host may not be logged into container registry. Try `stoneadm registry-login --registry-url <url> --registry-username <username> --registry-password <password>` or supply login info via a json file with `stoneadm registry-login --registry-json <file>`'
             logger.debug(f'Pulling image for `command_adopt` failed: {err_str}')
             raise Error(err_str)
 
@@ -5624,13 +5624,13 @@ def command_adopt(ctx):
                                   daemon_id,
                                   legacy_dir=ctx.legacy_dir)
     if not fsid:
-        raise Error('could not detect legacy fsid; set fsid in ceph.conf')
+        raise Error('could not detect legacy fsid; set fsid in stone.conf')
     lock = FileLock(ctx, fsid)
     lock.acquire()
 
     # call correct adoption
-    if daemon_type in Ceph.daemons:
-        command_adopt_ceph(ctx, daemon_type, daemon_id, fsid)
+    if daemon_type in Stone.daemons:
+        command_adopt_stone(ctx, daemon_type, daemon_id, fsid)
     elif daemon_type == 'prometheus':
         command_adopt_prometheus(ctx, daemon_id, fsid)
     elif daemon_type == 'grafana':
@@ -5645,7 +5645,7 @@ def command_adopt(ctx):
 
 class AdoptOsd(object):
     def __init__(self, ctx, osd_data_dir, osd_id):
-        # type: (CephadmContext, str, str) -> None
+        # type: (StoneadmContext, str, str) -> None
         self.ctx = ctx
         self.osd_data_dir = osd_data_dir
         self.osd_id = osd_id
@@ -5674,7 +5674,7 @@ class AdoptOsd(object):
         # type: () -> Tuple[Optional[str], Optional[str]]
         osd_fsid, osd_type = None, None
 
-        c = get_ceph_volume_container(
+        c = get_stone_volume_container(
             self.ctx,
             args=['lvm', 'list', '--format=json'],
         )
@@ -5684,16 +5684,16 @@ class AdoptOsd(object):
                 js = json.loads(out)
                 if self.osd_id in js:
                     logger.info('Found offline LVM OSD {}'.format(self.osd_id))
-                    osd_fsid = js[self.osd_id][0]['tags']['ceph.osd_fsid']
+                    osd_fsid = js[self.osd_id][0]['tags']['stone.osd_fsid']
                     for device in js[self.osd_id]:
-                        if device['tags']['ceph.type'] == 'block':
+                        if device['tags']['stone.type'] == 'block':
                             osd_type = 'bluestore'
                             break
-                        if device['tags']['ceph.type'] == 'data':
+                        if device['tags']['stone.type'] == 'data':
                             osd_type = 'filestore'
                             break
             except ValueError as e:
-                logger.info('Invalid JSON in ceph-volume lvm list: {}'.format(e))
+                logger.info('Invalid JSON in stone-volume lvm list: {}'.format(e))
 
         return osd_fsid, osd_type
 
@@ -5701,7 +5701,7 @@ class AdoptOsd(object):
         # type: () -> Tuple[Optional[str], Optional[str]]
         osd_fsid, osd_type = None, None
 
-        osd_file = glob('/etc/ceph/osd/{}-[a-f0-9-]*.json'.format(self.osd_id))
+        osd_file = glob('/etc/stone/osd/{}-[a-f0-9-]*.json'.format(self.osd_id))
         if len(osd_file) == 1:
             with open(osd_file[0], 'r') as f:
                 try:
@@ -5719,12 +5719,12 @@ class AdoptOsd(object):
         return osd_fsid, osd_type
 
 
-def command_adopt_ceph(ctx, daemon_type, daemon_id, fsid):
-    # type: (CephadmContext, str, str, str) -> None
+def command_adopt_stone(ctx, daemon_type, daemon_id, fsid):
+    # type: (StoneadmContext, str, str, str) -> None
 
     (uid, gid) = extract_uid_gid(ctx)
 
-    data_dir_src = ('/var/lib/ceph/%s/%s-%s' %
+    data_dir_src = ('/var/lib/stone/%s/%s-%s' %
                     (daemon_type, ctx.cluster, daemon_id))
     data_dir_src = os.path.abspath(ctx.legacy_dir + data_dir_src)
 
@@ -5746,12 +5746,12 @@ def command_adopt_ceph(ctx, daemon_type, daemon_id, fsid):
         logger.info('objectstore_type is %s' % osd_type)
         assert osd_type
         if osd_type == 'filestore':
-            raise Error('FileStore is not supported by cephadm')
+            raise Error('FileStore is not supported by stoneadm')
 
     # NOTE: implicit assumption here that the units correspond to the
-    # cluster we are adopting based on the /etc/{defaults,sysconfig}/ceph
+    # cluster we are adopting based on the /etc/{defaults,sysconfig}/stone
     # CLUSTER field.
-    unit_name = 'ceph-%s@%s' % (daemon_type, daemon_id)
+    unit_name = 'stone-%s@%s' % (daemon_type, daemon_id)
     (enabled, state, _) = check_unit(ctx, unit_name)
     if state == 'running':
         logger.info('Stopping old systemd unit %s...' % unit_name)
@@ -5796,32 +5796,32 @@ def command_adopt_ceph(ctx, daemon_type, daemon_id, fsid):
             if os.path.exists(p):
                 logger.info('Chowning %s...' % p)
                 os.chown(p, uid, gid)
-        # disable the ceph-volume 'simple' mode files on the host
-        simple_fn = os.path.join('/etc/ceph/osd',
+        # disable the stone-volume 'simple' mode files on the host
+        simple_fn = os.path.join('/etc/stone/osd',
                                  '%s-%s.json' % (daemon_id, osd_fsid))
         if os.path.exists(simple_fn):
-            new_fn = simple_fn + '.adopted-by-cephadm'
+            new_fn = simple_fn + '.adopted-by-stoneadm'
             logger.info('Renaming %s -> %s', simple_fn, new_fn)
             os.rename(simple_fn, new_fn)
-            logger.info('Disabling host unit ceph-volume@ simple unit...')
+            logger.info('Disabling host unit stone-volume@ simple unit...')
             call(ctx, ['systemctl', 'disable',
-                       'ceph-volume@simple-%s-%s.service' % (daemon_id, osd_fsid)])
+                       'stone-volume@simple-%s-%s.service' % (daemon_id, osd_fsid)])
         else:
             # assume this is an 'lvm' c-v for now, but don't error
             # out if it's not.
-            logger.info('Disabling host unit ceph-volume@ lvm unit...')
+            logger.info('Disabling host unit stone-volume@ lvm unit...')
             call(ctx, ['systemctl', 'disable',
-                       'ceph-volume@lvm-%s-%s.service' % (daemon_id, osd_fsid)])
+                       'stone-volume@lvm-%s-%s.service' % (daemon_id, osd_fsid)])
 
     # config
-    config_src = '/etc/ceph/%s.conf' % (ctx.cluster)
+    config_src = '/etc/stone/%s.conf' % (ctx.cluster)
     config_src = os.path.abspath(ctx.legacy_dir + config_src)
     config_dst = os.path.join(data_dir_dst, 'config')
     copy_files(ctx, [config_src], config_dst, uid=uid, gid=gid)
 
     # logs
     logger.info('Moving logs...')
-    log_dir_src = ('/var/log/ceph/%s-%s.%s.log*' %
+    log_dir_src = ('/var/log/stone/%s-%s.%s.log*' %
                    (ctx.cluster, daemon_type, daemon_id))
     log_dir_src = os.path.abspath(ctx.legacy_dir + log_dir_src)
     log_dir_dst = make_log_dir(ctx, fsid, uid=uid, gid=gid)
@@ -5840,7 +5840,7 @@ def command_adopt_ceph(ctx, daemon_type, daemon_id, fsid):
 
 
 def command_adopt_prometheus(ctx, daemon_id, fsid):
-    # type: (CephadmContext, str, str) -> None
+    # type: (StoneadmContext, str, str) -> None
     daemon_type = 'prometheus'
     (uid, gid) = extract_uid_gid_monitoring(ctx, daemon_type)
 
@@ -5869,7 +5869,7 @@ def command_adopt_prometheus(ctx, daemon_id, fsid):
 
 
 def command_adopt_grafana(ctx, daemon_id, fsid):
-    # type: (CephadmContext, str, str) -> None
+    # type: (StoneadmContext, str, str) -> None
 
     daemon_type = 'grafana'
     (uid, gid) = extract_uid_gid_monitoring(ctx, daemon_type)
@@ -5923,7 +5923,7 @@ def command_adopt_grafana(ctx, daemon_id, fsid):
 
 
 def command_adopt_alertmanager(ctx, daemon_id, fsid):
-    # type: (CephadmContext, str, str) -> None
+    # type: (StoneadmContext, str, str) -> None
 
     daemon_type = 'alertmanager'
     (uid, gid) = extract_uid_gid_monitoring(ctx, daemon_type)
@@ -5979,7 +5979,7 @@ def _adjust_grafana_ini(filename):
 
 
 def _stop_and_disable(ctx, unit_name):
-    # type: (CephadmContext, str) -> None
+    # type: (StoneadmContext, str) -> None
 
     (enabled, state, _) = check_unit(ctx, unit_name)
     if state == 'running':
@@ -5993,7 +5993,7 @@ def _stop_and_disable(ctx, unit_name):
 
 
 def command_rm_daemon(ctx):
-    # type: (CephadmContext) -> None
+    # type: (StoneadmContext) -> None
     lock = FileLock(ctx, ctx.fsid)
     lock.acquire()
 
@@ -6022,16 +6022,16 @@ def command_rm_daemon(ctx):
         os.rename(data_dir,
                   os.path.join(backup_dir, dirname))
     else:
-        if daemon_type == CephadmDaemon.daemon_type:
-            CephadmDaemon.uninstall(ctx, ctx.fsid, daemon_type, daemon_id)
+        if daemon_type == StoneadmDaemon.daemon_type:
+            StoneadmDaemon.uninstall(ctx, ctx.fsid, daemon_type, daemon_id)
         call_throws(ctx, ['rm', '-rf', data_dir])
 
 ##################################
 
 
-def _zap(ctx: CephadmContext, what: str) -> None:
-    mounts = get_container_mounts(ctx, ctx.fsid, 'clusterless-ceph-volume', None)
-    c = get_ceph_volume_container(ctx,
+def _zap(ctx: StoneadmContext, what: str) -> None:
+    mounts = get_container_mounts(ctx, ctx.fsid, 'clusterless-stone-volume', None)
+    c = get_stone_volume_container(ctx,
                                   args=['lvm', 'zap', '--destroy', what],
                                   volume_mounts=mounts,
                                   envs=ctx.env)
@@ -6040,12 +6040,12 @@ def _zap(ctx: CephadmContext, what: str) -> None:
 
 
 @infer_image
-def _zap_osds(ctx: CephadmContext) -> None:
+def _zap_osds(ctx: StoneadmContext) -> None:
     # assume fsid lock already held
 
     # list
-    mounts = get_container_mounts(ctx, ctx.fsid, 'clusterless-ceph-volume', None)
-    c = get_ceph_volume_container(ctx,
+    mounts = get_container_mounts(ctx, ctx.fsid, 'clusterless-stone-volume', None)
+    c = get_stone_volume_container(ctx,
                                   args=['inventory', '--format', 'json'],
                                   volume_mounts=mounts,
                                   envs=ctx.env)
@@ -6055,7 +6055,7 @@ def _zap_osds(ctx: CephadmContext) -> None:
     try:
         ls = json.loads(out)
     except ValueError as e:
-        raise Error(f'Invalid JSON in ceph-volume inventory: {e}')
+        raise Error(f'Invalid JSON in stone-volume inventory: {e}')
 
     for i in ls:
         matches = [lv.get('cluster_fsid') == ctx.fsid for lv in i.get('lvs', [])]
@@ -6068,7 +6068,7 @@ def _zap_osds(ctx: CephadmContext) -> None:
             logger.warning(f'Not zapping LVs (not implemented): {lv_names}')
 
 
-def command_zap_osds(ctx: CephadmContext) -> None:
+def command_zap_osds(ctx: StoneadmContext) -> None:
     if not ctx.force:
         raise Error('must pass --force to proceed: '
                     'this command may destroy precious data!')
@@ -6081,12 +6081,12 @@ def command_zap_osds(ctx: CephadmContext) -> None:
 ##################################
 
 
-def get_ceph_cluster_count(ctx: CephadmContext) -> int:
+def get_stone_cluster_count(ctx: StoneadmContext) -> int:
     return len([c for c in os.listdir(ctx.data_dir) if is_fsid(c)])
 
 
 def command_rm_cluster(ctx):
-    # type: (CephadmContext) -> None
+    # type: (StoneadmContext) -> None
     if not ctx.force:
         raise Error('must pass --force to proceed: '
                     'this command may destroy precious data!')
@@ -6106,15 +6106,15 @@ def command_rm_cluster(ctx):
     for d in list_daemons(ctx, detail=False):
         if d['fsid'] != ctx.fsid:
             continue
-        if d['style'] != 'cephadm:v1':
+        if d['style'] != 'stoneadm:v1':
             continue
         disable_systemd_service(get_unit_name(ctx.fsid, d['name']))
 
     # cluster units
-    for unit_name in ['ceph-%s.target' % ctx.fsid]:
+    for unit_name in ['stone-%s.target' % ctx.fsid]:
         disable_systemd_service(unit_name)
 
-    slice_name = 'system-ceph\\x2d{}.slice'.format(ctx.fsid.replace('-', '\\x2d'))
+    slice_name = 'system-stone\\x2d{}.slice'.format(ctx.fsid.replace('-', '\\x2d'))
     call(ctx, ['systemctl', 'stop', slice_name],
          verbosity=CallVerbosity.DEBUG)
 
@@ -6124,11 +6124,11 @@ def command_rm_cluster(ctx):
 
     # rm units
     call_throws(ctx, ['rm', '-f', ctx.unit_dir
-                      + '/ceph-%s@.service' % ctx.fsid])
+                      + '/stone-%s@.service' % ctx.fsid])
     call_throws(ctx, ['rm', '-f', ctx.unit_dir
-                      + '/ceph-%s.target' % ctx.fsid])
+                      + '/stone-%s.target' % ctx.fsid])
     call_throws(ctx, ['rm', '-rf',
-                      ctx.unit_dir + '/ceph-%s.target.wants' % ctx.fsid])
+                      ctx.unit_dir + '/stone-%s.target.wants' % ctx.fsid])
     # rm data
     call_throws(ctx, ['rm', '-rf', ctx.data_dir + '/' + ctx.fsid])
 
@@ -6136,48 +6136,48 @@ def command_rm_cluster(ctx):
         # rm logs
         call_throws(ctx, ['rm', '-rf', ctx.log_dir + '/' + ctx.fsid])
         call_throws(ctx, ['rm', '-rf', ctx.log_dir
-                          + '/*.wants/ceph-%s@*' % ctx.fsid])
+                          + '/*.wants/stone-%s@*' % ctx.fsid])
 
     # rm logrotate config
-    call_throws(ctx, ['rm', '-f', ctx.logrotate_dir + '/ceph-%s' % ctx.fsid])
+    call_throws(ctx, ['rm', '-f', ctx.logrotate_dir + '/stone-%s' % ctx.fsid])
 
     # if last cluster on host remove shared files
-    if get_ceph_cluster_count(ctx) == 0:
-        disable_systemd_service('ceph.target')
+    if get_stone_cluster_count(ctx) == 0:
+        disable_systemd_service('stone.target')
 
-        # rm shared ceph target files
-        call_throws(ctx, ['rm', '-f', ctx.unit_dir + '/multi-user.target.wants/ceph.target'])
-        call_throws(ctx, ['rm', '-f', ctx.unit_dir + '/ceph.target'])
+        # rm shared stone target files
+        call_throws(ctx, ['rm', '-f', ctx.unit_dir + '/multi-user.target.wants/stone.target'])
+        call_throws(ctx, ['rm', '-f', ctx.unit_dir + '/stone.target'])
 
-        # rm cephadm logrotate config
-        call_throws(ctx, ['rm', '-f', ctx.logrotate_dir + '/cephadm'])
+        # rm stoneadm logrotate config
+        call_throws(ctx, ['rm', '-f', ctx.logrotate_dir + '/stoneadm'])
 
         if not ctx.keep_logs:
-            # remove all cephadm logs
-            for fname in glob(f'{ctx.log_dir}/cephadm.log*'):
+            # remove all stoneadm logs
+            for fname in glob(f'{ctx.log_dir}/stoneadm.log*'):
                 os.remove(fname)
 
     # rm sysctl settings
     sysctl_dirs: List[Path] = [Path(ctx.sysctl_dir), Path('/usr/lib/sysctl.d')]
 
     for sysctl_dir in sysctl_dirs:
-        for p in sysctl_dir.glob(f'90-ceph-{ctx.fsid}-*.conf'):
+        for p in sysctl_dir.glob(f'90-stone-{ctx.fsid}-*.conf'):
             p.unlink()
 
-    # cleanup remaining ceph directories
-    ceph_dirs = [f'/run/ceph/{ctx.fsid}', f'/tmp/var/lib/ceph/{ctx.fsid}', f'/var/run/ceph/{ctx.fsid}']
-    for dd in ceph_dirs:
+    # cleanup remaining stone directories
+    stone_dirs = [f'/run/stone/{ctx.fsid}', f'/tmp/var/lib/stone/{ctx.fsid}', f'/var/run/stone/{ctx.fsid}']
+    for dd in stone_dirs:
         shutil.rmtree(dd, ignore_errors=True)
 
     # clean up config, keyring, and pub key files
-    files = ['/etc/ceph/ceph.conf', '/etc/ceph/ceph.pub', '/etc/ceph/ceph.client.admin.keyring']
+    files = ['/etc/stone/stone.conf', '/etc/stone/stone.pub', '/etc/stone/stone.client.admin.keyring']
     if os.path.exists(files[0]):
         valid_fsid = False
         with open(files[0]) as f:
             if ctx.fsid in f.read():
                 valid_fsid = True
         if valid_fsid:
-            # rm configuration files on /etc/ceph
+            # rm configuration files on /etc/stone
             for n in range(0, len(files)):
                 if os.path.exists(files[n]):
                     os.remove(files[n])
@@ -6186,7 +6186,7 @@ def command_rm_cluster(ctx):
 
 
 def check_time_sync(ctx, enabler=None):
-    # type: (CephadmContext, Optional[Packager]) -> bool
+    # type: (StoneadmContext, Optional[Packager]) -> bool
     units = [
         'chrony.service',  # 18.04 (at least)
         'chronyd.service',  # el / opensuse
@@ -6202,7 +6202,7 @@ def check_time_sync(ctx, enabler=None):
     return True
 
 
-def command_check_host(ctx: CephadmContext) -> None:
+def command_check_host(ctx: StoneadmContext) -> None:
     errors = []
     commands = ['systemctl', 'lvcreate']
 
@@ -6239,7 +6239,7 @@ def command_check_host(ctx: CephadmContext) -> None:
 ##################################
 
 
-def command_prepare_host(ctx: CephadmContext) -> None:
+def command_prepare_host(ctx: StoneadmContext) -> None:
     logger.info('Verifying podman|docker is present...')
     pkg = None
     try:
@@ -6303,7 +6303,7 @@ class CustomValidation(argparse.Action):
             # run the class' validate method, and convert to an argparse error
             # if problems are found
             try:
-                CephadmDaemon.validate_config(cfg)
+                StoneadmDaemon.validate_config(cfg)
             except Error as e:
                 raise argparse.ArgumentError(self,
                                              str(e))
@@ -6335,7 +6335,7 @@ def get_distro():
 
 
 class Packager(object):
-    def __init__(self, ctx: CephadmContext,
+    def __init__(self, ctx: StoneadmContext,
                  stable: Optional[str] = None, version: Optional[str] = None,
                  branch: Optional[str] = None, commit: Optional[str] = None):
         assert \
@@ -6368,7 +6368,7 @@ class Packager(object):
     def query_shaman(self, distro: str, distro_version: Any, branch: Optional[str], commit: Optional[str]) -> str:
         # query shaman
         logger.info('Fetching repo metadata from shaman and chacra...')
-        shaman_url = 'https://shaman.ceph.com/api/repos/ceph/{branch}/{sha1}/{distro}/{distro_version}/repo/?arch={arch}'.format(
+        shaman_url = 'https://shaman.stone.com/api/repos/stone/{branch}/{sha1}/{distro}/{distro_version}/repo/?arch={arch}'.format(
             distro=distro,
             distro_version=distro_version,
             branch=branch,
@@ -6393,9 +6393,9 @@ class Packager(object):
         if self.ctx.gpg_url:
             return self.ctx.gpg_url
         if self.stable or self.version:
-            return 'https://download.ceph.com/keys/release.gpg', 'release'
+            return 'https://download.stone.com/keys/release.gpg', 'release'
         else:
-            return 'https://download.ceph.com/keys/autobuild.gpg', 'autobuild'
+            return 'https://download.stone.com/keys/autobuild.gpg', 'autobuild'
 
     def enable_service(self, service: str) -> None:
         """
@@ -6410,7 +6410,7 @@ class Apt(Packager):
         'debian': 'debian',
     }
 
-    def __init__(self, ctx: CephadmContext,
+    def __init__(self, ctx: StoneadmContext,
                  stable: Optional[str], version: Optional[str], branch: Optional[str], commit: Optional[str],
                  distro: Optional[str], distro_version: Optional[str], distro_codename: Optional[str]) -> None:
         super(Apt, self).__init__(ctx, stable=stable, version=version,
@@ -6422,7 +6422,7 @@ class Apt(Packager):
         self.distro_version = distro_version
 
     def repo_path(self) -> str:
-        return '/etc/apt/sources.list.d/ceph.list'
+        return '/etc/apt/sources.list.d/stone.list'
 
     def add_repo(self) -> None:
 
@@ -6435,7 +6435,7 @@ class Apt(Packager):
                 url, err))
             raise Error('failed to fetch GPG key')
         key = response.read()
-        with open('/etc/apt/trusted.gpg.d/ceph.%s.gpg' % name, 'wb') as f:
+        with open('/etc/apt/trusted.gpg.d/stone.%s.gpg' % name, 'wb') as f:
             f.write(key)
 
         if self.version:
@@ -6456,7 +6456,7 @@ class Apt(Packager):
 
     def rm_repo(self) -> None:
         for name in ['autobuild', 'release']:
-            p = '/etc/apt/trusted.gpg.d/ceph.%s.gpg' % name
+            p = '/etc/apt/trusted.gpg.d/stone.%s.gpg' % name
             if os.path.exists(p):
                 logger.info('Removing repo GPG key %s...' % p)
                 os.unlink(p)
@@ -6543,7 +6543,7 @@ class YumDnf(Packager):
         'mariner': ('mariner', 'cm'),
     }
 
-    def __init__(self, ctx: CephadmContext,
+    def __init__(self, ctx: StoneadmContext,
                  stable: Optional[str], version: Optional[str], branch: Optional[str], commit: Optional[str],
                  distro: Optional[str], distro_version: Optional[str]) -> None:
         super(YumDnf, self).__init__(ctx, stable=stable, version=version,
@@ -6571,8 +6571,8 @@ class YumDnf(Packager):
 
         For example, it could look like::
 
-        [ceph repo]
-        name= ceph repo
+        [stone repo]
+        name= stone repo
         proxy=
         gpgcheck=
 
@@ -6619,7 +6619,7 @@ class YumDnf(Packager):
         return '\n'.join(lines)
 
     def repo_path(self) -> str:
-        return '/etc/yum.repos.d/ceph.repo'
+        return '/etc/yum.repos.d/stone.repo'
 
     def repo_baseurl(self) -> str:
         assert self.stable or self.version
@@ -6632,12 +6632,12 @@ class YumDnf(Packager):
 
     def validate(self) -> None:
         if self.distro_code.startswith('fc'):
-            raise Error('Ceph team does not build Fedora specific packages and therefore cannot add repos for this distro')
+            raise Error('Stone team does not build Fedora specific packages and therefore cannot add repos for this distro')
         if self.distro_code == 'el7':
             if self.stable and self.stable >= 'pacific':
-                raise Error('Ceph does not support pacific or later for this version of this linux distro and therefore cannot add a repo for it')
+                raise Error('Stone does not support pacific or later for this version of this linux distro and therefore cannot add a repo for it')
             if self.version and self.version.split('.')[0] >= '16':
-                raise Error('Ceph does not support 16.y.z or later for this version of this linux distro and therefore cannot add a repo for it')
+                raise Error('Stone does not support 16.y.z or later for this version of this linux distro and therefore cannot add a repo for it')
 
         if self.stable or self.version:
             # we know that yum & dnf require there to be a
@@ -6655,12 +6655,12 @@ class YumDnf(Packager):
         if self.stable or self.version:
             content = ''
             for n, t in {
-                    'Ceph': '$basearch',
-                    'Ceph-noarch': 'noarch',
-                    'Ceph-source': 'SRPMS'}.items():
+                    'Stone': '$basearch',
+                    'Stone-noarch': 'noarch',
+                    'Stone-source': 'SRPMS'}.items():
                 content += '[%s]\n' % (n)
                 content += self.custom_repo(
-                    name='Ceph %s' % t,
+                    name='Stone %s' % t,
                     baseurl=self.repo_baseurl() + '/' + t,
                     enabled=1,
                     gpgcheck=1,
@@ -6699,7 +6699,7 @@ class Zypper(Packager):
         'opensuse-leap'
     ]
 
-    def __init__(self, ctx: CephadmContext,
+    def __init__(self, ctx: StoneadmContext,
                  stable: Optional[str], version: Optional[str], branch: Optional[str], commit: Optional[str],
                  distro: Optional[str], distro_version: Optional[str]) -> None:
         super(Zypper, self).__init__(ctx, stable=stable, version=version,
@@ -6742,7 +6742,7 @@ class Zypper(Packager):
         return '\n'.join(lines)
 
     def repo_path(self) -> str:
-        return '/etc/zypp/repos.d/ceph.repo'
+        return '/etc/zypp/repos.d/stone.repo'
 
     def repo_baseurl(self) -> str:
         assert self.stable or self.version
@@ -6757,12 +6757,12 @@ class Zypper(Packager):
         if self.stable or self.version:
             content = ''
             for n, t in {
-                    'Ceph': '$basearch',
-                    'Ceph-noarch': 'noarch',
-                    'Ceph-source': 'SRPMS'}.items():
+                    'Stone': '$basearch',
+                    'Stone-noarch': 'noarch',
+                    'Stone-source': 'SRPMS'}.items():
                 content += '[%s]\n' % (n)
                 content += self.custom_repo(
-                    name='Ceph %s' % t,
+                    name='Stone %s' % t,
                     baseurl=self.repo_baseurl() + '/' + t,
                     enabled=1,
                     gpgcheck=1,
@@ -6790,7 +6790,7 @@ class Zypper(Packager):
         self.install(['podman'])
 
 
-def create_packager(ctx: CephadmContext,
+def create_packager(ctx: StoneadmContext,
                     stable: Optional[str] = None, version: Optional[str] = None,
                     branch: Optional[str] = None, commit: Optional[str] = None) -> Packager:
     distro, distro_version, distro_codename = get_distro()
@@ -6810,7 +6810,7 @@ def create_packager(ctx: CephadmContext,
     raise Error('Distro %s version %s not supported' % (distro, distro_version))
 
 
-def command_add_repo(ctx: CephadmContext) -> None:
+def command_add_repo(ctx: StoneadmContext) -> None:
     if ctx.version and ctx.release:
         raise Error('you can specify either --release or --version but not both')
     if not ctx.version and not ctx.release and not ctx.dev and not ctx.dev_commit:
@@ -6833,12 +6833,12 @@ def command_add_repo(ctx: CephadmContext) -> None:
     logger.info('Completed adding repo.')
 
 
-def command_rm_repo(ctx: CephadmContext) -> None:
+def command_rm_repo(ctx: StoneadmContext) -> None:
     pkg = create_packager(ctx)
     pkg.rm_repo()
 
 
-def command_install(ctx: CephadmContext) -> None:
+def command_install(ctx: StoneadmContext) -> None:
     pkg = create_packager(ctx)
     pkg.install(ctx.packages)
 
@@ -6950,8 +6950,8 @@ class HostFacts():
     }
     _excluded_block_devices = ('sr', 'zram', 'dm-')
 
-    def __init__(self, ctx: CephadmContext):
-        self.ctx: CephadmContext = ctx
+    def __init__(self, ctx: StoneadmContext):
+        self.ctx: StoneadmContext = ctx
         self.cpu_model: str = 'Unknown'
         self.cpu_count: int = 0
         self.cpu_cores: int = 0
@@ -7384,7 +7384,7 @@ class HostFacts():
     @property
     def kernel_parameters(self):
         # type: () -> Dict[str, str]
-        """Get kernel parameters required/used in Ceph clusters"""
+        """Get kernel parameters required/used in Stone clusters"""
 
         k_param = {}
         out, _, _ = call_throws(self.ctx, ['sysctl', '-a'], verbosity=CallVerbosity.SILENT)
@@ -7453,7 +7453,7 @@ class HostFacts():
 ##################################
 
 
-def command_gather_facts(ctx: CephadmContext) -> None:
+def command_gather_facts(ctx: StoneadmContext) -> None:
     """gather_facts is intended to provide host releated metadata to the caller"""
     host = HostFacts(ctx)
     print(host.dump())
@@ -7462,7 +7462,7 @@ def command_gather_facts(ctx: CephadmContext) -> None:
 ##################################
 
 
-class CephadmCache:
+class StoneadmCache:
     task_types = ['disks', 'daemons', 'host', 'http_server']
 
     def __init__(self) -> None:
@@ -7496,14 +7496,14 @@ class CephadmCache:
         }
 
     def update_health(self, task_type: str, task_status: str, error_msg: Optional[str] = None) -> None:
-        assert task_type in CephadmCache.task_types
+        assert task_type in StoneadmCache.task_types
         with self.lock:
             self.tasks[task_type] = task_status
             if error_msg:
                 self.errors.append(error_msg)
 
     def update_task(self, task_type: str, content: dict) -> None:
-        assert task_type in CephadmCache.task_types
+        assert task_type in StoneadmCache.task_types
         assert isinstance(content, dict)
         with self.lock:
             current = getattr(self, task_type)
@@ -7513,15 +7513,15 @@ class CephadmCache:
             setattr(self, task_type, current)
 
 
-class CephadmHTTPServer(ThreadingMixIn, HTTPServer):
+class StoneadmHTTPServer(ThreadingMixIn, HTTPServer):
     allow_reuse_address = True
     daemon_threads = True
-    cephadm_cache: CephadmCache
+    stoneadm_cache: StoneadmCache
     token: str
 
 
-class CephadmDaemonHandler(BaseHTTPRequestHandler):
-    server: CephadmHTTPServer
+class StoneadmDaemonHandler(BaseHTTPRequestHandler):
+    server: StoneadmHTTPServer
     api_version = 'v1'
     valid_routes = [
         f'/{api_version}/metadata',
@@ -7552,7 +7552,7 @@ class CephadmDaemonHandler(BaseHTTPRequestHandler):
     def _help_page(self) -> str:
         return """<!DOCTYPE html>
 <html>
-<head><title>cephadm metadata exporter</title></head>
+<head><title>stoneadm metadata exporter</title></head>
 <style>
 body {{
   font-family: sans-serif;
@@ -7571,19 +7571,19 @@ td,th {{
 }}
 </style>
 <body>
-    <h1>cephadm metadata exporter {api_version}</h1>
+    <h1>stoneadm metadata exporter {api_version}</h1>
     <table>
       <thead>
         <tr><th>Endpoint</th><th>Methods</th><th>Response</th><th>Description</th></tr>
       </thead>
       <tr><td><a href='{api_version}/metadata'>{api_version}/metadata</a></td><td>GET</td><td>JSON</td><td>Return <b>all</b> metadata for the host</td></tr>
-      <tr><td><a href='{api_version}/metadata/daemons'>{api_version}/metadata/daemons</a></td><td>GET</td><td>JSON</td><td>Return daemon and systemd states for ceph daemons (ls)</td></tr>
-      <tr><td><a href='{api_version}/metadata/disks'>{api_version}/metadata/disks</a></td><td>GET</td><td>JSON</td><td>show disk inventory (ceph-volume)</td></tr>
+      <tr><td><a href='{api_version}/metadata/daemons'>{api_version}/metadata/daemons</a></td><td>GET</td><td>JSON</td><td>Return daemon and systemd states for stone daemons (ls)</td></tr>
+      <tr><td><a href='{api_version}/metadata/disks'>{api_version}/metadata/disks</a></td><td>GET</td><td>JSON</td><td>show disk inventory (stone-volume)</td></tr>
       <tr><td><a href='{api_version}/metadata/health'>{api_version}/metadata/health</a></td><td>GET</td><td>JSON</td><td>Show current health of the exporter sub-tasks</td></tr>
       <tr><td><a href='{api_version}/metadata/host'>{api_version}/metadata/host</a></td><td>GET</td><td>JSON</td><td>Show host metadata (gather-facts)</td></tr>
     </table>
 </body>
-</html>""".format(api_version=CephadmDaemonHandler.api_version)
+</html>""".format(api_version=StoneadmDaemonHandler.api_version)
 
     def _fetch_root(self) -> None:
         self.send_response(200)
@@ -7599,12 +7599,12 @@ td,th {{
             # provide a html response if someone hits the root url, to document the
             # available api endpoints
             return self._fetch_root()
-        elif self.path in CephadmDaemonHandler.valid_routes:
+        elif self.path in StoneadmDaemonHandler.valid_routes:
             u = self.path.split('/')[-1]
             data = json.dumps({})
             status_code = 200
 
-            tasks = self.server.cephadm_cache.health.get('tasks', {})
+            tasks = self.server.stoneadm_cache.health.get('tasks', {})
             assert tasks
 
             # We're using the http status code to help indicate thread health
@@ -7613,7 +7613,7 @@ td,th {{
             # - 206 (Partial content): one or more theads are inactive
             # - 500 (Server Error): all threads inactive
             if u == 'metadata':
-                data = json.dumps(self.server.cephadm_cache.to_json())
+                data = json.dumps(self.server.stoneadm_cache.to_json())
                 if all([tasks[task_name] == 'inactive' for task_name in tasks if task_name != 'http_server']):
                     # All the subtasks are dead!
                     status_code = 500
@@ -7622,21 +7622,21 @@ td,th {{
 
             # Individual GETs against the a tasks endpoint will also return a 503 if the corresponding thread is inactive
             elif u == 'daemons':
-                data = json.dumps(self.server.cephadm_cache.daemons)
+                data = json.dumps(self.server.stoneadm_cache.daemons)
                 if tasks['daemons'] == 'inactive':
                     status_code = 204
             elif u == 'disks':
-                data = json.dumps(self.server.cephadm_cache.disks)
+                data = json.dumps(self.server.stoneadm_cache.disks)
                 if tasks['disks'] == 'inactive':
                     status_code = 204
             elif u == 'host':
-                data = json.dumps(self.server.cephadm_cache.host)
+                data = json.dumps(self.server.stoneadm_cache.host)
                 if tasks['host'] == 'inactive':
                     status_code = 204
 
             # a GET against health will always return a 200, since the op is always successful
             elif u == 'health':
-                data = json.dumps(self.server.cephadm_cache.health)
+                data = json.dumps(self.server.stoneadm_cache.health)
 
             self.send_response(status_code)
             self.send_header('Content-type', 'application/json')
@@ -7644,7 +7644,7 @@ td,th {{
             self.wfile.write(data.encode('utf-8'))
         else:
             # Invalid GET URL
-            bad_request_msg = 'Valid URLs are: {}'.format(', '.join(CephadmDaemonHandler.valid_routes))
+            bad_request_msg = 'Valid URLs are: {}'.format(', '.join(StoneadmDaemonHandler.valid_routes))
             self.send_response(404, message=bad_request_msg)  # reason
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -7655,9 +7655,9 @@ td,th {{
         logger.info(f'client:{self.address_string()} [{self.log_date_time_string()}] {rqst}')
 
 
-class CephadmDaemon():
+class StoneadmDaemon():
 
-    daemon_type = 'cephadm-exporter'
+    daemon_type = 'stoneadm-exporter'
     default_port = 9443
     key_name = 'key'
     crt_name = 'crt'
@@ -7670,35 +7670,35 @@ class CephadmDaemon():
     loop_delay = 1
     thread_check_interval = 5
 
-    def __init__(self, ctx: CephadmContext, fsid: str, daemon_id: Optional[str] = None, port: Optional[int] = None) -> None:
+    def __init__(self, ctx: StoneadmContext, fsid: str, daemon_id: Optional[str] = None, port: Optional[int] = None) -> None:
         self.ctx = ctx
         self.fsid = fsid
         self.daemon_id = daemon_id
         if not port:
-            self.port = CephadmDaemon.default_port
+            self.port = StoneadmDaemon.default_port
         else:
             self.port = port
         self.workers: List[Thread] = []
-        self.http_server: CephadmHTTPServer
+        self.http_server: StoneadmHTTPServer
         self.stop = False
-        self.cephadm_cache = CephadmCache()
+        self.stoneadm_cache = StoneadmCache()
         self.errors: List[str] = []
-        self.token = read_file([os.path.join(self.daemon_path, CephadmDaemon.token_name)])
+        self.token = read_file([os.path.join(self.daemon_path, StoneadmDaemon.token_name)])
 
     @classmethod
     def validate_config(cls, config: dict) -> None:
-        reqs = ', '.join(CephadmDaemon.config_requirements)
+        reqs = ', '.join(StoneadmDaemon.config_requirements)
         errors = []
 
-        if not config or not all([k_name in config for k_name in CephadmDaemon.config_requirements]):
+        if not config or not all([k_name in config for k_name in StoneadmDaemon.config_requirements]):
             raise Error(f'config must contain the following fields : {reqs}')
 
-        if not all([isinstance(config[k_name], str) for k_name in CephadmDaemon.config_requirements]):
+        if not all([isinstance(config[k_name], str) for k_name in StoneadmDaemon.config_requirements]):
             errors.append(f'the following fields must be strings: {reqs}')
 
-        crt = config[CephadmDaemon.crt_name]
-        key = config[CephadmDaemon.key_name]
-        token = config[CephadmDaemon.token_name]
+        crt = config[StoneadmDaemon.crt_name]
+        key = config[StoneadmDaemon.key_name]
+        token = config[StoneadmDaemon.token_name]
 
         if not crt.startswith('-----BEGIN CERTIFICATE-----') or not crt.endswith('-----END CERTIFICATE-----\n'):
             errors.append('crt field is not a valid SSL certificate')
@@ -7727,22 +7727,22 @@ class CephadmDaemon():
         # if port is in use
         if self.port_active:
             self.errors.append(f'TCP port {self.port} already in use, unable to bind')
-        if not os.path.exists(os.path.join(self.daemon_path, CephadmDaemon.key_name)):
-            self.errors.append(f"Key file '{CephadmDaemon.key_name}' is missing from {self.daemon_path}")
-        if not os.path.exists(os.path.join(self.daemon_path, CephadmDaemon.crt_name)):
-            self.errors.append(f"Certificate file '{CephadmDaemon.crt_name}' is missing from {self.daemon_path}")
+        if not os.path.exists(os.path.join(self.daemon_path, StoneadmDaemon.key_name)):
+            self.errors.append(f"Key file '{StoneadmDaemon.key_name}' is missing from {self.daemon_path}")
+        if not os.path.exists(os.path.join(self.daemon_path, StoneadmDaemon.crt_name)):
+            self.errors.append(f"Certificate file '{StoneadmDaemon.crt_name}' is missing from {self.daemon_path}")
         if self.token == 'Unknown':
-            self.errors.append(f"Authentication token '{CephadmDaemon.token_name}' is missing from {self.daemon_path}")
+            self.errors.append(f"Authentication token '{StoneadmDaemon.token_name}' is missing from {self.daemon_path}")
         return len(self.errors) == 0
 
     @staticmethod
     def _unit_name(fsid: str, daemon_id: str) -> str:
-        return '{}.service'.format(get_unit_name(fsid, CephadmDaemon.daemon_type, daemon_id))
+        return '{}.service'.format(get_unit_name(fsid, StoneadmDaemon.daemon_type, daemon_id))
 
     @property
     def unit_name(self) -> str:
         assert self.daemon_id is not None
-        return CephadmDaemon._unit_name(self.fsid, self.daemon_id)
+        return StoneadmDaemon._unit_name(self.fsid, self.daemon_id)
 
     @property
     def daemon_path(self) -> str:
@@ -7760,12 +7760,12 @@ class CephadmDaemon():
 
     def _handle_thread_exception(self, exc: Exception, thread_type: str) -> None:
         e_msg = f'{exc.__class__.__name__} exception: {str(exc)}'
-        thread_info = getattr(self.cephadm_cache, thread_type)
+        thread_info = getattr(self.stoneadm_cache, thread_type)
         errors = thread_info.get('scrape_errors', [])
         errors.append(e_msg)
         logger.error(e_msg)
         logger.exception(exc)
-        self.cephadm_cache.update_task(
+        self.stoneadm_cache.update_task(
             thread_type,
             {
                 'scrape_errors': errors,
@@ -7801,7 +7801,7 @@ class CephadmDaemon():
                         errors.append('host-facts provided invalid JSON')
                         logger.warning(errors[-1])
                         data = {}
-                    self.cephadm_cache.update_task(
+                    self.stoneadm_cache.update_task(
                         'host',
                         {
                             'scrape_timestamp': s_time,
@@ -7812,12 +7812,12 @@ class CephadmDaemon():
                     )
                     logger.debug(f'completed host-facts scrape - {elapsed}s')
 
-            time.sleep(CephadmDaemon.loop_delay)
-            ctr += CephadmDaemon.loop_delay
+            time.sleep(StoneadmDaemon.loop_delay)
+            ctr += StoneadmDaemon.loop_delay
         logger.info('host-facts thread stopped')
 
-    def _scrape_ceph_volume(self, refresh_interval: int = 15) -> None:
-        # we're invoking the ceph_volume command, so we need to set the args that it
+    def _scrape_stone_volume(self, refresh_interval: int = 15) -> None:
+        # we're invoking the stone_volume command, so we need to set the args that it
         # expects to use
         self.ctx.command = 'inventory --format=json'.split()
         self.ctx.fsid = self.fsid
@@ -7831,20 +7831,20 @@ class CephadmDaemon():
 
             if ctr >= refresh_interval:
                 ctr = 0
-                logger.debug('executing ceph-volume scrape')
+                logger.debug('executing stone-volume scrape')
                 errors = []
                 s_time = time.time()
                 stream = io.StringIO()
                 try:
                     with redirect_stdout(stream):
-                        command_ceph_volume(self.ctx)
+                        command_stone_volume(self.ctx)
                 except Exception as e:
                     self._handle_thread_exception(e, 'disks')
                     exception_encountered = True
                 else:
                     elapsed = time.time() - s_time
 
-                    # if the call to ceph-volume returns junk with the
+                    # if the call to stone-volume returns junk with the
                     # json, it won't parse
                     stdout = stream.getvalue()
 
@@ -7853,13 +7853,13 @@ class CephadmDaemon():
                         try:
                             data = json.loads(stdout)
                         except json.decoder.JSONDecodeError:
-                            errors.append('ceph-volume thread provided bad json data')
+                            errors.append('stone-volume thread provided bad json data')
                             logger.warning(errors[-1])
                     else:
-                        errors.append('ceph-volume did not return any data')
+                        errors.append('stone-volume did not return any data')
                         logger.warning(errors[-1])
 
-                    self.cephadm_cache.update_task(
+                    self.stoneadm_cache.update_task(
                         'disks',
                         {
                             'scrape_timestamp': s_time,
@@ -7869,11 +7869,11 @@ class CephadmDaemon():
                         }
                     )
 
-                    logger.debug(f'completed ceph-volume scrape - {elapsed}s')
-            time.sleep(CephadmDaemon.loop_delay)
-            ctr += CephadmDaemon.loop_delay
+                    logger.debug(f'completed stone-volume scrape - {elapsed}s')
+            time.sleep(StoneadmDaemon.loop_delay)
+            ctr += StoneadmDaemon.loop_delay
 
-        logger.info('ceph-volume thread stopped')
+        logger.info('stone-volume thread stopped')
 
     def _scrape_list_daemons(self, refresh_interval: int = 20) -> None:
         ctr = 0
@@ -7900,7 +7900,7 @@ class CephadmDaemon():
                         logger.warning(errors[-1])
                         data = []
                     elapsed = time.time() - s_time
-                    self.cephadm_cache.update_task(
+                    self.stoneadm_cache.update_task(
                         'daemons',
                         {
                             'scrape_timestamp': s_time,
@@ -7911,8 +7911,8 @@ class CephadmDaemon():
                     )
                     logger.debug(f'completed list-daemons scrape - {elapsed}s')
 
-            time.sleep(CephadmDaemon.loop_delay)
-            ctr += CephadmDaemon.loop_delay
+            time.sleep(StoneadmDaemon.loop_delay)
+            ctr += StoneadmDaemon.loop_delay
         logger.info('list-daemons thread stopped')
 
     def _create_thread(self, target: Any, name: str, refresh_interval: Optional[int] = None) -> Thread:
@@ -7922,7 +7922,7 @@ class CephadmDaemon():
             t = Thread(target=target)
         t.daemon = True
         t.name = name
-        self.cephadm_cache.update_health(name, 'active')
+        self.stoneadm_cache.update_health(name, 'active')
         t.start()
 
         start_msg = f'Started {name} thread'
@@ -7946,7 +7946,7 @@ class CephadmDaemon():
         self.http_server.shutdown()
 
     def run(self) -> None:
-        logger.info(f"cephadm exporter starting for FSID '{self.fsid}'")
+        logger.info(f"stoneadm exporter starting for FSID '{self.fsid}'")
         if not self.can_run:
             logger.error('Unable to start the exporter daemon')
             for e in self.errors:
@@ -7965,16 +7965,16 @@ class CephadmDaemon():
         daemons = self._create_thread(self._scrape_list_daemons, 'daemons', 20)
         self.workers.append(daemons)
 
-        disks = self._create_thread(self._scrape_ceph_volume, 'disks', 20)
+        disks = self._create_thread(self._scrape_stone_volume, 'disks', 20)
         self.workers.append(disks)
 
-        self.http_server = CephadmHTTPServer(('0.0.0.0', self.port), CephadmDaemonHandler)  # IPv4 only
+        self.http_server = StoneadmHTTPServer(('0.0.0.0', self.port), StoneadmDaemonHandler)  # IPv4 only
         self.http_server.socket = ssl.wrap_socket(self.http_server.socket,
-                                                  keyfile=os.path.join(self.daemon_path, CephadmDaemon.key_name),
-                                                  certfile=os.path.join(self.daemon_path, CephadmDaemon.crt_name),
+                                                  keyfile=os.path.join(self.daemon_path, StoneadmDaemon.key_name),
+                                                  certfile=os.path.join(self.daemon_path, StoneadmDaemon.crt_name),
                                                   server_side=True)
 
-        self.http_server.cephadm_cache = self.cephadm_cache
+        self.http_server.stoneadm_cache = self.stoneadm_cache
         self.http_server.token = self.token
         server_thread = self._create_thread(self.http_server.serve_forever, 'http_server')
         logger.info(f'https server listening on {self.http_server.server_address[0]}:{self.http_server.server_port}')
@@ -7984,18 +7984,18 @@ class CephadmDaemon():
             if self.stop:
                 break
 
-            if ctr >= CephadmDaemon.thread_check_interval:
+            if ctr >= StoneadmDaemon.thread_check_interval:
                 ctr = 0
                 for worker in self.workers:
-                    if self.cephadm_cache.tasks[worker.name] == 'inactive':
+                    if self.stoneadm_cache.tasks[worker.name] == 'inactive':
                         continue
                     if not worker.is_alive():
                         logger.warning(f'{worker.name} thread not running')
                         stop_time = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
-                        self.cephadm_cache.update_health(worker.name, 'inactive', f'{worker.name} stopped at {stop_time}')
+                        self.stoneadm_cache.update_health(worker.name, 'inactive', f'{worker.name} stopped at {stop_time}')
 
-            time.sleep(CephadmDaemon.loop_delay)
-            ctr += CephadmDaemon.loop_delay
+            time.sleep(StoneadmDaemon.loop_delay)
+            ctr += StoneadmDaemon.loop_delay
 
         logger.info('Main http server thread stopped')
 
@@ -8014,15 +8014,15 @@ class CephadmDaemon():
     @property
     def unit_file(self) -> str:
         docker = isinstance(self.ctx.container_engine, Docker)
-        return """#generated by cephadm
+        return """#generated by stoneadm
 [Unit]
-Description=cephadm exporter service for cluster {fsid}
+Description=stoneadm exporter service for cluster {fsid}
 After=network-online.target{docker_after}
 Wants=network-online.target
 {docker_requires}
 
-PartOf=ceph-{fsid}.target
-Before=ceph-{fsid}.target
+PartOf=stone-{fsid}.target
+Before=stone-{fsid}.target
 
 [Service]
 Type=forking
@@ -8032,7 +8032,7 @@ Restart=on-failure
 RestartSec=10s
 
 [Install]
-WantedBy=ceph-{fsid}.target
+WantedBy=stone-{fsid}.target
 """.format(fsid=self.fsid,
            daemon_path=self.daemon_path,
            # if docker, we depend on docker.service
@@ -8040,14 +8040,14 @@ WantedBy=ceph-{fsid}.target
            docker_requires='Requires=docker.service\n' if docker else '')
 
     def deploy_daemon_unit(self, config: Optional[dict] = None) -> None:
-        """deploy a specific unit file for cephadm
+        """deploy a specific unit file for stoneadm
 
         The normal deploy_daemon_units doesn't apply for this
         daemon since it's not a container, so we just create a
         simple service definition and add it to the fsid's target
         """
         if not config:
-            raise Error('Attempting to deploy cephadm daemon without a config')
+            raise Error('Attempting to deploy stoneadm daemon without a config')
         assert isinstance(config, dict)
 
         # Create the required config files in the daemons dir, with restricted permissions
@@ -8086,8 +8086,8 @@ WantedBy=ceph-{fsid}.target
         call_throws(self.ctx, ['systemctl', 'enable', '--now', self.unit_name])
 
     @classmethod
-    def uninstall(cls, ctx: CephadmContext, fsid: str, daemon_type: str, daemon_id: str) -> None:
-        unit_name = CephadmDaemon._unit_name(fsid, daemon_id)
+    def uninstall(cls, ctx: StoneadmContext, fsid: str, daemon_type: str, daemon_id: str) -> None:
+        unit_name = StoneadmDaemon._unit_name(fsid, daemon_id)
         unit_path = os.path.join(ctx.unit_dir, unit_name)
         unit_run = os.path.join(ctx.data_dir, fsid, f'{daemon_type}.{daemon_id}', 'unit.run')
         port = None
@@ -8124,8 +8124,8 @@ WantedBy=ceph-{fsid}.target
             stdout, stderr, rc = call(ctx, ['systemctl', 'daemon-reload'])
 
 
-def command_exporter(ctx: CephadmContext) -> None:
-    exporter = CephadmDaemon(ctx, ctx.fsid, daemon_id=ctx.id, port=ctx.port)
+def command_exporter(ctx: StoneadmContext) -> None:
+    exporter = StoneadmDaemon(ctx, ctx.fsid, daemon_id=ctx.id, port=ctx.port)
 
     if ctx.fsid not in os.listdir(ctx.data_dir):
         raise Error(f"cluster fsid '{ctx.fsid}' not found in '{ctx.data_dir}'")
@@ -8135,7 +8135,7 @@ def command_exporter(ctx: CephadmContext) -> None:
 ##################################
 
 
-def systemd_target_state(ctx: CephadmContext, target_name: str, subsystem: str = 'ceph') -> bool:
+def systemd_target_state(ctx: StoneadmContext, target_name: str, subsystem: str = 'stone') -> bool:
     # TODO: UNITTEST
     return os.path.exists(
         os.path.join(
@@ -8146,16 +8146,16 @@ def systemd_target_state(ctx: CephadmContext, target_name: str, subsystem: str =
     )
 
 
-def target_exists(ctx: CephadmContext) -> bool:
-    return os.path.exists(ctx.unit_dir + '/ceph.target')
+def target_exists(ctx: StoneadmContext) -> bool:
+    return os.path.exists(ctx.unit_dir + '/stone.target')
 
 
 @infer_fsid
-def command_maintenance(ctx: CephadmContext) -> str:
+def command_maintenance(ctx: StoneadmContext) -> str:
     if not ctx.fsid:
         raise Error('failed - must pass --fsid to specify cluster')
 
-    target = f'ceph-{ctx.fsid}.target'
+    target = f'stone-{ctx.fsid}.target'
 
     if ctx.maintenance_action.lower() == 'enter':
         logger.info('Requested to place host into maintenance')
@@ -8214,11 +8214,11 @@ def command_maintenance(ctx: CephadmContext) -> str:
 def _get_parser():
     # type: () -> argparse.ArgumentParser
     parser = argparse.ArgumentParser(
-        description='Bootstrap Ceph daemons with systemd and containers.',
+        description='Bootstrap Stone daemons with systemd and containers.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--image',
-        help='container image. Can also be set via the "CEPHADM_IMAGE" '
+        help='container image. Can also be set via the "STONEADM_IMAGE" '
         'env var')
     parser.add_argument(
         '--docker',
@@ -8272,7 +8272,7 @@ def _get_parser():
     subparsers = parser.add_subparsers(help='sub-command')
 
     parser_version = subparsers.add_parser(
-        'version', help='get ceph version from container')
+        'version', help='get stone version from container')
     parser_version.set_defaults(func=command_version)
 
     parser_pull = subparsers.add_parser(
@@ -8317,7 +8317,7 @@ def _get_parser():
         help='deployment style (legacy, ...)')
     parser_adopt.add_argument(
         '--cluster',
-        default='ceph',
+        default='stone',
         help='cluster name')
     parser_adopt.add_argument(
         '--legacy-dir',
@@ -8386,7 +8386,7 @@ def _get_parser():
         help='zap OSD devices for this cluster')
 
     parser_run = subparsers.add_parser(
-        'run', help='run a ceph daemon, in a container, in the foreground')
+        'run', help='run a stone daemon, in a container, in the foreground')
     parser_run.set_defaults(func=command_run)
     parser_run.add_argument(
         '--name', '-n',
@@ -8401,9 +8401,9 @@ def _get_parser():
         'shell', help='run an interactive shell inside a daemon container')
     parser_shell.set_defaults(func=command_shell)
     parser_shell.add_argument(
-        '--shared_ceph_folder',
-        metavar='CEPH_SOURCE_FOLDER',
-        help='Development mode. Several folders in containers are volumes mapped to different sub-folders in the ceph source folder')
+        '--shared_stone_folder',
+        metavar='STONE_SOURCE_FOLDER',
+        help='Development mode. Several folders in containers are volumes mapped to different sub-folders in the stone source folder')
     parser_shell.add_argument(
         '--fsid',
         help='cluster FSID')
@@ -8412,10 +8412,10 @@ def _get_parser():
         help='daemon name (type.id)')
     parser_shell.add_argument(
         '--config', '-c',
-        help='ceph.conf to pass through to the container')
+        help='stone.conf to pass through to the container')
     parser_shell.add_argument(
         '--keyring', '-k',
-        help='ceph.keyring to pass through to the container')
+        help='stone.keyring to pass through to the container')
     parser_shell.add_argument(
         '--mount', '-m',
         help=('mount a file or directory in the container. '
@@ -8455,26 +8455,26 @@ def _get_parser():
         'command', nargs=argparse.REMAINDER,
         help='command')
 
-    parser_ceph_volume = subparsers.add_parser(
-        'ceph-volume', help='run ceph-volume inside a container')
-    parser_ceph_volume.set_defaults(func=command_ceph_volume)
-    parser_ceph_volume.add_argument(
-        '--shared_ceph_folder',
-        metavar='CEPH_SOURCE_FOLDER',
-        help='Development mode. Several folders in containers are volumes mapped to different sub-folders in the ceph source folder')
-    parser_ceph_volume.add_argument(
+    parser_stone_volume = subparsers.add_parser(
+        'stone-volume', help='run stone-volume inside a container')
+    parser_stone_volume.set_defaults(func=command_stone_volume)
+    parser_stone_volume.add_argument(
+        '--shared_stone_folder',
+        metavar='STONE_SOURCE_FOLDER',
+        help='Development mode. Several folders in containers are volumes mapped to different sub-folders in the stone source folder')
+    parser_stone_volume.add_argument(
         '--fsid',
         help='cluster FSID')
-    parser_ceph_volume.add_argument(
+    parser_stone_volume.add_argument(
         '--config-json',
         help='JSON file with config and (client.bootrap-osd) key')
-    parser_ceph_volume.add_argument(
+    parser_stone_volume.add_argument(
         '--config', '-c',
-        help='ceph conf file')
-    parser_ceph_volume.add_argument(
+        help='stone conf file')
+    parser_stone_volume.add_argument(
         '--keyring', '-k',
-        help='ceph.keyring to pass through to the container')
-    parser_ceph_volume.add_argument(
+        help='stone.keyring to pass through to the container')
+    parser_stone_volume.add_argument(
         'command', nargs=argparse.REMAINDER,
         help='command')
 
@@ -8523,7 +8523,7 @@ def _get_parser():
     parser_bootstrap.set_defaults(func=command_bootstrap)
     parser_bootstrap.add_argument(
         '--config', '-c',
-        help='ceph conf file to incorporate')
+        help='stone conf file to incorporate')
     parser_bootstrap.add_argument(
         '--mon-id',
         required=False,
@@ -8543,7 +8543,7 @@ def _get_parser():
         help='cluster FSID')
     parser_bootstrap.add_argument(
         '--output-dir',
-        default='/etc/ceph',
+        default='/etc/stone',
         help='directory to write config, keyring, and pub key files')
     parser_bootstrap.add_argument(
         '--output-keyring',
@@ -8557,7 +8557,7 @@ def _get_parser():
     parser_bootstrap.add_argument(
         '--skip-admin-label',
         action='store_true',
-        help='do not create admin label for ceph.conf and client.admin keyring distribution')
+        help='do not create admin label for stone.conf and client.admin keyring distribution')
     parser_bootstrap.add_argument(
         '--skip-ssh',
         action='store_true',
@@ -8606,7 +8606,7 @@ def _get_parser():
     parser_bootstrap.add_argument(
         '--skip-dashboard',
         action='store_true',
-        help='do not enable the Ceph Dashboard')
+        help='do not enable the Stone Dashboard')
     parser_bootstrap.add_argument(
         '--dashboard-password-noupdate',
         action='store_true',
@@ -8638,7 +8638,7 @@ def _get_parser():
     parser_bootstrap.add_argument(
         '--allow-mismatched-release',
         action='store_true',
-        help="allow bootstrap of ceph that doesn't match this version of cephadm")
+        help="allow bootstrap of stone that doesn't match this version of stoneadm")
     parser_bootstrap.add_argument(
         '--skip-prepare-host',
         action='store_true',
@@ -8655,9 +8655,9 @@ def _get_parser():
         '--apply-spec',
         help='Apply cluster spec after bootstrap (copy ssh key, add hosts and apply services)')
     parser_bootstrap.add_argument(
-        '--shared_ceph_folder',
-        metavar='CEPH_SOURCE_FOLDER',
-        help='Development mode. Several folders in containers are volumes mapped to different sub-folders in the ceph source folder')
+        '--shared_stone_folder',
+        metavar='STONE_SOURCE_FOLDER',
+        help='Development mode. Several folders in containers are volumes mapped to different sub-folders in the stone source folder')
 
     parser_bootstrap.add_argument(
         '--registry-url',
@@ -8679,11 +8679,11 @@ def _get_parser():
     parser_bootstrap.add_argument(
         '--with-exporter',
         action='store_true',
-        help='Automatically deploy cephadm metadata exporter to each node')
+        help='Automatically deploy stoneadm metadata exporter to each node')
     parser_bootstrap.add_argument(
         '--exporter-config',
         action=CustomValidation,
-        help=f'Exporter configuration information in JSON format (providing: {", ".join(CephadmDaemon.config_requirements)}, port information)')
+        help=f'Exporter configuration information in JSON format (providing: {", ".join(StoneadmDaemon.config_requirements)}, port information)')
     parser_bootstrap.add_argument(
         '--cluster-network',
         help='subnet to use for cluster replication, recovery and heartbeats (in CIDR notation network/mask)')
@@ -8694,7 +8694,7 @@ def _get_parser():
     parser_bootstrap.add_argument(
         '--log-to-file',
         action='store_true',
-        help='configure cluster to log to traditional log files in /var/log/ceph/$fsid')
+        help='configure cluster to log to traditional log files in /var/log/stone/$fsid')
 
     parser_deploy = subparsers.add_parser(
         'deploy', help='deploy a daemon')
@@ -8770,7 +8770,7 @@ def _get_parser():
         help='Check that hostname matches an expected value')
 
     parser_prepare_host = subparsers.add_parser(
-        'prepare-host', help='prepare a host for cephadm use')
+        'prepare-host', help='prepare a host for stoneadm use')
     parser_prepare_host.set_defaults(func=command_prepare_host)
     parser_prepare_host.add_argument(
         '--expect-hostname',
@@ -8796,7 +8796,7 @@ def _get_parser():
         help='specify alternative GPG key location')
     parser_add_repo.add_argument(
         '--repo-url',
-        default='https://download.ceph.com',
+        default='https://download.stone.com',
         help='specify alternative repo location')
     # TODO: proxy?
 
@@ -8805,11 +8805,11 @@ def _get_parser():
     parser_rm_repo.set_defaults(func=command_rm_repo)
 
     parser_install = subparsers.add_parser(
-        'install', help='install ceph package(s)')
+        'install', help='install stone package(s)')
     parser_install.set_defaults(func=command_install)
     parser_install.add_argument(
         'packages', nargs='*',
-        default=['cephadm'],
+        default=['stoneadm'],
         help='packages')
 
     parser_registry_login = subparsers.add_parser(
@@ -8836,17 +8836,17 @@ def _get_parser():
     parser_gather_facts.set_defaults(func=command_gather_facts)
 
     parser_exporter = subparsers.add_parser(
-        'exporter', help='Start cephadm in exporter mode (web service), providing host/daemon/disk metadata')
+        'exporter', help='Start stoneadm in exporter mode (web service), providing host/daemon/disk metadata')
     parser_exporter.add_argument(
         '--fsid',
         required=True,
         type=str,
-        help='fsid of the cephadm exporter to run against')
+        help='fsid of the stoneadm exporter to run against')
     parser_exporter.add_argument(
         '--port',
         type=int,
-        default=int(CephadmDaemon.default_port),
-        help='port number for the cephadm exporter service')
+        default=int(StoneadmDaemon.default_port),
+        help='port number for the stoneadm exporter service')
     parser_exporter.add_argument(
         '--id',
         type=str,
@@ -8890,14 +8890,14 @@ def _parse_args(av: List[str]) -> argparse.Namespace:
     return args
 
 
-def cephadm_init_ctx(args: List[str]) -> CephadmContext:
-    ctx = CephadmContext()
+def stoneadm_init_ctx(args: List[str]) -> StoneadmContext:
+    ctx = StoneadmContext()
     ctx.set_args(_parse_args(args))
     return ctx
 
 
-def cephadm_init_logging(ctx: CephadmContext, args: List[str]) -> None:
-    """Configure the logging for cephadm as well as updating the system
+def stoneadm_init_logging(ctx: StoneadmContext, args: List[str]) -> None:
+    """Configure the logging for stoneadm as well as updating the system
     to have the expected log dir and logrotate configuration.
     """
     global logger
@@ -8906,10 +8906,10 @@ def cephadm_init_logging(ctx: CephadmContext, args: List[str]) -> None:
     dictConfig(logging_config)
     logger = logging.getLogger()
 
-    if not os.path.exists(ctx.logrotate_dir + '/cephadm'):
-        with open(ctx.logrotate_dir + '/cephadm', 'w') as f:
-            f.write("""# created by cephadm
-/var/log/ceph/cephadm.log {
+    if not os.path.exists(ctx.logrotate_dir + '/stoneadm'):
+        with open(ctx.logrotate_dir + '/stoneadm', 'w') as f:
+            f.write("""# created by stoneadm
+/var/log/stone/stoneadm.log {
     rotate 7
     daily
     compress
@@ -8922,13 +8922,13 @@ def cephadm_init_logging(ctx: CephadmContext, args: List[str]) -> None:
         for handler in logger.handlers:
             if handler.name == 'console':
                 handler.setLevel(logging.DEBUG)
-    logger.debug('%s\ncephadm %s' % ('-' * 80, args))
+    logger.debug('%s\nstoneadm %s' % ('-' * 80, args))
 
 
-def cephadm_require_root() -> None:
+def stoneadm_require_root() -> None:
     """Exit if the process is not running as root."""
     if os.geteuid() != 0:
-        sys.stderr.write('ERROR: cephadm should be run as root\n')
+        sys.stderr.write('ERROR: stoneadm should be run as root\n')
         sys.exit(1)
 
 
@@ -8936,13 +8936,13 @@ def main() -> None:
     av: List[str] = []
     av = sys.argv[1:]
 
-    ctx = cephadm_init_ctx(av)
+    ctx = stoneadm_init_ctx(av)
     if not ctx.has_function():
         sys.stderr.write('No command specified; pass -h or --help for usage\n')
         sys.exit(1)
 
-    cephadm_require_root()
-    cephadm_init_logging(ctx, av)
+    stoneadm_require_root()
+    stoneadm_init_logging(ctx, av)
     try:
         # podman or docker?
         ctx.container_engine = find_container_engine(ctx)

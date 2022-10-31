@@ -86,11 +86,11 @@ int krbd_unmap_by_spec(struct krbd_ctx *ctx,
 
 #ifdef __cplusplus
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
-int krbd_showmapped(struct krbd_ctx *ctx, ceph::Formatter *f);
+int krbd_showmapped(struct krbd_ctx *ctx, stone::Formatter *f);
 
 #endif /* __cplusplus */
 

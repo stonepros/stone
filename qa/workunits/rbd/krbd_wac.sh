@@ -2,7 +2,7 @@
 
 set -ex
 
-wget http://download.ceph.com/qa/wac.c
+wget http://download.stone.com/qa/wac.c
 gcc -o wac wac.c
 
 rbd create --size 300 img

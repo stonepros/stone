@@ -22,7 +22,7 @@
 #include "include/Context.h"
 #include "include/elist.h"
 #include "include/spinlock.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 class MDSRank;
 
@@ -62,7 +62,7 @@ public:
 protected:
   MDSHolder() = delete;
   MDSHolder(MDSRank* mds) : mds(mds) {
-    ceph_assert(mds != nullptr);
+    stone_assert(mds != nullptr);
   }
 
   MDSRank* mds;
@@ -105,11 +105,11 @@ public:
 
   virtual void print(std::ostream& out) const = 0;
 
-  static bool check_ios_in_flight(ceph::coarse_mono_time cutoff,
+  static bool check_ios_in_flight(stone::coarse_mono_time cutoff,
 				  std::string& slow_count,
-				  ceph::coarse_mono_time& oldest);
+				  stone::coarse_mono_time& oldest);
 private:
-  ceph::coarse_mono_time created_at;
+  stone::coarse_mono_time created_at;
   elist<MDSIOContextBase*>::item list_item;
   
   friend struct MDSIOContextList;
@@ -169,7 +169,7 @@ public:
   void finish(int r) override {}
   void complete(int r) override { delete this; }
 protected:
-  MDSRank* get_mds() override final {ceph_abort();}
+  MDSRank* get_mds() override final {stone_abort();}
 };
 
 
@@ -189,7 +189,7 @@ protected:
 public:
   C_IO_Wrapper(MDSRank *mds_, MDSContext *wrapped_) :
     MDSIOContext(mds_), async(true), wrapped(wrapped_) {
-    ceph_assert(wrapped != NULL);
+    stone_assert(wrapped != NULL);
   }
 
   ~C_IO_Wrapper() override {

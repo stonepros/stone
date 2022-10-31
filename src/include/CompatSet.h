@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2009 Sage Weil <sage@newdream.net>
  *
@@ -39,15 +39,15 @@ struct CompatSet {
 
   public:
     friend struct CompatSet;
-    friend class StoneeCompatSet_AllSet_Test;
-    friend class StoneeCompatSet_other_Test;
-    friend class StoneeCompatSet_merge_Test;
+    friend class StoneCompatSet_AllSet_Test;
+    friend class StoneCompatSet_other_Test;
+    friend class StoneCompatSet_merge_Test;
     friend std::ostream& operator<<(std::ostream& out, const CompatSet::FeatureSet& fs);
     friend std::ostream& operator<<(std::ostream& out, const CompatSet& compat);
     FeatureSet() : mask(1), names() {}
     void insert(const Feature& f) {
-      ceph_assert(f.id > 0);
-      ceph_assert(f.id < 64);
+      stone_assert(f.id > 0);
+      stone_assert(f.id < 64);
       mask |= ((uint64_t)1<<f.id);
       names[f.id] = f.name;
     }
@@ -63,7 +63,7 @@ struct CompatSet {
      */
     std::string get_name(uint64_t const f) const {
       std::map<uint64_t, std::string>::const_iterator i = names.find(f);
-      ceph_assert(i != names.end());
+      stone_assert(i != names.end());
       return i->second;
     }
 
@@ -77,16 +77,16 @@ struct CompatSet {
       remove(f.id);
     }
 
-    void encode(ceph::buffer::list& bl) const {
-      using ceph::encode;
+    void encode(stone::buffer::list& bl) const {
+      using stone::encode;
       /* See below, mask always has the lowest bit set in memory, but
        * unset in the encoding */
       encode(mask & (~(uint64_t)1), bl);
       encode(names, bl);
     }
 
-    void decode(ceph::buffer::list::const_iterator& bl) {
-      using ceph::decode;
+    void decode(stone::buffer::list::const_iterator& bl) {
+      using stone::decode;
       decode(mask, bl);
       decode(names, bl);
       /**
@@ -111,7 +111,7 @@ struct CompatSet {
       }
     }
 
-    void dump(ceph::Formatter *f) const {
+    void dump(stone::Formatter *f) const {
       for (auto p = names.cbegin(); p != names.cend(); ++p) {
 	char s[18];
 	snprintf(s, sizeof(s), "feature_%llu", (unsigned long long)p->first);
@@ -230,19 +230,19 @@ struct CompatSet {
     return o;
   }
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     compat.encode(bl);
     ro_compat.encode(bl);
     incompat.encode(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     compat.decode(bl);
     ro_compat.decode(bl);
     incompat.decode(bl);
   }
 
-  void dump(ceph::Formatter *f) const {
+  void dump(stone::Formatter *f) const {
     f->open_object_section("compat");
     compat.dump(f);
     f->close_section();

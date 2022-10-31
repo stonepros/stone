@@ -1,10 +1,10 @@
 import pytest
 from textwrap import dedent
 import json
-from ceph_volume.util import prepare
-from ceph_volume.util.prepare import system
-from ceph_volume import conf
-from ceph_volume.tests.conftest import Factory
+from stone_volume.util import prepare
+from stone_volume.util.prepare import system
+from stone_volume import conf
+from stone_volume.tests.conftest import Factory
 
 
 class TestOSDIDAvailable(object):
@@ -13,7 +13,7 @@ class TestOSDIDAvailable(object):
         assert not prepare.osd_id_available(None)
 
     def test_returncode_is_not_zero(self, monkeypatch):
-        monkeypatch.setattr('ceph_volume.process.call', lambda *a, **kw: ('', '', 1))
+        monkeypatch.setattr('stone_volume.process.call', lambda *a, **kw: ('', '', 1))
         with pytest.raises(RuntimeError):
             prepare.osd_id_available(1)
 
@@ -22,7 +22,7 @@ class TestOSDIDAvailable(object):
             dict(id=0, status="up"),
         ])
         stdout = ['', json.dumps(stdout)]
-        monkeypatch.setattr('ceph_volume.process.call', lambda *a, **kw: (stdout, '', 0))
+        monkeypatch.setattr('stone_volume.process.call', lambda *a, **kw: (stdout, '', 0))
         result = prepare.osd_id_available(0)
         assert not result
 
@@ -31,7 +31,7 @@ class TestOSDIDAvailable(object):
             dict(id=0),
         ])
         stdout = ['', json.dumps(stdout)]
-        monkeypatch.setattr('ceph_volume.process.call', lambda *a, **kw: (stdout, '', 0))
+        monkeypatch.setattr('stone_volume.process.call', lambda *a, **kw: (stdout, '', 0))
         result = prepare.osd_id_available(1)
         assert result
 
@@ -40,7 +40,7 @@ class TestOSDIDAvailable(object):
             dict(id=0, status="destroyed"),
         ])
         stdout = ['', json.dumps(stdout)]
-        monkeypatch.setattr('ceph_volume.process.call', lambda *a, **kw: (stdout, '', 0))
+        monkeypatch.setattr('stone_volume.process.call', lambda *a, **kw: (stdout, '', 0))
         result = prepare.osd_id_available(0)
         assert result
 
@@ -48,27 +48,27 @@ class TestOSDIDAvailable(object):
 class TestFormatDevice(object):
 
     def test_include_force(self, fake_run, monkeypatch):
-        monkeypatch.setattr(conf, 'ceph', Factory(get_list=lambda *a, **kw: []))
+        monkeypatch.setattr(conf, 'stone', Factory(get_list=lambda *a, **kw: []))
         prepare.format_device('/dev/sxx')
         flags = fake_run.calls[0]['args'][0]
         assert '-f' in flags
 
-    def test_device_is_always_appended(self, fake_run, conf_ceph):
-        conf_ceph(get_list=lambda *a, **kw: [])
+    def test_device_is_always_appended(self, fake_run, conf_stone):
+        conf_stone(get_list=lambda *a, **kw: [])
         prepare.format_device('/dev/sxx')
         flags = fake_run.calls[0]['args'][0]
         assert flags[-1] == '/dev/sxx'
 
-    def test_extra_flags_are_added(self, fake_run, conf_ceph):
-        conf_ceph(get_list=lambda *a, **kw: ['--why-yes'])
+    def test_extra_flags_are_added(self, fake_run, conf_stone):
+        conf_stone(get_list=lambda *a, **kw: ['--why-yes'])
         prepare.format_device('/dev/sxx')
         flags = fake_run.calls[0]['args'][0]
         assert '--why-yes' in flags
 
-    def test_default_options(self, conf_ceph_stub, fake_run):
-        conf_ceph_stub(dedent("""[global]
+    def test_default_options(self, conf_stone_stub, fake_run):
+        conf_stone_stub(dedent("""[global]
         fsid = 1234lkjh1234"""))
-        conf.cluster = 'ceph'
+        conf.cluster = 'stone'
         prepare.format_device('/dev/sda1')
         expected = [
             'mkfs', '-t', 'xfs',
@@ -76,12 +76,12 @@ class TestFormatDevice(object):
             '/dev/sda1']
         assert expected == fake_run.calls[0]['args'][0]
 
-    def test_multiple_options_are_used(self, conf_ceph_stub, fake_run):
-        conf_ceph_stub(dedent("""[global]
+    def test_multiple_options_are_used(self, conf_stone_stub, fake_run):
+        conf_stone_stub(dedent("""[global]
         fsid = 1234lkjh1234
         [osd]
         osd mkfs options xfs = -f -i size=1024"""))
-        conf.cluster = 'ceph'
+        conf.cluster = 'stone'
         prepare.format_device('/dev/sda1')
         expected = [
             'mkfs', '-t', 'xfs',
@@ -89,12 +89,12 @@ class TestFormatDevice(object):
             '/dev/sda1']
         assert expected == fake_run.calls[0]['args'][0]
 
-    def test_multiple_options_will_get_the_force_flag(self, conf_ceph_stub, fake_run):
-        conf_ceph_stub(dedent("""[global]
+    def test_multiple_options_will_get_the_force_flag(self, conf_stone_stub, fake_run):
+        conf_stone_stub(dedent("""[global]
         fsid = 1234lkjh1234
         [osd]
         osd mkfs options xfs = -i size=1024"""))
-        conf.cluster = 'ceph'
+        conf.cluster = 'stone'
         prepare.format_device('/dev/sda1')
         expected = [
             'mkfs', '-t', 'xfs',
@@ -102,12 +102,12 @@ class TestFormatDevice(object):
             '/dev/sda1']
         assert expected == fake_run.calls[0]['args'][0]
 
-    def test_underscore_options_are_used(self, conf_ceph_stub, fake_run):
-        conf_ceph_stub(dedent("""[global]
+    def test_underscore_options_are_used(self, conf_stone_stub, fake_run):
+        conf_stone_stub(dedent("""[global]
         fsid = 1234lkjh1234
         [osd]
         osd_mkfs_options_xfs = -i size=128"""))
-        conf.cluster = 'ceph'
+        conf.cluster = 'stone'
         prepare.format_device('/dev/sda1')
         expected = [
             'mkfs', '-t', 'xfs',
@@ -117,7 +117,7 @@ class TestFormatDevice(object):
 
 
 mkfs_filestore_flags = [
-    'ceph-osd',
+    'stone-osd',
     '--cluster',
     '--osd-objectstore', 'filestore',
     '--mkfs',
@@ -127,8 +127,8 @@ mkfs_filestore_flags = [
     '--osd-data',
     '--osd-journal',
     '--osd-uuid',
-    '--setuser', 'ceph',
-    '--setgroup', 'ceph'
+    '--setuser', 'stone',
+    '--setgroup', 'stone'
 ]
 
 
@@ -181,71 +181,71 @@ class TestOsdMkfsBluestore(object):
 
 class TestMountOSD(object):
 
-    def test_default_options(self, conf_ceph_stub, fake_run):
-        conf_ceph_stub(dedent("""[global]
+    def test_default_options(self, conf_stone_stub, fake_run):
+        conf_stone_stub(dedent("""[global]
         fsid = 1234lkjh1234"""))
-        conf.cluster = 'ceph'
+        conf.cluster = 'stone'
         prepare.mount_osd('/dev/sda1', 1)
         expected = [
             'mount', '-t', 'xfs', '-o',
             'rw,noatime,inode64', # default flags
-            '/dev/sda1', '/var/lib/ceph/osd/ceph-1']
+            '/dev/sda1', '/var/lib/stone/osd/stone-1']
         assert expected == fake_run.calls[0]['args'][0]
 
-    def test_mount_options_are_used(self, conf_ceph_stub, fake_run):
-        conf_ceph_stub(dedent("""[global]
+    def test_mount_options_are_used(self, conf_stone_stub, fake_run):
+        conf_stone_stub(dedent("""[global]
         fsid = 1234lkjh1234
         [osd]
         osd mount options xfs = rw"""))
-        conf.cluster = 'ceph'
+        conf.cluster = 'stone'
         prepare.mount_osd('/dev/sda1', 1)
         expected = [
             'mount', '-t', 'xfs', '-o',
             'rw',
-            '/dev/sda1', '/var/lib/ceph/osd/ceph-1']
+            '/dev/sda1', '/var/lib/stone/osd/stone-1']
         assert expected == fake_run.calls[0]['args'][0]
 
-    def test_multiple_whitespace_options_are_used(self, conf_ceph_stub, fake_run):
-        conf_ceph_stub(dedent("""[global]
+    def test_multiple_whitespace_options_are_used(self, conf_stone_stub, fake_run):
+        conf_stone_stub(dedent("""[global]
         fsid = 1234lkjh1234
         [osd]
         osd mount options xfs = rw auto exec"""))
-        conf.cluster = 'ceph'
+        conf.cluster = 'stone'
         prepare.mount_osd('/dev/sda1', 1)
         expected = [
             'mount', '-t', 'xfs', '-o',
             'rw,auto,exec',
-            '/dev/sda1', '/var/lib/ceph/osd/ceph-1']
+            '/dev/sda1', '/var/lib/stone/osd/stone-1']
         assert expected == fake_run.calls[0]['args'][0]
 
-    def test_multiple_comma_whitespace_options_are_used(self, conf_ceph_stub, fake_run):
-        conf_ceph_stub(dedent("""[global]
+    def test_multiple_comma_whitespace_options_are_used(self, conf_stone_stub, fake_run):
+        conf_stone_stub(dedent("""[global]
         fsid = 1234lkjh1234
         [osd]
         osd mount options xfs = rw, auto, exec"""))
-        conf.cluster = 'ceph'
+        conf.cluster = 'stone'
         prepare.mount_osd('/dev/sda1', 1)
         expected = [
             'mount', '-t', 'xfs', '-o',
             'rw,auto,exec',
-            '/dev/sda1', '/var/lib/ceph/osd/ceph-1']
+            '/dev/sda1', '/var/lib/stone/osd/stone-1']
         assert expected == fake_run.calls[0]['args'][0]
 
-    def test_underscore_mount_options_are_used(self, conf_ceph_stub, fake_run):
-        conf_ceph_stub(dedent("""[global]
+    def test_underscore_mount_options_are_used(self, conf_stone_stub, fake_run):
+        conf_stone_stub(dedent("""[global]
         fsid = 1234lkjh1234
         [osd]
         osd mount options xfs = rw"""))
-        conf.cluster = 'ceph'
+        conf.cluster = 'stone'
         prepare.mount_osd('/dev/sda1', 1)
         expected = [
             'mount', '-t', 'xfs', '-o',
             'rw',
-            '/dev/sda1', '/var/lib/ceph/osd/ceph-1']
+            '/dev/sda1', '/var/lib/stone/osd/stone-1']
         assert expected == fake_run.calls[0]['args'][0]
 
 
-ceph_conf_mount_values = [
+stone_conf_mount_values = [
     ['rw,', 'auto,' 'exec'],
     ['rw', 'auto', 'exec'],
     [' rw ', ' auto ', ' exec '],
@@ -271,7 +271,7 @@ class TestNormalizeFlags(object):
     # a bit overkill since most of this is already tested in prepare.mount_osd
     # tests
 
-    @pytest.mark.parametrize("flags", ceph_conf_mount_values)
+    @pytest.mark.parametrize("flags", stone_conf_mount_values)
     def test_normalize_lists(self, flags):
         result = sorted(prepare._normalize_mount_flags(flags).split(','))
         assert ','.join(result) == 'auto,exec,rw'
@@ -281,12 +281,12 @@ class TestNormalizeFlags(object):
         result = sorted(prepare._normalize_mount_flags(flags).split(','))
         assert ','.join(result) == 'auto,exec,rw'
 
-    @pytest.mark.parametrize("flags", ceph_conf_mount_values)
+    @pytest.mark.parametrize("flags", stone_conf_mount_values)
     def test_normalize_extra_flags(self, flags):
         result = prepare._normalize_mount_flags(flags, extras=['discard'])
         assert sorted(result.split(',')) == ['auto', 'discard', 'exec', 'rw']
 
-    @pytest.mark.parametrize("flags", ceph_conf_mount_values)
+    @pytest.mark.parametrize("flags", stone_conf_mount_values)
     def test_normalize_duplicate_extra_flags(self, flags):
         result = prepare._normalize_mount_flags(flags, extras=['rw', 'discard'])
         assert sorted(result.split(',')) == ['auto', 'discard', 'exec', 'rw']
@@ -305,80 +305,80 @@ class TestNormalizeFlags(object):
 class TestMkfsFilestore(object):
 
     def test_non_zero_exit_status(self, stub_call, monkeypatch):
-        conf.cluster = 'ceph'
-        monkeypatch.setattr('ceph_volume.util.prepare.system.chown', lambda x: True)
+        conf.cluster = 'stone'
+        monkeypatch.setattr('stone_volume.util.prepare.system.chown', lambda x: True)
         stub_call(([], [], 1))
         with pytest.raises(RuntimeError) as error:
             prepare.osd_mkfs_filestore('1', 'asdf-1234', 'keyring')
         assert "Command failed with exit code 1" in str(error.value)
 
     def test_non_zero_exit_formats_command_correctly(self, stub_call, monkeypatch):
-        conf.cluster = 'ceph'
-        monkeypatch.setattr('ceph_volume.util.prepare.system.chown', lambda x: True)
+        conf.cluster = 'stone'
+        monkeypatch.setattr('stone_volume.util.prepare.system.chown', lambda x: True)
         stub_call(([], [], 1))
         with pytest.raises(RuntimeError) as error:
             prepare.osd_mkfs_filestore('1', 'asdf-1234', 'keyring')
         expected = ' '.join([
-            'ceph-osd',
+            'stone-osd',
             '--cluster',
-            'ceph',
+            'stone',
             '--osd-objectstore', 'filestore', '--mkfs',
-            '-i', '1', '--monmap', '/var/lib/ceph/osd/ceph-1/activate.monmap',
-            '--keyfile', '-', '--osd-data', '/var/lib/ceph/osd/ceph-1/',
-            '--osd-journal', '/var/lib/ceph/osd/ceph-1/journal',
+            '-i', '1', '--monmap', '/var/lib/stone/osd/stone-1/activate.monmap',
+            '--keyfile', '-', '--osd-data', '/var/lib/stone/osd/stone-1/',
+            '--osd-journal', '/var/lib/stone/osd/stone-1/journal',
             '--osd-uuid', 'asdf-1234',
-            '--setuser', 'ceph', '--setgroup', 'ceph'])
+            '--setuser', 'stone', '--setgroup', 'stone'])
         assert expected in str(error.value)
 
 
 class TestMkfsBluestore(object):
 
     def test_non_zero_exit_status(self, stub_call, monkeypatch):
-        conf.cluster = 'ceph'
-        monkeypatch.setattr('ceph_volume.util.prepare.system.chown', lambda x: True)
+        conf.cluster = 'stone'
+        monkeypatch.setattr('stone_volume.util.prepare.system.chown', lambda x: True)
         stub_call(([], [], 1))
         with pytest.raises(RuntimeError) as error:
             prepare.osd_mkfs_bluestore('1', 'asdf-1234', keyring='keyring')
         assert "Command failed with exit code 1" in str(error.value)
 
     def test_non_zero_exit_formats_command_correctly(self, stub_call, monkeypatch):
-        conf.cluster = 'ceph'
-        monkeypatch.setattr('ceph_volume.util.prepare.system.chown', lambda x: True)
+        conf.cluster = 'stone'
+        monkeypatch.setattr('stone_volume.util.prepare.system.chown', lambda x: True)
         stub_call(([], [], 1))
         with pytest.raises(RuntimeError) as error:
             prepare.osd_mkfs_bluestore('1', 'asdf-1234', keyring='keyring')
         expected = ' '.join([
-            'ceph-osd',
+            'stone-osd',
             '--cluster',
-            'ceph',
+            'stone',
             '--osd-objectstore', 'bluestore', '--mkfs',
-            '-i', '1', '--monmap', '/var/lib/ceph/osd/ceph-1/activate.monmap',
-            '--keyfile', '-', '--osd-data', '/var/lib/ceph/osd/ceph-1/',
+            '-i', '1', '--monmap', '/var/lib/stone/osd/stone-1/activate.monmap',
+            '--keyfile', '-', '--osd-data', '/var/lib/stone/osd/stone-1/',
             '--osd-uuid', 'asdf-1234',
-            '--setuser', 'ceph', '--setgroup', 'ceph'])
+            '--setuser', 'stone', '--setgroup', 'stone'])
         assert expected in str(error.value)
 
 
 class TestGetJournalSize(object):
 
-    def test_undefined_size_fallbacks_formatted(self, conf_ceph_stub):
-        conf_ceph_stub(dedent("""
+    def test_undefined_size_fallbacks_formatted(self, conf_stone_stub):
+        conf_stone_stub(dedent("""
         [global]
         fsid = a25d19a6-7d57-4eda-b006-78e35d2c4d9f
         """))
         result = prepare.get_journal_size()
         assert result == '5G'
 
-    def test_undefined_size_fallbacks_unformatted(self, conf_ceph_stub):
-        conf_ceph_stub(dedent("""
+    def test_undefined_size_fallbacks_unformatted(self, conf_stone_stub):
+        conf_stone_stub(dedent("""
         [global]
         fsid = a25d19a6-7d57-4eda-b006-78e35d2c4d9f
         """))
         result = prepare.get_journal_size(lv_format=False)
         assert result.gb.as_int() == 5
 
-    def test_defined_size_unformatted(self, conf_ceph_stub):
-        conf_ceph_stub(dedent("""
+    def test_defined_size_unformatted(self, conf_stone_stub):
+        conf_stone_stub(dedent("""
         [global]
         fsid = a25d19a6-7d57-4eda-b006-78e35d2c4d9f
 
@@ -388,8 +388,8 @@ class TestGetJournalSize(object):
         result = prepare.get_journal_size(lv_format=False)
         assert result.gb.as_int() == 10
 
-    def test_defined_size_formatted(self, conf_ceph_stub):
-        conf_ceph_stub(dedent("""
+    def test_defined_size_formatted(self, conf_stone_stub):
+        conf_stone_stub(dedent("""
         [global]
         fsid = a25d19a6-7d57-4eda-b006-78e35d2c4d9f
 
@@ -399,8 +399,8 @@ class TestGetJournalSize(object):
         result = prepare.get_journal_size()
         assert result == '10G'
 
-    def test_refuse_tiny_journals(self, conf_ceph_stub):
-        conf_ceph_stub(dedent("""
+    def test_refuse_tiny_journals(self, conf_stone_stub):
+        conf_stone_stub(dedent("""
         [global]
         fsid = a25d19a6-7d57-4eda-b006-78e35d2c4d9f
 

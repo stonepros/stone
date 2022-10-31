@@ -107,7 +107,7 @@ General guideline is the following.
   doesn't reach to the max. For HDD and smaller block size, the old throttle may
   make sense, in that case we should set these delay multiple to 0.
 
-It is recommended that user should use ceph_smalliobenchfs tool to see the effect 
+It is recommended that user should use stone_smalliobenchfs tool to see the effect 
 of these parameters (and decide) on your HW before deploying OSDs. 
 
 Need to supply the following parameters.
@@ -119,8 +119,8 @@ Need to supply the following parameters.
 
   3. --op-dump-file 
 
-'ceph_smalliobenchfs --help' will show all the options that user can tweak.
-In case user wants to supply any ceph.conf parameter related to filestore,
+'stone_smalliobenchfs --help' will show all the options that user can tweak.
+In case user wants to supply any stone.conf parameter related to filestore,
 it can be done by adding '--' in front, for ex. --debug_filestore
 
 Once test is done, analyze the throughput and latency information dumped in the

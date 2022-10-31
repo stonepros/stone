@@ -14,7 +14,7 @@ install FUSE if you want to build the FUSE support::
 
   brew cask install osxfuse
 
-then, under the source directory of Ceph::
+then, under the source directory of Stone::
 
   mkdir build
   cd build
@@ -47,4 +47,4 @@ The paths to ``nss`` and ``snappy`` might vary if newer versions of the packages
 
 Also, please consider using boost v1.69 to address the bug of https://github.com/boostorg/atomic/issues/15.
 
-Currently, the most practical uses for Ceph on MacOS might be FUSE and some other librados based applications.
+Currently, the most practical uses for Stone on MacOS might be FUSE and some other librados based applications.

@@ -9,7 +9,7 @@ eval "rm out/*.heap" || echo "no heap dumps to rm"
 
 mkdir -p out/pg_stable
 for osd_num in `seq 0 $maxosd`; do
-    ./ceph osd tell $osd_num heapdump
+    ./stone osd tell $osd_num heapdump
     sleep 1
     eval "mv out/*.heap out/pg_stable"
 done
@@ -28,7 +28,7 @@ eval "rm out/*.heap" || echo "no heap dumps to rm"
 mkdir out/one_write
 
 for osd_num in `seq 0 $maxosd`; do
-    ./ceph osd tell $osd_num heapdump
+    ./stone osd tell $osd_num heapdump
     sleep 1
     eval "mv out/*.heap out/one_write"
 done
@@ -47,7 +47,7 @@ eval "rm out/*.heap"
 mkdir out/five_writes
 
 for osd_num in `seq 0 $maxosd`; do
-    ./ceph osd tell $osd_num heapdump
+    ./stone osd tell $osd_num heapdump
     sleep 1
     eval "mv out/*.heap out/five_writes"
 done

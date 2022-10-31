@@ -1,13 +1,13 @@
 =================================
-CephFS Distributed Metadata Cache
+StoneFS Distributed Metadata Cache
 =================================
-While the data for inodes in a Ceph file system is stored in RADOS and
+While the data for inodes in a Stone file system is stored in RADOS and
 accessed by the clients directly, inode metadata and directory
-information is managed by the Ceph metadata server (MDS). The MDS's
+information is managed by the Stone metadata server (MDS). The MDS's
 act as mediator for all metadata related activity, storing the resulting
 information in a separate RADOS pool from the file data.
 
-CephFS clients can request that the MDS fetch or change inode metadata
+StoneFS clients can request that the MDS fetch or change inode metadata
 on its behalf, but an MDS can also grant the client **capabilities**
 (aka **caps**) for each inode (see :doc:`/cephfs/capabilities`).
 
@@ -37,7 +37,7 @@ Client Metadata Requests
 When a client needs to query/change inode metadata or perform an
 operation on a directory, it has two options. It can make a request to
 the MDS directly, or serve the information out of its cache. With
-CephFS, the latter is only possible if the client has the necessary
+StoneFS, the latter is only possible if the client has the necessary
 caps.
 
 Clients can send simple requests to the MDS to query or request changes

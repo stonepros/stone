@@ -40,7 +40,7 @@ def task(ctx, config):
     For example::
 
         tasks:
-        - ceph:
+        - stone:
         - rados:
             clients: [client.0]
             ops: 1000
@@ -72,10 +72,10 @@ def task(ctx, config):
     Optionally, you can provide the pool name to run against:
 
         tasks:
-        - ceph:
+        - stone:
         - exec:
             client.0:
-              - ceph osd pool create foo
+              - stone osd pool create foo
         - rados:
             clients: [client.0]
             pools: [foo]
@@ -84,10 +84,10 @@ def task(ctx, config):
     Alternatively, you can provide a pool prefix:
 
         tasks:
-        - ceph:
+        - stone:
         - exec:
             client.0:
-              - ceph osd pool create foo.client.0
+              - stone osd pool create foo.client.0
         - rados:
             clients: [client.0]
             pool_prefix: foo
@@ -135,9 +135,9 @@ def task(ctx, config):
     testdir = teuthology.get_testdir(ctx)
     args = [
         'adjust-ulimits',
-        'ceph-coverage',
+        'stone-coverage',
         '{tdir}/archive/coverage'.format(tdir=testdir),
-        'ceph_test_rados']
+        'stone_test_rados']
     if config.get('ec_pool', False):
         args.extend(['--no-omap'])
         if not config.get('erasure_code_use_overwrites', False):
@@ -217,7 +217,7 @@ def task(ctx, config):
         """Thread spawned by gevent"""
         clients = ['client.{id}'.format(id=id_) for id_ in teuthology.all_roles_of_type(ctx.cluster, 'client')]
         log.info('clients are %s' % clients)
-        manager = ctx.managers['ceph']
+        manager = ctx.managers['stone']
         if config.get('ec_pool', False):
             profile = config.get('erasure_code_profile', {})
             profile_name = profile.get('name', 'teuthologyprofile')
@@ -255,7 +255,7 @@ def task(ctx, config):
 
                 (remote,) = ctx.cluster.only(role).remotes.keys()
                 proc = remote.run(
-                    args=["CEPH_CLIENT_ID={id_}".format(id_=id_)] + args +
+                    args=["STONE_CLIENT_ID={id_}".format(id_=id_)] + args +
                     ["--pool", pool],
                     logger=log.getChild("rados.{id}".format(id=id_)),
                     stdin=run.PIPE,

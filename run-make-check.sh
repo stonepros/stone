@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Ceph distributed storage system
+# Stone distributed storage system
 #
 # Copyright (C) 2014 Red Hat <contact@redhat.com>
 #

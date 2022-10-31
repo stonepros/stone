@@ -4,7 +4,7 @@ from typing import List, Optional, TYPE_CHECKING
 import multiprocessing as mp
 import threading
 
-from cephadm.serve import CephadmServe
+from stoneadm.serve import StoneadmServe
 
 try:
     import remoto
@@ -13,13 +13,13 @@ except ImportError:
 
 
 if TYPE_CHECKING:
-    from cephadm.module import CephadmOrchestrator
+    from stoneadm.module import StoneadmOrchestrator
 
 logger = logging.getLogger(__name__)
 
 
 class OfflineHostWatcher(threading.Thread):
-    def __init__(self, mgr: "CephadmOrchestrator") -> None:
+    def __init__(self, mgr: "StoneadmOrchestrator") -> None:
         self.mgr = mgr
         self.hosts: Optional[List[str]] = None
         self.new_hosts: Optional[List[str]] = None
@@ -46,7 +46,7 @@ class OfflineHostWatcher(threading.Thread):
     def check_host(self, host: str) -> None:
         if host not in self.mgr.offline_hosts:
             try:
-                with CephadmServe(self.mgr)._remote_connection(host) as tpl:
+                with StoneadmServe(self.mgr)._remote_connection(host) as tpl:
                     conn, connr = tpl
                     out, err, code = remoto.process.check(conn, ['true'])
             except Exception:

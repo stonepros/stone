@@ -17,28 +17,28 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import java.io.IOException;
 
 /**
- * Ceph is not mounted.
+ * Stone is not mounted.
  */
-public class CephNotMountedException extends IOException {
+public class StoneNotMountedException extends IOException {
 
   private static final long serialVersionUID = 1L;
 
   /**
-   * Construct CephNotMountedException.
+   * Construct StoneNotMountedException.
    */
-  public CephNotMountedException() {
+  public StoneNotMountedException() {
     super();
   }
 
   /**
-   * Construct CephNotMountedException with message.
+   * Construct StoneNotMountedException with message.
    */
-  public CephNotMountedException(String s) {
+  public StoneNotMountedException(String s) {
     super(s);
   }
 }

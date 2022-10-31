@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-# This testcase tests the scenario of the 'ceph fs subvolume rm' mgr command
+# This testcase tests the scenario of the 'stone fs subvolume rm' mgr command
 # when the osd is full. The command used to hang. The osd is of the size 1GB.
 # The subvolume is created and 500MB file is written. The full-ratios are
 # set below 500MB such that the osd is treated as full. Now the subvolume is
@@ -13,24 +13,24 @@ expect_failure() {
 	if "$@"; then return 1; else return 0; fi
 }
 
-ceph fs subvolume create cephfs sub_0
-subvol_path=$(ceph fs subvolume getpath cephfs sub_0 2>/dev/null)
+stone fs subvolume create stonefs sub_0
+subvol_path=$(stone fs subvolume getpath stonefs sub_0 2>/dev/null)
 
 #For debugging
 echo "Before write"
 df -h
-ceph osd df
+stone osd df
 
-sudo dd if=/dev/urandom of=$CEPH_MNT$subvol_path/500MB_file-1 status=progress bs=1M count=500
+sudo dd if=/dev/urandom of=$STONE_MNT$subvol_path/500MB_file-1 status=progress bs=1M count=500
 
-ceph osd set-full-ratio 0.2
-ceph osd set-nearfull-ratio 0.16
-ceph osd set-backfillfull-ratio 0.18
+stone osd set-full-ratio 0.2
+stone osd set-nearfull-ratio 0.16
+stone osd set-backfillfull-ratio 0.18
 
 timeout=30
 while [ $timeout -gt 0 ]
 do
-  health=$(ceph health detail)
+  health=$(stone health detail)
   [[ $health = *"OSD_FULL"* ]] && echo "OSD is full" && break
   echo "Wating for osd to be full: $timeout"
   sleep 1
@@ -40,16 +40,16 @@ done
 #For debugging
 echo "After ratio set"
 df -h
-ceph osd df
+stone osd df
 
 #Delete subvolume
-ceph fs subvolume rm cephfs sub_0
+stone fs subvolume rm stonefs sub_0
 
 #Validate subvolume is deleted
-expect_failure ceph fs subvolume info cephfs sub_0
+expect_failure stone fs subvolume info stonefs sub_0
 
 #Wait for subvolume to delete data
-trashdir=$CEPH_MNT/volumes/_deleting
+trashdir=$STONE_MNT/volumes/_deleting
 timeout=30
 while [ $timeout -gt 0 ]
 do

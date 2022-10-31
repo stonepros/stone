@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2020 Red Hat, Inc.
  *
@@ -16,7 +16,7 @@
 #pragma once
 
 #include <optional>
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "rgw_basic_types.h"
 
 class DoutPrefixProvider;
@@ -31,5 +31,5 @@ int rgw_bucket_sync_checkpoint(const DoutPrefixProvider* dpp,
                                const RGWBucketInfo& info,
                                std::optional<rgw_zone_id> opt_source_zone,
                                std::optional<rgw_bucket> opt_source_bucket,
-                               ceph::timespan retry_delay,
-                               ceph::coarse_mono_time timeout_at);
+                               stone::timespan retry_delay,
+                               stone::coarse_mono_time timeout_at);

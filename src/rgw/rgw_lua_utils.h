@@ -10,11 +10,11 @@
 
 namespace rgw::lua {
 
-// push ceph time in string format: "%Y-%m-%d %H:%M:%S"
-template <typename CephTime>
-void pushtime(lua_State* L, const CephTime& tp)
+// push stone time in string format: "%Y-%m-%d %H:%M:%S"
+template <typename StoneTime>
+void pushtime(lua_State* L, const StoneTime& tp)
 {
-  const auto tt = CephTime::clock::to_time_t(tp);
+  const auto tt = StoneTime::clock::to_time_t(tp);
   const auto tm = *std::localtime(&tt);
   char buff[64];
   std::strftime(buff, sizeof(buff), "%Y-%m-%d %H:%M:%S", &tm);
@@ -173,13 +173,13 @@ struct EmptyMetaTable {
 };
 
 // create a debug log action
-// it expects CephContext to be captured
+// it expects StoneContext to be captured
 // it expects one string parameter, which is the message to log
-// could be executed from any context that has CephContext
+// could be executed from any context that has StoneContext
 // e.g.
 //    RGWDebugLog("hello world from lua")
 //
-void create_debug_action(lua_State* L, CephContext* cct);
+void create_debug_action(lua_State* L, StoneContext* cct);
 
 // set the packages search path according to:
 // package.path = "<install_dir>/share/lua/5.3/?.lua"                                                                         │                         LuaRocks.

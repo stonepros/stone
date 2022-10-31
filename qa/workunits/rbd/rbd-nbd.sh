@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-. $(dirname $0)/../../standalone/ceph-helpers.sh
+. $(dirname $0)/../../standalone/stone-helpers.sh
 
 POOL=rbd
 ANOTHER_POOL=new_default_pool$$
@@ -35,13 +35,13 @@ setup()
     if [ -e CMakeCache.txt ]; then
 	# running under cmake build dir
 
-	CEPH_SRC=$(readlink -f $(dirname $0)/../../../src)
-	CEPH_ROOT=${PWD}
-	CEPH_BIN=${CEPH_ROOT}/bin
+	STONE_SRC=$(readlink -f $(dirname $0)/../../../src)
+	STONE_ROOT=${PWD}
+	STONE_BIN=${STONE_ROOT}/bin
 
-	export LD_LIBRARY_PATH=${CEPH_ROOT}/lib:${LD_LIBRARY_PATH}
-	export PYTHONPATH=${PYTHONPATH}:${CEPH_SRC}/pybind:${CEPH_ROOT}/lib/cython_modules/lib.3
-	PATH=${CEPH_BIN}:${PATH}
+	export LD_LIBRARY_PATH=${STONE_ROOT}/lib:${LD_LIBRARY_PATH}
+	export PYTHONPATH=${PYTHONPATH}:${STONE_SRC}/pybind:${STONE_ROOT}/lib/cython_modules/lib.3
+	PATH=${STONE_BIN}:${PATH}
     fi
 
     _sudo echo test sudo
@@ -59,7 +59,7 @@ setup()
     done
 
     # create another pool
-    ceph osd pool create ${ANOTHER_POOL} 8
+    stone osd pool create ${ANOTHER_POOL} 8
     rbd pool init ${ANOTHER_POOL}
 }
 
@@ -92,7 +92,7 @@ function cleanup()
 
     # cleanup/reset default pool
     rbd config global rm global rbd_default_pool
-    ceph osd pool delete ${ANOTHER_POOL} ${ANOTHER_POOL} --yes-i-really-really-mean-it
+    stone osd pool delete ${ANOTHER_POOL} ${ANOTHER_POOL} --yes-i-really-really-mean-it
 }
 
 function expect_false()
@@ -323,8 +323,8 @@ _sudo dd if=${DATA} of=${DEV} bs=1M count=1 oflag=direct
 # test rbd-nbd_quiesce hook that comes with distribution
 unmap_device ${DEV} ${PID}
 LOG_FILE=${TEMPDIR}/rbd-nbd.log
-if [ -n "${CEPH_SRC}" ]; then
-    QUIESCE_HOOK=${CEPH_SRC}/tools/rbd_nbd/rbd-nbd_quiesce
+if [ -n "${STONE_SRC}" ]; then
+    QUIESCE_HOOK=${STONE_SRC}/tools/rbd_nbd/rbd-nbd_quiesce
     DEV=`_sudo rbd device --device-type nbd map --quiesce --quiesce-hook ${QUIESCE_HOOK} \
                ${POOL}/${IMAGE} --log-file=${LOG_FILE}`
 else

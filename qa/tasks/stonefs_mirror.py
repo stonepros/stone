@@ -1,5 +1,5 @@
 """
-Task for running cephfs mirror daemons
+Task for running stonefs mirror daemons
 """
 
 import logging
@@ -8,22 +8,22 @@ from teuthology.orchestra import run
 from teuthology import misc
 from teuthology.exceptions import ConfigError
 from teuthology.task import Task
-from tasks.ceph_manager import get_valgrind_args
+from tasks.stone_manager import get_valgrind_args
 from tasks.util import get_remote_for_role
 
 log = logging.getLogger(__name__)
 
-class CephFSMirror(Task):
+class StoneFSMirror(Task):
     def __init__(self, ctx, config):
-        super(CephFSMirror, self).__init__(ctx, config)
+        super(StoneFSMirror, self).__init__(ctx, config)
         self.log = log
 
     def setup(self):
-        super(CephFSMirror, self).setup()
+        super(StoneFSMirror, self).setup()
         try:
             self.client = self.config['client']
         except KeyError:
-            raise ConfigError('cephfs-mirror requires a client to connect')
+            raise ConfigError('stonefs-mirror requires a client to connect')
 
         self.cluster_name, type_, self.client_id = misc.split_role(self.client)
         if not type_ == 'client':
@@ -31,12 +31,12 @@ class CephFSMirror(Task):
         self.remote = get_remote_for_role(self.ctx, self.client)
 
     def begin(self):
-        super(CephFSMirror, self).begin()
+        super(StoneFSMirror, self).begin()
         testdir = misc.get_testdir(self.ctx)
 
         args = [
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             '{tdir}/archive/coverage'.format(tdir=testdir),
             'daemon-helper',
             'term',
@@ -44,11 +44,11 @@ class CephFSMirror(Task):
 
         if 'valgrind' in self.config:
             args = get_valgrind_args(
-                testdir, 'cephfs-mirror-{id}'.format(id=self.client),
+                testdir, 'stonefs-mirror-{id}'.format(id=self.client),
                 args, self.config.get('valgrind'))
 
         args.extend([
-            'cephfs-mirror',
+            'stonefs-mirror',
             '--cluster',
             self.cluster_name,
             '--id',
@@ -58,7 +58,7 @@ class CephFSMirror(Task):
             args.extend(['--foreground'])
 
         self.ctx.daemons.add_daemon(
-            self.remote, 'cephfs-mirror', self.client,
+            self.remote, 'stonefs-mirror', self.client,
             args=args,
             logger=self.log.getChild(self.client),
             stdin=run.PIPE,
@@ -66,8 +66,8 @@ class CephFSMirror(Task):
         )
 
     def end(self):
-        mirror_daemon = self.ctx.daemons.get_daemon('cephfs-mirror', self.client)
+        mirror_daemon = self.ctx.daemons.get_daemon('stonefs-mirror', self.client)
         mirror_daemon.stop()
-        super(CephFSMirror, self).end()
+        super(StoneFSMirror, self).end()
 
-task = CephFSMirror
+task = StoneFSMirror

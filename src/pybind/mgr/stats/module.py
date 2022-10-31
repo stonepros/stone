@@ -1,5 +1,5 @@
 """
-performance stats for ceph filesystem (for now...)
+performance stats for stone filesystem (for now...)
 """
 
 import json
@@ -13,10 +13,10 @@ class Module(MgrModule):
     COMMANDS = [
         {
             "cmd": "fs perf stats "
-                   "name=mds_rank,type=CephString,req=false "
-                   "name=client_id,type=CephString,req=false "
-                   "name=client_ip,type=CephString,req=false ",
-            "desc": "retrieve ceph fs performance stats",
+                   "name=mds_rank,type=StoneString,req=false "
+                   "name=client_id,type=StoneString,req=false "
+                   "name=client_ip,type=StoneString,req=false ",
+            "desc": "retrieve stone fs performance stats",
             "perm": "r"
         },
     ]

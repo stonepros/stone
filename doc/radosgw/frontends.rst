@@ -6,7 +6,7 @@ HTTP Frontends
 
 .. contents::
 
-The Ceph Object Gateway supports two embedded HTTP frontend libraries
+The Stone Object Gateway supports two embedded HTTP frontend libraries
 that can be configured with ``rgw_frontends``. See `Config Reference`_
 for details about the syntax.
 

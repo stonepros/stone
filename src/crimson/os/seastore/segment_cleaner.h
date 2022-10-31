@@ -5,7 +5,7 @@
 
 #include <boost/intrusive/set.hpp>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 #include "crimson/os/seastore/cached_extent.h"
 #include "crimson/os/seastore/journal.h"
@@ -368,7 +368,7 @@ public:
   }
 
   void init_mark_segment_closed(segment_id_t segment, segment_seq_t seq) final {
-    crimson::get_logger(ceph_subsys_filestore).debug(
+    crimson::get_logger(stone_subsys_filestore).debug(
       "SegmentCleaner::init_mark_segment_closed: segment {}, seq {}",
       segment,
       seq);
@@ -433,7 +433,7 @@ public:
       }
     }
     if (ret != NULL_SEG_ID) {
-      crimson::get_logger(ceph_subsys_filestore).debug(
+      crimson::get_logger(stone_subsys_filestore).debug(
 	"SegmentCleaner::get_next_gc_target: segment {} seq {}",
 	ret,
 	segments[ret].journal_segment_seq);
@@ -482,7 +482,7 @@ public:
   using do_deferred_work_ertr = crimson::errorator<
     crimson::ct_error::input_output_error>;
   using do_deferred_work_ret = do_deferred_work_ertr::future<
-    ceph::timespan
+    stone::timespan
     >;
   do_deferred_work_ret do_deferred_work(
     Transaction &t);
@@ -661,7 +661,7 @@ private:
       assert(empty_segments > 0);
       --empty_segments;
     }
-    crimson::get_logger(ceph_subsys_filestore).debug(
+    crimson::get_logger(stone_subsys_filestore).debug(
       "mark_closed: empty_segments: {}",
       empty_segments);
     segments[segment].state = Segment::segment_state_t::CLOSED;

@@ -1,5 +1,5 @@
 ============================================
-Contributing to Ceph: A Guide for Developers
+Contributing to Stone: A Guide for Developers
 ============================================
 
 :Author: Loic Dachary
@@ -21,5 +21,5 @@ Contributing to Ceph: A Guide for Developers
    Running Tests Locally <running-tests-locally>
    Running Integration Tests using Teuthology <running-tests-using-teuth>
    Running Tests in the Cloud <running-tests-in-cloud>
-   Ceph Dashboard Developer Documentation (formerly HACKING.rst) <dash-devel>
+   Stone Dashboard Developer Documentation (formerly HACKING.rst) <dash-devel>
    cephadm Developer Documentation  <../cephadm/index>

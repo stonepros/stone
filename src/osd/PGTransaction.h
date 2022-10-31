@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -129,12 +129,12 @@ public:
      * to account for truncates overriding previous writes */
     std::optional<std::pair<uint64_t, uint64_t> > truncate = std::nullopt;
 
-    std::map<std::string, std::optional<ceph::buffer::list> > attr_updates;
+    std::map<std::string, std::optional<stone::buffer::list> > attr_updates;
 
     enum class OmapUpdateType {Remove, Insert, RemoveRange};
-    std::vector<std::pair<OmapUpdateType, ceph::buffer::list> > omap_updates;
+    std::vector<std::pair<OmapUpdateType, stone::buffer::list> > omap_updates;
 
-    std::optional<ceph::buffer::list> omap_header;
+    std::optional<stone::buffer::list> omap_header;
 
     /// (old, new) -- only valid with no truncate or buffer updates
     std::optional<std::pair<std::set<snapid_t>, std::set<snapid_t>>> updated_snaps;
@@ -148,7 +148,7 @@ public:
 
     struct BufferUpdate {
       struct Write {
-	ceph::buffer::list buffer;
+	stone::buffer::list buffer;
 	uint32_t fadvise_flags;
       };
       struct Zero {
@@ -174,7 +174,7 @@ public:
 	return match(
 	  bu,
 	  [&](const BufferUpdate::Write &w) -> BufferUpdateType {
-	    ceph::buffer::list bl;
+	    stone::buffer::list bl;
 	    bl.substr_of(w.buffer, offset, len);
 	    return BufferUpdate::Write{bl, w.fadvise_flags};
 	  },
@@ -223,18 +223,18 @@ public:
 	  left,
 	  [&](const BufferUpdate::Write &w) -> BufferUpdateType {
 	    auto r = boost::get<BufferUpdate::Write>(&right);
-	    ceph_assert(r && w.fadvise_flags == r->fadvise_flags);
-	    ceph::buffer::list bl = w.buffer;
+	    stone_assert(r && w.fadvise_flags == r->fadvise_flags);
+	    stone::buffer::list bl = w.buffer;
 	    bl.append(r->buffer);
 	    return BufferUpdate::Write{bl, w.fadvise_flags};
 	  },
 	  [&](const BufferUpdate::Zero &z) -> BufferUpdateType {
 	    auto r = boost::get<BufferUpdate::Zero>(&right);
-	    ceph_assert(r);
+	    stone_assert(r);
 	    return BufferUpdate::Zero{z.len + r->len};
 	  },
 	  [&](const BufferUpdate::CloneRange &c) -> BufferUpdateType {
-	    ceph_abort_msg("violates can_merge condition");
+	    stone_abort_msg("violates can_merge condition");
 	    return left;
 	  });
       }
@@ -250,7 +250,7 @@ public:
 private:
   ObjectOperation &get_object_op_for_modify(const hobject_t &hoid) {
     auto &op = op_map[hoid];
-    ceph_assert(!op.is_delete());
+    stone_assert(!op.is_delete());
     return op;
   }
   ObjectOperation &get_object_op(const hobject_t &hoid) {
@@ -259,7 +259,7 @@ private:
 public:
   void add_obc(
     ObjectContextRef obc) {
-    ceph_assert(obc);
+    stone_assert(obc);
     obc_map[obc->obs.oi.soid] = obc;
   }
   /// Sets up state for new object
@@ -267,7 +267,7 @@ public:
     const hobject_t &hoid
     ) {
     auto &op = op_map[hoid];
-    ceph_assert(op.is_none() || op.is_delete());
+    stone_assert(op.is_none() || op.is_delete());
     op.init_type = ObjectOperation::Init::Create();
   }
 
@@ -277,7 +277,7 @@ public:
     const hobject_t &source        ///< [in] obj to clone from
     ) {
     auto &op = op_map[target];
-    ceph_assert(op.is_none() || op.is_delete());
+    stone_assert(op.is_none() || op.is_delete());
     op.init_type = ObjectOperation::Init::Clone{source};
   }
 
@@ -286,10 +286,10 @@ public:
     const hobject_t &target,       ///< [in] to, must not exist, be non-temp
     const hobject_t &source        ///< [in] source (must be a temp object)
     ) {
-    ceph_assert(source.is_temp());
-    ceph_assert(!target.is_temp());
+    stone_assert(source.is_temp());
+    stone_assert(!target.is_temp());
     auto &op = op_map[target];
-    ceph_assert(op.is_none() || op.is_delete());
+    stone_assert(op.is_none() || op.is_delete());
 
     bool del_first = op.is_delete();
     auto iter = op_map.find(source);
@@ -308,11 +308,11 @@ public:
     ) {
     auto &op = get_object_op_for_modify(hoid);
     if (!op.is_fresh_object()) {
-      ceph_assert(!op.updated_snaps);
+      stone_assert(!op.updated_snaps);
       op = ObjectOperation();
       op.delete_first = true;
     } else {
-      ceph_assert(!op.is_rename());
+      stone_assert(!op.is_rename());
       op_map.erase(hoid); // make it a noop if it's a fresh object
     }
   }
@@ -323,9 +323,9 @@ public:
     const std::set<snapid_t> &new_snaps ///< [in] new snaps value
     ) {
     auto &op = get_object_op(hoid);
-    ceph_assert(!op.updated_snaps);
-    ceph_assert(op.buffer_updates.empty());
-    ceph_assert(!op.truncate);
+    stone_assert(!op.updated_snaps);
+    stone_assert(op.buffer_updates.empty());
+    stone_assert(!op.truncate);
     op.updated_snaps = make_pair(
       old_snaps,
       new_snaps);
@@ -345,7 +345,7 @@ public:
     uint64_t off                   ///< [in] offset to truncate to
     ) {
     auto &op = get_object_op_for_modify(hoid);
-    ceph_assert(!op.updated_snaps);
+    stone_assert(!op.updated_snaps);
     op.buffer_updates.erase(
       off,
       std::numeric_limits<uint64_t>::max() - off);
@@ -359,7 +359,7 @@ public:
   /// Attr ops
   void setattrs(
     const hobject_t &hoid,         ///< [in] object to write
-    std::map<std::string, ceph::buffer::list> &attrs ///< [in] attrs, may be cleared
+    std::map<std::string, stone::buffer::list> &attrs ///< [in] attrs, may be cleared
     ) {
     auto &op = get_object_op_for_modify(hoid);
     for (auto &&i: attrs) {
@@ -371,7 +371,7 @@ public:
   void setattr(
     const hobject_t &hoid,         ///< [in] object to write
     const std::string &attrname,        ///< [in] attr to write
-    ceph::buffer::list &bl                 ///< [in] val to write, may be claimed
+    stone::buffer::list &bl                 ///< [in] val to write, may be claimed
     ) {
     auto &op = get_object_op_for_modify(hoid);
     auto& d = op.attr_updates[attrname];
@@ -403,13 +403,13 @@ public:
     const hobject_t &hoid,         ///< [in] object to write
     uint64_t off,                  ///< [in] off at which to write
     uint64_t len,                  ///< [in] len to write from bl
-    ceph::buffer::list &bl,                ///< [in] bl to write will be claimed to len
+    stone::buffer::list &bl,                ///< [in] bl to write will be claimed to len
     uint32_t fadvise_flags = 0     ///< [in] fadvise hint
     ) {
     auto &op = get_object_op_for_modify(hoid);
-    ceph_assert(!op.updated_snaps);
-    ceph_assert(len > 0);
-    ceph_assert(len == bl.length());
+    stone_assert(!op.updated_snaps);
+    stone_assert(len > 0);
+    stone_assert(len == bl.length());
     op.buffer_updates.insert(
       off,
       len,
@@ -423,7 +423,7 @@ public:
     uint64_t tooff                 ///< [in] offset
     ) {
     auto &op = get_object_op_for_modify(to);
-    ceph_assert(!op.updated_snaps);
+    stone_assert(!op.updated_snaps);
     op.buffer_updates.insert(
       tooff,
       len,
@@ -435,7 +435,7 @@ public:
     uint64_t len                   ///< [in] amount to zero
     ) {
     auto &op = get_object_op_for_modify(hoid);
-    ceph_assert(!op.updated_snaps);
+    stone_assert(!op.updated_snaps);
     op.buffer_updates.insert(
       off,
       len,
@@ -445,7 +445,7 @@ public:
   /// Omap updates
   void omap_setkeys(
     const hobject_t &hoid,         ///< [in] object to write
-    ceph::buffer::list &keys_bl            ///< [in] encoded map<string, ceph::buffer::list>
+    stone::buffer::list &keys_bl            ///< [in] encoded map<string, stone::buffer::list>
     ) {
     auto &op = get_object_op_for_modify(hoid);
     op.omap_updates.emplace_back(
@@ -455,16 +455,16 @@ public:
   }
   void omap_setkeys(
     const hobject_t &hoid,         ///< [in] object to write
-    std::map<std::string, ceph::buffer::list> &keys  ///< [in] omap keys, may be cleared
+    std::map<std::string, stone::buffer::list> &keys  ///< [in] omap keys, may be cleared
     ) {
-    using ceph::encode;
-    ceph::buffer::list bl;
+    using stone::encode;
+    stone::buffer::list bl;
     encode(keys, bl);
     omap_setkeys(hoid, bl);
   }
   void omap_rmkeys(
     const hobject_t &hoid,         ///< [in] object to write
-    ceph::buffer::list &keys_bl            ///< [in] encode set<string>
+    stone::buffer::list &keys_bl            ///< [in] encode set<string>
     ) {
     auto &op = get_object_op_for_modify(hoid);
     op.omap_updates.emplace_back(
@@ -476,14 +476,14 @@ public:
     const hobject_t &hoid,         ///< [in] object to write
     std::set<std::string> &keys              ///< [in] omap keys, may be cleared
     ) {
-    using ceph::encode;
-    ceph::buffer::list bl;
+    using stone::encode;
+    stone::buffer::list bl;
     encode(keys, bl);
     omap_rmkeys(hoid, bl);
   }
   void omap_rmkeyrange(
     const hobject_t &hoid,         ///< [in] object to write
-    ceph::buffer::list &range_bl           ///< [in] encode string[2]
+    stone::buffer::list &range_bl           ///< [in] encode string[2]
     ) {
     auto &op = get_object_op_for_modify(hoid);
     op.omap_updates.emplace_back(
@@ -496,14 +496,14 @@ public:
     std::string& key_begin,        ///< [in] first key in range
     std::string& key_end           ///< [in] first key past range, range is [first,last)
     ) {
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     ::encode(key_begin, bl);
     ::encode(key_end, bl);
     omap_rmkeyrange(hoid, bl);
   }
   void omap_setheader(
     const hobject_t &hoid,         ///< [in] object to write
-    ceph::buffer::list &header             ///< [in] header
+    stone::buffer::list &header             ///< [in] header
     ) {
     auto &op = get_object_op_for_modify(hoid);
     op.omap_header = header;
@@ -589,7 +589,7 @@ public:
 	/* Internal node: push children onto stack, remove edge,
 	 * recurse.  When this node is encountered again, it'll
 	 * be a leaf */
-	ceph_assert(!diter->second.empty());
+	stone_assert(!diter->second.empty());
 	stack.splice(stack.begin(), diter->second);
 	dgraph.erase(diter);
       }

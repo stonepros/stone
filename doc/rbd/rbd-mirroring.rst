@@ -2,9 +2,9 @@
  RBD Mirroring
 ===============
 
-.. index:: Ceph Block Device; mirroring
+.. index:: Stone Block Device; mirroring
 
-RBD images can be asynchronously mirrored between two Ceph clusters. This
+RBD images can be asynchronously mirrored between two Stone clusters. This
 capability is available in two modes:
 
 * **Journal-based**: This mode uses the RBD journaling image feature to ensure
@@ -12,7 +12,7 @@ capability is available in two modes:
   the RBD image is first recorded to the associated journal before modifying the
   actual image. The remote cluster will read from this associated journal and
   replay the updates to its local copy of the image. Since each write to the
-  RBD image will result in two writes to the Ceph cluster, expect write
+  RBD image will result in two writes to the Stone cluster, expect write
   latencies to nearly double while using the RBD journaling image feature.
 
 * **Snapshot-based**: This mode uses periodically scheduled or manually
@@ -26,8 +26,8 @@ capability is available in two modes:
   scenario. Any partially applied set of deltas will be rolled back at moment
   of failover.
 
-.. note:: journal-based mirroring requires the Ceph Jewel release or later;
-   snapshot-based mirroring requires the Ceph Octopus release or later.
+.. note:: journal-based mirroring requires the Stone Jewel release or later;
+   snapshot-based mirroring requires the Stone Octopus release or later.
 
 Mirroring is configured on a per-pool basis within peer clusters and can be
 configured on a specific subset of images within the pool.  You can also mirror
@@ -48,7 +48,7 @@ for either one- or two-way replication:
   ``rbd-mirror`` daemon runs on both clusters.
 
 .. important:: Each instance of the ``rbd-mirror`` daemon must be able to
-   connect to both the local and remote Ceph clusters simultaneously (i.e.
+   connect to both the local and remote Stone clusters simultaneously (i.e.
    all monitor and OSD hosts). Additionally, the network must have sufficient
    bandwidth between the two data centers to handle mirroring workload.
 
@@ -64,9 +64,9 @@ procedures assume that both clusters, named "site-a" and "site-b", are accessibl
 from a single host for clarity.
 
 See the `rbd`_ manpage for additional details of how to connect to different
-Ceph clusters.
+Stone clusters.
 
-.. note:: The cluster name in the following examples corresponds to a Ceph
+.. note:: The cluster name in the following examples corresponds to a Stone
    configuration file of the same name (e.g. /etc/ceph/site-b.conf).  See the
    `ceph-conf`_ documentation for how to configure multiple clusters.  Note
    that ``rbd-mirror`` does **not** require the source and destination clusters
@@ -154,19 +154,19 @@ Add Cluster Peer Manually
 -------------------------
 
 Cluster peers can be specified manually if desired or if the above bootstrap
-commands are not available with the currently installed Ceph release.
+commands are not available with the currently installed Stone release.
 
 The remote ``rbd-mirror`` daemon will need access to the local cluster to
-perform mirroring. A new local Ceph user should be created for the remote
-daemon to use. To `create a Ceph user`_, with ``ceph`` specify the
+perform mirroring. A new local Stone user should be created for the remote
+daemon to use. To `create a Stone user`_, with ``ceph`` specify the
 ``auth get-or-create`` command, user name, monitor caps, and OSD caps::
 
         ceph auth get-or-create client.rbd-mirror-peer mon 'profile rbd' osd 'profile rbd'
 
 The resulting keyring should be copied to the other cluster's ``rbd-mirror``
-daemon hosts if not using the Ceph monitor ``config-key`` store described below.
+daemon hosts if not using the Stone monitor ``config-key`` store described below.
 
-To manually add a mirroring peer Ceph cluster with ``rbd``, specify the
+To manually add a mirroring peer Stone cluster with ``rbd``, specify the
 ``mirror pool peer add`` command, the pool name, and a cluster specification::
 
         rbd mirror pool peer add {pool-name} {client-name}@{cluster-name}
@@ -176,14 +176,14 @@ For example::
         $ rbd --cluster site-a mirror pool peer add image-pool client.rbd-mirror-peer@site-b
         $ rbd --cluster site-b mirror pool peer add image-pool client.rbd-mirror-peer@site-a
 
-By default, the ``rbd-mirror`` daemon needs to have access to a Ceph
+By default, the ``rbd-mirror`` daemon needs to have access to a Stone
 configuration file located at ``/etc/ceph/{cluster-name}.conf`` that provides
 the addresses of the peer cluster's monitors, in addition to a keyring for
 ``{client-name}`` located in the default or configured keyring search paths
 (e.g. ``/etc/ceph/{cluster-name}.{client-name}.keyring``).
 
 Alternatively, the peer cluster's monitor and/or client key can be securely
-stored within the local Ceph monitor ``config-key`` store. To specify the
+stored within the local Stone monitor ``config-key`` store. To specify the
 peer cluster connection attributes when adding a mirroring peer, use the
 ``--remote-mon-host`` and ``--remote-key-file`` optionals. For example::
 
@@ -200,7 +200,7 @@ peer cluster connection attributes when adding a mirroring peer, use the
 Remove Cluster Peer
 -------------------
 
-To remove a mirroring peer Ceph cluster with ``rbd``, specify the
+To remove a mirroring peer Stone cluster with ``rbd``, specify the
 ``mirror pool peer remove`` command, the pool name, and the peer UUID
 (available from the ``rbd mirror pool info`` command)::
 
@@ -227,7 +227,7 @@ Image Configuration
 ===================
 
 Unlike pool configuration, image configuration only needs to be performed
-against a single mirroring peer Ceph cluster.
+against a single mirroring peer Stone cluster.
 
 Mirrored RBD images are designated as either primary or non-primary. This is a
 property of the image and not the pool. Images that are designated as
@@ -292,7 +292,7 @@ For example::
    to enabling the journaling feature.
 
 .. tip:: You can enable journaling on all new images by default by adding
-   ``rbd default features = 125`` to your Ceph configuration file.
+   ``rbd default features = 125`` to your Stone configuration file.
 
 .. tip:: ``rbd-mirror`` tunables are set by default to values suitable for
    mirroring an entire pool.  When using ``rbd-mirror`` to migrate single
@@ -387,7 +387,7 @@ Image Promotion and Demotion
 ----------------------------
 
 In a failover scenario where the primary designation needs to be moved to the
-image in the peer Ceph cluster, access to the primary image should be stopped
+image in the peer Stone cluster, access to the primary image should be stopped
 (e.g. power down the VM or remove the associated drive from a VM), demote the
 current primary image, promote the new primary image, and resume access to the
 image on the alternate cluster.
@@ -437,7 +437,7 @@ For example::
 
 .. note:: Promotion can be forced using the ``--force`` option. Forced
    promotion is needed when the demotion cannot be propagated to the peer
-   Ceph cluster (e.g. Ceph cluster failure, communication outage). This will
+   Stone cluster (e.g. Stone cluster failure, communication outage). This will
    result in a split-brain scenario between the two peers and the image will no
    longer be in-sync until a `force resync command`_ is issued.
 
@@ -503,10 +503,10 @@ distribution package.
 .. important:: Each ``rbd-mirror`` daemon requires the ability to connect
    to both clusters simultaneously.
 .. warning:: Pre-Luminous releases: only run a single ``rbd-mirror`` daemon per
-   Ceph cluster.
+   Stone cluster.
 
-Each ``rbd-mirror`` daemon should use a unique Ceph user ID. To
-`create a Ceph user`_, with ``ceph`` specify the ``auth get-or-create``
+Each ``rbd-mirror`` daemon should use a unique Stone user ID. To
+`create a Stone user`_, with ``ceph`` specify the ``auth get-or-create``
 command, user name, monitor caps, and OSD caps::
 
   ceph auth get-or-create client.rbd-mirror.{unique id} mon 'profile rbd-mirror' osd 'profile rbd'
@@ -525,5 +525,5 @@ The ``rbd-mirror`` can also be run in foreground by ``rbd-mirror`` command::
 .. _explicitly enabled: #enable-image-mirroring
 .. _force resync command: #force-image-resync
 .. _demote the image: #image-promotion-and-demotion
-.. _create a Ceph user: ../../rados/operations/user-management#add-a-user
+.. _create a Stone user: ../../rados/operations/user-management#add-a-user
 .. _mirror-snapshots: #create-image-mirror-snapshots

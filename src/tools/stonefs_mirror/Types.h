@@ -9,13 +9,13 @@
 #include <string_view>
 
 #include "include/rados/librados.hpp"
-#include "include/cephfs/libcephfs.h"
+#include "include/stonefs/libstonefs.h"
 #include "mds/mdstypes.h"
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
-static const std::string STONEFS_MIRROR_OBJECT("cephfs_mirror");
+static const std::string STONEFS_MIRROR_OBJECT("stonefs_mirror");
 
 typedef boost::variant<bool, uint64_t, std::string> AttributeValue;
 typedef std::map<std::string, AttributeValue> Attributes;
@@ -79,9 +79,9 @@ typedef std::shared_ptr<librados::Rados> RadosRef;
 typedef std::shared_ptr<librados::IoCtx> IoCtxRef;
 
 // not a shared_ptr since the type is incomplete
-typedef ceph_mount_info *MountRef;
+typedef stone_mount_info *MountRef;
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_TYPES_H

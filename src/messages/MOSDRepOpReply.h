@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -46,7 +46,7 @@ public:
   // piggybacked osd state
   eversion_t last_complete_ondisk;
 
-  ceph::buffer::list::const_iterator p;
+  stone::buffer::list::const_iterator p;
   // Decoding flags. Decoding is only needed for messages caught by pipe reader.
   bool final_decode_needed;
 
@@ -61,7 +61,7 @@ public:
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     p = payload.cbegin();
     decode(map_epoch, p);
     if (header.version >= 2) {
@@ -75,7 +75,7 @@ public:
   }
 
   void finish_decode() {
-    using ceph::decode;
+    using stone::decode;
     if (!final_decode_needed)
       return; // Message is already final decoded
     decode(ack_type, p);
@@ -86,7 +86,7 @@ public:
     final_decode_needed = false;
   }
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(map_epoch, payload);
     if (HAVE_FEATURE(features, SERVER_LUMINOUS)) {
       header.version = HEAD_VERSION;
@@ -158,7 +158,7 @@ public:
 
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

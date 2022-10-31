@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -17,7 +17,7 @@
 
 #include <atomic>
 #include "common/LogEntry.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/ostream_temp.h"
 #include "common/ref.h"
 #include "include/health.h"
@@ -33,13 +33,13 @@ struct Connection;
 
 class LogChannel;
 
-namespace ceph {
+namespace stone {
 namespace logging {
   class Graylog;
 }
 }
 
-int parse_log_client_options(StoneeContext *cct,
+int parse_log_client_options(StoneContext *cct,
 			     std::map<std::string,std::string> &log_to_monitors,
 			     std::map<std::string,std::string> &log_to_syslog,
 			     std::map<std::string,std::string> &log_channels,
@@ -63,8 +63,8 @@ class LogChannel : public OstreamTemp::OstreamTempSink
 {
 public:
 
-  LogChannel(StoneeContext *cct, LogClient *lc, const std::string &channel);
-  LogChannel(StoneeContext *cct, LogClient *lc,
+  LogChannel(StoneContext *cct, LogClient *lc, const std::string &channel);
+  LogChannel(StoneContext *cct, LogClient *lc,
              const std::string &channel,
              const std::string &facility,
              const std::string &prio);
@@ -89,7 +89,7 @@ public:
         return error();
       default:
         // Invalid health_status_t value
-        ceph_abort();
+        stone_abort();
     }
   }
   OstreamTemp info() {
@@ -171,15 +171,15 @@ public:
   void do_log(clog_type prio, const std::string& s);
 
 private:
-  StoneeContext *cct;
+  StoneContext *cct;
   LogClient *parent;
-  ceph::mutex channel_lock = ceph::make_mutex("LogChannel::channel_lock");
+  stone::mutex channel_lock = stone::make_mutex("LogChannel::channel_lock");
   std::string log_channel;
   std::string log_prio;
   std::string syslog_facility;
   bool log_to_syslog;
   bool log_to_monitors;
-  std::shared_ptr<ceph::logging::Graylog> graylog;
+  std::shared_ptr<stone::logging::Graylog> graylog;
 
 };
 
@@ -193,14 +193,14 @@ public:
     FLAG_MON = 0x1,
   };
 
-  LogClient(StoneeContext *cct, Messenger *m, MonMap *mm,
+  LogClient(StoneContext *cct, Messenger *m, MonMap *mm,
 	    enum logclient_flag_t flags);
   virtual ~LogClient() {
     channels.clear();
   }
 
   bool handle_log_ack(MLogAck *m);
-  ceph::ref_t<Message> get_mon_log_message(bool flush);
+  stone::ref_t<Message> get_mon_log_message(bool flush);
   bool are_pending();
 
   LogChannelRef create_channel() {
@@ -235,14 +235,14 @@ public:
   void reset();
 
 private:
-  ceph::ref_t<Message> _get_mon_log_message();
+  stone::ref_t<Message> _get_mon_log_message();
   void _send_to_mon();
 
-  StoneeContext *cct;
+  StoneContext *cct;
   Messenger *messenger;
   MonMap *monmap;
   bool is_mon;
-  ceph::mutex log_lock = ceph::make_mutex("LogClient::log_lock");
+  stone::mutex log_lock = stone::make_mutex("LogClient::log_lock");
   version_t last_log_sent;
   version_t last_log;
   std::deque<LogEntry> log_queue;

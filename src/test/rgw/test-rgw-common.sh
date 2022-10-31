@@ -63,8 +63,8 @@ mrgw=$root_path/mrgw.sh
 
 url=http://localhost
 
-function start_ceph_cluster {
-  [ $# -ne 1 ] && echo "start_ceph_cluster() needs 1 param" && exit 1
+function start_stone_cluster {
+  [ $# -ne 1 ] && echo "start_stone_cluster() needs 1 param" && exit 1
 
   echo "$mstart $1"
 }

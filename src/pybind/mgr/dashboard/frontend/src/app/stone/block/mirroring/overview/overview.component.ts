@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
 
-import { Pool } from '~/app/ceph/pool/pool';
+import { Pool } from '~/app/stone/pool/pool';
 import { RbdMirroringService } from '~/app/shared/api/rbd-mirroring.service';
 import { Icons } from '~/app/shared/enum/icons.enum';
 import { ViewCacheStatus } from '~/app/shared/enum/view-cache-status.enum';

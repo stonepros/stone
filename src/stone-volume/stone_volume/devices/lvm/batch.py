@@ -3,9 +3,9 @@ from collections import namedtuple
 import json
 import logging
 from textwrap import dedent
-from ceph_volume import terminal, decorators
-from ceph_volume.util import disk, prompt_bool, arg_validators, templates
-from ceph_volume.util import prepare
+from stone_volume import terminal, decorators
+from stone_volume.util import disk, prompt_bool, arg_validators, templates
+from stone_volume.util import prepare
 from . import common
 from .create import Create
 from .prepare import Prepare
@@ -83,7 +83,7 @@ def get_lvm_osds(lvs, args):
     '''
     ret = []
     for lv in lvs:
-        if lv.used_by_ceph:
+        if lv.used_by_stone:
             continue
         osd_id = None
         if args.osd_ids:
@@ -107,7 +107,7 @@ def get_physical_fast_allocs(devices, type_, fast_slots_per_device, new_osds, ar
 
     requested_size = getattr(args, '{}_size'.format(type_), 0)
     if not requested_size or requested_size == 0:
-        # no size argument was specified, check ceph.conf
+        # no size argument was specified, check stone.conf
         get_size_fct = getattr(prepare, 'get_{}_size'.format(type_))
         requested_size = get_size_fct(lv_format=False)
 
@@ -165,7 +165,7 @@ def group_devices_by_vg(devices):
 def get_lvm_fast_allocs(lvs):
     return [("{}/{}".format(d.vg_name, d.lv_name), 100.0,
              disk.Size(b=int(d.lvs[0].lv_size)), 1) for d in lvs if not
-            d.used_by_ceph]
+            d.used_by_stone]
 
 
 class Batch(object):
@@ -177,17 +177,17 @@ class Batch(object):
 
     Usage:
 
-        ceph-volume lvm batch [DEVICE...]
+        stone-volume lvm batch [DEVICE...]
 
     Devices can be physical block devices or LVs.
     Optional reporting on possible outcomes is enabled with --report
 
-        ceph-volume lvm batch --report [DEVICE...]
+        stone-volume lvm batch --report [DEVICE...]
     """)
 
     def __init__(self, argv):
         parser = argparse.ArgumentParser(
-            prog='ceph-volume lvm batch',
+            prog='stone-volume lvm batch',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self._help,
         )

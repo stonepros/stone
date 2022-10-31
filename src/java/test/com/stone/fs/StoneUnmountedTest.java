@@ -17,147 +17,147 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.ceph.fs;
+package com.stone.fs;
 
 import org.junit.*;
 import static org.junit.Assert.*;
 
-public class CephUnmountedTest {
+public class StoneUnmountedTest {
 
-  private CephMount mount;
+  private StoneMount mount;
 
   @Before
   public void setup() throws Exception {
-    mount = new CephMount("admin");
+    mount = new StoneMount("admin");
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_unmount() throws Exception {
     mount.unmount();
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_statfs() throws Exception {
-    CephStatVFS stat = new CephStatVFS();
+    StoneStatVFS stat = new StoneStatVFS();
     mount.statfs("/a/path", stat);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_getcwd() throws Exception {
     mount.getcwd();
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_chdir() throws Exception {
     mount.chdir("/a/path");
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_listdir() throws Exception {
     mount.listdir("/a/path");
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_unlink() throws Exception {
     mount.unlink("/a/path");
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_rename() throws Exception {
     mount.rename("/a/path", "/another/path");
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_mkdirs() throws Exception {
     mount.mkdirs("/a/path", 0);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_rmdir() throws Exception {
     mount.rmdir("/a/path");
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_stat() throws Exception {
-    CephStat stat = new CephStat();
+    StoneStat stat = new StoneStat();
     mount.stat("/a/path", stat);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_lstat() throws Exception {
-    CephStat stat = new CephStat();
+    StoneStat stat = new StoneStat();
     mount.lstat("/a/path", stat);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_setattr() throws Exception {
-    CephStat stat = new CephStat();
+    StoneStat stat = new StoneStat();
     mount.setattr("/a/path", stat, 0);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_open() throws Exception {
     mount.open("/a/path", 0, 0);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_open_layout() throws Exception {
     mount.open("/a/path", 0, 0, 0, 0, 0, null);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_close() throws Exception {
     mount.close(0);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_lseek() throws Exception {
-    mount.lseek(0, 0, CephMount.SEEK_CUR);
+    mount.lseek(0, 0, StoneMount.SEEK_CUR);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_read() throws Exception {
     byte[] buf = new byte[1];
     mount.read(0, buf, 1, 0);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_write() throws Exception {
     byte[] buf = new byte[1];
     mount.write(0, buf, 1, 0);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_get_stripe_unit() throws Exception {
     mount.get_file_stripe_unit(0);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_get_repl() throws Exception {
     mount.get_file_replication(0);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_get_stripe_unit_gran() throws Exception {
     mount.get_stripe_unit_granularity();
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_get_pool_id() throws Exception {
     mount.get_pool_id("data");
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_get_pool_replication() throws Exception {
     mount.get_pool_replication(1);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_fchmod() throws Exception {
     mount.fchmod(1, 0);
   }
 
-  @Test(expected=CephNotMountedException.class)
+  @Test(expected=StoneNotMountedException.class)
   public void test_chmod() throws Exception {
     mount.chmod("/foo", 0);
   }

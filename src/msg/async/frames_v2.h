@@ -16,7 +16,7 @@
  * Documentation in: doc/dev/msgr2.rst
  **/
 
-namespace ceph::msgr::v2 {
+namespace stone::msgr::v2 {
 
 // We require these features from any peer, period, in order to encode
 // a entity_addrvec_t.
@@ -65,8 +65,8 @@ struct segment_t {
 
   static constexpr __u16 DEFAULT_ALIGNMENT = sizeof(void *);
 
-  ceph_le32 length;
-  ceph_le16 alignment;
+  stone_le32 length;
+  stone_le16 alignment;
 } __attribute__((packed));
 
 struct SegmentIndex {
@@ -105,20 +105,20 @@ struct preamble_block_t {
   __u8 _reserved[2];
 
   // CRC32 for this single preamble block.
-  ceph_le32 crc;
+  stone_le32 crc;
 } __attribute__((packed));
 static_assert(sizeof(preamble_block_t) % CRYPTO_BLOCK_SIZE == 0);
 static_assert(std::is_standard_layout<preamble_block_t>::value);
 
 struct epilogue_crc_rev0_block_t {
   __u8 late_flags;  // FRAME_LATE_FLAG_ABORTED
-  ceph_le32 crc_values[MAX_NUM_SEGMENTS];
+  stone_le32 crc_values[MAX_NUM_SEGMENTS];
 } __attribute__((packed));
 static_assert(std::is_standard_layout_v<epilogue_crc_rev0_block_t>);
 
 struct epilogue_crc_rev1_block_t {
   __u8 late_status;  // FRAME_LATE_STATUS_*
-  ceph_le32 crc_values[MAX_NUM_SEGMENTS - 1];
+  stone_le32 crc_values[MAX_NUM_SEGMENTS - 1];
 } __attribute__((packed));
 static_assert(std::is_standard_layout_v<epilogue_crc_rev1_block_t>);
 
@@ -141,7 +141,7 @@ static constexpr uint32_t FRAME_CRC_SIZE = 4;
 static constexpr uint32_t FRAME_PREAMBLE_INLINE_SIZE = 48;
 static_assert(FRAME_PREAMBLE_INLINE_SIZE % CRYPTO_BLOCK_SIZE == 0);
 // just for performance, nothing should break otherwise
-static_assert(sizeof(ceph_msg_header2) <= FRAME_PREAMBLE_INLINE_SIZE);
+static_assert(sizeof(stone_msg_header2) <= FRAME_PREAMBLE_INLINE_SIZE);
 static constexpr uint32_t FRAME_PREAMBLE_WITH_INLINE_SIZE =
     sizeof(preamble_block_t) + FRAME_PREAMBLE_INLINE_SIZE;
 
@@ -176,7 +176,7 @@ struct FrameError : std::runtime_error {
 class FrameAssembler {
 public:
   // crypto must be non-null
-  FrameAssembler(const ceph::crypto::onwire::rxtx_t* crypto, bool is_rev1)
+  FrameAssembler(const stone::crypto::onwire::rxtx_t* crypto, bool is_rev1)
       : m_crypto(crypto), m_is_rev1(is_rev1) {}
 
   void set_is_rev1(bool is_rev1) {
@@ -189,17 +189,17 @@ public:
   }
 
   size_t get_num_segments() const {
-    ceph_assert(!m_descs.empty());
+    stone_assert(!m_descs.empty());
     return m_descs.size();
   }
 
   uint32_t get_segment_logical_len(size_t seg_idx) const {
-    ceph_assert(seg_idx < m_descs.size());
+    stone_assert(seg_idx < m_descs.size());
     return m_descs[seg_idx].logical_len;
   }
 
   uint16_t get_segment_align(size_t seg_idx) const {
-    ceph_assert(seg_idx < m_descs.size());
+    stone_assert(seg_idx < m_descs.size());
     return m_descs[seg_idx].align;
   }
 
@@ -229,7 +229,7 @@ public:
   // mode, if the first segment gets fully inlined into the preamble
   // inline buffer, it is considered empty.
   uint32_t get_segment_onwire_len(size_t seg_idx) const {
-    ceph_assert(seg_idx < m_descs.size());
+    stone_assert(seg_idx < m_descs.size());
     if (m_crypto->rx) {
       uint32_t padded_len = get_segment_padded_len(seg_idx);
       if (m_is_rev1 && seg_idx == 0) {
@@ -278,7 +278,7 @@ public:
   // late_flags or late_status field that directs handling of frames
   // with more than one segment.
   uint32_t get_epilogue_onwire_len() const {
-    ceph_assert(!m_descs.empty());
+    stone_assert(!m_descs.empty());
     if (m_is_rev1 && m_descs.size() == 1) {
       return 0;
     }
@@ -307,7 +307,7 @@ public:
   // - read in the first segment
   // - call disassemble_first_segment()
   // - use the contents of the first segment, for example to
-  //   look up user-provided buffers based on ceph_msg_header2::tid
+  //   look up user-provided buffers based on stone_msg_header2::tid
   // - read in the remaining segments, possibly directly into
   //   user-provided buffers
   // - read in epilogue
@@ -372,7 +372,7 @@ private:
                                   const FrameAssembler& frame_asm);
 
   boost::container::static_vector<segment_desc_t, MAX_NUM_SEGMENTS> m_descs;
-  const ceph::crypto::onwire::rxtx_t* m_crypto;
+  const stone::crypto::onwire::rxtx_t* m_crypto;
   bool m_is_rev1;  // msgr2.1?
 };
 
@@ -381,7 +381,7 @@ struct Frame {
   static constexpr size_t SegmentsNumV = sizeof...(SegmentAlignmentVs);
   static_assert(SegmentsNumV > 0 && SegmentsNumV <= MAX_NUM_SEGMENTS);
 protected:
-  std::array<ceph::bufferlist, SegmentsNumV> segments;
+  std::array<stone::bufferlist, SegmentsNumV> segments;
 
 private:
   static constexpr std::array<uint16_t, SegmentsNumV> alignments {
@@ -389,10 +389,10 @@ private:
   };
 
 public:
-  ceph::bufferlist get_buffer(FrameAssembler& tx_frame_asm) {
+  stone::bufferlist get_buffer(FrameAssembler& tx_frame_asm) {
     auto bl = tx_frame_asm.assemble_frame(T::tag, segments.data(),
                                           alignments.data(), SegmentsNumV);
-    ceph_assert(bl.length() == tx_frame_asm.get_frame_onwire_len());
+    stone_assert(bl.length() == tx_frame_asm.get_frame_onwire_len());
     return bl;
   }
 };
@@ -404,7 +404,7 @@ public:
 template <class C, typename... Args>
 class ControlFrame : public Frame<C, segment_t::DEFAULT_ALIGNMENT /* single segment */> {
 protected:
-  ceph::bufferlist &get_payload_segment() {
+  stone::bufferlist &get_payload_segment() {
     return this->segments[SegmentIndex::Control::PAYLOAD];
   }
 
@@ -460,7 +460,7 @@ protected:
     (_encode_payload_each(args), ...);
   }
 
-  void _decode(const ceph::bufferlist &bl) {
+  void _decode(const stone::bufferlist &bl) {
     auto ti = bl.cbegin();
     _decode_payload(ti, std::index_sequence_for<Args...>());
   }
@@ -472,7 +472,7 @@ public:
     return c;
   }
 
-  static C Decode(const ceph::bufferlist &payload) {
+  static C Decode(const stone::bufferlist &payload) {
     C c;
     c._decode(payload);
     return c;
@@ -732,7 +732,7 @@ struct KeepAliveFrame : public ControlFrame<KeepAliveFrame,
   using ControlFrame::Decode;
 
   static KeepAliveFrame Encode() {
-    return KeepAliveFrame::Encode(ceph_clock_now());
+    return KeepAliveFrame::Encode(stone_clock_now());
   }
 
   inline utime_t &timestamp() { return get_val<0>(); }
@@ -779,10 +779,10 @@ struct MessageFrame : public Frame<MessageFrame,
                                    segment_t::PAGE_SIZE_ALIGNMENT> {
   static const Tag tag = Tag::MESSAGE;
 
-  static MessageFrame Encode(const ceph_msg_header2 &msg_header,
-                             const ceph::bufferlist &front,
-                             const ceph::bufferlist &middle,
-                             const ceph::bufferlist &data) {
+  static MessageFrame Encode(const stone_msg_header2 &msg_header,
+                             const stone::bufferlist &front,
+                             const stone::bufferlist &middle,
+                             const stone::bufferlist &data) {
     MessageFrame f;
     f.segments[SegmentIndex::Msg::HEADER].append(
         reinterpret_cast<const char*>(&msg_header), sizeof(msg_header));
@@ -804,20 +804,20 @@ struct MessageFrame : public Frame<MessageFrame,
     return f;
   }
 
-  inline const ceph_msg_header2 &header() {
+  inline const stone_msg_header2 &header() {
     auto& hdrbl = segments[SegmentIndex::Msg::HEADER];
-    return reinterpret_cast<const ceph_msg_header2&>(*hdrbl.c_str());
+    return reinterpret_cast<const stone_msg_header2&>(*hdrbl.c_str());
   }
 
-  ceph::bufferlist &front() {
+  stone::bufferlist &front() {
     return segments[SegmentIndex::Msg::FRONT];
   }
 
-  ceph::bufferlist &middle() {
+  stone::bufferlist &middle() {
     return segments[SegmentIndex::Msg::MIDDLE];
   }
 
-  ceph::bufferlist &data() {
+  stone::bufferlist &data() {
     return segments[SegmentIndex::Msg::DATA];
   }
 
@@ -837,6 +837,6 @@ protected:
   using Frame::Frame;
 };
 
-} // namespace ceph::msgr::v2
+} // namespace stone::msgr::v2
 
 #endif // _MSG_ASYNC_FRAMES_V2_

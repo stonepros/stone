@@ -20,58 +20,58 @@ def _remote_service_status(remote, service):
 def task(ctx, config):
     """
       - tasks:
-          ceph-deploy:
+          stone-deploy:
           systemd:
 
-    Test ceph systemd services can start, stop and restart and
+    Test stone systemd services can start, stop and restart and
     check for any failed services and report back errors
     """
     for remote, roles in ctx.cluster.remotes.items():
         remote.run(args=['sudo', 'ps', '-eaf', run.Raw('|'),
-                         'grep', 'ceph'])
-        units = remote.sh('sudo systemctl list-units | grep ceph',
+                         'grep', 'stone'])
+        units = remote.sh('sudo systemctl list-units | grep stone',
                           check_status=False)
         log.info(units)
         if units.find('failed'):
-            log.info("Ceph services in failed state")
+            log.info("Stone services in failed state")
 
-        # test overall service stop and start using ceph.target
-        # ceph.target tests are meant for ceph systemd tests
+        # test overall service stop and start using stone.target
+        # stone.target tests are meant for stone systemd tests
         # and not actual process testing using 'ps'
-        log.info("Stopping all Ceph services")
-        remote.run(args=['sudo', 'systemctl', 'stop', 'ceph.target'])
-        status = _remote_service_status(remote, 'ceph.target')
+        log.info("Stopping all Stone services")
+        remote.run(args=['sudo', 'systemctl', 'stop', 'stone.target'])
+        status = _remote_service_status(remote, 'stone.target')
         log.info(status)
         log.info("Checking process status")
-        ps_eaf = remote.sh('sudo ps -eaf | grep ceph')
+        ps_eaf = remote.sh('sudo ps -eaf | grep stone')
         if ps_eaf.find('Active: inactive'):
-            log.info("Successfully stopped all ceph services")
+            log.info("Successfully stopped all stone services")
         else:
-            log.info("Failed to stop ceph services")
+            log.info("Failed to stop stone services")
 
-        log.info("Starting all Ceph services")
-        remote.run(args=['sudo', 'systemctl', 'start', 'ceph.target'])
-        status = _remote_service_status(remote, 'ceph.target')
+        log.info("Starting all Stone services")
+        remote.run(args=['sudo', 'systemctl', 'start', 'stone.target'])
+        status = _remote_service_status(remote, 'stone.target')
         log.info(status)
         if status.find('Active: active'):
-            log.info("Successfully started all Ceph services")
+            log.info("Successfully started all Stone services")
         else:
-            log.info("info", "Failed to start Ceph services")
-        ps_eaf = remote.sh('sudo ps -eaf | grep ceph')
+            log.info("info", "Failed to start Stone services")
+        ps_eaf = remote.sh('sudo ps -eaf | grep stone')
         log.info(ps_eaf)
         time.sleep(4)
 
         # test individual services start stop
         name = remote.shortname
-        mon_name = 'ceph-mon@' + name + '.service'
-        mds_name = 'ceph-mds@' + name + '.service'
-        mgr_name = 'ceph-mgr@' + name + '.service'
+        mon_name = 'stone-mon@' + name + '.service'
+        mds_name = 'stone-mds@' + name + '.service'
+        mgr_name = 'stone-mgr@' + name + '.service'
         mon_role_name = 'mon.' + name
         mds_role_name = 'mds.' + name
         mgr_role_name = 'mgr.' + name
-        m_osd = re.search('--id (\d+) --setuser ceph', ps_eaf)
+        m_osd = re.search('--id (\d+) --setuser stone', ps_eaf)
         if m_osd:
-            osd_service = 'ceph-osd@{m}.service'.format(m=m_osd.group(1))
+            osd_service = 'stone-osd@{m}.service'.format(m=m_osd.group(1))
             remote.run(args=['sudo', 'systemctl', 'status',
                              osd_service])
             remote.run(args=['sudo', 'systemctl', 'stop',
@@ -80,9 +80,9 @@ def task(ctx, config):
             status = _remote_service_status(remote, osd_service)
             log.info(status)
             if status.find('Active: inactive'):
-                log.info("Successfully stopped single osd ceph service")
+                log.info("Successfully stopped single osd stone service")
             else:
-                log.info("Failed to stop ceph osd services")
+                log.info("Failed to stop stone osd services")
             remote.sh(['sudo', 'systemctl', 'start', osd_service])
             time.sleep(4)
         if mon_role_name in roles:
@@ -91,9 +91,9 @@ def task(ctx, config):
             time.sleep(4)  # immediate check will result in deactivating state
             status = _remote_service_status(remote, mon_name)
             if status.find('Active: inactive'):
-                log.info("Successfully stopped single mon ceph service")
+                log.info("Successfully stopped single mon stone service")
             else:
-                log.info("Failed to stop ceph mon service")
+                log.info("Failed to stop stone mon service")
             remote.run(args=['sudo', 'systemctl', 'start', mon_name])
             time.sleep(4)
         if mgr_role_name in roles:
@@ -102,9 +102,9 @@ def task(ctx, config):
             time.sleep(4)  # immediate check will result in deactivating state
             status = _remote_service_status(remote, mgr_name)
             if status.find('Active: inactive'):
-                log.info("Successfully stopped single ceph mgr service")
+                log.info("Successfully stopped single stone mgr service")
             else:
-                log.info("Failed to stop ceph mgr service")
+                log.info("Failed to stop stone mgr service")
             remote.run(args=['sudo', 'systemctl', 'start', mgr_name])
             time.sleep(4)
         if mds_role_name in roles:
@@ -113,9 +113,9 @@ def task(ctx, config):
             time.sleep(4)  # immediate check will result in deactivating state
             status = _remote_service_status(remote, mds_name)
             if status.find('Active: inactive'):
-                log.info("Successfully stopped single ceph mds service")
+                log.info("Successfully stopped single stone mds service")
             else:
-                log.info("Failed to stop ceph mds service")
+                log.info("Failed to stop stone mds service")
             remote.run(args=['sudo', 'systemctl', 'start', mds_name])
             time.sleep(4)
 
@@ -127,7 +127,7 @@ def task(ctx, config):
     reconnect(ctx, 480)  # reconnect all nodes
     # for debug info
     ctx.cluster.run(args=['sudo', 'ps', '-eaf', run.Raw('|'),
-                          'grep', 'ceph'])
+                          'grep', 'stone'])
     # wait for HEALTH_OK
     mon = get_first_mon(ctx, config)
     (mon_remote,) = ctx.cluster.only(mon).remotes.keys()

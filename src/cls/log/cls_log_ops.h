@@ -12,14 +12,14 @@ struct cls_log_add_op {
 
   cls_log_add_op() : monotonic_inc(true) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 1, bl);
     encode(entries, bl);
     encode(monotonic_inc, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(2, bl);
     decode(entries, bl);
     if (struct_v >= 2) {
@@ -39,7 +39,7 @@ struct cls_log_list_op {
 
   cls_log_list_op() : max_entries(0) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(from_time, bl);
     encode(marker, bl);
@@ -48,7 +48,7 @@ struct cls_log_list_op {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(from_time, bl);
     decode(marker, bl);
@@ -66,7 +66,7 @@ struct cls_log_list_ret {
 
   cls_log_list_ret() : truncated(false) {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(entries, bl);
     encode(marker, bl);
@@ -74,7 +74,7 @@ struct cls_log_list_ret {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(entries, bl);
     decode(marker, bl);
@@ -97,7 +97,7 @@ struct cls_log_trim_op {
 
   cls_log_trim_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 1, bl);
     encode(from_time, bl);
     encode(to_time, bl);
@@ -106,7 +106,7 @@ struct cls_log_trim_op {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(2, bl);
     decode(from_time, bl);
     decode(to_time, bl);
@@ -122,13 +122,13 @@ WRITE_CLASS_ENCODER(cls_log_trim_op)
 struct cls_log_info_op {
   cls_log_info_op() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     // currently empty request
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     // currently empty request
     DECODE_FINISH(bl);
@@ -139,13 +139,13 @@ WRITE_CLASS_ENCODER(cls_log_info_op)
 struct cls_log_info_ret {
   cls_log_header header;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(header, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(header, bl);
     DECODE_FINISH(bl);

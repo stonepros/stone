@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -46,7 +46,7 @@
 #include "common/LogClient.h"
 #include "auth/AuthClient.h"
 #include "auth/AuthServer.h"
-#include "auth/cephx/CephxKeyServer.h"
+#include "auth/stonex/StonexKeyServer.h"
 #include "auth/AuthMethodList.h"
 #include "auth/KeyRing.h"
 #include "include/common_fwd.h"
@@ -118,12 +118,12 @@ public:
   int rank;
   Messenger *messenger;
   ConnectionRef con_self;
-  ceph::mutex lock = ceph::make_mutex("Monitor::lock");
+  stone::mutex lock = stone::make_mutex("Monitor::lock");
   SafeTimer timer;
   Finisher finisher;
   ThreadPool cpu_tp;  ///< threadpool for CPU intensive work
 
-  ceph::mutex auth_lock = ceph::make_mutex("Monitor::auth_lock");
+  stone::mutex auth_lock = stone::make_mutex("Monitor::auth_lock");
 
   /// true if we have ever joined a quorum.  if false, we are either a
   /// new cluster, a newly joining monitor, or a just-upgraded
@@ -154,10 +154,10 @@ public:
 
   std::vector<MonCommand> leader_mon_commands; // quorum leader's commands
   std::vector<MonCommand> local_mon_commands;  // commands i support
-  ceph::buffer::list local_mon_commands_bl;       // encoded version of above
+  stone::buffer::list local_mon_commands_bl;       // encoded version of above
 
   std::vector<MonCommand> prenautilus_local_mon_commands;
-  ceph::buffer::list prenautilus_local_mon_commands_bl;
+  stone::buffer::list prenautilus_local_mon_commands_bl;
 
   Messenger *mgr_messenger;
   MgrClient mgr_client;
@@ -218,14 +218,14 @@ public:
 
   int quorum_age() const {
     auto age = std::chrono::duration_cast<std::chrono::seconds>(
-      ceph::mono_clock::now() - quorum_since);
+      stone::mono_clock::now() - quorum_since);
     return age.count();
   }
 
   bool is_mon_down() const {
     int max = monmap->size();
     int actual = get_quorum().size();
-    auto now = ceph::real_clock::now();
+    auto now = stone::real_clock::now();
     return actual < max && now > monmap->created.to_real_time();
   }
 
@@ -240,7 +240,7 @@ private:
   
   int leader;            // current leader (to best of knowledge)
   std::set<int> quorum;       // current active set of monitors (if !starting)
-  ceph::mono_clock::time_point quorum_since;  // when quorum formed
+  stone::mono_clock::time_point quorum_since;  // when quorum formed
   utime_t leader_since;  // when this monitor became the leader, if it is the leader
   utime_t exited_quorum; // time detected as not in quorum; 0 if in
 
@@ -257,7 +257,7 @@ private:
    */
   mon_feature_t quorum_mon_features;
 
-  ceph_release_t quorum_min_mon_release{ceph_release_t::unknown};
+  stone_release_t quorum_min_mon_release{stone_release_t::unknown};
 
   std::set<std::string> outside_quorum;
 
@@ -329,7 +329,7 @@ private:
   void scrub_timeout();
   void scrub_finish();
   void scrub_reset();
-  void scrub_update_interval(ceph::timespan interval);
+  void scrub_update_interval(stone::timespan interval);
 
   Context *scrub_event;       ///< periodic event to trigger scrub (leader)
   Context *scrub_timeout_event;  ///< scrub round timeout (leader)
@@ -365,8 +365,8 @@ private:
 
     SyncProvider() : cookie(0), last_committed(0), full(false) {}
 
-    void reset_timeout(CephContext *cct, int grace) {
-      timeout = ceph_clock_now();
+    void reset_timeout(StoneContext *cct, int grace) {
+      timeout = stone_clock_now();
       timeout += grace;
     }
   };
@@ -441,7 +441,7 @@ private:
   /**
    * Get the latest monmap for backup purposes during sync
    */
-  void sync_obtain_latest_monmap(ceph::buffer::list &bl);
+  void sync_obtain_latest_monmap(stone::buffer::list &bl);
 
   /**
    * Start sync process
@@ -457,7 +457,7 @@ public:
   /**
    * force a sync on next mon restart
    */
-  void sync_force(ceph::Formatter *f);
+  void sync_force(stone::Formatter *f);
 
 private:
   /**
@@ -656,12 +656,12 @@ public:
   void win_election(epoch_t epoch, const std::set<int>& q,
 		    uint64_t features,
                     const mon_feature_t& mon_features,
-		    ceph_release_t min_mon_release,
+		    stone_release_t min_mon_release,
 		    const std::map<int,Metadata>& metadata);
   void lose_election(epoch_t epoch, std::set<int>& q, int l,
 		     uint64_t features,
                      const mon_feature_t& mon_features,
-		     ceph_release_t min_mon_release);
+		     stone_release_t min_mon_release);
   // end election (called by Elector)
   void finish_election();
 
@@ -721,7 +721,7 @@ public:
 
   // -- sessions --
   MonSessionMap session_map;
-  ceph::mutex session_map_lock = ceph::make_mutex("Monitor::session_map_lock");
+  stone::mutex session_map_lock = stone::make_mutex("Monitor::session_map_lock");
   AdminSocketHook *admin_hook;
 
   template<typename Func, typename...Args>
@@ -746,16 +746,16 @@ public:
                         const cmdmap_t& cmdmap,
                         const std::map<std::string,std::string>& param_str_map,
                         const MonCommand *this_cmd);
-  void get_mon_status(ceph::Formatter *f);
-  void _quorum_status(ceph::Formatter *f, std::ostream& ss);
+  void get_mon_status(stone::Formatter *f);
+  void _quorum_status(stone::Formatter *f, std::ostream& ss);
   bool _add_bootstrap_peer_hint(std::string_view cmd, const cmdmap_t& cmdmap,
 				std::ostream& ss);
   void handle_tell_command(MonOpRequestRef op);
   void handle_command(MonOpRequestRef op);
   void handle_route(MonOpRequestRef op);
 
-  int get_mon_metadata(int mon, ceph::Formatter *f, std::ostream& err);
-  int print_nodes(ceph::Formatter *f, std::ostream& err);
+  int get_mon_metadata(int mon, stone::Formatter *f, std::ostream& err);
+  int print_nodes(stone::Formatter *f, std::ostream& err);
 
   // track metadata reported by win_election()
   std::map<int, Metadata> mon_metadata;
@@ -781,7 +781,7 @@ public:
 
   void health_tick_start();
   void health_tick_stop();
-  ceph::real_clock::time_point health_interval_calc_next_update();
+  stone::real_clock::time_point health_interval_calc_next_update();
   void health_interval_start();
   void health_interval_stop();
   void health_events_cleanup();
@@ -815,11 +815,11 @@ protected:
 
 public:
 
-  void get_cluster_status(std::stringstream &ss, ceph::Formatter *f,
+  void get_cluster_status(std::stringstream &ss, stone::Formatter *f,
 			  MonSession *session);
 
   void reply_command(MonOpRequestRef op, int rc, const std::string &rs, version_t version);
-  void reply_command(MonOpRequestRef op, int rc, const std::string &rs, ceph::buffer::list& rdata, version_t version);
+  void reply_command(MonOpRequestRef op, int rc, const std::string &rs, stone::buffer::list& rdata, version_t version);
 
   void reply_tell_command(MonOpRequestRef op, int rc, const std::string &rs);
 
@@ -846,7 +846,7 @@ public:
   // request routing
   struct RoutedRequest {
     uint64_t tid;
-    ceph::buffer::list request_bl;
+    stone::buffer::list request_bl;
     MonSession *session;
     ConnectionRef con;
     uint64_t con_features;
@@ -881,11 +881,11 @@ public:
     Monitor &mon;
     int rc;
     std::string rs;
-    ceph::buffer::list rdata;
+    stone::buffer::list rdata;
     version_t version;
     C_Command(Monitor &_mm, MonOpRequestRef _op, int r, std::string s, version_t v) :
       C_MonOp(_op), mon(_mm), rc(r), rs(s), version(v){}
-    C_Command(Monitor &_mm, MonOpRequestRef _op, int r, std::string s, ceph::buffer::list rd, version_t v) :
+    C_Command(Monitor &_mm, MonOpRequestRef _op, int r, std::string s, stone::buffer::list rd, version_t v) :
       C_MonOp(_op), mon(_mm), rc(r), rs(s), rdata(rd), version(v){}
 
     void _finish(int r) override {
@@ -921,7 +921,7 @@ public:
       else if (r == -EAGAIN)
         mon.dispatch_op(op);
       else
-	ceph_abort_msg("bad C_Command return value");
+	stone_abort_msg("bad C_Command return value");
     }
   };
 
@@ -938,7 +938,7 @@ public:
       else if (r == -ECANCELED)
         return;
       else
-	ceph_abort_msg("bad C_RetryMessage return value");
+	stone_abort_msg("bad C_RetryMessage return value");
     }
   };
 
@@ -968,18 +968,18 @@ private:
     AuthConnectionMeta *auth_meta,
     uint32_t *method,
     std::vector<uint32_t> *preferred_modes,
-    ceph::buffer::list *out) override;
+    stone::buffer::list *out) override;
   int handle_auth_reply_more(
     Connection *con,
     AuthConnectionMeta *auth_meta,
-   const ceph::buffer::list& bl,
-    ceph::buffer::list *reply) override;
+   const stone::buffer::list& bl,
+    stone::buffer::list *reply) override;
   int handle_auth_done(
     Connection *con,
     AuthConnectionMeta *auth_meta,
     uint64_t global_id,
     uint32_t con_mode,
-    const ceph::buffer::list& bl,
+    const stone::buffer::list& bl,
     CryptoKey *session_key,
     std::string *connection_secret) override;
   int handle_auth_bad_method(
@@ -996,16 +996,16 @@ private:
     AuthConnectionMeta *auth_meta,
     bool more,
     uint32_t auth_method,
-    const ceph::buffer::list& bl,
-    ceph::buffer::list *reply) override;
+    const stone::buffer::list& bl,
+    stone::buffer::list *reply) override;
   // /AuthServer
 
-  int write_default_keyring(ceph::buffer::list& bl);
+  int write_default_keyring(stone::buffer::list& bl);
   void extract_save_mon_key(KeyRing& keyring);
 
   void collect_metadata(Metadata *m);
   int load_metadata();
-  void count_metadata(const std::string& field, ceph::Formatter *f);
+  void count_metadata(const std::string& field, stone::Formatter *f);
   void count_metadata(const std::string& field, std::map<std::string,int> *out);
   // get_all_versions() gathers version information from daemons for health check
   void get_all_versions(std::map<string, std::list<std::string>> &versions);
@@ -1023,7 +1023,7 @@ private:
   OpTracker op_tracker;
 
  public:
-  Monitor(CephContext *cct_, std::string nm, MonitorDBStore *s,
+  Monitor(StoneContext *cct_, std::string nm, MonitorDBStore *s,
 	  Messenger *m, Messenger *mgr_m, MonMap *map);
   ~Monitor() override;
 
@@ -1045,7 +1045,7 @@ private:
 
   void handle_signal(int sig);
 
-  int mkfs(ceph::buffer::list& osdmapbl);
+  int mkfs(stone::buffer::list& osdmapbl);
 
   /**
    * check cluster_fsid file
@@ -1063,7 +1063,7 @@ private:
   int write_fsid(MonitorDBStore::TransactionRef t);
 
   int do_admin_command(std::string_view command, const cmdmap_t& cmdmap,
-		       ceph::Formatter *f,
+		       stone::Formatter *f,
 		       std::ostream& err,
 		       std::ostream& out);
 
@@ -1074,19 +1074,19 @@ private:
 
 public:
   static void format_command_descriptions(const std::vector<MonCommand> &commands,
-					  ceph::Formatter *f,
+					  stone::Formatter *f,
 					  uint64_t features,
-					  ceph::buffer::list *rdata);
+					  stone::buffer::list *rdata);
 
   const std::vector<MonCommand> &get_local_commands(mon_feature_t f) {
-    if (f.contains_all(ceph::features::mon::FEATURE_NAUTILUS)) {
+    if (f.contains_all(stone::features::mon::FEATURE_NAUTILUS)) {
       return local_mon_commands;
     } else {
       return prenautilus_local_mon_commands;
     }
   }
-  const ceph::buffer::list& get_local_commands_bl(mon_feature_t f) {
-    if (f.contains_all(ceph::features::mon::FEATURE_NAUTILUS)) {
+  const stone::buffer::list& get_local_commands_bl(mon_feature_t f) {
+    if (f.contains_all(stone::features::mon::FEATURE_NAUTILUS)) {
       return local_mon_commands_bl;
     } else {
       return prenautilus_local_mon_commands_bl;

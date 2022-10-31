@@ -1,8 +1,8 @@
 =================================
- Using libvirt with Ceph RBD
+ Using libvirt with Stone RBD
 =================================
 
-.. index:: Ceph Block Device; livirt
+.. index:: Stone Block Device; livirt
 
 The ``libvirt`` library creates a virtual machine abstraction layer between 
 hypervisor interfaces and the software applications that use them. With 
@@ -16,9 +16,9 @@ to many different hypervisors, including:
 - VirtualBox
 - etc.
 
-Ceph block devices support QEMU/KVM. You can use Ceph block devices with
+Stone block devices support QEMU/KVM. You can use Stone block devices with
 software that interfaces with ``libvirt``. The following stack diagram
-illustrates how ``libvirt`` and QEMU use Ceph block devices via ``librbd``. 
+illustrates how ``libvirt`` and QEMU use Stone block devices via ``librbd``. 
 
 
 .. ditaa::
@@ -40,27 +40,27 @@ illustrates how ``libvirt`` and QEMU use Ceph block devices via ``librbd``.
             +------------------------+ +------------------------+
 
 
-The most common ``libvirt`` use case involves providing Ceph block devices to
+The most common ``libvirt`` use case involves providing Stone block devices to
 cloud solutions like OpenStack or CloudStack. The cloud solution uses
-``libvirt`` to  interact with QEMU/KVM, and QEMU/KVM interacts with Ceph block
+``libvirt`` to  interact with QEMU/KVM, and QEMU/KVM interacts with Stone block
 devices via  ``librbd``. See `Block Devices and OpenStack`_ and `Block Devices
 and CloudStack`_ for details. See `Installation`_ for installation details.
 
-You can also use Ceph block devices with ``libvirt``, ``virsh`` and the
+You can also use Stone block devices with ``libvirt``, ``virsh`` and the
 ``libvirt`` API. See `libvirt Virtualization API`_ for details.
 
 
-To create VMs that use Ceph block devices, use the procedures in the following
+To create VMs that use Stone block devices, use the procedures in the following
 sections. In the exemplary embodiment, we have used ``libvirt-pool`` for the pool
 name, ``client.libvirt`` for the user name, and ``new-libvirt-image`` for  the
 image name. You may use any value you like, but ensure you replace those values
 when executing commands in the subsequent procedures.
 
 
-Configuring Ceph
+Configuring Stone
 ================
 
-To configure Ceph for use with ``libvirt``, perform the following steps:
+To configure Stone for use with ``libvirt``, perform the following steps:
 
 #. `Create a pool`_. The following example uses the 
    pool name ``libvirt-pool``.::
@@ -75,8 +75,8 @@ To configure Ceph for use with ``libvirt``, perform the following steps:
 
         rbd pool init <pool-name>
 
-#. `Create a Ceph User`_ (or use ``client.admin`` for version 0.9.7 and
-   earlier). The following example uses the Ceph user name ``client.libvirt``
+#. `Create a Stone User`_ (or use ``client.admin`` for version 0.9.7 and
+   earlier). The following example uses the Stone user name ``client.libvirt``
    and references ``libvirt-pool``. ::
 
 	ceph auth get-or-create client.libvirt mon 'profile rbd' osd 'profile rbd pool=libvirt-pool'
@@ -85,8 +85,8 @@ To configure Ceph for use with ``libvirt``, perform the following steps:
    
 	ceph auth ls
 
-   **NOTE**: ``libvirt`` will access Ceph using the ID ``libvirt``, 
-   not the Ceph name ``client.libvirt``. See `User Management - User`_ and 
+   **NOTE**: ``libvirt`` will access Stone using the ID ``libvirt``, 
+   not the Stone name ``client.libvirt``. See `User Management - User`_ and 
    `User Management - CLI`_ for a detailed explanation of the difference 
    between ID and name.	
 
@@ -166,13 +166,13 @@ To create a VM with ``virt-manager``, perform the following steps:
 
 #. Login to the VM (root/root)
 
-#. Stop the VM before configuring it for use with Ceph.
+#. Stop the VM before configuring it for use with Stone.
 
 
 Configuring the VM
 ==================
 
-When configuring the VM for use with Ceph, it is important  to use ``virsh``
+When configuring the VM for use with Stone, it is important  to use ``virsh``
 where appropriate. Additionally, ``virsh`` commands often require root
 privileges  (i.e., ``sudo``) and will not return appropriate results or notify
 you that root privileges are required. For a reference of ``virsh``
@@ -207,7 +207,7 @@ commands, refer to `Virsh Command Reference`_.
    properly.
    
 
-#. Add the Ceph RBD image you created as a ``<disk>`` entry. :: 
+#. Add the Stone RBD image you created as a ``<disk>`` entry. :: 
 
 	<disk type='network' device='disk'>
 		<source protocol='rbd' name='libvirt-pool/new-libvirt-image'>
@@ -218,7 +218,7 @@ commands, refer to `Virsh Command Reference`_.
 
    Replace ``{monitor-host}`` with the name of your host, and replace the 
    pool and/or image name as necessary. You may add multiple ``<host>`` 
-   entries for your Ceph monitors. The ``dev`` attribute is the logical
+   entries for your Stone monitors. The ``dev`` attribute is the logical
    device name that will appear under the ``/dev`` directory of your 
    VM. The optional ``bus`` attribute indicates the type of disk device to 
    emulate. The valid settings are driver specific (e.g., "ide", "scsi", 
@@ -229,7 +229,7 @@ commands, refer to `Virsh Command Reference`_.
 	
 #. Save the file.
 
-#. If your Ceph Storage Cluster has `Ceph Authentication`_ enabled (it does by 
+#. If your Stone Storage Cluster has `Stone Authentication`_ enabled (it does by 
    default), you must generate a secret. :: 
 
 	cat > secret.xml <<EOF
@@ -269,9 +269,9 @@ commands, refer to `Virsh Command Reference`_.
 	<target ... 
 
 
-   **NOTE:** The exemplary ID is ``libvirt``, not the Ceph name 
-   ``client.libvirt`` as generated at step 2 of `Configuring Ceph`_. Ensure 
-   you use the ID component of the Ceph name you generated. If for some reason 
+   **NOTE:** The exemplary ID is ``libvirt``, not the Stone name 
+   ``client.libvirt`` as generated at step 2 of `Configuring Stone`_. Ensure 
+   you use the ID component of the Stone name you generated. If for some reason 
    you need to regenerate the secret, you will have to execute 
    ``sudo virsh secret-undefine {uuid}`` before executing 
    ``sudo virsh secret-set-value`` again.
@@ -280,12 +280,12 @@ commands, refer to `Virsh Command Reference`_.
 Summary
 =======
 
-Once you have configured the VM for use with Ceph, you can start the VM.
-To verify that the VM and Ceph are communicating, you may perform the
+Once you have configured the VM for use with Stone, you can start the VM.
+To verify that the VM and Stone are communicating, you may perform the
 following procedures.
 
 
-#. Check to see if Ceph is running:: 
+#. Check to see if Stone is running:: 
 
 	ceph health
 
@@ -293,7 +293,7 @@ following procedures.
 
 	sudo virsh list
 
-#. Check to see if the VM is communicating with Ceph. Replace 
+#. Check to see if the VM is communicating with Stone. Replace 
    ``{vm-domain-name}`` with the name of your VM domain:: 
 
 	sudo virsh qemu-monitor-command --hmp {vm-domain-name} 'info block'
@@ -302,7 +302,7 @@ following procedures.
    
        virsh domblklist {vm-domain-name} --details
 
-If everything looks okay, you may begin using the Ceph block device 
+If everything looks okay, you may begin using the Stone block device 
 within your VM.
 
 
@@ -311,11 +311,11 @@ within your VM.
 .. _Block Devices and OpenStack: ../rbd-openstack
 .. _Block Devices and CloudStack: ../rbd-cloudstack
 .. _Create a pool: ../../rados/operations/pools#create-a-pool
-.. _Create a Ceph User: ../../rados/operations/user-management#add-a-user
+.. _Create a Stone User: ../../rados/operations/user-management#add-a-user
 .. _create an image: ../qemu-rbd#creating-images-with-qemu
 .. _Virsh Command Reference: http://www.libvirt.org/virshcmdref.html
 .. _KVM/VirtManager: https://help.ubuntu.com/community/KVM/VirtManager
-.. _Ceph Authentication: ../../rados/configuration/auth-config-ref
+.. _Stone Authentication: ../../rados/configuration/auth-config-ref
 .. _Disks: http://www.libvirt.org/formatdomain.html#elementsDisks
 .. _rbd create: ../rados-rbd-cmds#creating-a-block-device-image
 .. _User Management - User: ../../rados/operations/user-management#user

@@ -4,7 +4,7 @@ import time
 import errno
 import logging
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 from teuthology.exceptions import CommandFailedError
 from datetime import datetime, timedelta
 
@@ -19,7 +19,7 @@ def seconds_upto_next_schedule(time_from, timo):
     ts = int(time_from)
     return ((int(ts / 60) * 60) + timo) - ts
 
-class TestSnapSchedules(CephFSTestCase):
+class TestSnapSchedules(StoneFSTestCase):
     CLIENTS_REQUIRED = 1
 
     TEST_VOLUME_NAME = 'snap_vol'

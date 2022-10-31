@@ -4,7 +4,7 @@
 
 import pytest
 
-from cephadm.autotune import MemoryAutotuner
+from stoneadm.autotune import MemoryAutotuner
 from orchestrator import DaemonDescription
 
 

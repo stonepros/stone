@@ -173,7 +173,7 @@ class FixedCPUServerSocket
   struct construct_tag {};
 
   static seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_ms);
+    return crimson::get_logger(stone_subsys_ms);
   }
 
   seastar::future<> reset() {
@@ -190,7 +190,7 @@ public:
   ~FixedCPUServerSocket() {
     assert(!listener);
     // detect whether user have called destroy() properly
-    ceph_assert(!service);
+    stone_assert(!service);
   }
 
   FixedCPUServerSocket(FixedCPUServerSocket&&) = delete;
@@ -239,7 +239,7 @@ public:
                 logger().error("FixedCPUServerSocket({})::accept(): "
                                "fn_accept(s, {}) got unexpected exception {}",
                                ss.addr, peer_addr, eptr);
-                ceph_abort();
+                stone_abort();
               });
             });
           });
@@ -254,7 +254,7 @@ public:
         }).handle_exception([&ss] (auto eptr) {
           logger().error("FixedCPUServerSocket({})::accept(): "
                          "got unexpected exception {}", ss.addr, eptr);
-          ceph_abort();
+          stone_abort();
         });
       });
     });

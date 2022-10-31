@@ -15,17 +15,17 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7221" # git grep '\<7221\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
-    CEPH_ARGS+="--osd_max_backfills=10 "
+    export STONE_MON="127.0.0.1:7221" # git grep '\<7221\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
+    STONE_ARGS+="--osd_max_backfills=10 "
     export objects=600
     export poolprefix=test
 
@@ -42,7 +42,7 @@ function get_num_in_state() {
     local state=$1
     local expression
     expression+="select(contains(\"${state}\"))"
-    ceph --format json pg dump pgs 2>/dev/null | \
+    stone --format json pg dump pgs 2>/dev/null | \
         jq ".pg_stats | [.[] | .state | $expression] | length"
 }
 
@@ -62,7 +62,7 @@ function wait_for_state() {
         cur_in_state=$(get_num_in_state ${state})
         test $cur_in_state -gt 0 && break
         if (( $loop >= ${#delays[*]} )) ; then
-            ceph pg dump pgs
+            stone pg dump pgs
             return 1
         fi
         sleep ${delays[$loop]}
@@ -91,21 +91,21 @@ function TEST_recovery_test_simple() {
 
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
-    export CEPH_ARGS
+    export STONE_ARGS
 
     for osd in $(seq 0 $(expr $OSDS - 1))
     do
       run_osd $dir $osd || return 1
     done
 
-    ceph osd set-nearfull-ratio .40
-    ceph osd set-backfillfull-ratio .45
-    ceph osd set-full-ratio .50
+    stone osd set-nearfull-ratio .40
+    stone osd set-backfillfull-ratio .45
+    stone osd set-full-ratio .50
 
     for p in $(seq 1 $pools)
     do
       create_pool "${poolprefix}$p" 1 1
-      ceph osd pool set "${poolprefix}$p" size 1 --yes-i-really-mean-it
+      stone osd pool set "${poolprefix}$p" size 1 --yes-i-really-mean-it
     done
 
     wait_for_clean || return 1
@@ -118,30 +118,30 @@ function TEST_recovery_test_simple() {
 
     for o in $(seq 0 $(expr $OSDS - 1))
     do
-      ceph tell osd.$o injectargs '--fake_statfs_for_testing 3686400' || return 1
+      stone tell osd.$o injectargs '--fake_statfs_for_testing 3686400' || return 1
     done
     sleep 5
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
     for p in $(seq 1 $pools)
     do
-      ceph osd pool set "${poolprefix}$p" size 2
+      stone osd pool set "${poolprefix}$p" size 2
     done
 
     # If this times out, we'll detected errors below
     wait_for_recovery_toofull 30
 
     ERRORS=0
-    if [ "$(ceph pg dump pgs | grep +recovery_toofull | wc -l)" != "1" ];
+    if [ "$(stone pg dump pgs | grep +recovery_toofull | wc -l)" != "1" ];
     then
       echo "One pool should have been in recovery_toofull"
       ERRORS="$(expr $ERRORS + 1)"
     fi
 
-    ceph pg dump pgs
-    ceph status
-    ceph status --format=json-pretty > $dir/stat.json
+    stone pg dump pgs
+    stone status
+    stone status --format=json-pretty > $dir/stat.json
 
     eval SEV=$(jq '.health.checks.PG_RECOVERY_FULL.severity' $dir/stat.json)
     if [ "$SEV" != "HEALTH_ERR" ]; then

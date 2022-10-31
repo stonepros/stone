@@ -1,14 +1,14 @@
 Quotas
 ======
 
-CephFS allows quotas to be set on any directory in the system.  The
+StoneFS allows quotas to be set on any directory in the system.  The
 quota can restrict the number of *bytes* or the number of *files*
 stored beneath that point in the directory hierarchy.
 
 Limitations
 -----------
 
-#. *Quotas are cooperative and non-adversarial.* CephFS quotas rely on
+#. *Quotas are cooperative and non-adversarial.* StoneFS quotas rely on
    the cooperation of the client who is mounting the file system to
    stop writers when a limit is reached.  A modified or adversarial
    client cannot be prevented from writing as much data as it needs.
@@ -25,7 +25,7 @@ Limitations
 
 #. *Quotas are implemented in the kernel client 4.17 and higher.*
    Quotas are supported by the userspace client (libcephfs, ceph-fuse).
-   Linux kernel clients >= 4.17 support CephFS quotas but only on
+   Linux kernel clients >= 4.17 support StoneFS quotas but only on
    mimic+ clusters.  Kernel clients (even recent versions) will fail
    to handle quotas on older clusters, even if they may be able to set
    the quotas extended attributes.
@@ -47,7 +47,7 @@ Limitations
 Configuration
 -------------
 
-Like most other things in CephFS, quotas are configured using virtual
+Like most other things in StoneFS, quotas are configured using virtual
 extended attributes:
 
  * ``ceph.quota.max_files`` -- file limit

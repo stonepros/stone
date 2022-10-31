@@ -9,7 +9,7 @@
 
 #include <seastar/core/future.hh>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/buffer.h"
 #include "include/denc.h"
 
@@ -266,7 +266,7 @@ private:
     const record_t &record) const;
 
   /// create encoded record bl
-  ceph::bufferlist encode_record(
+  stone::bufferlist encode_record(
     record_size_t rsize,
     record_t &&record);
 

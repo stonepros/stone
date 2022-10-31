@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat Inc
  *
@@ -17,7 +17,7 @@
 #ifndef PY_FORMATTER_H_
 #define PY_FORMATTER_H_
 
-// Python.h comes first because otherwise it clobbers ceph's assert
+// Python.h comes first because otherwise it clobbers stone's assert
 #include <Python.h>
 
 #include <stack>
@@ -28,9 +28,9 @@
 #include <list>
 
 #include "common/Formatter.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-class PyFormatter : public ceph::Formatter
+class PyFormatter : public stone::Formatter
 {
 public:
   PyFormatter (const PyFormatter&) = delete;
@@ -57,9 +57,9 @@ public:
 
   // Obscure, don't care.
   void open_array_section_in_ns(std::string_view name, const char *ns) override
-  {ceph_abort();}
+  {stone_abort();}
   void open_object_section_in_ns(std::string_view name, const char *ns) override
-  {ceph_abort();}
+  {stone_abort();}
 
   void reset() override
   {
@@ -81,8 +81,8 @@ public:
   void open_object_section(std::string_view name) override;
   void close_section() override
   {
-    ceph_assert(cursor != root);
-    ceph_assert(!stack.empty());
+    stone_assert(cursor != root);
+    stone_assert(!stack.empty());
     cursor = stack.top();
     stack.pop();
   }
@@ -97,20 +97,20 @@ public:
   void flush(std::ostream& os) override
   {
       // This class is not a serializer: this doesn't make sense
-      ceph_abort();
+      stone_abort();
   }
 
   int get_len() const override
   {
       // This class is not a serializer: this doesn't make sense
-      ceph_abort();
+      stone_abort();
       return 0;
   }
 
   void write_raw_data(const char *data) override
   {
       // This class is not a serializer: this doesn't make sense
-      ceph_abort();
+      stone_abort();
   }
 
   PyObject *get()

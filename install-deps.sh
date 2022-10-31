@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # -*- mode:sh; tab-width:8; indent-tabs-mode:t -*-
 #
-# Ceph distributed storage system
+# Stone distributed storage system
 #
 # Copyright (C) 2014, 2015 Red Hat <contact@redhat.com>
 #
@@ -27,7 +27,7 @@ function in_jenkins() {
     test -n "$JENKINS_HOME"
 }
 
-function munge_ceph_spec_in {
+function munge_stone_spec_in {
     local with_seastar=$1
     shift
     local with_zbd=$1
@@ -35,7 +35,7 @@ function munge_ceph_spec_in {
     local for_make_check=$1
     shift
     local OUTFILE=$1
-    sed -e 's/@//g' < ceph.spec.in > $OUTFILE
+    sed -e 's/@//g' < stone.spec.in > $OUTFILE
     # http://rpm.org/user_doc/conditional_builds.html
     if $with_seastar; then
         sed -i -e 's/%bcond_with seastar/%bcond_without seastar/g' $OUTFILE
@@ -176,7 +176,7 @@ function install_pkg_on_ubuntu {
 	done
     fi
     if test -n "$missing_pkgs"; then
-	local shaman_url="https://shaman.ceph.com/api/repos/${project}/master/${sha1}/ubuntu/${codename}/repo"
+	local shaman_url="https://shaman.stone.com/api/repos/${project}/master/${sha1}/ubuntu/${codename}/repo"
 	$SUDO curl --silent --location $shaman_url --output /etc/apt/sources.list.d/$project.list
 	$SUDO env DEBIAN_FRONTEND=noninteractive apt-get update -y -o Acquire::Languages=none -o Acquire::Translation=none || true
 	$SUDO env DEBIAN_FRONTEND=noninteractive apt-get install --allow-unauthenticated -y $missing_pkgs
@@ -186,7 +186,7 @@ function install_pkg_on_ubuntu {
 function install_boost_on_ubuntu {
     local ver=1.73
     in_jenkins && echo "CI_DEBUG: Running install_boost_on_ubuntu() in install-deps.sh"
-    local installed_ver=$(apt -qq list --installed ceph-libboost*-dev 2>/dev/null |
+    local installed_ver=$(apt -qq list --installed stone-libboost*-dev 2>/dev/null |
                               grep -e 'libboost[0-9].[0-9]\+-dev' |
                               cut -d' ' -f2 |
                               cut -d'.' -f1,2)
@@ -194,8 +194,8 @@ function install_boost_on_ubuntu {
         if echo "$installed_ver" | grep -q "^$ver"; then
             return
         else
-            $SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove "ceph-libboost.*${installed_ver}.*"
-            $SUDO rm -f /etc/apt/sources.list.d/ceph-libboost${installed_ver}.list
+            $SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove "stone-libboost.*${installed_ver}.*"
+            $SUDO rm -f /etc/apt/sources.list.d/stone-libboost${installed_ver}.list
         fi
     fi
     local codename=$1
@@ -206,22 +206,22 @@ function install_boost_on_ubuntu {
 	$sha1 \
 	$codename \
 	check \
-	ceph-libboost-atomic$ver-dev \
-	ceph-libboost-chrono$ver-dev \
-	ceph-libboost-container$ver-dev \
-	ceph-libboost-context$ver-dev \
-	ceph-libboost-coroutine$ver-dev \
-	ceph-libboost-date-time$ver-dev \
-	ceph-libboost-filesystem$ver-dev \
-	ceph-libboost-iostreams$ver-dev \
-	ceph-libboost-program-options$ver-dev \
-	ceph-libboost-python$ver-dev \
-	ceph-libboost-random$ver-dev \
-	ceph-libboost-regex$ver-dev \
-	ceph-libboost-system$ver-dev \
-	ceph-libboost-test$ver-dev \
-	ceph-libboost-thread$ver-dev \
-	ceph-libboost-timer$ver-dev
+	stone-libboost-atomic$ver-dev \
+	stone-libboost-chrono$ver-dev \
+	stone-libboost-container$ver-dev \
+	stone-libboost-context$ver-dev \
+	stone-libboost-coroutine$ver-dev \
+	stone-libboost-date-time$ver-dev \
+	stone-libboost-filesystem$ver-dev \
+	stone-libboost-iostreams$ver-dev \
+	stone-libboost-program-options$ver-dev \
+	stone-libboost-python$ver-dev \
+	stone-libboost-random$ver-dev \
+	stone-libboost-regex$ver-dev \
+	stone-libboost-system$ver-dev \
+	stone-libboost-test$ver-dev \
+	stone-libboost-thread$ver-dev \
+	stone-libboost-timer$ver-dev
 }
 
 function install_libzbd_on_ubuntu {
@@ -348,8 +348,8 @@ else
 	# work is done
         in_jenkins && echo "CI_DEBUG: Running mk-build-deps in install-deps.sh"
 	$SUDO env DEBIAN_FRONTEND=noninteractive mk-build-deps --install --remove --tool="apt-get -y --no-install-recommends $backports" $control || exit 1
-        in_jenkins && echo "CI_DEBUG: Removing ceph-build-deps"
-	$SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove ceph-build-deps
+        in_jenkins && echo "CI_DEBUG: Removing stone-build-deps"
+	$SUDO env DEBIAN_FRONTEND=noninteractive apt-get -y remove stone-build-deps
 	if [ "$control" != "debian/control" ] ; then rm $control; fi
         ;;
     centos|fedora|rhel|ol|virtuozzo)
@@ -370,19 +370,19 @@ else
                     # Enable 'powertools' or 'PowerTools' repo
                     $SUDO dnf config-manager --set-enabled $(dnf repolist --all 2>/dev/null|gawk 'tolower($0) ~ /^powertools\s/{print $1}')
 		    # before EPEL8 and PowerTools provide all dependencies, we use sepia for the dependencies
-                    $SUDO dnf config-manager --add-repo http://apt-mirror.front.sepia.ceph.com/lab-extras/8/
-                    $SUDO dnf config-manager --setopt=apt-mirror.front.sepia.ceph.com_lab-extras_8_.gpgcheck=0 --save
+                    $SUDO dnf config-manager --add-repo http://apt-mirror.front.sepia.stone.com/lab-extras/8/
+                    $SUDO dnf config-manager --setopt=apt-mirror.front.sepia.stone.com_lab-extras_8_.gpgcheck=0 --save
                 elif test $ID = rhel -a $MAJOR_VERSION = 8 ; then
                     $SUDO subscription-manager repos --enable "codeready-builder-for-rhel-8-${ARCH}-rpms"
-		    $SUDO dnf config-manager --add-repo http://apt-mirror.front.sepia.ceph.com/lab-extras/8/
-		    $SUDO dnf config-manager --setopt=apt-mirror.front.sepia.ceph.com_lab-extras_8_.gpgcheck=0 --save
+		    $SUDO dnf config-manager --add-repo http://apt-mirror.front.sepia.stone.com/lab-extras/8/
+		    $SUDO dnf config-manager --setopt=apt-mirror.front.sepia.stone.com_lab-extras_8_.gpgcheck=0 --save
                 fi
                 ;;
         esac
-        munge_ceph_spec_in $with_seastar $with_zbd $for_make_check $DIR/ceph.spec
+        munge_stone_spec_in $with_seastar $with_zbd $for_make_check $DIR/stone.spec
         # for python3_pkgversion macro defined by python-srpm-macros, which is required by python3-devel
         $SUDO dnf install -y python3-devel
-        $SUDO $builddepcmd $DIR/ceph.spec 2>&1 | tee $DIR/yum-builddep.out
+        $SUDO $builddepcmd $DIR/stone.spec 2>&1 | tee $DIR/yum-builddep.out
         [ ${PIPESTATUS[0]} -ne 0 ] && exit 1
         IGNORE_YUM_BUILDEP_ERRORS="ValueError: SELinux policy is not managed or store cannot be accessed."
         sed "/$IGNORE_YUM_BUILDEP_ERRORS/d" $DIR/yum-builddep.out | grep -qi "error:" && exit 1
@@ -391,8 +391,8 @@ else
         echo "Using zypper to install dependencies"
         zypp_install="zypper --gpg-auto-import-keys --non-interactive install --no-recommends"
         $SUDO $zypp_install systemd-rpm-macros rpm-build || exit 1
-        munge_ceph_spec_in $with_seastar false $for_make_check $DIR/ceph.spec
-        $SUDO $zypp_install $(rpmspec -q --buildrequires $DIR/ceph.spec) || exit 1
+        munge_stone_spec_in $with_seastar false $for_make_check $DIR/stone.spec
+        $SUDO $zypp_install $(rpmspec -q --buildrequires $DIR/stone.spec) || exit 1
         ;;
     *)
         echo "$ID is unknown, dependencies will have to be installed manually."

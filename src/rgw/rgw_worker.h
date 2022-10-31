@@ -4,7 +4,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -21,39 +21,39 @@
 #include <atomic>
 
 #include "common/Thread.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/common_fwd.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 class RGWRados;
 
 class RGWRadosThread {
   class Worker : public Thread, public DoutPrefixProvider {
-    CephContext *cct;
+    StoneContext *cct;
     RGWRadosThread *processor;
-    ceph::mutex lock = ceph::make_mutex("RGWRadosThread::Worker");
-    ceph::condition_variable cond;
+    stone::mutex lock = stone::make_mutex("RGWRadosThread::Worker");
+    stone::condition_variable cond;
 
     void wait() {
       std::unique_lock l{lock};
       cond.wait(l);
     };
 
-    void wait_interval(const ceph::real_clock::duration& wait_time) {
+    void wait_interval(const stone::real_clock::duration& wait_time) {
       std::unique_lock l{lock};
       cond.wait_for(l, wait_time);
     }
 
   public:
-    Worker(CephContext *_cct, RGWRadosThread *_p) : cct(_cct), processor(_p) {}
+    Worker(StoneContext *_cct, RGWRadosThread *_p) : cct(_cct), processor(_p) {}
     void *entry() override;
     void signal() {
       std::lock_guard l{lock};
       cond.notify_all();
     }
 
-  CephContext *get_cct() const { return cct; }
+  StoneContext *get_cct() const { return cct; }
   unsigned get_subsys() const { return dout_subsys; }
   std::ostream& gen_prefix(std::ostream& out) const { return out << "rgw rados thread: "; }
 
@@ -62,7 +62,7 @@ class RGWRadosThread {
   Worker *worker;
 
 protected:
-  CephContext *cct;
+  StoneContext *cct;
   RGWRados *store;
 
   std::atomic<bool> down_flag = { false };

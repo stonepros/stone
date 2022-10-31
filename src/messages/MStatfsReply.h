@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -18,10 +18,10 @@
 
 class MStatfsReply : public Message {
 public:
-  struct ceph_mon_statfs_reply h{};
+  struct stone_mon_statfs_reply h{};
 
   MStatfsReply() : Message{STONE_MSG_STATFS_REPLY} {}
-  MStatfsReply(uuid_d &f, ceph_tid_t t, epoch_t epoch)
+  MStatfsReply(uuid_d &f, stone_tid_t t, epoch_t epoch)
     : Message{STONE_MSG_STATFS_REPLY} {
     memcpy(&h.fsid, f.bytes(), sizeof(h.fsid));
     header.tid = t;
@@ -34,7 +34,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(h, payload);
   }
   void decode_payload() override {
@@ -43,7 +43,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

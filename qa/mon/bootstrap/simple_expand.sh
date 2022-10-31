@@ -16,27 +16,27 @@ monmaptool --create mm \
     --add c 127.0.0.1:6791
 
 rm -f keyring
-ceph-authtool --create-keyring keyring --gen-key -n client.admin
-ceph-authtool keyring --gen-key -n mon.
+stone-authtool --create-keyring keyring --gen-key -n client.admin
+stone-authtool keyring --gen-key -n mon.
 
-ceph-mon -c conf -i a --mkfs --monmap mm --mon-data $cwd/mon.a -k keyring
-ceph-mon -c conf -i b --mkfs --monmap mm --mon-data $cwd/mon.b -k keyring
-ceph-mon -c conf -i c --mkfs --monmap mm --mon-data $cwd/mon.c -k keyring
+stone-mon -c conf -i a --mkfs --monmap mm --mon-data $cwd/mon.a -k keyring
+stone-mon -c conf -i b --mkfs --monmap mm --mon-data $cwd/mon.b -k keyring
+stone-mon -c conf -i c --mkfs --monmap mm --mon-data $cwd/mon.c -k keyring
 
-ceph-mon -c conf -i a --mon-data $cwd/mon.a
-ceph-mon -c conf -i c --mon-data $cwd/mon.b
-ceph-mon -c conf -i b --mon-data $cwd/mon.c
+stone-mon -c conf -i a --mon-data $cwd/mon.a
+stone-mon -c conf -i c --mon-data $cwd/mon.b
+stone-mon -c conf -i b --mon-data $cwd/mon.c
 
-ceph -c conf -k keyring --monmap mm health
+stone -c conf -k keyring --monmap mm health
 
 ## expand via a kludged monmap
 monmaptool mm --add d 127.0.0.1:6792
-ceph-mon -c conf -i d --mkfs --monmap mm --mon-data $cwd/mon.d -k keyring
-ceph-mon -c conf -i d --mon-data $cwd/mon.d
+stone-mon -c conf -i d --mkfs --monmap mm --mon-data $cwd/mon.d -k keyring
+stone-mon -c conf -i d --mon-data $cwd/mon.d
 
 while true; do
-    ceph -c conf -k keyring --monmap mm health
-    if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1,2,3'; then
+    stone -c conf -k keyring --monmap mm health
+    if stone -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1,2,3'; then
 	break
     fi
     sleep 1
@@ -44,17 +44,17 @@ done
 
 # again
 monmaptool mm --add e 127.0.0.1:6793
-ceph-mon -c conf -i e --mkfs --monmap mm --mon-data $cwd/mon.e -k keyring
-ceph-mon -c conf -i e --mon-data $cwd/mon.e
+stone-mon -c conf -i e --mkfs --monmap mm --mon-data $cwd/mon.e -k keyring
+stone-mon -c conf -i e --mon-data $cwd/mon.e
 
 while true; do
-    ceph -c conf -k keyring --monmap mm health
-    if ceph -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1,2,3,4'; then
+    stone -c conf -k keyring --monmap mm health
+    if stone -c conf -k keyring --monmap mm mon stat | grep 'quorum 0,1,2,3,4'; then
 	break
     fi
     sleep 1
 done
 
 
-killall ceph-mon
+killall stone-mon
 echo OK

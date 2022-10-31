@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -40,12 +40,12 @@ private:
 
 public:
   void request_full(epoch_t first, epoch_t last) {
-    ceph_assert(last >= first);
+    stone_assert(last >= first);
     full_first = first;
     full_last = last;
   }
   void request_inc(epoch_t first, epoch_t last) {
-    ceph_assert(last >= first);
+    stone_assert(last >= first);
     inc_first = first;
     inc_last = last;
   }
@@ -73,7 +73,7 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(full_first, payload);
     encode(full_last, payload);
@@ -81,7 +81,7 @@ public:
     encode(inc_last, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     paxos_decode(p);
     decode(full_first, p);
@@ -91,7 +91,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

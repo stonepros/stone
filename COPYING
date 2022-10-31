@@ -1,7 +1,7 @@
 Format-Specification: http://anonscm.debian.org/viewvc/dep/web/deps/dep5/copyright-format.xml?revision=279&view=markup
-Name: ceph
+Name: stone
 Maintainer: Sage Weil <sage@newdream.net>
-Source: http://ceph.com/
+Source: http://stone.com/
 
 Files: *
 Copyright: (c) 2004-2010 by Sage Weil <sage@newdream.net>
@@ -33,11 +33,11 @@ Files: src/os/btrfs_ioctl.h
 Copyright: Copyright (C) 2007 Oracle.  All rights reserved.
 License: GPL2 (see COPYING-GPL2)
 
-Files: src/include/ceph_hash.cc
+Files: src/include/stone_hash.cc
 Copyright: None
 License: Public domain
 
-Files: src/include/rados.h, except ceph_stable_mod(), which is public domain
+Files: src/include/rados.h, except stone_stable_mod(), which is public domain
 Copyright: the authors
 License: LGPL-2.1 or LGPL-3 (see COPYING-LGPL2.1 and COPYING-LGPL3)
 
@@ -194,7 +194,7 @@ Files: src/pybind/mgr/diskprediction_local/models/*
 Copyright: None
 License: Public domain
 
-Files: src/ceph-volume/plugin/zfs/*
+Files: src/stone-volume/plugin/zfs/*
 Copyright: 2018, Willem Jan Withagen
 License: BSD 3-clause
 

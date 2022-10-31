@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2011 New Dream Network
  *
@@ -26,7 +26,7 @@
 
 #include "include/compat.h"
 
-extern pid_t ceph_gettid();
+extern pid_t stone_gettid();
 
 class Thread {
  private:
@@ -75,7 +75,7 @@ std::thread make_named_thread(std::string_view n,
 			      Args&& ...args) {
 
   return std::thread([n = std::string(n)](auto&& fun, auto&& ...args) {
-		       ceph_pthread_setname(pthread_self(), n.data());
+		       stone_pthread_setname(pthread_self(), n.data());
 		       std::invoke(std::forward<Fun>(fun),
 				   std::forward<Args>(args)...);
 		     }, std::forward<Fun>(fun), std::forward<Args>(args)...);

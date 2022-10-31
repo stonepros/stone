@@ -13,9 +13,9 @@
 
 // helpers shared by librados tests
 std::string get_temp_pool_name(const std::string &prefix = "test-rados-api-");
-void assert_eq_sparse(ceph::bufferlist& expected,
+void assert_eq_sparse(stone::bufferlist& expected,
                       const std::map<uint64_t, uint64_t>& extents,
-                      ceph::bufferlist& actual);
+                      stone::bufferlist& actual);
 class TestAlarm
 {
 public:

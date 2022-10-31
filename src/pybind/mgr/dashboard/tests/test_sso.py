@@ -13,7 +13,7 @@ class AccessControlTest(unittest.TestCase, CLICommandTestMixin):
     IDP_METADATA = '''<?xml version="1.0"?>
 <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
                      xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-                     entityID="https://testidp.ceph.com/simplesamlphp/saml2/idp/metadata.php"
+                     entityID="https://testidp.stone.com/simplesamlphp/saml2/idp/metadata.php"
                      ID="pfx8ca6fbd7-6062-d4a9-7995-0730aeb8114f">
   <ds:Signature>
     <ds:SignedInfo>
@@ -51,10 +51,10 @@ class AccessControlTest(unittest.TestCase, CLICommandTestMixin):
       </ds:KeyInfo>
     </md:KeyDescriptor>
     <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                            Location="https://testidp.ceph.com/simplesamlphp/saml2/idp/SingleLogoutService.php"/>
+                            Location="https://testidp.stone.com/simplesamlphp/saml2/idp/SingleLogoutService.php"/>
     <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
     <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                            Location="https://testidp.ceph.com/simplesamlphp/saml2/idp/SSOService.php"/>
+                            Location="https://testidp.stone.com/simplesamlphp/saml2/idp/SSOService.php"/>
   </md:IDPSSODescriptor>
 </md:EntityDescriptor>'''
 
@@ -62,17 +62,17 @@ class AccessControlTest(unittest.TestCase, CLICommandTestMixin):
         self.mock_kv_store()
         load_sso_db()
 
-    def validate_onelogin_settings(self, onelogin_settings, ceph_dashboard_base_url, uid,
+    def validate_onelogin_settings(self, onelogin_settings, stone_dashboard_base_url, uid,
                                    sp_x509cert, sp_private_key, signature_enabled):
         self.assertIn('sp', onelogin_settings)
         self.assertIn('entityId', onelogin_settings['sp'])
         self.assertEqual(onelogin_settings['sp']['entityId'],
-                         '{}/auth/saml2/metadata'.format(ceph_dashboard_base_url))
+                         '{}/auth/saml2/metadata'.format(stone_dashboard_base_url))
 
         self.assertIn('assertionConsumerService', onelogin_settings['sp'])
         self.assertIn('url', onelogin_settings['sp']['assertionConsumerService'])
         self.assertEqual(onelogin_settings['sp']['assertionConsumerService']['url'],
-                         '{}/auth/saml2'.format(ceph_dashboard_base_url))
+                         '{}/auth/saml2'.format(stone_dashboard_base_url))
 
         self.assertIn('attributeConsumingService', onelogin_settings['sp'])
         attribute_consuming_service = onelogin_settings['sp']['attributeConsumingService']
@@ -85,7 +85,7 @@ class AccessControlTest(unittest.TestCase, CLICommandTestMixin):
         self.assertIn('singleLogoutService', onelogin_settings['sp'])
         self.assertIn('url', onelogin_settings['sp']['singleLogoutService'])
         self.assertEqual(onelogin_settings['sp']['singleLogoutService']['url'],
-                         '{}/auth/saml2/logout'.format(ceph_dashboard_base_url))
+                         '{}/auth/saml2/logout'.format(stone_dashboard_base_url))
 
         self.assertIn('x509cert', onelogin_settings['sp'])
         self.assertEqual(onelogin_settings['sp']['x509cert'], sp_x509cert)
@@ -111,9 +111,9 @@ class AccessControlTest(unittest.TestCase, CLICommandTestMixin):
 
     def test_sso_saml2_setup(self):
         result = self.exec_cmd('sso setup saml2',
-                               ceph_dashboard_base_url='https://cephdashboard.local',
+                               stone_dashboard_base_url='https://stonedashboard.local',
                                idp_metadata=self.IDP_METADATA)
-        self.validate_onelogin_settings(result, 'https://cephdashboard.local', 'uid', '', '',
+        self.validate_onelogin_settings(result, 'https://stonedashboard.local', 'uid', '', '',
                                         False)
 
     def test_sso_enable_saml2(self):
@@ -122,10 +122,10 @@ class AccessControlTest(unittest.TestCase, CLICommandTestMixin):
 
         self.assertEqual(ctx.exception.retcode, -errno.EPERM)
         self.assertEqual(str(ctx.exception), 'Single Sign-On is not configured: '
-                                             'use `ceph dashboard sso setup saml2`')
+                                             'use `stone dashboard sso setup saml2`')
 
         self.exec_cmd('sso setup saml2',
-                      ceph_dashboard_base_url='https://cephdashboard.local',
+                      stone_dashboard_base_url='https://stonedashboard.local',
                       idp_metadata=self.IDP_METADATA)
 
         result = self.exec_cmd('sso enable saml2')
@@ -140,7 +140,7 @@ class AccessControlTest(unittest.TestCase, CLICommandTestMixin):
         self.assertEqual(result, 'SSO is "disabled".')
 
         self.exec_cmd('sso setup saml2',
-                      ceph_dashboard_base_url='https://cephdashboard.local',
+                      stone_dashboard_base_url='https://stonedashboard.local',
                       idp_metadata=self.IDP_METADATA)
 
         result = self.exec_cmd('sso status')

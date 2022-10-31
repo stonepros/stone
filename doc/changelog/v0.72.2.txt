@@ -64,7 +64,7 @@ commit 1c4759cebb11ae1aa84aa3cbdb2b31e6d111f28e
 Author: Joao Eduardo Luis <joao.luis@inktank.com>
 Date:   Fri Nov 22 02:10:35 2013 +0000
 
-    mon: OSDMonitor: receive CephInt on 'osd pool set' instead on CephString
+    mon: OSDMonitor: receive StoneInt on 'osd pool set' instead on StoneString
 
     This partially reverts 2fe0d0d9 in order to allow Emperor monitors to
     forward mon command messages to Dumpling monitors without breaking a
@@ -103,14 +103,14 @@ Date:   Mon Nov 25 13:43:43 2013 -0800
     init, upstart: prevent daemons being started by both
 
     There can be only one init system starting a daemon. If there is a
-    host entry in ceph.conf for a daemon, sysvinit would try to start it
+    host entry in stone.conf for a daemon, sysvinit would try to start it
     even if the daemon's directory did not include a sysvinit file. This
     preserves backwards compatibility with older installs using sysvinit,
     but if an upstart file is present in the daemon's directory, upstart
-    will try to start them, regardless of host entries in ceph.conf.
+    will try to start them, regardless of host entries in stone.conf.
 
     If there's an upstart file in a daemon's directory and a host entry
-    for that daemon in ceph.conf, both sysvinit and upstart would attempt
+    for that daemon in stone.conf, both sysvinit and upstart would attempt
     to manage it.
 
     Fix this by only starting daemons if the marker file for the other

@@ -6,7 +6,7 @@
 
 #include "include/rados/librados.hpp"
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 #include "cls/queue/cls_queue_ops.h"
 #include "cls/rgw/cls_rgw_types.h"

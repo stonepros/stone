@@ -71,11 +71,11 @@ def setup_dnsmasq(remote, testdir, cnames):
         dnsmasq += address_template.format(cname=cname, ip_address=ip_address)
 
     # write to temporary dnsmasq file
-    dnsmasq_tmp = '/'.join((testdir, 'ceph.tmp'))
+    dnsmasq_tmp = '/'.join((testdir, 'stone.tmp'))
     remote.write_file(dnsmasq_tmp, dnsmasq)
 
     # move into /etc/dnsmasq.d/
-    dnsmasq_path = '/etc/dnsmasq.d/ceph'
+    dnsmasq_path = '/etc/dnsmasq.d/stone'
     remote.run(args=['sudo', 'mv', dnsmasq_tmp, dnsmasq_path])
     # restore selinux context if necessary
     remote.run(args=['sudo', 'restorecon', dnsmasq_path], check_status=False)
@@ -89,7 +89,7 @@ def setup_dnsmasq(remote, testdir, cnames):
         yield
     finally:
         log.info('Removing dnsmasq configuration from remote %s..', remote.name)
-        # remove /etc/dnsmasq.d/ceph
+        # remove /etc/dnsmasq.d/stone
         remote.run(args=['sudo', 'rm', dnsmasq_path])
         # restart dnsmasq
         remote.run(args=['sudo', 'systemctl', 'restart', 'dnsmasq'])

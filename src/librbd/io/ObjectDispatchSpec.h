@@ -77,12 +77,12 @@ public:
   };
 
   struct WriteRequest : public WriteRequestBase {
-    ceph::bufferlist data;
+    stone::bufferlist data;
     int write_flags;
     std::optional<uint64_t> assert_version;
 
     WriteRequest(uint64_t object_no, uint64_t object_off,
-                 ceph::bufferlist&& data, int write_flags,
+                 stone::bufferlist&& data, int write_flags,
                  std::optional<uint64_t> assert_version, uint64_t journal_tid)
       : WriteRequestBase(object_no, object_off, journal_tid),
         data(std::move(data)), write_flags(write_flags),
@@ -93,12 +93,12 @@ public:
   struct WriteSameRequest : public WriteRequestBase {
     uint64_t object_len;
     LightweightBufferExtents buffer_extents;
-    ceph::bufferlist data;
+    stone::bufferlist data;
 
     WriteSameRequest(uint64_t object_no, uint64_t object_off,
                      uint64_t object_len,
                      LightweightBufferExtents&& buffer_extents,
-                     ceph::bufferlist&& data, uint64_t journal_tid)
+                     stone::bufferlist&& data, uint64_t journal_tid)
     : WriteRequestBase(object_no, object_off, journal_tid),
       object_len(object_len), buffer_extents(std::move(buffer_extents)),
       data(std::move(data)) {
@@ -106,12 +106,12 @@ public:
   };
 
   struct CompareAndWriteRequest : public WriteRequestBase {
-    ceph::bufferlist cmp_data;
-    ceph::bufferlist data;
+    stone::bufferlist cmp_data;
+    stone::bufferlist data;
     uint64_t* mismatch_offset;
 
     CompareAndWriteRequest(uint64_t object_no, uint64_t object_off,
-                           ceph::bufferlist&& cmp_data, ceph::bufferlist&& data,
+                           stone::bufferlist&& cmp_data, stone::bufferlist&& data,
                            uint64_t* mismatch_offset,
                            uint64_t journal_tid)
       : WriteRequestBase(object_no, object_off, journal_tid),
@@ -195,7 +195,7 @@ public:
   template <typename ImageCtxT>
   static ObjectDispatchSpec* create_write(
       ImageCtxT* image_ctx, ObjectDispatchLayer object_dispatch_layer,
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
       IOContext io_context, int op_flags, int write_flags,
       std::optional<uint64_t> assert_version, uint64_t journal_tid,
       const ZTracer::Trace &parent_trace, Context *on_finish) {
@@ -212,7 +212,7 @@ public:
   static ObjectDispatchSpec* create_write_same(
       ImageCtxT* image_ctx, ObjectDispatchLayer object_dispatch_layer,
       uint64_t object_no, uint64_t object_off, uint64_t object_len,
-      LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+      LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
       IOContext io_context, int op_flags, uint64_t journal_tid,
       const ZTracer::Trace &parent_trace, Context *on_finish) {
     return new ObjectDispatchSpec(image_ctx->io_object_dispatcher,
@@ -229,8 +229,8 @@ public:
   template <typename ImageCtxT>
   static ObjectDispatchSpec* create_compare_and_write(
       ImageCtxT* image_ctx, ObjectDispatchLayer object_dispatch_layer,
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-      ceph::bufferlist&& write_data, IOContext io_context,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+      stone::bufferlist&& write_data, IOContext io_context,
       uint64_t *mismatch_offset, int op_flags, uint64_t journal_tid,
       const ZTracer::Trace &parent_trace, Context *on_finish) {
     return new ObjectDispatchSpec(image_ctx->io_object_dispatcher,

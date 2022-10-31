@@ -16,7 +16,7 @@ from .. import mgr
 from .access_control import LocalAuthenticator, UserDoesNotExist
 
 cherrypy.config.update({
-    'response.headers.server': 'Ceph-Dashboard',
+    'response.headers.server': 'Stone-Dashboard',
     'response.headers.content-security-policy': "frame-ancestors 'self';",
     'response.headers.x-content-type-options': 'nosniff',
     'response.headers.strict-transport-security': 'max-age=63072000; includeSubDomains; preload'
@@ -54,7 +54,7 @@ class JwtManager(object):
         ttl = int(ttl)
         now = int(time.time())
         payload = {
-            'iss': 'ceph-dashboard',
+            'iss': 'stone-dashboard',
             'jti': str(uuid.uuid4()),
             'exp': now + ttl,
             'iat': now,

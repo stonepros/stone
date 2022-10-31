@@ -1,8 +1,8 @@
-# Runs a 64k random write test against the ceph BlueStore.
+# Runs a 64k random write test against the stone BlueStore.
 [global]
-ioengine=libfio_ceph_objectstore.so # must be found in your LD_LIBRARY_PATH
+ioengine=libfio_stone_objectstore.so # must be found in your LD_LIBRARY_PATH
 
-conf=ceph-bluestore.conf # must point to a valid ceph configuration file
+conf=stone-bluestore.conf # must point to a valid stone configuration file
 directory=/mnt/fio-bluestore # directory for osd_data
 
 #oi_attr_len=350-4000 # specifies OI(aka '_') attribute length range to couple
@@ -15,7 +15,7 @@ directory=/mnt/fio-bluestore # directory for osd_data
                         # couple writes with. Default: 0 (disabled)
 
 #pglog_simulation=1   # couples write and omap generation in OSD PG log manner.
-                      # Ceph's osd_min_pg_log_entries, osd_pg_log_trim_min,
+                      # Stone's osd_min_pg_log_entries, osd_pg_log_trim_min,
 					  # osd_pg_log_dups_tracked settings control cyclic
 					  # omap keys creation/removal.
                       # Following additional FIO pglog_ settings to apply too:

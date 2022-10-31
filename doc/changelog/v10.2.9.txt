@@ -1,5 +1,5 @@
 commit 2ee413f77150c0f375ff6f10edd6c8f9c7d060d0
-Author: Jenkins Build Slave User <ceph-release-team@redhat.com>
+Author: Jenkins Build Slave User <stone-release-team@redhat.com>
 Date:   Thu Jul 13 13:04:57 2017 +0000
 
     10.2.9
@@ -11,7 +11,7 @@ Date:   Thu Jul 13 10:31:31 2017 +0200
 
     Merge pull request #16282 from smithfarm/wip-20599-jewel
     
-    jewel: cephfs: Damaged MDS with 10.2.8
+    jewel: stonefs: Damaged MDS with 10.2.8
     
     Reviewed-by: Yan, Zheng <zyan@redhat.com>
 

@@ -13,7 +13,7 @@
 #include <sstream>
 #include <map>
 
-namespace ceph {
+namespace stone {
 
   struct FormatterAttrs {
     std::list< std::pair<std::string, std::string> > attrs;

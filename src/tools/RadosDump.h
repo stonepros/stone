@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -67,14 +67,14 @@ struct super_header {
   super_header() : magic(0), version(0), header_size(0), footer_size(0) { }
 
   void encode(bufferlist& bl) const {
-    using ceph::encode;
+    using stone::encode;
     encode(magic, bl);
     encode(version, bl);
     encode(header_size, bl);
     encode(footer_size, bl);
   }
   void decode(bufferlist::const_iterator& bl) {
-    using ceph::decode;
+    using stone::decode;
     decode(magic, bl);
     decode(version, bl);
     decode(header_size, bl);

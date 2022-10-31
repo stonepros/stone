@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  * Copyright (C) 2020 Abutalib Aghayev
@@ -42,11 +42,11 @@ class HMSMRDevice final : public BlockDevice {
 
   std::string devname;  ///< kernel dev name (/sys/block/$devname), if any
 
-  ceph::mutex debug_lock = ceph::make_mutex("HMSMRDevice::debug_lock");
+  stone::mutex debug_lock = stone::make_mutex("HMSMRDevice::debug_lock");
   interval_set<uint64_t> debug_inflight;
 
   std::atomic<bool> io_since_flush = {false};
-  ceph::mutex flush_mutex = ceph::make_mutex("HMSMRDevice::flush_mutex");
+  stone::mutex flush_mutex = stone::make_mutex("HMSMRDevice::flush_mutex");
 
   std::unique_ptr<io_queue_t> io_queue;
   aio_callback_t discard_callback;
@@ -55,8 +55,8 @@ class HMSMRDevice final : public BlockDevice {
   bool discard_started;
   bool discard_stop;
 
-  ceph::mutex discard_lock = ceph::make_mutex("HMSMRDevice::discard_lock");
-  ceph::condition_variable discard_cond;
+  stone::mutex discard_lock = stone::make_mutex("HMSMRDevice::discard_lock");
+  stone::condition_variable discard_cond;
   bool discard_running = false;
   interval_set<uint64_t> discard_queued;
   interval_set<uint64_t> discard_finishing;
@@ -102,8 +102,8 @@ class HMSMRDevice final : public BlockDevice {
 
   // stalled aio debugging
   aio_list_t debug_queue;
-  ceph::mutex debug_queue_lock =
-      ceph::make_mutex("HMSMRDevice::debug_queue_lock");
+  stone::mutex debug_queue_lock =
+      stone::make_mutex("HMSMRDevice::debug_queue_lock");
   aio_t *debug_oldest = nullptr;
   utime_t debug_stall_since;
   void debug_aio_link(aio_t& aio);
@@ -115,7 +115,7 @@ class HMSMRDevice final : public BlockDevice {
   bool set_smr_params(const std::string& path);
 
 public:
-  HMSMRDevice(StoneeContext* cct, aio_callback_t cb, void *cbpriv,
+  HMSMRDevice(StoneContext* cct, aio_callback_t cb, void *cbpriv,
               aio_callback_t d_cb, void *d_cbpriv);
   static bool support(const std::string& path);
 

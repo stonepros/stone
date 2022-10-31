@@ -1318,7 +1318,7 @@ class TestCommand(object):
         eq(out['blocksize'], cmd['size'])
         eq(out['bytes_written'], cmd['count'])
 
-    def test_ceph_osd_pool_create_utf8(self):
+    def test_stone_osd_pool_create_utf8(self):
         poolname = "\u9ec5"
 
         cmd = {"prefix": "osd pool create", "pg_num": 16, "pool": poolname}

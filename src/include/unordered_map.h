@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-namespace ceph {
+namespace stone {
   using std::unordered_map;
   using std::unordered_multimap;
 }

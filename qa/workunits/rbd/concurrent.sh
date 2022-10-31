@@ -59,11 +59,11 @@ ITER_DEFAULT=${RBD_CONCURRENT_ITER:-100}
 COUNT_DEFAULT=${RBD_CONCURRENT_COUNT:-5}
 DELAY_DEFAULT=${RBD_CONCURRENT_DELAY:-5}		# seconds
 
-CEPH_SECRET_FILE=${CEPH_SECRET_FILE:-}
-CEPH_ID=${CEPH_ID:-admin}
+STONE_SECRET_FILE=${STONE_SECRET_FILE:-}
+STONE_ID=${STONE_ID:-admin}
 SECRET_ARGS=""
-if [ "${CEPH_SECRET_FILE}" ]; then
-	SECRET_ARGS="--secret $CEPH_SECRET_FILE"
+if [ "${STONE_SECRET_FILE}" ]; then
+	SECRET_ARGS="--secret $STONE_SECRET_FILE"
 fi
 
 ################################################################
@@ -84,7 +84,7 @@ function setup() {
 	# Set up some environment for normal teuthology test setup.
 	# This really should not be necessary but I found it was.
 
-	export CEPH_ARGS=" --name client.0"
+	export STONE_ARGS=" --name client.0"
 }
 
 function cleanup() {
@@ -257,7 +257,7 @@ function rbd_map_image() {
 	local image="$1"
 	local id
 
-	sudo rbd map "${image}" --user "${CEPH_ID}" ${SECRET_ARGS} \
+	sudo rbd map "${image}" --user "${STONE_ID}" ${SECRET_ARGS} \
 		> /dev/null 2>&1
 
 	id=$(rbd_image_id "${image}")

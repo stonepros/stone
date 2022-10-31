@@ -51,7 +51,7 @@ def monkey_with_compiler(customize):
 distutils.sysconfig.customize_compiler = \
     monkey_with_compiler(distutils.sysconfig.customize_compiler)
 
-# PEP 440 versioning of the Ceph FS package on PyPI
+# PEP 440 versioning of the Stone FS package on PyPI
 # Bump this version, after every changeset
 
 __version__ = '2.0.0'
@@ -78,25 +78,25 @@ def get_python_flags(libs):
 
 def check_sanity():
     """
-    Test if development headers and library for cephfs is available by compiling a dummy C program.
+    Test if development headers and library for stonefs is available by compiling a dummy C program.
     """
-    CEPH_SRC_DIR = os.path.join(
+    STONE_SRC_DIR = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
         '..',
         '..'
     )
 
     tmp_dir = tempfile.mkdtemp(dir=os.environ.get('TMPDIR', os.path.dirname(__file__)))
-    tmp_file = os.path.join(tmp_dir, 'cephfs_dummy.c')
+    tmp_file = os.path.join(tmp_dir, 'stonefs_dummy.c')
 
     with open(tmp_file, 'w') as fp:
         dummy_prog = textwrap.dedent("""
         #include <stddef.h>
-        #include "cephfs/libcephfs.h"
+        #include "stonefs/libstonefs.h"
 
         int main(void) {
-            struct ceph_mount_info *cmount = NULL;
-            ceph_init(cmount);
+            struct stone_mount_info *cmount = NULL;
+            stone_init(cmount);
             return 0;
         }
         """)
@@ -105,10 +105,10 @@ def check_sanity():
     compiler = new_compiler()
     distutils.sysconfig.customize_compiler(compiler)
 
-    if 'CEPH_LIBDIR' in os.environ:
-        # The setup.py has been invoked by a top-level Ceph make.
+    if 'STONE_LIBDIR' in os.environ:
+        # The setup.py has been invoked by a top-level Stone make.
         # Set the appropriate CFLAGS and LDFLAGS
-        compiler.set_library_dirs([os.environ.get('CEPH_LIBDIR')])
+        compiler.set_library_dirs([os.environ.get('STONE_LIBDIR')])
 
     try:
         compiler.define_macro('_FILE_OFFSET_BITS', '64')
@@ -116,21 +116,21 @@ def check_sanity():
         link_objects = compiler.compile(
             sources=[tmp_file],
             output_dir=tmp_dir,
-            extra_preargs=['-iquote{path}'.format(path=os.path.join(CEPH_SRC_DIR, 'include'))]
+            extra_preargs=['-iquote{path}'.format(path=os.path.join(STONE_SRC_DIR, 'include'))]
         )
 
         compiler.link_executable(
             objects=link_objects,
-            output_progname=os.path.join(tmp_dir, 'cephfs_dummy'),
-            libraries=['cephfs'],
+            output_progname=os.path.join(tmp_dir, 'stonefs_dummy'),
+            libraries=['stonefs'],
             output_dir=tmp_dir,
         )
 
     except CompileError:
-        print('\nCompile Error: Ceph FS development headers not found', file=sys.stderr)
+        print('\nCompile Error: Stone FS development headers not found', file=sys.stderr)
         return False
     except LinkError:
-        print('\nLink Error: Ceph FS library not found', file=sys.stderr)
+        print('\nLink Error: Stone FS library not found', file=sys.stderr)
         return False
     else:
         return True
@@ -143,7 +143,7 @@ if 'BUILD_DOC' in os.environ or 'READTHEDOCS' in os.environ:
     cython_constants = dict(BUILD_DOC=True)
     cythonize_args = dict(compile_time_env=cython_constants)
 elif check_sanity():
-    ext_args = get_python_flags(['cephfs'])
+    ext_args = get_python_flags(['stonefs'])
     cython_constants = dict(BUILD_DOC=False)
     include_path = [os.path.join(os.path.dirname(__file__), "..", "rados")]
     cythonize_args = dict(compile_time_env=cython_constants,
@@ -160,16 +160,16 @@ try:
 except ImportError:
     print("WARNING: Cython is not installed.")
 
-    if not os.path.isfile('cephfs.c'):
-        print('ERROR: Cannot find Cythonized file cephfs.c', file=sys.stderr)
+    if not os.path.isfile('stonefs.c'):
+        print('ERROR: Cannot find Cythonized file stonefs.c', file=sys.stderr)
         sys.exit(1)
     else:
         def cythonize(x, **kwargs):
             return x
 
-        source = "cephfs.c"
+        source = "stonefs.c"
 else:
-    source = "cephfs.pyx"
+    source = "stonefs.pyx"
 
 # Disable cythonification if we're not really building anything
 if (len(sys.argv) >= 2 and
@@ -179,24 +179,24 @@ if (len(sys.argv) >= 2 and
         return x
 
 setup(
-    name='cephfs',
+    name='stonefs',
     version=__version__,
-    description="Python bindings for the Ceph FS library",
+    description="Python bindings for the Stone FS library",
     long_description=(
         "This package contains Python bindings for interacting with the "
-        "Ceph Filesystem (Ceph FS) library. Ceph FS is a POSIX-compliant "
-        "filesystem that uses a Ceph Storage Cluster to store its data. The "
-        "Ceph filesystem uses the same Ceph Storage Cluster system as "
-        "Ceph Block Devices, Ceph Object Storage with its S3 and Swift APIs, "
+        "Stone Filesystem (Stone FS) library. Stone FS is a POSIX-compliant "
+        "filesystem that uses a Stone Storage Cluster to store its data. The "
+        "Stone filesystem uses the same Stone Storage Cluster system as "
+        "Stone Block Devices, Stone Object Storage with its S3 and Swift APIs, "
         "or native bindings (librados)."
     ),
-    url='https://github.com/ceph/ceph/tree/master/src/pybind/cephfs',
+    url='https://github.com/stone/stone/tree/master/src/pybind/stonefs',
     license='LGPLv2+',
     platforms='Linux',
     ext_modules=cythonize(
         [
             Extension(
-                "cephfs",
+                "stonefs",
                 [source],
                 **ext_args
             )

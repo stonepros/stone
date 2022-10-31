@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 Red Hat
  *
@@ -138,7 +138,7 @@ class LocalFileDriver : public RecoveryDriver
 };
 
 /**
- * A class that knows how to work with objects in a CephFS
+ * A class that knows how to work with objects in a StoneFS
  * metadata pool.
  */
 class MetadataTool
@@ -178,7 +178,7 @@ class MetadataTool
 };
 
 /**
- * A class that knows how to manipulate CephFS metadata pools
+ * A class that knows how to manipulate StoneFS metadata pools
  */
 class MetadataDriver : public RecoveryDriver, public MetadataTool
 {

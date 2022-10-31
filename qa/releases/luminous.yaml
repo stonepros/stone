@@ -1,9 +1,9 @@
 tasks:
 - exec:
     mgr.x:
-      - mkdir -p /var/lib/stone/mgr/stone-x
+      - mkdir -p /var/lib/stonepros/mgr/stone-x
       - stone auth get-or-create-key mgr.x mon 'allow profile mgr'
-      - stone auth export mgr.x > /var/lib/stone/mgr/stone-x/keyring
+      - stone auth export mgr.x > /var/lib/stonepros/mgr/stone-x/keyring
 - stone.restart:
     daemons: [mgr.x]
     wait-for-healthy: false

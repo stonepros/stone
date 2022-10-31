@@ -1,5 +1,5 @@
 ======================
-Capabilities in CephFS
+Capabilities in StoneFS
 ======================
 When a client wants to operate on an inode, it will query the MDS in various
 ways, which will then grant the client a set of **capabilities**. These

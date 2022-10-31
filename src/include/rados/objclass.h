@@ -74,7 +74,7 @@ extern int cls_register(const char *name, cls_handle_t *handle);
  *
  */
 typedef int (*cls_method_cxx_call_t)(cls_method_context_t ctx,
-    class ceph::buffer::list *inbl, class ceph::buffer::list *outbl);
+    class stone::buffer::list *inbl, class stone::buffer::list *outbl);
 
 /**
  * Register a method.
@@ -120,7 +120,7 @@ extern int cls_cxx_stat(cls_method_context_t hctx, uint64_t *size, time_t *mtime
  * @param len
  * @param bl
  */
-extern int cls_cxx_read(cls_method_context_t hctx, int ofs, int len, ceph::bufferlist *bl);
+extern int cls_cxx_read(cls_method_context_t hctx, int ofs, int len, stone::bufferlist *bl);
 
 /**
  * Write to the object.
@@ -130,7 +130,7 @@ extern int cls_cxx_read(cls_method_context_t hctx, int ofs, int len, ceph::buffe
  * @param len
  * @param bl
  */
-extern int cls_cxx_write(cls_method_context_t hctx, int ofs, int len, ceph::bufferlist *bl);
+extern int cls_cxx_write(cls_method_context_t hctx, int ofs, int len, stone::bufferlist *bl);
 
 /**
  * Get xattr of the object.
@@ -140,7 +140,7 @@ extern int cls_cxx_write(cls_method_context_t hctx, int ofs, int len, ceph::buff
  * @param outbl
  */
 extern int cls_cxx_getxattr(cls_method_context_t hctx, const char *name,
-                            ceph::bufferlist *outbl);
+                            stone::bufferlist *outbl);
 
 /**
  * Set xattr of the object.
@@ -150,7 +150,7 @@ extern int cls_cxx_getxattr(cls_method_context_t hctx, const char *name,
  * @param inbl
  */
 extern int cls_cxx_setxattr(cls_method_context_t hctx, const char *name,
-                            ceph::bufferlist *inbl);
+                            stone::bufferlist *inbl);
 
 /**
  * Get value corresponding to a key from the map.
@@ -160,7 +160,7 @@ extern int cls_cxx_setxattr(cls_method_context_t hctx, const char *name,
  * @param outbl
  */
 extern int cls_cxx_map_get_val(cls_method_context_t hctx,
-                               const std::string &key, ceph::bufferlist *outbl);
+                               const std::string &key, stone::bufferlist *outbl);
 
 /**
  * Set value corresponding to a key in the map.
@@ -170,7 +170,7 @@ extern int cls_cxx_map_get_val(cls_method_context_t hctx,
  * @param inbl
  */
 extern int cls_cxx_map_set_val(cls_method_context_t hctx,
-                               const std::string &key, ceph::bufferlist *inbl);
+                               const std::string &key, stone::bufferlist *inbl);
 
 #endif
 

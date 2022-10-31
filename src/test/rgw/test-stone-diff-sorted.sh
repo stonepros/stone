@@ -57,50 +57,50 @@ touch $empty
 #### testing ####
 
 # test perfect match
-ceph-diff-sorted $long $long >"${out1}"
+stone-diff-sorted $long $long >"${out1}"
 $assert $? -eq 0
 $assert $(cat $out1 | wc -l) -eq 0
 
 # test non-match; use /bin/diff to verify
 /bin/diff $short $long >"${out2}"
-ceph-diff-sorted $short $long >"${out1}"
+stone-diff-sorted $short $long >"${out1}"
 $assert $? -eq 1
 $assert $(cat $out1 | grep '^<' | wc -l) -eq $(cat $out2 | grep '^<' | wc -l)
 $assert $(cat $out1 | grep '^>' | wc -l) -eq $(cat $out2 | grep '^>' | wc -l)
 
 /bin/diff $long $short >"${out2}"
-ceph-diff-sorted $long $short >"${out1}"
+stone-diff-sorted $long $short >"${out1}"
 $assert $? -eq 1
 $assert $(cat $out1 | grep '^<' | wc -l) -eq $(cat $out2 | grep '^<' | wc -l)
 $assert $(cat $out1 | grep '^>' | wc -l) -eq $(cat $out2 | grep '^>' | wc -l)
 
 # test w blank line
-ceph-diff-sorted $short $short_w_blank 2>/dev/null
+stone-diff-sorted $short $short_w_blank 2>/dev/null
 $assert $? -eq 4
 
-ceph-diff-sorted $short_w_blank $short 2>/dev/null
+stone-diff-sorted $short_w_blank $short 2>/dev/null
 $assert $? -eq 4
 
 # test unsorted input
-ceph-diff-sorted $short $unsorted >"${out2}" 2>/dev/null
+stone-diff-sorted $short $unsorted >"${out2}" 2>/dev/null
 $assert $? -eq 4
 
-ceph-diff-sorted $unsorted $short >"${out2}" 2>/dev/null
+stone-diff-sorted $unsorted $short >"${out2}" 2>/dev/null
 $assert $? -eq 4
 
 # test bad # of args
-ceph-diff-sorted 2>/dev/null
+stone-diff-sorted 2>/dev/null
 $assert $? -eq 2
 
-ceph-diff-sorted $short 2>/dev/null
+stone-diff-sorted $short 2>/dev/null
 $assert $? -eq 2
 
 # test bad file path
 
-ceph-diff-sorted $short $fake 2>/dev/null
+stone-diff-sorted $short $fake 2>/dev/null
 $assert $? -eq 3
 
-ceph-diff-sorted $fake $short 2>/dev/null
+stone-diff-sorted $fake $short 2>/dev/null
 $assert $? -eq 3
 
 #### clean-up ####

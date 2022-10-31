@@ -57,7 +57,7 @@ class socket_blocker {
 
  public:
   seastar::future<> wait_blocked() {
-    ceph_assert(!p_blocked);
+    stone_assert(!p_blocked);
     if (p_unblocked) {
       return seastar::make_ready_future<>();
     } else {
@@ -76,25 +76,25 @@ class socket_blocker {
       p_blocked->request_abort();
       p_blocked = std::nullopt;
     }
-    ceph_assert(!p_unblocked);
+    stone_assert(!p_unblocked);
     p_unblocked = seastar::abort_source();
     return seastar::sleep_abortable(10s, *p_unblocked).then([] {
-      ceph_abort("Timeout (10s) in socket_blocker::block()");
+      stone_abort("Timeout (10s) in socket_blocker::block()");
     }).handle_exception_type([] (const seastar::sleep_aborted& e) {
       // wait done!
     });
   }
 
   void unblock() {
-    ceph_assert(!p_blocked);
-    ceph_assert(p_unblocked);
+    stone_assert(!p_blocked);
+    stone_assert(p_unblocked);
     p_unblocked->request_abort();
     p_unblocked = std::nullopt;
   }
 };
 
 struct tag_bp_t {
-  ceph::msgr::v2::Tag tag;
+  stone::msgr::v2::Tag tag;
   bp_type_t type;
   bool operator==(const tag_bp_t& x) const {
     return tag == x.tag && type == x.type;
@@ -109,7 +109,7 @@ struct Breakpoint {
   using var_t = std::variant<custom_bp_t, tag_bp_t>;
   var_t bp;
   Breakpoint(custom_bp_t bp) : bp(bp) { }
-  Breakpoint(ceph::msgr::v2::Tag tag, bp_type_t type)
+  Breakpoint(stone::msgr::v2::Tag tag, bp_type_t type)
     : bp(tag_bp_t{tag, type}) { }
   bool operator==(const Breakpoint& x) const { return bp == x.bp; }
   bool operator!=(const Breakpoint& x) const { return !operator==(x); }

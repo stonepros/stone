@@ -1,49 +1,49 @@
 :orphan:
 
-.. _ceph-deploy:
+.. _stone-deploy:
 
 =====================================
- ceph-deploy -- Ceph deployment tool
+ stone-deploy -- Stone deployment tool
 =====================================
 
-.. program:: ceph-deploy
+.. program:: stone-deploy
 
 Synopsis
 ========
 
-| **ceph-deploy** **new** [*initial-monitor-node(s)*]
+| **stone-deploy** **new** [*initial-monitor-node(s)*]
 
-| **ceph-deploy** **install** [*ceph-node*] [*ceph-node*...]
+| **stone-deploy** **install** [*stone-node*] [*stone-node*...]
 
-| **ceph-deploy** **mon** *create-initial*
+| **stone-deploy** **mon** *create-initial*
 
-| **ceph-deploy** **osd** *create* *--data* *device* *ceph-node*
+| **stone-deploy** **osd** *create* *--data* *device* *stone-node*
 
-| **ceph-deploy** **admin** [*admin-node*][*ceph-node*...]
+| **stone-deploy** **admin** [*admin-node*][*stone-node*...]
 
-| **ceph-deploy** **purgedata** [*ceph-node*][*ceph-node*...]
+| **stone-deploy** **purgedata** [*stone-node*][*stone-node*...]
 
-| **ceph-deploy** **forgetkeys**
+| **stone-deploy** **forgetkeys**
 
 Description
 ===========
 
-:program:`ceph-deploy` is a tool which allows easy and quick deployment of a
-Ceph cluster without involving complex and detailed manual configuration. It
-uses ssh to gain access to other Ceph nodes from the admin node, sudo for
+:program:`stone-deploy` is a tool which allows easy and quick deployment of a
+Stone cluster without involving complex and detailed manual configuration. It
+uses ssh to gain access to other Stone nodes from the admin node, sudo for
 administrator privileges on them and the underlying Python scripts automates
-the manual process of Ceph installation on each node from the admin node itself.
+the manual process of Stone installation on each node from the admin node itself.
 It can be easily run on an workstation and doesn't require servers, databases or
-any other automated tools. With :program:`ceph-deploy`, it is really easy to set
+any other automated tools. With :program:`stone-deploy`, it is really easy to set
 up and take down a cluster. However, it is not a generic deployment tool. It is
-a specific tool which is designed for those who want to get Ceph up and running
+a specific tool which is designed for those who want to get Stone up and running
 quickly with only the unavoidable initial configuration settings and without the
 overhead of installing other tools like ``Chef``, ``Puppet`` or ``Juju``. Those
 who want to customize security settings, partitions or directory locations and
 want to set up a cluster following detailed manual steps, should use other tools
 i.e, ``Chef``, ``Puppet``, ``Juju`` or ``Crowbar``.
 
-With :program:`ceph-deploy`, you can install Ceph packages on remote nodes,
+With :program:`stone-deploy`, you can install Stone packages on remote nodes,
 create a cluster, add monitors, gather/forget keys, add OSDs and metadata
 servers, configure admin hosts or take down the cluster.
 
@@ -56,14 +56,14 @@ new
 Start deploying a new cluster and write a configuration file and keyring for it.
 It tries to copy ssh keys from admin node to gain passwordless ssh to monitor
 node(s), validates host IP, creates a cluster with a new initial monitor node or
-nodes for monitor quorum, a ceph configuration file, a monitor secret keyring and
-a log file for the new cluster. It populates the newly created Ceph configuration
+nodes for monitor quorum, a stone configuration file, a monitor secret keyring and
+a log file for the new cluster. It populates the newly created Stone configuration
 file with ``fsid`` of cluster, hostnames and IP addresses of initial monitor
 members under ``[global]`` section.
 
 Usage::
 
-	ceph-deploy new [MON][MON...]
+	stone-deploy new [MON][MON...]
 
 Here, [MON] is the initial monitor hostname (short hostname i.e, ``hostname -s``).
 
@@ -72,7 +72,7 @@ Other options like :option:`--no-ssh-copykey`, :option:`--fsid`,
 this command.
 
 If more than one network interface is used, ``public network`` setting has to be
-added under ``[global]`` section of Ceph configuration file. If the public subnet
+added under ``[global]`` section of Stone configuration file. If the public subnet
 is given, ``new`` command will choose the one IP from the remote host that exists
 within the subnet range. Public network can also be added at runtime using
 :option:`--public-network` option with the command as mentioned above.
@@ -81,20 +81,20 @@ within the subnet range. Public network can also be added at runtime using
 install
 -------
 
-Install Ceph packages on remote hosts. As a first step it installs
+Install Stone packages on remote hosts. As a first step it installs
 ``yum-plugin-priorities`` in admin and other nodes using passwordless ssh and sudo
-so that Ceph packages from upstream repository get more priority. It then detects
-the platform and distribution for the hosts and installs Ceph normally by
-downloading distro compatible packages if adequate repo for Ceph is already added.
+so that Stone packages from upstream repository get more priority. It then detects
+the platform and distribution for the hosts and installs Stone normally by
+downloading distro compatible packages if adequate repo for Stone is already added.
 ``--release`` flag is used to get the latest release for installation. During
 detection of platform and distribution before installation, if it finds the
 ``distro.init`` to be ``sysvinit`` (Fedora, CentOS/RHEL etc), it doesn't allow
-installation with custom cluster name and uses the default name ``ceph`` for the
+installation with custom cluster name and uses the default name ``stone`` for the
 cluster.
 
 If the user explicitly specifies a custom repo url with :option:`--repo-url` for
 installation, anything detected from the configuration will be overridden and
-the custom repository location will be used for installation of Ceph packages.
+the custom repository location will be used for installation of Stone packages.
 If required, valid custom repositories are also detected and installed. In case
 of installation from a custom repo a boolean is used to determine the logic
 needed to proceed with a custom repo installation. A custom repo install helper
@@ -103,14 +103,14 @@ defined) and installs them. ``cd_conf`` is the object built from ``argparse``
 that holds the flags and information needed to determine what metadata from the
 configuration is to be used.
 
-A user can also opt to install only the repository without installing Ceph and
+A user can also opt to install only the repository without installing Stone and
 its dependencies by using :option:`--repo` option.
 
 Usage::
 
-	ceph-deploy install [HOST][HOST...]
+	stone-deploy install [HOST][HOST...]
 
-Here, [HOST] is/are the host node(s) where Ceph is to be installed.
+Here, [HOST] is/are the host node(s) where Stone is to be installed.
 
 An option ``--release`` is used to install a release known as CODENAME
 (default: firefly).
@@ -123,21 +123,21 @@ Other options like :option:`--testing`, :option:`--dev`, :option:`--adjust-repos
 mds
 ---
 
-Deploy Ceph mds on remote hosts. A metadata server is needed to use CephFS and
+Deploy Stone mds on remote hosts. A metadata server is needed to use StoneFS and
 the ``mds`` command is used to create one on the desired host node. It uses the
 subcommand ``create`` to do so. ``create`` first gets the hostname and distro
 information of the desired mds host. It then tries to read the ``bootstrap-mds``
 key for the cluster and deploy it in the desired host. The key generally has a
 format of ``{cluster}.bootstrap-mds.keyring``. If it doesn't finds a keyring,
 it runs ``gatherkeys`` to get the keyring. It then creates a mds on the desired
-host under the path ``/var/lib/ceph/mds/`` in ``/var/lib/ceph/mds/{cluster}-{name}``
-format and a bootstrap keyring under ``/var/lib/ceph/bootstrap-mds/`` in
-``/var/lib/ceph/bootstrap-mds/{cluster}.keyring`` format. It then runs appropriate
+host under the path ``/var/lib/stone/mds/`` in ``/var/lib/stone/mds/{cluster}-{name}``
+format and a bootstrap keyring under ``/var/lib/stone/bootstrap-mds/`` in
+``/var/lib/stone/bootstrap-mds/{cluster}.keyring`` format. It then runs appropriate
 commands based on ``distro.init`` to start the ``mds``.
 
 Usage::
 
-	ceph-deploy mds create [HOST[:DAEMON-NAME]] [HOST[:DAEMON-NAME]...]
+	stone-deploy mds create [HOST[:DAEMON-NAME]] [HOST[:DAEMON-NAME]...]
 
 The [DAEMON-NAME] is optional.
 
@@ -145,23 +145,23 @@ The [DAEMON-NAME] is optional.
 mon
 ---
 
-Deploy Ceph monitor on remote hosts. ``mon`` makes use of certain subcommands
-to deploy Ceph monitors on other nodes.
+Deploy Stone monitor on remote hosts. ``mon`` makes use of certain subcommands
+to deploy Stone monitors on other nodes.
 
 Subcommand ``create-initial`` deploys for monitors defined in
-``mon initial members`` under ``[global]`` section in Ceph configuration file,
+``mon initial members`` under ``[global]`` section in Stone configuration file,
 wait until they form quorum and then gatherkeys, reporting the monitor status
 along the process. If monitors don't form quorum the command will eventually
 time out.
 
 Usage::
 
-	ceph-deploy mon create-initial
+	stone-deploy mon create-initial
 
-Subcommand ``create`` is used to deploy Ceph monitors by explicitly specifying
+Subcommand ``create`` is used to deploy Stone monitors by explicitly specifying
 the hosts which are desired to be made monitors. If no hosts are specified it
 will default to use the ``mon initial members`` defined under ``[global]``
-section of Ceph configuration file. ``create`` first detects platform and distro
+section of Stone configuration file. ``create`` first detects platform and distro
 for desired hosts and checks if hostname is compatible for deployment. It then
 uses the monitor keyring initially created using ``new`` command and deploys the
 monitor in desired host. If multiple hosts were specified during ``new`` command
@@ -178,7 +178,7 @@ of monitors to desired multiple hosts.
 
 Usage::
 
-	ceph-deploy mon create [HOST] [HOST...]
+	stone-deploy mon create [HOST] [HOST...]
 
 Here, [HOST] is hostname of desired monitor host(s).
 
@@ -194,31 +194,31 @@ errors arise if the monitor is not added in ``mon initial members``, if it doesn
 exist in ``monmap`` and if neither ``public_addr`` nor ``public_network`` keys
 were defined for monitors. Under such conditions, monitors may not be able to
 form quorum. Monitor status tells if the monitor is up and running normally. The
-status is checked by running ``ceph daemon mon.hostname mon_status`` on remote
+status is checked by running ``stone daemon mon.hostname mon_status`` on remote
 end which provides the output and returns a boolean status of what is going on.
 ``False`` means a monitor that is not fine even if it is up and running, while
 ``True`` means the monitor is up and running correctly.
 
 Usage::
 
-	ceph-deploy mon add [HOST]
+	stone-deploy mon add [HOST]
 
-	ceph-deploy mon add [HOST] --address [IP]
+	stone-deploy mon add [HOST] --address [IP]
 
 Here, [HOST] is the hostname and [IP] is the IP address of the desired monitor
 node. Please note, unlike other ``mon`` subcommands, only one node can be
 specified at a time.
 
 Subcommand ``destroy`` is used to completely remove monitors on remote hosts.
-It takes hostnames as arguments. It stops the monitor, verifies if ``ceph-mon``
+It takes hostnames as arguments. It stops the monitor, verifies if ``stone-mon``
 daemon really stopped, creates an archive directory ``mon-remove`` under
-``/var/lib/ceph/``, archives old monitor directory in
+``/var/lib/stone/``, archives old monitor directory in
 ``{cluster}-{hostname}-{stamp}`` format in it and removes the monitor from
-cluster by running ``ceph remove...`` command.
+cluster by running ``stone remove...`` command.
 
 Usage::
 
-	ceph-deploy mon destroy [HOST] [HOST...]
+	stone-deploy mon destroy [HOST] [HOST...]
 
 Here, [HOST] is hostname of monitor that is to be removed.
 
@@ -234,7 +234,7 @@ cluster.
 
 Usage::
 
-	ceph-deploy gatherkeys [HOST] [HOST...]
+	stone-deploy gatherkeys [HOST] [HOST...]
 
 Here, [HOST] is hostname of the monitor from where keys are to be pulled.
 
@@ -242,19 +242,19 @@ Here, [HOST] is hostname of the monitor from where keys are to be pulled.
 disk
 ----
 
-Manage disks on a remote host. It actually triggers the ``ceph-volume`` utility
+Manage disks on a remote host. It actually triggers the ``stone-volume`` utility
 and its subcommands to manage disks.
 
-Subcommand ``list`` lists disk partitions and Ceph OSDs.
+Subcommand ``list`` lists disk partitions and Stone OSDs.
 
 Usage::
 
-	ceph-deploy disk list HOST
+	stone-deploy disk list HOST
 
 
 Subcommand ``zap`` zaps/erases/destroys a device's partition table and
-contents.  It actually uses ``ceph-volume lvm zap`` remotely, alternatively
-allowing someone to remove the Ceph metadata from the logical volume.
+contents.  It actually uses ``stone-volume lvm zap`` remotely, alternatively
+allowing someone to remove the Stone metadata from the logical volume.
 
 osd
 ---
@@ -262,35 +262,35 @@ osd
 Manage OSDs by preparing data disk on remote host. ``osd`` makes use of certain
 subcommands for managing OSDs.
 
-Subcommand ``create`` prepares a device for Ceph OSD. It first checks against
+Subcommand ``create`` prepares a device for Stone OSD. It first checks against
 multiple OSDs getting created and warns about the possibility of more than the
 recommended which would cause issues with max allowed PIDs in a system. It then
 reads the bootstrap-osd key for the cluster or writes the bootstrap key if not
 found.
-It then uses :program:`ceph-volume` utility's ``lvm create`` subcommand to
+It then uses :program:`stone-volume` utility's ``lvm create`` subcommand to
 prepare the disk, (and journal if using filestore) and deploy the OSD on the desired host.
 Once prepared, it gives some time to the OSD to start and checks for any
 possible errors and if found, reports to the user.
 
 Bluestore Usage::
 
-	ceph-deploy osd create --data DISK HOST
+	stone-deploy osd create --data DISK HOST
 
 Filestore Usage::
 
-	ceph-deploy osd create --data DISK --journal JOURNAL HOST
+	stone-deploy osd create --data DISK --journal JOURNAL HOST
 
 
 .. note:: For other flags available, please see the man page or the --help menu
-          on ceph-deploy osd create
+          on stone-deploy osd create
 
-Subcommand ``list`` lists devices associated to Ceph as part of an OSD.
-It uses the ``ceph-volume lvm list`` output that has a rich output, mapping
+Subcommand ``list`` lists devices associated to Stone as part of an OSD.
+It uses the ``stone-volume lvm list`` output that has a rich output, mapping
 OSDs to devices and other interesting information about the OSD setup.
 
 Usage::
 
-	ceph-deploy osd list HOST
+	stone-deploy osd list HOST
 
 
 admin
@@ -298,13 +298,13 @@ admin
 
 Push configuration and ``client.admin`` key to a remote host. It takes
 the ``{cluster}.client.admin.keyring`` from admin node and writes it under
-``/etc/ceph`` directory of desired node.
+``/etc/stone`` directory of desired node.
 
 Usage::
 
-	ceph-deploy admin [HOST] [HOST...]
+	stone-deploy admin [HOST] [HOST...]
 
-Here, [HOST] is desired host to be configured for Ceph administration.
+Here, [HOST] is desired host to be configured for Stone administration.
 
 
 config
@@ -312,14 +312,14 @@ config
 
 Push/pull configuration file to/from a remote host. It uses ``push`` subcommand
 to takes the configuration file from admin host and write it to remote host under
-``/etc/ceph`` directory. It uses ``pull`` subcommand to do the opposite i.e, pull
-the configuration file under ``/etc/ceph`` directory of remote host to admin node.
+``/etc/stone`` directory. It uses ``pull`` subcommand to do the opposite i.e, pull
+the configuration file under ``/etc/stone`` directory of remote host to admin node.
 
 Usage::
 
-	ceph-deploy config push [HOST] [HOST...]
+	stone-deploy config push [HOST] [HOST...]
 
-	ceph-deploy config pull [HOST] [HOST...]
+	stone-deploy config pull [HOST] [HOST...]
 
 Here, [HOST] is the hostname of the node where config file will be pushed to or
 pulled from.
@@ -328,51 +328,51 @@ pulled from.
 uninstall
 ---------
 
-Remove Ceph packages from remote hosts. It detects the platform and distro of
-selected host and uninstalls Ceph packages from it. However, some dependencies
+Remove Stone packages from remote hosts. It detects the platform and distro of
+selected host and uninstalls Stone packages from it. However, some dependencies
 like ``librbd1`` and ``librados2`` will not be removed because they can cause
 issues with ``qemu-kvm``.
 
 Usage::
 
-	ceph-deploy uninstall [HOST] [HOST...]
+	stone-deploy uninstall [HOST] [HOST...]
 
-Here, [HOST] is hostname of the node from where Ceph will be uninstalled.
+Here, [HOST] is hostname of the node from where Stone will be uninstalled.
 
 
 purge
 -----
 
-Remove Ceph packages from remote hosts and purge all data. It detects the
-platform and distro of selected host, uninstalls Ceph packages and purges all
+Remove Stone packages from remote hosts and purge all data. It detects the
+platform and distro of selected host, uninstalls Stone packages and purges all
 data. However, some dependencies like ``librbd1`` and ``librados2`` will not be
 removed because they can cause issues with ``qemu-kvm``.
 
 Usage::
 
-	ceph-deploy purge [HOST] [HOST...]
+	stone-deploy purge [HOST] [HOST...]
 
-Here, [HOST] is hostname of the node from where Ceph will be purged.
+Here, [HOST] is hostname of the node from where Stone will be purged.
 
 
 purgedata
 ---------
 
-Purge (delete, destroy, discard, shred) any Ceph data from ``/var/lib/ceph``.
-Once it detects the platform and distro of desired host, it first checks if Ceph
+Purge (delete, destroy, discard, shred) any Stone data from ``/var/lib/stone``.
+Once it detects the platform and distro of desired host, it first checks if Stone
 is still installed on the selected host and if installed, it won't purge data
-from it. If Ceph is already uninstalled from the host, it tries to remove the
-contents of ``/var/lib/ceph``. If it fails then probably OSDs are still mounted
+from it. If Stone is already uninstalled from the host, it tries to remove the
+contents of ``/var/lib/stone``. If it fails then probably OSDs are still mounted
 and needs to be unmounted to continue. It unmount the OSDs and tries to remove
-the contents of ``/var/lib/ceph`` again and checks for errors. It also removes
-contents of ``/etc/ceph``. Once all steps are successfully completed, all the
-Ceph data from the selected host are removed.
+the contents of ``/var/lib/stone`` again and checks for errors. It also removes
+contents of ``/etc/stone``. Once all steps are successfully completed, all the
+Stone data from the selected host are removed.
 
 Usage::
 
-	ceph-deploy purgedata [HOST] [HOST...]
+	stone-deploy purgedata [HOST] [HOST...]
 
-Here, [HOST] is hostname of the node from where Ceph data will be purged.
+Here, [HOST] is hostname of the node from where Stone data will be purged.
 
 
 forgetkeys
@@ -384,7 +384,7 @@ and bootstrap-mds keyring from the node.
 
 Usage::
 
-	ceph-deploy forgetkeys
+	stone-deploy forgetkeys
 
 
 pkg
@@ -397,9 +397,9 @@ specified after the command. Two options :option:`--install` and
 
 Usage::
 
-	ceph-deploy pkg --install [PKGs] [HOST] [HOST...]
+	stone-deploy pkg --install [PKGs] [HOST] [HOST...]
 
-	ceph-deploy pkg --remove [PKGs] [HOST] [HOST...]
+	stone-deploy pkg --remove [PKGs] [HOST] [HOST...]
 
 Here, [PKGs] is comma-separated package names and [HOST] is hostname of the
 remote node where packages are to be installed or removed from.
@@ -416,9 +416,9 @@ Options
 
 	Install packages modifying source repos.
 
-.. option:: --ceph-conf
+.. option:: --stone-conf
 
-	Use (or reuse) a given ``ceph.conf`` file.
+	Use (or reuse) a given ``stone.conf`` file.
 
 .. option:: --cluster
 
@@ -450,11 +450,11 @@ Options
 
 .. option:: --fsid
 
-	Provide an alternate FSID for ``ceph.conf`` generation.
+	Provide an alternate FSID for ``stone.conf`` generation.
 
 .. option:: --gpg-url
 
-	Specify a GPG key url to be used with custom repos (defaults to ceph.com).
+	Specify a GPG key url to be used with custom repos (defaults to stone.com).
 
 .. option:: --keyrings
 
@@ -494,7 +494,7 @@ Options
 
 .. option:: --repo-url
 
-	Specify a repo url that mirrors/contains Ceph packages.
+	Specify a repo url that mirrors/contains Stone packages.
 
 .. option:: --testing
 
@@ -506,7 +506,7 @@ Options
 
 .. option:: --version
 
-	The current installed version of :program:`ceph-deploy`.
+	The current installed version of :program:`stone-deploy`.
 
 .. option:: --zap-disk
 
@@ -516,14 +516,14 @@ Options
 Availability
 ============
 
-:program:`ceph-deploy` is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the documentation at https://ceph.com/ceph-deploy/docs for more information.
+:program:`stone-deploy` is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the documentation at https://stone.com/stone-deploy/docs for more information.
 
 
 See also
 ========
 
-:doc:`ceph-mon <ceph-mon>`\(8),
-:doc:`ceph-osd <ceph-osd>`\(8),
-:doc:`ceph-volume <ceph-volume>`\(8),
-:doc:`ceph-mds <ceph-mds>`\(8)
+:doc:`stone-mon <stone-mon>`\(8),
+:doc:`stone-osd <stone-osd>`\(8),
+:doc:`stone-volume <stone-volume>`\(8),
+:doc:`stone-mds <stone-mds>`\(8)

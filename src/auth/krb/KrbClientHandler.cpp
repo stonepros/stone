@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (c) 2018 SUSE LLC.
  * Author: Daniel Oliveira <doliveira@suse.com>
@@ -21,11 +21,11 @@
 
 #include "auth/KeyRing.h"
 #include "include/random.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/config.h"
 #include "common/dout.h"
 
-#define dout_subsys ceph_subsys_auth
+#define dout_subsys stone_subsys_auth
 #undef dout_prefix
 #define dout_prefix *_dout << "krb5/gssapi client request: "
 
@@ -36,7 +36,7 @@ KrbClientHandler::build_authorizer(uint32_t service_id) const
 {
   ldout(cct, 20) 
       << "KrbClientHandler::build_authorizer(): Service: " 
-      << ceph_entity_type_name(service_id) << dendl; 
+      << stone_entity_type_name(service_id) << dendl; 
 
   KrbAuthorizer* krb_auth = new KrbAuthorizer();
   if (krb_auth) {
@@ -70,7 +70,7 @@ int KrbClientHandler::build_request(bufferlist& buff_list) const
   krb_request.m_request_type = 
       static_cast<int>(GSSAuthenticationRequest::GSS_TOKEN);
 
-  using ceph::encode;
+  using stone::encode;
   encode(krb_request, buff_list);
 
   if (m_gss_buffer_out.length != 0) {
@@ -116,7 +116,7 @@ int KrbClientHandler::handle_response(
 
   KrbResponse krb_response; 
 
-  using ceph::decode;
+  using stone::decode;
   decode(krb_response, buff_list);
   if (m_gss_credentials == GSS_C_NO_CREDENTIAL) {
     gss_OID krb_client_type = GSS_C_NT_USER_NAME;
@@ -125,7 +125,7 @@ int KrbClientHandler::handle_response(
     gss_buffer_in.length = krb_client_name.length();
     gss_buffer_in.value  = (const_cast<char*>(krb_client_name.c_str()));
 
-    if (cct->_conf->name.get_type() == CEPH_ENTITY_TYPE_CLIENT) {
+    if (cct->_conf->name.get_type() == STONE_ENTITY_TYPE_CLIENT) {
       gss_major_status = gss_import_name(&gss_minor_status, 
                                          &gss_buffer_in, 
                                          krb_client_type, 
@@ -189,7 +189,7 @@ int KrbClientHandler::handle_response(
   } else {
     KrbTokenBlob krb_token; 
 
-    using ceph::decode;
+    using stone::decode;
     decode(krb_token, buff_list);
     ldout(cct, 20) 
         << "KrbClientHandler::handle_response() : Token Blob: " << "\n"; 

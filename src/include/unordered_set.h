@@ -3,7 +3,7 @@
 
 #include <unordered_set>
 
-namespace ceph {
+namespace stone {
   using std::unordered_set;
 }
 

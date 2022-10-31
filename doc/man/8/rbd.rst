@@ -9,7 +9,7 @@
 Synopsis
 ========
 
-| **rbd** [ -c *ceph.conf* ] [ -m *monaddr* ] [--cluster *cluster-name*]
+| **rbd** [ -c *stone.conf* ] [ -m *monaddr* ] [--cluster *cluster-name*]
   [ -p | --pool *pool* ] [ *command* ... ]
 
 
@@ -26,18 +26,18 @@ striped over must be a power of two.
 Options
 =======
 
-.. option:: -c ceph.conf, --conf ceph.conf
+.. option:: -c stone.conf, --conf stone.conf
 
-   Use ceph.conf configuration file instead of the default /etc/ceph/ceph.conf to
+   Use stone.conf configuration file instead of the default /etc/stone/stone.conf to
    determine monitor addresses during startup.
 
 .. option:: -m monaddress[:port]
 
-   Connect to specified monitor (instead of looking through ceph.conf).
+   Connect to specified monitor (instead of looking through stone.conf).
 
 .. option:: --cluster cluster-name
 
-   Use different cluster name as compared to default cluster name *ceph*.
+   Use different cluster name as compared to default cluster name *stone*.
 
 .. option:: -p pool-name, --pool pool-name
 
@@ -715,7 +715,7 @@ Striping
 ========
 
 RBD images are striped over many objects, which are then stored by the
-Ceph distributed object store (RADOS).  As a result, read and write
+Stone distributed object store (RADOS).  As a result, read and write
 requests for the image are distributed across many nodes in the
 cluster, generally preventing any single node from becoming a
 bottleneck when individual images get large or busy.
@@ -768,11 +768,11 @@ Per client instance `rbd device map` options:
   that only payload checksumming is disabled, header checksumming is always on.
   For msgr2.1 protocol this option is ignored.
 
-* cephx_require_signatures - Require msgr1 message signing feature (since 3.19,
+* stonex_require_signatures - Require msgr1 message signing feature (since 3.19,
   default).  This option is deprecated and will be removed in the future as the
   feature has been supported since the Bobtail release.
 
-* nocephx_require_signatures - Don't require msgr1 message signing feature
+* nostonex_require_signatures - Don't require msgr1 message signing feature
   (since 3.19).  This option is deprecated and will be removed in the future.
 
 * tcp_nodelay - Disable Nagle's algorithm on client sockets (since 4.0,
@@ -780,11 +780,11 @@ Per client instance `rbd device map` options:
 
 * notcp_nodelay - Enable Nagle's algorithm on client sockets (since 4.0).
 
-* cephx_sign_messages - Enable message signing for msgr1 on-the-wire protocol
+* stonex_sign_messages - Enable message signing for msgr1 on-the-wire protocol
   (since 4.4, default).  For msgr2.1 protocol this option is ignored: message
   signing is built into 'secure' mode and not offered in 'crc' mode.
 
-* nocephx_sign_messages - Disable message signing for msgr1 on-the-wire protocol
+* nostonex_sign_messages - Disable message signing for msgr1 on-the-wire protocol
   (since 4.4).  For msgr2.1 protocol this option is ignored.
 
 * mount_timeout=x - A timeout on various steps in `rbd device map` and
@@ -855,7 +855,7 @@ Per mapping (block device) `rbd device map` options:
 * read_from_replica=balance - When issued a read on a replicated pool, pick
   a random OSD for serving it (since 5.8).
 
-  This mode is safe for general use only since Octopus (i.e. after "ceph osd
+  This mode is safe for general use only since Octopus (i.e. after "stone osd
   require-osd-release octopus").  Otherwise it should be limited to read-only
   workloads such as images mapped read-only everywhere or snapshots.
 
@@ -866,7 +866,7 @@ Per mapping (block device) `rbd device map` options:
   bucket types, an OSD in a matching rack is closer than an OSD in a matching
   data center, which in turn is closer than an OSD in a matching region.
 
-  This mode is safe for general use only since Octopus (i.e. after "ceph osd
+  This mode is safe for general use only since Octopus (i.e. after "stone osd
   require-osd-release octopus").  Otherwise it should be limited to read-only
   workloads such as images mapped read-only everywhere or snapshots.
 
@@ -905,7 +905,7 @@ Per mapping (block device) `rbd device map` options:
   unchanged while it is being read to).  In particular this is the case for
   Windows where a system-wide "dummy" (throwaway) page may be mapped into the
   destination buffer in order to generate a single large I/O.  Otherwise,
-  "libceph: ... bad crc/signature" or "libceph: ... integrity error, bad crc"
+  "libstone: ... bad crc/signature" or "libstone: ... integrity error, bad crc"
   errors and associated performance degradation are expected.
 
 * udev - Wait for udev device manager to finish executing all matching
@@ -959,11 +959,11 @@ To delete a snapshot::
 
        rbd snap rm mypool/myimage@mysnap
 
-To map an image via the kernel with cephx enabled::
+To map an image via the kernel with stonex enabled::
 
        rbd device map mypool/myimage --id admin --keyfile secretfile
 
-To map an image via the kernel with different cluster name other than default *ceph*::
+To map an image via the kernel with different cluster name other than default *stone*::
 
        rbd device map mypool/myimage --cluster cluster-name
 
@@ -1024,12 +1024,12 @@ To restore an image from trash and rename it::
 Availability
 ============
 
-**rbd** is part of Ceph, a massively scalable, open-source, distributed storage system. Please refer to
-the Ceph documentation at http://ceph.com/docs for more information.
+**rbd** is part of Stone, a massively scalable, open-source, distributed storage system. Please refer to
+the Stone documentation at http://stone.com/docs for more information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8),
+:doc:`stone <stone>`\(8),
 :doc:`rados <rados>`\(8)

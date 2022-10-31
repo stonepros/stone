@@ -19,15 +19,15 @@ def create_keyring(ctx, cluster_name):
     for remote, roles_for_host in clients.remotes.items():
         for role in teuthology.cluster_roles_of_type(roles_for_host, 'client',
                                                      cluster_name):
-            name = teuthology.ceph_role(role)
-            client_keyring = '/etc/ceph/{0}.{1}.keyring'.format(cluster_name, name)
+            name = teuthology.stone_role(role)
+            client_keyring = '/etc/stonepros/{0}.{1}.keyring'.format(cluster_name, name)
             remote.run(
                 args=[
                     'sudo',
                     'adjust-ulimits',
-                    'ceph-coverage',
+                    'stone-coverage',
                     coverage_dir,
-                    'ceph-authtool',
+                    'stone-authtool',
                     '--create-keyring',
                     '--gen-key',
                     # TODO this --name= is not really obeyed, all unknown "types" are munged to "client"

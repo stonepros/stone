@@ -1,5 +1,5 @@
 """
-Workunit task -- Run ceph on sets of specific clients
+Workunit task -- Run stone on sets of specific clients
 """
 import logging
 import pipes
@@ -20,13 +20,13 @@ log = logging.getLogger(__name__)
 
 def task(ctx, config):
     """
-    Run ceph on all workunits found under the specified path.
+    Run stone on all workunits found under the specified path.
 
     For example::
 
         tasks:
-        - ceph:
-        - ceph-fuse: [client.0]
+        - stone:
+        - stone-fuse: [client.0]
         - workunit:
             clients:
               client.0: [direct_io, xattrs.sh]
@@ -35,8 +35,8 @@ def task(ctx, config):
 
     You can also run a list of workunits on all clients:
         tasks:
-        - ceph:
-        - ceph-fuse:
+        - stone:
+        - stone-fuse:
         - workunit:
             tag: v0.47
             clients:
@@ -50,8 +50,8 @@ def task(ctx, config):
     can also specify a time limit for each work unit (defaults to 3h):
 
         tasks:
-        - ceph:
-        - ceph-fuse:
+        - stone:
+        - stone-fuse:
         - workunit:
             sha1: 9b28948635b17165d17c1cf83d4a870bd138ddf6
             clients:
@@ -67,16 +67,16 @@ def task(ctx, config):
         - workunit:
             clients:
               all:
-                - test-ceph-helpers.sh test_get_config
+                - test-stone-helpers.sh test_get_config
 
-    This task supports roles that include a ceph cluster, e.g.::
+    This task supports roles that include a stone cluster, e.g.::
 
         tasks:
-        - ceph:
+        - stone:
         - workunit:
             clients:
               backup.client.0: [foo]
-              client.1: [bar] # cluster is implicitly 'ceph'
+              client.1: [bar] # cluster is implicitly 'stone'
 
     You can also specify an alternative top-level dir to 'qa/workunits', like
     'qa/standalone', with::
@@ -87,7 +87,7 @@ def task(ctx, config):
             basedir: qa/standalone
             clients:
               client.0:
-                - test-ceph-helpers.sh
+                - test-stone-helpers.sh
 
     :param ctx: Context
     :param config: Configuration
@@ -152,9 +152,9 @@ def _client_mountpoint(ctx, cluster, id_):
     Returns the path to the expected mountpoint for workunits running
     on some kind of filesystem.
     """
-    # for compatibility with tasks like ceph-fuse that aren't cluster-aware yet,
-    # only include the cluster name in the dir if the cluster is not 'ceph'
-    if cluster == 'ceph':
+    # for compatibility with tasks like stone-fuse that aren't cluster-aware yet,
+    # only include the cluster name in the dir if the cluster is not 'stone'
+    if cluster == 'stone':
         dir_ = 'mnt.{0}'.format(id_)
     else:
         dir_ = 'mnt.{0}.{1}'.format(cluster, id_)
@@ -212,7 +212,7 @@ def _make_scratch_dir(ctx, role, subdir):
     remote = get_remote_for_role(ctx, role)
     dir_owner = remote.user
     mnt = _client_mountpoint(ctx, cluster, id_)
-    # if neither kclient nor ceph-fuse are required for a workunit,
+    # if neither kclient nor stone-fuse are required for a workunit,
     # mnt may not exist. Stat and create the directory if it doesn't.
     try:
         remote.run(
@@ -337,17 +337,17 @@ def _run_tests(ctx, refspec, role, tests, env, basedir,
     srcdir = '{cdir}/{basedir}'.format(cdir=clonedir,
                                        basedir=basedir)
 
-    git_url = teuth_config.get_ceph_qa_suite_git_url()
-    # if we are running an upgrade test, and ceph-ci does not have branches like
-    # `jewel`, so should use ceph.git as an alternative.
+    git_url = teuth_config.get_stone_qa_suite_git_url()
+    # if we are running an upgrade test, and stone-ci does not have branches like
+    # `jewel`, so should use stone.git as an alternative.
     try:
         remote.run(logger=log.getChild(role),
                    args=refspec.clone(git_url, clonedir))
     except CommandFailedError:
-        if git_url.endswith('/ceph-ci.git'):
-            alt_git_url = git_url.replace('/ceph-ci.git', '/ceph.git')
-        elif git_url.endswith('/ceph-ci'):
-            alt_git_url = re.sub(r'/ceph-ci$', '/ceph.git', git_url)
+        if git_url.endswith('/stone-ci.git'):
+            alt_git_url = git_url.replace('/stone-ci.git', '/stone.git')
+        elif git_url.endswith('/stone-ci'):
+            alt_git_url = re.sub(r'/stone-ci$', '/stone.git', git_url)
         else:
             raise
         log.info(
@@ -392,15 +392,15 @@ def _run_tests(ctx, refspec, role, tests, env, basedir,
                     run.Raw('&&'),
                     'cd', '--', scratch_tmp,
                     run.Raw('&&'),
-                    run.Raw('CEPH_CLI_TEST_DUP_COMMAND=1'),
-                    run.Raw('CEPH_REF={ref}'.format(ref=refspec)),
+                    run.Raw('STONE_CLI_TEST_DUP_COMMAND=1'),
+                    run.Raw('STONE_REF={ref}'.format(ref=refspec)),
                     run.Raw('TESTDIR="{tdir}"'.format(tdir=testdir)),
-                    run.Raw('CEPH_ARGS="--cluster {0}"'.format(cluster)),
-                    run.Raw('CEPH_ID="{id}"'.format(id=id_)),
+                    run.Raw('STONE_ARGS="--cluster {0}"'.format(cluster)),
+                    run.Raw('STONE_ID="{id}"'.format(id=id_)),
                     run.Raw('PATH=$PATH:/usr/sbin'),
-                    run.Raw('CEPH_BASE={dir}'.format(dir=clonedir)),
-                    run.Raw('CEPH_ROOT={dir}'.format(dir=clonedir)),
-                    run.Raw('CEPH_MNT={dir}'.format(dir=mnt)),
+                    run.Raw('STONE_BASE={dir}'.format(dir=clonedir)),
+                    run.Raw('STONE_ROOT={dir}'.format(dir=clonedir)),
+                    run.Raw('STONE_MNT={dir}'.format(dir=mnt)),
                 ]
                 if env is not None:
                     for var, val in env.items():
@@ -410,7 +410,7 @@ def _run_tests(ctx, refspec, role, tests, env, basedir,
                 if coverage_and_limits:
                     args.extend([
                         'adjust-ulimits',
-                        'ceph-coverage',
+                        'stone-coverage',
                         '{tdir}/archive/coverage'.format(tdir=testdir)])
                 if timeout and timeout != '0':
                     args.extend(['timeout', timeout])

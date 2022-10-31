@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_MIRROR_IMAGE_STATE_UPDATE_REQUEST_H
 
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "cls/rbd/cls_rbd_types.h"
 #include "librbd/mirror/Types.h"
 

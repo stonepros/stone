@@ -1,50 +1,50 @@
 :orphan:
 
 =============================================
- ceph-debugpack -- ceph debug packer utility
+ stone-debugpack -- stone debug packer utility
 =============================================
 
-.. program:: ceph-debugpack
+.. program:: stone-debugpack
 
 Synopsis
 ========
 
-| **ceph-debugpack** [ *options* ] *filename.tar.gz*
+| **stone-debugpack** [ *options* ] *filename.tar.gz*
 
 
 Description
 ===========
 
-**ceph-debugpack** will build a tarball containing various items that are
+**stone-debugpack** will build a tarball containing various items that are
 useful for debugging crashes. The resulting tarball can be shared with
-Ceph developers when debugging a problem.
+Stone developers when debugging a problem.
 
-The tarball will include the binaries for ceph-mds, ceph-osd, and ceph-mon, radosgw, any
-log files, the ceph.conf configuration file, any core files we can
+The tarball will include the binaries for stone-mds, stone-osd, and stone-mon, radosgw, any
+log files, the stone.conf configuration file, any core files we can
 find, and (if the system is running) dumps of the current cluster state
-as reported by 'ceph report'.
+as reported by 'stone report'.
 
 
 Options
 =======
 
-.. option:: -c ceph.conf, --conf=ceph.conf
+.. option:: -c stone.conf, --conf=stone.conf
 
-   Use *ceph.conf* configuration file instead of the default
-   ``/etc/ceph/ceph.conf`` to determine monitor addresses during
+   Use *stone.conf* configuration file instead of the default
+   ``/etc/stone/stone.conf`` to determine monitor addresses during
    startup.
 
 
 Availability
 ============
 
-**ceph-debugpack** is part of Ceph, a massively scalable, open-source, distributed storage system. Please
-refer to the Ceph documentation at http://ceph.com/docs for more
+**stone-debugpack** is part of Stone, a massively scalable, open-source, distributed storage system. Please
+refer to the Stone documentation at http://stone.com/docs for more
 information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8)
-:doc:`ceph-post-file <ceph-post-file>`\(8)
+:doc:`stone <stone>`\(8)
+:doc:`stone-post-file <stone-post-file>`\(8)

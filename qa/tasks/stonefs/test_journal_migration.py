@@ -1,12 +1,12 @@
 
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 from tasks.workunit import task as workunit
 
 JOURNAL_FORMAT_LEGACY = 0
 JOURNAL_FORMAT_RESILIENT = 1
 
 
-class TestJournalMigration(CephFSTestCase):
+class TestJournalMigration(StoneFSTestCase):
     CLIENTS_REQUIRED = 1
     MDSS_REQUIRED = 2
 
@@ -18,7 +18,7 @@ class TestJournalMigration(CephFSTestCase):
         self.fs.mds_stop()
 
         # Create a filesystem using the older journal format.
-        self.fs.set_ceph_conf('mds', 'mds journal format', old_journal_version)
+        self.fs.set_stone_conf('mds', 'mds journal format', old_journal_version)
         self.fs.mds_restart()
         self.fs.recreate()
 
@@ -45,8 +45,8 @@ class TestJournalMigration(CephFSTestCase):
                 "timeout": "3h"
             })
 
-        # Modify the ceph.conf to ask the MDS to use the new journal format.
-        self.fs.set_ceph_conf('mds', 'mds journal format', new_journal_version)
+        # Modify the stone.conf to ask the MDS to use the new journal format.
+        self.fs.set_stone_conf('mds', 'mds journal format', new_journal_version)
 
         # Restart the MDS.
         self.fs.mds_fail_restart()
@@ -66,7 +66,7 @@ class TestJournalMigration(CephFSTestCase):
                 new_journal_version, journal_version()
             ))
 
-        # Verify that cephfs-journal-tool can now read the rewritten journal
+        # Verify that stonefs-journal-tool can now read the rewritten journal
         inspect_out = self.fs.journal_tool(["journal", "inspect"], 0)
         if not inspect_out.endswith(": OK"):
             raise RuntimeError("Unexpected journal-tool result: '{0}'".format(

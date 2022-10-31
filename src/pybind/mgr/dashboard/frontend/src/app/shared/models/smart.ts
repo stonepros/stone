@@ -151,7 +151,7 @@ export interface HddSmartDataV1 extends SmartCtlBaseDataV1 {
 }
 
 /**
- * Result structure of `smartctl` returned by Ceph and then back-end applied on
+ * Result structure of `smartctl` returned by Stone and then back-end applied on
  * an NVMe.
  */
 export interface NvmeSmartDataV1 extends SmartCtlBaseDataV1 {

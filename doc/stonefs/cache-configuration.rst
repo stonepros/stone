@@ -2,7 +2,7 @@
 MDS Cache Configuration
 =======================
 
-The Metadata Server coordinates a distributed cache among all MDS and CephFS
+The Metadata Server coordinates a distributed cache among all MDS and StoneFS
 clients. The cache serves to improve metadata access latency and allow clients
 to safely (coherently) mutate metadata state (e.g. via `chmod`). The MDS issues
 **capabilities** and **directory entry leases** to indicate what state clients
@@ -44,7 +44,7 @@ health alert to the Monitors indicating the cache is too large. This is
 controlled by the `mds_health_cache_threshold` configuration which is by
 default 150% of the maximum cache size.
 
-Because the cache limit is not a hard limit, potential bugs in the CephFS
+Because the cache limit is not a hard limit, potential bugs in the StoneFS
 client, MDS, or misbehaving applications might cause the MDS to exceed its
 cache size. The health warnings are intended to help the operator detect this
 situation and make necessary adjustments or investigate buggy clients.

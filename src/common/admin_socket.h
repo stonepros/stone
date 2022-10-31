@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2011 New Dream Network
  *
@@ -43,12 +43,12 @@ public:
    *
    * Executes action associated with admin command and returns byte-stream output @c out.
    * There is no restriction on output. Each handler defines output semantics.
-   * Typically output is textual representation of some ceph's internals.
+   * Typically output is textual representation of some stone's internals.
    * Handler should use provided formatter @c f if structuralized output is being produced.
    *
    * @param command[in] String matching constant part of cmddesc in @ref AdminSocket::register_command
    * @param cmdmap[in]  Parameters extracted from argument part of cmddesc in @ref AdminSocket::register_command
-   * @param f[in]       Formatter created according to requestor preference, used by `ceph --format`
+   * @param f[in]       Formatter created according to requestor preference, used by `stone --format`
    * @param errss[out]  Error stream, should contain details in case of execution failure
    * @param out[out]    Produced output
    *
@@ -60,9 +60,9 @@ public:
   virtual int call(
     std::string_view command,
     const cmdmap_t& cmdmap,
-    ceph::Formatter *f,
+    stone::Formatter *f,
     std::ostream& errss,
-    ceph::buffer::list& out) = 0;
+    stone::buffer::list& out) = 0;
 
   /**
    * @brief
@@ -71,8 +71,8 @@ public:
    * Executes action associated with admin command and prepares byte-stream response.
    * When processing is done @c on_finish must be called.
    * There is no restriction on output. Each handler defines own output semantics.
-   * Typically output is textual representation of some ceph's internals.
-   * Input @c inbl can be passed, see ceph --in-file.
+   * Typically output is textual representation of some stone's internals.
+   * Input @c inbl can be passed, see stone --in-file.
    * Handler should use provided formatter @c f if structuralized output is being produced.
    * on_finish handler has following parameters:
    * - result code of handler (same as @ref AdminSocketHook::call)
@@ -81,7 +81,7 @@ public:
    *
    * @param[in] command String matching constant part of cmddesc in @ref AdminSocket::register_command
    * @param[in] cmdmap  Parameters extracted from argument part of cmddesc in @ref AdminSocket::register_command
-   * @param[in] f       Formatter created according to requestor preference, used by `ceph --format`
+   * @param[in] f       Formatter created according to requestor preference, used by `stone --format`
    * @param[in] inbl    Input content for handler
    * @param[in] on_finish Function to call when processing is done
    *
@@ -90,11 +90,11 @@ public:
   virtual void call_async(
     std::string_view command,
     const cmdmap_t& cmdmap,
-    ceph::Formatter *f,
-    const ceph::buffer::list& inbl,
-    std::function<void(int,const std::string&,ceph::buffer::list&)> on_finish) {
+    stone::Formatter *f,
+    const stone::buffer::list& inbl,
+    std::function<void(int,const std::string&,stone::buffer::list&)> on_finish) {
     // by default, call the synchronous handler and then finish
-    ceph::buffer::list out;
+    stone::buffer::list out;
     std::ostringstream errss;
     int r = call(command, cmdmap, f, errss, out);
     on_finish(r, errss.str(), out);
@@ -105,7 +105,7 @@ public:
 class AdminSocket
 {
 public:
-  AdminSocket(StoneeContext *cct);
+  AdminSocket(StoneContext *cct);
   ~AdminSocket();
 
   AdminSocket(const AdminSocket&) = delete;
@@ -149,18 +149,18 @@ public:
   /// execute (async)
   void execute_command(
     const std::vector<std::string>& cmd,
-    const ceph::buffer::list& inbl,
-    std::function<void(int,const std::string&,ceph::buffer::list&)> on_fin);
+    const stone::buffer::list& inbl,
+    std::function<void(int,const std::string&,stone::buffer::list&)> on_fin);
 
   /// execute (blocking)
   int execute_command(
     const std::vector<std::string>& cmd,
-    const ceph::buffer::list& inbl,
+    const stone::buffer::list& inbl,
     std::ostream& errss,
-    ceph::buffer::list *outbl);
+    stone::buffer::list *outbl);
 
-  void queue_tell_command(ceph::cref_t<MCommand> m);
-  void queue_tell_command(ceph::cref_t<MMonCommand> m); // for compat
+  void queue_tell_command(stone::cref_t<MCommand> m);
+  void queue_tell_command(stone::cref_t<MMonCommand> m); // for compat
 
 private:
 
@@ -176,7 +176,7 @@ private:
   void do_accept();
   void do_tell_queue();
 
-  StoneeContext *m_cct;
+  StoneContext *m_cct;
   std::string m_path;
   int m_sock_fd = -1;
   int m_wakeup_rd_fd = -1;
@@ -191,8 +191,8 @@ private:
   std::unique_ptr<AdminSocketHook> getdescs_hook;
 
   std::mutex tell_lock;
-  std::list<ceph::cref_t<MCommand>> tell_queue;
-  std::list<ceph::cref_t<MMonCommand>> tell_legacy_queue;
+  std::list<stone::cref_t<MCommand>> tell_queue;
+  std::list<stone::cref_t<MMonCommand>> tell_legacy_queue;
 
   struct hook_info {
     AdminSocketHook* hook;

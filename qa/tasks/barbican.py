@@ -415,7 +415,7 @@ def task(ctx, config):
 
     tasks:
       - local_cluster:
-          cluster_path: /home/adam/ceph-1/build
+          cluster_path: /home/adam/stone-1/build
       - local_rgw:
       - tox: [ client.0 ]
       - keystone:

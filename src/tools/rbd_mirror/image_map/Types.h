@@ -17,7 +17,7 @@
 
 struct Context;
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 
@@ -87,7 +87,7 @@ struct PolicyMetaUnknown {
   }
 
   void encode(bufferlist& bl) const {
-    ceph_abort();
+    stone_abort();
   }
 
   void decode(__u8 version, bufferlist::const_iterator& it) {

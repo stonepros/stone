@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 
 struct rgw_meta_sync_info {
   enum SyncState {

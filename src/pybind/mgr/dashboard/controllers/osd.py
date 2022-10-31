@@ -6,13 +6,13 @@ import logging
 import time
 from typing import Any, Dict, List, Optional, Union
 
-from ceph.deployment.drive_group import DriveGroupSpec, DriveGroupValidationError  # type: ignore
+from stone.deployment.drive_group import DriveGroupSpec, DriveGroupValidationError  # type: ignore
 from mgr_util import get_most_recent_rate
 
 from .. import mgr
 from ..exceptions import DashboardException
 from ..security import Scope
-from ..services.ceph_service import CephService, SendCommandError
+from ..services.stone_service import StoneService, SendCommandError
 from ..services.exception import handle_orchestrator_error, handle_send_command_error
 from ..services.orchestrator import OrchClient, OrchFeature
 from ..tools import str_to_bool
@@ -86,7 +86,7 @@ class Osd(RESTController):
                 continue  # pragma: no cover - simple early continue
             for stat in ['osd.op_w', 'osd.op_in_bytes', 'osd.op_r', 'osd.op_out_bytes']:
                 prop = stat.split('.')[1]
-                rates = CephService.get_rates('osd', osd_spec, stat)
+                rates = StoneService.get_rates('osd', osd_spec, stat)
                 osd['stats'][prop] = get_most_recent_rate(rates)
                 osd['stats_history'][prop] = rates
             # Gauge stats
@@ -98,7 +98,7 @@ class Osd(RESTController):
     @RESTController.Collection('GET', version=APIVersion.EXPERIMENTAL)
     @ReadPermission
     def settings(self):
-        result = CephService.send_command('mon', 'osd dump')
+        result = StoneService.send_command('mon', 'osd dump')
         return {
             'nearfull_ratio': result['nearfull_ratio'],
             'full_ratio': result['full_ratio']
@@ -136,7 +136,7 @@ class Osd(RESTController):
         # type: (str) -> dict
         """Returns S.M.A.R.T data for the given OSD ID."""
         logger.debug('[SMART] retrieving data from OSD with ID %s', osd_id)
-        return CephService.get_smart_data_by_daemon('osd', osd_id)
+        return StoneService.get_smart_data_by_daemon('osd', osd_id)
 
     @RESTController.Resource('GET')
     def smart(self, svc_id):
@@ -165,7 +165,7 @@ class Osd(RESTController):
         :return: Returns the histogram data.
         """
         try:
-            histogram = CephService.send_command(
+            histogram = StoneService.send_command(
                 'osd', srv_spec=svc_id, prefix='perf histogram dump')
         except SendCommandError as e:  # pragma: no cover - the handling is too obvious
             raise DashboardException(
@@ -174,14 +174,14 @@ class Osd(RESTController):
         return histogram
 
     def set(self, svc_id, device_class):  # pragma: no cover
-        old_device_class = CephService.send_command('mon', 'osd crush get-device-class',
+        old_device_class = StoneService.send_command('mon', 'osd crush get-device-class',
                                                     ids=[svc_id])
         old_device_class = old_device_class[0]['device_class']
         if old_device_class != device_class:
-            CephService.send_command('mon', 'osd crush rm-device-class',
+            StoneService.send_command('mon', 'osd crush rm-device-class',
                                      ids=[svc_id])
             if device_class:
-                CephService.send_command('mon', 'osd crush set-device-class', **{
+                StoneService.send_command('mon', 'osd crush set-device-class', **{
                     'class': device_class,
                     'ids': [svc_id]
                 })
@@ -248,7 +248,7 @@ class Osd(RESTController):
     @allow_empty_body
     def scrub(self, svc_id, deep=False):
         api_scrub = "osd deep-scrub" if str_to_bool(deep) else "osd scrub"
-        CephService.send_command("mon", api_scrub, who=svc_id)
+        StoneService.send_command("mon", api_scrub, who=svc_id)
 
     @RESTController.Resource('PUT')
     @EndpointDoc("Mark OSD flags (out, in, down, lost, ...)",
@@ -266,7 +266,7 @@ class Osd(RESTController):
             else:
                 args['ids'] = [svc_id]
 
-            CephService.send_command(**args)
+            StoneService.send_command(**args)
         else:
             logger.error("Invalid OSD mark action: %s attempted on SVC_ID: %s", action, svc_id)
 
@@ -276,17 +276,17 @@ class Osd(RESTController):
         """
         Reweights the OSD temporarily.
 
-        Note that ‘ceph osd reweight’ is not a persistent setting. When an OSD
+        Note that ‘stone osd reweight’ is not a persistent setting. When an OSD
         gets marked out, the osd weight will be set to 0. When it gets marked
         in again, the weight will be changed to 1.
 
-        Because of this ‘ceph osd reweight’ is a temporary solution. You should
+        Because of this ‘stone osd reweight’ is a temporary solution. You should
         only use it to keep your cluster running while you’re ordering more
         hardware.
 
-        - Craig Lewis (http://lists.ceph.com/pipermail/ceph-users-ceph.com/2014-June/040967.html)
+        - Craig Lewis (http://lists.stone.com/pipermail/stone-users-stone.com/2014-June/040967.html)
         """
-        CephService.send_command(
+        StoneService.send_command(
             'mon',
             'osd reweight',
             id=int(svc_id),
@@ -305,7 +305,7 @@ class Osd(RESTController):
         except (KeyError, ValueError) as e:
             raise DashboardException(e, component='osd', http_status_code=400)
 
-        result = CephService.send_command(
+        result = StoneService.send_command(
             'mon', 'osd create', id=svc_id, uuid=uuid)
         return {
             'result': result,
@@ -340,7 +340,7 @@ class Osd(RESTController):
         """
         Note: osd must be marked `down` before removal.
         """
-        CephService.send_command('mon', 'osd purge-actual', id=int(svc_id),
+        StoneService.send_command('mon', 'osd purge-actual', id=int(svc_id),
                                  yes_i_really_mean_it=True)
 
     @RESTController.Resource('POST')
@@ -348,12 +348,12 @@ class Osd(RESTController):
     def destroy(self, svc_id):
         """
         Mark osd as being destroyed. Keeps the ID intact (allowing reuse), but
-        removes cephx keys, config-key data and lockbox keys, rendering data
+        removes stonex keys, config-key data and lockbox keys, rendering data
         permanently unreadable.
 
         The osd must be marked down before being destroyed.
         """
-        CephService.send_command(
+        StoneService.send_command(
             'mon', 'osd destroy-actual', id=int(svc_id), yes_i_really_mean_it=True)
 
     @Endpoint('GET', query_params=['ids'])
@@ -375,7 +375,7 @@ class Osd(RESTController):
             ids = [str(ids)]
 
         try:
-            result = CephService.send_command(
+            result = StoneService.send_command(
                 'mon', 'osd safe-to-destroy', ids=ids, target=('mgr', ''))
             result['is_safe_to_destroy'] = set(result['safe_to_destroy']) == set(map(int, ids))
             return result
@@ -403,7 +403,7 @@ class Osd(RESTController):
     @RESTController.Resource('GET')
     def devices(self, svc_id):
         # (str) -> dict
-        return CephService.send_command('mon', 'device ls-by-daemon', who='osd.{}'.format(svc_id))
+        return StoneService.send_command('mon', 'device ls-by-daemon', who='osd.{}'.format(svc_id))
 
 
 @APIRouter('/osd/flags', Scope.OSD)
@@ -413,8 +413,8 @@ class OsdFlagsController(RESTController):
     def _osd_flags():
         enabled_flags = mgr.get('osd_map')['flags_set']
         if 'pauserd' in enabled_flags and 'pausewr' in enabled_flags:
-            # 'pause' is set by calling `ceph osd set pause` and unset by
-            # calling `set osd unset pause`, but `ceph osd dump | jq '.flags'`
+            # 'pause' is set by calling `stone osd set pause` and unset by
+            # calling `set osd unset pause`, but `stone osd dump | jq '.flags'`
             # will contain 'pauserd,pausewr' if pause is set.
             # Let's pretend to the API that 'pause' is in fact a proper flag.
             enabled_flags = list(
@@ -426,11 +426,11 @@ class OsdFlagsController(RESTController):
         if ids:
             if flags:
                 ids = list(map(str, ids))
-                CephService.send_command('mon', 'osd ' + action, who=ids,
+                StoneService.send_command('mon', 'osd ' + action, who=ids,
                                          flags=','.join(flags))
         else:
             for flag in flags:
-                CephService.send_command('mon', 'osd ' + action, '', key=flag)
+                StoneService.send_command('mon', 'osd ' + action, '', key=flag)
 
     @EndpointDoc("Display OSD Flags",
                  responses={200: EXPORT_FLAGS_SCHEMA})

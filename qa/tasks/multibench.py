@@ -26,7 +26,7 @@ def task(ctx, config):
     example:
 
     tasks:
-    - ceph:
+    - stone:
     - multibench:
         clients: [client.0]
         time: 360

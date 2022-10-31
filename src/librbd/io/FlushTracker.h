@@ -5,7 +5,7 @@
 #define STONE_LIBRBD_IO_FLUSH_TRACKER_H
 
 #include "include/int_types.h"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include <atomic>
 #include <list>
 #include <map>
@@ -45,7 +45,7 @@ private:
 
   std::atomic<uint32_t> m_next_flush_tid{0};
 
-  mutable ceph::shared_mutex m_lock;
+  mutable stone::shared_mutex m_lock;
   TidToFlushTid m_tid_to_flush_tid;
 
   Tids m_in_flight_flush_tids;

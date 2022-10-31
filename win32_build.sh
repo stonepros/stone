@@ -11,7 +11,7 @@ num_vcpus=$(nproc)
 CEPH_DIR="${CEPH_DIR:-$SCRIPT_DIR}"
 BUILD_DIR="${BUILD_DIR:-${CEPH_DIR}/build}"
 DEPS_DIR="${DEPS_DIR:-$CEPH_DIR/build.deps}"
-ZIP_DEST="${ZIP_DEST:-$BUILD_DIR/ceph.zip}"
+ZIP_DEST="${ZIP_DEST:-$BUILD_DIR/stone.zip}"
 
 CLEAN_BUILD=${CLEAN_BUILD:-}
 SKIP_BUILD=${SKIP_BUILD:-}
@@ -24,7 +24,7 @@ SKIP_BINDIR_CLEAN=${SKIP_BINDIR_CLEAN:-}
 NUM_WORKERS_DEFAULT=$(( $num_vcpus + 2 ))
 NUM_WORKERS=${NUM_WORKERS:-$NUM_WORKERS_DEFAULT}
 DEV_BUILD=${DEV_BUILD:-}
-# Unless SKIP_ZIP is set, we're preparing an archive that contains the Ceph
+# Unless SKIP_ZIP is set, we're preparing an archive that contains the Stone
 # binaries, debug symbols as well as the required DLLs.
 SKIP_ZIP=${SKIP_ZIP:-}
 # By default, we'll move the debug symbols to separate files located in the
@@ -188,12 +188,12 @@ if [[ -z $SKIP_BUILD ]]; then
 
     cd $BUILD_DIR
     ninja_targets="rados rbd rbd-wnbd "
-    ninja_targets+=" ceph-conf ceph-immutable-object-cache"
-    ninja_targets+=" cephfs ceph-dokan"
-    # TODO: do we actually need the ceph compression libs?
-    ninja_targets+=" compressor ceph_lz4 ceph_snappy ceph_zlib ceph_zstd"
+    ninja_targets+=" stone-conf stone-immutable-object-cache"
+    ninja_targets+=" stonefs stone-dokan"
+    # TODO: do we actually need the stone compression libs?
+    ninja_targets+=" compressor stone_lz4 stone_snappy stone_zlib stone_zstd"
     if [[ -z $SKIP_TESTS ]]; then
-      ninja_targets+=" tests ceph_radosacl ceph_scratchtool"
+      ninja_targets+=" tests stone_radosacl stone_scratchtool"
     fi
 
     ninja -v $ninja_targets 2>&1 | tee "${BUILD_DIR}/build.log"
@@ -238,17 +238,17 @@ if [[ -z $SKIP_ZIP ]]; then
             [[ ! -f $strippedBinDir/$(basename $file) ]] && \
                 cp $file $strippedBinDir
         done
-        ln -s $strippedBinDir $ZIP_TMPDIR/ceph
+        ln -s $strippedBinDir $ZIP_TMPDIR/stone
     else
-        ln -s $binDir $ZIP_TMPDIR/ceph
+        ln -s $binDir $ZIP_TMPDIR/stone
     fi
     echo "Building zip archive $ZIP_DEST."
     # Include the README file in the archive
-    ln -s $CEPH_DIR/README.windows.rst $ZIP_TMPDIR/ceph/README.windows.rst
+    ln -s $CEPH_DIR/README.windows.rst $ZIP_TMPDIR/stone/README.windows.rst
     cd $ZIP_TMPDIR
     [[ -f $ZIP_DEST ]] && rm $ZIP_DEST
-    zip -r $ZIP_DEST ceph
+    zip -r $ZIP_DEST stone
     cd -
-    rm -rf $ZIP_TMPDIR/ceph/README.windows.rst $ZIP_TMPDIR
+    rm -rf $ZIP_TMPDIR/stone/README.windows.rst $ZIP_TMPDIR
     echo -e '\n  WIN32 files zipped to: '$ZIP_DEST'\n'
 fi

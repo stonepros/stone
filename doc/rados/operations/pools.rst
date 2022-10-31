@@ -3,7 +3,7 @@
 =======
 Pools are logical partitions for storing objects.
 
-When you first deploy a cluster without creating a pool, Ceph uses the default
+When you first deploy a cluster without creating a pool, Stone uses the default
 pools for storing data. A pool provides you with:
 
 - **Resilience**: You can set how many OSD are allowed to fail without losing data.
@@ -24,7 +24,7 @@ pools for storing data. A pool provides you with:
   by CRUSH rules. You can create a custom CRUSH rule for your pool if the default
   rule is not appropriate for your use case.
 
-- **Snapshots**: When you create snapshots with ``ceph osd pool mksnap``,
+- **Snapshots**: When you create snapshots with ``stone osd pool mksnap``,
   you effectively take a snapshot of a particular pool.
 
 To organize data into pools, you can list, create, and remove pools.
@@ -35,7 +35,7 @@ List Pools
 
 To list your cluster's pools, execute::
 
-	ceph osd lspools
+	stone osd lspools
 
 
 .. _createpool:
@@ -45,7 +45,7 @@ Create a Pool
 
 Before creating pools, refer to the `Pool, PG and CRUSH Config Reference`_.
 Ideally, you should override the default value for the number of placement
-groups in your Ceph configuration file, as the default is NOT ideal.
+groups in your Stone configuration file, as the default is NOT ideal.
 For details on placement group numbers refer to `setting the number of placement groups`_
 
 .. note:: Starting with Luminous, all pools need to be associated to the
@@ -59,9 +59,9 @@ For example::
 
 To create a pool, execute::
 
-	ceph osd pool create {pool-name} [{pg-num} [{pgp-num}]] [replicated] \
+	stone osd pool create {pool-name} [{pg-num} [{pgp-num}]] [replicated] \
              [crush-rule-name] [expected-num-objects]
-	ceph osd pool create {pool-name} [{pg-num} [{pgp-num}]]   erasure \
+	stone osd pool create {pool-name} [{pg-num} [{pgp-num}]]   erasure \
              [erasure-code-profile] [crush-rule-name] [expected_num_objects] [--autoscale-mode=<on,off,warn>]
 
 Where:
@@ -89,7 +89,7 @@ Where:
               for placement group splitting scenarios.
 
 :Type: Integer
-:Required: Yes. Picks up default or Ceph configuration value if not specified.
+:Required: Yes. Picks up default or Stone configuration value if not specified.
 :Default: 8
 
 ``{replicated|erasure}``
@@ -99,7 +99,7 @@ Where:
               objects or **erasure** to get a kind of
               `generalized RAID5 <../erasure-code>`_ capability.
               The **replicated** pools require more
-              raw storage but implement all Ceph operations. The
+              raw storage but implement all Stone operations. The
               **erasure** pools require less raw storage but only
               implement a subset of the available operations.
 
@@ -161,7 +161,7 @@ Associate Pool to Application
 =============================
 
 Pools need to be associated with an application before use. Pools that will be
-used with CephFS or pools that are automatically created by RGW are
+used with StoneFS or pools that are automatically created by RGW are
 automatically associated. Pools that are intended for use with RBD should be
 initialized using the ``rbd`` tool (see `Block Device Commands`_ for more
 information).
@@ -169,9 +169,9 @@ information).
 For other cases, you can manually associate a free-form application name to
 a pool.::
 
-        ceph osd pool application enable {pool-name} {application-name}
+        stone osd pool application enable {pool-name} {application-name}
 
-.. note:: CephFS uses the application name ``cephfs``, RBD uses the
+.. note:: StoneFS uses the application name ``stonefs``, RBD uses the
    application name ``rbd``, and RGW uses the application name ``rgw``.
 
 Set Pool Quotas
@@ -180,11 +180,11 @@ Set Pool Quotas
 You can set pool quotas for the maximum number of bytes and/or the maximum
 number of objects per pool. ::
 
-	ceph osd pool set-quota {pool-name} [max_objects {obj-count}] [max_bytes {bytes}]
+	stone osd pool set-quota {pool-name} [max_objects {obj-count}] [max_bytes {bytes}]
 
 For example::
 
-	ceph osd pool set-quota data max_objects 10000
+	stone osd pool set-quota data max_objects 10000
 
 To remove a quota, set its value to ``0``.
 
@@ -194,7 +194,7 @@ Delete a Pool
 
 To delete a pool, execute::
 
-	ceph osd pool delete {pool-name} [{pool-name} --yes-i-really-really-mean-it]
+	stone osd pool delete {pool-name} [{pool-name} --yes-i-really-really-mean-it]
 
 
 To remove a pool the mon_allow_pool_delete flag must be set to true in the Monitor's
@@ -207,11 +207,11 @@ See `Monitor Configuration`_ for more information.
 If you created your own rules for a pool you created, you should consider
 removing them when you no longer need your pool::
 
-	ceph osd pool get {pool-name} crush_rule
+	stone osd pool get {pool-name} crush_rule
 
 If the rule was "123", for example, you can check the other pools like so::
 
-	ceph osd dump | grep "^pool" | grep "crush_rule 123"
+	stone osd dump | grep "^pool" | grep "crush_rule 123"
 
 If no other pools use that custom rule, then it's safe to delete that
 rule from the cluster.
@@ -219,8 +219,8 @@ rule from the cluster.
 If you created users with permissions strictly for a pool that no longer
 exists, you should consider deleting those users too::
 
-	ceph auth ls | grep -C 5 {pool-name}
-	ceph auth del {user}
+	stone auth ls | grep -C 5 {pool-name}
+	stone auth del {user}
 
 
 Rename a Pool
@@ -228,7 +228,7 @@ Rename a Pool
 
 To rename a pool, execute::
 
-	ceph osd pool rename {current-pool-name} {new-pool-name}
+	stone osd pool rename {current-pool-name} {new-pool-name}
 
 If you rename a pool and you have per-pool capabilities for an authenticated
 user, you must update the user's capabilities (i.e., caps) with the new pool
@@ -243,7 +243,7 @@ To show a pool's utilization statistics, execute::
 
 Additionally, to obtain I/O information for a specific pool or all, execute::
 
-        ceph osd pool stats [{pool-name}]
+        stone osd pool stats [{pool-name}]
 
 
 Make a Snapshot of a Pool
@@ -251,14 +251,14 @@ Make a Snapshot of a Pool
 
 To make a snapshot of a pool, execute::
 
-	ceph osd pool mksnap {pool-name} {snap-name}
+	stone osd pool mksnap {pool-name} {snap-name}
 
 Remove a Snapshot of a Pool
 ===========================
 
 To remove a snapshot of a pool, execute::
 
-	ceph osd pool rmsnap {pool-name} {snap-name}
+	stone osd pool rmsnap {pool-name} {snap-name}
 
 .. _setpoolvalues:
 
@@ -268,7 +268,7 @@ Set Pool Values
 
 To set a value to a pool, execute the following::
 
-	ceph osd pool set {pool-name} {key} {value}
+	stone osd pool set {pool-name} {key} {value}
 
 You may set values for the following keys:
 
@@ -276,21 +276,21 @@ You may set values for the following keys:
 
 ``compression_algorithm``
 
-:Description: Sets inline compression algorithm to use for underlying BlueStore. This setting overrides the `global setting <https://docs.ceph.com/en/latest/rados/configuration/bluestore-config-ref/#inline-compression>`__ of ``bluestore compression algorithm``.
+:Description: Sets inline compression algorithm to use for underlying BlueStore. This setting overrides the `global setting <https://docs.stone.com/en/latest/rados/configuration/bluestore-config-ref/#inline-compression>`__ of ``bluestore compression algorithm``.
 
 :Type: String
 :Valid Settings: ``lz4``, ``snappy``, ``zlib``, ``zstd``
 
 ``compression_mode``
 
-:Description: Sets the policy for the inline compression algorithm for underlying BlueStore. This setting overrides the `global setting <http://docs.ceph.com/en/latest/rados/configuration/bluestore-config-ref/#inline-compression>`__ of ``bluestore compression mode``.
+:Description: Sets the policy for the inline compression algorithm for underlying BlueStore. This setting overrides the `global setting <http://docs.stone.com/en/latest/rados/configuration/bluestore-config-ref/#inline-compression>`__ of ``bluestore compression mode``.
 
 :Type: String
 :Valid Settings: ``none``, ``passive``, ``aggressive``, ``force``
 
 ``compression_min_blob_size``
 
-:Description: Chunks smaller than this are never compressed. This setting overrides the `global setting <http://docs.ceph.com/en/latest/rados/configuration/bluestore-config-ref/#inline-compression>`__ of ``bluestore compression min blob *``.
+:Description: Chunks smaller than this are never compressed. This setting overrides the `global setting <http://docs.stone.com/en/latest/rados/configuration/bluestore-config-ref/#inline-compression>`__ of ``bluestore compression min blob *``.
 
 :Type: Unsigned Integer
 
@@ -357,7 +357,7 @@ You may set values for the following keys:
 ``allow_ec_overwrites``
 
 :Description: Whether writes to an erasure coded pool can update part
-              of an object, so cephfs and rbd can use it. See
+              of an object, so stonefs and rbd can use it. See
               `Erasure Coding with Overwrites`_ for more details.
 :Type: Boolean
 :Version: ``12.2.0`` and above
@@ -446,7 +446,7 @@ You may set values for the following keys:
 ``hit_set_count``
 
 :Description: The number of hit sets to store for cache pools. The higher
-              the number, the more RAM consumed by the ``ceph-osd`` daemon.
+              the number, the more RAM consumed by the ``stone-osd`` daemon.
 
 :Type: Integer
 :Valid Range: ``1``. Agent doesn't handle > 1 yet.
@@ -457,7 +457,7 @@ You may set values for the following keys:
 
 :Description: The duration of a hit set period in seconds for cache pools.
               The higher the number, the more RAM consumed by the
-              ``ceph-osd`` daemon.
+              ``stone-osd`` daemon.
 
 :Type: Integer
 :Example: ``3600`` 1hr
@@ -510,7 +510,7 @@ You may set values for the following keys:
 
 ``target_max_bytes``
 
-:Description: Ceph will begin flushing or evicting objects when the
+:Description: Stone will begin flushing or evicting objects when the
               ``max_bytes`` threshold is triggered.
 
 :Type: Integer
@@ -520,7 +520,7 @@ You may set values for the following keys:
 
 ``target_max_objects``
 
-:Description: Ceph will begin flushing or evicting objects when the
+:Description: Stone will begin flushing or evicting objects when the
               ``max_objects`` threshold is triggered.
 
 :Type: Integer
@@ -639,7 +639,7 @@ Get Pool Values
 
 To get a value from a pool, execute the following::
 
-	ceph osd pool get {pool-name} {key}
+	stone osd pool get {pool-name} {key}
 
 You may get values for the following keys:
 
@@ -807,7 +807,7 @@ Set the Number of Object Replicas
 
 To set the number of object replicas on a replicated pool, execute the following::
 
-	ceph osd pool set {poolname} size {num-replicas}
+	stone osd pool set {poolname} size {num-replicas}
 
 .. important:: The ``{num-replicas}`` includes the object itself.
    If you want the object and two copies of the object for a total of
@@ -815,14 +815,14 @@ To set the number of object replicas on a replicated pool, execute the following
 
 For example::
 
-	ceph osd pool set data size 3
+	stone osd pool set data size 3
 
 You may execute this command for each pool. **Note:** An object might accept
 I/Os in degraded mode with fewer than ``pool size`` replicas.  To set a minimum
 number of required replicas for I/O, you should use the ``min_size`` setting.
 For example::
 
-  ceph osd pool set data min_size 2
+  stone osd pool set data min_size 2
 
 This ensures that no object in the data pool will receive I/O with fewer than
 ``min_size`` replicas.
@@ -833,10 +833,10 @@ Get the Number of Object Replicas
 
 To get the number of object replicas, execute the following::
 
-	ceph osd dump | grep 'replicated size'
+	stone osd dump | grep 'replicated size'
 
-Ceph will list the pools, with the ``replicated size`` attribute highlighted.
-By default, ceph creates two replicas of an object (a total of three copies, or
+Stone will list the pools, with the ``replicated size`` attribute highlighted.
+By default, stone creates two replicas of an object (a total of three copies, or
 a size of 3).
 
 

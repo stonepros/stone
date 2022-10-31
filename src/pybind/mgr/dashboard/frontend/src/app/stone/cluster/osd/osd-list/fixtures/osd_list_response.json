@@ -97,7 +97,7 @@
     },
     "host": {
       "id": -3,
-      "name": "ceph-master",
+      "name": "stone-master",
       "type": "host",
       "type_id": 1,
       "pool_weights": {},
@@ -298,7 +298,7 @@
     },
     "host": {
       "id": -3,
-      "name": "ceph-master",
+      "name": "stone-master",
       "type": "host",
       "type_id": 1,
       "pool_weights": {},
@@ -499,7 +499,7 @@
     },
     "host": {
       "id": -3,
-      "name": "ceph-master",
+      "name": "stone-master",
       "type": "host",
       "type_id": 1,
       "pool_weights": {},

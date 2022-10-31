@@ -4,7 +4,7 @@ Dump_stuck command
 import logging
 import time
 
-from tasks import ceph_manager
+from tasks import stone_manager
 from teuthology import misc as teuthology
 
 
@@ -16,7 +16,7 @@ def check_stuck(manager, num_inactive, num_unclean, num_stale, timeout=10):
     extract health information from the raw_cluster_cmd and compare the results with
     values passed in.  This passes if all asserts pass.
  
-    :param num_manager: Ceph manager
+    :param num_manager: Stone manager
     :param num_inactive: number of inaactive pages that are stuck
     :param num_unclean: number of unclean pages that are stuck
     :param num_stale: number of stale pages that are stuck
@@ -49,10 +49,10 @@ def task(ctx, config):
     first_mon = teuthology.get_first_mon(ctx, config)
     (mon,) = ctx.cluster.only(first_mon).remotes.keys()
 
-    manager = ceph_manager.CephManager(
+    manager = stone_manager.StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager'),
+        logger=log.getChild('stone_manager'),
         )
 
     manager.flush_pg_stats([0, 1])

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 arch=$(uname -m)
 
@@ -26,10 +26,10 @@ function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:17110" # git grep '\<17110\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:17110" # git grep '\<17110\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -44,9 +44,9 @@ function TEST_preload_warning() {
         setup $dir || return 1
         run_mon $dir a --osd_erasure_code_plugins="${plugin}" || return 1
 	run_mgr $dir x || return 1
-        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
+        STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.a) log flush || return 1
         run_osd $dir 0 --osd_erasure_code_plugins="${plugin}" || return 1
-        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.0) log flush || return 1
+        STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.0) log flush || return 1
         grep "WARNING: osd_erasure_code_plugins contains plugin ${plugin}" $dir/mon.a.log || return 1
         grep "WARNING: osd_erasure_code_plugins contains plugin ${plugin}" $dir/osd.0.log || return 1
         teardown $dir || return 1
@@ -61,9 +61,9 @@ function TEST_preload_no_warning() {
         setup $dir || return 1
         run_mon $dir a --osd_erasure_code_plugins="${plugin}" || return 1
 	run_mgr $dir x || return 1
-        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
+        STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.a) log flush || return 1
         run_osd $dir 0 --osd_erasure_code_plugins="${plugin}" || return 1
-        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.0) log flush || return 1
+        STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.0) log flush || return 1
         ! grep "WARNING: osd_erasure_code_plugins contains plugin" $dir/mon.a.log || return 1
         ! grep "WARNING: osd_erasure_code_plugins contains plugin" $dir/osd.0.log || return 1
         teardown $dir || return 1
@@ -77,10 +77,10 @@ function TEST_preload_no_warning_default() {
 
     setup $dir || return 1
     run_mon $dir a || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.a) log flush || return 1
     run_mgr $dir x || return 1
     run_osd $dir 0 || return 1
-    CEPH_ARGS='' ceph --admin-daemon $(get_asok_path osd.0) log flush || return 1
+    STONE_ARGS='' stone --admin-daemon $(get_asok_path osd.0) log flush || return 1
     ! grep "WARNING: osd_erasure_code_plugins" $dir/mon.a.log || return 1
     ! grep "WARNING: osd_erasure_code_plugins" $dir/osd.0.log || return 1
     teardown $dir || return 1
@@ -101,14 +101,14 @@ function TEST_ec_profile_warning() {
     wait_for_clean || return 1
 
     for plugin in ${legacy_jerasure_plugins[*]}; do
-        ceph osd erasure-code-profile set prof-${plugin} crush-failure-domain=osd technique=reed_sol_van plugin=${plugin} || return 1
-        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
+        stone osd erasure-code-profile set prof-${plugin} crush-failure-domain=osd technique=reed_sol_van plugin=${plugin} || return 1
+        STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.a) log flush || return 1
         grep "WARNING: erasure coding profile prof-${plugin} uses plugin ${plugin}" $dir/mon.a.log || return 1
     done
 
     for plugin in ${legacy_shec_plugins[*]}; do
-        ceph osd erasure-code-profile set prof-${plugin} crush-failure-domain=osd plugin=${plugin} || return 1
-        CEPH_ARGS='' ceph --admin-daemon $(get_asok_path mon.a) log flush || return 1
+        stone osd erasure-code-profile set prof-${plugin} crush-failure-domain=osd plugin=${plugin} || return 1
+        STONE_ARGS='' stone --admin-daemon $(get_asok_path mon.a) log flush || return 1
         grep "WARNING: erasure coding profile prof-${plugin} uses plugin ${plugin}" $dir/mon.a.log || return 1
     done
 

@@ -65,7 +65,7 @@ class CInode;
 class Session;
 class MDLockCache;
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -76,12 +76,12 @@ public:
   struct Export {
     Export() {}
     Export(int64_t id, int w, int i, int p, snapid_t cf,
-	   ceph_seq_t s, ceph_seq_t m, utime_t lis, unsigned st) :
+	   stone_seq_t s, stone_seq_t m, utime_t lis, unsigned st) :
       cap_id(id), wanted(w), issued(i), pending(p), client_follows(cf),
       seq(s), mseq(m), last_issue_stamp(lis), state(st) {}
-    void encode(ceph::buffer::list &bl) const;
-    void decode(ceph::buffer::list::const_iterator &p);
-    void dump(ceph::Formatter *f) const;
+    void encode(stone::buffer::list &bl) const;
+    void decode(stone::buffer::list::const_iterator &p);
+    void dump(stone::Formatter *f) const;
     static void generate_test_instances(std::list<Export*>& ls);
 
     int64_t cap_id = 0;
@@ -89,33 +89,33 @@ public:
     int32_t issued = 0;
     int32_t pending = 0;
     snapid_t client_follows;
-    ceph_seq_t seq = 0;
-    ceph_seq_t mseq = 0;
+    stone_seq_t seq = 0;
+    stone_seq_t mseq = 0;
     utime_t last_issue_stamp;
     uint32_t state = 0;
   };
   struct Import {
     Import() {}
-    Import(int64_t i, ceph_seq_t s, ceph_seq_t m) : cap_id(i), issue_seq(s), mseq(m) {}
-    void encode(ceph::buffer::list &bl) const;
-    void decode(ceph::buffer::list::const_iterator &p);
-    void dump(ceph::Formatter *f) const;
+    Import(int64_t i, stone_seq_t s, stone_seq_t m) : cap_id(i), issue_seq(s), mseq(m) {}
+    void encode(stone::buffer::list &bl) const;
+    void decode(stone::buffer::list::const_iterator &p);
+    void dump(stone::Formatter *f) const;
 
     int64_t cap_id = 0;
-    ceph_seq_t issue_seq = 0;
-    ceph_seq_t mseq = 0;
+    stone_seq_t issue_seq = 0;
+    stone_seq_t mseq = 0;
   };
   struct revoke_info {
     revoke_info() {}
-    revoke_info(__u32 b, ceph_seq_t s, ceph_seq_t li) : before(b), seq(s), last_issue(li) {}
-    void encode(ceph::buffer::list& bl) const;
-    void decode(ceph::buffer::list::const_iterator& bl);
-    void dump(ceph::Formatter *f) const;
+    revoke_info(__u32 b, stone_seq_t s, stone_seq_t li) : before(b), seq(s), last_issue(li) {}
+    void encode(stone::buffer::list& bl) const;
+    void decode(stone::buffer::list::const_iterator& bl);
+    void dump(stone::Formatter *f) const;
     static void generate_test_instances(std::list<revoke_info*>& ls);
 
     __u32 before = 0;
-    ceph_seq_t seq = 0;
-    ceph_seq_t last_issue = 0;
+    stone_seq_t seq = 0;
+    stone_seq_t last_issue = 0;
   };
 
   const static unsigned STATE_NOTABLE		= (1<<0);
@@ -144,7 +144,7 @@ public:
   int revoking() const {
     return _issued & ~_pending;
   }
-  ceph_seq_t issue(unsigned c, bool reval=false) {
+  stone_seq_t issue(unsigned c, bool reval=false) {
     if (reval)
       revalidate();
 
@@ -165,13 +165,13 @@ public:
 	_revokes.pop_back();
     } else {
       // no change.
-      ceph_assert(_pending == c);
+      stone_assert(_pending == c);
     }
     //last_issue = 
     inc_last_seq();
     return last_sent;
   }
-  ceph_seq_t issue_norevoke(unsigned c, bool reval=false) {
+  stone_seq_t issue_norevoke(unsigned c, bool reval=false) {
     if (reval)
       revalidate();
 
@@ -182,7 +182,7 @@ public:
     inc_last_seq();
     return last_sent;
   }
-  int confirm_receipt(ceph_seq_t seq, unsigned caps) {
+  int confirm_receipt(stone_seq_t seq, unsigned caps) {
     int was_revoking = (_issued & ~_pending);
     if (seq == last_sent) {
       _revokes.clear();
@@ -212,7 +212,7 @@ public:
   }
   // we may get a release racing with revocations, which means our revokes will be ignored
   // by the client.  clean them out of our _revokes history so we don't wait on them.
-  void clean_revoke_from(ceph_seq_t li) {
+  void clean_revoke_from(stone_seq_t li) {
     bool changed = false;
     while (!_revokes.empty() && _revokes.front().last_issue <= li) {
       _revokes.pop_front();
@@ -228,7 +228,7 @@ public:
       }
     }
   }
-  ceph_seq_t get_mseq() const { return mseq; }
+  stone_seq_t get_mseq() const { return mseq; }
   void inc_mseq() { mseq++; }
 
   utime_t get_last_issue_stamp() const { return last_issue_stamp; }
@@ -244,7 +244,7 @@ public:
   void set_cap_id(uint64_t i) { cap_id = i; }
   uint64_t get_cap_id() const { return cap_id; }
 
-  //ceph_seq_t get_last_issue() { return last_issue; }
+  //stone_seq_t get_last_issue() { return last_issue; }
 
   bool is_suppress() const { return suppress > 0; }
   void inc_suppress() { suppress++; }
@@ -298,10 +298,10 @@ public:
   void set_wanted(int w);
 
   void inc_last_seq() { last_sent++; }
-  ceph_seq_t get_last_seq() const {
+  stone_seq_t get_last_seq() const {
     return last_sent;
   }
-  ceph_seq_t get_last_issue() const { return last_issue; }
+  stone_seq_t get_last_issue() const { return last_issue; }
 
   void reset_seq() {
     last_sent = 0;
@@ -351,9 +351,9 @@ public:
   }
 
   // serializers
-  void encode(ceph::buffer::list &bl) const;
-  void decode(ceph::buffer::list::const_iterator &bl);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list &bl) const;
+  void decode(stone::buffer::list::const_iterator &bl);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<Capability*>& ls);
 
   snapid_t client_follows = 0;
@@ -403,9 +403,9 @@ private:
   __u32 _pending = 0, _issued = 0;
   mempool::mds_co::list<revoke_info> _revokes;
 
-  ceph_seq_t last_sent = 0;
-  ceph_seq_t last_issue = 0;
-  ceph_seq_t mseq = 0;
+  stone_seq_t last_sent = 0;
+  stone_seq_t last_issue = 0;
+  stone_seq_t mseq = 0;
 
   int suppress = 0;
   unsigned state = 0;

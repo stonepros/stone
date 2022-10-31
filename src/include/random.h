@@ -30,7 +30,7 @@ using random_device_t = std::random_device;
 #endif
 
 // Basic random number facility (see N3551 for inspiration):
-namespace ceph::util {
+namespace stone::util {
 
 inline namespace version_1_0_3 {
 
@@ -296,6 +296,6 @@ random_number_generator(const NumberT max) -> random_number_generator<NumberT>;
 
 } // inline namespace version_*
 
-} // namespace ceph::util
+} // namespace stone::util
 
 #endif

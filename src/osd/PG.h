@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -20,7 +20,7 @@
 #include "include/mempool.h"
 
 // re-include our assert to clobber boost's
-#include "include/ceph_assert.h" 
+#include "include/stone_assert.h" 
 #include "include/common_fwd.h"
 
 #include "include/types.h"
@@ -96,7 +96,7 @@ class PGRecoveryStats {
     per_state_info() : enter(0), exit(0), events(0) {}
   };
   std::map<const char *,per_state_info> info;
-  ceph::mutex lock = ceph::make_mutex("PGRecoverStats::lock");
+  stone::mutex lock = stone::make_mutex("PGRecoverStats::lock");
 
   public:
   PGRecoveryStats() = default;
@@ -117,7 +117,7 @@ class PGRecoveryStats {
     }
   }
 
-  void dump_formatted(ceph::Formatter *f) {
+  void dump_formatted(stone::Formatter *f) {
     std::lock_guard l(lock);
     f->open_array_section("pg_recovery_stats");
     for (std::map<const char *,per_state_info>::iterator p = info.begin();
@@ -192,11 +192,11 @@ public:
 
   // -- methods --
   std::ostream& gen_prefix(std::ostream& out) const override;
-  StoneeContext *get_cct() const override {
+  StoneContext *get_cct() const override {
     return cct;
   }
   unsigned get_subsys() const override {
-    return ceph_subsys_osd;
+    return stone_subsys_osd;
   }
 
   const char* const get_current_state() const {
@@ -204,7 +204,7 @@ public:
   }
 
   const OSDMapRef& get_osdmap() const {
-    ceph_assert(is_locked());
+    stone_assert(is_locked());
     return recovery_state.get_osdmap();
   }
 
@@ -284,7 +284,7 @@ public:
     return recovery_state.is_primary();
   }
   bool pg_has_reset_since(epoch_t e) {
-    ceph_assert(is_locked());
+    stone_assert(is_locked());
     return recovery_state.pg_has_reset_since(e);
   }
 
@@ -359,7 +359,7 @@ public:
     __u8 &);
   static bool _has_removal_flag(ObjectStore *store, spg_t pgid);
 
-  void rm_backoff(const ceph::ref_t<Backoff>& b);
+  void rm_backoff(const stone::ref_t<Backoff>& b);
 
   void update_snap_mapper_bits(uint32_t bits) {
     snap_mapper.update_bits(bits);
@@ -587,10 +587,10 @@ public:
 
   void send_pg_created(pg_t pgid) override;
 
-  ceph::signedspan get_mnow() override;
+  stone::signedspan get_mnow() override;
   HeartbeatStampsRef get_hb_stamps(int peer) override;
-  void schedule_renew_lease(epoch_t lpr, ceph::timespan delay) override;
-  void queue_check_readable(epoch_t lpr, ceph::timespan delay) override;
+  void schedule_renew_lease(epoch_t lpr, stone::timespan delay) override;
+  void queue_check_readable(epoch_t lpr, stone::timespan delay) override;
 
   void rebuild_missing_set_with_deletes(PGLog &pglog) override;
 
@@ -605,7 +605,7 @@ public:
     PeeringCtx &rctx);
   void handle_activate_map(PeeringCtx &rctx);
   void handle_initialize(PeeringCtx &rxcx);
-  void handle_query_state(ceph::Formatter *f);
+  void handle_query_state(stone::Formatter *f);
 
   /**
    * @param ops_begun returns how many recovery ops the function started
@@ -621,8 +621,8 @@ public:
 
   virtual void get_watchers(std::list<obj_watch_item_t> *ls) = 0;
 
-  void dump_pgstate_history(ceph::Formatter *f);
-  void dump_missing(ceph::Formatter *f);
+  void dump_pgstate_history(stone::Formatter *f);
+  void dump_missing(stone::Formatter *f);
 
   void get_pg_stats(std::function<void(const pg_stat_t&, epoch_t lec)> f);
   void with_heartbeat_peers(std::function<void(int)> f);
@@ -682,8 +682,8 @@ public:
   virtual void do_command(
     const std::string_view& prefix,
     const cmdmap_t& cmdmap,
-    const ceph::buffer::list& idata,
-    std::function<void(int,const std::string&,ceph::buffer::list&)> on_finish) = 0;
+    const stone::buffer::list& idata,
+    std::function<void(int,const std::string&,stone::buffer::list&)> on_finish) = 0;
 
   virtual bool agent_work(int max) = 0;
   virtual bool agent_work(int max, int agent_flush_quota) = 0;
@@ -697,7 +697,7 @@ public:
     epoch_t epoch;
     C_DeleteMore(PG *p, epoch_t e) : pg(p), epoch(e) {}
     void finish(int r) override {
-      ceph_abort();
+      stone_abort();
     }
     void complete(int r) override;
   };
@@ -741,7 +741,7 @@ public:
   OSDShard *osd_shard = nullptr;
   OSDShardPGSlot *pg_slot = nullptr;
 protected:
-  StoneeContext *cct;
+  StoneContext *cct;
 
   // locking and reference counting.
   // I destroy myself when the reference count hits zero.
@@ -749,14 +749,14 @@ protected:
   // get() should be called on pointer copy (to another thread, etc.).
   // put() should be called on destruction of some previously copied pointer.
   // unlock() when done with the current pointer (_most common_).
-  mutable ceph::mutex _lock = ceph::make_mutex("PG::_lock");
+  mutable stone::mutex _lock = stone::make_mutex("PG::_lock");
 #ifndef STONE_DEBUG_MUTEX
   mutable std::thread::id locked_by;
 #endif
   std::atomic<unsigned int> ref{0};
 
 #ifdef PG_DEBUG_REFS
-  ceph::mutex _ref_id_lock = ceph::make_mutex("PG::_ref_id_lock");
+  stone::mutex _ref_id_lock = stone::make_mutex("PG::_ref_id_lock");
   std::map<uint64_t, std::string> _live_ids;
   std::map<std::string, uint64_t> _tag_counts;
   uint64_t _ref_id = 0;
@@ -829,8 +829,8 @@ protected:
   void set_probe_targets(const std::set<pg_shard_t> &probe_set) override;
   void clear_probe_targets() override;
 
-  ceph::mutex heartbeat_peer_lock =
-    ceph::make_mutex("PG::heartbeat_peer_lock");
+  stone::mutex heartbeat_peer_lock =
+    stone::make_mutex("PG::heartbeat_peer_lock");
   std::set<int> heartbeat_peers;
   std::set<int> probe_targets;
 
@@ -881,7 +881,7 @@ public:
     }
   }
   void sub_local_num_bytes(int64_t num_bytes) {
-    ceph_assert(num_bytes >= 0);
+    stone_assert(num_bytes >= 0);
     if (num_bytes) {
       int64_t prev_bytes = local_num_bytes.load();
       int64_t new_bytes;
@@ -895,7 +895,7 @@ public:
   // The value of num_bytes could be negative,
   // but we don't let info.stats.stats.sum.num_bytes go negative.
   void add_num_bytes(int64_t num_bytes) {
-    ceph_assert(ceph_mutex_is_locked_by_me(_lock));
+    stone_assert(stone_mutex_is_locked_by_me(_lock));
     if (num_bytes) {
       recovery_state.update_stats(
 	[num_bytes](auto &history, auto &stats) {
@@ -908,8 +908,8 @@ public:
     }
   }
   void sub_num_bytes(int64_t num_bytes) {
-    ceph_assert(ceph_mutex_is_locked_by_me(_lock));
-    ceph_assert(num_bytes >= 0);
+    stone_assert(stone_mutex_is_locked_by_me(_lock));
+    stone_assert(num_bytes >= 0);
     if (num_bytes) {
       recovery_state.update_stats(
 	[num_bytes](auto &history, auto &stats) {
@@ -1043,8 +1043,8 @@ protected:
   object_stat_collection_t unstable_stats;
 
   // publish stats
-  ceph::mutex pg_stats_publish_lock =
-    ceph::make_mutex("PG::pg_stats_publish_lock");
+  stone::mutex pg_stats_publish_lock =
+    stone::make_mutex("PG::pg_stats_publish_lock");
   bool pg_stats_publish_valid;
   pg_stat_t pg_stats_publish;
 
@@ -1073,7 +1073,7 @@ protected:
       pg->get_pgbackend()->try_stash(hoid, v, t);
     }
     void rollback(const pg_log_entry_t &entry) override {
-      ceph_assert(entry.can_rollback());
+      stone_assert(entry.can_rollback());
       pg->get_pgbackend()->rollback(entry, t);
     }
     void rollforward(const pg_log_entry_t &entry) override {
@@ -1128,18 +1128,18 @@ protected:
   friend struct C_DeleteMore;
 
   // -- backoff --
-  ceph::mutex backoff_lock = // orders inside Backoff::lock
-    ceph::make_mutex("PG::backoff_lock");
-  std::map<hobject_t,std::set<ceph::ref_t<Backoff>>> backoffs;
+  stone::mutex backoff_lock = // orders inside Backoff::lock
+    stone::make_mutex("PG::backoff_lock");
+  std::map<hobject_t,std::set<stone::ref_t<Backoff>>> backoffs;
 
-  void add_backoff(const ceph::ref_t<Session>& s, const hobject_t& begin, const hobject_t& end);
+  void add_backoff(const stone::ref_t<Session>& s, const hobject_t& begin, const hobject_t& end);
   void release_backoffs(const hobject_t& begin, const hobject_t& end);
   void release_backoffs(const hobject_t& o) {
     release_backoffs(o, o);
   }
   void clear_backoffs();
 
-  void add_pg_backoff(const ceph::ref_t<Session>& s) {
+  void add_pg_backoff(const stone::ref_t<Session>& s) {
     hobject_t begin = info.pgid.pgid.get_hobj_start();
     hobject_t end = info.pgid.pgid.get_hobj_end(pool.info.get_pg_num());
     add_backoff(s, begin, end);
@@ -1274,9 +1274,9 @@ protected:
     eversion_t at_version(
       get_osdmap_epoch(),
       projected_last_update.version+1);
-    ceph_assert(at_version > info.last_update);
-    ceph_assert(at_version > recovery_state.get_pg_log().get_head());
-    ceph_assert(at_version > projected_last_update);
+    stone_assert(at_version > info.last_update);
+    stone_assert(at_version > recovery_state.get_pg_log().get_head());
+    stone_assert(at_version > projected_last_update);
     return at_version;
   }
 

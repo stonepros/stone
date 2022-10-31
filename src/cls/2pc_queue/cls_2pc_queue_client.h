@@ -77,7 +77,7 @@ int cls_2pc_queue_list_reservations_result(const librados::bufferlist& bl, cls_2
 
 // expire stale reservations (older than the given time)
 void cls_2pc_queue_expire_reservations(librados::ObjectWriteOperation& op, 
-        ceph::coarse_real_time stale_time);
+        stone::coarse_real_time stale_time);
 
 // remove all entries up to the given marker
 void cls_2pc_queue_remove_entries(librados::ObjectWriteOperation& op, const std::string& end_marker);

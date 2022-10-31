@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
   *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -26,7 +26,7 @@
 
 
 #include "include/interval_set.h"
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "BlockDevice.h"
 
 enum class IOCommand {
@@ -51,7 +51,7 @@ class NVMEDevice : public BlockDevice {
   std::atomic_int queue_number = {0};
   SharedDriverData *get_driver() { return driver; }
 
-  NVMEDevice(StoneeContext* cct, aio_callback_t cb, void *cbpriv);
+  NVMEDevice(StoneContext* cct, aio_callback_t cb, void *cbpriv);
 
   bool supported_bdev_label() override { return false; }
 

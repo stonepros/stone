@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2013 Inktank, Inc
  *
@@ -50,7 +50,7 @@ public:
   void gather_all_health_checks(health_check_map_t *all);
   health_status_t get_health_status(
     bool want_detail,
-    ceph::Formatter *f,
+    stone::Formatter *f,
     std::string *plain,
     const char *sep1 = " ",
     const char *sep2 = "; ");

@@ -4,7 +4,7 @@
 #ifndef STONE_LIBRBD_DEEP_COPY_REQUEST_H
 #define STONE_LIBRBD_DEEP_COPY_REQUEST_H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/RefCountedObj.h"
 #include "include/int_types.h"
 #include "librbd/ImageCtx.h"
@@ -104,7 +104,7 @@ private:
   Context *m_on_finish;
 
   StoneContext *m_cct;
-  ceph::mutex m_lock;
+  stone::mutex m_lock;
   bool m_canceled = false;
 
   deep_copy::SnapshotCopyRequest<ImageCtxT> *m_snapshot_copy_request = nullptr;

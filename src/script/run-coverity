@@ -17,7 +17,7 @@ rm -rf build
 cd build
 ~/cov-analysis/bin/cov-build --dir cov-int make -j$(nproc)
 
-echo Sage Weil sage@newdream.net ceph >> README
+echo Sage Weil sage@newdream.net stone >> README
 tar czvf project.tgz README cov-int
 rm -f README
 
@@ -27,7 +27,7 @@ curl --form token=$token \
   --form email=sage@newdream.net \
   --form file=@project.tgz \
   --form version="$version" \
-  --form description="Automated Ceph build from `hostname`" \
-  https://scan.coverity.com/builds?project=ceph
+  --form description="Automated Stone build from `hostname`" \
+  https://scan.coverity.com/builds?project=stone
 
 echo done.

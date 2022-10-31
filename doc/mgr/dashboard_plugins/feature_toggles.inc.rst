@@ -3,7 +3,7 @@
 Feature Toggles
 ^^^^^^^^^^^^^^^
 
-This plug-in allows to enable or disable some features from the Ceph Dashboard
+This plug-in allows to enable or disable some features from the Stone Dashboard
 on-demand. When a feature becomes disabled:
 
 - Its front-end elements (web pages, menu entries, charts, etc.) will become hidden.
@@ -19,7 +19,7 @@ The list of features that can be enabled/disabled is:
    - Image Management: ``rbd``
    - Mirroring: ``mirroring``
    - iSCSI: ``iscsi``
-- **Filesystem (Cephfs)**: ``cephfs``
+- **Filesystem (Stonefs)**: ``stonefs``
 - **Objects (RGW)**: ``rgw`` (including daemon, user and bucket management).
 - **NFS**: ``nfs-ganesha`` exports.
 
@@ -27,8 +27,8 @@ By default all features come enabled.
 
 To retrieve a list of features and their current statuses::
 
-  $ ceph dashboard feature status
-  Feature 'cephfs': 'enabled'
+  $ stone dashboard feature status
+  Feature 'stonefs': 'enabled'
   Feature 'iscsi': 'enabled'
   Feature 'mirroring': 'enabled'
   Feature 'rbd': 'enabled'
@@ -37,7 +37,7 @@ To retrieve a list of features and their current statuses::
 
 To enable or disable the status of a single or multiple features::
 
-  $ ceph dashboard feature disable iscsi mirroring
+  $ stone dashboard feature disable iscsi mirroring
   Feature 'iscsi': disabled
   Feature 'mirroring': disabled
 

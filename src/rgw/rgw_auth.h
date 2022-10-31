@@ -91,7 +91,7 @@ inline std::ostream& operator<<(std::ostream& out,
 
 
 std::unique_ptr<rgw::auth::Identity>
-transform_old_authinfo(CephContext* const cct,
+transform_old_authinfo(StoneContext* const cct,
                        const rgw_user& auth_id,
                        const int perm_mask,
                        const bool is_admin,
@@ -365,7 +365,7 @@ class StrategyRegistry;
 
 class WebIdentityApplier : public IdentityApplier {
 protected:
-  CephContext* const cct;
+  StoneContext* const cct;
   RGWCtl* const ctl;
   string role_session;
   string role_tenant;
@@ -378,7 +378,7 @@ protected:
                       const string& display_name,
                       RGWUserInfo& user_info) const;     /* out */
 public:
-  WebIdentityApplier( CephContext* const cct,
+  WebIdentityApplier( StoneContext* const cct,
                       RGWCtl* const ctl,
                       const string& role_session,
                       const string& role_tenant,
@@ -432,7 +432,7 @@ public:
   struct Factory {
     virtual ~Factory() {}
 
-    virtual aplptr_t create_apl_web_identity( CephContext* cct,
+    virtual aplptr_t create_apl_web_identity( StoneContext* cct,
                                               const req_state* s,
                                               const string& role_session,
                                               const string& role_tenant,
@@ -474,8 +474,8 @@ private:
     const std::set <std::string> &changed) override;
 };
 
-std::tuple<bool,bool> implicit_tenants_enabled_for_swift(CephContext * const cct);
-std::tuple<bool,bool> implicit_tenants_enabled_for_s3(CephContext * const cct);
+std::tuple<bool,bool> implicit_tenants_enabled_for_swift(StoneContext * const cct);
+std::tuple<bool,bool> implicit_tenants_enabled_for_s3(StoneContext * const cct);
 
 /* rgw::auth::RemoteApplier targets those authentication engines which don't
  * need to ask the RADOS store while performing the auth process. Instead,
@@ -518,7 +518,7 @@ public:
   typedef std::function<uint32_t(const aclspec_t&)> acl_strategy_t;
 
 protected:
-  CephContext* const cct;
+  StoneContext* const cct;
 
   /* Read-write is intensional here due to RGWUserInfo creation process. */
   RGWCtl* const ctl;
@@ -538,7 +538,7 @@ protected:
                               RGWUserInfo& user_info) const;          /* out */
 
 public:
-  RemoteApplier(CephContext* const cct,
+  RemoteApplier(StoneContext* const cct,
                 RGWCtl* const ctl,
                 acl_strategy_t&& extra_acl_strategy,
                 const AuthInfo& info,
@@ -569,7 +569,7 @@ public:
     /* Providing r-value reference here is required intensionally. Callee is
      * thus disallowed to handle std::function in a way that could inhibit
      * the move behaviour (like forgetting about std::moving a l-value). */
-    virtual aplptr_t create_apl_remote(CephContext* cct,
+    virtual aplptr_t create_apl_remote(StoneContext* cct,
                                        const req_state* s,
                                        acl_strategy_t&& extra_acl_strategy,
                                        const AuthInfo &info) const = 0;
@@ -595,7 +595,7 @@ protected:
 public:
   static const std::string NO_SUBUSER;
 
-  LocalApplier(CephContext* const cct,
+  LocalApplier(StoneContext* const cct,
                const RGWUserInfo& user_info,
                std::string subuser,
                const boost::optional<uint32_t>& perm_mask)
@@ -628,7 +628,7 @@ public:
 
   struct Factory {
     virtual ~Factory() {}
-    virtual aplptr_t create_apl_local(CephContext* cct,
+    virtual aplptr_t create_apl_local(StoneContext* cct,
                                       const req_state* s,
                                       const RGWUserInfo& user_info,
                                       const std::string& subuser,
@@ -653,7 +653,7 @@ protected:
 
 public:
 
-  RoleApplier(CephContext* const cct,
+  RoleApplier(StoneContext* const cct,
                const Role& role,
                const rgw_user& user_id,
                const string& token_policy,
@@ -690,7 +690,7 @@ public:
 
   struct Factory {
     virtual ~Factory() {}
-    virtual aplptr_t create_apl_role( CephContext* cct,
+    virtual aplptr_t create_apl_role( StoneContext* cct,
                                       const req_state* s,
                                       const rgw::auth::RoleApplier::Role& role,
                                       const rgw_user& user_id,
@@ -703,11 +703,11 @@ public:
 
 /* The anonymous abstract engine. */
 class AnonymousEngine : public Engine {
-  CephContext* const cct;
+  StoneContext* const cct;
   const rgw::auth::LocalApplier::Factory* const apl_factory;
 
 public:
-  AnonymousEngine(CephContext* const cct,
+  AnonymousEngine(StoneContext* const cct,
                   const rgw::auth::LocalApplier::Factory* const apl_factory)
     : cct(cct),
       apl_factory(apl_factory) {

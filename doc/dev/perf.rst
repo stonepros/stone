@@ -23,7 +23,7 @@ To view by callee (where you can see who calls each top function)::
 Common Issues
 -------------
 
-Ceph use `RelWithDebInfo` as its default `CMAKE_BUILD_TYPE`. Hence `-O2 -g` is
+Stone use `RelWithDebInfo` as its default `CMAKE_BUILD_TYPE`. Hence `-O2 -g` is
 used to compile the tree in this case. And the `-O2` optimization level
 enables `-fomit-frame-pointer` by default. But this prevents stack profilers
 from accessing the complete stack information. So one can disable this option

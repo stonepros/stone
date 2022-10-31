@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -40,7 +40,7 @@ public:
 			  const std::set <std::string> &changed) override;
 
 protected:
-  ceph::async::io_context_pool poolctx;
+  stone::async::io_context_pool poolctx;
   MonClient monc;
   std::unique_ptr<Messenger> client_messenger;
   Objecter objecter;
@@ -51,7 +51,7 @@ protected:
   LogClient log_client;
   LogChannelRef clog, audit_clog;
 
-  ceph::mutex lock = ceph::make_mutex("MgrStandby::lock");
+  stone::mutex lock = stone::make_mutex("MgrStandby::lock");
   Finisher finisher;
   SafeTimer timer;
 
@@ -63,7 +63,7 @@ protected:
 
   std::string state_str();
 
-  void handle_mgr_map(ceph::ref_t<MMgrMap> m);
+  void handle_mgr_map(stone::ref_t<MMgrMap> m);
   void _update_log_config();
   void send_beacon();
 
@@ -73,7 +73,7 @@ public:
   MgrStandby(int argc, const char **argv);
   ~MgrStandby() override;
 
-  bool ms_dispatch2(const ceph::ref_t<Message>& m) override;
+  bool ms_dispatch2(const stone::ref_t<Message>& m) override;
   bool ms_handle_reset(Connection *con) override { return false; }
   void ms_handle_remote_reset(Connection *con) override {}
   bool ms_handle_refused(Connection *con) override;

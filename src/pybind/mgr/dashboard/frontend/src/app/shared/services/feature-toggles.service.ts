@@ -9,7 +9,7 @@ export class FeatureTogglesMap {
   rbd = true;
   mirroring = true;
   iscsi = true;
-  cephfs = true;
+  stonefs = true;
   rgw = true;
   nfs = true;
 }

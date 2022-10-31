@@ -11,7 +11,7 @@ Zoned Block Commands (ZBC) and Zoned Device ATA Command Set (ZAC) standards on
 Shingled Magnetic Recording (SMR) hard disks today and is also being adopted for
 NVMe Solid State Disks with the upcoming NVMe Zoned Namespaces (ZNS) standard.
 
-This project aims to enable Ceph to work on zoned storage drives and at the same
+This project aims to enable Stone to work on zoned storage drives and at the same
 time explore research problems related to adopting this new interface.  The
 first target is to enable non-ovewrite workloads (e.g. RGW) on host-managed SMR
 (HM-SMR) drives and explore cleaning (garbage collection) policies.  HM-SMR

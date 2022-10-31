@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -39,11 +39,11 @@ class KernelDevice : public BlockDevice {
 
   std::string devname;  ///< kernel dev name (/sys/block/$devname), if any
 
-  ceph::mutex debug_lock = ceph::make_mutex("KernelDevice::debug_lock");
+  stone::mutex debug_lock = stone::make_mutex("KernelDevice::debug_lock");
   interval_set<uint64_t> debug_inflight;
 
   std::atomic<bool> io_since_flush = {false};
-  ceph::mutex flush_mutex = ceph::make_mutex("KernelDevice::flush_mutex");
+  stone::mutex flush_mutex = stone::make_mutex("KernelDevice::flush_mutex");
 
   std::unique_ptr<io_queue_t> io_queue;
   aio_callback_t discard_callback;
@@ -52,8 +52,8 @@ class KernelDevice : public BlockDevice {
   bool discard_started;
   bool discard_stop;
 
-  ceph::mutex discard_lock = ceph::make_mutex("KernelDevice::discard_lock");
-  ceph::condition_variable discard_cond;
+  stone::mutex discard_lock = stone::make_mutex("KernelDevice::discard_lock");
+  stone::condition_variable discard_cond;
   bool discard_running = false;
   interval_set<uint64_t> discard_queued;
   interval_set<uint64_t> discard_finishing;
@@ -91,7 +91,7 @@ class KernelDevice : public BlockDevice {
   void _aio_log_start(IOContext *ioc, uint64_t offset, uint64_t length);
   void _aio_log_finish(IOContext *ioc, uint64_t offset, uint64_t length);
 
-  int _sync_write(uint64_t off, ceph::buffer::list& bl, bool buffered, int write_hint);
+  int _sync_write(uint64_t off, stone::buffer::list& bl, bool buffered, int write_hint);
 
   int _lock();
 
@@ -99,7 +99,7 @@ class KernelDevice : public BlockDevice {
 
   // stalled aio debugging
   aio_list_t debug_queue;
-  ceph::mutex debug_queue_lock = ceph::make_mutex("KernelDevice::debug_queue_lock");
+  stone::mutex debug_queue_lock = stone::make_mutex("KernelDevice::debug_queue_lock");
   aio_t *debug_oldest = nullptr;
   utime_t debug_stall_since;
   void debug_aio_link(aio_t& aio);
@@ -109,7 +109,7 @@ class KernelDevice : public BlockDevice {
   int choose_fd(bool buffered, int write_hint) const;
 
 public:
-  KernelDevice(StoneeContext* cct, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
+  KernelDevice(StoneContext* cct, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv);
 
   void aio_submit(IOContext *ioc) override;
   void discard_drain() override;
@@ -126,15 +126,15 @@ public:
 
   bool get_thin_utilization(uint64_t *total, uint64_t *avail) const override;
 
-  int read(uint64_t off, uint64_t len, ceph::buffer::list *pbl,
+  int read(uint64_t off, uint64_t len, stone::buffer::list *pbl,
 	   IOContext *ioc,
 	   bool buffered) override;
-  int aio_read(uint64_t off, uint64_t len, ceph::buffer::list *pbl,
+  int aio_read(uint64_t off, uint64_t len, stone::buffer::list *pbl,
 	       IOContext *ioc) override;
   int read_random(uint64_t off, uint64_t len, char *buf, bool buffered) override;
 
-  int write(uint64_t off, ceph::buffer::list& bl, bool buffered, int write_hint = WRITE_LIFE_NOT_SET) override;
-  int aio_write(uint64_t off, ceph::buffer::list& bl,
+  int write(uint64_t off, stone::buffer::list& bl, bool buffered, int write_hint = WRITE_LIFE_NOT_SET) override;
+  int aio_write(uint64_t off, stone::buffer::list& bl,
 		IOContext *ioc,
 		bool buffered,
 		int write_hint = WRITE_LIFE_NOT_SET) override;

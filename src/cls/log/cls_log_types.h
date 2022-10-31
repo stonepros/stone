@@ -16,11 +16,11 @@ struct cls_log_entry {
   std::string section;
   std::string name;
   utime_t timestamp;
-  ceph::buffer::list data;
+  stone::buffer::list data;
 
   cls_log_entry() {}
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 1, bl);
     encode(section, bl);
     encode(name, bl);
@@ -30,7 +30,7 @@ struct cls_log_entry {
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(2, bl);
     decode(section, bl);
     decode(name, bl);
@@ -47,14 +47,14 @@ struct cls_log_header {
   std::string max_marker;
   utime_t max_time;
 
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(1, 1, bl);
     encode(max_marker, bl);
     encode(max_time, bl);
     ENCODE_FINISH(bl);
   }
 
-  void decode(ceph::buffer::list::const_iterator& bl) {
+  void decode(stone::buffer::list::const_iterator& bl) {
     DECODE_START(1, bl);
     decode(max_marker, bl);
     decode(max_time, bl);

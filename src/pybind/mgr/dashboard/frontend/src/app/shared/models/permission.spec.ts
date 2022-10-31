@@ -3,7 +3,7 @@ import { Permissions } from './permissions';
 describe('cd-notification classes', () => {
   it('should show empty permissions', () => {
     expect(new Permissions({})).toEqual({
-      cephfs: { create: false, delete: false, read: false, update: false },
+      stonefs: { create: false, delete: false, read: false, update: false },
       configOpt: { create: false, delete: false, read: false, update: false },
       grafana: { create: false, delete: false, read: false, update: false },
       hosts: { create: false, delete: false, read: false, update: false },
@@ -24,7 +24,7 @@ describe('cd-notification classes', () => {
 
   it('should show full permissions', () => {
     const fullyGranted = {
-      cephfs: ['create', 'read', 'update', 'delete'],
+      stonefs: ['create', 'read', 'update', 'delete'],
       'config-opt': ['create', 'read', 'update', 'delete'],
       grafana: ['create', 'read', 'update', 'delete'],
       hosts: ['create', 'read', 'update', 'delete'],
@@ -41,7 +41,7 @@ describe('cd-notification classes', () => {
       user: ['create', 'read', 'update', 'delete']
     };
     expect(new Permissions(fullyGranted)).toEqual({
-      cephfs: { create: true, delete: true, read: true, update: true },
+      stonefs: { create: true, delete: true, read: true, update: true },
       configOpt: { create: true, delete: true, read: true, update: true },
       grafana: { create: true, delete: true, read: true, update: true },
       hosts: { create: true, delete: true, read: true, update: true },

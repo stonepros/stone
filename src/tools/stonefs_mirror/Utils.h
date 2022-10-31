@@ -6,17 +6,17 @@
 
 #include "Types.h"
 
-namespace cephfs {
+namespace stonefs {
 namespace mirror {
 
 int connect(std::string_view client_name, std::string_view cluster_name,
-            RadosRef *cluster, std::string_view mon_host={}, std::string_view cephx_key={},
+            RadosRef *cluster, std::string_view mon_host={}, std::string_view stonex_key={},
             std::vector<const char *> args={});
 
 int mount(RadosRef cluster, const Filesystem &filesystem, bool cross_check_fscid,
           MountRef *mount);
 
 } // namespace mirror
-} // namespace cephfs
+} // namespace stonefs
 
 #endif // STONEFS_MIRROR_UTILS_H

@@ -2,7 +2,7 @@
  Network Protocol
 ==================
 
-This file describes the network protocol used by Ceph.  In order to understand
+This file describes the network protocol used by Stone.  In order to understand
 the way the structures are defined it is recommended to read the introduction
 of :doc:`/dev/network-encoding` first.
 
@@ -145,7 +145,7 @@ CEPH_MSGR_TAG_MSG (0x07)
 		u8    flags;
 	}
 
-Messages are the business logic of Ceph.  They are what is used to send data and
+Messages are the business logic of Stone.  They are what is used to send data and
 requests between nodes.  The message header contains the length of the message
 so unknown messages can be handled gracefully.
 

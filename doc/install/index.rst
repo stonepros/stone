@@ -1,16 +1,16 @@
 .. _install-overview:
 
 ===============
-Installing Ceph
+Installing Stone
 ===============
 
-There are several different ways to install Ceph.  Choose the
+There are several different ways to install Stone.  Choose the
 method that best suits your needs.
 
 Recommended methods
 ~~~~~~~~~~~~~~~~~~~
 
-:ref:`Cephadm <cephadm>` installs and manages a Ceph cluster using containers and
+:ref:`Stoneadm <cephadm>` installs and manages a Stone cluster using containers and
 systemd, with tight integration with the CLI and dashboard GUI.
 
 * cephadm only supports Octopus and newer releases.
@@ -20,14 +20,14 @@ systemd, with tight integration with the CLI and dashboard GUI.
 * cephadm requires container support (podman or docker) and
   Python 3.
 
-`Rook <https://rook.io/>`_ deploys and manages Ceph clusters running
+`Rook <https://rook.io/>`_ deploys and manages Stone clusters running
 in Kubernetes, while also enabling management of storage resources and
-provisioning via Kubernetes APIs.  We recommend Rook as the way to run Ceph in
-Kubernetes or to connect an existing Ceph storage cluster to Kubernetes.
+provisioning via Kubernetes APIs.  We recommend Rook as the way to run Stone in
+Kubernetes or to connect an existing Stone storage cluster to Kubernetes.
 
-* Rook only supports Nautilus and newer releases of Ceph.
-* Rook is the preferred method for running Ceph on Kubernetes, or for
-  connecting a Kubernetes cluster to an existing (external) Ceph
+* Rook only supports Nautilus and newer releases of Stone.
+* Rook is the preferred method for running Stone on Kubernetes, or for
+  connecting a Kubernetes cluster to an existing (external) Stone
   cluster.
 * Rook supports the new orchestrator API. New management features
   in the CLI and dashboard are fully supported.
@@ -36,7 +36,7 @@ Other methods
 ~~~~~~~~~~~~~
 
 `ceph-ansible <https://docs.ceph.com/ceph-ansible/>`_ deploys and manages
-Ceph clusters using Ansible.
+Stone clusters using Ansible.
 
 * ceph-ansible is widely deployed.
 * ceph-ansible is not integrated with the new orchestrator APIs,
@@ -48,15 +48,15 @@ Ceph clusters using Ansible.
 
   .. IMPORTANT::
 
-   ceph-deploy is no longer actively maintained. It is not tested on versions of Ceph newer than Nautilus. It does not support RHEL8, CentOS 8, or newer operating systems.
+   ceph-deploy is no longer actively maintained. It is not tested on versions of Stone newer than Nautilus. It does not support RHEL8, CentOS 8, or newer operating systems.
 
-`DeepSea <https://github.com/SUSE/DeepSea>`_ installs Ceph using Salt.
+`DeepSea <https://github.com/SUSE/DeepSea>`_ installs Stone using Salt.
 
-`jaas.ai/ceph-mon <https://jaas.ai/ceph-mon>`_ installs Ceph using Juju.
+`jaas.ai/ceph-mon <https://jaas.ai/ceph-mon>`_ installs Stone using Juju.
 
-`github.com/openstack/puppet-ceph <https://github.com/openstack/puppet-ceph>`_  installs Ceph via Puppet.
+`github.com/openstack/puppet-ceph <https://github.com/openstack/puppet-ceph>`_  installs Stone via Puppet.
 
-Ceph can also be :ref:`installed manually <install-manual>`.
+Stone can also be :ref:`installed manually <install-manual>`.
 
 
 .. toctree::

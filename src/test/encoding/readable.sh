@@ -3,21 +3,21 @@ set -e
 
 source $(dirname $0)/../detect-build-env-vars.sh
 
-[ -z "$CEPH_ROOT" ] && CEPH_ROOT=..
+[ -z "$STONE_ROOT" ] && STONE_ROOT=..
 
-dir=$CEPH_ROOT/ceph-object-corpus
+dir=$STONE_ROOT/stone-object-corpus
 
 failed=0
 numtests=0
 pids=""
 
-if [ -x ./ceph-dencoder ]; then
-  CEPH_DENCODER=./ceph-dencoder
+if [ -x ./stone-dencoder ]; then
+  STONE_DENCODER=./stone-dencoder
 else
-  CEPH_DENCODER=ceph-dencoder
+  STONE_DENCODER=stone-dencoder
 fi
 
-myversion=`$CEPH_DENCODER version`
+myversion=`$STONE_DENCODER version`
 DEBUG=0
 WAITALL_DELAY=.1
 debug() { if [ "$DEBUG" -gt 0 ]; then echo "DEBUG: $*" >&2; fi }
@@ -32,7 +32,7 @@ test_object() {
     tmp2=`mktemp /tmp/test_object_2-XXXXXXXXX`
 
     rm -f $output_file
-    if $CEPH_DENCODER type $type 2>/dev/null; then
+    if $STONE_DENCODER type $type 2>/dev/null; then
       #echo "type $type";
       echo "        $vdir/objects/$type"
 
@@ -97,9 +97,9 @@ test_object() {
           continue
         fi;
 
-        $CEPH_DENCODER type $type import $vdir/objects/$type/$f decode dump_json > $tmp1 &
+        $STONE_DENCODER type $type import $vdir/objects/$type/$f decode dump_json > $tmp1 &
         pid1="$!"
-        $CEPH_DENCODER type $type import $vdir/objects/$type/$f decode encode decode dump_json > $tmp2 &
+        $STONE_DENCODER type $type import $vdir/objects/$type/$f decode encode decode dump_json > $tmp2 &
         pid2="$!"
         #echo "\t$vdir/$type/$f"
         if ! wait $pid1; then
@@ -119,7 +119,7 @@ test_object() {
         # nondeterministically.  compare the sorted json
         # output.  this is a weaker test, but is better than
         # nothing.
-        if ! $CEPH_DENCODER type $type is_deterministic; then
+        if ! $STONE_DENCODER type $type is_deterministic; then
           echo "  sorting json output for nondeterministic object"
           for f in $tmp1 $tmp2; do
             sort $f | sed 's/,$//' > $f.new

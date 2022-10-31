@@ -11,11 +11,11 @@ Merge: 3e473d4 c5e12f9
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Feb 13 06:55:37 2014 -0800
 
-    Merge pull request #1232 from ceph/dumpling-7334
+    Merge pull request #1232 from stone/dumpling-7334
     
-    backport ceph-disk improvements to dumpling
+    backport stone-disk improvements to dumpling
     
-    http://pulpito.ceph.com/ubuntu-2014-02-12_16:52:33-ceph-deploy-dumpling-7334-testing-basic-plana/
+    http://pulpito.stone.com/ubuntu-2014-02-12_16:52:33-stone-deploy-dumpling-7334-testing-basic-plana/
 
 commit 3e473d4237697872498094b41fed19b414f8d3c4
 Author: David Zafman <david.zafman@inktank.com>
@@ -37,7 +37,7 @@ Date:   Wed Feb 12 16:43:59 2014 -0500
     add support for absence of PATH
     
     Note that this commit is actually bisecting the changes from
-    Loic Dachary that touch ceph-disk only (ad515bf). As that changeset
+    Loic Dachary that touch stone-disk only (ad515bf). As that changeset
     also touches other files it causes conflicts that are not resolvable
     for backporting it to dumpling.
     
@@ -47,9 +47,9 @@ commit c531d75f7e86cee619e44c247298b50c37b81539
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Sep 9 22:27:23 2013 -0700
 
-    ceph-disk: make initial journal files 0 bytes
+    stone-disk: make initial journal files 0 bytes
     
-    The ceph-osd will resize journal files up and properly fallocate() them
+    The stone-osd will resize journal files up and properly fallocate() them
     so that the blocks are preallocated and (hopefully) contiguous.  We
     don't need to do it here too, and getting fallocate() to work from
     python is a pain in the butt.
@@ -80,20 +80,20 @@ commit 5ebd7c4520a9805f985cab1a0ba9311e19efa041
 Author: Josh Durgin <josh.durgin@inktank.com>
 Date:   Tue Jan 28 17:26:58 2014 -0800
 
-    ceph-disk: run the right executables from udev
+    stone-disk: run the right executables from udev
     
     When run by the udev rules, PATH is not defined. Thus,
-    ceph-disk-activate relies on its which() function to locate the
+    stone-disk-activate relies on its which() function to locate the
     correct executable.  The which() function used os.defpath if none was
     set, and this worked for anything using it.
     
     ad6b4b4b08b6ef7ae8086f2be3a9ef521adaa88c added a new default value to
     PATH, so only /usr/bin was checked by callers that did not use
     which(). This resulted in the mount command not being found when
-    ceph-disk-activate was run by udev, and thus osds failing to start
-    after being prepared by ceph-deploy.
+    stone-disk-activate was run by udev, and thus osds failing to start
+    after being prepared by stone-deploy.
     
-    Make ceph-disk consistently use the existing helpers (command() and
+    Make stone-disk consistently use the existing helpers (command() and
     command_check_call()) that use which(), so lack of PATH does not
     matter. Simplify _check_output() to use command(),
     another wrapper around subprocess.Popen.
@@ -106,9 +106,9 @@ commit 4a7c4e0a81753dfb811396e7bfa1df72135ee12b
 Author: Loic Dachary <loic@dachary.org>
 Date:   Fri Jan 3 16:06:55 2014 +0100
 
-    ceph-disk: implement --sysconfdir as /etc/ceph
+    stone-disk: implement --sysconfdir as /etc/stone
     
-    Replace hardcoded /etc/ceph with the SYSCONFDIR global variable and
+    Replace hardcoded /etc/stone with the SYSCONFDIR global variable and
     implement the --sysconfdir option to override the default value.
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
@@ -118,9 +118,9 @@ commit c8b9798a69bd1655a7131c7bce8a14c2c74aba0c
 Author: Loic Dachary <loic@dachary.org>
 Date:   Fri Jan 3 16:03:09 2014 +0100
 
-    ceph-disk: implement --statedir as /var/lib/ceph
+    stone-disk: implement --statedir as /var/lib/stone
     
-    Replace hardcoded /var/lib/ceph with the STATEDIR global variable and
+    Replace hardcoded /var/lib/stone with the STATEDIR global variable and
     implement the --statedir option to override the default value.
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
@@ -130,7 +130,7 @@ commit 79564874be35d4414092fbb80df3214d7f282b1c
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Jan 1 22:05:03 2014 +0100
 
-    ceph-disk: add copyright notice
+    stone-disk: add copyright notice
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 51ee3c04777aaf6b9609dde9bc318b5c66c70787)
@@ -139,7 +139,7 @@ commit c4b66bbdf09a8bb85ed14fbb643f40f87345463b
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Jan 1 22:11:30 2014 +0100
 
-    ceph-disk: create the data directory if it does not exist
+    stone-disk: create the data directory if it does not exist
     
     Instead of failing if the OSD data directory does not exist, create
     it. Only do so if the data directory is not enforced to be a device via
@@ -152,7 +152,7 @@ commit c473c65d4b6235fe20a97bd1d4741c12f86858e8
 Author: Loic Dachary <loic@dachary.org>
 Date:   Tue Dec 31 00:03:42 2013 +0100
 
-    ceph-disk: run ceph-osd when --mark-init=none
+    stone-disk: run stone-osd when --mark-init=none
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 0fcc081858fae4febbb6a613a93cfbbcedd5a320)
@@ -161,11 +161,11 @@ commit 6ea59a3a0c38c9629036442aff652489eecce51a
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Dec 30 23:57:39 2013 +0100
 
-    ceph-disk: implement --mark-init=none
+    stone-disk: implement --mark-init=none
     
     It is meant to be used when preparing and activating a directory that is
     not to be used with init. No file is created to identify the init
-    system, no symbolic link is made to the directory in /var/lib/ceph
+    system, no symbolic link is made to the directory in /var/lib/stone
     and the init scripts are not called.
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
@@ -175,10 +175,10 @@ commit 3aae5b764c5698c665a708a3f6f2243dfee1a28d
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Jan 1 22:07:57 2014 +0100
 
-    ceph-disk: fsid is a known configuration option
+    stone-disk: fsid is a known configuration option
     
     Use get_conf_with_default instead of get_conf because fsid is a known
-    ceph configuration option. It allows overriding via CEPH_ARGS which is
+    stone configuration option. It allows overriding via CEPH_ARGS which is
     convenient for testing. Only options that are not found in config_opts.h
     are fetch via get_conf.
     
@@ -189,7 +189,7 @@ commit a33ad6d150206232806ee466f301e41f15c631e9
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Jan 1 22:06:29 2014 +0100
 
-    ceph-disk: use CalledProcessError.returncode
+    stone-disk: use CalledProcessError.returncode
     
     CalledProcessError has no errno data member
     
@@ -200,7 +200,7 @@ commit 6ae96d3ce757b05daeb7c1437778149b07248d47
 Author: Loic Dachary <loic@dachary.org>
 Date:   Wed Jan 1 22:13:15 2014 +0100
 
-    ceph-disk: display the command output on OSD creation failure
+    stone-disk: display the command output on OSD creation failure
     
     The string form of a CalledProcessError instance does not include the
     output datamember. Add it to the Error exception for debug purposes.
@@ -212,10 +212,10 @@ commit deefb3a05788b308631812c652e9eccaeb999d7f
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Dec 30 23:07:27 2013 +0100
 
-    ceph-disk: which() uses PATH first
+    stone-disk: which() uses PATH first
     
     Instead of relying on a hardcoded set of if paths. Although this has the
-    potential of changing the location of the binary being used by ceph-disk
+    potential of changing the location of the binary being used by stone-disk
     on an existing installation, it is currently only used for sgdisk. It
     could be disruptive for someone using a modified version of sgdisk but
     the odds of this happening are very low.
@@ -227,9 +227,9 @@ commit 06bbea187293ac52aefbcf4e98c162bb3286341d
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Dec 30 22:48:46 2013 +0100
 
-    ceph-disk: add --prepend-to-path to control execution
+    stone-disk: add --prepend-to-path to control execution
     
-    /usr/bin is hardcoded in front of some ceph programs which makes it
+    /usr/bin is hardcoded in front of some stone programs which makes it
     impossible to control where they are located via the PATH.
     
     The hardcoded path cannot be removed altogether because it will most
@@ -248,7 +248,7 @@ commit ccf182241dc04c79e2377b6ba2f060dbfe6dddae
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Dec 30 17:15:29 2013 +0100
 
-    ceph-disk: make exception handling terse in main_activate_journal
+    stone-disk: make exception handling terse in main_activate_journal
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 908348b8047e8577ecf9133f2683f91423694416)
@@ -257,7 +257,7 @@ commit d60e952f3c00d0e551b04c0d6486b11d9761be35
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Dec 30 17:13:47 2013 +0100
 
-    ceph-disk: do not hide main_activate() exceptions
+    stone-disk: do not hide main_activate() exceptions
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 55ca7bb2da73f1be1293710a635cfea42abd7682)
@@ -266,7 +266,7 @@ commit 827edb93e3971fc7549fe831894776c6bf163346
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Dec 30 17:11:30 2013 +0100
 
-    ceph-disk: fix activate() indent
+    stone-disk: fix activate() indent
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 324804a81c37ff89f2488e2ba106033c0e6e119e)
@@ -275,7 +275,7 @@ commit 27988cf9ffedf3289099e51f1e7c3f5b8d79d667
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Dec 30 17:09:35 2013 +0100
 
-    ceph-disk: remove noop try:
+    stone-disk: remove noop try:
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit de0050596b5f56863c3486c1cd5e7ffea62e3d00)
@@ -284,7 +284,7 @@ commit 75bdb5430d9403bed8bd2ccd6a9c5a30d63a189e
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Dec 30 16:57:36 2013 +0100
 
-    ceph-disk: fix Error() messages formatting
+    stone-disk: fix Error() messages formatting
     
     Mainly using % instead of ,
     
@@ -295,9 +295,9 @@ commit 5df1eaa55bc7ebe68473831d06cf9819fa39baa6
 Author: Loic Dachary <loic@dachary.org>
 Date:   Mon Dec 30 12:26:20 2013 +0100
 
-    ceph-disk: prepare --data-dir must not override files
+    stone-disk: prepare --data-dir must not override files
     
-    ceph-disk does nothing when given a device that is already prepared. If
+    stone-disk does nothing when given a device that is already prepared. If
     given a directory that already contains a successfully prepared OSD, it
     will however override it.
     
@@ -312,13 +312,13 @@ commit 2e8496a6e0b74ff351bc2a4f138ddc665d8c30ca
 Author: Loic Dachary <loic@dachary.org>
 Date:   Sun Dec 15 15:34:17 2013 +0100
 
-    ceph-disk: zap needs at least one device
+    stone-disk: zap needs at least one device
     
-    If given no argument, ceph-disk zap should display the usage instead of
+    If given no argument, stone-disk zap should display the usage instead of
     silently doing nothing. Silence can be confused with "I zapped all the
     disks".
     
-    http://tracker.ceph.com/issues/6981 fixes #6981
+    http://tracker.stone.com/issues/6981 fixes #6981
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 07888ef3fd4440332c8287d0faa9f23a32cf141c)
@@ -374,7 +374,7 @@ commit 3942a93fae3331b2d08f93181eb2c9cf90b50440
 Author: Loic Dachary <loic@dachary.org>
 Date:   Thu Nov 21 13:21:22 2013 +0100
 
-    ceph-disk: blacklist /dev/fd0
+    stone-disk: blacklist /dev/fd0
     
     blkid -s TYPE /dev/fd0 has been verified to hang forever on a
     H8DMR-82 supermicro motherboard running
@@ -382,10 +382,10 @@ Date:   Thu Nov 21 13:21:22 2013 +0100
     3.8.0-33-generic #48~precise1-Ubuntu SMP Thu Oct 24 16:28:06 UTC 2013
     x86_64
     
-    It is unlikely that ceph will ever be used on floppy disks, they
+    It is unlikely that stone will ever be used on floppy disks, they
     can be blacklisted.
     
-    http://tracker.ceph.com/issues/6827 fixes: #6827
+    http://tracker.stone.com/issues/6827 fixes: #6827
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 65701978715237ff5a4c68573c0696fd9d438e4f)
@@ -396,8 +396,8 @@ Date:   Thu Oct 3 10:32:50 2013 +0100
 
     Make fsid comparison case-insensitive
     
-    get_fsid and find_cluster_by_uuid are modified so ceph-disk activate and
-    ceph-disk activate-all will work if the fsid uses uppercase characters.
+    get_fsid and find_cluster_by_uuid are modified so stone-disk activate and
+    stone-disk activate-all will work if the fsid uses uppercase characters.
     
     Signed-off-by: Harry Harrington <git-harry@live.co.uk>
     (cherry picked from commit 22f8325dbfce7ef2e97bf015c0f8bba53e75dfe9)
@@ -474,7 +474,7 @@ Date:   Mon Feb 10 23:42:38 2014 +0100
     new_formatter function will return null and the AdminSocketHook::call
     function must fall back to a sensible default.
     
-    The CephContextHook::call and HelpHook::call failed to do that and a
+    The StoneContextHook::call and HelpHook::call failed to do that and a
     malformed format argument would cause the mon to crash. A check is added
     to each of them and fallback to json-pretty if the format is not
     recognized.
@@ -484,14 +484,14 @@ Date:   Mon Feb 10 23:42:38 2014 +0100
     command in AdminSocket::do_accept and replaced with json-pretty if it is
     not known.
     
-    A test case is added for both CephContextHook::call and HelpHook::call
+    A test case is added for both StoneContextHook::call and HelpHook::call
     to demonstrate the problem exists and is fixed by the patch.
     
     Three other instances of unsafe calls to new_formatter were found and
     a fallback to json-pretty was added. All other calls have been audited
     and appear to be safe.
     
-    http://tracker.ceph.com/issues/7378 fixes #7378
+    http://tracker.stone.com/issues/7378 fixes #7378
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 165e76d4d03ffcc490fd3c2ba60fb37372990d0a)
@@ -710,7 +710,7 @@ Date:   Sun Dec 15 12:26:19 2013 -0800
 
     rgw: Fix CORS allow-headers validation
     
-    This fix is needed because Ceph presently validates CORS headers in a
+    This fix is needed because Stone presently validates CORS headers in a
     case-sensitive manner. Keeps a local cache of lowercased allowed headers
     to avoid converting the allowed headers to lowercase each time.
     
@@ -922,7 +922,7 @@ Date:   Mon Jan 27 12:27:51 2014 -0700
     Adjust the conditional to apply to RHEL as well as CentOS. (The %{rhel}
     macro is defined in both platforms' redhat-rpm-config package.)
     
-    Fixes http://tracker.ceph.com/issues/7245
+    Fixes http://tracker.stone.com/issues/7245
     
     Signed-off-by: Ken Dreyer <ken.dreyer@inktank.com>
     (cherry picked from commit 64a0b4fa563795bc22753940aa3a4a2946113109)
@@ -932,7 +932,7 @@ Merge: 9fa8d2d abf6441
 Author: Sage Weil <sage@inktank.com>
 Date:   Thu Jan 23 07:12:37 2014 -0800
 
-    Merge pull request #1129 from ceph/wip-dumpling-backport-6620
+    Merge pull request #1129 from stone/wip-dumpling-backport-6620
     
     mds: MDSMap: adjust buffer size for uint64 values with more than 5 chars
 
@@ -1041,9 +1041,9 @@ commit 2354b957b7924af3e81f559d5c975262848c3bf6
 Author: Loic Dachary <loic@dachary.org>
 Date:   Sun Dec 15 22:59:51 2013 +0100
 
-    qa: test for error when ceph osd rm is EBUSY
+    qa: test for error when stone osd rm is EBUSY
     
-    http://tracker.ceph.com/issues/6824 fixes #6824
+    http://tracker.stone.com/issues/6824 fixes #6824
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 31507c90f0161c4569a2cc634c0b5f671179440a)
@@ -1052,7 +1052,7 @@ commit 10ad2e01f832ca9293a1bda1c82f7d318e8c3589
 Author: Loic Dachary <loic@dachary.org>
 Date:   Sun Dec 15 16:27:02 2013 +0100
 
-    mon: set ceph osd (down|out|in|rm) error code on failure
+    mon: set stone osd (down|out|in|rm) error code on failure
     
     Instead of always returning true, the error code is set if at least one
     operation fails.
@@ -1060,17 +1060,17 @@ Date:   Sun Dec 15 16:27:02 2013 +0100
     EINVAL if the OSD id is invalid (osd.foobar for instance).
     EBUSY if trying to remove and OSD that is up.
     
-    When used with the ceph command line, it looks like this:
+    When used with the stone command line, it looks like this:
     
-        ceph -c ceph.conf osd rm osd.0
+        stone -c stone.conf osd rm osd.0
         Error EBUSY: osd.0 is still up; must be down before removal.
         kill PID_OF_osd.0
-        ceph -c ceph.conf osd down osd.0
+        stone -c stone.conf osd down osd.0
         marked down osd.0.
-        ceph -c ceph.conf osd rm osd.0 osd.1
+        stone -c stone.conf osd rm osd.0 osd.1
         Error EBUSY: removed osd.0, osd.1 is still up; must be down before removal.
     
-    http://tracker.ceph.com/issues/6824 fixes #6824
+    http://tracker.stone.com/issues/6824 fixes #6824
     
     Signed-off-by: Loic Dachary <loic@dachary.org>
     (cherry picked from commit 15b8616b13a327701c5d48c6cb7aeab8fcc4cafc)
@@ -1133,7 +1133,7 @@ Date:   Thu Dec 5 17:44:37 2013 -0800
 
     rbd: check write return code during bench-write
     
-    This is allows rbd-bench to detect http://tracker.ceph.com/issues/6938
+    This is allows rbd-bench to detect http://tracker.stone.com/issues/6938
     when combined with rapidly changing the mon osd full ratio.
     
     Signed-off-by: Josh Durgin <josh.durgin@inktank.com>
@@ -1184,7 +1184,7 @@ Date:   Thu Dec 5 17:34:38 2013 -0800
     
     Old clients talking to osds with this fix will hang instead of
     propagating an error, but only if they run into this race
-    condition. ceph-fuse and rbd with caching enabled are not affected,
+    condition. stone-fuse and rbd with caching enabled are not affected,
     since the ObjectCacher will retry writes that return errors.
     
     Refs: #6938
@@ -1243,7 +1243,7 @@ Merge: a60ac91 4e47a00
 Author: Sage Weil <sage@inktank.com>
 Date:   Sun Dec 29 21:10:30 2013 -0800
 
-    Merge pull request #808 from ceph/wip-6152-dumpling
+    Merge pull request #808 from stone/wip-6152-dumpling
     
     rgw: Fix S3 auth when using response-* query string params
 

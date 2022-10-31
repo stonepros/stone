@@ -94,7 +94,7 @@ describe('NavigationComponent', () => {
       [['iscsi'], ['.tc_submenuitem_block_iscsi']],
       [['rbdImage', 'rbdMirroring', 'iscsi'], ['.tc_menuitem_block']],
       [['nfs'], ['.tc_menuitem_nfs']],
-      [['cephfs'], ['.tc_menuitem_cephfs']],
+      [['stonefs'], ['.tc_menuitem_stonefs']],
       [
         ['rgw'],
         [
@@ -142,7 +142,7 @@ describe('NavigationComponent', () => {
       [['iscsi'], ['.tc_submenuitem_block_iscsi']],
       [['rbd', 'mirroring', 'iscsi'], ['.tc_menuitem_block']],
       [['nfs'], ['.tc_menuitem_nfs']],
-      [['cephfs'], ['.tc_menuitem_cephfs']],
+      [['stonefs'], ['.tc_menuitem_stonefs']],
       [
         ['rgw'],
         [

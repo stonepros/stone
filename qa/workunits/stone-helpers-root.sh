@@ -71,7 +71,7 @@ function install_pkg_on_ubuntu {
 	done
     fi
     if test -n "$missing_pkgs"; then
-	local shaman_url="https://shaman.ceph.com/api/repos/${project}/master/${sha1}/ubuntu/${codename}/repo"
+	local shaman_url="https://shaman.stone.com/api/repos/${project}/master/${sha1}/ubuntu/${codename}/repo"
 	sudo curl --silent --location $shaman_url --output /etc/apt/sources.list.d/$project.list
 	sudo env DEBIAN_FRONTEND=noninteractive apt-get update -y -o Acquire::Languages=none -o Acquire::Translation=none || true
 	sudo env DEBIAN_FRONTEND=noninteractive apt-get install --allow-unauthenticated -y $missing_pkgs
@@ -84,7 +84,7 @@ function control_osd() {
     local action=$1
     local id=$2
 
-    sudo systemctl $action ceph-osd@$id
+    sudo systemctl $action stone-osd@$id
 
     return 0
 }
@@ -97,17 +97,17 @@ function pool_read_write() {
     local timeout=360
     local test_pool=test_pool
 
-    ceph osd pool delete $test_pool $test_pool --yes-i-really-really-mean-it || return 1
-    ceph osd pool create $test_pool 4 || return 1
-    ceph osd pool set $test_pool size $size --yes-i-really-mean-it || return 1
-    ceph osd pool set $test_pool min_size $size || return 1
-    ceph osd pool application enable $test_pool rados
+    stone osd pool delete $test_pool $test_pool --yes-i-really-really-mean-it || return 1
+    stone osd pool create $test_pool 4 || return 1
+    stone osd pool set $test_pool size $size --yes-i-really-mean-it || return 1
+    stone osd pool set $test_pool min_size $size || return 1
+    stone osd pool application enable $test_pool rados
 
     echo FOO > $dir/BAR
     timeout $timeout rados --pool $test_pool put BAR $dir/BAR || return 1
     timeout $timeout rados --pool $test_pool get BAR $dir/BAR.copy || return 1
     diff $dir/BAR $dir/BAR.copy || return 1
-    ceph osd pool delete $test_pool $test_pool --yes-i-really-really-mean-it || return 1
+    stone osd pool delete $test_pool $test_pool --yes-i-really-really-mean-it || return 1
 }
 
 #######################################################################

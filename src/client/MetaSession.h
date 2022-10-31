@@ -52,9 +52,9 @@ struct MetaSession {
   xlist<Inode*> flushing_caps;
   xlist<MetaRequest*> requests;
   xlist<MetaRequest*> unsafe_requests;
-  std::set<ceph_tid_t> flushing_caps_tids;
+  std::set<stone_tid_t> flushing_caps_tids;
 
-  ceph::ref_t<MClientCapRelease> release;
+  stone::ref_t<MClientCapRelease> release;
 
   MetaSession(mds_rank_t mds_num, ConnectionRef con, const entity_addrvec_t& addrs)
     : mds_num(mds_num), con(con), addrs(addrs) {
@@ -64,8 +64,8 @@ struct MetaSession {
 
   void dump(Formatter *f, bool cap_dump=false) const;
 
-  void enqueue_cap_release(inodeno_t ino, uint64_t cap_id, ceph_seq_t iseq,
-      ceph_seq_t mseq, epoch_t osd_barrier);
+  void enqueue_cap_release(inodeno_t ino, uint64_t cap_id, stone_seq_t iseq,
+      stone_seq_t mseq, epoch_t osd_barrier);
 };
 
 #endif

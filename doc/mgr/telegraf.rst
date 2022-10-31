@@ -20,14 +20,14 @@ To enable the module, use the following command:
 
 ::
 
-    ceph mgr module enable telegraf
+    stone mgr module enable telegraf
 
 If you wish to subsequently disable the module, you can use the corresponding
 *disable* command:
 
 ::
 
-    ceph mgr module disable telegraf
+    stone mgr module disable telegraf
 
 -------------
 Configuration 
@@ -40,7 +40,7 @@ Set configuration values using the following command:
 
 ::
 
-    ceph telegraf config-set <key> <value>
+    stone telegraf config-set <key> <value>
 
 
 The most important settings are ``address`` and ``interval``.
@@ -49,8 +49,8 @@ For example, a typical configuration might look like this:
 
 ::
 
-    ceph telegraf config-set address udp://:8094
-    ceph telegraf config-set interval 10
+    stone telegraf config-set address udp://:8094
+    stone telegraf config-set interval 10
     
 The default values for these configuration keys are:
 

@@ -37,7 +37,7 @@ if current_branch in 'mimic nautilus octopus pacific'.split():
     postfix += '-' + current_branch
     print(f"Adding current branch name '-{current_branch}' as a postfix")
 
-repo = "ceph/ceph"
+repo = "stone/stone"
 
 try:
     from docopt import docopt

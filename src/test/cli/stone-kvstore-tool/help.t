@@ -1,5 +1,5 @@
-  $ ceph-kvstore-tool --help
-  Usage: ceph-kvstore-tool <leveldb|rocksdb|bluestore-kv> <store path> command [args...]
+  $ stone-kvstore-tool --help
+  Usage: stone-kvstore-tool <leveldb|rocksdb|bluestore-kv> <store path> command [args...]
   
   Commands:
     list [prefix]

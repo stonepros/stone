@@ -59,7 +59,7 @@ public:
 
   struct GetParams {
     RGWObjVersionTracker *objv_tracker{nullptr};
-    ceph::real_time *mtime{nullptr};
+    stone::real_time *mtime{nullptr};
 
     GetParams() {}
 
@@ -68,7 +68,7 @@ public:
       return *this;
     }
 
-    GetParams& set_mtime(ceph::real_time *_mtime) {
+    GetParams& set_mtime(stone::real_time *_mtime) {
       mtime = _mtime;
       return *this;
     }
@@ -76,7 +76,7 @@ public:
 
   struct PutParams {
     RGWObjVersionTracker *objv_tracker{nullptr};
-    ceph::real_time mtime;
+    stone::real_time mtime;
 
     PutParams() {}
 
@@ -85,7 +85,7 @@ public:
       return *this;
     }
 
-    PutParams& set_mtime(const ceph::real_time& _mtime) {
+    PutParams& set_mtime(const stone::real_time& _mtime) {
       mtime = _mtime;
       return *this;
     }

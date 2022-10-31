@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 def get_ip_and_ports(ctx, daemon):
     assert daemon.startswith('mon.')
-    addr = ctx.ceph['ceph'].mons['{a}'.format(a=daemon)]
+    addr = ctx.stone['stone'].mons['{a}'.format(a=daemon)]
     ips = re.findall("[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[:[0-9]*]*", addr)
     assert len(ips) > 0
     plain_ip = re.match("[0-9\.]*", ips[0]).group()

@@ -64,13 +64,13 @@ namespace rados {
         locker_id_t() {}
         locker_id_t(entity_name_t& _n, const std::string& _c) : locker(_n), cookie(_c) {}
 
-        void encode(ceph::buffer::list &bl) const {
+        void encode(stone::buffer::list &bl) const {
           ENCODE_START(1, 1, bl);
           encode(locker, bl);
           encode(cookie, bl);
           ENCODE_FINISH(bl);
         }
-        void decode(ceph::buffer::list::const_iterator &bl) {
+        void decode(stone::buffer::list::const_iterator &bl) {
           DECODE_START_LEGACY_COMPAT_LEN(1, 1, 1, bl);
           decode(locker, bl);
           decode(cookie, bl);
@@ -84,7 +84,7 @@ namespace rados {
             return true;
           return false;
         }
-        void dump(ceph::Formatter *f) const;
+        void dump(stone::Formatter *f) const;
 	friend std::ostream& operator<<(std::ostream& out,
 					const locker_id_t& data) {
 	  out << data.locker;
@@ -104,24 +104,24 @@ namespace rados {
         locker_info_t(const utime_t& _e, const entity_addr_t& _a,
                       const std::string& _d) :  expiration(_e), addr(_a), description(_d) {}
 
-        void encode(ceph::buffer::list &bl, uint64_t features) const {
+        void encode(stone::buffer::list &bl, uint64_t features) const {
           ENCODE_START(1, 1, bl);
           encode(expiration, bl);
           encode(addr, bl, features);
           encode(description, bl);
           ENCODE_FINISH(bl);
         }
-        void decode(ceph::buffer::list::const_iterator &bl) {
+        void decode(stone::buffer::list::const_iterator &bl) {
           DECODE_START_LEGACY_COMPAT_LEN(1, 1, 1, bl);
           decode(expiration, bl);
           decode(addr, bl);
           decode(description, bl);
           DECODE_FINISH(bl);
         }
-        void dump(ceph::Formatter *f) const;
+        void dump(stone::Formatter *f) const;
 	friend std::ostream& operator<<(std::ostream& out,
 					const locker_info_t& data) {
-	  using ceph::operator <<;
+	  using stone::operator <<;
 	  out << "{addr:" << data.addr << ", exp:";
 
 	  const auto& exp = data.expiration;
@@ -144,7 +144,7 @@ namespace rados {
                                                  //      as long as set of non expired lockers
                                                  //      is bigger than 0.
 
-        void encode(ceph::buffer::list &bl, uint64_t features) const {
+        void encode(stone::buffer::list &bl, uint64_t features) const {
           ENCODE_START(1, 1, bl);
           encode(lockers, bl, features);
           uint8_t t = (uint8_t)lock_type;
@@ -152,7 +152,7 @@ namespace rados {
           encode(tag, bl);
           ENCODE_FINISH(bl);
         }
-        void decode(ceph::buffer::list::const_iterator &bl) {
+        void decode(stone::buffer::list::const_iterator &bl) {
           DECODE_START_LEGACY_COMPAT_LEN(1, 1, 1, bl);
           decode(lockers, bl);
           uint8_t t;
@@ -163,7 +163,7 @@ namespace rados {
         }
 
         lock_info_t() : lock_type(ClsLockType::NONE) {}
-        void dump(ceph::Formatter *f) const;
+        void dump(stone::Formatter *f) const;
         static void generate_test_instances(std::list<lock_info_t *>& o);
       };
       WRITE_CLASS_ENCODER_FEATURES(lock_info_t);

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#command line => CEPH_BRANCH=<branch>; MACHINE_NAME=<machine_type>; SUITE_NAME=<suite>; ../schedule_subset.sh <day_of_week> $CEPH_BRANCH $MACHINE_NAME $SUITE_NAME $CEPH_QA_EMAIL $KERNEL <$FILTER>
+#command line => STONE_BRANCH=<branch>; MACHINE_NAME=<machine_type>; SUITE_NAME=<suite>; ../schedule_subset.sh <day_of_week> $STONE_BRANCH $MACHINE_NAME $SUITE_NAME $STONE_QA_EMAIL $KERNEL <$FILTER>
 
 # $1 - part (day of week)
 # $2 - branch name

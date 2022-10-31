@@ -74,13 +74,13 @@ echo "Testing result, retest: = " $RETEST
 
 if [ $RETEST -eq 1 ]; then
     # make sure no leftovers are there
-    killall ceph-osd || true
-    killall ceph-mgr || true
-    killall ceph-mds || true
-    killall ceph-mon || true
+    killall stone-osd || true
+    killall stone-mgr || true
+    killall stone-mds || true
+    killall stone-mon || true
     # clean up after testing
     rm -rf td/* /tmp/td src/test/td/* || true
-    rm -rf /tmp/ceph-asok.* || true
+    rm -rf /tmp/stone-asok.* || true
     rm -rf /tmp/cores.* || true
     rm -rf /tmp/*.core || true
 

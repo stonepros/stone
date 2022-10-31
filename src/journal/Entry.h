@@ -10,7 +10,7 @@
 #include <iosfwd>
 #include <string>
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 
@@ -38,7 +38,7 @@ public:
 
   void encode(bufferlist &bl) const;
   void decode(bufferlist::const_iterator &iter);
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
   bool operator==(const Entry& rhs) const;
 

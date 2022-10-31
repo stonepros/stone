@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -30,7 +30,7 @@ struct ThreadPool {
 #include <string>
 #include <vector>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/unordered_map.h"
 #include "common/config_obs.h"
 #include "common/HeartbeatMap.h"
@@ -43,30 +43,30 @@ struct ThreadPool {
 /// Pool of threads that share work submitted to multiple work queues.
 class ThreadPool : public md_config_obs_t {
 protected:
-  StoneeContext *cct;
+  StoneContext *cct;
   std::string name;
   std::string thread_name;
   std::string lockname;
-  ceph::mutex _lock;
-  ceph::condition_variable _cond;
+  stone::mutex _lock;
+  stone::condition_variable _cond;
   bool _stop;
   int _pause;
   int _draining;
-  ceph::condition_variable _wait_cond;
+  stone::condition_variable _wait_cond;
 
 public:
   class TPHandle : public HBHandle {
     friend class ThreadPool;
-    StoneeContext *cct;
-    ceph::heartbeat_handle_d *hb;
-    ceph::timespan grace;
-    ceph::timespan suicide_grace;
+    StoneContext *cct;
+    stone::heartbeat_handle_d *hb;
+    stone::timespan grace;
+    stone::timespan suicide_grace;
   public:
     TPHandle(
-      StoneeContext *cct,
-      ceph::heartbeat_handle_d *hb,
-      ceph::timespan grace,
-      ceph::timespan suicide_grace)
+      StoneContext *cct,
+      stone::heartbeat_handle_d *hb,
+      stone::timespan grace,
+      stone::timespan suicide_grace)
       : cct(cct), hb(hb), grace(grace), suicide_grace(suicide_grace) {}
     void reset_tp_timeout() override final;
     void suspend_tp_timeout() override final;
@@ -76,9 +76,9 @@ protected:
   /// Basic interface to a work queue used by the worker threads.
   struct WorkQueue_ {
     std::string name;
-    ceph::timespan timeout_interval;
-    ceph::timespan suicide_interval;
-    WorkQueue_(std::string n, ceph::timespan ti, ceph::timespan sti)
+    stone::timespan timeout_interval;
+    stone::timespan suicide_interval;
+    WorkQueue_(std::string n, stone::timespan ti, stone::timespan sti)
       : name(std::move(n)), timeout_interval(ti), suicide_interval(sti)
     { }
     virtual ~WorkQueue_() {}
@@ -118,7 +118,7 @@ public:
    * construction and remove itself on destruction. */
   template<typename T, typename U = T>
   class WorkQueueVal : public WorkQueue_ {
-    ceph::mutex _lock = ceph::make_mutex("WorkQueueVal::_lock");
+    stone::mutex _lock = stone::make_mutex("WorkQueueVal::_lock");
     ThreadPool *pool;
     std::list<U> to_process;
     std::list<U> to_finish;
@@ -140,7 +140,7 @@ public:
     }
     void _void_process(void *, TPHandle &handle) override {
       _lock.lock();
-      ceph_assert(!to_process.empty());
+      stone_assert(!to_process.empty());
       U u = to_process.front();
       to_process.pop_front();
       _lock.unlock();
@@ -154,7 +154,7 @@ public:
 
     void _void_process_finish(void *) override {
       _lock.lock();
-      ceph_assert(!to_finish.empty());
+      stone_assert(!to_finish.empty());
       U u = to_finish.front();
       to_finish.pop_front();
       _lock.unlock();
@@ -166,8 +166,8 @@ public:
 
   public:
     WorkQueueVal(std::string n,
-		 ceph::timespan ti,
-		 ceph::timespan sti,
+		 stone::timespan ti,
+		 stone::timespan sti,
 		 ThreadPool *p)
       : WorkQueue_(std::move(n), ti, sti), pool(p) {
       pool->add_work_queue(this);
@@ -232,7 +232,7 @@ public:
 
   public:
     WorkQueue(std::string n,
-	      ceph::timespan ti, ceph::timespan sti,
+	      stone::timespan ti, stone::timespan sti,
 	      ThreadPool* p)
       : WorkQueue_(std::move(n), ti, sti), pool(p) {
       pool->add_work_queue(this);
@@ -287,7 +287,7 @@ public:
   public:
     ~PointerWQ() override {
       m_pool->remove_work_queue(this);
-      ceph_assert(m_processing == 0);
+      stone_assert(m_processing == 0);
     }
     void drain() {
       {
@@ -311,7 +311,7 @@ public:
     }
   protected:
     PointerWQ(std::string n,
-	      ceph::timespan ti, ceph::timespan sti,
+	      stone::timespan ti, stone::timespan sti,
 	      ThreadPool* p)
       : WorkQueue_(std::move(n), ti, sti), m_pool(p), m_processing(0) {
     }
@@ -319,15 +319,15 @@ public:
       m_pool->add_work_queue(this);
     }
     void _clear() override {
-      ceph_assert(ceph_mutex_is_locked(m_pool->_lock));
+      stone_assert(stone_mutex_is_locked(m_pool->_lock));
       m_items.clear();
     }
     bool _empty() override {
-      ceph_assert(ceph_mutex_is_locked(m_pool->_lock));
+      stone_assert(stone_mutex_is_locked(m_pool->_lock));
       return m_items.empty();
     }
     void *_void_dequeue() override {
-      ceph_assert(ceph_mutex_is_locked(m_pool->_lock));
+      stone_assert(stone_mutex_is_locked(m_pool->_lock));
       if (m_items.empty()) {
         return NULL;
       }
@@ -341,8 +341,8 @@ public:
       process(reinterpret_cast<T *>(item));
     }
     void _void_process_finish(void *item) override {
-      ceph_assert(ceph_mutex_is_locked(m_pool->_lock));
-      ceph_assert(m_processing > 0);
+      stone_assert(stone_mutex_is_locked(m_pool->_lock));
+      stone_assert(m_processing > 0);
       --m_processing;
     }
 
@@ -353,7 +353,7 @@ public:
     }
 
     T *front() {
-      ceph_assert(ceph_mutex_is_locked(m_pool->_lock));
+      stone_assert(stone_mutex_is_locked(m_pool->_lock));
       if (m_items.empty()) {
         return NULL;
       }
@@ -373,7 +373,7 @@ public:
       std::lock_guard pool_locker(m_pool->_lock);
       m_pool->_cond.notify_one();
     }
-    ceph::mutex &get_pool_lock() {
+    stone::mutex &get_pool_lock() {
       return m_pool->_lock;
     }
   private:
@@ -406,7 +406,7 @@ protected:
   virtual void worker(WorkThread *wt);
 
 public:
-  ThreadPool(StoneeContext *cct_, std::string nm, std::string tn, int n, const char *option = NULL);
+  ThreadPool(StoneContext *cct_, std::string nm, std::string tn, int n, const char *option = NULL);
   ~ThreadPool() override;
 
   /// return number of threads currently running
@@ -428,7 +428,7 @@ public:
       i++;
     for (i++; i < work_queues.size(); i++) 
       work_queues[i-1] = work_queues[i];
-    ceph_assert(i == work_queues.size());
+    stone_assert(i == work_queues.size());
     work_queues.resize(i-1);
   }
 
@@ -442,7 +442,7 @@ public:
   }
 
   /// wait for a kick on this thread pool
-  void wait(ceph::condition_variable &c) {
+  void wait(stone::condition_variable &c) {
     std::unique_lock l(_lock, std::adopt_lock);
     c.wait(l);
   }
@@ -482,7 +482,7 @@ class GenContextWQ :
   public ThreadPool::WorkQueueVal<GenContext<ThreadPool::TPHandle&>*> {
   std::list<GenContext<ThreadPool::TPHandle&>*> _queue;
 public:
-  GenContextWQ(const std::string &name, ceph::timespan ti, ThreadPool *tp)
+  GenContextWQ(const std::string &name, stone::timespan ti, ThreadPool *tp)
     : ThreadPool::WorkQueueVal<
       GenContext<ThreadPool::TPHandle&>*>(name, ti, ti*10, tp) {}
   
@@ -496,7 +496,7 @@ public:
     return _queue.empty();
   }
   GenContext<ThreadPool::TPHandle&> *_dequeue() override {
-    ceph_assert(!_queue.empty());
+    stone_assert(!_queue.empty());
     GenContext<ThreadPool::TPHandle&> *c = _queue.front();
     _queue.pop_front();
     return c;
@@ -522,8 +522,8 @@ public:
 /// @see Finisher
 class ContextWQ : public ThreadPool::PointerWQ<Context> {
 public:
-  ContextWQ(const std::string &name, ceph::timespan ti, ThreadPool *tp)
-    : ThreadPool::PointerWQ<Context>(name, ti, ceph::timespan::zero(), tp) {
+  ContextWQ(const std::string &name, stone::timespan ti, ThreadPool *tp)
+    : ThreadPool::PointerWQ<Context>(name, ti, stone::timespan::zero(), tp) {
     this->register_work_queue();
   }
 
@@ -546,7 +546,7 @@ protected:
     int result = 0;
     {
       std::lock_guard locker(m_lock);
-      ceph::unordered_map<Context *, int>::iterator it =
+      stone::unordered_map<Context *, int>::iterator it =
         m_context_results.find(ctx);
       if (it != m_context_results.end()) {
         result = it->second;
@@ -556,19 +556,19 @@ protected:
     ctx->complete(result);
   }
 private:
-  ceph::mutex m_lock = ceph::make_mutex("ContextWQ::m_lock");
-  ceph::unordered_map<Context*, int> m_context_results;
+  stone::mutex m_lock = stone::make_mutex("ContextWQ::m_lock");
+  stone::unordered_map<Context*, int> m_context_results;
 };
 
 class ShardedThreadPool {
 
-  StoneeContext *cct;
+  StoneContext *cct;
   std::string name;
   std::string thread_name;
   std::string lockname;
-  ceph::mutex shardedpool_lock;
-  ceph::condition_variable shardedpool_cond;
-  ceph::condition_variable wait_cond;
+  stone::mutex shardedpool_lock;
+  stone::condition_variable shardedpool_cond;
+  stone::condition_variable wait_cond;
   uint32_t num_threads;
 
   std::atomic<bool> stop_threads = { false };
@@ -583,12 +583,12 @@ public:
   class BaseShardedWQ {
   
   public:
-    ceph::timespan timeout_interval, suicide_interval;
-    BaseShardedWQ(ceph::timespan ti, ceph::timespan sti)
+    stone::timespan timeout_interval, suicide_interval;
+    BaseShardedWQ(stone::timespan ti, stone::timespan sti)
       :timeout_interval(ti), suicide_interval(sti) {}
     virtual ~BaseShardedWQ() {}
 
-    virtual void _process(uint32_t thread_index, ceph::heartbeat_handle_d *hb ) = 0;
+    virtual void _process(uint32_t thread_index, stone::heartbeat_handle_d *hb ) = 0;
     virtual void return_waiting_threads() = 0;
     virtual void stop_return_waiting_threads() = 0;
     virtual bool is_shard_empty(uint32_t thread_index) = 0;
@@ -605,8 +605,8 @@ public:
 
 
   public:
-    ShardedWQ(ceph::timespan ti,
-	      ceph::timespan sti, ShardedThreadPool* tp)
+    ShardedWQ(stone::timespan ti,
+	      stone::timespan sti, ShardedThreadPool* tp)
       : BaseShardedWQ(ti, sti), sharded_pool(tp) {
       tp->set_wq(this);
     }
@@ -650,7 +650,7 @@ private:
 
 public:
 
-  ShardedThreadPool(StoneeContext *cct_, std::string nm, std::string tn, uint32_t pnum_threads);
+  ShardedThreadPool(StoneContext *cct_, std::string nm, std::string tn, uint32_t pnum_threads);
 
   ~ShardedThreadPool(){};
 

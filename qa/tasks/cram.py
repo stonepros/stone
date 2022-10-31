@@ -26,7 +26,7 @@ def task(ctx, config):
     For example::
 
         tasks:
-        - ceph:
+        - stone:
         - cram:
             clients:
               client.0:
@@ -39,7 +39,7 @@ def task(ctx, config):
     You can also run a list of cram tests on all clients::
 
         tasks:
-        - ceph:
+        - stone:
         - cram:
             clients:
               all: [qa/test.t]
@@ -60,7 +60,7 @@ def task(ctx, config):
 
     _parallel = config.get('parallel', True)
 
-    git_url = teuth_config.get_ceph_qa_suite_git_url()
+    git_url = teuth_config.get_stone_qa_suite_git_url()
     log.info('Pulling tests from %s ref %s', git_url, refspec)
 
     try:
@@ -140,17 +140,17 @@ def _run_tests(ctx, role):
     else:
         id_ = role
     (remote,) = (ctx.cluster.only(role).remotes.keys())
-    ceph_ref = ctx.summary.get('ceph-sha1', 'master')
+    stone_ref = ctx.summary.get('stone-sha1', 'master')
 
     testdir = teuthology.get_testdir(ctx)
     log.info('Running tests for %s...', role)
     remote.run(
         args=[
-            run.Raw('CEPH_REF={ref}'.format(ref=ceph_ref)),
-            run.Raw('CEPH_ID="{id}"'.format(id=id_)),
+            run.Raw('STONE_REF={ref}'.format(ref=stone_ref)),
+            run.Raw('STONE_ID="{id}"'.format(id=id_)),
             run.Raw('PATH=$PATH:/usr/sbin'),
             'adjust-ulimits',
-            'ceph-coverage',
+            'stone-coverage',
             '{tdir}/archive/coverage'.format(tdir=testdir),
             '{tdir}/virtualenv/bin/cram'.format(tdir=testdir),
             '-v', '--',

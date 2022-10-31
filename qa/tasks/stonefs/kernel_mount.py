@@ -10,7 +10,7 @@ from teuthology.orchestra.run import CommandFailedError
 from teuthology.orchestra import run
 from teuthology.contextutil import MaxWhileTries
 
-from tasks.cephfs.mount import CephFSMount
+from tasks.stonefs.mount import StoneFSMount
 
 log = logging.getLogger(__name__)
 
@@ -18,14 +18,14 @@ log = logging.getLogger(__name__)
 UMOUNT_TIMEOUT = 300
 
 
-class KernelMount(CephFSMount):
+class KernelMount(StoneFSMount):
     def __init__(self, ctx, test_dir, client_id, client_remote,
                  client_keyring_path=None, hostfs_mntpt=None,
-                 cephfs_name=None, cephfs_mntpt=None, brxnet=None, config={}):
+                 stonefs_name=None, stonefs_mntpt=None, brxnet=None, config={}):
         super(KernelMount, self).__init__(ctx=ctx, test_dir=test_dir,
             client_id=client_id, client_remote=client_remote,
             client_keyring_path=client_keyring_path, hostfs_mntpt=hostfs_mntpt,
-            cephfs_name=cephfs_name, cephfs_mntpt=cephfs_mntpt, brxnet=brxnet)
+            stonefs_name=stonefs_name, stonefs_mntpt=stonefs_mntpt, brxnet=brxnet)
 
         self.rbytes = config.get('rbytes', False)
         self.inst = None
@@ -41,9 +41,9 @@ class KernelMount(CephFSMount):
         # absurd. The proper order should be: create FS first and then
         # call mount().
         if createfs:
-            self.setupfs(name=self.cephfs_name)
-        if not self.cephfs_mntpt:
-            self.cephfs_mntpt = '/'
+            self.setupfs(name=self.stonefs_name)
+        if not self.stonefs_mntpt:
+            self.stonefs_mntpt = '/'
 
         stderr = StringIO()
         try:
@@ -64,7 +64,7 @@ class KernelMount(CephFSMount):
                 stderr=stderr, timeout=(5*60))
         except CommandFailedError:
             # the client does not have write permissions in the caps it holds
-            # for the Ceph FS that was just mounted.
+            # for the Stone FS that was just mounted.
             if 'permission denied' in stderr.getvalue().lower():
                 pass
 
@@ -79,8 +79,8 @@ class KernelMount(CephFSMount):
             opts += ',secret=' + self.get_key_from_keyfile()
         if self.config_path:
             opts += ',conf=' + self.config_path
-        if self.cephfs_name:
-            opts += ",mds_namespace=" + self.cephfs_name
+        if self.stonefs_name:
+            opts += ",mds_namespace=" + self.stonefs_name
         if self.rbytes:
             opts += ",rbytes"
         else:
@@ -88,12 +88,12 @@ class KernelMount(CephFSMount):
         if mntopts:
             opts += ',' + ','.join(mntopts)
 
-        mount_dev = ':' + self.cephfs_mntpt
-        prefix = ['sudo', 'adjust-ulimits', 'ceph-coverage',
+        mount_dev = ':' + self.stonefs_mntpt
+        prefix = ['sudo', 'adjust-ulimits', 'stone-coverage',
                   self.test_dir + '/archive/coverage',
                   'nsenter',
                   '--net=/var/run/netns/{0}'.format(self.netns_name)]
-        cmdargs = prefix + ['/bin/mount', '-t', 'ceph', mount_dev,
+        cmdargs = prefix + ['/bin/mount', '-t', 'stone', mount_dev,
                             self.hostfs_mntpt, '-v', '-o', opts]
 
         mountcmd_stdout, mountcmd_stderr = StringIO(), StringIO()
@@ -171,12 +171,12 @@ class KernelMount(CephFSMount):
         Get the debugfs folder for this mount
         """
 
-        cluster_name = 'ceph'
-        fsid = self.ctx.ceph[cluster_name].fsid
+        cluster_name = 'stone'
+        fsid = self.ctx.stone[cluster_name].fsid
 
         global_id = self._get_global_id()
 
-        return os.path.join("/sys/kernel/debug/ceph/", f"{fsid}.client{global_id}")
+        return os.path.join("/sys/kernel/debug/stonepros/", f"{fsid}.client{global_id}")
 
     def read_debug_file(self, filename):
         """
@@ -198,7 +198,7 @@ class KernelMount(CephFSMount):
 
     def _get_global_id(self):
         try:
-            p = self.run_shell_payload("getfattr --only-values -n ceph.client_id .", stdout=StringIO())
+            p = self.run_shell_payload("getfattr --only-values -n stone.client_id .", stdout=StringIO())
             v = p.stdout.getvalue()
             prefix = "client"
             assert v.startswith(prefix)
@@ -214,7 +214,7 @@ class KernelMount(CephFSMount):
 
                 def get_id_to_dir():
                     result = {}
-                    for dir in glob.glob("/sys/kernel/debug/ceph/*"):
+                    for dir in glob.glob("/sys/kernel/debug/stonepros/*"):
                         mds_sessions_lines = open(os.path.join(dir, "mds_sessions")).readlines()
                         global_id = mds_sessions_lines[0].split()[1].strip('"')
                         client_id = mds_sessions_lines[1].split()[1].strip('"')
@@ -238,7 +238,7 @@ class KernelMount(CephFSMount):
 
     def get_global_id(self):
         """
-        Look up the CephFS client ID for this mount, using debugfs.
+        Look up the StoneFS client ID for this mount, using debugfs.
         """
 
         assert self.mounted
@@ -273,13 +273,13 @@ class KernelMount(CephFSMount):
 
     def get_global_inst(self):
         """
-        Look up the CephFS client instance for this mount
+        Look up the StoneFS client instance for this mount
         """
         return self._global_inst
 
     def get_global_addr(self):
         """
-        Look up the CephFS client addr for this mount
+        Look up the StoneFS client addr for this mount
         """
         return self._global_addr
 

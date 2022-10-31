@@ -1,6 +1,6 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2015 XSky <haomai@xsky.com>
  *
@@ -17,7 +17,7 @@
 
 #include <functional>
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/Tub.h"
 
 #include "msg/async/Stack.h"
@@ -122,7 +122,7 @@ private:
     } else {
       _cur_off += f.size;
     }
-    ceph_assert(data.length());
+    stone_assert(data.length());
     return data.length();
   }
   virtual ssize_t send(bufferlist &bl, bool more) override {
@@ -220,7 +220,7 @@ class DPDKWorker : public Worker {
     interface _netif;
     std::shared_ptr<DPDKDevice> _dev;
     ipv4 _inet;
-    Impl(StoneeContext *cct, unsigned i, EventCenter *c, std::shared_ptr<DPDKDevice> dev);
+    Impl(StoneContext *cct, unsigned i, EventCenter *c, std::shared_ptr<DPDKDevice> dev);
     ~Impl();
   };
   std::unique_ptr<Impl> _impl;
@@ -232,7 +232,7 @@ class DPDKWorker : public Worker {
   using tcp4 = tcp<ipv4_traits>;
 
  public:
-  explicit DPDKWorker(StoneeContext *c, unsigned i): Worker(c, i) {}
+  explicit DPDKWorker(StoneContext *c, unsigned i): Worker(c, i) {}
   virtual int listen(entity_addr_t &addr, unsigned addr_slot,
 		     const SocketOptions &opts, ServerSocket *) override;
   virtual int connect(const entity_addr_t &addr, const SocketOptions &opts, ConnectedSocket *socket) override;
@@ -249,12 +249,12 @@ class DPDKWorker : public Worker {
 class DPDKStack : public NetworkStack {
   vector<std::function<void()> > funcs;
 
-  virtual Worker* create_worker(StoneeContext *c, unsigned worker_id) override {
+  virtual Worker* create_worker(StoneContext *c, unsigned worker_id) override {
     return new DPDKWorker(c, worker_id);
   }
 
  public:
-  explicit DPDKStack(StoneeContext *cct): NetworkStack(cct) {
+  explicit DPDKStack(StoneContext *cct): NetworkStack(cct) {
     funcs.resize(cct->_conf->ms_async_max_op_threads);
   }
   virtual bool support_local_listen_table() const override { return true; }

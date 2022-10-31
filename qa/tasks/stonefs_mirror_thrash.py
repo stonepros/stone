@@ -1,5 +1,5 @@
 """
-Task for thrashing cephfs-mirror daemons
+Task for thrashing stonefs-mirror daemons
 """
 
 import contextlib
@@ -20,20 +20,20 @@ from tasks.thrasher import Thrasher
 log = logging.getLogger(__name__)
 
 
-class CephFSMirrorThrasher(Thrasher, Greenlet):
+class StoneFSMirrorThrasher(Thrasher, Greenlet):
     """
-    CephFSMirrorThrasher::
+    StoneFSMirrorThrasher::
 
-    The CephFSMirrorThrasher thrashes cephfs-mirror daemons during execution of other
+    The StoneFSMirrorThrasher thrashes stonefs-mirror daemons during execution of other
     tasks (workunits, etc).
 
     The config is optional.  Many of the config parameters are a maximum value
     to use when selecting a random value from a range.  The config is a dict
     containing some or all of:
 
-    cluster: [default: ceph] cluster to thrash
+    cluster: [default: stone] cluster to thrash
 
-    max_thrash: [default: 1] the maximum number of active cephfs-mirror daemons per
+    max_thrash: [default: 1] the maximum number of active stonefs-mirror daemons per
       cluster will be thrashed at any given time.
 
     min_thrash_delay: [default: 60] minimum number of seconds to delay before
@@ -43,7 +43,7 @@ class CephFSMirrorThrasher(Thrasher, Greenlet):
       thrashing again.
 
     max_revive_delay: [default: 10] maximum number of seconds to delay before
-      bringing back a thrashed cephfs-mirror daemon.
+      bringing back a thrashed stonefs-mirror daemon.
 
     randomize: [default: true] enables randomization and use the max/min values
 
@@ -55,14 +55,14 @@ class CephFSMirrorThrasher(Thrasher, Greenlet):
       values:
 
       tasks:
-      - ceph:
-      - cephfs_mirror_thrash:
+      - stone:
+      - stonefs_mirror_thrash:
           randomize: False
           max_thrash_delay: 10
     """
 
     def __init__(self, ctx, config, cluster, daemons):
-        super(CephFSMirrorThrasher, self).__init__()
+        super(StoneFSMirrorThrasher, self).__init__()
 
         self.ctx = ctx
         self.config = config
@@ -70,7 +70,7 @@ class CephFSMirrorThrasher(Thrasher, Greenlet):
         self.daemons = daemons
 
         self.logger = log
-        self.name = 'thrasher.cephfs_mirror.[{cluster}]'.format(cluster = cluster)
+        self.name = 'thrasher.stonefs_mirror.[{cluster}]'.format(cluster = cluster)
         self.stopping = Event()
 
         self.randomize = bool(self.config.get('randomize', True))
@@ -90,7 +90,7 @@ class CephFSMirrorThrasher(Thrasher, Greenlet):
             # The DaemonWatchdog will observe the error and tear down the test.
 
     def log(self, x):
-        """Write data to logger assigned to this CephFSMirrorThrasher"""
+        """Write data to logger assigned to this StoneFSMirrorThrasher"""
         self.logger.info(x)
 
     def stop(self):
@@ -179,39 +179,39 @@ class CephFSMirrorThrasher(Thrasher, Greenlet):
 @contextlib.contextmanager
 def task(ctx, config):
     """
-    Stress test the cephfs-mirror by thrashing while another task/workunit
+    Stress test the stonefs-mirror by thrashing while another task/workunit
     is running.
 
-    Please refer to CephFSMirrorThrasher class for further information on the
+    Please refer to StoneFSMirrorThrasher class for further information on the
     available options.
     """
     if config is None:
         config = {}
     assert isinstance(config, dict), \
-        'cephfs_mirror_thrash task only accepts a dict for configuration'
+        'stonefs_mirror_thrash task only accepts a dict for configuration'
 
-    cluster = config.get('cluster', 'ceph')
-    daemons = list(ctx.daemons.iter_daemons_of_role('cephfs-mirror', cluster))
+    cluster = config.get('cluster', 'stone')
+    daemons = list(ctx.daemons.iter_daemons_of_role('stonefs-mirror', cluster))
     assert len(daemons) > 0, \
-        'cephfs_mirror_thrash task requires at least 1 cephfs-mirror daemon'
+        'stonefs_mirror_thrash task requires at least 1 stonefs-mirror daemon'
 
     # choose random seed
     if 'seed' in config:
         seed = int(config['seed'])
     else:
         seed = int(time.time())
-    log.info('cephfs_mirror_thrash using random seed: {seed}'.format(seed=seed))
+    log.info('stonefs_mirror_thrash using random seed: {seed}'.format(seed=seed))
     random.seed(seed)
 
-    thrasher = CephFSMirrorThrasher(ctx, config, cluster, daemons)
+    thrasher = StoneFSMirrorThrasher(ctx, config, cluster, daemons)
     thrasher.start()
-    ctx.ceph[cluster].thrashers.append(thrasher)
+    ctx.stone[cluster].thrashers.append(thrasher)
 
     try:
         log.debug('Yielding')
         yield
     finally:
-        log.info('joining cephfs_mirror_thrash')
+        log.info('joining stonefs_mirror_thrash')
         thrasher.stop()
         if thrasher.exception is not None:
             raise RuntimeError('error during thrashing')

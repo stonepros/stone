@@ -1,12 +1,12 @@
 import logging
 import errno
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 from teuthology.contextutil import safe_while
 from teuthology.orchestra.run import CommandFailedError
 
 log = logging.getLogger(__name__)
 
-class TestScrub2(CephFSTestCase):
+class TestScrub2(StoneFSTestCase):
     MDSS_REQUIRED = 3
     CLIENTS_REQUIRED = 1
 
@@ -22,7 +22,7 @@ class TestScrub2(CephFSTestCase):
                                                            reverse=reverse), True)
 
     def _check_task_status_na(self, timo=120):
-        """ check absence of scrub status in ceph status """
+        """ check absence of scrub status in stone status """
         with safe_while(sleep=1, tries=120, action='wait for task status') as proceed:
             while proceed():
                 active = self.fs.get_active_names()
@@ -32,7 +32,7 @@ class TestScrub2(CephFSTestCase):
                     return True
 
     def _check_task_status(self, expected_status, timo=120):
-        """ check scrub status for current active mds in ceph status """
+        """ check scrub status for current active mds in stone status """
         with safe_while(sleep=1, tries=120, action='wait for task status') as proceed:
             while proceed():
                 active = self.fs.get_active_names()
@@ -61,9 +61,9 @@ class TestScrub2(CephFSTestCase):
         self.mount_a.run_shell(['mkdir', '-p', path])
         self.mount_a.run_shell(['sync', path])
 
-        self.mount_a.setfattr("d1/d2", "ceph.dir.pin", "0")
-        self.mount_a.setfattr("d1/d2/d3/d4", "ceph.dir.pin", "1")
-        self.mount_a.setfattr("d1/d2/d3/d4/d5/d6", "ceph.dir.pin", "2")
+        self.mount_a.setfattr("d1/d2", "stone.dir.pin", "0")
+        self.mount_a.setfattr("d1/d2/d3/d4", "stone.dir.pin", "1")
+        self.mount_a.setfattr("d1/d2/d3/d4/d5/d6", "stone.dir.pin", "2")
         
         self._wait_subtrees([('/d1/d2', 0), ('/d1/d2/d3/d4', 1)], status, 0)
         self._wait_subtrees([('/d1/d2/d3/d4', 1), ('/d1/d2/d3/d4/d5/d6', 2)], status, 1)

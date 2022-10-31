@@ -2,7 +2,7 @@ import json
 import os
 import pytest
 
-from ceph.deployment.inventory import Devices
+from stone.deployment.inventory import Devices
 
 
 @pytest.mark.parametrize("filename",

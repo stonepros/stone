@@ -37,7 +37,7 @@ export class ApiInterceptorService implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const acceptHeader = request.headers.get('Accept');
     let reqWithVersion: HttpRequest<any>;
-    if (acceptHeader && acceptHeader.startsWith('application/vnd.ceph.api.v')) {
+    if (acceptHeader && acceptHeader.startsWith('application/vnd.stone.api.v')) {
       reqWithVersion = request.clone();
     } else {
       reqWithVersion = request.clone({

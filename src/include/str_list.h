@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-namespace ceph {
+namespace stone {
 
 /// Split a string using the given delimiters, passing each piece as a
 /// (non-null-terminated) std::string_view to the callback.
@@ -23,7 +23,7 @@ void for_each_substr(std::string_view s, const char *delims, Func&& f)
   }
 }
 
-} // namespace ceph
+} // namespace stone
 
 /**
  * Split **str** into a list of strings, using the ";,= \t" delimiters and output the result in **str_list**.

@@ -6,9 +6,9 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrModule } from 'ngx-toastr';
 
-import { CephModule } from '~/app/ceph/ceph.module';
-import { ClusterModule } from '~/app/ceph/cluster/cluster.module';
-import { DashboardModule } from '~/app/ceph/dashboard/dashboard.module';
+import { StoneModule } from '~/app/stone/stone.module';
+import { ClusterModule } from '~/app/stone/cluster/cluster.module';
+import { DashboardModule } from '~/app/stone/dashboard/dashboard.module';
 import { CoreModule } from '~/app/core/core.module';
 import { TableActionsComponent } from '~/app/shared/datatable/table-actions/table-actions.component';
 import { SharedModule } from '~/app/shared/shared.module';
@@ -29,7 +29,7 @@ describe('ActiveAlertListComponent', () => {
       SharedModule,
       ClusterModule,
       DashboardModule,
-      CephModule,
+      StoneModule,
       CoreModule
     ]
   });

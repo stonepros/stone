@@ -3,7 +3,7 @@
 .. _osdmaptool:
 
 ======================================================
- osdmaptool -- ceph osd cluster map manipulation tool
+ osdmaptool -- stone osd cluster map manipulation tool
 ======================================================
 
 .. program:: osdmaptool
@@ -25,7 +25,7 @@ Description
 ===========
 
 **osdmaptool** is a utility that lets you create, view, and manipulate
-OSD cluster maps from the Ceph distributed storage system. Notably, it
+OSD cluster maps from the Stone distributed storage system. Notably, it
 lets you extract the embedded CRUSH map or import a new CRUSH map.
 It can also simulate the upmap balancer mode so you can get a sense of
 what is needed to balance your PGs.
@@ -319,13 +319,13 @@ To simulate the active balancer in upmap mode::
 Availability
 ============
 
-**osdmaptool** is part of Ceph, a massively scalable, open-source, distributed storage system.  Please
-refer to the Ceph documentation at http://ceph.com/docs for more
+**osdmaptool** is part of Stone, a massively scalable, open-source, distributed storage system.  Please
+refer to the Stone documentation at http://stone.com/docs for more
 information.
 
 
 See also
 ========
 
-:doc:`ceph <ceph>`\(8),
+:doc:`stone <stone>`\(8),
 :doc:`crushtool <crushtool>`\(8),

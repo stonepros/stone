@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -88,7 +88,7 @@ public:
     case OP_ABORT: return "abort";
       //case OP_COMMIT: return "commit";
 
-    default: ceph_abort(); return 0;
+    default: stone_abort(); return 0;
     }
   }
 
@@ -120,14 +120,14 @@ public:
   filepath destdnpath;
   std::string alternate_name;
   std::set<mds_rank_t> witnesses;
-  ceph::buffer::list inode_export;
+  stone::buffer::list inode_export;
   version_t inode_export_v;
   mds_rank_t srcdn_auth;
   utime_t op_stamp;
 
-  mutable ceph::buffer::list straybl;  // stray dir + dentry
-  ceph::buffer::list srci_snapbl;
-  ceph::buffer::list desti_snapbl;
+  mutable stone::buffer::list straybl;  // stray dir + dentry
+  stone::buffer::list srci_snapbl;
+  stone::buffer::list desti_snapbl;
 
 public:
   metareqid_t get_reqid() const { return reqid; }
@@ -162,8 +162,8 @@ public:
   void mark_req_blocked() { flags |= FLAG_REQBLOCKED; }
 
   void set_lock_type(int t) { lock_type = t; }
-  const ceph::buffer::list& get_lock_data() const { return inode_export; }
-  ceph::buffer::list& get_lock_data() { return inode_export; }
+  const stone::buffer::list& get_lock_data() const { return inode_export; }
+  stone::buffer::list& get_lock_data() { return inode_export; }
 
 protected:
   MMDSPeerRequest() : MMDSOp{MSG_MDS_PEER_REQUEST, HEAD_VERSION, COMPAT_VERSION} { }
@@ -175,7 +175,7 @@ protected:
 
 public:
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(reqid, payload);
     encode(attempt, payload);
     encode(op, payload);
@@ -196,7 +196,7 @@ public:
     encode(alternate_name, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(reqid, p);
     decode(attempt, p);
@@ -227,7 +227,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

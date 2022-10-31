@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2009 Sage Weil <sage@newdream.net>
  *
@@ -15,12 +15,12 @@
 #ifndef STONE_OBJ_BENCHER_H
 #define STONE_OBJ_BENCHER_H
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "common/Formatter.h"
-#include "ceph_time.h"
+#include "stone_time.h"
 #include <cfloat>
 
-using ceph::mono_clock;
+using stone::mono_clock;
 
 struct bench_interval_data {
   double min_bandwidth = DBL_MAX;
@@ -66,9 +66,9 @@ class ObjBencher {
   Formatter *formatter = NULL;
   ostream *outstream = NULL;
 public:
-  StoneeContext *cct;
+  StoneContext *cct;
 protected:
-  ceph::mutex lock = ceph::make_mutex("ObjBencher::lock");
+  stone::mutex lock = stone::make_mutex("ObjBencher::lock");
 
   static void *status_printer(void *bencher);
 
@@ -107,7 +107,7 @@ protected:
   ostream& out(ostream& os);
   ostream& out(ostream& os, utime_t& t);
 public:
-  explicit ObjBencher(StoneeContext *cct_) : show_time(false), cct(cct_), data() {}
+  explicit ObjBencher(StoneContext *cct_) : show_time(false), cct(cct_), data() {}
   virtual ~ObjBencher() {}
   int aio_bench(
     int operation, int secondsToRun,

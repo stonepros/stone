@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 SUSE LINUX GmbH
  *
@@ -19,10 +19,10 @@
 #include <resolv.h>
 #endif
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "msg/msg_types.h"		// for entity_addr_t
 
-namespace ceph {
+namespace stone {
 
 /**
  * this class is used to facilitate the testing of
@@ -85,7 +85,7 @@ class DNSResolver {
       entity_addr_t addr;
     };
 
-    int resolve_cname(StoneeContext *cct, const std::string& hostname,
+    int resolve_cname(StoneContext *cct, const std::string& hostname,
         std::string *cname, bool *found);
 
     /**
@@ -95,7 +95,7 @@ class DNSResolver {
      * @param[out] addr the hostname's address
      * @returns 0 on success, negative error code on failure
      */
-    int resolve_ip_addr(StoneeContext *cct, const std::string& hostname,
+    int resolve_ip_addr(StoneContext *cct, const std::string& hostname,
         entity_addr_t *addr);
 
     /**
@@ -109,7 +109,7 @@ class DNSResolver {
      *             changed.
      * @returns 0 on success, negative error code on failure
      */
-    int resolve_srv_hosts(StoneeContext *cct, const std::string& service_name,
+    int resolve_srv_hosts(StoneContext *cct, const std::string& service_name,
         const SRV_Protocol trans_protocol, std::map<std::string, Record> *srv_hosts);
 
     /**
@@ -124,7 +124,7 @@ class DNSResolver {
      *             changed.
      * @returns 0 on success, negative error code on failure
      */
-    int resolve_srv_hosts(StoneeContext *cct, const std::string& service_name,
+    int resolve_srv_hosts(StoneContext *cct, const std::string& service_name,
         const SRV_Protocol trans_protocol, const std::string& domain,
         std::map<std::string, Record> *srv_hosts);
 
@@ -132,12 +132,12 @@ class DNSResolver {
     DNSResolver() { resolv_h = new ResolvHWrapper(); }
     ~DNSResolver();
 
-    ceph::mutex lock = ceph::make_mutex("DNSResolver::lock");
+    stone::mutex lock = stone::make_mutex("DNSResolver::lock");
     ResolvHWrapper *resolv_h;
 #ifdef HAVE_RES_NQUERY
     std::list<res_state> states;
 
-    int get_state(StoneeContext *cct, res_state *ps);
+    int get_state(StoneContext *cct, res_state *ps);
     void put_state(res_state s);
 #endif
 
@@ -145,7 +145,7 @@ class DNSResolver {
     /* this private function allows to reuse the res_state structure used
      * by other function of this class
      */
-    int resolve_ip_addr(StoneeContext *cct, res_state *res,
+    int resolve_ip_addr(StoneContext *cct, res_state *res,
         const std::string& hostname, entity_addr_t *addr);
 #endif
 

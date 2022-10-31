@@ -3,9 +3,9 @@ import argparse
 import logging
 import os
 from textwrap import dedent
-from ceph_volume import process, conf, decorators, terminal
-from ceph_volume.util import system
-from ceph_volume.util import prepare as prepare_utils
+from stone_volume import process, conf, decorators, terminal
+from stone_volume.util import system
+from stone_volume.util import prepare as prepare_utils
 from .list import direct_report
 
 
@@ -17,12 +17,12 @@ def activate_bluestore(meta, tmpfs, systemd, block_wal=None, block_db=None):
     osd_uuid = meta['osd_uuid']
 
     # mount on tmpfs the osd directory
-    osd_path = '/var/lib/ceph/osd/%s-%s' % (conf.cluster, osd_id)
+    osd_path = '/var/lib/stone/osd/%s-%s' % (conf.cluster, osd_id)
     if not system.path_is_mounted(osd_path):
         # mkdir -p and mount as tmpfs
         prepare_utils.create_osd_path(osd_id, tmpfs=tmpfs)
 
-    # XXX This needs to be removed once ceph-bluestore-tool can deal with
+    # XXX This needs to be removed once stone-bluestore-tool can deal with
     # symlinks that exist in the osd dir
     for link_name in ['block', 'block.db', 'block.wal']:
         link_path = os.path.join(osd_path, link_name)
@@ -34,7 +34,7 @@ def activate_bluestore(meta, tmpfs, systemd, block_wal=None, block_db=None):
     # even if permissions are somehow messed up
     system.chown(osd_path)
     prime_command = [
-        'ceph-bluestore-tool',
+        'stone-bluestore-tool',
         'prime-osd-dir', '--dev', meta['device'],
         '--path', osd_path,
         '--no-mon-config']
@@ -52,7 +52,7 @@ def activate_bluestore(meta, tmpfs, systemd, block_wal=None, block_db=None):
         prepare_utils.link_db(block_db, osd_id, osd_uuid)
 
     system.chown(osd_path)
-    terminal.success("ceph-volume raw activate successful for osd ID: %s" % osd_id)
+    terminal.success("stone-volume raw activate successful for osd ID: %s" % osd_id)
 
 
 class Activate(object):
@@ -73,7 +73,7 @@ class Activate(object):
 
         for osd_id, meta in found.items():
             logger.info('Activating osd.%s uuid %s cluster %s' % (
-                        osd_id, meta['osd_uuid'], meta['ceph_fsid']))
+                        osd_id, meta['osd_uuid'], meta['stone_fsid']))
             activate_bluestore(meta,
                                tmpfs=tmpfs,
                                systemd=systemd,
@@ -85,13 +85,13 @@ class Activate(object):
         Activate (BlueStore) OSD on a raw block device based on the
         device label (normally the first block of the device).
 
-            ceph-volume raw activate --device /dev/sdb
+            stone-volume raw activate --device /dev/sdb
 
         The device(s) associated with the OSD needs to have been prepared
         previously, so that all needed tags and metadata exist.
         """)
         parser = argparse.ArgumentParser(
-            prog='ceph-volume raw activate',
+            prog='stone-volume raw activate',
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=sub_command_help,
         )

@@ -63,12 +63,12 @@ protected:
   * provides handling for spilled over entries
   * (when entry count >= max_entries)
   */
-  AvlAllocator(CephContext* cct, int64_t device_size, int64_t block_size,
+  AvlAllocator(StoneContext* cct, int64_t device_size, int64_t block_size,
     uint64_t max_mem,
     const std::string& name);
 
 public:
-  AvlAllocator(CephContext* cct, int64_t device_size, int64_t block_size,
+  AvlAllocator(StoneContext* cct, int64_t device_size, int64_t block_size,
 	       const std::string& name);
   ~AvlAllocator();
   const char* get_type() const override
@@ -185,7 +185,7 @@ private:
   uint64_t range_count_cap = 0;
 
   void _range_size_tree_rm(range_seg_t& r) {
-    ceph_assert(num_free >= r.length());
+    stone_assert(num_free >= r.length());
     num_free -= r.length();
     range_size_tree.erase(r);
 
@@ -232,14 +232,14 @@ private:
   virtual void _spillover_range(uint64_t start, uint64_t end) {
     // this should be overriden when range count cap is present,
     // i.e. (range_count_cap > 0)
-    ceph_assert(false);
+    stone_assert(false);
   }
 protected:
   // called when extent to be released/marked free
   virtual void _add_to_tree(uint64_t start, uint64_t size);
 
 protected:
-  CephContext* cct;
+  StoneContext* cct;
   std::mutex lock;
 
   double _get_fragmentation() const {

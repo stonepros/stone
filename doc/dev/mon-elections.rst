@@ -33,7 +33,7 @@ The Problems
 ==============
 The original algorithm didn't work at all under a variety of netsplit
 conditions. This didn't manifest often in practice but has become
-important as the community and commercial vendors move Ceph into
+important as the community and commercial vendors move Stone into
 spaces requiring the use of "stretch clusters".
 
 The New Algorithms

@@ -22,7 +22,7 @@ namespace swift {
 /* TempURL: applier. */
 class TempURLApplier : public rgw::auth::LocalApplier {
 public:
-  TempURLApplier(CephContext* const cct,
+  TempURLApplier(StoneContext* const cct,
                  const RGWUserInfo& user_info)
     : LocalApplier(cct, user_info, LocalApplier::NO_SUBUSER, boost::none) {
   };
@@ -31,7 +31,7 @@ public:
 
   struct Factory {
     virtual ~Factory() {}
-    virtual aplptr_t create_apl_turl(CephContext* cct,
+    virtual aplptr_t create_apl_turl(StoneContext* cct,
                                      const req_state* s,
                                      const RGWUserInfo& user_info) const = 0;
   };
@@ -41,7 +41,7 @@ public:
 class TempURLEngine : public rgw::auth::Engine {
   using result_t = rgw::auth::Engine::result_t;
 
-  CephContext* const cct;
+  StoneContext* const cct;
   /* const */ RGWCtl* const ctl;
   const TempURLApplier::Factory* const apl_factory;
 
@@ -59,7 +59,7 @@ class TempURLEngine : public rgw::auth::Engine {
   class PrefixableSignatureHelper;
 
 public:
-  TempURLEngine(CephContext* const cct,
+  TempURLEngine(StoneContext* const cct,
                 /*const*/ RGWCtl* const ctl,
                 const TempURLApplier::Factory* const apl_factory)
     : cct(cct),
@@ -80,7 +80,7 @@ public:
 class SignedTokenEngine : public rgw::auth::Engine {
   using result_t = rgw::auth::Engine::result_t;
 
-  CephContext* const cct;
+  StoneContext* const cct;
   RGWCtl* const ctl;
   const rgw::auth::TokenExtractor* const extractor;
   const rgw::auth::LocalApplier::Factory* const apl_factory;
@@ -92,7 +92,7 @@ class SignedTokenEngine : public rgw::auth::Engine {
                         const req_state* s) const;
 
 public:
-  SignedTokenEngine(CephContext* const cct,
+  SignedTokenEngine(StoneContext* const cct,
                     /* const */RGWCtl* const ctl,
                     const rgw::auth::TokenExtractor* const extractor,
                     const rgw::auth::LocalApplier::Factory* const apl_factory)
@@ -117,7 +117,7 @@ public:
 class ExternalTokenEngine : public rgw::auth::Engine {
   using result_t = rgw::auth::Engine::result_t;
 
-  CephContext* const cct;
+  StoneContext* const cct;
   RGWCtl* const ctl;
   const rgw::auth::TokenExtractor* const extractor;
   const rgw::auth::LocalApplier::Factory* const apl_factory;
@@ -128,7 +128,7 @@ class ExternalTokenEngine : public rgw::auth::Engine {
                         const req_state* s, optional_yield y) const;
 
 public:
-  ExternalTokenEngine(CephContext* const cct,
+  ExternalTokenEngine(StoneContext* const cct,
                       /* const */RGWCtl* const ctl,
                       const rgw::auth::TokenExtractor* const extractor,
                       const rgw::auth::LocalApplier::Factory* const apl_factory)
@@ -151,7 +151,7 @@ public:
 /* SwiftAnonymous: applier. */
 class SwiftAnonymousApplier : public rgw::auth::LocalApplier {
   public:
-    SwiftAnonymousApplier(CephContext* const cct,
+    SwiftAnonymousApplier(StoneContext* const cct,
                           const RGWUserInfo& user_info)
       : LocalApplier(cct, user_info, LocalApplier::NO_SUBUSER, boost::none) {
       };
@@ -167,7 +167,7 @@ class SwiftAnonymousEngine : public rgw::auth::AnonymousEngine {
   }
 
 public:
-  SwiftAnonymousEngine(CephContext* const cct,
+  SwiftAnonymousEngine(StoneContext* const cct,
                        const SwiftAnonymousApplier::Factory* const apl_factory,
                        const rgw::auth::TokenExtractor* const extractor)
     : AnonymousEngine(cct, apl_factory),
@@ -195,7 +195,7 @@ class DefaultStrategy : public rgw::auth::Strategy,
   const rgw::auth::swift::ExternalTokenEngine external_engine;
   const rgw::auth::swift::SwiftAnonymousEngine anon_engine;
 
-  using keystone_config_t = rgw::keystone::CephCtxConfig;
+  using keystone_config_t = rgw::keystone::StoneCtxConfig;
   using keystone_cache_t = rgw::keystone::TokenCache;
   using aplptr_t = rgw::auth::IdentityApplier::aplptr_t;
   using acl_strategy_t = rgw::auth::RemoteApplier::acl_strategy_t;
@@ -207,7 +207,7 @@ class DefaultStrategy : public rgw::auth::Strategy,
     return s->info.env->get("HTTP_X_AUTH_TOKEN", "");
   }
 
-  aplptr_t create_apl_remote(CephContext* const cct,
+  aplptr_t create_apl_remote(StoneContext* const cct,
                              const req_state* const s,
                              acl_strategy_t&& extra_acl_strategy,
                              const rgw::auth::RemoteApplier::AuthInfo &info) const override {
@@ -221,7 +221,7 @@ class DefaultStrategy : public rgw::auth::Strategy,
     return aplptr_t(new decltype(apl)(std::move(apl)));
   }
 
-  aplptr_t create_apl_local(CephContext* const cct,
+  aplptr_t create_apl_local(StoneContext* const cct,
                             const req_state* const s,
                             const RGWUserInfo& user_info,
                             const std::string& subuser,
@@ -234,7 +234,7 @@ class DefaultStrategy : public rgw::auth::Strategy,
     return aplptr_t(new decltype(apl)(std::move(apl)));
   }
 
-  aplptr_t create_apl_turl(CephContext* const cct,
+  aplptr_t create_apl_turl(StoneContext* const cct,
                            const req_state* const s,
                            const RGWUserInfo& user_info) const override {
     /* TempURL doesn't need any user account override. It's a Swift-specific
@@ -244,7 +244,7 @@ class DefaultStrategy : public rgw::auth::Strategy,
   }
 
 public:
-  DefaultStrategy(CephContext* const cct,
+  DefaultStrategy(StoneContext* const cct,
                   ImplicitTenants& implicit_tenant_context,
                   RGWCtl* const ctl)
     : ctl(ctl),

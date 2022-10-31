@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -17,7 +17,7 @@
 
 #include "messages/PaxosServiceMessage.h"
 
-#include "include/ceph_features.h"
+#include "include/stone_features.h"
 #include "include/types.h"
 #include "osd/osd_types.h"
 
@@ -66,7 +66,7 @@ public:
   void encode_payload(uint64_t features) override {
     header.version = HEAD_VERSION;
     header.compat_version = COMPAT_VERSION;
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     if (!HAVE_FEATURE(features, SERVER_NAUTILUS)) {
       header.version = 6;
@@ -90,7 +90,7 @@ public:
   }
   void decode_payload() override {
     auto p = payload.cbegin();
-    using ceph::decode;
+    using stone::decode;
     paxos_decode(p);
     if (header.version < 7) {
       entity_addr_t a;
@@ -116,7 +116,7 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

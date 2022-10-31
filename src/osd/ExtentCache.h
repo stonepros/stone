@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat
  *
@@ -96,26 +96,26 @@
 
 /// If someone wants these types, but not ExtentCache, move to another file
 struct bl_split_merge {
-  ceph::buffer::list split(
+  stone::buffer::list split(
     uint64_t offset,
     uint64_t length,
-    ceph::buffer::list &bl) const {
-    ceph::buffer::list out;
+    stone::buffer::list &bl) const {
+    stone::buffer::list out;
     out.substr_of(bl, offset, length);
     return out;
   }
-  bool can_merge(const ceph::buffer::list &left, const ceph::buffer::list &right) const {
+  bool can_merge(const stone::buffer::list &left, const stone::buffer::list &right) const {
     return true;
   }
-  ceph::buffer::list merge(ceph::buffer::list &&left, ceph::buffer::list &&right) const {
-    ceph::buffer::list bl{std::move(left)};
+  stone::buffer::list merge(stone::buffer::list &&left, stone::buffer::list &&right) const {
+    stone::buffer::list bl{std::move(left)};
     bl.claim_append(right);
     return bl;
   }
-  uint64_t length(const ceph::buffer::list &b) const { return b.length(); }
+  uint64_t length(const stone::buffer::list &b) const { return b.length(); }
 };
 using extent_set = interval_set<uint64_t>;
-using extent_map = interval_map<uint64_t, ceph::buffer::list, bl_split_merge>;
+using extent_map = interval_map<uint64_t, stone::buffer::list, bl_split_merge>;
 
 class ExtentCache {
   struct object_extent_set;
@@ -130,7 +130,7 @@ private:
 
     uint64_t offset;
     uint64_t length;
-    std::optional<ceph::buffer::list> bl;
+    std::optional<stone::buffer::list> bl;
 
     uint64_t get_length() const {
       return length;
@@ -141,16 +141,16 @@ private:
     }
 
     bool pinned_by_write() const {
-      ceph_assert(parent_pin_state);
+      stone_assert(parent_pin_state);
       return parent_pin_state->is_write();
     }
 
     uint64_t pin_tid() const {
-      ceph_assert(parent_pin_state);
+      stone_assert(parent_pin_state);
       return parent_pin_state->tid;
     }
 
-    extent(uint64_t offset, ceph::buffer::list _bl)
+    extent(uint64_t offset, stone::buffer::list _bl)
       : offset(offset), length(_bl.length()), bl(_bl) {}
 
     extent(uint64_t offset, uint64_t length)
@@ -203,7 +203,7 @@ private:
 	UPDATE_PIN
       };
       type action = NONE;
-      std::optional<ceph::buffer::list> bl;
+      std::optional<stone::buffer::list> bl;
     };
     template <typename F>
     void traverse_update(
@@ -219,14 +219,14 @@ private:
 
 	update_action action;
 	f(offset, extlen, nullptr, &action);
-	ceph_assert(!action.bl || action.bl->length() == extlen);
+	stone_assert(!action.bl || action.bl->length() == extlen);
 	if (action.action == update_action::UPDATE_PIN) {
 	  extent *ext = action.bl ?
 	    new extent(offset, *action.bl) :
 	    new extent(offset, extlen);
 	  ext->link(*this, pin);
 	} else {
-	  ceph_assert(!action.bl);
+	  stone_assert(!action.bl);
 	}
       }
 
@@ -241,7 +241,7 @@ private:
 
 	update_action action;
 	f(extoff, extlen, ext, &action);
-	ceph_assert(!action.bl || action.bl->length() == extlen);
+	stone_assert(!action.bl || action.bl->length() == extlen);
 	extent *final_extent = nullptr;
 	if (action.action == update_action::NONE) {
 	  final_extent = ext;
@@ -252,7 +252,7 @@ private:
 	      (ext->offset + ext->get_length() > offset)) {
 	    extent *head = nullptr;
 	    if (ext->bl) {
-	      ceph::buffer::list bl;
+	      stone::buffer::list bl;
 	      bl.substr_of(
 		*(ext->bl),
 		0,
@@ -270,7 +270,7 @@ private:
 	      (ext->offset + ext->get_length()) - (offset + length);
 	    extent *tail = nullptr;
 	    if (ext->bl) {
-	      ceph::buffer::list bl;
+	      stone::buffer::list bl;
 	      bl.substr_of(
 		*(ext->bl),
 		ext->get_length() - nlen,
@@ -283,7 +283,7 @@ private:
 	  }
 	  if (action.action == update_action::UPDATE_PIN) {
 	    if (ext->bl) {
-	      ceph::buffer::list bl;
+	      stone::buffer::list bl;
 	      bl.substr_of(
 		*(ext->bl),
 		extoff - ext->offset,
@@ -301,8 +301,8 @@ private:
 	}
 
 	if (action.bl) {
-	  ceph_assert(final_extent);
-	  ceph_assert(final_extent->length == action.bl->length());
+	  stone_assert(final_extent);
+	  stone_assert(final_extent->length == action.bl->length());
 	  final_extent->bl = *(action.bl);
 	}
 
@@ -314,14 +314,14 @@ private:
 
 	  update_action action;
 	  f(tailoff, taillen, nullptr, &action);
-	  ceph_assert(!action.bl || action.bl->length() == taillen);
+	  stone_assert(!action.bl || action.bl->length() == taillen);
 	  if (action.action == update_action::UPDATE_PIN) {
 	    extent *ext = action.bl ?
 	      new extent(tailoff, *action.bl) :
 	      new extent(tailoff, taillen);
 	    ext->link(*this, pin);
 	  } else {
-	    ceph_assert(!action.bl);
+	    stone_assert(!action.bl);
 	  }
 	}
       }
@@ -366,13 +366,13 @@ private:
     using list = boost::intrusive::list<extent, list_member_options>;
     list pin_list;
     ~pin_state() {
-      ceph_assert(pin_list.empty());
-      ceph_assert(tid == 0);
-      ceph_assert(pin_type == NONE);
+      stone_assert(pin_list.empty());
+      stone_assert(tid == 0);
+      stone_assert(pin_type == NONE);
     }
     void _open(uint64_t in_tid, pin_type_t in_type) {
-      ceph_assert(pin_type == NONE);
-      ceph_assert(in_tid > 0);
+      stone_assert(pin_type == NONE);
+      stone_assert(in_tid > 0);
       tid = in_tid;
       pin_type = in_type;
     }
@@ -382,7 +382,7 @@ private:
     for (auto iter = p.pin_list.begin(); iter != p.pin_list.end(); ) {
       std::unique_ptr<extent> extent(&*iter); // we now own this
       iter++; // unlink will invalidate
-      ceph_assert(extent->parent_extent_set);
+      stone_assert(extent->parent_extent_set);
       auto &eset = *(extent->parent_extent_set);
       extent->unlink();
       remove_and_destroy_if_empty(eset);

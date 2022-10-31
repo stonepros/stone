@@ -46,7 +46,7 @@ on each machine that will be a iSCSI gateway:
 2. Install Git
 ==============
 
-In order to install all the packages needed to run iSCSI with Ceph, you need to download them directly from their repository by using Git.
+In order to install all the packages needed to run iSCSI with Stone, you need to download them directly from their repository by using Git.
 On CentOS/RHEL execute:
 
 ::
@@ -65,7 +65,7 @@ To know more about Git and how it works, please, visit https://git-scm.com
 3. Ensure a compatible kernel is used
 =====================================
 
-Ensure you use a supported kernel that contains the required Ceph iSCSI patches:
+Ensure you use a supported kernel that contains the required Stone iSCSI patches:
 
 -  all Linux distribution with a kernel v4.16 or newer, or
 -  Red Hat Enterprise Linux or CentOS 7.5 or later (in these distributions ceph-iscsi support is backported)
@@ -73,7 +73,7 @@ Ensure you use a supported kernel that contains the required Ceph iSCSI patches:
 If you are already using a compatible kernel, you can go to next step.
 However, if you are NOT using a compatible kernel then check your distro's
 documentation for specific instructions on how to build this kernel. The only
-Ceph iSCSI specific requirements are that the following build options must be
+Stone iSCSI specific requirements are that the following build options must be
 enabled:
 
     ::

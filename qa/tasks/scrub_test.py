@@ -7,7 +7,7 @@ import os
 import time
 import tempfile
 
-from tasks import ceph_manager
+from tasks import stone_manager
 from teuthology import misc as teuthology
 
 log = logging.getLogger(__name__)
@@ -32,8 +32,8 @@ def find_victim_object(ctx, pg, osd):
     """Return a file to be fuzzed"""
     (osd_remote,) = ctx.cluster.only('osd.%d' % osd).remotes.keys()
     data_path = os.path.join(
-        '/var/lib/ceph/osd',
-        'ceph-{id}'.format(id=osd),
+        '/var/lib/stonepros/osd',
+        'stone-{id}'.format(id=osd),
         'fuse',
         '{pg}_head'.format(pg=pg),
         'all',
@@ -322,7 +322,7 @@ def task(ctx, config):
     tasks:
     - chef:
     - install:
-    - ceph:
+    - stone:
         log-ignorelist:
         - '!= data_digest'
         - '!= omap_digest'
@@ -353,10 +353,10 @@ def task(ctx, config):
     num_osds = teuthology.num_instances_of_type(ctx.cluster, 'osd')
     log.info('num_osds is %s' % num_osds)
 
-    manager = ceph_manager.CephManager(
+    manager = stone_manager.StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager'),
+        logger=log.getChild('stone_manager'),
         )
 
     while len(manager.get_osd_status()['up']) < num_osds:

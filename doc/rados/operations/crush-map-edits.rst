@@ -4,10 +4,10 @@ Manually editing a CRUSH Map
 .. note:: Manually editing the CRUSH map is an advanced
 	  administrator operation.  All CRUSH changes that are
 	  necessary for the overwhelming majority of installations are
-	  possible via the standard ceph CLI and do not require manual
+	  possible via the standard stone CLI and do not require manual
 	  CRUSH map edits.  If you have identified a use case where
-	  manual edits *are* necessary with recent Ceph releases, consider
-	  contacting the Ceph developers so that future versions of Ceph
+	  manual edits *are* necessary with recent Stone releases, consider
+	  contacting the Stone developers so that future versions of Stone
 	  can obviate your corner case.
 
 To edit an existing CRUSH map:
@@ -37,9 +37,9 @@ Get a CRUSH Map
 
 To get the CRUSH map for your cluster, execute the following::
 
-	ceph osd getcrushmap -o {compiled-crushmap-filename}
+	stone osd getcrushmap -o {compiled-crushmap-filename}
 
-Ceph will output (-o) a compiled CRUSH map to the filename you specified. Since
+Stone will output (-o) a compiled CRUSH map to the filename you specified. Since
 the CRUSH map is in a compiled form, you must decompile it first before you can
 edit it.
 
@@ -68,9 +68,9 @@ Set the CRUSH Map
 
 To set the CRUSH map for your cluster, execute the following::
 
-	ceph osd setcrushmap -i {compiled-crushmap-filename}
+	stone osd setcrushmap -i {compiled-crushmap-filename}
 
-Ceph will load (-i) a compiled CRUSH map from the filename you specified.
+Stone will load (-i) a compiled CRUSH map from the filename you specified.
 
 Sections
 --------
@@ -131,7 +131,7 @@ For example::
 	device 2 osd.2
 	device 3 osd.3
 
-In most cases, each device maps to a single ``ceph-osd`` daemon.  This
+In most cases, each device maps to a single ``stone-osd`` daemon.  This
 is normally a single storage device, a pair of devices (for example,
 one for data and one for a journal or metadata), or in some cases a
 small RAID device.
@@ -146,7 +146,7 @@ CRUSH Map Bucket Types
 The second list in the CRUSH map defines 'bucket' types. Buckets facilitate
 a hierarchy of nodes and leaves. Node (or non-leaf) buckets typically represent
 physical locations in a hierarchy. Nodes aggregate other nodes or leaves.
-Leaf buckets represent ``ceph-osd`` daemons and their corresponding storage
+Leaf buckets represent ``stone-osd`` daemons and their corresponding storage
 media.
 
 .. tip:: The term "bucket" used in the context of CRUSH means a node in
@@ -292,7 +292,7 @@ and one rack bucket. The OSDs are declared as items within the host buckets::
 
 .. topic:: Bucket Types
 
-   Ceph supports five bucket types, each representing a tradeoff between
+   Stone supports five bucket types, each representing a tradeoff between
    performance and reorganization efficiency. If you are unsure of which bucket
    type to use, we recommend using a ``straw2`` bucket.  For a detailed
    discussion of bucket types, refer to
@@ -341,7 +341,7 @@ and one rack bucket. The OSDs are declared as items within the host buckets::
 
 .. topic:: Hash
 
-   Each bucket uses a hash algorithm. Currently, Ceph supports ``rjenkins1``.
+   Each bucket uses a hash algorithm. Currently, Stone supports ``rjenkins1``.
    Enter ``0`` as your hash setting to select ``rjenkins1``.
 
 
@@ -349,7 +349,7 @@ and one rack bucket. The OSDs are declared as items within the host buckets::
 
 .. topic:: Weighting Bucket Items
 
-   Ceph expresses bucket weights as doubles, which allows for fine
+   Stone expresses bucket weights as doubles, which allows for fine
    weighting. A weight is the relative difference between device capacities. We
    recommend using ``1.00`` as the relative weight for a 1TB storage device.
    In such a scenario, a weight of ``0.5`` would represent approximately 500GB,
@@ -657,7 +657,7 @@ There are three types of transformations possible:
 
 The final command to convert the map comprised of the above fragments would be something like::
 
-  $ ceph osd getcrushmap -o original
+  $ stone osd getcrushmap -o original
   $ crushtool -i original --reclassify \
       --set-subtree-class default hdd \
       --reclassify-root default hdd \
@@ -677,7 +677,7 @@ in the parentheses.
 
 If you are satisfied with the adjusted map, you can apply it to the cluster with something like::
 
-  ceph osd setcrushmap -i adjusted
+  stone osd setcrushmap -i adjusted
 
 Tuning CRUSH, the hard way
 --------------------------
@@ -688,7 +688,7 @@ and reinjecting it into the cluster.
 
 * Extract the latest CRUSH map::
 
-	ceph osd getcrushmap -o /tmp/crush
+	stone osd getcrushmap -o /tmp/crush
 
 * Adjust tunables.  These values appear to offer the best behavior
   for both large and small clusters we tested with.  You will need to
@@ -700,7 +700,7 @@ and reinjecting it into the cluster.
 
 * Reinject modified map::
 
-	ceph osd setcrushmap -i /tmp/crush.new
+	stone osd setcrushmap -i /tmp/crush.new
 
 Legacy values
 -------------
@@ -712,7 +712,7 @@ with::
 
 Again, the special ``--enable-unsafe-tunables`` option is required.
 Further, as noted above, be careful running old versions of the
-``ceph-osd`` daemon after reverting to legacy values as the feature
+``stone-osd`` daemon after reverting to legacy values as the feature
 bit is not perfectly enforced.
 
-.. _CRUSH - Controlled, Scalable, Decentralized Placement of Replicated Data: https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf
+.. _CRUSH - Controlled, Scalable, Decentralized Placement of Replicated Data: https://stone.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf

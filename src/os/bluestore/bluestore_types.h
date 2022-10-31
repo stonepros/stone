@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2014 Red Hat
  *
@@ -27,9 +27,9 @@
 #include "compressor/Compressor.h"
 #include "common/Checksummer.h"
 #include "include/mempool.h"
-#include "include/ceph_hash.h"
+#include "include/stone_hash.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -42,9 +42,9 @@ struct bluestore_bdev_label_t {
 
   std::map<std::string,std::string> meta; ///< {read,write}_meta() content from ObjectStore
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
-  void dump(ceph::Formatter *f) const;
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_bdev_label_t*>& o);
 };
 WRITE_CLASS_ENCODER(bluestore_bdev_label_t)
@@ -62,7 +62,7 @@ struct bluestore_cnode_t {
     denc(v.bits, p);
     DENC_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_cnode_t*>& o);
 };
 WRITE_CLASS_DENC(bluestore_cnode_t)
@@ -106,7 +106,7 @@ struct bluestore_pextent_t : public bluestore_interval_t<uint64_t, uint32_t>
     denc_varint_lowz(v.length, p);
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_pextent_t*>& ls);
 };
 WRITE_CLASS_DENC(bluestore_pextent_t)
@@ -131,13 +131,13 @@ struct denc_traits<PExtentVector> {
     }
   }
   static void encode(const PExtentVector& v,
-		     ceph::buffer::list::contiguous_appender& p) {
+		     stone::buffer::list::contiguous_appender& p) {
     denc_varint(v.size(), p);
     for (auto& i : v) {
       denc(i, p);
     }
   }
-  static void decode(PExtentVector& v, ceph::buffer::ptr::const_iterator& p) {
+  static void decode(PExtentVector& v, stone::buffer::ptr::const_iterator& p) {
     unsigned num;
     denc_varint(num, p);
     v.clear();
@@ -189,7 +189,7 @@ struct bluestore_extent_ref_map_t {
       p += elem_size * ref_map.size();
     }
   }
-  void encode(ceph::buffer::list::contiguous_appender& p) const {
+  void encode(stone::buffer::list::contiguous_appender& p) const {
     const uint32_t n = ref_map.size();
     denc_varint(n, p);
     if (n) {
@@ -204,7 +204,7 @@ struct bluestore_extent_ref_map_t {
       }
     }
   }
-  void decode(ceph::buffer::ptr::const_iterator& p) {
+  void decode(stone::buffer::ptr::const_iterator& p) {
     uint32_t n;
     denc_varint(n, p);
     if (n) {
@@ -220,7 +220,7 @@ struct bluestore_extent_ref_map_t {
     }
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_extent_ref_map_t*>& o);
 };
 WRITE_CLASS_DENC(bluestore_extent_ref_map_t)
@@ -308,7 +308,7 @@ struct bluestore_blob_use_tracker_t {
     if (num_au) {
       new_len = round_up_to(new_len, au_size);
       uint32_t _num_au = new_len / au_size;
-      ceph_assert(_num_au <= num_au);
+      stone_assert(_num_au <= num_au);
       if (_num_au) {
         num_au = _num_au; // bytes_per_au array is left unmodified
 
@@ -319,7 +319,7 @@ struct bluestore_blob_use_tracker_t {
   }
   void add_tail(uint32_t new_len, uint32_t _au_size) {
     auto full_size = au_size * (num_au ? num_au : 1);
-    ceph_assert(new_len >= full_size);
+    stone_assert(new_len >= full_size);
     if (new_len == full_size) {
       return;
     }
@@ -327,13 +327,13 @@ struct bluestore_blob_use_tracker_t {
       uint32_t old_total = total_bytes;
       total_bytes = 0;
       init(new_len, _au_size);
-      ceph_assert(num_au);
+      stone_assert(num_au);
       bytes_per_au[0] = old_total;
     } else {
-      ceph_assert(_au_size == au_size);
+      stone_assert(_au_size == au_size);
       new_len = round_up_to(new_len, au_size);
       uint32_t _num_au = new_len / au_size;
-      ceph_assert(_num_au >= num_au);
+      stone_assert(_num_au >= num_au);
       if (_num_au > num_au) {
 	auto old_bytes = bytes_per_au;
 	auto old_num_au = num_au;
@@ -391,7 +391,7 @@ struct bluestore_blob_use_tracker_t {
       }
     }
   }
-  void encode(ceph::buffer::list::contiguous_appender& p) const {
+  void encode(stone::buffer::list::contiguous_appender& p) const {
     denc_varint(au_size, p);
     if (au_size) {
       denc_varint(num_au, p);
@@ -406,7 +406,7 @@ struct bluestore_blob_use_tracker_t {
       }
     }
   }
-  void decode(ceph::buffer::ptr::const_iterator& p) {
+  void decode(stone::buffer::ptr::const_iterator& p) {
     clear();
     denc_varint(au_size, p);
     if (au_size) {
@@ -422,7 +422,7 @@ struct bluestore_blob_use_tracker_t {
     }
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_blob_use_tracker_t*>& o);
 private:
   void allocate();
@@ -455,7 +455,7 @@ public:
   uint8_t csum_type = Checksummer::CSUM_NONE;      ///< CSUM_*
   uint8_t csum_chunk_order = 0;       ///< csum block size is 1<<block_order bytes
 
-  ceph::buffer::ptr csum_data;                ///< opaque std::vector of csum data
+  stone::buffer::ptr csum_data;                ///< opaque std::vector of csum data
 
   bluestore_blob_t(uint32_t f = 0) : flags(f) {}
 
@@ -468,7 +468,7 @@ public:
 
   DENC_HELPERS;
   void bound_encode(size_t& p, uint64_t struct_v) const {
-    ceph_assert(struct_v == 1 || struct_v == 2);
+    stone_assert(struct_v == 1 || struct_v == 2);
     denc(extents, p);
     denc_varint(flags, p);
     denc_varint_lowz(logical_length, p);
@@ -480,8 +480,8 @@ public:
     p += sizeof(unused_t);
   }
 
-  void encode(ceph::buffer::list::contiguous_appender& p, uint64_t struct_v) const {
-    ceph_assert(struct_v == 1 || struct_v == 2);
+  void encode(stone::buffer::list::contiguous_appender& p, uint64_t struct_v) const {
+    stone_assert(struct_v == 1 || struct_v == 2);
     denc(extents, p);
     denc_varint(flags, p);
     if (is_compressed()) {
@@ -500,8 +500,8 @@ public:
     }
   }
 
-  void decode(ceph::buffer::ptr::const_iterator& p, uint64_t struct_v) {
-    ceph_assert(struct_v == 1 || struct_v == 2);
+  void decode(stone::buffer::ptr::const_iterator& p, uint64_t struct_v) {
+    stone_assert(struct_v == 1 || struct_v == 2);
     denc(extents, p);
     denc_varint(flags, p);
     if (is_compressed()) {
@@ -533,7 +533,7 @@ public:
     return !has_csum() || blob_offset % get_csum_chunk_size() == 0;
   }
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_blob_t*>& ls);
 
   bool has_flag(unsigned f) const {
@@ -583,11 +583,11 @@ public:
   }
   uint64_t calc_offset(uint64_t x_off, uint64_t *plen) const {
     auto p = extents.begin();
-    ceph_assert(p != extents.end());
+    stone_assert(p != extents.end());
     while (x_off >= p->length) {
       x_off -= p->length;
       ++p;
-      ceph_assert(p != extents.end());
+      stone_assert(p != extents.end());
     }
     if (plen)
       *plen = p->length - x_off;
@@ -599,7 +599,7 @@ public:
   bool _validate_range(uint64_t b_off, uint64_t b_len,
                        bool require_allocated) const {
     auto p = extents.begin();
-    ceph_assert(p != extents.end());
+    stone_assert(p != extents.end());
     while (b_off >= p->length) {
       b_off -= p->length;
       if (++p == extents.end())
@@ -617,7 +617,7 @@ public:
       if (++p == extents.end())
         return false;
     }
-    ceph_abort_msg("we should not get here");
+    stone_abort_msg("we should not get here");
     return false;
   }
 
@@ -638,10 +638,10 @@ public:
     if (!has_unused()) {
       return false;
     }
-    ceph_assert(!is_compressed());
+    stone_assert(!is_compressed());
     uint64_t blob_len = get_logical_length();
-    ceph_assert((blob_len % (sizeof(unused)*8)) == 0);
-    ceph_assert(offset + length <= blob_len);
+    stone_assert((blob_len % (sizeof(unused)*8)) == 0);
+    stone_assert(offset + length <= blob_len);
     uint64_t chunk_size = blob_len / (sizeof(unused)*8);
     uint64_t start = offset / chunk_size;
     uint64_t end = round_up_to(offset + length, chunk_size) / chunk_size;
@@ -654,10 +654,10 @@ public:
 
   /// mark a range that has never been used
   void add_unused(uint64_t offset, uint64_t length) {
-    ceph_assert(!is_compressed());
+    stone_assert(!is_compressed());
     uint64_t blob_len = get_logical_length();
-    ceph_assert((blob_len % (sizeof(unused)*8)) == 0);
-    ceph_assert(offset + length <= blob_len);
+    stone_assert((blob_len % (sizeof(unused)*8)) == 0);
+    stone_assert(offset + length <= blob_len);
     uint64_t chunk_size = blob_len / (sizeof(unused)*8);
     uint64_t start = round_up_to(offset, chunk_size) / chunk_size;
     uint64_t end = (offset + length) / chunk_size;
@@ -672,10 +672,10 @@ public:
   /// indicate that a range has (now) been used.
   void mark_used(uint64_t offset, uint64_t length) {
     if (has_unused()) {
-      ceph_assert(!is_compressed());
+      stone_assert(!is_compressed());
       uint64_t blob_len = get_logical_length();
-      ceph_assert((blob_len % (sizeof(unused)*8)) == 0);
-      ceph_assert(offset + length <= blob_len);
+      stone_assert((blob_len % (sizeof(unused)*8)) == 0);
+      stone_assert(offset + length <= blob_len);
       uint64_t chunk_size = blob_len / (sizeof(unused)*8);
       uint64_t start = offset / chunk_size;
       uint64_t end = round_up_to(offset + length, chunk_size) / chunk_size;
@@ -732,11 +732,11 @@ public:
   int map(uint64_t x_off, uint64_t x_len, F&& f) const {
     auto x_off0 = x_off;
     auto p = extents.begin();
-    ceph_assert(p != extents.end());
+    stone_assert(p != extents.end());
     while (x_off >= p->length) {
       x_off -= p->length;
       ++p;
-      ceph_assert(p != extents.end());
+      stone_assert(p != extents.end());
     }
     while (x_len > 0 && p != extents.end()) {
       uint64_t l = std::min(p->length - x_off, x_len);
@@ -753,23 +753,23 @@ public:
 
   template<class F>
   void map_bl(uint64_t x_off,
-	      ceph::buffer::list& bl,
+	      stone::buffer::list& bl,
 	      F&& f) const {
-    static_assert(std::is_invocable_v<F, uint64_t, ceph::buffer::list&>);
+    static_assert(std::is_invocable_v<F, uint64_t, stone::buffer::list&>);
 
     auto p = extents.begin();
-    ceph_assert(p != extents.end());
+    stone_assert(p != extents.end());
     while (x_off >= p->length) {
       x_off -= p->length;
       ++p;
-      ceph_assert(p != extents.end());
+      stone_assert(p != extents.end());
     }
-    ceph::buffer::list::iterator it = bl.begin();
+    stone::buffer::list::iterator it = bl.begin();
     uint64_t x_len = bl.length();
     while (x_len > 0) {
-      ceph_assert(p != extents.end());
+      stone_assert(p != extents.end());
       uint64_t l = std::min(p->length - x_off, x_len);
-      ceph::buffer::list t;
+      stone::buffer::list t;
       it.copy(l, t);
       f(p->offset + x_off, t);
       x_off = 0;
@@ -802,17 +802,17 @@ public:
     const char *p = csum_data.c_str();
     switch (cs) {
     case 0:
-      ceph_abort_msg("no csum data, bad index");
+      stone_abort_msg("no csum data, bad index");
     case 1:
       return reinterpret_cast<const uint8_t*>(p)[i];
     case 2:
-      return reinterpret_cast<const ceph_le16*>(p)[i];
+      return reinterpret_cast<const stone_le16*>(p)[i];
     case 4:
-      return reinterpret_cast<const ceph_le32*>(p)[i];
+      return reinterpret_cast<const stone_le32*>(p)[i];
     case 8:
-      return reinterpret_cast<const ceph_le64*>(p)[i];
+      return reinterpret_cast<const stone_le64*>(p)[i];
     default:
-      ceph_abort_msg("unrecognized csum word size");
+      stone_abort_msg("unrecognized csum word size");
     }
   }
   const char *get_csum_item_ptr(unsigned i) const {
@@ -828,18 +828,18 @@ public:
     flags |= FLAG_CSUM;
     csum_type = type;
     csum_chunk_order = order;
-    csum_data = ceph::buffer::create(get_csum_value_size() * len / get_csum_chunk_size());
+    csum_data = stone::buffer::create(get_csum_value_size() * len / get_csum_chunk_size());
     csum_data.zero();
     csum_data.reassign_to_mempool(mempool::mempool_bluestore_cache_other);
   }
 
   /// calculate csum for the buffer at the given b_off
-  void calc_csum(uint64_t b_off, const ceph::buffer::list& bl);
+  void calc_csum(uint64_t b_off, const stone::buffer::list& bl);
 
   /// verify csum: return -EOPNOTSUPP for unsupported checksum type;
   /// return -1 and valid(nonnegative) b_bad_off for checksum error;
   /// return 0 if all is well.
-  int verify_csum(uint64_t b_off, const ceph::buffer::list& bl, int* b_bad_off,
+  int verify_csum(uint64_t b_off, const stone::buffer::list& bl, int* b_bad_off,
 		  uint64_t *bad_csum) const;
 
   bool can_prune_tail() const {
@@ -853,26 +853,26 @@ public:
     logical_length -= p.length;
     extents.pop_back();
     if (has_csum()) {
-      ceph::buffer::ptr t;
+      stone::buffer::ptr t;
       t.swap(csum_data);
-      csum_data = ceph::buffer::ptr(t.c_str(),
+      csum_data = stone::buffer::ptr(t.c_str(),
 			    get_logical_length() / get_csum_chunk_size() *
 			    get_csum_value_size());
     }
   }
   void add_tail(uint32_t new_len) {
-    ceph_assert(is_mutable());
-    ceph_assert(!has_unused());
-    ceph_assert(new_len > logical_length);
+    stone_assert(is_mutable());
+    stone_assert(!has_unused());
+    stone_assert(new_len > logical_length);
     extents.emplace_back(
       bluestore_pextent_t(
         bluestore_pextent_t::INVALID_OFFSET,
         new_len - logical_length));
     logical_length = new_len;
     if (has_csum()) {
-      ceph::buffer::ptr t;
+      stone::buffer::ptr t;
       t.swap(csum_data);
-      csum_data = ceph::buffer::create(
+      csum_data = stone::buffer::create(
 	get_csum_value_size() * logical_length / get_csum_chunk_size());
       csum_data.copy_in(0, t.length(), t.c_str());
       csum_data.zero(t.length(), csum_data.length() - t.length());
@@ -927,7 +927,7 @@ struct bluestore_shared_blob_t {
   }
 
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_shared_blob_t*>& ls);
 
   bool empty() const {
@@ -943,7 +943,7 @@ struct bluestore_onode_t {
   uint64_t nid = 0;                    ///< numeric id (locally unique)
   uint64_t size = 0;                   ///< object size
   // mempool to be assigned to buffer::ptr manually
-  std::map<mempool::bluestore_cache_meta::string, ceph::buffer::ptr> attrs;
+  std::map<mempool::bluestore_cache_meta::string, stone::buffer::ptr> attrs;
 
   struct shard_info {
     uint32_t offset = 0;  ///< logical offset for start of shard
@@ -952,7 +952,7 @@ struct bluestore_onode_t {
       denc_varint(v.offset, p);
       denc_varint(v.bytes, p);
     }
-    void dump(ceph::Formatter *f) const;
+    void dump(stone::Formatter *f) const;
   };
   std::vector<shard_info> extent_map_shards; ///< extent std::map shards (if any)
 
@@ -1044,7 +1044,7 @@ struct bluestore_onode_t {
     denc_varint(v.alloc_hint_flags, p);
     DENC_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_onode_t*>& o);
 };
 WRITE_CLASS_DENC(bluestore_onode_t::shard_info)
@@ -1060,7 +1060,7 @@ struct bluestore_deferred_op_t {
   __u8 op = 0;
 
   PExtentVector extents;
-  ceph::buffer::list data;
+  stone::buffer::list data;
 
   DENC(bluestore_deferred_op_t, v, p) {
     DENC_START(1, 1, p);
@@ -1069,7 +1069,7 @@ struct bluestore_deferred_op_t {
     denc(v.data, p);
     DENC_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_deferred_op_t*>& o);
 };
 WRITE_CLASS_DENC(bluestore_deferred_op_t)
@@ -1090,7 +1090,7 @@ struct bluestore_deferred_transaction_t {
     denc(v.released, p);
     DENC_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_deferred_transaction_t*>& o);
 };
 WRITE_CLASS_DENC(bluestore_deferred_transaction_t)
@@ -1113,7 +1113,7 @@ struct bluestore_compression_header_t {
     }
     DENC_FINISH(p);
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<bluestore_compression_header_t*>& o);
 };
 WRITE_CLASS_DENC(bluestore_compression_header_t)
@@ -1128,7 +1128,7 @@ class ref_counter_2hash_tracker_t {
 public:
   ref_counter_2hash_tracker_t(uint64_t mem_cap) {
     num_buckets = mem_cap / sizeof(COUNTER_TYPE) / 2;
-    ceph_assert(num_buckets);
+    stone_assert(num_buckets);
     buckets1.resize(num_buckets);
     buckets2.resize(num_buckets);
     reset();
@@ -1139,7 +1139,7 @@ public:
   }
 
   void inc(const char* hash_val, size_t hash_val_len, int n) {
-    auto h = ceph_str_hash_rjenkins((const char*)hash_val, hash_val_len) %
+    auto h = stone_str_hash_rjenkins((const char*)hash_val, hash_val_len) %
       num_buckets;
     if (buckets1[h] == 0 && n) {
       ++num_non_zero;
@@ -1147,7 +1147,7 @@ public:
       --num_non_zero;
     }
     buckets1[h] += n;
-    h = ceph_str_hash_linux((const char*)hash_val, hash_val_len) % num_buckets;
+    h = stone_str_hash_linux((const char*)hash_val, hash_val_len) % num_buckets;
     if (buckets2[h] == 0 && n) {
       ++num_non_zero;
     } else if (buckets2[h] == -n) {
@@ -1161,20 +1161,20 @@ public:
     const char* hash_val2,
     size_t hash_val_len) const {
 
-    auto h1 = ceph_str_hash_rjenkins((const char*)hash_val1, hash_val_len);
-    auto h2 = ceph_str_hash_rjenkins((const char*)hash_val2, hash_val_len);
-    auto h3 = ceph_str_hash_linux((const char*)hash_val1, hash_val_len);
-    auto h4 = ceph_str_hash_linux((const char*)hash_val2, hash_val_len);
+    auto h1 = stone_str_hash_rjenkins((const char*)hash_val1, hash_val_len);
+    auto h2 = stone_str_hash_rjenkins((const char*)hash_val2, hash_val_len);
+    auto h3 = stone_str_hash_linux((const char*)hash_val1, hash_val_len);
+    auto h4 = stone_str_hash_linux((const char*)hash_val2, hash_val_len);
     return ((h1 % num_buckets) == (h2 % num_buckets)) &&
       ((h3 % num_buckets) == (h4 % num_buckets));
   }
 
   bool test_all_zero(const char* hash_val, size_t hash_val_len) const {
-    auto h = ceph_str_hash_rjenkins((const char*)hash_val, hash_val_len);
+    auto h = stone_str_hash_rjenkins((const char*)hash_val, hash_val_len);
     if (buckets1[h % num_buckets] != 0) {
       return false;
     }
-    h = ceph_str_hash_linux((const char*)hash_val, hash_val_len);
+    h = stone_str_hash_linux((const char*)hash_val, hash_val_len);
     return buckets2[h % num_buckets] == 0;
   }
 
@@ -1210,8 +1210,8 @@ class shared_blob_2hash_tracker_t
 public:
   shared_blob_2hash_tracker_t(uint64_t mem_cap, size_t alloc_unit)
     : ref_counter_2hash_tracker_t(mem_cap) {
-    ceph_assert(alloc_unit);
-    ceph_assert(isp2(alloc_unit));
+    stone_assert(alloc_unit);
+    stone_assert(isp2(alloc_unit));
     au_void_bits = ctz(alloc_unit);
   }
   void inc(uint64_t sbid, uint64_t offset, int n);

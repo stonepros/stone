@@ -1,6 +1,6 @@
 ls on empty pool never containing images
 ========================================
-  $ ceph osd pool create rbd_other
+  $ stone osd pool create rbd_other
   pool 'rbd_other' created
   $ rbd pool init rbd_other
   $ rados -p rbd rm rbd_directory >/dev/null 2>&1 || true
@@ -1167,5 +1167,5 @@ For now, use a more inclusive regex.
   $ rbd rm quux 2> /dev/null
   $ rbd rm quuy 2> /dev/null
   $ rbd rm baz 2> /dev/null
-  $ ceph osd pool delete rbd_other rbd_other --yes-i-really-really-mean-it
+  $ stone osd pool delete rbd_other rbd_other --yes-i-really-really-mean-it
   pool 'rbd_other' removed

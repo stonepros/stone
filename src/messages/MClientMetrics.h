@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "msg/Message.h"
-#include "include/cephfs/metrics/Types.h"
+#include "include/stonefs/metrics/Types.h"
 
 class MClientMetrics final : public SafeMessage {
 private:
@@ -36,19 +36,19 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(updates, payload);
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto iter = payload.cbegin();
     decode(updates, iter);
   }
 
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif // STONE_MDS_CLIENT_METRICS_H

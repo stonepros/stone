@@ -16,9 +16,9 @@
 #include "rgw_rest_s3.h" // RGW_Auth_S3
 #include "rgw_ldap.h"
 #include "services/svc_zone_utils.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-#define dout_subsys ceph_subsys_rgw
+#define dout_subsys stone_subsys_rgw
 
 class OpsLogSink;
 
@@ -33,7 +33,7 @@ namespace rgw {
     rgw::LDAPHelper* ldh{nullptr};
     RGWREST rest; // XXX needed for RGWProcessEnv
     rgw::sal::RGWRadosStore* store;
-    boost::intrusive_ptr<CephContext> cct;
+    boost::intrusive_ptr<StoneContext> cct;
 
   public:
     RGWLib() : fec(nullptr), fe(nullptr), olog(nullptr), store(nullptr)
@@ -46,7 +46,7 @@ namespace rgw {
 
     rgw::LDAPHelper* get_ldh() { return ldh; }
 
-    CephContext *get_cct() const override { return cct.get(); }
+    StoneContext *get_cct() const override { return cct.get(); }
     unsigned get_subsys() const { return dout_subsys; }
     std::ostream& gen_prefix(std::ostream& out) const { return out << "lib rgw: "; }
 
@@ -71,7 +71,7 @@ namespace rgw {
     explicit RGWLibIO(const RGWUserInfo &_user_info)
       : user_info(_user_info) {}
 
-    int init_env(CephContext *cct) override {
+    int init_env(StoneContext *cct) override {
       env.init(cct);
       return 0;
     }
@@ -136,13 +136,13 @@ namespace rgw {
   private:
     std::unique_ptr<rgw::sal::RGWUser> tuser; // Don't use this.  It's empty except during init.
   public:
-    CephContext* cct;
+    StoneContext* cct;
     boost::optional<RGWSysObjectCtx> sysobj_ctx;
 
     /* unambiguiously return req_state */
     inline struct req_state* get_state() { return this->RGWRequest::s; }
 
-    RGWLibRequest(CephContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user)
+    RGWLibRequest(StoneContext* _cct, std::unique_ptr<rgw::sal::RGWUser> _user)
       :  RGWRequest(rgwlib.get_store()->getRados()->get_new_req_id()),
 	 tuser(std::move(_user)), cct(_cct)
       {}
@@ -198,7 +198,7 @@ namespace rgw {
     RGWObjectCtx rados_ctx;
   public:
 
-    RGWLibContinuedReq(CephContext* _cct,
+    RGWLibContinuedReq(StoneContext* _cct,
 		       std::unique_ptr<rgw::sal::RGWUser> _user)
       :  RGWLibRequest(_cct, std::move(_user)), io_ctx(),
 	 rstate(_cct, &io_ctx.get_env(), id),
@@ -225,7 +225,7 @@ namespace rgw {
     inline RGWLibIO& get_io() { return io_ctx; }
     inline RGWObjectCtx& get_octx() { return rados_ctx; }
 
-    virtual int execute() final { ceph_abort(); }
+    virtual int execute() final { stone_abort(); }
     virtual int exec_start() = 0;
     virtual int exec_continue() = 0;
     virtual int exec_finish() = 0;

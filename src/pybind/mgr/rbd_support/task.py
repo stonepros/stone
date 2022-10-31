@@ -160,7 +160,7 @@ class TaskHandler:
 
     @property
     def default_pool_name(self):
-        return self.module.get_ceph_option("rbd_default_pool")
+        return self.module.get_stone_option("rbd_default_pool")
 
     def extract_pool_spec(self, pool_spec):
         pool_spec = extract_pool_key(pool_spec)

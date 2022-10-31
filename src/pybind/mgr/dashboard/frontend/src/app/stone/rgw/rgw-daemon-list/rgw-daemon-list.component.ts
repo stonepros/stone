@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 
-import { RgwDaemon } from '~/app/ceph/rgw/models/rgw-daemon';
+import { RgwDaemon } from '~/app/stone/rgw/models/rgw-daemon';
 import { RgwDaemonService } from '~/app/shared/api/rgw-daemon.service';
 import { RgwSiteService } from '~/app/shared/api/rgw-site.service';
 import { ListWithDetails } from '~/app/shared/classes/list-with-details.class';
 import { CdTableColumn } from '~/app/shared/models/cd-table-column';
 import { CdTableFetchDataContext } from '~/app/shared/models/cd-table-fetch-data-context';
 import { Permission } from '~/app/shared/models/permissions';
-import { CephShortVersionPipe } from '~/app/shared/pipes/ceph-short-version.pipe';
+import { StoneShortVersionPipe } from '~/app/shared/pipes/stone-short-version.pipe';
 import { AuthStorageService } from '~/app/shared/services/auth-storage.service';
 
 @Component({
@@ -24,7 +24,7 @@ export class RgwDaemonListComponent extends ListWithDetails implements OnInit {
   constructor(
     private rgwDaemonService: RgwDaemonService,
     private authStorageService: AuthStorageService,
-    private cephShortVersionPipe: CephShortVersionPipe,
+    private stoneShortVersionPipe: StoneShortVersionPipe,
     private rgwSiteService: RgwSiteService
   ) {
     super();
@@ -62,7 +62,7 @@ export class RgwDaemonListComponent extends ListWithDetails implements OnInit {
         name: $localize`Version`,
         prop: 'version',
         flexGrow: 1,
-        pipe: this.cephShortVersionPipe
+        pipe: this.stoneShortVersionPipe
       }
     ];
     this.rgwSiteService

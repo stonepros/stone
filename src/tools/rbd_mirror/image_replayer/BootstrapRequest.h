@@ -6,7 +6,7 @@
 
 #include "include/int_types.h"
 #include "include/rados/librados.hpp"
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/Timer.h"
 #include "cls/rbd/cls_rbd_types.h"
 #include "librbd/mirror/Types.h"
@@ -134,7 +134,7 @@ private:
   StateBuilder<ImageCtxT>** m_state_builder;
   bool *m_do_resync;
 
-  mutable ceph::mutex m_lock;
+  mutable stone::mutex m_lock;
   bool m_canceled = false;
 
   int m_ret_val = 0;

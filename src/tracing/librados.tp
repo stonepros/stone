@@ -6,7 +6,7 @@ TRACEPOINT_EVENT(librados, rados_create_enter,
     TP_ARGS(
         const char*, id),
     TP_FIELDS(
-        ceph_ctf_string(id, id)
+        stone_ctf_string(id, id)
     )
 )
 
@@ -26,8 +26,8 @@ TRACEPOINT_EVENT(librados, rados_create2_enter,
         const char*, name,
         uint64_t, flags),
     TP_FIELDS(
-        ceph_ctf_string(clustername, clustername)
-        ceph_ctf_string(name, name)
+        stone_ctf_string(clustername, clustername)
+        stone_ctf_string(name, name)
         ctf_integer_hex(uint64_t, flags, flags)
     )
 )
@@ -151,7 +151,7 @@ TRACEPOINT_EVENT(librados, rados_conf_read_file_enter,
         const char*, path_list),
     TP_FIELDS(
         ctf_integer_hex(rados_t, cluster, cluster)
-        ceph_ctf_string(path_list, path_list)
+        stone_ctf_string(path_list, path_list)
     )
 )
 
@@ -177,7 +177,7 @@ TRACEPOINT_EVENT(librados, rados_conf_parse_argv_arg,
     TP_ARGS(
         const char*, arg),
     TP_FIELDS(
-        ceph_ctf_string(arg, arg)
+        stone_ctf_string(arg, arg)
     )
 )
 
@@ -203,7 +203,7 @@ TRACEPOINT_EVENT(librados, rados_conf_parse_argv_remainder_arg,
     TP_ARGS(
         const char*, arg),
     TP_FIELDS(
-        ceph_ctf_string(arg, arg)
+        stone_ctf_string(arg, arg)
     )
 )
 
@@ -211,7 +211,7 @@ TRACEPOINT_EVENT(librados, rados_conf_parse_argv_remainder_remarg,
     TP_ARGS(
         const char*, remarg),
     TP_FIELDS(
-        ceph_ctf_string(remarg, remarg)
+        stone_ctf_string(remarg, remarg)
     )
 )
 
@@ -248,8 +248,8 @@ TRACEPOINT_EVENT(librados, rados_conf_set_enter,
         const char*, value),
     TP_FIELDS(
         ctf_integer_hex(rados_t, cluster, cluster)
-        ceph_ctf_string(option, option)
-        ceph_ctf_string(value, value)
+        stone_ctf_string(option, option)
+        stone_ctf_string(value, value)
     )
 )
 
@@ -426,7 +426,7 @@ TRACEPOINT_EVENT(librados, rados_ping_monitor_exit,
         size_t*, len),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_sequencep(unsigned char, buf, buf, size_t, len)
+        stone_ctf_sequencep(unsigned char, buf, buf, size_t, len)
     )
 )
 
@@ -439,7 +439,7 @@ TRACEPOINT_EVENT(librados, rados_mon_command_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_t, cluster, cluster)
         ctf_integer(size_t, cmdlen, cmdlen)
-        ceph_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
+        stone_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
     )
 )
 
@@ -460,9 +460,9 @@ TRACEPOINT_EVENT(librados, rados_mon_command_exit,
         size_t*, outslen),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_stringp(outs, outs)
-        ceph_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
-        ceph_ctf_integerp(size_t, outslen, outslen)
+        stone_ctf_stringp(outs, outs)
+        stone_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
+        stone_ctf_integerp(size_t, outslen, outslen)
     )
 )
 
@@ -477,7 +477,7 @@ TRACEPOINT_EVENT(librados, rados_mon_command_target_enter,
         ctf_integer_hex(rados_t, cluster, cluster)
         ctf_string(name, name)
         ctf_integer(size_t, cmdlen, cmdlen)
-        ceph_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
+        stone_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
     )
 )
 
@@ -498,9 +498,9 @@ TRACEPOINT_EVENT(librados, rados_mon_command_target_exit,
         size_t*, outslen),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_stringp(outs, outs)
-        ceph_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
-        ceph_ctf_integerp(size_t, outslen, outslen)
+        stone_ctf_stringp(outs, outs)
+        stone_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
+        stone_ctf_integerp(size_t, outslen, outslen)
     )
 )
 
@@ -515,7 +515,7 @@ TRACEPOINT_EVENT(librados, rados_osd_command_enter,
         ctf_integer_hex(rados_t, cluster, cluster)
         ctf_integer(int, osdid, osdid)
         ctf_integer(size_t, cmdlen, cmdlen)
-        ceph_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
+        stone_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
     )
 )
 
@@ -536,9 +536,9 @@ TRACEPOINT_EVENT(librados, rados_osd_command_exit,
         size_t*, outslen),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_stringp(outs, outs)
-        ceph_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
-        ceph_ctf_integerp(size_t, outslen, outslen)
+        stone_ctf_stringp(outs, outs)
+        stone_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
+        stone_ctf_integerp(size_t, outslen, outslen)
     )
 )
 
@@ -551,7 +551,7 @@ TRACEPOINT_EVENT(librados, rados_mgr_command_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_t, cluster, cluster)
         ctf_integer(size_t, cmdlen, cmdlen)
-        ceph_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
+        stone_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
     )
 )
 
@@ -572,9 +572,9 @@ TRACEPOINT_EVENT(librados, rados_mgr_command_exit,
         size_t*, outslen),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_stringp(outs, outs)
-        ceph_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
-        ceph_ctf_integerp(size_t, outslen, outslen)
+        stone_ctf_stringp(outs, outs)
+        stone_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
+        stone_ctf_integerp(size_t, outslen, outslen)
     )
 )
 
@@ -589,7 +589,7 @@ TRACEPOINT_EVENT(librados, rados_mgr_command_target_enter,
         ctf_integer_hex(rados_t, cluster, cluster)
 	ctf_string(name, name)
         ctf_integer(size_t, cmdlen, cmdlen)
-        ceph_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
+        stone_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
     )
 )
 
@@ -610,9 +610,9 @@ TRACEPOINT_EVENT(librados, rados_mgr_command_target_exit,
         size_t*, outslen),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_stringp(outs, outs)
-        ceph_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
-        ceph_ctf_integerp(size_t, outslen, outslen)
+        stone_ctf_stringp(outs, outs)
+        stone_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
+        stone_ctf_integerp(size_t, outslen, outslen)
     )
 )
 
@@ -627,7 +627,7 @@ TRACEPOINT_EVENT(librados, rados_pg_command_enter,
         ctf_integer_hex(rados_t, cluster, cluster)
         ctf_string(pg, pg)
         ctf_integer(size_t, cmdlen, cmdlen)
-        ceph_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
+        stone_ctf_sequence(unsigned char, inbuf, inbuf, size_t, inbuflen)
     )
 )
 
@@ -648,9 +648,9 @@ TRACEPOINT_EVENT(librados, rados_pg_command_exit,
         size_t*, outslen),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_stringp(outs, outs)
-        ceph_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
-        ceph_ctf_integerp(size_t, outslen, outslen)
+        stone_ctf_stringp(outs, outs)
+        stone_ctf_sequencep(unsigned char, outbuf, outbuf, size_t, outbuflen)
+        stone_ctf_integerp(size_t, outslen, outslen)
     )
 )
 
@@ -675,7 +675,7 @@ TRACEPOINT_EVENT(librados, rados_monitor_log_enter,
         void*, arg),
     TP_FIELDS(
         ctf_integer_hex(rados_t, cluster, cluster)
-        ceph_ctf_string(level, level)
+        stone_ctf_string(level, level)
         ctf_integer_hex(rados_log_callback_t, callback, callback)
         ctf_integer_hex(void*, arg, arg)
     )
@@ -697,7 +697,7 @@ TRACEPOINT_EVENT(librados, rados_monitor_log2_enter,
         void*, arg),
     TP_FIELDS(
         ctf_integer_hex(rados_t, cluster, cluster)
-        ceph_ctf_string(level, level)
+        stone_ctf_string(level, level)
         ctf_integer_hex(rados_log_callback2_t, callback, callback)
         ctf_integer_hex(void*, arg, arg)
     )
@@ -856,7 +856,7 @@ TRACEPOINT_EVENT(librados, rados_write_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_sequence(unsigned char, buf, buf, size_t, len)
+        stone_ctf_sequence(unsigned char, buf, buf, size_t, len)
         ctf_integer(uint64_t, off, off)
     )
 )
@@ -878,7 +878,7 @@ TRACEPOINT_EVENT(librados, rados_append_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_sequence(unsigned char, buf, buf, size_t, len)
+        stone_ctf_sequence(unsigned char, buf, buf, size_t, len)
     )
 )
 
@@ -899,7 +899,7 @@ TRACEPOINT_EVENT(librados, rados_write_full_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_sequence(unsigned char, buf, buf, size_t, len)
+        stone_ctf_sequence(unsigned char, buf, buf, size_t, len)
     )
 )
 
@@ -922,7 +922,7 @@ TRACEPOINT_EVENT(librados, rados_writesame_enter,
     TP_FIELDS(
 	ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
 	ctf_string(oid, oid)
-	ceph_ctf_sequence(unsigned char, buf, buf, size_t, data_len)
+	stone_ctf_sequence(unsigned char, buf, buf, size_t, data_len)
 	ctf_integer(size_t, write_len, write_len)
 	ctf_integer(uint64_t, off, off)
     )
@@ -996,7 +996,7 @@ TRACEPOINT_EVENT(librados, rados_read_exit,
         void*, buf),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_sequence(unsigned char, buf, buf, uint64_t, retval)
+        stone_ctf_sequence(unsigned char, buf, buf, uint64_t, retval)
     )
 )
 
@@ -1014,7 +1014,7 @@ TRACEPOINT_EVENT(librados, rados_checksum_enter,
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
         ctf_integer(int, type, type)
-        ceph_ctf_sequence(unsigned char, init_value, init_value, size_t, init_value_len)
+        stone_ctf_sequence(unsigned char, init_value, init_value, size_t, init_value_len)
         ctf_integer(size_t, len, len)
         ctf_integer(uint64_t, off, off)
         ctf_integer(size_t, chunk_size, chunk_size)
@@ -1029,7 +1029,7 @@ TRACEPOINT_EVENT(librados, rados_checksum_exit,
         ),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-	ceph_ctf_sequence(unsigned char, checksum, checksum, size_t, checksum_len)
+	stone_ctf_sequence(unsigned char, checksum, checksum, size_t, checksum_len)
     )
 )
 
@@ -1277,7 +1277,7 @@ TRACEPOINT_EVENT(librados, rados_ioctx_locator_set_key_enter,
         const char*, key),
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
-        ceph_ctf_string(key, key)
+        stone_ctf_string(key, key)
     )
 )
 
@@ -1292,7 +1292,7 @@ TRACEPOINT_EVENT(librados, rados_ioctx_set_namespace_enter,
         const char*, nspace),
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
-        ceph_ctf_string(nspace, nspace)
+        stone_ctf_string(nspace, nspace)
     )
 )
 
@@ -1564,7 +1564,7 @@ TRACEPOINT_EVENT(librados, rados_ioctx_snap_get_stamp_exit,
         time_t, time),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_time_t(time, time)
+        stone_ctf_time_t(time, time)
     )
 )
 
@@ -1578,7 +1578,7 @@ TRACEPOINT_EVENT(librados, rados_cmpext_enter,
     TP_FIELDS(
 	ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
 	ctf_string(oid, oid)
-	ceph_ctf_sequence(unsigned char, cmp_buf, cmp_buf, size_t, cmp_len)
+	stone_ctf_sequence(unsigned char, cmp_buf, cmp_buf, size_t, cmp_len)
 	ctf_integer(uint64_t, off, off)
     )
 )
@@ -1612,7 +1612,7 @@ TRACEPOINT_EVENT(librados, rados_getxattr_exit,
         int, len),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_sequence(unsigned char, value, value, uint64_t, len)
+        stone_ctf_sequence(unsigned char, value, value, uint64_t, len)
     )
 )
 
@@ -1652,8 +1652,8 @@ TRACEPOINT_EVENT(librados, rados_getxattrs_next_exit,
         size_t, len),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_string(aname, aname)
-        ceph_ctf_sequence(unsigned char, value, value, size_t, len)
+        stone_ctf_string(aname, aname)
+        stone_ctf_sequence(unsigned char, value, value, size_t, len)
     )
 )
 
@@ -1681,7 +1681,7 @@ TRACEPOINT_EVENT(librados, rados_setxattr_enter,
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
         ctf_string(aname, aname)
-        ceph_ctf_sequence(unsigned char, value, value, size_t, len)
+        stone_ctf_sequence(unsigned char, value, value, size_t, len)
     )
 )
 
@@ -1730,8 +1730,8 @@ TRACEPOINT_EVENT(librados, rados_stat_exit,
         time_t*, mtime),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_integerp(uint64_t, size, size)
-        ceph_ctf_time_tp(mtime, mtime)
+        stone_ctf_integerp(uint64_t, size, size)
+        stone_ctf_time_tp(mtime, mtime)
     )
 )
 
@@ -1749,7 +1749,7 @@ TRACEPOINT_EVENT(librados, rados_exec_enter,
         ctf_string(oid, oid)
         ctf_string(cls, cls)
         ctf_string(method, method)
-        ceph_ctf_sequence(unsigned char, inbuf, inbuf, size_t, in_len)
+        stone_ctf_sequence(unsigned char, inbuf, inbuf, size_t, in_len)
         ctf_integer(size_t, out_len, out_len)
     )
 )
@@ -1761,7 +1761,7 @@ TRACEPOINT_EVENT(librados, rados_exec_exit,
         size_t, len),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_sequence(unsigned char, outbuf, outbuf, size_t, len)
+        stone_ctf_sequence(unsigned char, outbuf, outbuf, size_t, len)
     )
 )
 
@@ -1878,9 +1878,9 @@ TRACEPOINT_EVENT(librados, rados_nobjects_list_next_exit,
         char const* const*, nspace),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_string(entry, entry)
-        ceph_ctf_stringp(key, key)
-        ceph_ctf_stringp(nspace, nspace)
+        stone_ctf_string(entry, entry)
+        stone_ctf_stringp(key, key)
+        stone_ctf_stringp(nspace, nspace)
     )
 )
 
@@ -1903,9 +1903,9 @@ TRACEPOINT_EVENT(librados, rados_nobjects_list_next2_exit,
         const size_t*, nspace_size),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_sequencep(char, entry, entry, size_t, entry_size)
-        ceph_ctf_sequencep(char, key, key, size_t, key_size)
-        ceph_ctf_sequencep(char, nspace, nspace, size_t, nspace_size)
+        stone_ctf_sequencep(char, entry, entry, size_t, entry_size)
+        stone_ctf_sequencep(char, key, key, size_t, key_size)
+        stone_ctf_sequencep(char, nspace, nspace, size_t, nspace_size)
     )
 )
 
@@ -1990,8 +1990,8 @@ TRACEPOINT_EVENT(librados, rados_objects_list_next_exit,
         char const* const*, key),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_string(entry, entry)
-        ceph_ctf_stringp(key, key)
+        stone_ctf_string(entry, entry)
+        stone_ctf_stringp(key, key)
     )
 )
 
@@ -2246,7 +2246,7 @@ TRACEPOINT_EVENT(librados, rados_aio_write_enter,
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
         ctf_integer_hex(rados_completion_t, completion, completion)
-        ctf_sequence(unsigned char, buf, buf, size_t, CEPH_MIN(len, CEPH_TRACE_BUF_TRUNC_LEN))
+        ctf_sequence(unsigned char, buf, buf, size_t, STONE_MIN(len, STONE_TRACE_BUF_TRUNC_LEN))
         ctf_integer(size_t, len, len)
         ctf_integer(uint64_t, off, off)
     )
@@ -2271,7 +2271,7 @@ TRACEPOINT_EVENT(librados, rados_aio_append_enter,
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
         ctf_integer_hex(rados_completion_t, completion, completion)
-        ctf_sequence(unsigned char, buf, buf, size_t, CEPH_MIN(len, CEPH_TRACE_BUF_TRUNC_LEN))
+        ctf_sequence(unsigned char, buf, buf, size_t, STONE_MIN(len, STONE_TRACE_BUF_TRUNC_LEN))
         ctf_integer(size_t, len, len)
     )
 )
@@ -2295,7 +2295,7 @@ TRACEPOINT_EVENT(librados, rados_aio_write_full_enter,
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
         ctf_integer_hex(rados_completion_t, completion, completion)
-        ctf_sequence(unsigned char, buf, buf, size_t, CEPH_MIN(len, CEPH_TRACE_BUF_TRUNC_LEN))
+        ctf_sequence(unsigned char, buf, buf, size_t, STONE_MIN(len, STONE_TRACE_BUF_TRUNC_LEN))
         ctf_integer(size_t, len, len)
     )
 )
@@ -2321,7 +2321,7 @@ TRACEPOINT_EVENT(librados, rados_aio_writesame_enter,
 	ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
 	ctf_string(oid, oid)
 	ctf_integer_hex(rados_completion_t, completion, completion)
-	ctf_sequence(unsigned char, buf, buf, size_t, CEPH_MIN(data_len, CEPH_TRACE_BUF_TRUNC_LEN))
+	ctf_sequence(unsigned char, buf, buf, size_t, STONE_MIN(data_len, STONE_TRACE_BUF_TRUNC_LEN))
 	ctf_integer(size_t, data_len, data_len)
 	ctf_integer(size_t, write_len, write_len)
 	ctf_integer(uint64_t, off, off)
@@ -2414,7 +2414,7 @@ TRACEPOINT_EVENT(librados, rados_aio_getxattr_exit,
         int, len),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_sequence(unsigned char, value, value, uint64_t, len)
+        stone_ctf_sequence(unsigned char, value, value, uint64_t, len)
     )
 )
 
@@ -2453,7 +2453,7 @@ TRACEPOINT_EVENT(librados, rados_aio_setxattr_enter,
         ctf_string(oid, oid)
         ctf_integer_hex(rados_completion_t, completion, completion)
         ctf_string(aname, aname)
-        ceph_ctf_sequence(unsigned char, value, value, size_t, len)
+        stone_ctf_sequence(unsigned char, value, value, size_t, len)
     )
 )
 
@@ -2536,7 +2536,7 @@ TRACEPOINT_EVENT(librados, rados_aio_cmpext_enter,
 	size_t, cmp_len,
 	uint64_t, off),
     TP_FIELDS(
-	ceph_ctf_sequence(unsigned char, cmp_buf, cmp_buf, size_t, cmp_len)
+	stone_ctf_sequence(unsigned char, cmp_buf, cmp_buf, size_t, cmp_len)
 	ctf_integer(uint64_t, off, off)
     )
 )
@@ -2720,7 +2720,7 @@ TRACEPOINT_EVENT(librados, rados_notify_enter,
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
         ctf_integer(uint64_t, version, version)
-        ceph_ctf_sequence(unsigned char, buf, buf, size_t, buf_len)
+        stone_ctf_sequence(unsigned char, buf, buf, size_t, buf_len)
     )
 )
 
@@ -2742,7 +2742,7 @@ TRACEPOINT_EVENT(librados, rados_notify2_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_sequence(unsigned char, buf, buf, size_t, buf_len)
+        stone_ctf_sequence(unsigned char, buf, buf, size_t, buf_len)
         ctf_integer(uint64_t, timeout_ms, timeout_ms)
     )
 )
@@ -2767,7 +2767,7 @@ TRACEPOINT_EVENT(librados, rados_aio_notify_enter,
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
         ctf_integer_hex(rados_completion_t, completion, completion)
-        ceph_ctf_sequence(unsigned char, buf, buf, size_t, buf_len)
+        stone_ctf_sequence(unsigned char, buf, buf, size_t, buf_len)
         ctf_integer(uint64_t, timeout_ms, timeout_ms)
     )
 )
@@ -2793,7 +2793,7 @@ TRACEPOINT_EVENT(librados, rados_notify_ack_enter,
         ctf_string(oid, oid)
         ctf_integer(uint64_t, notify_id, notify_id)
         ctf_integer(uint64_t, handle, handle)
-        ceph_ctf_sequence(unsigned char, buf, buf, size_t, buf_len)
+        stone_ctf_sequence(unsigned char, buf, buf, size_t, buf_len)
     )
 )
 
@@ -2897,10 +2897,10 @@ TRACEPOINT_EVENT(librados, rados_lock_exclusive_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_string(name, name)
-        ceph_ctf_string(cookie, cookie)
-        ceph_ctf_string(description, description)
-        ceph_ctf_timevalp(duration, duration)
+        stone_ctf_string(name, name)
+        stone_ctf_string(cookie, cookie)
+        stone_ctf_string(description, description)
+        stone_ctf_timevalp(duration, duration)
         ctf_integer(uint8_t, flags, flags)
     )
 )
@@ -2926,11 +2926,11 @@ TRACEPOINT_EVENT(librados, rados_lock_shared_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_string(name, name)
-        ceph_ctf_string(cookie, cookie)
-        ceph_ctf_string(tag, tag)
-        ceph_ctf_string(description, description)
-        ceph_ctf_timevalp(duration, duration)
+        stone_ctf_string(name, name)
+        stone_ctf_string(cookie, cookie)
+        stone_ctf_string(tag, tag)
+        stone_ctf_string(description, description)
+        stone_ctf_timevalp(duration, duration)
         ctf_integer(uint8_t, flags, flags)
     )
 )
@@ -2952,8 +2952,8 @@ TRACEPOINT_EVENT(librados, rados_unlock_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_string(name, name)
-        ceph_ctf_string(cookie, cookie)
+        stone_ctf_string(name, name)
+        stone_ctf_string(cookie, cookie)
     )
 )
 
@@ -2975,8 +2975,8 @@ TRACEPOINT_EVENT(librados, rados_aio_unlock_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_string(name, name)
-        ceph_ctf_string(cookie, cookie)
+        stone_ctf_string(name, name)
+        stone_ctf_string(cookie, cookie)
         ctf_integer_hex(rados_completion_t, completion, completion)
     )
 )
@@ -3001,7 +3001,7 @@ TRACEPOINT_EVENT(librados, rados_list_lockers_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_string(name, name)
+        stone_ctf_string(name, name)
         ctf_integer(size_t, tag_len, tag_len)
         ctf_integer(size_t, clients_len, clients_len)
         ctf_integer(size_t, cookies_len, cookies_len)
@@ -3051,9 +3051,9 @@ TRACEPOINT_EVENT(librados, rados_break_lock_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_string(name, name)
-        ceph_ctf_string(client, client)
-        ceph_ctf_string(cookie, cookie)
+        stone_ctf_string(name, name)
+        stone_ctf_string(client, client)
+        stone_ctf_string(cookie, cookie)
     )
 )
 
@@ -3143,7 +3143,7 @@ TRACEPOINT_EVENT(librados, rados_write_op_cmpext_enter,
 	int*, prval),
     TP_FIELDS(
 	ctf_integer_hex(rados_write_op_t, op, op)
-	ceph_ctf_sequence(unsigned char, cmp_buffer, cmp_buffer, size_t, cmp_len)
+	stone_ctf_sequence(unsigned char, cmp_buffer, cmp_buffer, size_t, cmp_len)
 	ctf_integer(size_t, cmp_len, cmp_len)
 	ctf_integer(uint64_t, offset, offset)
 	ctf_integer_hex(void*, prval, prval)
@@ -3164,9 +3164,9 @@ TRACEPOINT_EVENT(librados, rados_write_op_cmpxattr_enter,
         size_t, value_len),
     TP_FIELDS(
         ctf_integer_hex(rados_write_op_t, op, op)
-        ceph_ctf_string(aname, aname)
+        stone_ctf_string(aname, aname)
         ctf_integer(uint8_t, comparison_operator, comparison_operator)
-        ceph_ctf_sequence(unsigned char, value, value, size_t, value_len)
+        stone_ctf_sequence(unsigned char, value, value, size_t, value_len)
     )
 )
 
@@ -3185,9 +3185,9 @@ TRACEPOINT_EVENT(librados, rados_write_op_omap_cmp_enter,
         int*, prval),
     TP_FIELDS(
         ctf_integer_hex(rados_write_op_t, op, op)
-        ceph_ctf_string(name, name)
+        stone_ctf_string(name, name)
         ctf_integer(uint8_t, comparison_operator, comparison_operator)
-        ceph_ctf_sequence(unsigned char, value, value, size_t, value_len)
+        stone_ctf_sequence(unsigned char, value, value, size_t, value_len)
         ctf_integer_hex(int*, prval, prval)
     )
 )
@@ -3205,8 +3205,8 @@ TRACEPOINT_EVENT(librados, rados_write_op_setxattr_enter,
         size_t, value_len),
     TP_FIELDS(
         ctf_integer_hex(rados_write_op_t, op, op)
-        ceph_ctf_string(name, name)
-        ceph_ctf_sequence(unsigned char, value, value, size_t, value_len)
+        stone_ctf_string(name, name)
+        stone_ctf_sequence(unsigned char, value, value, size_t, value_len)
     )
 )
 
@@ -3221,7 +3221,7 @@ TRACEPOINT_EVENT(librados, rados_write_op_rmxattr_enter,
         const char*, name),
     TP_FIELDS(
         ctf_integer_hex(rados_write_op_t, op, op)
-        ceph_ctf_string(name, name)
+        stone_ctf_string(name, name)
     )
 )
 
@@ -3253,7 +3253,7 @@ TRACEPOINT_EVENT(librados, rados_write_op_write_enter,
         uint64_t, offset),
     TP_FIELDS(
         ctf_integer_hex(rados_write_op_t, op, op)
-        ceph_ctf_sequence(unsigned char, buffer, buffer, size_t, len)
+        stone_ctf_sequence(unsigned char, buffer, buffer, size_t, len)
         ctf_integer(uint64_t, offset, offset)
     )
 )
@@ -3270,7 +3270,7 @@ TRACEPOINT_EVENT(librados, rados_write_op_write_full_enter,
         size_t, len),
     TP_FIELDS(
         ctf_integer_hex(rados_write_op_t, op, op)
-        ceph_ctf_sequence(unsigned char, buffer, buffer, size_t, len)
+        stone_ctf_sequence(unsigned char, buffer, buffer, size_t, len)
     )
 )
 
@@ -3288,7 +3288,7 @@ TRACEPOINT_EVENT(librados, rados_write_op_writesame_enter,
 	uint64_t, offset),
     TP_FIELDS(
 	ctf_integer_hex(rados_write_op_t, op, op)
-	ceph_ctf_sequence(unsigned char, buffer, buffer, size_t, data_len)
+	stone_ctf_sequence(unsigned char, buffer, buffer, size_t, data_len)
 	ctf_integer(size_t, write_len, write_len)
 	ctf_integer(uint64_t, offset, offset)
     )
@@ -3306,7 +3306,7 @@ TRACEPOINT_EVENT(librados, rados_write_op_append_enter,
         size_t, len),
     TP_FIELDS(
         ctf_integer_hex(rados_write_op_t, op, op)
-        ceph_ctf_sequence(unsigned char, buffer, buffer, size_t, len)
+        stone_ctf_sequence(unsigned char, buffer, buffer, size_t, len)
     )
 )
 
@@ -3370,9 +3370,9 @@ TRACEPOINT_EVENT(librados, rados_write_op_exec_enter,
         int*, prval),
     TP_FIELDS(
         ctf_integer_hex(rados_write_op_t, op, op)
-        ceph_ctf_string(cls, cls)
-        ceph_ctf_string(method, method)
-        ceph_ctf_sequence(unsigned char, in_buf, in_buf, size_t, in_len)
+        stone_ctf_string(cls, cls)
+        stone_ctf_string(method, method)
+        stone_ctf_sequence(unsigned char, in_buf, in_buf, size_t, in_len)
         ctf_integer_hex(int*, prval, prval)
     )
 )
@@ -3398,8 +3398,8 @@ TRACEPOINT_EVENT(librados, rados_write_op_omap_set_entry,
         const char*, value,
         size_t, value_len),
     TP_FIELDS(
-        ceph_ctf_string(key, key)
-        ceph_ctf_sequence(unsigned char, value, value, size_t, value_len)
+        stone_ctf_string(key, key)
+        stone_ctf_sequence(unsigned char, value, value, size_t, value_len)
     )
 )
 
@@ -3422,7 +3422,7 @@ TRACEPOINT_EVENT(librados, rados_write_op_omap_rm_keys_entry,
     TP_ARGS(
         const char*, key),
     TP_FIELDS(
-        ceph_ctf_string(key, key)
+        stone_ctf_string(key, key)
     )
 )
 
@@ -3438,8 +3438,8 @@ TRACEPOINT_EVENT(librados, rados_write_op_omap_rm_range_enter,
         const char*, key_end),
     TP_FIELDS(
         ctf_integer_hex(rados_write_op_t, op, op)
-        ceph_ctf_string(key_begin, key_begin)
-        ceph_ctf_string(key_end, key_end)
+        stone_ctf_string(key_begin, key_begin)
+        stone_ctf_string(key_end, key_end)
     )
 )
 
@@ -3508,7 +3508,7 @@ TRACEPOINT_EVENT(librados, rados_write_op_operate_enter,
         ctf_integer_hex(rados_write_op_t, op, op)
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_time_tp(mtime, mtime)
+        stone_ctf_time_tp(mtime, mtime)
         ctf_integer_hex(int, flags, flags)
     )
 )
@@ -3524,7 +3524,7 @@ TRACEPOINT_EVENT(librados, rados_write_op_operate2_enter,
         ctf_integer_hex(rados_write_op_t, op, op)
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_string(oid, oid)
-        ceph_ctf_timespecp(ts, ts)
+        stone_ctf_timespecp(ts, ts)
         ctf_integer_hex(int, flags, flags)
     )
 )
@@ -3550,7 +3550,7 @@ TRACEPOINT_EVENT(librados, rados_aio_write_op_operate_enter,
         ctf_integer_hex(rados_ioctx_t, ioctx, ioctx)
         ctf_integer_hex(rados_completion_t, completion, completion)
         ctf_string(oid, oid)
-        ceph_ctf_time_tp(mtime, mtime)
+        stone_ctf_time_tp(mtime, mtime)
         ctf_integer_hex(int, flags, flags)
     )
 )
@@ -3641,7 +3641,7 @@ TRACEPOINT_EVENT(librados, rados_read_op_cmpext_enter,
 	int*, prval),
     TP_FIELDS(
 	ctf_integer_hex(rados_read_op_t, op, op)
-	ceph_ctf_sequence(unsigned char, cmp_buffer, cmp_buffer, size_t, cmp_len)
+	stone_ctf_sequence(unsigned char, cmp_buffer, cmp_buffer, size_t, cmp_len)
 	ctf_integer(size_t, cmp_len, cmp_len)
 	ctf_integer(uint64_t, offset, offset)
 	ctf_integer_hex(void*, prval, prval)
@@ -3664,7 +3664,7 @@ TRACEPOINT_EVENT(librados, rados_read_op_cmpxattr_enter,
         ctf_integer_hex(rados_read_op_t, read_op, read_op)
         ctf_string(name, name)
         ctf_integer(uint8_t, comparison_operator, comparison_operator)
-        ceph_ctf_sequence(unsigned char, value, value, size_t, value_len)
+        stone_ctf_sequence(unsigned char, value, value, size_t, value_len)
     )
 )
 
@@ -3685,7 +3685,7 @@ TRACEPOINT_EVENT(librados, rados_read_op_omap_cmp_enter,
         ctf_integer_hex(rados_read_op_t, read_op, read_op)
         ctf_string(name, name)
         ctf_integer(uint8_t, comparison_operator, comparison_operator)
-        ceph_ctf_sequence(unsigned char, value, value, size_t, value_len)
+        stone_ctf_sequence(unsigned char, value, value, size_t, value_len)
         ctf_integer_hex(void*, prval, prval)
     )
 )
@@ -3749,7 +3749,7 @@ TRACEPOINT_EVENT(librados, rados_read_op_checksum_enter,
     TP_FIELDS(
         ctf_integer_hex(rados_read_op_t, read_op, read_op)
         ctf_integer(int, type, type)
-        ceph_ctf_sequence(unsigned char, init_value, init_value, size_t, init_value_len)
+        stone_ctf_sequence(unsigned char, init_value, init_value, size_t, init_value_len)
         ctf_integer(uint64_t, offset, offset)
         ctf_integer(size_t, len, len)
         ctf_integer(size_t, chunk_size, chunk_size)
@@ -3773,9 +3773,9 @@ TRACEPOINT_EVENT(librados, rados_read_op_exec_enter,
         int*, prval),
     TP_FIELDS(
         ctf_integer_hex(rados_read_op_t, read_op, read_op)
-        ceph_ctf_string(cls, cls)
-        ceph_ctf_string(method, method)
-        ceph_ctf_sequence(unsigned char, in_buf, in_buf, size_t, in_len)
+        stone_ctf_string(cls, cls)
+        stone_ctf_string(method, method)
+        stone_ctf_sequence(unsigned char, in_buf, in_buf, size_t, in_len)
         ctf_integer_hex(void*, out_buf, out_buf)
         ctf_integer_hex(void*, out_len, out_len)
         ctf_integer_hex(void*, prval, prval)
@@ -3800,9 +3800,9 @@ TRACEPOINT_EVENT(librados, rados_read_op_exec_user_buf_enter,
         int*, prval),
     TP_FIELDS(
         ctf_integer_hex(rados_read_op_t, read_op, read_op)
-        ceph_ctf_string(cls, cls)
-        ceph_ctf_string(method, method)
-        ceph_ctf_sequence(unsigned char, in_buf, in_buf, size_t, in_len)
+        stone_ctf_string(cls, cls)
+        stone_ctf_string(method, method)
+        stone_ctf_sequence(unsigned char, in_buf, in_buf, size_t, in_len)
         ctf_integer_hex(void*, out_buf, out_buf)
         ctf_integer(size_t, out_len, out_len)
         ctf_integer_hex(void*, used_len, used_len)
@@ -3842,8 +3842,8 @@ TRACEPOINT_EVENT(librados, rados_read_op_omap_get_vals_enter,
         int*, prval),
     TP_FIELDS(
         ctf_integer_hex(rados_read_op_t, read_op, read_op)
-        ceph_ctf_string(start_after, start_after)
-        ceph_ctf_string(filter_prefix, filter_prefix)
+        stone_ctf_string(start_after, start_after)
+        stone_ctf_string(filter_prefix, filter_prefix)
         ctf_integer(uint64_t, max_return, max_return)
         ctf_integer_hex(void*, prval, prval)
     )
@@ -3865,7 +3865,7 @@ TRACEPOINT_EVENT(librados, rados_read_op_omap_get_keys_enter,
         int*, prval),
     TP_FIELDS(
         ctf_integer_hex(rados_read_op_t, read_op, read_op)
-        ceph_ctf_string(start_after, start_after)
+        stone_ctf_string(start_after, start_after)
         ctf_integer(uint64_t, max_return, max_return)
         ctf_integer_hex(void*, prval, prval)
     )
@@ -3919,8 +3919,8 @@ TRACEPOINT_EVENT(librados, rados_omap_get_next_exit,
         size_t*, len),
     TP_FIELDS(
         ctf_integer(int, retval, retval)
-        ceph_ctf_stringp(key, key)
-        ceph_ctf_sequencep(unsigned char, val, val, size_t, len)
+        stone_ctf_stringp(key, key)
+        stone_ctf_sequencep(unsigned char, val, val, size_t, len)
     )
 )
 
@@ -3970,7 +3970,7 @@ TRACEPOINT_EVENT(librados, rados_aio_read_op_operate_enter,
         ctf_integer_hex(rados_read_op_t, read_op, read_op)
         ctf_integer_hex(rados_ioctx_t, ctx, ctx)
         ctf_integer_hex(rados_completion_t, completion, completion)
-        ceph_ctf_string(oid, oid)
+        stone_ctf_string(oid, oid)
         ctf_integer(int, flags, flags)
     )
 )
@@ -3989,7 +3989,7 @@ TRACEPOINT_EVENT(librados, rados_cache_pin_enter,
 	const char*, o),
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, io, io)
-        ceph_ctf_string(o, o)
+        stone_ctf_string(o, o)
     )
 )
 
@@ -4007,7 +4007,7 @@ TRACEPOINT_EVENT(librados, rados_cache_unpin_enter,
 	const char*, o),
     TP_FIELDS(
         ctf_integer_hex(rados_ioctx_t, io, io)
-        ceph_ctf_string(o, o)
+        stone_ctf_string(o, o)
     )
 )
 

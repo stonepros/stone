@@ -27,7 +27,7 @@ public:
       osd_beacon_report_interval(interval)
   {}
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     paxos_encode();
     encode(pgs, payload);
     encode(min_last_epoch_clean, payload);
@@ -36,7 +36,7 @@ public:
   }
   void decode_payload() override {
     auto p = payload.cbegin();
-    using ceph::decode;
+    using stone::decode;
     paxos_decode(p);
     decode(pgs, p);
     decode(min_last_epoch_clean, p);
@@ -60,5 +60,5 @@ public:
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };

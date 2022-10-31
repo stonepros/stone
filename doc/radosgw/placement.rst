@@ -95,7 +95,7 @@ The zone placement configuration can be queried with:
 
 .. note:: If you have not done any previous `Multisite Configuration`_,
           a ``default`` zone and zonegroup are created for you, and changes
-          to the zone/zonegroup will not take effect until the Ceph Object
+          to the zone/zonegroup will not take effect until the Stone Object
           Gateways are restarted. If you have created a realm for multisite,
           the zone/zonegroup changes will take effect once the changes are
           committed with ``radosgw-admin period update --commit``.
@@ -165,7 +165,7 @@ This zonegroup setting can be changed with:
 User Placement
 --------------
 
-A Ceph Object Gateway user can override the zonegroup's default placement
+A Stone Object Gateway user can override the zonegroup's default placement
 target by setting a non-empty ``default_placement`` field in the user info.
 Similarly, the ``default_storage_class`` can override the ``STANDARD``
 storage class applied to objects by default.

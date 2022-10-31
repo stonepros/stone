@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2009 Sage Weil <sage@newdream.net>
  *
@@ -49,9 +49,9 @@ class MonmapMonitor : public PaxosService {
 
   void on_active() override;
   void apply_mon_features(const mon_feature_t& features,
-			  ceph_release_t min_mon_release);
+			  stone_release_t min_mon_release);
 
-  void dump_info(ceph::Formatter *f);
+  void dump_info(stone::Formatter *f);
 
   bool preprocess_query(MonOpRequestRef op) override;
   bool prepare_update(MonOpRequestRef op) override;
@@ -62,7 +62,7 @@ class MonmapMonitor : public PaxosService {
   bool preprocess_command(MonOpRequestRef op);
   bool prepare_command(MonOpRequestRef op);
 
-  int get_monmap(ceph::buffer::list &bl);
+  int get_monmap(stone::buffer::list &bl);
 
   /*
    * Since monitors are pretty
@@ -76,7 +76,7 @@ class MonmapMonitor : public PaxosService {
 
 private:
   void check_subs();
-  ceph::buffer::list monmap_bl;
+  stone::buffer::list monmap_bl;
   /**
    * Check validity of inputs and monitor state to
    * engage stretch mode. Designed to be used with

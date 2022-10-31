@@ -16,7 +16,7 @@
 using param_pair_t = pair<string, string>;
 using param_vec_t = vector<param_pair_t>;
 
-void rgw_http_client_init(CephContext *cct);
+void rgw_http_client_init(StoneContext *cct);
 void rgw_http_client_cleanup();
 
 struct rgw_http_req_data;
@@ -50,7 +50,7 @@ class RGWHTTPClient : public RGWIOProvider
 
 
 protected:
-  CephContext *cct;
+  StoneContext *cct;
 
   string method;
   string url;
@@ -92,7 +92,7 @@ protected:
                                size_t nmemb,
                                void *_info);
 
-  ceph::mutex& get_req_lock();
+  stone::mutex& get_req_lock();
 
   /* needs to be called under req_lock() */
   void _set_write_paused(bool pause);
@@ -107,7 +107,7 @@ public:
   static constexpr int HTTPCLIENT_IO_CONTROL = 0x4;
 
   virtual ~RGWHTTPClient();
-  explicit RGWHTTPClient(CephContext *cct,
+  explicit RGWHTTPClient(StoneContext *cct,
                          const string& _method,
                          const string& _url)
     : has_send_len(false),
@@ -198,7 +198,7 @@ public:
   typedef std::string header_value_t;
   typedef std::set<header_name_t, ltstr_nocase> header_spec_t;
 
-  RGWHTTPHeadersCollector(CephContext * const cct,
+  RGWHTTPHeadersCollector(StoneContext * const cct,
                           const string& method,
                           const string& url,
                           const header_spec_t &relevant_headers)
@@ -230,7 +230,7 @@ class RGWHTTPTransceiver : public RGWHTTPHeadersCollector {
   size_t post_data_index;
 
 public:
-  RGWHTTPTransceiver(CephContext * const cct,
+  RGWHTTPTransceiver(StoneContext * const cct,
                      const string& method,
                      const string& url,
                      bufferlist * const read_bl,
@@ -240,7 +240,7 @@ public:
       post_data_index(0) {
   }
 
-  RGWHTTPTransceiver(CephContext * const cct,
+  RGWHTTPTransceiver(StoneContext * const cct,
                      const string& method,
                      const string& url,
                      bufferlist * const read_bl,
@@ -285,14 +285,14 @@ class RGWHTTPManager {
 
     set_state(rgw_http_req_data *_req, int _bitmask) : req(_req), bitmask(_bitmask) {}
   };
-  CephContext *cct;
+  StoneContext *cct;
   RGWCompletionManager *completion_mgr;
   void *multi_handle;
   bool is_started = false;
   std::atomic<unsigned> going_down { 0 };
   std::atomic<unsigned> is_stopped { 0 };
 
-  ceph::shared_mutex reqs_lock = ceph::make_shared_mutex("RGWHTTPManager::reqs_lock");
+  stone::shared_mutex reqs_lock = stone::make_shared_mutex("RGWHTTPManager::reqs_lock");
   map<uint64_t, rgw_http_req_data *> reqs;
   list<rgw_http_req_data *> unregistered_reqs;
   list<set_state> reqs_change_state;
@@ -329,7 +329,7 @@ class RGWHTTPManager {
   int signal_thread();
 
 public:
-  RGWHTTPManager(CephContext *_cct, RGWCompletionManager *completion_mgr = NULL);
+  RGWHTTPManager(StoneContext *_cct, RGWCompletionManager *completion_mgr = NULL);
   ~RGWHTTPManager();
 
   int start();

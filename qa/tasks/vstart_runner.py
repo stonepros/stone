@@ -1,32 +1,32 @@
 """
-vstart_runner: override Filesystem and Mount interfaces to run a CephFSTestCase against a vstart
-ceph instance instead of a packaged/installed cluster.  Use this to turn around test cases
+vstart_runner: override Filesystem and Mount interfaces to run a StoneFSTestCase against a vstart
+stone instance instead of a packaged/installed cluster.  Use this to turn around test cases
 quickly during development.
 
-Simple usage (assuming teuthology and ceph checked out in ~/git):
+Simple usage (assuming teuthology and stone checked out in ~/git):
 
     # Activate the teuthology virtualenv
     source ~/git/teuthology/virtualenv/bin/activate
-    # Go into your ceph build directory
-    cd ~/git/ceph/build
+    # Go into your stone build directory
+    cd ~/git/stonepros/build
     # Invoke a test using this script
-    python ~/git/ceph/qa/tasks/vstart_runner.py --create tasks.cephfs.test_data_scan
+    python ~/git/stonepros/qa/tasks/vstart_runner.py --create tasks.stonefs.test_data_scan
 
 Alternative usage:
 
     # Alternatively, if you use different paths, specify them as follows:
-    LD_LIBRARY_PATH=`pwd`/lib PYTHONPATH=~/git/teuthology:~/git/ceph/qa:`pwd`/../src/pybind:`pwd`/lib/cython_modules/lib.3 python ~/git/ceph/qa/tasks/vstart_runner.py
+    LD_LIBRARY_PATH=`pwd`/lib PYTHONPATH=~/git/teuthology:~/git/stonepros/qa:`pwd`/../src/pybind:`pwd`/lib/cython_modules/lib.3 python ~/git/stonepros/qa/tasks/vstart_runner.py
 
     # If you wish to drop to a python shell on failures, use --interactive:
-    python ~/git/ceph/qa/tasks/vstart_runner.py --interactive
+    python ~/git/stonepros/qa/tasks/vstart_runner.py --interactive
 
     # If you wish to run a named test case, pass it as an argument:
-    python ~/git/ceph/qa/tasks/vstart_runner.py tasks.cephfs.test_data_scan
+    python ~/git/stonepros/qa/tasks/vstart_runner.py tasks.stonefs.test_data_scan
 
     # Also, you can create the cluster once and then run named test cases against it:
-    python ~/git/ceph/qa/tasks/vstart_runner.py --create-cluster-only
-    python ~/git/ceph/qa/tasks/vstart_runner.py tasks.mgr.dashboard.test_health
-    python ~/git/ceph/qa/tasks/vstart_runner.py tasks.mgr.dashboard.test_rgw
+    python ~/git/stonepros/qa/tasks/vstart_runner.py --create-cluster-only
+    python ~/git/stonepros/qa/tasks/vstart_runner.py tasks.mgr.dashboard.test_health
+    python ~/git/stonepros/qa/tasks/vstart_runner.py tasks.mgr.dashboard.test_rgw
 
 """
 
@@ -134,16 +134,16 @@ if os.path.exists("./CMakeCache.txt") and os.path.exists("./bin"):
 
 
 try:
-    from tasks.ceph_manager import CephManager
-    from tasks.cephfs.fuse_mount import FuseMount
-    from tasks.cephfs.kernel_mount import KernelMount
-    from tasks.cephfs.filesystem import Filesystem, MDSCluster, CephCluster
-    from tasks.cephfs.mount import CephFSMount
+    from tasks.stone_manager import StoneManager
+    from tasks.stonefs.fuse_mount import FuseMount
+    from tasks.stonefs.kernel_mount import KernelMount
+    from tasks.stonefs.filesystem import Filesystem, MDSCluster, StoneCluster
+    from tasks.stonefs.mount import StoneFSMount
     from tasks.mgr.mgr_test_case import MgrCluster
     from teuthology.task import interactive
 except ImportError:
     sys.stderr.write("***\nError importing packages, have you activated your teuthology virtualenv "
-                     "and set PYTHONPATH to point to teuthology and ceph-qa-suite?\n***\n\n")
+                     "and set PYTHONPATH to point to teuthology and stone-qa-suite?\n***\n\n")
     raise
 
 # Must import after teuthology because of gevent monkey patching
@@ -411,7 +411,7 @@ class LocalRemote(object):
 
         # Filter out helper tools that don't exist in a vstart environment
         args = [a for a in args if a not in ('adjust-ulimits',
-                                             'ceph-coverage')]
+                                             'stone-coverage')]
 
         # Adjust binary path prefix if given a bare program name
         if not isinstance(args[0], Raw) and "/" not in args[0]:
@@ -421,7 +421,7 @@ class LocalRemote(object):
             if os.path.exists(local_bin):
                 args = [local_bin] + args[1:]
             else:
-                log.debug("'{0}' is not a binary in the Ceph build dir".format(
+                log.debug("'{0}' is not a binary in the Stone build dir".format(
                     args[0]
                 ))
 
@@ -520,7 +520,7 @@ class LocalDaemon(object):
         lines = ps_txt.split("\n")[1:]
 
         for line in lines:
-            if line.find("ceph-{0} -i {1}".format(self.daemon_type, self.daemon_id)) != -1:
+            if line.find("stone-{0} -i {1}".format(self.daemon_type, self.daemon_id)) != -1:
                 log.debug("Found ps line for daemon: {0}".format(line))
                 return int(line.split()[0])
         if opt_log_ps_output:
@@ -573,7 +573,7 @@ class LocalDaemon(object):
             self.stop()
 
         self.proc = self.controller.run(args=[
-            os.path.join(BIN_PREFIX, "./ceph-{0}".format(self.daemon_type)),
+            os.path.join(BIN_PREFIX, "./stone-{0}".format(self.daemon_type)),
             "-i", self.daemon_id])
 
     def signal(self, sig, silent=False):
@@ -598,9 +598,9 @@ def safe_kill(pid):
         else:
             raise
 
-def mon_in_localhost(config_path="./ceph.conf"):
+def mon_in_localhost(config_path="./stone.conf"):
     """
-    If the ceph cluster is using the localhost IP as mon host, will must disable ns unsharing
+    If the stone cluster is using the localhost IP as mon host, will must disable ns unsharing
     """
     with open(config_path) as f:
         for line in f:
@@ -612,16 +612,16 @@ def mon_in_localhost(config_path="./ceph.conf"):
 class LocalKernelMount(KernelMount):
     def __init__(self, ctx, test_dir, client_id=None,
                  client_keyring_path=None, client_remote=None,
-                 hostfs_mntpt=None, cephfs_name=None, cephfs_mntpt=None,
+                 hostfs_mntpt=None, stonefs_name=None, stonefs_mntpt=None,
                  brxnet=None):
         super(LocalKernelMount, self).__init__(ctx=ctx, test_dir=test_dir,
             client_id=client_id, client_keyring_path=client_keyring_path,
             client_remote=LocalRemote(), hostfs_mntpt=hostfs_mntpt,
-            cephfs_name=cephfs_name, cephfs_mntpt=cephfs_mntpt, brxnet=brxnet)
+            stonefs_name=stonefs_name, stonefs_mntpt=stonefs_mntpt, brxnet=brxnet)
 
     @property
     def config_path(self):
-        return "./ceph.conf"
+        return "./stone.conf"
 
     def get_keyring_path(self):
         # This is going to end up in a config file, so use an absolute path
@@ -648,13 +648,13 @@ class LocalKernelMount(KernelMount):
         return BIN_PREFIX
 
     def _asok_path(self):
-        # In teuthology, the asok is named after the PID of the ceph-fuse process, because it's
+        # In teuthology, the asok is named after the PID of the stone-fuse process, because it's
         # run foreground.  When running it daemonized however, the asok is named after
-        # the PID of the launching process, not the long running ceph-fuse process.  Therefore
+        # the PID of the launching process, not the long running stone-fuse process.  Therefore
         # we need to give an exact path here as the logic for checking /proc/ for which
         # asok is alive does not work.
 
-        # Load the asok path from ceph.conf as vstart.sh now puts admin sockets
+        # Load the asok path from stone.conf as vstart.sh now puts admin sockets
         # in a tmpdir. All of the paths are the same, so no need to select
         # based off of the service type.
         d = "./out"
@@ -677,11 +677,11 @@ class LocalKernelMount(KernelMount):
         else:
             self.using_namespace = False
 
-        if not self.cephfs_mntpt:
-            self.cephfs_mntpt = "/"
+        if not self.stonefs_mntpt:
+            self.stonefs_mntpt = "/"
         # TODO: don't call setupfs() from within mount()
         if createfs:
-            self.setupfs(name=self.cephfs_name)
+            self.setupfs(name=self.stonefs_name)
 
         opts = 'norequire_active_mds'
         if self.client_id:
@@ -690,8 +690,8 @@ class LocalKernelMount(KernelMount):
             opts += ",secret=" + self.get_key_from_keyfile()
         if self.config_path:
             opts += ',conf=' + self.config_path
-        if self.cephfs_name:
-            opts += ",mds_namespace={0}".format(self.cephfs_name)
+        if self.stonefs_name:
+            opts += ",mds_namespace={0}".format(self.stonefs_name)
         if mntopts:
             opts += ',' + ','.join(mntopts)
 
@@ -703,13 +703,13 @@ class LocalKernelMount(KernelMount):
             if 'file exists' not in stderr.getvalue().lower():
                 raise
 
-        if self.cephfs_mntpt is None:
-            self.cephfs_mntpt = "/"
+        if self.stonefs_mntpt is None:
+            self.stonefs_mntpt = "/"
         cmdargs = ['sudo']
         if self.using_namespace:
            cmdargs += ['nsenter',
                        '--net=/var/run/netns/{0}'.format(self.netns_name)]
-        cmdargs += ['./bin/mount.ceph', ':' + self.cephfs_mntpt,
+        cmdargs += ['./bin/mount.stone', ':' + self.stonefs_mntpt,
                     self.hostfs_mntpt, '-v', '-o', opts]
 
         mountcmd_stdout, mountcmd_stderr = StringIO(), StringIO()
@@ -731,7 +731,7 @@ class LocalKernelMount(KernelMount):
                                    timeout=(5*60))
         except CommandFailedError:
             # the client does not have write permissions in cap it holds for
-            # the Ceph FS that was just mounted.
+            # the Stone FS that was just mounted.
             if 'permission denied' in stderr.getvalue().lower():
                 pass
 
@@ -751,17 +751,17 @@ class LocalKernelMount(KernelMount):
 
 class LocalFuseMount(FuseMount):
     def __init__(self, ctx, test_dir, client_id, client_keyring_path=None,
-                 client_remote=None, hostfs_mntpt=None, cephfs_name=None,
-                 cephfs_mntpt=None, brxnet=None):
+                 client_remote=None, hostfs_mntpt=None, stonefs_name=None,
+                 stonefs_mntpt=None, brxnet=None):
         super(LocalFuseMount, self).__init__(ctx=ctx, client_config=None,
             test_dir=test_dir, client_id=client_id,
             client_keyring_path=client_keyring_path,
             client_remote=LocalRemote(), hostfs_mntpt=hostfs_mntpt,
-            cephfs_name=cephfs_name, cephfs_mntpt=cephfs_mntpt, brxnet=brxnet)
+            stonefs_name=stonefs_name, stonefs_mntpt=stonefs_mntpt, brxnet=brxnet)
 
     @property
     def config_path(self):
-        return "./ceph.conf"
+        return "./stone.conf"
 
     def get_keyring_path(self):
         # This is going to end up in a config file, so use an absolute path
@@ -782,13 +782,13 @@ class LocalFuseMount(FuseMount):
         return BIN_PREFIX
 
     def _asok_path(self):
-        # In teuthology, the asok is named after the PID of the ceph-fuse process, because it's
+        # In teuthology, the asok is named after the PID of the stone-fuse process, because it's
         # run foreground.  When running it daemonized however, the asok is named after
-        # the PID of the launching process, not the long running ceph-fuse process.  Therefore
+        # the PID of the launching process, not the long running stone-fuse process.  Therefore
         # we need to give an exact path here as the logic for checking /proc/ for which
         # asok is alive does not work.
 
-        # Load the asok path from ceph.conf as vstart.sh now puts admin sockets
+        # Load the asok path from stone.conf as vstart.sh now puts admin sockets
         # in a tmpdir. All of the paths are the same, so no need to select
         # based off of the service type.
         d = "./out"
@@ -813,7 +813,7 @@ class LocalFuseMount(FuseMount):
 
         # TODO: don't call setupfs() from within mount()
         if createfs:
-            self.setupfs(name=self.cephfs_name)
+            self.setupfs(name=self.stonefs_name)
 
         stderr = StringIO()
         try:
@@ -841,7 +841,7 @@ class LocalFuseMount(FuseMount):
             else:
                 return []
 
-        # Before starting ceph-fuse process, note the contents of
+        # Before starting stone-fuse process, note the contents of
         # /sys/fs/fuse/connections
         pre_mount_conns = list_connections()
         log.debug("Pre-mount connections: {0}".format(pre_mount_conns))
@@ -851,16 +851,16 @@ class LocalFuseMount(FuseMount):
             cmdargs = ['sudo', 'nsenter',
                        '--net=/var/run/netns/{0}'.format(self.netns_name),
                        '--setuid', str(os.getuid())]
-        cmdargs += [os.path.join(BIN_PREFIX, 'ceph-fuse'), self.hostfs_mntpt,
+        cmdargs += [os.path.join(BIN_PREFIX, 'stone-fuse'), self.hostfs_mntpt,
                     '-f']
         if self.client_id is not None:
             cmdargs += ["--id", self.client_id]
         if self.client_keyring_path and self.client_id is not None:
             cmdargs.extend(['-k', self.client_keyring_path])
-        if self.cephfs_name:
-            cmdargs += ["--client_fs=" + self.cephfs_name]
-        if self.cephfs_mntpt:
-            cmdargs += ["--client_mountpoint=" + self.cephfs_mntpt]
+        if self.stonefs_name:
+            cmdargs += ["--client_fs=" + self.stonefs_name]
+        if self.stonefs_mntpt:
+            cmdargs += ["--client_mountpoint=" + self.stonefs_mntpt]
         if os.getuid() != 0:
             cmdargs += ["--client_die_on_failed_dentry_invalidate=false"]
         if mntopts:
@@ -945,15 +945,15 @@ class LocalFuseMount(FuseMount):
         return self.client_remote.run(args=[py_version, '-c', pyscript],
                                       wait=False, stdout=StringIO())
 
-# XXX: this class has nothing to do with the Ceph daemon (ceph-mgr) of
+# XXX: this class has nothing to do with the Stone daemon (stone-mgr) of
 # the same name.
-class LocalCephManager(CephManager):
+class LocalStoneManager(StoneManager):
     def __init__(self):
         # Deliberately skip parent init, only inheriting from it to get
         # util methods like osd_dump that sit on top of raw_cluster_cmd
         self.controller = LocalRemote()
 
-        # A minority of CephManager fns actually bother locking for when
+        # A minority of StoneManager fns actually bother locking for when
         # certain teuthology tests want to run tasks in parallel
         self.lock = threading.RLock()
 
@@ -961,7 +961,7 @@ class LocalCephManager(CephManager):
 
         # Don't bother constructing a map of pools: it should be empty
         # at test cluster start, and in any case it would be out of date
-        # in no time.  The attribute needs to exist for some of the CephManager
+        # in no time.  The attribute needs to exist for some of the StoneManager
         # methods to work though.
         self.pools = {}
 
@@ -972,13 +972,13 @@ class LocalCephManager(CephManager):
         """
         return LocalRemote()
 
-    def run_ceph_w(self, watch_channel=None):
+    def run_stone_w(self, watch_channel=None):
         """
         :param watch_channel: Specifies the channel to be watched.
                               This can be 'cluster', 'audit', ...
         :type watch_channel: str
         """
-        args = [os.path.join(BIN_PREFIX, "ceph"), "-w"]
+        args = [os.path.join(BIN_PREFIX, "stone"), "-w"]
         if watch_channel is not None:
             args.append("--watch-channel")
             args.append(watch_channel)
@@ -987,12 +987,12 @@ class LocalCephManager(CephManager):
 
     def run_cluster_cmd(self, **kwargs):
         """
-        Run a Ceph command and the object representing the process for the
+        Run a Stone command and the object representing the process for the
         command.
 
         Accepts arguments same as teuthology.orchestra.remote.run().
         """
-        kwargs['args'] = [os.path.join(BIN_PREFIX,'ceph')]+list(kwargs['args'])
+        kwargs['args'] = [os.path.join(BIN_PREFIX,'stone')]+list(kwargs['args'])
         return self.controller.run(**kwargs)
 
     def raw_cluster_cmd(self, *args, **kwargs) -> str:
@@ -1018,7 +1018,7 @@ class LocalCephManager(CephManager):
             stdout = StringIO()
 
         return self.controller.run(
-            args=[os.path.join(BIN_PREFIX, "ceph"), "daemon",
+            args=[os.path.join(BIN_PREFIX, "stone"), "daemon",
                   "{0}.{1}".format(daemon_type, daemon_id)] + command,
             check_status=check_status, timeout=timeout, stdout=stdout)
 
@@ -1070,11 +1070,11 @@ class LocalCephManager(CephManager):
         return tuple(socks)
 
 
-class LocalCephCluster(CephCluster):
+class LocalStoneCluster(StoneCluster):
     def __init__(self, ctx):
-        # Deliberately skip calling CephCluster constructor
+        # Deliberately skip calling StoneCluster constructor
         self._ctx = ctx
-        self.mon_manager = LocalCephManager()
+        self.mon_manager = LocalStoneManager()
         self._conf = defaultdict(dict)
 
     @property
@@ -1095,10 +1095,10 @@ class LocalCephCluster(CephCluster):
         return self.json_asok(['config', 'get', key], service_type, service_id)[key]
 
     def _write_conf(self):
-        # In teuthology, we have the honour of writing the entire ceph.conf, but
+        # In teuthology, we have the honour of writing the entire stone.conf, but
         # in vstart land it has mostly already been written and we need to carefully
         # append to it.
-        conf_path = "./ceph.conf"
+        conf_path = "./stone.conf"
         banner = "\n#LOCAL_TEST\n"
         existing_str = open(conf_path).read()
 
@@ -1132,20 +1132,20 @@ class LocalCephCluster(CephCluster):
 
         open(conf_path, "w").write(existing_str)
 
-    def set_ceph_conf(self, subsys, key, value):
+    def set_stone_conf(self, subsys, key, value):
         self._conf[subsys][key] = value
         self._write_conf()
 
-    def clear_ceph_conf(self, subsys, key):
+    def clear_stone_conf(self, subsys, key):
         del self._conf[subsys][key]
         self._write_conf()
 
 
-class LocalMDSCluster(LocalCephCluster, MDSCluster):
+class LocalMDSCluster(LocalStoneCluster, MDSCluster):
     def __init__(self, ctx):
-        LocalCephCluster.__init__(self, ctx)
+        LocalStoneCluster.__init__(self, ctx)
         # Deliberately skip calling MDSCluster constructor
-        self._mds_ids = ctx.daemons.daemons['ceph.mds'].keys()
+        self._mds_ids = ctx.daemons.daemons['stone.mds'].keys()
         log.debug("Discovered MDS IDs: {0}".format(self._mds_ids))
         self._mds_daemons = dict([(id_, LocalDaemon("mds", id_)) for id_ in self.mds_ids])
 
@@ -1161,7 +1161,7 @@ class LocalMDSCluster(LocalCephCluster, MDSCluster):
         # FIXME: unimplemented
         pass
 
-    def newfs(self, name='cephfs', create=True):
+    def newfs(self, name='stonefs', create=True):
         return LocalFilesystem(self._ctx, name=name, create=create)
 
     def delete_all_filesystems(self):
@@ -1172,11 +1172,11 @@ class LocalMDSCluster(LocalCephCluster, MDSCluster):
             LocalFilesystem(ctx=self._ctx, fscid=fs['id']).destroy()
 
 
-class LocalMgrCluster(LocalCephCluster, MgrCluster):
+class LocalMgrCluster(LocalStoneCluster, MgrCluster):
     def __init__(self, ctx):
         super(LocalMgrCluster, self).__init__(ctx)
 
-        self.mgr_ids = ctx.daemons.daemons['ceph.mgr'].keys()
+        self.mgr_ids = ctx.daemons.daemons['stone.mgr'].keys()
         self.mgr_daemons = dict([(id_, LocalDaemon("mgr", id_)) for id_ in self.mgr_ids])
 
 
@@ -1194,7 +1194,7 @@ class LocalFilesystem(LocalMDSCluster, Filesystem):
         self.fs_config = fs_config
         self.ec_profile = fs_config.get('ec_profile')
 
-        self.mon_manager = LocalCephManager()
+        self.mon_manager = LocalStoneManager()
 
         self.client_remote = LocalRemote()
 
@@ -1249,10 +1249,10 @@ class LocalContext(object):
 
         # Shove some LocalDaemons into the ctx.daemons DaemonGroup instance so that any
         # tests that want to look these up via ctx can do so.
-        # Inspect ceph.conf to see what roles exist
-        for conf_line in open("ceph.conf").readlines():
+        # Inspect stone.conf to see what roles exist
+        for conf_line in open("stone.conf").readlines():
             for svc_type in ["mon", "osd", "mds", "mgr"]:
-                prefixed_type = "ceph." + svc_type
+                prefixed_type = "stone." + svc_type
                 if prefixed_type not in self.daemons.daemons:
                     self.daemons.daemons[prefixed_type] = {}
                 match = re.match("^\[{0}\.(.+)\]$".format(svc_type), conf_line)
@@ -1289,14 +1289,14 @@ def load_tests(modules, loader):
         log.debug("Executing modules: {0}".format(modules))
         module_suites = []
         for mod_name in modules:
-            # Test names like cephfs.test_auto_repair
+            # Test names like stonefs.test_auto_repair
             module_suites.append(loader.loadTestsFromName(mod_name))
         log.debug("Loaded: {0}".format(list(module_suites)))
         return suite.TestSuite(module_suites)
     else:
-        log.debug("Executing all cephfs tests")
+        log.debug("Executing all stonefs tests")
         return loader.discover(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "cephfs")
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "stonefs")
         )
 
 
@@ -1467,7 +1467,7 @@ def launch_individually(overall_suite):
 
     started_at = datetime.datetime.utcnow()
     for suite_, case in enumerate_methods(overall_suite):
-        # don't run logrotate beforehand since some ceph daemons might be
+        # don't run logrotate beforehand since some stone daemons might be
         # down and pre/post-rotate scripts in logrotate.conf might fail.
         if opt_rotate_logs:
             logrotate.run_logrotate()
@@ -1574,11 +1574,11 @@ def exec_test():
 
     # Help developers by stopping up-front if their tree isn't built enough for all the
     # tools that the tests might want to use (add more here if needed)
-    require_binaries = ["ceph-dencoder", "cephfs-journal-tool", "cephfs-data-scan",
-                        "cephfs-table-tool", "ceph-fuse", "rados", "cephfs-meta-injection"]
+    require_binaries = ["stone-dencoder", "stonefs-journal-tool", "stonefs-data-scan",
+                        "stonefs-table-tool", "stone-fuse", "rados", "stonefs-meta-injection"]
     missing_binaries = [b for b in require_binaries if not os.path.exists(os.path.join(BIN_PREFIX, b))]
     if missing_binaries and not opt_ignore_missing_binaries:
-        log.error("Some ceph binaries missing, please build them: {0}".format(" ".join(missing_binaries)))
+        log.error("Some stone binaries missing, please build them: {0}".format(" ".join(missing_binaries)))
         sys.exit(-1)
 
     max_required_mds, max_required_clients, \
@@ -1587,19 +1587,19 @@ def exec_test():
     global remote
     remote = LocalRemote()
 
-    CephFSMount.cleanup_stale_netnses_and_bridge(remote)
+    StoneFSMount.cleanup_stale_netnses_and_bridge(remote)
 
     # Tolerate no MDSs or clients running at start
     ps_txt = remote.run(args=["ps", "-u"+str(os.getuid())],
                         stdout=StringIO()).stdout.getvalue().strip()
     lines = ps_txt.split("\n")[1:]
     for line in lines:
-        if 'ceph-fuse' in line or 'ceph-mds' in line:
+        if 'stone-fuse' in line or 'stone-mds' in line:
             pid = int(line.split()[0])
             log.warning("Killing stray process {0}".format(line))
             os.kill(pid, signal.SIGKILL)
 
-    # Fire up the Ceph cluster if the user requested it
+    # Fire up the Stone cluster if the user requested it
     if opt_create_cluster or opt_create_cluster_only:
         log.info("Creating cluster with {0} MDS daemons".format(
             max_required_mds))
@@ -1627,7 +1627,7 @@ def exec_test():
 
         # Wait for OSD to come up so that subsequent injectargs etc will
         # definitely succeed
-        LocalCephCluster(LocalContext()).mon_manager.wait_for_all_osds_up(timeout=30)
+        LocalStoneCluster(LocalContext()).mon_manager.wait_for_all_osds_up(timeout=30)
 
     if opt_create_cluster_only:
         return
@@ -1642,7 +1642,7 @@ def exec_test():
     teuth_config['test_path'] = test_dir
 
     ctx = LocalContext()
-    ceph_cluster = LocalCephCluster(ctx)
+    stone_cluster = LocalStoneCluster(ctx)
     mds_cluster = LocalMDSCluster(ctx)
     mgr_cluster = LocalMgrCluster(ctx)
 
@@ -1654,7 +1654,7 @@ def exec_test():
         client_name = "client.{0}".format(client_id)
 
         if client_name not in open("./keyring").read():
-            p = remote.run(args=[os.path.join(BIN_PREFIX, "ceph"), "auth", "get-or-create", client_name,
+            p = remote.run(args=[os.path.join(BIN_PREFIX, "stone"), "auth", "get-or-create", client_name,
                                  "osd", "allow rw",
                                  "mds", "allow",
                                  "mon", "allow r"], stdout=StringIO())
@@ -1676,34 +1676,34 @@ def exec_test():
             else:
                 os.rmdir(mount.hostfs_mntpt)
 
-    from tasks.cephfs_test_runner import DecoratingLoader
+    from tasks.stonefs_test_runner import DecoratingLoader
 
     decorating_loader = DecoratingLoader({
         "ctx": ctx,
         "mounts": mounts,
-        "ceph_cluster": ceph_cluster,
+        "stone_cluster": stone_cluster,
         "mds_cluster": mds_cluster,
         "mgr_cluster": mgr_cluster,
     })
 
     # For the benefit of polling tests like test_full -- in teuthology land we set this
     # in a .yaml, here it's just a hardcoded thing for the developer's pleasure.
-    remote.run(args=[os.path.join(BIN_PREFIX, "ceph"), "tell", "osd.*", "injectargs", "--osd-mon-report-interval", "5"])
-    ceph_cluster.set_ceph_conf("osd", "osd_mon_report_interval", "5")
+    remote.run(args=[os.path.join(BIN_PREFIX, "stone"), "tell", "osd.*", "injectargs", "--osd-mon-report-interval", "5"])
+    stone_cluster.set_stone_conf("osd", "osd_mon_report_interval", "5")
 
     # Vstart defaults to two segments, which very easily gets a "behind on trimming" health warning
     # from normal IO latency.  Increase it for running teests.
-    ceph_cluster.set_ceph_conf("mds", "mds log max segments", "10")
+    stone_cluster.set_stone_conf("mds", "mds log max segments", "10")
 
     # Make sure the filesystem created in tests has uid/gid that will let us talk to
     # it after mounting it (without having to  go root).  Set in 'global' not just 'mds'
-    # so that cephfs-data-scan will pick it up too.
-    ceph_cluster.set_ceph_conf("global", "mds root ino uid", "%s" % os.getuid())
-    ceph_cluster.set_ceph_conf("global", "mds root ino gid", "%s" % os.getgid())
+    # so that stonefs-data-scan will pick it up too.
+    stone_cluster.set_stone_conf("global", "mds root ino uid", "%s" % os.getuid())
+    stone_cluster.set_stone_conf("global", "mds root ino gid", "%s" % os.getgid())
 
     # Monkeypatch get_package_version to avoid having to work out what kind of distro we're on
     def _get_package_version(remote, pkg_name):
-        # Used in cephfs tests to find fuse version.  Your development workstation *does* have >=2.9, right?
+        # Used in stonefs tests to find fuse version.  Your development workstation *does* have >=2.9, right?
         return "2.9"
 
     import teuthology.packaging
@@ -1744,7 +1744,7 @@ def exec_test():
     overall_suite = load_tests(modules, loader.TestLoader())
     result = launch_tests(overall_suite)
 
-    CephFSMount.cleanup_stale_netnses_and_bridge(remote)
+    StoneFSMount.cleanup_stale_netnses_and_bridge(remote)
     if opt_teardown_cluster:
         teardown_cluster()
 

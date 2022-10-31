@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2021 Red Hat
  *
@@ -26,18 +26,18 @@
 class TestClient : public ::testing::Test {
 public:
     static void SetUpTestSuite() {
-      icp.start(g_ceph_context->_conf.get_val<std::uint64_t>("client_asio_thread_count"));
+      icp.start(g_stone_context->_conf.get_val<std::uint64_t>("client_asio_thread_count"));
     }
     static void TearDownTestSuite() {
       icp.stop();
     }
     void SetUp() override {
-      messenger = Messenger::create_client_messenger(g_ceph_context, "client");
+      messenger = Messenger::create_client_messenger(g_stone_context, "client");
       if (messenger->start() != 0) {
         throw std::runtime_error("failed to start messenger");
       }
 
-      mc = new MonClient(g_ceph_context, icp);
+      mc = new MonClient(g_stone_context, icp);
       if (mc->build_initial_monmap() < 0) {
         throw std::runtime_error("build monmap");
       }
@@ -47,7 +47,7 @@ public:
         throw std::runtime_error("init monclient");
       }
 
-      objecter = new Objecter(g_ceph_context, messenger, mc, icp);
+      objecter = new Objecter(g_stone_context, messenger, mc, icp);
       objecter->set_client_incarnation(0);
       objecter->init();
       messenger->add_dispatcher_tail(objecter);
@@ -76,7 +76,7 @@ public:
       messenger = nullptr;
     }
 protected:
-    static inline ceph::async::io_context_pool icp;
+    static inline stone::async::io_context_pool icp;
     static inline UserPerm myperm{0,0};
     MonClient* mc = nullptr;
     Messenger* messenger = nullptr;

@@ -21,7 +21,7 @@
 #include "include/common_fwd.h"
 
 namespace TOPNSPC::global {
-extern StoneContext *g_ceph_context;
+extern StoneContext *g_stone_context;
 ConfigProxy& g_conf();
 
 extern const char *g_assert_file;

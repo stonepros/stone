@@ -528,7 +528,7 @@ class NodeLayoutT final : public InternalNodeImpl, public LeafNodeImpl {
       assert(p_value->value == src);
       extent.update_child_addr_replayable(dst, const_cast<laddr_packed_t*>(p_value));
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
   }
 
@@ -550,7 +550,7 @@ class NodeLayoutT final : public InternalNodeImpl, public LeafNodeImpl {
       }
       return {insert_stage, insert_size};
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
   }
 
@@ -563,7 +563,7 @@ class NodeLayoutT final : public InternalNodeImpl, public LeafNodeImpl {
       STAGE_T::template lookup_largest_slot<true, true, true>(
           extent.read(), &cast_down_fill_0<STAGE>(pos), &index_key, pp_value);
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
   }
 
@@ -580,7 +580,7 @@ class NodeLayoutT final : public InternalNodeImpl, public LeafNodeImpl {
             key, value, history, mstat, cast_down<STAGE>(insert_pos));
       }
     } else {
-      ceph_abort("impossible path");
+      stone_abort("impossible path");
     }
   }
 
@@ -595,7 +595,7 @@ class NodeLayoutT final : public InternalNodeImpl, public LeafNodeImpl {
   }
 
   static seastar::logger& logger() {
-    return crimson::get_logger(ceph_subsys_filestore);
+    return crimson::get_logger(stone_subsys_filestore);
   }
 
   extent_t extent;

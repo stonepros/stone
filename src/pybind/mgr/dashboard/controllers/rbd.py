@@ -13,7 +13,7 @@ import rbd
 from .. import mgr
 from ..exceptions import DashboardException
 from ..security import Scope
-from ..services.ceph_service import CephService
+from ..services.stone_service import StoneService
 from ..services.exception import handle_rados_error, handle_rbd_error, serialize_dashboard_exception
 from ..services.rbd import RbdConfiguration, RbdService, RbdSnapshotService, \
     format_bitmask, format_features, parse_image_spec, rbd_call, \
@@ -81,7 +81,7 @@ class Rbd(RESTController):
         if pool_name:
             pools = [pool_name]
         else:
-            pools = [p['pool_name'] for p in CephService.get_pool_list('rbd')]
+            pools = [p['pool_name'] for p in StoneService.get_pool_list('rbd')]
 
         result = []
         for pool in pools:
@@ -387,7 +387,7 @@ class RbdTrash(RESTController):
         if pool_name:
             pools = [pool_name]
         else:
-            pools = [p['pool_name'] for p in CephService.get_pool_list('rbd')]
+            pools = [p['pool_name'] for p in StoneService.get_pool_list('rbd')]
 
         result = []
         for pool in pools:

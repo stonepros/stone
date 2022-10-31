@@ -16,24 +16,24 @@ from teuthology.misc import get_file, write_file
 from teuthology.orchestra import run
 from teuthology.orchestra.run import CommandFailedError, ConnectionLostError, Raw
 
-from tasks.cephfs.filesystem import Filesystem
+from tasks.stonefs.filesystem import Filesystem
 
 log = logging.getLogger(__name__)
 
-class CephFSMount(object):
+class StoneFSMount(object):
     def __init__(self, ctx, test_dir, client_id, client_remote,
                  client_keyring_path=None, hostfs_mntpt=None,
-                 cephfs_name=None, cephfs_mntpt=None, brxnet=None):
+                 stonefs_name=None, stonefs_mntpt=None, brxnet=None):
         """
         :param test_dir: Global teuthology test dir
         :param client_id: Client ID, the 'foo' in client.foo
         :param client_keyring_path: path to keyring for given client_id
         :param client_remote: Remote instance for the host where client will
                               run
-        :param hostfs_mntpt: Path to directory on the FS on which Ceph FS will
+        :param hostfs_mntpt: Path to directory on the FS on which Stone FS will
                              be mounted
-        :param cephfs_name: Name of Ceph FS to be mounted
-        :param cephfs_mntpt: Path to directory inside Ceph FS that will be
+        :param stonefs_name: Name of Stone FS to be mounted
+        :param stonefs_mntpt: Path to directory inside Stone FS that will be
                              mounted as root
         """
         self.mounted = False
@@ -42,8 +42,8 @@ class CephFSMount(object):
 
         self._verify_attrs(client_id=client_id,
                            client_keyring_path=client_keyring_path,
-                           hostfs_mntpt=hostfs_mntpt, cephfs_name=cephfs_name,
-                           cephfs_mntpt=cephfs_mntpt)
+                           hostfs_mntpt=hostfs_mntpt, stonefs_name=stonefs_name,
+                           stonefs_mntpt=stonefs_mntpt)
 
         self.client_id = client_id
         self.client_keyring_path = client_keyring_path
@@ -53,17 +53,17 @@ class CephFSMount(object):
             self.hostfs_mntpt_dirname = os.path.basename(self.hostfs_mntpt)
         else:
             self.hostfs_mntpt = os.path.join(self.test_dir, f'mnt.{self.client_id}')
-        self.cephfs_name = cephfs_name
-        self.cephfs_mntpt = cephfs_mntpt
+        self.stonefs_name = stonefs_name
+        self.stonefs_mntpt = stonefs_mntpt
 
         self.fs = None
 
         self._netns_name = None
         self.nsid = -1
         if brxnet is None:
-            self.ceph_brx_net = '192.168.0.0/16'
+            self.stone_brx_net = '192.168.0.0/16'
         else:
-            self.ceph_brx_net = brxnet
+            self.stone_brx_net = brxnet
 
         self.test_files = ['a', 'b', 'c']
 
@@ -78,7 +78,7 @@ class CephFSMount(object):
         p = p.stdout.getvalue().strip()
 
         # Get the netns name list
-        netns_list = re.findall(r'ceph-ns-[^()\s][-.\w]+[^():\s]', p)
+        netns_list = re.findall(r'stone-ns-[^()\s][-.\w]+[^():\s]', p)
 
         # Remove the stale netnses
         for ns in netns_list:
@@ -89,15 +89,15 @@ class CephFSMount(object):
             except Exception:
                 pass
 
-        # Remove the stale 'ceph-brx'
+        # Remove the stale 'stone-brx'
         try:
-            args = ['sudo', 'ip', 'link', 'delete', 'ceph-brx']
+            args = ['sudo', 'ip', 'link', 'delete', 'stone-brx']
             remote.run(args=args, timeout=(5*60), omit_sudo=False)
         except Exception:
             pass
 
     def _parse_netns_name(self):
-        self._netns_name = '-'.join(["ceph-ns",
+        self._netns_name = '-'.join(["stone-ns",
                                      re.sub(r'/+', "-", self.mountpoint)])
 
     @property
@@ -130,19 +130,19 @@ class CephFSMount(object):
         """
         if not self.client_id or not self.client_remote or \
            not self.hostfs_mntpt:
-            errmsg = ('Mounting CephFS requires that at least following '
+            errmsg = ('Mounting StoneFS requires that at least following '
                       'details to be provided -\n'
                       '1. the client ID,\n2. the mountpoint and\n'
-                      '3. the remote machine where CephFS will be mounted.\n')
+                      '3. the remote machine where StoneFS will be mounted.\n')
             raise RuntimeError(errmsg)
 
-        log.info('Mounting Ceph FS. Following are details of mount; remember '
+        log.info('Mounting Stone FS. Following are details of mount; remember '
                  '"None" represents Python type None -')
         log.info(f'self.client_remote.hostname = {self.client_remote.hostname}')
         log.info(f'self.client.name = client.{self.client_id}')
         log.info(f'self.hostfs_mntpt = {self.hostfs_mntpt}')
-        log.info(f'self.cephfs_name = {self.cephfs_name}')
-        log.info(f'self.cephfs_mntpt = {self.cephfs_mntpt}')
+        log.info(f'self.stonefs_name = {self.stonefs_name}')
+        log.info(f'self.stonefs_mntpt = {self.stonefs_mntpt}')
         log.info(f'self.client_keyring_path = {self.client_keyring_path}')
         if self.client_keyring_path:
             log.info('keyring content -\n' +
@@ -162,31 +162,31 @@ class CephFSMount(object):
         log.info('Ready to start {}...'.format(type(self).__name__))
 
     def _setup_brx_and_nat(self):
-        # The ip for ceph-brx should be
-        ip = IP(self.ceph_brx_net)[-2]
-        mask = self.ceph_brx_net.split('/')[1]
-        brd = IP(self.ceph_brx_net).broadcast()
+        # The ip for stone-brx should be
+        ip = IP(self.stone_brx_net)[-2]
+        mask = self.stone_brx_net.split('/')[1]
+        brd = IP(self.stone_brx_net).broadcast()
 
         brx = self.client_remote.run(args=['ip', 'addr'], stderr=StringIO(),
                                      stdout=StringIO(), timeout=(5*60))
-        brx = re.findall(r'inet .* ceph-brx', brx.stdout.getvalue())
+        brx = re.findall(r'inet .* stone-brx', brx.stdout.getvalue())
         if brx:
-            # If the 'ceph-brx' already exists, then check whether
+            # If the 'stone-brx' already exists, then check whether
             # the new net is conflicting with it
             _ip, _mask = brx[0].split()[1].split('/', 1)
             if _ip != "{}".format(ip) or _mask != mask:
-                raise RuntimeError("Conflict with existing ceph-brx {0}, new {1}/{2}".format(brx[0].split()[1], ip, mask))
+                raise RuntimeError("Conflict with existing stone-brx {0}, new {1}/{2}".format(brx[0].split()[1], ip, mask))
 
-        # Setup the ceph-brx and always use the last valid IP
+        # Setup the stone-brx and always use the last valid IP
         if not brx:
-            log.info("Setuping the 'ceph-brx' with {0}/{1}".format(ip, mask))
+            log.info("Setuping the 'stone-brx' with {0}/{1}".format(ip, mask))
 
             self.run_shell_payload(f"""
                 set -e
-                sudo ip link add name ceph-brx type bridge
-                sudo ip addr flush dev ceph-brx
-                sudo ip link set ceph-brx up
-                sudo ip addr add {ip}/{mask} brd {brd} dev ceph-brx
+                sudo ip link add name stone-brx type bridge
+                sudo ip addr flush dev stone-brx
+                sudo ip link set stone-brx up
+                sudo ip addr add {ip}/{mask} brd {brd} dev stone-brx
             """, timeout=(5*60), omit_sudo=False, cwd='/')
         
         args = "echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward"
@@ -202,8 +202,8 @@ class CephFSMount(object):
 
         self.run_shell_payload(f"""
             set -e
-            sudo iptables -A FORWARD -o {gw} -i ceph-brx -j ACCEPT
-            sudo iptables -A FORWARD -i {gw} -o ceph-brx -j ACCEPT
+            sudo iptables -A FORWARD -o {gw} -i stone-brx -j ACCEPT
+            sudo iptables -A FORWARD -i {gw} -o stone-brx -j ACCEPT
             sudo iptables -t nat -A POSTROUTING -s {ip}/{mask} -o {gw} -j MASQUERADE
         """, timeout=(5*60), omit_sudo=False, cwd='/')
 
@@ -245,7 +245,7 @@ class CephFSMount(object):
             return
 
         # Get one ip address for netns
-        ips = IP(self.ceph_brx_net)
+        ips = IP(self.stone_brx_net)
         for ip in ips:
             found = False
             if ip == ips[0]:
@@ -273,13 +273,13 @@ class CephFSMount(object):
             if found == False:
                 break
 
-        mask = self.ceph_brx_net.split('/')[1]
-        brd = IP(self.ceph_brx_net).broadcast()
+        mask = self.stone_brx_net.split('/')[1]
+        brd = IP(self.stone_brx_net).broadcast()
 
         log.info("Setuping the netns '{0}' with {1}/{2}".format(self.netns_name, ip, mask))
 
         # Setup the veth interfaces
-        brxip = IP(self.ceph_brx_net)[-2]
+        brxip = IP(self.stone_brx_net)[-2]
         self.run_shell_payload(f"""
             set -e
             sudo ip link add veth0 netns {self.netns_name} type veth peer name brx.{nsid}
@@ -289,11 +289,11 @@ class CephFSMount(object):
             sudo ip netns exec {self.netns_name} ip route add default via {brxip}
         """, timeout=(5*60), omit_sudo=False, cwd='/')
 
-        # Bring up the brx interface and join it to 'ceph-brx'
+        # Bring up the brx interface and join it to 'stone-brx'
         self.run_shell_payload(f"""
             set -e
             sudo ip link set brx.{nsid} up
-            sudo ip link set dev brx.{nsid} master ceph-brx
+            sudo ip link set dev brx.{nsid} master stone-brx
         """, timeout=(5*60), omit_sudo=False, cwd='/')
 
     def _cleanup_netns(self):
@@ -314,11 +314,11 @@ class CephFSMount(object):
     def _cleanup_brx_and_nat(self):
         brx = self.client_remote.run(args=['ip', 'addr'], stderr=StringIO(),
                                      stdout=StringIO(), timeout=(5*60))
-        brx = re.findall(r'inet .* ceph-brx', brx.stdout.getvalue())
+        brx = re.findall(r'inet .* stone-brx', brx.stdout.getvalue())
         if not brx:
             return
 
-        # If we are the last netns, will delete the ceph-brx
+        # If we are the last netns, will delete the stone-brx
         args = ['sudo', 'ip', 'link', 'show']
         p = self.client_remote.run(args=args, stdout=StringIO(),
                                    timeout=(5*60), omit_sudo=False)
@@ -326,17 +326,17 @@ class CephFSMount(object):
         if len(_list) != 0:
             return
 
-        log.info("Removing the 'ceph-brx'")
+        log.info("Removing the 'stone-brx'")
 
         self.run_shell_payload("""
             set -e
-            sudo ip link set ceph-brx down
-            sudo ip link delete ceph-brx
+            sudo ip link set stone-brx down
+            sudo ip link delete stone-brx
         """, timeout=(5*60), omit_sudo=False, cwd='/')
 
         # Drop the iptables NAT rules
-        ip = IP(self.ceph_brx_net)[-2]
-        mask = self.ceph_brx_net.split('/')[1]
+        ip = IP(self.stone_brx_net)[-2]
+        mask = self.stone_brx_net.split('/')[1]
 
         p = self.client_remote.run(args=['route'], stderr=StringIO(),
                                    stdout=StringIO(), timeout=(5*60))
@@ -346,8 +346,8 @@ class CephFSMount(object):
         gw = p[0].split()[7]
         self.run_shell_payload(f"""
             set -e
-            sudo iptables -D FORWARD -o {gw} -i ceph-brx -j ACCEPT
-            sudo iptables -D FORWARD -i {gw} -o ceph-brx -j ACCEPT
+            sudo iptables -D FORWARD -o {gw} -i stone-brx -j ACCEPT
+            sudo iptables -D FORWARD -i {gw} -o stone-brx -j ACCEPT
             sudo iptables -t nat -D POSTROUTING -s {ip}/{mask} -o {gw} -j MASQUERADE
         """, timeout=(5*60), omit_sudo=False, cwd='/')
 
@@ -417,8 +417,8 @@ class CephFSMount(object):
 
         :param force: Expect that the mount will not shutdown cleanly: kill
                       it hard.
-        :param require_clean: Wait for the Ceph client associated with the
-                              mount (e.g. ceph-fuse) to terminate, and
+        :param require_clean: Wait for the Stone client associated with the
+                              mount (e.g. stone-fuse) to terminate, and
                               raise if it doesn't do so cleanly.
         :param timeout: amount of time to be waited for umount command to finish
         :return:
@@ -428,7 +428,7 @@ class CephFSMount(object):
     def _verify_attrs(self, **kwargs):
         """
         Verify that client_id, client_keyring_path, client_remote, hostfs_mntpt,
-        cephfs_name, cephfs_mntpt are either type str or None.
+        stonefs_name, stonefs_mntpt are either type str or None.
         """
         for k, v in kwargs.items():
             if v is not None and not isinstance(v, str):
@@ -436,16 +436,16 @@ class CephFSMount(object):
                                    f'or None. {k} - {v}')
 
     def update_attrs(self, client_id=None, client_keyring_path=None,
-                     client_remote=None, hostfs_mntpt=None, cephfs_name=None,
-                     cephfs_mntpt=None):
+                     client_remote=None, hostfs_mntpt=None, stonefs_name=None,
+                     stonefs_mntpt=None):
         if not (client_id or client_keyring_path or client_remote or
-                cephfs_name or cephfs_mntpt or hostfs_mntpt):
+                stonefs_name or stonefs_mntpt or hostfs_mntpt):
             return
 
         self._verify_attrs(client_id=client_id,
                            client_keyring_path=client_keyring_path,
-                           hostfs_mntpt=hostfs_mntpt, cephfs_name=cephfs_name,
-                           cephfs_mntpt=cephfs_mntpt)
+                           hostfs_mntpt=hostfs_mntpt, stonefs_name=stonefs_name,
+                           stonefs_mntpt=stonefs_mntpt)
 
         if client_id:
             self.client_id = client_id
@@ -455,10 +455,10 @@ class CephFSMount(object):
             self.client_remote = client_remote
         if hostfs_mntpt:
             self.hostfs_mntpt = hostfs_mntpt
-        if cephfs_name:
-            self.cephfs_name = cephfs_name
-        if cephfs_mntpt:
-            self.cephfs_mntpt = cephfs_mntpt
+        if stonefs_name:
+            self.stonefs_name = stonefs_name
+        if stonefs_mntpt:
+            self.stonefs_mntpt = stonefs_mntpt
 
     def remount(self, **kwargs):
         """
@@ -496,7 +496,7 @@ class CephFSMount(object):
     def kill(self):
         """
         Suspend the netns veth interface to make the client disconnected
-        from the ceph cluster
+        from the stone cluster
         """
         log.info('Killing connection on {0}...'.format(self.client_remote.name))
         self.suspend_netns()
@@ -530,11 +530,11 @@ class CephFSMount(object):
         raise NotImplementedError()
 
     def get_keyring_path(self):
-        # N.B.: default keyring is /etc/ceph/ceph.keyring; see ceph.py and generate_caps
-        return '/etc/ceph/ceph.client.{id}.keyring'.format(id=self.client_id)
+        # N.B.: default keyring is /etc/stonepros/stone.keyring; see stone.py and generate_caps
+        return '/etc/stonepros/stone.client.{id}.keyring'.format(id=self.client_id)
 
     def get_key_from_keyfile(self):
-        # XXX: don't call run_shell(), since CephFS might be unmounted.
+        # XXX: don't call run_shell(), since StoneFS might be unmounted.
         keyring = self.client_remote.run(
             args=['sudo', 'cat', self.client_keyring_path], stdout=StringIO(),
             omit_sudo=False).stdout.getvalue()
@@ -545,10 +545,10 @@ class CephFSMount(object):
     @property
     def config_path(self):
         """
-        Path to ceph.conf: override this if you're not a normal systemwide ceph install
+        Path to stone.conf: override this if you're not a normal systemwide stone install
         :return: stringv
         """
-        return "/etc/ceph/ceph.conf"
+        return "/etc/stonepros/stone.conf"
 
     @contextmanager
     def mounted_wait(self):
@@ -972,7 +972,7 @@ class CephFSMount(object):
 
     def validate_test_pattern(self, filename, size):
         log.info("Validating {0} bytes from {1}".format(size, filename))
-        # Use sudo because cephfs-data-scan may recreate the file with owner==root
+        # Use sudo because stonefs-data-scan may recreate the file with owner==root
         return self.run_python(dedent("""
             import zlib
             path = "{path}"
@@ -995,7 +995,7 @@ class CephFSMount(object):
         """
         Open N files for writing, hold them open in a background process
 
-        :param fs_path: Path relative to CephFS root, e.g. "foo/bar"
+        :param fs_path: Path relative to StoneFS root, e.g. "foo/bar"
         :return: a RemoteProcess
         """
         assert(self.is_mounted())

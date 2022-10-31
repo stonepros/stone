@@ -8,14 +8,14 @@ function run_payload {
     local payload="$1"
     sudo "$PYTHON" <<EOF
 from __future__ import print_function
-from ceph_volume_client import CephFSVolumeClient, VolumePath
+from stone_volume_client import StoneFSVolumeClient, VolumePath
 from sys import version_info as sys_version_info
 from rados import OSError as rados_OSError
 import logging
-log = logging.getLogger("ceph_volume_client")
+log = logging.getLogger("stone_volume_client")
 log.addHandler(logging.StreamHandler())
 log.setLevel(logging.DEBUG)
-vc = CephFSVolumeClient("manila", "/etc/ceph/ceph.conf", "ceph")
+vc = StoneFSVolumeClient("manila", "/etc/stonepros/stone.conf", "stone")
 vc.connect()
 ${payload}
 vc.disconnect()
@@ -27,19 +27,19 @@ function import_key {
   if [ -n "$2" ]; then
     local keyring="$2"
   else
-    local keyring="/etc/ceph/ceph.client.${client}.keyring"
+    local keyring="/etc/stonepros/stone.client.${client}.keyring"
   fi
   local T=$(mktemp)
   tee "$T" >&2
   sudo touch -- "$keyring"
-  sudo ceph-authtool "$keyring" --import-keyring "$T"
+  sudo stone-authtool "$keyring" --import-keyring "$T"
   rm -f -- "$T"
 }
 
 function conf_keys {
   local client="$1"
-  ls /etc/ceph >&2
-  ceph auth get-or-create "client.manila" mds 'allow *' osd 'allow rw' mon 'allow *' | import_key "$client" /etc/ceph/ceph.keyring
+  ls /etc/stone >&2
+  stone auth get-or-create "client.manila" mds 'allow *' osd 'allow rw' mon 'allow *' | import_key "$client" /etc/stonepros/stone.keyring
 }
 
 function create_data_isolated {
@@ -76,19 +76,19 @@ function populate {
 }
 
 function verify_data_isolated {
-  ceph fs subvolume getpath cephfs vol_isolated
+  stone fs subvolume getpath stonefs vol_isolated
   stat bin
   ls bin | tail
 }
 
 function verify_default {
-  ceph fs subvolume getpath cephfs vol_default
+  stone fs subvolume getpath stonefs vol_default
   stat bin
   ls bin | tail
 }
 
 function verify {
-  diff <(ceph fs subvolume ls cephfs | jq -cS 'sort_by(.name)' | tee /dev/stderr) <(printf '[{"name":"vol_isolated"},{"name":"vol_default"}]' | jq -cS 'sort_by(.name)')
+  diff <(stone fs subvolume ls stonefs | jq -cS 'sort_by(.name)' | tee /dev/stderr) <(printf '[{"name":"vol_isolated"},{"name":"vol_default"}]' | jq -cS 'sort_by(.name)')
   verify_data_isolated
   verify_default
 }

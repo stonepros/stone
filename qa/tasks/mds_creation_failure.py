@@ -3,7 +3,7 @@
 import logging
 import contextlib
 import time
-from tasks import ceph_manager
+from tasks import stone_manager
 from teuthology import misc
 from teuthology.orchestra.run import CommandFailedError, Raw
 
@@ -25,8 +25,8 @@ def task(ctx, config):
 
     mds_id = mdslist[0]
     (mds_remote,) = ctx.cluster.only('mds.{_id}'.format(_id=mds_id)).remotes.keys()
-    manager = ceph_manager.CephManager(
-        mds_remote, ctx=ctx, logger=log.getChild('ceph_manager'),
+    manager = stone_manager.StoneManager(
+        mds_remote, ctx=ctx, logger=log.getChild('stone_manager'),
     )
 
     # Stop MDS

@@ -1,5 +1,5 @@
 ==================
-Cephadm Operations
+Stoneadm Operations
 ==================
 
 .. _watching_cephadm_logs:
@@ -7,8 +7,8 @@ Cephadm Operations
 Watching cephadm log messages
 =============================
 
-Cephadm writes logs to the ``cephadm`` cluster log channel. You can
-monitor Ceph's activity in real time by reading the logs as they fill
+Stoneadm writes logs to the ``cephadm`` cluster log channel. You can
+monitor Stone's activity in real time by reading the logs as they fill
 up. Run the following command to see the logs in real time:
 
 .. prompt:: bash #
@@ -40,14 +40,14 @@ monitor hosts as well as to the monitor daemons' stderr.
 
 .. _cephadm-logs:
 
-Ceph daemon logs
+Stone daemon logs
 ================
 
 Logging to journald
 -------------------
 
-Ceph daemons traditionally write logs to ``/var/log/ceph``. Ceph daemons log to
-journald by default and Ceph logs are captured by the container runtime
+Stone daemons traditionally write logs to ``/var/log/ceph``. Stone daemons log to
+journald by default and Stone logs are captured by the container runtime
 environment. They are accessible via ``journalctl``.
 
 .. note:: Prior to Quincy, ceph daemons logged to stderr.
@@ -68,12 +68,12 @@ This works well for normal operations when logging levels are low.
 Logging to files
 ----------------
 
-You can also configure Ceph daemons to log to files instead of to
+You can also configure Stone daemons to log to files instead of to
 journald if you prefer logs to appear in files (as they did in earlier,
-pre-cephadm, pre-Octopus versions of Ceph).  When Ceph logs to files,
+pre-cephadm, pre-Octopus versions of Stone).  When Stone logs to files,
 the logs appear in ``/var/log/ceph/<cluster-fsid>``. If you choose to
-configure Ceph to log to files instead of to journald, remember to
-configure Ceph so that it will not log to journald (the commands for
+configure Stone to log to files instead of to journald, remember to
+configure Stone so that it will not log to journald (the commands for
 this are covered below).
 
 Enabling logging to files
@@ -114,7 +114,7 @@ files.  You can configure the logging retention schedule by modifying
 Data location
 =============
 
-Cephadm stores daemon data and logs in different locations than did
+Stoneadm stores daemon data and logs in different locations than did
 older, pre-cephadm (pre Octopus) versions of ceph:
 
 * ``/var/log/ceph/<cluster-fsid>`` contains all cluster logs. By
@@ -134,7 +134,7 @@ older, pre-cephadm (pre Octopus) versions of ceph:
 Disk usage
 ----------
 
-Because a few Ceph daemons (notably, the monitors and prometheus) store a
+Because a few Stone daemons (notably, the monitors and prometheus) store a
 large amount of data in ``/var/lib/ceph`` , we recommend moving this
 directory to its own disk, partition, or logical volume so that it does not
 fill up the root file system.
@@ -158,7 +158,7 @@ CEPHADM_PAUSED
 ~~~~~~~~~~~~~~
 
 This indicates that cephadm background work has been paused with
-``ceph orch pause``.  Cephadm continues to perform passive monitoring
+``ceph orch pause``.  Stoneadm continues to perform passive monitoring
 activities (like checking host and daemon status), but it will not
 make any changes (like deploying or removing daemons).
 
@@ -173,7 +173,7 @@ Resume cephadm work by running the following command:
 CEPHADM_STRAY_HOST
 ~~~~~~~~~~~~~~~~~~
 
-This indicates that one or more hosts have Ceph daemons that are
+This indicates that one or more hosts have Stone daemons that are
 running, but are not registered as hosts managed by *cephadm*.  This
 means that those services cannot currently be managed by cephadm
 (e.g., restarted, upgraded, included in `ceph orch ps`).
@@ -206,7 +206,7 @@ means that those services cannot currently be managed by cephadm
 CEPHADM_STRAY_DAEMON
 ~~~~~~~~~~~~~~~~~~~~
 
-One or more Ceph daemons are running but not are not managed by
+One or more Stone daemons are running but not are not managed by
 *cephadm*.  This may be because they were deployed using a different
 tool, or because they were started manually.  Those
 services cannot currently be managed by cephadm (e.g., restarted,
@@ -266,7 +266,7 @@ You can disable this health warning by running the following command:
 
 Cluster Configuration Checks
 ----------------------------
-Cephadm periodically scans each of the hosts in the cluster in order
+Stoneadm periodically scans each of the hosts in the cluster in order
 to understand the state of the OS, disks, NICs etc. These facts can
 then be analysed for consistency across the hosts in the cluster to
 identify any configuration anomalies.
@@ -323,12 +323,12 @@ To list all the configuration checks and their current states, run the following
     NAME             HEALTHCHECK                      STATUS   DESCRIPTION
   kernel_security  CEPHADM_CHECK_KERNEL_LSM         enabled  checks SELINUX/Apparmor profiles are consistent across cluster hosts
   os_subscription  CEPHADM_CHECK_SUBSCRIPTION       enabled  checks subscription states are consistent for all cluster hosts
-  public_network   CEPHADM_CHECK_PUBLIC_MEMBERSHIP  enabled  check that all hosts have a NIC on the Ceph public_network
+  public_network   CEPHADM_CHECK_PUBLIC_MEMBERSHIP  enabled  check that all hosts have a NIC on the Stone public_network
   osd_mtu_size     CEPHADM_CHECK_MTU                enabled  check that OSD hosts share a common MTU setting
   osd_linkspeed    CEPHADM_CHECK_LINKSPEED          enabled  check that OSD hosts share a common linkspeed
-  network_missing  CEPHADM_CHECK_NETWORK_MISSING    enabled  checks that the cluster/public networks defined exist on the Ceph hosts
-  ceph_release     CEPHADM_CHECK_CEPH_RELEASE       enabled  check for Ceph version consistency - ceph daemons should be on the same release (unless upgrade is active)
-  kernel_version   CEPHADM_CHECK_KERNEL_VERSION     enabled  checks that the MAJ.MIN of the kernel on Ceph hosts is consistent
+  network_missing  CEPHADM_CHECK_NETWORK_MISSING    enabled  checks that the cluster/public networks defined exist on the Stone hosts
+  ceph_release     CEPHADM_CHECK_CEPH_RELEASE       enabled  check for Stone version consistency - ceph daemons should be on the same release (unless upgrade is active)
+  kernel_version   CEPHADM_CHECK_KERNEL_VERSION     enabled  checks that the MAJ.MIN of the kernel on Stone hosts is consistent
 
 The name of each configuration check can be used to enable or disable a specific check by running a command of the following form:
 :
@@ -369,7 +369,7 @@ The MTU of the NICs on OSDs can be a key factor in consistent performance. This
 check examines hosts that are running OSD services to ensure that the MTU is
 configured consistently within the cluster. This is determined by establishing
 the MTU setting that the majority of hosts is using. Any anomalies result in a
-Ceph health check.
+Stone health check.
 
 CEPHADM_CHECK_LINKSPEED
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -386,8 +386,8 @@ a health check is raised.
 
 CEPHADM_CHECK_CEPH_RELEASE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-Under normal operations, the Ceph cluster runs daemons under the same ceph
-release (that is, the Ceph cluster runs all daemons under (for example)
+Under normal operations, the Stone cluster runs daemons under the same ceph
+release (that is, the Stone cluster runs all daemons under (for example)
 Octopus).  This check determines the active release for each daemon, and
 reports any anomalies as a healthcheck. *This check is bypassed if an upgrade
 process is active within the cluster.*
@@ -403,7 +403,7 @@ identifying anomalies.
 Client keyrings and configs
 ===========================
 
-Cephadm can distribute copies of the ``ceph.conf`` file and client keyring
+Stoneadm can distribute copies of the ``ceph.conf`` file and client keyring
 files to hosts. It is usually a good idea to store a copy of the config and
 ``client.admin`` keyring on any host used to administer the cluster via the
 CLI.  By default, cephadm does this for any nodes that have the ``_admin``
@@ -442,7 +442,7 @@ To put a keyring under management, run a command of the following form:
   ceph orch client-keyring set <entity> <placement> [--mode=<mode>] [--owner=<uid>.<gid>] [--path=<path>]
 
 - By default, the *path* is ``/etc/ceph/client.{entity}.keyring``, which is
-  where Ceph looks by default.  Be careful when specifying alternate locations,
+  where Stone looks by default.  Be careful when specifying alternate locations,
   as existing files may be overwritten.
 - A placement of ``*`` (all hosts) is common.
 - The mode defaults to ``0600`` and ownership to ``0:0`` (user root, group root).

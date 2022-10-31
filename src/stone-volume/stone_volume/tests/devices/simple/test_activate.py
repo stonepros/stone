@@ -1,6 +1,6 @@
 import os
 import pytest
-from ceph_volume.devices.simple import activate
+from stone_volume.devices.simple import activate
 
 
 class TestActivate(object):
@@ -12,7 +12,7 @@ class TestActivate(object):
             activate.Activate([]).activate(args)
 
     def test_invalid_json_path(self):
-        os.environ['CEPH_VOLUME_SIMPLE_JSON_DIR'] = '/non/existing/path'
+        os.environ['STONE_VOLUME_SIMPLE_JSON_DIR'] = '/non/existing/path'
         with pytest.raises(RuntimeError) as error:
             activate.Activate(['1', 'asdf']).main()
         assert 'Expected JSON config path not found' in str(error.value)
@@ -53,7 +53,7 @@ class TestEnableSystemdUnits(object):
         activation.enable_systemd_units('0', '1234')
         stdout, stderr = capsys.readouterr()
         assert 'Skipping enabling of `simple`' in stderr
-        assert 'Skipping masking of ceph-disk' in stderr
+        assert 'Skipping masking of stone-disk' in stderr
         assert 'Skipping enabling and starting OSD simple' in stderr
 
     def test_no_systemd_flag_is_true(self, tmpfile, is_root):
@@ -70,11 +70,11 @@ class TestEnableSystemdUnits(object):
         activation.main()
         assert activation.skip_systemd is False
 
-    def test_masks_ceph_disk(self, tmpfile, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.mask_ceph_disk', capture)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.enable_volume', lambda *a: True)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.enable_osd', lambda *a: True)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.start_osd', lambda *a: True)
+    def test_masks_stone_disk(self, tmpfile, is_root, monkeypatch, capture):
+        monkeypatch.setattr('stone_volume.systemd.systemctl.mask_stone_disk', capture)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.enable_volume', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.enable_osd', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.start_osd', lambda *a: True)
 
         json_config = tmpfile(contents='{}')
         activation = activate.Activate(['--file', json_config, '0', '1234'], from_trigger=False)
@@ -84,10 +84,10 @@ class TestEnableSystemdUnits(object):
         assert len(capture.calls) == 1
 
     def test_enables_simple_unit(self, tmpfile, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.mask_ceph_disk', lambda *a: True)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.enable_volume', capture)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.enable_osd', lambda *a: True)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.start_osd', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.mask_stone_disk', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.enable_volume', capture)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.enable_osd', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.start_osd', lambda *a: True)
 
         json_config = tmpfile(contents='{}')
         activation = activate.Activate(['--file', json_config, '0', '1234'], from_trigger=False)
@@ -98,10 +98,10 @@ class TestEnableSystemdUnits(object):
         assert capture.calls[0]['args'] == ('0', '1234', 'simple')
 
     def test_enables_osd_unit(self, tmpfile, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.mask_ceph_disk', lambda *a: True)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.enable_volume', lambda *a: True)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.enable_osd', capture)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.start_osd', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.mask_stone_disk', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.enable_volume', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.enable_osd', capture)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.start_osd', lambda *a: True)
 
         json_config = tmpfile(contents='{}')
         activation = activate.Activate(['--file', json_config, '0', '1234'], from_trigger=False)
@@ -112,10 +112,10 @@ class TestEnableSystemdUnits(object):
         assert capture.calls[0]['args'] == ('0',)
 
     def test_starts_osd_unit(self, tmpfile, is_root, monkeypatch, capture):
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.mask_ceph_disk', lambda *a: True)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.enable_volume', lambda *a: True)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.enable_osd', lambda *a: True)
-        monkeypatch.setattr('ceph_volume.systemd.systemctl.start_osd', capture)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.mask_stone_disk', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.enable_volume', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.enable_osd', lambda *a: True)
+        monkeypatch.setattr('stone_volume.systemd.systemctl.start_osd', capture)
 
         json_config = tmpfile(contents='{}')
         activation = activate.Activate(['--file', json_config, '0', '1234'], from_trigger=False)

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  * Copyright (C) 2019 SUSE LLC
@@ -38,7 +38,7 @@ enum class scheduler_t {
                         dmclock
 };
 
-inline scheduler_t get_scheduler_t(CephContext* const cct)
+inline scheduler_t get_scheduler_t(StoneContext* const cct)
 {
   const auto scheduler_type = cct->_conf.get_val<std::string>("rgw_scheduler_type");
   if (scheduler_type == "dmclock")

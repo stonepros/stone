@@ -3,7 +3,7 @@
 Message of the day (MOTD)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Displays a configured `message of the day` at the top of the Ceph Dashboard.
+Displays a configured `message of the day` at the top of the Stone Dashboard.
 
 The importance of a MOTD can be configured by its severity, which is
 `info`, `warning` or `danger`. The MOTD can expire after a given time,
@@ -14,15 +14,15 @@ or `5w` for 5 weeks. Use `0` to configure a MOTD that does not expire.
 
 To configure a MOTD, run the following command::
 
-  $ ceph dashboard motd set <severity:info|warning|danger> <expires> <message>
+  $ stone dashboard motd set <severity:info|warning|danger> <expires> <message>
 
 To show the configured MOTD::
 
-  $ ceph dashboard motd get
+  $ stone dashboard motd get
 
 To clear the configured MOTD run::
 
-  $ ceph dashboard motd clear
+  $ stone dashboard motd clear
 
 A MOTD with a `info` or `warning` severity can be closed by the user. The
 `info` MOTD is not displayed anymore until the local storage cookies are

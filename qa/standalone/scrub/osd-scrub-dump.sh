@@ -15,7 +15,7 @@
 # GNU Library Public License for more details.
 #
 
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 MAX_SCRUBS=4
 SCRUB_SLEEP=2
@@ -27,17 +27,17 @@ function run() {
     local SLEEP=0
     local CHUNK_MAX=5
 
-    export CEPH_MON="127.0.0.1:7184" # git grep '\<7184\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
-    CEPH_ARGS+="--osd_max_scrubs=$MAX_SCRUBS "
-    CEPH_ARGS+="--osd_scrub_sleep=$SLEEP "
-    CEPH_ARGS+="--osd_scrub_chunk_max=$CHUNK_MAX "
-    CEPH_ARGS+="--osd_scrub_sleep=$SCRUB_SLEEP "
-    CEPH_ARGS+="--osd_pool_default_size=$POOL_SIZE "
+    export STONE_MON="127.0.0.1:7184" # git grep '\<7184\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
+    STONE_ARGS+="--osd_max_scrubs=$MAX_SCRUBS "
+    STONE_ARGS+="--osd_scrub_sleep=$SLEEP "
+    STONE_ARGS+="--osd_scrub_chunk_max=$CHUNK_MAX "
+    STONE_ARGS+="--osd_scrub_sleep=$SCRUB_SLEEP "
+    STONE_ARGS+="--osd_pool_default_size=$POOL_SIZE "
 
-    export -n CEPH_CLI_TEST_DUP_COMMAND
+    export -n STONE_CLI_TEST_DUP_COMMAND
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
         setup $dir || return 1
@@ -78,32 +78,32 @@ function TEST_recover_unexpected() {
     done
     rm datafile
 
-    ceph osd set noscrub
-    ceph osd set nodeep-scrub
+    stone osd set noscrub
+    stone osd set nodeep-scrub
 
-    for qpg in $(ceph pg dump pgs --format=json-pretty | jq '.pg_stats[].pgid')
+    for qpg in $(stone pg dump pgs --format=json-pretty | jq '.pg_stats[].pgid')
     do
-	primary=$(ceph pg dump pgs --format=json | jq ".pg_stats[] | select(.pgid == $qpg) | .acting_primary")
+	primary=$(stone pg dump pgs --format=json | jq ".pg_stats[] | select(.pgid == $qpg) | .acting_primary")
 	eval pg=$qpg   # strip quotes around qpg
-	ceph tell $pg scrub
+	stone tell $pg scrub
     done
 
-    ceph pg dump pgs
+    stone pg dump pgs
 
-    max=$(CEPH_ARGS='' ceph daemon $(get_asok_path osd.0) dump_scrub_reservations | jq '.osd_max_scrubs')
+    max=$(STONE_ARGS='' stone daemon $(get_asok_path osd.0) dump_scrub_reservations | jq '.osd_max_scrubs')
     if [ $max != $MAX_SCRUBS];
     then
 	echo "ERROR: Incorrect osd_max_scrubs from dump_scrub_reservations"
 	return 1
     fi
 
-    ceph osd unset noscrub
+    stone osd unset noscrub
 
     ok=false
     for i in $(seq 0 300)
     do
-	ceph pg dump pgs
-	if ceph pg dump pgs | grep scrubbing; then
+	stone pg dump pgs
+	if stone pg dump pgs | grep scrubbing; then
 	    ok=true
 	    break
 	fi
@@ -122,8 +122,8 @@ function TEST_recover_unexpected() {
 	pass=0
 	for o in $(seq 0 $(expr $OSDS - 1))
 	do
-		CEPH_ARGS='' ceph daemon $(get_asok_path osd.$o) dump_scrub_reservations
-		scrubs=$(CEPH_ARGS='' ceph daemon $(get_asok_path osd.$o) dump_scrub_reservations | jq '.scrubs_local + .scrubs_remote')
+		STONE_ARGS='' stone daemon $(get_asok_path osd.$o) dump_scrub_reservations
+		scrubs=$(STONE_ARGS='' stone daemon $(get_asok_path osd.$o) dump_scrub_reservations | jq '.scrubs_local + .scrubs_remote')
 		if [ $scrubs -gt $MAX_SCRUBS ]; then
 		    echo "ERROR: More than $MAX_SCRUBS currently reserved"
 		    return 1
@@ -143,7 +143,7 @@ function TEST_recover_unexpected() {
     # Check that there are no more scrubs
     for i in $(seq 0 5)
     do
-        if ceph pg dump pgs | grep scrubbing; then
+        if stone pg dump pgs | grep scrubbing; then
 	    echo "ERROR: Extra scrubs after test completion...not expected"
 	    return 1
         fi

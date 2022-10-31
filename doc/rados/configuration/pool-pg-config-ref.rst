@@ -4,13 +4,13 @@
 
 .. index:: pools; configuration
 
-When you create pools and set the number of placement groups (PGs) for each, Ceph
+When you create pools and set the number of placement groups (PGs) for each, Stone
 uses default values when you don't specifically override the defaults. **We
 recommend** overriding some of the defaults. Specifically, we recommend setting
 a pool's replica size and overriding the default number of placement groups. You
 can specifically set these values when running `pool`_ commands. You can also
 override the defaults by adding new ones in the ``[global]`` section of  your
-Ceph configuration file.
+Stone configuration file.
 
 
 .. literalinclude:: pool-pg.conf
@@ -27,7 +27,7 @@ Ceph configuration file.
 ``mon_pg_create_interval``
 
 :Description: Number of seconds between PG creation in the same
-              Ceph OSD Daemon.
+              Stone OSD Daemon.
 
 :Type: Float
 :Default: ``30.0``
@@ -87,7 +87,7 @@ Ceph configuration file.
 :Description: Raise ``HEALTH_WARN`` if the average RADOS object count per PG
               of any pool is greater than ``mon_pg_warn_max_object_skew`` times
               the average RADOS object count per PG of all pools. Zero or a non-positive
-              number disables this. Note that this option applies to ``ceph-mgr`` daemons.
+              number disables this. Note that this option applies to ``stone-mgr`` daemons.
 :Type: Float
 :Default: ``10``
 
@@ -115,14 +115,14 @@ Ceph configuration file.
 
 ``osd_pg_bits``
 
-:Description: Placement group bits per Ceph OSD Daemon.
+:Description: Placement group bits per Stone OSD Daemon.
 :Type: 32-bit Integer
 :Default: ``6``
 
 
 ``osd_pgp_bits``
 
-:Description: The number of bits per Ceph OSD Daemon for PGPs.
+:Description: The number of bits per Stone OSD Daemon for PGPs.
 :Type: 32-bit Integer
 :Default: ``6``
 
@@ -133,7 +133,7 @@ Ceph configuration file.
               ordinal rank rather than name.
 
 :Type: 32-bit Integer
-:Default: ``1``. Typically a host containing one or more Ceph OSD Daemons.
+:Default: ``1``. Typically a host containing one or more Stone OSD Daemons.
 
 
 ``osd_crush_initial_weight``
@@ -172,7 +172,7 @@ Ceph configuration file.
 
 :Description: Sets the number of replicas for objects in the pool. The default
               value is the same as
-              ``ceph osd pool set {pool-name} size {size}``.
+              ``stone osd pool set {pool-name} size {size}``.
 
 :Type: 32-bit Integer
 :Default: ``3``
@@ -182,7 +182,7 @@ Ceph configuration file.
 
 :Description: Sets the minimum number of written replicas for objects in the
              pool in order to acknowledge a write operation to the client.  If
-             minimum is not met, Ceph will not acknowledge the write to the
+             minimum is not met, Stone will not acknowledge the write to the
              client, **which may result in data loss**. This setting ensures
              a minimum number of replicas when operating in ``degraded`` mode.
 
@@ -220,7 +220,7 @@ Ceph configuration file.
 ``osd_max_pgls``
 
 :Description: The maximum number of placement groups to list. A client
-              requesting a large number can tie up the Ceph OSD Daemon.
+              requesting a large number can tie up the Stone OSD Daemon.
 
 :Type: Unsigned 64-bit Integer
 :Default: ``1024``

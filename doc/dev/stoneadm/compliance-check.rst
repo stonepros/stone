@@ -2,17 +2,17 @@
 Compliance Check
 ================
 
-The stability and reliability of a Ceph cluster is dependent not just upon the Ceph daemons, but
-also the OS and hardware that Ceph is installed on. This document is intended to promote a design 
+The stability and reliability of a Stone cluster is dependent not just upon the Stone daemons, but
+also the OS and hardware that Stone is installed on. This document is intended to promote a design 
 discussion for providing a "compliance" feature within mgr/cephadm, which would be responsible for
-identifying common platform-related issues that could impact Ceph stability and operation.
+identifying common platform-related issues that could impact Stone stability and operation.
 
 The ultimate goal of these checks is to identify issues early and raise a healthcheck WARN
 event, to alert the Administrator to the issue.
 
 Prerequisites
 =============
-In order to effectively analyse the hosts that Ceph is deployed to, this feature requires a cache
+In order to effectively analyse the hosts that Stone is deployed to, this feature requires a cache
 of host-related metadata. The metadata is already available from cephadm's HostFacts class and the
 ``gather-facts`` cephadm command. For the purposes of this document, we will assume that this
 data is available within the mgr/cephadm "cache" structure.
@@ -93,13 +93,13 @@ support status is available only for Red Hat machines.
 
 Network : MTU (MTU)
 ________________________________
-All network interfaces on the same Ceph network (public/cluster) should have the same MTU
+All network interfaces on the same Stone network (public/cluster) should have the same MTU
 
 *src: gather-facts output*
 
 Network : LinkSpeed (LINKSPEED)
 ____________________________________________
-All network interfaces on the same Ceph network (public/cluster) should have the same Linkspeed
+All network interfaces on the same Stone network (public/cluster) should have the same Linkspeed
 
 *src: gather-facts output*
 

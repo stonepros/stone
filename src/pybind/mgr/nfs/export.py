@@ -19,7 +19,7 @@ from rados import TimedOut, ObjectNotFound, Rados, LIBRADOS_ALL_NSPACES
 from orchestrator import NoOrchestrator
 from mgr_module import NFS_POOL_NAME as POOL_NAME, NFS_GANESHA_SUPPORTED_FSALS
 
-from .export_utils import GaneshaConfParser, Export, RawBlock, CephFSFSAL, RGWFSAL
+from .export_utils import GaneshaConfParser, Export, RawBlock, StoneFSFSAL, RGWFSAL
 from .exception import NFSException, NFSInvalidOperation, FSNotFound
 from .utils import (
     CONF_PREFIX,
@@ -230,7 +230,7 @@ class ExportMgr:
             return None
 
     def _delete_export_user(self, export: Export) -> None:
-        if isinstance(export.fsal, CephFSFSAL):
+        if isinstance(export.fsal, StoneFSFSAL):
             assert export.fsal.user_id
             self.mgr.check_mon_command({
                 'prefix': 'auth rm',
@@ -242,14 +242,14 @@ class ExportMgr:
             pass
 
     def _create_export_user(self, export: Export) -> None:
-        if isinstance(export.fsal, CephFSFSAL):
-            fsal = cast(CephFSFSAL, export.fsal)
+        if isinstance(export.fsal, StoneFSFSAL):
+            fsal = cast(StoneFSFSAL, export.fsal)
             assert fsal.fs_name
             fsal.user_id = f"nfs.{export.cluster_id}.{export.export_id}"
-            fsal.cephx_key = self._create_user_key(
+            fsal.stonex_key = self._create_user_key(
                 export.cluster_id, fsal.user_id, export.path, fsal.fs_name
             )
-            log.debug("Successfully created user %s for cephfs path %s", fsal.user_id, export.path)
+            log.debug("Successfully created user %s for stonefs path %s", fsal.user_id, export.path)
 
         elif isinstance(export.fsal, RGWFSAL):
             rgwfsal = cast(RGWFSAL, export.fsal)
@@ -387,8 +387,8 @@ class ExportMgr:
 
         try:
             fsal_type = kwargs.pop('fsal_type')
-            if fsal_type == 'cephfs':
-                return self.create_cephfs_export(**kwargs)
+            if fsal_type == 'stonefs':
+                return self.create_stonefs_export(**kwargs)
             if fsal_type == 'rgw':
                 return self.create_rgw_export(**kwargs)
             raise NotImplementedError()
@@ -524,11 +524,11 @@ class ExportMgr:
             fs_name: str,
             user_id: str
     ) -> None:
-        osd_cap = 'allow rw pool={} namespace={}, allow rw tag cephfs data={}'.format(
+        osd_cap = 'allow rw pool={} namespace={}, allow rw tag stonefs data={}'.format(
             self.rados_pool, cluster_id, fs_name)
-        # NFS-Ganesha can dynamically enforce an export's access type changes, but Ceph server
-        # daemons can't dynamically enforce changes in Ceph user caps of the Ceph clients. To
-        # allow dynamic updates of CephFS NFS exports, always set FSAL Ceph user's MDS caps with
+        # NFS-Ganesha can dynamically enforce an export's access type changes, but Stone server
+        # daemons can't dynamically enforce changes in Stone user caps of the Stone clients. To
+        # allow dynamic updates of StoneFS NFS exports, always set FSAL Stone user's MDS caps with
         # path restricted read-write access. Rely on the ganesha servers to enforce the export
         # access type requested for the NFS clients.
         self.mgr.check_mon_command({
@@ -546,7 +546,7 @@ class ExportMgr:
             path: str,
             fs_name: str,
     ) -> str:
-        osd_cap = 'allow rw pool={} namespace={}, allow rw tag cephfs data={}'.format(
+        osd_cap = 'allow rw pool={} namespace={}, allow rw tag stonefs data={}'.format(
             self.rados_pool, cluster_id, fs_name)
         nfs_caps = [
             'mon', 'allow r',
@@ -621,7 +621,7 @@ class ExportMgr:
                   fsal_type, ex_id, cluster_id)
         return export
 
-    def create_cephfs_export(self,
+    def create_stonefs_export(self,
                              fs_name: str,
                              cluster_id: str,
                              pseudo_path: str,
@@ -648,7 +648,7 @@ class ExportMgr:
                     "clients": clients,
                 }
             )
-            log.debug("creating cephfs export %s", export)
+            log.debug("creating stonefs export %s", export)
             self._create_export_user(export)
             self._save_export(cluster_id, export)
             result = {
@@ -754,8 +754,8 @@ class ExportMgr:
                       new_export.export_id, old_export.pseudo, new_export.pseudo)
 
         if old_export.fsal.name == NFS_GANESHA_SUPPORTED_FSALS[0]:
-            old_fsal = cast(CephFSFSAL, old_export.fsal)
-            new_fsal = cast(CephFSFSAL, new_export.fsal)
+            old_fsal = cast(StoneFSFSAL, old_export.fsal)
+            new_fsal = cast(StoneFSFSAL, new_export.fsal)
             if old_fsal.user_id != new_fsal.user_id:
                 self._delete_export_user(old_export)
                 self._create_export_user(new_export)
@@ -769,7 +769,7 @@ class ExportMgr:
                     cast(str, new_fsal.fs_name),
                     cast(str, new_fsal.user_id)
                 )
-                new_fsal.cephx_key = old_fsal.cephx_key
+                new_fsal.stonex_key = old_fsal.stonex_key
             else:
                 expected_mds_caps = 'allow rw path={}'.format(new_export.path)
                 entity = new_fsal.user_id
@@ -790,7 +790,7 @@ class ExportMgr:
                     )
                 elif old_export.pseudo == new_export.pseudo:
                     need_nfs_service_restart = False
-                new_fsal.cephx_key = old_fsal.cephx_key
+                new_fsal.stonex_key = old_fsal.stonex_key
 
         if old_export.fsal.name == NFS_GANESHA_SUPPORTED_FSALS[1]:
             old_rgw_fsal = cast(RGWFSAL, old_export.fsal)

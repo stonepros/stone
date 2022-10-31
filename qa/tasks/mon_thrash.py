@@ -9,8 +9,8 @@ import gevent
 import json
 import math
 from teuthology import misc as teuthology
-from tasks import ceph_manager
-from tasks.cephfs.filesystem import MDSCluster
+from tasks import stone_manager
+from tasks.stonefs.filesystem import MDSCluster
 from tasks.thrasher import Thrasher
 
 log = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ class MonitorThrasher(Thrasher):
     For example::
 
     tasks:
-    - ceph:
+    - stone:
     - mon_thrash:
         revive_delay: 20
         thrash_delay: 1
@@ -79,7 +79,7 @@ class MonitorThrasher(Thrasher):
         maintain_quorum: true
         thrash_many: true
         check_mds_failover: True
-    - ceph-fuse:
+    - stone-fuse:
     - workunit:
         clients:
           all:
@@ -362,20 +362,20 @@ def task(ctx, config):
         'mon_thrash task requires at least 3 monitors'
 
     if 'cluster' not in config:
-        config['cluster'] = 'ceph'
+        config['cluster'] = 'stone'
 
     log.info('Beginning mon_thrash...')
     first_mon = teuthology.get_first_mon(ctx, config)
     (mon,) = ctx.cluster.only(first_mon).remotes.keys()
-    manager = ceph_manager.CephManager(
+    manager = stone_manager.StoneManager(
         mon,
         ctx=ctx,
-        logger=log.getChild('ceph_manager'),
+        logger=log.getChild('stone_manager'),
         )
     thrash_proc = MonitorThrasher(ctx,
         manager, config, "MonitorThrasher",
         logger=log.getChild('mon_thrasher'))
-    ctx.ceph[config['cluster']].thrashers.append(thrash_proc)
+    ctx.stone[config['cluster']].thrashers.append(thrash_proc)
     try:
         log.debug('Yielding')
         yield

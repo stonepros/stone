@@ -8,7 +8,7 @@ commit 1aa01910957e967e87e46b86f1e67844148703e3
 Author: Dan Mick <dan.mick@inktank.com>
 Date:   Thu Aug 15 17:10:56 2013 -0700
 
-    ceph.in: --admin-daemon was not returning EINVAL on bad command
+    stone.in: --admin-daemon was not returning EINVAL on bad command
     
     Fix by restructuring code to hoist common code and have only one
     place where admin_socket is actually called.

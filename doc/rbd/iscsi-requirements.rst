@@ -3,7 +3,7 @@ iSCSI Gateway Requirements
 ==========================
 
 It is recommended to provision two to four iSCSI gateway nodes to
-realize a highly available Ceph iSCSI gateway solution.
+realize a highly available Stone iSCSI gateway solution.
 
 For hardware recommendations, see :ref:`hardware-recommendations` .
 
@@ -12,7 +12,7 @@ For hardware recommendations, see :ref:`hardware-recommendations` .
     of the RBD images mapped and can grow to be large. Plan memory
     requirements accordingly based on the number RBD images to be mapped.
 
-There are no specific iSCSI gateway options for the Ceph Monitors or
+There are no specific iSCSI gateway options for the Stone Monitors or
 OSDs, but it is important to lower the default heartbeat interval for
 detecting down OSDs to reduce the possibility of initiator timeouts.
 The following configuration options are suggested::
@@ -21,7 +21,7 @@ The following configuration options are suggested::
         osd heartbeat grace = 20
         osd heartbeat interval = 5
 
--   Updating Running State From a Ceph Monitor Node
+-   Updating Running State From a Stone Monitor Node
 
    ::
 
@@ -43,7 +43,7 @@ The following configuration options are suggested::
        ceph daemon osd.0 config set osd_heartbeat_grace 20
        ceph daemon osd.0 config set osd_heartbeat_interval 5
 
-For more details on setting Ceph's configuration options, see
+For more details on setting Stone's configuration options, see
 :ref:`configuring-ceph`.  Be sure to persist these settings in
 ``/etc/ceph.conf`` or, on Mimic and later releases, in the
 centralized config store.

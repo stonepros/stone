@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2012 Inktank Storage, Inc.
  *
@@ -17,7 +17,7 @@
 
 #include <vector>
 #include <sstream>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 /**
  * TextTable:
@@ -118,7 +118,7 @@ public:
     }
 
     // inserting more items than defined columns is a coding error
-    ceph_assert(curcol + 1 <= col.size());
+    stone_assert(curcol + 1 <= col.size());
 
     // get rendered width of item alone
     std::ostringstream oss;

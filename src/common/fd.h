@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2012 Inktank
  *
@@ -17,6 +17,6 @@
 
 #include "include/common_fwd.h"
 
-void dump_open_fds(StoneeContext *cct);
+void dump_open_fds(StoneContext *cct);
 
 #endif

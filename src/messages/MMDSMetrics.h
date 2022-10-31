@@ -35,19 +35,19 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     encode(metrics_message, payload, features);
   }
 
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto iter = payload.cbegin();
     decode(metrics_message, iter);
   }
 
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif // STONE_MDS_METRICS_H

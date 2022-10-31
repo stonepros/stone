@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -19,8 +19,8 @@
 
 class MClientSnap final : public SafeMessage {
 public:
-  ceph_mds_snap_head head;
-  ceph::buffer::list bl;
+  stone_mds_snap_head head;
+  stone::buffer::list bl;
   
   // (for split only)
   std::vector<inodeno_t> split_inos;
@@ -37,7 +37,7 @@ protected:
 public:  
   std::string_view get_type_name() const override { return "client_snap"; }
   void print(std::ostream& out) const override {
-    out << "client_snap(" << ceph_snap_op_name(head.op);
+    out << "client_snap(" << stone_snap_op_name(head.op);
     if (head.split)
       out << " split=" << inodeno_t(head.split);
     out << " tracelen=" << bl.length();
@@ -45,27 +45,27 @@ public:
   }
 
   void encode_payload(uint64_t features) override {
-    using ceph::encode;
+    using stone::encode;
     head.num_split_inos = split_inos.size();
     head.num_split_realms = split_realms.size();
     head.trace_len = bl.length();
     encode(head, payload);
-    ceph::encode_nohead(split_inos, payload);
-    ceph::encode_nohead(split_realms, payload);
-    ceph::encode_nohead(bl, payload);
+    stone::encode_nohead(split_inos, payload);
+    stone::encode_nohead(split_realms, payload);
+    stone::encode_nohead(bl, payload);
   }
   void decode_payload() override {
-    using ceph::decode;
+    using stone::decode;
     auto p = payload.cbegin();
     decode(head, p);
-    ceph::decode_nohead(head.num_split_inos, split_inos, p);
-    ceph::decode_nohead(head.num_split_realms, split_realms, p);
-    ceph::decode_nohead(head.trace_len, bl, p);
-    ceph_assert(p.end());
+    stone::decode_nohead(head.num_split_inos, split_inos, p);
+    stone::decode_nohead(head.num_split_realms, split_realms, p);
+    stone::decode_nohead(head.trace_len, bl, p);
+    stone_assert(p.end());
   }
 private:
   template<class T, typename... Args>
-  friend boost::intrusive_ptr<T> ceph::make_message(Args&&... args);
+  friend boost::intrusive_ptr<T> stone::make_message(Args&&... args);
 };
 
 #endif

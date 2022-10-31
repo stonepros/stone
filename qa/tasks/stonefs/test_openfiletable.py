@@ -1,10 +1,10 @@
 import time
 import logging
-from tasks.cephfs.cephfs_test_case import CephFSTestCase
+from tasks.stonefs.stonefs_test_case import StoneFSTestCase
 
 log = logging.getLogger(__name__)
 
-class OpenFileTable(CephFSTestCase):
+class OpenFileTable(StoneFSTestCase):
     CLIENTS_REQUIRED = 1
     MDSS_REQUIRED = 1
 

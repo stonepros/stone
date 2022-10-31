@@ -8,7 +8,7 @@
 #include <set>
 #include <string>
 
-using namespace ceph;
+using namespace stone;
 
 class TestFixture : public ::testing::Test {
 public:
@@ -46,7 +46,7 @@ public:
   static uint64_t _image_number;
   static std::string _data_pool;
 
-  StoneeContext* m_cct = nullptr;
+  StoneContext* m_cct = nullptr;
   librados::IoCtx m_ioctx;
   librbd::RBD m_rbd;
 

@@ -13,7 +13,7 @@
 #include <vector>
 #include <boost/variant/variant.hpp>
 
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 namespace rbd_replay {
 namespace action {

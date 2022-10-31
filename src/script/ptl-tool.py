@@ -6,14 +6,14 @@
 # into master. Make sure you generate a Personal access token in GitHub and
 # add it your ~/.github.key.
 #
-# Because developers often have custom names for the ceph upstream remote
-# (https://github.com/ceph/ceph.git), You will probably want to export the
+# Because developers often have custom names for the stone upstream remote
+# (https://github.com/stone/stone.git), You will probably want to export the
 # PTL_TOOL_BASE_PATH environment variable in your shell rc files before using
 # this script:
 #
 #     export PTL_TOOL_BASE_PATH=refs/remotes/<remotename>/
 #
-# and PTL_TOOL_BASE_REMOTE as the name of your Ceph upstream remote (default: "upstream"):
+# and PTL_TOOL_BASE_REMOTE as the name of your Stone upstream remote (default: "upstream"):
 #
 #     export PTL_TOOL_BASE_REMOTE=<remotename>
 #
@@ -121,8 +121,8 @@ log = logging.getLogger(__name__)
 log.addHandler(logging.StreamHandler())
 log.setLevel(logging.INFO)
 
-BASE_PROJECT = os.getenv("PTL_TOOL_BASE_PROJECT", "ceph")
-BASE_REPO = os.getenv("PTL_TOOL_BASE_REPO", "ceph")
+BASE_PROJECT = os.getenv("PTL_TOOL_BASE_PROJECT", "stone")
+BASE_REPO = os.getenv("PTL_TOOL_BASE_REPO", "stone")
 BASE_REMOTE = os.getenv("PTL_TOOL_BASE_REMOTE", "upstream")
 BASE_PATH = os.getenv("PTL_TOOL_BASE_PATH", "refs/remotes/upstream/")
 GITDIR = os.getenv("PTL_TOOL_GITDIR", ".")
@@ -160,7 +160,7 @@ with codecs.open(git_dir + "/.githubmap", encoding='utf-8') as f:
         CONTRIBUTORS[m.group(1)] = m.group(2)
 
 BZ_MATCH = re.compile("(.*https?://bugzilla.redhat.com/.*)")
-TRACKER_MATCH = re.compile("(.*https?://tracker.ceph.com/.*)")
+TRACKER_MATCH = re.compile("(.*https?://tracker.stone.com/.*)")
 
 def get(session, url, params=None, paging=True):
     if params is None:
@@ -219,7 +219,7 @@ def get_credits(session, pr, pr_req):
             for m in BZ_MATCH.finditer(body):
                 log.info("[ {url} ] BZ cited: {cite}".format(url=url, cite=m.group(1)))
             for m in TRACKER_MATCH.finditer(body):
-                log.info("[ {url} ] Ceph tracker cited: {cite}".format(url=url, cite=m.group(1)))
+                log.info("[ {url} ] Stone tracker cited: {cite}".format(url=url, cite=m.group(1)))
             for indication in INDICATIONS:
                 for cap in indication.findall(comment["body"]):
                     credits.add(cap)
@@ -330,7 +330,7 @@ def build_branch(args):
             for m in BZ_MATCH.finditer(commit.message):
                 log.info("[ {sha1} ] BZ cited: {cite}".format(sha1=short, cite=m.group(1)))
             for m in TRACKER_MATCH.finditer(commit.message):
-                log.info("[ {sha1} ] Ceph tracker cited: {cite}".format(sha1=short, cite=m.group(1)))
+                log.info("[ {sha1} ] Stone tracker cited: {cite}".format(sha1=short, cite=m.group(1)))
 
         message = message + "\n"
         if args.credits:
@@ -377,7 +377,7 @@ def build_branch(args):
             log.info("Created tag %s" % tag)
 
 def main():
-    parser = argparse.ArgumentParser(description="Ceph PTL tool")
+    parser = argparse.ArgumentParser(description="Stone PTL tool")
     default_base = 'master'
     default_branch = TEST_BRANCH
     default_label = ''

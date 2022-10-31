@@ -18,7 +18,7 @@ import { NgxPipeFunctionModule } from 'ngx-pipe-function';
 
 import { SharedModule } from '~/app/shared/shared.module';
 import { PerformanceCounterModule } from '../performance-counter/performance-counter.module';
-import { CephSharedModule } from '../shared/ceph-shared.module';
+import { StoneSharedModule } from '../shared/stone-shared.module';
 import { ConfigurationDetailsComponent } from './configuration/configuration-details/configuration-details.component';
 import { ConfigurationFormComponent } from './configuration/configuration-form/configuration-form.component';
 import { ConfigurationComponent } from './configuration/configuration.component';
@@ -72,7 +72,7 @@ import { TelemetryComponent } from './telemetry/telemetry.component';
     NgbTypeaheadModule,
     NgbTimepickerModule,
     TreeModule,
-    CephSharedModule,
+    StoneSharedModule,
     NgbDatepickerModule,
     NgbPopoverModule,
     NgbDropdownModule,

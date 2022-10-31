@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -55,18 +55,18 @@ e 12v
  *
  * Each version's value (value_1, value_2, ..., value_n) is a blob of data,
  * incomprehensible to the Paxos. These values are proposed to the Paxos on
- * propose_new_value() and each one is a transaction encoded in a ceph::buffer::list.
+ * propose_new_value() and each one is a transaction encoded in a stone::buffer::list.
  *
  * The Paxos will write the value to disk, associating it with its version,
  * but will take a step further: the value shall be decoded, and the operations
  * on that transaction shall be applied during the same transaction that will
- * write the value's encoded ceph::buffer::list to disk. This behavior ensures that
+ * write the value's encoded stone::buffer::list to disk. This behavior ensures that
  * whatever is being proposed will only be available on the store when it is
  * applied by Paxos, which will then be aware of such new values, guaranteeing
  * the store state is always consistent without requiring shady workarounds.
  *
  * So, let's say that FooMonitor proposes the following transaction, neatly
- * encoded on a ceph::buffer::list of course:
+ * encoded on a stone::buffer::list of course:
  *
  *  Tx_Foo
  *    put(foo, last_committed, 3)
@@ -75,16 +75,16 @@ e 12v
  *    erase(foo, 1)
  *    put(foo, first_committed, 3)
  *
- * And knowing that the Paxos is proposed Tx_Foo as a ceph::buffer::list, once it is
+ * And knowing that the Paxos is proposed Tx_Foo as a stone::buffer::list, once it is
  * ready to commit, and assuming we are now committing version 5 of the Paxos,
  * we will do something along the lines of:
  *
  *  Tx proposed_tx;
- *  proposed_tx.decode(Tx_foo_ceph::buffer::list);
+ *  proposed_tx.decode(Tx_foo_stone::buffer::list);
  *
  *  Tx our_tx;
  *  our_tx.put(paxos, last_committed, 5);
- *  our_tx.put(paxos, 5, Tx_foo_ceph::buffer::list);
+ *  our_tx.put(paxos, 5, Tx_foo_stone::buffer::list);
  *  our_tx.append(proposed_tx);
  *
  *  store_apply(our_tx);
@@ -98,7 +98,7 @@ e 12v
  *		    2 -> value_2
  *		    3 -> value_3
  *		    4 -> value_4
- *		    5 -> Tx_foo_ceph::buffer::list
+ *		    5 -> Tx_foo_stone::buffer::list
  *  foo:
  *    first_committed -> 3
  *     last_committed -> 3
@@ -276,7 +276,7 @@ private:
    */
   int commits_started = 0;
 
-  ceph::condition_variable shutdown_cond;
+  stone::condition_variable shutdown_cond;
 
 public:
   /**
@@ -402,7 +402,7 @@ private:
    * keep leases. Each lease will have an expiration date, which may or may
    * not be extended. 
    */
-  ceph::real_clock::time_point lease_expire;
+  stone::real_clock::time_point lease_expire;
   /**
    * List of callbacks waiting for our state to change into STATE_ACTIVE.
    */
@@ -477,7 +477,7 @@ private:
    * on the Leader, or learnt by the Leader from a Peon during the collect
    * phase.
    */
-  ceph::buffer::list uncommitted_value;
+  stone::buffer::list uncommitted_value;
   /**
    * Used to specify when an on-going collect phase times out.
    */
@@ -535,10 +535,10 @@ private:
   /**
    * New Value being proposed to the Peons.
    *
-   * This ceph::buffer::list holds the value the Leader is proposing to the Peons, and
+   * This stone::buffer::list holds the value the Leader is proposing to the Peons, and
    * that will be committed if the Peons do accept the proposal.
    */
-  ceph::buffer::list new_value;
+  stone::buffer::list new_value;
   /**
    * Set of participants (Leader & Peons) that accepted the new proposed value.
    *
@@ -664,16 +664,16 @@ public:
   class C_Proposal : public Context {
     Context *proposer_context;
   public:
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     // for debug purposes. Will go away. Soon.
     bool proposed;
     utime_t proposal_time;
 
-    C_Proposal(Context *c, ceph::buffer::list& proposal_bl) :
+    C_Proposal(Context *c, stone::buffer::list& proposal_bl) :
 	proposer_context(c),
 	bl(proposal_bl),
 	proposed(false),
-	proposal_time(ceph_clock_now())
+	proposal_time(stone_clock_now())
       { }
 
     void finish(int r) override {
@@ -805,7 +805,7 @@ private:
    *
    * @param value The value being proposed to the quorum
    */
-  void begin(ceph::buffer::list& value);
+  void begin(stone::buffer::list& value);
   /**
    * Accept or decline (by ignoring) a proposal from the Leader.
    *
@@ -1083,7 +1083,7 @@ public:
   /**
    * dump state info to a formatter
    */
-  void dump_info(ceph::Formatter *f);
+  void dump_info(stone::Formatter *f);
 
   /**
    * This function runs basic consistency checks. Importantly, if
@@ -1135,8 +1135,8 @@ public:
    *
    * Basically, we received a set of version. Or just one. It doesn't matter.
    * What matters is that we have to stash it in the store. So, we will simply
-   * write every single ceph::buffer::list into their own versions on our side (i.e.,
-   * onto paxos-related keys), and then we will decode those same ceph::buffer::lists
+   * write every single stone::buffer::list into their own versions on our side (i.e.,
+   * onto paxos-related keys), and then we will decode those same stone::buffer::lists
    * we just wrote and apply the transactions they hold. We will also update
    * our first and last committed values to point to the new values, if need
    * be. All this is done tightly wrapped in a transaction to ensure we
@@ -1149,18 +1149,18 @@ public:
   void _sanity_check_store();
 
   /**
-   * Helper function to decode a ceph::buffer::list into a transaction and append it
+   * Helper function to decode a stone::buffer::list into a transaction and append it
    * to another transaction.
    *
    * This function is used during the Leader's commit and during the
-   * Paxos::store_state in order to apply the ceph::buffer::list's transaction onto
+   * Paxos::store_state in order to apply the stone::buffer::list's transaction onto
    * the store.
    *
    * @param t The transaction to which we will append the operations
-   * @param bl A ceph::buffer::list containing an encoded transaction
+   * @param bl A stone::buffer::list containing an encoded transaction
    */
   static void decode_append_transaction(MonitorDBStore::TransactionRef t,
-					ceph::buffer::list& bl) {
+					stone::buffer::list& bl) {
     auto vt(std::make_shared<MonitorDBStore::Transaction>());
     auto it = bl.cbegin();
     vt->decode(it);
@@ -1219,11 +1219,11 @@ public:
     return plugged;
   }
   void plug() {
-    ceph_assert(plugged == false);
+    stone_assert(plugged == false);
     plugged = true;
   }
   void unplug() {
-    ceph_assert(plugged == true);
+    stone_assert(plugged == true);
     plugged = false;
   }
 
@@ -1264,7 +1264,7 @@ public:
    * @param[out] bl The version's value
    * @return 'true' if we successfully read the value; 'false' otherwise
    */
-  bool read(version_t v, ceph::buffer::list &bl);
+  bool read(version_t v, stone::buffer::list &bl);
   /**
    * Read the latest committed version
    *
@@ -1272,14 +1272,14 @@ public:
    * @return the latest committed version if we successfully read the value;
    *	     or 0 (zero) otherwise.
    */
-  version_t read_current(ceph::buffer::list &bl);
+  version_t read_current(stone::buffer::list &bl);
   /**
    * Add onreadable to the list of callbacks waiting for us to become readable.
    *
    * @param onreadable A callback
    */
   void wait_for_readable(MonOpRequestRef op, Context *onreadable) {
-    ceph_assert(!is_readable());
+    stone_assert(!is_readable());
     if (op)
       op->mark_event("paxos:wait_for_readable");
     waiting_for_readable.push_back(onreadable);
@@ -1321,7 +1321,7 @@ public:
    * @param c A callback
    */
   void wait_for_writeable(MonOpRequestRef op, Context *c) {
-    ceph_assert(!is_writeable());
+    stone_assert(!is_writeable());
     if (op)
       op->mark_event("paxos:wait_for_writeable");
     waiting_for_writeable.push_back(c);
@@ -1370,12 +1370,12 @@ inline std::ostream& operator<<(std::ostream& out, Paxos::C_Proposal& p)
 {
   std::string proposed = (p.proposed ? "proposed" : "unproposed");
   out << " " << proposed
-      << " queued " << (ceph_clock_now() - p.proposal_time)
+      << " queued " << (stone_clock_now() - p.proposal_time)
       << " tx dump:\n";
   auto t(std::make_shared<MonitorDBStore::Transaction>());
   auto p_it = p.bl.cbegin();
   t->decode(p_it);
-  ceph::JSONFormatter f(true);
+  stone::JSONFormatter f(true);
   t->dump(&f);
   f.flush(out);
   return out;

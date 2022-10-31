@@ -20,7 +20,7 @@ In this case, ``ceph-volume lvm`` follows these constraints:
 LUKS
 ----
 There are currently two versions of LUKS, 1 and 2. Version 2 is a bit easier
-to implement but not widely available in all distros Ceph supports. LUKS 1 is
+to implement but not widely available in all distros Stone supports. LUKS 1 is
 not going to be deprecated in favor of LUKS 2, so in order to have as wide
 support as possible, ``ceph-volume`` uses LUKS version 1.
 

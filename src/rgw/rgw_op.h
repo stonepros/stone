@@ -30,8 +30,8 @@
 #include "common/armor.h"
 #include "common/mime.h"
 #include "common/utf8.h"
-#include "common/ceph_json.h"
-#include "common/ceph_time.h"
+#include "common/stone_json.h"
+#include "common/stone_time.h"
 
 #include "rgw_common.h"
 #include "rgw_dmclock.h"
@@ -55,9 +55,9 @@
 #include "services/svc_sys_obj.h"
 #include "services/svc_tier_rados.h"
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
-using ceph::crypto::SHA1;
+using stone::crypto::SHA1;
 
 struct req_state;
 class RGWOp;
@@ -75,7 +75,7 @@ class StrategyRegistry;
 }
 
 int rgw_op_get_bucket_policy_from_attr(const DoutPrefixProvider *dpp, 
-                                       CephContext *cct,
+                                       StoneContext *cct,
 				       rgw::sal::RGWStore *store,
                                        RGWBucketInfo& bucket_info,
                                        map<string, bufferlist>& bucket_attrs,
@@ -205,8 +205,8 @@ public:
 
   // implements DoutPrefixProvider
   std::ostream& gen_prefix(std::ostream& out) const override;
-  CephContext* get_cct() const override { return s->cct; }
-  unsigned get_subsys() const override { return ceph_subsys_rgw; }
+  StoneContext* get_cct() const override { return s->cct; }
+  unsigned get_subsys() const override { return stone_subsys_rgw; }
 
   virtual dmc::client_id dmclock_client() { return dmc::client_id::metadata; }
   virtual dmc::Cost dmclock_cost() { return 1; }
@@ -271,11 +271,11 @@ protected:
   uint64_t total_len;
   off_t start;
   off_t end;
-  ceph::real_time mod_time;
-  ceph::real_time lastmod;
-  ceph::real_time unmod_time;
-  ceph::real_time *mod_ptr;
-  ceph::real_time *unmod_ptr;
+  stone::real_time mod_time;
+  stone::real_time lastmod;
+  stone::real_time unmod_time;
+  stone::real_time *mod_ptr;
+  stone::real_time *unmod_ptr;
   rgw::sal::RGWAttrs attrs;
   bool get_data;
   bool partial_content;
@@ -629,7 +629,7 @@ protected:
 
   bool handle_file_verify_permission(RGWBucketInfo& binfo,
 				     const rgw_obj& obj,
-				     std::map<std::string, ceph::bufferlist>& battrs,
+				     std::map<std::string, stone::bufferlist>& battrs,
                                      ACLOwner& bucket_owner /* out */,
 				     optional_yield y);
   int handle_file(std::string_view path,
@@ -671,8 +671,8 @@ public:
   StreamGetter() = default;
   virtual ~StreamGetter() = default;
 
-  virtual ssize_t get_at_most(size_t want, ceph::bufferlist& dst) = 0;
-  virtual ssize_t get_exactly(size_t want, ceph::bufferlist& dst) = 0;
+  virtual ssize_t get_at_most(size_t want, stone::bufferlist& dst) = 0;
+  virtual ssize_t get_exactly(size_t want, stone::bufferlist& dst) = 0;
 }; /* End of nested subclass StreamGetter */
 
 
@@ -690,11 +690,11 @@ public:
   }
   virtual ~DecoratedStreamGetter() = default;
 
-  ssize_t get_at_most(const size_t want, ceph::bufferlist& dst) override {
+  ssize_t get_at_most(const size_t want, stone::bufferlist& dst) override {
     return get_decoratee().get_at_most(want, dst);
   }
 
-  ssize_t get_exactly(const size_t want, ceph::bufferlist& dst) override {
+  ssize_t get_exactly(const size_t want, stone::bufferlist& dst) override {
     return get_decoratee().get_exactly(want, dst);
   }
 }; /* RGWBulkUploadOp::DecoratedStreamGetter */
@@ -718,8 +718,8 @@ public:
       alignment(alignment) {
   }
   virtual ~AlignedStreamGetter();
-  ssize_t get_at_most(size_t want, ceph::bufferlist& dst) override;
-  ssize_t get_exactly(size_t want, ceph::bufferlist& dst) override;
+  ssize_t get_at_most(size_t want, stone::bufferlist& dst) override;
+  ssize_t get_exactly(size_t want, stone::bufferlist& dst) override;
 }; /* RGWBulkUploadOp::AlignedStreamGetter */
 
 
@@ -739,7 +739,7 @@ protected:
   std::string end_marker;
   int64_t limit;
   uint64_t limit_max;
-  std::map<std::string, ceph::bufferlist> attrs;
+  std::map<std::string, stone::bufferlist> attrs;
   bool is_truncated;
 
   RGWUsageStats global_stats;
@@ -1137,7 +1137,7 @@ protected:
   const char *dlo_manifest;
   RGWSLOInfo *slo_info;
   rgw::sal::RGWAttrs attrs;
-  ceph::real_time mtime;
+  stone::real_time mtime;
   uint64_t olh_epoch;
   string version_id;
   bufferlist bl_aux;
@@ -1148,7 +1148,7 @@ protected:
   std::string multipart_part_str;
   int multipart_part_num = 0;
 
-  boost::optional<ceph::real_time> delete_at;
+  boost::optional<stone::real_time> delete_at;
   //append obj
   bool append;
   uint64_t position;
@@ -1234,7 +1234,7 @@ protected:
   string etag;
   RGWAccessControlPolicy policy;
   map<string, bufferlist> attrs;
-  boost::optional<ceph::real_time> delete_at;
+  boost::optional<stone::real_time> delete_at;
 
   /* Must be called after get_data() or the result is undefined. */
   virtual std::string get_current_filename() const = 0;
@@ -1269,7 +1269,7 @@ public:
     return 0;
   }
   virtual int get_params(optional_yield y) = 0;
-  virtual int get_data(ceph::bufferlist& bl, bool& again) = 0;
+  virtual int get_data(stone::bufferlist& bl, bool& again) = 0;
   void send_response() override = 0;
   const char* name() const override { return "post_obj"; }
   RGWOpType get_type() override { return RGW_OP_POST_OBJ; }
@@ -1354,7 +1354,7 @@ public:
 class RGWPutMetadataObject : public RGWOp {
 protected:
   RGWAccessControlPolicy policy;
-  boost::optional<ceph::real_time> delete_at;
+  boost::optional<stone::real_time> delete_at;
   const char *dlo_manifest;
 
 public:
@@ -1383,7 +1383,7 @@ protected:
   bool delete_marker;
   bool multipart_delete;
   string version_id;
-  ceph::real_time unmod_since; /* if unmodified since */
+  stone::real_time unmod_since; /* if unmodified since */
   bool no_precondition_error;
   std::unique_ptr<RGWBulkDelete::Deleter> deleter;
   bool bypass_perm;
@@ -1428,10 +1428,10 @@ protected:
   off_t ofs;
   off_t len;
   off_t end;
-  ceph::real_time mod_time;
-  ceph::real_time unmod_time;
-  ceph::real_time *mod_ptr;
-  ceph::real_time *unmod_ptr;
+  stone::real_time mod_time;
+  stone::real_time unmod_time;
+  stone::real_time *mod_ptr;
+  stone::real_time *unmod_ptr;
   rgw::sal::RGWAttrs attrs;
   string src_tenant_name, src_bucket_name, src_obj_name;
   std::unique_ptr<rgw::sal::RGWBucket> src_bucket;
@@ -1439,8 +1439,8 @@ protected:
   string dest_tenant_name, dest_bucket_name, dest_obj_name;
   std::unique_ptr<rgw::sal::RGWBucket> dest_bucket;
   std::unique_ptr<rgw::sal::RGWObject> dest_object;
-  ceph::real_time src_mtime;
-  ceph::real_time mtime;
+  stone::real_time src_mtime;
+  stone::real_time mtime;
   rgw::sal::AttrsMod attrs_mod;
   string source_zone;
   string etag;
@@ -1450,7 +1450,7 @@ protected:
   string version_id;
   uint64_t olh_epoch;
 
-  boost::optional<ceph::real_time> delete_at;
+  boost::optional<stone::real_time> delete_at;
   bool copy_if_newer;
 
   bool need_to_check_storage_class = false;
@@ -1716,7 +1716,7 @@ class RGWInitMultipart : public RGWOp {
 protected:
   string upload_id;
   RGWAccessControlPolicy policy;
-  ceph::real_time mtime;
+  stone::real_time mtime;
 
 public:
   RGWInitMultipart() {}
@@ -1952,7 +1952,7 @@ extern int rgw_build_object_policies(const DoutPrefixProvider *dpp, rgw::sal::RG
 				     bool prefetch_data, optional_yield y);
 extern void rgw_build_iam_environment(rgw::sal::RGWRadosStore* store,
 						                          struct req_state* s);
-extern vector<rgw::IAM::Policy> get_iam_user_policy_from_attr(CephContext* cct,
+extern vector<rgw::IAM::Policy> get_iam_user_policy_from_attr(StoneContext* cct,
                         rgw::sal::RGWRadosStore* store,
                         map<string, bufferlist>& attrs,
                         const string& tenant);
@@ -2016,9 +2016,9 @@ static inline void format_xattr(std::string &xattr)
  *
  */
 inline int rgw_get_request_metadata(const DoutPrefixProvider *dpp,
-                                    CephContext* const cct,
+                                    StoneContext* const cct,
 				    struct req_info& info,
-				    std::map<std::string, ceph::bufferlist>& attrs,
+				    std::map<std::string, stone::bufferlist>& attrs,
 				    const bool allow_empty_attrs = true)
 {
   static const std::set<std::string> blocklisted_headers = {
@@ -2067,11 +2067,11 @@ inline int rgw_get_request_metadata(const DoutPrefixProvider *dpp,
         return -E2BIG;
       }
 
-      auto rval = attrs.emplace(std::move(attr_name), ceph::bufferlist());
+      auto rval = attrs.emplace(std::move(attr_name), stone::bufferlist());
       /* At the moment the value of the freshly created attribute key-value
        * pair is an empty bufferlist. */
 
-      ceph::bufferlist& bl = rval.first->second;
+      stone::bufferlist& bl = rval.first->second;
       bl.append(xattr.c_str(), xattr.size() + 1);
     }
   }
@@ -2079,7 +2079,7 @@ inline int rgw_get_request_metadata(const DoutPrefixProvider *dpp,
   return 0;
 } /* rgw_get_request_metadata */
 
-inline void encode_delete_at_attr(boost::optional<ceph::real_time> delete_at,
+inline void encode_delete_at_attr(boost::optional<stone::real_time> delete_at,
 				  map<string, bufferlist>& attrs)
 {
   if (delete_at == boost::none) {

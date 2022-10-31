@@ -38,8 +38,8 @@ public:
     scrub_stack(member_offset(MDSCacheObject, item_scrub)),
     scrub_waiting(member_offset(MDSCacheObject, item_scrub)) {}
   ~ScrubStack() {
-    ceph_assert(scrub_stack.empty());
-    ceph_assert(!scrubs_in_progress);
+    stone_assert(scrub_stack.empty());
+    stone_assert(!scrubs_in_progress);
   }
   /**
    * Put the inode at either the top or bottom of the stack, with the

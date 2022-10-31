@@ -1,12 +1,12 @@
 """
-Ceph FUSE client task
+Stone FUSE client task
 """
 
 import contextlib
 import logging
 
 from teuthology import misc
-from tasks.cephfs.fuse_mount import FuseMount
+from tasks.stonefs.fuse_mount import FuseMount
 
 log = logging.getLogger(__name__)
 
@@ -14,12 +14,12 @@ log = logging.getLogger(__name__)
 @contextlib.contextmanager
 def task(ctx, config):
     """
-    Mount/unmount a ``ceph-fuse`` client.
+    Mount/unmount a ``stone-fuse`` client.
 
     The config is optional and defaults to mounting on all clients. If
     a config is given, it is expected to be a list of clients to do
     this operation on. This lets you e.g. set up one client with
-    ``ceph-fuse`` and another with ``kclient``.
+    ``stone-fuse`` and another with ``kclient``.
 
     ``brxnet`` should be a Private IPv4 Address range, default range is
     [192.168.0.0/16]
@@ -27,24 +27,24 @@ def task(ctx, config):
     Example that mounts all clients::
 
         tasks:
-        - ceph:
-        - ceph-fuse:
+        - stone:
+        - stone-fuse:
         - interactive:
         - brxnet: [192.168.0.0/16]
 
-    Example that uses both ``kclient` and ``ceph-fuse``::
+    Example that uses both ``kclient` and ``stone-fuse``::
 
         tasks:
-        - ceph:
-        - ceph-fuse: [client.0]
+        - stone:
+        - stone-fuse: [client.0]
         - kclient: [client.1]
         - interactive:
 
     Example that enables valgrind:
 
         tasks:
-        - ceph:
-        - ceph-fuse:
+        - stone:
+        - stone-fuse:
             client.0:
               valgrind: [--tool=memcheck, --leak-check=full, --show-reachable=yes]
         - interactive:
@@ -54,10 +54,10 @@ def task(ctx, config):
     ::
 
         tasks:
-            - ceph:
-            - ceph-fuse: [client.0]
+            - stone:
+            - stone-fuse: [client.0]
             - ... do something that requires the FS mounted ...
-            - ceph-fuse:
+            - stone-fuse:
                 client.0:
                     mounted: false
             - ... do something that requires the FS unmounted ...
@@ -65,8 +65,8 @@ def task(ctx, config):
     Example that adds more generous wait time for mount (for virtual machines):
 
         tasks:
-        - ceph:
-        - ceph-fuse:
+        - stone:
+        - stone-fuse:
             client.0:
               mount_wait: 60 # default is 0, do not wait before checking /sys/
               mount_timeout: 120 # default is 30, give up if /sys/ is not populated
@@ -75,7 +75,7 @@ def task(ctx, config):
     :param ctx: Context
     :param config: Configuration
     """
-    log.info('Running ceph_fuse task...')
+    log.info('Running stone_fuse task...')
 
     if config is None:
         ids = misc.all_roles_of_type(ctx.cluster, 'client')
@@ -100,7 +100,7 @@ def task(ctx, config):
     brxnet = config.get("brxnet", None)
 
     # Construct any new FuseMount instances
-    overrides = ctx.config.get('overrides', {}).get('ceph-fuse', {})
+    overrides = ctx.config.get('overrides', {}).get('stone-fuse', {})
     top_overrides = dict(filter(lambda x: 'client.' not in x[0], overrides.items()))
     for id_, remote in clients:
         entity = f"client.{id_}"
@@ -116,7 +116,7 @@ def task(ctx, config):
 
         remotes.add(remote)
         auth_id = client_config.get("auth_id", id_)
-        cephfs_name = client_config.get("cephfs_name")
+        stonefs_name = client_config.get("stonefs_name")
 
         skip = client_config.get("skip", False)
         if skip:
@@ -127,10 +127,10 @@ def task(ctx, config):
             fuse_mount = FuseMount(ctx=ctx, client_config=client_config,
                                    test_dir=testdir, client_id=auth_id,
                                    client_remote=remote, brxnet=brxnet,
-                                   cephfs_name=cephfs_name)
+                                   stonefs_name=stonefs_name)
             all_mounts[id_] = fuse_mount
         else:
-            # Catch bad configs where someone has e.g. tried to use ceph-fuse and kcephfs for the same client
+            # Catch bad configs where someone has e.g. tried to use stone-fuse and kstonefs for the same client
             assert isinstance(all_mounts[id_], FuseMount)
 
         if not config.get("disabled", False) and client_config.get('mounted', True):
@@ -148,12 +148,12 @@ def task(ctx, config):
         FuseMount.cleanup_stale_netnses_and_bridge(remote)
 
     # Mount any clients we have been asked to (default to mount all)
-    log.info('Mounting ceph-fuse clients...')
+    log.info('Mounting stone-fuse clients...')
     for info in mounted_by_me.values():
         config = info["config"]
         mount_x = info['mount']
         if config.get("mount_path"):
-            mount_x.cephfs_mntpt = config.get("mount_path")
+            mount_x.stonefs_mntpt = config.get("mount_path")
         if config.get("mountpoint"):
             mount_x.hostfs_mntpt = config.get("mountpoint")
         mount_x.mount(createfs=False)
@@ -164,7 +164,7 @@ def task(ctx, config):
     try:
         yield all_mounts
     finally:
-        log.info('Unmounting ceph-fuse clients...')
+        log.info('Unmounting stone-fuse clients...')
 
         for info in mounted_by_me.values():
             # Conditional because an inner context might have umounted it

@@ -132,7 +132,7 @@ public:
 
     case LOCK_SNAP_SYNC: return "snap->sync";
 
-    default: ceph_abort(); return std::string_view();
+    default: stone_abort(); return std::string_view();
     }
   }
 
@@ -204,10 +204,10 @@ public:
   int get_cap_shift() const;
   int get_cap_mask() const;
 
-  void decode_locked_state(const ceph::buffer::list& bl) {
+  void decode_locked_state(const stone::buffer::list& bl) {
     parent->decode_lock_state(type->type, bl);
   }
-  void encode_locked_state(ceph::buffer::list& bl) {
+  void encode_locked_state(stone::buffer::list& bl) {
     parent->encode_lock_state(type->type, bl);
   }
   void finish_waiters(uint64_t mask, int r=0) {
@@ -238,7 +238,7 @@ public:
     return s;
   }
   void set_state_rejoin(int s, MDSContext::vec& waiters, bool survivor) {
-    ceph_assert(!get_parent()->is_auth());
+    stone_assert(!get_parent()->is_auth());
 
     // If lock in the replica object was not in SYNC state when auth mds of the object failed.
     // Auth mds of the object may take xlock on the lock and change the object when replaying
@@ -363,7 +363,7 @@ public:
     return ++num_rdlock; 
   }
   int put_rdlock() {
-    ceph_assert(num_rdlock>0);
+    stone_assert(num_rdlock>0);
     --num_rdlock;
     if (num_rdlock == 0)
       parent->put(MDSCacheObject::PIN_LOCK);
@@ -396,8 +396,8 @@ public:
 
   // xlock
   void get_xlock(MutationRef who, client_t client) { 
-    ceph_assert(get_xlock_by() == MutationRef());
-    ceph_assert(state == LOCK_XLOCK || is_locallock() ||
+    stone_assert(get_xlock_by() == MutationRef());
+    stone_assert(state == LOCK_XLOCK || is_locallock() ||
 	   state == LOCK_LOCK /* if we are a peer */);
     parent->get(MDSCacheObject::PIN_LOCK);
     more()->num_xlock++;
@@ -405,15 +405,15 @@ public:
     more()->xlock_by_client = client;
   }
   void set_xlock_done() {
-    ceph_assert(more()->xlock_by);
-    ceph_assert(state == LOCK_XLOCK || is_locallock() ||
+    stone_assert(more()->xlock_by);
+    stone_assert(state == LOCK_XLOCK || is_locallock() ||
 	   state == LOCK_LOCK /* if we are a peer */);
     if (!is_locallock())
       state = LOCK_XLOCKDONE;
     more()->xlock_by.reset();
   }
   void put_xlock() {
-    ceph_assert(state == LOCK_XLOCK || state == LOCK_XLOCKDONE ||
+    stone_assert(state == LOCK_XLOCK || state == LOCK_XLOCKDONE ||
 	   state == LOCK_XLOCKSNAP || state == LOCK_LOCK_XLOCK ||
 	   state == LOCK_LOCK  || /* if we are a leader of a peer */
 	   is_locallock());
@@ -446,11 +446,11 @@ public:
     return state_flags & LEASED;
   }
   void get_client_lease() {
-    ceph_assert(!is_leased());
+    stone_assert(!is_leased());
     state_flags |= LEASED;
   }
   void put_client_lease() {
-    ceph_assert(is_leased());
+    stone_assert(is_leased());
     state_flags &= ~LEASED;
   }
 
@@ -465,7 +465,7 @@ public:
   }
 
   // encode/decode
-  void encode(ceph::buffer::list& bl) const {
+  void encode(stone::buffer::list& bl) const {
     ENCODE_START(2, 2, bl);
     encode(state, bl);
     if (have_more())
@@ -474,7 +474,7 @@ public:
       encode(empty_gather_set, bl);
     ENCODE_FINISH(bl);
   }
-  void decode(ceph::buffer::list::const_iterator& p) {
+  void decode(stone::buffer::list::const_iterator& p) {
     DECODE_START(2, p);
     decode(state, p);
     std::set<__s32> g;
@@ -483,21 +483,21 @@ public:
       more()->gather_set.swap(g);
     DECODE_FINISH(p);
   }
-  void encode_state_for_replica(ceph::buffer::list& bl) const {
+  void encode_state_for_replica(stone::buffer::list& bl) const {
     __s16 s = get_replica_state();
-    using ceph::encode;
+    using stone::encode;
     encode(s, bl);
   }
-  void decode_state(ceph::buffer::list::const_iterator& p, bool is_new=true) {
-    using ceph::decode;
+  void decode_state(stone::buffer::list::const_iterator& p, bool is_new=true) {
+    using stone::decode;
     __s16 s;
     decode(s, p);
     if (is_new)
       state = s;
   }
-  void decode_state_rejoin(ceph::buffer::list::const_iterator& p, MDSContext::vec& waiters, bool survivor) {
+  void decode_state_rejoin(stone::buffer::list::const_iterator& p, MDSContext::vec& waiters, bool survivor) {
     __s16 s;
-    using ceph::decode;
+    using stone::decode;
     decode(s, p);
     set_state_rejoin(s, waiters, survivor);
   }
@@ -589,7 +589,7 @@ public:
    * Write bare values (caller must be in an object section)
    * to formatter, or nothing if is_sync_and_unlocked.
    */
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
 
   virtual void print(std::ostream& out) const {
     out << "(";

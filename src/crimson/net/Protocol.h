@@ -55,7 +55,7 @@ class Protocol {
 
   virtual void trigger_close() = 0;
 
-  virtual ceph::bufferlist do_sweep_messages(
+  virtual stone::bufferlist do_sweep_messages(
       const std::deque<MessageRef>& msgs,
       size_t num_msgs,
       bool require_keepalive,

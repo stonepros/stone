@@ -5,7 +5,7 @@
 
 #include <cstdint>
 #include <seastar/core/future.hh>
-#include "common/ceph_time.h"
+#include "common/stone_time.h"
 #include "crimson/common/gated.h"
 #include "crimson/net/Dispatcher.h"
 #include "crimson/net/Fwd.h"
@@ -81,7 +81,7 @@ private:
 
   seastar::timer<seastar::lowres_clock> timer;
   // use real_clock so it can be converted to utime_t
-  using clock = ceph::coarse_real_clock;
+  using clock = stone::coarse_real_clock;
 
   class ConnectionListener;
   class Connection;
@@ -406,7 +406,7 @@ class Heartbeat::Peer final : private Heartbeat::ConnectionListener {
     return session.failed_since(now);
   }
   void send_heartbeat(
-      clock::time_point, ceph::signedspan, std::vector<seastar::future<>>&);
+      clock::time_point, stone::signedspan, std::vector<seastar::future<>>&);
   seastar::future<> handle_reply(crimson::net::ConnectionRef, Ref<MOSDPing>);
   void handle_reset(crimson::net::ConnectionRef conn, bool is_replace) {
     for_each_conn([&] (auto& _conn) {
@@ -437,7 +437,7 @@ class Heartbeat::Peer final : private Heartbeat::ConnectionListener {
   void on_connected() override;
   void on_disconnected() override;
   void do_send_heartbeat(
-      clock::time_point, ceph::signedspan, std::vector<seastar::future<>>*);
+      clock::time_point, stone::signedspan, std::vector<seastar::future<>>*);
 
   template <typename Func>
   void for_each_conn(Func&& f) {

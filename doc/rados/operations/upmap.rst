@@ -17,23 +17,23 @@ Enabling
 New clusters will have this module on by default. The cluster must only
 have luminous (and newer) clients. You can the turn the balancer off with::
 
-  ceph balancer off
+  stone balancer off
 
 To allow use of the feature on existing clusters, you must tell the
 cluster that it only needs to support luminous (and newer) clients with::
 
-  ceph osd set-require-min-compat-client luminous
+  stone osd set-require-min-compat-client luminous
 
 This command will fail if any pre-luminous clients or daemons are
 connected to the monitors.  You can see what client versions are in
 use with::
 
-  ceph features
+  stone features
 
 Balancer module
 -----------------
 
-The `balancer` module for ceph-mgr will automatically balance
+The `balancer` module for stone-mgr will automatically balance
 the number of PGs per OSD.  See :ref:`balancer`
 
 
@@ -44,7 +44,7 @@ Upmap entries are updated with an offline optimizer built into ``osdmaptool``.
 
 #. Grab the latest copy of your osdmap::
 
-     ceph osd getmap -o om
+     stone osd getmap -o om
 
 #. Run the optimizer::
 
@@ -60,7 +60,7 @@ Upmap entries are updated with an offline optimizer built into ``osdmaptool``.
    data pool, no).
 
    The ``max-optimizations`` value is the maximum number of upmap entries to
-   identify in the run.  The default is `10` like the ceph-mgr balancer module,
+   identify in the run.  The default is `10` like the stone-mgr balancer module,
    but you should use a larger number if you are doing offline optimization.
    If it cannot find any additional changes to make it will stop early
    (i.e., when the pool distribution is perfect).
@@ -72,7 +72,7 @@ Upmap entries are updated with an offline optimizer built into ``osdmaptool``.
    The ``--upmap-active`` option simulates the behavior of the active
    balancer in upmap mode.  It keeps cycling until the OSDs are balanced
    and reports how many rounds and how long each round is taking.  The
-   elapsed time for rounds indicates the CPU load ceph-mgr will be
+   elapsed time for rounds indicates the CPU load stone-mgr will be
    consuming when it tries to compute the next optimization plan.
 
 #. Apply the changes::
@@ -80,7 +80,7 @@ Upmap entries are updated with an offline optimizer built into ``osdmaptool``.
      source out.txt
 
    The proposed changes are written to the output file ``out.txt`` in
-   the example above.  These are normal ceph CLI commands that can be
+   the example above.  These are normal stone CLI commands that can be
    run to apply the changes to the cluster.
 
 

@@ -15,13 +15,13 @@ enum health_status_t {
   HEALTH_OK = 2,
 };
 
-inline void encode(health_status_t hs, ceph::buffer::list& bl) {
-  using ceph::encode;
+inline void encode(health_status_t hs, stone::buffer::list& bl) {
+  using stone::encode;
   uint8_t v = hs;
   encode(v, bl);
 }
-inline void decode(health_status_t& hs, ceph::buffer::list::const_iterator& p) {
-  using ceph::decode;
+inline void decode(health_status_t& hs, stone::buffer::list::const_iterator& p) {
+  using stone::decode;
   uint8_t v;
   decode(v, p);
   hs = health_status_t(v);
@@ -32,21 +32,21 @@ struct denc_traits<health_status_t> {
   static constexpr bool featured = false;
   static constexpr bool bounded = true;
   static constexpr bool need_contiguous = false;
-  static void bound_encode(const ceph::buffer::ptr& v, size_t& p, uint64_t f=0) {
+  static void bound_encode(const stone::buffer::ptr& v, size_t& p, uint64_t f=0) {
     p++;
   }
   static void encode(const health_status_t& v,
-		     ceph::buffer::list::contiguous_appender& p,
+		     stone::buffer::list::contiguous_appender& p,
 		     uint64_t f=0) {
     ::denc((uint8_t)v, p);
   }
-  static void decode(health_status_t& v, ceph::buffer::ptr::const_iterator& p,
+  static void decode(health_status_t& v, stone::buffer::ptr::const_iterator& p,
 		     uint64_t f=0) {
     uint8_t tmp;
     ::denc(tmp, p);
     v = health_status_t(tmp);
   }
-  static void decode(health_status_t& v, ceph::buffer::list::const_iterator& p,
+  static void decode(health_status_t& v, stone::buffer::list::const_iterator& p,
 		     uint64_t f=0) {
     uint8_t tmp;
     ::denc(tmp, p);

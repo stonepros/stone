@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-ceph dashboard mgr plugin (based on CherryPy)
+stone dashboard mgr plugin (based on CherryPy)
 """
 from __future__ import absolute_import
 
@@ -112,7 +112,7 @@ class CherryPyConfig(object):
         if server_addr is None:
             raise ServerConfigException(
                 'no server_addr configured; '
-                'try "ceph config set mgr mgr/{}/{}/server_addr <ip>"'
+                'try "stone config set mgr mgr/{}/{}/server_addr <ip>"'
                 .format(self.module_name, self.get_mgr_id()))  # type: ignore
         self.log.info('server: ssl=%s host=%s port=%d', 'yes' if use_ssl else 'no',  # type: ignore
                       server_addr, server_port)
@@ -234,7 +234,7 @@ class Module(MgrModule, CherryPyConfig):
     COMMANDS = [
         {
             'cmd': 'dashboard set-jwt-token-ttl '
-                   'name=seconds,type=CephInt',
+                   'name=seconds,type=StoneInt',
             'desc': 'Set the JWT token TTL in seconds',
             'perm': 'w'
         },
@@ -392,7 +392,7 @@ class Module(MgrModule, CherryPyConfig):
 
     @CLIWriteCommand("dashboard create-self-signed-cert")
     def set_mgr_created_self_signed_cert(self):
-        cert, pkey = create_self_signed_cert('IT', 'ceph-dashboard')
+        cert, pkey = create_self_signed_cert('IT', 'stone-dashboard')
         result = HandleCommandResult(*self.set_ssl_certificate(inbuf=cert))
         if result.retval != 0:
             return result
@@ -488,11 +488,11 @@ class StandbyModule(MgrStandbyModule, CherryPyConfig):
                              does not know an active URI to redirect to, otherwise
                              a simple redirect is returned instead -->
                         <head>
-                            <title>Ceph</title>
+                            <title>Stone</title>
                             <meta http-equiv="refresh" content="{delay}">
                         </head>
                         <body>
-                            No active ceph-mgr instance is currently running
+                            No active stone-mgr instance is currently running
                             the dashboard. A failover may be in progress.
                             Retrying in {delay} seconds...
                         </body>

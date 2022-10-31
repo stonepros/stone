@@ -1,2 +1,2 @@
 version=3
-https://download.ceph.com/tarballs/ceph-(\d.*)\.tar\.gz
+https://download.stone.com/tarballs/stone-(\d.*)\.tar\.gz

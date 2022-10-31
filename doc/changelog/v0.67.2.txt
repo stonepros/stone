@@ -130,7 +130,7 @@ commit 96d719eeecceaa06078a29c2f868e50e6bc9ab31
 Author: Sage Weil <sage@inktank.com>
 Date:   Mon Aug 19 12:48:50 2013 -0700
 
-    ceph: parse CEPH_ARGS environment variable
+    stone: parse CEPH_ARGS environment variable
     
     Fixes: #6052
     Signed-off-by: Sage Weil <sage@inktank.com>

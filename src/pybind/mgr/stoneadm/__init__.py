@@ -1,7 +1,7 @@
-from .module import CephadmOrchestrator
+from .module import StoneadmOrchestrator
 
 __all__ = [
-    "CephadmOrchestrator",
+    "StoneadmOrchestrator",
 ]
 
 import os

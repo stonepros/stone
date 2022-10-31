@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 XSKY <haomai@xsky.com>
  *
@@ -25,10 +25,10 @@
 #include "Stack.h"
 
 class PosixWorker : public Worker {
-  ceph::NetHandler net;
+  stone::NetHandler net;
   void initialize() override;
  public:
-  PosixWorker(StoneeContext *c, unsigned i)
+  PosixWorker(StoneContext *c, unsigned i)
       : Worker(c, i), net(c) {}
   int listen(entity_addr_t &sa,
 	     unsigned addr_slot,
@@ -40,19 +40,19 @@ class PosixWorker : public Worker {
 class PosixNetworkStack : public NetworkStack {
   std::vector<std::thread> threads;
 
-  virtual Worker* create_worker(StoneeContext *c, unsigned worker_id) override {
+  virtual Worker* create_worker(StoneContext *c, unsigned worker_id) override {
     return new PosixWorker(c, worker_id);
   }
 
  public:
-  explicit PosixNetworkStack(StoneeContext *c);
+  explicit PosixNetworkStack(StoneContext *c);
 
   void spawn_worker(unsigned i, std::function<void ()> &&func) override {
     threads.resize(i+1);
     threads[i] = std::thread(func);
   }
   void join_worker(unsigned i) override {
-    ceph_assert(threads.size() > i && threads[i].joinable());
+    stone_assert(threads.size() > i && threads[i].joinable());
     threads[i].join();
   }
 };

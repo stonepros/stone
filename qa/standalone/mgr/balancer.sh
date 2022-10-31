@@ -14,16 +14,16 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library Public License for more details.
 #
-source $CEPH_ROOT/qa/standalone/ceph-helpers.sh
+source $STONE_ROOT/qa/standalone/stone-helpers.sh
 
 function run() {
     local dir=$1
     shift
 
-    export CEPH_MON="127.0.0.1:7102" # git grep '\<7102\>' : there must be only one
-    export CEPH_ARGS
-    CEPH_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
-    CEPH_ARGS+="--mon-host=$CEPH_MON "
+    export STONE_MON="127.0.0.1:7102" # git grep '\<7102\>' : there must be only one
+    export STONE_ARGS
+    STONE_ARGS+="--fsid=$(uuidgen) --auth-supported=none "
+    STONE_ARGS+="--mon-host=$STONE_MON "
 
     local funcs=${@:-$(set | sed -n -e 's/^\(TEST_[0-9a-z_]*\) .*/\1/p')}
     for func in $funcs ; do
@@ -48,71 +48,71 @@ function TEST_balancer() {
 
     wait_for_clean || return 1
 
-    ceph pg dump pgs
-    ceph balancer status || return 1
-    eval MODE=$(ceph balancer status | jq '.mode')
+    stone pg dump pgs
+    stone balancer status || return 1
+    eval MODE=$(stone balancer status | jq '.mode')
     test $MODE = "upmap" || return 1
-    ACTIVE=$(ceph balancer status | jq '.active')
+    ACTIVE=$(stone balancer status | jq '.active')
     test $ACTIVE = "true" || return 1
 
-    ceph balancer ls || return 1
-    PLANS=$(ceph balancer ls)
+    stone balancer ls || return 1
+    PLANS=$(stone balancer ls)
     test "$PLANS" = "[]" || return 1
-    ceph balancer eval || return 1
-    EVAL="$(ceph balancer eval)"
+    stone balancer eval || return 1
+    EVAL="$(stone balancer eval)"
     test "$EVAL" = "current cluster score 0.000000 (lower is better)"
-    ceph balancer eval-verbose || return 1
+    stone balancer eval-verbose || return 1
 
-    ceph balancer pool add $TEST_POOL1 || return 1
-    ceph balancer pool add $TEST_POOL2 || return 1
-    ceph balancer pool ls || return 1
-    eval POOL=$(ceph balancer pool ls | jq 'sort | .[0]')
+    stone balancer pool add $TEST_POOL1 || return 1
+    stone balancer pool add $TEST_POOL2 || return 1
+    stone balancer pool ls || return 1
+    eval POOL=$(stone balancer pool ls | jq 'sort | .[0]')
     test "$POOL" = "$TEST_POOL1" || return 1
-    eval POOL=$(ceph balancer pool ls | jq 'sort | .[1]')
+    eval POOL=$(stone balancer pool ls | jq 'sort | .[1]')
     test "$POOL" = "$TEST_POOL2" || return 1
-    ceph balancer pool rm $TEST_POOL1 || return 1
-    ceph balancer pool rm $TEST_POOL2 || return 1
-    ceph balancer pool ls || return 1
-    ceph balancer pool add $TEST_POOL1 || return 1
+    stone balancer pool rm $TEST_POOL1 || return 1
+    stone balancer pool rm $TEST_POOL2 || return 1
+    stone balancer pool ls || return 1
+    stone balancer pool add $TEST_POOL1 || return 1
 
-    ceph balancer mode crush-compat || return 1
-    ceph balancer status || return 1
-    eval MODE=$(ceph balancer status | jq '.mode')
+    stone balancer mode crush-compat || return 1
+    stone balancer status || return 1
+    eval MODE=$(stone balancer status | jq '.mode')
     test $MODE = "crush-compat" || return 1
-    ceph balancer off || return 1
-    ! ceph balancer optimize plan_crush $TEST_POOL1 || return 1
-    ceph balancer status || return 1
-    eval RESULT=$(ceph balancer status | jq '.optimize_result')
+    stone balancer off || return 1
+    ! stone balancer optimize plan_crush $TEST_POOL1 || return 1
+    stone balancer status || return 1
+    eval RESULT=$(stone balancer status | jq '.optimize_result')
     test "$RESULT" = "Distribution is already perfect" || return 1
 
-    ceph balancer on || return 1
-    ACTIVE=$(ceph balancer status | jq '.active')
+    stone balancer on || return 1
+    ACTIVE=$(stone balancer status | jq '.active')
     test $ACTIVE = "true" || return 1
     sleep 2
-    ceph balancer status || return 1
-    ceph balancer off || return 1
-    ACTIVE=$(ceph balancer status | jq '.active')
+    stone balancer status || return 1
+    stone balancer off || return 1
+    ACTIVE=$(stone balancer status | jq '.active')
     test $ACTIVE = "false" || return 1
     sleep 2
 
-    ceph balancer reset || return 1
+    stone balancer reset || return 1
 
-    ceph balancer mode upmap || return 1
-    ceph balancer status || return 1
-    eval MODE=$(ceph balancer status | jq '.mode')
+    stone balancer mode upmap || return 1
+    stone balancer status || return 1
+    eval MODE=$(stone balancer status | jq '.mode')
     test $MODE = "upmap" || return 1
-    ! ceph balancer optimize plan_upmap $TEST_POOL || return 1
-    ceph balancer status || return 1
-    eval RESULT=$(ceph balancer status | jq '.optimize_result')
+    ! stone balancer optimize plan_upmap $TEST_POOL || return 1
+    stone balancer status || return 1
+    eval RESULT=$(stone balancer status | jq '.optimize_result')
     test "$RESULT" = "Unable to find further optimization, or pool(s) pg_num is decreasing, or distribution is already perfect" || return 1
 
-    ceph balancer on || return 1
-    ACTIVE=$(ceph balancer status | jq '.active')
+    stone balancer on || return 1
+    ACTIVE=$(stone balancer status | jq '.active')
     test $ACTIVE = "true" || return 1
     sleep 2
-    ceph balancer status || return 1
-    ceph balancer off || return 1
-    ACTIVE=$(ceph balancer status | jq '.active')
+    stone balancer status || return 1
+    stone balancer off || return 1
+    ACTIVE=$(stone balancer status | jq '.active')
     test $ACTIVE = "false" || return 1
 
     teardown $dir || return 1
@@ -130,8 +130,8 @@ function TEST_balancer2() {
     # Integer average of PGS per OSD (150)
     FINAL_PER_OSD2=$(expr \( \( $TEST_PGS1 + $TEST_PGS2 \) \* $DEFAULT_REPLICAS \) / $OSDS)
 
-    CEPH_ARGS+="--osd_pool_default_pg_autoscale_mode=off "
-    CEPH_ARGS+="--debug_osd=20 "
+    STONE_ARGS+="--osd_pool_default_pg_autoscale_mode=off "
+    STONE_ARGS+="--debug_osd=20 "
     setup $dir || return 1
     run_mon $dir a || return 1
     run_mgr $dir x || return 1
@@ -140,11 +140,11 @@ function TEST_balancer2() {
       run_osd $dir $i || return 1
     done
 
-    ceph osd set-require-min-compat-client luminous
-    ceph config set mgr mgr/balancer/upmap_max_deviation 1
-    ceph balancer mode upmap || return 1
-    ceph balancer on || return 1
-    ceph config set mgr mgr/balancer/sleep_interval 5
+    stone osd set-require-min-compat-client luminous
+    stone config set mgr mgr/balancer/upmap_max_deviation 1
+    stone balancer mode upmap || return 1
+    stone balancer on || return 1
+    stone config set mgr mgr/balancer/sleep_interval 5
 
     create_pool $TEST_POOL1 $TEST_PGS1
 
@@ -165,17 +165,17 @@ function TEST_balancer2() {
     # Plan is found, but PGs still need to move
     sleep 10
     wait_for_clean || return 1
-    ceph osd df
+    stone osd df
 
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[0].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[0].pgs')
     test $PGS -ge $FINAL_PER_OSD1 || return 1
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[1].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[1].pgs')
     test $PGS -ge $FINAL_PER_OSD1 || return 1
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[2].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[2].pgs')
     test $PGS -ge $FINAL_PER_OSD1 || return 1
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[3].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[3].pgs')
     test $PGS -ge $FINAL_PER_OSD1 || return 1
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[4].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[4].pgs')
     test $PGS -ge $FINAL_PER_OSD1 || return 1
 
     create_pool $TEST_POOL2 $TEST_PGS2
@@ -196,21 +196,21 @@ function TEST_balancer2() {
     # Plan is found, but PGs still need to move
     sleep 10
     wait_for_clean || return 1
-    ceph osd df
+    stone osd df
 
     # We should be with plus or minus 2 of FINAL_PER_OSD2
     # This is because here each pool is balanced independently
     MIN=$(expr $FINAL_PER_OSD2 - 2)
     MAX=$(expr $FINAL_PER_OSD2 + 2)
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[0].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[0].pgs')
     test $PGS -ge $MIN -a $PGS -le $MAX || return 1
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[1].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[1].pgs')
     test $PGS -ge $MIN -a $PGS -le $MAX || return 1
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[2].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[2].pgs')
     test $PGS -ge $MIN -a $PGS -le $MAX || return 1
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[3].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[3].pgs')
     test $PGS -ge $MIN -a $PGS -le $MAX || return 1
-    PGS=$(ceph osd df --format=json-pretty | jq '.nodes[4].pgs')
+    PGS=$(stone osd df --format=json-pretty | jq '.nodes[4].pgs')
     test $PGS -ge $MIN -a $PGS -le $MAX || return 1
 
     teardown $dir || return 1

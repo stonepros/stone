@@ -45,7 +45,7 @@ class RGWPeriodPusher final : public RGWRealmWatcher::Watcher,
  private:
   void handle_notify(RGWZonesNeedPeriod&& period);
 
-  CephContext *const cct;
+  StoneContext *const cct;
   rgw::sal::RGWRadosStore* store;
 
   std::mutex mutex;

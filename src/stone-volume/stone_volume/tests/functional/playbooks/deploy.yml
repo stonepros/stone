@@ -89,11 +89,11 @@
 
   tasks:
     - import_role:
-        name: ceph-defaults
+        name: stone-defaults
     - import_role:
-        name: ceph-facts
+        name: stone-facts
     - import_role:
-        name: ceph-validate
+        name: stone-validate
 
 - hosts:
   - mons
@@ -106,50 +106,50 @@
     dashboard_enabled: False
   tasks:
     - import_role:
-        name: ceph-defaults
+        name: stone-defaults
     - import_role:
-        name: ceph-facts
+        name: stone-facts
     - import_role:
-        name: ceph-handler
+        name: stone-handler
     - import_role:
-        name: ceph-common
+        name: stone-common
 
-    - name: rsync ceph-volume to test nodes on centos
+    - name: rsync stone-volume to test nodes on centos
       synchronize:
-        src: "{{ toxinidir }}/../../../../ceph_volume"
+        src: "{{ toxinidir }}/../../../../stone_volume"
         dest: "/usr/lib/python3.6/site-packages"
         use_ssh_args: true
       when:
         - ansible_facts['os_family'] == "RedHat"
         - inventory_hostname in groups.get(osd_group_name, [])
 
-    - name: rsync ceph-volume to test nodes on ubuntu
+    - name: rsync stone-volume to test nodes on ubuntu
       synchronize:
-        src: "{{ toxinidir }}/../../../../ceph_volume"
+        src: "{{ toxinidir }}/../../../../stone_volume"
         dest: "/usr/lib/python2.7/dist-packages"
         use_ssh_args: true
       when:
         - ansible_facts['os_family'] == "Debian"
         - inventory_hostname in groups.get(osd_group_name, [])
 
-    - name: run ceph-config role
+    - name: run stone-config role
       import_role:
-        name: ceph-config
+        name: stone-config
 
-    - name: run ceph-mon role
+    - name: run stone-mon role
       import_role:
-        name: ceph-mon
+        name: stone-mon
       when:
         - inventory_hostname in groups.get(mon_group_name, [])
 
-    - name: run ceph-mgr role
+    - name: run stone-mgr role
       import_role:
-        name: ceph-mgr
+        name: stone-mgr
       when:
         - inventory_hostname in groups.get(mgr_group_name, [])
 
-    - name: run ceph-osd role
+    - name: run stone-osd role
       import_role:
-        name: ceph-osd
+        name: stone-osd
       when:
         - inventory_hostname in groups.get(osd_group_name, [])

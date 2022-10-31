@@ -3,7 +3,7 @@
 // vim: ts=8 sw=2 smarttab
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -28,7 +28,7 @@ using RGWBucketSyncPolicyHandlerRef = std::shared_ptr<RGWBucketSyncPolicyHandler
 class RGWSI_Bucket_Sync : public RGWServiceInstance
 {
 public:
-  RGWSI_Bucket_Sync(CephContext *cct) : RGWServiceInstance(cct) {}
+  RGWSI_Bucket_Sync(StoneContext *cct) : RGWServiceInstance(cct) {}
 
   virtual int get_policy_handler(RGWSI_Bucket_X_Ctx& ctx,
                                  std::optional<rgw_zone_id> zone,

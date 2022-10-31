@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -ex
 
-# this should be run from the src directory in the ceph.git
+# this should be run from the src directory in the stone.git
 
 source $(dirname $0)/detect-build-env-vars.sh
-PATH="$CEPH_BIN:$PATH"
+PATH="$STONE_BIN:$PATH"
 
 if [ $# = 0 ]; then
   # mimic the old behaviour

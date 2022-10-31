@@ -1,11 +1,11 @@
 import os
 import pytest
 from mock.mock import patch, PropertyMock, create_autospec
-from ceph_volume.api import lvm
-from ceph_volume.util import disk
-from ceph_volume.util import device
-from ceph_volume.util.constants import ceph_disk_guids
-from ceph_volume import conf, configuration
+from stone_volume.api import lvm
+from stone_volume.util import disk
+from stone_volume.util import device
+from stone_volume.util.constants import stone_disk_guids
+from stone_volume import conf, configuration
 
 
 class Capture(object):
@@ -49,7 +49,7 @@ def mock_lv_device_generator():
         dev.lv_name = 'lv'
         dev.vg_name = 'vg'
         dev.path = '{}/{}'.format(dev.vg_name, dev.lv_name)
-        dev.used_by_ceph = False
+        dev.used_by_stone = False
         dev.vg_size = [size]
         dev.vg_free = dev.vg_size
         dev.available_lvm = True
@@ -95,14 +95,14 @@ def osds_per_device(request):
 @pytest.fixture
 def fake_run(monkeypatch):
     fake_run = Capture()
-    monkeypatch.setattr('ceph_volume.process.run', fake_run)
+    monkeypatch.setattr('stone_volume.process.run', fake_run)
     return fake_run
 
 
 @pytest.fixture
 def fake_call(monkeypatch):
     fake_call = Capture(always_returns=([], [], 0))
-    monkeypatch.setattr('ceph_volume.process.call', fake_call)
+    monkeypatch.setattr('stone_volume.process.call', fake_call)
     return fake_call
 
 
@@ -134,7 +134,7 @@ def stub_call(monkeypatch):
         if isinstance(return_values, tuple):
             return_values = [return_values]
         stubbed_call = Capture(return_values=return_values)
-        monkeypatch.setattr('ceph_volume.process.call', stubbed_call)
+        monkeypatch.setattr('stone_volume.process.call', stubbed_call)
         return stubbed_call
 
     return apply
@@ -143,49 +143,49 @@ def stub_call(monkeypatch):
 @pytest.fixture(autouse=True)
 def reset_cluster_name(request, monkeypatch):
     """
-    The globally available ``ceph_volume.conf.cluster`` might get mangled in
+    The globally available ``stone_volume.conf.cluster`` might get mangled in
     tests, make sure that after evert test, it gets reset, preventing pollution
     going into other tests later.
     """
     def fin():
         conf.cluster = None
         try:
-            os.environ.pop('CEPH_CONF')
+            os.environ.pop('STONE_CONF')
         except KeyError:
             pass
     request.addfinalizer(fin)
 
 
 @pytest.fixture
-def conf_ceph(monkeypatch):
+def conf_stone(monkeypatch):
     """
-    Monkeypatches ceph_volume.conf.ceph, which is meant to parse/read
-    a ceph.conf. The patching is naive, it allows one to set return values for
+    Monkeypatches stone_volume.conf.stone, which is meant to parse/read
+    a stone.conf. The patching is naive, it allows one to set return values for
     specific method calls.
     """
     def apply(**kw):
         stub = Factory(**kw)
-        monkeypatch.setattr(conf, 'ceph', stub)
+        monkeypatch.setattr(conf, 'stone', stub)
         return stub
     return apply
 
 
 @pytest.fixture
-def conf_ceph_stub(monkeypatch, tmpfile):
+def conf_stone_stub(monkeypatch, tmpfile):
     """
-    Monkeypatches ceph_volume.conf.ceph with contents from a string that are
-    written to a temporary file and then is fed through the same ceph.conf
-    loading mechanisms for testing.  Unlike ``conf_ceph`` which is just a fake,
-    we are actually loading values as seen on a ceph.conf file
+    Monkeypatches stone_volume.conf.stone with contents from a string that are
+    written to a temporary file and then is fed through the same stone.conf
+    loading mechanisms for testing.  Unlike ``conf_stone`` which is just a fake,
+    we are actually loading values as seen on a stone.conf file
 
-    This is useful when more complex ceph.conf's are needed. In the case of
-    just trying to validate a key/value behavior ``conf_ceph`` is better
+    This is useful when more complex stone.conf's are needed. In the case of
+    just trying to validate a key/value behavior ``conf_stone`` is better
     suited.
     """
     def apply(contents):
         conf_path = tmpfile(contents=contents)
         parser = configuration.load(conf_path)
-        monkeypatch.setattr(conf, 'ceph', parser)
+        monkeypatch.setattr(conf, 'stone', parser)
         return parser
     return apply
 
@@ -193,7 +193,7 @@ def conf_ceph_stub(monkeypatch, tmpfile):
 @pytest.fixture
 def is_root(monkeypatch):
     """
-    Patch ``os.getuid()`` so that ceph-volume's decorators that ensure a user
+    Patch ``os.getuid()`` so that stone-volume's decorators that ensure a user
     is root (or is sudoing to superuser) can continue as-is
     """
     monkeypatch.setattr('os.getuid', lambda: 0)
@@ -219,40 +219,40 @@ def disable_kernel_queries(monkeypatch):
     '''
     This speeds up calls to Device and Disk
     '''
-    monkeypatch.setattr("ceph_volume.util.device.disk.get_devices", lambda: {})
-    monkeypatch.setattr("ceph_volume.util.disk.udevadm_property", lambda *a, **kw: {})
+    monkeypatch.setattr("stone_volume.util.device.disk.get_devices", lambda: {})
+    monkeypatch.setattr("stone_volume.util.disk.udevadm_property", lambda *a, **kw: {})
 
 
 @pytest.fixture(params=[
-    '', 'ceph data', 'ceph journal', 'ceph block',
-    'ceph block.wal', 'ceph block.db', 'ceph lockbox'])
-def ceph_partlabel(request):
+    '', 'stone data', 'stone journal', 'stone block',
+    'stone block.wal', 'stone block.db', 'stone lockbox'])
+def stone_partlabel(request):
     return request.param
 
 
-@pytest.fixture(params=list(ceph_disk_guids.keys()))
-def ceph_parttype(request):
+@pytest.fixture(params=list(stone_disk_guids.keys()))
+def stone_parttype(request):
     return request.param
 
 
 @pytest.fixture
-def lsblk_ceph_disk_member(monkeypatch, request, ceph_partlabel, ceph_parttype):
-    monkeypatch.setattr("ceph_volume.util.device.disk.lsblk",
-                        lambda path: {'TYPE': 'disk', 'PARTLABEL': ceph_partlabel})
+def lsblk_stone_disk_member(monkeypatch, request, stone_partlabel, stone_parttype):
+    monkeypatch.setattr("stone_volume.util.device.disk.lsblk",
+                        lambda path: {'TYPE': 'disk', 'PARTLABEL': stone_partlabel})
     # setting blkid here too in order to be able to fall back to PARTTYPE based
     # membership
-    monkeypatch.setattr("ceph_volume.util.device.disk.blkid",
+    monkeypatch.setattr("stone_volume.util.device.disk.blkid",
                         lambda path: {'TYPE': 'disk',
                                       'PARTLABEL': '',
-                                      'PARTTYPE': ceph_parttype})
+                                      'PARTTYPE': stone_parttype})
 
 
 @pytest.fixture
-def blkid_ceph_disk_member(monkeypatch, request, ceph_partlabel, ceph_parttype):
-    monkeypatch.setattr("ceph_volume.util.device.disk.blkid",
+def blkid_stone_disk_member(monkeypatch, request, stone_partlabel, stone_parttype):
+    monkeypatch.setattr("stone_volume.util.device.disk.blkid",
                         lambda path: {'TYPE': 'disk',
-                                      'PARTLABEL': ceph_partlabel,
-                                      'PARTTYPE': ceph_parttype})
+                                      'PARTLABEL': stone_partlabel,
+                                      'PARTTYPE': stone_parttype})
 
 
 @pytest.fixture(params=[
@@ -261,22 +261,22 @@ def blkid_ceph_disk_member(monkeypatch, request, ceph_partlabel, ceph_parttype):
     ('', 'gluster partition'),
     ('gluster partition', ''),
 ])
-def device_info_not_ceph_disk_member(monkeypatch, request):
-    monkeypatch.setattr("ceph_volume.util.device.disk.lsblk",
+def device_info_not_stone_disk_member(monkeypatch, request):
+    monkeypatch.setattr("stone_volume.util.device.disk.lsblk",
                         lambda path: {'TYPE': 'disk',
                                       'PARTLABEL': request.param[0]})
-    monkeypatch.setattr("ceph_volume.util.device.disk.blkid",
+    monkeypatch.setattr("stone_volume.util.device.disk.blkid",
                         lambda path: {'TYPE': 'disk',
                                       'PARTLABEL': request.param[1]})
 
 @pytest.fixture
 def patched_get_block_devs_lsblk():
-    with patch('ceph_volume.util.disk.get_block_devs_lsblk') as p:
+    with patch('stone_volume.util.disk.get_block_devs_lsblk') as p:
         yield p
 
 @pytest.fixture
 def patch_bluestore_label():
-    with patch('ceph_volume.util.device.Device.has_bluestore_label',
+    with patch('stone_volume.util.device.Device.has_bluestore_label',
                new_callable=PropertyMock) as p:
         p.return_value = False
         yield p
@@ -290,14 +290,14 @@ def device_info(monkeypatch, patch_bluestore_label):
         blkid = blkid if blkid else {}
         udevadm = udevadm if udevadm else {}
         lv = Factory(**lv) if lv else None
-        monkeypatch.setattr("ceph_volume.sys_info.devices", {})
-        monkeypatch.setattr("ceph_volume.util.device.disk.get_devices", lambda: devices)
+        monkeypatch.setattr("stone_volume.sys_info.devices", {})
+        monkeypatch.setattr("stone_volume.util.device.disk.get_devices", lambda: devices)
         if not devices:
-            monkeypatch.setattr("ceph_volume.util.device.lvm.get_single_lv", lambda filters: lv)
+            monkeypatch.setattr("stone_volume.util.device.lvm.get_single_lv", lambda filters: lv)
         else:
-            monkeypatch.setattr("ceph_volume.util.device.lvm.get_device_lvs",
+            monkeypatch.setattr("stone_volume.util.device.lvm.get_device_lvs",
                                 lambda path: [lv])
-        monkeypatch.setattr("ceph_volume.util.device.disk.lsblk", lambda path: lsblk)
-        monkeypatch.setattr("ceph_volume.util.device.disk.blkid", lambda path: blkid)
-        monkeypatch.setattr("ceph_volume.util.disk.udevadm_property", lambda *a, **kw: udevadm)
+        monkeypatch.setattr("stone_volume.util.device.disk.lsblk", lambda path: lsblk)
+        monkeypatch.setattr("stone_volume.util.device.disk.blkid", lambda path: blkid)
+        monkeypatch.setattr("stone_volume.util.disk.udevadm_property", lambda *a, **kw: udevadm)
     return apply

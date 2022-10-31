@@ -1,6 +1,6 @@
 import pytest
 
-from ceph.deployment.utils import is_ipv6, unwrap_ipv6, wrap_ipv6, valid_addr
+from stone.deployment.utils import is_ipv6, unwrap_ipv6, wrap_ipv6, valid_addr
 from typing import NamedTuple
 
 

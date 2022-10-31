@@ -51,8 +51,8 @@ class IscsiGatewaysConfig(object):
     @classmethod
     def update_iscsi_config(cls, config):
         """
-        Since `ceph-iscsi` config v10, gateway names were renamed from host short name to FQDN.
-        If Ceph Dashboard were configured before v10, we try to update our internal gateways
+        Since `stone-iscsi` config v10, gateway names were renamed from host short name to FQDN.
+        If Stone Dashboard were configured before v10, we try to update our internal gateways
         database automatically.
         """
         for gateway_name, gateway_config in config['gateways'].items():

@@ -18,7 +18,7 @@
 #include <boost/variant.hpp>
 #include <boost/mpl/vector.hpp>
 
-namespace ceph {
+namespace stone {
 class Formatter;
 }
 

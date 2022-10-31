@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 
-import { TablePerformanceCounterComponent } from '~/app/ceph/performance-counter/table-performance-counter/table-performance-counter.component';
-import { CephSharedModule } from '~/app/ceph/shared/ceph-shared.module';
+import { TablePerformanceCounterComponent } from '~/app/stone/performance-counter/table-performance-counter/table-performance-counter.component';
+import { StoneSharedModule } from '~/app/stone/shared/stone-shared.module';
 import { SharedModule } from '~/app/shared/shared.module';
 import { configureTestBed } from '~/testing/unit-test-helper';
 import { OsdDetailsComponent } from './osd-details.component';
@@ -14,7 +14,7 @@ describe('OsdDetailsComponent', () => {
   let fixture: ComponentFixture<OsdDetailsComponent>;
 
   configureTestBed({
-    imports: [HttpClientTestingModule, NgbNavModule, SharedModule, CephSharedModule],
+    imports: [HttpClientTestingModule, NgbNavModule, SharedModule, StoneSharedModule],
     declarations: [OsdDetailsComponent, TablePerformanceCounterComponent]
   });
 

@@ -2,17 +2,17 @@
 
 #pragma once
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 #include <thread>
 #include <string>
 
-namespace ceph {
+namespace stone {
 /// a FIFO mutex
 class fair_mutex {
 public:
   fair_mutex(const std::string& name)
-    : mutex{ceph::make_mutex(name)}
+    : mutex{stone::make_mutex(name)}
   {}
   ~fair_mutex() = default;
   fair_mutex(const fair_mutex&) = delete;
@@ -71,10 +71,10 @@ private:
 private:
   unsigned next_id = 0;
   unsigned unblock_id = 0;
-  ceph::condition_variable cond;
-  ceph::mutex mutex;
+  stone::condition_variable cond;
+  stone::mutex mutex;
 #ifdef STONE_DEBUG_MUTEX
   std::thread::id locked_by = {};
 #endif
 };
-} // namespace ceph
+} // namespace stone

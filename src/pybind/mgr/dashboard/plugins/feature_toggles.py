@@ -7,7 +7,7 @@ from typing import List, Optional
 import cherrypy
 from mgr_module import CLICommand, Option
 
-from ..controllers.cephfs import CephFS
+from ..controllers.stonefs import StoneFS
 from ..controllers.iscsi import Iscsi, IscsiTarget
 from ..controllers.nfs import NFSGanesha, NFSGaneshaExports
 from ..controllers.rbd import Rbd, RbdSnapshot, RbdTrash
@@ -28,7 +28,7 @@ class Features(Enum):
     RBD = 'rbd'
     MIRRORING = 'mirroring'
     ISCSI = 'iscsi'
-    CEPHFS = 'cephfs'
+    STONEFS = 'stonefs'
     RGW = 'rgw'
     NFS = 'nfs'
 
@@ -40,7 +40,7 @@ Feature2Controller = {
     Features.MIRRORING: [
         RbdMirroringSummary, RbdMirroringPoolMode, RbdMirroringPoolPeer],
     Features.ISCSI: [Iscsi, IscsiTarget],
-    Features.CEPHFS: [CephFS],
+    Features.STONEFS: [StoneFS],
     Features.RGW: [Rgw, RgwDaemon, RgwBucket, RgwUser],
     Features.NFS: [NFSGanesha, NFSGaneshaExports],
 }
@@ -83,7 +83,7 @@ class FeatureToggles(I.CanMgr, I.Setupable, I.HasOptions,
                 action: Actions = Actions.STATUS,
                 features: Optional[List[Features]] = None):
             '''
-            Enable or disable features in Ceph-Mgr Dashboard
+            Enable or disable features in Stone-Mgr Dashboard
             '''
             ret = 0
             msg = []
@@ -144,7 +144,7 @@ class FeatureToggles(I.CanMgr, I.Setupable, I.HasOptions,
             "rbd": (bool, ''),
             "mirroring": (bool, ''),
             "iscsi": (bool, ''),
-            "cephfs": (bool, ''),
+            "stonefs": (bool, ''),
             "rgw": (bool, ''),
             "nfs": (bool, '')
         }

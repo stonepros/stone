@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
  *
@@ -16,12 +16,12 @@
 #ifndef STONE_Sem_Posix__H
 #define STONE_Sem_Posix__H
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 
 class Semaphore
 {
-  ceph::mutex m = ceph::make_mutex("Semaphore::m");
-  ceph::condition_variable c;
+  stone::mutex m = stone::make_mutex("Semaphore::m");
+  stone::condition_variable c;
   int count = 0;
 
   public:

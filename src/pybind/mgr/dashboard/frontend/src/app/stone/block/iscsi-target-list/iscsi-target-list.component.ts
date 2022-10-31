@@ -40,7 +40,7 @@ export class IscsiTargetListComponent extends ListWithDetails implements OnInit,
   modalRef: NgbModalRef;
   permission: Permission;
   selection = new CdTableSelection();
-  cephIscsiConfigVersion: number;
+  stoneIscsiConfigVersion: number;
   settings: any;
   status: string;
   summaryDataSubscription: Subscription;
@@ -135,7 +135,7 @@ export class IscsiTargetListComponent extends ListWithDetails implements OnInit,
     if (this.available) {
       this.setTableRefreshTimeout();
       this.iscsiService.version().subscribe((res: any) => {
-        this.cephIscsiConfigVersion = res['ceph_iscsi_config_version'];
+        this.stoneIscsiConfigVersion = res['stone_iscsi_config_version'];
       });
       this.taskListService.init(
         () => this.iscsiService.listTargets(),

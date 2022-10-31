@@ -3,6 +3,6 @@ set -ex
 
 what="$1"
 [ -z "$what" ] && what=/etc/udev/rules.d
-sudo ceph-post-file -d ceph-test-workunit $what
+sudo stone-post-file -d stone-test-workunit $what
 
 echo OK

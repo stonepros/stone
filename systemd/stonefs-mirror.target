@@ -1,7 +1,7 @@
 [Unit]
-Description=Ceph target to start/stop all cephfs-mirror@.service instances
-PartOf=ceph.target
-Before=ceph.target
+Description=Stone target to start/stop all stonefs-mirror@.service instances
+PartOf=stone.target
+Before=stone.target
 
 [Install]
-WantedBy=multi-user.target ceph.target
+WantedBy=multi-user.target stone.target

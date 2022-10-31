@@ -3,12 +3,12 @@ import json
 import logging
 import os
 from textwrap import dedent
-from ceph_volume.util import prepare as prepare_utils
-from ceph_volume.util import encryption as encryption_utils
-from ceph_volume.util import disk
-from ceph_volume.util import system
-from ceph_volume import decorators, terminal
-from ceph_volume.devices.lvm.common import rollback_osd
+from stone_volume.util import prepare as prepare_utils
+from stone_volume.util import encryption as encryption_utils
+from stone_volume.util import disk
+from stone_volume.util import system
+from stone_volume import decorators, terminal
+from stone_volume.devices.lvm.common import rollback_osd
 from .common import create_parser
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ def prepare_dmcrypt(key, device, device_type, fsid):
     if not device:
         return ''
     kname = disk.lsblk(device)['KNAME']
-    mapping = 'ceph-{}-{}-{}-dmcrypt'.format(fsid, kname, device_type)
+    mapping = 'stone-{}-{}-{}-dmcrypt'.format(fsid, kname, device_type)
     # format data device
     encryption_utils.luks_format(
         key,
@@ -40,11 +40,11 @@ def prepare_bluestore(block, wal, db, secrets, osd_id, fsid, tmpfs):
     :param block: The name of the logical volume for the bluestore data
     :param wal: a regular/plain disk or logical volume, to be used for block.wal
     :param db: a regular/plain disk or logical volume, to be used for block.db
-    :param secrets: A dict with the secrets needed to create the osd (e.g. cephx)
+    :param secrets: A dict with the secrets needed to create the osd (e.g. stonex)
     :param id_: The OSD id
     :param fsid: The OSD fsid, also known as the OSD UUID
     """
-    cephx_secret = secrets.get('cephx_secret', prepare_utils.create_key())
+    stonex_secret = secrets.get('stonex_secret', prepare_utils.create_key())
 
     if secrets.get('dmcrypt_key'):
         key = secrets['dmcrypt_key']
@@ -59,11 +59,11 @@ def prepare_bluestore(block, wal, db, secrets, osd_id, fsid, tmpfs):
     # get the latest monmap
     prepare_utils.get_monmap(osd_id)
     # write the OSD keyring if it doesn't exist already
-    prepare_utils.write_keyring(osd_id, cephx_secret)
+    prepare_utils.write_keyring(osd_id, stonex_secret)
     # prepare the osd filesystem
     prepare_utils.osd_mkfs_bluestore(
         osd_id, fsid,
-        keyring=cephx_secret,
+        keyring=stonex_secret,
         wal=wal,
         db=db
     )
@@ -95,18 +95,18 @@ class Prepare(object):
             rollback_osd(self.args, self.osd_id)
             raise
         dmcrypt_log = 'dmcrypt' if args.dmcrypt else 'clear'
-        terminal.success("ceph-volume raw {} prepare successful for: {}".format(dmcrypt_log, self.args.data))
+        terminal.success("stone-volume raw {} prepare successful for: {}".format(dmcrypt_log, self.args.data))
 
 
     @decorators.needs_root
     def prepare(self):
-        secrets = {'cephx_secret': prepare_utils.create_key()}
+        secrets = {'stonex_secret': prepare_utils.create_key()}
         encrypted = 1 if self.args.dmcrypt else 0
-        cephx_lockbox_secret = '' if not encrypted else prepare_utils.create_key()
+        stonex_lockbox_secret = '' if not encrypted else prepare_utils.create_key()
 
         if encrypted:
-            secrets['dmcrypt_key'] = os.getenv('CEPH_VOLUME_DMCRYPT_SECRET')
-            secrets['cephx_lockbox_secret'] = cephx_lockbox_secret # dummy value to make `ceph osd new` not complaining
+            secrets['dmcrypt_key'] = os.getenv('STONE_VOLUME_DMCRYPT_SECRET')
+            secrets['stonex_lockbox_secret'] = stonex_lockbox_secret # dummy value to make `stone osd new` not complaining
 
         osd_fsid = system.generate_uuid()
         crush_device_class = self.args.crush_device_class
@@ -142,15 +142,15 @@ class Prepare(object):
         Once the OSD is ready, an ad-hoc systemd unit will be enabled so that
         it can later get activated and the OSD daemon can get started.
 
-            ceph-volume raw prepare --bluestore --data {device}
+            stone-volume raw prepare --bluestore --data {device}
 
         DB and WAL devices are supported.
 
-            ceph-volume raw prepare --bluestore --data {device} --block.db {device} --block.wal {device}
+            stone-volume raw prepare --bluestore --data {device} --block.db {device} --block.wal {device}
 
         """)
         parser = create_parser(
-            prog='ceph-volume raw prepare',
+            prog='stone-volume raw prepare',
             description=sub_command_help,
         )
         if not self.argv:
@@ -160,9 +160,9 @@ class Prepare(object):
         if not self.args.bluestore:
             terminal.error('must specify --bluestore (currently the only supported backend)')
             raise SystemExit(1)
-        if self.args.dmcrypt and not os.getenv('CEPH_VOLUME_DMCRYPT_SECRET'):
+        if self.args.dmcrypt and not os.getenv('STONE_VOLUME_DMCRYPT_SECRET'):
             terminal.error('encryption was requested (--dmcrypt) but environment variable ' \
-                           'CEPH_VOLUME_DMCRYPT_SECRET is not set, you must set ' \
+                           'STONE_VOLUME_DMCRYPT_SECRET is not set, you must set ' \
                            'this variable to provide a dmcrypt secret.')
             raise SystemExit(1)
 

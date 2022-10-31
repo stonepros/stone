@@ -8,14 +8,14 @@
 #include "include/Context.h"
 #include "SocketCommon.h"
 
-namespace ceph {
+namespace stone {
 namespace immutable_obj_cache {
 
 namespace {
 struct HeaderHelper {
   uint8_t v;
   uint8_t c_v;
-  ceph_le32 len;
+  stone_le32 len;
 }__attribute__((packed));
 
 inline uint8_t get_header_size() {
@@ -132,5 +132,5 @@ class ObjectCacheReadRadosData : public ObjectCacheRequest {
 ObjectCacheRequest* decode_object_cache_request(bufferlist payload_buffer);
 
 }  // namespace immutable_obj_cache
-}  // namespace ceph
+}  // namespace stone
 #endif  // STONE_CACHE_TYPES_H

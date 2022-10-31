@@ -1,5 +1,5 @@
 """
-Ceph cluster task, deployed via cephadm orchestrator
+Stone cluster task, deployed via stoneadm orchestrator
 """
 import argparse
 import configobj
@@ -13,34 +13,34 @@ import yaml
 
 from io import BytesIO, StringIO
 from tarfile import ReadError
-from tasks.ceph_manager import CephManager
+from tasks.stone_manager import StoneManager
 from teuthology import misc as teuthology
 from teuthology import contextutil
 from teuthology.orchestra import run
 from teuthology.orchestra.daemon import DaemonGroup
 from teuthology.config import config as teuth_config
 
-# these items we use from ceph.py should probably eventually move elsewhere
-from tasks.ceph import get_mons, healthy
+# these items we use from stone.py should probably eventually move elsewhere
+from tasks.stone import get_mons, healthy
 from tasks.vip import subst_vip
 
-CEPH_ROLE_TYPES = ['mon', 'mgr', 'osd', 'mds', 'rgw', 'prometheus']
+STONE_ROLE_TYPES = ['mon', 'mgr', 'osd', 'mds', 'rgw', 'prometheus']
 
 log = logging.getLogger(__name__)
 
 
-def _shell(ctx, cluster_name, remote, args, extra_cephadm_args=[], **kwargs):
+def _shell(ctx, cluster_name, remote, args, extra_stoneadm_args=[], **kwargs):
     teuthology.get_testdir(ctx)
     return remote.run(
         args=[
             'sudo',
-            ctx.cephadm,
-            '--image', ctx.ceph[cluster_name].image,
+            ctx.stoneadm,
+            '--image', ctx.stone[cluster_name].image,
             'shell',
-            '-c', '/etc/ceph/{}.conf'.format(cluster_name),
-            '-k', '/etc/ceph/{}.client.admin.keyring'.format(cluster_name),
-            '--fsid', ctx.ceph[cluster_name].fsid,
-            ] + extra_cephadm_args + [
+            '-c', '/etc/stonepros/{}.conf'.format(cluster_name),
+            '-k', '/etc/stonepros/{}.client.admin.keyring'.format(cluster_name),
+            '--fsid', ctx.stone[cluster_name].fsid,
+            ] + extra_stoneadm_args + [
             '--',
             ] + args,
         **kwargs
@@ -50,11 +50,11 @@ def _shell(ctx, cluster_name, remote, args, extra_cephadm_args=[], **kwargs):
 def build_initial_config(ctx, config):
     cluster_name = config['cluster']
 
-    path = os.path.join(os.path.dirname(__file__), 'cephadm.conf')
+    path = os.path.join(os.path.dirname(__file__), 'stoneadm.conf')
     conf = configobj.ConfigObj(path, file_error=True)
 
     conf.setdefault('global', {})
-    conf['global']['fsid'] = ctx.ceph[cluster_name].fsid
+    conf['global']['fsid'] = ctx.stone[cluster_name].fsid
 
     # overrides
     for section, keys in config.get('conf',{}).items():
@@ -87,7 +87,7 @@ def update_archive_setting(ctx, key, value):
 def normalize_hostnames(ctx):
     """
     Ensure we have short hostnames throughout, for consistency between
-    remote.shortname and socket.gethostname() in cephadm.
+    remote.shortname and socket.gethostname() in stoneadm.
     """
     log.info('Normalizing hostnames...')
     ctx.cluster.run(args=[
@@ -103,24 +103,24 @@ def normalize_hostnames(ctx):
 
 
 @contextlib.contextmanager
-def download_cephadm(ctx, config, ref):
+def download_stoneadm(ctx, config, ref):
     cluster_name = config['cluster']
 
-    if config.get('cephadm_mode') != 'cephadm-package':
-        ref = config.get('cephadm_branch', ref)
-        git_url = config.get('cephadm_git_url', teuth_config.get_ceph_git_url())
-        log.info('Downloading cephadm (repo %s ref %s)...' % (git_url, ref))
+    if config.get('stoneadm_mode') != 'stoneadm-package':
+        ref = config.get('stoneadm_branch', ref)
+        git_url = config.get('stoneadm_git_url', teuth_config.get_stone_git_url())
+        log.info('Downloading stoneadm (repo %s ref %s)...' % (git_url, ref))
         if ctx.config.get('redhat'):
-            log.info("Install cephadm using RPM")
-            # cephadm already installed from redhat.install task
+            log.info("Install stoneadm using RPM")
+            # stoneadm already installed from redhat.install task
             ctx.cluster.run(
                 args=[
                     'cp',
-                    run.Raw('$(which cephadm)'),
-                    ctx.cephadm,
+                    run.Raw('$(which stoneadm)'),
+                    ctx.stoneadm,
                     run.Raw('&&'),
                     'ls', '-l',
-                    ctx.cephadm,
+                    ctx.stoneadm,
                 ]
             )
         elif git_url.startswith('https://github.com/'):
@@ -130,12 +130,12 @@ def download_cephadm(ctx, config, ref):
             ctx.cluster.run(
                 args=[
                     'curl', '--silent',
-                    'https://raw.githubusercontent.com/' + rest + '/' + ref + '/src/cephadm/cephadm',
+                    'https://raw.githubusercontent.com/' + rest + '/' + ref + '/src/stoneadm/stoneadm',
                     run.Raw('>'),
-                    ctx.cephadm,
+                    ctx.stoneadm,
                     run.Raw('&&'),
                     'ls', '-l',
-                    ctx.cephadm,
+                    ctx.stoneadm,
                 ],
             )
         else:
@@ -144,22 +144,22 @@ def download_cephadm(ctx, config, ref):
                     'git', 'archive',
                     '--remote=' + git_url,
                     ref,
-                    'src/cephadm/cephadm',
+                    'src/stoneadm/stoneadm',
                     run.Raw('|'),
-                    'tar', '-xO', 'src/cephadm/cephadm',
+                    'tar', '-xO', 'src/stoneadm/stoneadm',
                     run.Raw('>'),
-                    ctx.cephadm,
+                    ctx.stoneadm,
                 ],
             )
         # sanity-check the resulting file and set executable bit
-        cephadm_file_size = '$(stat -c%s {})'.format(ctx.cephadm)
+        stoneadm_file_size = '$(stat -c%s {})'.format(ctx.stoneadm)
         ctx.cluster.run(
             args=[
-                'test', '-s', ctx.cephadm,
+                'test', '-s', ctx.stoneadm,
                 run.Raw('&&'),
-                'test', run.Raw(cephadm_file_size), "-gt", run.Raw('1000'),
+                'test', run.Raw(stoneadm_file_size), "-gt", run.Raw('1000'),
                 run.Raw('&&'),
-                'chmod', '+x', ctx.cephadm,
+                'chmod', '+x', ctx.stoneadm,
             ],
         )
 
@@ -169,29 +169,29 @@ def download_cephadm(ctx, config, ref):
         log.info('Removing cluster...')
         ctx.cluster.run(args=[
             'sudo',
-            ctx.cephadm,
+            ctx.stoneadm,
             'rm-cluster',
-            '--fsid', ctx.ceph[cluster_name].fsid,
+            '--fsid', ctx.stone[cluster_name].fsid,
             '--force',
         ])
 
-        if config.get('cephadm_mode') == 'root':
-            log.info('Removing cephadm ...')
+        if config.get('stoneadm_mode') == 'root':
+            log.info('Removing stoneadm ...')
             ctx.cluster.run(
                 args=[
                     'rm',
                     '-rf',
-                    ctx.cephadm,
+                    ctx.stoneadm,
                 ],
             )
 
 
 @contextlib.contextmanager
-def ceph_log(ctx, config):
+def stone_log(ctx, config):
     cluster_name = config['cluster']
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
-    update_archive_setting(ctx, 'log', '/var/log/ceph')
+    update_archive_setting(ctx, 'log', '/var/log/stone')
 
 
     try:
@@ -204,9 +204,9 @@ def ceph_log(ctx, config):
 
     finally:
         log.info('Checking cluster log for badness...')
-        def first_in_ceph_log(pattern, excludes):
+        def first_in_stone_log(pattern, excludes):
             """
-            Find the first occurrence of the pattern specified in the Ceph log,
+            Find the first occurrence of the pattern specified in the Stone log,
             Returns None if none found.
 
             :param pattern: Pattern scanned for.
@@ -216,7 +216,7 @@ def ceph_log(ctx, config):
             args = [
                 'sudo',
                 'egrep', pattern,
-                '/var/log/ceph/{fsid}/ceph.log'.format(
+                '/var/log/stonepros/{fsid}/stone.log'.format(
                     fsid=fsid),
             ]
             if excludes:
@@ -225,7 +225,7 @@ def ceph_log(ctx, config):
             args.extend([
                 run.Raw('|'), 'head', '-n', '1',
             ])
-            r = ctx.ceph[cluster_name].bootstrap_remote.run(
+            r = ctx.stone[cluster_name].bootstrap_remote.run(
                 stdout=StringIO(),
                 args=args,
             )
@@ -234,14 +234,14 @@ def ceph_log(ctx, config):
                 return stdout
             return None
 
-        if first_in_ceph_log('\[ERR\]|\[WRN\]|\[SEC\]',
+        if first_in_stone_log('\[ERR\]|\[WRN\]|\[SEC\]',
                              config.get('log-ignorelist')) is not None:
             log.warning('Found errors (ERR|WRN|SEC) in cluster log')
             ctx.summary['success'] = False
             # use the most severe problem as the failure reason
             if 'failure_reason' not in ctx.summary:
                 for pattern in ['\[SEC\]', '\[ERR\]', '\[WRN\]']:
-                    match = first_in_ceph_log(pattern, config['log-ignorelist'])
+                    match = first_in_stone_log(pattern, config['log-ignorelist'])
                     if match is not None:
                         ctx.summary['failure_reason'] = \
                             '"{match}" in cluster log'.format(
@@ -258,8 +258,8 @@ def ceph_log(ctx, config):
                     args=[
                         'sudo',
                         'find',
-                        '/var/log/ceph',   # all logs, not just for the cluster
-                        '/var/log/rbd-target-api', # ceph-iscsi
+                        '/var/log/stone',   # all logs, not just for the cluster
+                        '/var/log/rbd-target-api', # stone-iscsi
                         '-name',
                         '*.log',
                         '-print0',
@@ -289,21 +289,21 @@ def ceph_log(ctx, config):
                 except OSError:
                     pass
                 try:
-                    teuthology.pull_directory(remote, '/var/log/ceph',  # everything
+                    teuthology.pull_directory(remote, '/var/log/stone',  # everything
                                               os.path.join(sub, 'log'))
                 except ReadError:
                     pass
 
 
 @contextlib.contextmanager
-def ceph_crash(ctx, config):
+def stone_crash(ctx, config):
     """
-    Gather crash dumps from /var/lib/ceph/$fsid/crash
+    Gather crash dumps from /var/lib/stonepros/$fsid/crash
     """
     cluster_name = config['cluster']
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
-    update_archive_setting(ctx, 'crash', '/var/lib/ceph/crash')
+    update_archive_setting(ctx, 'crash', '/var/lib/stonepros/crash')
 
     try:
         yield
@@ -324,34 +324,34 @@ def ceph_crash(ctx, config):
                     pass
                 try:
                     teuthology.pull_directory(remote,
-                                              '/var/lib/ceph/%s/crash' % fsid,
+                                              '/var/lib/stonepros/%s/crash' % fsid,
                                               os.path.join(sub, 'crash'))
                 except ReadError:
                     pass
 
 
 @contextlib.contextmanager
-def ceph_bootstrap(ctx, config):
+def stone_bootstrap(ctx, config):
     """
-    Bootstrap ceph cluster.
+    Bootstrap stone cluster.
 
     :param ctx: the argparse.Namespace object
     :param config: the config dict
     """
     cluster_name = config['cluster']
     testdir = teuthology.get_testdir(ctx)
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
-    bootstrap_remote = ctx.ceph[cluster_name].bootstrap_remote
-    first_mon = ctx.ceph[cluster_name].first_mon
-    first_mon_role = ctx.ceph[cluster_name].first_mon_role
-    mons = ctx.ceph[cluster_name].mons
+    bootstrap_remote = ctx.stone[cluster_name].bootstrap_remote
+    first_mon = ctx.stone[cluster_name].first_mon
+    first_mon_role = ctx.stone[cluster_name].first_mon_role
+    mons = ctx.stone[cluster_name].mons
 
     ctx.cluster.run(args=[
-        'sudo', 'mkdir', '-p', '/etc/ceph',
+        'sudo', 'mkdir', '-p', '/etc/stone',
         ]);
     ctx.cluster.run(args=[
-        'sudo', 'chmod', '777', '/etc/ceph',
+        'sudo', 'chmod', '777', '/etc/stone',
         ]);
     try:
         # write seed config
@@ -363,7 +363,7 @@ def ceph_bootstrap(ctx, config):
             path='{}/seed.{}.conf'.format(testdir, cluster_name),
             data=conf_fp.getvalue())
         log.debug('Final config:\n' + conf_fp.getvalue().decode())
-        ctx.ceph[cluster_name].conf = seed_config
+        ctx.stone[cluster_name].conf = seed_config
 
         # register initial daemons
         ctx.daemons.register_daemon(
@@ -374,8 +374,8 @@ def ceph_bootstrap(ctx, config):
             wait=False,
             started=True,
         )
-        if not ctx.ceph[cluster_name].roleless:
-            first_mgr = ctx.ceph[cluster_name].first_mgr
+        if not ctx.stone[cluster_name].roleless:
+            first_mgr = ctx.stone[cluster_name].first_mgr
             ctx.daemons.register_daemon(
                 bootstrap_remote, 'mgr', first_mgr,
                 cluster=cluster_name,
@@ -389,15 +389,15 @@ def ceph_bootstrap(ctx, config):
         log.info('Bootstrapping...')
         cmd = [
             'sudo',
-            ctx.cephadm,
-            '--image', ctx.ceph[cluster_name].image,
+            ctx.stoneadm,
+            '--image', ctx.stone[cluster_name].image,
             '-v',
             'bootstrap',
             '--fsid', fsid,
             '--config', '{}/seed.{}.conf'.format(testdir, cluster_name),
-            '--output-config', '/etc/ceph/{}.conf'.format(cluster_name),
+            '--output-config', '/etc/stonepros/{}.conf'.format(cluster_name),
             '--output-keyring',
-            '/etc/ceph/{}.client.admin.keyring'.format(cluster_name),
+            '/etc/stonepros/{}.client.admin.keyring'.format(cluster_name),
             '--output-pub-ssh-key', '{}/{}.pub'.format(testdir, cluster_name),
         ]
 
@@ -409,7 +409,7 @@ def ceph_bootstrap(ctx, config):
                 "--registry-password", registry['password'],
             ]
 
-        if not ctx.ceph[cluster_name].roleless:
+        if not ctx.stone[cluster_name].roleless:
             cmd += [
                 '--mon-id', first_mon,
                 '--mgr-id', first_mgr,
@@ -433,20 +433,20 @@ def ceph_bootstrap(ctx, config):
         cmd += [
             run.Raw('&&'),
             'sudo', 'chmod', '+r',
-            '/etc/ceph/{}.client.admin.keyring'.format(cluster_name),
+            '/etc/stonepros/{}.client.admin.keyring'.format(cluster_name),
         ]
         bootstrap_remote.run(args=cmd)
 
         # fetch keys and configs
         log.info('Fetching config...')
-        ctx.ceph[cluster_name].config_file = \
-            bootstrap_remote.read_file(f'/etc/ceph/{cluster_name}.conf')
+        ctx.stone[cluster_name].config_file = \
+            bootstrap_remote.read_file(f'/etc/stonepros/{cluster_name}.conf')
         log.info('Fetching client.admin keyring...')
-        ctx.ceph[cluster_name].admin_keyring = \
-            bootstrap_remote.read_file(f'/etc/ceph/{cluster_name}.client.admin.keyring')
+        ctx.stone[cluster_name].admin_keyring = \
+            bootstrap_remote.read_file(f'/etc/stonepros/{cluster_name}.client.admin.keyring')
         log.info('Fetching mon keyring...')
-        ctx.ceph[cluster_name].mon_keyring = \
-            bootstrap_remote.read_file(f'/var/lib/ceph/{fsid}/mon.{first_mon}/keyring', sudo=True)
+        ctx.stone[cluster_name].mon_keyring = \
+            bootstrap_remote.read_file(f'/var/lib/stonepros/{fsid}/mon.{first_mon}/keyring', sudo=True)
 
         # fetch ssh key, distribute to additional nodes
         log.info('Fetching pub ssh key...')
@@ -467,12 +467,12 @@ def ceph_bootstrap(ctx, config):
         # set options
         if config.get('allow_ptrace', True):
             _shell(ctx, cluster_name, bootstrap_remote,
-                   ['ceph', 'config', 'set', 'mgr', 'mgr/cephadm/allow_ptrace', 'true'])
+                   ['stone', 'config', 'set', 'mgr', 'mgr/stoneadm/allow_ptrace', 'true'])
 
         if not config.get('avoid_pacific_features', False):
             log.info('Distributing conf and client.admin keyring to all hosts + 0755')
             _shell(ctx, cluster_name, bootstrap_remote,
-                   ['ceph', 'orch', 'client-keyring', 'set', 'client.admin',
+                   ['stone', 'orch', 'client-keyring', 'set', 'client.admin',
                     '*', '--mode', '0755'],
                    check_status=False)
 
@@ -482,22 +482,22 @@ def ceph_bootstrap(ctx, config):
                 continue
 
             # note: this may be redundant (see above), but it avoids
-            # us having to wait for cephadm to do it.
+            # us having to wait for stoneadm to do it.
             log.info('Writing (initial) conf and keyring to %s' % remote.shortname)
             remote.write_file(
-                path='/etc/ceph/{}.conf'.format(cluster_name),
-                data=ctx.ceph[cluster_name].config_file)
+                path='/etc/stonepros/{}.conf'.format(cluster_name),
+                data=ctx.stone[cluster_name].config_file)
             remote.write_file(
-                path='/etc/ceph/{}.client.admin.keyring'.format(cluster_name),
-                data=ctx.ceph[cluster_name].admin_keyring)
+                path='/etc/stonepros/{}.client.admin.keyring'.format(cluster_name),
+                data=ctx.stone[cluster_name].admin_keyring)
 
             log.info('Adding host %s to orchestrator...' % remote.shortname)
             _shell(ctx, cluster_name, remote, [
-                'ceph', 'orch', 'host', 'add',
+                'stone', 'orch', 'host', 'add',
                 remote.shortname
             ])
             r = _shell(ctx, cluster_name, remote,
-                       ['ceph', 'orch', 'host', 'ls', '--format=json'],
+                       ['stone', 'orch', 'host', 'ls', '--format=json'],
                        stdout=StringIO())
             hosts = [node['hostname'] for node in json.loads(r.stdout.getvalue())]
             assert remote.shortname in hosts
@@ -505,7 +505,7 @@ def ceph_bootstrap(ctx, config):
         yield
 
     finally:
-        log.info('Cleaning up testdir ceph.* files...')
+        log.info('Cleaning up testdir stone.* files...')
         ctx.cluster.run(args=[
             'rm', '-f',
             '{}/seed.{}.conf'.format(testdir, cluster_name),
@@ -515,10 +515,10 @@ def ceph_bootstrap(ctx, config):
         log.info('Stopping all daemons...')
 
         # this doesn't block until they are all stopped...
-        #ctx.cluster.run(args=['sudo', 'systemctl', 'stop', 'ceph.target'])
+        #ctx.cluster.run(args=['sudo', 'systemctl', 'stop', 'stone.target'])
 
         # stop the daemons we know
-        for role in ctx.daemons.resolve_role_list(None, CEPH_ROLE_TYPES, True):
+        for role in ctx.daemons.resolve_role_list(None, STONE_ROLE_TYPES, True):
             cluster, type_, id_ = teuthology.split_role(role)
             try:
                 ctx.daemons.get_daemon(type_, id_, cluster).stop()
@@ -530,48 +530,48 @@ def ceph_bootstrap(ctx, config):
         ctx.cluster.run(
             args=[
                 'sudo',
-                ctx.cephadm,
+                ctx.stoneadm,
                 'rm-cluster',
                 '--fsid', fsid,
                 '--force',
                 '--keep-logs',
             ],
-            check_status=False,  # may fail if upgrading from old cephadm
+            check_status=False,  # may fail if upgrading from old stoneadm
         )
 
-        # clean up /etc/ceph
+        # clean up /etc/stone
         ctx.cluster.run(args=[
             'sudo', 'rm', '-f',
-            '/etc/ceph/{}.conf'.format(cluster_name),
-            '/etc/ceph/{}.client.admin.keyring'.format(cluster_name),
+            '/etc/stonepros/{}.conf'.format(cluster_name),
+            '/etc/stonepros/{}.client.admin.keyring'.format(cluster_name),
         ])
 
 
 @contextlib.contextmanager
-def ceph_mons(ctx, config):
+def stone_mons(ctx, config):
     """
     Deploy any additional mons
     """
     cluster_name = config['cluster']
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
     try:
         daemons = {}
         if config.get('add_mons_via_daemon_add'):
             # This is the old way of adding mons that works with the (early) octopus
-            # cephadm scheduler.
+            # stoneadm scheduler.
             num_mons = 1
             for remote, roles in ctx.cluster.remotes.items():
                 for mon in [r for r in roles
                             if teuthology.is_type('mon', cluster_name)(r)]:
                     c_, _, id_ = teuthology.split_role(mon)
-                    if c_ == cluster_name and id_ == ctx.ceph[cluster_name].first_mon:
+                    if c_ == cluster_name and id_ == ctx.stone[cluster_name].first_mon:
                         continue
                     log.info('Adding %s on %s' % (mon, remote.shortname))
                     num_mons += 1
                     _shell(ctx, cluster_name, remote, [
-                        'ceph', 'orch', 'daemon', 'add', 'mon',
-                        remote.shortname + ':' + ctx.ceph[cluster_name].mons[mon] + '=' + id_,
+                        'stone', 'orch', 'daemon', 'add', 'mon',
+                        remote.shortname + ':' + ctx.stone[cluster_name].mons[mon] + '=' + id_,
                     ])
                     ctx.daemons.register_daemon(
                         remote, 'mon', id_,
@@ -591,7 +591,7 @@ def ceph_mons(ctx, config):
                                 cluster_name=cluster_name,
                                 remote=remote,
                                 args=[
-                                    'ceph', 'mon', 'dump', '-f', 'json',
+                                    'stone', 'mon', 'dump', '-f', 'json',
                                 ],
                                 stdout=StringIO(),
                             )
@@ -606,14 +606,14 @@ def ceph_mons(ctx, config):
                     c_, _, id_ = teuthology.split_role(mon)
                     log.info('Adding %s on %s' % (mon, remote.shortname))
                     nodes.append(remote.shortname
-                                 + ':' + ctx.ceph[cluster_name].mons[mon]
+                                 + ':' + ctx.stone[cluster_name].mons[mon]
                                  + '=' + id_)
-                    if c_ == cluster_name and id_ == ctx.ceph[cluster_name].first_mon:
+                    if c_ == cluster_name and id_ == ctx.stone[cluster_name].first_mon:
                         continue
                     daemons[mon] = (remote, id_)
 
             _shell(ctx, cluster_name, remote, [
-                'ceph', 'orch', 'apply', 'mon',
+                'stone', 'orch', 'apply', 'mon',
                 str(len(nodes)) + ';' + ';'.join(nodes)]
                    )
             for mgr, i in daemons.items():
@@ -635,7 +635,7 @@ def ceph_mons(ctx, config):
                         cluster_name=cluster_name,
                         remote=remote,
                         args=[
-                            'ceph', 'mon', 'dump', '-f', 'json',
+                            'stone', 'mon', 'dump', '-f', 'json',
                         ],
                         stdout=StringIO(),
                     )
@@ -643,19 +643,19 @@ def ceph_mons(ctx, config):
                     if len(j['mons']) == len(nodes):
                         break
 
-        # refresh our (final) ceph.conf file
-        bootstrap_remote = ctx.ceph[cluster_name].bootstrap_remote
-        log.info('Generating final ceph.conf file...')
+        # refresh our (final) stone.conf file
+        bootstrap_remote = ctx.stone[cluster_name].bootstrap_remote
+        log.info('Generating final stone.conf file...')
         r = _shell(
             ctx=ctx,
             cluster_name=cluster_name,
             remote=bootstrap_remote,
             args=[
-                'ceph', 'config', 'generate-minimal-conf',
+                'stone', 'config', 'generate-minimal-conf',
             ],
             stdout=StringIO(),
         )
-        ctx.ceph[cluster_name].config_file = r.stdout.getvalue()
+        ctx.stone[cluster_name].config_file = r.stdout.getvalue()
 
         yield
 
@@ -664,12 +664,12 @@ def ceph_mons(ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_mgrs(ctx, config):
+def stone_mgrs(ctx, config):
     """
     Deploy any additional mgrs
     """
     cluster_name = config['cluster']
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
     try:
         nodes = []
@@ -680,12 +680,12 @@ def ceph_mgrs(ctx, config):
                 c_, _, id_ = teuthology.split_role(mgr)
                 log.info('Adding %s on %s' % (mgr, remote.shortname))
                 nodes.append(remote.shortname + '=' + id_)
-                if c_ == cluster_name and id_ == ctx.ceph[cluster_name].first_mgr:
+                if c_ == cluster_name and id_ == ctx.stone[cluster_name].first_mgr:
                     continue
                 daemons[mgr] = (remote, id_)
         if nodes:
             _shell(ctx, cluster_name, remote, [
-                'ceph', 'orch', 'apply', 'mgr',
+                'stone', 'orch', 'apply', 'mgr',
                 str(len(nodes)) + ';' + ';'.join(nodes)]
             )
         for mgr, i in daemons.items():
@@ -706,12 +706,12 @@ def ceph_mgrs(ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_osds(ctx, config):
+def stone_osds(ctx, config):
     """
     Deploy OSDs
     """
     cluster_name = config['cluster']
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
     try:
         log.info('Deploying OSDs...')
@@ -741,9 +741,9 @@ def ceph_osds(ctx, config):
             log.info('Deploying %s on %s with %s...' % (
                 osd, remote.shortname, dev))
             _shell(ctx, cluster_name, remote, [
-                'ceph-volume', 'lvm', 'zap', dev])
+                'stone-volume', 'lvm', 'zap', dev])
             _shell(ctx, cluster_name, remote, [
-                'ceph', 'orch', 'daemon', 'add', 'osd',
+                'stone', 'orch', 'daemon', 'add', 'osd',
                 remote.shortname + ':' + short_dev
             ])
             ctx.daemons.register_daemon(
@@ -758,7 +758,7 @@ def ceph_osds(ctx, config):
 
         if cur == 0:
             _shell(ctx, cluster_name, remote, [
-                'ceph', 'orch', 'apply', 'osd', '--all-available-devices',
+                'stone', 'orch', 'apply', 'osd', '--all-available-devices',
             ])
             # expect the number of scratch devs
             num_osds = sum(map(len, devs_by_remote.values()))
@@ -770,8 +770,8 @@ def ceph_osds(ctx, config):
         log.info(f'Waiting for {num_osds} OSDs to come up...')
         with contextutil.safe_while(sleep=1, tries=120) as proceed:
             while proceed():
-                p = _shell(ctx, cluster_name, ctx.ceph[cluster_name].bootstrap_remote,
-                           ['ceph', 'osd', 'stat', '-f', 'json'], stdout=StringIO())
+                p = _shell(ctx, cluster_name, ctx.stone[cluster_name].bootstrap_remote,
+                           ['stone', 'osd', 'stat', '-f', 'json'], stdout=StringIO())
                 j = json.loads(p.stdout.getvalue())
                 if int(j.get('num_up_osds', 0)) == num_osds:
                     break;
@@ -782,12 +782,12 @@ def ceph_osds(ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_mdss(ctx, config):
+def stone_mdss(ctx, config):
     """
     Deploy MDSss
     """
     cluster_name = config['cluster']
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
     nodes = []
     daemons = {}
@@ -800,7 +800,7 @@ def ceph_mdss(ctx, config):
             daemons[role] = (remote, id_)
     if nodes:
         _shell(ctx, cluster_name, remote, [
-            'ceph', 'orch', 'apply', 'mds',
+            'stone', 'orch', 'apply', 'mds',
             'all',
             str(len(nodes)) + ';' + ';'.join(nodes)]
         )
@@ -819,12 +819,12 @@ def ceph_mdss(ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_monitoring(daemon_type, ctx, config):
+def stone_monitoring(daemon_type, ctx, config):
     """
     Deploy prometheus, node-exporter, etc.
     """
     cluster_name = config['cluster']
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
     nodes = []
     daemons = {}
@@ -837,7 +837,7 @@ def ceph_monitoring(daemon_type, ctx, config):
             daemons[role] = (remote, id_)
     if nodes:
         _shell(ctx, cluster_name, remote, [
-            'ceph', 'orch', 'apply', daemon_type,
+            'stone', 'orch', 'apply', daemon_type,
             str(len(nodes)) + ';' + ';'.join(nodes)]
         )
     for role, i in daemons.items():
@@ -855,12 +855,12 @@ def ceph_monitoring(daemon_type, ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_rgw(ctx, config):
+def stone_rgw(ctx, config):
     """
     Deploy rgw
     """
     cluster_name = config['cluster']
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
     nodes = {}
     daemons = {}
@@ -877,7 +877,7 @@ def ceph_rgw(ctx, config):
 
     for svc, nodes in nodes.items():
         _shell(ctx, cluster_name, remote, [
-            'ceph', 'orch', 'apply', 'rgw', svc,
+            'stone', 'orch', 'apply', 'rgw', svc,
              '--placement',
              str(len(nodes)) + ';' + ';'.join(nodes)]
         )
@@ -896,12 +896,12 @@ def ceph_rgw(ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_iscsi(ctx, config):
+def stone_iscsi(ctx, config):
     """
     Deploy iSCSIs
     """
     cluster_name = config['cluster']
-    fsid = ctx.ceph[cluster_name].fsid
+    fsid = ctx.stone[cluster_name].fsid
 
     nodes = []
     daemons = {}
@@ -914,20 +914,20 @@ def ceph_iscsi(ctx, config):
             daemons[role] = (remote, id_)
     if nodes:
         poolname = 'iscsi'
-        # ceph osd pool create iscsi 3 3 replicated
+        # stone osd pool create iscsi 3 3 replicated
         _shell(ctx, cluster_name, remote, [
-            'ceph', 'osd', 'pool', 'create',
+            'stone', 'osd', 'pool', 'create',
             poolname, '3', '3', 'replicated']
         )
 
         _shell(ctx, cluster_name, remote, [
-            'ceph', 'osd', 'pool', 'application', 'enable',
+            'stone', 'osd', 'pool', 'application', 'enable',
             poolname, 'rbd']
         )
 
-        # ceph orch apply iscsi iscsi user password
+        # stone orch apply iscsi iscsi user password
         _shell(ctx, cluster_name, remote, [
-            'ceph', 'orch', 'apply', 'iscsi',
+            'stone', 'orch', 'apply', 'iscsi',
             poolname, 'user', 'password',
             '--placement', str(len(nodes)) + ';' + ';'.join(nodes)]
         )
@@ -946,7 +946,7 @@ def ceph_iscsi(ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_clients(ctx, config):
+def stone_clients(ctx, config):
     cluster_name = config['cluster']
 
     log.info('Setting up client nodes...')
@@ -954,15 +954,15 @@ def ceph_clients(ctx, config):
     for remote, roles_for_host in clients.remotes.items():
         for role in teuthology.cluster_roles_of_type(roles_for_host, 'client',
                                                      cluster_name):
-            name = teuthology.ceph_role(role)
-            client_keyring = '/etc/ceph/{0}.{1}.keyring'.format(cluster_name,
+            name = teuthology.stone_role(role)
+            client_keyring = '/etc/stonepros/{0}.{1}.keyring'.format(cluster_name,
                                                                 name)
             r = _shell(
                 ctx=ctx,
                 cluster_name=cluster_name,
                 remote=remote,
                 args=[
-                    'ceph', 'auth',
+                    'stone', 'auth',
                     'get-or-create', name,
                     'mon', 'allow *',
                     'osd', 'allow *',
@@ -977,7 +977,7 @@ def ceph_clients(ctx, config):
 
 
 @contextlib.contextmanager
-def ceph_initial():
+def stone_initial():
     try:
         yield
     finally:
@@ -988,17 +988,17 @@ def ceph_initial():
 @contextlib.contextmanager
 def stop(ctx, config):
     """
-    Stop ceph daemons
+    Stop stone daemons
 
     For example::
       tasks:
-      - ceph.stop: [mds.*]
+      - stone.stop: [mds.*]
 
       tasks:
-      - ceph.stop: [osd.0, osd.2]
+      - stone.stop: [osd.0, osd.2]
 
       tasks:
-      - ceph.stop:
+      - stone.stop:
           daemons: [osd.0, osd.2]
 
     """
@@ -1008,7 +1008,7 @@ def stop(ctx, config):
         config = {'daemons': config}
 
     daemons = ctx.daemons.resolve_role_list(
-        config.get('daemons', None), CEPH_ROLE_TYPES, True)
+        config.get('daemons', None), STONE_ROLE_TYPES, True)
     clusters = set()
 
     for role in daemons:
@@ -1017,8 +1017,8 @@ def stop(ctx, config):
         clusters.add(cluster)
 
 #    for cluster in clusters:
-#        ctx.ceph[cluster].watchdog.stop()
-#        ctx.ceph[cluster].watchdog.join()
+#        ctx.stone[cluster].watchdog.stop()
+#        ctx.stone[cluster].watchdog.join()
 
     yield
 
@@ -1027,7 +1027,7 @@ def shell(ctx, config):
     """
     Execute (shell) commands
     """
-    cluster_name = config.get('cluster', 'ceph')
+    cluster_name = config.get('cluster', 'stone')
 
     args = []
     for k in config.pop('env', []):
@@ -1051,12 +1051,12 @@ def shell(ctx, config):
             for c in cmd:
                 _shell(ctx, cluster_name, remote,
                        ['bash', '-c', subst_vip(ctx, c)],
-                       extra_cephadm_args=args)
+                       extra_stoneadm_args=args)
         else:
             assert isinstance(cmd, str)
             _shell(ctx, cluster_name, remote,
                    ['bash', '-ex', '-c', subst_vip(ctx, cmd)],
-                   extra_cephadm_args=args)
+                   extra_stoneadm_args=args)
 
 
 def apply(ctx, config):
@@ -1064,7 +1064,7 @@ def apply(ctx, config):
     Apply spec
     
       tasks:
-        - cephadm.apply:
+        - stoneadm.apply:
             specs:
             - service_type: rgw
               service_id: foo
@@ -1078,15 +1078,15 @@ def apply(ctx, config):
                 realm: asdf
 
     """
-    cluster_name = config.get('cluster', 'ceph')
+    cluster_name = config.get('cluster', 'stone')
 
     specs = config.get('specs', [])
     y = subst_vip(ctx, yaml.dump_all(specs))
 
     log.info(f'Applying spec(s):\n{y}')
     _shell(
-        ctx, cluster_name, ctx.ceph[cluster_name].bootstrap_remote,
-        ['ceph', 'orch', 'apply', '-i', '-'],
+        ctx, cluster_name, ctx.stone[cluster_name].bootstrap_remote,
+        ['stone', 'orch', 'apply', '-i', '-'],
         stdin=y,
     )
 
@@ -1096,12 +1096,12 @@ def wait_for_service(ctx, config):
     Wait for a service to be fully started
 
       tasks:
-        - cephadm.wait_for_service:
+        - stoneadm.wait_for_service:
             service: rgw.foo
             timeout: 60    # defaults to 300
 
     """
-    cluster_name = config.get('cluster', 'ceph')
+    cluster_name = config.get('cluster', 'stone')
     timeout = config.get('timeout', 300)
     service = config.get('service')
     assert service
@@ -1114,9 +1114,9 @@ def wait_for_service(ctx, config):
             r = _shell(
                 ctx=ctx,
                 cluster_name=cluster_name,
-                remote=ctx.ceph[cluster_name].bootstrap_remote,
+                remote=ctx.stone[cluster_name].bootstrap_remote,
                 args=[
-                    'ceph', 'orch', 'ls', '-f', 'json',
+                    'stone', 'orch', 'ls', '-f', 'json',
                 ],
                 stdout=StringIO(),
             )
@@ -1147,7 +1147,7 @@ def tweaked_option(ctx, config):
     # we can complicate this when necessary
     options = ['mon-health-to-clog']
     type_, id_ = 'mon', '*'
-    cluster = config.get('cluster', 'ceph')
+    cluster = config.get('cluster', 'stone')
     manager = ctx.managers[cluster]
     if id_ == '*':
         get_from = next(teuthology.all_roles_of_type(ctx.cluster, type_))
@@ -1170,20 +1170,20 @@ def tweaked_option(ctx, config):
 @contextlib.contextmanager
 def restart(ctx, config):
     """
-   restart ceph daemons
+   restart stone daemons
 
    For example::
       tasks:
-      - ceph.restart: [all]
+      - stone.restart: [all]
 
    For example::
       tasks:
-      - ceph.restart: [osd.0, mon.1, mds.*]
+      - stone.restart: [osd.0, mon.1, mds.*]
 
    or::
 
       tasks:
-      - ceph.restart:
+      - stone.restart:
           daemons: [osd.0, mon.1]
           wait-for-healthy: false
           wait-for-osds-up: true
@@ -1197,7 +1197,7 @@ def restart(ctx, config):
         config = {'daemons': config}
 
     daemons = ctx.daemons.resolve_role_list(
-        config.get('daemons', None), CEPH_ROLE_TYPES, True)
+        config.get('daemons', None), STONE_ROLE_TYPES, True)
     clusters = set()
 
     log.info('daemons %s' % daemons)
@@ -1230,20 +1230,20 @@ def distribute_config_and_admin_keyring(ctx, config):
     log.info('Distributing (final) config and client.admin keyring...')
     for remote, roles in ctx.cluster.remotes.items():
         remote.write_file(
-            '/etc/ceph/{}.conf'.format(cluster_name),
-            ctx.ceph[cluster_name].config_file,
+            '/etc/stonepros/{}.conf'.format(cluster_name),
+            ctx.stone[cluster_name].config_file,
             sudo=True)
         remote.write_file(
-            path='/etc/ceph/{}.client.admin.keyring'.format(cluster_name),
-            data=ctx.ceph[cluster_name].admin_keyring,
+            path='/etc/stonepros/{}.client.admin.keyring'.format(cluster_name),
+            data=ctx.stone[cluster_name].admin_keyring,
             sudo=True)
     try:
         yield
     finally:
         ctx.cluster.run(args=[
             'sudo', 'rm', '-f',
-            '/etc/ceph/{}.conf'.format(cluster_name),
-            '/etc/ceph/{}.client.admin.keyring'.format(cluster_name),
+            '/etc/stonepros/{}.conf'.format(cluster_name),
+            '/etc/stonepros/{}.client.admin.keyring'.format(cluster_name),
         ])
 
 
@@ -1253,8 +1253,8 @@ def crush_setup(ctx, config):
 
     profile = config.get('crush_tunables', 'default')
     log.info('Setting crush tunables to %s', profile)
-    _shell(ctx, cluster_name, ctx.ceph[cluster_name].bootstrap_remote,
-        args=['ceph', 'osd', 'crush', 'tunables', profile])
+    _shell(ctx, cluster_name, ctx.stone[cluster_name].bootstrap_remote,
+        args=['stone', 'osd', 'crush', 'tunables', profile])
     yield
 
 
@@ -1266,15 +1266,15 @@ def create_rbd_pool(ctx, config):
       teuthology.wait_until_osds_up(
           ctx,
           cluster=ctx.cluster,
-          remote=ctx.ceph[cluster_name].bootstrap_remote,
-          ceph_cluster=cluster_name,
+          remote=ctx.stone[cluster_name].bootstrap_remote,
+          stone_cluster=cluster_name,
       )
       log.info('Creating RBD pool')
-      _shell(ctx, cluster_name, ctx.ceph[cluster_name].bootstrap_remote,
-          args=['sudo', 'ceph', '--cluster', cluster_name,
+      _shell(ctx, cluster_name, ctx.stone[cluster_name].bootstrap_remote,
+          args=['sudo', 'stone', '--cluster', cluster_name,
                 'osd', 'pool', 'create', 'rbd', '8'])
-      _shell(ctx, cluster_name, ctx.ceph[cluster_name].bootstrap_remote,
-          args=['sudo', 'ceph', '--cluster', cluster_name,
+      _shell(ctx, cluster_name, ctx.stone[cluster_name].bootstrap_remote,
+          args=['sudo', 'stone', '--cluster', cluster_name,
                 'osd', 'pool', 'application', 'enable',
                 'rbd', 'rbd', '--yes-i-really-mean-it'
           ])
@@ -1291,33 +1291,33 @@ def initialize_config(ctx, config):
     cluster_name = config['cluster']
     testdir = teuthology.get_testdir(ctx)
 
-    ctx.ceph[cluster_name].thrashers = []
-    # fixme: setup watchdog, ala ceph.py
+    ctx.stone[cluster_name].thrashers = []
+    # fixme: setup watchdog, ala stone.py
 
-    ctx.ceph[cluster_name].roleless = False  # see below
+    ctx.stone[cluster_name].roleless = False  # see below
 
-    first_ceph_cluster = False
+    first_stone_cluster = False
     if not hasattr(ctx, 'daemons'):
-        first_ceph_cluster = True
+        first_stone_cluster = True
 
-    # cephadm mode?
-    if 'cephadm_mode' not in config:
-        config['cephadm_mode'] = 'root'
-    assert config['cephadm_mode'] in ['root', 'cephadm-package']
-    if config['cephadm_mode'] == 'root':
-        ctx.cephadm = testdir + '/cephadm'
+    # stoneadm mode?
+    if 'stoneadm_mode' not in config:
+        config['stoneadm_mode'] = 'root'
+    assert config['stoneadm_mode'] in ['root', 'stoneadm-package']
+    if config['stoneadm_mode'] == 'root':
+        ctx.stoneadm = testdir + '/stoneadm'
     else:
-        ctx.cephadm = 'cephadm'  # in the path
+        ctx.stoneadm = 'stoneadm'  # in the path
 
-    if first_ceph_cluster:
+    if first_stone_cluster:
         # FIXME: this is global for all clusters
         ctx.daemons = DaemonGroup(
-            use_cephadm=ctx.cephadm)
+            use_stoneadm=ctx.stoneadm)
 
     # uuid
     fsid = str(uuid.uuid1())
     log.info('Cluster fsid is %s' % fsid)
-    ctx.ceph[cluster_name].fsid = fsid
+    ctx.stone[cluster_name].fsid = fsid
 
     # mon ips
     log.info('Choosing monitor IPs and ports...')
@@ -1337,27 +1337,27 @@ def initialize_config(ctx, config):
 
     roles = [role_list for (remote, role_list) in ctx.cluster.remotes.items()]
 
-    ctx.ceph[cluster_name].mons = get_mons(
+    ctx.stone[cluster_name].mons = get_mons(
         roles, ips, cluster_name,
         mon_bind_msgr2=config.get('mon_bind_msgr2', True),
         mon_bind_addrvec=config.get('mon_bind_addrvec', True),
     )
-    log.info('Monitor IPs: %s' % ctx.ceph[cluster_name].mons)
+    log.info('Monitor IPs: %s' % ctx.stone[cluster_name].mons)
 
     if config.get('roleless', False):
-        ctx.ceph[cluster_name].roleless = True
-        ctx.ceph[cluster_name].bootstrap_remote = bootstrap_remote
-        ctx.ceph[cluster_name].first_mon = first_mon
-        ctx.ceph[cluster_name].first_mon_role = 'mon.' + first_mon
+        ctx.stone[cluster_name].roleless = True
+        ctx.stone[cluster_name].bootstrap_remote = bootstrap_remote
+        ctx.stone[cluster_name].first_mon = first_mon
+        ctx.stone[cluster_name].first_mon_role = 'mon.' + first_mon
     else:
-        first_mon_role = sorted(ctx.ceph[cluster_name].mons.keys())[0]
+        first_mon_role = sorted(ctx.stone[cluster_name].mons.keys())[0]
         _, _, first_mon = teuthology.split_role(first_mon_role)
         (bootstrap_remote,) = ctx.cluster.only(first_mon_role).remotes.keys()
         log.info('First mon is mon.%s on %s' % (first_mon,
                                                 bootstrap_remote.shortname))
-        ctx.ceph[cluster_name].bootstrap_remote = bootstrap_remote
-        ctx.ceph[cluster_name].first_mon = first_mon
-        ctx.ceph[cluster_name].first_mon_role = first_mon_role
+        ctx.stone[cluster_name].bootstrap_remote = bootstrap_remote
+        ctx.stone[cluster_name].first_mon = first_mon
+        ctx.stone[cluster_name].first_mon_role = first_mon_role
 
         others = ctx.cluster.remotes[bootstrap_remote]
         mgrs = sorted([r for r in others
@@ -1366,29 +1366,29 @@ def initialize_config(ctx, config):
             raise RuntimeError('no mgrs on the same host as first mon %s' % first_mon)
         _, _, first_mgr = teuthology.split_role(mgrs[0])
         log.info('First mgr is %s' % (first_mgr))
-        ctx.ceph[cluster_name].first_mgr = first_mgr
+        ctx.stone[cluster_name].first_mgr = first_mgr
     yield
 
 
 @contextlib.contextmanager
 def task(ctx, config):
     """
-    Deploy ceph cluster using cephadm
+    Deploy stone cluster using stoneadm
 
     For example, teuthology.yaml can contain the 'defaults' section:
 
         defaults:
-          cephadm:
+          stoneadm:
             containers:
-              image: 'quay.io/ceph-ci/ceph'
+              image: 'quay.io/stone-ci/stone'
 
     Using overrides makes it possible to customize it per run.
     The equivalent 'overrides' section looks like:
 
         overrides:
-          cephadm:
+          stoneadm:
             containers:
-              image: 'quay.io/ceph-ci/ceph'
+              image: 'quay.io/stone-ci/stone'
             registry-login:
               url:  registry-url
               username: registry-user
@@ -1404,36 +1404,36 @@ def task(ctx, config):
         "task only supports a dictionary for configuration"
 
     overrides = ctx.config.get('overrides', {})
-    teuthology.deep_merge(config, overrides.get('ceph', {}))
-    teuthology.deep_merge(config, overrides.get('cephadm', {}))
+    teuthology.deep_merge(config, overrides.get('stone', {}))
+    teuthology.deep_merge(config, overrides.get('stoneadm', {}))
     log.info('Config: ' + str(config))
 
     # set up cluster context
-    if not hasattr(ctx, 'ceph'):
-        ctx.ceph = {}
+    if not hasattr(ctx, 'stone'):
+        ctx.stone = {}
     if 'cluster' not in config:
-        config['cluster'] = 'ceph'
+        config['cluster'] = 'stone'
     cluster_name = config['cluster']
-    if cluster_name not in ctx.ceph:
-        ctx.ceph[cluster_name] = argparse.Namespace()
-        ctx.ceph[cluster_name].bootstrapped = False
+    if cluster_name not in ctx.stone:
+        ctx.stone[cluster_name] = argparse.Namespace()
+        ctx.stone[cluster_name].bootstrapped = False
 
     # image
     teuth_defaults = teuth_config.get('defaults', {})
-    cephadm_defaults = teuth_defaults.get('cephadm', {})
-    containers_defaults = cephadm_defaults.get('containers', {})
+    stoneadm_defaults = teuth_defaults.get('stoneadm', {})
+    containers_defaults = stoneadm_defaults.get('containers', {})
     container_image_name = containers_defaults.get('image', None)
 
     containers = config.get('containers', {})
     container_image_name = containers.get('image', container_image_name)
 
-    if not hasattr(ctx.ceph[cluster_name], 'image'):
-        ctx.ceph[cluster_name].image = config.get('image')
+    if not hasattr(ctx.stone[cluster_name], 'image'):
+        ctx.stone[cluster_name].image = config.get('image')
     ref = None
-    if not ctx.ceph[cluster_name].image:
+    if not ctx.stone[cluster_name].image:
         if not container_image_name:
             raise Exception("Configuration error occurred. "
-                            "The 'image' value is undefined for 'cephadm' task. "
+                            "The 'image' value is undefined for 'stoneadm' task. "
                             "Please provide corresponding options in the task's "
                             "config, task 'overrides', or teuthology 'defaults' "
                             "section.")
@@ -1442,53 +1442,53 @@ def task(ctx, config):
 
         if sha1:
             if flavor == "crimson":
-                ctx.ceph[cluster_name].image = container_image_name + ':' + sha1 + '-' + flavor
+                ctx.stone[cluster_name].image = container_image_name + ':' + sha1 + '-' + flavor
             else:
-                ctx.ceph[cluster_name].image = container_image_name + ':' + sha1
+                ctx.stone[cluster_name].image = container_image_name + ':' + sha1
             ref = sha1
         else:
             # hmm, fall back to branch?
             branch = config.get('branch', 'master')
             ref = branch
-            ctx.ceph[cluster_name].image = container_image_name + ':' + branch
-    log.info('Cluster image is %s' % ctx.ceph[cluster_name].image)
+            ctx.stone[cluster_name].image = container_image_name + ':' + branch
+    log.info('Cluster image is %s' % ctx.stone[cluster_name].image)
 
 
     with contextutil.nested(
             #if the cluster is already bootstrapped bypass corresponding methods
-            lambda: _bypass() if (ctx.ceph[cluster_name].bootstrapped)\
+            lambda: _bypass() if (ctx.stone[cluster_name].bootstrapped)\
                               else initialize_config(ctx=ctx, config=config),
-            lambda: ceph_initial(),
+            lambda: stone_initial(),
             lambda: normalize_hostnames(ctx=ctx),
-            lambda: _bypass() if (ctx.ceph[cluster_name].bootstrapped)\
-                              else download_cephadm(ctx=ctx, config=config, ref=ref),
-            lambda: ceph_log(ctx=ctx, config=config),
-            lambda: ceph_crash(ctx=ctx, config=config),
-            lambda: _bypass() if (ctx.ceph[cluster_name].bootstrapped)\
-                              else ceph_bootstrap(ctx, config),
+            lambda: _bypass() if (ctx.stone[cluster_name].bootstrapped)\
+                              else download_stoneadm(ctx=ctx, config=config, ref=ref),
+            lambda: stone_log(ctx=ctx, config=config),
+            lambda: stone_crash(ctx=ctx, config=config),
+            lambda: _bypass() if (ctx.stone[cluster_name].bootstrapped)\
+                              else stone_bootstrap(ctx, config),
             lambda: crush_setup(ctx=ctx, config=config),
-            lambda: ceph_mons(ctx=ctx, config=config),
+            lambda: stone_mons(ctx=ctx, config=config),
             lambda: distribute_config_and_admin_keyring(ctx=ctx, config=config),
-            lambda: ceph_mgrs(ctx=ctx, config=config),
-            lambda: ceph_osds(ctx=ctx, config=config),
-            lambda: ceph_mdss(ctx=ctx, config=config),
-            lambda: ceph_rgw(ctx=ctx, config=config),
-            lambda: ceph_iscsi(ctx=ctx, config=config),
-            lambda: ceph_monitoring('prometheus', ctx=ctx, config=config),
-            lambda: ceph_monitoring('node-exporter', ctx=ctx, config=config),
-            lambda: ceph_monitoring('alertmanager', ctx=ctx, config=config),
-            lambda: ceph_monitoring('grafana', ctx=ctx, config=config),
-            lambda: ceph_clients(ctx=ctx, config=config),
+            lambda: stone_mgrs(ctx=ctx, config=config),
+            lambda: stone_osds(ctx=ctx, config=config),
+            lambda: stone_mdss(ctx=ctx, config=config),
+            lambda: stone_rgw(ctx=ctx, config=config),
+            lambda: stone_iscsi(ctx=ctx, config=config),
+            lambda: stone_monitoring('prometheus', ctx=ctx, config=config),
+            lambda: stone_monitoring('node-exporter', ctx=ctx, config=config),
+            lambda: stone_monitoring('alertmanager', ctx=ctx, config=config),
+            lambda: stone_monitoring('grafana', ctx=ctx, config=config),
+            lambda: stone_clients(ctx=ctx, config=config),
             lambda: create_rbd_pool(ctx=ctx, config=config),
     ):
         if not hasattr(ctx, 'managers'):
             ctx.managers = {}
-        ctx.managers[cluster_name] = CephManager(
-            ctx.ceph[cluster_name].bootstrap_remote,
+        ctx.managers[cluster_name] = StoneManager(
+            ctx.stone[cluster_name].bootstrap_remote,
             ctx=ctx,
-            logger=log.getChild('ceph_manager.' + cluster_name),
+            logger=log.getChild('stone_manager.' + cluster_name),
             cluster=cluster_name,
-            cephadm=True,
+            stoneadm=True,
         )
 
         try:

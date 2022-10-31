@@ -26,16 +26,16 @@ public:
       uint32_t data_length) = 0;
   virtual C_WriteRequest<T> *create_write_request(
       T &pwl, utime_t arrived, io::Extents &&image_extents,
-      bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+      bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req) = 0;
   virtual C_WriteSameRequest<T> *create_writesame_request(
       T &pwl, utime_t arrived, io::Extents &&image_extents,
-      bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+      bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req) = 0;
   virtual C_WriteRequest<T> *create_comp_and_write_request(
       T &pwl, utime_t arrived, io::Extents &&image_extents,
       bufferlist&& cmp_bl, bufferlist&& bl, uint64_t *mismatch_offset,
-      const int fadvise_flags, ceph::mutex &lock,
+      const int fadvise_flags, stone::mutex &lock,
       PerfCounters *perfcounter, Context *user_req) = 0;
   virtual std::shared_ptr<WriteLogOperation> create_write_log_operation(
       WriteLogOperationSet &set, uint64_t image_offset_bytes,
@@ -50,7 +50,7 @@ public:
       uint64_t write_bytes, uint32_t discard_granularity_bytes,
       utime_t dispatch_time, PerfCounters *perfcounter, StoneContext *cct) = 0;
   virtual C_ReadRequest *create_read_request(StoneContext *cct, utime_t arrived,
-      PerfCounters *perfcounter, ceph::bufferlist *bl, Context *on_finish) = 0;
+      PerfCounters *perfcounter, stone::bufferlist *bl, Context *on_finish) = 0;
 
 };
 

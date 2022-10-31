@@ -47,7 +47,7 @@ namespace rados {
 			    std::list<std::string> *locks);
       extern void get_lock_info_start(librados::ObjectReadOperation *rados_op,
 				      const std::string& name);
-      extern int get_lock_info_finish(ceph::bufferlist::const_iterator *out,
+      extern int get_lock_info_finish(stone::bufferlist::const_iterator *out,
 				      std::map<locker_id_t, locker_info_t> *lockers,
 				      ClsLockType *type, std::string *tag);
 
@@ -82,8 +82,8 @@ namespace rados {
 	void set_tag(const std::string& t) { tag = t; }
 	void set_description(const std::string& desc) { description = desc; }
 	void set_duration(const utime_t& e) { duration = e; }
-	void set_duration(const ceph::timespan& d) {
-	  duration = utime_t(ceph::real_clock::zero() + d);
+	void set_duration(const stone::timespan& d) {
+	  duration = utime_t(stone::real_clock::zero() + d);
 	}
 
 	void set_may_renew(bool renew) {

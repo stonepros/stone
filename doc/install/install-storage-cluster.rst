@@ -1,8 +1,8 @@
 ==============================
- Install Ceph Storage Cluster
+ Install Stone Storage Cluster
 ==============================
 
-This guide describes installing Ceph packages manually. This procedure
+This guide describes installing Stone packages manually. This procedure
 is only for users who are not installing with a deployment tool such as
 ``cephadm``, ``chef``, ``juju``, etc. 
 
@@ -11,7 +11,7 @@ Installing with APT
 ===================
 
 Once you have added either release or development packages to APT, you should
-update APT's database and install Ceph::
+update APT's database and install Stone::
 
 	sudo apt-get update && sudo apt-get install ceph ceph-mds
 
@@ -19,7 +19,7 @@ update APT's database and install Ceph::
 Installing with RPM
 ===================
 
-To install Ceph with RPMs, execute the following steps:
+To install Stone with RPMs, execute the following steps:
 
 
 #. Install ``yum-plugin-priorities``. ::
@@ -37,7 +37,7 @@ To install Ceph with RPMs, execute the following steps:
    `Get Packages`_ for details::
 
 	[ceph]
-	name=Ceph packages for $basearch
+	name=Stone packages for $basearch
 	baseurl=https://download.ceph.com/rpm-{ceph-release}/{distro}/$basearch
 	enabled=1
 	priority=2
@@ -45,7 +45,7 @@ To install Ceph with RPMs, execute the following steps:
 	gpgkey=https://download.ceph.com/keys/release.asc
 
 	[ceph-noarch]
-	name=Ceph noarch packages
+	name=Stone noarch packages
 	baseurl=https://download.ceph.com/rpm-{ceph-release}/{distro}/noarch
 	enabled=1
 	priority=2
@@ -53,7 +53,7 @@ To install Ceph with RPMs, execute the following steps:
 	gpgkey=https://download.ceph.com/keys/release.asc
 
 	[ceph-source]
-	name=Ceph source packages
+	name=Stone source packages
 	baseurl=https://download.ceph.com/rpm-{ceph-release}/{distro}/SRPMS
 	enabled=0
 	priority=2
@@ -67,7 +67,7 @@ To install Ceph with RPMs, execute the following steps:
 
 
 Once you have added either release or development packages, or added a
-``ceph.repo`` file to ``/etc/yum.repos.d``, you can install Ceph packages. :: 
+``ceph.repo`` file to ``/etc/yum.repos.d``, you can install Stone packages. :: 
 
 	sudo yum install ceph
 
@@ -75,13 +75,13 @@ Once you have added either release or development packages, or added a
 Installing a Build
 ==================
 
-If you build Ceph from source code, you may install Ceph in user space
+If you build Stone from source code, you may install Stone in user space
 by executing the following:: 
 
 	sudo make install
 
-If you install Ceph locally, ``make`` will place the executables in
-``usr/local/bin``. You may add the Ceph configuration file to the
-``usr/local/bin`` directory to run Ceph from a single directory.
+If you install Stone locally, ``make`` will place the executables in
+``usr/local/bin``. You may add the Stone configuration file to the
+``usr/local/bin`` directory to run Stone from a single directory.
 
 .. _Get Packages: ../get-packages

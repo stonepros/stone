@@ -52,11 +52,11 @@ public:
   }
 
   MOCK_METHOD10(execute_write,
-               bool(uint64_t, uint64_t, const ceph::bufferlist&,
+               bool(uint64_t, uint64_t, const stone::bufferlist&,
                     IOContext, int, std::optional<uint64_t>, int*,
                     uint64_t*, DispatchResult*, Context *));
   bool write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& data,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& data,
       IOContext io_context, int op_flags, int write_flags,
       std::optional<uint64_t> assert_version,
       const ZTracer::Trace &parent_trace, int* dispatch_flags,
@@ -70,11 +70,11 @@ public:
   MOCK_METHOD10(execute_write_same,
                 bool(uint64_t, uint64_t, uint64_t,
                      const LightweightBufferExtents&,
-                     const ceph::bufferlist&, IOContext, int*,
+                     const stone::bufferlist&, IOContext, int*,
                      uint64_t*, DispatchResult*, Context *));
   bool write_same(
       uint64_t object_no, uint64_t object_off, uint64_t object_len,
-      LightweightBufferExtents&& buffer_extents, ceph::bufferlist&& data,
+      LightweightBufferExtents&& buffer_extents, stone::bufferlist&& data,
       IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, int* dispatch_flags,
       uint64_t* journal_tid, DispatchResult* dispatch_result,
@@ -85,12 +85,12 @@ public:
   }
 
   MOCK_METHOD9(execute_compare_and_write,
-               bool(uint64_t, uint64_t, const ceph::bufferlist&,
-                    const ceph::bufferlist&, uint64_t*, int*, uint64_t*,
+               bool(uint64_t, uint64_t, const stone::bufferlist&,
+                    const stone::bufferlist&, uint64_t*, int*, uint64_t*,
                     DispatchResult*, Context *));
   bool compare_and_write(
-      uint64_t object_no, uint64_t object_off, ceph::bufferlist&& cmp_data,
-      ceph::bufferlist&& write_data, IOContext io_context, int op_flags,
+      uint64_t object_no, uint64_t object_off, stone::bufferlist&& cmp_data,
+      stone::bufferlist&& write_data, IOContext io_context, int op_flags,
       const ZTracer::Trace &parent_trace, uint64_t* mismatch_offset,
       int* dispatch_flags, uint64_t* journal_tid,
       DispatchResult* dispatch_result, Context** on_finish,

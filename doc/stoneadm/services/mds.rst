@@ -5,10 +5,10 @@ MDS Service
 
 .. _orchestrator-cli-cephfs:
 
-Deploy CephFS
+Deploy StoneFS
 =============
 
-One or more MDS daemons is required to use the :term:`CephFS` file system.
+One or more MDS daemons is required to use the :term:`StoneFS` file system.
 These are created automatically if the newer ``ceph fs volume``
 interface is used to create a new file system. For more information,
 see :ref:`fs-volumes-and-subvolumes`.
@@ -19,7 +19,7 @@ For example:
 
   ceph fs volume create <fs_name> --placement="<placement spec>"
 
-where ``fs_name`` is the name of the CephFS and ``placement`` is a
+where ``fs_name`` is the name of the StoneFS and ``placement`` is a
 :ref:`orchestrator-cli-placement-spec`.
 
 For manually deploying MDS daemons, use this specification:

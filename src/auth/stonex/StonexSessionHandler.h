@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -19,8 +19,8 @@
 
 class Message;
 
-class StoneexSessionHandler  : public AuthSessionHandler {
-  StoneeContext *cct;
+class StonexSessionHandler  : public AuthSessionHandler {
+  StoneContext *cct;
   int protocol;
   CryptoKey key;                // per mon authentication
   uint64_t features;
@@ -28,7 +28,7 @@ class StoneexSessionHandler  : public AuthSessionHandler {
   int _calc_signature(Message *m, uint64_t *psig);
 
 public:
-  StoneexSessionHandlerStoneneContext *cct,
+  StonexSessionHandler(StoneContext *cct,
 		      const CryptoKey& session_key,
 		      const uint64_t features)
     : cct(cct),
@@ -36,7 +36,7 @@ public:
       key(session_key),
       features(features) {
   }
-  ~StoneexSessionHandler() override = default;
+  ~StonexSessionHandler() override = default;
 
   int sign_message(Message *m) override;
   int check_message_signature(Message *m) override ;

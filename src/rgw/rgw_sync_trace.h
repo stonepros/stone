@@ -6,7 +6,7 @@
 
 #include <atomic>
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "common/shunique_lock.h"
 #include "common/admin_socket.h"
 
@@ -35,13 +35,13 @@ using RGWSyncTraceNodeRef = std::shared_ptr<RGWSyncTraceNode>;
 class RGWSyncTraceNode final {
   friend class RGWSyncTraceManager;
 
-  CephContext *cct;
+  StoneContext *cct;
   RGWSyncTraceNodeRef parent;
 
   uint16_t state{0};
   std::string status;
 
-  ceph::mutex lock = ceph::make_mutex("RGWSyncTraceNode::lock");
+  stone::mutex lock = stone::make_mutex("RGWSyncTraceNode::lock");
 
   std::string type;
   std::string id;
@@ -55,7 +55,7 @@ class RGWSyncTraceNode final {
   boost::circular_buffer<string> history;
 
   // private constructor, create with RGWSyncTraceManager::add_node()
-  RGWSyncTraceNode(CephContext *_cct, uint64_t _handle,
+  RGWSyncTraceNode(StoneContext *_cct, uint64_t _handle,
                    const RGWSyncTraceNodeRef& _parent,
                    const std::string& _type, const std::string& _id);
 
@@ -103,9 +103,9 @@ class RGWSyncTraceManager : public AdminSocketHook {
   friend class RGWSyncTraceNode;
 
   mutable std::shared_timed_mutex lock;
-  using shunique_lock = ceph::shunique_lock<decltype(lock)>;
+  using shunique_lock = stone::shunique_lock<decltype(lock)>;
 
-  CephContext *cct;
+  StoneContext *cct;
   RGWSyncTraceServiceMapThread *service_map_thread{nullptr};
 
   std::map<uint64_t, RGWSyncTraceNodeRef> nodes;
@@ -121,7 +121,7 @@ class RGWSyncTraceManager : public AdminSocketHook {
   void finish_node(RGWSyncTraceNode *node);
 
 public:
-  RGWSyncTraceManager(CephContext *_cct, int max_lru) : cct(_cct), complete_nodes(max_lru) {}
+  RGWSyncTraceManager(StoneContext *_cct, int max_lru) : cct(_cct), complete_nodes(max_lru) {}
   ~RGWSyncTraceManager();
 
   void init(RGWRados *store);

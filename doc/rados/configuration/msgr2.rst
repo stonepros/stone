@@ -7,7 +7,7 @@ What is it
 ----------
 
 The messenger v2 protocol, or msgr2, is the second major revision on
-Ceph's on-wire protocol.  It brings with it several key features:
+Stone's on-wire protocol.  It brings with it several key features:
 
 * A *secure* mode that encrypts all data passing over the network
 * Improved encapsulation of authentication payloads, enabling future
@@ -15,7 +15,7 @@ Ceph's on-wire protocol.  It brings with it several key features:
 * Improved earlier feature advertisement and negotiation, enabling
   future protocol revisions
 
-Ceph daemons can now bind to multiple ports, allowing both legacy Ceph
+Stone daemons can now bind to multiple ports, allowing both legacy Stone
 clients and new v2-capable clients to connect to the same cluster.
 
 By default, monitors now bind to the new IANA-assigned port ``3300``
@@ -103,7 +103,7 @@ The v2 protocol supports two connection modes:
 * *crc* mode provides:
 
   - a strong initial authentication when the connection is established
-    (with cephx, mutual authentication of both parties with protection
+    (with stonex, mutual authentication of both parties with protection
     from a man-in-the-middle or eavesdropper), and
   - a crc32c integrity check to protect against bit flips due to flaky
     hardware or cosmic rays
@@ -119,7 +119,7 @@ The v2 protocol supports two connection modes:
 * *secure* mode provides:
 
   - a strong initial authentication when the connection is established
-    (with cephx, mutual authentication of both parties with protection
+    (with stonex, mutual authentication of both parties with protection
     from a man-in-the-middle or eavesdropper), and
   - full encryption of all post-authentication traffic, including a
     cryptographic integrity check.
@@ -135,12 +135,12 @@ Connection mode configuration options
 For most connections, there are options that control which modes are used:
 
 * ``ms_cluster_mode`` is the connection mode (or permitted modes) used
-  for intra-cluster communication between Ceph daemons.  If multiple
+  for intra-cluster communication between Stone daemons.  If multiple
   modes are listed, the modes listed first are preferred.
 * ``ms_service_mode`` is a list of permitted modes for clients to use
   when connecting to the cluster.
 * ``ms_client_mode`` is a list of connection modes, in order of
-  preference, for clients to use (or allow) when talking to a Ceph
+  preference, for clients to use (or allow) when talking to a Stone
   cluster.
 
 There are a parallel set of options that apply specifically to
@@ -150,7 +150,7 @@ secure) requirements on communication with the monitors.
 * ``ms_mon_cluster_mode`` is the connection mode (or permitted modes)
   to use between monitors.
 * ``ms_mon_service_mode`` is a list of permitted modes for clients or
-  other Ceph daemons to use when connecting to monitors.
+  other Stone daemons to use when connecting to monitors.
 * ``ms_mon_client_mode`` is a list of connection modes, in order of
   preference, for clients or non-monitor daemons to use when
   connecting to monitors.
@@ -165,26 +165,26 @@ start advertising v2 addresses.
 
 For most users, the monitors are binding to the default legacy port ``6789`` for the v1 protocol.  When this is the case, enabling v2 is as simple as::
 
-  ceph mon enable-msgr2
+  stone mon enable-msgr2
 
 If the monitors are bound to non-standard ports, you will need to
 specify an additional port for v2 explicitly.  For example, if your
 monitor ``mon.a`` binds to ``1.2.3.4:1111``, and you want to add v2 on
 port ``1112``,::
 
-  ceph mon set-addrs a [v2:1.2.3.4:1112,v1:1.2.3.4:1111]
+  stone mon set-addrs a [v2:1.2.3.4:1112,v1:1.2.3.4:1111]
 
 Once the monitors bind to v2, each daemon will start advertising a v2
 address when it is next restarted.
 
 
-.. _msgr2_ceph_conf:
+.. _msgr2_stone_conf:
 
-Updating ceph.conf and mon_host
+Updating stone.conf and mon_host
 -------------------------------
 
 Prior to Nautilus, a CLI user or daemon will normally discover the
-monitors via the ``mon_host`` option in ``/etc/ceph/ceph.conf``.  The
+monitors via the ``mon_host`` option in ``/etc/stone/stone.conf``.  The
 syntax for this option has expanded starting with Nautilus to allow
 support the new bracketed list format.  For example, an old line
 like::
@@ -200,27 +200,27 @@ be omitted::
 
   mon_host = 10.0.0.1,10.0.0.2,10.0.0.3
 
-Once v2 has been enabled on the monitors, ``ceph.conf`` may need to be
+Once v2 has been enabled on the monitors, ``stone.conf`` may need to be
 updated to either specify no ports (this is usually simplest), or
 explicitly specify both the v2 and v1 addresses.  Note, however, that
 the new bracketed syntax is only understood by Nautilus and later, so
-do not make that change on hosts that have not yet had their ceph
+do not make that change on hosts that have not yet had their stone
 packages upgraded.
 
-When you are updating ``ceph.conf``, note the new ``ceph config
+When you are updating ``stone.conf``, note the new ``stone config
 generate-minimal-conf`` command (which generates a barebones config
 file with just enough information to reach the monitors) and the
-``ceph config assimilate-conf`` (which moves config file options into
+``stone config assimilate-conf`` (which moves config file options into
 the monitors' configuration database) may be helpful.  For example,::
 
-  # ceph config assimilate-conf < /etc/ceph/ceph.conf
-  # ceph config generate-minimal-config > /etc/ceph/ceph.conf.new
-  # cat /etc/ceph/ceph.conf.new
-  # minimal ceph.conf for 0e5a806b-0ce5-4bc6-b949-aa6f68f5c2a3
+  # stone config assimilate-conf < /etc/stone/stone.conf
+  # stone config generate-minimal-config > /etc/stone/stone.conf.new
+  # cat /etc/stone/stone.conf.new
+  # minimal stone.conf for 0e5a806b-0ce5-4bc6-b949-aa6f68f5c2a3
   [global]
           fsid = 0e5a806b-0ce5-4bc6-b949-aa6f68f5c2a3
           mon_host = [v2:10.0.0.1:3300/0,v1:10.0.0.1:6789/0]
-  # mv /etc/ceph/ceph.conf.new /etc/ceph/ceph.conf
+  # mv /etc/stone/stone.conf.new /etc/stone/stone.conf
 
 Protocol
 --------

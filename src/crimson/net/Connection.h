@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2017 Red Hat, Inc
  *
@@ -160,7 +160,7 @@ public:
     user_private = std::move(new_user_private);
   }
   user_private_t &get_user_private() {
-    ceph_assert(user_private);
+    stone_assert(user_private);
     return *user_private;
   }
 };

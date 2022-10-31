@@ -2,7 +2,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 John Spray <john.spray@redhat.com>
  *
@@ -15,7 +15,7 @@
 
 #pragma once
 
-// Python.h comes first because otherwise it clobbers ceph's assert
+// Python.h comes first because otherwise it clobbers stone's assert
 #include "Python.h"
 
 #include "common/cmdparse.h"

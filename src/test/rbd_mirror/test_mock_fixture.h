@@ -10,7 +10,7 @@
 #include "librbd/asio/ContextWQ.h"
 #include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 
 namespace librados {
 class TestRadosClient;

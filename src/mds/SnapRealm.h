@@ -44,7 +44,7 @@ public:
   void build_snap_set() const;
   void get_snap_info(std::map<snapid_t, const SnapInfo*>& infomap, snapid_t first=0, snapid_t last=STONE_NOSNAP);
 
-  const ceph::buffer::list& get_snap_trace() const;
+  const stone::buffer::list& get_snap_trace() const;
   void build_snap_trace() const;
 
   std::string_view get_snapname(snapid_t snapid, inodeno_t atino);
@@ -142,7 +142,7 @@ private:
   mutable snapid_t cached_last_destroyed;
   mutable std::set<snapid_t> cached_snaps;
   mutable SnapContext cached_snap_context;
-  mutable ceph::buffer::list cached_snap_trace;
+  mutable stone::buffer::list cached_snap_trace;
   mutable inodeno_t cached_subvolume_ino = 0;
 };
 

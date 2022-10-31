@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include "os_xattr.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "include/buffer_fwd.h"
 
 #if defined(__linux__)
@@ -34,45 +34,45 @@
 
 inline int sys_fgetxattr(int fd, const char *name, void *val, size_t size)
 {
-  int r = ::ceph_os_fgetxattr(fd, name, val, size);
+  int r = ::stone_os_fgetxattr(fd, name, val, size);
   return (r < 0 ? -errno : r);
 }
 inline int sys_getxattr(const char *fn, const char *name, void *val, size_t size)
 {
-  int r = ::ceph_os_getxattr(fn, name, val, size);
+  int r = ::stone_os_getxattr(fn, name, val, size);
   return (r < 0 ? -errno : r);
 }
 
 inline int sys_setxattr(const char *fn, const char *name, const void *val, size_t size)
 {
-  int r = ::ceph_os_setxattr(fn, name, val, size);
+  int r = ::stone_os_setxattr(fn, name, val, size);
   return (r < 0 ? -errno : r);
 }
 inline int sys_fsetxattr(int fd, const char *name, const void *val, size_t size)
 {
-  int r = ::ceph_os_fsetxattr(fd, name, val, size);
+  int r = ::stone_os_fsetxattr(fd, name, val, size);
   return (r < 0 ? -errno : r);
 }
 
 inline int sys_listxattr(const char *fn, char *names, size_t len)
 {
-  int r = ::ceph_os_listxattr(fn, names, len);
+  int r = ::stone_os_listxattr(fn, names, len);
   return (r < 0 ? -errno : r);
 }
 inline int sys_flistxattr(int fd, char *names, size_t len)
 {
-  int r = ::ceph_os_flistxattr(fd, names, len);
+  int r = ::stone_os_flistxattr(fd, names, len);
   return (r < 0 ? -errno : r);
 }
 
 inline int sys_removexattr(const char *fn, const char *name)
 {
-  int r = ::ceph_os_removexattr(fn, name);
+  int r = ::stone_os_removexattr(fn, name);
   return (r < 0 ? -errno : r);
 }
 inline int sys_fremovexattr(int fd, const char *name)
 {
-  int r = ::ceph_os_fremovexattr(fd, name);
+  int r = ::stone_os_fremovexattr(fd, name);
   return (r < 0 ? -errno : r);
 }
 
@@ -80,7 +80,7 @@ inline int sys_fremovexattr(int fd, const char *name)
 // wrappers to chain large values across multiple xattrs
 
 int chain_getxattr(const char *fn, const char *name, void *val, size_t size);
-int chain_getxattr_buf(const char *fn, const char *name, ceph::buffer::ptr *bp);
+int chain_getxattr_buf(const char *fn, const char *name, stone::buffer::ptr *bp);
 int chain_fgetxattr(int fd, const char *name, void *val, size_t size);
 
 int get_xattr_block_size(size_t size);
@@ -113,7 +113,7 @@ int chain_setxattr(
     pos  += chunk_size;
     ret = pos;
     i++;
-    ceph_assert(size == 0 || !ensure_single_attr);
+    stone_assert(size == 0 || !ensure_single_attr);
   } while (size);
 
   if (ret >= 0 && !skip_chain_cleanup) {
@@ -157,7 +157,7 @@ int chain_fsetxattr(
     pos  += chunk_size;
     ret = pos;
     i++;
-    ceph_assert(size == 0 || !ensure_single_attr);
+    stone_assert(size == 0 || !ensure_single_attr);
   } while (size);
 
   if (ret >= 0 && !skip_chain_cleanup) {

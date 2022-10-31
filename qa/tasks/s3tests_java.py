@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
     If such does not match the rgw client the task will fail.
         
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.0]
         - s3tests-java:
             client.0:
@@ -36,7 +36,7 @@ log = logging.getLogger(__name__)
     run in info/debug mode (for the java suite) or forward the gradle output to a log file):
 
         tasks:
-        - ceph:
+        - stone:
         - rgw: [client.0]
         - s3tests-java:
             client.0:
@@ -104,7 +104,7 @@ class S3tests_java(Task):
         log.info("S3 Tests Java: Downloading test suite...")
         testdir = teuthology.get_testdir(self.ctx)
         branch = 'master'
-        repo = 'https://github.com/ceph/java_s3tests.git'
+        repo = 'https://github.com/stonepros/java_s3tests.git'
         if client in self.config and self.config[client] is not None:
             if 'force-branch' in self.config[client] and self.config[client]['force-branch'] is not None:
                 branch = self.config[client]['force-branch']
@@ -209,7 +209,7 @@ class S3tests_java(Task):
                     client_with_id = daemon_type + '.' + client_id
                     args = [
                         'adjust-ulimits',
-                        'ceph-coverage',
+                        'stone-coverage',
                         '{tdir}/archive/coverage'.format(tdir=testdir),
                         'radosgw-admin',
                         '-n', client_with_id,
@@ -386,14 +386,14 @@ class S3tests_java(Task):
             self.ctx.cluster.only(client).run(
                 args=[
                     'adjust-ulimits',
-                    'ceph-coverage',
+                    'stone-coverage',
                     '{tdir}/archive/coverage'.format(tdir=testdir),
                     'radosgw-admin',
                     '-n', client,
                     'user', 'rm',
                     '--uid', s3_user_id,
                     '--purge-data',
-                    '--cluster', 'ceph',
+                    '--cluster', 'stone',
                 ],
                 stdout=BytesIO()
             )

@@ -5,7 +5,7 @@ from .helper import DashboardTestCase, JList, JObj, addrvec_schema
 
 
 class LogsTest(DashboardTestCase):
-    CEPHFS = True
+    STONEFS = True
 
     def test_logs(self):
         data = self._get("/api/logs/all")

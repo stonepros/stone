@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab ft=cpp
 
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat, Inc.
  *
@@ -43,7 +43,7 @@ class RGWSI_Cls : public RGWServiceInstance
     }
 
   public:
-    ClsSubService(CephContext *cct) : RGWServiceInstance(cct) {}
+    ClsSubService(StoneContext *cct) : RGWServiceInstance(cct) {}
   };
 
 public:
@@ -53,10 +53,10 @@ public:
 
     void prepare_mfa_write(librados::ObjectWriteOperation *op,
 			   RGWObjVersionTracker *objv_tracker,
-			   const ceph::real_time& mtime);
+			   const stone::real_time& mtime);
 
   public:
-    MFA(CephContext *cct): ClsSubService(cct) {}
+    MFA(StoneContext *cct): ClsSubService(cct) {}
 
     string get_mfa_oid(const rgw_user& user) {
       return string("user:") + user.to_str();
@@ -64,26 +64,26 @@ public:
 
     int check_mfa(const DoutPrefixProvider *dpp, const rgw_user& user, const string& otp_id, const string& pin, optional_yield y);
     int create_mfa(const DoutPrefixProvider *dpp, const rgw_user& user, const rados::cls::otp::otp_info_t& config,
-		   RGWObjVersionTracker *objv_tracker, const ceph::real_time& mtime, optional_yield y);
+		   RGWObjVersionTracker *objv_tracker, const stone::real_time& mtime, optional_yield y);
     int remove_mfa(const DoutPrefixProvider *dpp, 
                    const rgw_user& user, const string& id,
 		   RGWObjVersionTracker *objv_tracker,
-		   const ceph::real_time& mtime,
+		   const stone::real_time& mtime,
 		   optional_yield y);
     int get_mfa(const DoutPrefixProvider *dpp, const rgw_user& user, const string& id, rados::cls::otp::otp_info_t *result, optional_yield y);
     int list_mfa(const DoutPrefixProvider *dpp, const rgw_user& user, list<rados::cls::otp::otp_info_t> *result, optional_yield y);
-    int otp_get_current_time(const DoutPrefixProvider *dpp, const rgw_user& user, ceph::real_time *result, optional_yield y);
+    int otp_get_current_time(const DoutPrefixProvider *dpp, const rgw_user& user, stone::real_time *result, optional_yield y);
     int set_mfa(const DoutPrefixProvider *dpp, const string& oid, const list<rados::cls::otp::otp_info_t>& entries,
 		bool reset_obj, RGWObjVersionTracker *objv_tracker,
 		const real_time& mtime, optional_yield y);
     int list_mfa(const DoutPrefixProvider *dpp, const string& oid, list<rados::cls::otp::otp_info_t> *result,
-		 RGWObjVersionTracker *objv_tracker, ceph::real_time *pmtime, optional_yield y);
+		 RGWObjVersionTracker *objv_tracker, stone::real_time *pmtime, optional_yield y);
   } mfa;
 
   class TimeLog : public ClsSubService {
     int init_obj(const DoutPrefixProvider *dpp, const string& oid, RGWSI_RADOS::Obj& obj);
   public:
-    TimeLog(CephContext *cct): ClsSubService(cct) {}
+    TimeLog(StoneContext *cct): ClsSubService(cct) {}
 
     void prepare_entry(cls_log_entry& entry,
                        const real_time& ut,
@@ -134,7 +134,7 @@ public:
   class Lock : public ClsSubService {
     int init_obj(const string& oid, RGWSI_RADOS::Obj& obj);
     public:
-    Lock(CephContext *cct): ClsSubService(cct) {}
+    Lock(StoneContext *cct): ClsSubService(cct) {}
     int lock_exclusive(const DoutPrefixProvider *dpp,
                        const rgw_pool& pool,
                        const string& oid,
@@ -150,7 +150,7 @@ public:
                std::optional<string> lock_name = std::nullopt);
   } lock;
 
-  RGWSI_Cls(CephContext *cct): RGWServiceInstance(cct), mfa(cct), timelog(cct), lock(cct) {}
+  RGWSI_Cls(StoneContext *cct): RGWServiceInstance(cct), mfa(cct), timelog(cct), lock(cct) {}
 
   void init(RGWSI_Zone *_zone_svc, RGWSI_RADOS *_rados_svc) {
     rados_svc = _rados_svc;

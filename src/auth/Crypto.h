@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Stonee - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2004-2009 Sage Weil <sage@newdream.net>
  *
@@ -23,7 +23,7 @@
 #include <string>
 
 class CryptoKeyContext;
-namespace ceph { class Formatter; }
+namespace stone { class Formatter; }
 
 /*
  * Random byte stream generator suitable for cryptographic use
@@ -61,7 +61,7 @@ public:
     unsigned char* const buf;
   };
 
-  ceph::bufferptr secret;
+  stone::bufferptr secret;
 
   template <class BlockSizeT>
   CryptoKeyHandler(BlockSizeT) {
@@ -70,10 +70,10 @@ public:
 
   virtual ~CryptoKeyHandler() {}
 
-  virtual int encrypt(const ceph::buffer::list& in,
-		      ceph::buffer::list& out, std::string *error) const = 0;
-  virtual int decrypt(const ceph::buffer::list& in,
-		      ceph::buffer::list& out, std::string *error) const = 0;
+  virtual int encrypt(const stone::buffer::list& in,
+		      stone::buffer::list& out, std::string *error) const = 0;
+  virtual int decrypt(const stone::buffer::list& in,
+		      stone::buffer::list& out, std::string *error) const = 0;
 
   // TODO: provide nullptr in the out::buf to get/estimate size requirements?
   // Or maybe dedicated methods?
@@ -82,50 +82,50 @@ public:
   virtual std::size_t decrypt(const in_slice_t& in,
 			      const out_slice_t& out) const;
 
-  sha256_digest_t hmac_sha256(const ceph::bufferlist& in) const;
+  sha256_digest_t hmac_sha256(const stone::bufferlist& in) const;
 };
 
 /*
- * match encoding of struct ceph_secret
+ * match encoding of struct stone_secret
  */
 class CryptoKey {
 protected:
   __u16 type;
   utime_t created;
-  ceph::buffer::ptr secret;   // must set this via set_secret()!
+  stone::buffer::ptr secret;   // must set this via set_secret()!
 
   // cache a pointer to the implementation-specific key handler, so we
   // don't have to create it for every crypto operation.
   mutable std::shared_ptr<CryptoKeyHandler> ckh;
 
-  int _set_secret(int type, const ceph::buffer::ptr& s);
+  int _set_secret(int type, const stone::buffer::ptr& s);
 
 public:
   CryptoKey() : type(0) { }
-  CryptoKey(int t, utime_t c, ceph::buffer::ptr& s)
+  CryptoKey(int t, utime_t c, stone::buffer::ptr& s)
     : created(c) {
     _set_secret(t, s);
   }
   ~CryptoKey() {
   }
 
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& bl);
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& bl);
 
   int get_type() const { return type; }
   utime_t get_created() const { return created; }
   void print(std::ostream& out) const;
 
-  int set_secret(int type, const ceph::buffer::ptr& s, utime_t created);
-  const ceph::buffer::ptr& get_secret() { return secret; }
-  const ceph::buffer::ptr& get_secret() const { return secret; }
+  int set_secret(int type, const stone::buffer::ptr& s, utime_t created);
+  const stone::buffer::ptr& get_secret() { return secret; }
+  const stone::buffer::ptr& get_secret() const { return secret; }
 
   bool empty() const { return ckh.get() == nullptr; }
 
   void encode_base64(std::string& s) const {
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     encode(bl);
-    ceph::bufferlist e;
+    stone::bufferlist e;
     bl.encode_base64(e);
     e.append('\0');
     s = e.c_str();
@@ -136,49 +136,49 @@ public:
     return s;
   }
   void decode_base64(const std::string& s) {
-    ceph::buffer::list e;
+    stone::buffer::list e;
     e.append(s);
-    ceph::buffer::list bl;
+    stone::buffer::list bl;
     bl.decode_base64(e);
     auto p = std::cbegin(bl);
     decode(p);
   }
 
-  void encode_formatted(std::string label, ceph::Formatter *f,
-			ceph::buffer::list &bl);
-  void encode_plaintext(ceph::buffer::list &bl);
+  void encode_formatted(std::string label, stone::Formatter *f,
+			stone::buffer::list &bl);
+  void encode_plaintext(stone::buffer::list &bl);
 
   // --
-  int create(StoneeContext *cct, int type);
-  int encrypt(StoneeContext *cct, const ceph::buffer::list& in,
-	      ceph::buffer::list& out,
+  int create(StoneContext *cct, int type);
+  int encrypt(StoneContext *cct, const stone::buffer::list& in,
+	      stone::buffer::list& out,
 	      std::string *error) const {
-    ceph_assert(ckh); // Bad key?
+    stone_assert(ckh); // Bad key?
     return ckh->encrypt(in, out, error);
   }
-  int decrypt(StoneeContext *cct, const ceph::buffer::list& in,
-	      ceph::buffer::list& out,
+  int decrypt(StoneContext *cct, const stone::buffer::list& in,
+	      stone::buffer::list& out,
 	      std::string *error) const {
-    ceph_assert(ckh); // Bad key?
+    stone_assert(ckh); // Bad key?
     return ckh->decrypt(in, out, error);
   }
 
   using in_slice_t = CryptoKeyHandler::in_slice_t;
   using out_slice_t = CryptoKeyHandler::out_slice_t;
 
-  std::size_t encrypt(StoneeContext*, const in_slice_t& in,
+  std::size_t encrypt(StoneContext*, const in_slice_t& in,
 		      const out_slice_t& out) {
-    ceph_assert(ckh);
+    stone_assert(ckh);
     return ckh->encrypt(in, out);
   }
-  std::size_t decrypt(StoneeContext*, const in_slice_t& in,
+  std::size_t decrypt(StoneContext*, const in_slice_t& in,
 		      const out_slice_t& out) {
-    ceph_assert(ckh);
+    stone_assert(ckh);
     return ckh->encrypt(in, out);
   }
 
-  sha256_digest_t hmac_sha256(StoneeContext*, const ceph::buffer::list& in) {
-    ceph_assert(ckh);
+  sha256_digest_t hmac_sha256(StoneContext*, const stone::buffer::list& in) {
+    stone_assert(ckh);
     return ckh->hmac_sha256(in);
   }
 
@@ -200,16 +200,16 @@ inline std::ostream& operator<<(std::ostream& out, const CryptoKey& k)
 /*
  * Driver for a particular algorithm
  *
- * To use these functions, you need to call ceph::crypto::init(), see
- * common/ceph_crypto.h. common_init_finish does this for you.
+ * To use these functions, you need to call stone::crypto::init(), see
+ * common/stone_crypto.h. common_init_finish does this for you.
  */
 class CryptoHandler {
 public:
   virtual ~CryptoHandler() {}
   virtual int get_type() const = 0;
-  virtual int create(CryptoRandom *random, ceph::buffer::ptr& secret) = 0;
-  virtual int validate_secret(const ceph::buffer::ptr& secret) = 0;
-  virtual CryptoKeyHandler *get_key_handler(const ceph::buffer::ptr& secret,
+  virtual int create(CryptoRandom *random, stone::buffer::ptr& secret) = 0;
+  virtual int validate_secret(const stone::buffer::ptr& secret) = 0;
+  virtual CryptoKeyHandler *get_key_handler(const stone::buffer::ptr& secret,
 					    std::string& error) = 0;
 
   static CryptoHandler *create(int type);

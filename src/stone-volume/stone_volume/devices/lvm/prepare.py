@@ -2,12 +2,12 @@ from __future__ import print_function
 import json
 import logging
 from textwrap import dedent
-from ceph_volume.util import prepare as prepare_utils
-from ceph_volume.util import encryption as encryption_utils
-from ceph_volume.util import system, disk
-from ceph_volume.util.arg_validators import exclude_group_options
-from ceph_volume import conf, decorators, terminal
-from ceph_volume.api import lvm as api
+from stone_volume.util import prepare as prepare_utils
+from stone_volume.util import encryption as encryption_utils
+from stone_volume.util import system, disk
+from stone_volume.util.arg_validators import exclude_group_options
+from stone_volume import conf, decorators, terminal
+from stone_volume.api import lvm as api
 from .common import prepare_parser, rollback_osd
 
 
@@ -21,7 +21,7 @@ def prepare_dmcrypt(key, device, device_type, tags):
     """
     if not device:
         return ''
-    tag_name = 'ceph.%s_uuid' % device_type
+    tag_name = 'stone.%s_uuid' % device_type
     uuid = tags[tag_name]
     # format data device
     encryption_utils.luks_format(
@@ -41,11 +41,11 @@ def prepare_filestore(device, journal, secrets, tags, osd_id, fsid):
     """
     :param device: The name of the logical volume to work with
     :param journal: similar to device but can also be a regular/plain disk
-    :param secrets: A dict with the secrets needed to create the osd (e.g. cephx)
+    :param secrets: A dict with the secrets needed to create the osd (e.g. stonex)
     :param id_: The OSD id
     :param fsid: The OSD fsid, also known as the OSD UUID
     """
-    cephx_secret = secrets.get('cephx_secret', prepare_utils.create_key())
+    stonex_secret = secrets.get('stonex_secret', prepare_utils.create_key())
 
     # encryption-only operations
     if secrets.get('dmcrypt_key'):
@@ -68,16 +68,16 @@ def prepare_filestore(device, journal, secrets, tags, osd_id, fsid):
     # get the latest monmap
     prepare_utils.get_monmap(osd_id)
     # prepare the osd filesystem
-    prepare_utils.osd_mkfs_filestore(osd_id, fsid, cephx_secret)
+    prepare_utils.osd_mkfs_filestore(osd_id, fsid, stonex_secret)
     # write the OSD keyring if it doesn't exist already
-    prepare_utils.write_keyring(osd_id, cephx_secret)
+    prepare_utils.write_keyring(osd_id, stonex_secret)
     if secrets.get('dmcrypt_key'):
         # if the device is going to get activated right away, this can be done
         # here, otherwise it will be recreated
         encryption_utils.write_lockbox_keyring(
             osd_id,
             fsid,
-            tags['ceph.cephx_lockbox_secret']
+            tags['stone.stonex_lockbox_secret']
         )
 
 
@@ -86,11 +86,11 @@ def prepare_bluestore(block, wal, db, secrets, tags, osd_id, fsid):
     :param block: The name of the logical volume for the bluestore data
     :param wal: a regular/plain disk or logical volume, to be used for block.wal
     :param db: a regular/plain disk or logical volume, to be used for block.db
-    :param secrets: A dict with the secrets needed to create the osd (e.g. cephx)
+    :param secrets: A dict with the secrets needed to create the osd (e.g. stonex)
     :param id_: The OSD id
     :param fsid: The OSD fsid, also known as the OSD UUID
     """
-    cephx_secret = secrets.get('cephx_secret', prepare_utils.create_key())
+    stonex_secret = secrets.get('stonex_secret', prepare_utils.create_key())
     # encryption-only operations
     if secrets.get('dmcrypt_key'):
         # If encrypted, there is no need to create the lockbox keyring file because
@@ -110,11 +110,11 @@ def prepare_bluestore(block, wal, db, secrets, tags, osd_id, fsid):
     # get the latest monmap
     prepare_utils.get_monmap(osd_id)
     # write the OSD keyring if it doesn't exist already
-    prepare_utils.write_keyring(osd_id, cephx_secret)
+    prepare_utils.write_keyring(osd_id, stonex_secret)
     # prepare the osd filesystem
     prepare_utils.osd_mkfs_bluestore(
         osd_id, fsid,
-        keyring=cephx_secret,
+        keyring=stonex_secret,
         wal=wal,
         db=db
     )
@@ -146,8 +146,8 @@ class Prepare(object):
         """
         if device_name is None:
             return '', '', tags
-        tags['ceph.type'] = device_type
-        tags['ceph.vdo'] = api.is_vdo(device_name)
+        tags['stone.type'] = device_type
+        tags['stone.vdo'] = api.is_vdo(device_name)
 
         try:
             vg_name, lv_name = device_name.split('/')
@@ -159,8 +159,8 @@ class Prepare(object):
         if lv:
             lv_uuid = lv.lv_uuid
             path = lv.lv_path
-            tags['ceph.%s_uuid' % device_type] = lv_uuid
-            tags['ceph.%s_device' % device_type] = path
+            tags['stone.%s_uuid' % device_type] = lv_uuid
+            tags['stone.%s_device' % device_type] = path
             lv.set_tags(tags)
         elif disk.is_device(device_name):
             # We got a disk, create an lv
@@ -180,16 +180,16 @@ class Prepare(object):
                 name_uuid,
                 **kwargs)
             path = lv.lv_path
-            tags['ceph.{}_device'.format(device_type)] = path
-            tags['ceph.{}_uuid'.format(device_type)] = lv.lv_uuid
+            tags['stone.{}_device'.format(device_type)] = path
+            tags['stone.{}_uuid'.format(device_type)] = lv.lv_uuid
             lv_uuid = lv.lv_uuid
             lv.set_tags(tags)
         else:
             # otherwise assume this is a regular disk partition
             name_uuid = self.get_ptuuid(device_name)
             path = device_name
-            tags['ceph.%s_uuid' % device_type] = name_uuid
-            tags['ceph.%s_device' % device_type] = path
+            tags['stone.%s_uuid' % device_type] = name_uuid
+            tags['stone.%s_device' % device_type] = path
             lv_uuid = name_uuid
         return path, lv_uuid, tags
 
@@ -209,7 +209,7 @@ class Prepare(object):
             # we must create a vg, and then a single lv
             lv_name_prefix = "osd-{}".format(device_type)
             kwargs = {'device': device,
-                      'tags': {'ceph.type': device_type},
+                      'tags': {'stone.type': device_type},
                       'slots': self.args.data_slots,
                      }
             logger.debug('data device size: {}'.format(self.args.data_size))
@@ -245,7 +245,7 @@ class Prepare(object):
         except ValueError:
             lv = None
 
-        if api.is_ceph_device(lv):
+        if api.is_stone_device(lv):
             logger.info("device {} is already used".format(self.args.data))
             raise RuntimeError("skipping {}, it is already prepared".format(self.args.data))
         try:
@@ -255,17 +255,17 @@ class Prepare(object):
             logger.info('will rollback OSD ID creation')
             rollback_osd(self.args, self.osd_id)
             raise
-        terminal.success("ceph-volume lvm prepare successful for: %s" % self.args.data)
+        terminal.success("stone-volume lvm prepare successful for: %s" % self.args.data)
 
     def get_cluster_fsid(self):
         """
         Allows using --cluster-fsid as an argument, but can fallback to reading
-        from ceph.conf if that is unset (the default behavior).
+        from stone.conf if that is unset (the default behavior).
         """
         if self.args.cluster_fsid:
             return self.args.cluster_fsid
         else:
-            return conf.ceph.get('global', 'fsid')
+            return conf.stone.get('global', 'fsid')
 
     @decorators.needs_root
     def prepare(self):
@@ -273,14 +273,14 @@ class Prepare(object):
         # OSD, this needs to be fixed. This could either be a file (!) or a string
         # (!!) or some flags that we would need to compound into a dict so that we
         # can convert to JSON (!!!)
-        secrets = {'cephx_secret': prepare_utils.create_key()}
-        cephx_lockbox_secret = ''
+        secrets = {'stonex_secret': prepare_utils.create_key()}
+        stonex_lockbox_secret = ''
         encrypted = 1 if self.args.dmcrypt else 0
-        cephx_lockbox_secret = '' if not encrypted else prepare_utils.create_key()
+        stonex_lockbox_secret = '' if not encrypted else prepare_utils.create_key()
 
         if encrypted:
             secrets['dmcrypt_key'] = encryption_utils.create_dmcrypt_key()
-            secrets['cephx_lockbox_secret'] = cephx_lockbox_secret
+            secrets['stonex_lockbox_secret'] = stonex_lockbox_secret
 
         cluster_fsid = self.get_cluster_fsid()
 
@@ -291,12 +291,12 @@ class Prepare(object):
         # reuse a given ID if it exists, otherwise create a new ID
         self.osd_id = prepare_utils.create_id(osd_fsid, json.dumps(secrets), osd_id=self.args.osd_id)
         tags = {
-            'ceph.osd_fsid': osd_fsid,
-            'ceph.osd_id': self.osd_id,
-            'ceph.cluster_fsid': cluster_fsid,
-            'ceph.cluster_name': conf.cluster,
-            'ceph.crush_device_class': crush_device_class,
-            'ceph.osdspec_affinity': prepare_utils.get_osdspec_affinity()
+            'stone.osd_fsid': osd_fsid,
+            'stone.osd_id': self.osd_id,
+            'stone.cluster_fsid': cluster_fsid,
+            'stone.cluster_name': conf.cluster,
+            'stone.crush_device_class': crush_device_class,
+            'stone.osdspec_affinity': prepare_utils.get_osdspec_affinity()
         }
         if self.args.filestore:
             if not self.args.journal:
@@ -313,8 +313,8 @@ class Prepare(object):
                     raise RuntimeError('Can\'t handle multiple filestore OSDs '
                                        'with colocated journals yet. Please '
                                        'create journal LVs manually')
-            tags['ceph.cephx_lockbox_secret'] = cephx_lockbox_secret
-            tags['ceph.encrypted'] = encrypted
+            tags['stone.stonex_lockbox_secret'] = stonex_lockbox_secret
+            tags['stone.encrypted'] = encrypted
 
             journal_device, journal_uuid, tags = self.setup_device(
                 'journal',
@@ -333,10 +333,10 @@ class Prepare(object):
             if not data_lv:
                 data_lv = self.prepare_data_device('data', osd_fsid)
 
-            tags['ceph.data_device'] = data_lv.lv_path
-            tags['ceph.data_uuid'] = data_lv.lv_uuid
-            tags['ceph.vdo'] = api.is_vdo(data_lv.lv_path)
-            tags['ceph.type'] = 'data'
+            tags['stone.data_device'] = data_lv.lv_path
+            tags['stone.data_uuid'] = data_lv.lv_uuid
+            tags['stone.vdo'] = api.is_vdo(data_lv.lv_path)
+            tags['stone.type'] = 'data'
             data_lv.set_tags(tags)
             if not journal_device.startswith('/'):
                 # we got a journal lv, set rest of the tags
@@ -362,11 +362,11 @@ class Prepare(object):
             if not block_lv:
                 block_lv = self.prepare_data_device('block', osd_fsid)
 
-            tags['ceph.block_device'] = block_lv.lv_path
-            tags['ceph.block_uuid'] = block_lv.lv_uuid
-            tags['ceph.cephx_lockbox_secret'] = cephx_lockbox_secret
-            tags['ceph.encrypted'] = encrypted
-            tags['ceph.vdo'] = api.is_vdo(block_lv.lv_path)
+            tags['stone.block_device'] = block_lv.lv_path
+            tags['stone.block_uuid'] = block_lv.lv_uuid
+            tags['stone.stonex_lockbox_secret'] = stonex_lockbox_secret
+            tags['stone.encrypted'] = encrypted
+            tags['stone.vdo'] = api.is_vdo(block_lv.lv_path)
 
             wal_device, wal_uuid, tags = self.setup_device(
                 'wal',
@@ -381,7 +381,7 @@ class Prepare(object):
                 self.args.block_db_size,
                 self.args.block_db_slots)
 
-            tags['ceph.type'] = 'block'
+            tags['stone.type'] = 'block'
             block_lv.set_tags(tags)
 
             prepare_bluestore(
@@ -408,20 +408,20 @@ class Prepare(object):
 
         Existing logical volume (lv):
 
-            ceph-volume lvm prepare --data {vg/lv}
+            stone-volume lvm prepare --data {vg/lv}
 
         Existing block device (a logical volume will be created):
 
-            ceph-volume lvm prepare --data /path/to/device
+            stone-volume lvm prepare --data /path/to/device
 
         Optionally, can consume db and wal devices, partitions or logical
         volumes. A device will get a logical volume, partitions and existing
         logical volumes will be used as is:
 
-            ceph-volume lvm prepare --data {vg/lv} --block.wal {partition} --block.db {/path/to/device}
+            stone-volume lvm prepare --data {vg/lv} --block.wal {partition} --block.db {/path/to/device}
         """)
         parser = prepare_parser(
-            prog='ceph-volume lvm prepare',
+            prog='stone-volume lvm prepare',
             description=sub_command_help,
         )
         if len(self.argv) == 0:

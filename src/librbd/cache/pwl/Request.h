@@ -139,12 +139,12 @@ public:
   unique_ptr<WriteLogOperationSet> op_set = nullptr;
 
   C_WriteRequest(T &pwl, const utime_t arrived, io::Extents &&image_extents,
-                 bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+                 bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
                  PerfCounters *perfcounter, Context *user_req);
 
   C_WriteRequest(T &pwl, const utime_t arrived, io::Extents &&image_extents,
                  bufferlist&& cmp_bl, bufferlist&& bl, uint64_t *mismatch_offset,
-                 int fadvise_flags, ceph::mutex &lock, PerfCounters *perfcounter,
+                 int fadvise_flags, stone::mutex &lock, PerfCounters *perfcounter,
                  Context *user_req);
 
   ~C_WriteRequest() override;
@@ -186,7 +186,7 @@ private:
   bool m_do_early_flush = false;
   std::atomic<int> m_appended = {0};
   bool m_queued = false;
-  ceph::mutex &m_lock;
+  stone::mutex &m_lock;
   template <typename U>
   friend std::ostream &operator<<(std::ostream &os,
                                   const C_WriteRequest<U> &req);
@@ -209,7 +209,7 @@ public:
   C_FlushRequest(T &pwl, const utime_t arrived,
                  io::Extents &&image_extents,
                  bufferlist&& bl, const int fadvise_flags,
-                 ceph::mutex &lock, PerfCounters *perfcounter,
+                 stone::mutex &lock, PerfCounters *perfcounter,
                  Context *user_req);
 
   ~C_FlushRequest() override {}
@@ -229,7 +229,7 @@ public:
       uint64_t *number_unpublished_reserves) override;
 private:
   std::shared_ptr<SyncPointLogOperation> op;
-  ceph::mutex &m_lock;
+  stone::mutex &m_lock;
   PerfCounters *m_perfcounter = nullptr;
 
   void finish_req(int r) override;
@@ -254,7 +254,7 @@ public:
   std::shared_ptr<DiscardLogOperation> op;
 
   C_DiscardRequest(T &pwl, const utime_t arrived, io::Extents &&image_extents,
-                   uint32_t discard_granularity_bytes, ceph::mutex &lock,
+                   uint32_t discard_granularity_bytes, stone::mutex &lock,
                    PerfCounters *perfcounter, Context *user_req);
 
   ~C_DiscardRequest() override;
@@ -279,7 +279,7 @@ public:
       uint64_t *number_unpublished_reserves) override;
 private:
   uint32_t m_discard_granularity_bytes;
-  ceph::mutex &m_lock;
+  stone::mutex &m_lock;
   PerfCounters *m_perfcounter = nullptr;
   template <typename U>
   friend std::ostream &operator<<(std::ostream &os,
@@ -297,7 +297,7 @@ class C_WriteSameRequest : public C_WriteRequest<T> {
 public:
   using C_BlockIORequest<T>::pwl;
   C_WriteSameRequest(T &pwl, const utime_t arrived, io::Extents &&image_extents,
-                     bufferlist&& bl, const int fadvise_flags, ceph::mutex &lock,
+                     bufferlist&& bl, const int fadvise_flags, stone::mutex &lock,
                      PerfCounters *perfcounter, Context *user_req);
 
   ~C_WriteSameRequest() override;
@@ -343,7 +343,7 @@ public:
 private:
   boost::function<void(GuardedRequestFunctionContext&)> m_callback;
   void finish(int r) override {
-    ceph_assert(cell);
+    stone_assert(cell);
     m_callback(*this);
   }
 };

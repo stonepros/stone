@@ -1,6 +1,6 @@
-# /etc/default/ceph
+# /etc/default/stone
 #
-# Environment file for ceph daemon systemd unit files.
+# Environment file for stone daemon systemd unit files.
 #
 
 # Increase tcmalloc cache size

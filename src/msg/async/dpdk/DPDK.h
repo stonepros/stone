@@ -140,7 +140,7 @@ class DPDKQueuePair {
      *         failure
      */
     static tx_buf* from_packet_zc(
-            StoneeContext *cct, Packet&& p, DPDKQueuePair& qp);
+            StoneContext *cct, Packet&& p, DPDKQueuePair& qp);
 
     /**
      * Copy the contents of the "packet" into the given cluster of
@@ -187,8 +187,8 @@ class DPDKQueuePair {
 
       rte_mbuf* m;
 
-      // TODO: ceph_assert() in a fast path! Remove me ASAP!
-      ceph_assert(frag.size);
+      // TODO: stone_assert() in a fast path! Remove me ASAP!
+      stone_assert(frag.size);
 
       // Create a HEAD of mbufs' cluster and set the first bytes into it
       len = do_one_buf(qp, head, base, left_to_set);
@@ -291,7 +291,7 @@ class DPDKQueuePair {
       if (!pa)
         return copy_one_data_buf(qp, m, va, buf_len);
 
-      ceph_assert(buf_len);
+      stone_assert(buf_len);
       tx_buf* buf = qp.get_tx_buf();
       if (!buf) {
         return 0;
@@ -432,7 +432,7 @@ class DPDKQueuePair {
     //
     static constexpr int gc_count = 1;
    public:
-    tx_buf_factory(StoneeContext *c, DPDKDevice *dev, uint8_t qid);
+    tx_buf_factory(StoneContext *c, DPDKDevice *dev, uint8_t qid);
     ~tx_buf_factory() {
       // put all mbuf back into mempool in order to make the next factory work
       while (gc());
@@ -515,13 +515,13 @@ class DPDKQueuePair {
     }
 
    private:
-    StoneeContext *cct;
+    StoneContext *cct;
     std::vector<tx_buf*> _ring;
     rte_mempool* _pool = nullptr;
   };
 
  public:
-  explicit DPDKQueuePair(StoneeContext *c, EventCenter *cen, DPDKDevice* dev, uint8_t qid);
+  explicit DPDKQueuePair(StoneContext *c, EventCenter *cen, DPDKDevice* dev, uint8_t qid);
   ~DPDKQueuePair() {
     if (device_stat_time_fd) {
       center->delete_time_event(device_stat_time_fd);
@@ -550,8 +550,8 @@ class DPDKQueuePair {
   uint32_t _send(circular_buffer<Packet>& pb, Func &&packet_to_tx_buf_p) {
     if (_tx_burst.size() == 0) {
       for (auto&& p : pb) {
-        // TODO: ceph_assert() in a fast path! Remove me ASAP!
-        ceph_assert(p.len());
+        // TODO: stone_assert() in a fast path! Remove me ASAP!
+        stone_assert(p.len());
 
         tx_buf* buf = packet_to_tx_buf_p(std::move(p));
         if (!buf) {
@@ -654,7 +654,7 @@ class DPDKQueuePair {
   Tub<Packet> from_mbuf_lro(rte_mbuf* m);
 
  private:
-  StoneeContext *cct;
+  StoneContext *cct;
   std::vector<packet_provider_type> _pkt_providers;
   Tub<std::array<uint8_t, 128>> _sw_reta;
   circular_buffer<Packet> _proxy_packetq;
@@ -735,7 +735,7 @@ class DPDKQueuePair {
 
 class DPDKDevice {
  public:
-  StoneeContext *cct;
+  StoneContext *cct;
   PerfCounters *perf_logger;
   std::vector<std::unique_ptr<DPDKQueuePair>> _queues;
   std::vector<DPDKWorker*> workers;
@@ -798,7 +798,7 @@ class DPDKDevice {
   void set_hw_flow_control();
 
  public:
-  DPDKDevice(StoneeContext *c, uint8_t port_idx, uint16_t num_queues, bool use_lro, bool enable_fc):
+  DPDKDevice(StoneContext *c, uint8_t port_idx, uint16_t num_queues, bool use_lro, bool enable_fc):
       cct(c), _port_idx(port_idx), _num_queues(num_queues),
       _home_cpu(0), _use_lro(use_lro),
       _enable_fc(enable_fc) {
@@ -849,7 +849,7 @@ class DPDKDevice {
   }
   const rss_key_type& rss_key() const { return _rss_key; }
   uint16_t hw_queues_count() { return _num_queues; }
-  std::unique_ptr<DPDKQueuePair> init_local_queue(StoneeContext *c, EventCenter *center, string hugepages, uint16_t qid) {
+  std::unique_ptr<DPDKQueuePair> init_local_queue(StoneContext *c, EventCenter *center, string hugepages, uint16_t qid) {
     std::unique_ptr<DPDKQueuePair> qp;
     qp = std::unique_ptr<DPDKQueuePair>(new DPDKQueuePair(c, center, this, qid));
     return qp;
@@ -859,11 +859,11 @@ class DPDKDevice {
     return _redir_table[hash & (_redir_table.size() - 1)];
   }
   void set_local_queue(unsigned i, std::unique_ptr<DPDKQueuePair> qp) {
-    ceph_assert(!_queues[i]);
+    stone_assert(!_queues[i]);
     _queues[i] = std::move(qp);
   }
   void unset_local_queue(unsigned i) {
-    ceph_assert(_queues[i]);
+    stone_assert(_queues[i]);
     _queues[i].reset();
   }
   template <typename Func>
@@ -872,7 +872,7 @@ class DPDKDevice {
     if (!qp._sw_reta)
       return src_cpuid;
 
-    ceph_assert(!qp._sw_reta);
+    stone_assert(!qp._sw_reta);
     auto hash = hashfn() >> _rss_table_bits;
     auto& reta = *qp._sw_reta;
     return reta[hash % reta.size()];
@@ -909,7 +909,7 @@ class DPDKDevice {
 
 
 std::unique_ptr<DPDKDevice> create_dpdk_net_device(
-    StoneeContext *c, unsigned cores, uint8_t port_idx = 0,
+    StoneContext *c, unsigned cores, uint8_t port_idx = 0,
     bool use_lro = true, bool enable_fc = true);
 
 

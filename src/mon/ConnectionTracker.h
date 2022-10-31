@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*- 
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2019 Red Hat
  *
@@ -46,7 +46,7 @@ struct ConnectionReport {
   }
   friend std::ostream& operator<<(std::ostream&o, const ConnectionReport& c);
 
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ConnectionReport*>& o);
 };
 WRITE_CLASS_ENCODER(ConnectionReport);
@@ -191,7 +191,7 @@ class ConnectionTracker {
   friend std::ostream& operator<<(std::ostream& o, const ConnectionTracker& c);
   friend ConnectionReport *get_connection_reports(ConnectionTracker& ct);
   friend map<int,ConnectionReport> *get_peer_reports(ConnectionTracker& ct);
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   static void generate_test_instances(std::list<ConnectionTracker*>& o);
 };
 

@@ -86,9 +86,9 @@ struct chunk_refs_t {
 
   void _encode_r(bufferlist& bl) const;
   void _encode_final(bufferlist& bl, bufferlist& t) const;
-  void dynamic_encode(ceph::buffer::list& bl, size_t max);
-  void encode(ceph::buffer::list& bl) const;
-  void decode(ceph::buffer::list::const_iterator& p);
+  void dynamic_encode(stone::buffer::list& bl, size_t max);
+  void encode(stone::buffer::list& bl) const;
+  void decode(stone::buffer::list::const_iterator& p);
 
   void dump(Formatter *f) const {
     r->dump(f);
@@ -214,7 +214,7 @@ struct chunk_refs_by_hash_t : public chunk_refs_t::refs_t {
   void bound_encode(size_t& p) const {
     p += 6 + sizeof(uint64_t) + by_hash.size() * (10 + 10);
   }
-  void encode(::ceph::buffer::list::contiguous_appender& p) const {
+  void encode(::stone::buffer::list::contiguous_appender& p) const {
     DENC_START(1, 1, p);
     denc_varint(total, p);
     denc_varint(hash_bits, p);
@@ -223,12 +223,12 @@ struct chunk_refs_by_hash_t : public chunk_refs_t::refs_t {
     for (auto& i : by_hash) {
       denc_signed_varint(i.first.first, p);
       // this may write some bytes past where we move cursor too; harmless!
-      *(ceph_le32*)p.get_pos_add(hash_bytes) = i.first.second;
+      *(stone_le32*)p.get_pos_add(hash_bytes) = i.first.second;
       denc_varint(i.second, p);
     }
     DENC_FINISH(p);
   }
-  void decode(::ceph::buffer::ptr::const_iterator& p) {
+  void decode(::stone::buffer::ptr::const_iterator& p) {
     DENC_START(1, 1, p);
     denc_varint(total, p);
     denc_varint(hash_bits, p);
@@ -237,7 +237,7 @@ struct chunk_refs_by_hash_t : public chunk_refs_t::refs_t {
     int hash_bytes = (hash_bits + 7) / 8;
     while (n--) {
       int64_t poolid;
-      ceph_le32 hash;
+      stone_le32 hash;
       uint64_t count;
       denc_signed_varint(poolid, p);
       memcpy(&hash, p.get_pos_add(hash_bytes), hash_bytes);
@@ -304,7 +304,7 @@ struct chunk_refs_by_pool_t : public chunk_refs_t::refs_t {
     p += 6 + sizeof(uint64_t) + by_pool.size() * (9 + 9);
   }
   DENC_HELPERS
-  void encode(::ceph::buffer::list::contiguous_appender& p) const {
+  void encode(::stone::buffer::list::contiguous_appender& p) const {
     DENC_START(1, 1, p);
     denc_varint(total, p);
     denc_varint(by_pool.size(), p);
@@ -314,7 +314,7 @@ struct chunk_refs_by_pool_t : public chunk_refs_t::refs_t {
     }
     DENC_FINISH(p);
   }
-  void decode(::ceph::buffer::ptr::const_iterator& p) {
+  void decode(::stone::buffer::ptr::const_iterator& p) {
     DENC_START(1, 1, p);
     denc_varint(total, p);
     uint64_t n;

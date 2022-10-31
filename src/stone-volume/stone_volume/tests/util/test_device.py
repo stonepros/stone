@@ -1,7 +1,7 @@
 import pytest
 from copy import deepcopy
-from ceph_volume.util import device
-from ceph_volume.api import lvm as api
+from stone_volume.util import device
+from stone_volume.api import lvm as api
 from mock.mock import patch, mock_open
 
 
@@ -169,33 +169,33 @@ class TestDevice(object):
         disk = device.Device("/dev/sda")
         assert not disk.is_mapper
 
-    @pytest.mark.usefixtures("lsblk_ceph_disk_member",
+    @pytest.mark.usefixtures("lsblk_stone_disk_member",
                              "disable_kernel_queries")
-    def test_is_ceph_disk_lsblk(self, monkeypatch, patch_bluestore_label):
+    def test_is_stone_disk_lsblk(self, monkeypatch, patch_bluestore_label):
         disk = device.Device("/dev/sda")
-        assert disk.is_ceph_disk_member
+        assert disk.is_stone_disk_member
 
-    @pytest.mark.usefixtures("blkid_ceph_disk_member",
+    @pytest.mark.usefixtures("blkid_stone_disk_member",
                              "disable_kernel_queries")
-    def test_is_ceph_disk_blkid(self, monkeypatch, patch_bluestore_label):
+    def test_is_stone_disk_blkid(self, monkeypatch, patch_bluestore_label):
         disk = device.Device("/dev/sda")
-        assert disk.is_ceph_disk_member
+        assert disk.is_stone_disk_member
 
-    @pytest.mark.usefixtures("lsblk_ceph_disk_member",
+    @pytest.mark.usefixtures("lsblk_stone_disk_member",
                              "disable_kernel_queries")
-    def test_is_ceph_disk_member_not_available_lsblk(self, monkeypatch, patch_bluestore_label):
+    def test_is_stone_disk_member_not_available_lsblk(self, monkeypatch, patch_bluestore_label):
         disk = device.Device("/dev/sda")
-        assert disk.is_ceph_disk_member
+        assert disk.is_stone_disk_member
         assert not disk.available
-        assert "Used by ceph-disk" in disk.rejected_reasons
+        assert "Used by stone-disk" in disk.rejected_reasons
 
-    @pytest.mark.usefixtures("blkid_ceph_disk_member",
+    @pytest.mark.usefixtures("blkid_stone_disk_member",
                              "disable_kernel_queries")
-    def test_is_ceph_disk_member_not_available_blkid(self, monkeypatch, patch_bluestore_label):
+    def test_is_stone_disk_member_not_available_blkid(self, monkeypatch, patch_bluestore_label):
         disk = device.Device("/dev/sda")
-        assert disk.is_ceph_disk_member
+        assert disk.is_stone_disk_member
         assert not disk.available
-        assert "Used by ceph-disk" in disk.rejected_reasons
+        assert "Used by stone-disk" in disk.rejected_reasons
 
     def test_reject_removable_device(self, device_info):
         data = {"/dev/sdb": {"removable": 1}}
@@ -267,11 +267,11 @@ class TestDevice(object):
         assert not disk.available
         assert "Failed to determine if device is BlueStore" in disk.rejected_reasons
 
-    @pytest.mark.usefixtures("device_info_not_ceph_disk_member",
+    @pytest.mark.usefixtures("device_info_not_stone_disk_member",
                              "disable_kernel_queries")
-    def test_is_not_ceph_disk_member_lsblk(self, patch_bluestore_label):
+    def test_is_not_stone_disk_member_lsblk(self, patch_bluestore_label):
         disk = device.Device("/dev/sda")
-        assert disk.is_ceph_disk_member is False
+        assert disk.is_stone_disk_member is False
 
     def test_existing_vg_available(self, monkeypatch, device_info):
         vg = api.VolumeGroup(vg_name='foo/bar', vg_free_count=1536,
@@ -311,9 +311,9 @@ class TestDevice(object):
         assert not disk.available
         assert not disk.available_raw
 
-    @pytest.mark.parametrize("ceph_type", ["data", "block"])
-    def test_used_by_ceph(self, device_info,
-                          monkeypatch, ceph_type):
+    @pytest.mark.parametrize("stone_type", ["data", "block"])
+    def test_used_by_stone(self, device_info,
+                          monkeypatch, stone_type):
         data = {"/dev/sda": {"foo": "bar"}}
         lsblk = {"TYPE": "part", "PKNAME": "sda"}
         FooPVolume = api.PVolume(pv_name='/dev/sda', pv_uuid="0000",
@@ -322,7 +322,7 @@ class TestDevice(object):
         pvolumes.append(FooPVolume)
         lv_data = {"lv_name": "lv", "lv_path": "vg/lv", "vg_name": "vg",
                    "lv_uuid": "0000", "lv_tags":
-                   "ceph.osd_id=0,ceph.type="+ceph_type}
+                   "stone.osd_id=0,stone.type="+stone_type}
         volumes = []
         lv = api.Volume(**lv_data)
         volumes.append(lv)
@@ -335,20 +335,20 @@ class TestDevice(object):
                              vg_extent_size=1073741824)
         monkeypatch.setattr(api, 'get_device_vgs', lambda x: [vg])
         disk = device.Device("/dev/sda")
-        assert disk.used_by_ceph
+        assert disk.used_by_stone
 
-    def test_not_used_by_ceph(self, device_info, monkeypatch):
+    def test_not_used_by_stone(self, device_info, monkeypatch):
         FooPVolume = api.PVolume(pv_name='/dev/sda', pv_uuid="0000", lv_uuid="0000", pv_tags={}, vg_name="vg")
         pvolumes = []
         pvolumes.append(FooPVolume)
         data = {"/dev/sda": {"foo": "bar"}}
         lsblk = {"TYPE": "part", "PKNAME": "sda"}
-        lv_data = {"lv_path": "vg/lv", "vg_name": "vg", "lv_uuid": "0000", "tags": {"ceph.osd_id": 0, "ceph.type": "journal"}}
+        lv_data = {"lv_path": "vg/lv", "vg_name": "vg", "lv_uuid": "0000", "tags": {"stone.osd_id": 0, "stone.type": "journal"}}
         monkeypatch.setattr(api, 'get_pvs', lambda **kwargs: pvolumes)
 
         device_info(devices=data, lsblk=lsblk, lv=lv_data)
         disk = device.Device("/dev/sda")
-        assert not disk.used_by_ceph
+        assert not disk.used_by_stone
 
     def test_get_device_id(self, device_info):
         udev = {k:k for k in ['ID_VENDOR', 'ID_MODEL', 'ID_SCSI_SERIAL']}
@@ -385,7 +385,7 @@ class TestDeviceEncryption(object):
 
     def test_partition_is_not_encrypted_blkid(self, device_info):
         lsblk = {'TYPE': 'part', 'PKNAME': 'sda'}
-        blkid = {'TYPE': 'ceph data'}
+        blkid = {'TYPE': 'stone data'}
         device_info(lsblk=lsblk, blkid=blkid)
         disk = device.Device("/dev/sda")
         assert disk.is_encrypted is False
@@ -519,58 +519,58 @@ class TestDeviceOrdering(object):
         assert sdd > sdb
 
 
-class TestCephDiskDevice(object):
+class TestStoneDiskDevice(object):
 
     def test_partlabel_lsblk(self, device_info):
         lsblk = {"TYPE": "disk", "PARTLABEL": ""}
         device_info(lsblk=lsblk)
-        disk = device.CephDiskDevice(device.Device("/dev/sda"))
+        disk = device.StoneDiskDevice(device.Device("/dev/sda"))
 
         assert disk.partlabel == ''
 
     def test_partlabel_blkid(self, device_info):
-        blkid = {"TYPE": "disk", "PARTLABEL": "ceph data"}
+        blkid = {"TYPE": "disk", "PARTLABEL": "stone data"}
         device_info(blkid=blkid)
-        disk = device.CephDiskDevice(device.Device("/dev/sda"))
+        disk = device.StoneDiskDevice(device.Device("/dev/sda"))
 
-        assert disk.partlabel == 'ceph data'
+        assert disk.partlabel == 'stone data'
 
-    @pytest.mark.usefixtures("blkid_ceph_disk_member",
+    @pytest.mark.usefixtures("blkid_stone_disk_member",
                              "disable_kernel_queries")
     def test_is_member_blkid(self, monkeypatch, patch_bluestore_label):
-        disk = device.CephDiskDevice(device.Device("/dev/sda"))
+        disk = device.StoneDiskDevice(device.Device("/dev/sda"))
 
         assert disk.is_member is True
 
-    @pytest.mark.usefixtures("lsblk_ceph_disk_member",
+    @pytest.mark.usefixtures("lsblk_stone_disk_member",
                              "disable_kernel_queries")
     def test_is_member_lsblk(self, patch_bluestore_label, device_info):
-        lsblk = {"TYPE": "disk", "PARTLABEL": "ceph"}
+        lsblk = {"TYPE": "disk", "PARTLABEL": "stone"}
         device_info(lsblk=lsblk)
-        disk = device.CephDiskDevice(device.Device("/dev/sda"))
+        disk = device.StoneDiskDevice(device.Device("/dev/sda"))
 
         assert disk.is_member is True
 
     def test_unknown_type(self, device_info):
         lsblk = {"TYPE": "disk", "PARTLABEL": "gluster"}
         device_info(lsblk=lsblk)
-        disk = device.CephDiskDevice(device.Device("/dev/sda"))
+        disk = device.StoneDiskDevice(device.Device("/dev/sda"))
 
         assert disk.type == 'unknown'
 
-    ceph_types = ['data', 'wal', 'db', 'lockbox', 'journal', 'block']
+    stone_types = ['data', 'wal', 'db', 'lockbox', 'journal', 'block']
 
-    @pytest.mark.usefixtures("blkid_ceph_disk_member",
+    @pytest.mark.usefixtures("blkid_stone_disk_member",
                              "disable_kernel_queries")
-    def test_type_blkid(self, monkeypatch, device_info, ceph_partlabel):
-        disk = device.CephDiskDevice(device.Device("/dev/sda"))
+    def test_type_blkid(self, monkeypatch, device_info, stone_partlabel):
+        disk = device.StoneDiskDevice(device.Device("/dev/sda"))
 
-        assert disk.type in self.ceph_types
+        assert disk.type in self.stone_types
 
-    @pytest.mark.usefixtures("blkid_ceph_disk_member",
-                             "lsblk_ceph_disk_member",
+    @pytest.mark.usefixtures("blkid_stone_disk_member",
+                             "lsblk_stone_disk_member",
                              "disable_kernel_queries")
-    def test_type_lsblk(self, device_info, ceph_partlabel):
-        disk = device.CephDiskDevice(device.Device("/dev/sda"))
+    def test_type_lsblk(self, device_info, stone_partlabel):
+        disk = device.StoneDiskDevice(device.Device("/dev/sda"))
 
-        assert disk.type in self.ceph_types
+        assert disk.type in self.stone_types

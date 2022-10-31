@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * Copyright (C) 2016 Red Hat Inc.
  *
@@ -26,7 +26,7 @@
 #include "crimson/osd/scheduler/scheduler.h"
 #include "common/config.h"
 #include "include/cmp.h"
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 
 
 namespace crimson::osd::scheduler {
@@ -116,7 +116,7 @@ public:
   }
 
   // Formatted output of the queue
-  void dump(ceph::Formatter &f) const final;
+  void dump(stone::Formatter &f) const final;
 
   void print(std::ostream &ostream) const final {
     ostream << "mClockScheduler";

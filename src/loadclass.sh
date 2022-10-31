@@ -21,6 +21,6 @@ arch=""
 
 [ -z "$arch" ] && { echo "lib architecture not identified"; exit; }
 
-`dirname $0`/ceph class add $name $ver $arch --in-data=$fname
+`dirname $0`/stone class add $name $ver $arch --in-data=$fname
 
 

@@ -22,15 +22,15 @@
 #include <errno.h>
 #include "common/errno.h"
 #include "common/dout.h"
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "common/Formatter.h"
 #include "common/Cond.h"
 
-#include "common/ceph_context.h"
+#include "common/stone_context.h"
 #include "include/common_fwd.h"
 
 // reinclude our assert to clobber the system one
-# include "include/ceph_assert.h"
+# include "include/stone_assert.h"
 
 enum {
   l_leveldb_first = 34300,
@@ -46,17 +46,17 @@ enum {
   l_leveldb_last,
 };
 
-extern leveldb::Logger *create_leveldb_ceph_logger();
+extern leveldb::Logger *create_leveldb_stone_logger();
 
-class StoneeLevelDBLogger;
+class StoneLevelDBLogger;
 
 /**
  * Uses LevelDB to implement the KeyValueDB interface
  */
 class LevelDBStore : public KeyValueDB {
-  StoneeContext *cct;
+  StoneContext *cct;
   PerfCounters *logger;
-  StoneeLevelDBLogger *ceph_logger;
+  StoneLevelDBLogger *stone_logger;
   std::string path;
   boost::scoped_ptr<leveldb::Cache> db_cache;
 #ifdef HAVE_LEVELDB_FILTER_POLICY
@@ -68,9 +68,9 @@ class LevelDBStore : public KeyValueDB {
   int do_open(std::ostream &out, bool create_if_missing);
 
   // manage async compactions
-  ceph::mutex compact_queue_lock =
-    ceph::make_mutex("LevelDBStore::compact_thread_lock");
-  ceph::condition_variable compact_queue_cond;
+  stone::mutex compact_queue_lock =
+    stone::make_mutex("LevelDBStore::compact_thread_lock");
+  stone::condition_variable compact_queue_cond;
   std::list<std::pair<std::string, std::string>> compact_queue;
   bool compact_queue_stop;
   class CompactThread : public Thread {
@@ -157,10 +157,10 @@ public:
     {}
   } options;
 
-  LevelDBStore(StoneeContext *c, const std::string &path) :
+  LevelDBStore(StoneContext *c, const std::string &path) :
     cct(c),
     logger(NULL),
-    ceph_logger(NULL),
+    stone_logger(NULL),
     path(path),
     db_cache(NULL),
 #ifdef HAVE_LEVELDB_FILTER_POLICY
@@ -197,7 +197,7 @@ public:
     void set(
       const std::string &prefix,
       const std::string &k,
-      const ceph::buffer::list &bl) override;
+      const stone::buffer::list &bl) override;
     using KeyValueDB::TransactionImpl::set;
     void rmkey(
       const std::string &prefix,
@@ -222,12 +222,12 @@ public:
   int get(
     const std::string &prefix,
     const std::set<std::string> &key,
-    std::map<std::string, ceph::buffer::list> *out
+    std::map<std::string, stone::buffer::list> *out
     ) override;
 
   int get(const std::string &prefix, 
 	  const std::string &key,   
-	  ceph::buffer::list *value) override;
+	  stone::buffer::list *value) override;
 
   using KeyValueDB::get;
 
@@ -311,13 +311,13 @@ public:
         return false;
       }
     }
-    ceph::buffer::list value() override {
+    stone::buffer::list value() override {
       return to_bufferlist(dbiter->value());
     }
 
-    ceph::bufferptr value_as_ptr() override {
+    stone::bufferptr value_as_ptr() override {
       leveldb::Slice data = dbiter->value();
-      return ceph::bufferptr(data.data(), data.size());
+      return stone::bufferptr(data.data(), data.size());
     }
 
     int status() override {
@@ -328,7 +328,7 @@ public:
   /// Utility
   static std::string combine_strings(const std::string &prefix, const std::string &value);
   static int split_key(leveldb::Slice in, std::string *prefix, std::string *key);
-  static ceph::buffer::list to_bufferlist(leveldb::Slice in);
+  static stone::buffer::list to_bufferlist(leveldb::Slice in);
   static std::string past_prefix(const std::string &prefix) {
     std::string limit = prefix;
     limit.push_back(1);

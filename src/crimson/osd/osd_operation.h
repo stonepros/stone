@@ -15,10 +15,10 @@
 #include <seastar/core/timer.hh>
 #include <seastar/core/lowres_clock.hh>
 
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "crimson/osd/scheduler/scheduler.h"
 
-namespace ceph {
+namespace stone {
   class Formatter;
 }
 
@@ -123,11 +123,11 @@ public:
   blocking_future<T> make_blocking_future(seastar::future<T> &&f) {
     return blocking_future<T>(this, std::move(f));
   }
-  void dump(ceph::Formatter *f) const;
+  void dump(stone::Formatter *f) const;
   virtual ~Blocker() = default;
 
 private:
-  virtual void dump_detail(ceph::Formatter *f) const = 0;
+  virtual void dump_detail(stone::Formatter *f) const = 0;
   virtual const char *get_type_name() const = 0;
 };
 
@@ -148,7 +148,7 @@ public:
     : parent_blockers(std::move(parent_blockers)) {}
   static constexpr const char *type_name = "AggregateBlocker";
 private:
-  void dump_detail(ceph::Formatter *f) const final;
+  void dump_detail(stone::Formatter *f) const final;
 };
 
 template <typename T>
@@ -200,12 +200,12 @@ class Operation : public boost::intrusive_ref_counter<
     });
   }
 
-  void dump(ceph::Formatter *f);
-  void dump_brief(ceph::Formatter *f);
+  void dump(stone::Formatter *f);
+  void dump_brief(stone::Formatter *f);
   virtual ~Operation() = default;
 
  private:
-  virtual void dump_detail(ceph::Formatter *f) const = 0;
+  virtual void dump_detail(stone::Formatter *f) const = 0;
 
  private:
   registry_hook_t registry_hook;
@@ -250,7 +250,7 @@ public:
   virtual ~OperationT() = default;
 
 private:
-  virtual void dump_detail(ceph::Formatter *f) const = 0;
+  virtual void dump_detail(stone::Formatter *f) const = 0;
 };
 
 /**
@@ -381,7 +381,7 @@ private:
  */
 class OrderedPipelinePhase : public Blocker {
 private:
-  void dump_detail(ceph::Formatter *f) const final;
+  void dump_detail(stone::Formatter *f) const final;
   const char *get_type_name() const final {
     return name;
   }

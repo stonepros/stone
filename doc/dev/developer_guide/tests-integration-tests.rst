@@ -3,16 +3,16 @@
 Testing - Integration Tests
 ===========================
 
-Ceph has two types of tests: :ref:`make check <make-check>` tests and integration tests.
+Stone has two types of tests: :ref:`make check <make-check>` tests and integration tests.
 When a test requires multiple machines, root access or lasts for a
-longer time (for example, to simulate a realistic Ceph deployment), it
+longer time (for example, to simulate a realistic Stone deployment), it
 is deemed to be an integration test. Integration tests are organized into
 "suites", which are defined in the `ceph/qa sub-directory`_ and run with
 the ``teuthology-suite`` command.
 
 The ``teuthology-suite`` command is part of the `teuthology framework`_.
 In the sections that follow we attempt to provide a detailed introduction
-to that framework from the perspective of a beginning Ceph developer.
+to that framework from the perspective of a beginning Stone developer.
 
 Teuthology consumes packages
 ----------------------------
@@ -25,18 +25,18 @@ installed on any machine running those platforms.
 Teuthology has a `list of platforms that it supports
 <https://github.com/ceph/ceph/tree/master/qa/distros/supported>`_ (as
 of September 2020 the list consisted of "RHEL/CentOS 8" and "Ubuntu 18.04").  It
-expects to be provided pre-built Ceph packages for these platforms.
+expects to be provided pre-built Stone packages for these platforms.
 Teuthology deploys these platforms on machines (bare-metal or
-cloud-provisioned), installs the packages on them, and deploys Ceph
+cloud-provisioned), installs the packages on them, and deploys Stone
 clusters on them - all as called for by the test.
 
 The Nightlies
 -------------
 
 A number of integration tests are run on a regular basis in the `Sepia
-lab`_ against the official Ceph repositories (on the ``master`` development
+lab`_ against the official Stone repositories (on the ``master`` development
 branch and the stable branches). Traditionally, these tests are called "the
-nightlies" because the Ceph core developers used to live and work in
+nightlies" because the Stone core developers used to live and work in
 the same time zone and from their perspective the tests were run overnight.
 
 The results of the nightlies are published at http://pulpito.ceph.com/. The
@@ -93,43 +93,43 @@ Suites Inventory
 ----------------
 
 The ``suites`` directory of the `ceph/qa sub-directory`_ contains
-all the integration tests, for all the Ceph components.
+all the integration tests, for all the Stone components.
 
 `ceph-deploy <https://github.com/ceph/ceph/tree/master/qa/suites/ceph-deploy>`_
-  install a Ceph cluster with ``ceph-deploy`` (:ref:`ceph-deploy man page <ceph-deploy>`)
+  install a Stone cluster with ``ceph-deploy`` (:ref:`ceph-deploy man page <ceph-deploy>`)
 
 `dummy <https://github.com/ceph/ceph/tree/master/qa/suites/dummy>`_
   get a machine, do nothing and return success (commonly used to
   verify the :ref:`testing-integration-tests` infrastructure works as expected)
 
 `fs <https://github.com/ceph/ceph/tree/master/qa/suites/fs>`_
-  test CephFS mounted using kernel and FUSE clients, also with multiple MDSs.
+  test StoneFS mounted using kernel and FUSE clients, also with multiple MDSs.
 
 `krbd <https://github.com/ceph/ceph/tree/master/qa/suites/krbd>`_
   test the RBD kernel module
 
 `powercycle <https://github.com/ceph/ceph/tree/master/qa/suites/powercycle>`_
-  verify the Ceph cluster behaves when machines are powered off
+  verify the Stone cluster behaves when machines are powered off
   and on again
 
 `rados <https://github.com/ceph/ceph/tree/master/qa/suites/rados>`_
-  run Ceph clusters including OSDs and MONs, under various conditions of
+  run Stone clusters including OSDs and MONs, under various conditions of
   stress
 
 `rbd <https://github.com/ceph/ceph/tree/master/qa/suites/rbd>`_
-  run RBD tests using actual Ceph clusters, with and without qemu
+  run RBD tests using actual Stone clusters, with and without qemu
 
 `rgw <https://github.com/ceph/ceph/tree/master/qa/suites/rgw>`_
-  run RGW tests using actual Ceph clusters
+  run RGW tests using actual Stone clusters
 
 `smoke <https://github.com/ceph/ceph/tree/master/qa/suites/smoke>`_
-  run tests that exercise the Ceph API with an actual Ceph cluster
+  run tests that exercise the Stone API with an actual Stone cluster
 
 `teuthology <https://github.com/ceph/ceph/tree/master/qa/suites/teuthology>`_
   verify that teuthology can run integration tests, with and without OpenStack
 
 `upgrade <https://github.com/ceph/ceph/tree/master/qa/suites/upgrade>`_
-  for various versions of Ceph, verify that upgrades can happen
+  for various versions of Stone, verify that upgrades can happen
   without disrupting an ongoing workload
 
 .. _`ceph-deploy man page`: ../../man/8/ceph-deploy
@@ -154,7 +154,7 @@ coverage and quality.
 How integration tests are run
 -----------------------------
 
-Given that - as a new Ceph developer - you will typically not have access
+Given that - as a new Stone developer - you will typically not have access
 to the `Sepia lab`_, you may rightly ask how you can run the integration
 tests in your own environment.
 
@@ -244,7 +244,7 @@ the ``task()`` function defined in that file.
 
 In this case, the `install
 <https://github.com/ceph/teuthology/blob/master/teuthology/task/install/__init__.py>`_
-task comes first. It installs the Ceph packages on each machine (as
+task comes first. It installs the Stone packages on each machine (as
 defined by the ``roles`` array). A full description of the ``install``
 task is `found in the python file
 <https://github.com/ceph/teuthology/blob/master/teuthology/task/install/__init__.py>`_
@@ -255,7 +255,7 @@ The ``ceph`` task, which is documented `here
 search for "def task"), starts OSDs and MONs (and possibly MDSs as well)
 as required by the ``roles`` array. In this example, it will start one MON
 (``mon.a``) and two OSDs (``osd.0`` and ``osd.1``), all on the same
-machine. Control moves to the next task when the Ceph cluster reaches
+machine. Control moves to the next task when the Stone cluster reaches
 ``HEALTH_OK`` state.
 
 The next task is ``admin_socket`` (`source code
@@ -495,7 +495,7 @@ different messenger types: ``simple``, ``async`` and ``random``, because they
 are combined (via the special file ``%``) with the `msgr directory
 <https://github.com/ceph/ceph/tree/master/qa/suites/rados/basic/msgr>`_
 
-All integration tests are required to be run before a Ceph release is
+All integration tests are required to be run before a Stone release is
 published. When merely verifying whether a contribution can be merged without
 risking a trivial regression, it is enough to run a subset. The ``--subset``
 option can be used to reduce the number of tests that are triggered. For

@@ -4,16 +4,16 @@ import random
 import string
 from typing import List, Dict, Any, Tuple, cast, Optional
 
-from ceph.deployment.service_spec import IngressSpec
+from stone.deployment.service_spec import IngressSpec
 from mgr_util import build_url
-from cephadm.utils import resolve_ip
+from stoneadm.utils import resolve_ip
 from orchestrator import OrchestratorError
-from cephadm.services.cephadmservice import CephadmDaemonDeploySpec, CephService
+from stoneadm.services.stoneadmservice import StoneadmDaemonDeploySpec, StoneService
 
 logger = logging.getLogger(__name__)
 
 
-class IngressService(CephService):
+class IngressService(StoneService):
     TYPE = 'ingress'
 
     def primary_daemon_type(self) -> str:
@@ -24,8 +24,8 @@ class IngressService(CephService):
 
     def prepare_create(
             self,
-            daemon_spec: CephadmDaemonDeploySpec,
-    ) -> CephadmDaemonDeploySpec:
+            daemon_spec: StoneadmDaemonDeploySpec,
+    ) -> StoneadmDaemonDeploySpec:
         if daemon_spec.daemon_type == 'haproxy':
             return self.haproxy_prepare_create(daemon_spec)
         if daemon_spec.daemon_type == 'keepalived':
@@ -34,7 +34,7 @@ class IngressService(CephService):
 
     def generate_config(
             self,
-            daemon_spec: CephadmDaemonDeploySpec
+            daemon_spec: StoneadmDaemonDeploySpec
     ) -> Tuple[Dict[str, Any], List[str]]:
         if daemon_spec.daemon_type == 'haproxy':
             return self.haproxy_generate_config(daemon_spec)
@@ -44,8 +44,8 @@ class IngressService(CephService):
 
     def haproxy_prepare_create(
             self,
-            daemon_spec: CephadmDaemonDeploySpec,
-    ) -> CephadmDaemonDeploySpec:
+            daemon_spec: StoneadmDaemonDeploySpec,
+    ) -> StoneadmDaemonDeploySpec:
         assert daemon_spec.daemon_type == 'haproxy'
 
         daemon_id = daemon_spec.daemon_id
@@ -61,7 +61,7 @@ class IngressService(CephService):
 
     def haproxy_generate_config(
             self,
-            daemon_spec: CephadmDaemonDeploySpec,
+            daemon_spec: StoneadmDaemonDeploySpec,
     ) -> Tuple[Dict[str, Any], List[str]]:
         spec = cast(IngressSpec, self.mgr.spec_store[daemon_spec.service_name].spec)
         assert spec.backend_service
@@ -149,8 +149,8 @@ class IngressService(CephService):
 
     def keepalived_prepare_create(
             self,
-            daemon_spec: CephadmDaemonDeploySpec,
-    ) -> CephadmDaemonDeploySpec:
+            daemon_spec: StoneadmDaemonDeploySpec,
+    ) -> StoneadmDaemonDeploySpec:
         assert daemon_spec.daemon_type == 'keepalived'
 
         daemon_id = daemon_spec.daemon_id
@@ -166,7 +166,7 @@ class IngressService(CephService):
 
     def keepalived_generate_config(
             self,
-            daemon_spec: CephadmDaemonDeploySpec,
+            daemon_spec: StoneadmDaemonDeploySpec,
     ) -> Tuple[Dict[str, Any], List[str]]:
         spec = cast(IngressSpec, self.mgr.spec_store[daemon_spec.service_name].spec)
         assert spec.backend_service

@@ -1,9 +1,9 @@
 import json
 
-from cephadm.services.osd import OSDRemovalQueue, OSD
+from stoneadm.services.osd import OSDRemovalQueue, OSD
 import pytest
 from tests import mock
-from .fixtures import with_cephadm_module
+from .fixtures import with_stoneadm_module
 from datetime import datetime
 
 
@@ -29,7 +29,7 @@ class TestOSDRemoval:
         ]
     )
     def test_get_pg_count(self, rm_util, osd_id, osd_df, expected):
-        with mock.patch("cephadm.services.osd.RemoveUtil.osd_df", return_value=osd_df):
+        with mock.patch("stoneadm.services.osd.RemoveUtil.osd_df", return_value=osd_df):
             assert rm_util.get_pg_count(osd_id) == expected
 
     @pytest.mark.parametrize(
@@ -47,7 +47,7 @@ class TestOSDRemoval:
         ]
     )
     def test_find_stop_threshold(self, rm_util, osds, ok_to_stop, expected):
-        with mock.patch("cephadm.services.osd.RemoveUtil.ok_to_stop", side_effect=ok_to_stop):
+        with mock.patch("stoneadm.services.osd.RemoveUtil.ok_to_stop", side_effect=ok_to_stop):
             assert rm_util.find_osd_stop_threshold(osds) == expected
 
     def test_process_removal_queue(self, rm_util):
@@ -75,10 +75,10 @@ class TestOSDRemoval:
         ]
     )
     def test_ready_to_drain_osds(self, max_osd_draining_count, draining_osds, idling_osds, ok_to_stop, expected):
-        with with_cephadm_module({'max_osd_draining_count': max_osd_draining_count}) as m:
-            with mock.patch("cephadm.services.osd.OSDRemovalQueue.draining_osds", return_value=draining_osds):
-                with mock.patch("cephadm.services.osd.OSDRemovalQueue.idling_osds", return_value=idling_osds):
-                    with mock.patch("cephadm.services.osd.RemoveUtil.ok_to_stop", side_effect=ok_to_stop):
+        with with_stoneadm_module({'max_osd_draining_count': max_osd_draining_count}) as m:
+            with mock.patch("stoneadm.services.osd.OSDRemovalQueue.draining_osds", return_value=draining_osds):
+                with mock.patch("stoneadm.services.osd.OSDRemovalQueue.idling_osds", return_value=idling_osds):
+                    with mock.patch("stoneadm.services.osd.RemoveUtil.ok_to_stop", side_effect=ok_to_stop):
                         removal_queue = OSDRemovalQueue(m)
                         assert len(removal_queue._ready_to_drain_osds()) == expected
 
@@ -102,7 +102,7 @@ class TestOSDRemoval:
         rm_util._run_mon_cmd.assert_called_with(
             {'prefix': 'osd purge-actual', 'id': 1, 'yes_i_really_mean_it': True})
 
-    def test_load(self, cephadm_module, rm_util):
+    def test_load(self, stoneadm_module, rm_util):
         data = json.dumps([
             {
                 "osd_id": 35,
@@ -119,12 +119,12 @@ class TestOSDRemoval:
                 "process_started_at": "2020-09-14T11:41:52.245832"
             }
         ])
-        cephadm_module.set_store('osd_remove_queue', data)
-        cephadm_module.to_remove_osds.load_from_store()
+        stoneadm_module.set_store('osd_remove_queue', data)
+        stoneadm_module.to_remove_osds.load_from_store()
 
-        expected = OSDRemovalQueue(cephadm_module)
+        expected = OSDRemovalQueue(stoneadm_module)
         expected.osds.add(OSD(osd_id=35, remove_util=rm_util, draining=True))
-        assert cephadm_module.to_remove_osds == expected
+        assert stoneadm_module.to_remove_osds == expected
 
 
 class TestOSD:
@@ -179,7 +179,7 @@ class TestOSD:
         assert osd_obj.draining is False
         assert ret is True
 
-    @mock.patch('cephadm.services.osd.OSD.stop_draining')
+    @mock.patch('stoneadm.services.osd.OSD.stop_draining')
     def test_stop(self, stop_draining_mock, osd_obj):
         osd_obj.stop()
         assert osd_obj.started is False
@@ -200,11 +200,11 @@ class TestOSD:
         ]
     )
     def test_is_draining(self, osd_obj, draining, empty, expected):
-        with mock.patch("cephadm.services.osd.OSD.is_empty", new_callable=mock.PropertyMock(return_value=empty)):
+        with mock.patch("stoneadm.services.osd.OSD.is_empty", new_callable=mock.PropertyMock(return_value=empty)):
             osd_obj.draining = draining
             assert osd_obj.is_draining is expected
 
-    @mock.patch("cephadm.services.osd.RemoveUtil.ok_to_stop")
+    @mock.patch("stoneadm.services.osd.RemoveUtil.ok_to_stop")
     def test_is_ok_to_stop(self, _, osd_obj):
         osd_obj.is_ok_to_stop
         osd_obj.rm_util.ok_to_stop.assert_called_once()
@@ -219,30 +219,30 @@ class TestOSD:
         ]
     )
     def test_is_empty(self, osd_obj, pg_count, expected):
-        with mock.patch("cephadm.services.osd.OSD.get_pg_count", return_value=pg_count):
+        with mock.patch("stoneadm.services.osd.OSD.get_pg_count", return_value=pg_count):
             assert osd_obj.is_empty is expected
 
-    @mock.patch("cephadm.services.osd.RemoveUtil.safe_to_destroy")
+    @mock.patch("stoneadm.services.osd.RemoveUtil.safe_to_destroy")
     def test_safe_to_destroy(self, _, osd_obj):
         osd_obj.safe_to_destroy()
         osd_obj.rm_util.safe_to_destroy.assert_called_once()
 
-    @mock.patch("cephadm.services.osd.RemoveUtil.set_osd_flag")
+    @mock.patch("stoneadm.services.osd.RemoveUtil.set_osd_flag")
     def test_down(self, _, osd_obj):
         osd_obj.down()
         osd_obj.rm_util.set_osd_flag.assert_called_with([osd_obj], 'down')
 
-    @mock.patch("cephadm.services.osd.RemoveUtil.destroy_osd")
+    @mock.patch("stoneadm.services.osd.RemoveUtil.destroy_osd")
     def test_destroy_osd(self, _, osd_obj):
         osd_obj.destroy()
         osd_obj.rm_util.destroy_osd.assert_called_once()
 
-    @mock.patch("cephadm.services.osd.RemoveUtil.purge_osd")
+    @mock.patch("stoneadm.services.osd.RemoveUtil.purge_osd")
     def test_purge(self, _, osd_obj):
         osd_obj.purge()
         osd_obj.rm_util.purge_osd.assert_called_once()
 
-    @mock.patch("cephadm.services.osd.RemoveUtil.get_pg_count")
+    @mock.patch("stoneadm.services.osd.RemoveUtil.get_pg_count")
     def test_pg_count(self, _, osd_obj):
         osd_obj.get_pg_count()
         osd_obj.rm_util.get_pg_count.assert_called_once()
@@ -274,23 +274,23 @@ class TestOSDRemovalQueue:
         q.osds.add(osd_obj)
         assert q.queue_size() == 1
 
-    @mock.patch("cephadm.services.osd.OSD.start")
-    @mock.patch("cephadm.services.osd.OSD.exists")
+    @mock.patch("stoneadm.services.osd.OSD.start")
+    @mock.patch("stoneadm.services.osd.OSD.exists")
     def test_enqueue(self, exist, start, osd_obj):
         q = OSDRemovalQueue(mock.Mock())
         q.enqueue(osd_obj)
         osd_obj.start.assert_called_once()
 
-    @mock.patch("cephadm.services.osd.OSD.stop")
-    @mock.patch("cephadm.services.osd.OSD.exists")
+    @mock.patch("stoneadm.services.osd.OSD.stop")
+    @mock.patch("stoneadm.services.osd.OSD.exists")
     def test_rm_raise(self, exist, stop, osd_obj):
         q = OSDRemovalQueue(mock.Mock())
         with pytest.raises(KeyError):
             q.rm(osd_obj)
             osd_obj.stop.assert_called_once()
 
-    @mock.patch("cephadm.services.osd.OSD.stop")
-    @mock.patch("cephadm.services.osd.OSD.exists")
+    @mock.patch("stoneadm.services.osd.OSD.stop")
+    @mock.patch("stoneadm.services.osd.OSD.exists")
     def test_rm(self, exist, stop, osd_obj):
         q = OSDRemovalQueue(mock.Mock())
         q.osds.add(osd_obj)

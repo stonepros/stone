@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 /*
- * Ceph - scalable distributed file system
+ * Stone - scalable distributed file system
  *
  * This is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -14,7 +14,7 @@
 
 #include <functional>
 #include <ostream>
-#include "include/ceph_assert.h"
+#include "include/stone_assert.h"
 #include "bluestore_types.h"
 #include "zoned_types.h"
 
@@ -72,7 +72,7 @@ public:
   virtual double get_fragmentation_score();
   virtual void shutdown() = 0;
 
-  static Allocator *create(CephContext* cct, std::string type, int64_t size,
+  static Allocator *create(StoneContext* cct, std::string type, int64_t size,
 			   int64_t block_size, const std::string& name = "");
 
 

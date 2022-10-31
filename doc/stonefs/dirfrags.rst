@@ -3,7 +3,7 @@
 Configuring Directory fragmentation
 ===================================
 
-In CephFS, directories are *fragmented* when they become very large
+In StoneFS, directories are *fragmented* when they become very large
 or very busy.  This splits up the metadata so that it can be shared
 between multiple MDS daemons, and between multiple objects in the
 metadata pool.
@@ -12,10 +12,10 @@ In normal operation, directory fragmentation is invisible to
 users and administrators, and all the configuration settings mentioned
 here should be left at their default values.
 
-While directory fragmentation enables CephFS to handle very large
+While directory fragmentation enables StoneFS to handle very large
 numbers of entries in a single directory, application programmers should
 remain conservative about creating very large directories, as they still
-have a resource cost in situations such as a CephFS client listing
+have a resource cost in situations such as a StoneFS client listing
 the directory, where all the fragments must be loaded at once.
 
 .. tip:: The root directory cannot be fragmented.

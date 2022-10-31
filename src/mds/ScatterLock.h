@@ -25,7 +25,7 @@ public:
   ScatterLock(MDSCacheObject *o, LockType *lt) :
     SimpleLock(o, lt) {}
   ~ScatterLock() override {
-    ceph_assert(!_more);
+    stone_assert(!_more);
   }
 
   bool is_scatterlock() const override {
@@ -55,8 +55,8 @@ public:
 
   void set_xlock_snap_sync(MDSContext *c)
   {
-    ceph_assert(get_type() == STONE_LOCK_IFILE);
-    ceph_assert(state == LOCK_XLOCK || state == LOCK_XLOCKDONE);
+    stone_assert(get_type() == STONE_LOCK_IFILE);
+    stone_assert(state == LOCK_XLOCK || state == LOCK_XLOCKDONE);
     state = LOCK_XLOCKSNAP;
     add_waiter(WAIT_STABLE, c);
   }
@@ -142,7 +142,7 @@ public:
       state = LOCK_LOCK;
   }
 
-  void encode_state_for_rejoin(ceph::buffer::list& bl, int rep) {
+  void encode_state_for_rejoin(stone::buffer::list& bl, int rep) {
     __s16 s = get_replica_state();
     if (is_gathering(rep)) {
       // the recovering mds may hold rejoined wrlocks
@@ -167,11 +167,11 @@ public:
     if (s == LOCK_MIX || s == LOCK_MIX_LOCK || s == LOCK_MIX_SYNC)
       mark_need_recover();
 
-    using ceph::encode;
+    using stone::encode;
     encode(s, bl);
   }
 
-  void decode_state_rejoin(ceph::buffer::list::const_iterator& p, MDSContext::vec& waiters, bool survivor) {
+  void decode_state_rejoin(stone::buffer::list::const_iterator& p, MDSContext::vec& waiters, bool survivor) {
     SimpleLock::decode_state_rejoin(p, waiters, survivor);
     if (is_flushing()) {
       set_dirty();

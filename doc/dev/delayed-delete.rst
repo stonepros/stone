@@ -1,5 +1,5 @@
 =========================
- CephFS delayed deletion
+ StoneFS delayed deletion
 =========================
 
 When you delete a file, the data is not immediately removed. Each

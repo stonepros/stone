@@ -2,7 +2,7 @@
  RBD Replay
 ===================
 
-.. index:: Ceph Block Device; RBD Replay
+.. index:: Stone Block Device; RBD Replay
 
 RBD Replay is a set of tools for capturing and replaying RADOS Block Device
 (RBD) workloads. To capture an RBD workload, ``lttng-tools`` must be installed

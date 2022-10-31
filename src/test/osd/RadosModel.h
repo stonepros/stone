@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 #include "include/int_types.h"
 
-#include "common/ceph_mutex.h"
+#include "common/stone_mutex.h"
 #include "include/rados/librados.hpp"
 
 #include <iostream>
@@ -70,10 +70,10 @@ enum TestOpType {
 class TestWatchContext : public librados::WatchCtx2 {
   TestWatchContext(const TestWatchContext&);
 public:
-  ceph::condition_variable cond;
+  stone::condition_variable cond;
   uint64_t handle = 0;
   bool waiting = false;
-  ceph::mutex lock = ceph::make_mutex("watch lock");
+  stone::mutex lock = stone::make_mutex("watch lock");
   TestWatchContext() = default;
   void handle_notify(uint64_t notify_id, uint64_t cookie,
 		     uint64_t notifier_id,
@@ -156,8 +156,8 @@ public:
 
 class RadosTestContext {
 public:
-  ceph::mutex state_lock = ceph::make_mutex("Context Lock");
-  ceph::condition_variable wait_cond;
+  stone::mutex state_lock = stone::make_mutex("Context Lock");
+  stone::condition_variable wait_cond;
   // snap => {oid => desc}
   map<int, map<string,ObjectDesc> > pool_obj_cont;
   set<string> oid_in_use;
@@ -279,7 +279,7 @@ public:
     stringstream hostpid;
     hostpid << hostname_cstr << getpid() << "-";
     prefix = hostpid.str();
-    ceph_assert(!initialized);
+    stone_assert(!initialized);
     initialized = true;
     return 0;
   }
@@ -293,7 +293,7 @@ public:
 
   void loop(TestOpGenerator *gen)
   {
-    ceph_assert(initialized);
+    stone_assert(initialized);
     list<TestOp*> inflight;
     std::unique_lock state_locker{state_lock};
 
@@ -351,12 +351,12 @@ public:
   }
 
   TestWatchContext *watch(const string &oid) {
-    ceph_assert(!watches.count(oid));
+    stone_assert(!watches.count(oid));
     return (watches[oid] = new TestWatchContext);
   }
 
   void unwatch(const string &oid) {
-    ceph_assert(watches.count(oid));
+    stone_assert(watches.count(oid));
     delete watches[oid];
     watches.erase(oid);
   }
@@ -468,7 +468,7 @@ public:
 
   void remove_object(const string &oid)
   {
-    ceph_assert(!get_watch_context(oid));
+    stone_assert(!get_watch_context(oid));
     ObjectDesc new_obj;
     pool_obj_cont[current_snap].insert_or_assign(oid, new_obj);
   }
@@ -519,9 +519,9 @@ public:
   void remove_snap(int snap)
   {
     map<int, map<string,ObjectDesc> >::iterator next_iter = pool_obj_cont.find(snap);
-    ceph_assert(next_iter != pool_obj_cont.end());
+    stone_assert(next_iter != pool_obj_cont.end());
     map<int, map<string,ObjectDesc> >::iterator current_iter = next_iter++;
-    ceph_assert(current_iter != pool_obj_cont.end());
+    stone_assert(current_iter != pool_obj_cont.end());
     map<string,ObjectDesc> &current = current_iter->second;
     map<string,ObjectDesc> &next = next_iter->second;
     for (map<string,ObjectDesc>::iterator i = current.begin();
@@ -545,7 +545,7 @@ public:
 
   void roll_back(const string &oid, int snap)
   {
-    ceph_assert(!get_watch_context(oid));
+    stone_assert(!get_watch_context(oid));
     ObjectDesc contents;
     find_object(oid, &contents, snap);
     contents.dirty = true;
@@ -726,7 +726,7 @@ public:
     int r;
     if ((r = comp->get_return_value())) {
       cerr << "err " << r << std::endl;
-      ceph_abort();
+      stone_abort();
     }
     done = true;
     context->update_object_version(oid, comp->get_version64());
@@ -794,12 +794,12 @@ public:
 	0;
       bool requires_alignment;
       int r = context->io_ctx.pool_requires_alignment2(&requires_alignment);
-      ceph_assert(r == 0);
+      stone_assert(r == 0);
       uint64_t alignment = 0;
       if (requires_alignment) {
         r = context->io_ctx.pool_required_alignment2(&alignment);
-        ceph_assert(r == 0);
-        ceph_assert(alignment != 0);
+        stone_assert(r == 0);
+        stone_assert(alignment != 0);
       }
       cont_gen = new AppendGenerator(
 	prev_length,
@@ -829,8 +829,8 @@ public:
     for (auto [offset, len] : ranges) {
       gen_pos.seek(offset);
       bufferlist to_write = gen_pos.gen_bl_advance(len);
-      ceph_assert(to_write.length() == len);
-      ceph_assert(to_write.length() > 0);
+      stone_assert(to_write.length() == len);
+      stone_assert(to_write.length() > 0);
       std::cout << num << ":  writing " << context->prefix+oid
 		<< " from " << offset
 		<< " to " << len + offset << " tid " << tid << std::endl;
@@ -887,7 +887,7 @@ public:
 
   void _finish(CallbackInfo *info) override
   {
-    ceph_assert(info);
+    stone_assert(info);
     std::lock_guard state_locker{context->state_lock};
     uint64_t tid = info->id;
 
@@ -896,18 +896,18 @@ public:
     if (tid <= last_acked_tid) {
       cerr << "Error: finished tid " << tid
 	   << " when last_acked_tid was " << last_acked_tid << std::endl;
-      ceph_abort();
+      stone_abort();
     }
     last_acked_tid = tid;
 
-    ceph_assert(!done);
+    stone_assert(!done);
     waiting_on--;
     if (waiting_on == 0) {
       uint64_t version = 0;
       for (set<librados::AioCompletion *>::iterator i = waiting.begin();
 	   i != waiting.end();
 	   ) {
-	ceph_assert((*i)->is_complete());
+	stone_assert((*i)->is_complete());
 	if (int err = (*i)->get_return_value()) {
 	  cerr << "Error: oid " << oid << " write returned error code "
 	       << err << std::endl;
@@ -923,12 +923,12 @@ public:
 	cerr << "Error: racing read on " << oid << " returned version "
 	     << rcompletion->get_version64() << " rather than version "
 	     << version << std::endl;
-	ceph_abort_msg("racing read got wrong version");
+	stone_abort_msg("racing read got wrong version");
       }
 
       {
 	ObjectDesc old_value;
-	ceph_assert(context->find_object(oid, &old_value, -1));
+	stone_assert(context->find_object(oid, &old_value, -1));
 	if (old_value.deleted())
 	  std::cout << num << ":  left oid " << oid << " deleted" << std::endl;
 	else
@@ -1008,8 +1008,8 @@ public:
     for (auto [offset, len] : ranges) {
       gen_pos.seek(offset);
       bufferlist to_write = gen_pos.gen_bl_advance(len);
-      ceph_assert(to_write.length() == len);
-      ceph_assert(to_write.length() > 0);
+      stone_assert(to_write.length() == len);
+      stone_assert(to_write.length() > 0);
       std::cout << num << ":  writing " << context->prefix+oid
 		<< " from " << offset
 		<< " to " << offset + len << " tid " << tid << std::endl;
@@ -1061,7 +1061,7 @@ public:
 
   void _finish(CallbackInfo *info) override
   {
-    ceph_assert(info);
+    stone_assert(info);
     std::lock_guard state_locker{context->state_lock};
     uint64_t tid = info->id;
 
@@ -1070,18 +1070,18 @@ public:
     if (tid <= last_acked_tid) {
       cerr << "Error: finished tid " << tid
 	   << " when last_acked_tid was " << last_acked_tid << std::endl;
-      ceph_abort();
+      stone_abort();
     }
     last_acked_tid = tid;
 
-    ceph_assert(!done);
+    stone_assert(!done);
     waiting_on--;
     if (waiting_on == 0) {
       uint64_t version = 0;
       for (set<librados::AioCompletion *>::iterator i = waiting.begin();
 	   i != waiting.end();
 	   ) {
-	ceph_assert((*i)->is_complete());
+	stone_assert((*i)->is_complete());
 	if (int err = (*i)->get_return_value()) {
 	  cerr << "Error: oid " << oid << " writesame returned error code "
 	       << err << std::endl;
@@ -1093,19 +1093,19 @@ public:
       }
 
       context->update_object_version(oid, version);
-      ceph_assert(rcompletion->is_complete());
-      ceph_assert(rcompletion->get_return_value() == 1);
+      stone_assert(rcompletion->is_complete());
+      stone_assert(rcompletion->get_return_value() == 1);
       if (rcompletion->get_version64() != version) {
 	cerr << "Error: racing read on " << oid << " returned version "
 	     << rcompletion->get_version64() << " rather than version "
 	     << version << std::endl;
-	ceph_abort_msg("racing read got wrong version");
+	stone_abort_msg("racing read got wrong version");
       }
       rcompletion->release();
 
       {
 	ObjectDesc old_value;
-	ceph_assert(context->find_object(oid, &old_value, -1));
+	stone_assert(context->find_object(oid, &old_value, -1));
 	if (old_value.deleted())
 	  std::cout << num << ":  left oid " << oid << " deleted" << std::endl;
 	else
@@ -1174,7 +1174,7 @@ public:
     }
     if (r && !(r == -ENOENT && !present)) {
       cerr << "r is " << r << " while deleting " << oid << " and present is " << present << std::endl;
-      ceph_abort();
+      stone_abort();
     }
 
     state_locker.lock();
@@ -1283,7 +1283,7 @@ public:
 
     context->oid_in_use.insert(oid);
     context->oid_not_in_use.erase(oid);
-    ceph_assert(context->find_object(oid, &old_value, snap));
+    stone_assert(context->find_object(oid, &old_value, snap));
     if (old_value.deleted())
       std::cout << num << ":  expect deleted" << std::endl;
     else
@@ -1292,7 +1292,7 @@ public:
     TestWatchContext *ctx = context->get_watch_context(oid);
     state_locker.unlock();
     if (ctx) {
-      ceph_assert(old_value.exists);
+      stone_assert(old_value.exists);
       TestAlarm alarm;
       std::cerr << num << ":  about to start" << std::endl;
       ctx->start();
@@ -1302,7 +1302,7 @@ public:
       int r = context->io_ctx.notify2(context->prefix+oid, bl, 0, NULL);
       if (r < 0) {
 	std::cerr << "r is " << r << std::endl;
-	ceph_abort();
+	stone_abort();
       }
       std::cerr << num << ":  notified, waiting" << std::endl;
       ctx->wait();
@@ -1338,7 +1338,7 @@ public:
     if (localize_reads)
       flags |= librados::OPERATION_LOCALIZE_READS;
 
-    ceph_assert(!context->io_ctx.aio_operate(context->prefix+oid, completions[0], &op,
+    stone_assert(!context->io_ctx.aio_operate(context->prefix+oid, completions[0], &op,
 					flags, NULL));
     waiting_on++;
  
@@ -1347,7 +1347,7 @@ public:
     for (uint32_t i = 1; i < 3; ++i) {
       librados::ObjectReadOperation pipeline_op;
       _do_read(pipeline_op, i);
-      ceph_assert(!context->io_ctx.aio_operate(context->prefix+oid, completions[i], &pipeline_op, 0));
+      stone_assert(!context->io_ctx.aio_operate(context->prefix+oid, completions[i], &pipeline_op, 0));
       waiting_on++;
     }
 
@@ -1359,8 +1359,8 @@ public:
   void _finish(CallbackInfo *info) override
   {
     std::unique_lock state_locker{context->state_lock};
-    ceph_assert(!done);
-    ceph_assert(waiting_on > 0);
+    stone_assert(!done);
+    stone_assert(waiting_on > 0);
     if (--waiting_on) {
       return;
     }
@@ -1370,24 +1370,24 @@ public:
     int retval = completions[0]->get_return_value();
     for (vector<librados::AioCompletion *>::iterator it = completions.begin();
          it != completions.end(); ++it) {
-      ceph_assert((*it)->is_complete());
+      stone_assert((*it)->is_complete());
       uint64_t version = (*it)->get_version64();
       int err = (*it)->get_return_value();
       if (err != retval) {
         cerr << num << ": Error: oid " << oid << " read returned different error codes: "
              << retval << " and " << err << std::endl;
-	ceph_abort();
+	stone_abort();
       }
       if (err) {
         if (!(err == -ENOENT && old_value.deleted())) {
           cerr << num << ": Error: oid " << oid << " read returned error code "
                << err << std::endl;
-          ceph_abort();
+          stone_abort();
         }
       } else if (version != old_value.version) {
 	cerr << num << ": oid " << oid << " version is " << version
 	     << " and expected " << old_value.version << std::endl;
-	ceph_assert(version == old_value.version);
+	stone_assert(version == old_value.version);
       }
     }
     if (!retval) {
@@ -1398,7 +1398,7 @@ public:
 	  cerr << num << ": Error: did not find header attr, has_contents: "
 	       << old_value.has_contents()
 	       << std::endl;
-	  ceph_assert(!old_value.has_contents());
+	  stone_assert(!old_value.has_contents());
 	}
       } else {
 	headerbl = iter->second;
@@ -1406,7 +1406,7 @@ public:
       }
       if (old_value.deleted()) {
 	std::cout << num << ":  expect deleted" << std::endl;
-	ceph_abort_msg("expected deleted");
+	stone_abort_msg("expected deleted");
       } else {
 	std::cout << num << ":  expect " << old_value.most_recent() << std::endl;
       }
@@ -1450,7 +1450,7 @@ public:
 	    }
 	  }
 	}
-	if (context->errors) ceph_abort();
+	if (context->errors) stone_abort();
       }
 
       // Attributes
@@ -1459,23 +1459,23 @@ public:
 	  cerr << num << ": oid " << oid << " header does not match, old size: "
 	       << old_value.header.length() << " new size " << header.length()
 	       << std::endl;
-	  ceph_assert(old_value.header == header);
+	  stone_assert(old_value.header == header);
 	}
 	if (omap.size() != old_value.attrs.size()) {
 	  cerr << num << ": oid " << oid << " omap.size() is " << omap.size()
 	       << " and old is " << old_value.attrs.size() << std::endl;
-	  ceph_assert(omap.size() == old_value.attrs.size());
+	  stone_assert(omap.size() == old_value.attrs.size());
 	}
 	if (omap_keys.size() != old_value.attrs.size()) {
 	  cerr << num << ": oid " << oid << " omap.size() is " << omap_keys.size()
 	       << " and old is " << old_value.attrs.size() << std::endl;
-	  ceph_assert(omap_keys.size() == old_value.attrs.size());
+	  stone_assert(omap_keys.size() == old_value.attrs.size());
 	}
       }
       if (xattrs.size() != old_value.attrs.size()) {
 	cerr << num << ": oid " << oid << " xattrs.size() is " << xattrs.size()
 	     << " and old is " << old_value.attrs.size() << std::endl;
-	ceph_assert(xattrs.size() == old_value.attrs.size());
+	stone_assert(xattrs.size() == old_value.attrs.size());
       }
       for (map<string, ContDesc>::iterator iter = old_value.attrs.begin();
 	   iter != old_value.attrs.end();
@@ -1484,23 +1484,23 @@ public:
 	  iter->second);
 	if (!context->no_omap) {
 	  map<string, bufferlist>::iterator omap_iter = omap.find(iter->first);
-	  ceph_assert(omap_iter != omap.end());
-	  ceph_assert(bl.length() == omap_iter->second.length());
+	  stone_assert(omap_iter != omap.end());
+	  stone_assert(bl.length() == omap_iter->second.length());
 	  bufferlist::iterator k = bl.begin();
 	  for(bufferlist::iterator l = omap_iter->second.begin();
 	      !k.end() && !l.end();
 	      ++k, ++l) {
-	    ceph_assert(*l == *k);
+	    stone_assert(*l == *k);
 	  }
 	}
 	map<string, bufferlist>::iterator xattr_iter = xattrs.find(iter->first);
-	ceph_assert(xattr_iter != xattrs.end());
-	ceph_assert(bl.length() == xattr_iter->second.length());
+	stone_assert(xattr_iter != xattrs.end());
+	stone_assert(bl.length() == xattr_iter->second.length());
 	bufferlist::iterator k = bl.begin();
 	for (bufferlist::iterator j = xattr_iter->second.begin();
 	     !k.end() && !j.end();
 	     ++j, ++k) {
-	  ceph_assert(*j == *k);
+	  stone_assert(*j == *k);
 	}
       }
       if (!context->no_omap) {
@@ -1508,17 +1508,17 @@ public:
 	     i != omap_requested_keys.end();
 	     ++i) {
 	  if (!omap_returned_values.count(*i))
-	    ceph_assert(!old_value.attrs.count(*i));
+	    stone_assert(!old_value.attrs.count(*i));
 	  if (!old_value.attrs.count(*i))
-	    ceph_assert(!omap_returned_values.count(*i));
+	    stone_assert(!omap_returned_values.count(*i));
 	}
 	for (map<string, bufferlist>::iterator i = omap_returned_values.begin();
 	     i != omap_returned_values.end();
 	     ++i) {
-	  ceph_assert(omap_requested_keys.count(i->first));
-	  ceph_assert(omap.count(i->first));
-	  ceph_assert(old_value.attrs.count(i->first));
-	  ceph_assert(i->second == omap[i->first]);
+	  stone_assert(omap_requested_keys.count(i->first));
+	  stone_assert(omap.count(i->first));
+	  stone_assert(old_value.attrs.count(i->first));
+	  stone_assert(i->second == omap[i->first]);
 	}
       }
     }
@@ -1563,12 +1563,12 @@ public:
       int ret = context->io_ctx.snap_create(snapname.c_str());
       if (ret) {
 	cerr << "snap_create returned " << ret << std::endl;
-	ceph_abort();
+	stone_abort();
       }
-      ceph_assert(!context->io_ctx.snap_lookup(snapname.c_str(), &snap));
+      stone_assert(!context->io_ctx.snap_lookup(snapname.c_str(), &snap));
 
     } else {
-      ceph_assert(!context->io_ctx.selfmanaged_snap_create(&snap));
+      stone_assert(!context->io_ctx.selfmanaged_snap_create(&snap));
     }
 
     std::unique_lock state_locker{context->state_lock};
@@ -1589,7 +1589,7 @@ public:
       int r = context->io_ctx.selfmanaged_snap_set_write_ctx(context->seq, snapset);
       if (r) {
 	cerr << "r is " << r << " snapset is " << snapset << " seq is " << context->seq << std::endl;
-	ceph_abort();
+	stone_abort();
       }
     }
   }
@@ -1620,10 +1620,10 @@ public:
     if (context->pool_snaps) {
       string snapname;
 
-      ceph_assert(!context->io_ctx.snap_get_name(snap, &snapname));
-      ceph_assert(!context->io_ctx.snap_remove(snapname.c_str()));
+      stone_assert(!context->io_ctx.snap_get_name(snap, &snapname));
+      stone_assert(!context->io_ctx.snap_remove(snapname.c_str()));
      } else {
-      ceph_assert(!context->io_ctx.selfmanaged_snap_remove(snap));
+      stone_assert(!context->io_ctx.selfmanaged_snap_remove(snap));
 
       vector<uint64_t> snapset(context->snaps.size());
       int j = 0;
@@ -1636,7 +1636,7 @@ public:
       int r = context->io_ctx.selfmanaged_snap_set_write_ctx(context->seq, snapset);
       if (r) {
 	cerr << "r is " << r << " snapset is " << snapset << " seq is " << context->seq << std::endl;
-	ceph_abort();
+	stone_abort();
       }
     }
   }
@@ -1692,7 +1692,7 @@ public:
 
     if (r) {
       cerr << "r is " << r << std::endl;
-      ceph_abort();
+      stone_abort();
     }
 
     {
@@ -1815,13 +1815,13 @@ public:
     uint64_t tid = info->id;
     cout << num << ":  finishing rollback tid " << tid
 	 << " to " << context->prefix + oid << std::endl;
-    ceph_assert((int)(info->id) > last_finished);
+    stone_assert((int)(info->id) > last_finished);
     last_finished = info->id;
 
     int r;
     if ((r = comps[last_finished]->get_return_value()) != 0) {
       cerr << "err " << r << std::endl;
-      ceph_abort();
+      stone_abort();
     }
     if (--outstanding == 0) {
       done = true;
@@ -1924,7 +1924,7 @@ public:
 
     if (info->id == 0) {
       // copy_from
-      ceph_assert(comp->is_complete());
+      stone_assert(comp->is_complete());
       cout << num << ":  finishing copy_from to " << context->prefix + oid << std::endl;
       if ((r = comp->get_return_value())) {
 	if (r == -ENOENT && src_value.deleted()) {
@@ -1932,16 +1932,16 @@ public:
 	} else {
 	  cerr << "Error: oid " << oid << " copy_from " << oid_src << " returned error code "
 	       << r << std::endl;
-	  ceph_abort();
+	  stone_abort();
 	}
       } else {
-	ceph_assert(!version || comp->get_version64() == version);
+	stone_assert(!version || comp->get_version64() == version);
 	version = comp->get_version64();
 	context->update_object_version(oid, comp->get_version64());
       }
     } else if (info->id == 1) {
       // racing read
-      ceph_assert(comp_racing_read->is_complete());
+      stone_assert(comp_racing_read->is_complete());
       cout << num << ":  finishing copy_from racing read to " << context->prefix + oid << std::endl;
       if ((r = comp_racing_read->get_return_value())) {
 	if (!(r == -ENOENT && src_value.deleted())) {
@@ -1949,8 +1949,8 @@ public:
 	       << r << std::endl;
 	}
       } else {
-	ceph_assert(comp_racing_read->get_return_value() == 0);
-	ceph_assert(!version || comp_racing_read->get_version64() == version);
+	stone_assert(comp_racing_read->get_return_value() == 0);
+	stone_assert(!version || comp_racing_read->get_version64() == version);
 	version = comp_racing_read->get_version64();
       }
     }
@@ -2085,7 +2085,7 @@ public:
     TestWatchContext *ctx = context->get_watch_context(oid);
     context->state_lock.unlock();
     if (ctx) {
-      ceph_assert(old_value.exists);
+      stone_assert(old_value.exists);
       TestAlarm alarm;
       std::cerr << num << ":  about to start" << std::endl;
       ctx->start();
@@ -2095,7 +2095,7 @@ public:
       int r = context->io_ctx.notify2(context->prefix+oid, bl, 0, NULL);
       if (r < 0) {
 	std::cerr << "r is " << r << std::endl;
-	ceph_abort();
+	stone_abort();
       }
       std::cerr << num << ":  notified, waiting" << std::endl;
       ctx->wait();
@@ -2110,12 +2110,12 @@ public:
     if (localize_reads)
       flags |= librados::OPERATION_LOCALIZE_READS;
 
-    ceph_assert(!context->io_ctx.aio_operate(context->prefix+oid, completions[0], &op,
+    stone_assert(!context->io_ctx.aio_operate(context->prefix+oid, completions[0], &op,
 					flags, NULL));
     waiting_on++;
 
     _do_read(op, tgt_offset, length, 1);
-    ceph_assert(!context->io_ctx.aio_operate(context->prefix+tgt_oid, completions[1], &op,
+    stone_assert(!context->io_ctx.aio_operate(context->prefix+tgt_oid, completions[1], &op,
 					flags, NULL));
 
     waiting_on++;
@@ -2124,8 +2124,8 @@ public:
   void _finish(CallbackInfo *info) override
   {
     std::lock_guard l{context->state_lock};
-    ceph_assert(!done);
-    ceph_assert(waiting_on > 0);
+    stone_assert(!done);
+    stone_assert(waiting_on > 0);
     if (--waiting_on) {
       return;
     }
@@ -2137,18 +2137,18 @@ public:
     context->find_object(tgt_oid, &tgt_value);
 
     for (int i = 0; i < 2; i++) {
-      ceph_assert(completions[i]->is_complete()); 
+      stone_assert(completions[i]->is_complete()); 
       int err = completions[i]->get_return_value();
       if (err != retval) {
         cerr << num << ": Error: oid " << oid << " read returned different error codes: "
              << retval << " and " << err << std::endl;
-	ceph_abort();
+	stone_abort();
       }
       if (err) {
         if (!(err == -ENOENT && old_value.deleted())) {
           cerr << num << ": Error: oid " << oid << " read returned error code "
                << err << std::endl;
-          ceph_abort();
+          stone_abort();
         }
       }
     }
@@ -2156,7 +2156,7 @@ public:
     if (!retval) {
       if (old_value.deleted()) {
 	std::cout << num << ":  expect deleted" << std::endl;
-	ceph_abort_msg("expected deleted");
+	stone_abort_msg("expected deleted");
       } else {
 	std::cout << num << ":  expect " << old_value.most_recent() << std::endl;
       }
@@ -2188,7 +2188,7 @@ public:
 	       << std::endl;
 	  context->errors++;
 	}
-	if (context->errors) ceph_abort();
+	if (context->errors) stone_abort();
       }
     }
     for (vector<librados::AioCompletion *>::iterator it = completions.begin();
@@ -2258,12 +2258,12 @@ public:
     std::lock_guard l{context->state_lock};
 
     if (info->id == 0) {
-      ceph_assert(comp->is_complete());
+      stone_assert(comp->is_complete());
       cout << num << ":  finishing copy op to oid " << oid << std::endl;
       if ((r = comp->get_return_value())) {
 	cerr << "Error: oid " << oid << " write returned error code "
 	     << r << std::endl;
-	ceph_abort();
+	stone_abort();
       }
     }
 
@@ -2320,7 +2320,7 @@ public:
     context->oid_in_use.insert(oid);
     context->oid_not_in_use.erase(oid);
 
-    if (tgt_pool_name.empty()) ceph_abort();
+    if (tgt_pool_name.empty()) stone_abort();
 
     context->find_object(oid, &src_value); 
     context->find_object(oid_tgt, &tgt_value);
@@ -2344,7 +2344,7 @@ public:
     std::lock_guard l{context->state_lock};
 
     if (info->id == 0) {
-      ceph_assert(comp->is_complete());
+      stone_assert(comp->is_complete());
       cout << num << ":  finishing set_chunk to oid " << oid << std::endl;
       if ((r = comp->get_return_value())) {
 	if (r == -ENOENT && src_value.deleted()) {
@@ -2364,12 +2364,12 @@ public:
 	  if (!is_overlapped) {
 	    cerr << "Error: oid " << oid << " set_chunk " << oid_tgt << " returned error code "
 		  << r << " offset: " << offset << " length: " << length <<  std::endl;
-	    ceph_abort();
+	    stone_abort();
 	  }
 	} else {
 	  cerr << "Error: oid " << oid << " set_chunk " << oid_tgt << " returned error code "
 	       << r << std::endl;
-	  ceph_abort();
+	  stone_abort();
 	}
       } else {
 	ChunkDesc info;
@@ -2429,7 +2429,7 @@ public:
     context->oid_redirect_in_use.insert(oid_tgt);
     context->oid_redirect_not_in_use.erase(oid_tgt);
 
-    if (tgt_pool_name.empty()) ceph_abort();
+    if (tgt_pool_name.empty()) stone_abort();
 
     context->find_object(oid, &src_value); 
     if(!context->redirect_objs[oid].empty()) {
@@ -2443,7 +2443,7 @@ public:
       if ((r = comp->get_return_value())) {
 	cerr << "Error: oid " << oid << " copy_from " << oid_tgt << " returned error code "
 	     << r << std::endl;
-	ceph_abort();
+	stone_abort();
       }
       comp->release();
 
@@ -2458,7 +2458,7 @@ public:
       if ((r = comp->get_return_value())) {
 	if (!(r == -ENOENT && !present) && r != -EOPNOTSUPP) {
 	  cerr << "r is " << r << " while deleting " << oid << " and present is " << present << std::endl;
-	  ceph_abort();
+	  stone_abort();
 	}
       }
       comp->release();
@@ -2477,7 +2477,7 @@ public:
     if ((r = comp->get_return_value()) && !src_value.deleted()) {
       cerr << "Error: oid " << oid << " stat returned error code "
 	   << r << std::endl;
-      ceph_abort();
+      stone_abort();
     }
     context->update_object_version(oid, comp->get_version64());
     comp->release();
@@ -2492,7 +2492,7 @@ public:
     if ((r = comp->get_return_value())) {
       cerr << "Error: oid " << oid_tgt << " stat returned error code "
 	   << r << std::endl;
-      ceph_abort();
+      stone_abort();
     }
     uint64_t tgt_version = comp->get_version64();
     comp->release();
@@ -2517,7 +2517,7 @@ public:
     std::lock_guard l{context->state_lock};
 
     if (info->id == 0) {
-      ceph_assert(comp->is_complete());
+      stone_assert(comp->is_complete());
       cout << num << ":  finishing set_redirect to oid " << oid << std::endl;
       if ((r = comp->get_return_value())) {
 	if (r == -ENOENT && src_value.deleted()) {
@@ -2525,7 +2525,7 @@ public:
 	} else {
 	  cerr << "Error: oid " << oid << " set_redirect " << oid_tgt << " returned error code "
 	       << r << std::endl;
-	  ceph_abort();
+	  stone_abort();
 	}
       } else {
 	context->update_object_redirect_target(oid, oid_tgt);
@@ -2593,7 +2593,7 @@ public:
     int r = comp->get_return_value();
     if (r && !(r == -ENOENT && !present)) {
       cerr << "r is " << r << " while deleting " << oid << " and present is " << present << std::endl;
-      ceph_abort();
+      stone_abort();
     }
     state_locker.lock();
     context->oid_in_use.erase(oid);
@@ -2645,14 +2645,14 @@ public:
     op.tier_promote();
     int r = context->io_ctx.aio_operate(context->prefix+oid, completion,
 					&op);
-    ceph_assert(!r);
+    stone_assert(!r);
   }
 
   void _finish(CallbackInfo *info) override
   {
     std::lock_guard l{context->state_lock};
-    ceph_assert(!done);
-    ceph_assert(completion->is_complete());
+    stone_assert(!done);
+    stone_assert(completion->is_complete());
 
     ObjectDesc oid_value;
     context->find_object(oid, &oid_value);
@@ -2661,7 +2661,7 @@ public:
     if (r == 0) {
       // sucess
     } else {
-      ceph_abort_msg("shouldn't happen");
+      stone_abort_msg("shouldn't happen");
     }
     context->update_object_version(oid, completion->get_version64());
     context->find_object(oid, &oid_value);
@@ -2716,21 +2716,21 @@ public:
     unsigned flags = librados::OPERATION_IGNORE_CACHE;
     int r = context->io_ctx.aio_operate(context->prefix+oid, completion,
 					&op, flags, NULL);
-    ceph_assert(!r);
+    stone_assert(!r);
   }
 
   void _finish(CallbackInfo *info) override
   {
     context->state_lock.lock();
-    ceph_assert(!done);
-    ceph_assert(completion->is_complete());
+    stone_assert(!done);
+    stone_assert(completion->is_complete());
 
     int r = completion->get_return_value();
     cout << num << ":  got " << cpp_strerror(r) << std::endl;
     if (r == 0) {
       // sucess
     } else {
-      ceph_abort_msg("shouldn't happen");
+      stone_abort_msg("shouldn't happen");
     }
     context->update_object_version(oid, completion->get_version64());
     context->oid_in_use.erase(oid);
@@ -2775,7 +2775,7 @@ public:
     comp1 = context->rados.aio_create_completion((void*) cb_arg,
 						 &write_callback);
     int r = context->io_ctx.hit_set_list(hash, comp1, &ls);
-    ceph_assert(r == 0);
+    stone_assert(r == 0);
   }
 
   void _finish(CallbackInfo *info) override {
@@ -2795,7 +2795,7 @@ public:
 						   new TestOp::CallbackInfo(0));
 	comp2 = context->rados.aio_create_completion((void*) cb_arg, &write_callback);
 	r = context->io_ctx.hit_set_get(hash, comp2, p->second, &bl);
-	ceph_assert(r == 0);
+	stone_assert(r == 0);
       }
     } else {
       int r = comp2->get_return_value();
@@ -2808,7 +2808,7 @@ public:
 	     << std::endl;
       } else {
 	// FIXME: we could verify that we did in fact race with a trim...
-	ceph_assert(r == -ENOENT);
+	stone_assert(r == -ENOENT);
       }
       done = true;
     }
@@ -2857,14 +2857,14 @@ public:
     op.undirty();
     int r = context->io_ctx.aio_operate(context->prefix+oid, completion,
 					&op, 0);
-    ceph_assert(!r);
+    stone_assert(!r);
   }
 
   void _finish(CallbackInfo *info) override
   {
     std::lock_guard state_locker{context->state_lock};
-    ceph_assert(!done);
-    ceph_assert(completion->is_complete());
+    stone_assert(!done);
+    stone_assert(completion->is_complete());
     context->oid_in_use.erase(oid);
     context->oid_not_in_use.insert(oid);
     context->update_object_version(oid, completion->get_version64());
@@ -2933,7 +2933,7 @@ public:
     op.is_dirty(&dirty, NULL);
     int r = context->io_ctx.aio_operate(context->prefix+oid, completion,
 					&op, 0);
-    ceph_assert(!r);
+    stone_assert(!r);
 
     if (snap >= 0) {
       context->io_ctx.snap_set_read(0);
@@ -2943,22 +2943,22 @@ public:
   void _finish(CallbackInfo *info) override
   {
     std::lock_guard state_locker{context->state_lock};
-    ceph_assert(!done);
-    ceph_assert(completion->is_complete());
+    stone_assert(!done);
+    stone_assert(completion->is_complete());
     context->oid_in_use.erase(oid);
     context->oid_not_in_use.insert(oid);
 
-    ceph_assert(context->find_object(oid, &old_value, snap));
+    stone_assert(context->find_object(oid, &old_value, snap));
 
     int r = completion->get_return_value();
     if (r == 0) {
       cout << num << ":  " << (dirty ? "dirty" : "clean") << std::endl;
-      ceph_assert(!old_value.deleted());
-      ceph_assert(dirty == old_value.dirty);
+      stone_assert(!old_value.deleted());
+      stone_assert(dirty == old_value.dirty);
     } else {
       cout << num << ":  got " << r << std::endl;
-      ceph_assert(r == -ENOENT);
-      ceph_assert(old_value.deleted());
+      stone_assert(r == -ENOENT);
+      stone_assert(old_value.deleted());
     }
     context->kick();
     done = true;
@@ -3041,7 +3041,7 @@ public:
     }
     int r = context->io_ctx.aio_operate(context->prefix+oid, completion,
 					&op, flags, NULL);
-    ceph_assert(!r);
+    stone_assert(!r);
 
     if (snap >= 0) {
       context->io_ctx.snap_set_read(0);
@@ -3051,8 +3051,8 @@ public:
   void _finish(CallbackInfo *info) override
   {
     std::lock_guard state_locker{context->state_lock};
-    ceph_assert(!done);
-    ceph_assert(completion->is_complete());
+    stone_assert(!done);
+    stone_assert(completion->is_complete());
     context->oid_flushing.erase(oid);
     context->oid_not_flushing.insert(oid);
     int r = completion->get_return_value();
@@ -3060,13 +3060,13 @@ public:
     if (r == 0) {
       context->update_object_version(oid, 0, snap);
     } else if (r == -EBUSY) {
-      ceph_assert(can_fail);
+      stone_assert(can_fail);
     } else if (r == -EINVAL) {
       // caching not enabled?
     } else if (r == -ENOENT) {
       // may have raced with a remove?
     } else {
-      ceph_abort_msg("shouldn't happen");
+      stone_abort_msg("shouldn't happen");
     }
     context->kick();
     done = true;
@@ -3127,7 +3127,7 @@ public:
     int r = context->io_ctx.aio_operate(context->prefix+oid, completion,
 					&op, librados::OPERATION_IGNORE_CACHE,
 					NULL);
-    ceph_assert(!r);
+    stone_assert(!r);
 
     if (snap >= 0) {
       context->io_ctx.snap_set_read(0);
@@ -3137,8 +3137,8 @@ public:
   void _finish(CallbackInfo *info) override
   {
     std::lock_guard state_locker{context->state_lock};
-    ceph_assert(!done);
-    ceph_assert(completion->is_complete());
+    stone_assert(!done);
+    stone_assert(completion->is_complete());
 
     int r = completion->get_return_value();
     cout << num << ":  got " << cpp_strerror(r) << std::endl;
@@ -3151,7 +3151,7 @@ public:
     } else if (r == -ENOENT) {
       // may have raced with a remove?
     } else {
-      ceph_abort_msg("shouldn't happen");
+      stone_abort_msg("shouldn't happen");
     }
     context->kick();
     done = true;
