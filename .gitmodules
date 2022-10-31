@@ -72,3 +72,6 @@
 [submodule "src/blkin"]
 	path = src/blkin
 	url = https://github.com/stonepros/blkin
+[submodule "src/fmt"]
+	path = src/fmt
+	url = https://github.com/stonepros/fmt.git
